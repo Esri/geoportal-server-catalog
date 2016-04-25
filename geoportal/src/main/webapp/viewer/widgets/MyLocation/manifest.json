@@ -1,0 +1,15 @@
+{
+  "name": "MyLocation",
+  "platform": "HTML",
+  "version": "1.4",
+  "wabVersion": "1.4",
+  "author": "Esri R&D Center Beijing",
+  "description": "",
+  "copyright": "",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "properties": {
+    "inPanel": false,
+    "hasUIFile": false,
+    "supportMultiInstance": false
+  }
+}

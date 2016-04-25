@@ -1,0 +1,32 @@
+﻿<div>
+	<div data-dojo-attach-point="contentSection" class="content-section">
+		<div class="add-btn-section">
+			<div data-dojo-attach-point="btnAddExp" data-dojo-attach-event="click:_onBtnAddExpClick"
+			 class="add-with-icon jimu-state-disabled add-expression jimu-float-leading">
+				<span data-dojo-attach-point="iconAddExp" class="jimu-icon jimu-icon-add jimu-state-disabled"></span>
+				<span class="add-label">${nls.addAnotherExpression}</span>
+			</div>
+			<div data-dojo-attach-point="btnAddSet" data-dojo-attach-event="click:_onBtnAddSetClick"
+			 class="add-with-icon jimu-state-disabled add-set jimu-float-leading">
+				<span data-dojo-attach-point="iconAddSet" class="jimu-icon jimu-icon-add jimu-state-disabled"></span>
+				<span class="add-label">${nls.addSet}</span>
+			</div>
+		</div>
+		<span data-dojo-attach-point="matchMsg" style="margin-top:11px;margin-bottom:11px;display:none;">
+			<span>${nls.strMatchMsgPart1}</span>
+			<select data-dojo-attach-point="allAnySelect">
+				<option value="AND" selected>${nls.all}</option>
+				<option value="OR">${nls.any}</option>
+			</select>
+			<span>${nls.strMatchMsgPart2}</span>
+		</span>
+		<div class="allExpsBox" data-dojo-attach-point="allExpsBox">
+		</div>
+	</div>
+	<div data-dojo-attach-point="errorSection" style="display:none;">
+		<span class="jimu-icon jimu-icon-error"></span>
+		<span data-dojo-attach-point="errorTip" class="error-tip"></span>
+	</div>
+	<div data-dojo-attach-point="noFilterTipSection" class="no-filter-tip" style="display:none;"></div>
+	<div data-dojo-attach-point="loading" data-dojo-type="jimu/dijit/LoadingIndicator" data-dojo-props="hidden:true"></div>
+</div>

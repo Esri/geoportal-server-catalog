@@ -1,0 +1,46 @@
+<div style="width:100%;height:100%;">
+    <table class="settings-section">
+      <tbody>
+        <tr>
+          <td>${nls.unit}</td>
+          <td class="second">
+            <div>
+              <div class="unit-item" data-dojo-attach-point="englishNode">
+                <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-props="group:'sclebarUnit'"></div>
+                <label class="jimu-leading-margin025">${nls.english}</label>
+              </div>
+              <div class="unit-item" data-dojo-attach-point="metricNode">
+                <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-props="group:'sclebarUnit'"></div>
+                <label class="jimu-leading-margin025">${nls.metric}</label>
+              </div>
+              <div class="unit-item" data-dojo-attach-point="dualNode">
+                <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-props="group:'sclebarUnit'"></div>
+                <label class="jimu-leading-margin025">${nls.dual}</label>
+              </div>
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td>${nls.style}</td>
+          <td class="second">
+            <div>
+              <div class="style-item" data-dojo-attach-point="lineNode">
+                <div class="jimu-float-leading" data-dojo-type="jimu/dijit/RadioBtn" data-dojo-props="group:'sclebarStyle'"></div>
+                <div class="style-preview jimu-float-trailing">
+                  <div class="line-icon"></div>
+                  <label>${nls.line}</label>
+                </div>
+              </div>
+              <div class="style-item" data-dojo-attach-point="rulerNode">
+                <div class="jimu-float-leading" data-dojo-type="jimu/dijit/RadioBtn" data-dojo-props="group:'sclebarStyle'"></div>
+                <div class="style-preview jimu-float-trailing">
+                  <div class="ruler-icon"></div>
+                  <label>${nls.ruler}</label>
+                </div>
+              </div>
+            </div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+</div>

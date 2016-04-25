@@ -1,0 +1,78 @@
+<div>
+  <div class="source-tips jimu-ellipsis" title="${nls.locatorTips}" data-dojo-attach-point="tipsNode">
+    <em>${nls.locatorTips}</em>
+  </div>
+  <div class="source-url-section">
+    <table class="source-table" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="first">
+            <span class="source-label">${nls.locatorUrl}</span>
+          </td>
+          <td class="second">
+            <div data-dojo-attach-point="locatorUrl" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="required:true,trim:true,disabled:true,style:{width:'100%'}"></div>
+          </td>
+          <td class="third">
+            <span class="jimu-btn" data-dojo-attach-event="click:_onSetLocatorUrlClick">${nls.set}</span>
+          </td>
+        </tr>
+        <tr class="example">
+          <td class="first"></td>
+          <td class="second">
+            <span class="example">${nls.locatorExample}: http://&lt;myServerName&gt;/arcgis/rest/services/World/GeocodeServer</span>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div class="source-details-section" data-dojo-attach-point="detailsSection">
+    <table class="source-table" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="first">${nls.locatorName}</td>
+          <td class="second">
+            <input type="text" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-attach-point="locatorName" data-dojo-attach-event="Blur: _onLocatorNameBlur"
+            placeHolder="${nls.locatorName}"
+            required="true" data-dojo-props='style:{width:"100%"}'/>
+          </td>
+        </tr>
+        <tr>
+          <td class="first">${nls.placeholder}</td>
+          <td class="second">
+            <input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-attach-point="placeholder"
+            data-dojo-attach-event="Blur: _onPlaceholderBlur"
+            placeHolder="${nls.placeholder}" data-dojo-props='style:{width:"100%"}'/>
+          </td>
+        </tr>
+        <tr class="hide-country-code-row country-code-row" data-dojo-attach-point="countryCodeRow">
+          <td class="first">${nls.countryCode}</td>
+          <td class="second">
+            <input type="text" data-dojo-type="dijit/form/TextBox" data-dojo-attach-point="countryCode"
+            data-dojo-attach-event="Blur:_onCountryCodeBlur"
+            placeHolder="${nls.countryCodeEg} USA,CHN" data-dojo-props='style:{width:"97%"}'/>
+            <a class="jimu-float-trailing" target="_blank" href="https://developers.arcgis.com/rest/geocode/api-reference/geocode-coverage.htm" style="line-height:30px;">?</a>
+            <span class="example">${nls.countryCodeHint}</span>
+          </td>
+        </tr>
+        <tr>
+          <td class="first">
+            <span class="source-label">${nls.maxResults}</span>
+          </td>
+          <td class="second">
+            <div data-dojo-attach-point="maxResults" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="constraints:{min:1,places:0},style:{width:'100%'}"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+    <table class="source-table" cellspacing="0">
+      <tbody>
+        <tr>
+          <td class="first">
+            <div data-dojo-attach-point="searchInCurrentMapExtent"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div data-dojo-attach-point="shelter" data-dojo-type="jimu/dijit/LoadingShelter" data-dojo-props="hidden:true"></div>
+</div>

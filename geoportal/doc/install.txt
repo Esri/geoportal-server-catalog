@@ -1,0 +1,54 @@
+Installing Geoportal Server
+
+Install Elasticsearch (2.2 of higher)
+Install Tomcat 8
+
+Deploy geoportal.war to Tomcat then 
+  - stop Tomcat
+  - update your Geoportal configuration (see below, ***)
+  - restart Tomcat
+  
+  
+[Tomcat8]/webapps/geoportal/WEB-INF/classes/app-context.xml
+Main configuration file. 
+*** Set the node name(s) within your Elasticsearch cluster, e.g.:
+  <beans:bean id="elasticContext" class="com.esri.geoportal.db.elastic.ElasticContext">
+    <beans:property name="autoCreateIndex" value="true"/>
+    <beans:property name="metadataIndexName" value="metadata"/>
+    <beans:property name="metadataIndexType_item" value="item"/>
+    <beans:property name="metadataIndexType_xml" value="xml"/>
+    <beans:property name="metadataIndexMappingsFile" value="elastic-mappings.json"/>
+    <beans:property name="nodes">
+        <beans:value>host1</beans:value>
+        <beans:value>host2</beans:value>
+      </beans:list>
+    </beans:property>
+  </beans:bean>  
+
+
+[Tomcat8]/webapps/geoportal/WEB-INF/classes/app-security.xml
+Contains the security configuration. Currently it's a simple set of 3 users:
+admin/admin publisher/publisher user/user
+
+
+[Tomcat8]/webapps/geoportal/WEB-INF/classes/app-metadata-types.xml
+Defines the supported metadata types.
+
+
+[Tomcat8]/webapps/geoportal/WEB-INF/classes/log4j.properties
+Logging properties. You can modify the location of the log file by updating:
+log4j.appender.file.File
+
+
+[Tomcat8]/webapps/geoportal/WEB-INF/classes/elastic-mappings.xml
+Contains the Elasticsearch mappings for the "metadata" index, used 
+when Geoportal auto-creates the "metadata" index.
+Whenever you create a "metadata" index within Elasticsearch, you'll 
+need to include these mappings within your request "PUT" request.
+
+
+
+
+
+
+

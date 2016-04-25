@@ -1,0 +1,75 @@
+.jimu-widget-splash-setting{
+  margin:0;
+  padding:0;
+  font-size:14px;
+  margin-top: 20px;
+	position: absolute;
+	top: 0;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+.jimu-widget-splash-setting .instruction span{
+	color: #596679;
+}
+.jimu-widget-splash-setting .editor-container{
+	position: absolute;
+	top: 34px;
+	bottom: 165px;
+	left: 0;
+	right: 0;
+	border: 1px solid #d2dae2;
+	background-color: #fafafc;
+}
+.jimu-widget-splash-setting .editor-container .dijitEditorIFrameContainer{
+	position: absolute;
+	top: 58px;
+	bottom: 0;
+	left: 0;
+	right: 0;
+}
+.jimu-widget-splash-setting .editor-container .uploaderInsideNode embed {
+	display: none;
+}
+.jimu-widget-splash-setting .splash-footer{
+	position: absolute;
+	bottom: 5px;
+	color: #596679;
+	left: 0;
+	right: 0;
+	height: 155px;
+}
+.jimu-widget-splash-setting .splash-footer .require-continue{
+	position: absolute;
+	top: 0;
+}
+.jimu-widget-splash-setting .splash-footer .require-item{
+	margin-bottom: 10px;
+}
+.jimu-widget-splash-setting .splash-footer .option-text{
+	display: none;
+	margin: 10px 0 15px 23px;
+}
+.jimu-widget-splash-setting .splash-footer .confirm-container{
+	display: none;
+	margin-left: 20px;
+	margin-bottom: 10px;
+}
+.jimu-widget-splash-setting .splash-footer .confirm-text,
+.jimu-widget-splash-setting .splash-footer .confirm-option{
+	width: 100%;
+	margin-top: 10px;
+}
+.jimu-widget-splash-setting .splash-footer .spinner-label{
+	line-height: 30px;
+	margin-right: 10px;
+	display: inline-block;
+}
+.jimu-widget-splash-setting .splash-footer .set-background,
+.jimu-widget-splash-setting .splash-footer .set-background *{
+	vertical-align: middle;
+}
+.jimu-widget-splash-setting .splash-footer input{
+	width: 755px;
+	color: #7989a0;
+}

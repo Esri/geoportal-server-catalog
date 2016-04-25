@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+	
+  <security:ldap-server 
+    id="ldapServer"  
+    url="ldap://gptsrv12r2:10389"
+    manager-dn="uid=admin, ou=system" 
+    manager-password="secret" />
+	
+  <security:authentication-manager alias="authenticationManager">
+    <security:ldap-authentication-provider 
+      server-ref="ldapServer"
+      role-prefix="ROLE_"
+      user-search-base="ou=users,ou=system" 
+	    user-search-filter="(&amp;(objectclass=person)(uid={0}))" 
+	    group-search-base="ou=groups,ou=system"
+	    group-role-attribute="cn" 
+	    group-search-filter="(&amp;(objectclass=groupOfUniqueNames)(uniquemember={0}))"
+	    user-context-mapper-ref="ldapUserContextMapper">
+    </security:ldap-authentication-provider>
+  </security:authentication-manager>
+  
+  <beans:bean id="ldapUserContextMapper" class="com.esri.geoportal.base.security.LdapUserContextMapper">
+    <beans:property name="defaultRole" value="USER" />
+    <beans:property name="roleMap">
+      <beans:map key-type="java.lang.String" value-type="java.lang.String">
+        <beans:entry key="ROLE_GPT_ADMINISTRATORS" value="ADMIN,PUBLISHER" />
+        <beans:entry key="ROLE_GPT_PUBLISHERS" value="PUBLISHER" />
+      </beans:map>
+    </beans:property>
+  </beans:bean>
+
+</beans:beans>

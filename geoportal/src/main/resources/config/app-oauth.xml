@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd
+    http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd">
+  
+  <!-- variables =============================================================================== -->  
+	<beans:bean id="jwtSigningKey" class="java.lang.String">
+	  <beans:constructor-arg value="jwtSigningKey"/>
+	</beans:bean>
+  <beans:bean id="jwtAccessTokenValiditySeconds" class="java.lang.String">
+    <beans:constructor-arg value="7200"/>
+  </beans:bean>	
+  
+  <!-- OAuth2 clients ========================================================================== -->
+  <oauth:client-details-service id="oauthClientDetails">
+    <oauth:client client-id="geoportal-client" 
+      authorized-grant-types="password" authorities="ROLE_CLIENT" scope="read,write" />
+    <!-- <oauth:client client-id="geoportal-client" authorized-grant-types="password,refresh_token"
+      authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" /> -->
+  </oauth:client-details-service>
+  
+  <!-- OAuth2  ================================================================================= -->
+  <security:http realm="Geoportal/client" pattern="/oauth/token" 
+      create-session="stateless" authentication-manager-ref="oauthClientAuthenticationManager">
+    <security:intercept-url pattern="/oauth/token" access="isFullyAuthenticated()"/>
+    <security:anonymous enabled="false" />
+    <security:csrf disabled="true"/>
+    <security:http-basic />
+    <security:custom-filter ref="oauthClientCredentialsTokenEndpointFilter" after="BASIC_AUTH_FILTER" />
+    <security:access-denied-handler ref="oauthAccessDeniedHandler" />
+  </security:http>
+  <oauth:authorization-server 
+      authorization-endpoint-url="/oauth/authorize"
+      token-endpoint-url="/oauth/token"
+      client-details-service-ref="oauthClientDetails"
+      token-services-ref="oauthTokenServices"
+      user-approval-handler-ref="oauthUserApprovalHandler">
+    <oauth:authorization-code />
+    <oauth:implicit />
+    <oauth:refresh-token />
+    <oauth:client-credentials />
+    <oauth:password />
+  </oauth:authorization-server>
+  <oauth:resource-server id="oauthResourceFilter" token-services-ref="oauthTokenServices" />
+  <security:authentication-manager id="oauthClientAuthenticationManager">
+    <security:authentication-provider user-service-ref="oauthClientDetailsUserService" />
+  </security:authentication-manager>
+  <beans:bean id="oauthClientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
+    <beans:constructor-arg ref="oauthClientDetails" />
+  </beans:bean>
+  <beans:bean id="oauthAccessDeniedHandler" class="org.springframework.security.oauth2.provider.error.OAuth2AccessDeniedHandler" />
+  <beans:bean id="jwtAccessTokenConverter" class="org.springframework.security.oauth2.provider.token.store.JwtAccessTokenConverter">
+    <beans:property name="signingKey" ref="jwtSigningKey" />
+  </beans:bean>
+  <beans:bean id="oauthTokenStore" class="org.springframework.security.oauth2.provider.token.store.JwtTokenStore">
+    <beans:constructor-arg ref="jwtAccessTokenConverter"/>
+  </beans:bean>
+  <beans:bean id="oauthRequestFactory" class="org.springframework.security.oauth2.provider.request.DefaultOAuth2RequestFactory">
+    <beans:constructor-arg ref="oauthClientDetails"/>
+  </beans:bean>
+  <beans:bean id="oauthTokenServices" class="org.springframework.security.oauth2.provider.token.DefaultTokenServices">
+    <beans:property name="tokenStore" ref="oauthTokenStore" />
+    <beans:property name="supportRefreshToken" value="true" />
+    <beans:property name="accessTokenValiditySeconds" ref="jwtAccessTokenValiditySeconds" />
+    <beans:property name="clientDetailsService" ref="oauthClientDetails" />
+    <beans:property name="tokenEnhancer" ref="jwtAccessTokenConverter" />
+  </beans:bean>
+  <beans:bean id="oauthUserApprovalHandler" class="org.springframework.security.oauth2.provider.approval.TokenStoreUserApprovalHandler">
+    <beans:property name="tokenStore" ref="oauthTokenStore" />
+    <beans:property name="requestFactory" ref="oauthRequestFactory"/>
+  </beans:bean>
+  <beans:bean id="oauthClientCredentialsTokenEndpointFilter" 
+    class="org.springframework.security.oauth2.provider.client.ClientCredentialsTokenEndpointFilter">
+    <beans:property name="authenticationManager" ref="oauthClientAuthenticationManager" />
+  </beans:bean>
+
+</beans:beans>

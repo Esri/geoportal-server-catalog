@@ -1,0 +1,56 @@
+/* jimu-widget-coordinate-setting */
+.jimu-widget-overviewmap-setting{
+  margin:0;
+  padding:0;
+  font-size:14px;
+  color: #596679;
+}
+
+.jimu-widget-overviewmap-setting .corner-section .overview-items{
+  margin-top: 15px;
+  margin-bottom: 30px;
+  overflow: hidden;
+  font-size: 10px;
+}
+.jimu-widget-overviewmap-setting .corner-section .overview-item {
+  text-align: center;
+  color: #596679;
+}
+.jimu-widget-overviewmap-setting .corner-section .overview-item label {
+  font-size: 14px;
+  vertical-align: middle;
+}
+.jimu-widget-overviewmap-setting .corner-section .overview-item:first-child{
+  margin-left: 0;
+}
+.jimu-rtl .overview-item:first-child {
+  margin-left: 2em;
+  margin-right: 0;
+}
+.jimu-widget-overviewmap-setting .corner-section .overview-item-image{
+  position: relative;
+  width: 226px;
+  height: 150px;
+  margin-bottom: 10px;
+}
+.jimu-widget-overviewmap-setting .jimu-radio {
+  width: 14px;
+  height: 14px;
+  vertical-align: middle;
+}
+.jimu-widget-overviewmap-setting .jimu-radio-inner{
+  width: 8px;
+  height: 8px;
+}
+.jimu-widget-overviewmap-setting .overview-item .overview-top-left{
+  background: url(images/topleft.png);
+}
+.jimu-widget-overviewmap-setting .overview-item .overview-top-right{
+  background: url(images/topright.png);
+}
+.jimu-widget-overviewmap-setting .overview-item .overview-bottom-left{
+  background: url(images/bottomleft.png);
+}
+.jimu-widget-overviewmap-setting .overview-item .overview-bottom-right{
+  background: url(images/bottomright.png);
+}

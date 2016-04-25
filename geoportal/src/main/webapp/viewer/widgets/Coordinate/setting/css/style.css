@@ -1,0 +1,118 @@
+/* jimu-widget-coordinate-setting */
+.jimu-widget-coordinate-setting{
+  margin:0;
+  padding:0;
+  font-size: 14px;
+  padding-top: 20px;
+  color: #596679;
+}
+.jimu-widget-coordinate-setting .dijitSelect{
+  height: 30px;
+  width: 100%;
+}
+.jimu-widget-coordinate-setting .dijitArrowButtonContainer{
+  width: 17px;
+}
+
+.jimu-widget-coordinate-setting .zoom-scale-table{
+  margin-top:12px;
+}
+
+.jimu-widget-coordinate-setting .settings-section p{
+  font-size: 14px;
+  margin-bottom: 20px;
+}
+
+.jimu-widget-coordinate-setting .add-output-coordinate{
+  margin-bottom: 7px;
+  cursor: pointer;
+  display: inline-block;
+}
+
+.jimu-widget-coordinate-setting .add-output-coordinate-icon{
+  background-image: url(images/add_icon.png);
+  background-repeat: no-repeat;
+  background-position: center;
+  width: 14px;
+  height: 14px;
+  display: inline-block;
+  vertical-align: middle;
+}
+
+.jimu-widget-coordinate-setting .add-output-coordinate-label{
+  font-size: 14px;
+  color: #518dca;
+  margin-left: 10px;
+  /* line-height: 24px; */
+  display: inline-block;
+  height: 100%;
+  text-decoration: underline;
+}
+
+.jimu-widget-coordinate-setting .wkid, 
+.jimu-widget-coordinate-setting .transformationWkid,
+.jimu-widget-coordinate-setting .actions{
+  width: 120px;
+}
+
+.jimu-widget-coordinate-setting .coordinate-table{
+  height: 396px;
+}
+
+.jimu-widget-coordinate-setting .display-number,
+.jimu-widget-coordinate-setting .separator{
+  margin-top: 10px;
+}
+
+
+
+/*jimu-coordinate-edit*/
+
+.jimu-coordinate-edit{
+  width: 100%;
+  font-size: 16px;
+  color: #596679;
+}
+
+.jimu-coordinate-edit table{
+  width: 100%;
+}
+
+.jimu-coordinate-edit .wkid-header{
+  margin: 0 0 10px;
+}
+
+.jimu-coordinate-edit .check{
+  margin-top: 10px;
+}
+
+.jimu-coordinate-edit .label{
+  font-size: 14px;
+}
+
+.jimu-coordinate-edit .wkid-label{
+  font-size: 14px;
+  font-style: italic;
+  color: #a0acbf;
+  width: 100%;
+  display: inline-block;
+  margin-top: 5px;
+}
+
+.jimu-coordinate-edit .edit-module{
+  margin-bottom: 10px;
+}
+
+.jimu-coordinate-edit .edit-module:last-child{
+  margin-bottom: 0;
+}
+
+.jimu-coordinate-edit .display-units .display{
+  width: 20%;
+}
+
+.jimu-coordinate-edit .older-version{
+  font-size: 14px;
+  font-style: italic;
+  color: #e84b4b;
+}

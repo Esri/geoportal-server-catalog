@@ -1,0 +1,84 @@
+.jimu-widget-scalebar-setting{
+  margin:0;
+  padding:0;
+  font-size: 14px;
+  color: #596679;
+}
+/*.jimu-widget-scalebar-setting .dijitArrowButtonContainer{
+  width: 17px;
+}
+.jimu-widget-scalebar-setting .dijitSelect{
+  height: 30px;
+  width: 100%;
+}*/
+.jimu-widget-scalebar-setting .zoom-scale-table{
+  margin-top:12px;
+}
+.jimu-widget-scalebar-setting .setting-table > thead > tr > th,
+.jimu-widget-scalebar-setting .setting-table > tbody > tr > td{
+  height:40px;
+  line-height:40px;
+  vertical-align:middle;
+}
+
+.jimu-widget-scalebar-setting .input-table > tbody > tr > .first{
+  width:auto;
+  text-align: right;
+  padding-right:15px;
+}
+
+.jimu-widget-scalebar-setting .unit-item{
+  display: inline-block;
+  margin-right: 30px;
+  vertical-align: middle;
+}
+
+.jimu-widget-scalebar-setting .style-item{
+  display: inline-block;
+  margin-right: 30px;
+  vertical-align: middle;
+  width: 160px;
+  padding-top: 5px;
+}
+
+.jimu-widget-scalebar-setting .jimu-radio {
+  margin: 4px auto;
+  vertical-align: middle;
+  width: 14px;
+  height: 14px;
+}
+
+.jimu-widget-scalebar-setting .jimu-radio-inner {
+  width: 8px;
+  height: 8px;
+}
+
+
+.jimu-widget-scalebar-setting .style-item .style-preview{
+  width: 138px;
+  padding-top: 7px;
+  text-align: center;
+}
+
+.jimu-widget-scalebar-setting .style-preview .line-icon,
+.jimu-widget-scalebar-setting .style-preview .ruler-icon {
+  width: 100%;
+  height: 10px;
+  margin-bottom: 4px;
+}
+
+.jimu-widget-scalebar-setting .style-preview .line-icon{
+  background: url(images/Line.png) center no-repeat;
+}
+
+.jimu-widget-scalebar-setting .style-preview .ruler-icon{
+  background: url(images/Ruler.png) center no-repeat;
+}
+
+.jimu-widget-scalebar-setting .settings-section > tbody > tr > .second{
+  /*width:200px;*/
+}
+/*
+.jimu-widget-scalebar-setting .input-table > tbody > tr > .third{
+  width:35px;
+}*/

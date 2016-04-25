@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Geoportal</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
+
+<link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/themes/calcite/dijit/calcite.css">
+<link rel="stylesheet" href="https://js.arcgis.com/3.16/esri/themes/calcite/esri/esri.css">
+<!-- 
+<link rel="stylesheet" href="//js.arcgis.com/3.16/esri/css/esri.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.16/dijit/themes/claro/claro.css">
+ -->
+ 
+<link rel="stylesheet" href="./app/style/main.css">
+<link rel="stylesheet" href="./lib/typeahead.css">
+<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css">
+
+<body class="calcite">
+<div id="app"></div>
+<div id="app-loading-node" class="g-app-loading">
+	<div class="progress">
+	  <div class="progress-bar progress-bar-striped active" 
+	    role="progressbar" style="width:100%">Geoportal...</div>
+	</div>
+</div>
+<script type="text/javascript">
+  var dojoConfig = {
+    locale: "en",
+    parseOnLoad: true,
+    packages: [
+      {
+        name: 'app',
+        location: location.pathname.replace(/\/[^/]*$/, '') + '/app',
+      }
+    ]
+  };
+</script>
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+<script src="//js.arcgis.com/3.16/"></script>
+<script src="lib/calcite-bootstrap/scripts/vendor.js"></script>
+<script src="lib/calcite-bootstrap/scripts/plugins.js"></script>
+<script src="lib/typeahead.js"></script>
+
+<!-- 
+<script src="//d3js.org/d3.v3.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
+-->
+ 
+<script>
+require(["app"],function() {
+  require(["dojo/ready","app/context/AppContext","app/context/AppStarter"],
+  function(ready,AppContext,AppStarter) {
+    window.AppContext = new AppContext();
+    ready(function() {
+      (new AppStarter()).startupApp();
+    });
+  });
+});
+</script>
+</body>
+</html>

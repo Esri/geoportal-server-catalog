@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+
+  <!-- One and only one of the authentication methods must be implemented. -->
+  <!-- <beans:import resource="authentication-arcgis.xml"/> -->
+  <!-- <beans:import resource="authentication-ldap.xml"/> -->
+  <!-- <beans:import resource="authentication-simple.xml"/> -->
+  <beans:import resource="authentication-simple.xml"/>
+
+  <beans:import resource="app-oauth.xml"/>
+  <security:http realm="Geoportal" auto-config="true">
+    <security:headers>
+       <security:frame-options policy="SAMEORIGIN"/>
+    </security:headers>
+    <security:custom-filter ref="oauthResourceFilter" before="PRE_AUTH_FILTER" />
+    <security:http-basic />
+    <security:csrf disabled="true"/>
+    <security:intercept-url pattern="/" access="permitAll" />
+    
+    <!-- /rest/metadata/ - the metadata catalog -->
+    <security:intercept-url pattern="/rest/metadata/item/*" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/item/*/html" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/item/*/xml" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/item/*/owner/*" method="PUT" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/rest/metadata/realias" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/rest/metadata/reindex" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/rest/metadata/search" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/transform" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/validate" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/**" access="hasRole('PUBLISHER')" />
+    
+    <!-- /elastic/ - proxied to the Elasticsearch cluster -->
+    <security:intercept-url pattern="/elastic/metadata/_count/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_count/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/_search/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_search/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/_mappings/**" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_mappings/**" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/elastic/**" access="hasRole('ADMIN')" />
+    
+  </security:http>
+
+</beans:beans>

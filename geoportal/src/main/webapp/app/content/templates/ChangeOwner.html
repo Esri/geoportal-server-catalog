@@ -1,0 +1,14 @@
+<div>
+  <div class="form-group" data-dojo-attach-point="itemTitleNode"></div>
+  <div class="form-group">
+    <label>${i18n.content.changeOwner.currentOwner}</label>
+    <span data-dojo-attach-point="currentOwnerNode"></span>
+  </div>
+  <div class="form-group g-scrollable-typeahead" style="position: relative;">
+	  <label for="${id}_newOwner">${i18n.content.changeOwner.newOwner}</label>
+	  <div>
+	    <input id="${id}_newOwner" type="text" class="form-control typeahead" 
+	      data-dojo-attach-point="newOwnerNode">
+	  </div>
+  </div>
+</div>

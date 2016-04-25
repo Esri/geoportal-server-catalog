@@ -1,0 +1,78 @@
+{
+  "widgetOnScreen": {
+    "widgets": {
+      "themes/FoldableTheme/widgets/HeaderController/Widget":{
+        "position": {
+          "left": 0,
+          "top": 0,
+          "right": 0,
+          "height": 40,
+          "paddingRight": 275,
+          "relativeTo": "browser"
+        }
+      },
+      "widgets/Search/Widget":{
+        "position": {
+          "right": 2,
+          "top": 2,
+          "relativeTo": "browser",
+          "zIndex": 6
+        }
+      },
+      "ph_4": {
+        "position": {
+          "left": 55,
+          "bottom": 55
+        }
+      },
+      "ph_5": {
+        "position": {
+          "left": 105,
+          "bottom": 55
+        }
+      },
+      "ph_6": {
+        "position": {
+          "left": 155,
+          "bottom": 55
+        }
+      },
+      "ph_7": {
+        "position": {
+          "left": 205,
+          "bottom": 55
+        }
+      },
+      "ph_8": {
+        "position": {
+          "left": 255,
+          "bottom": 55
+        }
+      }
+    }
+  },
+  "mobileLayout": {
+    "widgetOnScreen": {
+      "widgets": {
+        "themes/FoldableTheme/widgets/HeaderController/Widget":{
+          "position": {
+            "left": 0,
+            "top": 0,
+            "right": 0,
+            "height": 40,
+            "paddingRight": 0,
+            "relativeTo": "browser"
+          }
+        },
+        "widgets/Search/Widget":{
+          "position": {
+            "right": 2,
+            "top": 50,
+            "relativeTo": "browser",
+            "zIndex": 4
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<names xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gml="http://www.opengis.net/gml" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:gmi="http://www.isotc211.org/2005/gmi">
+	<name tagname="gmd:spatialRepresentationInfo">Spatial Representation Information</name>
+	<name tagname="gmd:referenceSystemInfo">Reference System Information</name>
+	<name tagname="gmd:identificationInfo">Identification Information</name>
+	<name tagname="gmd:contentInfo">Content Information</name>
+	<name tagname="gmd:distributionInfo">Distribution Information</name>
+	<name tagname="gmd:dataQualityInfo">Data Quality Information</name>
+	<name tagname="gmd:portrayalCatalogueInfo">Portrayal Catalogue Information</name>
+	<name tagname="gmd:metadataConstraints">Metadata Constraint Information</name>
+	<name tagname="gmd:applicationSchemaInfo">Application Schema Information</name>
+	<name tagname="gmd:metadataMaintenance">Metadata Maintenance Information</name>
+	<name tagname="gmi:acquisitionInformation">Acquisition Information</name>
+	<name tagname="gmd:metadataExtensionInfo">Metadata Extension Information</name>
+	<name tagname="gfc:FC_FeatureCatalogue">Feature Catalog Information</name>
+</names>

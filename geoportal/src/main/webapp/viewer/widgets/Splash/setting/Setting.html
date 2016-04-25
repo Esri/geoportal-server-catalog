@@ -1,0 +1,32 @@
+<div style="width:100%;">
+  <div class="instruction">
+    <span class="instruction-inner">${nls.instruction}</span>
+  </div>
+  <div class="editor-container" data-dojo-attach-point="editorContainer">
+    <div data-dojo-attach-point="editor"></div>
+  </div>
+  <div class="splash-footer">
+    <div class="require-list">
+      <div class="require-item" data-dojo-attach-point="noRequireConfirmSplash">
+        <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-props="group:'requireItem'"></div>
+        <label class="jimu-leading-margin025">${nls.noRequireConfirm}</label>
+      </div>
+      <div class="option-text" data-dojo-type="jimu/dijit/CheckBox" data-dojo-attach-point="showOption" data-dojo-props='label:"${nls.optionText}",checked:false'></div>
+      <div class="require-item" data-dojo-attach-point="requireConfirmSplash">
+        <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-props="group:'requireItem'"></div>
+        <label class="jimu-leading-margin025">${nls.requireConfirm}</label>
+      </div>
+      <div class="confirm-container" data-dojo-attach-point="confirmContainer">
+        <div class="confirm-text">
+          <span class="spinner-label jimu-ellipsis" title="${nls.confirmLabel}">${nls.confirmLabel}</span>
+          <input class="jimu-input jimu-float-trailing" type="text" value="${nls.defaultConfirmText}" data-dojo-attach-point="confirmText" data-dojo-attach-event="blur:_onConfirmTextBlur">
+        </div>
+        <div class="confirm-option" data-dojo-type="jimu/dijit/CheckBox" data-dojo-attach-point="confirmOption" data-dojo-props='label:"${nls.confirmOption}",checked:false'></div>
+      </div>
+    </div>
+    <div class="set-background">
+      <span class="jimu-ellipsis" title="${nls.backgroundColor}">${nls.backgroundColor}</span>
+      <div data-dojo-attach-point="colorPicker" data-dojo-type="jimu/dijit/ColorPicker" data-dojo-props='color:"${_defaultColor}"' style="display:inline-block;width:25px;height:25px;"></div>
+    </div>
+  </div>
+</div>

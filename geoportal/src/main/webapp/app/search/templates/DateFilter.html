@@ -1,0 +1,39 @@
+<div>
+  <div class="g-drop-pane" data-dojo-type="app/search/DropPane" 
+    data-dojo-attach-point="dropPane" data-dojo-props="title:'${label}',open:${open}">
+    <div data-dojo-attach-point="filterNode">
+      <div class="form-group">
+        <label for="${id}_from">${i18n.search.dateFilter.fromDate}</label>
+        <div>
+          <input type="text" id="${id}_from"
+            data-dojo-type="dijit/form/DateTextBox" 
+            data-dojo-attach-point="fromDate" 
+            data-dojo-attach-event="onChange: fromDateChanged"
+            data-dojo-props="constraints:{datePattern:'yyyy-MM-dd'}"/>
+            <small class="text-muted">&nbsp;${i18n.search.dateFilter.formatHint}&nbsp;</small>
+            <a href="#" title="${i18n.search.dateFilter.plotTip}"
+              data-dojo-attach-point="showBeginPlotNode"  
+              data-dojo-attach-event="onclick: showBeginPlot">
+              <span class="glyphicon glyphicon-signal" style="color:#1f77b4;"></span>
+            </a>
+        </div>
+      </div>
+      <div class="form-group">
+        <label for="${id}_to">${i18n.search.dateFilter.toDate}</label>
+        <div>
+          <input type="text" id="${id}_to"
+            data-dojo-type="dijit/form/DateTextBox" 
+            data-dojo-attach-point="toDate" 
+            data-dojo-attach-event="onChange: toDateChanged"
+            data-dojo-props="constraints:{datePattern:'yyyy-MM-dd'}"/>
+            <small class="text-muted">&nbsp;${i18n.search.dateFilter.formatHint}&nbsp;</small>
+            <a href="#" title="${i18n.search.dateFilter.plotTip}"
+              data-dojo-attach-point="showEndPlotNode"  
+              data-dojo-attach-event="onclick: showEndPlot">
+              <span class="glyphicon glyphicon-signal" style="color:#ff7f0e;"></span>
+            </a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

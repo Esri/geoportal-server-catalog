@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+    
+  <beans:bean id="arcgisAuthenticationProvider" class="com.esri.geoportal.base.security.ArcGISAuthenticationProvider">
+    <beans:property name="appId" value="6iJ2pLIj9UwcSdfA"/>
+    <beans:property name="authorizeUrl" value="https://www.arcgis.com/sharing/rest/oauth2/authorize"/>
+    <beans:property name="expirationMinutes" value="120" />
+    <beans:property name="geoportalAdministratorsGroupId" value="" />
+    <beans:property name="geoportalPublishersGroupId" value="" />
+    <beans:property name="allUsersCanPublish" value="true" />
+    <beans:property name="rolePrefix" value="ROLE_" />
+  </beans:bean>
+
+	<security:authentication-manager alias="authenticationManager">
+	  <security:authentication-provider ref="arcgisAuthenticationProvider"/>
+	</security:authentication-manager>
+
+</beans:beans>

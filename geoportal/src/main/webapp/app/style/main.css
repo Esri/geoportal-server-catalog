@@ -1,0 +1,276 @@
+body {
+  font-size: 12px;
+  background-color: #ffffff;
+}
+
+/* chrome */
+:focus {
+  outline: none;
+}
+
+.calcite .dijitTitlePaneTitle, .calcite .dijitTitlePaneTextNode {
+  font-size: 12px;
+}
+.calcite .dijitTitlePaneTitle {
+  padding: 4px 6px;
+}
+.calcite .dijitTitlePaneContentInner {
+  padding: 8px;
+}
+.calcite .dijitTitlePane {
+  border: 1px solid #ebebeb;
+}
+.calcite .dijitTitlePaneContentOuter {
+	/*border-top: 1px solid #ebebeb;*/
+	border: none;
+}
+
+.g-modal-plot .modal-dialog {
+  width: 800px;
+}
+.g-temporal-plot {
+  min-width: 700px;
+}
+.g-temporal-plot .c3-axis-x .tick {
+  display: none;
+}
+
+.g-app-loading {
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  z-index: 99;
+  background-color: #f8f8f8;
+}
+.g-app-loading .progress {
+  width: 120px;
+  margin: auto;
+  position: absolute;
+  top: 0; left: 0; bottom: 0; right: 0;
+  background-color: #f8f8f8;
+}
+.g-app-loading .g-error {
+  height: 50px;
+  position: relative;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #000000;
+}
+.g-app-loading .progress {
+  border-radius: 5px;
+}
+.g-app-loading .progress-bar {
+  border-radius: 4px;
+}
+
+.navbar-inverse {
+  background-color: #196fa6;
+}
+.navbar-inverse .navbar-nav > .active > a, 
+.navbar-inverse .navbar-nav > .active > a:hover, 
+.navbar-inverse .navbar-nav > .active > a:focus {
+  background-color: #478CB8;
+  color: #ffffff;
+}
+.navbar-inverse .navbar-nav > li > a {
+  color: #ffffff;
+}
+.navbar-inverse .glyphicon, .navbar-inverse .navbar-brand {
+  color: #ffffff;
+}
+.g-app > .navbar {
+	min-height: 5px;
+}
+.g-app > .navbar-inverse .navbar-nav > li > a {
+	padding-left: 8px;
+  padding-right: 8px;
+	padding-bottom: 12px;
+	padding-top: 12px;
+}
+.g-app > .navbar-inverse .navbar-nav > li > a:hover, 
+.g-app > .navbar-inverse .navbar-nav > li > a:focus {
+  background-image: none;
+  transition: none;
+  background-color: transparent;
+  outline: none;
+}
+.g-app > .navbar-inverse .navbar-nav > li.active > a {
+  background-image: linear-gradient(to bottom, transparent 90%, #cfe1ec 91%, #cfe1ec 100%);
+  transition: color 150ms linear 0s, text-decoration 150ms linear 0s;
+  background-color: transparent;
+  outline: none;
+}
+.g-app > .navbar-inverse .navbar-nav > li > a:hover {
+  outline: thin dotted;
+  outline-offset: -2px;
+}
+.g-app > .navbar-inverse .g-tools {
+  padding-top: 13px;
+  padding-right: 20px;
+  color: #ffffff;
+}
+.g-app > .navbar-inverse .g-tools > a {
+  color: #ffffff;
+}
+.g-app > .navbar-inverse .g-tools > .g-options {
+  margin-left: 16px;
+}
+
+.g-search-pane {
+	margin: 0px 20px 20px 20px; 
+	padding: 0px;
+}
+.g-search-pane-left {
+	width: 25%; 
+	min-width: 100px; 
+	float: left; 
+}
+.g-search-pane-right {
+	width: 73%; 
+	float: right; 
+}
+
+.g-drop-pane-tools {
+  float: right;
+  vertical-align: middle;
+}
+
+.g-drop-pane-tools input {
+  vertical-align: top;
+  cursor: pointer;
+}
+.g-drop-pane-tools label {
+  margin-left: 3px;
+  font-size: 10px;
+  font-weight: normal;
+  cursor: pointer;
+}
+
+.g-drop-pane .g-entries {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.g-entry-links > div {
+  padding: 2px 0px;
+}
+
+.g-spatial-filter-map {
+  height: 300px !important;
+  width: auto !important;
+}
+.g-spatial-filter-relation {
+  margin-left: 12px;
+}
+.g-applied-filters .g-drop-pane-tools label {
+	margin-right: 20px;
+	margin-top: 4px;
+}
+.g-applied-filters .g-drop-pane-tools .glyphicon {
+	vertical-align: none;
+	top: 0;
+}
+
+.g-applied-filter {
+  line-height: 2;
+  padding: 2px 4px;
+  margin-right: 4px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+  
+}
+.g-applied-filter a {
+  vertical-align: middle;
+}
+
+.g-search-results-pane .g-sort-dropdown {
+  display: inline-block;
+  width: 120px;
+}
+.g-search-results-pane .g-sort-dropdown .glyphicon {
+  padding-left: 2px;
+  margin-bottom: 2px;
+}
+
+.g-paging {
+	display: inline-block;
+	margin-left: 10px;
+}
+.g-paging-count {
+  display: inline-block;
+  margin: 0 10px;
+}
+.g-paging .pagination {
+  margin: 0;
+}
+.g-paging .pagination-sm > li > a, .g-paging .pagination-sm > li > span {
+  padding: 1px 10px;
+}
+
+.g-search-results {
+  /*max-height: 400px;
+  overflow-y: auto;*/
+  max-height: -webkit-calc(100vh - 200px);
+  max-height:    -moz-calc(100vh - 200px);
+  max-height:         calc(100vh - 200px);
+  overflow: auto;
+}
+
+.g-item-card {
+  margin-top: 5px;
+  padding: 4px;
+  border-bottom: 1px solid #cccccc;
+}
+
+.g-item-card .g-item-title {
+  font-weight: bold;
+}
+
+.g-item-card .g-item-description, 
+.g-item-card .g-item-actions, 
+.g-item-card .g-item-owner-and-date {
+	margin-left: 20px;
+}
+
+.g-item-card .g-item-description, 
+.g-item-card .g-item-owner-and-date {
+  padding: 2px;
+  font-size: 10px;
+  width: 85%;
+}
+.g-item-card .g-item-thumbnail {
+	width: 80px;
+	height: 60px;
+}
+
+.g-item-card .g-item-actions {
+  padding: 2px;
+}
+.g-item-card .g-item-actions > a, 
+.g-item-card .g-item-actions > .dropdown {
+  margin-right: 20px;
+}
+
+.g-scrollable-typeahead .tt-menu {
+  max-height: 200px;
+  overflow-y: auto;
+}
+
+.g-validation-errors {
+	margin-top: 12px;
+	max-height: 200px;
+	overflow-y: auto;
+}
+
+.g-mapframe-container {
+  position: absolute;
+  top: 50px; /* TODO ?? */
+  left: 0; 
+  bottom: 4px; 
+  right: 0;
+}
+.g-mapframe-container > iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+

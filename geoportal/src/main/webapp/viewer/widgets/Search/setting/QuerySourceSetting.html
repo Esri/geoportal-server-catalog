@@ -1,0 +1,83 @@
+<div>
+  <div class="source-tips jimu-ellipsis" title="${nls.searchLayerTips}" data-dojo-attach-point="tipsNode">
+    <em>${nls.searchLayerTips}</em>
+  </div>
+  <div class="source-url-section">
+    <table class="source-table">
+      <tr>
+        <td class="first">
+          <span class="source-label">${nls.layerSource}</span>
+        </td>
+        <td class="second">
+          <div data-dojo-attach-point="sourceUrl" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="required:true,trim:true,disabled:true,style:{width:'100%'}"></div>
+        </td>
+        <td class="third">
+          <span class="jimu-btn" data-dojo-attach-event="click:_onSetSourceClick">${nls.set}</span>
+        </td>
+      </tr>
+    </table>
+  </div>
+  <div class="source-details-section">
+    <table class="source-table">
+      <tr>
+        <td class="first">
+          <span class="source-label">${nls.name}</span>
+        </td>
+        <td class="second">
+          <div data-dojo-attach-point="sourceName" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-attach-event="Blur:_onSourceNameBlur" data-dojo-props="trim:true,required:true,style:{width:'100%'}"></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="first">
+          <span class="source-label">${nls.placeholder}</span>
+        </td>
+        <td class="second">
+          <div data-dojo-attach-point="placeholder" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-attach-event="Blur:_onPlaceholderBlur" data-dojo-props="trim:true,style:{width:'100%'}"></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="first">
+          <span class="source-label">${nls.searchFields}</span>
+        </td>
+        <td class="second">
+          <div class="search-fields">
+            <!-- <span class="fields jimu-float-leading" data-dojo-attach-point="fieldsNode"></span> -->
+            <div data-dojo-attach-point="searchFields" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="required:true,trim:true,disabled:true,style:{width:'95%'}"></div>
+            <div class="search-fields-selector jimu-float-trailing" data-dojo-attach-point="fieldsSelectorNode" data-dojo-attach-event="click:_onFieldsSelectorClick"></div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td class="first">
+          <span class="source-label">${nls.displayField}</span>
+        </td>
+        <td class="second">
+          <div data-dojo-attach-point="displayField" data-dojo-type="dijit/form/Select" data-dojo-props='style:{width:"100%"}'></div>
+        </td>
+      </tr>
+      <tr>
+        <td class="first">
+          <span class="source-label">${nls.maxResults}</span>
+        </td>
+        <td class="second">
+          <div data-dojo-attach-point="maxResults" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="constraints:{min:1,places:0},style:{width:'100%'}"></div>
+        </td>
+      </tr>
+    </table>
+    <table class="source-table">
+      <tbody>
+        <tr>
+          <td class="first">
+            <div data-dojo-attach-point="exactMatch"></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="first">
+            <div data-dojo-attach-point="searchInCurrentMapExtent"></div>
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+  <div data-dojo-attach-point="shelter" data-dojo-type="jimu/dijit/LoadingShelter" data-dojo-props="hidden:true"></div>
+</div>

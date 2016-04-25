@@ -1,0 +1,138 @@
+Geoportal Server API
+
+HTTP [any] geoportal/elastic/*
+
+HTTP GET      geoportal/rest/metadata/item/{id}
+HTTP GET      geoportal/rest/metadata/item/{id}/xml
+HTTP GET      geoportal/rest/metadata/item/{id}/html
+HTTP PUT      geoportal/rest/metadata/item
+HTTP PUT      geoportal/rest/metadata/item/{id}
+HTTP PUT      geoportal/rest/metadata/item/{id}/owner/{newOwner}
+HTTP DELETE   geoportal/rest/metadata/item/{id}
+HTTP GET      geoportal/rest/metadata/reindex
+HTTP GET/POST geoportal/rest/metadata/search
+HTTP POST/PUT geoportal/rest/metadata/transform
+HTTP POST/PUT geoportal/rest/metadata/validate
+
+HTTP GET geoportal/opensearch
+HTTP GET geoportal/opensearch/description
+
+HTTP GET geoportal/csw
+
+------------------------------------------------------------------------------------------
+
+geoportal/elastic/*
+
+HTTP requests to these endpoints are proxied to the Elasticsearch cluster. 
+See: WEB-INF/classes/app-context.html for cluster configuration
+See: WEB-INF/classes/app-security.html for securing these endpoints
+Example: http://localhost:8080/geoportal/elastic/metadata/_mappings?pretty=true
+Example: http://localhost:8080/geoportal/elastic/metadata/item/_search?pretty=true&q=*:*
+Example: http://localhost:8080/geoportal/elastic/metadata/xml/_search?pretty=true&q=*:*
+
+------------------------------------------------------------------------------------------
+
+HTTP GET geoportal/rest/metadata/item/{id}
+Gets the item associated with the supplied identifier.
+Response Content Type: application/json
+Optional Query Parameters:
+  includeMetadata - boolean indicating whether the metadata xml should be included (default=false)
+  pretty - boolean for formatted json (default=false)
+  
+HTTP GET geoportal/rest/metadata/item/{id}/xml
+Gets the metadata document associated with the supplied identifier.
+Response Content Type: application/xml
+
+HTTP GET geoportal/rest/metadata/item/{id}/html
+Gets the metadata details (xml transformation) associated with the supplied identifier.
+Response Content Type: text/html
+
+HTTP PUT geoportal/rest/metadata/item
+Publishes a metadata document.
+Available only to users with a Publisher role.
+Request Content Type: application/xml
+Response Content Type: application/json
+Optional Query Parameters:
+  pretty - boolean for formatted json (default=false)
+  
+HTTP PUT geoportal/rest/metadata/item/{id}
+Publishes a metadata document using the supplied identifier.
+Available only to users with a Publisher role.
+Request Content Type: application/xml
+Response Content Type: application/json
+Optional Query Parameters:
+  pretty - boolean for formatted json (default=false)
+
+HTTP PUT geoportal/rest/metadata/item/{id}/owner/{newOwner}
+Changes the owner associated with the supplied identifier.
+Only an Admin can change ownership.
+Response Content Type: application/json
+Optional Query Parameters:
+  pretty - boolean for formatted json (default=false)
+
+HTTP DELETE geoportal/rest/metadata/item/{id}
+Delete the item associated with the supplied identifier.
+Only the item owner (or an Admin) can delete and item.
+Response Content Type: application/json
+Optional Query Parameters:
+  pretty - boolean for formatted json (default=false)
+
+HTTP GET geoportal/rest/metadata/realias
+Reset the index associated with the metadata alias.
+Required Query Parameters:
+  indexName - the index to associated with the metadata alias
+  
+HTTP GET geoportal/rest/metadata/reindex
+Re-index content.
+Required Query Parameters:
+  fromIndexName - the source
+  toIndexName - the destination
+  
+HTTP GET/POST geoportal/rest/metadata/search
+Search for items.
+Optional Query Parameters:
+  q - the search terms
+  f - the response format (json|atom|csw)
+  from - the starting index
+  size - the number of items to return
+  bbox - the bounding envelope WGS84 (bbox=xmin,ymin,xmax,ymax)
+  time - time period for the resource (time=start/end)
+  pretty - boolean for formatted json or xml (default=false)
+Example: http://localhost:8080/geoportal/rest/metadata/search?q=*:*
+  
+HTTP POST/PUT geoportal/rest/metadata/transform
+Transform an xml document.
+Request Content Type: application/xml
+Response Content Type: varies
+Required Query Parameters:
+  xslt - the name of the xslt
+
+HTTP POST/PUT geoportal/rest/metadata/validate
+Validate a metadata document.
+Request Content Type: application/xml
+Response Content Type: application/json
+Optional Query Parameters:
+  pretty - boolean for formatted json (default=false)
+  
+------------------------------------------------------------------------------------------
+
+HTTP GET geoportal/opensearch
+The Opensearch implementation.
+Example: http://localhost:8080/geoportal/opensearch?q=*:*
+
+HTTP GET geoportal/opensearch/description
+The Opensearch description file.
+
+HTTP GET geoportal/csw
+The Opensearch implementation.
+Example: http://localhost:8080/geoportal/csw
+Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetCapabilities&version=3.0.0
+Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetRecords&q=*:*
+Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetRecordById&id=e5d10bc3269b496da3557e0964429ccd
+
+-------------------------------------------------------------------------------------------
+ 
+
+
+
+

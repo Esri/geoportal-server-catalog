@@ -1,0 +1,9 @@
+@import url("panels/FoldablePanel/style.css");
+@import url("panels/DockablePanel/style.css");
+/********** styles for simple panel***********/
+.jimu-simple-panel{
+  -moz-border-radius: 4px;
+  -webkit-border-radius: 4px;
+  border-radius: 4px;
+}
+

@@ -1,0 +1,90 @@
+  <div style="width:100%">
+    <div class="output-wkid edit-module" data-dojo-attach-point="outputDiv">
+      <table cellspacing="0">
+        <tbody>
+          <tr>
+            <td>
+              <div class="wkid-header">
+                <span>${nls.output}</span>
+                <a href="https://developers.arcgis.com/javascript/jshelp/ref_coordsystems.html" target="blank">WKID</a>
+              </div>
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <input type="text" data-dojo-type="dijit/form/ValidationTextBox" required="true"
+            placeHolder="WKID" data-dojo-attach-event="onChange:onWkidChange"
+            data-dojo-attach-point="wkid" data-dojo-props='style:{width:"100%"}' />
+            </td>
+          </tr>
+          <tr>
+            <td>
+              <span class="wkid-label" data-dojo-attach-point="wkidLabel">${nls.cName}</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="display-units edit-module" data-dojo-attach-point="displayUnits">
+      <table cellspacing="0">
+        <tbody>
+          <tr>
+            <td class="display">
+              <span>${nls.units}</span>
+            </td>
+            <td class="units">
+              <select data-dojo-attach-point="outputUnit" data-dojo-props='style:{width:"462px"}' data-dojo-type="dijit/form/Select">
+                <option value="">${nls.Default}</option>
+                <option type="separator"></option>
+                <option value="INCHES">${nls.Inches}</option>
+                <option value="FOOT">${nls.Foot}</option>
+                <option value="YARDS">${nls.Yards}</option>
+                <option value="MILES">${nls.Miles}</option>
+                <option value="NAUTICAL_MILES">${nls.Nautical_Miles}</option>
+                <option value="MILLIMETERS">${nls.Millimeters}</option>
+                <option value="CENTIMETERS">${nls.Centimeters}</option>
+                <option value="METER">${nls.Meter}</option>
+                <option value="KILOMETERS">${nls.Kilometers}</option>
+                <option value="DECIMETERS">${nls.Decimeters}</option>
+                <option type="separator"></option>
+                <option value="DECIMAL_DEGREES">${nls.Decimal_Degrees}</option>
+                <option value="DEGREE_MINUTE_SECONDS">${nls.Degree_Minutes_Seconds}</option>
+                <option type="separator"></option>
+                <option value="MGRS">${nls.MGRS}</option>
+                <option value="USNG">${nls.USNG}</option>
+              </select>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+    <div data-dojo-attach-point="enhanceVersionDiv">
+      <div class="datum-wkid edit-module" data-dojo-attach-point="transformDiv">
+        <table cellspacing="0">
+          <tbody>
+            <tr>
+              <td>
+                <div class="wkid-header">
+                  <span>${nls.datum}</span>
+                  <a href="http://resources.arcgis.com/en/help/arcgis-rest-api/index.html#//02r3000000r8000000" target="blank">TFWKID</a>
+                </div>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <input type="text" data-dojo-type="dijit/form/ValidationTextBox" required="true" placeHolder="${nls.tWKIDPlaceHolder}"
+              data-dojo-attach-point="transformationWkid" data-dojo-attach-event="onChange:ontfWkidChange" data-dojo-props='style:{width:"100%"}' />
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <span class="wkid-label" data-dojo-attach-point="transformationLabel">${nls.tName}</span>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+        <div class="check" data-dojo-attach-point="transformForward"></div>
+      </div>
+    </div>
+    <div class="older-version" data-dojo-attach-point="olderVersionDiv">${nls.olderVersion}</div>
+  </div>

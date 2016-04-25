@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd">
+  
+  <!-- Extensibility classes that are instantiated on demand -->
+  
+  <beans:bean id="request.ChangeOwnerRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest"/>
+  <beans:bean id="request.CswRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.CswRequest"/>
+  <beans:bean id="request.DeleteItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.DeleteItemRequest"/>
+  <beans:bean id="request.GetItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetItemRequest"/>
+  <beans:bean id="request.GetMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetMetadataRequest"/>
+  <beans:bean id="request.OpensearchRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.OpensearchRequest"/>
+  <beans:bean id="request.PublishMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.PublishMetadataRequest"/>
+  <beans:bean id="request.ReindexRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ReindexRequest"/>
+  <beans:bean id="request.SearchRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.SearchRequest"/>
+  <beans:bean id="request.TransformMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.TransformMetadataRequest"/>
+  <beans:bean id="request.ValidateMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest"/>
+  
+  <beans:bean id="metadata.Evaluator" scope="prototype" class="com.esri.geoportal.base.metadata.Evaluator">
+    <beans:property name="javascriptFile" value="metadata/js/Evaluator.js"/>
+  </beans:bean>
+  <beans:bean id="metadata.Validator" scope="prototype" class="com.esri.geoportal.base.metadata.Validator"/>
+  
+  <!-- Search response writers f=json|atom|csw -->
+  <beans:bean id="item.ItemWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ItemWriter"/>
+  <beans:bean id="item.AtomWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
+    <beans:property name="javascriptFile" value="search/js/WriterFor_ATOM.js"/>
+  </beans:bean>
+  <beans:bean id="item.CswWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
+    <beans:property name="javascriptFile" value="search/js/WriterFor_CSW.js"/>
+  </beans:bean>
+  <beans:bean id="item.JsonWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
+    <beans:property name="javascriptFile" value="search/js/WriterFor_JSON.js"/>
+  </beans:bean>
+  <beans:bean id="item.ItemWriterFactory" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ItemWriterFactory">
+	  <beans:property name="map">
+	    <beans:map key-type="java.lang.String" value-type="java.lang.String">
+	      <!-- Default -->
+	      <beans:entry key="" value="item.JsonWriter" />
+	      <!-- Json -->
+	      <beans:entry key="json" value="item.JsonWriter" />
+	      <beans:entry key="pjson" value="item.JsonWriter" />
+	      <beans:entry key="application/json" value="item.JsonWriter" />
+	      <!-- Atom -->
+	      <beans:entry key="atom" value="item.AtomWriter" />
+	      <beans:entry key="application/atom+xml" value="item.AtomWriter" />
+	      <beans:entry key="http://www.w3.org/2005/Atom" value="item.AtomWriter" />
+	      <!-- CSW -->
+	      <beans:entry key="csw" value="item.CswWriter" />
+	      <beans:entry key="application/xml" value="item.CswWriter" />
+	      <beans:entry key="http://www.opengis.net/cat/csw/3.0" value="item.CswWriter" />
+	    </beans:map>
+	  </beans:property>
+  </beans:bean>
+  
+</beans:beans>
