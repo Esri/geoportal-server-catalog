@@ -45,12 +45,14 @@ public class ElasticContext {
   private boolean allowFileId;
   private boolean autoCreateIndex;
   private String clusterName = null;
+  private int httpPort = 9200;
   private String indexName = "metadata";
   private boolean indexNameIsAlias = true;
   private String itemIndexType = "item";
   private String mappingsFile = "config/elastic-mappings.json";
   private List<String> nodes;
   private TransportClient transportClient;
+  private int transportPort = 9300;
   private String xmlIndexType = "clob";
   
   /** Constructor */
@@ -82,14 +84,14 @@ public class ElasticContext {
   public void setClusterName(String clusterName) {
     this.clusterName = clusterName;
   }
-
-  /** The index mappings file (default=config/elastic-mappings.json). */
-  public String getMappingsFile() {
-    return mappingsFile;
+  
+  /** The HTTP port (default=9200) */
+  public int getHttpPort() {
+    return httpPort;
   }
-  /** The index mappings file (default=config/elastic-mappings.json). */
-  public void setMappingsFile(String mappingsFile) {
-    this.mappingsFile = mappingsFile;
+  /** The HTTP port (default=9200) */
+  public void setHttpPort(int httpPort) {
+    this.httpPort = httpPort;
   }
 
   /** The metadata index name (default=metadata). */
@@ -124,6 +126,15 @@ public class ElasticContext {
   private void setItemIndexType(String itemIndexType) {
     this.itemIndexType = itemIndexType;
   }
+  
+  /** The index mappings file (default=config/elastic-mappings.json). */
+  public String getMappingsFile() {
+    return mappingsFile;
+  }
+  /** The index mappings file (default=config/elastic-mappings.json). */
+  public void setMappingsFile(String mappingsFile) {
+    this.mappingsFile = mappingsFile;
+  }
 
   /** The node names. */
   public List<String> getNodes() {
@@ -143,6 +154,15 @@ public class ElasticContext {
     this.transportClient = transportClient;
   }
   
+  /** The transport port (default=9300) */
+  public int getTransportPort() {
+    return transportPort;
+  }
+  /** The transport port (default=9300) */
+  public void setTransportPort(int transportPort) {
+    this.transportPort = transportPort;
+  }
+
   /** The index name holding metadata xmls. */
   public String getXmlIndexName() {
     return this.indexName;
@@ -260,7 +280,7 @@ public class ElasticContext {
       }
       for (String node: nodes) {
         InetAddress a = InetAddress.getByName(node);
-        transportClient.addTransportAddress(new InetSocketTransportAddress(a,9300));
+        transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
       }
       if (this.getAutoCreateIndex()) {
         ensureIndex(getItemIndexName(),this.getIndexNameIsAlias());

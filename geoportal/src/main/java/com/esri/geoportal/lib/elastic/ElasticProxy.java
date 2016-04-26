@@ -58,7 +58,7 @@ public class ElasticProxy extends BalancerServlet {
       List<String> nodes = ec.getNodes();
       if ((nodes != null) && (nodes.size() > 0)) {
         for (String node: nodes) {
-          String url = "http://"+node+":9200";
+          String url = "http://"+node+":"+ec.getHttpPort();
           LOGGER.debug("Adding BalancerNode: "+url);
           balancerSupport.getBalancerNodes().add(new BalancerNode(url));
         }
