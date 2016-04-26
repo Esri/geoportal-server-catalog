@@ -34,7 +34,7 @@ G.evaluators.dc = {
     
     G.evalProps(task,item,root,"keywords_s","//dc:subject");
     G.evalProps(task,item,root,"links_s","//dct:references");
-    G.evalProp(task,item,root,"url_thumbnail_s","rdf:Description/dct:references[@scheme='urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail']");
+    G.evalProp(task,item,root,"thumbnail_s","rdf:Description/dct:references[@scheme='urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail']");
     
     G.evalProps(task,item,root,"contact_organizations_s","dc:creator");
     G.evalProps(task,item,root,"contact_people_s","dc:creator");

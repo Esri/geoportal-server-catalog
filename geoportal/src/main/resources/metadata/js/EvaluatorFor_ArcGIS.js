@@ -32,7 +32,7 @@ G.evaluators.arcgis = {
     G.evalProp(task,item,root,"description","dataIdInfo/idAbs");
     G.evalProps(task,item,root,"keywords_s","//TopicCatCd/@value | //keyword");
     G.evalProps(task,item,root,"links_s","//linkage");
-    G.evalProp(task,item,root,"url_thumbnail_s","dataIdInfo/graphOver/bgFileName");
+    G.evalProp(task,item,root,"thumbnail_s","dataIdInfo/graphOver/bgFileName");
   },
 
   evalService: function(task) {

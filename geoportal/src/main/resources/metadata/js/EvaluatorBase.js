@@ -41,11 +41,11 @@ var G = {
         params.begin = {
           date: params.instant.date,
           indeterminate: params.instant.indeterminate
-        }
+        };
         params.end = {
           date: params.instant.date,
           indeterminate: params.instant.indeterminate
-        }
+        };
       }
     }
     if (params.begin) {

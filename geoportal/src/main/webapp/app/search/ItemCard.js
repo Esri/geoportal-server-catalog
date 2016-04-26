@@ -301,10 +301,10 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     _renderThumbnail: function(item) {
       var show = AppContext.appConfig.searchResults.showThumbnails;
       var thumbnailNode = this.thumbnailNode;
-      if (show && typeof item.url_thumbnail_s === "string" && item.url_thumbnail_s.indexOf("http") === 0) {
-        //console.warn(item.url_thumbnail_s);
-        //thumbnailNode.src = item.url_thumbnail_s;
-        setTimeout(function(){thumbnailNode.src = item.url_thumbnail_s;},1);
+      if (show && typeof item.thumbnail_s === "string" && item.thumbnail_s.indexOf("http") === 0) {
+        //console.warn(item.thumbnail_s);
+        //thumbnailNode.src = item.thumbnail_s;
+        setTimeout(function(){thumbnailNode.src = item.thumbnail_s;},1);
         //thumbnailNode.style.display = "none";
       } else {
         thumbnailNode.style.display = "none";

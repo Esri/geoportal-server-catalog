@@ -31,7 +31,7 @@ G.evaluators.fgdc = {
     G.evalProp(task,item,root,"description","idinfo/descript/abstract");
     G.evalProps(task,item,root,"keywords_s","//themekey | //placekey");
     G.evalProps(task,item,root,"links_s","idinfo/citation/citeinfo/onlink | distinfo/stdorder/digform/digtopt/onlinopt/computer/networka/networkr");
-    G.evalProp(task,item,root,"url_thumbnail_s","idinfo/browse/browsen");
+    G.evalProp(task,item,root,"thumbnail_s","idinfo/browse/browsen");
     G.evalProps(task,item,root,"contact_organizations_s","//cntinfo/cntorgp/cntorg");
     G.evalProps(task,item,root,"contact_people_s","//cntinfo/cntorgp/cntper");
     G.evalProps(task,item,root,"contentType_s","distinfo/resdesc");
