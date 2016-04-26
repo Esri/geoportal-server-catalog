@@ -362,6 +362,11 @@ public class SearchRequest extends _SearchRequestBase {
             throw new InvalidParameterException("bbox",msg);
           }
           
+          if ((xmin < -180.0) && (xmax >= -180.0)) xmin = -180.0;
+          if ((xmax > 180.0) && (xmin <= 180.0)) xmax = 180.0;
+          if ((ymin < -90.0) && (ymax >= -90.0)) ymin = -90.0;
+          if ((ymax > 90.0) && (ymin <= 90.0)) ymax = 90.0;
+          
           String txt = "{\"type\":\"envelope\",\"coordinates\":[["+xmin+","+ymax+"],["+xmax+","+ymin+"]]}";
           JsonStructure env = JsonUtil.toJsonStructure(txt);
           JsonObjectBuilder jso = Json.createObjectBuilder();
@@ -441,8 +446,7 @@ public class SearchRequest extends _SearchRequestBase {
       }
     }
      */
-    // TODO configure field names
-    // TODO end: lt or lte ???
+    /*
     String startField = "apiso_TempExtent_begin_dt";
     String endField = "apiso_TempExtent_end_dt";
     String time = Val.trim(this.getParameter("time"));
@@ -463,6 +467,48 @@ public class SearchRequest extends _SearchRequestBase {
             endField,Json.createObjectBuilder().add("lt",end)));
         filters.add(jso.build());
       }
+    }
+    */
+    // TODO configure field names
+    // TODO end: lt or lte ???
+    List<JsonStructure> tFilters = new ArrayList<JsonStructure>();
+    String startField = "timeperiod_nst.begin_dt";
+    String endField = "timeperiod_nst.end_dt";
+    String time = Val.trim(this.getParameter("time"));
+    if (time != null && time.length() > 0) {
+      String start = null, end = null;
+      String[] parts = time.split("/");
+      start = Val.trim(parts[0]);
+      if (parts.length > 1) end = Val.trim(parts[1]);
+      if (start != null && start.length() > 0) {
+        JsonObjectBuilder jso = Json.createObjectBuilder();
+        jso.add("range",Json.createObjectBuilder().add(
+            startField,Json.createObjectBuilder().add("gte",start)));
+        tFilters.add(jso.build());
+      }
+      if (end != null && end.length() > 0) {
+        JsonObjectBuilder jso = Json.createObjectBuilder();
+        jso.add("range",Json.createObjectBuilder().add(
+            endField,Json.createObjectBuilder().add("lt",end)));
+        tFilters.add(jso.build());
+      }
+    }
+    if (tFilters.size() > 0) {
+      JsonArrayBuilder a = Json.createArrayBuilder();
+      for (JsonStructure j: tFilters) a.add(j);
+      JsonObjectBuilder jq = Json.createObjectBuilder();
+      jq.add("query",Json.createObjectBuilder()
+          .add("nested",Json.createObjectBuilder()
+            .add("path", "timeperiod_nst")
+            .add("query",Json.createObjectBuilder()
+              .add("bool",Json.createObjectBuilder()
+                .add("must",a)
+              )
+            )
+          )
+        );
+      //System.err.println("temporalq="+jq.build());
+      filters.add(jq.build());
     }
   }
   

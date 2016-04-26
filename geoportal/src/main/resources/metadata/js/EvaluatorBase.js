@@ -27,17 +27,26 @@ var G = {
   analyzeTimePeriod: function(task,params) {
     //print("analyzeTimePeriod");
     if (!params) return;
+    //"instant_dt": null, "instant_indeterminate_s": null,
     var data = {
-      "instant_dt": null,
-      "instant_indeterminate_s": null,
       "begin_dt": null,
       "begin_indeterminate_s": null,
       "end_dt": null,
       "end_indeterminate_s": null,
     };
     if (params.instant) {
-      data["instant_dt"] = this.DateUtil.checkIsoDateTime(params.instant.date,false);
-      data["instant_indeterminate_s"] = this.Val.chkStr(params.instant.indeterminate,null);
+      //data["instant_dt"] = this.DateUtil.checkIsoDateTime(params.instant.date,false);
+      //data["instant_indeterminate_s"] = this.Val.chkStr(params.instant.indeterminate,null);
+      if (!params.begin && !params.end) {
+        params.begin = {
+          date: params.instant.date,
+          indeterminate: params.instant.indeterminate
+        }
+        params.end = {
+          date: params.instant.date,
+          indeterminate: params.instant.indeterminate
+        }
+      }
     }
     if (params.begin) {
       data["begin_dt"] = this.DateUtil.checkIsoDateTime(params.begin.date,false);
@@ -222,22 +231,8 @@ var G = {
       if ((xmax > 180.0) && (xmin <= 180.0)) xmax = 180.0;
       if ((ymin < -90.0) && (ymax >= -90.0)) ymin = -90.0;
       if ((ymax > 90.0) && (ymin <= 90.0)) ymax = 90.0;
-
       var xcen = (xmin + xmax) / 2.0;
       var ycen = (ymin + ymax) / 2.0;
-      
-      //print("xmin="+xmin+ "ymin="+ymin+ "xmax="+xmax+ "ymax="+ymax+" xcen="+xcen+" ycen="+ycen);
-
-      // TODO
-      /*
-      if ((xmax >= xmin) && (ymax >= ymin)) {
-        if ((xmin >= -180) && (xmax <= 180.0) && (ymin >= -90.0) && (ymax <= 90.0)) {
-          text = "{\"type\":\"envelope\",\"coordinates\":[["+xmin+","+ymax+"],["+xmax+","+ymin+"]]}";
-          return text;
-        }
-      }
-       */
-
       result = {
         "envelope": {
           "type": "envelope",
