@@ -149,7 +149,7 @@ G.evaluators.iso = {
   },
 
   evalTemporal: function(task) {
-    var item = task.item, root = task.root
+    var item = task.item, root = task.root;
     G.forEachNode(task,root,"//gmd:EX_TemporalExtent/gmd:extent",function(node){
       var params = null;
       if (G.hasNode(task,node,"gml:TimeInstant/gml:timePosition")) {

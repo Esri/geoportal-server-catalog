@@ -31,7 +31,7 @@ G.writers.json = {
     appResponse.setMediaType(G.MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8"));
     appResponse.setEntity(json);
   }
-}
+};
 
 function writeItem(appRequest,appResponse,itemId,itemString,responseString) {
   G.writers.json.writeItem(appRequest,appResponse,itemId,itemString,responseString);

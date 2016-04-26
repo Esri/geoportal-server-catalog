@@ -96,7 +96,8 @@
         "esri",
         "$",
         "c3",
-        "d3"
+        "d3",
+        "G", "load", "com", "Java", "java", "javax"
     ],
     "globals"       : { // ** `false` = don't allow variable to be redefined locally
         "define": false,

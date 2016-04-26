@@ -71,7 +71,7 @@ G.evaluators.dc = {
   },
 
   evalTemporal: function(task) {
-    var item = task.item, root = task.root
+    var item = task.item, root = task.root;
     
     // TODO
     

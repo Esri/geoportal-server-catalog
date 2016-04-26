@@ -115,7 +115,7 @@ G._interrogate = function(mdoc) {
     }
   }
   if (type) {
-    mdtype = new com.esri.geoportal.base.metadata.MetadataType();
+    var mdtype = new com.esri.geoportal.base.metadata.MetadataType();
     mdtype.setKey(type.key);
     if (type.identifier) mdtype.setIdentifier(type.identifier);
     if (type.detailsXslt) mdtype.setDetailsXslt(type.detailsXslt);

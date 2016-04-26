@@ -68,7 +68,7 @@ var G = {
     var arcgisTypes = ["MapServer","ImageServer","FeatureServer","GlobeServer","GPServer","GeocodeServer",
                        "GeometryServer","NAServer","GeoDataServer ","MobileServer","SceneServer",
                        "SchematicsServer","StreamServer","VectorTileServer"]; 
-    var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS"]
+    var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS"];
     var dataTypes = ["zip","shp"];
 
     var i, v, lc, linkType = null, linkUrl = null;
@@ -247,7 +247,7 @@ var G = {
           "lat": ycen,
           "lon": xcen
         }
-      }
+      };
     }
     return result;
   },

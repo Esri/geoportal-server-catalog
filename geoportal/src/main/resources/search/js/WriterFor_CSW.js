@@ -208,7 +208,7 @@ G.writers.csw = {
     xmlBuilder.writer.writeEndElement();
   }
   
-}
+};
 
 function writeItem(appRequest,appResponse,itemId,itemString,responseString) {
   G.writers.csw.writeItem(appRequest,appResponse,itemId,itemString,responseString);

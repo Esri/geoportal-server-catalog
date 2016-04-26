@@ -261,7 +261,7 @@ G.writers.atom = {
     
     xmlBuilder.writer.writeEndElement();
   }
-}
+};
 
 function writeItem(appRequest,appResponse,itemId,itemString,responseString) {
   G.writers.atom.writeItem(appRequest,appResponse,itemId,itemString,responseString);

@@ -28,11 +28,11 @@ G.evaluators.arcgis = {
     var item = task.item, root = task.root;
     
     G.evalProp(task,item,root,"fileid","mdFileID");
-    G.evalProp(task,item,iden,"title","dataIdInfo/idCitation/resTitle");
-    G.evalProp(task,item,iden,"description","dataIdInfo/idAbs");
+    G.evalProp(task,item,root,"title","dataIdInfo/idCitation/resTitle");
+    G.evalProp(task,item,root,"description","dataIdInfo/idAbs");
     G.evalProps(task,item,root,"keywords_s","//TopicCatCd/@value | //keyword");
     G.evalProps(task,item,root,"links_s","//linkage");
-    G.evalProp(task,item,iden,"url_thumbnail_s","dataIdInfo/graphOver/bgFileName");
+    G.evalProp(task,item,root,"url_thumbnail_s","dataIdInfo/graphOver/bgFileName");
   },
 
   evalService: function(task) {
@@ -58,7 +58,7 @@ G.evaluators.arcgis = {
   },
 
   evalTemporal: function(task) {
-    var item = task.item, root = task.root
+    var item = task.item, root = task.root;
     // TODO
   }
 
