@@ -5,7 +5,7 @@ define([],function(){var obj={
     numPerPage: 10,
     showDate: true,
     showOwner: true,
-    showThumbnails: false
+    showThumbnails: true
   }
   
 // .......................................................................................
