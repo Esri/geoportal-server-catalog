@@ -2,6 +2,8 @@
 
 ignore/
 z_*
+zz_*
+zzz_*
 
 *.bak
 *.class
