@@ -36,6 +36,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -96,10 +97,19 @@ public class MetadataService {
   public Response put(
       String body,
       @Context SecurityContext sc,
-      @QueryParam("pretty") boolean pretty) {
+      @QueryParam("pretty") boolean pretty,
+      @QueryParam("async") boolean async) {
     //System.err.println("request-count="+requestCount.getAndIncrement()+" ...");
     AppUser user = new AppUser(sc);
-    return this.publishMetadata(user,pretty,null,body);
+    if (async) {
+      new Thread(() -> {
+        this.publishMetadata(user,pretty,null,body);
+      }).start();;
+      String json = "{\"async\": true}";
+      return Response.ok(json).type(MediaType.APPLICATION_JSON_TYPE).build();
+    } else {
+      return this.publishMetadata(user,pretty,null,body);
+    }
   }
   
   @PUT
@@ -307,6 +317,7 @@ public class MetadataService {
    */
   protected Response publishMetadata( AppUser user, boolean pretty, String id, String content) {
     try {
+      //System.err.println("publishMetadata............");
       PublishMetadataRequest request = GeoportalContext.getInstance().getBean(
           "request.PublishMetadataRequest",PublishMetadataRequest.class);
       request.init(user,pretty);
