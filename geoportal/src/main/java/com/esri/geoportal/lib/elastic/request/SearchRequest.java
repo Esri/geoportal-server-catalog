@@ -191,7 +191,7 @@ public class SearchRequest extends _SearchRequestBase {
     if (q != null && q.length() > 0) {
       QueryStringQueryBuilder qsqb = QueryBuilders.queryStringQuery(q);
       if (!q.equals("*:*")) {
-        qsqb.escape(true); // TODO should this be escaped
+        //qsqb.escape(true); // TODO should this be escaped
       }
       //qsqb.allowLeadingWildcard(true);  // TODO should this be allowed
       qsqb.defaultField(Val.chkStr(this.getParameter("df"),null));
