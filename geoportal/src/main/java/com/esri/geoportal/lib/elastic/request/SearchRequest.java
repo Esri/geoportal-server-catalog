@@ -39,11 +39,16 @@ import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
 import org.elasticsearch.search.sort.SortOrder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Search for items.
  */
 public class SearchRequest extends _SearchRequestBase {
+  
+  /** Logger. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(SearchRequest.class);
 
   /** Instance variables . */
   protected int from = 0;
@@ -99,6 +104,7 @@ public class SearchRequest extends _SearchRequestBase {
     String wq = JsonUtil.toJson(jsoQuery.build());
     search.setQuery(QueryBuilders.wrapperQuery(wq));
     // TODO some logging here
+    LOGGER.trace("SearchRequest: "+wq);
     SearchResponse searchResponse = search.get();
     writeResponse(response,searchResponse);
     return response;
@@ -366,7 +372,7 @@ public class SearchRequest extends _SearchRequestBase {
           if ((xmax > 180.0) && (xmin <= 180.0)) xmax = 180.0;
           if ((ymin < -90.0) && (ymax >= -90.0)) ymin = -90.0;
           if ((ymax > 90.0) && (ymin <= 90.0)) ymax = 90.0;
-          
+                    
           String txt = "{\"type\":\"envelope\",\"coordinates\":[["+xmin+","+ymax+"],["+xmax+","+ymin+"]]}";
           JsonStructure env = JsonUtil.toJsonStructure(txt);
           JsonObjectBuilder jso = Json.createObjectBuilder();
@@ -446,29 +452,6 @@ public class SearchRequest extends _SearchRequestBase {
       }
     }
      */
-    /*
-    String startField = "apiso_TempExtent_begin_dt";
-    String endField = "apiso_TempExtent_end_dt";
-    String time = Val.trim(this.getParameter("time"));
-    if (time != null && time.length() > 0) {
-      String start = null, end = null;
-      String[] parts = time.split("/");
-      start = Val.trim(parts[0]);
-      if (parts.length > 1) end = Val.trim(parts[1]);
-      if (start != null && start.length() > 0) {
-        JsonObjectBuilder jso = Json.createObjectBuilder();
-        jso.add("range",Json.createObjectBuilder().add(
-            startField,Json.createObjectBuilder().add("gte",start)));
-        filters.add(jso.build());
-      }
-      if (end != null && end.length() > 0) {
-        JsonObjectBuilder jso = Json.createObjectBuilder();
-        jso.add("range",Json.createObjectBuilder().add(
-            endField,Json.createObjectBuilder().add("lt",end)));
-        filters.add(jso.build());
-      }
-    }
-    */
     // TODO configure field names
     // TODO end: lt or lte ???
     List<JsonStructure> tFilters = new ArrayList<JsonStructure>();
