@@ -112,7 +112,7 @@ public class XsdValidator implements ErrorHandler {
   
   /**
    * Triggered when a SAX fatal error occurs during XSD validation.
-   * <br/>The error is captured and an exception is thrown. 
+   * <br>The error is captured and an exception is thrown. 
    * @param e the associated SAX exception
    * @throws SAXException the supplied SAXParseException is thrown to end the process
    */
@@ -123,7 +123,7 @@ public class XsdValidator implements ErrorHandler {
   
   /**
    * Triggered when a SAX error occurs during XSD validation.
-   * <br/>The error is captured bu no exception is thrown. 
+   * <br>The error is captured bu no exception is thrown. 
    * @param e the associated SAX exception
    * @throws SAXException part of the implemented method signature but never thrown
    */
@@ -273,7 +273,7 @@ public class XsdValidator implements ErrorHandler {
   
   /**
    * Triggered when a SAX warning occurs during XSD validation.
-   * <br/>Warnings are ignored.
+   * <br>Warnings are ignored.
    * @param e the associated SAX exception
    * @throws SAXException part of the implemented method signature but never thrown
    */

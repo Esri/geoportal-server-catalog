@@ -211,7 +211,7 @@ public class AppResponse {
   /**
    * Write a json response entity, HTTP 200.
    * @param request the request
-   * @param jsonBuidler the json entity 
+   * @param jsonBuilder the json entity 
    */
   public void writeOkJson(AppRequest request, JsonObjectBuilder jsonBuilder) {
     String json = JsonUtil.toJson(jsonBuilder.build(),request.getPretty());

@@ -32,7 +32,7 @@ import org.w3c.dom.NodeList;
 
 /**
  * Validates a document against a Schematron XSLT.
- * <p/>
+ * <br>
  * The XSLT must produce an SVRL document (Schematron Validation Report Language).
  */
 public class SchematronValidator {

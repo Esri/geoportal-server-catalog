@@ -37,7 +37,7 @@ public class ScriptEngines {
 
   /**
    * Gets a cached script engine.
-   * <br/>Only use for thread safe, immutable JavaScript modules.
+   * <br>Only use for thread safe, immutable JavaScript modules.
    * @param javascriptFile the path to a JavaScript file
    * @return the engine
    * @throws IOException 

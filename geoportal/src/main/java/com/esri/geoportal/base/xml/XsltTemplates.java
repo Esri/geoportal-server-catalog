@@ -36,9 +36,7 @@ public class XsltTemplates {
    * Gets a compiled XSLT template.
    * @param xsltPath the path to an XSLT
    * @return the compiled template
-   * @throws IOException if an IO exception occurs
    * @throws TransformerException if a transformation exception occurs
-   * @throws SAXException if a SAX parsing exception occurs
    */
   public static XsltTemplate getCompiledTemplate(String xsltPath)
       throws TransformerException {

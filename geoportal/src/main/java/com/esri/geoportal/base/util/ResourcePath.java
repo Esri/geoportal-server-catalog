@@ -20,7 +20,7 @@ import org.xml.sax.InputSource;
 
 /**
  * Helps with the location of file resources relative to the deployed application.
- * <p/>
+ * <br>
  * This class has no static methods or members to ensure a proper class loader.
  */
 public class ResourcePath {

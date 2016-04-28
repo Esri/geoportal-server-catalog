@@ -79,7 +79,7 @@ public class KvpClob extends Kvp {
   /**
    * Write content.
    * @param ec the context
-   * @param base64 the content
+   * @param content the content
    * @return the response
    * @throws Exception
    */

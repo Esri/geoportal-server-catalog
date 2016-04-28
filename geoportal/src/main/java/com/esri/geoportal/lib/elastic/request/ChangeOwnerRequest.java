@@ -98,8 +98,8 @@ public class ChangeOwnerRequest extends AppRequest {
    * @param id the item id
    * @param newOwner the new owner
    */
-  public void init(String item, String newOwner) {
-    this.setId(item);
+  public void init(String id, String newOwner) {
+    this.setId(id);
     this.setNewOwner(newOwner);
   }
   

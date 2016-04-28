@@ -156,7 +156,7 @@ public class TransformMetadataRequest extends AppRequest {
   /**
    * Write the response. 
    * @param response the response
-   * @param e the validation exception (if invalid)
+   * @param result the result
    */
   public void writeOk(AppResponse response, String result) {
     // TODO determine the mime type

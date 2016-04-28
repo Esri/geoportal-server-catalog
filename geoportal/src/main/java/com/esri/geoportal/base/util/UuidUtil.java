@@ -35,7 +35,7 @@ public class UuidUtil {
 
   /**
    * Normalize a GPT document uuid.
-   * <br/>(remove curly braces {}, remove dashes, ensure lower case)
+   * <br>(remove curly braces {}, remove dashes, ensure lower case)
    * @return the uuid
    */
   public static String normalizeGptUuid(String docuuid) {

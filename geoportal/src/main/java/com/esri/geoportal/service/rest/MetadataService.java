@@ -429,7 +429,6 @@ public class MetadataService {
    * Validate metadata.
    * @param user the active user
    * @param pretty for pretty JSON
-   * @param id the item id
    * @param xml the metadata
    * @return the response
    */

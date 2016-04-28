@@ -334,7 +334,7 @@ public class SearchRequest extends _SearchRequestBase {
   
   /**
    * Parse the bbox parameter.
-   * <br/>bbox={geo:box?}
+   * <br>bbox={geo:box?}
    * @param search the search
    */
   protected void parseXtnBBox(SearchRequestBuilder search) {
@@ -389,7 +389,7 @@ public class SearchRequest extends _SearchRequestBase {
   
   /**
    * Parse the response format parameter.
-   * <br/>f={json|pjson|atom|csw}
+   * <br>f={json|pjson|atom|csw}
    * @param search the search
    */
   protected void parseXtnF(SearchRequestBuilder search) {
@@ -404,7 +404,7 @@ public class SearchRequest extends _SearchRequestBase {
   
   /**
    * Parse the id parameter.
-   * <br/>id={id,id,id}
+   * <br>id={id,id,id}
    * @param search the search
    */
   protected void parseXtnId(SearchRequestBuilder search) {
@@ -423,7 +423,7 @@ public class SearchRequest extends _SearchRequestBase {
   
   /**
    * Parse the filter parameter.
-   * <br/>filter={filter}
+   * <br>filter={filter}
    * @param search the search
    */
   protected void parseXtnFilter(SearchRequestBuilder search) {
@@ -437,7 +437,7 @@ public class SearchRequest extends _SearchRequestBase {
   
   /**
    * Parse the time parameter (temporal extent)
-   * <br/>time={time:start?/{time:end?}
+   * <br>time={time:start?/{time:end?}
    * @param search the search
    */
   protected void parseXtnTime(SearchRequestBuilder search) {

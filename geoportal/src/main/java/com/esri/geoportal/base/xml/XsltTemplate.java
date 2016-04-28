@@ -81,11 +81,11 @@ public class XsltTemplate {
 
   /**
    * Compiles the XSLT based upon a relative resource path.
-   * <br/>The resource path should be relative to the WEB-INF/classes folder. If
+   * <br>The resource path should be relative to the WEB-INF/classes folder. If
    * the XSLT is located at:
-   * <br/><deployment folder>/WEB-INF/classes/somefolder/somefile.xslt
+   * <br>[deployment folder]/WEB-INF/classes/somefolder/somefile.xslt
    * then supply a relative resource path of:
-   * <br/>somefolder/somefile.xslt
+   * <br>somefolder/somefile.xslt
    * @param resourcePath the relative resource path to XSLT file
    * @throws IOException if the is an io problem with the XSLT file
    * @throws TransformerConfigurationException if a configuration exception occurs
@@ -98,9 +98,9 @@ public class XsltTemplate {
 
   /**
    * Compiles the XSLT based upon a system path.
-   * <br/>systemId examples:
-   * <br/>c:/somefolder/somefile.xslt
-   * <br/>file:///c:/somefolder/somefile.xslt
+   * <br>systemId examples:
+   * <br>c:/somefolder/somefile.xslt
+   * <br>file:///c:/somefolder/somefile.xslt
    * @param systemId the system path to XSLT file
    * @throws TransformerConfigurationException if a configuration exception occurs
    */
@@ -113,11 +113,11 @@ public class XsltTemplate {
 
   /**
    * Makes a compiled XSLT template based upon a relative resource path.
-   * <br/>The resource path should be relative to the WEB-INF/classes folder. If
+   * <br>The resource path should be relative to the WEB-INF/classes folder. If
    * the XSLT is located at:
-   * <br/><deployment folder>/WEB-INF/classes/somefolder/somefile.xslt
+   * <br>[deployment folder]/WEB-INF/classes/somefolder/somefile.xslt
    * then supply a relative resource path of:
-   * <br/>somefolder/somefile.xslt
+   * <br>somefolder/somefile.xslt
    * @param resourcePath the relative resource path to XSLT file
    * @return the XSLT template
    * @throws TransformerConfigurationException if a configuration exception occurs
@@ -131,9 +131,9 @@ public class XsltTemplate {
 
   /**
    * Makes a compiled XSLT template based upon a system path.
-   * <br/>systemId examples:
-   * <br/>c:/somefolder/somefile.xslt
-   * <br/>file:///c:/somefolder/somefile.xslt
+   * <br>systemId examples:
+   * <br>c:/somefolder/somefile.xslt
+   * <br>file:///c:/somefolder/somefile.xslt
    * @param systemId the system path to XSLT file
    * @return the XSLT template
    * @throws TransformerConfigurationException if a configuration exception occurs

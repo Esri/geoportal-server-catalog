@@ -82,7 +82,7 @@ public class CswService extends Application {
    * @param user the active user
    * @param pretty for pretty response
    * @param hsr the http request
-   * @param String body the request body
+   * @param body String body the request body
    * @return the response
    */
   protected Response execute(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
@@ -117,7 +117,7 @@ public class CswService extends Application {
    * @param user the active user
    * @param pretty for pretty response
    * @param hsr the http request
-   * @param String body the request body
+   * @param body String body the request body
    * @return the response
    */
   protected Response getCapabilities(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {

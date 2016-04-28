@@ -83,7 +83,7 @@ public class XmlNamespaceContext implements NamespaceContext {
 
   /**
    * Gets the namespace prefix iterator associated with a URI.
-   * <br/>This method always returns null.
+   * <br>This method always returns null.
    * @param namespaceURI uri the URI
    */
   @SuppressWarnings("rawtypes")

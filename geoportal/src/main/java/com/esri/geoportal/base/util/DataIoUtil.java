@@ -20,7 +20,7 @@ import java.util.Date;
 
 /**
  * DataInput/DataOutput utilities.
- * <p/>
+ * <br>
  * Intended for reading/writing of objects as binary data.
  */
 public class DataIoUtil {

@@ -31,7 +31,7 @@ public class XmlUtil {
   /** DEFAULT_ENCODING = "UTF-8" */
   public static final String DEFAULT_ENCODING = "UTF-8";
 
-  /** DEFAULT_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" */
+  /** DEFAULT_HEADER = "&lt;?xml version=\"1.0\" encoding=\"UTF-8\"?&gt;" */
   public static final String DEFAULT_HEADER = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
 
   /**
@@ -95,7 +95,7 @@ public class XmlUtil {
 
   /**
    * Executes an identity transform.
-   * @param the xml
+   * @param xml the xml
    * @throws TransformerException if an exception occurs
    */
   public static String identity(String xml) throws TransformerException {
@@ -122,7 +122,7 @@ public class XmlUtil {
 
   /**
    * Reads a file.
-   * @param path the path
+   * @param systemId the system id
    * @return the content
    * @throws Exception if an exception occurs
    */
@@ -161,7 +161,7 @@ public class XmlUtil {
 
   /**
    * Executes a transformation.
-   * <br/>The output encoding is set to UTF-8
+   * <br>The output encoding is set to UTF-8
    * @param source the transformation source
    * @param result the transformation result
    * @param indent if true, the output indent key is set to "yes"

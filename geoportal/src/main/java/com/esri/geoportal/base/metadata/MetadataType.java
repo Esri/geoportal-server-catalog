@@ -125,7 +125,7 @@ public class MetadataType {
   
   /**
    * The path to the xslt for translating to a known schema.
-   * <p/>
+   * <br>
    * Certain metadata types require immediate transformation to a known schema.
    */
   public String getToKnownXslt() {
@@ -133,7 +133,7 @@ public class MetadataType {
   }
   /**
    * The path to the xslt for translating to a known schema.
-   * <p/>
+   * <br>
    * Certain metadata types require immediate transformation to a known schema.
    */
   public void setToKnownXslt(String toKnownXslt) {
