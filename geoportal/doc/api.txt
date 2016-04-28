@@ -2,6 +2,8 @@ Geoportal Server API
 
 HTTP [any] geoportal/elastic/*
 
+HTTP GET      geoportal/rest/geoportal
+
 HTTP GET      geoportal/rest/metadata/item/{id}
 HTTP GET      geoportal/rest/metadata/item/{id}/xml
 HTTP GET      geoportal/rest/metadata/item/{id}/html
@@ -9,15 +11,18 @@ HTTP PUT      geoportal/rest/metadata/item
 HTTP PUT      geoportal/rest/metadata/item/{id}
 HTTP PUT      geoportal/rest/metadata/item/{id}/owner/{newOwner}
 HTTP DELETE   geoportal/rest/metadata/item/{id}
+HTTP GET      geoportal/rest/metadata/realias
 HTTP GET      geoportal/rest/metadata/reindex
 HTTP GET/POST geoportal/rest/metadata/search
 HTTP POST/PUT geoportal/rest/metadata/transform
 HTTP POST/PUT geoportal/rest/metadata/validate
 
-HTTP GET geoportal/opensearch
-HTTP GET geoportal/opensearch/description
+HTTP GET      geoportal/opensearch
+HTTP GET      geoportal/opensearch/description
 
-HTTP GET geoportal/csw
+HTTP GET      geoportal/csw
+
+HTTP POST     geoportal/oauth/token
 
 ------------------------------------------------------------------------------------------
 
@@ -30,6 +35,14 @@ Example: http://localhost:8080/geoportal/elastic/metadata/_mappings?pretty=true
 Example: http://localhost:8080/geoportal/elastic/metadata/item/_search?pretty=true&q=*:*
 Example: http://localhost:8080/geoportal/elastic/metadata/xml/_search?pretty=true&q=*:*
 
+------------------------------------------------------------------------------------------
+
+HTTP GET geoportal/rest/geoportal
+Provides information on the Geoportal application itself.
+Response Content Type: application/json
+Optional Query Parameters:
+  pretty - boolean for formatted json (default=false)
+  
 ------------------------------------------------------------------------------------------
 
 HTTP GET geoportal/rest/metadata/item/{id}
@@ -80,7 +93,7 @@ Optional Query Parameters:
 HTTP GET geoportal/rest/metadata/realias
 Reset the index associated with the metadata alias.
 Required Query Parameters:
-  indexName - the index to associated with the metadata alias
+  indexName - the index to associate with the metadata alias
   
 HTTP GET geoportal/rest/metadata/reindex
 Re-index content.
@@ -129,6 +142,19 @@ Example: http://localhost:8080/geoportal/csw
 Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetCapabilities&version=3.0.0
 Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetRecords&q=*:*
 Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetRecordById&id=e5d10bc3269b496da3557e0964429ccd
+
+-------------------------------------------------------------------------------------------
+
+HTTP POST geoportal/oauth/token
+Generates an OAuth access token.
+The token can be supplied to subsequent requests as a query parameter: access_token=
+The request should be POSTed via https using form-urlencoded parameters within the body.
+Response Content Type: application/json
+Required Query Parameters:
+  grant_type: password
+  client_id: geoportal-client
+  username: the username
+  password: the password
 
 -------------------------------------------------------------------------------------------
  
