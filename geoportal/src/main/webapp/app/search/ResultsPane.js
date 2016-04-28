@@ -76,8 +76,6 @@ function(declare, lang, array, aspect, domConstruct, template, i18n, SearchCompo
         },ddli);
       };
       
-      //$('#sidebar_filter_areas').trigger('click.bs.dropdown');
-      
       dd = domConstruct.create("div",{
         "class": "dropdown g-sort-dropdown"
       },this.dropPane.toolsNode);
@@ -150,7 +148,7 @@ function(declare, lang, array, aspect, domConstruct, template, i18n, SearchCompo
           itemCard.placeAt(itemsNode);
         },this);
       }
-    },
+    }
     
   });
   

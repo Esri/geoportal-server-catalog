@@ -31,33 +31,6 @@ function(declare, lang, Templated, template, i18n, has, domStyle, domGeometry) {
     
     postCreate: function() {
       this.inherited(arguments);
-      // Firefox issue, IFrame with inherited display:none
-      //var cs = document.defaultView.getComputedStyle(this.mapFrameNode,null);
-      //var cs2 = domStyle.getComputedStyle(this.mapFrameNode);
-      //console.warn("getComputedStyle=",cs2);
-      
-      /*
-      var nd = this.mapFrameNode;
-      var cs = domStyle.getComputedStyle(nd);
-      var be = domGeometry.getBorderExtents(nd,cs);
-      console.warn("cs",cs);
-      console.warn("be",be);
-      this.ensureMap();
-      */
-      
-      
-      //if (!has("mozilla")) this.ensureMap();
-      /*
-      var url = "./viewer/index.html"; 
-      try {
-        this.mapFrameNode.src = url;
-      } catch (err) {
-        console.warn("MapPanel.postCreate",err);
-      }
-      this.mapWasInitialized = true;
-      */
-      
-      //this.ensureMap();
     },
     
     addToMap: function(params) {
@@ -65,10 +38,6 @@ function(declare, lang, Templated, template, i18n, has, domStyle, domGeometry) {
       if (mapWindow && typeof mapWindow.addToMapListener === "function") {
         mapWindow.addToMapListener(params);
       }
-    },
-    
-    ensureVisibility: function() {
-      this.mapFrameNode.style.visibility = "visible";
     },
   
     ensureMap: function(urlParams) {

@@ -38,8 +38,9 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
     i18n: i18n,
     templateString: template,
     
-    activeRequest: null,
     searchOnStart: true,
+    
+    _dfd: null,
     
     postCreate: function() {
       this.inherited(arguments);
@@ -50,12 +51,6 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       topic.subscribe(appTopics.ItemUploaded,function(params){
         if (self._started) self.search();
       });
-      
-      /*
-      array.forEach(this.getChildren(),lang.hitch(this,function(child){
-        console.warn(child);
-      }));
-      */
     },
     
     startup: function() {
@@ -79,31 +74,6 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       });
       
       return components;
-      /*
-      var components = [];
-      array.forEach(query("[data-option-name]", this.domNode),function(widget){
-        if (widget.getAttribute("data-option-name")) {
-          widgets.push(widget);
-        }
-      });
-      */
-      
-      /*
-      var nodes = [];
-      if (this.searchToolbar) nodes.push(this.searchToolbar);
-      if (this.searchScopeBar) nodes.push(this.searchScopeBar);
-      if (this.searchDataTypeBar) nodes.push(this.searchDataTypeBar);
-      if (this.searchDocumentTypeBar) nodes.push(this.searchDocumentTypeBar);
-      if (this.searchSortBar) nodes.push(this.searchSortBar);
-      if (this.searchBottomToolbar) nodes.push(this.searchBottomToolbar);
-      array.forEach(nodes,function(node){
-        array.forEach(registry.findWidgets(node),function(widget){
-          if (widget.isSearchComponent) components.push(widget);
-        });
-      });
-      components.push(this.resultsPane);
-      return components;
-      */
     },
     
     search: function() {
@@ -165,19 +135,24 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
         info.postData = JSON.stringify(postData);
       }
       
-      var request = self.activeRequest = esriRequest(info,options);
-      request.then(function(response) {
-        //console.warn("search-response",response);
-        response.urlParams = params.urlParams;
-        array.forEach(components,function(component){
-          component.processResults(response);
-        });
-        self.activeRequest = null;
+      if (this._dfd !== null && !this._dfd.isCanceled()) {
+        this._dfd.cancel("Search aborted.",false);
+      }
+
+      var dfd = this._dfd = esriRequest(info,options);
+      dfd.then(function(response) {
+        if (!dfd.isCanceled()) {
+          //console.warn("search-response",response);
+          response.urlParams = params.urlParams;
+          array.forEach(components,function(component){
+            component.processResults(response);
+          });
+        }
       }).otherwise(function(error){
+        // TODO show error?
         console.warn("search-error",error);
-        self.activeRequest = null;
       });
-      return request;
+      return dfd;
     }
 
   });

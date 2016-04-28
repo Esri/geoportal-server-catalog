@@ -111,16 +111,13 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
         showOk: false,
         cancelLabel: i18n.general.close,
         onShow: function() {
-         //$(window).trigger("resize");
          self.renderPlot(aggData,isBegin,content);
         }
       });
-      //this.renderPlot(aggData,isBegin,content);
       d.show();
     },
     
     renderPlot: function(aggData,isBegin,bindToNode) {
-      //console.warn(isBegin,aggData);
       var self = this, interval = this.interval;
       var tooltipTitle = i18n.search.dateFilter.plot.counts;
       var labelData = [];
@@ -132,7 +129,6 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
 
       if (aggData && aggData.buckets) {
         array.forEach(aggData.buckets,function(entry){
-          //console.warn("entry",entry);
           var dt = entry.key_as_string;
           var yyyy = dt.substring(0,dt.indexOf("-"));
           var yyyymmdd = dt.substring(0,dt.indexOf("T"));
@@ -151,7 +147,6 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
       if (labelData.length === 1) {
         plotName = labelData[0];
       } else if (labelData.length > 0) {
-        //plotName = labelData[0]+" .. "+ labelData[xLast];
         plotName = rangePattern.replace("{from}",labelData[0]).replace("{to}",labelData[xLast]);
       }
       
@@ -222,224 +217,6 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
           }
         }
       });      
-    },
-    
-    /*
-    renderPlot: function(searchResponse) {
-      if (!searchResponse.aggregations) return;
-
-      var populateData = function(buckets,dateData,countData,labelData,interval) {
-        array.forEach(buckets,function(entry){
-          console.warn("entry",entry);
-          var dt = entry.key_as_string;
-          var yyyy = dt.substring(0,dt.indexOf("-"));
-          var yyyymmdd = dt.substring(0,dt.indexOf("T"));
-          dateData.push(dt);
-          countData.push(entry.doc_count);
-          if (interval === "year") {
-            labelData.push(yyyy);
-          } else {
-            labelData.push(yyyymmdd);
-          }
-          
-        });
-      };
-      
-      var self = this, interval = this.interval;
-      var key = this.getAggregationKey();
-      var data = searchResponse.aggregations[key];
-      var dateData = [];
-      var dateLabelData = [];
-      var countData = ["countData"];
-     
-      var endData = {
-        dateData: [],
-        countData: ["endDateData"],
-        labelData: []
-      };
-      
-      if (data && data.dates && data.dates.buckets) {
-        populateData(data.dates.buckets,dateData,countData,dateLabelData,interval);
-      }
-      
-      if (data && data.endDates && data.endDates.buckets) {
-        populateData(data.endDates.buckets,endData.dateData,endData.countData,endData.labelData,interval);
-      }      
-      
-      
-
-      if (data && data.dates && data.dates.buckets) {
-        array.forEach(data.dates.buckets,function(entry){
-          //console.warn("entry",entry);
-          var dt = entry.key_as_string;
-          var yyyy = dt.substring(0,dt.indexOf("-"));
-          var yyyymmdd = dt.substring(0,dt.indexOf("T"));
-          dateData.push(dt);
-          if (interval === "year") {
-            dateLabelData.push(yyyy);
-          } else {
-            dateLabelData.push(yyyymmdd);
-          }
-          countData.push(entry.doc_count);
-        },this);
-      }
-
-      
-      
-      var xLast = dateData.length - 1;
-      var plotName = "No Data";
-      if (dateLabelData.length === 1) {
-        plotName = dateLabelData[0];
-      } else if (dateLabelData.length > 0) {
-        plotName = dateLabelData[0]+" .. "+ dateLabelData[xLast];
-      }
-      
-      c3.generate({
-        bindto: this.plotNode,
-        data: {
-          columns: [countData],
-          names: {
-            "countData": plotName
-          },
-          onclick: function(d,element) {
-            console.warn("onclick",dateData[d.index]);
-            if (interval === "year") {
-              self._searchDisabled = true;
-              var year = dateLabelData[d.index];
-              self.fromDate.set("value",year+"-01-01");
-              self.toDate.set("value",year+"-12-31");
-              self.interval = "day";
-              self._searchDisabled = false;
-              self.search();
-            }
-          }
-        },
-        axis: {
-          x: {
-            type: "indexed",
-            tick: {
-              format: function(x) {
-                if (x === 0) return dateLabelData[x];
-                else if (x === xLast) return dateLabelData[x];
-              }
-            }
-          }
-        },
-        tooltip: {
-          format: {
-            title: function(index) {
-              //console.warn("tooltip.title",index);
-              return dateLabelData[index]; 
-            },
-            name: function(name,ratio,id,index) { 
-              //console.warn("tooltip.name",name,ratio,id,index);
-              return dateLabelData[index]; 
-            }
-          }
-        }
-      });      
-    },
-    */
-    
-    
-    
-    renderPlot2: function(aggData,isBegin) {
-      var bindToNode = this.plotNode;
-      var self = this, interval = this.interval;
-      var label = "Begin Date";
-      var labelData = [];
-      var countData = [];
-      var lineColor = "#1f77b4";
-      if (!isBegin) {
-        label = "End Date";
-        lineColor = "#ff7f0e";
-      }
-
-      var max = 1;
-      if (aggData && aggData.buckets) {
-        array.forEach(aggData.buckets,function(entry){
-          //console.warn("entry",entry);
-          var dt = entry.key_as_string;
-          var yyyy = dt.substring(0,dt.indexOf("-"));
-          var yyyymmdd = dt.substring(0,dt.indexOf("T"));
-          if (interval === "year") {
-            labelData.push(yyyy);
-          } else {
-            labelData.push(yyyymmdd);
-          }
-          countData.push(entry.doc_count);
-          if (entry.doc_count > max) max = entry.doc_count;
-        });
-      }
-      
-      // Generate a Bates distribution of 10 random variables.
-      //var values = d3.range(1000).map(d3.random.bates(10)); max = 1; var xTicks= 20;
-      
-      
-      var values = countData; var xTicks = countData.length;
-      console.warn(values);
-
-      // A formatter for counts.
-      var formatCount = d3.format(",.0f");
-
-      var margin = {top: 10, right: 30, bottom: 30, left: 30};
-      //var width = 960 - margin.left - margin.right;
-      //var height = 500 - margin.top - margin.bottom;
-      
-      var width = 400 - margin.left - margin.right;
-      var height = 300 - margin.top - margin.bottom;
-      
-     // width = bindToNode.clientWidth;
-
-      var x = d3.scale.linear()
-          .domain([0, max])
-          .range([0, width]);
-
-      // Generate a histogram using twenty uniformly-spaced bins.
-      var data = d3.layout.histogram()
-          .bins(x.ticks(xTicks))
-          (values);
-
-      var y = d3.scale.linear()
-          .domain([0, d3.max(data, function(d) { return d.y; })])
-          .range([height, 0]);
-
-      var xAxis = d3.svg.axis()
-          .scale(x)
-          .orient("bottom");
-
-      var svg = d3.select(bindToNode).append("svg")
-          .attr("width", width + margin.left + margin.right)
-          .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-          .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-
-      var bar = svg.selectAll(".bar")
-          .data(data)
-        .enter().append("g")
-          .attr("class", "bar")
-          .attr("transform", function(d) { return "translate(" + x(d.x) + "," + y(d.y) + ")"; });
-
-      bar.append("rect")
-          .attr("x", 1)
-          .attr("width", x(data[0].dx) - 1)
-          .attr("height", function(d) { return height - y(d.y); });
-
-      /*
-      bar.append("text")
-          .attr("dy", ".75em")
-          .attr("y", 6)
-          .attr("x", x(data[0].dx) / 2)
-          .attr("text-anchor", "middle")
-          .text(function(d) { return formatCount(d.y); });
-
-      
-      svg.append("g")
-          .attr("class", "x axis")
-          .attr("transform", "translate(0," + height + ")")
-          .call(xAxis);
-      */
-      
     },
     
     /* SearchComponent API ============================================= */
@@ -526,16 +303,9 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
       
       var key = this.getAggregationKey();
       if (!params.aggregations) params.aggregations = {};
-      //params.aggregations[key] = {"date_histogram":{"field":"sys_modified_dt","interval":"year"}};
       var aggregationField = this.field;
       var interval = this.interval;
       var minDocCount = 1;
-      //if (interval === "day") minDocCount = 0;
-      /*
-        "nested" : {
-          "path" : this.nestedPath
-        },
-       */
       
       var dateHistogram = {
         "date_histogram":{
@@ -567,32 +337,6 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
           params.aggregations[key+"_end"] = endDateHistogram;
         }
       }
-      
-      /*
-      params.aggregations[key] = {
-        "aggregations": {
-          "dates": {
-            "date_histogram":{
-              "field": aggregationField,
-              "interval": interval,
-              "min_doc_count": minDocCount
-            }
-          }
-        }
-      };
-      if (this.hasNestedPath()) {
-        params.aggregations[key].nested = {"path": this.nestedPath};
-      }
-      if (this.hasToField()) {
-        params.aggregations[key].aggregations["endDates"] = {
-          "date_histogram":{
-            "field": this.toField,
-            "interval": interval,
-            "min_doc_count": minDocCount
-          }
-        };
-      }
-      */
       
     },
  

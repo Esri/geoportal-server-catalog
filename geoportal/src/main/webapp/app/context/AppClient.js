@@ -61,18 +61,6 @@ function(declare, lang, Deferred, esriRequest, dojoRequest) {
     
     generateToken: function(username,password) {
       // TODO needs to be https
-      /*
-      var url = this.getBaseUri()+"/oauth/token";
-      var content = {
-        grant_type: "password",
-        client_id: "geoportal-client",
-        username: username,
-        password: password
-      };
-      var info = {url:url,handleAs:"json",content:content};
-      var options = {usePost:true};
-      return esriRequest(info,options);
-      */
       var url = this.getBaseUri()+"/oauth/token";
       var content = {
         grant_type: "password",
@@ -85,14 +73,6 @@ function(declare, lang, Deferred, esriRequest, dojoRequest) {
     },
 
     pingGeoportal: function(accessToken) {
-      /*
-      var url = this.getRestUri()+"/geoportal";
-      var info = {url:url,handleAs:"json"};
-      var options = {usePost:false};
-      if (!accessToken) accessToken = this.getAccessToken();
-      if (accessToken) info.content = {access_token:encodeURIComponent(accessToken)};
-      return esriRequest(info,options);
-      */
       var url = this.getRestUri()+"/geoportal";
       var info = {handleAs:"json"};
       if (!accessToken) accessToken = this.getAccessToken();

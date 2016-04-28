@@ -35,12 +35,6 @@ function(declare, lang, on, event, domConstruct, TitlePane, i18n) {
       this.toolsNode = domConstruct.create("span",{"class":"g-drop-pane-tools"});
       this.focusNode.appendChild(this.toolsNode);
       this.own(on(this.toolsNode,"click",lang.hitch(this,function(e) {
-        /*
-        if (e && e.target && e.target.getAttribute("data-toggle") === "dropdown") {
-        } else {
-          if (this.stopEvents) event.stop(e);
-        }
-        */
         if (this.stopEvents) event.stop(e);
       })));
       this.own(on(this.toolsNode,"mousedown",lang.hitch(this,function(e) {

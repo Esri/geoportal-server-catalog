@@ -31,49 +31,11 @@ function(declare, lang, on, keys, domClass,
 
     postCreate: function() {
       this.inherited(arguments);
-      /*
-      this.activeQClauses = [];
-      this.ensureSolrClient();
-      this.solrClient.registerQComponent(this);
-      this.own(on(this.__textBox,"keyup",lang.hitch(this,function(evt) {
-        if (evt.keyCode === keys.ENTER) this.search();
-      })));
-      */
       
       this.own(on(this.searchTextBox,"keyup",lang.hitch(this,function(evt) {
         if (evt.keyCode === keys.ENTER) this.search();
       })));
-      this.own(on(this.searchTextBox,"keydown",lang.hitch(this,function(evt) {
-        //this._showClearButton();
-        if ((evt.keyCode === keys.HOME) || (evt.keyCode === keys.END) ||
-            (evt.keyCode === keys.LEFT_ARROW) || (evt.keyCode === keys.RIGHT_ARROW)){
-          evt.stopPropagation();
-          //evt.stopImmediatePropagation();
-          //evt.preventDefault();
-        }
-      })));
-      
     },
-    
-    /*
-    clearButtonClicked: function() {
-      this.searchTextBox.value = "";
-      this._hideClearButton();
-      on.emit(this,"ClearClick");
-    },
-    
-    searchButtonClicked: function() {
-      this.search();
-    },
-    
-    _showClearButton: function() {
-      domClass.remove(this.clearButton, "hidden");
-    },
-
-    _hideClearButton: function() {
-      domClass.add(this.clearButton, "hidden");
-    },
-    */
     
     /* SearchComponent API ============================================= */
     

@@ -125,9 +125,7 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
             }
           }
         }
-        
-        //linkType = "MapServer"; linkUrl = "http://server.arcgisonline.com/ArcGIS/rest/services/Specialty/Soil_Survey_Map/MapServer";
-        
+
         if (typeof linkUrl === "string") {
           //console.warn(linkType,linkUrl);
           domConstruct.create("a",{
@@ -302,10 +300,7 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       var show = AppContext.appConfig.searchResults.showThumbnails;
       var thumbnailNode = this.thumbnailNode;
       if (show && typeof item.thumbnail_s === "string" && item.thumbnail_s.indexOf("http") === 0) {
-        //console.warn(item.thumbnail_s);
-        //thumbnailNode.src = item.thumbnail_s;
         setTimeout(function(){thumbnailNode.src = item.thumbnail_s;},1);
-        //thumbnailNode.style.display = "none";
       } else {
         thumbnailNode.style.display = "none";
       }

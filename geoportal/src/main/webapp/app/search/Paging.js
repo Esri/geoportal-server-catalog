@@ -34,7 +34,7 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
     hasMore: false,
     nextStart: -1,
     numHits: 0,
-    numPerPage: 10, // TODO config
+    numPerPage: 10, 
     previousStart: -1,
     start: 1,
     
@@ -46,6 +46,9 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
       this.numPerPage = AppContext.appConfig.searchResults.numPerPage;
       this.typePlural = i18n.search.resultCount.itemPlural;
       this.typeSingular = i18n.search.resultCount.itemSingular;
+      if (typeof this.numPerPage === "undefined" || this.numPerPage === null) {
+        this.numPerPage = 10;
+      }
       
       var self = this;
       topic.subscribe(appTopics.ItemDeleted,function(params){

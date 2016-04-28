@@ -36,27 +36,13 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
       var self = this;
       this.updateUI();
       
-      /*
-      $('a[data-toggle="tab"]').on('shown.bs.tab',function(e) {
-        //e.target // newly activated tab
-        //e.relatedTarget // previous active tab
-        console.warn(e);
-        var href = e.target.href;
-        if (e.target.href.indexOf("#mapPanel") !== -1) {
-          self.mapPanel.mapPanelActivated();
-        }
-      });
-      */
-      
       var ignoreMapPanelActivated = false; 
       $("a[href='#mapPanel']").on("shown.bs.tab",function(e) {
         if (!ignoreMapPanelActivated && !self.mapPanel.mapWasInitialized) {
           self.mapPanel.ensureMap();
-          //self.mapPanel.ensureVisibility();
         }
       });
       topic.subscribe(appTopics.AddToMapClicked,function(params){
-        //console.warn("appTopics.AddToMapClicked",params);
         if (self.mapPanel.mapWasInitialized) {
           $("a[href='#mapPanel']").tab("show");
           self.mapPanel.addToMap(params);
@@ -70,7 +56,6 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
       });
       
       topic.subscribe(appTopics.SignedIn,function(params){
-        //console.warn("appTopics.SignedIn",params);
         self.updateUI();
       });
       
@@ -81,8 +66,6 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
     },
     
     /* =================================================================================== */
-    
-    
     
     signInClicked: function() {
       AppContext.appUser.showSignIn();
