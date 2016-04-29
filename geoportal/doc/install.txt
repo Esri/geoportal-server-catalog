@@ -4,13 +4,19 @@ Install Elasticsearch (2.3.1 of higher)
 Install Tomcat 8
 
 Deploy geoportal.war to Tomcat then 
-  - stop Tomcat
-  - update your Geoportal configuration (see below, ***)
-  - restart Tomcat
+  - Stop Tomcat
+  - Update your Geoportal essential configuration if needed (see below, ***)
+  - Restart Tomcat
+  - Run quick smoke test:
+     -- Open geoportal web page (e.g. http://localhost:8080/geoportal)
+     -- Signin as gptadmin/gptadmin (top right)
+     -- Upload a few metadata records (top right)
+     -- Perform search (left panel), if search return the matching records, then the basic installation is working
+  - Perform additional configuration (see below)
   
-  
+Main configuration file
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/config/app-context.xml
-Main configuration file. 
+
 *** Set the cluster and node name(s) for Elasticsearch cluster, e.g.:
   <beans:bean id="elasticContext" class="com.esri.geoportal.db.elastic.ElasticContext">
     <beans:property name="clusterName" value="elasticsearch" />
@@ -22,13 +28,15 @@ Main configuration file.
   </beans:bean>  
 
 
+Security configuration
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/app-security.xml
-Contains the security configuration. 
 
+Logging
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/log4j.properties
 Logging properties. You can modify the location of the log file by updating:
 log4j.appender.file.File
 
+Elasticsearch mappings for the "metadata" index
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/config/elastic-mappings.xml
 Contains the Elasticsearch mappings for the "metadata" index, used 
 when Geoportal auto-creates the "metadata" index.
