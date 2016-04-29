@@ -8,4 +8,4 @@ Geoportal Server next generation search application and metadata catalog, based 
 - Click [here](https://github.com/ArcGIS/geoportal-server-catalog/blob/master/geoportal/doc/install.txt) for installation instruction.
 
 ## Documentation
-- Please refer to the wiki.
+- Please refer to the [Wiki](https://github.com/ArcGIS/geoportal-server-catalog/wiki).
