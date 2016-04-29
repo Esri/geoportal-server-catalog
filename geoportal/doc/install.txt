@@ -12,8 +12,9 @@ Deploy geoportal.war to Tomcat then
      -- Signin as gptadmin/gptadmin (top right)
      -- Upload a few metadata records (top right)
      -- Perform search (left panel), if search return the matching records, then the basic installation is working
-  - Perform additional configuration (see below)
+  - Perform additional configuration as necessary (see below)
   
+----------------------------------------------------------------------------------------------  
 Main configuration file
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/config/app-context.xml
 
@@ -30,6 +31,7 @@ Main configuration file
 
 Security configuration
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/app-security.xml
+- configure various authentication options such as simple, LDAP, OAuth2.
 
 Logging
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/log4j.properties
