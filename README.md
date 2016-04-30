@@ -1,5 +1,7 @@
 # geoportal-server-catalog
-Geoportal Server next generation search application and metadata catalog, based on elasticsearch.
+As part of the evolution of Geoportal Server, the catalog capability has been separated into its own module. This because there are use cases where the catalog can be used without the need for harvesting or even metadata editing. 
+
+This repository thus contains the catalog capability of Geoportal Server, while it's sibling [geoportal-server-harvester](https://github.com/ArcGIS/geoportal-server-harvester) is the new harvester of Geoportal Server.
 
 ## Releases and Downloads
 - 2.0.0 - Initial release of geoportal-server-catalog. Click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
