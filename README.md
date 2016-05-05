@@ -20,7 +20,7 @@ This repository thus contains the catalog capability of Geoportal Server, while 
 * Tomcat 8
 
 ## Installation
-- See the [installation instructions](https://github.com/ArcGIS/geoportal-server-catalog/wiki/Installing-2.0.0) on the wiki.
+- See the [installation instructions](https://github.com/Esri/geoportal-server-catalog/wiki/Installing-Geoportal-Server-2.0.0) on the wiki.
 
 ## Issues
 
