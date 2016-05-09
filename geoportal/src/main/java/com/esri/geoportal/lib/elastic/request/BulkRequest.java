@@ -41,6 +41,7 @@ public class BulkRequest extends AppRequest {
   private boolean adminOnly = true;
   private int docsPerRequest = 1000;
   private String processMessage;
+  private int retryOnConflict = 1;
   private int scrollerPageSize = 1000;
     
   /** Constructor. */
@@ -75,6 +76,15 @@ public class BulkRequest extends AppRequest {
     this.processMessage = processMessage;
   }
   
+  /** How many retries for a version conflict. */
+  public int getRetryOnConflict() {
+    return retryOnConflict;
+  }
+  /** How many retries for a version conflict. */
+  public void setRetryOnConflict(int retryOnConflict) {
+    this.retryOnConflict = retryOnConflict;
+  }
+
   /** The scroller page size. */
   public int getScrollerPageSize() {
     return scrollerPageSize;

@@ -65,8 +65,10 @@ public class BulkChangeOwnerRequest extends BulkRequest {
    */
   protected void appendHit(ElasticContext ec, BulkRequestBuilder request, SearchHit hit) {
     request.add(ec.getTransportClient().prepareUpdate(
-        ec.getItemIndexName(),ec.getItemIndexType(),hit.getId()
-      ).setDoc(FieldNames.FIELD_SYS_OWNER,getNewOwner()));
+      ec.getItemIndexName(),ec.getItemIndexType(),hit.getId())
+      .setDoc(FieldNames.FIELD_SYS_OWNER,getNewOwner())
+      .setRetryOnConflict(getRetryOnConflict())
+    );
   }
   
   @Override
