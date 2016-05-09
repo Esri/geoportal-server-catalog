@@ -29,7 +29,7 @@ import org.elasticsearch.search.SearchHit;
 public class BulkChangeOwnerRequest extends BulkRequest {
   
   /** Instance variables. */
-  private String currentOwner;
+  private String owner;
   private String newOwner;
     
   /** Constructor. */
@@ -37,15 +37,6 @@ public class BulkChangeOwnerRequest extends BulkRequest {
     super();
   }
   
-  /** The current owner. */
-  public String getCurrentOwner() {
-    return currentOwner;
-  }
-  /** The current owner. */
-  public void setCurrentOwner(String currentOwner) {
-    this.currentOwner = currentOwner;
-  }
-
   /** The new owner. */
   public String getNewOwner() {
     return newOwner;
@@ -53,6 +44,15 @@ public class BulkChangeOwnerRequest extends BulkRequest {
   /** The new owner. */
   public void setNewOwner(String newOwner) {
     this.newOwner = newOwner;
+  }
+  
+  /** The owner. */
+  public String getOwner() {
+    return owner;
+  }
+  /** The owner. */
+  public void setOwner(String owner) {
+    this.owner = owner;
   }
   
   /** Methods =============================================================== */
@@ -72,9 +72,9 @@ public class BulkChangeOwnerRequest extends BulkRequest {
   @Override
   public AppResponse execute() throws Exception {
     AppResponse response = new AppResponse();
-    String currentOwner = getCurrentOwner();
-    if (currentOwner == null || currentOwner.length() == 0) {
-      response.writeMissingParameter(this,"currentOwner");
+    String owner = getOwner();
+    if (owner == null || owner.length() == 0) {
+      response.writeMissingParameter(this,"owner");
       return response;
     }
     String newOwner = getNewOwner();
@@ -84,7 +84,7 @@ public class BulkChangeOwnerRequest extends BulkRequest {
     }
     this.setDocsPerRequest(10000);
     this.setAdminOnly(true);
-    setProcessMessage("Bulk Change Owner: "+getCurrentOwner()+"->"+getNewOwner());
+    setProcessMessage("Bulk Change Owner: "+getOwner()+"->"+getNewOwner());
     return super.execute();
   }
   
@@ -94,7 +94,7 @@ public class BulkChangeOwnerRequest extends BulkRequest {
    * @param newOwner the new owner
    */
   public void init(String currentOwner, String newOwner) {
-    this.setCurrentOwner(currentOwner);
+    this.setOwner(currentOwner);
     this.setNewOwner(newOwner);
   }
   
@@ -104,7 +104,7 @@ public class BulkChangeOwnerRequest extends BulkRequest {
    * @return the scroller
    */
   protected Scroller newScroller(ElasticContext ec) {
-    QueryBuilder q = QueryBuilders.matchQuery(FieldNames.FIELD_SYS_OWNER,getCurrentOwner());
+    QueryBuilder q = QueryBuilders.matchQuery(FieldNames.FIELD_SYS_OWNER,getOwner());
     Scroller scroller = new Scroller();
     scroller.setIndexName(ec.getItemIndexName());
     scroller.setIndexType(ec.getItemIndexType());

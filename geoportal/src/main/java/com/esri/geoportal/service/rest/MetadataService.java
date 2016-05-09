@@ -16,6 +16,7 @@ package com.esri.geoportal.service.rest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.request.BulkChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
@@ -45,6 +46,26 @@ import javax.ws.rs.core.SecurityContext;
  */
 @Path("/metadata")
 public class MetadataService {
+  
+  @PUT
+  @Path("/bulk/changeOwner")
+  public Response bulkChangeOwner(
+      @Context SecurityContext sc,
+      @QueryParam("owner") String owner, 
+      @QueryParam("newOwner") String newOwner, 
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(sc);
+    try {
+      BulkChangeOwnerRequest request = GeoportalContext.getInstance().getBeanIfDeclared(
+        "request.BulkChangeOwnerRequest",BulkChangeOwnerRequest.class,new BulkChangeOwnerRequest());
+      request.init(user,pretty);
+      request.init(owner,newOwner);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
   
   @DELETE 
   @Path("/item/{id}")

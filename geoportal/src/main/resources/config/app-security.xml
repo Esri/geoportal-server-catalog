@@ -23,6 +23,7 @@
     <security:intercept-url pattern="/" access="permitAll" />
     
     <!-- /rest/metadata/ - the metadata catalog -->
+    <security:intercept-url pattern="/rest/metadata/bulk/**" access="hasRole('ADMIN')" />
     <security:intercept-url pattern="/rest/metadata/item/*" method="GET" access="permitAll" />
     <security:intercept-url pattern="/rest/metadata/item/*/html" method="GET" access="permitAll" />
     <security:intercept-url pattern="/rest/metadata/item/*/xml" method="GET" access="permitAll" />
