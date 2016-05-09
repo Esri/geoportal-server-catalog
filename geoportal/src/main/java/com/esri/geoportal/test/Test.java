@@ -21,6 +21,7 @@ import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.request.BulkChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.CswRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
@@ -30,6 +31,7 @@ import com.esri.geoportal.lib.elastic.request.PublishMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ReindexRequest;
 import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
+import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.Scroller;
 
 import java.io.IOException;
@@ -53,6 +55,7 @@ import javax.json.JsonObjectBuilder;
 import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 
 import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
+import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchScrollRequestBuilder;
@@ -105,6 +108,7 @@ public class Test {
       //Test.testKvp();
       //Test.testDump();
       //Test.testLoad();
+      Test.testBulkChangeOwner();
     } catch (Throwable t) {
       LOGGER.error(t.getClass().getName());
       LOGGER.error("Exception",t);
@@ -798,6 +802,42 @@ public class Test {
     } catch (IOException ex) {
       ex.printStackTrace();
     }
+  }
+  
+  public static void testBulk() throws Exception {
+    String index = null;
+    String type = null;
+    String id = null;
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    BulkRequestBuilder req = ec.getTransportClient().prepareBulk();
+    //req.add(ec.getTransportClient().prepareDelete(index,type,id));
+    
+    String ownerField = FieldNames.FIELD_SYS_OWNER;
+    String originalOwner = null;
+    String newOwner = null;
+    req.add(ec.getTransportClient().prepareUpdate(index,type,id).setDoc(ownerField,newOwner));
+  }
+  
+  public static void testBulkChangeOwner() throws Exception {
+    AppUser user = new AppUser("admin",true,true);
+    //user = new AppUser("publisher",false,true);
+    //user = null;
+    boolean pretty = true;
+    String currentOwner = "admin";
+    String newOwner = "publisher";
+    //currentOwner = null;
+    //newOwner = "";
+    
+    currentOwner = "publisher";
+    newOwner = "admin";
+    
+    BulkChangeOwnerRequest request = GeoportalContext.getInstance().getBeanIfDeclared(
+        "request.BulkChangeOwnerRequest",BulkChangeOwnerRequest.class, new BulkChangeOwnerRequest());
+    request.init(user,pretty);
+    request.init(currentOwner,newOwner);
+    AppResponse response = request.execute();
+    LOGGER.info(response.getStatus().toString());
+    LOGGER.info(response.getEntity().toString());
   }
 
 

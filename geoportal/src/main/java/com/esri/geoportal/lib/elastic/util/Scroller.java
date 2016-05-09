@@ -35,6 +35,7 @@ import org.elasticsearch.search.sort.SortBuilders;
 public class Scroller {
 
   /** Instance variables. */
+  private boolean fetchSource = true;
   private String indexName;
   private String indexType;
   private int keepAliveMillis = 60000;
@@ -46,6 +47,15 @@ public class Scroller {
 
   /** Constructor. */
   public Scroller() {}
+
+  /** If true fetch the _source. */
+  public boolean getFetchSource() {
+    return fetchSource;
+  }
+  /** If true fetch the _source. */
+  public void setFetchSource(boolean fetchSource) {
+    this.fetchSource = fetchSource;
+  }
 
   /** The index name. */
   public String getIndexName() {
@@ -127,6 +137,9 @@ public class Scroller {
     search.setScroll(new TimeValue(getKeepAliveMillis()));
     search.addSort(SortBuilders.fieldSort("_doc"));
     search.setSize(getPageSize());
+    if (!getFetchSource()) {
+      search.setFetchSource(false);
+    }
 
     long count = 0, max = getMaxDocs();
 
