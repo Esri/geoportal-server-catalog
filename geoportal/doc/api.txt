@@ -4,6 +4,7 @@ HTTP [any] geoportal/elastic/*
 
 HTTP GET      geoportal/rest/geoportal
 
+HTTP PUT      geoportal/rest/metadata/bulk/changeOwner
 HTTP GET      geoportal/rest/metadata/item/{id}
 HTTP GET      geoportal/rest/metadata/item/{id}/xml
 HTTP GET      geoportal/rest/metadata/item/{id}/html
@@ -44,6 +45,15 @@ Optional Query Parameters:
   pretty - boolean for formatted json (default=false)
   
 ------------------------------------------------------------------------------------------
+
+HTTP PUT geoportal/rest/metadata/bulk/changeOwner
+Transfers ownership of all documents owner by a user.
+Response Content Type: application/json
+Required Query Parameters:
+  owner - the current owner
+  newOwner - the new owner
+Optional Query Parameters:
+  pretty - boolean for formatted json (default=false)
 
 HTTP GET geoportal/rest/metadata/item/{id}
 Gets the item associated with the supplied identifier.
