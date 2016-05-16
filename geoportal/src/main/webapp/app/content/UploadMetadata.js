@@ -49,7 +49,7 @@ function(declare, lang, array, aspect, domConstruct, topic, appTopics, Templated
       domConstruct.empty(this.validationErrorsNode);
       
       var client = new AppClient();
-      client.uploadMetadata(text,filename).then(function(response){
+      client.uploadMetadata(text,null,filename).then(function(response){
         if (response && response.status) {
           // wait for real-time update
           setTimeout(function(){

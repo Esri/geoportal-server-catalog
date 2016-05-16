@@ -22,9 +22,10 @@ define(["dojo/_base/declare",
         "app/etc/util",
         "app/main/SearchPanel",
         "app/main/MapPanel",
+        "app/content/MetadataEditor",
         "app/content/UploadMetadata"], 
 function(declare, lang, topic, appTopics, Templated, template, i18n, util, SearchPanel, MapPanel,
-    UploadMetadata) {
+    MetadataEditor, UploadMetadata) {
 
   var oThisClass = declare([Templated], {
 
@@ -66,6 +67,11 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
     },
     
     /* =================================================================================== */
+    
+    createMetadataClicked: function() {
+      var editor = new MetadataEditor();
+      editor.show();
+    },
     
     signInClicked: function() {
       AppContext.appUser.showSignIn();

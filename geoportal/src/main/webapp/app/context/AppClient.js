@@ -1,9 +1,8 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/Deferred",
-        "esri/request",
         "dojo/request"],
-function(declare, lang, Deferred, esriRequest, dojoRequest) {
+function(declare, lang, Deferred, dojoRequest) {
 
   var oThisClass = declare(null, {
 
@@ -80,8 +79,19 @@ function(declare, lang, Deferred, esriRequest, dojoRequest) {
       return dojoRequest.get(url,info);
     },
     
-    uploadMetadata: function(xml,filename) {
+    readMetadata: function(itemId) {
       var url = this.getRestUri()+"/metadata/item";
+      url += "/"+encodeURIComponent(itemId)+"/xml";
+      url = this.appendAccessToken(url);
+      var info = {handleAs:"text"};
+      return dojoRequest.get(url,info);
+    },
+    
+    uploadMetadata: function(xml,itemId,filename) {
+      var url = this.getRestUri()+"/metadata/item";
+      if (typeof itemId === "string" && itemId.length > 0) {
+        url += "/"+encodeURIComponent(itemId);
+      }
       url = this.appendAccessToken(url);
       if (typeof filename === "string" && filename.length > 0) {
         if (url.indexOf("?") === -1) url += "?";

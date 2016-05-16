@@ -22,8 +22,14 @@
 	      <ul class="dropdown-menu">
 	         <li class="divider"></li>
            <li data-role="publisher">
+             <a href="#" class="small" data-dojo-attach-point="createMetadataNode" 
+               data-dojo-attach-event="onclick: createMetadataClicked">
+               ${i18n.nav.options.createMetadata}
+             </a>
+           </li>
+           <li data-role="publisher">
              <a href="#" class="small" data-dojo-attach-point="uploadNode" data-dojo-attach-event="onclick: uploadClicked">
-               ${i18n.nav.options.upload}
+               ${i18n.nav.options.uploadMetadata}
              </a>
            </li>	         
 	         <li class="divider"></li>

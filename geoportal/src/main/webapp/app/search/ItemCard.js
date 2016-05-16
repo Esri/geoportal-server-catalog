@@ -27,10 +27,12 @@ define(["dojo/_base/declare",
         "app/context/AppClient",
         "app/etc/util",
         "app/common/ConfirmationDialog",
-        "app/content/ChangeOwner"], 
+        "app/content/ChangeOwner",
+        "app/content/MetadataEditor",
+        "app/context/metadata-editor",], 
 function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
-    AppClient, util, ConfirmationDialog, ChangeOwner) {
+    AppClient, util, ConfirmationDialog, ChangeOwner, MetadataEditor, gxeConfig) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -64,6 +66,25 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
+    },
+    
+    _canEditMetadata: function(item,isOwner,isAdmin) {
+      var v;
+      if (isOwner || isAdmin) {
+        v = item.sys_metadatatype_s;
+        if (typeof v === "string") {
+          if (gxeConfig.editable.geoportalTypes.indexOf(v) !== -1) {
+            if (gxeConfig.editable.allowNonGxeDocs) {
+              return true;
+            }
+            v = item.app_editor_s;
+            if (typeof v === "string" && v === "gxe") {
+              return true;
+            }
+          }
+        }
+      }
+      return false;
     },
     
     _isOwner: function(item) {
@@ -205,7 +226,20 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       var isOwner = this._isOwner(item), isAdmin = AppContext.appUser.isAdmin();
       var links = [];
       
+      if (this._canEditMetadata(item,isOwner,isAdmin)) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.item.actions.options.editMetadata,
+          onclick: function() {
+            var editor = new MetadataEditor({itemId:itemId});
+            editor.show();
+          }
+        }));
+      }
+      
       if (isOwner || isAdmin) {
+
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",

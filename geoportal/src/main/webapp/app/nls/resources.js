@@ -39,7 +39,8 @@ define({
       signIn: "Sign In",
       signOut: "Sign Out",
       options: {
-        "upload": "Upload"
+        createMetadata: "Create Metadata",
+        uploadMetadata: "Upload Metadata"
       }
     },
     
@@ -123,6 +124,7 @@ define({
           caption: "Options",
           changeOwner: "Change Owner",
           deleteItem: "Delete Item",
+          editMetadata: "Edit Metadata"
         }
       }
     },
@@ -134,10 +136,21 @@ define({
         currentOwner: "Current Owner:",
         newOwner: "New Owner:"
       },
+      createMetadata: {
+        caption: "Create Metadata",
+      },
       uploadMetadata: {
         caption: "Upload Metadata",
         button: "Upload"
       }
+    },
+    
+    metadataEditor: {
+      caption: "Metadata",
+      loading: "Loading editor...",
+      filePrompt: "Select an XML file.",
+      asTemplatePrompt: "Reset identifiers",
+      xmlViewOnly: "The type of metadata associated with this item is not supported by the editor."
     },
     
     errorTranslations: {
