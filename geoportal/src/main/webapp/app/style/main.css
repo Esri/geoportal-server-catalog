@@ -244,6 +244,7 @@ body {
 
 .g-item-card .g-item-actions {
   padding: 2px;
+  clear: both;
 }
 .g-item-card .g-item-actions > a, 
 .g-item-card .g-item-actions > .dropdown {
