@@ -124,7 +124,8 @@ define({
           caption: "Options",
           changeOwner: "Change Owner",
           deleteItem: "Delete Item",
-          editMetadata: "Edit Metadata"
+          editMetadata: "Edit Metadata",
+          uploadMetadata: "Upload Metadata"
         }
       }
     },

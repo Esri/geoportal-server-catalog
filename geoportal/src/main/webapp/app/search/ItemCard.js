@@ -29,10 +29,12 @@ define(["dojo/_base/declare",
         "app/common/ConfirmationDialog",
         "app/content/ChangeOwner",
         "app/content/MetadataEditor",
-        "app/context/metadata-editor",], 
+        "app/context/metadata-editor",
+        "app/content/UploadMetadata"], 
 function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
-    AppClient, util, ConfirmationDialog, ChangeOwner, MetadataEditor, gxeConfig) {
+    AppClient, util, ConfirmationDialog, ChangeOwner, MetadataEditor, gxeConfig, 
+    UploadMetadata) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -68,9 +70,9 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       this._renderAddToMap(item,links);
     },
     
-    _canEditMetadata: function(item,isOwner,isAdmin) {
+    _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
       var v;
-      if (isOwner || isAdmin) {
+      if ((isOwner && isPublisher) || isAdmin) {
         v = item.sys_metadatatype_s;
         if (typeof v === "string") {
           if (gxeConfig.editable.geoportalTypes.indexOf(v) !== -1) {
@@ -97,17 +99,29 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     
     _mitigateDropdownClip: function(dd,ddul) {
       // Bootstrap dropdown menus clipped by scrollable container
+      var self = this;
       var reposition = function() {
+        //console.warn($(dd).offset());
         var t = $(dd).offset().top + 15 - $(window).scrollTop();
         var l = $(dd).offset().left;
         $(ddul).css('top',t);
         $(ddul).css('left',l);
+        
+        var position = dd.getBoundingClientRect().top;
+        var buttonHeight = dd.getBoundingClientRect().height;
+        var menuHeight = $(ddul).outerHeight();
+        var winHeight = $(window).height();
+        if (position > menuHeight && winHeight - position < buttonHeight + menuHeight) {
+          //console.warn("dropup","position:",position,"t",t,"buttonHeight",buttonHeight,"menuHeight",menuHeight);
+          t = t - menuHeight - buttonHeight - 4;
+          $(ddul).css('top',t);
+        } 
       };
       $(ddul).css("position","fixed");
       $(dd).on('click', function() {reposition();});
-      $(window).scroll(function() {reposition();});
-      $(this.itemsNode).scroll(function() {reposition();});
-      $(window).resize(function() {reposition();});
+      //$(window).scroll(function() {reposition();});
+      //$(this.itemsNode).scroll(function() {reposition();});
+      //$(window).resize(function() {reposition();});
       //$(window).resize(function() {$(dd).removeClass('open');});
     },
     
@@ -223,10 +237,12 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     
     _renderOptionsDropdown: function(itemId,item) {
       var self = this;
-      var isOwner = this._isOwner(item), isAdmin = AppContext.appUser.isAdmin();
+      var isOwner = this._isOwner(item);
+      var isAdmin = AppContext.appUser.isAdmin();
+      var isPublisher = AppContext.appUser.isPublisher();
       var links = [];
       
-      if (this._canEditMetadata(item,isOwner,isAdmin)) {
+      if (this._canEditMetadata(item,isOwner,isAdmin,isPublisher)) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
@@ -238,8 +254,17 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
         }));
       }
       
-      if (isOwner || isAdmin) {
-
+      if ((isOwner && isPublisher) || isAdmin) {
+        
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.item.actions.options.uploadMetadata,
+          onclick: function() {
+            (new UploadMetadata({itemId:itemId})).show();
+          }
+        }));
+        
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
