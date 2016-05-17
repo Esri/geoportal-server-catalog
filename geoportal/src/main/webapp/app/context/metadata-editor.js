@@ -1,23 +1,25 @@
 define([],function(){var obj={
 // .......................................................................................
   
-  showValidateButton: true,
-  validateOnSave: false,
-  startupTypeKey: null,
-
   editable: {
     // Warning: The editor will be lossy if allowNonGxeDocs this is enabled.
     allowNonGxeDocs: false, 
-    geoportalTypes: ["arcgis", "fgdc", "iso19115","iso19115-2"],
+    geoportalTypes: ["arcgis", "fgdc", "iso19115", "iso19115-2"]
   },
   
-  allowedTypeKeys: [
-    "arcgis", "fgdc", 
-    "iso-19115", "iso-19119", "iso-19115-2",
-    "inspire-iso-19115", "inspire-iso-19119", 
-    "gemini-iso-19115", "gemini-iso-19119"
-  ],
-  
+  gxeContext: {
+    allowedTypeKeys: [
+      "arcgis", "fgdc", 
+      "iso-19115", "iso-19119", "iso-19115-2",
+      "inspire-iso-19115", "inspire-iso-19119", 
+      "gemini-iso-19115", "gemini-iso-19119"
+    ],
+    basemap: "hybrid",
+    showValidateButton: true,
+    validateOnSave: false,
+    startupTypeKey: null
+  },
+
   typeDefinitions: [
     {
       key: "arcgis",

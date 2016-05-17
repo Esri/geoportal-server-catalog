@@ -63,18 +63,7 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
           "esri/dijit/metadata/context/GxeAdaptor",
           "esri/dijit/metadata/editor/EditorDialog"],
         function(GxeContext,GxeAdaptor,EditorDialog) {
-          var gxeContext = new GxeContext({
-            basemap: "hybrid",
-            allowViewXml: false,
-            allowSaveAndClose: false,
-            arcgisMode: false,
-            startupTypeKey: gxeConfig.startupTypeKey,
-            showValidateButton: gxeConfig.showValidateButton,
-            validateOnSave: gxeConfig.validateOnSave,
-            filePromptText: i18n.metadataEditor.filePrompt,
-            asTemplateText: i18n.metadataEditor.asTemplatePrompt,
-            xmlViewOnlyText: i18n.metadataEditor.xmlViewOnly
-          });
+          var gxeContext = self._newContext(GxeContext);
           gxeContext.documentTypes.index = {};
           gxeContext.documentTypes.list = [];
           self._loadTypes(gxeContext,function(){
@@ -113,7 +102,7 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
     },
     
     _loadTypes: function(gxeContext,callback) {      
-      var typeDefs = [], allowedTypeKeys = gxeConfig.allowedTypeKeys;      
+      var typeDefs = [], allowedTypeKeys = gxeContext.allowedTypeKeys;      
       array.forEach(allowedTypeKeys,function(key) {
         array.some(gxeConfig.typeDefinitions,function(typeDef) {
           if (typeDef.key === key) {
@@ -123,7 +112,7 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
         });
       });
       this._loadType(gxeContext,typeDefs,function(){
-        gxeContext.setAllowedTypeKeys(gxeConfig.allowedTypeKeys);
+        gxeContext.setAllowedTypeKeys(allowedTypeKeys);
         callback();
       });
     },
@@ -197,6 +186,21 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
       return gxeAdaptor;
     },
     
+    _newContext: function(GxeContext) {
+      var params = {
+        allowViewXml: false,
+        allowSaveAndClose: false,
+        arcgisMode: false,
+        startupTypeKey: null,
+        showValidateButton: false,
+        validateOnSave: true,
+        filePromptText: i18n.metadataEditor.filePrompt,
+        asTemplateText: i18n.metadataEditor.asTemplatePrompt,
+        xmlViewOnlyText: i18n.metadataEditor.xmlViewOnly
+      };
+      return new GxeContext(lang.mixin(params,gxeConfig.gxeContext));
+    },
+    
     _save: function(xmlString,itemId) {
       var client = new AppClient();
       var url = client.getRestUri()+"/metadata/item";
@@ -239,6 +243,7 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
           });
         }
      
+        /*
         if (!LoadDocumentPane.prototype.xtnWasExtended) {
           //console.warn("Extending LoadDocumentPane...",LoadDocumentPane);
           lang.extend(LoadDocumentPane, {
@@ -282,7 +287,9 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
             }
           });
         }
+        */
 
+        /*
         if (!PrimaryToolbar.prototype.xtnWasExtended) {
           //console.warn("Extending PrimaryToolbar...",PrimaryToolbar.prototype);
           PrimaryToolbar.prototype.xtnUpdateUI = PrimaryToolbar.prototype.updateUI;
@@ -394,6 +401,7 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
             }
           });
         }
+        */
         
         callback();
       });
