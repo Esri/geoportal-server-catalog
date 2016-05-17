@@ -122,7 +122,6 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       //$(window).scroll(function() {reposition();});
       //$(this.itemsNode).scroll(function() {reposition();});
       //$(window).resize(function() {reposition();});
-      //$(window).resize(function() {$(dd).removeClass('open');});
     },
     
     _renderAddToMap: function(item,links) {
