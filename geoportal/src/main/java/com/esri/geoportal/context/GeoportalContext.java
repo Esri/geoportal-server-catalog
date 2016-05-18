@@ -46,7 +46,7 @@ public class GeoportalContext implements ApplicationContextAware {
   /** Instance variables. */
   private ApplicationContext applicationContext;
   private ElasticContext elasticContext;
-  private String version = "2";
+  private String version = "2.0.1";
   
   /** Constructor */
   public GeoportalContext() {}
