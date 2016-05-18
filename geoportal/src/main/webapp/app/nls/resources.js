@@ -148,7 +148,7 @@ define({
     
     metadataEditor: {
       caption: "Metadata",
-      loading: "Loading editor...",
+      loading: "Starting editor...",
       filePrompt: "Select an XML file.",
       asTemplatePrompt: "Reset identifiers",
       xmlViewOnly: "The type of metadata associated with this item is not supported by the editor."
