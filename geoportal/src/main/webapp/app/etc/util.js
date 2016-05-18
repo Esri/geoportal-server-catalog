@@ -17,6 +17,15 @@ function (lang) {
   
   var oThisObject = {
 
+    checkMixedContent: function(uri) {
+      if ((typeof window.location.href === "string") && (window.location.href.indexOf("https://") === 0)) {
+        if ((typeof uri === "string") && (uri.indexOf("http://") === 0)) {
+          uri = "https:"+uri.substring("5");
+        }
+      }
+      return uri;
+    },
+    
     escapeForLucene: function(value) {
       var a = ['+', '-', '&', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', '*', '?', ':', '\\'];
       var r = new RegExp("(\\" + a.join("|\\") + ")", "g");

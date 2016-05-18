@@ -358,7 +358,9 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       var show = AppContext.appConfig.searchResults.showThumbnails;
       var thumbnailNode = this.thumbnailNode;
       if (show && typeof item.thumbnail_s === "string" && item.thumbnail_s.indexOf("http") === 0) {
-        setTimeout(function(){thumbnailNode.src = item.thumbnail_s;},1);
+        setTimeout(function(){
+          thumbnailNode.src = util.checkMixedContent(item.thumbnail_s);
+        },1);
       } else {
         thumbnailNode.style.display = "none";
       }

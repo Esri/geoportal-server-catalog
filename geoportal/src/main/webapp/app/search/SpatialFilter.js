@@ -24,11 +24,13 @@ define(["dojo/_base/declare",
         "app/search/DropPane",
         "app/search/QClause",
         "app/etc/GeohashEx",
+        "app/etc/util",
         "esri/map",
         "esri/layers/ArcGISTiledMapServiceLayer",
         "esri/layers/GraphicsLayer",
         "esri/geometry/webMercatorUtils",
         "esri/geometry/Point",
+        "esri/SpatialReference",
         "esri/symbols/SimpleMarkerSymbol",
         "esri/symbols/SimpleLineSymbol",
         "esri/symbols/SimpleFillSymbol",
@@ -38,9 +40,10 @@ define(["dojo/_base/declare",
         "esri/graphic",
         "esri/Color"], 
 function(declare, lang, array, djQuery, on, domConstruct, template, i18n, SearchComponent, 
-    DropPane, QClause, GeohashEx, Map, ArcGISTiledMapServiceLayer, GraphicsLayer,
-    webMercatorUtils, Point, SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol,       
-    PictureMarkerSymbol, ClassBreaksRenderer, SimpleRenderer, Graphic, Color) {
+    DropPane, QClause, GeohashEx, util, Map, ArcGISTiledMapServiceLayer, GraphicsLayer,
+    webMercatorUtils, Point, SpatialReference, SimpleMarkerSymbol, SimpleLineSymbol, 
+    SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, SimpleRenderer, 
+    Graphic, Color) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -199,24 +202,26 @@ function(declare, lang, array, djQuery, on, domConstruct, template, i18n, Search
     },
     
     initializeMap: function() {
-      var mapProps = this.map;
+      var mapProps = this.map || AppContext.appConfig.searchMap || {};
+      if (mapProps) mapProps = lang.clone(mapProps);
+      var v = mapProps.basemapUrl;
+      delete mapProps.basemapUrl;
+      if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
+        v = null;
+      }
       this.map = null;
-      var oMap = new Map(this.mapNode,mapProps);
-      var s = this.basemapUrl;
-      if (!s) {
-        // TODO: lookup from config default?
+      var map = new Map(this.mapNode,mapProps);
+      if (typeof v === "string" && v.length > 0) {
+        v =  util.checkMixedContent(v);
+        var basemap = new ArcGISTiledMapServiceLayer(v);
+        map.addLayer(basemap);
       }
-      if (s) {
-        var basemap = new ArcGISTiledMapServiceLayer(s);
-        oMap.addLayer(basemap);
-      }
-      this.own(on(oMap,"Load",lang.hitch(this,function(){
-        this.map = oMap;
-        window.searchMap = this.map;
-        this.own(on(oMap,"ExtentChange",lang.hitch(this,function(){
+      this.own(on(map,"Load",lang.hitch(this,function(){
+        this.map = map;
+        //window.AppContext.searchMap = this.map;
+        this.own(on(map,"ExtentChange",lang.hitch(this,function(){
           if (this.getRelation() !== "anywhere") this.search();
         })));
-       // this.onMapLoad();
       })));
     },
     
@@ -285,7 +290,7 @@ function(declare, lang, array, djQuery, on, domConstruct, template, i18n, Search
         var clusterLayer = new GraphicsLayer({
           id: "clusters"
         });
-        var min = null, max = null;
+        var min = null, max = null, outSR = map.spatialReference;
         var geohash = new GeohashEx();
         array.forEach(data.buckets,function(entry){
           var key = entry.key;
@@ -294,13 +299,15 @@ function(declare, lang, array, djQuery, on, domConstruct, template, i18n, Search
             var count = entry.doc_count;
             if (min === null || count < min) min = count;
             if (max === null || count > max) max = count;
-            var location = geohash.decode(entry.key);
-            //console.warn("location",location);
-            var xy = webMercatorUtils.lngLatToXY(location.longitude, location.latitude); // TODO???
-            //var xy = [location.longitude, location.latitude];
-            var pt = new Point(xy[0],xy[1],map.spatialReference);
-            var attributes = {"Count":count};
-            clusterLayer.add(new Graphic(pt,null,attributes));
+            var loc = geohash.decode(entry.key);
+            var pt = new Point(loc.longitude,loc.latitude,new SpatialReference(4326));
+            if (webMercatorUtils.canProject(pt,outSR)) {
+              var pt2 = webMercatorUtils.project(pt,outSR);
+              if (pt2) {
+                var attributes = {"Count":count};
+                clusterLayer.add(new Graphic(pt2,null,attributes));
+              }
+            }
           } catch(ex) {
             //console.warn(ex);
           }

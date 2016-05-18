@@ -25,9 +25,10 @@ define(["dojo/_base/declare",
         "app/context/AppClient",
         "app/context/metadata-editor",
         "app/common/ModalBase",
+        "app/etc/util",
         "dojo/request"],
 function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopics, 
-  Templated, i18n, AppClient, gxeConfig, ModalBase, dojoRequest) {
+  Templated, i18n, AppClient, gxeConfig, ModalBase, util, dojoRequest) {
 
   return declare([Templated], {
     
@@ -39,6 +40,11 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
     
     postCreate: function() {
       this.inherited(arguments);
+   
+      var v = gxeConfig.gxeContext.basemapUrl;
+      if (typeof v === "string" && v.length > 0) {
+        gxeConfig.gxeContext.basemapUrl =  util.checkMixedContent(v);
+      }
     },
     
     show: function() {
