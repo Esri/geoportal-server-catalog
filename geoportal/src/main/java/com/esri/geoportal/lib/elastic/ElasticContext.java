@@ -20,6 +20,8 @@ import com.esri.geoportal.base.util.Val;
 import java.net.InetAddress;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Timer;
+import java.util.TimerTask;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -210,8 +212,10 @@ public class ElasticContext {
    * Ensure that an index exists.
    * @param name the index name
    * @param considerAsAlias consider creating an aliased index
+   * @throws Exception if an exception occurs
    */
-  public void ensureIndex(String name, boolean considerAsAlias) {
+  public void ensureIndex(String name, boolean considerAsAlias) throws Exception {
+    LOGGER.debug("Checking index: "+name);
     try {
       if (name == null || name.trim().length() == 0) return;
       AdminClient client = this.getTransportClient().admin();
@@ -250,6 +254,7 @@ public class ElasticContext {
       }
     } catch (Exception e) {
       LOGGER.error("Error executing ensureIndex()",e);
+      throw e;
     }
   }
   
@@ -282,9 +287,31 @@ public class ElasticContext {
         InetAddress a = InetAddress.getByName(node);
         transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
       }
+      
       if (this.getAutoCreateIndex()) {
-        ensureIndex(getItemIndexName(),this.getIndexNameIsAlias());
+        String indexName = getItemIndexName();
+        boolean indexNameIsAlias = getIndexNameIsAlias();
+        try {
+          ensureIndex(indexName,indexNameIsAlias);
+        } catch (Exception e) {
+          // keep trying - every 5 minutes
+          long period = 1000 * 60 * 5;
+          long delay = period;
+          Timer timer = new Timer(true);
+          timer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+              try {
+                ensureIndex(indexName,indexNameIsAlias);
+                timer.cancel();
+              } catch (Exception e2) {
+                // logging is handled by ensureIndex
+              }
+            }      
+          },delay,period);
+        }
       }
+      
     }
   }
 
