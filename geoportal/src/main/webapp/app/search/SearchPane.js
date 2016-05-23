@@ -25,13 +25,13 @@ define(["dojo/_base/declare",
         "dijit/_WidgetsInTemplateMixin",
         "dojo/text!./templates/SearchPane.html",
         "dojo/i18n!app/nls/resources",
-        "esri/request",
+        "dojo/request",
         "app/context/AppClient",
         "app/search/SearchBox",
         "app/search/ResultsPane"], 
 function(declare, lang, array, query, domClass, topic, appTopics, registry,
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
-         esriRequest, AppClient) {
+         dojoRequest, AppClient) {
 
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -77,19 +77,16 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
     },
     
     search: function() {
-      //if (this.activeSearch) {}; TODO cancel an active search?
       var components = this.getSearchComponents();
       var self = this, params = {urlParams:{}};
-      
-      //params = {"query":{"query_string" : {"query" : "product"}}};
-      
       array.forEach(components,function(component){
         component.appendQueryParams(params);
       });
-      // TODO show searching...
-      var u = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
-      var info = {url:u, handleAs:"json"};
-      var options = {usePost: false};
+      var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
+      //var client = new AppClient();
+      //url = client.appendAccessToken(url);
+      var postData = null;
+      var u;
 
       if (params.urlParams) {
         var sProp = null, oProp = null, props = params.urlParams;
@@ -97,49 +94,47 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
           if (props.hasOwnProperty(sProp)) {
             oProp = props[sProp];
             if (typeof oProp !== "undefined" && oProp !== null) {
-              if (u.indexOf("?") === -1) u += "?";
-              else u += "&";
-              u += sProp+"="+encodeURIComponent(oProp);
+              if (url.indexOf("?") === -1) url += "?";
+              else url += "&";
+              url += sProp+"="+encodeURIComponent(oProp);
             }
           }
         }
-        info.url = u;
       }
-      
-      var postData = null;
-      
+
       //console.warn("params.queries",params.queries);
-      
       if (params.queries && params.queries.length > 0) {
         if (postData === null) postData = {};
-        postData.query = {"bool":{"must":params.queries}}; // TODO must or should??
+        postData.query = {"bool":{"must":params.queries}};
       } else {
         // TODO config default-sort??
         /*
         if (!params.hasScorable && typeof params.urlParams.sort === "undefined") {
-          if (info.url.indexOf("?") === -1) info.url += "?";
-          else info.url += "&";
-          info.url += "sort="+encodeURIComponent("sys_modified_dt:desc");
+          if (url.indexOf("?") === -1) url += "?";
+          else url += "&";
+          url += "sort="+encodeURIComponent("sys_modified_dt:desc");
         }
         */
       }
-      
       if (params.aggregations) {
         if (postData === null) postData = {};
         postData.aggregations = params.aggregations;
       }
-      
-      if (postData !== null) {
-        options.usePost = true;
-        info.headers = {"Content-Type": "application/json"};
-        info.postData = JSON.stringify(postData);
-      }
-      
       if (this._dfd !== null && !this._dfd.isCanceled()) {
         this._dfd.cancel("Search aborted.",false);
       }
-
-      var dfd = this._dfd = esriRequest(info,options);
+      
+      var dfd = null;
+      if (postData === null) {
+        dfd = this._dfd = dojoRequest.get(url,{handleAs:"json"});
+      } else {
+        dfd = this._dfd = dojoRequest.post(url,{
+          handleAs: "json",
+          headers: {"Content-Type": "application/json"},
+          data: JSON.stringify(postData)
+        });
+      }
+      
       dfd.then(function(response) {
         if (!dfd.isCanceled()) {
           //console.warn("search-response",response);
@@ -149,8 +144,11 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
           });
         }
       }).otherwise(function(error){
-        // TODO show error?
-        console.warn("search-error",error);
+        console.warn("search-error");
+        console.warn(error);
+        array.forEach(components,function(component){
+          component.processError(error);
+        });
       });
       return dfd;
     }

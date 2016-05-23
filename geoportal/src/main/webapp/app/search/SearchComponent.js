@@ -58,6 +58,8 @@ function(declare, lang, array, query, domClass, registry,
       return "id_"+this.id;
     },
     
+    processError: function(searchError) {},
+    
     processResults: function(searchResponse) {},
     
     pushQClause: function(qClause,bSearch) {

@@ -116,7 +116,7 @@ function(declare, lang, array, aspect, domConstruct, template, i18n, SearchCompo
     },
     
     showNoMatch: function() {
-      this.setNodeText(this.noMatchNode,this.i18n.search.results.noMatch);
+      this.setNodeText(this.noMatchNode,i18n.search.results.noMatch);
       this.noMatchNode.style.display = "block";
     },
     
@@ -127,6 +127,12 @@ function(declare, lang, array, aspect, domConstruct, template, i18n, SearchCompo
       if (this.sortField !== null && this.sortDir !== null) {
         params.urlParams.sort = this.sortField+":"+this.sortDir;
       }
+    },
+    
+    processError: function(searchError) {
+      this.destroyItems();
+      this.setNodeText(this.noMatchNode,i18n.search.results.error);
+      this.noMatchNode.style.display = "block";
     },
     
     processResults: function(searchResponse) {

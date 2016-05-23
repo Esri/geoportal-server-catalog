@@ -89,7 +89,8 @@ define({
       },
       results: {
         label: "Results",
-        noMatch: "No results were found."
+        noMatch: "No results were found.",
+        error: "An error occurred."
       },
       resultCount: {
         countPattern: "{count} {type}",
