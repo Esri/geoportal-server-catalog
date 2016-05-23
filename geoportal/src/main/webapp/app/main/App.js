@@ -89,7 +89,7 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
     
     getCreateAccountUrl: function() {
       if (AppContext.geoportal && AppContext.geoportal.createAccountUrl) {
-        return AppContext.geoportal.createAccountUrl;
+        return util.checkMixedContent(AppContext.geoportal.createAccountUrl);
       }
       return null;
     },
