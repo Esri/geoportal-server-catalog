@@ -23,6 +23,34 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       lang.mixin(this,args);
     },
     
+    getArcGISPortalUrlForLink: function() {
+      var p = null, url = null;
+      try {
+        if (this.arcgisPortalUser !== null) p = this.arcgisPortalUser.portal;
+        if (p && p.customBaseUrl && (p.customBaseUrl.length > 0) && p.urlKey && (p.urlKey.length > 0)) {
+          url = window.location.protocol+"//"+p.urlKey+"."+p.customBaseUrl;
+          return url;
+        } else if (p && p.url) {
+          return p.url;
+        }
+      } catch(ex) {
+        console.warn(ex);
+      }
+    },
+    
+    getMyProfileUrl: function() {
+      if (AppContext.geoportal && AppContext.geoportal.arcgisOAuth && 
+          AppContext.geoportal.arcgisOAuth.showMyProfileLink) {
+        if (this.arcgisPortalUser) {
+          var v = this.getArcGISPortalUrlForLink();
+          if (v) {
+            return v+"/home/user.html?user="+encodeURIComponent(this.arcgisPortalUser.username);
+          } 
+        }
+      }
+      return null;
+    },
+    
     getUsername: function() {
       if (this.geoportalUser) {
         var v = this.geoportalUser.username;

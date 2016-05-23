@@ -15,6 +15,7 @@
     <beans:property name="geoportalPublishersGroupId" value="" />
     <beans:property name="allUsersCanPublish" value="true" />
     <beans:property name="rolePrefix" value="ROLE_" />
+    <beans:property name="showMyProfileLink" value="true" />
   </beans:bean>
 
 	<security:authentication-manager alias="authenticationManager">

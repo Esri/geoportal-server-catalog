@@ -21,7 +21,7 @@
 		      ><span class="glyphicon glyphicon-menu-hamburger"></span></a>
 	      <ul class="dropdown-menu">
 	         <li class="divider"></li>
-           <li data-role="publisher" data-dojo-attach-point="createMetadataNode" >
+           <li data-role="publisher" data-dojo-attach-point="createMetadataNode">
              <a href="#" class="small" data-dojo-attach-event="onclick: createMetadataClicked">
                ${i18n.nav.options.createMetadata}
              </a>
@@ -32,9 +32,14 @@
              </a>
            </li>	         
 	         <li class="divider"></li>
-           <li data-dojo-attach-point="createAccountNode" >
-             <a href="#" class="small" data-dojo-attach-event="onclick: createAccountClicked">
+           <li data-dojo-attach-point="createAccountNode">
+             <a href="#" class="small" target="_blank" data-dojo-attach-point="createAccountLink">
                ${i18n.nav.options.createAccount}
+             </a>
+           </li>
+           <li data-dojo-attach-point="myProfileNode">
+             <a href="#" class="small" target="_blank" data-dojo-attach-point="myProfileLink">
+               ${i18n.nav.options.myProfile}
              </a>
            </li>
 	         <li data-dojo-attach-point="signOutNode" >

@@ -61,12 +61,13 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
   private String geoportalAdministratorsGroupId;
   private String geoportalPublishersGroupId;  
   private String rolePrefix;
+  private boolean showMyProfileLink = false;
 
-  /** True if all authenticated users shoul have a Publisher role. */
+  /** True if all authenticated users shoudl have a Publisher role. */
   public boolean getAllUsersCanPublish() {
     return allUsersCanPublish;
   }
-  /** True if all authenticated users shoul have a Publisher role. */
+  /** True if all authenticated users should have a Publisher role. */
   public void setAllUsersCanPublish(boolean allUsersCanPublish) {
     this.allUsersCanPublish = allUsersCanPublish;
   }
@@ -132,6 +133,15 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
   /** The Spring role prefix. */
   public void setRolePrefix(String rolePrefix) {
     this.rolePrefix = rolePrefix;
+  }
+  
+  /** If true, show My Profile link. */
+  public boolean getShowMyProfileLink() {
+    return showMyProfileLink;
+  }
+  /** If true, show My Profile link. */
+  public void setShowMyProfileLink(boolean showMyProfileLink) {
+    this.showMyProfileLink = showMyProfileLink;
   }
 
   /** Methods =============================================================== */

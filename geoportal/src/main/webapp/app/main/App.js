@@ -68,11 +68,6 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
     
     /* =================================================================================== */
     
-    createAccountClicked: function() {
-      var url = this.getCreateAccountUrl();
-      if (url) window.open(url);
-    },
-    
     createMetadataClicked: function() {
       var editor = new MetadataEditor();
       editor.show();
@@ -100,24 +95,32 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
     },
     
     updateUI: function() {
+      var updateHref = function(node,link,href) {
+        if (typeof href === "string" && href.length > 0) {
+          link.href = href;
+          node.style.display = "";
+        } else {
+          link.href = "#";
+          node.style.display = "none";
+        }
+      };
+      var v;
       if (AppContext.appUser.isSignedIn()) {
-        var v = i18n.nav.welcomePattern.replace("{name}",AppContext.appUser.getUsername());
+        v = i18n.nav.welcomePattern.replace("{name}",AppContext.appUser.getUsername());
         util.setNodeText(this.usernameNode,v);
         this.usernameNode.style.display = "";
-        this.createAccountNode.style.display = "none";
         this.signInNode.style.display = "none";
         this.signOutNode.style.display = "";
+        updateHref(this.createAccountNode,this.createAccountLink,null);
+        updateHref(this.myProfileNode,this.myProfileLink,AppContext.appUser.getMyProfileUrl());
       } else {
         this.usernameNode.innerHTML = "";
         this.usernameNode.style.display = "none";
         this.createAccountNode.style.display = "none";
         this.signInNode.style.display = "";
         this.signOutNode.style.display = "none";
-        if (this.getCreateAccountUrl()) {
-          this.createAccountNode.style.display = "";
-        } else {
-          this.createAccountNode.style.display = "none";
-        }
+        updateHref(this.createAccountNode,this.createAccountLink,this.getCreateAccountUrl());
+        updateHref(this.myProfileNode,this.myProfileLink,null);
       }
       
       var isAdmin = AppContext.appUser.isAdmin();
