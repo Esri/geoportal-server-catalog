@@ -21,20 +21,24 @@
 		      ><span class="glyphicon glyphicon-menu-hamburger"></span></a>
 	      <ul class="dropdown-menu">
 	         <li class="divider"></li>
-           <li data-role="publisher">
-             <a href="#" class="small" data-dojo-attach-point="createMetadataNode" 
-               data-dojo-attach-event="onclick: createMetadataClicked">
+           <li data-role="publisher" data-dojo-attach-point="createMetadataNode" >
+             <a href="#" class="small" data-dojo-attach-event="onclick: createMetadataClicked">
                ${i18n.nav.options.createMetadata}
              </a>
            </li>
-           <li data-role="publisher">
-             <a href="#" class="small" data-dojo-attach-point="uploadNode" data-dojo-attach-event="onclick: uploadClicked">
+           <li data-role="publisher" data-dojo-attach-point="uploadNode">
+             <a href="#" class="small" data-dojo-attach-event="onclick: uploadClicked">
                ${i18n.nav.options.uploadMetadata}
              </a>
            </li>	         
 	         <li class="divider"></li>
-	         <li>
-	           <a href="#" class="small" data-dojo-attach-point="signOutNode" data-dojo-attach-event="onclick: signOutClicked">
+           <li data-dojo-attach-point="createAccountNode" >
+             <a href="#" class="small" data-dojo-attach-event="onclick: createAccountClicked">
+               ${i18n.nav.options.createAccount}
+             </a>
+           </li>
+	         <li data-dojo-attach-point="signOutNode" >
+	           <a href="#" class="small" data-dojo-attach-event="onclick: signOutClicked">
 	             ${i18n.nav.signOut}
 	           </a>
 	         </li>

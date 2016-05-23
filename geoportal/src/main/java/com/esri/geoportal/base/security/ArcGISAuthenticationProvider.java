@@ -55,7 +55,8 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
   /** Instance variables. */
   private boolean allUsersCanPublish = false;
   private String appId;
-  private String authorizeUrl;  
+  private String authorizeUrl; 
+  private String createAccountUrl;
   private int expirationMinutes = 120;
   private String geoportalAdministratorsGroupId;
   private String geoportalPublishersGroupId;  
@@ -88,6 +89,15 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
     this.authorizeUrl = authorizeUrl;
   }
 
+  /** The create account URL. */
+  public String getCreateAccountUrl() {
+    return createAccountUrl;
+  }
+  /** The create account URL. */
+  public void setCreateAccountUrl(String createAccountUrl) {
+    this.createAccountUrl = createAccountUrl;
+  }
+  
   /** Token expiration minutes. */
   public int getExpirationMinutes() {
     return expirationMinutes;
@@ -203,7 +213,12 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
       if (hasOrgAdminRole) isAdmin = true;
     }
     if (allUsersCanPublish) {
-      if (hasOrgAdminRole || hasOrgPubRole || hasOrgUserRole) isPublisher = true;
+      if (hasOrgAdminRole || hasOrgPubRole || hasOrgUserRole) {
+        isPublisher = true;
+      } else {
+        // This is a Public account (Facebook, ...)
+        isPublisher = true;
+      }
     }
     if ((pubGroupId != null) && (pubGroupId.length() > 0)) {
       if (isInPubGroup) isPublisher = true;

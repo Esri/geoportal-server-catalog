@@ -9,6 +9,7 @@
   <beans:bean id="arcgisAuthenticationProvider" class="com.esri.geoportal.base.security.ArcGISAuthenticationProvider">
     <beans:property name="appId" value="6iJ2pLIj9UwcSdfA"/>
     <beans:property name="authorizeUrl" value="https://www.arcgis.com/sharing/rest/oauth2/authorize"/>
+    <beans:property name="createAccountUrl" value="https://www.arcgis.com/home/createaccount.html"/>
     <beans:property name="expirationMinutes" value="120" />
     <beans:property name="geoportalAdministratorsGroupId" value="" />
     <beans:property name="geoportalPublishersGroupId" value="" />

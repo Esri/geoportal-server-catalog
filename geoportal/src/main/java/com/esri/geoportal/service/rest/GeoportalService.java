@@ -82,6 +82,9 @@ public class GeoportalService {
           .add("restUrl",ap.getRestUrl())
           .add("expirationMinutes",ap.getExpirationMinutes())
         );
+        if (ap.getCreateAccountUrl() != null && ap.getCreateAccountUrl().length() > 0) {
+          jso.add("createAccountUrl",ap.getCreateAccountUrl());
+        }
       }
       
       response.writeOkJson(request,jso);

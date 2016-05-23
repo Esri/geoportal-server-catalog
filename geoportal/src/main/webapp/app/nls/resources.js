@@ -39,6 +39,7 @@ define({
       signIn: "Sign In",
       signOut: "Sign Out",
       options: {
+        createAccount: "Create Account",
         createMetadata: "Create Metadata",
         uploadMetadata: "Upload Metadata"
       }

@@ -68,6 +68,11 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
     
     /* =================================================================================== */
     
+    createAccountClicked: function() {
+      var url = this.getCreateAccountUrl();
+      if (url) window.open(url);
+    },
+    
     createMetadataClicked: function() {
       var editor = new MetadataEditor();
       editor.show();
@@ -87,18 +92,32 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
     
     /* =================================================================================== */
     
+    getCreateAccountUrl: function() {
+      if (AppContext.geoportal && AppContext.geoportal.createAccountUrl) {
+        return AppContext.geoportal.createAccountUrl;
+      }
+      return null;
+    },
+    
     updateUI: function() {
       if (AppContext.appUser.isSignedIn()) {
         var v = i18n.nav.welcomePattern.replace("{name}",AppContext.appUser.getUsername());
         util.setNodeText(this.usernameNode,v);
         this.usernameNode.style.display = "";
+        this.createAccountNode.style.display = "none";
         this.signInNode.style.display = "none";
         this.signOutNode.style.display = "";
       } else {
         this.usernameNode.innerHTML = "";
         this.usernameNode.style.display = "none";
+        this.createAccountNode.style.display = "none";
         this.signInNode.style.display = "";
         this.signOutNode.style.display = "none";
+        if (this.getCreateAccountUrl()) {
+          this.createAccountNode.style.display = "";
+        } else {
+          this.createAccountNode.style.display = "none";
+        }
       }
       
       var isAdmin = AppContext.appUser.isAdmin();
