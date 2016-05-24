@@ -45,12 +45,16 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
     postCreate: function() {
       this.inherited(arguments);
       var self = this;
-      topic.subscribe(appTopics.SignedIn,function(params){
+      topic.subscribe(appTopics.BulkUpdate,function(params){
         if (self._started) self.search();
       });
       topic.subscribe(appTopics.ItemUploaded,function(params){
         if (self._started) self.search();
       });
+      topic.subscribe(appTopics.SignedIn,function(params){
+        if (self._started) self.search();
+      });
+
     },
     
     startup: function() {

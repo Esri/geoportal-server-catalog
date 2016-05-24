@@ -1,6 +1,8 @@
 define([],function(){var obj={
 // .......................................................................................
 
+  allowBulkChangeOwner: true,
+  
   searchMap: {
     basemap: "streets",
     autoResize: true, 

@@ -21,9 +21,11 @@ define(["dojo/_base/declare",
         "app/common/Templated",
         "dojo/text!./templates/ChangeOwner.html",
         "dojo/i18n!app/nls/resources",
+        "app/common/ConfirmationDialog",
         "app/common/ModalDialog",
         "app/context/AppClient"],
-function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, ModalDialog, AppClient) {
+function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, 
+  ConfirmationDialog, ModalDialog, AppClient) {
 
   var oThisClass = declare([Templated], {
     
@@ -41,7 +43,7 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, M
       this.inherited(arguments);
     },
     
-    execute: function(dialog) {
+    execute: function(bulk) {
       if (this._working) return;
       var self = this;
       var v = this.newOwnerNode.value;
@@ -49,12 +51,18 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, M
       if (v !== null && v.length > 0 ) {
         this._working = true;
         this.dialog.okCancelBar.showWorking(i18n.general.working,true);
-        var client = new AppClient();
-        client.changeOwner(this.item._id,v).then(function(response){
+        var dfd, client = new AppClient();
+        if (bulk) {
+          dfd = client.bulkChangeOwner(this.item.sys_owner_s,v);
+        } else {
+          dfd = client.changeOwner(this.item._id,v);
+        }
+        dfd.then(function(response){
           self.item.sys_owner_s = v;
           // wait for real-time update
           setTimeout(function(){
-            topic.publish(appTopics.ItemOwnerChanged,{item:self.item});
+            if (bulk) topic.publish(appTopics.BulkUpdate,{});
+            else topic.publish(appTopics.ItemOwnerChanged,{item:self.item});  
             self.dialog.hide();
           },1500);
         }).otherwise(function(error){
@@ -83,6 +91,13 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, M
       var self = this;
       this.setNodeText(this.itemTitleNode,this.item.title);
       this.setNodeText(this.currentOwnerNode,this.item.sys_owner_s);
+      if (AppContext.appConfig.allowBulkChangeOwner) {
+        var v = i18n.content.changeOwner.bulkPattern;
+        v = v.replace("{username}",this.item.sys_owner_s);
+        this.setNodeText(this.bulkLabelNode,v);
+      } else {
+        this.bulkNode.style.display = "none";
+      }
       this.own(on(this.newOwnerNode,"keyup",function(evt) {
         if (evt.keyCode === keys.ENTER) self.execute();
       }));
@@ -163,7 +178,26 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, M
           self.destroyRecursive(false);
         }, 
         onOkClicked: function() {
-          self.execute();
+          if (self._working) return;
+          var v = self.newOwnerNode.value;
+          if (v === null || lang.trim(v).length === 0) {
+            self.newOwnerNode.focus();
+            return;
+          }
+          if (AppContext.appConfig.allowBulkChangeOwner && self.bulkCheckbox.checked) {
+            var cd = new ConfirmationDialog({
+              title: self.title,
+              content: self.bulkLabelNode.innerHTML,
+              okLabel: self.okLabel,
+              hideOnOk: true,
+              status: "danger"
+            });
+            cd.show().then(function(ok){
+              if (ok) self.execute(true);
+            });
+          } else {
+            self.execute(false);
+          }
         }
       });
       $(this.dialog.domNode).on('shown.bs.modal',function() {

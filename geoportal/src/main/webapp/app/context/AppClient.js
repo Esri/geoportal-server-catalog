@@ -42,6 +42,15 @@ function(declare, lang, Deferred, dojoRequest) {
     
     /* ===================================================================== */
     
+    bulkChangeOwner: function(owner,newOwner) {
+      var url = this.getRestUri()+"/metadata/bulk/changeOwner";
+      url += "?owner="+encodeURIComponent(owner);
+      url += "&newOwner="+encodeURIComponent(newOwner);
+      url = this.appendAccessToken(url);
+      var info = {handleAs:"json"};
+      return dojoRequest.put(url,info);
+    },
+    
     changeOwner: function(id,newOwner) {
       var url = this.getRestUri()+"/metadata/item/";
       url += encodeURIComponent(id)+"/owner/"+encodeURIComponent(newOwner);

@@ -4,6 +4,9 @@ define([],function(){var obj={
   /* params - {type:string, url:string}; */
   AddToMapClicked: "app/AddToMapClicked",
   
+  /* params - {} */
+  BulkUpdate: "app/BulkUpdate",
+  
   /* params - {item:obj} */
   ItemOwnerChanged: "app/ItemOwnerChanged",
   

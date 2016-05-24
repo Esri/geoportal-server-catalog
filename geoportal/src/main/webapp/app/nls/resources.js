@@ -138,10 +138,8 @@ define({
         caption: "Change Owner",
         button: "Update",
         currentOwner: "Current Owner:",
-        newOwner: "New Owner:"
-      },
-      createMetadata: {
-        caption: "Create Metadata",
+        newOwner: "New Owner:",
+        bulkPattern: "Apply change to all items owned by {username}"
       },
       uploadMetadata: {
         caption: "Upload Metadata",
