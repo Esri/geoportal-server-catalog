@@ -39,11 +39,15 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
     templateString: template,
     
     searchOnStart: true,
+    defaultSort: null,
     
     _dfd: null,
     
     postCreate: function() {
       this.inherited(arguments);
+      if (this.defaultSort === null) {
+        this.defaultSort = AppContext.appConfig.searchResults.defaultSort;
+      }
       var self = this;
       topic.subscribe(appTopics.BulkUpdate,function(params){
         if (self._started) self.search();
@@ -54,7 +58,6 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       topic.subscribe(appTopics.SignedIn,function(params){
         if (self._started) self.search();
       });
-
     },
     
     startup: function() {
@@ -87,22 +90,27 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
         component.appendQueryParams(params);
       });
       var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
+      var v, postData = null;
+
       //var client = new AppClient();
       //url = client.appendAccessToken(url);
-      var postData = null;
-      var u;
-
-      if (params.urlParams) {
-        var sProp = null, oProp = null, props = params.urlParams;
-        for (sProp in props) {
-          if (props.hasOwnProperty(sProp)) {
-            oProp = props[sProp];
-            if (typeof oProp !== "undefined" && oProp !== null) {
-              if (url.indexOf("?") === -1) url += "?";
-              else url += "&";
-              url += sProp+"="+encodeURIComponent(oProp);
-            }
+      var sProp = null, oProp = null, props = params.urlParams;
+      for (sProp in props) {
+        if (props.hasOwnProperty(sProp)) {
+          oProp = props[sProp];
+          if (typeof oProp !== "undefined" && oProp !== null) {
+            if (url.indexOf("?") === -1) url += "?";
+            else url += "&";
+            url += sProp+"="+encodeURIComponent(oProp);
           }
+        }
+      }
+      if (!params.hasScorable && typeof params.urlParams.sort === "undefined") {
+        v = AppContext.appConfig.searchResults.defaultSort;
+        if (typeof this.defaultSort === "string" && this.defaultSort.length > 0) {
+          if (url.indexOf("?") === -1) url += "?";
+          else url += "&";
+          url += "sort="+encodeURIComponent(this.defaultSort);
         }
       }
 
@@ -111,14 +119,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
         if (postData === null) postData = {};
         postData.query = {"bool":{"must":params.queries}};
       } else {
-        // TODO config default-sort??
-        /*
-        if (!params.hasScorable && typeof params.urlParams.sort === "undefined") {
-          if (url.indexOf("?") === -1) url += "?";
-          else url += "&";
-          url += "sort="+encodeURIComponent("sys_modified_dt:desc");
-        }
-        */
+
       }
       if (params.aggregations) {
         if (postData === null) postData = {};

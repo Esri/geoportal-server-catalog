@@ -14,7 +14,8 @@ define([],function(){var obj={
     numPerPage: 10,
     showDate: true,
     showOwner: true,
-    showThumbnails: true
+    showThumbnails: true,
+    defaultSort: "title.sort:asc"
   }
   
 // .......................................................................................
