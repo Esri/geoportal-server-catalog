@@ -281,3 +281,22 @@ body {
   border: none;
 }
 
+.calcite .gxePrimaryToolbar > .gxeTabs > .gxeTabButton {
+  border: 1px solid #ccc;
+}
+
+/*
+.gxePrimaryToolbar > .gxeTabs > div {
+  float: right;
+}
+.gxePrimaryToolbar > .gxeTabs > .gxeMessageArea {
+	clear: right;
+  position: relative;
+  left: 200px;
+  margin-top: -20px;
+}
+*/
+
+
+
+

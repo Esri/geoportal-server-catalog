@@ -2,7 +2,7 @@ define([],function(){var obj={
 // .......................................................................................
   
   editable: {
-    // Warning: The editor will be lossy if allowNonGxeDocs this is enabled.
+    // Warning: The editor will be lossy if allowNonGxeDocs is enabled.
     allowNonGxeDocs: false, 
     geoportalTypes: ["arcgis", "fgdc", "iso19115", "iso19115-2"]
   },
@@ -15,8 +15,9 @@ define([],function(){var obj={
       "gemini-iso-19115", "gemini-iso-19119"
     ],
     basemap: "hybrid",
-    showValidateButton: true,
-    validateOnSave: false,
+    allowViewXml: true,
+    showValidateButton: false,
+    validateOnSave: true,
     startupTypeKey: null
   },
 
