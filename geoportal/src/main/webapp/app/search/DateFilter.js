@@ -41,6 +41,7 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
     nestedPath: null,
     
     interval: "year",
+    zulu: false,
     
     label: i18n.search.dateFilter.label,
     open: false,
@@ -168,8 +169,15 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
             var value = labelData[d.index];
             var modalNode = $(bindToNode).parents("[role='dialog']");
             if (isBegin) {
-              if (interval === "year") self.fromDate.set("value",value+"-01-01");
-              else self.fromDate.set("value",value);
+              if (interval === "year") {
+                if (self.zulu) {
+                  self.fromDate.set("value",value+"-01-01T00:00:00Z");
+                } else {
+                  self.fromDate.set("value",value+"-01-01");
+                }
+              } else {
+                self.fromDate.set("value",value);
+              }
               dtFrom = self.fromDate.get("value");
               dtTo = self.toDate.get("value");
               if (!dtTo) {
