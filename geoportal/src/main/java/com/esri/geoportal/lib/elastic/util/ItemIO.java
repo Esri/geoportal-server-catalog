@@ -96,14 +96,17 @@ public class ItemIO {
     boolean hasEvaluatedJson = mdoc.hasEvaluatedJson();
     boolean hasSuppliedJson = mdoc.hasSuppliedJson();
     boolean hasElasticSource = (elasticSource != null  && elasticSource.length() > 0);
-    if (hasEvaluatedJson) {
-      eval = (JsonObject)JsonUtil.toJsonStructure(mdoc.getEvaluatedJson());
-    }
     if (hasSuppliedJson) {
       supplied = (JsonObject)JsonUtil.toJsonStructure(mdoc.getSuppliedJson());
+      title = getTitle(supplied,title);
+    }
+    if (hasEvaluatedJson) {
+      eval = (JsonObject)JsonUtil.toJsonStructure(mdoc.getEvaluatedJson());
+      title = getTitle(eval,title);
     }
     if (hasElasticSource) {
       src = (JsonObject)JsonUtil.toJsonStructure(elasticSource);
+      title = getTitle(src,title);
     }
     if (hasElasticSource) {
       title = getTitle(src,title);
@@ -112,8 +115,6 @@ public class ItemIO {
         String name = entry.getKey();
         boolean bAdd = false;
         if (!hasEvaluatedJson) {
-          bAdd = true;
-        } else if (name.equals("title")) {
           bAdd = true;
         } else if (name.startsWith("_") || name.startsWith("sys_") || name.startsWith("src_") || name.startsWith("app_")) {
           bAdd = true;
@@ -125,12 +126,11 @@ public class ItemIO {
       }
     }
     if (hasEvaluatedJson) {
-      title = getTitle(eval,title);
       for (Entry<String, JsonValue> entry: eval.entrySet()) {
         // TODO need a naming convention ??
         String name = entry.getKey();
         boolean bAdd = false;
-        if (name.startsWith("_") || name.startsWith("sys_") || name.startsWith("src_")) {
+        if (name.startsWith("sys_")) {
           bAdd = false;
         } else if (!name.equalsIgnoreCase("xml")) {
           bAdd = true;
@@ -142,12 +142,11 @@ public class ItemIO {
       }
     }
     if (hasSuppliedJson) {
-      title = getTitle(supplied,title);
       for (Entry<String, JsonValue> entry: supplied.entrySet()) {
         // TODO need a naming convention ??
         String name = entry.getKey();
         boolean bAdd = false;
-        if (name.startsWith("_") || name.startsWith("sys_") || name.startsWith("src_")) {
+        if (name.startsWith("sys_")) {
           bAdd = false;
         } else if (!name.equalsIgnoreCase("xml")) {
           bAdd = true;
