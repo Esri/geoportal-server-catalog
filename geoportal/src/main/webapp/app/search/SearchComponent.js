@@ -15,17 +15,11 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
-        "dojo/query",
-        "dojo/dom-class",
-        "dijit/registry",
-        "dijit/_WidgetBase",
-        "dijit/_TemplatedMixin",
-        "dijit/_WidgetsInTemplateMixin",
+        "app/common/Templated",
         "app/etc/util"], 
-function(declare, lang, array, query, domClass, registry,
-         _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, util) {
+function(declare, lang, array, Templated, util) {
   
-  var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+  var oThisClass = declare([Templated], {
   
     activeQClauses: null,
     isSearchComponent: true,
