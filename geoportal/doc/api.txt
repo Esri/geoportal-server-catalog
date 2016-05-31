@@ -168,7 +168,12 @@ Required Query Parameters:
 
 -------------------------------------------------------------------------------------------
  
+Website
 
+Example: http://localhost:8080/geoportal/index.html
+Example: http://localhost:8080/geoportal/index.html?filter=oceans
 
+Optional Query Parameters:
+  filter - a filter to be applied to all searches 
 
 
