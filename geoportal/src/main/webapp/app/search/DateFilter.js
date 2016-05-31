@@ -41,6 +41,7 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
     nestedPath: null,
     
     interval: "year",
+    selector: null,
     zulu: false,
     
     label: i18n.search.dateFilter.label,
@@ -233,7 +234,7 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
       var query = null, qFrom = null, qTo = null, qNested = null, condition = null;
       var lbl = this.label, tip = "";
       
-      var from = null, to = null, dt, options = {zulu: true};
+      var from = null, to = null, dt, options = {zulu:true,selector:this.selector};
       var dtFrom = this.fromDate.get("value");
       var dtTo = this.toDate.get("value");
       //console.warn(dtFrom,dtTo);
