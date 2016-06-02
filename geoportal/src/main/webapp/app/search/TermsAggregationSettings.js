@@ -110,7 +110,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
         if (typeof v2 === "string" && lang.trim(v2).length > 0) {
           this.targetWidget.label = lang.trim(v2);
         } else {
-          this.targetWidget.label = this.targetWidget.field
+          this.targetWidget.label = this.targetWidget.field;
         }
       } else {
         v = this.targetWidget._initialField;
@@ -129,7 +129,6 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
         }
       }
       this.targetWidget.dropPane.set("title",this.targetWidget.label);
-      console.warn(this.targetWidget.dropPane);
       
       delete targetProps.size;
       v = number.parse(this.sizeInput.value,{places:0});

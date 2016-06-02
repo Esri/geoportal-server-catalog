@@ -68,12 +68,15 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
       this._initialLabel = this.label;
     },
     
-    addEntry: function(term,count) {
+    addEntry: function(term,count,missingVal) {
       var v = term+" ("+count+")";
       var tipPattern = i18n.search.appliedFilters.tipPattern;
       var tip = tipPattern.replace("{type}",this.label).replace("{value}",term);
       var query = {"term": {}};
       query.term[this.field] = term;
+      if (typeof missingVal === "string" && missingVal.length > 0 && missingVal === term) {
+        query = {"missing": {"field": this.field}};
+      }
       var qClause = new QClause({
         label: term,
         tip: tip,
@@ -118,8 +121,14 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
       if (searchResponse.aggregations) {
         var data = searchResponse.aggregations[key];
         if (data && data.buckets) {
+          
+          var v, missingVal = null;
+          if (this.props && typeof this.props.missing === "string") {
+            v = lang.trim(this.props.missing);
+            if (v.length > 0) missingVal = v;
+          }
           array.forEach(data.buckets,function(entry){
-            this.addEntry(entry.key,entry.doc_count);
+            this.addEntry(entry.key,entry.doc_count,missingVal);
           },this);
         }
       }
