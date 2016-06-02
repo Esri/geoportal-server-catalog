@@ -113,6 +113,33 @@ define({
         nextTip: "Next",
         pagePattern: "Page {page}",
         countPattern: "{count} items"
+      },
+      termsAggregation: {
+        settings: {
+          caption: "Terms Aggregation",
+          field: "Field",
+          fieldPlaceholder: "",
+          fieldLabel: "Label",
+          fieldLabelPlaceholder: "",
+          size: "Size",
+          sizePlaceholder: "number > 0",
+          minDocCount: "Minimum Count",
+          minDocCountPlaceholder: "number > 0",
+          include: "Include",
+          includePlaceholder: "filter",
+          exclude: "Exclude",
+          excludePlaceholder: "filter",
+          missing: "Missing",
+          missingPlaceholder: "label",
+          order: {
+            label: "Order",
+            placeholder: "",
+            countAsc: "Count - ascending",
+            countDesc: "Count - descending",
+            termAsc: "Term - ascending",
+            termDesc: "Term - descending",
+          }
+        }
       }
     },
     

@@ -3,6 +3,10 @@ define([],function(){var obj={
 
   allowBulkChangeOwner: true,
   
+  search: {
+    allowSettings: true
+  },
+  
   searchMap: {
     basemap: "streets",
     autoResize: true, 

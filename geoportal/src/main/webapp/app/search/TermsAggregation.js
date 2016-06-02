@@ -20,26 +20,41 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/search/DropPane",
-        "app/search/QClause"], 
-function(declare, lang, array, domConstruct, template, i18n, SearchComponent, DropPane, QClause) {
+        "app/search/QClause",
+        "app/search/TermsAggregationSettings"], 
+function(declare, lang, array, domConstruct, template, i18n, SearchComponent, 
+  DropPane, QClause, TermsAggregationSettings) {
   
   var oThisClass = declare([SearchComponent], {
     
     i18n: i18n,
     templateString: template,
     
+    allowSettings: null,
     field: null,
     label: null,
     open: false,
     props: null,
     
+    _initialField: null,
+    _initialLabel: null,
+    
     postCreate: function() {
       this.inherited(arguments);
+      
+      if (this.allowSettings === null) {
+        if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
+          this.allowSettings = true;
+        }
+      }
       
       if (this.allowSettings) {
         var link = this.dropPane.addSettingsLink();
         link.onclick = lang.hitch(this,function(e) {
-          //console.warn("TermsAggregation.settings clicked.");
+          var d = new TermsAggregationSettings({
+            targetWidget: this
+          });
+          d.showDialog();
         });
       }
     },
@@ -49,6 +64,8 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent, Dr
       if (typeof this.label === "undefined" || this.label === null || this.label.length === 0) {
         this.label = this.field;
       }
+      this._initialField = this.field;
+      this._initialLabel = this.label;
     },
     
     addEntry: function(term,count) {
