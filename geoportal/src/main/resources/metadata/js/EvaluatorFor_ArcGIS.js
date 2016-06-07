@@ -59,7 +59,31 @@ G.evaluators.arcgis = {
 
   evalTemporal: function(task) {
     var item = task.item, root = task.root;
-    // TODO
+    G.forEachNode(task,root,"dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Instant/tmPosition",function(node){
+      var v = G.getNodeText(node);
+      var params = {
+        instant: {
+          date: v,
+          indeterminate: null
+        }
+      };
+      G.analyzeTimePeriod(task,params);
+    });
+    G.forEachNode(task,root,"dataIdInfo/dataExt/tempEle/TempExtent/exTemp/TM_Period",function(node){
+      var v1 = G.getString(task,node,"tmBegin");
+      var v2 = G.getString(task,node,"tmEnd");
+      var params = {
+        begin: {
+          date: v1,
+          indeterminate: null
+        },
+        end: {
+          date: v2,
+          indeterminate: null
+        } 
+      };
+      G.analyzeTimePeriod(task,params);
+    });
   }
 
 };

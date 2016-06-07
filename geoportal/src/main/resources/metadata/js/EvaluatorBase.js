@@ -42,6 +42,7 @@ var G = {
           date: params.instant.date,
           indeterminate: params.instant.indeterminate
         };
+        // TODO should use the instant
         params.end = {
           date: params.instant.date,
           indeterminate: params.instant.indeterminate

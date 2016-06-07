@@ -71,16 +71,42 @@ G.evaluators.dc = {
   },
 
   evalTemporal: function(task) {
+    var chk = function(v) {
+      var params = null, n;
+      if (typeof v === "string" && v.length > 0) {
+        n = v.indexOf("/");
+        if (n !== -1) {
+          params = {
+            begin: {
+              date: v.substring(0,n),
+              indeterminate: null
+            },
+            end: {
+              date: v.substring(n+1),
+              indeterminate: null
+            } 
+          };
+        } else {
+          params = {
+            instant: {
+              date: v,
+              indeterminate: null
+            }
+          };  
+        }
+      }
+      if (params) G.analyzeTimePeriod(task,params);
+    };
+    
     var item = task.item, root = task.root;
-    
-    // TODO
-    
-    /* 
-      dc:date 
-   
-      <property meaning="timeperiod.analyze" xpathType="STRING" xpath="concat('tp.position.',//dct:valid)"/>
-     */
-
+    G.forEachNode(task,root,"//dct:valid",function(node){
+      var v = G.getNodeText(node);
+      chk(v);
+    });
+    G.forEachNode(task,root,"//dc:date",function(node){
+      var v = G.getNodeText(node);
+      chk(v);
+    });
   }
 
 };

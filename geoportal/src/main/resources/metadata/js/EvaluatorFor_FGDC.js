@@ -60,32 +60,68 @@ G.evaluators.fgdc = {
   },
 
   evalTemporal: function(task) {
+    var concat = function(text,time) {
+      var n, s, zone = "";
+      if (typeof text === "string" && text.length === 8 && text.indexOf("-") === -1) {
+        text = text.substring(0,4)+"-"+text.substring(4,6)+"-"+text.substring(6,8);
+        if (typeof time === "string" && time.length >= 6  && time.indexOf(":") === -1) {
+          n = time.indexOf("-");
+          if (n > 0) {
+            s = "-";
+          } else {
+            n = time.indexOf("+");
+            if (n > 0) {
+              s = "+";
+            } else {
+              n = time.toUpperCase().indexOf("Z");
+              if (n > 0) s = "Z";
+            }
+          }
+          if (n > 0) {
+            zone = s+time.substring(n+1);
+            time = time.substring(0,n);
+            if (zone.length === 5) {
+              zone = zone.substring(0,3)+":"+zone.substring(3,5);
+            }
+          }
+          if (time.length === 6) { 
+            time = time.substring(0,2)+":"+time.substring(2,4)+":"+time.substring(4,6);
+            text = text+"T"+time+zone;
+          } else if (time.length > 6) { 
+            time = time.substring(0,2)+":"+time.substring(2,4)+":"+time.substring(4,6)+"."+time.substring(6);
+            text = text+"T"+time+zone;
+          }
+        }
+      }
+      return text;
+    };
+    
     var item = task.item, root = task.root;
-    
-    // TODO
-    
-    /*
-    <field name="apiso_TempExtent_begin_dt" instruction="instruction.checkFgdcDate">
-      <xsl:value-of select="/metadata/idinfo/timeperd/timeinfo/rngdates/begdate | /metadata/idinfo/timeperd/timeinfo/sngdate/caldate"/>
-    </field>
-    <field name="apiso_TempExtent_end_dt" instruction="instruction.checkFgdcDate.end">
-      <xsl:value-of select="/metadata/idinfo/timeperd/timeinfo/rngdates/enddate | /metadata/idinfo/timeperd/timeinfo/sngdate/caldate"/>
-    </field>
-    
-    <property xpath="/metadata/idinfo/timeperd/timeinfo/rngdates">
-      <property meaning="timeperiod.analyze" xpathType="STRING"
-        xpath="concat('tp.begin.',begdate,'.fgdctime.',begtime,'.end.',enddate,'.fgdctime.',endtime)"/>
-    </property>
-    <property xpath="/metadata/idinfo/timeperd/timeinfo/mdattim/sngdate">
-      <property meaning="timeperiod.analyze" xpathType="STRING"
-        xpath="concat('tp.position.',caldate,'.fgdctime.',time)"/>
-    </property>
-    <property xpath="/metadata/idinfo/timeperd/timeinfo/sngdate">
-      <property meaning="timeperiod.analyze" xpathType="STRING"
-        xpath="concat('tp.position.',caldate,'.fgdctime.',time)"/>
-    </property>    
-     */
-    
+    G.forEachNode(task,root,"idinfo/timeperd/timeinfo/sngdate | idinfo/timeperd/timeinfo/mdattim/sngdate",function(node){
+      var v = concat(G.getString(task,node,"caldate"),G.getString(task,node,"time"));
+      var params = {
+        instant: {
+          date: v,
+          indeterminate: null
+        }
+      };
+      G.analyzeTimePeriod(task,params);
+    });
+    G.forEachNode(task,root,"idinfo/timeperd/timeinfo/rngdates",function(node){
+      var v1 = concat(G.getString(task,node,"begdate"),G.getString(task,node,"begtime"));
+      var v2 = concat(G.getString(task,node,"enddate"),G.getString(task,node,"endtime"));
+      var params = {
+        begin: {
+          date: v1,
+          indeterminate: null
+        },
+        end: {
+          date: v2,
+          indeterminate: null
+        } 
+      };
+      G.analyzeTimePeriod(task,params);
+    });
   }
 
 };
