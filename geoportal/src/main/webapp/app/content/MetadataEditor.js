@@ -247,6 +247,19 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
             i18nInspire: i18nInspire,
             i18nGemini: i18nGemini
           });
+          lang.extend(DescriptorMixin, {
+            postMixInProperties: function() {
+              //this.inherited(arguments);
+              if (typeof this.templateString === "string") {
+                if (this.templateString.indexOf("sngdate") > 0) {
+                  var v = this.templateString;
+                  if (v.indexOf("descript") > 0 && v.indexOf("caldate") > 0 && v.indexOf("mdattim") > 0) {
+                    this.templateString = this.templateString.replace("target:'descript'","target:'timeinfo'");
+                  }
+                }
+              }
+            }
+          });
         }
      
         /*
