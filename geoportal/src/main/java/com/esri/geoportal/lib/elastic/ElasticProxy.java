@@ -16,7 +16,6 @@ package com.esri.geoportal.lib.elastic;
 import com.esri.geoportal.base.util.BalancerSupport;
 import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
 import com.esri.geoportal.context.GeoportalContext;
-import java.util.List;
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import org.eclipse.jetty.client.HttpClient;
@@ -55,8 +54,8 @@ public class ElasticProxy extends BalancerServlet {
     ElasticContext ec = null;
     if (gc != null) ec = gc.getElasticContext();
     if (ec != null) {
-      List<String> nodes = ec.getNodes();
-      if ((nodes != null) && (nodes.size() > 0)) {
+      String[] nodes = ec.nodesToArray();
+      if ((nodes != null) && (nodes.length > 0)) {
         for (String node: nodes) {
           String url = "http://"+node+":"+ec.getHttpPort();
           LOGGER.debug("Adding BalancerNode: "+url);

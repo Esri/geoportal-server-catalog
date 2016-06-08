@@ -18,6 +18,7 @@ import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.Val;
 
 import java.net.InetAddress;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
@@ -258,6 +259,25 @@ public class ElasticContext {
     }
   }
   
+  /**
+   * Return an array of node names.
+   * <br/>Names are split by commas.
+   * @return the node names
+   */
+  public String[] nodesToArray() {
+    ArrayList<String> al = new ArrayList<String>();
+    if (getNodes() != null) {
+      for (String node: this.getNodes()) {
+        String[] a = node.split(",");
+        for (String v: a) {
+          v = v.trim();
+          if (v.length() > 0) al.add(v);
+        }
+      }
+    }
+    return al.toArray(new String[0]);
+  }
+  
   /** Shutdown. */
   @PreDestroy
   public void shutdown() throws Exception {
@@ -272,7 +292,8 @@ public class ElasticContext {
   @PostConstruct
   public void startup() throws Exception {
     LOGGER.info("Starting up ElasticContext...");
-    if ((nodes == null) || (nodes.size() == 0)) {
+    String[] nodeNames = this.nodesToArray();
+    if ((nodeNames == null) || (nodeNames.length == 0)) {
       LOGGER.warn("Configuration warning: Elasticsearch - no nodes defined.");
     } else if (transportClient != null) {
       LOGGER.warn("Configuration warning: TransportClient has already been started.");
@@ -283,7 +304,7 @@ public class ElasticContext {
       } else {
         transportClient = TransportClient.builder().build();
       }
-      for (String node: nodes) {
+      for (String node: nodeNames) {
         InetAddress a = InetAddress.getByName(node);
         transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
       }

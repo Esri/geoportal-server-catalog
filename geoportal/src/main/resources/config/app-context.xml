@@ -18,7 +18,7 @@
 	</beans:bean>
 
 	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContext">
-		<beans:property name="clusterName" value="elasticsearch" />
+		<beans:property name="clusterName" value="${es_cluster:elasticsearch}" />
 		<beans:property name="indexName" value="metadata" />
 		<beans:property name="indexNameIsAlias" value="true" />
 		<beans:property name="autoCreateIndex" value="true" />
