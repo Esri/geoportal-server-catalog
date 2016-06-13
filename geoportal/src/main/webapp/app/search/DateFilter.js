@@ -40,9 +40,8 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
     toField: null,
     nestedPath: null,
     
-    interval: "year",
+    interval: "year", // year or day - Elasticsearch supports year, quarter, month, week, day, hour, minute, second
     selector: null,
-    zulu: false,
     
     label: i18n.search.dateFilter.label,
     open: false,
@@ -106,6 +105,7 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
         aggData = this._aggEndDates;
       }
       if (!aggData) return;
+      //console.warn(aggData);
       var d = new ModalDialog({
         "class": "g-modal-plot",
         title: title,
@@ -171,11 +171,7 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
             var modalNode = $(bindToNode).parents("[role='dialog']");
             if (isBegin) {
               if (interval === "year") {
-                if (self.zulu) {
-                  self.fromDate.set("value",value+"-01-01T00:00:00Z");
-                } else {
-                  self.fromDate.set("value",value+"-01-01");
-                }
+                self.fromDate.set("value",value+"-01-01");
               } else {
                 self.fromDate.set("value",value);
               }
@@ -234,7 +230,8 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
       var query = null, qFrom = null, qTo = null, qNested = null, condition = null;
       var lbl = this.label, tip = "";
       
-      var from = null, to = null, dt, options = {zulu:true,selector:this.selector};
+      var from = null, to = null, dt;
+      var options = {zulu:true,selector:this.selector};
       var dtFrom = this.fromDate.get("value");
       var dtTo = this.toDate.get("value");
       //console.warn(dtFrom,dtTo);
@@ -392,7 +389,6 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
     whenQClauseRemoved: function(qClause) {
       var self = this;
       if (this === qClause.parentQComponent) {
-        //this.interval = "year";
         this._searchDisabled = true;
         this.fromDate.set("value",null);
         this.toDate.set("value",null);

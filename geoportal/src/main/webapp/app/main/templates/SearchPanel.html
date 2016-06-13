@@ -15,12 +15,16 @@
           nestedPath:'timeperiod_nst',
           field:'timeperiod_nst.begin_dt',
           toField:'timeperiod_nst.end_dt',
+          interval:'year',
           selector:'date',
-          open:false,
           label:'Temporal Extent'">
       </div>
       <div data-dojo-type="app/search/DateFilter"
-        data-dojo-props="field:'sys_modified_dt',allowHistogram:false,label:'Date'">
+        data-dojo-props="
+	        field:'sys_modified_dt',
+	        interval:'day',
+	        allowHistogram:false,
+	        label:'Date'">
       </div>
       <div data-dojo-type="app/search/TermsAggregation"
         data-dojo-props="field:'sys_owner_s',open:false,label:'Owner'">
