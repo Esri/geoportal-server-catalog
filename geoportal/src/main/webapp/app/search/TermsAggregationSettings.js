@@ -17,9 +17,8 @@ define(["dojo/_base/declare",
         "dojo/number",
         "app/search/SearchComponentSettings",
         "dojo/text!./templates/TermsAggregationSettings.html",
-        "dojo/i18n!app/nls/resources",
-        "dijit/form/NumberTextBox"], 
-function(declare, lang, number, SearchComponentSettings, template, i18n, NumberTextBox) {
+        "dojo/i18n!app/nls/resources"], 
+function(declare, lang, number, SearchComponentSettings, template, i18n) {
   
   var oThisClass = declare([SearchComponentSettings], {
     
@@ -43,6 +42,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
     },
     
     _setTextVal: function(props,name,inputNode) {
+      inputNode.value = "";
       var v = props[name];
       if (typeof v === "string") {
         v = lang.trim(v);
@@ -56,15 +56,16 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
       return i18n.search.termsAggregation.settings.caption;
     },
     
-    init: function() {
+    init: function(settings) {
       this.inherited(arguments);
-      var v, v2, props = this.targetWidget.props || {};
+      if (!settings) settings = this.targetWidget;
       
-      //console.warn("targetWidget.props",props);
+      var v, v2, props = settings.props || {};
       
-      this.fieldInput.value = this.targetWidget.field;
-      this.componentLabelInput.value = this.targetWidget.label;
+      this.componentLabelInput.value = settings.label;
+      this.fieldInput.value = settings.field;
       
+      this.sizeInput.value = "";
       v = number.parse(props.size,{places:0});
       if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
         if (v > 0 && v <= this.maxSize) {
@@ -72,6 +73,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
         }
       }
       
+      this.minDocCountInput.value = "";
       v = number.parse(props.min_doc_count,{places:0});
       if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
         if (v > 0 && v <= this.maxMinDocCount) {
@@ -79,6 +81,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
         }
       }
       
+      $(this.orderSelect).val("");
       v = props.order, v2 = null;
       if (typeof v === "object" && v !== null) {
         if (v._count === "asc") {
@@ -96,39 +99,27 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
       this._setTextVal(props,"missing",this.missingInput);
       //this._setTextVal(props,"include",this.includeInput);
       //this._setTextVal(props,"exclude",this.excludeInput);
-      
+    },
+    
+    reset: function() {
+      this.init(this.targetWidget._initialSettings);
     },
     
     validateAndApply: function() {
+      var chkInput = function(inputNode,defaultVal) {
+        var v = inputNode.value;
+        if (typeof v === "string" && lang.trim(v).length > 0) {
+          return lang.trim(v);
+        }
+        return defaultVal;
+      };
+      
       if (!this.targetWidget.props) this.targetWidget.props = {};
       var v, v2, props = {}, targetProps = this.targetWidget.props;
       
-      v = this.fieldInput.value;
-      v2 = this.componentLabelInput.value;
-      if (typeof v === "string" && lang.trim(v).length > 0) {
-        this.targetWidget.field = lang.trim(v);
-        if (typeof v2 === "string" && lang.trim(v2).length > 0) {
-          this.targetWidget.label = lang.trim(v2);
-        } else {
-          this.targetWidget.label = this.targetWidget.field;
-        }
-      } else {
-        v = this.targetWidget._initialField;
-        if (typeof v === "string" && lang.trim(v).length > 0) {
-          this.targetWidget.field = lang.trim(v);
-        }
-        if (typeof v2 === "string" && lang.trim(v2).length > 0) {
-          this.targetWidget.label = lang.trim(v2);
-        } else {
-          v2 = this.targetWidget._initialLabel;
-          if (typeof v2 === "string" && lang.trim(v2).length > 0) {
-            this.targetWidget.label = lang.trim(v2);
-          } else {
-            this.targetWidget.label = this.targetWidget.field;
-          }
-        }
-      }
+      this.targetWidget.label = chkInput(this.componentLabelInput,this.targetWidget.label);
       this.targetWidget.dropPane.set("title",this.targetWidget.label);
+      this.targetWidget.field = chkInput(this.fieldInput,this.targetWidget.field);
       
       delete targetProps.size;
       v = number.parse(this.sizeInput.value,{places:0});

@@ -36,11 +36,18 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
     open: false,
     props: null,
     
-    _initialField: null,
-    _initialLabel: null,
+    _initialSettings: null,
     
     postCreate: function() {
       this.inherited(arguments);
+      
+      this._initialSettings = {
+        label: this.label,
+        field: this.field
+      };
+      if (this.props) {
+        this._initialSettings.props = lang.clone(this.props);
+      }
       
       if (this.allowSettings === null) {
         if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
@@ -63,8 +70,6 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
       if (typeof this.label === "undefined" || this.label === null || this.label.length === 0) {
         this.label = this.field;
       }
-      this._initialField = this.field;
-      this._initialLabel = this.label;
     },
     
     addEntry: function(term,count,missingVal) {
