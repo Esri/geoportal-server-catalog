@@ -65,6 +65,22 @@ define({
         intersects: "Intersects",
         within: "Within"
       },
+      temporalFilter: {
+        label: "Temporal",
+        interval: {
+          year: "Year",
+          quarter: "Quarter",
+          month: "Month",
+          week: "Week",
+          day: "Day",
+          hour: "Hour",
+          minute: "Minute",
+          second: "Second"
+        },
+        settings: {
+          
+        }
+      },
       dateFilter: {
         label: "Date",
         labelTimePeriod: "Time Period",

@@ -320,3 +320,45 @@ body {
   margin-top: -20px;
 }
 */
+
+.g-temporal-bar {
+	margin-bottom: 5px;
+}
+.g-temporal-bar select {
+  margin-left: 10px;
+}
+
+.g-d3 svg {
+  xfont: 10px sans-serif;
+  font-size: 9px;
+}
+
+.g-d3 .axis path,
+.g-d3 .axis line {
+  fill: none;
+  stroke: #cccccc;
+  shape-rendering: crispEdges;
+}
+
+.g-d3 .dot {
+  stroke: #0079c1;
+}
+
+.g-d3 .tooltip {
+  position: absolute;
+  width: 200px;
+  height: 28px;
+  pointer-events: none;
+  background-color: #ffffff;
+  xborder: 1px solid #cccccc;
+}
+
+.g-d3 .area {
+  fill: steelblue;
+}
+
+.g-d3 .brush .extent {
+  stroke: #fff;
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+}

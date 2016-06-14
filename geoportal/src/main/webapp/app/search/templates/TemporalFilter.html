@@ -1,0 +1,24 @@
+<div>
+  <div class="g-drop-pane" data-dojo-type="app/search/DropPane" 
+    data-dojo-attach-point="dropPane" data-dojo-props="title:'${label}',open:${open}">
+    <div class="g-d3" data-dojo-attach-point="svgNode"></div>
+    <div class="g-temporal-bar pull-right">
+      <a href="javascript:void(0)" class="small" 
+        data-dojo-attach-point="brushExtentNode"
+        data-dojo-attach-event="onclick: applyBrushExtent">
+      </a>
+      <select id="${id}_intervalSelect"
+        data-dojo-attach-point="intervalSelect"
+        data-dojo-attach-event="onChange: intervalChanged">
+        <option value="year">${i18n.search.temporalFilter.interval.year}</option>
+        <option value="quarter">${i18n.search.temporalFilter.interval.quarter}</option>
+        <option value="month">${i18n.search.temporalFilter.interval.month}</option>
+        <option value="week">${i18n.search.temporalFilter.interval.week}</option>
+        <option value="day">${i18n.search.temporalFilter.interval.day}</option>
+        <option value="hour">${i18n.search.temporalFilter.interval.hour}</option>
+        <option value="minute">${i18n.search.temporalFilter.interval.minute}</option>
+        <option value="second">${i18n.search.temporalFilter.interval.second}</option>
+      </select>
+    </div>
+  </div>
+</div>
