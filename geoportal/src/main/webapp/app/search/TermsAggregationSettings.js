@@ -63,7 +63,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
       //console.warn("targetWidget.props",props);
       
       this.fieldInput.value = this.targetWidget.field;
-      this.fieldLabelInput.value = this.targetWidget.label;
+      this.componentLabelInput.value = this.targetWidget.label;
       
       v = number.parse(props.size,{places:0});
       if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
@@ -104,7 +104,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n, NumberT
       var v, v2, props = {}, targetProps = this.targetWidget.props;
       
       v = this.fieldInput.value;
-      v2 = this.fieldLabelInput.value;
+      v2 = this.componentLabelInput.value;
       if (typeof v === "string" && lang.trim(v).length > 0) {
         this.targetWidget.field = lang.trim(v);
         if (typeof v2 === "string" && lang.trim(v2).length > 0) {

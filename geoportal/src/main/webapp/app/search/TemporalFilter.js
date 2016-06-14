@@ -22,15 +22,17 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/search/DropPane",
-        "app/search/QClause"], 
+        "app/search/QClause",
+        "app/search/TemporalFilterSettings"], 
 function(declare, lang, array, djDate, stamp, domConstruct, template, i18n, 
-    SearchComponent, DropPane, QClause) {
+    SearchComponent, DropPane, QClause, TemporalFilterSettings) {
   
   var oThisClass = declare([SearchComponent], {
     
     i18n: i18n,
     templateString: template,
     
+    allowSettings: null,
     field: null,
     toField: null,
     nestedPath: null,
@@ -49,10 +51,37 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
     _fromDate: null,
     _toDate: null,
     
+    _initialSettings: null,
+    
     postCreate: function() {
       this.inherited(arguments);
+      
+      this._initialSettings = {
+        label: this.label,
+        field: this.field,
+        toField: this.toField,
+        nestedPath: this.nestedPath,
+        interval: this.interval,
+        useUTC: this.useUTC
+      };
+      
       $(this.intervalSelect).val(this.interval);
       this.plot();
+      
+      if (this.allowSettings === null) {
+        if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
+          this.allowSettings = true;
+        }
+      }
+      if (this.allowSettings) {
+        var link = this.dropPane.addSettingsLink();
+        link.onclick = lang.hitch(this,function(e) {
+          var d = new TemporalFilterSettings({
+            targetWidget: this
+          });
+          d.showDialog();
+        });
+      }
     },
     
     advanceToUpper: function(toDate) {

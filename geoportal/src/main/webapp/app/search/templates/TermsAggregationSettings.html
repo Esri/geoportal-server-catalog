@@ -1,20 +1,20 @@
 <div class="g-settings-pane g-labels-right">
   <div class="form-group form-group-sm">
+    <label for="${id}_componentLabel" class="control-label col-sm-3"
+      >${i18n.search.componentSettings.componentLabel}</label>
+    <div class="col-sm-8">
+      <input id="${id}_componentLabel" type="text" class="form-control input-sm g-input-text" 
+        placeholder="${i18n.search.componentSettings.componentLabelPlaceholder}"
+        data-dojo-attach-point="componentLabelInput" >
+    </div>
+  </div>
+  <div class="form-group form-group-sm">
     <label for="${id}_field" class="control-label col-sm-3"
       >${i18n.search.termsAggregation.settings.field}</label>
     <div class="col-sm-8">
 	    <input id="${id}_field" type="text" class="form-control g-input-text" 
 	      placeholder="${i18n.search.termsAggregation.settings.fieldPlaceholder}"
 	      data-dojo-attach-point="fieldInput" >
-    </div>
-  </div>
-  <div class="form-group form-group-sm">
-    <label for="${id}_fieldLabel" class="control-label col-sm-3"
-      >${i18n.search.termsAggregation.settings.fieldLabel}</label>
-    <div class="col-sm-8">
-	    <input id="${id}_fieldLabel" type="text" class="form-control input-sm g-input-text" 
-	      placeholder="${i18n.search.termsAggregation.settings.fieldLabelPlaceholder}"
-	      data-dojo-attach-point="fieldLabelInput" >
     </div>
   </div>
 	<div class="form-group form-group-sm">

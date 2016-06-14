@@ -56,6 +56,11 @@ define({
     },
     
     search: {
+      componentSettings: {
+        componentLabel: "Label",
+        componentLabelPlaceholder: "",
+        reset: "Reset"
+      },
       searchBox: {
         search: "Search"
       },
@@ -78,7 +83,16 @@ define({
           second: "Second"
         },
         settings: {
-          
+          caption: "Temporal Filter",
+          field: "Date Field",
+          fieldPlaceholder: "",
+          toField: "End Date Field",
+          toFieldPlaceholder: "",
+          nestedPath: "Nested Path",
+          nestedPathPlaceholder: "",
+          interval: "Interval",
+          intervalPlaceholder: "",
+          useUTC: "Coordinated universal time"
         }
       },
       dateFilter: {
@@ -135,8 +149,6 @@ define({
           caption: "Terms Aggregation",
           field: "Field",
           fieldPlaceholder: "",
-          fieldLabel: "Label",
-          fieldLabelPlaceholder: "",
           size: "Size",
           sizePlaceholder: "number > 0",
           minDocCount: "Minimum Count",

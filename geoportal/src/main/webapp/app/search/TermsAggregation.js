@@ -47,7 +47,6 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
           this.allowSettings = true;
         }
       }
-      
       if (this.allowSettings) {
         var link = this.dropPane.addSettingsLink();
         link.onclick = lang.hitch(this,function(e) {
