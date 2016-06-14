@@ -130,8 +130,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
     },
     
     intervalChanged: function() {
-      var v = this.intervalSelect.options[this.intervalSelect.selectedIndex].value;
-      this.interval = v;
+      this.interval = $(this.intervalSelect).val();
       this.search();
     },
     
