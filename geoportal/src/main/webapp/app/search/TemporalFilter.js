@@ -181,14 +181,6 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
       x.domain(d3.extent(data.map(function(d){return d.date;})));
       y.domain([0, d3.max(data.map(function(d){return d.count;}))]);
       
-      /*
-      var area = d3.svg.area()
-      .interpolate("monotone")
-        .x(function(d){return x(d.date);})
-        .y0(height)
-        .y1(function(d){return y(d.count);});
-      */
-      
       var margin2 = {top: margin.top+height+25, right: 20, bottom: 20, left: 40};
       var height2 = 35;
       var x2 = d3.time.scale().range([0, width]);
@@ -209,16 +201,6 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
       var tooltip = d3.select(svgNode).append("div")
         .attr("class", "tooltip")
         .style("opacity", 0);
-      
-      /*
-      var clipId = this.id+"_clip";
-      var clipUrl = "url("+clipId+")";
-      svg.append("defs").append("clipPath")
-          .attr("id",clipId)
-        .append("rect")
-          .attr("width", width)
-          .attr("height", height);
-      */
 
       var focus = svg.append("g")
         .attr("class", "focus")
@@ -230,7 +212,16 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
       focus.append("g")
         .attr("class", "y axis")
         .call(yAxis);
-      //focus.append("g").attr("clip-path",clipUrl);
+      /*
+      var clipId = this.id+"_clip";
+      var clipUrl = "url("+clipId+")";
+      focus.append("defs").append("clipPath")
+          .attr("id",clipId)
+        .append("rect")
+          .attr("width", width)
+          .attr("height", height);
+      focus.append("g").attr("clip-path",clipUrl);
+      */
       focus.selectAll(".dot")
         .data(data)
       .enter().append("circle")
