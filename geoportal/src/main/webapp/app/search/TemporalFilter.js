@@ -107,19 +107,19 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
     },
     
     formatDate: function(date) {
+      if (!date) return "";
       var options = {zulu:this.useUTC};
       return stamp.toISOString(date,options);
     },
     
-    formatDateRange: function(fromDate,toDate) {
-      if (fromDate && toDate) {
-        return this.formatDate(fromDate)+" .. "+this.formatDate(toDate);
-      } else if (fromDate) {
-        return this.formatDate(fromDate)+" ..";
-      } else if (toDate) {
-        return ".. "+this.formatDate(toDate);
+    formatDateRange: function(fromDate,toDate,forSearchLink) {
+      var v = "", rangePattern;
+      if (fromDate || toDate) {
+        rangePattern = i18n.search.temporalFilter.rangePattern;
+        v = rangePattern.replace("{from}",this.formatDate(fromDate));
+        v = v.replace("{to}",this.formatDate(toDate));
       }
-      return null;
+      return v;
     },
     
     hasNestedPath: function() {
@@ -278,7 +278,6 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
         var brushstart = function() { 
         };
         var brushmove = function() { 
-          if (self.field === "sys_modified_dt") console.warn("brushmove",data.length);
           x.domain(brush.empty() ? x2.domain() : brush.extent());
           //focus.select(".area").attr("d", area);
           focus.selectAll(".dot").attr("cx",xMap).attr("cy",yMap);
@@ -290,7 +289,8 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
             var isLast = (ext[1].getTime() === data[data.length-1].date.getTime());
             if (isLast) ext[1] = self.advanceToUpper(ext[1]);
             self._brushExtent = ext;
-            self.setNodeText(self.brushExtentNode,self.formatDateRange(ext[0],ext[1]));
+            var txt = self.formatDateRange(ext[0],ext[1],true);
+            self.setNodeText(self.brushExtentNode,txt);
           } else {
             self._brushExtent = null;
             self.setNodeText(self.brushExtentNode,"");
@@ -473,7 +473,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
       var from = null, to = null, dt;
       var dtFrom = this._fromDate, dtTo = this._toDate;
       var options = {zulu:true};
-      var tip = this.formatDateRange(dtFrom,dtTo);
+      var tip = this.formatDateRange(dtFrom,dtTo,false);
       if (dtFrom) from = stamp.toISOString(dtFrom,options);
       if (dtTo) to = stamp.toISOString(dtTo,options);
       

@@ -72,6 +72,8 @@ define({
       },
       temporalFilter: {
         label: "Temporal",
+        rangePattern: "{from}..{to}",
+        searchTip: "Search",
         interval: {
           year: "Year",
           quarter: "Quarter",
