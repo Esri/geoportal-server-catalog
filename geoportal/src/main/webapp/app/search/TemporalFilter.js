@@ -243,10 +243,10 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
         .on("mouseover", function(d) {
           tooltip.transition()
            .duration(200)
-           .style("opacity", 0.9);
-          tooltip.html(d.count+": "+fmtDate(d.date))
-           .style("left", (d3.event.pageX + 5) + "px")
-           .style("top", (d3.event.pageY - 28) + "px");
+           .style("opacity", 1);
+          tooltip.html(d.count+"<br>"+fmtDate(d.date))
+           .style("left", (d3.event.pageX + 16) + "px")
+           .style("top", (d3.event.pageY - 38) + "px");
         })
         .on("mouseout", function(d) {
           tooltip.transition()
@@ -287,6 +287,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
         var brushstart = function() { 
         };
         var brushmove = function() { 
+          if (self.field === "sys_modified_dt") console.warn("brushmove",data.length);
           x.domain(brush.empty() ? x2.domain() : brush.extent());
           //focus.select(".area").attr("d", area);
           focus.selectAll(".dot").attr("cx",xMap).attr("cy",yMap);

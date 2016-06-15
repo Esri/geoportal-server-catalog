@@ -347,11 +347,12 @@ body {
 
 .g-temporal-d3 .tooltip {
   position: absolute;
-  width: 200px;
-  height: 28px;
+  padding: 5px;
   pointer-events: none;
   background-color: #ffffff;
-  xborder: 1px solid #cccccc;
+  color: #000000;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
 }
 
 .g-temporal-d3 .area {
