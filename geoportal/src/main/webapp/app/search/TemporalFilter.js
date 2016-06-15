@@ -244,7 +244,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
           tooltip.transition()
            .duration(200)
            .style("opacity", 1);
-          tooltip.html(d.count+"<br>"+fmtDate(d.date))
+          tooltip.html(fmtDate(d.date)+"<br>"+d.count)
            .style("left", (d3.event.pageX + 16) + "px")
            .style("top", (d3.event.pageY - 38) + "px");
         })

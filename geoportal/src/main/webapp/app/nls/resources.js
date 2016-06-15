@@ -92,7 +92,7 @@ define({
           nestedPathPlaceholder: "",
           interval: "Interval",
           intervalPlaceholder: "",
-          useUTC: "Coordinated universal time"
+          useUTC: "GMT"
         }
       },
       dateFilter: {
