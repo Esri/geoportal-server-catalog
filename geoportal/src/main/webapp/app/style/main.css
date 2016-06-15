@@ -326,25 +326,26 @@ body {
 }
 .g-temporal-bar select {
   margin-left: 10px;
+  margin-right: 10px;
 }
 
-.g-d3 svg {
+.g-temporal-d3 svg {
   xfont: 10px sans-serif;
   font-size: 9px;
 }
 
-.g-d3 .axis path,
-.g-d3 .axis line {
+.g-temporal-d3 .axis path,
+.g-temporal-d3 .axis line {
   fill: none;
   stroke: #cccccc;
   shape-rendering: crispEdges;
 }
 
-.g-d3 .dot {
+.g-temporal-d3 .dot {
   stroke: #0079c1;
 }
 
-.g-d3 .tooltip {
+.g-temporal-d3 .tooltip {
   position: absolute;
   width: 200px;
   height: 28px;
@@ -353,12 +354,21 @@ body {
   xborder: 1px solid #cccccc;
 }
 
-.g-d3 .area {
-  fill: steelblue;
+.g-temporal-d3 .area {
+  fill: #818181;
 }
 
-.g-d3 .brush .extent {
+.g-temporal-d3 .brush .extent {
   stroke: #fff;
+  fill: #b3b3b3;
   fill-opacity: .125;
   shape-rendering: crispEdges;
+}
+
+.g-temporal-d3 .resize path {
+  fill: #bfbfbf;
+  fill-opacity: .8;
+  stroke: #b3b3b3;
+  /*stroke: #818181;*/
+  stroke-width: 1.5px;
 }
