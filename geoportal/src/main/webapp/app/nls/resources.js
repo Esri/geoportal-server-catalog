@@ -69,11 +69,12 @@ define({
         anywhere: "Anywhere",
         intersects: "Intersects",
         within: "Within",
-        tipPattern: "{count} centered here"
+        countPattern: "{count} centered here"
       },
       temporalFilter: {
         label: "Temporal",
         rangePattern: "{from}..{to}",
+        countPattern: "{count} aggregated here",
         searchTip: "Search",
         interval: {
           year: "Year",

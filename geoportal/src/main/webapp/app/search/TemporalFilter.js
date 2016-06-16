@@ -140,7 +140,13 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
       domConstruct.empty(svgNode);
       this._brushExtent = null;
       this.setNodeText(this.brushExtentNode,"");
-      var fmtDate = function(date) {return self.formatDate(date);};
+      
+      var countPattern = i18n.search.temporalFilter.countPattern;
+      var fmtTip = function(d) {
+        var s1 = self.formatDate(d.date);
+        var s2 = countPattern.replace("{count}",d.count);
+        return s1+"<br>"+s2;
+      };
       
       var data = [], dtLast = null;
       if (this._aggDates && this._aggDates.buckets) {
@@ -235,7 +241,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
           tooltip.transition()
            .duration(200)
            .style("opacity", 1);
-          tooltip.html(fmtDate(d.date)+"<br>"+d.count)
+          tooltip.html(fmtTip(d))
            .style("left", (d3.event.pageX + 16) + "px")
            .style("top", (d3.event.pageY - 38) + "px");
         })
@@ -302,166 +308,6 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
         brushmove();        
       }
     },
-    
-    /*
-    plot: function() {
-      var self = this, svgNode = this.svgNode;
-      domConstruct.empty(svgNode);
-      this._brushExtent = [this._fromDate,this._toDate];
-      this.setNodeText(this.brushExtentNode,this.formatDateRange(this._fromDate,this._toDate));
-      
-      var data = [], dtLast = null;
-      if (this._aggDates && this._aggDates.buckets) {
-        array.forEach(this._aggDates.buckets,function(bucket){
-          var dt = stamp.fromISOString(bucket.key_as_string);
-          dtLast = dt;
-          data.push({
-            date: dt,
-            count: bucket.doc_count,
-            stroke: "rgb(0,121,193)",
-            fill: "rgba(0,0,0,0)"
-          });
-        });
-      }
-      if (this._aggEndDates && this._aggEndDates.buckets) {
-        array.forEach(this._aggEndDates.buckets,function(bucket){
-          var dt = stamp.fromISOString(bucket.key_as_string);
-          if (!dtLast || dt > dtLast) {
-            data.push({
-              date: dt,
-              count: bucket.doc_count,
-              stroke: "rgb(255,127,14)",
-              fill: "rgba(255,127,14,1)"
-            });
-          }
-        });
-      }
-      
-      var fmtDate = function(date) {
-        return self.formatDate(date);
-      };
-      var xMap = function(d) {return x(d.date);};
-      var yMap = function(d) {return y(d.count);};
-      
-      var margin = {top: 10, right: 10, bottom: 80, left: 40};
-      var width = 350 - margin.left - margin.right;
-      var height = 70;
-      var x = d3.time.scale().range([0, width]);
-      var y = d3.scale.linear().range([height, 0]);
-      var xAxis = d3.svg.axis().scale(x).orient("bottom").ticks(3);
-      var yAxis = d3.svg.axis().scale(y).orient("left").ticks(3);
-      //var yAxis = d3.svg.axis().scale(y).orient("left").ticks(4).tickFormat(d3.format("d"));
-      var area = d3.svg.area()
-      .interpolate("monotone")
-        .x(function(d){return x(d.date);})
-        .y0(height)
-        .y1(function(d){return y(d.count);});
-      
-      var margin2 = {top: margin.top+height+25, right: 10, bottom: 20, left: 40};
-      var height2 = 35;
-      var x2 = d3.time.scale().range([0, width]);
-      var y2 = d3.scale.linear().range([height2, 0]);
-      var xAxis2 = d3.svg.axis().scale(x2).orient("bottom").ticks(3);
-      var area2 = d3.svg.area()
-        .interpolate("monotone")
-        .x(function(d){return x2(d.date);})
-        .y0(height2)
-        .y1(function(d){ return y2(d.count);});
-      
-      var svg = d3.select(svgNode).append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom);
-      
-      var clipId = this.id+"_clip";
-      var clipUrl = "url("+clipId+")";
-      svg.append("defs").append("clipPath")
-          .attr("id",clipId)
-        .append("rect")
-          .attr("width", width)
-          .attr("height", height);
-      
-      var tooltip = d3.select(svgNode).append("div")
-        .attr("class", "tooltip")
-        .style("opacity", 0);
-      
-      var focus = svg.append("g")
-        .attr("class", "focus")
-        .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
-      
-      var context = svg.append("g")
-        .attr("class", "context")
-        .attr("transform", "translate(" + margin2.left + "," + margin2.top + ")");
-      
-      var brush = d3.svg.brush()
-        .x(x2)
-        .on("brush", function(){
-          x.domain(brush.empty() ? x2.domain() : brush.extent());
-          //focus.select(".area").attr("d", area);
-          focus.selectAll(".dot").attr("cx", xMap).attr("cy", yMap);
-          focus.select(".x.axis").call(xAxis);
-          var ext = self._brushExtent = brush.extent();
-          if (ext && ext.length === 2 && !isNaN(ext[0])) {
-            self.setNodeText(self.brushExtentNode,self.formatDateRange(ext[0],ext[1]));
-          } else {
-            self.setNodeText(self.brushExtentNode,"");
-          }
-        }); 
-
-      x.domain(d3.extent(data.map(function(d){return d.date;})));
-      y.domain([0, d3.max(data.map(function(d){return d.count;}))]);
-      x2.domain(x.domain());
-      y2.domain(y.domain());
-      
-      focus.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height + ")")
-        .call(xAxis);
-      focus.append("g")
-        .attr("class", "y axis")
-        .call(yAxis);
-      //focus.append("g").attr("clip-path",clipUrl);
-      
-      focus.selectAll(".dot")
-        .data(data)
-      .enter().append("circle")
-        .attr("class", "dot")
-        .attr("r", 3.5)
-        .attr("cx", function(d) {return x(d.date);})
-        .attr("cy", function(d) {return y(d.count);})
-        // .style("stroke", function(d) {return d.stroke;})
-        .style("fill", function(d) {return d.fill;})
-        .on("mouseover", function(d) {
-          tooltip.transition()
-           .duration(200)
-           .style("opacity", 0.9);
-          tooltip.html(d.count+": "+fmtDate(d.date))
-           .style("left", (d3.event.pageX + 5) + "px")
-           .style("top", (d3.event.pageY - 28) + "px");
-        })
-        .on("mouseout", function(d) {
-          tooltip.transition()
-           .duration(500)
-           .style("opacity", 0);
-        });
-      
-      context.append("path")
-        .datum(data)
-        .attr("class", "area")
-        .attr("d", area2);
-
-      context.append("g")
-        .attr("class", "x axis")
-        .attr("transform", "translate(0," + height2 + ")")
-        .call(xAxis2);
-
-      context.append("g")
-        .attr("class", "x brush")
-        .call(brush)
-      .selectAll("rect")
-        .attr("y", -6)
-        .attr("height", height2 + 7);
-    },
-    */
     
     /* SearchComponent API ============================================= */
     

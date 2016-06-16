@@ -335,7 +335,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
         map.addLayer(clusterLayer);
         //console.warn("clusterLayer",clusterLayer);
         
-        var tipPattern = i18n.search.spatialFilter.tipPattern;
+        var countPattern = i18n.search.spatialFilter.countPattern;
         var tooltip = d3.select(this.tooltipNode);
         tooltip.style("opacity", 0);
         var hideTooltip = function() {
@@ -344,7 +344,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
         this._tmpHandles.push(clusterLayer.on("mouse-over",function(evt){
           if (evt.graphic && evt.graphic.attributes) {
             var c = djNumber.format(evt.graphic.attributes["Count"]);
-            var txt = tipPattern.replace("{count}",c);
+            var txt = countPattern.replace("{count}",c);
             tooltip.transition().duration(200).style("opacity", 1);
             tooltip.html(txt)
               .style("left", (evt.pageX + 12) + "px")
