@@ -153,24 +153,14 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
         array.forEach(this._aggDates.buckets,function(bucket){
           var dt = stamp.fromISOString(bucket.key_as_string);
           dtLast = dt;
-          data.push({
-            date: dt,
-            count: bucket.doc_count,
-            stroke: "rgb(0,121,193)",
-            fill: "rgba(0,0,0,0)"
-          });
+          data.push({date:dt,count:bucket.doc_count});
         });
       }
       if (this._aggEndDates && this._aggEndDates.buckets) {
         array.forEach(this._aggEndDates.buckets,function(bucket){
           var dt = stamp.fromISOString(bucket.key_as_string);
           if (!dtLast || dt > dtLast) {
-            data.push({
-              date: dt,
-              count: bucket.doc_count,
-              stroke: "rgb(255,127,14)",
-              fill: "rgba(255,127,14,1)"
-            });
+            data.push({date:dt,count:bucket.doc_count});
           }
         });
       }
@@ -235,8 +225,6 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
         .attr("r", 3.5)
         .attr("cx", function(d) {return x(d.date);})
         .attr("cy", function(d) {return y(d.count);})
-        // .style("stroke", function(d) {return d.stroke;})
-        .style("fill", function(d) {return d.fill;})
         .on("mouseover", function(d) {
           tooltip.transition()
            .duration(200)
@@ -270,9 +258,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
         var brush = d3.svg.brush()
           .x(x2)
           .extent(x2.domain())
-          .on("brushstart",function(){brushstart();})
-          .on("brush",function(){brushmove();})
-          .on("brushend",function(){brushend();});
+          .on("brush",function(){brushmove();});
         var brushg = context.append("g")
           .attr("class", "brush")
           .call(brush);
@@ -281,16 +267,12 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
           .attr("d", arc);
         brushg.selectAll("rect")
           .attr("height", height2);
-        var brushstart = function() { 
-        };
         var brushmove = function() { 
           x.domain(brush.empty() ? x2.domain() : brush.extent());
-          //focus.select(".area").attr("d", area);
           focus.selectAll(".dot").attr("cx",xMap).attr("cy",yMap);
           focus.select(".x.axis").call(xAxis);
           var ext = self._brushExtent = brush.extent();
           if (ext && ext.length === 2 && !isNaN(ext[0])) {
-            //console.warn(ext[1],data[data.length-1].date);
             ext = [ext[0],ext[1]];
             var isLast = (ext[1].getTime() === data[data.length-1].date.getTime());
             if (isLast) ext[1] = self.advanceToUpper(ext[1]);
@@ -302,9 +284,6 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
             self.setNodeText(self.brushExtentNode,"");
           }
         };
-        var brushend = function() { 
-        };
-        brushstart();
         brushmove();        
       }
     },

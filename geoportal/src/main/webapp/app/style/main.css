@@ -344,6 +344,7 @@ body {
 .g-temporal-d3 .dot {
   /* #0079c1 #818181 #1db87b #FFC300 #f6b052 #ff7f0e; */
   stroke: #818181;
+  fill-opacity: 0;
 }
 
 .g-temporal-d3 .area {
