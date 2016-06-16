@@ -18,6 +18,7 @@ define(["dojo/_base/declare",
         "dojo/query",
         "dojo/on",
         "dojo/dom-construct",
+        "dojo/number",
         "dojo/text!./templates/SpatialFilter.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
@@ -38,12 +39,14 @@ define(["dojo/_base/declare",
         "esri/renderers/ClassBreaksRenderer",
         "esri/renderers/SimpleRenderer",
         "esri/graphic",
-        "esri/Color"], 
-function(declare, lang, array, djQuery, on, domConstruct, template, i18n, SearchComponent, 
+        "esri/Color",
+        "esri/dijit/PopupTemplate",
+        "esri/InfoTemplate"], 
+function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i18n, SearchComponent, 
     DropPane, QClause, GeohashEx, util, Map, ArcGISTiledMapServiceLayer, GraphicsLayer,
     webMercatorUtils, Point, SpatialReference, SimpleMarkerSymbol, SimpleLineSymbol, 
     SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, SimpleRenderer, 
-    Graphic, Color) {
+    Graphic, Color, PopupTemplate, InfoTemplate) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -60,6 +63,7 @@ function(declare, lang, array, djQuery, on, domConstruct, template, i18n, Search
     open: false,
     
     map: null,
+    _tmpHandles: null,
     
     postCreate: function() {
       this.inherited(arguments);
@@ -96,6 +100,17 @@ function(declare, lang, array, djQuery, on, domConstruct, template, i18n, Search
         "max": 9
       };
       if (!this.lodToGeoHashGridPrecision) this.lodToGeoHashGridPrecision = _lodToGeoHashGridPrecision;
+    },
+    
+    destroy: function() {
+      this._clearTmpHandles();
+      this.inherited(arguments);
+    },
+    
+    _clearTmpHandles: function() {
+      try {array.forEach(this._tmpHandles,function(h) {h.remove();});} 
+      catch(ex) {console.warn(ex);}
+      this._tmpHandles = [];      
     },
     
     equalInterval: function(min,max) {
@@ -278,6 +293,7 @@ function(declare, lang, array, djQuery, on, domConstruct, template, i18n, Search
     },
     
     processResults: function(searchResponse) {
+      this._clearTmpHandles();
       if (!searchResponse.aggregations) return;
       var map = this.map, lyr;
       if (map) {
@@ -318,6 +334,28 @@ function(declare, lang, array, djQuery, on, domConstruct, template, i18n, Search
         clusterLayer.setRenderer(renderer);
         map.addLayer(clusterLayer);
         //console.warn("clusterLayer",clusterLayer);
+        
+        var tipPattern = i18n.search.spatialFilter.tipPattern;
+        var tooltip = d3.select(this.tooltipNode);
+        tooltip.style("opacity", 0);
+        var hideTooltip = function() {
+          tooltip.transition().duration(500).style("opacity", 0);
+        };
+        this._tmpHandles.push(clusterLayer.on("mouse-over",function(evt){
+          if (evt.graphic && evt.graphic.attributes) {
+            var c = djNumber.format(evt.graphic.attributes["Count"]);
+            var txt = tipPattern.replace("{count}",c);
+            tooltip.transition().duration(200).style("opacity", 1);
+            tooltip.html(txt)
+              .style("left", (evt.pageX + 12) + "px")
+              .style("top", (evt.pageY - 20) + "px");   
+          } else {
+            hideTooltip();
+          }
+        }));
+        this._tmpHandles.push(clusterLayer.on("mouse-out",function(evt){
+          hideTooltip();
+        }));
       }
     },
     

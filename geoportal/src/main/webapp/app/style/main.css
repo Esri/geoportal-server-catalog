@@ -366,7 +366,8 @@ body {
   stroke-width: 1.5px;
 }
 
-.g-temporal-d3 .tooltip {
+.g-temporal-d3 .tooltip,
+.g-spatial-filter-d3-tooltip {
   position: absolute;
   padding: 5px;
   pointer-events: none;
@@ -374,5 +375,6 @@ body {
   color: #000000;
   border: 1px solid #cccccc;
   border-radius: 5px;
+  z-index: 99;
 }
 

@@ -68,7 +68,8 @@ define({
         label: "Map",
         anywhere: "Anywhere",
         intersects: "Intersects",
-        within: "Within"
+        within: "Within",
+        tipPattern: "{count} centered here"
       },
       temporalFilter: {
         label: "Temporal",
