@@ -66,7 +66,7 @@ define({
       },
       spatialFilter: {
         label: "Map",
-        anywhere: "Anywhere",
+        any: "Any",
         intersects: "Intersects",
         within: "Within",
         countPattern: "{count} centered here"

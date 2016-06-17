@@ -165,8 +165,8 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
     
     getRelation: function() {
       var r = djQuery("input[type=radio]:checked",this.relationsNode)[0].getAttribute("data-op");
-      if (typeof r === "string" && r !== "anywhere" && r.length > 0) return r;
-      return "anywhere";
+      if (typeof r === "string" && r !== "any" && r.length > 0) return r;
+      return "any";
     },
     
     hasField: function() {
@@ -186,8 +186,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
       
       var addChoice = function(lbl,op) {
         var spn = domConstruct.create("span",{
-          "class": "g-spatial-filter-relation",
-          title: op
+          "class": "g-spatial-filter-relation"
         },nd);
         var id = self.id+"_op_"+op;
         var radio = domConstruct.create("input",{
@@ -211,7 +210,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
         return radio;
       };
       
-      addChoice(i18n.search.spatialFilter.anywhere,"anywhere").checked = true;
+      addChoice(i18n.search.spatialFilter.any,"any").checked = true;
       addChoice(i18n.search.spatialFilter.intersects,"intersects");
       addChoice(i18n.search.spatialFilter.within,"within");
     },
@@ -235,7 +234,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
         this.map = map;
         //window.AppContext.searchMap = this.map;
         this.own(on(map,"ExtentChange",lang.hitch(this,function(){
-          if (this.getRelation() !== "anywhere") this.search();
+          if (this.getRelation() !== "any") this.search();
         })));
       })));
     },
@@ -266,7 +265,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
         return qry;
       };
 
-      if (map && relation !== "anywhere") {
+      if (map && relation !== "any") {
         //console.warn("map.geographicExtent",map.geographicExtent);
         var env = map.geographicExtent;
         if (env) {
@@ -404,7 +403,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
     
     whenQClauseRemoved: function(qClause) {
       if (this === qClause.parentQComponent) {
-        djQuery("input[data-op=anywhere]",this.relationsNode)[0].checked = true;
+        djQuery("input[data-op=any]",this.relationsNode)[0].checked = true;
       }
     }
     
