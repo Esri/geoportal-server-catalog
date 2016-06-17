@@ -124,6 +124,14 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       //$(window).resize(function() {reposition();});
     },
     
+    _mouseenter: function(e) {
+      topic.publish(appTopics.OnMouseEnterResultItem,{item:this.item});
+    },
+
+    _mouseleave: function(e) {
+      topic.publish(appTopics.OnMouseLeaveResultItem,{item:this.item});
+    },
+    
     _renderAddToMap: function(item,links) {
       if (links.length === 0) return;
       var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};

@@ -19,6 +19,8 @@ define(["dojo/_base/declare",
         "dojo/on",
         "dojo/dom-construct",
         "dojo/number",
+        "dojo/topic",
+        "app/context/app-topics",
         "dojo/text!./templates/SpatialFilter.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
@@ -30,6 +32,7 @@ define(["dojo/_base/declare",
         "esri/layers/ArcGISTiledMapServiceLayer",
         "esri/layers/GraphicsLayer",
         "esri/geometry/webMercatorUtils",
+        "esri/geometry/Extent",
         "esri/geometry/Point",
         "esri/SpatialReference",
         "esri/symbols/SimpleMarkerSymbol",
@@ -42,11 +45,11 @@ define(["dojo/_base/declare",
         "esri/Color",
         "esri/dijit/PopupTemplate",
         "esri/InfoTemplate"], 
-function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i18n, SearchComponent, 
-    DropPane, QClause, GeohashEx, util, Map, ArcGISTiledMapServiceLayer, GraphicsLayer,
-    webMercatorUtils, Point, SpatialReference, SimpleMarkerSymbol, SimpleLineSymbol, 
-    SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, SimpleRenderer, 
-    Graphic, Color, PopupTemplate, InfoTemplate) {
+function(declare, lang, array, djQuery, on, domConstruct, djNumber, topic, appTopics, template, i18n, 
+    SearchComponent, DropPane, QClause, GeohashEx, util, Map, ArcGISTiledMapServiceLayer, GraphicsLayer,
+    webMercatorUtils, Extent, Point, SpatialReference, SimpleMarkerSymbol, SimpleLineSymbol, 
+    SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, SimpleRenderer, Graphic, Color, 
+    PopupTemplate, InfoTemplate) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -63,6 +66,8 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
     open: false,
     
     map: null,
+    
+    _highlighted: null,
     _tmpHandles: null,
     
     postCreate: function() {
@@ -100,6 +105,40 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
         "max": 9
       };
       if (!this.lodToGeoHashGridPrecision) this.lodToGeoHashGridPrecision = _lodToGeoHashGridPrecision;
+      
+      var self = this;
+      topic.subscribe(appTopics.OnMouseEnterResultItem,function(params){
+        try {
+          var map = self.map, geometry, outSR;
+          if (map && params && params.item && params.item.envelope_geo) {
+            outSR = map.spatialReference;
+            var env = params.item.envelope_geo.coordinates;
+            geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
+          }
+          if (geometry && webMercatorUtils.canProject(geometry,outSR)) {
+            var projected = webMercatorUtils.project(geometry,outSR);
+            if (!self._highlighted) {
+              var symbol = new SimpleFillSymbol(
+                SimpleFillSymbol.STYLE_SOLID, 
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,0,0]), 2), 
+                new Color([255,255,0,0.3]));
+              self._highlighted = new Graphic(projected,symbol);
+              map.graphics.add(self._highlighted);
+            } else {
+              self._highlighted.setGeometry(projected);
+              self._highlighted.show();
+            }
+            self._highlighted.xtnItemId = params.item._id;
+          }          
+        } catch(ex) {
+          console.warn("SpatialFilter.OnMouseEnterResultItem");
+          console.warn(ex);
+        }
+      });
+      
+      topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
+        if (self._highlighted) self._highlighted.hide();
+      });
     },
     
     destroy: function() {
@@ -336,6 +375,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
     
     processResults: function(searchResponse) {
       this._clearTmpHandles();
+      if (this._highlighted) this._highlighted.hide();
       if (!searchResponse.aggregations) return;
       var map = this.map, lyr;
       if (map) {

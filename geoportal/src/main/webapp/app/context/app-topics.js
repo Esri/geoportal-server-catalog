@@ -16,6 +16,12 @@ define([],function(){var obj={
   /* params - {searchPane:obj,itemId:string} */
   ItemDeleted: "app/ItemDeleted",
   
+  /* params - {item:item} */
+  OnMouseEnterResultItem: "app/OnMouseEnterResultItem",
+  
+  /* params - {item:item} */
+  OnMouseLeaveResultItem: "app/OnMouseLeaveResultItem",
+  
   /* params - {geoportalUser:obj} */
   SignedIn: "app/SignedIn",
 
