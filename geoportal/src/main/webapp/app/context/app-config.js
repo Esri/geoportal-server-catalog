@@ -10,6 +10,7 @@ define([],function(){var obj={
   searchMap: {
     basemap: "streets",
     autoResize: true, 
+    wrapAround180: true,
     center: [-98, 40], 
     zoom: 3
   },

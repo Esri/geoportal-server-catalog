@@ -244,28 +244,71 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, template, i1
     
     appendQueryParams: function(params) {
       if (!this.hasField()) return;
-      var relation = this.getRelation();
-      var qClause = null;
-      if (this.map && relation !== "anywhere") {
-        var env = this.map.geographicExtent;
+      var field = this.field, relation = this.getRelation();
+      var map = this.map, qClause = null;
+      var env1, env2, query, tip;
+      
+      var chkBnd = function(env) {
+        if (!env) return;
+        if (env.xmin < -180) env.xmin = -180;
+        if (env.xmax > 180) env.xmax = 180;
+        if (env.ymin < -90) env.ymin = -90;
+        if (env.ymax > 90) env.ymax = 90;
+      };
+      
+      var makeQuery = function(env) {
+        var shp = {
+          "type": "envelope",
+          "coordinates": [[env.xmin,env.ymax], [env.xmax,env.ymin]]  
+        };
+        var qry = {"geo_shape":{}};
+        qry.geo_shape[field] = {"shape":shp,"relation":relation};
+        return qry;
+      };
+
+      if (map && relation !== "anywhere") {
+        //console.warn("map.geographicExtent",map.geographicExtent);
+        var env = map.geographicExtent;
         if (env) {
-          var xmin = env.xmin, ymin = env.ymin;
-          var xmax = env.xmax, ymax = env.ymax;
-          if (xmin < -180) xmin = -180;
-          if (xmax > 180) xmax = 180;
-          if (ymin < -90) ymin = -90;
-          if (ymax > 90) ymax = 90;
-          var sEnv = xmin+" "+ymin+" "+xmax+" "+ymax;
-          var lbl = this.label;
-          var tip = sEnv;
-          var shape = {
-            "type": "envelope",
-            "coordinates": [[xmin,ymax], [xmax,ymin]]  
-          };
-          var query = {"geo_shape":{}};
-          query.geo_shape[this.field] = {"shape":shape,"relation":relation};
+          env1 = {xmin:env.xmin,ymin:env.ymin,xmax:env.xmax,ymax:env.ymax};
+          if (map.wrapAround180) {
+            //console.warn("xmin",env1.xmin,"xmax",env1.xmax);
+            while (env1.xmin <= env1.xmax && env1.xmin < -180 && env1.xmax < -180) {
+              env1.xmin = env1.xmin + 360;
+              env1.xmax = env1.xmax + 360;
+            }
+            while (env1.xmin <= env1.xmax && env1.xmin > 180 && env.xmax > 180) {
+              env1.xmin = env1.xmin - 360;
+              env1.xmax = env1.xmax - 360;
+            }
+            //console.warn("... xmin",env1.xmin,"xmax",env1.xmax);
+            if (env1.xmin < env1.xmax && env1.xmin < -180 && env1.xmax >= -180) {
+              if (env1.xmax > -180) {
+                env2 = {xmin:-180,ymin:env1.ymin,xmax:env1.xmax,ymax:env1.ymax};
+              }
+              env1 = {xmin:env1.xmin + 360,ymin:env1.ymin,xmax:180,ymax:env1.ymax};
+            } else if (env1.xmin < env1.xmax && env1.xmin < 180 && env1.xmax >= 180) {
+              if (env1.xmax > 180) {
+                env2 = {xmin:-180,ymin:env1.ymin,xmax:env1.xmax - 360,ymax:env1.ymax};
+              }
+              env1 = {xmin:env1.xmin,ymin:env1.ymin,xmax:180,ymax:env1.ymax};
+            }
+            //console.warn("... ... xmin",env1.xmin,"xmax",env1.xmax);
+          }
+          
+          chkBnd(env1);
+          chkBnd(env2);
+          if (env2) {
+            tip = env1.xmin+" "+env1.ymin+" "+env2.xmax+" "+env1.ymax;
+            // TODO relation="within" - what if the indexed shape crosses 180?
+            query = {"bool": {"should":[makeQuery(env1),makeQuery(env2)]}};
+          } else {
+            tip = env1.xmin+" "+env1.ymin+" "+env1.xmax+" "+env1.ymax;
+            query = makeQuery(env1);
+          }
+          
           qClause = new QClause({
-            label: lbl,
+            label: this.label,
             tip: tip,
             parentQComponent: this,
             removable: true,
