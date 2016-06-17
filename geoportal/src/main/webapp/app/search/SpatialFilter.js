@@ -15,9 +15,13 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
+        "dojo/aspect",
         "dojo/query",
         "dojo/on",
         "dojo/dom-construct",
+        "dojo/dom-class",
+        "dojo/dom-geometry",
+        "dojo/dom-style",
         "dojo/number",
         "dojo/topic",
         "app/context/app-topics",
@@ -44,12 +48,13 @@ define(["dojo/_base/declare",
         "esri/graphic",
         "esri/Color",
         "esri/dijit/PopupTemplate",
-        "esri/InfoTemplate"], 
-function(declare, lang, array, djQuery, on, domConstruct, djNumber, topic, appTopics, template, i18n, 
-    SearchComponent, DropPane, QClause, GeohashEx, util, Map, ArcGISTiledMapServiceLayer, GraphicsLayer,
-    webMercatorUtils, Extent, Point, SpatialReference, SimpleMarkerSymbol, SimpleLineSymbol, 
-    SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, SimpleRenderer, Graphic, Color, 
-    PopupTemplate, InfoTemplate) {
+        "esri/InfoTemplate",
+        "esri/dijit/Search"], 
+function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber, 
+    topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Map, 
+    ArcGISTiledMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference, 
+    SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, 
+    SimpleRenderer, Graphic, Color, PopupTemplate, InfoTemplate, SearchWidget) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -64,10 +69,12 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, topic, appTo
     label: i18n.search.spatialFilter.label,
     lodToGeoHashGridPrecision: null,
     open: false,
+    highlightItemOnHover: true,
     
     map: null,
     
     _highlighted: null,
+    _locator: null,
     _tmpHandles: null,
     
     postCreate: function() {
@@ -107,7 +114,9 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, topic, appTo
       if (!this.lodToGeoHashGridPrecision) this.lodToGeoHashGridPrecision = _lodToGeoHashGridPrecision;
       
       var self = this;
-      topic.subscribe(appTopics.OnMouseEnterResultItem,function(params){
+      
+      this.own(topic.subscribe(appTopics.OnMouseEnterResultItem,function(params){
+        if (!self.highlightItemOnHover) return;
         try {
           var map = self.map, geometry, outSR;
           if (map && params && params.item && params.item.envelope_geo) {
@@ -134,11 +143,24 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, topic, appTo
           console.warn("SpatialFilter.OnMouseEnterResultItem");
           console.warn(ex);
         }
-      });
+      }));
       
-      topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
+      this.own(topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
         if (self._highlighted) self._highlighted.hide();
-      });
+      }));
+      
+      var positionLocator = true;
+      this.own(aspect.after(this.dropPane,"_setOpenAttr",function() {
+        if (positionLocator && self.map && self.map._slider && self._locator) {
+          console.warn(domGeometry.position(self.map._slider));
+          var sliderPos = domGeometry.position(self.map._slider);
+          if (sliderPos.x > 0) {
+            var nd = self._locator.domNode;
+            domStyle.set(nd,"left",Math.round(sliderPos.x)+"px");
+            domStyle.set(nd,"top",Math.round(sliderPos.y+sliderPos.h)+"px");
+          }
+        }
+      }));
     },
     
     destroy: function() {
@@ -254,6 +276,20 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, topic, appTo
       addChoice(i18n.search.spatialFilter.within,"within");
     },
     
+    initializeLocator: function() {
+      var params = {
+        map: this.map,
+        enableButtonMode: true,
+        enableHighlight: false,
+        enableInfoWindow: false,
+        showInfoWindowOnSelect: false
+      };
+      var locator = new SearchWidget(params,this.searchWidgetNode);
+      locator.startup();
+      domClass.add(locator.domNode,"g-spatial-filter-locator");
+      this._locator = locator;
+    },
+    
     initializeMap: function() {
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
@@ -271,6 +307,7 @@ function(declare, lang, array, djQuery, on, domConstruct, djNumber, topic, appTo
       }
       this.own(on(map,"Load",lang.hitch(this,function(){
         this.map = map;
+        this.initializeLocator();
         //window.AppContext.searchMap = this.map;
         this.own(on(map,"ExtentChange",lang.hitch(this,function(){
           if (this.getRelation() !== "any") this.search();

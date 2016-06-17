@@ -165,6 +165,14 @@ body {
 .g-spatial-filter-relation {
   margin-left: 12px;
 }
+.g-spatial-filter-locator {
+  display: block;
+  position: absolute;
+  z-index: 31;
+  left: 44px;
+  top: 215px;
+}
+
 .g-applied-filters .g-drop-pane-tools label {
 	margin-right: 20px;
 	margin-top: 4px;
