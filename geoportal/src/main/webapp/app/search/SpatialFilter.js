@@ -67,10 +67,11 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     field: "envelope_geo",
     pointField: "envelope_cen_pt",
     label: i18n.search.spatialFilter.label,
+    locatorParams: null,
     lodToGeoHashGridPrecision: null,
     open: false,
     highlightItemOnHover: true,
-    
+    showLocator: true,
     map: null,
     
     _highlighted: null,
@@ -152,7 +153,6 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       var positionLocator = true;
       this.own(aspect.after(this.dropPane,"_setOpenAttr",function() {
         if (positionLocator && self.map && self.map._slider && self._locator) {
-          console.warn(domGeometry.position(self.map._slider));
           var sliderPos = domGeometry.position(self.map._slider);
           if (sliderPos.x > 0) {
             var nd = self._locator.domNode;
@@ -277,6 +277,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     },
     
     initializeLocator: function() {
+      if (!this.showLocator) return;
       var params = {
         map: this.map,
         enableButtonMode: true,
@@ -284,6 +285,11 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         enableInfoWindow: false,
         showInfoWindowOnSelect: false
       };
+      var cfgParams = this.locatorParams;
+      if (!cfgParams && AppContext.appConfig.searchMap) {
+        cfgParams = AppContext.appConfig.searchMap.locatorParams;
+      }
+      if (cfgParams) lang.mixin(params,cfgParams);
       var locator = new SearchWidget(params,this.searchWidgetNode);
       locator.startup();
       domClass.add(locator.domNode,"g-spatial-filter-locator");
