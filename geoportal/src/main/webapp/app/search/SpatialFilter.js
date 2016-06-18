@@ -164,7 +164,12 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     },
     
     destroy: function() {
-      this._clearTmpHandles();
+      try {
+        if (this._locator) {
+          this._locator.destroyRecursive(false);
+        }
+        this._clearTmpHandles();
+      } catch(ex) {}
       this.inherited(arguments);
     },
     
