@@ -1,5 +1,0 @@
-﻿define(
-   ({
-    _widgetLabel: "Yleiskatsauskartta"
-  })
-);
