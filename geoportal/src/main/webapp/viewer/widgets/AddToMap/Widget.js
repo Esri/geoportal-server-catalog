@@ -1,100 +1,93 @@
+///////////////////////////////////////////////////////////////////////////
+// Copyright © 2016 Esri. All Rights Reserved.
+//
+// Licensed under the Apache License Version 2.0 (the "License");
+// you may not use this file except in compliance with the License.
+// You may obtain a copy of the License at
+//
+//    http://www.apache.org/licenses/LICENSE-2.0
+//
+// Unless required by applicable law or agreed to in writing, software
+// distributed under the License is distributed on an "AS IS" BASIS,
+// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+// See the License for the specific language governing permissions and
+// limitations under the License.
+///////////////////////////////////////////////////////////////////////////
 define([
-  'dojo/_base/declare',
-  'dojo/_base/lang',
-  'dojo/_base/array',
-  'dojo/on',
-  'dijit/_WidgetsInTemplateMixin',
-  'jimu/BaseWidget',
-  'dojo/topic',
-  'jimu/dijit/Message',
-  './LinksProcessor',
-  './LayerFactory',
-  './WebmapProcessor'],
-function(declare, lang, array, on, _WidgetsInTemplateMixin, BaseWidget, topic,
-  Message, LinksProcessor, LayerFactory, WebmapProcessor) {
+  "dojo/_base/declare",
+  "dojo/_base/lang",
+  "dojo/Deferred",
+  "dijit/_WidgetsInTemplateMixin",
+  "jimu/BaseWidget",
+  "jimu/dijit/Message",
+  "./LayerProcessor"],
+function(declare, lang, Deferred, _WidgetsInTemplateMixin, BaseWidget, 
+  Message, LayerProcessor) {
   
   return declare([BaseWidget, _WidgetsInTemplateMixin], {    
 
-    name: 'AddToMap',
-    baseClass: 'geoportal-addToMap',
+    name: "AddToMap",
+    baseClass: "geoportal-addToMap",
 
     postCreate: function(){
       this.inherited(arguments);
-      //console.warn("AddToMap.postCreate...");
-
+      
+      var self = this;
       if (!window.addToMapListener){
-        window.addToMapListener = lang.hitch(this,function(params){
+        
+        //console.warn("navigator.userAgent",navigator.userAgent);
+        if (!window._saveGetComputedStyle && navigator && navigator.userAgent && 
+          navigator.userAgent.indexOf("Firefox") !== -1) {
+          console.warn("Overriding window.getComputedStyle for:",navigator.userAgent);
+          window._saveGetComputedStyle = window.getComputedStyle;
+          window.getComputedStyle = function (element,pseudoElt) {
+            var t = window._saveGetComputedStyle(element,pseudoElt);
+            if (t === null) {
+              return {getPropertyValue: function(){}};
+            } else {
+              return t;
+            }
+          };
+        }
+        
+        window.addToMapListener = function(params){
           //console.warn("addToMapListener",params);
-          this._addLayer(params.type,params.url);
-        });
+          return self._addLayer(params.type,params.url);
+        };
       }
       
-      //topic.subscribe("mapLoaded", lang.hitch(this, this.addResource));
-      //topic.subscribe("appConfigLoaded", lang.hitch(this, this.addResource));
-      //topic.subscribe("appConfigChanged", lang.hitch(this, this.addResource));
-
       this._checkWindowUrl();
     },
     
-    _addLayer: function(linkType,href){
-      //console.warn("AddToMap._addLayer...",linkType,href);
-      linkType = linkType.toLowerCase();
-      if (linkType == "mapserver" || linkType == "featureserver" || linkType == "imageserver" || 
-          linkType == "kml" || linkType == "wms") {
-
-        LayerFactory.createLayer(href,linkType).then(lang.hitch(this,function(layer){
-          layer.on("error",lang.hitch(this,function(error){
-            //new Message({message: "Unable to load: "+href});
-            console.warn(error);
-          }));
-          layer.on("load",lang.hitch(this,function(){
-            //console.warn("onLoad",layer);
-            /*if(title.length > 0){
-            layer.attr("id",title);
-            layer.attr("name",title);
-            layer.attr("title",title);
-            }*/
-            //console.warn("AddToMap._addLayer",layer);
-            if (layer && layer.declaredClass && layer.declaredClass === "esri.layers.WMSLayer") {
-              //console.warn(layer.declaredClass);
-              //console.warn(layer.layerInfos);
-              var maxLayers = 10, lyrNames = [];
-              array.forEach(layer.layerInfos,function(lyrInfo){
-                //console.warn("lyrInfo",lyrInfo);
-                if (typeof lyrInfo.name === "string" && lyrInfo.name.length > 0) {
-                  if (lyrNames.length < maxLayers) lyrNames.push(lyrInfo.name);
-                }
-              });
-              //console.warn("lyrNames",lyrNames);
-              if (lyrNames.length <= maxLayers) {
-                layer.setVisibleLayers(lyrNames);
-              }
-            }
-            console.warn("AddToMap._addLayer",layer);
-            this.map.addLayer(layer);
-            //console.log("layer added to map.");
-          }));
-        }));
-
-      } else if (linkType == "agsrest" || linkType == "ags") { 
-
-        var linksProcessor = new LinksProcessor();
-        linkType = linksProcessor.getServiceType(href);
-
-        LayerFactory.createLayer(href,linkType).then(lang.hitch(this,function(layer){              
-          this.map.addLayer(layer);
-          //console.log("layer added to map.");
-        }));
-
-      } else if (linkType == "webmap") { 
-        //console.log("webmap processing...");
-        var wmProcessor = new WebMapProcessor();
-        wmProcessor.process(href,this.map);
-        //console.log("webmap operational layers added to map.");
-      } 
-      //console.groupEnd();
+    _addLayer: function(type,url){
+      // console.warn("AddToMap.addLayer...",type,url);      
+      var dfd = new Deferred();
+      var msg = this.nls.unableToLoadPattern.replace("{url}",url);
+      var popupMsg = function() {
+        new Message({message:msg});
+      };
+      var processor = new LayerProcessor();
+      processor.addLayer(this.map,type,url).then(function(result){
+        if (result) {
+          dfd.resolve(result);
+        } else {
+          dfd.reject("Failed");
+          console.warn("AddToMap failed for",url);
+          popupMsg();
+        }
+      }).otherwise(function(error){
+        dfd.reject(error);
+        if (typeof error === "string" && error === "Unsupported") {
+          console.warn("AddToMap: Unsupported type",type,url);
+        } else {
+          console.warn("AddToMap failed for",url);
+          console.warn(error);
+        }
+        popupMsg();
+      }); 
+      return dfd;
     },
-
+    
     _checkWindowUrl: function(){
       //console.warn("AddToMap._checkWindowUrl...");
       var queryObject = this._parseParameters();  // window.queryObject; env.js // <-- did not work well, so using above function
@@ -110,7 +103,7 @@ function(declare, lang, array, on, _WidgetsInTemplateMixin, BaseWidget, topic,
           return;
         }
 
-        var linkType = parts[0].toLowerCase();
+        var linkType = parts[0];
         var href = "";
         // loop parameter values in array elements since value may contain ':'
         for(var i=1; i<parts.length; i++){
@@ -135,7 +128,7 @@ function(declare, lang, array, on, _WidgetsInTemplateMixin, BaseWidget, topic,
         var splits = decodeURIComponent(pairs[i]).split('=');
         var parameterValue = "";
         // loop parameter values in array elements since value may contain '='
-        for(j=1; j<splits.length; j++){
+        for(var j=1; j<splits.length; j++){
           if(parameterValue.length > 0){
             parameterValue += "=";
           }

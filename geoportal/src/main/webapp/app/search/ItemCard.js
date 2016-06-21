@@ -25,6 +25,7 @@ define(["dojo/_base/declare",
         "dojo/text!./templates/ItemCard.html",
         "dojo/i18n!app/nls/resources",
         "app/context/AppClient",
+        "app/etc/ServiceType",
         "app/etc/util",
         "app/common/ConfirmationDialog",
         "app/content/ChangeOwner",
@@ -33,8 +34,8 @@ define(["dojo/_base/declare",
         "app/content/UploadMetadata"], 
 function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
-    AppClient, util, ConfirmationDialog, ChangeOwner, MetadataEditor, gxeConfig, 
-    UploadMetadata) {
+    AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
+    MetadataEditor, gxeConfig, UploadMetadata) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -137,47 +138,15 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
       var actionsNode = this.actionsNode;
       array.some(links, function(u){
-        // "mapserver" "featureserver" "imageserver" "kml" "wms" "agsrest" "ags" "webmap"
-        var lc, linkType = null, linkUrl = null;
-        if (typeof u === "string" && (u.indexOf("http://") === 0 || u.indexOf("https://") === 0)) {
-          lc = u.toLowerCase();
-          if (lc.indexOf("service=") > 0) {
-            if (lc.indexOf("?service=wms") > 0 || lc.indexOf("&service=wms") > 0) {
-              linkType = "wms";
-              linkUrl = u;
-            }
-          } else if (lc.indexOf("/rest/services") > 0) {
-            if (endsWith(lc,"/mapserver")) {
-              linkType = "MapServer";
-              linkUrl = u;
-            } else if (endsWith(lc,"/featureserver")) {
-              linkType = "FeatureServer";
-              linkUrl = u;
-            } else if (endsWith(lc,"/imageserver")) {
-              linkType = "ImageServer";
-              linkUrl = u;
-            }
-          }
-          if (linkType === null) {
-            if (endsWith(lc,".kml") || endsWith(lc,".kmz") || 
-                lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 || 
-                lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
-              linkType = "kml";
-              linkUrl = u;
-            }
-          }
-        }
-
-        if (typeof linkUrl === "string") {
-          //console.warn(linkType,linkUrl);
+        var serviceType = new ServiceType();
+        serviceType.checkUrl(u);
+        //console.warn("serviceType",serviceType.isSet(),serviceType);
+        if (serviceType.isSet()) {
           domConstruct.create("a",{
             href: "javascript:void(0)",
             innerHTML: i18n.item.actions.addToMap,
             onclick: function() {
-              topic.publish(appTopics.AddToMapClicked,{
-                type: linkType,
-                url: linkUrl
-              });
+              topic.publish(appTopics.AddToMapClicked,serviceType);
             }
           },actionsNode);
           return true;
