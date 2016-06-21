@@ -1,0 +1,35 @@
+.jimu-main-background{
+  background-color: black;
+}
+.jimu-widget-header-controller .jimu-drop-menu{
+  background-color: black;
+}
+.jimu-header-more-popup {
+  background-color: #435063;
+}
+.jimu-header-more-popup .icon-node {
+  background-color: black;
+}
+.jimu-header-more-popup .close {
+  background-color: #435063;
+}
+.jimu-header-more-popup .close-inner {
+  background-color: black;
+}
+.jimu-on-screen-widget-panel>.jimu-panel-title,
+.jimu-foldable-panel>.jimu-panel-title,
+.jimu-title-panel>.title{
+  color: white;
+  background-color: #000;
+}
+
+.jimu-widget-header-controller .jimu-drop-menu .menu-item{
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+.jimu-widget-header-controller .jimu-drop-menu .menu-item:hover{
+  background-color: rgba(255, 255, 255, 0.2);
+}
+
+.esriPopup .titlePane {
+  background-color: black;
+}

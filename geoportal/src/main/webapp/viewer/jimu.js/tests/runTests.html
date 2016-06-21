@@ -1,0 +1,31 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
+<html>
+    <head>
+    <title>jimu Unit Test Runner</title>
+    <BODY>
+        <script>
+          var queryObject = getQueryObject();
+          var redirectUrl = '/portal/apps/webappbuilder/stemapp/arcgis-js-api/util/doh/' +
+          'runner.html?test=jimutests/testModules&paths=jimutests,' +
+          '/portal/apps/webappbuilder/stemapp/jimu.js/tests';
+          if(queryObject.testfile){
+            redirectUrl = redirectUrl + '&testfile=' + queryObject.testfile;
+          }
+          window.location.href = redirectUrl;
+
+          function getQueryObject(){
+            var query = window.location.search;
+            if (query.indexOf('?') > -1) {
+              query = query.substr(1);
+            }
+            var pairs = query.split('&');
+            var queryObject = {};
+            for(var i = 0; i < pairs.length; i++){
+              var splits = decodeURIComponent(pairs[i]).split('=');
+              queryObject[splits[0]] = splits[1];
+            }
+            return queryObject;
+          }
+        </script>
+    </BODY>
+</HTML> 

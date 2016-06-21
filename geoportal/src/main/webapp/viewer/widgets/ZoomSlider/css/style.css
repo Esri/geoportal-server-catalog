@@ -1,0 +1,36 @@
+.jimu-widget-zoomslider{
+  background-color: #ccc;
+  background-color: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 25px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  color: #fff;
+  text-align: center;
+  font-family: verdana,helvetica;
+}
+
+.jimu-widget-zoomslider .zoom{
+  width: 30px;
+  height: 30px;
+}
+
+.jimu-widget-zoomslider .zoom:hover{
+  background-color: #848385;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.jimu-widget-zoomslider .zoom.jimu-state-disabled{
+  color: #ddd;
+}
+
+.jimu-widget-zoomslider.vertical .zoom-in{
+  border-bottom: 1px solid #57585A;
+}
+
+.jimu-widget-zoomslider.horizontal .zoom-in{
+  border-right: 1px solid #57585A;
+}

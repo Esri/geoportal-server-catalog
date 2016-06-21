@@ -1,0 +1,27 @@
+﻿<div>
+	<table class="header-table" cellspacing="0" cellpadding="0">
+		<tbody>
+			<tr>
+				<td>
+					<div>
+						<span>${nls.strMatchMsgPart1}</span>
+						<select data-dojo-attach-point="allAnySelect">
+							<option value="AND" selected>${nls.all}</option>
+							<option value="OR">${nls.any}</option>
+						</select>
+						<span>${nls.strMatchMsgPart2}</span>
+					</div>
+				</td>
+				<td style="width:15px;padding-right:10px;">
+					<div data-dojo-attach-point="btnDelete" data-dojo-attach-event="onclick:_destroySelf"
+					 class="jimu-icon jimu-icon-delete"></div>
+				</td>
+				<td style="width:15px;padding-right:14px;">
+					<div data-dojo-attach-point="btnAdd" class="jimu-icon jimu-icon-add"></div>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	<div data-dojo-attach-point="allExpsBox">
+	</div>
+</div>

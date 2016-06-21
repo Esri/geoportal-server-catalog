@@ -1,0 +1,71 @@
+.jimu-navbar .jimu-icon-btn:first-child{
+  margin-left: 0;
+}
+
+
+/*builder/app.css*/
+#app-list .head-section .create-button,
+#app-list .head-section .upload-button{
+  filter: progid:dXImageTransform.Microsoft.DropShadow(color=#a0acbf,offX=0,offY=1,positives=true);
+  -ms-filter: "progid:dXImageTransform.Microsoft.DropShadow(color=#a0acbf,offX=0,offY=1,positives=true)";
+}
+#app-list .head-section .upload-button-div .file-input{
+  filter: Alpha(opacity=0);
+  -ms-filter: "Alpha(opacity=0)";
+}
+#app-list .app-content .list-section-head,
+#app-list .app-content .list-section-body-content{
+  filter: progid:dXImageTransform.Microsoft.DropShadow(color=#a0acbf,offX=1,offY=1,positives=true);
+  -ms-filter: "progid:dXImageTransform.Microsoft.DropShadow(color=#a0acbf,offX=1,offY=1,positives=true)";
+}
+
+/*builder/leftpane.css*/
+.config-app .left-pane .loading-cover{
+  background-color: #000;
+  filter:Alpha(Opacity=30);
+  -ms-filter: "Alpha(Opacity=30)";
+}
+
+/*builder/widget.css*/
+.app-widgets .empty-node .box {
+  filter: Alpha(opacity=0);
+  -ms-filter: "Alpha(opacity=0)";
+}
+.app-widgets .moveable .edit-btn{
+  background-color: #000;
+  filter: Alpha(opacity=30);
+  -ms-filter: "Alpha(opacity=30)";
+}
+.app-widgets .moveable .edit-btn:hover{
+  filter: Alpha(opacity=60);
+  -ms-filter: "Alpha(opacity=60)";
+}
+.app-widgets .moveable.hide {
+  filter: Alpha(opacity=50);
+  -ms-filter: "Alpha(opacity=50)";
+}
+
+/*jimu.css*/
+/*.jimu-widget-onscreen-icon,*/
+.esriSimpleSliderVertical .esriSimpleSliderIncrementButton,
+.esriSimpleSliderVertical .esriSimpleSliderDecrementButton{
+  background-color: #000;
+  filter: Alpha(opacity=20);
+  opacity: 0.2;
+}
+/*.jimu-widget-onscreen-icon:hover,*/
+.esriSimpleSliderVertical .esriSimpleSliderIncrementButton:hover,
+.esriSimpleSliderVertical .esriSimpleSliderDecrementButton:hover{
+  background-color: #000;
+  filter: Alpha(opacity=40);
+  opacity: 0.4;
+}
+
+/*icon highlight*/
+.icon-highlight{
+  background-color: #e84b4b;
+  border: 2px solid #e84b4b;
+  z-index: 105;
+  filter: Alpha(opacity=40);
+  opacity: 0.4;
+}

@@ -1,0 +1,20 @@
+<div style="width:100%;">
+  <div class="instruction">
+    <p>${nls.instruction}</p>
+  </div>
+  <div data-dojo-attach-point="tableLayerInfos" class="table-layer-infos"></div>
+  <div class="table-options jimu-ellipsis">
+    <ul>
+      <li>
+        <div data-dojo-attach-point="exportcsv" checked
+        data-dojo-type="jimu/dijit/CheckBox" label="${nls.exportCSV}"></div>
+      </li>
+      <li>
+        <div data-dojo-attach-point="expand" data-dojo-type="jimu/dijit/CheckBox" label="${nls.expand}"></div>
+      </li>
+      <li>
+        <div data-dojo-attach-point="filterByMapExtent" data-dojo-type="jimu/dijit/CheckBox" label="${nls.filterByExtent}"></div>
+      </li>
+    </ul>
+  </div>
+</div>

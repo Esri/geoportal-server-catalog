@@ -1,0 +1,8 @@
+{
+	"name": "wab-app-libs",
+	"version": "1.0",
+	"main": "main",
+	"description": "ArcGIS Web Application libs",
+	"bugs": "",
+	"dojoBuild": "package.js"
+}

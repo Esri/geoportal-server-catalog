@@ -1,0 +1,232 @@
+{
+  "theme": {
+    "name": "FoldableTheme",
+    "styles": [
+      "default",
+      "black",
+      "blue",
+      "cyan",
+      "green",
+      "purple",
+      "red",
+      "yellow"
+    ],
+    "version": "2.0.1"
+  },
+  "portalUrl": "http://www.arcgis.com",
+  "appId": "",
+  "authorizedCrossOriginDomains": [],
+  "title": "Map Viewer",
+  "subtitle": "with Web AppBuilder for ArcGIS",
+  "keepAppState": false,
+  "logo": "images/app-logo.png",
+  "geometryService": "http://utility.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer",
+  "links": [],
+  "widgetOnScreen": {
+    "widgets": [
+       {
+        "uri": "widgets/AddToMap/Widget",
+        "position": {
+          "relativeTo": "browser"
+        },
+        "openAtStart": true,
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/Scalebar/Widget",
+        "position": {
+          "left": 7,
+          "bottom": 25
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/Search/Widget",
+        "position": {
+          "left": 155,
+          "top": 5
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/Coordinate/Widget",
+        "position": {
+          "left": 7,
+          "bottom": 5
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/Legend/Widget",
+        "version": "2.0.1",
+        "position":{
+          "left":105,
+          "top": 5
+        }
+      },
+      {
+        "uri": "widgets/LayerList/Widget",
+        "version": "2.0.1",
+        "position":{
+          "left": 55,
+          "top": 5
+        }
+      },
+      {
+        "position": {
+          "left": 55,
+          "top": 45
+        }
+      },
+      {
+        "position": {
+          "left": 105,
+          "top": 45
+        }
+      },
+      {
+        "position": {
+          "left": 155,
+          "top": 45
+        }
+      },
+      {
+        "position": {
+          "left": 205,
+          "top": 45
+        }
+      },
+      {
+        "position": {
+          "left": 255,
+          "top": 45
+        }
+      },
+      {
+        "uri": "widgets/OverviewMap/Widget",
+        "position": {
+          "bottom": 0,
+          "right": 0,
+          "zIndex": 1
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/HomeButton/Widget",
+        "position": {
+          "left": 7,
+          "top": 75
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/MyLocation/Widget",
+        "position": {
+          "left": 7,
+          "top": 110
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/AttributeTable/Widget",
+        "position": {
+          "relativeTo": "browser"
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/Splash/Widget",
+        "visible": false,
+        "position": {
+          "relativeTo": "browser"
+        },
+        "version": "2.0.1"
+      },
+      {
+        "uri": "widgets/ZoomSlider/Widget",
+        "visible": true,
+        "position": {
+          "top": 5,
+          "left": 7
+        },
+        "version": "2.0.1"
+      }
+    ]
+  },
+  "map": {
+    "3D": false,
+    "2D": true,
+    "position": {
+      "left": 0,
+      "top": 0,
+      "right": 0,
+      "bottom": 0
+    },
+    "itemId": "6e03e8c26aad4b9c92a87c1063ddb0e3",
+    "mapOptions": {
+      "extent": {
+        "type": "extent",
+        "xmin": -18520997.70160645,
+        "ymin": 2430493.343299305,
+        "xmax": -3659193.418067012,
+        "ymax": 6980025.266831786,
+        "spatialReference": {
+          "wkid": 102100
+        }
+      }
+    }
+  },
+  "widgetPool": {
+    "panel": {
+      "uri": "themes/FoldableTheme/panels/FoldablePanel/Panel",
+      "position": {
+        "top": 5,
+        "right": 5,
+        "bottom": 5,
+        "zIndex": 5
+      }
+    },
+    "widgets": []
+  },
+  "mobileLayout": {
+    "widgetOnScreen": {
+      "widgets": {
+        "widgets/Scalebar/Widget": {
+          "position": {
+            "left": 7,
+            "bottom": 40
+          },
+          "version": "1.4"
+        },
+        "widgets/Coordinate/Widget": {
+          "position": {
+            "left": 7,
+            "bottom": 17
+          },
+          "version": "1.4"
+        }
+      }
+    }
+  },
+  "loadingPage": {
+    "backgroundColor": "#508dca",
+    "backgroundImage": {
+      "visible": false
+    },
+    "loadingGif": {
+      "visible": true,
+      "uri": "configs/loading/images/predefined_loading_1.gif",
+      "width": 58,
+      "height": 29
+    }
+  },
+  "wabVersion": "2.0.1",
+  "isTemplateApp": true,
+  "isWebTier": false,
+  "httpProxy": {
+    "useProxy": true,
+    "alwaysUseProxy": false,
+    "url": "./proxy.jsp",
+    "rules": []
+  }
+}

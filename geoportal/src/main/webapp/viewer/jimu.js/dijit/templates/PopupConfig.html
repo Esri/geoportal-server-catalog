@@ -1,0 +1,34 @@
+﻿<div style="width:560px;">
+	<table class="popup-config-layout" style="width:100%;table-layout:fixed;">
+		<colgroup>
+			<col width="auto"></col>
+			<col width="370px"></col>
+			<col width="70px"></col>
+		</colgroup>
+		<tbody>
+			<tr data-dojo-attach-point="titleTR">
+				<td nowrap>
+					<span>${nls.title}</span>
+				</td>
+				<td>
+					<input data-dojo-attach-point="titleTextBox" data-dojo-type="dijit/form/TextBox" style="width:100%;" />
+				</td>
+				<td>
+					<div data-dojo-attach-point="btnAdd" data-dojo-type="dijit/form/DropDownButton">
+						<span>${nls.add}</span>
+						<div data-dojo-type="dijit/TooltipDialog">
+							<div data-dojo-attach-point="menu" data-dojo-type="dijit/Menu"></div>
+						</div>
+					</div>
+				</td>
+			</tr>
+			<tr data-dojo-attach-point="fieldsTR">
+				<td nowrap>
+					<span>${nls.fields}</span>
+				</td>
+				<td colspan="2" data-dojo-attach-point="fieldsTableTd">
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

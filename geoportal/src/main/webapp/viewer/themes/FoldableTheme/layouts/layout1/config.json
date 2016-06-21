@@ -1,0 +1,125 @@
+{
+  "widgetOnScreen": {
+    "widgets": [{
+      "position": {
+        "left": 0,
+        "top": 0,
+        "right": 0,
+        "height": 40,
+        "relativeTo": "browser"
+      }
+    },{
+      "position": {
+        "left": 7,
+        "bottom": 25
+      }
+    }, {
+      "position": {
+        "left": 55,
+        "top": 5
+      }
+    }, {
+      "position": {
+        "left": 7,
+        "bottom": 5
+      }
+    },{
+      "position": {
+        "left": 7,
+        "bottom": 70
+      }
+    }, {
+      "position": {
+        "left": 57,
+        "bottom": 70
+      }
+    }, {
+      "position": {
+        "left": 107,
+        "bottom": 70
+      }
+    }, {
+      "position": {
+        "left": 157,
+        "bottom": 70
+      }
+    }, {
+      "position": {
+        "left": 207,
+        "bottom": 70
+      }
+    }, {
+      "position": {
+        "right": 0,
+        "bottom": 0,
+        "zIndex": 1
+      }
+    }, {
+      "position": {
+        "left": 7,
+        "top": 75
+      }
+    }, {
+      "position": {
+        "left": 7,
+        "top": 110
+      }
+    }]
+  },
+
+  "mobileLayout": {
+    "widgetOnScreen": {
+      "widgets": {
+        "widgets/Scalebar/Widget": {
+          "position": {
+            "left": 7,
+            "bottom": 40
+          },
+          "version": "1.4"
+        },
+        "widgets/Coordinate/Widget": {
+          "position": {
+            "left": 7,
+            "bottom": 20
+          },
+          "version": "1.4"
+        },
+        "ph_4": {
+          "position": {
+            "left": 7,
+            "bottom": 70
+          },
+          "version": "1.4"
+        },
+        "ph_5": {
+          "position": {
+            "left": 57,
+            "bottom": 70
+          },
+          "version": "1.4"
+        },
+        "ph_6": {
+          "position": {
+            "left": 107,
+            "bottom": 70
+          },
+          "version": "1.4"
+        },
+        "ph_7": {
+          "position": {
+            "left": 157,
+            "bottom": 70
+          },
+          "version": "1.4"
+        },
+        "ph_8": {
+          "position": {
+            "left": 207,
+            "bottom": 70
+          },
+          "version": "1.4"
+        }
+      }
+    }
+  }
+}
