@@ -1,6 +1,6 @@
 Installing Geoportal Server
 
-Install Elasticsearch (2.3.1 of higher)
+Install Elasticsearch (2.3.3 or higher)
 Install Tomcat 8
 
 Deploy geoportal.war to Tomcat then 
