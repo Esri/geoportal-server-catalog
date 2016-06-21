@@ -2,9 +2,19 @@
   "settings": {
     "analysis": {
       "analyzer": {
+        "default": {
+          "tokenizer": "standard",
+          "filter": ["standard", "lowercase", "english_stemmer"]
+        },
         "case_insensitive_sort": {
           "tokenizer": "keyword",
-          "filter": [ "lowercase" ] 
+          "filter": ["lowercase"] 
+        }
+      },
+      "filter": {
+        "english_stemmer": {
+           "type": "stemmer",
+           "name": "english"
         }
       }
     }
