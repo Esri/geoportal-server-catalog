@@ -108,7 +108,7 @@ public class Test {
       //Test.testKvp();
       //Test.testDump();
       //Test.testLoad();
-      Test.testBulkChangeOwner();
+      //Test.testBulkChangeOwner();
     } catch (Throwable t) {
       LOGGER.error(t.getClass().getName());
       LOGGER.error("Exception",t);
@@ -772,9 +772,8 @@ public class Test {
     String creds = "admin:admin";
     String base64Creds = new String(Base64.getEncoder().encode(creds.getBytes())); 
     String dir = "C:/Projects/elastic/metadata/sampedata/";
-    String url = "http://localhost:8080/geoportal/rest/metadata/item";
-    url = "http://gptdbsrv08r2:8080/geoportal/rest/metadata/item";
-    url += "?async=true";
+    String url = "http://localhost:8080/geoportal/rest/metadata/item?async=true";
+    url = "http://gptdb1:8080/geoportal/rest/metadata/item?async=true";
     int count = 0;
     try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(dir))) {
       for (Path path: directoryStream) {
