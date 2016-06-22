@@ -168,7 +168,6 @@ function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
       
       var w = 150; // 350
       var pos = domGeometry.position(this.dropPane.domNode);
-      console.warn("pos",pos.w,pos);
       if (pos.w > 150) {
         w = (pos.w - 25);
       }
