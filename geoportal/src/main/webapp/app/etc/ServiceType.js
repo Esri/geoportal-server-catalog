@@ -21,8 +21,8 @@ function(declare, lang, vectorTile) {
     type 
       ArcGIS - FeatureServer MapServer ImageServer VectorTileServer StreamServer
       WMS
-      WMTS - not yet
-      WFS - not yet
+      WMTS - not yet working with wab 2.0
+      WFS - not yet with wab 2.0
       KML
       GeoRSS
       CSV
@@ -49,7 +49,7 @@ function(declare, lang, vectorTile) {
     http://basemaps.arcgis.com/arcgis/rest/services/World_Basemap/VectorTileServer/resources/styles/root.json
     http://geodesign.maps.arcgis.com/sharing/rest/content/items/bdf1eec3fa79456c8c7c2bb62f86dade/resources/styles/root.json
   
-    http://suite.opengeo.org/geoserver/wfs
+    http://suite.opengeo.org/geoserver/wfs?request=GetCapabilities&service=WFS&version=1.1.0
     http://v2.suite.opengeo.org/geoserver/gwc/service/wmts?request=GetCapabilities&service=WMTS&version=1.0.0
     http://www.ndbc.noaa.gov/kml/marineobs_as_kml.php
    */
@@ -72,9 +72,14 @@ function(declare, lang, vectorTile) {
       if (typeof url === "string" && 
           (url.indexOf("http://") === 0 || url.indexOf("https://") === 0)) {
         lc = url.toLowerCase();
-        if (lc.indexOf("service=") > 0) {
+        if (lc.indexOf("?service=") > 0 || lc.indexOf("&service=") > 0) {
           if (lc.indexOf("?service=wms") > 0 || lc.indexOf("&service=wms") > 0) {
             type = "WMS";
+          } else if (lc.indexOf("?service=wmts") > 0 || lc.indexOf("&service=wmts") > 0) {
+            //type = "WMTS";
+          } else if (lc.indexOf("?service=wfs") > 0 || lc.indexOf("&service=wfs") > 0) {
+            //type = "WFS";
+          } else if (lc.indexOf("?service=wcs") > 0 || lc.indexOf("&service=wcs") > 0) {
           }
         } else if (lc.indexOf("/com.esri.wms.esrimap") !== -1) {
           type = "WMS";

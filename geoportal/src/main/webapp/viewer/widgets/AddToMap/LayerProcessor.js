@@ -34,12 +34,13 @@ define([
   "esri/layers/WFSLayer",
   "esri/layers/WMSLayer",
   "esri/layers/WMTSLayer",
+  "esri/layers/WMTSLayerInfo",
   "esri/InfoTemplate",
   "esri/layers/vector-tile"],
 function(declare, lang, array, Deferred, all, i18n, util, esriRequest,
   ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer, CSVLayer, 
   FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, WFSLayer, WMSLayer, WMTSLayer, 
-  InfoTemplate, vectorTile){
+  WMTSLayerInfo, InfoTemplate, vectorTile){
   
   return declare(null, {
     
@@ -139,10 +140,38 @@ function(declare, lang, array, Deferred, all, i18n, util, esriRequest,
       } else if (type === "WMS") {
         layer = new WMSLayer(url,{id:id});
         this.waitThenAdd(dfd,map,type,layer);
-      } else if (type === "WMTS") { 
+      } else if (type === "WMTS") {
+        /*
+        var layerInfo = new WMTSLayerInfo({
+          identifier: "opengeo:countries",
+          tileMatrixSet: "EPSG:4326",
+          format: "png"
+        });
+        var options = {
+          serviceMode: "KVP",
+          layerInfo: layerInfo
+        };
+        url = url.substring(0,url.indexOf("?"));
+        url = "http://v2.suite.opengeo.org/geoserver/gwc/service/wmts";
+        */
         layer = new WMTSLayer(url,{id:id});
+        this.waitThenAdd(dfd,map,type,layer);
       } else if (type === "WFS") {
-        layer = new WFSLayer({id:id,url:url});
+        /*
+        var options = {
+          "id": id,
+          "url": "http://suite.opengeo.org/geoserver/wfs",
+          "version": "1.1.0",
+          "nsLayerName": "http://medford.opengeo.org|citylimits",
+          "wkid": 3857,
+          "mode": "SNAPSHOT",
+          "maxFeatures": 100,
+          "showDetails": true,
+          "infoTemplate": new InfoTemplate()
+        };
+        */
+        var options = {id:id,url:url,};
+        layer = new WFSLayer(options);
         this.waitThenAdd(dfd,map,type,layer);
       } else if (type === "KML") {
         layer = new KMLLayer(url,{id:id});
@@ -227,6 +256,8 @@ function(declare, lang, array, Deferred, all, i18n, util, esriRequest,
       } else if (dcl === "esri.layers.CSVLayer") {
         layer.infoTemplate = this.newInfoTemplate(layer);
       } else if (dcl === "esri.layers.StreamLayer") {
+        layer.infoTemplate = this.newInfoTemplate(layer);
+      } else if (dcl === "esri.layers.WFSLayer") {
         layer.infoTemplate = this.newInfoTemplate(layer);
       } else if (dcl === "esri.layers.ArcGISDynamicMapServiceLayer" ||
           dcl === "esri.layers.ArcGISTiledMapServiceLayer") {
