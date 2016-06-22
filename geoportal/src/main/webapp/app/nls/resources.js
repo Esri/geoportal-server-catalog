@@ -56,6 +56,16 @@ define({
     },
     
     search: {
+      criteria: {
+        map: "Map",
+        timePeriod: "Time Period",
+        date: "Date",
+        owner: "Owner",
+        topicCategory: "Topic Category",
+        metadataType: "Metadata Type",
+        organizations: "Organizations",
+        keywords: "Keywords",
+      },
       componentSettings: {
         componentLabel: "Label",
         componentLabelPlaceholder: "",

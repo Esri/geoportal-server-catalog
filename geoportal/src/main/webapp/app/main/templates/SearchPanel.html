@@ -8,7 +8,8 @@
           field: 'envelope_geo',
           pointField: 'envelope_cen_pt',
           allowAggregation: true,
-          open: false">
+          open: false,
+          label:'${i18n.search.criteria.map}'">
       </div>
       <div data-dojo-type="app/search/TemporalFilter"
         data-dojo-props="
@@ -17,14 +18,14 @@
           toField:'timeperiod_nst.end_dt',
           interval:'year',
           open:false,
-          label:'Time Period'">
+          label:'${i18n.search.criteria.timePeriod}'">
       </div>
       <div data-dojo-type="app/search/TemporalFilter"
         data-dojo-props="
           field:'sys_modified_dt',
           interval:'day',
           open:false,
-          label:'Date'">
+          label:'${i18n.search.criteria.date}'">
       </div>
       <!--
       <div data-dojo-type="app/search/DateFilter"
@@ -32,20 +33,20 @@
       </div>
       -->
       <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'sys_owner_s',open:false,label:'Owner'">
+        data-dojo-props="field:'sys_owner_s',open:false,label:'${i18n.search.criteria.owner}'">
       </div>
       <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'apiso_TopicCategory_s',open:false,label:'Topic Category'">
+        data-dojo-props="field:'apiso_TopicCategory_s',open:false,label:'${i18n.search.criteria.topicCategory}'">
       </div>
       <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'sys_metadatatype_s',label:'Metadata Type'">
+        data-dojo-props="field:'sys_metadatatype_s',label:'${i18n.search.criteria.metadataType}'">
       </div>  
       <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'contact_organizations_s',label:'Organizations'">
+        data-dojo-props="field:'contact_organizations_s',label:'${i18n.search.criteria.organizations}'">
       </div>
       <!-- e.g. field:'keywords_s',label:'Keywords',props:{size:20,min_doc_count:500} -->
       <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'keywords_s',label:'Keywords',props:{size:20}">
+        data-dojo-props="field:'keywords_s',label:'${i18n.search.criteria.keywords}',props:{size:20}">
       </div>    
     </div>
     <div class="g-search-pane-right">
