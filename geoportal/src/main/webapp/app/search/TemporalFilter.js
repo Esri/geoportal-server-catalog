@@ -18,14 +18,15 @@ define(["dojo/_base/declare",
         "dojo/date",
         "dojo/date/stamp",
         "dojo/dom-construct",
+        "dojo/dom-geometry",
         "dojo/text!./templates/TemporalFilter.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/TemporalFilterSettings"], 
-function(declare, lang, array, djDate, stamp, domConstruct, template, i18n, 
-    SearchComponent, DropPane, QClause, TemporalFilterSettings) {
+function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
+    template, i18n, SearchComponent, DropPane, QClause, TemporalFilterSettings) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -164,9 +165,15 @@ function(declare, lang, array, djDate, stamp, domConstruct, template, i18n,
           }
         });
       }
-
+      
+      var w = 150; // 350
+      var pos = domGeometry.position(this.dropPane.domNode);
+      console.warn("pos",pos.w,pos);
+      if (pos.w > 150) {
+        w = (pos.w - 25);
+      }
       var margin = {top: 10, right: 20, bottom: 80, left: 40};
-      var width = 350 - margin.left - margin.right;
+      var width = w - margin.left - margin.right;
       var height = 70;
       var x = d3.time.scale().range([0, width]);
       var y = d3.scale.linear().range([height, 0]);
