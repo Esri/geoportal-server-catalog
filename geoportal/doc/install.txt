@@ -15,18 +15,41 @@ Deploy geoportal.war to Tomcat then
   - Perform additional configuration as necessary (see below)
   
 ----------------------------------------------------------------------------------------------  
+
 Main configuration file
+
 [Tomcat8]/webapps/geoportal/WEB-INF/classes/config/app-context.xml
 
-*** Set the cluster and node name(s) for Elasticsearch cluster, e.g.:
+Set the cluster and node name(s) for Elasticsearch cluster. 
+By default, Geoportal is configured to look on the localhost for a cluster named elasticsearch. 
+
+  <beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContext">
+    <beans:property name="clusterName" value="${es_cluster:elasticsearch}" />
+    <beans:property name="nodes">
+      <!-- The list of host names within the Elasticsearch cluster, one value element per host -->
+      <beans:list>
+        <beans:value>${es_node:localhost}</beans:value>
+      </beans:list>
+    </beans:property>
+  </beans:bean>  
+
+If you have a cluster with multiple nodes, you can define it in one of two ways:
+
+1. Add the following to [Tomcat8]/conf/catalina.properties, es_node is a comma separated list.      
+
+# Geoportal
+es_cluster=myclustername
+es_node=host1,host2
+    
+2. OR, update app-context.xml  
   <beans:bean id="elasticContext" class="com.esri.geoportal.db.elastic.ElasticContext">
-    <beans:property name="clusterName" value="elasticsearch" />
+    <beans:property name="clusterName" value="myclustername" />
     <beans:property name="nodes">
         <beans:value>host1</beans:value>
         <beans:value>host2</beans:value>
       </beans:list>
     </beans:property>
-  </beans:bean>  
+  </beans:bean> 
 
 
 Security configuration
@@ -44,10 +67,3 @@ Contains the Elasticsearch mappings for the "metadata" index, used
 when Geoportal auto-creates the "metadata" index.
 Whenever you create a "metadata" index within Elasticsearch, you'll 
 need to include these mappings within your request "PUT" request.
-
-
-
-
-
-
-
