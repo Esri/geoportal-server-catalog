@@ -37,6 +37,7 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
     allowSettings: null,
     field: null,
     toField: null,
+    fieldsOperator: "must",
     nestedPath: null,
     interval: "year", // year, quarter, month, week, day, hour, minute, second
     useUTC: true,
@@ -62,6 +63,7 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
         label: this.label,
         field: this.field,
         toField: this.toField,
+        fieldsOperator: this.fieldsOperator,
         nestedPath: this.nestedPath,
         interval: this.interval,
         useUTC: this.useUTC
@@ -325,20 +327,29 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
       
       if (from || to) {
         if (this.hasToField()) {
+          
           if (from) {
-            condition = {"gte":from};
+            //condition = {"gte":from};
+            if (to) condition = {"gte":from,"lte":to};
+            else condition = {"gte":from};
             qFrom = {"range": {}};
             qFrom.range[this.field] = condition;
             query = qFrom;
           }
           if (to) {
             condition = {"lte":to};
+            if (from) condition = {"gte":from,"lte":to};
+            else condition = {"lte":to};
             qTo = {"range": {}};
             qTo.range[this.toField] = condition;
             query = qTo;
           }
           if (from && to) {
-            query = {"bool": {"must":[qFrom,qTo]}};
+            if (this.fieldsOperator === "must") {
+              query = {"bool": {"must":[qFrom,qTo]}};
+            } else {
+              query = {"bool": {"should":[qFrom,qTo]}};
+            }
           }
           
           if (query && this.hasNestedPath()) {
@@ -348,6 +359,7 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
             }}};
             query = qNested;
           }
+          
         } else {
           if (from && to) {
             condition = {"gte":from,"lte":to};
