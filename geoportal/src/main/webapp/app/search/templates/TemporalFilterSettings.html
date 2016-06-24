@@ -23,7 +23,12 @@
     <div class="col-sm-8">
       <input id="${id}_toField" type="text" class="form-control g-input-text" 
         placeholder="${i18n.search.temporalFilter.settings.toFieldPlaceholder}"
-        data-dojo-attach-point="toFieldInput" >
+        data-dojo-attach-point="toFieldInput" 
+        style="display:inline-block;width:75%">
+      <input id="${id}_chkMust" type="checkbox" style="margin-top:10px;margin-left:10px"
+        data-dojo-attach-point="mustCheckbox" >
+      <label for="${id}_chkMust" class="control-label"
+        >${i18n.search.temporalFilter.settings.mustOperator}</label>
     </div>
   </div>
   <div class="form-group form-group-sm">
@@ -54,9 +59,9 @@
   <div class="form-group form-group-sm">
     <div class="col-sm-3"></div>
     <div class="col-sm-8">
-      <input id="${id}_check1" type="checkbox" style="margin-top:10px;"
+      <input id="${id}_chkUTC" type="checkbox" style="margin-top:10px;"
         data-dojo-attach-point="utcCheckbox" >
-      <label for="${id}_check1" class="control-label"
+      <label for="${id}_chkUTC" class="control-label"
         >${i18n.search.temporalFilter.settings.useUTC}</label>
     </div>
   </div>

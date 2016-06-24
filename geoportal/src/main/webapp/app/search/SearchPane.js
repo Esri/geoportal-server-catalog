@@ -149,11 +149,16 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
           });
         }
       }).otherwise(function(error){
-        console.warn("search-error");
-        console.warn(error);
-        array.forEach(components,function(component){
-          component.processError(error);
-        });
+        if (!dfd.isCanceled()) {
+          if (error && error.dojoType && error.dojoType === "cancel") {
+          } else {
+            console.warn("search-error");
+            console.warn(error);
+            array.forEach(components,function(component){
+              component.processError(error);
+            });            
+          }
+        }
       });
       return dfd;
     }

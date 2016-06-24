@@ -102,6 +102,7 @@ define({
           fieldPlaceholder: "",
           toField: "End Date Field",
           toFieldPlaceholder: "",
+          mustOperator: "Within",
           nestedPath: "Nested Path",
           nestedPathPlaceholder: "",
           interval: "Interval",

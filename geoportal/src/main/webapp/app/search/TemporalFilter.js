@@ -16,6 +16,7 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
         "dojo/date",
+        "dojo/date/locale",
         "dojo/date/stamp",
         "dojo/dom-construct",
         "dojo/dom-geometry",
@@ -25,7 +26,7 @@ define(["dojo/_base/declare",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/TemporalFilterSettings"], 
-function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
+function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
     template, i18n, SearchComponent, DropPane, QClause, TemporalFilterSettings) {
   
   var oThisClass = declare([SearchComponent], {
@@ -36,6 +37,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
     allowSettings: null,
     field: null,
     toField: null,
+    fieldsOperator: "must",
     nestedPath: null,
     interval: "year", // year, quarter, month, week, day, hour, minute, second
     useUTC: true,
@@ -61,6 +63,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
         label: this.label,
         field: this.field,
         toField: this.toField,
+        fieldsOperator: this.fieldsOperator,
         nestedPath: this.nestedPath,
         interval: this.interval,
         useUTC: this.useUTC
@@ -113,12 +116,26 @@ function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
       return stamp.toISOString(date,options);
     },
     
+    formatDate2: function(date) {
+      if (!date) return "";
+      var options = {zulu:this.useUTC};
+      var v, interval = this.interval, fmt = null;
+      if (interval === "year") {
+        return stamp.toISOString(date,options).substring(0,4);
+      } else if (interval === "quarter" || interval === "month") {
+        return stamp.toISOString(date,options).substring(0,7);
+      } else if (interval === "week" || interval === "day") {
+        return stamp.toISOString(date,options).substring(0,10);
+      }
+      return stamp.toISOString(date,options);
+    },
+    
     formatDateRange: function(fromDate,toDate,forSearchLink) {
       var v = "", rangePattern;
       if (fromDate || toDate) {
         rangePattern = i18n.search.temporalFilter.rangePattern;
-        v = rangePattern.replace("{from}",this.formatDate(fromDate));
-        v = v.replace("{to}",this.formatDate(toDate));
+        v = rangePattern.replace("{from}",this.formatDate2(fromDate));
+        v = v.replace("{to}",this.formatDate2(toDate));
       }
       return v;
     },
@@ -144,7 +161,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
       
       var countPattern = i18n.search.temporalFilter.countPattern;
       var fmtTip = function(d) {
-        var s1 = self.formatDate(d.date);
+        var s1 = self.formatDate2(d.date);
         var s2 = countPattern.replace("{count}",d.count);
         return s1+"<br>"+s2;
       };
@@ -310,20 +327,29 @@ function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
       
       if (from || to) {
         if (this.hasToField()) {
+          
           if (from) {
-            condition = {"gte":from};
+            //condition = {"gte":from};
+            if (to) condition = {"gte":from,"lte":to};
+            else condition = {"gte":from};
             qFrom = {"range": {}};
             qFrom.range[this.field] = condition;
             query = qFrom;
           }
           if (to) {
             condition = {"lte":to};
+            if (from) condition = {"gte":from,"lte":to};
+            else condition = {"lte":to};
             qTo = {"range": {}};
             qTo.range[this.toField] = condition;
             query = qTo;
           }
           if (from && to) {
-            query = {"bool": {"must":[qFrom,qTo]}};
+            if (this.fieldsOperator === "must") {
+              query = {"bool": {"must":[qFrom,qTo]}};
+            } else {
+              query = {"bool": {"should":[qFrom,qTo]}};
+            }
           }
           
           if (query && this.hasNestedPath()) {
@@ -333,6 +359,7 @@ function(declare, lang, array, djDate, stamp, domConstruct, domGeometry,
             }}};
             query = qNested;
           }
+          
         } else {
           if (from && to) {
             condition = {"gte":from,"lte":to};

@@ -43,6 +43,7 @@ function(declare, lang, SearchComponentSettings, template, i18n) {
       this.nestedPathInput.value = settings.nestedPath;
       $(this.intervalSelect).val(settings.interval);
       this.utcCheckbox.checked = settings.useUTC;
+      this.mustCheckbox.checked = (settings.fieldsOperator === "must");
     },
     
     reset: function() {
@@ -64,6 +65,8 @@ function(declare, lang, SearchComponentSettings, template, i18n) {
       this.targetWidget.nestedPath = chkInput(this.nestedPathInput,null);
       this.targetWidget.interval = $(this.intervalSelect).val();
       this.targetWidget.useUTC = !!this.utcCheckbox.checked;
+      if (this.mustCheckbox.checked) this.targetWidget.fieldsOperator = "must";
+      else this.targetWidget.fieldsOperator = "should";
       
       this.targetWidget.dropPane.set("title",this.targetWidget.label);
       $(this.targetWidget.intervalSelect).val(this.targetWidget.interval);
