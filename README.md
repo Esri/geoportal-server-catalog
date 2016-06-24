@@ -9,6 +9,7 @@ This repository thus contains the catalog capability of Geoportal Server, while 
 
 
 ## Features
+* Metadata editor - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE (Data), INSPIRE (Service), GEMINI (Data), GEMINI (Service)
 * Faceted Search - Configure different facets to allow your user to filter from the hay stack to the needle
 * Scalability - Thank you elasticsearch for providing multi-node configuration support
 * OGC CSW 3.0.0 - Standards compliant catalog service interface
