@@ -4,7 +4,9 @@ As part of the evolution of Geoportal Server, the catalog capability has been se
 This repository thus contains the catalog capability of Geoportal Server, while it's sibling [geoportal-server-harvester](https://github.com/ArcGIS/geoportal-server-harvester) is the new harvester of Geoportal Server.
 
 ## Releases and Downloads
-- 2.0.0 - Initial release of geoportal-server-catalog. Click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
+- 2.0.1 - released June 24, 2016, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
+- 2.0.0 - released May 5, 2016, initial release of geoportal-server-catalog. Click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
+
 
 ## Features
 * Faceted Search - Configure different facets to allow your user to filter from the hay stack to the needle
@@ -16,11 +18,11 @@ This repository thus contains the catalog capability of Geoportal Server, while 
 
 ## Requirements
 
-* Elasticsearch 2.3.1 or higher
+* Elasticsearch 2.3.3 or higher
 * Tomcat 8
 
 ## Installation
-- See the [installation instructions](https://github.com/Esri/geoportal-server-catalog/wiki/Installing-Geoportal-Server-2.0.0) on the wiki.
+- See the [installation instructions](https://github.com/Esri/geoportal-server-catalog/wiki/Installation) on the wiki.
 
 ## Issues
 
