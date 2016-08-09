@@ -34,7 +34,7 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"fileid","gmd:fileIdentifier/gco:CharacterString");
     G.evalProp(task,item,iden,"title","gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString");
     G.evalProp(task,item,iden,"description","gmd:abstract/gco:CharacterString");
-    G.evalProps(task,item,root,"keywords_s","//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString");
+    G.evalProps(task,item,root,"keywords_s","//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gmx:Anchor");
     G.evalProps(task,item,root,"links_s","//gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
     G.evalProp(task,item,iden,"thumbnail_s","gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString");
     G.evalProps(task,item,root,"contact_organizations_s","//gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString");
@@ -50,7 +50,7 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"apiso_OrganizationName_txt","gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString");
 
     /* subject */
-    G.evalProps(task,item,root,"apiso_Subject_txt","//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString");
+    G.evalProps(task,item,root,"apiso_Subject_txt","//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gmx:Anchor");
     G.evalProps(task,item,root,"apiso_Format_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat/gmd:MD_Format/name/gco:CharacterString");
     G.evalProps(task,item,root,"apiso_TopicCategory_s","//gmd:MD_TopicCategoryCode");
     G.evalProps(task,item,root,"apiso_KeywordType_s","//gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:type/gmd:MD_KeywordTypeCode/@codeListValue");
