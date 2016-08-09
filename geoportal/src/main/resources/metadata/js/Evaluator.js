@@ -74,9 +74,14 @@ G._initializeTask = function(mdoc) {
   nsmap.put("gmd","http://www.isotc211.org/2005/gmd");
   nsmap.put("gmi","http://www.isotc211.org/2005/gmi");
   nsmap.put("gco","http://www.isotc211.org/2005/gco");
+
   nsmap.put("gml","http://www.opengis.net/gml");
   nsmap.put("gml32","http://www.opengis.net/gml/3.2");
   nsmap.put("srv","http://www.isotc211.org/2005/srv");
+  nsmap.put("gmx","http://www.isotc211.org/2005/gmx");
+  nsmap.put("gsr","http://www.isotc211.org/2005/gsr");
+  nsmap.put("gss","http://www.isotc211.org/2005/gss");
+  nsmap.put("gts","http://www.isotc211.org/2005/gts");
   nsmap.put("xlink","http://www.w3.org/1999/xlink");
   nsmap.put("rdf","http://www.w3.org/1999/02/22-rdf-syntax-ns#");
   nsmap.put("dc","http://purl.org/dc/elements/1.1/");
