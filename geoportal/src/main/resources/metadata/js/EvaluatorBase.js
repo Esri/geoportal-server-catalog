@@ -60,7 +60,7 @@ var G = {
     var ok = false;
     for (var k in data) {
       if (data.hasOwnProperty(k)) {
-        if (data[k] !== null) {
+        if (data[k] !== null && !data[k].startsWith("9999")) {
           ok = true;
           break;
         }
