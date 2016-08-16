@@ -50,17 +50,21 @@ var G = {
       }
     }
     if (params.begin) {
-      data["begin_dt"] = this.DateUtil.checkIsoDateTime(params.begin.date,false);
+      if (typeof params.begin.date === "string" && !params.begin.date.startsWith("9999")) {
+        data["begin_dt"] = this.DateUtil.checkIsoDateTime(params.begin.date,false);
+      }
       data["begin_indeterminate_s"] = this.Val.chkStr(params.begin.indeterminate,null);
     }
     if (params.end) {
-      data["end_dt"] = this.DateUtil.checkIsoDateTime(params.end.date,true);
+      if (typeof params.end.date === "string" && !params.end.date.startsWith("9999")) {
+        data["end_dt"] = this.DateUtil.checkIsoDateTime(params.end.date,true);
+      }
       data["end_indeterminate_s"] = this.Val.chkStr(params.end.indeterminate,null);
     }
     var ok = false;
     for (var k in data) {
       if (data.hasOwnProperty(k)) {
-        if (data[k] !== null) {
+        if (data[k] !== null ) {
           ok = true;
           break;
         }
