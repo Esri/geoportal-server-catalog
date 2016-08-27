@@ -142,6 +142,8 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent, Dr
       else this.myContentNode.style.display = "none";
       if (hasViewable) this.clearAllNode.style.visibility = "visible";
       else this.clearAllNode.style.visibility = "hidden";
+      if ( hasViewable && !this.dropPane.open) this.dropPane.toggle();
+      if ( !hasViewable && this.dropPane.open) this.dropPane.toggle();
     }
     
   });
