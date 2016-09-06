@@ -29,6 +29,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent, Dr
     templateString: template,
     
     allowMyContent: true,
+    autoExpand: true,
     label: i18n.search.appliedFilters.label,
     open: false,
     
@@ -94,7 +95,18 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent, Dr
         component.activeQClauses = aClauses;
       });
       this.destroyEntries();
+      if (this.autoExpand) {
+        this.dropPane.set("open",false);
+      }
       this.search();
+    },
+    
+    count: function() {
+      var n = 0;
+      array.forEach(this.dropPane.getChildren(),function(child){
+        if (child.isAppliedFilter) n++;
+      });
+      return n;
     },
     
     destroyEntries: function() {
@@ -119,6 +131,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent, Dr
     },
     
     processResults: function(searchResponse) {
+      var prevCount = this.count();
       this.destroyEntries();
       if (!this.searchPane) return;
       var hasRemovable = false, hasViewable = false;
@@ -142,6 +155,15 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent, Dr
       else this.myContentNode.style.display = "none";
       if (hasViewable) this.clearAllNode.style.visibility = "visible";
       else this.clearAllNode.style.visibility = "hidden";
+      
+      if (this.autoExpand) {
+        var count = this.count();
+        if (prevCount === 0 && count > 0) {
+          this.dropPane.set("open",true);
+        } else if (prevCount > 0 && count === 0) {
+          this.dropPane.set("open",false);
+        }
+      }
     }
     
   });
