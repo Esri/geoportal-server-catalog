@@ -228,14 +228,40 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
         "esri/dijit/metadata/editor/util/LoadDocumentPane",
         "esri/dijit/metadata/editor/PrimaryToolbar",
         "esri/dijit/metadata/context/DescriptorMixin",
+        "esri/dijit/metadata/types/inspire/srv/ServiceCategoryOptions",
         "dojo/i18n!esri/dijit/metadata/nls/i18nBase",
         "dojo/i18n!esri/dijit/metadata/nls/i18nArcGIS",
         "dojo/i18n!esri/dijit/metadata/nls/i18nFgdc",
         "dojo/i18n!esri/dijit/metadata/nls/i18nIso",
         "dojo/i18n!esri/dijit/metadata/nls/i18nInspire",
         "dojo/i18n!esri/dijit/metadata/nls/i18nGemini"],
-      function(LoadDocumentPane, PrimaryToolbar, DescriptorMixin,
+      function(LoadDocumentPane, PrimaryToolbar, DescriptorMixin, ServiceCategoryOptions,
         i18nBase, i18nArcGIS, i18nFgdc, i18nIso, i18nInspire, i18nGemini){
+        
+        if (!ServiceCategoryOptions.prototype.xtnWasExtended) {
+          lang.extend(ServiceCategoryOptions, {
+            xtnWasExtended: true,
+            _isGxeOption: false,
+            _isGxeOptions: true,
+            fetchOptionWidgets: function() {
+              var deferred = new Deferred();
+              var optionsWidget = null, optionWidgets = [];
+              array.forEach(this.getChildren(), function(widget) {
+                if(widget._isGxeOptions) {
+                  optionsWidget = widget;
+                } else if(widget._isGxeOption) {
+                  optionWidgets.push(widget);
+                }
+              });
+              if(optionsWidget === null) {
+                deferred.resolve(optionWidgets);
+                return deferred;
+              } else {
+                return optionsWidget.fetchOptionWidgets();
+              }
+            }
+          });
+        }
         
         if (!DescriptorMixin.prototype.xtnWasExtended) {
           //console.warn("Extending DescriptorMixin...",DescriptorMixin);
