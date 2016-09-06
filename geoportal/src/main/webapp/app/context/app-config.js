@@ -4,7 +4,8 @@ define([],function(){var obj={
   allowBulkChangeOwner: true,
   
   search: {
-    allowSettings: true
+    allowSettings: true,
+    useSimpleQueryString: true
   },
   
   searchMap: {

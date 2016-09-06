@@ -28,10 +28,11 @@ function(declare, lang, on, keys, domClass,
 
     i18n: i18n,
     templateString: template,
+    
+    useSimpleQueryString: null,
 
     postCreate: function() {
       this.inherited(arguments);
-      
       this.own(on(this.searchTextBox,"keyup",lang.hitch(this,function(evt) {
         if (evt.keyCode === keys.ENTER) this.search();
       })));
@@ -44,10 +45,21 @@ function(declare, lang, on, keys, domClass,
       if (v !== null && lang.trim(v).length > 0) {
         var tipPattern = i18n.search.appliedFilters.tipPattern;
         var tip = tipPattern.replace("{type}",i18n.search.searchBox.search).replace("{value}",v);
-        var query = {"query_string": {
-          "analyze_wildcard": true,
-          "query": v
-        }};
+        var query = null, useSimpleQueryString = this.useSimpleQueryString;
+        if (typeof useSimpleQueryString === "undefined" || useSimpleQueryString === null) {
+          useSimpleQueryString = AppContext.appConfig.search.useSimpleQueryString;
+        }
+        if (useSimpleQueryString) {
+          query = {"simple_query_string": {
+            "analyze_wildcard": true,
+            "query": v
+          }};
+        } else {
+          query = {"query_string": {
+            "analyze_wildcard": true,
+            "query": v
+          }};
+        }
         var qClause = new QClause({
           label: v,
           tip: tip,
