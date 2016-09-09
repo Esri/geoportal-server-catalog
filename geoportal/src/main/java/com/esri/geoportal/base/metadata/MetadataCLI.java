@@ -45,14 +45,14 @@ public class MetadataCLI{
                 .desc("HELP")
                 .build();
 
-        Option metadataJsDir =
-                Option.builder("js")
-                        .required(true)
-                        .hasArg()
-                        .longOpt("jsdir")
-                        .desc("Base metadata javascript directory")
-                      //  .type(File.class)  // test if this is a directory
-                        .build();
+//        Option metadataJsDir =
+//                Option.builder("js")
+//                        .required(true)
+//                        .hasArg()
+//                        .longOpt("jsdir")
+//                        .desc("Base metadata javascript directory")
+//                      //  .type(File.class)  // test if this is a directory
+//                        .build();
         ;
         /* not needed.
         js read from classpath,
@@ -61,14 +61,14 @@ public class MetadataCLI{
         TODO: test if this works in/on a jar, if not might need to test if
         running in a jar, and set appropriate resource location
          */
-//        Option metadataFile =
-//                Option.builder("md")
-//                        .required(true)
-//                        .hasArg()
-//                        .longOpt("metdatafile")
-//                        .desc("Metadata File")
-//                       // .type(File.class)
-//                        .build();
+        Option metadataFile =
+                Option.builder("md")
+                        .required(true)
+                        .hasArg()
+                        .longOpt("metdatafile")
+                        .desc("Metadata File")
+                       // .type(File.class)
+                        .build();
         ;
         Option quiet = Option.builder("q")
                 .required(false)
@@ -83,8 +83,8 @@ public class MetadataCLI{
 
         Options options = new Options();
         options.addOption(help);
-        options.addOption(metadataJsDir);
-       // options.addOption(metadataFile);
+        //options.addOption(metadataJsDir);
+        options.addOption(metadataFile);
         options.addOption(quiet);
         options.addOption(verbose);
         ;
@@ -97,10 +97,11 @@ public class MetadataCLI{
            // File md = (File)line.getParsedOptionValue("md");
             String mds= line.getOptionValue("md");
             File md = new File(mds);
-            String jss = line.getOptionValue("js");
-            File js = new File(jss);
+            //String jss = line.getOptionValue("js");
+           // File js = new File(jss);
+            File js = null;
             if (!md.isFile()) System.err.println("Md Metadata must be a file");
-            if (!js.isDirectory()) System.err.println("js must be a directory");
+           // if (!js.isDirectory()) System.err.println("js must be a directory");
             testScriptEvaluator(js,md);
         } catch (ParseException exp) {
             // oops, something went wrong
@@ -122,7 +123,7 @@ public class MetadataCLI{
 
         Evaluator jsEvaluator = new Evaluator();
         // add all files from directory
-        File[] files =  metadataPath.listFiles();
+        //File[] files =  metadataPath.listFiles();
         //String jsPath = metadataPath.getPath() + "metadata/js/Evaluator.js";
 
         String jsPath ="metadata/js/Evaluator.js";
