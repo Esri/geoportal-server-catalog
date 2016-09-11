@@ -1,3 +1,17 @@
+/* See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * Esri Inc. licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 package com.esri.geoportal.base.metadata;
 
 import com.esri.geoportal.base.xml.XmlUtil;
@@ -34,6 +48,7 @@ public class MetadataCLI{
      * elastic search json document. Other steps, such as itemID are found in {@link com.esri.geoportal.lib.elastic.request.PublishMetadataRequest#prePublish(ElasticContext, AccessUtil, AppResponse, MetadataDocument)} </p>
      *
      *<p><b>Note:</b> mainly tested in JetBrains Intellij</p>
+     *  <p><b>Note:</b> mvn command line call is in contrib</p>
      *
      * @author David Valentine
      *
@@ -70,13 +85,10 @@ public class MetadataCLI{
                        // .type(File.class)
                         .build();
         ;
-        Option quiet = Option.builder("q")
-                .required(false)
-                .longOpt("quiet")
-                .build();
-        ;
+
         Option verbose = Option.builder("v")
                 .required(false)
+
                 .longOpt("verboase")
                 .build();
         ;
@@ -85,7 +97,7 @@ public class MetadataCLI{
         options.addOption(help);
         //options.addOption(metadataJsDir);
         options.addOption(metadataFile);
-        options.addOption(quiet);
+;
         options.addOption(verbose);
         ;
         // create the parser
@@ -93,16 +105,15 @@ public class MetadataCLI{
         try {
             // parse the command line arguments
             CommandLine line = parser.parse(options, args);
-            //File js = (File)line.getParsedOptionValue("js");
-           // File md = (File)line.getParsedOptionValue("md");
+            Boolean v = line.hasOption("v");
+
+
             String mds= line.getOptionValue("md");
             File md = new File(mds);
-            //String jss = line.getOptionValue("js");
-           // File js = new File(jss);
-            File js = null;
+
             if (!md.isFile()) System.err.println("Md Metadata must be a file");
-           // if (!js.isDirectory()) System.err.println("js must be a directory");
-            testScriptEvaluator(js,md);
+
+            testScriptEvaluator(md,v);
         } catch (ParseException exp) {
             // oops, something went wrong
             System.err.println("Parsing failed.  Reason: " + exp.getMessage());
@@ -111,7 +122,7 @@ public class MetadataCLI{
         }
 
     }
-    public static void testScriptEvaluator(File metadataPath, File metadata) throws Exception {
+    public static void testScriptEvaluator( File metadata, Boolean verbose) throws Exception {
         ObjectMapper mapper = new ObjectMapper();
         AppUser user = null;
         boolean pretty = true;
@@ -119,7 +130,7 @@ public class MetadataCLI{
         String xml = XmlUtil.readFile(p.getAbsolutePath());
         MetadataDocument mdoc = new MetadataDocument();
         mdoc.setXml(xml);
-        //mdoc.interrogate();
+
 
         Evaluator jsEvaluator = new Evaluator();
         // add all files from directory
@@ -129,19 +140,19 @@ public class MetadataCLI{
         String jsPath ="metadata/js/Evaluator.js";
         jsEvaluator.setJavascriptFile(jsPath);
         //jsEvaluator.setJavascriptFile(metadataPath.getPath() + "IsoEvaluator.js");
-        //jsEvaluator.setJavascriptFile("metadata/js/Evaluator.js");
-        //jsEvaluator.setJavascriptFile("metadata/js/IsoEvaluator.js");
+
         jsEvaluator.interrogate(mdoc);
         System.err.println("typeKey="+mdoc.getMetadataType().getKey());
-        System.err.println("detailsXslt=" + jsEvaluator.getDetailsXslt("iso19115"));
+        System.err.println("detailsXslt=" + jsEvaluator.getDetailsXslt(mdoc.getMetadataType().getKey()));
         jsEvaluator.evaluate(mdoc);
         System.err.println("title="+mdoc.getTitle());
-        System.err.println("xml="+mdoc.getXml());
+        if (verbose) {
+            System.err.println("xml=" + mdoc.getXml());
+        }
         Object json = mapper.readValue(mdoc.getEvaluatedJson(), Object.class);
         String indented = mapper.writerWithDefaultPrettyPrinter().writeValueAsString(json);
         System.err.println("evaluatedjson="+indented);
-        //jsEvaluator.evaluate(mdoc);
-        //jsEvaluator.evaluate(mdoc);
+
 
     }
 }
