@@ -31,5 +31,26 @@
 			</beans:list>
 		</beans:property>
 	</beans:bean>
+	
+	<!-- 
+	  The url documenting the rest api has the following pattern:
+	  http://localhost:8080/geoportal/swagger-ui/index.html?url=/geoportal/rest/swagger.json
+	  Comment out the section below to disable the api documentation.
+	 -->
+	<beans:bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
+		<beans:property name="version" value="2.0.2" />
+		<beans:property name="schemes" value="http" />
+		<beans:property name="host" value="localhost:8080" />
+		<beans:property name="basePath" value="/geoportal/rest"/>
+		<beans:property name="resourcePackage" value="com.esri.geoportal.service.rest"/>
+		<beans:property name="prettyPrint" value="true"/>
+		<beans:property name="usePathBasedConfig" value="false"/>
+		<beans:property name="title" value="Esri Geoportal Server"/>
+		<beans:property name="description" value="https://github.com/Esri/geoportal-server-catalog"/>
+		<beans:property name="contact" value="portal@esri.com"/>
+		<beans:property name="license" value="Apache 2.0"/>
+		<beans:property name="licenseUrl" value="http://www.apache.org/licenses/LICENSE-2.0.html"/>
+		<beans:property name="scan" value="true"/>
+	</beans:bean>
  
 </beans:beans>

@@ -19,6 +19,10 @@ import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.GET;
@@ -32,12 +36,14 @@ import javax.ws.rs.core.SecurityContext;
  * Handles /rest/geoportal requests.
  */
 @Path("/geoportal")
+@Api
 public class GeoportalService {
 
-  @GET 
+  @GET
+  @ApiOperation(value="Provides information on the Geoportal application itself.")
   public Response getSelf(
       @Context SecurityContext sc,
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value="for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return self(user,pretty);
   }

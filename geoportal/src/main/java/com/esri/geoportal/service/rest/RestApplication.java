@@ -24,13 +24,20 @@ import javax.ws.rs.core.Application;
  */
 @ApplicationPath("rest")
 public class RestApplication extends Application {
+  
+  /** Constructor. */
+  public RestApplication() {
+    super();
+  }
 
   @Override
   public Set<Class<?>> getClasses() {
-    Set<Class<?>> s = new HashSet<Class<?>>();
-    s.add(GeoportalService.class);
-    s.add(MetadataService.class);
-    return s;
+    Set<Class<?>> resources = new HashSet<Class<?>>();
+    resources.add(GeoportalService.class);
+    resources.add(MetadataService.class);
+    resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
+    resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+    return resources;
   }
 
 }

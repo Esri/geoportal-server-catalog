@@ -26,6 +26,11 @@ import com.esri.geoportal.lib.elastic.request.RealiasRequest;
 import com.esri.geoportal.lib.elastic.request.ReindexRequest;
 import com.esri.geoportal.lib.elastic.request.SearchRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
+
+import io.swagger.annotations.Api;
+import io.swagger.annotations.ApiOperation;
+import io.swagger.annotations.ApiParam;
+
 import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
 
 import javax.servlet.http.HttpServletRequest;
@@ -45,15 +50,17 @@ import javax.ws.rs.core.SecurityContext;
  * Handles /rest/metadata/* requests.
  */
 @Path("/metadata")
+@Api
 public class MetadataService {
   
   @PUT
   @Path("/bulk/changeOwner")
+  @ApiOperation(value="Transfers ownership of all documents owned by a user.")
   public Response bulkChangeOwner(
       @Context SecurityContext sc,
-      @QueryParam("owner") String owner, 
-      @QueryParam("newOwner") String newOwner, 
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value="the current owner",required=true) @QueryParam("owner") String owner, 
+      @ApiParam(value="the new owner",required=true) @QueryParam("newOwner") String newOwner, 
+      @ApiParam(value="for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     try {
       BulkChangeOwnerRequest request = GeoportalContext.getInstance().getBeanIfDeclared(
@@ -69,22 +76,25 @@ public class MetadataService {
   
   @DELETE 
   @Path("/item/{id}")
+  @ApiOperation(value="Delete the item associated with the supplied identifier.",
+    notes="Only the item owner (or an Admin) can delete an item.")
   public Response delete(
       @Context SecurityContext sc,
-      @PathParam("id") String id, 
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value="the item id",required=true) @PathParam("id") String id, 
+      @ApiParam(value="for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return this.deleteItem(user,pretty,id);
   }
   
   @GET 
   @Path("/item/{id}")
+  @ApiOperation(value="Gets the item associated with the supplied identifier.")
   public Response get(
       @Context SecurityContext sc,
-      @PathParam("id") String id,
-      @QueryParam("pretty") boolean pretty,
+      @ApiParam(value="the item id",required=true) @PathParam("id") String id,
+      @ApiParam(value="for an indented response") @QueryParam("pretty") boolean pretty,
       @QueryParam("f") String f,
-      @QueryParam("includeMetadata") String incl) {
+      @ApiParam(value="true if metadata xml should be included as a json property") @QueryParam("includeMetadata") String incl) {
     //System.err.println("MetadataService.getItem");
     //boolean inclIsFalse = (incl != null && incl.equalsIgnoreCase("false"));
     //boolean includeMetadata = !inclIsFalse;
@@ -98,7 +108,7 @@ public class MetadataService {
   @Path("/item/{id}/xml")
   public Response getXml(
       @Context SecurityContext sc,
-      @PathParam("id") String id) {
+      @ApiParam(value = "the item id") @PathParam("id") String id) {
     AppUser user = new AppUser(sc);
     return this.getMetadata(user,id);
   }
@@ -107,7 +117,7 @@ public class MetadataService {
   @Path("/item/{id}/html")
   public Response getHtml(
       @Context SecurityContext sc,
-      @PathParam("id") String id) {
+      @ApiParam(value = "the item id") @PathParam("id") String id) {
     AppUser user = new AppUser(sc);
     boolean pretty = false;
     return this.transformMetadata(user,pretty,true,id,null,null);
@@ -118,7 +128,7 @@ public class MetadataService {
   public Response put(
       String body,
       @Context SecurityContext sc,
-      @QueryParam("pretty") boolean pretty,
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty,
       @QueryParam("async") boolean async) {
     //System.err.println("request-count="+requestCount.getAndIncrement()+" ...");
     AppUser user = new AppUser(sc);
@@ -138,8 +148,8 @@ public class MetadataService {
   public Response putWithId(
       String body,
       @Context SecurityContext sc,
-      @PathParam("id") String id, 
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value = "the item id") @PathParam("id") String id, 
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return this.publishMetadata(user,pretty,id,body);
   }
@@ -150,7 +160,7 @@ public class MetadataService {
       @Context SecurityContext sc,
       @PathParam("id") String id, 
       @PathParam("newOwner") String newOwner, 
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return this.changeOwner(user,pretty,id,newOwner);
   }
@@ -160,7 +170,7 @@ public class MetadataService {
   public Response realiasUsingGet(
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty,
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty,
       @QueryParam("indexName") String indexName) {
     AppUser user = new AppUser(sc);
     return this.realias(user,pretty,indexName);
@@ -171,7 +181,7 @@ public class MetadataService {
   public Response reindexUsingGet(
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty,
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty,
       @QueryParam("fromIndexName") String fromIndexName,
       @QueryParam("toIndexName") String toIndexName,
       @QueryParam("fromVersionCue") String fromVersionCue) {
@@ -184,7 +194,7 @@ public class MetadataService {
   public Response searchUsingGet(
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     String body = null;
     return this.search(user,pretty,hsr,body);
@@ -196,7 +206,7 @@ public class MetadataService {
       String body,
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return this.search(user,pretty,hsr,body);
   }
@@ -228,7 +238,7 @@ public class MetadataService {
   public Response validateUsingPost(
       String xml,
       @Context SecurityContext sc,
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return this.validateMetadata(user,pretty,xml);
   }
@@ -238,7 +248,7 @@ public class MetadataService {
   public Response validateUsingPut(
       String xml,
       @Context SecurityContext sc,
-      @QueryParam("pretty") boolean pretty) {
+      @ApiParam(value = "for an indented response") @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return this.validateMetadata(user,pretty,xml);
   }
