@@ -36,7 +36,7 @@ import javax.ws.rs.core.SecurityContext;
  * Handles /rest/geoportal requests.
  */
 @Path("/geoportal")
-@Api
+@Api(value="/rest")
 public class GeoportalService {
 
   @GET

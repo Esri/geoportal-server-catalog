@@ -10,6 +10,6 @@
  
   <mvc:annotation-driven />
   <mvc:default-servlet-handler />
-  <mvc:resources mapping="/swagger-ui/**" location="classpath:/META-INF/resources/webjars/swagger-ui/2.1.4/"/>
+  <mvc:resources mapping="/swagger-ui/**" location="classpath:/META-INF/resources/webjars/swagger-ui/2.2.2/"/>
     
 </beans:beans>

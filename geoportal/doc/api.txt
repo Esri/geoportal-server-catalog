@@ -123,14 +123,14 @@ Optional Query Parameters:
   pretty - boolean for formatted json or xml (default=false)
 Example: http://localhost:8080/geoportal/rest/metadata/search?q=*:*
   
-HTTP POST/PUT geoportal/rest/metadata/transform
+HTTP POST geoportal/rest/metadata/transform
 Transform an xml document.
 Request Content Type: application/xml
 Response Content Type: varies
 Required Query Parameters:
   xslt - the name of the xslt
 
-HTTP POST/PUT geoportal/rest/metadata/validate
+HTTP POST geoportal/rest/metadata/validate
 Validate a metadata document.
 Request Content Type: application/xml
 Response Content Type: application/json

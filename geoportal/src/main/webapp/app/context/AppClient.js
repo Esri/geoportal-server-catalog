@@ -76,7 +76,7 @@ function(declare, lang, Deferred, dojoRequest) {
         username: username,
         password: password
       };
-      var info = {handleAs:"json",data:content};
+      var info = {handleAs:"json",data:content,headers:{Accept:"application/json"}};
       return dojoRequest.post(url,info);
     },
 

@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 package com.esri.geoportal.service.rest;
+import com.esri.geoportal.context.GeoportalContext;
 import java.util.HashSet;
 import java.util.Set;
-
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.core.Application;
 
@@ -35,8 +35,15 @@ public class RestApplication extends Application {
     Set<Class<?>> resources = new HashSet<Class<?>>();
     resources.add(GeoportalService.class);
     resources.add(MetadataService.class);
-    resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-    resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class);
+    
+    if (GeoportalContext.getInstance().getBeanIfDeclared("swaggerConfig") != null) {
+      try {
+        resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
+        resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class); 
+      } catch(Exception ex) {
+        ex.printStackTrace();
+      }
+    }
     return resources;
   }
 
