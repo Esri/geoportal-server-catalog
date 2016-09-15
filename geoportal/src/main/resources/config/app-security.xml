@@ -16,6 +16,7 @@
   <security:http realm="Geoportal" auto-config="true">
     <security:headers>
        <security:frame-options policy="SAMEORIGIN"/>
+       <security:header name="Access-Control-Allow-Origin" value="*" />
     </security:headers>
     <security:custom-filter ref="oauthResourceFilter" before="PRE_AUTH_FILTER" />
     <security:http-basic />
