@@ -33,8 +33,10 @@
 	</beans:bean>
 	
 	<!-- 
-	  The url documenting the rest api has the following pattern:
-	  http://localhost:8080/geoportal/swagger-ui/index.html?url=/geoportal/rest/swagger.json
+	  The url documenting the rest api has the following patterns:
+	  http://localhost:8080/geoportal/swagger
+	  or
+	  http://localhost:8080/geoportal/swagger-ui/index.html?url=/geoportal/swagger/swagger.json
 	  Comment out the section below to disable the api documentation.
 	--> 
 	<beans:bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">

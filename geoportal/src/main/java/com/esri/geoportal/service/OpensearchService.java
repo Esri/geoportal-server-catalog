@@ -42,9 +42,9 @@ public class OpensearchService extends Application {
   
   @Override
   public Set<Class<?>> getClasses() {
-    Set<Class<?>> s = new HashSet<Class<?>>();
-    s.add(OpensearchService.class);
-    return s;
+    Set<Class<?>> resources = new HashSet<Class<?>>();
+    resources.add(OpensearchService.class);
+    return resources;
   }
   
   @GET
