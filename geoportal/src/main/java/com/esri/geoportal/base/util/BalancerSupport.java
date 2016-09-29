@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 package com.esri.geoportal.base.util;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -68,9 +70,24 @@ public class BalancerSupport {
     String pathInfo = request.getPathInfo();
     if (pathInfo != null) target.append(pathInfo);
     String query = request.getQueryString();
-    if (query != null) target.append("?").append(query); // TODO URLEncode?
-    String uri = URI.create(target.toString()).normalize().toString();
-    return uri;
+    if (query != null) {
+      try {
+        String lc = query.toLowerCase();
+        String lcd = URLDecoder.decode(query,"UTF-8").toLowerCase();
+        if (lc.contains("<script") && lc.contains("</script>")) return null;
+        if (lcd.contains("<script") && lcd.contains("</script>")) return null;
+      } catch (UnsupportedEncodingException e) {}
+    }
+    if (query != null) {
+      target.append("?").append(query); // request.getQueryString() is not decoded 
+    }
+    try {
+      String uri = URI.create(target.toString()).normalize().toString();
+      return uri;
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
+    return null;
   }
   
   /** A node that is part of the cluster to which requests are proxied. */
