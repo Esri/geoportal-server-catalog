@@ -14,6 +14,7 @@
  */
 package com.esri.geoportal.context;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.harvester.HarvesterContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -46,6 +47,7 @@ public class GeoportalContext implements ApplicationContextAware {
   /** Instance variables. */
   private ApplicationContext applicationContext;
   private ElasticContext elasticContext;
+  private HarvesterContext harvesterContext;
   private String version = "2.0.2";
   
   /** Constructor */
@@ -85,6 +87,22 @@ public class GeoportalContext implements ApplicationContextAware {
   /** The Elasticsearch context. */
   public void setElasticContext(ElasticContext elasticContext) {
     this.elasticContext = elasticContext;
+  }
+
+  /**
+   * Gets harvester context.
+   * @return harvester context
+   */
+  public HarvesterContext getHarvesterContext() {
+    return harvesterContext;
+  }
+
+  /**
+   * Sets harvester context.
+   * @param harvesterContext harvester context 
+   */
+  public void setHarvesterContext(HarvesterContext harvesterContext) {
+    this.harvesterContext = harvesterContext;
   }
   
   /** The version. */

@@ -15,6 +15,7 @@
 
 	<beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
 		<beans:property name="elasticContext" ref="elasticContext" />
+		<beans:property name="harvesterContext" ref="harvesterContext" />
 	</beans:bean>
 
 	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContext">
@@ -28,6 +29,15 @@
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
 				<beans:value>${es_node:localhost}</beans:value>
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<beans:bean id="harvesterContext" class="com.esri.geoportal.lib.harvester.HarvesterContext">
+		<beans:property name="nodes">
+			<!-- The list of host names within the Harvester cluster, one value element per host -->
+			<beans:list>
+				<beans:value>${harvester_node:}</beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>

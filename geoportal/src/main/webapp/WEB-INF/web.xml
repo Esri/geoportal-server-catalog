@@ -36,6 +36,20 @@
   </servlet-mapping>
 
   <servlet>
+    <servlet-name>HarvesterProxy</servlet-name>
+    <servlet-class>com.esri.geoportal.lib.harvester.HarvesterProxy</servlet-class>
+    <init-param>
+      <param-name>maxThreads</param-name>
+      <param-value>256</param-value>
+    </init-param>
+    <async-supported>true</async-supported>
+  </servlet>
+  <servlet-mapping>
+    <servlet-name>HarvesterProxy</servlet-name>
+    <url-pattern>/harvester/*</url-pattern>
+  </servlet-mapping>
+
+  <servlet>
     <servlet-name>spring</servlet-name>
     <servlet-class>org.springframework.web.servlet.DispatcherServlet</servlet-class>
     <init-param>
