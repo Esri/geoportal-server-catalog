@@ -16,32 +16,33 @@ package com.esri.geoportal.lib.harvester;
 
 import java.util.ArrayList;
 import java.util.List;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 
 /**
  * Harvester context.
  */
 public class HarvesterContext {
-
-  /** Logger. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(HarvesterContext.class);
   
   /** Instance variables */
   private List<String> nodes;
 
-  /** The node names. */
+  /** 
+   * Gets node names.
+   * @return  
+   */
   public List<String> getNodes() {
     return this.nodes;
   }
-  /** The node names. */
+  /** 
+   * Sets node names.
+   * @param nodes 
+   */
   public void setNodes(List<String> nodes) {
     this.nodes = nodes;
   }
   
   /**
    * Return an array of node names.
-   * <br/>Names are split by commas.
+   * <br>Names are split by commas.
    * @return the node names
    */
   public String[] nodesToArray() {
