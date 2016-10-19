@@ -50,9 +50,9 @@ public class CswService extends Application {
 
   @Override
   public Set<Class<?>> getClasses() {
-    Set<Class<?>> s = new HashSet<Class<?>>();
-    s.add(CswService.class);
-    return s;
+    Set<Class<?>> resources = new HashSet<Class<?>>();
+    resources.add(CswService.class);
+    return resources;
   }
 
   @GET

@@ -61,7 +61,7 @@ public class Swagger extends Application {
         String cp = hsr.getContextPath();
         String p = URLEncoder.encode(cp+"/swagger/swagger.json","UTF-8");
         URI uri = new URI(cp+"/swagger-ui/index.html?url="+p);
-        System.err.println("/swagger redirect: "+uri.toString());
+        //System.err.println("/swagger redirect: "+uri.toString());
         return Response.temporaryRedirect(uri).build();
       }
     } catch(Exception ex) {
