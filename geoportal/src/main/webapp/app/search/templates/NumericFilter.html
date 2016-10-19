@@ -1,0 +1,13 @@
+<div>
+  <div class="g-drop-pane" data-dojo-type="app/search/DropPane" 
+    data-dojo-attach-point="dropPane" data-dojo-props="title:'${label}',open:${open}">
+    <div class="g-temporal-d3" data-dojo-attach-point="svgNode"></div>
+    <div class="g-temporal-bar pull-right">
+      <a href="javascript:void(0)" class="small" 
+        title="${i18n.search.temporalFilter.searchTip}"
+        data-dojo-attach-point="brushExtentNode"
+        data-dojo-attach-event="onclick: applyBrushExtent">
+      </a>
+    </div>
+  </div>
+</div>
