@@ -93,6 +93,7 @@ G.writers.atom = {
     xmlBuilder.writer.writeNamespace("time",G.URI_TIME);
     xmlBuilder.writer.writeNamespace("opensearch",G.URI_OPENSEARCH);
     xmlBuilder.writer.writeNamespace("dc",G.URI_DC);
+    xmlBuilder.writer.writeNamespace("sdi",G.URI_SDI);
   },
   
   _addQuery: function(request,xmlBuilder) {
@@ -257,7 +258,41 @@ G.writers.atom = {
         xmlBuilder.writeElement(G.URI_GEORSS10,"box",rssBox);
       }
     }
-   
+    
+    // Eros elements
+    if (resources != null) {
+      var resourcesArray = G.chkObjArray(resources);
+      // Eros type conversion table
+      var ETCT = {
+        "FeatureServer": "agsfeatureserver",
+        "ImageServer": "agsimageserver",
+        "MapServer": "agsmapserver",
+        "CSW": "csw",
+        "IMS": "image",
+        "SOS": "sos",
+        "WCS": "wcs",
+        "WFS": "wfs",
+        "WMS": "wms"
+      };
+      for (i=0;i<resourcesArray.length;i++) {
+        r = resourcesArray[i];
+        if (r.url_type_s) {
+          var serviceType = ETCT[r.url_type_s];
+          if (serviceType) {
+            var baseUrl = request.getBaseUrl();
+            var itemXml = baseUrl+"/rest/metadata/item/"+encodeURIComponent(itemId)+"/xml";
+
+            xmlBuilder.writeElement(G.URI_SDI,"metadataUrl",itemXml);
+            xmlBuilder.writeElement(G.URI_SDI,"serviceUrl",r.url_s);
+            xmlBuilder.writeElement(G.URI_SDI,"serviceType",serviceType);
+            xmlBuilder.writeElement(G.URI_SDI,"emailAddress","");
+
+            break;
+          }
+        }
+      }
+    }
+    
     
     // TODO resource time period??
     
