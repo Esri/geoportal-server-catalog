@@ -82,7 +82,7 @@ var G = {
     var arcgisTypes = ["MapServer","ImageServer","FeatureServer","GlobeServer","GPServer","GeocodeServer",
                        "GeometryServer","NAServer","GeoDataServer ","MobileServer","SceneServer",
                        "SchematicsServer","StreamServer","VectorTileServer"]; 
-    var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS"];
+    var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS","CSW"];
     var dataTypes = ["zip","shp"];
 
     var i, v, lc, linkType = null, linkUrl = null;
@@ -115,6 +115,12 @@ var G = {
             lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 || 
             lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
           linkType = "kml";
+          linkUrl = url;
+        }
+      }
+      if (linkType === null) {
+        if (lc.indexOf("com.esri.wms.esrimap")>= 0) {
+          linkType = "IMS";
           linkUrl = url;
         }
       }

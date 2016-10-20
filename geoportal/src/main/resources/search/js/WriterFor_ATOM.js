@@ -262,19 +262,33 @@ G.writers.atom = {
     // Eros elements
     if (resources != null) {
       var resourcesArray = G.chkObjArray(resources);
+      // Eros type conversion table
+      var ETCT = {
+        "FeatureServer": "agsfeatureserver",
+        "ImageServer": "agsimageserver",
+        "MapServer": "agsmapserver",
+        "CSW": "csw",
+        "IMS": "image",
+        "SOS": "sos",
+        "WCS": "wcs",
+        "WFS": "wfs",
+        "WMS": "wms"
+      };
       for (i=0;i<resourcesArray.length;i++) {
         r = resourcesArray[i];
-        var serviceType = quessServiceType(r.url_s);
-        if (serviceType) {
-          var baseUrl = request.getBaseUrl();
-          var itemXml = baseUrl+"/rest/metadata/item/"+encodeURIComponent(itemId)+"/xml";
-          
-          xmlBuilder.writeElement(G.URI_SDI,"metadataUrl",itemXml);
-          xmlBuilder.writeElement(G.URI_SDI,"serviceUrl",r.url_s);
-          xmlBuilder.writeElement(G.URI_SDI,"serviceType",serviceType);
-          xmlBuilder.writeElement(G.URI_SDI,"emailAddress","");
-          
-          break;
+        if (r.url_type_s) {
+          var serviceType = ETCT[r.url_type_s];
+          if (serviceType) {
+            var baseUrl = request.getBaseUrl();
+            var itemXml = baseUrl+"/rest/metadata/item/"+encodeURIComponent(itemId)+"/xml";
+
+            xmlBuilder.writeElement(G.URI_SDI,"metadataUrl",itemXml);
+            xmlBuilder.writeElement(G.URI_SDI,"serviceUrl",r.url_s);
+            xmlBuilder.writeElement(G.URI_SDI,"serviceType",serviceType);
+            xmlBuilder.writeElement(G.URI_SDI,"emailAddress","");
+
+            break;
+          }
         }
       }
     }
@@ -285,54 +299,6 @@ G.writers.atom = {
     xmlBuilder.writer.writeEndElement();
   }
 };
-
-function quessServiceType(url) {
-  if (url) {
-    url = url.toLowerCase();
-    if (url.search("service=wms")>=0 || url.search("wmsserver")>=0 || url.search("com.esri.wms.esrimap")>=0) {
-      return "wms";
-    }
-    if (url.search("service=wfs")>=0 || url.search("wfsserver")>=0) {
-      return "wfs";
-    }
-    if (url.search("service=wcs")>=0 || url.search("wcsserver")>=0) {
-      return "wcs";
-    }
-    if (url.search("com.esri.esrimap.esrimap")>=0) {
-      return "aims";
-    }
-    if (url.search("arcgis/rest")>=0 || url.search("arcgis/services")>=0 || url.search("rest/services")>=0) {
-      if (url.endsWith("mapserver")) {
-        return "agsmapserver";
-      }
-      if (url.endsWith("featureserver")) {
-        return "agsfeatureserver";
-      }
-      if (url.endsWith("imageserver")) {
-        return "agsimageserver";
-      }
-    }
-    if (url.search("service=csw")>=0) {
-      return "csw";
-    }
-    if (url.search("service=sos")>=0) {
-      return "sos";
-    }
-    if (url.endsWith(".nmf")) {
-      return "ArcGIS:nmf";
-    }
-    if (url.endsWith(".lyr")) {
-      return "ArcGIS:lyr";
-    }
-    if (url.endsWith(".mxd")) {
-      return "ArcGIS:mxd";
-    }
-    if (url.endsWith(".kml") || url.endsWith("kmz")) {
-      return "kml";
-    }
-  }
-  return null;
-}
 
 function writeItem(appRequest,appResponse,itemId,itemString,responseString) {
   G.writers.atom.writeItem(appRequest,appResponse,itemId,itemString,responseString);
