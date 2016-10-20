@@ -23,7 +23,7 @@ define(["dojo/_base/declare",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
-        "app/search/TemporalFilterSettings"], 
+        "app/search/NumericFilterSettings"], 
 function(declare, lang, array, djNumber, domConstruct, domGeometry,
     template, i18n, SearchComponent, DropPane, QClause, Settings) {
   
@@ -40,7 +40,7 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
     ticks: 4,
     places: 2,
     
-    label: i18n.search.temporalFilter.label,
+    label: i18n.search.numericFilter.label,
     open: false,
         
     _aggValues: null,
@@ -59,16 +59,14 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
       this._initialSettings = {
         label: this.label,
         field: this.field,
-        toField: this.toField,
-        fieldsOperator: this.fieldsOperator,
         nestedPath: this.nestedPath,
         interval: this.interval,
+        ticks: this.ticks,
+        places: this.places
       };
       
       // TODO $(this.intervalSelect).val(this.interval);
       this.plot();
-      
-      this.allowSettings = false; // TODO ***
       
       if (this.allowSettings === null) {
         if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
@@ -96,7 +94,7 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
     formatRange: function(fromValue,toValue,forSearchLink) {
       var v = "", rangePattern;
       if (fromValue || toValue) {
-        rangePattern = i18n.search.temporalFilter.rangePattern;
+        rangePattern = i18n.search.numericFilter.rangePattern;
         v = rangePattern.replace("{from}",this.formatValue(fromValue));
         v = v.replace("{to}",this.formatValue(toValue));
       }
@@ -118,7 +116,7 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
       this._brushExtent = null;
       this.setNodeText(this.brushExtentNode,"");
       
-      var countPattern = i18n.search.temporalFilter.countPattern;
+      var countPattern = i18n.search.numericFilter.countPattern;
       var fmtTip = function(d) {
         var s1 = self.formatValue(d.value);
         var s2 = countPattern.replace("{count}",d.count);

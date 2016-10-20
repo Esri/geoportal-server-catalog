@@ -125,6 +125,24 @@ define({
           rangePattern: "{from} .. {to}"
         }
       },
+      numericFilter: {
+        label: "Numeric",
+        rangePattern: "{from}..{to}",
+        countPattern: "{count} aggregated here",
+        searchTip: "Search",
+        interval: "Interval",
+        settings: {
+          caption: "Numeric Filter",
+          field: "Numeric Field",
+          fieldPlaceholder: "",
+          interval: "Interval",
+          intervalPlaceholder: "number > 0",
+          ticks: "Ticks",
+          ticksPlaceholder: "integer > 0",
+          places: "Decimal Places",
+          placesPlaceholder: "integer > 0"
+        }
+      },
       appliedFilters: {
         label: "Filters",
         myContent: "My Content",
