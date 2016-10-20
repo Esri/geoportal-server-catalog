@@ -14,17 +14,27 @@
  */
 package com.esri.geoportal.lib.elastic.request;
 
+import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
 import com.esri.geoportal.base.util.Val;
 import com.esri.geoportal.base.xml.XmlUtil;
 import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.response.ItemWriter;
+import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
+import javax.json.JsonObjectBuilder;
+import javax.json.JsonStructure;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 
@@ -84,6 +94,7 @@ public class ErosRequest extends SearchRequest {
   public AppResponse execute() throws Exception {
     this.setF("eros");
     this.setInputIndexOffset(1);
+    /*
     String[] ids = getParameterValues("id");
     if (ids != null && ids.length == 1) {
       ids = Val.tokenize(ids[0],",",false);
@@ -91,7 +102,50 @@ public class ErosRequest extends SearchRequest {
     if (ids != null && ids.length == 1) {
       this.setIsItemByIdRequest(true);
     }
-    return super.execute();
+    */
+    
+    // return super.execute();
+    AppResponse response = new AppResponse();
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    
+    boolean b = Val.chkBool(getParameter("pretty"),false);
+    if (b) this.setPretty(b);
+
+    SearchRequestBuilder search = ec.getTransportClient().prepareSearch(ec.getItemIndexName());
+    parse(search);
+    search.setTypes(ec.getItemIndexType());
+    
+    JsonObjectBuilder jsoQuery = Json.createObjectBuilder();
+    JsonObjectBuilder jsoBool = Json.createObjectBuilder();
+    JsonObjectBuilder jsoMust = Json.createObjectBuilder();
+    JsonObjectBuilder jsoNested = Json.createObjectBuilder();
+    JsonObjectBuilder jsoNestedQuery = Json.createObjectBuilder();
+    JsonObjectBuilder jsoTerms = Json.createObjectBuilder();
+    JsonArrayBuilder jsoTermsArray = Json.createArrayBuilder();
+    jsoTermsArray.add("FeatureServer");
+    jsoTermsArray.add("ImageServer");
+    jsoTermsArray.add("MapServer");
+    jsoTermsArray.add("CSW");
+    jsoTermsArray.add("IMS");
+    jsoTermsArray.add("SOS");
+    jsoTermsArray.add("WCS");
+    jsoTermsArray.add("WFS");
+    jsoTermsArray.add("WMS");
+    jsoTerms.add("resources_nst.url_type_s", jsoTermsArray);
+    jsoNestedQuery.add("terms", jsoTerms);
+    jsoNested.add("path", "resources_nst");
+    jsoNested.add("query", jsoNestedQuery);
+    jsoMust.add("nested", jsoNested);
+    jsoBool.add("must", jsoMust);
+    jsoQuery.add("bool", jsoBool);
+    
+    String wq = JsonUtil.toJson(jsoQuery.build());
+    search.setQuery(QueryBuilders.wrapperQuery(wq));
+    // TODO some logging here
+    //LOGGER.trace("SearchRequest: "+wq);
+    SearchResponse searchResponse = search.get();
+    writeResponse(response,searchResponse);
+    return response;
   }
   
   @Override

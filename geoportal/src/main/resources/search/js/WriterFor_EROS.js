@@ -145,6 +145,8 @@ G.writers.atom = {
     }
     
     var title = G.chkStr(item["title"]);
+    var resources = item["resources_nst"];
+    /*
     var description = G.chkStr(item["description"]);
     var itemType = G.chkStr(item["itemType"]); // TODO
     var owner = G.chkStr(item["sys_owner_s"]);
@@ -154,20 +156,24 @@ G.writers.atom = {
     var credits = G.chkStrArray(item["credits_s"]);
     var rights = G.chkStrArray(item["rights_s"]);
     var extent = item["envelope_geo"];
-    var resources = item["resources_nst"];
     var links = G.buildLinks(request,itemId,item);
+    */
     
     if (title === null || title.length === 0) title = "Empty";
+    /*
     if (description === null || description.length === 0) description = "Empty";
     if (owner === null || owner.length === 0) owner = "Empty";
+    */
     
     // atom:id is required
     xmlBuilder.writeElement(G.URI_ATOM,"id",itemId);
+    /*
     xmlBuilder.writeElement(G.URI_DC,"identifier",itemId);
+    */
     
     // atom:title is required
     xmlBuilder.writeElement(G.URI_ATOM,"title",title);
-    
+    /*
     // atom:summary is required
     xmlBuilder.writer.writeStartElement(G.URI_ATOM,"summary");
     xmlBuilder.writer.writeAttribute("type","html");
@@ -258,6 +264,7 @@ G.writers.atom = {
         xmlBuilder.writeElement(G.URI_GEORSS10,"box",rssBox);
       }
     }
+    */
     
     // Eros elements
     if (resources != null) {
