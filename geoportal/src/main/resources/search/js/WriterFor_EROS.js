@@ -146,129 +146,20 @@ G.writers.atom = {
     
     var title = G.chkStr(item["title"]);
     var resources = item["resources_nst"];
-    /*
-    var description = G.chkStr(item["description"]);
-    var itemType = G.chkStr(item["itemType"]); // TODO
-    var owner = G.chkStr(item["sys_owner_s"]);
-    var created = G.chkStr(item["sys_created_dt"]);
-    var modified = G.chkStr(item["sys_modified_dt"]);
-    var keywords = G.chkStrArray(item["keywords_s"]);
-    var credits = G.chkStrArray(item["credits_s"]);
-    var rights = G.chkStrArray(item["rights_s"]);
-    var extent = item["envelope_geo"];
-    var links = G.buildLinks(request,itemId,item);
-    */
     
     if (title === null || title.length === 0) title = "Empty";
-    /*
-    if (description === null || description.length === 0) description = "Empty";
-    if (owner === null || owner.length === 0) owner = "Empty";
-    */
     
     // atom:id is required
     xmlBuilder.writeElement(G.URI_ATOM,"id",itemId);
-    /*
-    xmlBuilder.writeElement(G.URI_DC,"identifier",itemId);
-    */
     
     // atom:title is required
     xmlBuilder.writeElement(G.URI_ATOM,"title",title);
-    /*
-    // atom:summary is required
-    xmlBuilder.writer.writeStartElement(G.URI_ATOM,"summary");
-    xmlBuilder.writer.writeAttribute("type","html");
-    xmlBuilder.writer.writeCharacters(description);
-    xmlBuilder.writer.writeEndElement();
-
-    // atom:published is optional
-    if (created !== null && created.length > 0) {
-      xmlBuilder.writeElement(G.URI_ATOM,"published",created);
-    }
-
-    // atom:updated is required
-    if (modified != null && modified.length > 0) {
-      xmlBuilder.writeElement(G.URI_ATOM,"updated",modified);
-    } else if (created != null && created.length > 0) {
-      xmlBuilder.writeElement(G.URI_ATOM,"updated",created);
-    } else {
-      xmlBuilder.writeElement(G.URI_ATOM,"updated",options.now);
-    }
-
-    // atom:author is required
-    xmlBuilder.writer.writeStartElement(G.URI_ATOM,"author");
-    xmlBuilder.writeElement(G.URI_ATOM,"name",owner);
-    xmlBuilder.writer.writeEndElement();
-    
-    // at least one link is required 
-    if (links != null) {
-      for (i=0;i<links.length;i++) {
-        v = links[i];
-        this._addLink(v.rel,v.type,v.href,xmlBuilder);
-      }
-    }
-    
-    // TODO itemType
-    if (itemType !== null && itemType.length > 0) {
-      xmlBuilder.writer.writeStartElement(G.URI_ATOM,"category");
-      xmlBuilder.writer.writeAttribute("scheme","type");
-      xmlBuilder.writer.writeAttribute("term",itemType);
-      xmlBuilder.writer.writeEndElement();
-    }
-    
-    // keywords
-    if (keywords != null) {
-      for (i=0;i<keywords.length;i++) {
-        v = G.chkStr(keywords[i]);
-        if (v !== null && v.length() > 0) {
-          xmlBuilder.writer.writeStartElement(G.URI_ATOM,"category");
-          xmlBuilder.writer.writeAttribute("scheme","keywords");
-          xmlBuilder.writer.writeAttribute("term",v);
-          xmlBuilder.writer.writeEndElement();
-        }
-      }
-    }
-    
-    // credits
-    if (credits != null) {
-      for (i=0;i<credits.length;i++) {
-        v = G.chkStr(credits[i]);
-        if (v !== null && v.length() > 0) {
-          xmlBuilder.writer.writeStartElement(G.URI_ATOM,"contributor");
-          xmlBuilder.writeElement(G.URI_ATOM,"name",v);
-          xmlBuilder.writer.writeEndElement();
-        }
-      }
-    }
-
-    // rights
-    if (rights != null) {
-      for (i=0;i<rights.length;i++) {
-        v = G.chkStr(rights[i]);
-        if (v !== null && v.length() > 0) {
-          xmlBuilder.writer.writeStartElement(G.URI_ATOM,"rights");
-          xmlBuilder.writer.writeAttribute("type","html");
-          xmlBuilder.writer.writeCharacters(v);
-          xmlBuilder.writer.writeEndElement();
-        }
-      }
-    }
-
-    // extent
-    if (extent && extent.type && extent.type === "envelope" && extent.coordinates && extent.coordinates.length === 2) {
-      var topLeft = extent.coordinates[0];
-      var bottomRight = extent.coordinates[1];
-      if (topLeft != null && topLeft.length === 2 && bottomRight != null && bottomRight.length === 2) {
-        var coordinates = [topLeft[0],bottomRight[1],bottomRight[0],topLeft[1]];
-        var rssBox = coordinates[1]+" "+coordinates[0]+" "+coordinates[3]+" "+coordinates[2];
-        xmlBuilder.writeElement(G.URI_GEORSS,"box",rssBox);
-        xmlBuilder.writeElement(G.URI_GEORSS10,"box",rssBox);
-      }
-    }
-    */
     
     // Eros elements
     if (resources != null) {
       var resourcesArray = G.chkObjArray(resources);
+      var urlTypes = request.getParameter("urlTypes");
+      var urlTypesArr = urlTypes && urlTypes.length>0? urlTypes.split(","): null;
       // Eros type conversion table
       var ETCT = {
         "FeatureServer": "agsfeatureserver",
@@ -283,7 +174,7 @@ G.writers.atom = {
       };
       for (i=0;i<resourcesArray.length;i++) {
         r = resourcesArray[i];
-        if (r.url_type_s) {
+        if (r.url_type_s && (!urlTypesArr || urlTypesArr.length==0 || urlTypesArr.indexOf(r.url_type_s)>=0)) {
           var serviceType = ETCT[r.url_type_s];
           if (serviceType) {
             var baseUrl = request.getBaseUrl();
