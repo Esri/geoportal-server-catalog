@@ -22,14 +22,12 @@ import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.response.ItemWriter;
-import java.math.BigDecimal;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
-import javax.json.JsonStructure;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -44,7 +42,7 @@ import org.elasticsearch.search.SearchHits;
 public class ErosRequest extends SearchRequest {
 
   /** Instance variables . */
-  private String descriptionFile = "search/opensearch-description.xml";
+  private String descriptionFile = "search/eros-description.xml";
 
   /** Constructor */
   public ErosRequest() {
@@ -70,7 +68,7 @@ public class ErosRequest extends SearchRequest {
   public AppResponse description() throws Exception {
     AppResponse response = new AppResponse();
     String baseUrl = this.getBaseUrl();
-    String opensearchUrl = baseUrl+"/opensearch";
+    String opensearchUrl = baseUrl+"/Eros";
     ResourcePath rp = new ResourcePath();
     URI uri = rp.makeUrl(descriptionFile).toURI();
     String xml = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");

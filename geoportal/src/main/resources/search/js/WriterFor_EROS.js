@@ -40,7 +40,7 @@ G.writers.atom = {
     var size = searchRequest.getSize();
     
     var baseUrl = searchRequest.getBaseUrl();
-    var dscUrl = baseUrl+"/opensearch/description"; // TODO
+    var dscUrl = baseUrl+"/Eros/description"; // TODO
     var feedId = baseUrl;
     var feedTitle = "Results"; // TODO - "Results"
     var authorName = baseUrl;

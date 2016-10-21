@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/" xmlns:geo="http://a9.com/-/opensearch/extensions/geo/1.0/"
+  xmlns:time="http://a9.com/-/opensearch/extensions/time/1.0/">
+  <ShortName>Geoportal</ShortName>
+  <Description>Geoportal</Description>
+  <Image width="16" height="16">{base.url}/images/opensearch.png</Image>
+  <Url type="application/atom+xml" indexOffset="1"
+    template="{opensearch.url}?from={startIndex?}&amp;size={count?}&amp;f=atom"/>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+</OpenSearchDescription>
