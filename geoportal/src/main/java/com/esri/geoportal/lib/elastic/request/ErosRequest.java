@@ -170,4 +170,26 @@ public class ErosRequest extends SearchRequest {
     writer.write(this,response,searchResponse);
   }
 
+  @Override
+  protected void parse(SearchRequestBuilder search) {
+    
+    int nFrom = Val.chkInt(this.getParameter("from"),-1);
+    if (nFrom >= 0) {
+      this.from = nFrom;
+      if (this.getInputIndexOffset() == 0) {
+        search.setFrom(nFrom);
+      } else {
+        search.setFrom(nFrom - this.getInputIndexOffset());
+      }
+    } else {
+      this.from = this.getInputIndexOffset();
+    }
+
+    int nSize = Val.chkInt(this.getParameter("size"),-1);
+    if (nSize >= 0) {
+      this.size = nSize;
+      search.setSize(size);
+    }
+  }
+
 }
