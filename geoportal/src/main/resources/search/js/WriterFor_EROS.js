@@ -40,7 +40,7 @@ G.writers.atom = {
     var size = searchRequest.getSize();
     
     var baseUrl = searchRequest.getBaseUrl();
-    var dscUrl = baseUrl+"/opensearch/description"; // TODO
+    var dscUrl = baseUrl+"/Eros/description"; // TODO
     var feedId = baseUrl;
     var feedTitle = "Results"; // TODO - "Results"
     var authorName = baseUrl;
@@ -93,6 +93,7 @@ G.writers.atom = {
     xmlBuilder.writer.writeNamespace("time",G.URI_TIME);
     xmlBuilder.writer.writeNamespace("opensearch",G.URI_OPENSEARCH);
     xmlBuilder.writer.writeNamespace("dc",G.URI_DC);
+    xmlBuilder.writer.writeNamespace("sdi",G.URI_SDI);
   },
   
   _addQuery: function(request,xmlBuilder) {
@@ -144,120 +145,52 @@ G.writers.atom = {
     }
     
     var title = G.chkStr(item["title"]);
-    var description = G.chkStr(item["description"]);
-    var itemType = G.chkStr(item["itemType"]); // TODO
-    var owner = G.chkStr(item["sys_owner_s"]);
-    var created = G.chkStr(item["sys_created_dt"]);
-    var modified = G.chkStr(item["sys_modified_dt"]);
-    var keywords = G.chkStrArray(item["keywords_s"]);
-    var credits = G.chkStrArray(item["credits_s"]);
-    var rights = G.chkStrArray(item["rights_s"]);
-    var extent = item["envelope_geo"];
     var resources = item["resources_nst"];
-    var links = G.buildLinks(request,itemId,item);
     
     if (title === null || title.length === 0) title = "Empty";
-    if (description === null || description.length === 0) description = "Empty";
-    if (owner === null || owner.length === 0) owner = "Empty";
     
     // atom:id is required
     xmlBuilder.writeElement(G.URI_ATOM,"id",itemId);
-    xmlBuilder.writeElement(G.URI_DC,"identifier",itemId);
     
     // atom:title is required
     xmlBuilder.writeElement(G.URI_ATOM,"title",title);
     
-    // atom:summary is required
-    xmlBuilder.writer.writeStartElement(G.URI_ATOM,"summary");
-    xmlBuilder.writer.writeAttribute("type","html");
-    xmlBuilder.writer.writeCharacters(description);
-    xmlBuilder.writer.writeEndElement();
+    // Eros elements
+    if (resources != null) {
+      var resourcesArray = G.chkObjArray(resources);
+      var urlTypes = request.getParameter("urlTypes");
+      var urlTypesArr = urlTypes && urlTypes.length>0? urlTypes.split(","): null;
+      // Eros type conversion table
+      var ETCT = {
+        "FeatureServer": "agsfeatureserver",
+        "ImageServer": "agsimageserver",
+        "MapServer": "agsmapserver",
+        "CSW": "csw",
+        "IMS": "image",
+        "SOS": "sos",
+        "WCS": "wcs",
+        "WFS": "wfs",
+        "WMS": "wms"
+      };
+      for (i=0;i<resourcesArray.length;i++) {
+        r = resourcesArray[i];
+        if (r.url_type_s && (!urlTypesArr || urlTypesArr.length==0 || urlTypesArr.indexOf(r.url_type_s)>=0)) {
+          var serviceType = ETCT[r.url_type_s];
+          if (serviceType) {
+            var baseUrl = request.getBaseUrl();
+            var itemXml = baseUrl+"/rest/metadata/item/"+encodeURIComponent(itemId)+"/xml";
 
-    // atom:published is optional
-    if (created !== null && created.length > 0) {
-      xmlBuilder.writeElement(G.URI_ATOM,"published",created);
-    }
+            xmlBuilder.writeElement(G.URI_SDI,"metadataUrl",itemXml);
+            xmlBuilder.writeElement(G.URI_SDI,"serviceUrl",r.url_s);
+            xmlBuilder.writeElement(G.URI_SDI,"serviceType",serviceType);
+            xmlBuilder.writeElement(G.URI_SDI,"emailAddress","");
 
-    // atom:updated is required
-    if (modified != null && modified.length > 0) {
-      xmlBuilder.writeElement(G.URI_ATOM,"updated",modified);
-    } else if (created != null && created.length > 0) {
-      xmlBuilder.writeElement(G.URI_ATOM,"updated",created);
-    } else {
-      xmlBuilder.writeElement(G.URI_ATOM,"updated",options.now);
-    }
-
-    // atom:author is required
-    xmlBuilder.writer.writeStartElement(G.URI_ATOM,"author");
-    xmlBuilder.writeElement(G.URI_ATOM,"name",owner);
-    xmlBuilder.writer.writeEndElement();
-    
-    // at least one link is required 
-    if (links != null) {
-      for (i=0;i<links.length;i++) {
-        v = links[i];
-        this._addLink(v.rel,v.type,v.href,xmlBuilder);
-      }
-    }
-    
-    // TODO itemType
-    if (itemType !== null && itemType.length > 0) {
-      xmlBuilder.writer.writeStartElement(G.URI_ATOM,"category");
-      xmlBuilder.writer.writeAttribute("scheme","type");
-      xmlBuilder.writer.writeAttribute("term",itemType);
-      xmlBuilder.writer.writeEndElement();
-    }
-    
-    // keywords
-    if (keywords != null) {
-      for (i=0;i<keywords.length;i++) {
-        v = G.chkStr(keywords[i]);
-        if (v !== null && v.length() > 0) {
-          xmlBuilder.writer.writeStartElement(G.URI_ATOM,"category");
-          xmlBuilder.writer.writeAttribute("scheme","keywords");
-          xmlBuilder.writer.writeAttribute("term",v);
-          xmlBuilder.writer.writeEndElement();
+            break;
+          }
         }
       }
     }
     
-    // credits
-    if (credits != null) {
-      for (i=0;i<credits.length;i++) {
-        v = G.chkStr(credits[i]);
-        if (v !== null && v.length() > 0) {
-          xmlBuilder.writer.writeStartElement(G.URI_ATOM,"contributor");
-          xmlBuilder.writeElement(G.URI_ATOM,"name",v);
-          xmlBuilder.writer.writeEndElement();
-        }
-      }
-    }
-
-    // rights
-    if (rights != null) {
-      for (i=0;i<rights.length;i++) {
-        v = G.chkStr(rights[i]);
-        if (v !== null && v.length() > 0) {
-          xmlBuilder.writer.writeStartElement(G.URI_ATOM,"rights");
-          xmlBuilder.writer.writeAttribute("type","html");
-          xmlBuilder.writer.writeCharacters(v);
-          xmlBuilder.writer.writeEndElement();
-        }
-      }
-    }
-
-    // extent
-    if (extent && extent.type && extent.type === "envelope" && extent.coordinates && extent.coordinates.length === 2) {
-      var topLeft = extent.coordinates[0];
-      var bottomRight = extent.coordinates[1];
-      if (topLeft != null && topLeft.length === 2 && bottomRight != null && bottomRight.length === 2) {
-        var coordinates = [topLeft[0],bottomRight[1],bottomRight[0],topLeft[1]];
-        var rssBox = coordinates[1]+" "+coordinates[0]+" "+coordinates[3]+" "+coordinates[2];
-        xmlBuilder.writeElement(G.URI_GEORSS,"box",rssBox);
-        xmlBuilder.writeElement(G.URI_GEORSS10,"box",rssBox);
-      }
-    }
-   
     
     // TODO resource time period??
     

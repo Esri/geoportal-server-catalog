@@ -21,8 +21,10 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.response.ItemWriter;
 import com.esri.geoportal.lib.elastic.response.ItemWriterFactory;
+import java.math.BigDecimal;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 import javax.json.Json;
@@ -53,6 +55,7 @@ public class SearchRequest extends _SearchRequestBase {
   /** Instance variables . */
   protected int from = 0;
   protected int size = 10;
+  protected String [] urlTypes;
   protected List<JsonStructure> musts = new ArrayList<JsonStructure>();
   protected List<JsonStructure> filters = new ArrayList<JsonStructure>();
 
@@ -69,6 +72,14 @@ public class SearchRequest extends _SearchRequestBase {
   /** The number of search results per page. */
   public int getSize() {
     return size;
+  }
+
+  public String[] getUrlTypes() {
+    return urlTypes;
+  }
+
+  public void setUrlTypes(String...urlTypes) {
+    this.urlTypes = urlTypes;
   }
 
   /** Methods =============================================================== */
@@ -127,6 +138,7 @@ public class SearchRequest extends _SearchRequestBase {
   protected void parse(SearchRequestBuilder search) {
     this.parseXtnF(search);
     this.parseElastic(search);
+    this.parseUrlTypes(search);
     this.parseXtnBBox(search);
     this.parseXtnTime(search);
     this.parseXtnFilter(search);
@@ -491,6 +503,37 @@ public class SearchRequest extends _SearchRequestBase {
           )
         );
       //System.err.println("temporalq="+jq.build());
+      filters.add(jq.build());
+    }
+  }
+
+  protected void parseUrlTypes(SearchRequestBuilder search) {
+    String sUrlTypes = Val.trim(this.getParameter("urlTypes"));
+    if (sUrlTypes!=null) {
+      urlTypes = sUrlTypes.split(",");
+    }
+    
+    if (urlTypes!=null && urlTypes.length>0) {
+      JsonObjectBuilder jsoQuery = Json.createObjectBuilder();
+      JsonObjectBuilder jsoBool = Json.createObjectBuilder();
+      JsonObjectBuilder jsoMust = Json.createObjectBuilder();
+      JsonObjectBuilder jsoNested = Json.createObjectBuilder();
+      JsonObjectBuilder jsoNestedQuery = Json.createObjectBuilder();
+      JsonObjectBuilder jsoTerms = Json.createObjectBuilder();
+      JsonArrayBuilder jsoTermsArray = Json.createArrayBuilder();
+      Arrays.asList(urlTypes).forEach(jsoTermsArray::add);
+
+      jsoTerms.add("resources_nst.url_type_s", jsoTermsArray);
+      jsoNestedQuery.add("terms", jsoTerms);
+      jsoNested.add("path", "resources_nst");
+      jsoNested.add("query", jsoNestedQuery);
+      jsoMust.add("nested", jsoNested);
+      jsoBool.add("must", jsoMust);
+      jsoQuery.add("bool", jsoBool);
+
+      JsonObjectBuilder jq = Json.createObjectBuilder();
+      jq.add("query", jsoQuery);
+
       filters.add(jq.build());
     }
   }

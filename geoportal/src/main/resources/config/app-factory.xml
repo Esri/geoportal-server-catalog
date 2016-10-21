@@ -12,6 +12,7 @@
   <beans:bean id="request.GetItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetItemRequest"/>
   <beans:bean id="request.GetMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetMetadataRequest"/>
   <beans:bean id="request.OpensearchRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.OpensearchRequest"/>
+  <beans:bean id="request.ErosRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ErosRequest"/>
   <beans:bean id="request.PublishMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.PublishMetadataRequest"/>
   <beans:bean id="request.ReindexRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ReindexRequest"/>
   <beans:bean id="request.SearchRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.SearchRequest"/>
@@ -34,6 +35,9 @@
   <beans:bean id="item.JsonWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
     <beans:property name="javascriptFile" value="search/js/WriterFor_JSON.js"/>
   </beans:bean>
+  <beans:bean id="item.ErosWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
+    <beans:property name="javascriptFile" value="search/js/WriterFor_EROS.js"/>
+  </beans:bean>
   <beans:bean id="item.ItemWriterFactory" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ItemWriterFactory">
 	  <beans:property name="map">
 	    <beans:map key-type="java.lang.String" value-type="java.lang.String">
@@ -51,6 +55,8 @@
 	      <beans:entry key="csw" value="item.CswWriter" />
 	      <beans:entry key="application/xml" value="item.CswWriter" />
 	      <beans:entry key="http://www.opengis.net/cat/csw/3.0" value="item.CswWriter" />
+          <!-- Eros -->
+	      <beans:entry key="eros" value="item.ErosWriter" />
 	    </beans:map>
 	  </beans:property>
   </beans:bean>

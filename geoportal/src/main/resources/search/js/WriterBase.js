@@ -34,6 +34,7 @@ var G = {
   URI_TIME: "http://a9.com/-/opensearch/extensions/time/1.0/",
   URI_OPENSEARCH: "http://a9.com/-/spec/opensearch/1.1/",
   URI_OWS: "http://www.opengis.net/ows/2.0",
+  URI_SDI: "http://www.geodata.gov/sdi_atom",
 
   buildLinks: function(appRequest,itemId,item) {
     var links = [];
@@ -76,6 +77,13 @@ var G = {
     if (typeof v === "undefined" || v === null) return null;
     else if (typeof v === "string") return [v];
     else if (typeof v.push === "function") return v;
+    return null;
+  },
+  
+  chkObjArray: function(v) {
+    if (typeof v === "undefined" || v === null) return null;
+    else if (typeof v === "object" && typeof v.push === "undefined") return [v];
+    else if (typeof v === "object" && typeof v.push === "function") return v;
     return null;
   },
   

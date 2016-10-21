@@ -83,7 +83,7 @@ public class OpensearchRequest extends SearchRequest {
 
   @Override
   public AppResponse execute() throws Exception {
-    this.setF("atom");
+    setDefaultF();
     this.setInputIndexOffset(1);
     String[] ids = getParameterValues("id");
     if (ids != null && ids.length == 1) {
@@ -93,6 +93,10 @@ public class OpensearchRequest extends SearchRequest {
       this.setIsItemByIdRequest(true);
     }
     return super.execute();
+  }
+  
+  protected void setDefaultF() {
+    this.setF("atom");
   }
   
   @Override
