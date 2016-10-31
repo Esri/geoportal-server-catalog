@@ -47,6 +47,7 @@ function(declare, lang, on, event, domConstruct, TitlePane, i18n) {
       var link = this.settingsNode = domConstruct.create("a",{
         href: "#",
         onclick: lang.hitch(this,function(e) {
+          e.stopPropagation();
         })
       },this.toolsNode);
       link.innerHTML = "<span class=\"glyphicon glyphicon-cog\"></span>";

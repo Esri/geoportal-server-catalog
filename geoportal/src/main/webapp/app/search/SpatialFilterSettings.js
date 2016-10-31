@@ -16,7 +16,7 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/number",
         "app/search/SearchComponentSettings",
-        "dojo/text!./templates/NumericFilterSettings.html",
+        "dojo/text!./templates/SpatialFilterSettings.html",
         "dojo/i18n!app/nls/resources"], 
 function(declare, lang, number, SearchComponentSettings, template, i18n) {
   
@@ -32,17 +32,14 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
     /* SearchComponentSettings API ============================================= */
     
     getTitle: function() {
-      return i18n.search.numericFilter.settings.caption;
+      return i18n.search.spatialFilter.settings.caption;
     },
     
     init: function(settings) {
       this.inherited(arguments);
       if (!settings) settings = this.targetWidget;
       this.componentLabelInput.value = settings.label;
-      this.fieldInput.value = settings.field;
-      this.intervalInput.value = settings.interval;
-      this.ticksInput.value = settings.ticks;
-      this.placesInput.value = settings.places;
+      this.aggCheckbox.checked = settings.allowAggregation;
     },
     
     reset: function() {
@@ -57,28 +54,10 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
         }
         return defaultVal;
       };
-      var chkInt = function(inputNode,min,max,defaultVal) {
-        var v = inputNode.value;
-        v = number.parse(v,{places:0});
-        if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
-          if (v >= min && v <= max) return v;
-        } 
-        return defaultVal;
-      };
-      var chkNum = function(inputNode,defaultVal) {
-        var v = inputNode.value;
-        v = number.parse(v);
-        if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
-          if (v > 0) return v;
-        } 
-        return defaultVal;
-      };
       
       this.targetWidget.label = chkInput(this.componentLabelInput,this.targetWidget.label);
-      this.targetWidget.field = chkInput(this.fieldInput,this.targetWidget.field);
-      this.targetWidget.interval = chkNum(this.intervalInput,this.targetWidget.interval);
-      this.targetWidget.ticks = chkInt(this.ticksInput,1,10,this.targetWidget.ticks);
-      this.targetWidget.places = chkInt(this.placesInput,0,10,this.targetWidget.places);
+      this.targetWidget.allowAggregation = !!this.aggCheckbox.checked;
+
       this.targetWidget.dropPane.set("title",this.targetWidget.label);
       this.targetWidget.search();
       this.hideDialog();
