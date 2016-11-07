@@ -79,7 +79,11 @@ define({
         any: "Any",
         intersects: "Intersects",
         within: "Within",
-        countPattern: "{count} centered here"
+        countPattern: "{count} centered here",
+        settings: {
+          caption: "Spatial Filter",
+          aggregations: "Aggregations"
+        }
       },
       temporalFilter: {
         label: "Temporal",

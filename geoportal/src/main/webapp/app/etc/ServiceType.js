@@ -91,7 +91,7 @@ function(declare, lang, vectorTile) {
           } else if (lc.indexOf("/featureserver") > 0) {
             type = "FeatureServer";
           } else if (lc.indexOf("/imageserver") > 0) {
-            type = "ImageServer";
+            if (endsWith(lc,"/imageserver")) type = "ImageServer";
           } else if (lc.indexOf("/streamserver") > 0) {
             type = "StreamServer";
           } else if (lc.indexOf("/vectortileserver") > 0 || 

@@ -32,6 +32,7 @@ define(["dojo/_base/declare",
         "app/search/QClause",
         "app/etc/GeohashEx",
         "app/etc/util",
+        "app/search/SpatialFilterSettings",
         "esri/map",
         "esri/layers/ArcGISTiledMapServiceLayer",
         "esri/layers/GraphicsLayer",
@@ -51,7 +52,7 @@ define(["dojo/_base/declare",
         "esri/InfoTemplate",
         "esri/dijit/Search"], 
 function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber, 
-    topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Map, 
+    topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map, 
     ArcGISTiledMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference, 
     SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, 
     SimpleRenderer, Graphic, Color, PopupTemplate, InfoTemplate, SearchWidget) {
@@ -61,8 +62,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     i18n: i18n,
     templateString: template,
     
-    basemapUrl: null,
     allowAggregation: true,
+    allowSettings: null,
+    basemapUrl: null,
     relationsNode: null,
     field: "envelope_geo",
     pointField: "envelope_cen_pt",
@@ -81,8 +83,55 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     postCreate: function() {
       this.inherited(arguments);
       this.initializeChoices();
-      this.initializeMap(); 
+      this.initializeMap();
       
+      this._initialSettings = {
+        label: this.label,
+        allowAggregation: this.allowAggregation
+      };
+      if (this.allowSettings === null) {
+        if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
+          this.allowSettings = true;
+        }
+      }
+      if (this.allowSettings) {
+        var link = this.dropPane.addSettingsLink();
+        link.onclick = lang.hitch(this,function(e) {
+          var d = new Settings({targetWidget:this});
+          d.showDialog();
+        });
+      }
+      
+      var _lodToGeoHashGridPrecision = {
+        "default": 3,
+        "min": 1,
+        0: 1,
+        1: 1,
+        2: 2,
+        3: 2,
+        4: 3,
+        5: 4,
+        6: 4,
+        7: 5,
+        8: 5,
+        9: 6,
+        10: 6,
+        11: 6,
+        12: 7,
+        13: 7,
+        14: 7,
+        15: 7,
+        16: 7,
+        17: 8,
+        18: 8,
+        19: 8,
+        20: 8,
+        21: 9,
+        22: 9,
+        23: 9,
+        "max": 9
+      };
+      /*
       var _lodToGeoHashGridPrecision = {
         "default": 3,
         "min": 1,
@@ -112,6 +161,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         23: 9,
         "max": 9
       };
+       */
       if (!this.lodToGeoHashGridPrecision) this.lodToGeoHashGridPrecision = _lodToGeoHashGridPrecision;
       
       var self = this;
@@ -349,6 +399,20 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         };
         var qry = {"geo_shape":{}};
         qry.geo_shape[field] = {"shape":shp,"relation":relation};
+        
+        qry = {"geo_bounding_box": {
+          "envelope_cen_pt" : {
+            "top_left" : {
+              "lat" : env.ymax,
+              "lon" : env.xmin
+            },
+            "bottom_right" : {
+              "lat" : 40.01,
+              "lon" : env.xmax
+            }
+          }
+        }};
+        
         return qry;
       };
 

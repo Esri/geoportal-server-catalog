@@ -162,6 +162,9 @@ body {
   height: 300px !important;
   width: auto !important;
 }
+.g-spatial-filter-relations {
+  margin-right: 12px;
+}
 .g-spatial-filter-relation {
   margin-left: 12px;
 }
