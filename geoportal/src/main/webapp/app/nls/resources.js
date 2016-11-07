@@ -65,6 +65,7 @@ define({
         metadataType: "Metadata Type",
         organizations: "Organizations",
         keywords: "Keywords",
+        origin: "Source of Origin"
       },
       componentSettings: {
         componentLabel: "Label",
