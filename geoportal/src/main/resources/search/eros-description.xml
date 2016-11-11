@@ -5,7 +5,7 @@
   <Description>Geoportal</Description>
   <Image width="16" height="16">{base.url}/images/opensearch.png</Image>
   <Url type="application/atom+xml" indexOffset="1"
-    template="{opensearch.url}?from={startIndex?}&amp;size={count?}&amp;f=atom"/>
+    template="{opensearch.url}?start={startIndex?}&amp;max={count?}&amp;f=atom"/>
   <InputEncoding>UTF-8</InputEncoding>
   <OutputEncoding>UTF-8</OutputEncoding>
 </OpenSearchDescription>

@@ -224,6 +224,10 @@ public class SearchRequest extends _SearchRequestBase {
     } 
     
     int nFrom = Val.chkInt(this.getParameter("from"),-1);
+    if (nFrom<0) {
+      // backward compatibility with old version of Eros feed
+      nFrom = Val.chkInt(this.getParameter("start"),-1);
+    }
     if (nFrom >= 0) {
       this.from = nFrom;
       if (this.getInputIndexOffset() == 0) {
@@ -242,6 +246,10 @@ public class SearchRequest extends _SearchRequestBase {
     }
 
     int nSize = Val.chkInt(this.getParameter("size"),-1);
+    if (nSize<0) {
+      // backward compatibility with old version of Eros feed
+      nSize = Val.chkInt(this.getParameter("max"),-1);
+    }
     if (nSize >= 0) {
       this.size = nSize;
       search.setSize(size);
