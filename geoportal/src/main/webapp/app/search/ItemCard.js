@@ -16,6 +16,7 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
         "dojo/topic",
+        "dojo/request/xhr",
         "app/context/app-topics",
         "dojo/dom-class",
         "dojo/dom-construct",
@@ -32,7 +33,7 @@ define(["dojo/_base/declare",
         "app/content/MetadataEditor",
         "app/context/metadata-editor",
         "app/content/UploadMetadata"], 
-function(declare, lang, array, topic, appTopics, domClass, domConstruct,
+function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
     AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
     MetadataEditor, gxeConfig, UploadMetadata) {
@@ -46,6 +47,8 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     item: null,
     itemsNode: null,
     searchPane: null,
+    
+    allowedServices: ["FeatureServer","ImageServer","MapServer","CSW","IMS","SOS","WCS","WFS","WMS"],
     
     postCreate: function() {
       this.inherited(arguments);
@@ -69,6 +72,7 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
+      this._checkService(item);
     },
     
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
@@ -380,6 +384,43 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       }
       var iconPlace = domConstruct.create("img",{src: "images/serviceChecker"+imgSrc, alt: info, height: 16, width: 16});
       domConstruct.place(iconPlace,this.titleNode,"first");
+    },
+    
+    _isServiceAllowed: function(service) {
+      if (service) {
+        service = service.toLowerCase();
+        for(var i=0; i<this.allowedServices.length; i++) {
+          if (this.allowedServices[i].toLowerCase()===service) {
+            return true;
+          }
+        }
+      }
+      return false;
+    },
+    
+    _checkService: function(item) {
+      if (item && item.resources_nst) {
+        if (item.resources_nst.length) {
+          for (var i=0; i<item.resources_nst.length; i++) {
+            if (item.resources_nst[i].url_type_s && this._isServiceAllowed(item.resources_nst[i].url_type_s)) {
+              console.log("Service check for: ",item.resources_nst[i].url_s);
+              break;
+            }
+          }
+        } else if (item.resources_nst.url_type_s && this._isServiceAllowed(item.resources_nst.url_type_s)) {
+          console.log("Service check for: ",item.resources_nst.url_s);
+        }
+      }
+      /*
+      xhr.get("proxy.jsp?https://statuschecker.fgdc.gov/api/v2/results",{
+        query: {
+          auth: "4f5c3a231b516e06261f5137902ef08b",
+          type: "wms",
+          id: "{13DE1BA4-CBD3-4E9D-A95B-D868AC7C13E7}"
+        },
+        handleAs: "json"
+      });
+      */
     }
     
   });
