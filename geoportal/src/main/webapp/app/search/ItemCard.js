@@ -354,6 +354,32 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
         });
       }
       return links;
+    },
+    
+    _setServiceCheckerIcon: function(score) {
+      console.log("SCORE", score);
+      var imgSrc;
+      var info;
+      if(!score || score < 0) {
+        imgSrc = "Unknown16.png";
+        info = "Unknown";
+      } else if(score <= 25) {
+        imgSrc = "VeryBad16.png";
+      } else if(score <= 50 ) {
+        imgSrc = "Bad16.png";
+      } else if(score <= 75 ) {
+        imgSrc = "Good16.png";
+      } else if(score > 75 && score <= 100) {
+        imgSrc = "Excellent16.png";
+      } else {
+        imgSrc = "Unknown16.png";
+        info = "Unknown";
+      }
+      if (!info) {
+        info = "Service Availability = " + score + "%";
+      }
+      var iconPlace = domConstruct.create("img",{src: "images/serviceChecker"+imgSrc, alt: info, height: 16, width: 16});
+      domConstruct.place(iconPlace,this.titleNode,"first");
     }
     
   });
