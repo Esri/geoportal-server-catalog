@@ -22,6 +22,12 @@ define([],function(){var obj={
     showOwner: true,
     showThumbnails: true,
     defaultSort: "title.sort:asc"
+  },
+  
+  statusChecker: {
+    apiUrl: "https://statuschecker.fgdc.gov/api/v2/results",
+    infoUrl: "https://statuschecker.fgdc.gov/test-results",
+    authKey: "geopor_129"
   }
   
 // .......................................................................................

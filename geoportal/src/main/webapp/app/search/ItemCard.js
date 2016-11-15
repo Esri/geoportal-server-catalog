@@ -48,7 +48,17 @@ function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
     itemsNode: null,
     searchPane: null,
     
-    allowedServices: ["FeatureServer","ImageServer","MapServer","CSW","IMS","SOS","WCS","WFS","WMS"],
+    allowedServices: {
+      "featureserver":"agsfeatureserver",
+      "imageserver":"agsimageserver",
+      "mapserver":"agsmapserver",
+      "csw": "csw",
+      "ims": "image",
+      "sos": "sos",
+      "wcs": "wcs",
+      "wfs": "wfs",
+      "wms": "wms"
+    },
     
     postCreate: function() {
       this.inherited(arguments);
@@ -72,7 +82,7 @@ function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
       this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
-      this._checkService(item);
+      this._renderServiceStatus(item);
     },
     
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
@@ -360,7 +370,47 @@ function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
       return links;
     },
     
-    _setServiceCheckerIcon: function(score) {
+    _renderServiceStatus: function(item) {
+      if (item && item.resources_nst) {
+        if (item.resources_nst.length) {
+          for (var i=0; i<item.resources_nst.length; i++) {
+            var type = this._translateService(item.resources_nst[i].url_type_s);
+            if (type) {
+              this._checkService(item._id,type);
+              break;
+            }
+          }
+        } else {
+          var type = this._translateService(item.resources_nst.url_type_s);
+          if (type) {
+            this._checkService(item._id,type);
+          }
+        }
+      }
+    },
+    
+    _checkService: function(id,type) {
+      console.log("Service check for: ", id, type);
+      xhr.get("proxy.jsp?"+AppContext.appConfig.statusChecker.apiUrl,{
+        query: {
+          auth: AppContext.appConfig.statusChecker.authKey,
+          type: type,
+          id: id
+        },
+        handleAs: "json"
+      }).then(lang.hitch({self: this, id: id, type: type},this._drawStatusIcon));
+    },
+    
+    _drawStatusIcon: function(response) {
+      if (response.error) {
+        console.error(response.error);
+      } else if (data.data!=null && data.data.constructor==Array && data.data.length>0) {
+        var score = data.data[0].summary.scoredTest.currentScore;
+        this.self._setServiceCheckerIcon(score,this.id,this.type);
+      }
+    },
+    
+    _setServiceCheckerIcon: function(score,id,type) {
       console.log("SCORE", score);
       var imgSrc;
       var info;
@@ -384,43 +434,19 @@ function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
       }
       var iconPlace = domConstruct.create("img",{src: "images/serviceChecker"+imgSrc, alt: info, height: 16, width: 16});
       domConstruct.place(iconPlace,this.titleNode,"first");
+      
+      var link = domConstruct.create("a",{href: AppContext.appConfig.statusChecker.apiUrl+"?auth="+AppContext.appConfig.statusChecker.authKey+"&uId="+id+"&serviceType="+type});
+      domConstruct.place(link,iconPlace);
     },
     
-    _isServiceAllowed: function(service) {
+    _translateService: function(service) {
       if (service) {
         service = service.toLowerCase();
-        for(var i=0; i<this.allowedServices.length; i++) {
-          if (this.allowedServices[i].toLowerCase()===service) {
-            return true;
-          }
+        if (this.allowedServices[service]) {
+          return this.allowedServices[service];
         }
       }
-      return false;
-    },
-    
-    _checkService: function(item) {
-      if (item && item.resources_nst) {
-        if (item.resources_nst.length) {
-          for (var i=0; i<item.resources_nst.length; i++) {
-            if (item.resources_nst[i].url_type_s && this._isServiceAllowed(item.resources_nst[i].url_type_s)) {
-              console.log("Service check for: ",item.resources_nst[i].url_s);
-              break;
-            }
-          }
-        } else if (item.resources_nst.url_type_s && this._isServiceAllowed(item.resources_nst.url_type_s)) {
-          console.log("Service check for: ",item.resources_nst.url_s);
-        }
-      }
-      /*
-      xhr.get("proxy.jsp?https://statuschecker.fgdc.gov/api/v2/results",{
-        query: {
-          auth: "4f5c3a231b516e06261f5137902ef08b",
-          type: "wms",
-          id: "{13DE1BA4-CBD3-4E9D-A95B-D868AC7C13E7}"
-        },
-        handleAs: "json"
-      });
-      */
+      return null;
     }
     
   });
