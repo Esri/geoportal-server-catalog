@@ -27,7 +27,7 @@ define([],function(){var obj={
   statusChecker: {
     apiUrl: "https://statuschecker.fgdc.gov/api/v2/results",
     infoUrl: "https://statuschecker.fgdc.gov/test-results",
-    authKey: "geopor_129"
+    authKey: "2d95f7f8131704f33cc82ceacebec8bf"
   }
   
 // .......................................................................................
