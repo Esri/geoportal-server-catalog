@@ -15,6 +15,7 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
+        "dojo/string",
         "dojo/topic",
         "dojo/request/xhr",
         "app/context/app-topics",
@@ -23,6 +24,7 @@ define(["dojo/_base/declare",
         "dijit/_WidgetBase",
         "dijit/_TemplatedMixin",
         "dijit/_WidgetsInTemplateMixin",
+        "dijit/Tooltip",
         "dojo/text!./templates/ItemCard.html",
         "dojo/i18n!app/nls/resources",
         "app/context/AppClient",
@@ -33,8 +35,8 @@ define(["dojo/_base/declare",
         "app/content/MetadataEditor",
         "app/context/metadata-editor",
         "app/content/UploadMetadata"], 
-function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
-    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
+function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConstruct,
+    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, template, i18n, 
     AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
     MetadataEditor, gxeConfig, UploadMetadata) {
   
@@ -371,19 +373,22 @@ function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
     },
     
     _renderServiceStatus: function(item) {
-      if (item && item.resources_nst) {
-        if (item.resources_nst.length) {
-          for (var i=0; i<item.resources_nst.length; i++) {
-            var type = this._translateService(item.resources_nst[i].url_type_s);
+      var authKey = AppContext.appConfig.statusChecker.authKey;
+      if (authKey && string.trim(authKey).length>0) {
+        if (item && item.resources_nst) {
+          if (item.resources_nst.length) {
+            for (var i=0; i<item.resources_nst.length; i++) {
+              var type = this._translateService(item.resources_nst[i].url_type_s);
+              if (type) {
+                this._checkService(item._id,type);
+                break;
+              }
+            }
+          } else {
+            var type = this._translateService(item.resources_nst.url_type_s);
             if (type) {
               this._checkService(item._id,type);
-              break;
             }
-          }
-        } else {
-          var type = this._translateService(item.resources_nst.url_type_s);
-          if (type) {
-            this._checkService(item._id,type);
           }
         }
       }
@@ -416,7 +421,7 @@ function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
       var info;
       if(!score || score < 0) {
         imgSrc = "Unknown16.png";
-        info = "Unknown";
+        info = i18n.item.statusChecker.unknown;
       } else if(score <= 25) {
         imgSrc = "VeryBad16.png";
       } else if(score <= 50 ) {
@@ -427,16 +432,34 @@ function(declare, lang, array, topic, xhr, appTopics, domClass, domConstruct,
         imgSrc = "Excellent16.png";
       } else {
         imgSrc = "Unknown16.png";
-        info = "Unknown";
+        info = i18n.item.statusChecker.unknown;
       }
       if (!info) {
-        info = "Service Availability = " + score + "%";
+        info = string.substitute(i18n.item.statusChecker.status,{score: score});
       }
-      var iconPlace = domConstruct.create("img",{src: "images/serviceChecker"+imgSrc, alt: info, height: 16, width: 16});
-      domConstruct.place(iconPlace,this.titleNode,"first");
       
-      var link = domConstruct.create("a",{href: AppContext.appConfig.statusChecker.apiUrl+"?auth="+AppContext.appConfig.statusChecker.authKey+"&uId="+id+"&serviceType="+type});
-      domConstruct.place(link,iconPlace);
+      var link = domConstruct.create("a",{
+        href: AppContext.appConfig.statusChecker.infoUrl+"?auth="+AppContext.appConfig.statusChecker.authKey+"&uId="+id+"&serviceType="+type, 
+        target: "_blank",
+        alt: info,
+        "class": "g-item-status"
+      });
+      domConstruct.place(link,this.titleNode,"first");
+      
+      var iconPlace = domConstruct.create("img",{
+        src: "images/serviceChecker"+imgSrc, 
+        alt: info, 
+        height: 16, 
+        width: 16
+      });
+      domConstruct.place(iconPlace,link);
+      
+      var tooltip = new Tooltip({
+        connectId: link,
+        label: info,
+        position: ['below']
+      });
+      tooltip.startup();
     },
     
     _translateService: function(service) {

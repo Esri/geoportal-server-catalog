@@ -223,6 +223,10 @@ define({
           editMetadata: "Edit Metadata",
           uploadMetadata: "Upload Metadata"
         }
+      },
+      statusChecker: {
+        unknown: "Unknown",
+        status: "Service availability = ${score}%"
       }
     },
     

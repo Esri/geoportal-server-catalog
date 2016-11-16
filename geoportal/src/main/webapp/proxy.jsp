@@ -25,7 +25,6 @@ try {
     rd.close();
  
 } catch(Exception e) {
-  e.printStackTrace();
   response.setStatus(500);
 }
 %>
