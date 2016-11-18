@@ -409,10 +409,10 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
     _drawStatusIcon: function(response) {
       if (response.error) {
         console.error(response.error);
-      } else if (data.data!=null && data.data.constructor==Array && data.data.length>0) {
-        var score = data.data[0].summary.scoredTest.currentScore;
+      } else if (response.data!=null && response.data.constructor==Array && response.data.length>0) {
+        var score = response.data[0].summary.scoredTest.currentScore;
         this.self._setServiceCheckerIcon(score,this.id,this.type);
-      }
+      }    
     },
     
     _setServiceCheckerIcon: function(score,id,type) {
