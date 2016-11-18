@@ -407,7 +407,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
               "lon" : env.xmin
             },
             "bottom_right" : {
-              "lat" : 40.01,
+              "lat" : env.ymin,
               "lon" : env.xmax
             }
           }
