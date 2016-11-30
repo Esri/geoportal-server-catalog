@@ -73,6 +73,14 @@
         }
       },
       {
+        "uri": "widgets/GeoportalSearch/Widget",
+        "version": "2.0.1",
+        "position":{
+          "left": 55,
+          "top": 55
+        }
+      },
+      {
         "position": {
           "left": 55,
           "top": 45
