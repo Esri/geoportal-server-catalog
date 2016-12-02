@@ -396,7 +396,7 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
     
     _checkService: function(id,type) {
       console.log("Service check for: ", id, type);
-      xhr.get("proxy.jsp?"+AppContext.appConfig.statusChecker.apiUrl,{
+      xhr.get("viewer/proxy.jsp?"+AppContext.appConfig.statusChecker.apiUrl,{
         query: {
           auth: AppContext.appConfig.statusChecker.authKey,
           type: type,
