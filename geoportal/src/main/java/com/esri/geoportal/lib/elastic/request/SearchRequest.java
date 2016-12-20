@@ -213,7 +213,7 @@ public class SearchRequest extends _SearchRequestBase {
       qsqb.defaultField(Val.chkStr(this.getParameter("df"),null));
       qsqb.analyzer(Val.chkStr(this.getParameter("analyzer"),null));
       qsqb.analyzeWildcard(Val.chkBool(this.getParameter("analyze_wildcard"),true)); // TODO false?
-      qsqb.lowercaseExpandedTerms(Val.chkBool(this.getParameter("lowercase_expanded_terms"),true));
+      // qsqb.lowercaseExpandedTerms(Val.chkBool(this.getParameter("lowercase_expanded_terms"),true)); // TODO ES 2to5
       String lenient = Val.trim(this.getParameter("lenient"));
       if (lenient != null && lenient.length() > 0) {
         qsqb.lenient(Val.chkBool(lenient,false));
