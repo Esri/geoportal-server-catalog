@@ -28,52 +28,46 @@
           "doc_values": false
         },
         "sys_itemid": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "sys_meta":{
-          "type":"string",
-          "index":"no"
+          "type":"keyword",
+          "index":false
         }
       }
     },
     "clob":{
       "properties":{
         "sys_clob":{
-          "type":"string",
-          "index":"no",
+          "type":"keyword",
+          "index":false,
           "store": false,
           "doc_values": false
         },
         "sys_itemid": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "sys_meta":{
-          "type":"string",
-          "index":"no"
+          "type":"keyword",
+          "index":false
         }
       }
     },
     "item":{
       "properties": {
         "title": {
-          "type": "string",
-          "index": "analyzed",
+          "type": "text",
           "fields": {
             "sort": { 
-              "type":  "string",
-              "analyzer": "case_insensitive_sort"
+              "type":  "keyword"
             }
           }
         },
         "fileid": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "description": {
-          "type": "string",
-          "index": "analyzed"
+          "type": "text"
         }
       },
       "dynamic_templates":[
@@ -81,8 +75,7 @@
           "_s":{
             "match":"*_s",
             "mapping":{
-              "type":"string",
-              "index":"not_analyzed"
+              "type":"keyword"
             }
           }
         },
@@ -90,8 +83,7 @@
           "_txt":{
             "match":"*_txt",
             "mapping":{
-              "type":"string",
-              "index":"analyzed"
+              "type":"text"
             }
           }
         },
@@ -189,8 +181,8 @@
           "_clob":{
             "match":"*_clob",
             "mapping":{
-              "type":"string",
-              "index":"no",
+              "type":"keyword",
+              "index":false,
               "store": false,
               "doc_values": false
             }

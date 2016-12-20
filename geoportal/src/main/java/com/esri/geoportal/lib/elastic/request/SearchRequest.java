@@ -37,10 +37,14 @@ import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.QueryStringQueryBuilder;
-import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
+/* ES 2to5 */
+//import org.elasticsearch.index.query.QueryStringQueryBuilder.Operator;
+import org.elasticsearch.index.query.Operator;
 import org.elasticsearch.index.query.WrapperQueryBuilder;
 import org.elasticsearch.search.sort.SortOrder;
+import org.elasticsearch.search.suggest.SuggestBuilder;
 import org.elasticsearch.search.suggest.SuggestBuilders;
+import org.elasticsearch.search.suggest.term.TermSuggestionBuilder.SuggestMode;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -266,6 +270,19 @@ public class SearchRequest extends _SearchRequestBase {
     int terminateAfter = Val.chkInt(this.getParameter("terminate_after"),-1);
     if (terminateAfter > 0) search.setTerminateAfter(terminateAfter);
     
+    /*
+        if (request.param("fields") != null) {
+            throw new IllegalArgumentException("The parameter [" +
+                SearchSourceBuilder.FIELDS_FIELD + "] is no longer supported, please use [" +
+                SearchSourceBuilder.STORED_FIELDS_FIELD + "] to retrieve stored fields or _source filtering " +
+                "if the field is not stored");
+        }
+     */
+    
+    // https://github.com/elastic/elasticsearch/blob/44ac5d057a8ceb6940c26275d9963bccb9f5065a/core/src/main/java/org/elasticsearch/rest/action/search/RestSearchAction.java
+    
+    /* ES 2to5 */
+    /*
     String fieldsParam = Val.trim(this.getParameter("fields"));
     if (fieldsParam != null) {
       if (fieldsParam.length() == 0) {
@@ -275,9 +292,32 @@ public class SearchRequest extends _SearchRequestBase {
         for (String field: fields) search.addField(field);
       }
     }
+    */
+    
+    String fieldsParam = this.getParameter("fields");
+    if (fieldsParam == null) fieldsParam = this.getParameter("stored_fields");
+    fieldsParam = Val.trim(fieldsParam);
+    if (fieldsParam != null) {
+      if (fieldsParam.length() == 0) {
+        //search.setNoFields(); /* ES 2to5  TODO */
+      } else {
+        String[] fields = Val.tokenize(fieldsParam,",",false);
+        for (String field: fields) search.addStoredField(field);
+      }
+    }
 
+    /* ES 2to5 */
+    /*
     String[] fdFields = Val.tokenize(this.getParameter("fielddata_fields"),",",false);
     for (String field: fdFields) search.addFieldDataField(field);
+    */
+    String[] dvFields = Val.tokenize(this.getParameter("docvalue_fields"),",",false);
+    for (String field: dvFields) search.addDocValueField(field);
+    String[] fdFields = Val.tokenize(this.getParameter("fielddata_fields"),",",false);
+    for (String field: fdFields) search.addDocValueField(field);
+    
+    
+    // "stored_fields"
   
     boolean checkFetchSource = true;
     if (checkFetchSource) {
@@ -338,8 +378,14 @@ public class SearchRequest extends _SearchRequestBase {
       String suggestText = Val.chkStr(this.getParameter("suggest_text"),q);
       int suggestSize = Val.chkInt(this.getParameter("suggest_size"),5);
       String suggestMode = Val.trim(this.getParameter("suggest_mode"));
+      /* ES 2to5 */
+      /*
       search.addSuggestion(SuggestBuilders.termSuggestion(suggestField)
           .field(suggestField).text(suggestText).size(suggestSize).suggestMode(suggestMode));
+      */
+      search.suggest(new SuggestBuilder().addSuggestion(suggestField,
+        SuggestBuilders.termSuggestion(suggestField)
+          .text(suggestText).size(suggestSize).suggestMode(SuggestMode.resolve(suggestMode))));
     }
 
   }

@@ -135,7 +135,9 @@ public class AccessUtil {
     GetRequestBuilder request = ec.getTransportClient().prepareGet(
         ec.getItemIndexName(),ec.getItemIndexType(),id);
     request.setFetchSource(false);
-    request.setFields(ownerField);
+    /* ES 2to5 */
+    //request.setFields(ownerField);
+    request.setStoredFields(ownerField);
     GetResponse response = request.get();
     boolean ownerOk = checkOwner(user,ownerField,response);
     if (!ownerOk) throw new AccessDeniedException(notOwnerMessage);

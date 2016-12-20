@@ -49,7 +49,9 @@ public class KvpClob extends Kvp {
     String fieldName = getDataFieldName();
     GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
     req.setFetchSource(false);
-    req.setFields(fieldName);
+    /* ES 2to5 */
+    //req.setFields(fieldName);
+    req.setStoredFields(fieldName);
     GetResponse resp = req.get();
     if (resp.isExists()) {
       setFound(true);

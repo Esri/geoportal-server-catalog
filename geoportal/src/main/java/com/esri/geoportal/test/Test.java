@@ -87,6 +87,8 @@ public class Test {
     AbstractApplicationContext context = null;
     try {
       context = new ClassPathXmlApplicationContext("config/app-context.xml");
+      //org.apache.logging.log4j
+      
       
       //Test.test1();
       //Test.testPublishMetadata();

@@ -19,7 +19,8 @@
 	</beans:bean>
 
 	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContext">
-		<beans:property name="clusterName" value="${es_cluster:elasticsearch}" />
+		<!-- <beans:property name="clusterName" value="${es_cluster:elasticsearch}" /> -->
+		<beans:property name="clusterName" value="gptes5" />
 		<beans:property name="indexName" value="metadata" />
 		<beans:property name="indexNameIsAlias" value="true" />
 		<beans:property name="autoCreateIndex" value="true" />
@@ -28,7 +29,8 @@
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
-				<beans:value>${es_node:localhost}</beans:value>
+				<!-- <beans:value>${es_node:localhost}</beans:value> -->
+				<beans:value>gptdb3</beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
@@ -49,6 +51,7 @@
 	  http://localhost:8080/geoportal/swagger-ui/index.html?url=/geoportal/swagger/swagger.json
 	  Comment out the section below to disable the api documentation.
 	--> 
+	<!-- 
 	<beans:bean id="swaggerConfig" class="io.swagger.jaxrs.config.BeanConfig">
 		<beans:property name="version" value="2.0.2" />
 		<beans:property name="basePath" value="#{servletContext.contextPath}/rest"/>
@@ -61,5 +64,6 @@
 		<beans:property name="licenseUrl" value="http://www.apache.org/licenses/LICENSE-2.0.html"/>
 		<beans:property name="scan" value="true"/>
 	</beans:bean>
+	-->
  
 </beans:beans>

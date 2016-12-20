@@ -23,6 +23,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
@@ -125,7 +126,9 @@ public class Kvp {
   public DeleteResponse deleteContent(ElasticContext ec, String id) throws Exception {
     setFound(false);
     DeleteResponse resp = ec.getTransportClient().prepareDelete(getIndexName(),getIndexType(),id).get();
-    setFound(resp.isFound());
+    /* ES 2to5 */
+    //setFound(resp.isFound());
+    setFound(resp.getResult().equals(Result.DELETED));
     return resp;
   }
 
@@ -213,7 +216,9 @@ public class Kvp {
     String fieldName = FieldNames.FIELD_SYS_META;
     GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
     req.setFetchSource(false);
-    req.setFields(fieldName);
+    /* ES 2to5 */
+    //req.setFields(fieldName);
+    req.setStoredFields(fieldName);
     GetResponse resp = req.get();
     if (resp.isExists()) {
       setFound(true);
