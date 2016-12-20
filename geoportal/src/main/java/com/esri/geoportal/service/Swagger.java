@@ -39,21 +39,12 @@ public class Swagger extends Application {
   public Set<Class<?>> getClasses() {
     Set<Class<?>> resources = new HashSet<Class<?>>();
     resources.add(Swagger.class);
-    
-    try {
-      if (GeoportalContext.getInstance().getBeanIfDeclared("swaggerConfig") != null) {
-        resources.add(io.swagger.jaxrs.listing.ApiListingResource.class);
-        resources.add(io.swagger.jaxrs.listing.SwaggerSerializers.class); 
-      }
-    } catch(Exception ex) {
-      ex.printStackTrace();
-    }
     return resources;
   }
 
   @GET
-  public Response swagger(
-      @Context HttpServletRequest hsr) {
+  public Response swagger(@Context HttpServletRequest hsr) {
+    /*
     try {
       io.swagger.jaxrs.config.BeanConfig cfg = (io.swagger.jaxrs.config.BeanConfig)GeoportalContext
           .getInstance().getBeanIfDeclared("swaggerConfig");
@@ -67,6 +58,7 @@ public class Swagger extends Application {
     } catch(Exception ex) {
       ex.printStackTrace();
     }
+    */
     return null;
   }
 
