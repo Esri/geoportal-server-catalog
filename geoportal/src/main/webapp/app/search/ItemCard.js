@@ -15,13 +15,16 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
+        "dojo/string",
         "dojo/topic",
+        "dojo/request/xhr",
         "app/context/app-topics",
         "dojo/dom-class",
         "dojo/dom-construct",
         "dijit/_WidgetBase",
         "dijit/_TemplatedMixin",
         "dijit/_WidgetsInTemplateMixin",
+        "dijit/Tooltip",
         "dojo/text!./templates/ItemCard.html",
         "dojo/i18n!app/nls/resources",
         "app/context/AppClient",
@@ -32,8 +35,8 @@ define(["dojo/_base/declare",
         "app/content/MetadataEditor",
         "app/context/metadata-editor",
         "app/content/UploadMetadata"], 
-function(declare, lang, array, topic, appTopics, domClass, domConstruct,
-    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
+function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConstruct,
+    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, template, i18n, 
     AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
     MetadataEditor, gxeConfig, UploadMetadata) {
   
@@ -46,6 +49,18 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
     item: null,
     itemsNode: null,
     searchPane: null,
+    
+    allowedServices: {
+      "featureserver":"agsfeatureserver",
+      "imageserver":"agsimageserver",
+      "mapserver":"agsmapserver",
+      "csw": "csw",
+      "ims": "image",
+      "sos": "sos",
+      "wcs": "wcs",
+      "wfs": "wfs",
+      "wms": "wms"
+    },
     
     postCreate: function() {
       this.inherited(arguments);
@@ -69,6 +84,7 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
       this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
+      this._renderServiceStatus(item);
     },
     
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
@@ -354,6 +370,106 @@ function(declare, lang, array, topic, appTopics, domClass, domConstruct,
         });
       }
       return links;
+    },
+    
+    _renderServiceStatus: function(item) {
+      var authKey = AppContext.appConfig.statusChecker.authKey;
+      if (authKey && string.trim(authKey).length>0) {
+        if (item && item.resources_nst) {
+          if (item.resources_nst.length) {
+            for (var i=0; i<item.resources_nst.length; i++) {
+              var type = this._translateService(item.resources_nst[i].url_type_s);
+              if (type) {
+                this._checkService(item._id,type);
+                break;
+              }
+            }
+          } else {
+            var type = this._translateService(item.resources_nst.url_type_s);
+            if (type) {
+              this._checkService(item._id,type);
+            }
+          }
+        }
+      }
+    },
+    
+    _checkService: function(id,type) {
+      console.log("Service check for: ", id, type);
+      xhr.get("viewer/proxy.jsp?"+AppContext.appConfig.statusChecker.apiUrl,{
+        query: {
+          auth: AppContext.appConfig.statusChecker.authKey,
+          type: type,
+          id: id
+        },
+        handleAs: "json"
+      }).then(lang.hitch({self: this, id: id, type: type},this._drawStatusIcon));
+    },
+    
+    _drawStatusIcon: function(response) {
+      if (response.error) {
+        console.error(response.error);
+      } else if (response.data!=null && response.data.constructor==Array && response.data.length>0) {
+        var score = response.data[0].summary.scoredTest.currentScore;
+        this.self._setServiceCheckerIcon(score,this.id,this.type);
+      }    
+    },
+    
+    _setServiceCheckerIcon: function(score,id,type) {
+      console.log("SCORE", score);
+      var imgSrc;
+      var info;
+      if(!score || score < 0) {
+        imgSrc = "Unknown16.png";
+        info = i18n.item.statusChecker.unknown;
+      } else if(score <= 25) {
+        imgSrc = "VeryBad16.png";
+      } else if(score <= 50 ) {
+        imgSrc = "Bad16.png";
+      } else if(score <= 75 ) {
+        imgSrc = "Good16.png";
+      } else if(score > 75 && score <= 100) {
+        imgSrc = "Excellent16.png";
+      } else {
+        imgSrc = "Unknown16.png";
+        info = i18n.item.statusChecker.unknown;
+      }
+      if (!info) {
+        info = string.substitute(i18n.item.statusChecker.status,{score: score});
+      }
+      
+      var link = domConstruct.create("a",{
+        href: AppContext.appConfig.statusChecker.infoUrl+"?auth="+AppContext.appConfig.statusChecker.authKey+"&uId="+id+"&serviceType="+type, 
+        target: "_blank",
+        alt: info,
+        "class": "g-item-status"
+      });
+      domConstruct.place(link,this.titleNode,"first");
+      
+      var iconPlace = domConstruct.create("img",{
+        src: "images/serviceChecker"+imgSrc, 
+        alt: info, 
+        height: 16, 
+        width: 16
+      });
+      domConstruct.place(iconPlace,link);
+      
+      var tooltip = new Tooltip({
+        connectId: link,
+        label: info,
+        position: ['below']
+      });
+      tooltip.startup();
+    },
+    
+    _translateService: function(service) {
+      if (service) {
+        service = service.toLowerCase();
+        if (this.allowedServices[service]) {
+          return this.allowedServices[service];
+        }
+      }
+      return null;
     }
     
   });

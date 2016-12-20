@@ -242,6 +242,10 @@ body {
   font-weight: bold;
 }
 
+.g-item-card .g-item-status {
+  margin-right: 0.5em;
+}
+
 .g-item-card .g-item-description, 
 .g-item-card .g-item-actions, 
 .g-item-card .g-item-owner-and-date {

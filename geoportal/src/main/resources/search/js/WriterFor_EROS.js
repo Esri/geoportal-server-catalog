@@ -55,6 +55,16 @@ G.writers.atom = {
     xmlBuilder.writer.writeEndElement();
     
     this._addLink("search","application/opensearchdescription+xml",dscUrl,xmlBuilder);
+    this._addLink("self","application/opensearchdescription+xml",baseUrl+"/Eros?start="+from+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
+    this._addLink("first","application/opensearchdescription+xml",baseUrl+"/Eros?start="+1+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
+    this._addLink("last","application/opensearchdescription+xml",baseUrl+"/Eros?start="+(size*Math.floor(totalHits/size))+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
+    if (from-size>=1) {
+      this._addLink("prev","application/opensearchdescription+xml",baseUrl+"/Eros?start="+(from-size)+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
+    }
+    if (from+size<=totalHits) {
+      this._addLink("next","application/opensearchdescription+xml",baseUrl+"/Eros?start="+(from+size)+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
+    }
+    
     xmlBuilder.writeElement(G.URI_OPENSEARCH,"totalResults",""+totalHits);
     xmlBuilder.writeElement(G.URI_OPENSEARCH,"startIndex",""+from); // TODO startIndex??
     xmlBuilder.writeElement(G.URI_OPENSEARCH,"itemsPerPage",""+size);

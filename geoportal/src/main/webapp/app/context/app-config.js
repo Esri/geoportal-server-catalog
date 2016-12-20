@@ -22,6 +22,12 @@ define([],function(){var obj={
     showOwner: true,
     showThumbnails: true,
     defaultSort: "title.sort:asc"
+  },
+  
+  statusChecker: {
+    apiUrl: "http://registry.fgdc.gov/statuschecker/api/v2/results?",
+    infoUrl: "http://registry.fgdc.gov/statuschecker/ServiceDetail.php?",
+    authKey: "2d95f7f8131704f33cc82ceacebec8bf"
   }
   
 // .......................................................................................

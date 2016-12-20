@@ -65,6 +65,7 @@ define({
         metadataType: "Metadata Type",
         organizations: "Organizations",
         keywords: "Keywords",
+        origin: "Source of Origin"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -222,6 +223,10 @@ define({
           editMetadata: "Edit Metadata",
           uploadMetadata: "Upload Metadata"
         }
+      },
+      statusChecker: {
+        unknown: "Unknown",
+        status: "Service availability = ${score}%"
       }
     },
     
