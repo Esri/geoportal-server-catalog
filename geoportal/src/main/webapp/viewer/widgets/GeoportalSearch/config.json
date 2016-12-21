@@ -7,7 +7,11 @@
       {
         "name": "California Geoportal",
         "url": "http://portal.gis.ca.gov/geoportal/rest/find/document"
-      }
+      },
+      {
+        "name": "USGIN Geoportal",
+        "url": "http://catalog.usgin.org/geoportal/rest/find/document"
+      }      
   ],
   "recordsPerPage": 10,
   "showAllAddedLayers": true
