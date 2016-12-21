@@ -114,11 +114,14 @@ public class SearchRequest extends _SearchRequestBase {
       for (JsonStructure j: filters) a.add(j);
       jsoBool.add("filter",a);
     }
-    jsoQuery.add("query",Json.createObjectBuilder().add("bool",jsoBool));
+    /* ES 2to5 */
+    //jsoQuery.add("query",Json.createObjectBuilder().add("bool",jsoBool));
+    jsoQuery.add("bool",jsoBool);
     
     String wq = JsonUtil.toJson(jsoQuery.build());
     search.setQuery(QueryBuilders.wrapperQuery(wq));
     // TODO some logging here
+    //LOGGER.info("SearchRequest: "+wq);
     LOGGER.trace("SearchRequest: "+wq);
     SearchResponse searchResponse = search.get();
     writeResponse(response,searchResponse);
