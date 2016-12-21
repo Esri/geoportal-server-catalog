@@ -13,10 +13,10 @@
  * limitations under the License.
  */
 package com.esri.geoportal.service;
-import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.context.AppResponse;
 
-import java.net.URI;
-import java.net.URLEncoder;
+import java.io.File;
+import java.nio.file.Files;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -26,13 +26,17 @@ import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
+import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
 /**
  * Swagger API configuration and redirect.
+ * <p>
+ *   http://host:port/geoportal/swagger/swagger.json
+ * </p>
  */
 @ApplicationPath("swagger")
-@Path("")
+@Path("swagger.json")
 public class Swagger extends Application {
 
   @Override
@@ -43,23 +47,23 @@ public class Swagger extends Application {
   }
 
   @GET
-  public Response swagger(@Context HttpServletRequest hsr) {
-    /*
+  public Response getFile(@Context HttpServletRequest hsr) {
+    boolean pretty = false;
     try {
-      io.swagger.jaxrs.config.BeanConfig cfg = (io.swagger.jaxrs.config.BeanConfig)GeoportalContext
-          .getInstance().getBeanIfDeclared("swaggerConfig");
-      if (cfg != null) {
-        String cp = hsr.getContextPath();
-        String p = URLEncoder.encode(cp+"/swagger/swagger.json","UTF-8");
-        URI uri = new URI(cp+"/swagger-ui/index.html?url="+p);
-        //System.err.println("/swagger redirect: "+uri.toString());
-        return Response.temporaryRedirect(uri).build();
+      String fileName = "swagger/swagger.json";
+      String contextPath = hsr.getContextPath();
+      if (contextPath == null || contextPath.length() == 0) {
+        contextPath = "/";
       }
+      ClassLoader classLoader = this.getClass().getClassLoader();
+      File file = new File(classLoader.getResource(fileName).getFile());
+      String v = new String(Files.readAllBytes(file.toPath()),"UTF-8");
+      v = v.replaceAll("\\$\\{contextPath}",contextPath);
+      return Response.ok(v).type(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8")).build();
     } catch(Exception ex) {
       ex.printStackTrace();
+      return (new AppResponse()).buildException(ex,pretty);
     }
-    */
-    return null;
   }
 
 }
