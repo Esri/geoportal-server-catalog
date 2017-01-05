@@ -400,6 +400,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         var qry = {"geo_shape":{}};
         qry.geo_shape[field] = {"shape":shp,"relation":relation};
         
+        // TODO
         qry = {"geo_bounding_box": {
           "envelope_cen_pt" : {
             "top_left" : {
@@ -412,6 +413,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             }
           }
         }};
+       
         
         return qry;
       };

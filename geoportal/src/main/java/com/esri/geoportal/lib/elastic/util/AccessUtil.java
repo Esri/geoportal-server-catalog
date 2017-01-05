@@ -21,7 +21,6 @@ import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.index.get.GetField;
 import org.springframework.security.access.AccessDeniedException;
 
 /**
@@ -35,27 +34,7 @@ public class AccessUtil {
   
   /** Constructor */
   public AccessUtil() {}
-  
-  /**
-   * Check the owner.
-   * @param user the user
-   * @param ownerField the owner field name (username)
-   * @param response the GetResponse
-   * @return false if not
-   */
-  private boolean checkOwner(AppUser user, String ownerField, GetResponse response) {
-    boolean ok = true;
-    if (response.isExists()) {
-      ok = false;
-      GetField field = response.getField(ownerField);
-      if (field != null) {
-        String owner = (String)field.getValue();
-        ok = (owner != null) && (owner.equalsIgnoreCase(user.getUsername()));
-      } 
-    }
-    return ok;
-  }
-  
+    
   /**
    * Determines an item id
    * @param id the id
@@ -134,13 +113,14 @@ public class AccessUtil {
     
     GetRequestBuilder request = ec.getTransportClient().prepareGet(
         ec.getItemIndexName(),ec.getItemIndexType(),id);
-    request.setFetchSource(false);
+    //request.setFetchSource(false);
     /* ES 2to5 */
     //request.setFields(ownerField);
-    request.setStoredFields(ownerField);
+    //request.setStoredFields(ownerField);
     GetResponse response = request.get();
-    boolean ownerOk = checkOwner(user,ownerField,response);
-    if (!ownerOk) throw new AccessDeniedException(notOwnerMessage);
+    String owner = (String)response.getSource().get(ownerField);
+    boolean ok = (owner != null) && (owner.equalsIgnoreCase(user.getUsername()));
+    if (!ok) throw new AccessDeniedException(notOwnerMessage);
   }
   
 }

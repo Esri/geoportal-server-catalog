@@ -24,15 +24,17 @@
       "properties":{
         "sys_blob":{
           "type":"binary",
-          "store": false,
-          "doc_values": false
+          "store":true,
+          "doc_values":false
         },
         "sys_itemid": {
-          "type": "keyword"
+          "type":"keyword"
         },
         "sys_meta":{
           "type":"keyword",
-          "index":false
+          "index":false,
+          "store":true,
+          "doc_values":false
         }
       }
     },
@@ -41,15 +43,17 @@
         "sys_clob":{
           "type":"keyword",
           "index":false,
-          "store": false,
-          "doc_values": false
+          "store":true,
+          "doc_values":false
         },
         "sys_itemid": {
-          "type": "keyword"
+          "type":"keyword"
         },
         "sys_meta":{
           "type":"keyword",
-          "index":false
+          "index":false,
+          "store":true,
+          "doc_values":false
         }
       }
     },
@@ -59,7 +63,7 @@
           "type": "text",
           "fields": {
             "sort": { 
-              "type":  "keyword"
+              "type": "keyword"
             }
           }
         },
@@ -172,7 +176,7 @@
             "match":"*_blob",
             "mapping":{
               "type":"binary",
-              "store": false,
+              "store": true,
               "doc_values": false
             }
           }
@@ -183,7 +187,7 @@
             "mapping":{
               "type":"keyword",
               "index":false,
-              "store": false,
+              "store": true,
               "doc_values": false
             }
           }

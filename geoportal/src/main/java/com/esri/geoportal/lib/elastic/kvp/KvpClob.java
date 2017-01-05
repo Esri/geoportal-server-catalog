@@ -60,6 +60,9 @@ public class KvpClob extends Kvp {
         if (field != null) {
           return (String)field.getValue();
         }
+        //String v = (String)resp.getSource().get(fieldName);
+        //System.err.println(v);
+        //return v;
       } catch (Exception e) {
         String msg = getIndexName()+"/"+getIndexType()+"/"+getId();
         LOGGER.error("Error reading field: "+fieldName+", "+msg,e);
