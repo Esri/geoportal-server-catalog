@@ -28,6 +28,14 @@
       <param-name>maxThreads</param-name>
       <param-value>256</param-value>
     </init-param>
+    <init-param>
+      <param-name>timeout</param-name>
+      <param-value>120000</param-value>
+    </init-param>
+    <init-param>
+      <param-name>idleTimeout</param-name>
+      <param-value>120000</param-value>
+    </init-param>
     <async-supported>true</async-supported>
   </servlet>
   <servlet-mapping>
