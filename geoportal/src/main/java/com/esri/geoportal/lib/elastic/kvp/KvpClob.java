@@ -49,7 +49,9 @@ public class KvpClob extends Kvp {
     String fieldName = getDataFieldName();
     GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
     req.setFetchSource(false);
-    req.setFields(fieldName);
+    /* ES 2to5 */
+    //req.setFields(fieldName);
+    req.setStoredFields(fieldName);
     GetResponse resp = req.get();
     if (resp.isExists()) {
       setFound(true);
@@ -58,6 +60,9 @@ public class KvpClob extends Kvp {
         if (field != null) {
           return (String)field.getValue();
         }
+        //String v = (String)resp.getSource().get(fieldName);
+        //System.err.println(v);
+        //return v;
       } catch (Exception e) {
         String msg = getIndexName()+"/"+getIndexType()+"/"+getId();
         LOGGER.error("Error reading field: "+fieldName+", "+msg,e);

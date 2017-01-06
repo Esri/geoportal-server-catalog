@@ -244,6 +244,12 @@ var G = {
       if ((ymax > 90.0) && (ymin <= 90.0)) ymax = 90.0;
       var xcen = (xmin + xmax) / 2.0;
       var ycen = (ymin + ymax) / 2.0;
+      if (xmin > xmax) {
+        if (xcen >= 0) xcen = xcen - 180.0;
+        else xcen = xcen + 180.0;
+      }
+      if (xcen < -180.0) xcen = -180.0;
+      if (xcen > 180.0) xcen = 180.0;
       result = {
         "envelope": {
           "type": "envelope",

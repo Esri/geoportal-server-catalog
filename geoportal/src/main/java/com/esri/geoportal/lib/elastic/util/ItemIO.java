@@ -26,6 +26,7 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
@@ -46,7 +47,9 @@ public class ItemIO {
   public DeleteResponse deleteItem(ElasticContext ec, String id) throws Exception {
     DeleteResponse resp = ec.getTransportClient().prepareDelete(
       ec.getItemIndexName(),ec.getItemIndexType(),id).get();
-    if (resp.isFound()) {
+    /* ES 2to5 */
+    // if (resp.isFound()) {
+    if (resp.getResult().equals(Result.DELETED)) {
       (new XmlContent(ec)).deleteContent(ec,id);
     }
     return resp;

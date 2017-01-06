@@ -5,7 +5,7 @@ define([],function(){var obj={
   
   search: {
     allowSettings: true,
-    useSimpleQueryString: true
+    useSimpleQueryString: false
   },
   
   searchMap: {
@@ -27,7 +27,7 @@ define([],function(){var obj={
   statusChecker: {
     apiUrl: "http://registry.fgdc.gov/statuschecker/api/v2/results?",
     infoUrl: "http://registry.fgdc.gov/statuschecker/ServiceDetail.php?",
-    authKey: "2d95f7f8131704f33cc82ceacebec8bf"
+    authKey: null
   }
   
 // .......................................................................................

@@ -87,6 +87,15 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
       if (ext && ext.length === 2) {
         this._fromValue = ext[0];
         this._toValue = ext[1];
+        // TODO ES2to5 can't pass decimals to an integer field
+        if (this.places === 0) {
+          if (typeof this._fromValue === "number") {
+            this._fromValue = Math.round(this._fromValue);
+          }
+          if (typeof this._toValue === "number") {
+            this._toValue = Math.round(this._toValue);
+          }
+        }
         this.search();
       }
     },
