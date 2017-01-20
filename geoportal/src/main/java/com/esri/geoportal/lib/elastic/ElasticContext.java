@@ -33,6 +33,7 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -299,10 +300,16 @@ public class ElasticContext {
       LOGGER.warn("Configuration warning: TransportClient has already been started.");
     } else {
       if (clusterName != null && clusterName.length() > 0) {
-        Settings settings = Settings.settingsBuilder().put("cluster.name",clusterName).build();
-        transportClient = TransportClient.builder().settings(settings).build();
+        /* ES 2to5 */
+        //Settings settings = Settings.settingsBuilder().put("cluster.name",clusterName).build();
+        Settings settings = Settings.builder().put("cluster.name",clusterName).build();
+        /* ES 2to5 */
+        // transportClient = TransportClient.builder().settings(settings).build();
+        transportClient = new PreBuiltTransportClient(settings);
       } else {
-        transportClient = TransportClient.builder().build();
+        /* ES 2to5 */
+        //transportClient = TransportClient.builder().build();
+        transportClient = new PreBuiltTransportClient(Settings.EMPTY);
       }
       for (String node: nodeNames) {
         InetAddress a = InetAddress.getByName(node);

@@ -24,56 +24,54 @@
       "properties":{
         "sys_blob":{
           "type":"binary",
-          "store": false,
-          "doc_values": false
+          "store":true,
+          "doc_values":false
         },
         "sys_itemid": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type":"keyword"
         },
         "sys_meta":{
-          "type":"string",
-          "index":"no"
+          "type":"keyword",
+          "index":false,
+          "store":true,
+          "doc_values":false
         }
       }
     },
     "clob":{
       "properties":{
         "sys_clob":{
-          "type":"string",
-          "index":"no",
-          "store": false,
-          "doc_values": false
+          "type":"keyword",
+          "index":false,
+          "store":true,
+          "doc_values":false
         },
         "sys_itemid": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type":"keyword"
         },
         "sys_meta":{
-          "type":"string",
-          "index":"no"
+          "type":"keyword",
+          "index":false,
+          "store":true,
+          "doc_values":false
         }
       }
     },
     "item":{
       "properties": {
         "title": {
-          "type": "string",
-          "index": "analyzed",
+          "type": "text",
           "fields": {
             "sort": { 
-              "type":  "string",
-              "analyzer": "case_insensitive_sort"
+              "type": "keyword"
             }
           }
         },
         "fileid": {
-          "type": "string",
-          "index": "not_analyzed"
+          "type": "keyword"
         },
         "description": {
-          "type": "string",
-          "index": "analyzed"
+          "type": "text"
         }
       },
       "dynamic_templates":[
@@ -81,8 +79,7 @@
           "_s":{
             "match":"*_s",
             "mapping":{
-              "type":"string",
-              "index":"not_analyzed"
+              "type":"keyword"
             }
           }
         },
@@ -90,8 +87,7 @@
           "_txt":{
             "match":"*_txt",
             "mapping":{
-              "type":"string",
-              "index":"analyzed"
+              "type":"text"
             }
           }
         },
@@ -180,7 +176,7 @@
             "match":"*_blob",
             "mapping":{
               "type":"binary",
-              "store": false,
+              "store": true,
               "doc_values": false
             }
           }
@@ -189,9 +185,9 @@
           "_clob":{
             "match":"*_clob",
             "mapping":{
-              "type":"string",
-              "index":"no",
-              "store": false,
+              "type":"keyword",
+              "index":false,
+              "store": true,
               "doc_values": false
             }
           }

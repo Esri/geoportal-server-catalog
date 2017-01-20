@@ -23,6 +23,7 @@ import com.esri.geoportal.lib.elastic.util.ItemIO;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
+import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.delete.DeleteResponse;
 
 /**
@@ -64,7 +65,9 @@ public class DeleteItemRequest extends AppRequest {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ItemIO itemio = new ItemIO();
     DeleteResponse resp = itemio.deleteItem(ec,id);
-    if (resp.isFound()) {
+    /* ES 2to5 */
+    // if (resp.isFound()) {
+    if (resp.getResult().equals(Result.DELETED)) {
       this.writeOk(response,resp.getId());
     } else {
       response.writeIdNotFound(this,id);

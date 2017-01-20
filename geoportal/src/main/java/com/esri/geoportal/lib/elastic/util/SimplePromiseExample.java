@@ -78,7 +78,9 @@ class SimplePromiseExample {
         GetRequestBuilder getItem = ec.getTransportClient().prepareGet(
             ec.getItemIndexName(),ec.getItemIndexType(),id);
         getItem.setFetchSource(false);
-        getItem.setFields(ownerField);
+        /* ES 2to5 */
+        //getItem.setFields(ownerField);
+        getItem.setStoredFields(ownerField);
         if (!async) {
           GetResponse response = getItem.get();
           checkOwner(user,ownerField,response,promise);
@@ -88,10 +90,18 @@ class SimplePromiseExample {
             public void onResponse(final GetResponse response) {
               checkOwner(user,ownerField,response,promise);
             }
+            /* ES 2to5 */
+            /*
             @Override
             public void onFailure(final Throwable t) {
               // TODO log this??
               promise.reject(t);
+            }
+            */
+            @Override
+            public void onFailure(Exception e) {
+              // TODO log this??
+              promise.reject(e);
             }
           });
         }

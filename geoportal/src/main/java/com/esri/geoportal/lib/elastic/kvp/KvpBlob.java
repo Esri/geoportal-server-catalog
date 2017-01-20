@@ -50,7 +50,9 @@ public class KvpBlob extends Kvp {
     String fieldName = getDataFieldName();
     GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
     req.setFetchSource(false);
-    req.setFields(fieldName);
+    /* ES 2to5 */
+    //req.setFields(fieldName);
+    req.setStoredFields(fieldName);
     GetResponse resp = req.get();
     if (resp.isExists()) {
       setFound(true);
@@ -82,7 +84,9 @@ public class KvpBlob extends Kvp {
    */
   public String readUtf8(ElasticContext ec) throws Exception {
     BytesReference ref = readBlob(ec);
-    if (ref != null) return ref.toUtf8();
+    /* ES 2to5 */
+    //if (ref != null) return ref.toUtf8();
+    if (ref != null) return ref.utf8ToString();
     return null;
   }
   

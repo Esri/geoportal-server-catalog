@@ -79,6 +79,19 @@ public class BalancerSupport {
       } catch (UnsupportedEncodingException e) {}
     }
     if (query != null) {
+      StringBuilder qsb = new StringBuilder();
+      String[] pairs = query.split("&");
+      for (String kvp: pairs) {
+        String[] p = kvp.split("=");
+        if (p.length != 2) continue;
+        if (p[0].equalsIgnoreCase("access_token")) continue;
+        if (qsb.length() > 0) qsb.append("&");
+        qsb.append(p[0]).append("=").append(p[1]);
+      }
+      if (qsb.length() > 0) query = qsb.toString();
+      else query = null;
+    }
+    if (query != null) {
       target.append("?").append(query); // request.getQueryString() is not decoded 
     }
     try {
