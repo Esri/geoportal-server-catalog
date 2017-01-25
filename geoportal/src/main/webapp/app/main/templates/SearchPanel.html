@@ -50,7 +50,28 @@
       </div>    
       <div data-dojo-type="app/search/TermsAggregation"
         data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20}">
-      </div>    
+      </div>
+      <!-- example hierarchies -->
+      <!-- e.g. field:'category_cat',label:'Category',props:{size:20,min_doc_count:500} (names in app.nls.resources.js)-->
+      <!--
+        <div data-dojo-type="app/search/HierarchyAggregation"
+             data-dojo-props="field:'categories_cat',rootTerm:'science domain',
+             label:'${i18n.search.criteria.categories}',props:{size:1000}">
+        </div>
+        <div data-dojo-type="app/search/HierarchyAggregation"
+             data-dojo-props="field:'categories_cat',rootTerm:'material',
+             label:'Material',props:{size:1000},showRoot: false">
+        </div>
+        <div data-dojo-type="app/search/HierarchyAggregation"
+             data-dojo-props="field:'categories_cat',rootTerm:'property',
+             label:'Property',props:{size:1000}">
+        </div>
+        <div data-dojo-type="app/search/HierarchyAggregation"
+             data-dojo-props="field:'hierarchies_cat',rootTerm:'category',
+             label:'hierarchies_cat',props:{size:1000},showRoot: false">
+        </div>
+        -->
+      <!-- end example hierarchies -->
     </div>
     <div class="g-search-pane-right">
       <div data-dojo-type="app/search/AppliedFilters" data-dojo-props="autoExpand:true"></div>
