@@ -239,13 +239,13 @@ License: CDDL 1.0
 See Common Open Source Licenses section for a copy of CDDL 1.0 License.
 
 ===============================================================================
-Jersey Container Servlet, jersey-container-servlet-2.22.1.jar, https://jersey.java.net/project-info/2.5/jersey/project/jersey-container-servlet/dependencies.html
-Jersey Container Servlet Core, jersey-container-servlet-core-2.22.1.jar, https://jersey.java.net/
-Jersey Core Client, jersey-client-2.22.1.jar, https://jersey.java.net/
-Jersey Core Common, jersey-common-2.22.1.jar, https://jersey.java.net/
-Jersey Core Server, jersey-server-2.22.1.jar, https://jersey.java.net/
-Jersey Media Jaxb, jersey-media-jaxb-2.22.1.jar, https://jersey.java.net/
-Jersey Repackaged Guava, jersey-guava-2.22.1.jar, https://jersey.java.net/
+Jersey Container Servlet
+Jersey Container Servlet Core
+Jersey Core Client
+Jersey Core Common
+Jersey Core Server
+Jersey Media Jaxb
+Jersey Repackaged Guava
 -------------------------------------------------------------------------------
 Copyright ©2010-2017 Oracle Corporation. All Rights Reserved.
 
@@ -401,7 +401,7 @@ See Common Open Source Licenses section below for a copy of Apache 2.0 License.
 
 
 ===============================================================================
-T Digest, t-digest-3.0.jar, https://github.com/tdunning/t-digest
+T Digest
 -------------------------------------------------------------------------------
 The code for the t-digest was originally authored by Ted Dunning
 
@@ -1071,7 +1071,7 @@ NOTICE PURSUANT TO SECTION 9 OF THE COMMON DEVELOPMENT AND DISTRIBUTION LICENSE 
 The code released under the CDDL shall be governed by the laws of the State of California (excluding conflict-of-law provisions). Any litigation relating to this License shall be subject to the jurisdiction of the Federal Courts of the Northern District of California and the state courts of the State of California, with venue lying in Santa Clara County, California.
 
 ~
-
+-------------------------------------------------------------------------------
 GNU GENERAL PUBLIC LICENSE (GPL Version 2, June 1991)
 Copyright (C) 1989, 1991 Free Software Foundation, Inc.
 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA
@@ -1197,7 +1197,7 @@ Ty Coon, President of Vice
 This General Public License does not permit incorporating your program into proprietary programs. If your program is a subroutine library, you may consider it more useful to permit linking proprietary applications with the library. If this is what you want to do, use the GNU Lesser General Public License instead of this License.
 
 ~
-
+-------------------------------------------------------------------------------
 Classpath Exception to the GPL
 Certain source files distributed by Oracle America and/or its affiliates are subject to the following clarification and special exception to the GPL, but only where Oracle has expressly included in the particular source file’s header the words “Oracle designates this particular file as subject to the ”Classpath“ exception as provided by Oracle in the LICENSE file that accompanied this code.”
 
