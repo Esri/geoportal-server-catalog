@@ -1,6 +1,6 @@
 ===============================================================================
 ESRI Geoportal Server Catalog
-Copyright Â©2017 Esri. 
+Copyright ©2017 Esri. 
 ===============================================================================
 This document includes acknowledgments for the third‐parties whose software has 
 been used in permissible forms with the Geoportal Server Catalog and its related 
