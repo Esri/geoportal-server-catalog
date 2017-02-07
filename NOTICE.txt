@@ -12,18 +12,18 @@ related products, these third‐party resources are under the protection of thei
 respective license.
 
 ===============================================================================
-AOP Alliance
+AOP Alliance (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 License: all the source code provided by AOP Alliance is Public Domain. 
 
 ===============================================================================
 HK2:
-Aopalliance Version 1.0 Repackaged As A Module
-HK2 API Module
-HK2 Implementation Utilities
-Javax.inject:1 As OSGi Bundle
-OSGi Resource Locator
-ServiceLocator Default Implementation
+Aopalliance Version 1.0 Repackaged As A Module (dependency of 3rd party libraries)
+HK2 API Module (dependency of 3rd party libraries)
+HK2 Implementation Utilities (dependency of 3rd party libraries)
+Javax.inject:1 As OSGi Bundle (dependency of 3rd party libraries)
+OSGi Resource Locator (dependency of 3rd party libraries)
+ServiceLocator Default Implementation (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright ©2009-2017 Oracle Corporation. All Rights Reserved.
 
@@ -34,9 +34,9 @@ See Common Open Source Licenses section for a copy of the License.
 
 ===============================================================================
 Apache Commons:
-Apache Commons Codec
+Apache Commons Codec (dependency of 3rd party libraries)
 Commons Cli
-Logging
+Logging (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 © 2002-2016 The Apache Software Foundation
 This product includes software developed by The Apache Software Foundation
@@ -46,10 +46,10 @@ See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
 Apache HttpComponents:
-Apache HttpAsyncClient
-Apache HttpClient
-Apache HttpCore
-Apache HttpCore NIO
+Apache HttpAsyncClient (dependency of 3rd party libraries)
+Apache HttpClient (dependency of 3rd party libraries)
+Apache HttpCore (dependency of 3rd party libraries)
+Apache HttpCore NIO (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 © 2005-2017 The Apache Software Foundation
 This product includes software developed by The Apache Software Foundation
@@ -70,7 +70,7 @@ This product includes software developed by The Apache Software Foundation
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
-Bean Validation API
+Bean Validation API (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright (c) Red Hat, Inc., Emmanuel Bernard
 All of our work is freely available under open source licenses.
@@ -92,8 +92,8 @@ See Common Open Source Licenses section for a copy of MIT License.
 
 ===============================================================================
 Bouncy Castle:
-Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, And CRMF APIs
-Bouncy Castle Provider
+Bouncy Castle PKIX, CMS, EAC, TSP, PKCS, OCSP, CMP, And CRMF APIs (dependency of 3rd party libraries)
+Bouncy Castle Provider (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright (c) 2000 - 2016 The Legion of the Bouncy Castle Inc. (https://www.bouncycastle.org)
 License:
@@ -112,7 +112,7 @@ License: MIT
 See Common Open Source Licenses section for a copy of MIT License.
 
 ===============================================================================
-Compiler
+Compiler (dependency of 3rd party libraries)
 http://github.com/spullara/mustache.java
 -------------------------------------------------------------------------------
 Copyright 2010 RightTime, Inc.
@@ -130,16 +130,16 @@ Copyright 2010 RightTime, Inc.
    limitations under the License.
    
 ===============================================================================
-elasticsearch, https://github.com/elastic/elasticsearch
+elasticsearch, https://github.com/elastic/elasticsearch (dependency of 3rd party libraries)
 Core
-Elasticsearch SecureSM
-Lang Mustache
-Percolator
-Reindex
-Rest
-Transport
-Transport Netty3
-Transport Netty4
+Elasticsearch SecureSM (dependency of 3rd party libraries)
+Lang Mustache (dependency of 3rd party libraries)
+Percolator (dependency of 3rd party libraries)
+Reindex (dependency of 3rd party libraries)
+Rest (dependency of 3rd party libraries)
+Transport 
+Transport Netty3 (dependency of 3rd party libraries)
+Transport Netty4 (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 This software is licensed under the Apache License, version 2 ("ALv2"), quoted below.
 
@@ -177,13 +177,13 @@ Dojo is available under either the terms of the modified BSD license or the Acad
 See Common Open Source Licenses section for a copy of the License.
 
 ===============================================================================
-HdrHistogram
+HdrHistogram (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Public Domain, per Creative Commons CC0
 HdrHistogram was originally authored by Gil Tene (@giltene) (Java) and placed in the public domain, as explained at http://creativecommons.org/publicdomain/zero/1.0/, with ports by Mike Barker (@mikeb01) (C), Matt Warren (@mattwarren) (C#), Darach Ennis (@darach) (Erlang), Alec Hothan (@ahothan) (Python), Coda Hale (@codahale) (Go), and Jon Gjengset (@jonhoo) (Rust)
 
 ===============================================================================
-HPPC Collections
+HPPC Collections (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright 2010-2013, Carrot Search s.c., Boznicza 11/56, Poznan, Poland
 License: Apache License 2.0
@@ -191,28 +191,28 @@ License: Apache License 2.0
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
-Jackson
-Jackson Annotations
-Jackson Core
-Jackson Databind
-Jackson Dataformat YAML
-Jackson Dataformat: CBOR
-Jackson Dataformat: Smile
-Data Mapper For Jackson
+Jackson (dependency of 3rd party libraries)
+Jackson Annotations (dependency of 3rd party libraries)
+Jackson Core (dependency of 3rd party libraries)
+Jackson Databind 
+Jackson Dataformat YAML  (dependency of 3rd party libraries)
+Jackson Dataformat: CBOR (dependency of 3rd party libraries)
+Jackson Dataformat: Smile (dependency of 3rd party libraries)
+Data Mapper For Jackson (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 License: Apache 2.0
 
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
-Java Native Access
+Java Native Access (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 This library is licensed under the LGPL, version 2.1 or later, and (from version 4.0 onward) the Apache Software License, version 2.0. Commercial license arrangements are negotiable.
 
 NOTE: Oracle is not sponsoring this project, even though the package name (com.sun.jna) might imply otherwise.
 
 ===============================================================================
-Javassist
+Javassist (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright (C) 1999- by Shigeru Chiba, All rights reserved.
 
@@ -221,7 +221,7 @@ Javassist (JAVA programming ASSISTant) makes Java bytecode manipulation simple. 
 This software is distributed under the Mozilla Public License Version 1.1, the GNU Lesser General Public License Version 2.1 or later, or the Apache License Version 2.0.
 
 ===============================================================================
-Javax.annotation API
+Javax.annotation API (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright (c) 2012-2016 Oracle and/or its affiliates. All rights reserved.
 
@@ -240,12 +240,12 @@ See Common Open Source Licenses section for a copy of CDDL 1.0 License.
 
 ===============================================================================
 Jersey Container Servlet
-Jersey Container Servlet Core
-Jersey Core Client
-Jersey Core Common
-Jersey Core Server
-Jersey Media Jaxb
-Jersey Repackaged Guava
+Jersey Container Servlet Core (dependency of 3rd party libraries)
+Jersey Core Client (dependency of 3rd party libraries)
+Jersey Core Common (dependency of 3rd party libraries)
+Jersey Core Server (dependency of 3rd party libraries)
+Jersey Media Jaxb (dependency of 3rd party libraries)
+Jersey Repackaged Guava (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright ©2010-2017 Oracle Corporation. All Rights Reserved.
 
@@ -261,17 +261,17 @@ See Common Open Source Licenses section for a copy of the License.
 
 ===============================================================================
 Jetty
-Jetty :: Asynchronous HTTP Client
-Jetty :: Http Utility
-Jetty :: IO Utility
-Jetty :: Proxy
-Jetty :: Utilities
+Jetty :: Asynchronous HTTP Client (dependency of 3rd party libraries)
+Jetty :: Http Utility (dependency of 3rd party libraries)
+Jetty :: IO Utility (dependency of 3rd party libraries)
+Jetty :: Proxy 
+Jetty :: Utilities (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Jetty 9 (as well as 7 and 8) is dual licensed under the Apache License 2.0 and Eclipse Public License 1.0. Jetty is free for commercial use and distribution under the terms of either license, with exceptions listed in the NOTICE file.
 See Common Open Source Licenses section for a copy of Apache 2.0 and EPL 1.0 License.
 
 ===============================================================================
-Joda Time
+Joda Time (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright ©2002-2016 Joda.org. All Rights Reserved.
 
@@ -280,7 +280,7 @@ License: Apache 2.0
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
-JOpt Simple
+JOpt Simple (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 License: MIT
 See Common Open Source Licenses section for a copy of MIT License.
@@ -302,20 +302,20 @@ See Common Open Source Licenses section for a copy of the License.
 
 ===============================================================================
 Lucene:
-Lucene Common Analyzers
-Lucene Core
-Lucene Grouping
-Lucene Highlighter
-Lucene Join
-Lucene Memory
-Lucene Miscellaneous
-Lucene Queries
-Lucene QueryParsers
-Lucene Sandbox
-Lucene Spatial
-Lucene Spatial 3D
-Lucene Spatial Extras
-Lucene Suggest
+Lucene Common Analyzers (dependency of 3rd party libraries)
+Lucene Core (dependency of 3rd party libraries)
+Lucene Grouping (dependency of 3rd party libraries)
+Lucene Highlighter (dependency of 3rd party libraries)
+Lucene Join (dependency of 3rd party libraries)
+Lucene Memory (dependency of 3rd party libraries)
+Lucene Miscellaneous (dependency of 3rd party libraries)
+Lucene Queries (dependency of 3rd party libraries)
+Lucene QueryParsers (dependency of 3rd party libraries)
+Lucene Sandbox (dependency of 3rd party libraries)
+Lucene Spatial (dependency of 3rd party libraries)
+Lucene Spatial 3D (dependency of 3rd party libraries)
+Lucene Spatial Extras (dependency of 3rd party libraries)
+Lucene Suggest (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright © 2011-2016 The Apache Software Foundation, Licensed under the Apache License, Version 2.0.
 
@@ -323,14 +323,14 @@ See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
 Netty:
-Netty/All In One
-Netty/Buffer
-Netty/Codec
-Netty/Codec/HTTP
-Netty/Common
-Netty/Handler
-Netty/Resolver
-Netty/Transport
+Netty/All In One (dependency of 3rd party libraries)
+Netty/Buffer (dependency of 3rd party libraries)
+Netty/Codec (dependency of 3rd party libraries)
+Netty/Codec/HTTP (dependency of 3rd party libraries)
+Netty/Common (dependency of 3rd party libraries)
+Netty/Handler (dependency of 3rd party libraries)
+Netty/Resolver (dependency of 3rd party libraries)
+Netty/Transport (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright © 2017 The Netty project
 License: Apache 2.0
@@ -338,7 +338,7 @@ License: Apache 2.0
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
-SnakeYAML
+SnakeYAML (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 License: Apache 2.0
 
@@ -346,12 +346,12 @@ See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
 Spring Framework:
-Spring AOP
-Spring Beans
-Spring Context
+Spring AOP (dependency of 3rd party libraries)
+Spring Beans (dependency of 3rd party libraries)
+Spring Context (dependency of 3rd party libraries) 
 Spring Core
-Spring Expression Language (SpEL)
-Spring Transaction
+Spring Expression Language (SpEL) (dependency of 3rd party libraries)
+Spring Transaction (dependency of 3rd party libraries)
 Spring Web
 Spring Web MVC
 -------------------------------------------------------------------------------
@@ -362,7 +362,7 @@ See Common Open Source Licenses section for a copy of Apache 2.0 License.
 ===============================================================================
 Spring Security:
 Spring Security Config
-Spring Security Core
+Spring Security Core (dependency of 3rd party libraries)
 Spring Security Ldap
 Spring Security Web
 -------------------------------------------------------------------------------
@@ -370,7 +370,7 @@ License: Apache 2.0
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
-Spring Ldap Core
+Spring Ldap Core (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 License: Apache 2.0
 
@@ -401,7 +401,7 @@ See Common Open Source Licenses section below for a copy of Apache 2.0 License.
 
 
 ===============================================================================
-T Digest
+T Digest (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 The code for the t-digest was originally authored by Ted Dunning
 
