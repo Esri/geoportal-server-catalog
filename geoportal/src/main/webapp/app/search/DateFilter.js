@@ -265,10 +265,16 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
         }
         
         if (query && this.hasNestedPath()) {
+          /*
           qNested = {"query":{"nested":{
             "path": this.nestedPath,
             "query": query
           }}};
+          */
+          qNested = {"nested":{
+            "path": this.nestedPath,
+            "query": query
+          }};
           query = qNested;
         }
         
@@ -284,10 +290,16 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
           query = {"range": {}};
           query.range[this.field] = condition;
           if (this.hasNestedPath()) {
+            /*
             qNested = {"query":{"nested":{
               "path": this.nestedPath,
               "query": {"bool": {"must":[query]}}
             }}};
+            */
+            qNested = {"nested":{
+              "path": this.nestedPath,
+              "query": {"bool": {"must":[query]}}
+            }};
             query = qNested;
           }
         }       

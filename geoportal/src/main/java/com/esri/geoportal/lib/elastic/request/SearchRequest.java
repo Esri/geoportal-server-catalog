@@ -549,6 +549,7 @@ public class SearchRequest extends _SearchRequestBase {
       JsonArrayBuilder a = Json.createArrayBuilder();
       for (JsonStructure j: tFilters) a.add(j);
       JsonObjectBuilder jq = Json.createObjectBuilder();
+      /*
       jq.add("query",Json.createObjectBuilder()
           .add("nested",Json.createObjectBuilder()
             .add("path", "timeperiod_nst")
@@ -559,6 +560,17 @@ public class SearchRequest extends _SearchRequestBase {
             )
           )
         );
+       */
+
+      jq.add("nested",Json.createObjectBuilder()
+        .add("path", "timeperiod_nst")
+        .add("query",Json.createObjectBuilder()
+          .add("bool",Json.createObjectBuilder()
+            .add("must",a)
+          )
+        )
+      );
+
       //System.err.println("temporalq="+jq.build());
       filters.add(jq.build());
     }
