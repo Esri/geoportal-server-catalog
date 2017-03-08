@@ -285,10 +285,16 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
           query = {"range": {}};
           query.range[this.field] = condition;
           if (this.hasNestedPath()) {
+            /*
             qNested = {"query":{"nested":{
               "path": this.nestedPath,
               "query": {"bool": {"must":[query]}}
             }}};
+            */
+            qNested = {"nested":{
+              "path": this.nestedPath,
+              "query": {"bool": {"must":[query]}}
+            }};
             query = qNested;
           }
         }       
