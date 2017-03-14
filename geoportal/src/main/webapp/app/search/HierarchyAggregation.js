@@ -182,30 +182,39 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
     //});
 
 
-      var catModel = new ObjectStoreModel({
+        try {
+        var catModel = new ObjectStoreModel({
         store:  catStore,
         query: {id: this.rootTerm}
       });
-      var tree = new Tree({
-        model: catModel,
-        open: this.open,
-        showRoot: this.showRoot,
-        onClick: lang.hitch(this,function(item) {
-          var query = {"term": {}};
-          query.term[this.field] = item.key;
-          var tip = item.key;
-          var qClause = new QClause({
-            label:  item.key,
-            tip: tip,
-            parentQComponent: this,
-            removable: true,
-            scorable: true,
-            query: query
+
+          var tree = new Tree({
+              model: catModel,
+              open: this.open,
+              showRoot: this.showRoot,
+              onClick: lang.hitch(this, function (item) {
+                  var query = {"term": {}};
+                  query.term[this.field] = item.key;
+                  var tip = item.key;
+                  var qClause = new QClause({
+                      label: item.key,
+                      tip: tip,
+                      parentQComponent: this,
+                      removable: true,
+                      scorable: true,
+                      query: query
+                  });
+                  this.pushQClause(qClause, true);
+              })
           });
-          this.pushQClause(qClause,true);
-        })
-      });
-      tree.placeAt( this.categoryNode);
+
+          tree.placeAt(this.categoryNode);
+      }
+      catch (e) {
+          console.log( "tree warining. Not items for base term")
+          this.setNodeText(this.categoryNode,"(No Items)");
+      }
+
      // tree.startup();
     }
     
