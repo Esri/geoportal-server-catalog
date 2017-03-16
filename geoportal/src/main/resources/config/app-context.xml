@@ -24,7 +24,7 @@
 		<beans:property name="indexNameIsAlias" value="true" />
 		<beans:property name="autoCreateIndex" value="true" />
 		<beans:property name="allowFileId" value="false" />
-		<beans:property name="mappingsFile" value="config/elastic-mappings.json" />
+		<beans:property name="mappingsFile" value="${es_mapping:config/elastic-mappings.json}" />
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
