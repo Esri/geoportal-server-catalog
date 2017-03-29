@@ -26,20 +26,31 @@ G.evaluators.dc = {
 
   evalBase: function(task) {
     var item = task.item, root = task.root;
-    var dsc = G.getNode(task,root,"rdf:Description");
+      var dsc = G.getNode(task,root,"rdf:Description | oai_dc:dc");
 
-    G.evalProp(task,item,root,"fileid","rdf:Description/dc:identifier");
-    G.evalProp(task,item,root,"title","rdf:Description/dc:title");
-    G.evalProp(task,item,root,"description","rdf:Description/dct:abstract");
-    
-    G.evalProps(task,item,root,"keywords_s","//dc:subject");
-    G.evalProps(task,item,root,"links_s","//dct:references");
-    G.evalProp(task,item,root,"thumbnail_s","rdf:Description/dct:references[@scheme='urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail']");
-    
-    G.evalProps(task,item,root,"contact_organizations_s","dc:creator");
-    G.evalProps(task,item,root,"contact_people_s","dc:creator");
+      G.evalProp(task,item,root,"fileid","dc:identifier[contains(text(),'doi:')] |dc:identifier");
+      G.evalProp(task,item,root,"title","dc:title ");
+
+      G.evalProps(task,item,root,"description","dct:abstract | dc:description");
+
+      G.evalProps(task,item,root,"keywords_s","//dc:subject");
+      G.evalProps(task,item,root,"links_s","//dct:references");
+      G.evalProp(task,item,dsc,"thumbnail_s","dct:references[@scheme='urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail']");
+
+      G.evalProps(task,item,root,"contact_organizations_s","dc:creator");
+      G.evalProps(task,item,root,"contact_people_s","dc:creator");
+      G.evalProps(task,item,root,"type_s","dc:type");
+      G.evalProps(task,item,root,"format_s","dc:format");
   },
 
+    evalDoi: function(task){
+        var item = task.item, root = task.root;
+        var name = G.getString(task, root, "dc:identifier[contains(text(),'doi:')] ");
+        name = name.trim().substr(4);
+        name = "http://doi.org/".concat(name);
+        G.writeMultiProp(task.item,"links_s",name);
+    },
+    
   evalService: function(task) {
     var item = task.item, root = task.root;
     G.evalResourceLinks(task,item,root,"//dct:references");
