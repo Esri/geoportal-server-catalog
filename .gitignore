@@ -38,6 +38,7 @@ Thumbs.db
 # User-specific stuff:
 .idea/workspace.xml
 .idea/tasks.xml
+geoportal/nb-configuration.xml
 
 # Sensitive or high-churn files:
 .idea/dataSources/
