@@ -64,20 +64,25 @@ PUT `http://localhost:9200/metadata_v1/_settings`
       }
 ```
 
-PUT `http://localhost:9200/metadata_v1/_settings`
+PUT `http://localhost:9200/metadata_v1/_mapping/item`
 ```javascript
-  { "mappings": {
-          "_hier":{
-            "match":"*_hier",
-            "mapping":{
-              "type":"string",
-              "analyzer": "category",
+{  
+  
+         "dynamic_templates": [
+          {
+            "_hier": {
+              "match_mapping_type": "string",
+              "match": "*_hier",
+              "mapping": {
+                "type": "keyword",
+                 "analyzer": "category",
               "search_analyzer": "keyword"
-
+              }
             }
           }
-        }
-   }
+          ]
+
+}
 ```  
 
 ### Start index
@@ -191,3 +196,35 @@ evalCinergi: function(task) {
 
     });  },
 ```
+
+===
+"Fielddata is disabled on text fields by default. Set fielddata=true on [categories_cat] in order to load fielddata in memory by uninverting the inverted index. Note that this can however use significant memory."
+
+PUT http://132.249.238.169:9200/metadata_v1/_mappings/item/
+  {      "properties": {
+
+          "categories_cat": {
+            "type": "text",
+            "fielddata":"true",
+            "fields": {
+              "keyword": {
+                "type": "keyword",
+                "ignore_above": 256
+              }
+            }
+          }
+}
+}
+
+Working on this:
+change the resources/config/app-context.xml
+
+http://localhost:8081/geoportal/rest/metadata/reindex?fromIndexName=metadata&toIndexName=md2
+"name" : "fromIndexName",
+          "in" : "query",
+          "description" : "the source",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "toIndexName",
+          "in" : "query",

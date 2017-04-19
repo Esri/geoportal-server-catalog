@@ -31,17 +31,26 @@
         "category_analyzer": {
           "tokenizer": "category_tokenizer",
           "filter": [
-            "lowercase"
+            "lowercase",
+            "hierarchy_stop"
           ]
         },
         "hierarchy_analyzer": {
-          "tokenizer": "hierarchy_tokenizer"
+          "tokenizer": "hierarchy_tokenizer",
+          "filter": [
+            "hierarchy_stop"
+          ]
         }
       },
       "filter": {
         "english_stemmer": {
           "type": "stemmer",
           "name": "english"
+        },
+        "hierarchy_stop": {
+          "type":       "stop",
+          "ignore_case": true,
+          "stopwords":  ["category > unassigned", "unassigned"]
         }
       }
     }
@@ -224,8 +233,9 @@
             "match": "*_cat",
             "mapping": {
               "type": "string",
-              "analyzer": "category",
-              "search_analyzer": "keyword_analyzer"
+              "fielddata": true,
+              "analyzer": "category_analyzer",
+              "search_analyzer": "category_analyzer"
             }
           }
         },
@@ -234,8 +244,9 @@
             "match": "*_hier",
             "mapping": {
               "type": "string",
+              "fielddata": true,
               "analyzer": "hierarchy_analyzer",
-              "search_analyzer": "keyword"
+              "search_analyzer": "hierarchy_analyzer"
             }
           }
         }
