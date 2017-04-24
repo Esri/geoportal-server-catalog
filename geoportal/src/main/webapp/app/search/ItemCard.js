@@ -85,6 +85,7 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
       this._renderServiceStatus(item);
+      this._renderWorkbenchLinksDropdown(item,links);
     },
     
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
@@ -470,7 +471,41 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
         }
       }
       return null;
-    }
+    },
+      _renderWorkbenchLinksDropdown: function(item,links) {
+          if ( ! Array.isArray(item.resources_nst)) return;
+          if( item.resources_nst.length === 0) return;
+          var dd = domConstruct.create("div",{
+              "class": "dropdown",
+              "style": "display:inline-block;"
+          },this.actionsNode);
+          var ddbtn = domConstruct.create("a",{
+              "class": "dropdown-toggle",
+              "href": "#",
+              "data-toggle": "dropdown",
+              "aria-haspopup": true,
+              "aria-expanded": true,
+              innerHTML: "Workbench"
+          },dd);
+          domConstruct.create("span",{
+              "class": "caret"
+          },ddbtn);
+          var ddul = domConstruct.create("ul",{
+              "class": "dropdown-menu",
+          },dd);
+          if (lang.isArray(item.resources_nst)){
+          array.forEach(item.resources_nst, function(u){
+              var ddli = domConstruct.create("li",{},ddul);
+              domConstruct.create("a",{
+                  "class": "small",
+                  href: u.url_s,
+                  target: "_blank",
+                  innerHTML: u.url_type_s
+              },ddli);
+          });
+          }
+          this._mitigateDropdownClip(dd,ddul);
+      },
     
   });
   
