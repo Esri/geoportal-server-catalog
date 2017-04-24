@@ -115,6 +115,7 @@ G.evaluators.cinergi = {
         G.evalProps(task, item, root, "apiso_CouplingType_s", "//gmd:identificationInfo/srv:SV_ServiceIdentification/srv:couplingType/srv:SV_CouplingType/@codeListValue");
 
         G.evalResourceLinks(task, item, root, "gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | gmd:identificationInfo/srv:SV_ServiceIdentification/srv:containsOperations/srv:SV_OperationMetadata/srv:connectPoint/gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
+        this.evalResourceLinks(task, item, root, "gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | gmd:identificationInfo/srv:SV_ServiceIdentification/srv:containsOperations/srv:SV_OperationMetadata/srv:connectPoint/gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
     },
 
     evalSpatial: function (task) {
@@ -302,7 +303,8 @@ G.evaluators.cinergi = {
             //    });
 
         } catch (e) {
-            print(e.stack);
+            print("INFO: Cinergi.ISO: No CINEGI hierarchy for:", fileid);
+            print(e.message);
         }
         //G.forEachNode(task,root,"//gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString[contains(.,'>')]/../../../../gmd:keyword",function(node){
         //  var cat = G.getString(task,node,"../gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString") + '>';
@@ -313,7 +315,82 @@ G.evaluators.cinergi = {
         //});
 
     },
+    evalResourceLinks: function(task,obj,contextNode,xpathExpression) {
+        if (!contextNode) return;
+        var self = this, urls = [], name = "resources_nst";
+        G.forEachNode(task,contextNode,xpathExpression,function(node){
+            var url = G.getNodeText(node);
+            var info = self.checkResourceLink(url);
+            if (info && info.linkUrl && info.linkType) {
+                if (urls.indexOf(info.linkUrl) === -1) {
+                    urls.push(info.linkUrl);
+                    G.writeMultiProp(obj,name,{
+                        "url_s": info.linkUrl,
+                        "url_type_s": info.linkType
+                    });
+                }
+            }
+        });
+    },
+    checkResourceLink: function(url) {
+        var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
 
+        var arcgisTypes = ["MapServer","ImageServer","FeatureServer","GlobeServer","GPServer","GeocodeServer",
+            "GeometryServer","NAServer","GeoDataServer ","MobileServer","SceneServer",
+            "SchematicsServer","StreamServer","VectorTileServer"];
+        var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS","CSW"];
+        var dataTypes = ["zip","shp"];
+
+        var i, v, lc, linkType = null, linkUrl = null;
+        var isHttp = (typeof url === "string" && (url.indexOf("http://") === 0 || url.indexOf("https://") === 0));
+        var isFtp = (typeof url === "string" && (url.indexOf("ftp://") === 0 || url.indexOf("ftps://") === 0));
+        if (isHttp) {
+            lc = url.toLowerCase();
+            if (lc.indexOf("service=") > 0) {
+                //if (lc.indexOf("request=getcapabilities") > 0) {}
+                for (i=0;i<ogcTypes.length;i++) {
+                    v = "service="+ogcTypes[i].toLowerCase();
+                    if (lc.indexOf("?"+v) > 0 || lc.indexOf("&"+v) > 0) {
+                        linkType = ogcTypes[i];
+                        linkUrl = url;
+                        break;
+                    }
+                }
+            } else if (lc.indexOf("/rest/services/") > 0) {
+                for (i=0;i<arcgisTypes.length;i++) {
+                    v = "/"+arcgisTypes[i].toLowerCase();
+                    if (endsWith(lc,v)) {
+                        linkType = arcgisTypes[i];
+                        linkUrl = url;
+                        break;
+                    }
+                }
+            }
+            if (linkType === null) {
+                if (endsWith(lc,".kml") || endsWith(lc,".kmz") ||
+                    lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 ||
+                    lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
+                    linkType = "kml";
+                    linkUrl = url;
+                }
+            }
+            if (linkType === null) {
+                if (lc.indexOf("com.esri.wms.esrimap")>= 0) {
+                    linkType = "IMS";
+                    linkUrl = url;
+                }
+            }
+            if (linkType === null) {
+                if (lc.indexOf("cuahsi_1_1.asmx")>= 0) {
+                    linkType = "WaterOneFlow";
+                    linkUrl = url;
+                }
+            }
+        }
+        if (linkType !== null && (isHttp || isFtp)) {
+            return {linkType:linkType,linkUrl:linkUrl};
+        }
+    },
 };
 //var getJSON = function(url, callback) {
 //  var xhr = new XMLHttpRequest();
