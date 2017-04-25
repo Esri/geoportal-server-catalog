@@ -116,6 +116,7 @@ G.evaluators.cinergi = {
 
         G.evalResourceLinks(task, item, root, "gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | gmd:identificationInfo/srv:SV_ServiceIdentification/srv:containsOperations/srv:SV_OperationMetadata/srv:connectPoint/gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
         this.evalResourceLinks(task, item, root, "gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | gmd:identificationInfo/srv:SV_ServiceIdentification/srv:containsOperations/srv:SV_OperationMetadata/srv:connectPoint/gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
+        this.evalWorkbenchLinks(task, item, root, "gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine");
     },
 
     evalSpatial: function (task) {
@@ -333,6 +334,99 @@ G.evaluators.cinergi = {
         });
     },
     checkResourceLink: function(url) {
+        var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
+
+        var arcgisTypes = ["MapServer","ImageServer","FeatureServer","GlobeServer","GPServer","GeocodeServer",
+            "GeometryServer","NAServer","GeoDataServer ","MobileServer","SceneServer",
+            "SchematicsServer","StreamServer","VectorTileServer"];
+        var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS","CSW"];
+        var dataTypes = ["zip","shp"];
+
+        var i, v, lc, linkType = null, linkUrl = null;
+        var isHttp = (typeof url === "string" && (url.indexOf("http://") === 0 || url.indexOf("https://") === 0));
+        var isFtp = (typeof url === "string" && (url.indexOf("ftp://") === 0 || url.indexOf("ftps://") === 0));
+        if (isHttp) {
+            lc = url.toLowerCase();
+            if (lc.indexOf("service=") > 0) {
+                //if (lc.indexOf("request=getcapabilities") > 0) {}
+                for (i=0;i<ogcTypes.length;i++) {
+                    v = "service="+ogcTypes[i].toLowerCase();
+                    if (lc.indexOf("?"+v) > 0 || lc.indexOf("&"+v) > 0) {
+                        linkType = ogcTypes[i];
+                        linkUrl = url;
+                        break;
+                    }
+                }
+            } else if (lc.indexOf("/rest/services/") > 0) {
+                for (i=0;i<arcgisTypes.length;i++) {
+                    v = "/"+arcgisTypes[i].toLowerCase();
+                    if (endsWith(lc,v)) {
+                        linkType = arcgisTypes[i];
+                        linkUrl = url;
+                        break;
+                    }
+                }
+            }
+            if (linkType === null) {
+                if (endsWith(lc,".kml") || endsWith(lc,".kmz") ||
+                    lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 ||
+                    lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
+                    linkType = "kml";
+                    linkUrl = url;
+                }
+            }
+            if (linkType === null) {
+                if (lc.indexOf("com.esri.wms.esrimap")>= 0) {
+                    linkType = "IMS";
+                    linkUrl = url;
+                }
+            }
+            if (linkType === null) {
+                if (lc.indexOf("cuahsi_1_1.asmx")>= 0) {
+                    linkType = "WaterOneFlow";
+                    linkUrl = url;
+                }
+            }
+        }
+        if (linkType !== null && (isHttp || isFtp)) {
+            return {linkType:linkType,linkUrl:linkUrl};
+        }
+    },
+    // //gmd:transferOptions
+    evalWorkbenchLinks: function(task,item,root,xpathExpression) {
+        if (!root) return;
+        var self = this, urls = [], name = "services_nst";
+        print(xpathExpression);
+        G.forEachNode(task,root,xpathExpression,function(node){
+            //CUAHSI WaterOneFlow SOAP service
+            // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:distributionFormat[1]/gmd:MD_Format[1]/gmd:name[1]/gco:CharacterString[1]
+            print (node);
+            var linkName = G.getString(task, node,"../../../gmd:distributionFormat/gmd:MD_Format/gmd:name/gco:CharacterString");
+            print(name);
+            // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:transferOptions[1]/gmd:MD_DigitalTransferOptions[1]/gmd:onLine[1]/gmd:CI_OnlineResource[1]/gmd:linkage[1]/gmd:URL[1]
+
+            var url = G.getString(task, node,"gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
+            print ("url"+ url);
+            // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:transferOptions[1]/gmd:MD_DigitalTransferOptions[1]/gmd:onLine[1]/gmd:CI_OnlineResource[1]/gmd:name[1]/gco:CharacterString[1]
+
+             var type = G.getString(task, node,"gmd:CI_OnlineResource/gmd:name/gco:CharacterString");
+            print("type" + type);
+            //var info = self.checkResourceLink(url);
+            // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:transferOptions[1]/gmd:MD_DigitalTransferOptions[1]/gmd:onLine[1]/gmd:CI_OnlineResource[1]
+
+            if (linkName && url && type) {
+                if (urls.indexOf(url) === -1) {
+                    urls.push(url);
+                    G.writeMultiProp(item,name,{
+                        "url_s": url,
+                        "url_type_s": type,
+                        "url_name_s": linkName
+                    });
+                }
+            }
+        });
+    },
+    checkWorkbenchLink: function(url) {
         var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
 
         var arcgisTypes = ["MapServer","ImageServer","FeatureServer","GlobeServer","GPServer","GeocodeServer",

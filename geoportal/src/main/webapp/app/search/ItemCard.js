@@ -473,8 +473,8 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
       return null;
     },
       _renderWorkbenchLinksDropdown: function(item,links) {
-          if ( ! Array.isArray(item.resources_nst)) return;
-          if( item.resources_nst.length === 0) return;
+          if ( ! Array.isArray(item.services_nst)) return;
+          if( item.services_nst.length === 0) return;
           var dd = domConstruct.create("div",{
               "class": "dropdown",
               "style": "display:inline-block;"
@@ -493,8 +493,8 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
           var ddul = domConstruct.create("ul",{
               "class": "dropdown-menu",
           },dd);
-          if (lang.isArray(item.resources_nst)){
-          array.forEach(item.resources_nst, function(u){
+          if (lang.isArray(item.services_nst)){
+          array.forEach(item.services_nst, function(u){
               var ddli = domConstruct.create("li",{},ddul);
               domConstruct.create("a",{
                   "class": "small",
