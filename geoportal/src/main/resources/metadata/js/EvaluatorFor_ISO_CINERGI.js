@@ -153,6 +153,7 @@ G.evaluators.cinergi = {
     },
 
     evalTemporal: function (task) {
+        var self = this;
         var item = task.item, root = task.root;
         G.forEachNode(task, root, "//gmd:EX_TemporalExtent/gmd:extent", function (node) {
             var params = null;
@@ -217,7 +218,8 @@ G.evaluators.cinergi = {
                 };
             }
 
-            if (params) G.analyzeTimePeriod(task, params);
+            //if (params) G.analyzeTimePeriod(task, params);
+            if (params) self._analyzeTimePeriod(task, params);
         });
     },
 
@@ -396,21 +398,21 @@ G.evaluators.cinergi = {
     evalWorkbenchLinks: function(task,item,root,xpathExpression) {
         if (!root) return;
         var self = this, urls = [], name = "services_nst";
-        print(xpathExpression);
+       // print(xpathExpression);
         G.forEachNode(task,root,xpathExpression,function(node){
             //CUAHSI WaterOneFlow SOAP service
             // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:distributionFormat[1]/gmd:MD_Format[1]/gmd:name[1]/gco:CharacterString[1]
-            print (node);
+         //   print (node);
             var linkName = G.getString(task, node,"../../../gmd:distributionFormat/gmd:MD_Format/gmd:name/gco:CharacterString");
-            print(name);
+           // print(name);
             // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:transferOptions[1]/gmd:MD_DigitalTransferOptions[1]/gmd:onLine[1]/gmd:CI_OnlineResource[1]/gmd:linkage[1]/gmd:URL[1]
 
             var url = G.getString(task, node,"gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
-            print ("url"+ url);
+           // print ("url"+ url);
             // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:transferOptions[1]/gmd:MD_DigitalTransferOptions[1]/gmd:onLine[1]/gmd:CI_OnlineResource[1]/gmd:name[1]/gco:CharacterString[1]
 
              var type = G.getString(task, node,"gmd:CI_OnlineResource/gmd:name/gco:CharacterString");
-            print("type" + type);
+           // print("type" + type);
             //var info = self.checkResourceLink(url);
             // /gmd:MD_Metadata/gmd:distributionInfo[1]/gmd:MD_Distribution[1]/gmd:transferOptions[1]/gmd:MD_DigitalTransferOptions[1]/gmd:onLine[1]/gmd:CI_OnlineResource[1]
 
@@ -484,6 +486,78 @@ G.evaluators.cinergi = {
         if (linkType !== null && (isHttp || isFtp)) {
             return {linkType:linkType,linkUrl:linkUrl};
         }
+    },
+    _analyzeTimePeriod: function(task,params) {
+        //print("analyzeTimePeriod");
+        if (!params) return;
+        //"instant_dt": null, "instant_indeterminate_s": null,
+        var data = {
+            "begin_dt": null,
+            "begin_indeterminate_s": null,
+            "end_dt": null,
+            "end_indeterminate_s": null,
+        };
+        if (params.instant) {
+            //data["instant_dt"] = this.DateUtil.checkIsoDateTime(params.instant.date,false);
+            //data["instant_indeterminate_s"] = this.Val.chkStr(params.instant.indeterminate,null);
+            if (!params.begin && !params.end) {
+                params.begin = {
+                    date: params.instant.date,
+                    indeterminate: params.instant.indeterminate
+                };
+                // TODO should use the instant
+                params.end = {
+                    date: params.instant.date,
+                    indeterminate: params.instant.indeterminate
+                };
+            }
+        }
+        if (params.begin) {
+            if (typeof params.begin.date === "string" && !params.begin.date.startsWith("9999")
+            && this._limitDateRange(params.begin.date )
+            ) {
+                data["begin_dt"] = G.DateUtil.checkIsoDateTime(params.begin.date,false);
+            }
+            data["begin_indeterminate_s"] = G.Val.chkStr(params.begin.indeterminate,null);
+        }
+        if (params.end) {
+            if (typeof params.end.date === "string" && !params.end.date.startsWith("9999")
+                && this._limitDateRange(params.end.date )
+            ) {
+                data["end_dt"] = G.DateUtil.checkIsoDateTime(params.end.date,true);
+            }
+            data["end_indeterminate_s"] = G.Val.chkStr(params.end.indeterminate,null);
+        }
+        var ok = false;
+        for (var k in data) {
+            if (data.hasOwnProperty(k)) {
+                if (data[k] !== null ) {
+                    ok = true;
+                    break;
+                }
+            }
+        }
+        if (ok) {
+            //this.writeMultiProp(task.item,"timeperiod_tp",data);
+            G.writeMultiProp(task.item,"timeperiod_nst",data);
+        }
+    },
+    _limitDateRange: function(dateString){
+        var validDate = true;
+        if (dateString.startsWith("9999")) validDate = false;
+
+        try {
+            var dateYear = dateString.substr(0,4);
+            var dateInt = parseInt(dateYear);
+            if ( (dateInt === undefined) ||  (dateInt < 1000) || (dateInt > 2100) ){
+                print ("daterange reject "+ dateString );
+                validDate = false;
+            }
+        } catch (ex) {
+            print ("daterange error "+dateString );
+            validDate=false;
+        }
+        return validDate;
     },
 };
 //var getJSON = function(url, callback) {
