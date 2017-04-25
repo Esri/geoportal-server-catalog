@@ -22,7 +22,7 @@ define(["dojo/_base/declare",
         "app/etc/util",
         "app/main/SearchPanel",
         "app/main/MapPanel",
-        "app/main/AboutPanel",
+
         "app/main/WorkbenchPanel",
         "app/content/MetadataEditor",
         "app/content/UploadMetadata"], 

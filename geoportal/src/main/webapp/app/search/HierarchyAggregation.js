@@ -130,6 +130,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
     processResults: function(searchResponse) {
       domConstruct.empty(this.categoryNode);
       var key = this.getAggregationKey();
+      this.treeData=[];
       var catStore = new Memory({
         data: this.treeData,
         getChildren: function (object) {
@@ -211,7 +212,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
           tree.placeAt(this.categoryNode);
       }
       catch (e) {
-          console.log( "tree warining. Not items for base term")
+          console.log( "tree warining. No items for base term")
           this.setNodeText(this.categoryNode,"(No Items)");
       }
 
