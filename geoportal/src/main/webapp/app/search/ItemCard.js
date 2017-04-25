@@ -77,7 +77,8 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
       item._id = hit._id; 
       var links = this._uniqueLinks(item);
       util.setNodeText(this.titleNode,item.title);
-      this._renderOwnerAndDate(item);
+      //this._renderOwnerAndDate(item);
+      this._renderSourceAndDate(item);
       util.setNodeText(this.descriptionNode,item.description);
       this._renderThumbnail(item);
       this._renderItemLinks(hit._id,item);
@@ -86,6 +87,7 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
       this._renderAddToMap(item,links);
       this._renderServiceStatus(item);
       this._renderWorkbenchLinksDropdown(item,links);
+       this._renderCinergiLinks(hit._id,item);
     },
     
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
@@ -472,6 +474,23 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
       }
       return null;
     },
+      _renderSourceAndDate: function(item) {
+          var owner = item.src_source_name_s;
+          var date = item.sys_modified_dt;
+          var idx, text = "";
+          if (AppContext.appConfig.searchResults.showDate && typeof date === "string" && date.length > 0) {
+              idx = date.indexOf("T");
+              if (idx > 0) date =date.substring(0,idx);
+              text = date;
+          }
+          if (typeof owner === "string" && owner.length > 0) {
+              if (text.length > 0) text += " ";
+              text += owner;
+          }
+          if (text.length > 0) {
+              util.setNodeText(this.ownerAndDateNode,text);
+          }
+      },
       _renderWorkbenchLinksDropdown: function(item,links) {
           if ( ! Array.isArray(item.services_nst)) return;
           if( item.services_nst.length === 0) return;
@@ -506,7 +525,26 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
           }
           this._mitigateDropdownClip(dd,ddul);
       },
-    
+      _renderCinergiLinks: function(itemId,item) {
+          // if categories_cat exists, then these should exist
+          if (item.categories_cat) {
+
+          var actionsNode = this.actionsNode;
+          var uri = "http://cinergi.sdsc.edu/vizgraph/?mid=" + encodeURIComponent(item.fileid);
+          var htmlNode = domConstruct.create("a", {
+              href: uri + "&ttl=" + encodeURIComponent(item.title),
+              target: "_blank",
+              innerHTML: "Provenance"
+          }, actionsNode);
+          var uri2 = "http://cinergi.sdsc.edu/vizgraph/?source=" + encodeURIComponent(item.fileid);
+          var htmlNode = domConstruct.create("a", {
+              href: uri2+"&ttl=PlaceHolder for Now", // for now
+              target: "_blank",
+              innerHTML: "Edit"
+          }, actionsNode);
+      }
+
+      },
   });
   
   return oThisClass;
