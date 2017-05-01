@@ -22,6 +22,8 @@ G.evaluators.dc = {
     this.evalService(task);
     this.evalSpatial(task);
     this.evalTemporal(task);
+    this.evalDoi(task);
+    this.evalReferences(task);
   },
 
   evalBase: function(task) {
@@ -29,12 +31,12 @@ G.evaluators.dc = {
       var dsc = G.getNode(task,root,"rdf:Description | oai_dc:dc");
 
       G.evalProp(task,item,root,"fileid","dc:identifier[contains(text(),'doi:')] |dc:identifier");
-      G.evalProp(task,item,root,"title","dc:title ");
+      G.evalProp(task,item,root,"title","dc:title | rdf:Description/@rdf:about");
 
       G.evalProps(task,item,root,"description","dct:abstract | dc:description");
 
       G.evalProps(task,item,root,"keywords_s","//dc:subject");
-      G.evalProps(task,item,root,"links_s","//dct:references");
+      G.evalProps(task,item,root,"links_s","//dct:references | dc:relations");
       G.evalProp(task,item,dsc,"thumbnail_s","dct:references[@scheme='urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail']");
 
       G.evalProps(task,item,root,"contact_organizations_s","dc:creator");
@@ -42,18 +44,10 @@ G.evaluators.dc = {
       G.evalProps(task,item,root,"type_s","dc:type");
       G.evalProps(task,item,root,"format_s","dc:format");
   },
-
-    evalDoi: function(task){
-        var item = task.item, root = task.root;
-        var name = G.getString(task, root, "dc:identifier[contains(text(),'doi:')] ");
-        name = name.trim().substr(4);
-        name = "http://doi.org/".concat(name);
-        G.writeMultiProp(task.item,"links_s",name);
-    },
     
   evalService: function(task) {
     var item = task.item, root = task.root;
-    G.evalResourceLinks(task,item,root,"//dct:references");
+    G.evalResourceLinks(task,item,root,"//dct:references| dc:relations");
   },
 
   evalSpatial: function(task) {
@@ -118,6 +112,76 @@ G.evaluators.dc = {
       var v = G.getNodeText(node);
       chk(v);
     });
-  }
+  },
+
+    evalDoi: function(task){
+        var item = task.item, root = task.root;
+        if (G.hasNode(task, root, "dc:identifier[contains(text(),'doi:')] ")) {
+            var name = G.getString(task, root, "dc:identifier[contains(text(),'doi:')] ");
+            name = name.trim().substr(4);
+            name = "http://doi.org/".concat(name);
+            G.writeMultiProp(task.item, "links_s", name);
+        }
+    }
+    ,
+
+    evalReferences: function(task){
+        var item = task.item, root = task.root;
+        var urls = [], name = "resources_nst";
+        //"url_s": info.linkUrl,
+        //"url_type_s": info.linkType
+        // url_title:
+        G.forEachNode(task,root,"//dct:references", function(node) {
+            print("dctnode:"+G.getString(task, node, "@dct:scheme | @scheme"));
+
+          if (G.hasText(task,node,"@dct:scheme | @scheme")){
+
+              var ref = G.getString(task, node, "@dct:scheme| @scheme");
+              print("dctref:"+ref);
+              var url = G.getNodeText(node);
+              G.writeMultiProp(task.item, "links_s", url);
+              if (url && ref) {
+                  if (urls.indexOf(url) === -1) {
+                      urls.push(url);
+                      G.writeMultiProp(task.item,name,{
+                          "url_s": url,
+                          "url_type_s": ref
+                      });
+                  }
+              }
+
+          }
+          else if (G.hasNode(task,node,"dc:identifier[contains(text(),'doi:')] ")) {
+              var doi = G.getString(task, node, ".");
+              doi = doi.trim().substr(4);
+              doi = "http://doi.org/".concat(name);
+              G.writeMultiProp(task.item, "links_s", doi);
+              if (urls.indexOf(url) === -1) {
+                  urls.push(url);
+                  G.writeMultiProp(task.item,name,{
+                      "url_s": url,
+                      "url_type_s": "DOI"
+                  });
+              }
+          } else {
+
+              var url = G.getNodeText(node);
+              G.writeMultiProp(task.item, "links_s", url);
+              if (G.hasNode(task,root,"dc:format")){
+                  var ref = G.getString(task, node, "dc:format");
+
+                  if ( url && ref) {
+                      if (urls.indexOf(url) === -1) {
+                          urls.push(url);
+                          G.writeMultiProp(task.item,name,{
+                              "url_s": url,
+                              "url_type_s": ref
+                          });
+                      }
+                  }
+              }
+          }
+        })
+    },
 
 };
