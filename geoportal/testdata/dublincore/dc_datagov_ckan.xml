@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcmiBox="http://dublincore.org/documents/2000/07/11/dcmi-box/"
+    xmlns:dct="http://purl.org/dc/terms/" xmlns:ows="http://www.opengis.net/ows/2.0"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description
+        rdf:about="000f1c44-a0b8-402f-8d4b-a4b66dfb7734"
+            ><dc:identifier>000f1c44-a0b8-402f-8d4b-a4b66dfb7734</dc:identifier><dc:title>College
+            Scorecard</dc:title><dc:description>College Scorecards make it easier for students to
+            search for a college that is a good fit for them. They can use the College Scorecard to
+            find out more about a college&amp;apos;s affordability and value so they can make more
+            informed decisions about which college to attend.</dc:description><dct:abstract>College
+            Scorecards make it easier for students to search for a college that is a good fit for
+            them. They can use the College Scorecard to find out more about a college&amp;apos;s
+            affordability and value so they can make more informed decisions about which college to
+            attend.</dct:abstract><dc:date>2017-03-08T15:23:58.171456</dc:date><dct:references>https://collegescorecard.ed.gov/</dct:references><dct:references
+            dct:scheme="urn:application/zip"
+            >https://ed-public-download.apps.cloud.gov/downloads/CollegeScorecard_Raw_Data.zip</dct:references><dct:references
+            dct:scheme="urn:text/csv"
+            >https://ed-public-download.apps.cloud.gov/downloads/Most-Recent-Cohorts-Scorecard-Elements.csv</dct:references><dct:references
+            dct:scheme="urn:text/csv"
+            >https://ed-public-download.apps.cloud.gov/downloads/Most-Recent-Cohorts-All-Data-Elements.csv</dct:references><dct:references
+            dct:scheme="urn:text/csv"
+            >https://ed-public-download.apps.cloud.gov/downloads/Most-Recent-Cohorts-NSLDS-Elements.csv</dct:references><dct:references
+            dct:scheme="urn:text/csv"
+            >https://ed-public-download.apps.cloud.gov/downloads/Most-Recent-Cohorts-Treasury-Elements.csv</dct:references><dct:references>https://collegescorecard.ed.gov/data/documentation/</dct:references></rdf:Description></rdf:RDF>

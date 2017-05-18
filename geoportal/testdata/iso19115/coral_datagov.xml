@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?><rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:dcmiBox="http://dublincore.org/documents/2000/07/11/dcmi-box/"
+ xmlns:dct="http://purl.org/dc/terms/" xmlns:ows="http://www.opengis.net/ows/2.0" 
+ xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description rdf:about="000a421d-28aa-47be-878e-9376e6ea0522">
+ <dc:identifier>000a421d-28aa-47be-878e-9376e6ea0522</dc:identifier>
+ <dc:title>Rose Atoll Site 10P 7/30/2004 23-24M</dc:title>
+ <dc:description>One-meter-square (1 meter x 1 meter) benthic substrate at Rose Atoll, site 10P (14 33.075S, 168 09.622W), between 23 and 24 meters along a permanent transect.</dc:description><dct:abstract>One-meter-square (1 meter x 1 meter) benthic substrate at Rose Atoll, site 10P (14 33.075S, 168 09.622W), between 23 and 24 meters along a permanent transect.</dct:abstract>
+ <dc:date>2016-07-27T22:30:16.619058</dc:date>
+ <dct:references>https://ecos.fws.gov/ServCat/DownloadFile/10938?Reference=11249</dct:references>
+ </rdf:Description></rdf:RDF>

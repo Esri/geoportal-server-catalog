@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcmiBox="http://dublincore.org/documents/2000/07/11/dcmi-box/"
+    xmlns:dct="http://purl.org/dc/terms/" xmlns:ows="http://www.opengis.net/ows/2.0"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description
+        rdf:about="00e14f0e-e149-43c0-9bb0-923878475fee">
+        <dc:identifier>00e14f0e-e149-43c0-9bb0-923878475fee</dc:identifier><dc:title>vid119_0601c--
+            Point coverage of sediment types from video collected from the Delta submersible
+            vehicle.</dc:title>
+        <dc:description>The Delta submersible vehicle, outfitted with video
+            equipment (and other devices), was deployed from the R/V Auriga during September 2001 to
+            monitor seafloor disturbance and benthic recovery after installation of the PC1 fiber
+            optic cables.</dc:description>
+        <dct:abstract>The Delta submersible vehicle, outfitted
+            with video equipment (and other devices), was deployed from the R/V Auriga during
+            September 2001 to monitor seafloor disturbance and benthic recovery after installation
+            of the PC1 fiber optic
+            cables.</dct:abstract><dc:date>2017-05-01T03:26:11.663932</dc:date>
+        <dct:references>http://olympiccoast.noaa.gov/science/habitatmapping/habitatmapping.htmldatacatalog.html</dct:references>
+        <dct:references>http://sanctuaries.noaa.gov/</dct:references>
+        <dct:references>https://inport.nmfs.noaa.gov/inport/item/40158/dmp</dct:references>
+        <dct:references>http://olympiccoast.noaa.gov/science/habitatmapping/habitatmapping.html</dct:references>
+    </rdf:Description></rdf:RDF>
