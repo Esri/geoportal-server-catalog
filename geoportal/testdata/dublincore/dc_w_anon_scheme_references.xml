@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<rdf:RDF xmlns:dc="http://purl.org/dc/elements/1.1/"
+    xmlns:dcmiBox="http://dublincore.org/documents/2000/07/11/dcmi-box/"
+    xmlns:dct="http://purl.org/dc/terms/" xmlns:ows="http://www.opengis.net/ows/2.0"
+    xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"><rdf:Description
+        rdf:about="dff49c35-fcd2-41f5-936e-f35b2687e623"
+            ><dc:identifier>dff49c35-fcd2-41f5-936e-f35b2687e623</dc:identifier><dc:title>Prodotti
+            certificati</dc:title><dc:description>Elenco dei prodotti trentini certificati (DOP,
+            IGP, STG) per nome, caratteristiche, consorzio, riferimenti normativi e zona di
+            produzione. E&amp;apos; disponibile, inoltre, il link ad ogni singolo prodotto.
+            [Ulteriori informazioni]
+            (http://www.trentinoagricoltura.it/it/SC/2449/Prodotti.html)</dc:description><dct:abstract>Elenco
+            dei prodotti trentini certificati (DOP, IGP, STG) per nome, caratteristiche, consorzio,
+            riferimenti normativi e zona di produzione. E&amp;apos; disponibile, inoltre, il link ad
+            ogni singolo prodotto. [Ulteriori informazioni]
+            (http://www.trentinoagricoltura.it/it/SC/2449/Prodotti.html)</dct:abstract><dc:date>2016-06-09T20:15:40.650057</dc:date>
+        <dct:references
+            scheme="urn:text/csv"
+            >http://dati.trentino.it//dataset/22eea137-9fc3-4222-a716-bac22cc2039a/resource/fe507a10-4c49-4b18-8bf6-6705198cfd42/download/prodottiprotetti.csv</dct:references>
+    </rdf:Description></rdf:RDF>
