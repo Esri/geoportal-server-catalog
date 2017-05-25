@@ -4,8 +4,10 @@ define([],function(){var obj={
   allowBulkChangeOwner: true,
   
   search: {
-    allowSettings: true,
-    useSimpleQueryString: false
+    allowSettings: false,
+    useSimpleQueryString: false,
+      DateMin: 1000,
+      DateMax: 2500
   },
   
   searchMap: {
@@ -19,7 +21,7 @@ define([],function(){var obj={
   searchResults: {
     numPerPage: 10,
     showDate: true,
-    showOwner: true,
+    showOwner: false,
     showThumbnails: true,
     defaultSort: "title.sort:asc"
   },

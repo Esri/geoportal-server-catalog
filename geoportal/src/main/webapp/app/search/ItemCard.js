@@ -34,7 +34,8 @@ define(["dojo/_base/declare",
         "app/content/ChangeOwner",
         "app/content/MetadataEditor",
         "app/context/metadata-editor",
-        "app/content/UploadMetadata"], 
+        "app/content/UploadMetadata",
+    "app/prov/Prov"],
 function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConstruct,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, template, i18n, 
     AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
@@ -79,7 +80,8 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
       util.setNodeText(this.titleNode,item.title);
       //this._renderOwnerAndDate(item);
       this._renderSourceAndDate(item);
-      util.setNodeText(this.descriptionNode,item.description);
+      //util.setNodeText(this.descriptionNode,item.description);
+      this._renderDescription(item);
       this._renderThumbnail(item);
       this._renderItemLinks(hit._id,item);
       this._renderLinksDropdown(item,links);
@@ -478,16 +480,16 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
           var owner = item.src_source_name_s;
           var date = item.sys_modified_dt;
           var idx, text = "";
+
+          if (typeof owner === "string" && owner.length > 0) {
+              if (text.length > 0) text += " ";
+              text = "Source: " + owner;
+          }
           if (AppContext.appConfig.searchResults.showDate && typeof date === "string" && date.length > 0) {
               idx = date.indexOf("T");
               if (idx > 0) date =date.substring(0,idx);
-              text = date;
-          }
-          if (typeof owner === "string" && owner.length > 0) {
-              if (text.length > 0) text += " ";
-              text += owner;
-          }
-          if (text.length > 0) {
+              text += " Last Modified: " + date;
+          }          if (text.length > 0) {
               util.setNodeText(this.ownerAndDateNode,text);
           }
       },
@@ -530,21 +532,28 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
           if (item.categories_cat) {
 
           var actionsNode = this.actionsNode;
-          var uri = "http://cinergi.sdsc.edu/vizgraph/?mid=" + encodeURIComponent(item.fileid);
+          var uri = "app/prov/templates/Prov.html?source=" + encodeURIComponent(item.fileid);
           var htmlNode = domConstruct.create("a", {
               href: uri + "&ttl=" + encodeURIComponent(item.title),
               target: "_blank",
               innerHTML: "Provenance"
           }, actionsNode);
-          var uri2 = "http://cinergi.sdsc.edu/vizgraph/?source=" + encodeURIComponent(item.fileid);
+          var uri2 = "http://mdeditor.usgin.org/?docId=" + encodeURIComponent(item.fileid);
           var htmlNode = domConstruct.create("a", {
-              href: uri2+"&ttl=PlaceHolder for Now", // for now
+              href: uri2,
               target: "_blank",
               innerHTML: "Edit"
           }, actionsNode);
       }
 
       },
+      _renderDescription: function (item) {
+      var desc = item.description;
+      if (desc && desc.indexOf("REQUIRED FIELD") > -1 ){
+        desc = "";
+      }
+          util.setNodeText(this.descriptionNode,desc);
+      }
   });
   
   return oThisClass;

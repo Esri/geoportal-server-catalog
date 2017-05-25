@@ -60,9 +60,9 @@ G.evaluators.cinergi = {
 
         /* dates */
         G.evalDate(task, item, root, "apiso_Modified_dt", "gmd:dateStamp/gco:Date | gmd:dateStamp/gco:DateTime");
-        G.evalDate(task, item, iden, "apiso_CreationDate_dt", "gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='creation']");
-        G.evalDate(task, item, iden, "apiso_RevisionDate_dt", "gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='revision']");
-        G.evalDate(task, item, root, "apiso_PublicationDate_dt", "gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='publication']");
+        G.evalDate(task, item, iden, "apiso_CreationDate_dt", "gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='creation'] | gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:DateTime[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='creation']");
+        G.evalDate(task, item, iden, "apiso_RevisionDate_dt", "gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='revision'] | gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:DateTime[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='revision']");
+        G.evalDate(task, item, iden, "apiso_PublicationDate_dt", "gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:Date[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='publication'] | gmd:citation/gmd:CI_Citation/gmd:date/gmd:CI_Date/gmd:date/gco:DateTime[../../gmd:dateType/gmd:CI_DateTypeCode/@codeListValue='publication']");
 
         /* language */
         G.evalCode(task, item, root, "apiso_Language_s", "gmd:language/gmd:LanguageCode");
@@ -157,6 +157,7 @@ G.evaluators.cinergi = {
         var item = task.item, root = task.root;
         G.forEachNode(task, root, "//gmd:EX_TemporalExtent/gmd:extent", function (node) {
             var params = null;
+
             if (G.hasNode(task, node, "gml:TimeInstant/gml:timePosition")) {
                 params = {
                     instant: {
@@ -307,7 +308,7 @@ G.evaluators.cinergi = {
 
         } catch (e) {
             print("INFO: Cinergi.ISO: No CINEGI hierarchy for:", fileid);
-            print(e.message);
+          //  print(e.message);
         }
         //G.forEachNode(task,root,"//gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString[contains(.,'>')]/../../../../gmd:keyword",function(node){
         //  var cat = G.getString(task,node,"../gmd:thesaurusName/gmd:CI_Citation/gmd:title/gco:CharacterString") + '>';

@@ -481,6 +481,18 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
         setTimeout(function(){self._searchDisabled = false;},100);
       }
     }
+    // ,
+    //   intializeToolTip: function(){
+    //       var node =  this.dropPane.titleBarNode;
+    //       //  var node = dom.byId('someNode');
+    //       if (this.ToolTip) {
+    //           //  var node = dom.byId('someNode');
+    //           this.ToolTip.set("connectId", [node]);
+    //           if (this.extendedToolTip) {
+    //               this.ToolTip.label =this.extendedToolTip + this.ToolTip.label;
+    //           }
+    //       }
+    //   }
     
   });
   

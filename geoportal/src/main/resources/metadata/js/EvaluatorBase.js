@@ -131,9 +131,10 @@ var G = {
   },
 
   checkValue: function(value,name,options) {
-    if (typeof value === "undefined" || value === null) return;
+    if (typeof value === "undefined" || value === null ) return;
     if (options && options.dataType && typeof value !== "undefined" && value !== null) {
       if (options.dataType === "IsoDateTime" && typeof value === "string") {
+        if (value.startsWith('9999')) return; // Data.Gov uses 9999-01-01 as default
         var isEnd = (options.isEnd || false);
         value = this.DateUtil.checkIsoDateTime(value,isEnd);
       }

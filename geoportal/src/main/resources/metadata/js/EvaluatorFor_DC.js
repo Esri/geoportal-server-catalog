@@ -19,6 +19,7 @@ G.evaluators.dc = {
 
   evaluate: function(task) {
     this.evalBase(task);
+    this.evalTitleAndDescription(task);
     this.evalService(task);
     this.evalSpatial(task);
     this.evalTemporal(task);
@@ -28,23 +29,48 @@ G.evaluators.dc = {
 
   evalBase: function(task) {
     var item = task.item, root = task.root;
-      var dsc = G.getNode(task,root,"rdf:Description | oai_dc:dc");
+      var dsc = G.getNode(task,root,"//rdf:Description | oai_dc:dc");
 
-      G.evalProp(task,item,root,"fileid","dc:identifier[contains(text(),'doi:')] |dc:identifier");
-      G.evalProp(task,item,root,"title","dc:title | rdf:Description/@rdf:about");
+      G.evalProp(task,item,dsc,"fileid","dc:identifier[contains(text(),'doi:')] |dc:identifier");
+      //G.evalProp(task,item,root,"title","dc:title | rdf:Description/@rdf:about");
 
-      G.evalProps(task,item,root,"description","dct:abstract | dc:description");
+      //G.evalProps(task,item,root,"description","dct:abstract | dc:description");
 
       G.evalProps(task,item,root,"keywords_s","//dc:subject");
       G.evalProps(task,item,root,"links_s","//dct:references | dc:relations");
       G.evalProp(task,item,dsc,"thumbnail_s","dct:references[@scheme='urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail']");
 
-      G.evalProps(task,item,root,"contact_organizations_s","dc:creator");
-      G.evalProps(task,item,root,"contact_people_s","dc:creator");
-      G.evalProps(task,item,root,"type_s","dc:type");
-      G.evalProps(task,item,root,"format_s","dc:format");
+      G.evalProps(task,item,dsc,"contact_organizations_s","dc:creator | dc:contributor");
+      G.evalProps(task,item,dsc,"contact_people_s","dc:creator | dc:contributor");
+      G.evalProps(task,item,dsc,"type_s","dc:type");
+      G.evalProps(task,item,dsc,"format_s","dc:format");
+      // time.. use first element found. Others in timeperiod_nst
+      G.evalProp(task,item,dsc,"apiso_CreationDate_dt","dct:created | //dct:issued");
+      //G.evalProp(task,item,root,"apiso_RevisionDate_dt","dc:format");
+      G.evalProp(task,item,dsc,"apiso_PublicationDate_dt","//dct:issued | //dct:dateCopyrighted | //dct:created ");
+      // core returnables
+      G.evalProps(task,item,dsc,"publisher_s","dc:publisher | dct:publisher");
+      G.evalProps(task,item,dsc,"contributor_s","dc:contributor | dct:contributor");
+      G.evalProps(task,item,dsc,"creator_s","dc:creator | dct:creator ");
   },
-    
+    evalTitleAndDescription: function(task){
+        var item = task.item, root = task.root;
+        var dsc = G.getNode(task,root,"rdf:Description | oai_dc:dc");
+        // can't guarentee order of xpath, so we need to force it.
+        // title dc:title | rdf:Description/@rdf:about
+        if (G.hasNode(task,dsc,"dc:title ")){
+            G.evalProp(task,item,dsc,"title","dc:title");
+        } else if (G.hasNode(task,root,"rdf:Description/@rdf:about ")){
+            G.evalProp(task,item,root,"title","rdf:Description/@rdf:about ");
+        }
+
+        if (G.hasNode(task,dsc,"dct:abstract ")){
+            G.evalProp(task,item,dsc,"description","dct:abstract");
+        } else if (G.hasNode(task,dsc,"dc:description")){
+            G.evalProp(task,item,dsc,"description","dc:description");
+        }
+    },
+
   evalService: function(task) {
     var item = task.item, root = task.root;
     G.evalResourceLinks(task,item,root,"//dct:references| dc:relations");
@@ -112,6 +138,11 @@ G.evaluators.dc = {
       var v = G.getNodeText(node);
       chk(v);
     });
+    // this reall needs to be ap_iso_published, created, etc
+      G.forEachNode(task,root," //dct:created | //dct:issued | //dct:dateCopyrighted ",function(node){
+          var v = G.getNodeText(node);
+          chk(v);
+      });
   },
 
     evalDoi: function(task){
@@ -132,12 +163,12 @@ G.evaluators.dc = {
         //"url_type_s": info.linkType
         // url_title:
         G.forEachNode(task,root,"//dct:references", function(node) {
-            print("dctnode:"+G.getString(task, node, "@dct:scheme | @scheme"));
+           // print("dctnode:"+G.getString(task, node, "@dct:scheme | @scheme"));
 
           if (G.hasText(task,node,"@dct:scheme | @scheme")){
 
               var ref = G.getString(task, node, "@dct:scheme| @scheme");
-              print("dctref:"+ref);
+            //  print("dctref:"+ref);
               var url = G.getNodeText(node);
               G.writeMultiProp(task.item, "links_s", url);
               if (url && ref) {

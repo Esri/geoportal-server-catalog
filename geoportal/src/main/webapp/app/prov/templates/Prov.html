@@ -1,0 +1,67 @@
+<html>
+<head>
+	<style>
+	 .node { stroke: #000; stroke-width: 1.5px;}
+	 .link { stroke: #000; stroke-width: 2px;}	 
+	 .button {
+  font: bold 11px Arial;
+  text-decoration: none;
+  background-color: #EEEEEE;
+  color: #333333;
+  padding: 2px 6px 2px 6px;
+  border-top: 1px solid #CCCCCC;
+  border-right: 1px solid #333333;
+  border-bottom: 1px solid #333333;
+  border-left: 1px solid #CCCCCC;
+}
+	 h4.detail-header { border-bottom: solid 1px #bbb !important; margin-bottom: 5px !important; padding-bottom: 5px !important;}
+	</style>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.1/css/bootstrap.min.css">
+</head>
+<body>
+	<div class="row">
+		<div class="col-md-1"></div>
+		<div class="col-md-10"><table><tr><td>
+		<img src="https://www.earthcube.org/sites/default/files/doc-repository/logo_earthcube_cube-only_SMALL.png" width="120">
+		</td><td>
+	<h1 id="Title_t">ProvDB/viz</h1>
+	</td></tr></table>
+	<hr/>
+		</div>
+		<div class="col-md-1"></div>
+	</div>
+	<div class="row">
+		<div class="col-md-1"></div>
+     	<div id="graph" class="col-md-6"></div>
+	  <div id="detail_column" class="col-md-4" style="border-left:solid 1px #bbb;">
+	  	<table class="table" id="detail"></table></div>
+	  <div class="col-md-1"></div>
+	</div>
+	<div class="row">
+		<div class="col-md-2"></div>
+		<div class="col-md-9" id="desc">
+			<hr/>
+			<h4></h4>
+			<p id="desc-body"><p>
+		</div>
+		<div class="col-md-1"></div>
+			<div class="row">
+		<div class="col-md-2"></div>
+		</div>
+	<div class="row">
+		<div class="col-md-2"></div>
+		<div class="col-md-9" id="desc2">
+			
+
+		<div class="row">
+		<div class="col-md-2">
+	<!--	<a class="button" href="#" id="annotate" target="_new">Annotate Enhancements</a>&nbsp; <br/>  <br/>  <br/>
+			&nbsp; <a class="button" href="#" id="validate" target="_new">ISO XML Validation</a></div>
+	-->	</div>
+		
+
+</body>
+
+<script src="http://d3js.org/d3.v3.min.js"></script>
+<script src="../prov_layout.js"></script>
+</html>

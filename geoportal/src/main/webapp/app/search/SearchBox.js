@@ -20,9 +20,10 @@ define(["dojo/_base/declare",
         "dojo/text!./templates/SearchBox.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
-        "app/search/QClause"], 
+        "app/search/QClause",
+        "dijit/Tooltip"],
 function(declare, lang, on, keys, domClass,
-         template, i18n, SearchComponent, QClause) {
+         template, i18n, SearchComponent, QClause,Tooltip) {
   
   var oThisClass = declare([SearchComponent], {
 
@@ -33,11 +34,24 @@ function(declare, lang, on, keys, domClass,
 
     postCreate: function() {
       this.inherited(arguments);
+      this.queryParamFilter();
       this.own(on(this.searchTextBox,"keyup",lang.hitch(this,function(evt) {
         if (evt.keyCode === keys.ENTER) this.search();
       })));
+      this.intializeToolTip();
     },
-    
+    queryParamFilter: function(){
+        var self = this, params = {urlParams:{}}
+        var uri = window.location.search;
+        var query = uri.substring(uri.indexOf("?") + 1, uri.length);
+        if (query != null && query.length >0) {
+            // ioQuery.queryToObject(query); // tried no reference error
+            params.urlParams = dojo.queryToObject(query);
+        }
+        if (params.urlParams['q']){
+            this.searchTextBox.value = params.urlParams['q'];
+        }
+    },
     /* SearchComponent API ============================================= */
     
     appendQueryParams: function(params) {

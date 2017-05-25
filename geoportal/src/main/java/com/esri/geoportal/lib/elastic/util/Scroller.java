@@ -37,7 +37,7 @@ public class Scroller {
   private boolean fetchSource = true;
   private String indexName;
   private String indexType;
-  private int keepAliveMillis = 120000;//60000;
+  private int keepAliveMillis = 600000;//60000;
   private long maxDocs = Long.MAX_VALUE;
   private int pageSize = 100;
   private AtomicLong processed = new AtomicLong();
@@ -136,6 +136,13 @@ public class Scroller {
     search.setScroll(new TimeValue(getKeepAliveMillis()));
     search.addSort(SortBuilders.fieldSort("_doc"));
     search.setSize(getPageSize());
+    // adding due to scroll timeouts
+    // as per notes: https://www.elastic.co/guide/en/elasticsearch/reference/current/search-request-scroll.html
+    // https://discuss.elastic.co/t/apparent-scroll-timeout-error/4440/5
+    // Do not use slices. it screws up  reindexing
+    //SliceBuilder slice = new SliceBuilder(0,2);
+    //search.slice(slice);
+
     if (!getFetchSource()) {
       search.setFetchSource(false);
     }

@@ -118,11 +118,14 @@ body {
 .g-search-pane {
 	margin: 0px 20px 20px 20px; 
 	padding: 0px;
+
 }
 .g-search-pane-left {
-	width: 25%; 
+	width: 25%;
+
 	min-width: 100px; 
-	float: left; 
+	float: left;
+
 }
 .g-search-pane-right {
 	width: 73%; 

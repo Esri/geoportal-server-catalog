@@ -28,10 +28,11 @@ define(["dojo/_base/declare",
         "dojo/request",
         "app/context/AppClient",
         "app/search/SearchBox",
-        "app/search/ResultsPane"], 
+        "app/search/ResultsPane",
+        "dojo/io-query"],
 function(declare, lang, array, query, domClass, topic, appTopics, registry,
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n, 
-         dojoRequest, AppClient) {
+         dojoRequest, AppClient, ioQuery) {
 
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -86,6 +87,12 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
     search: function() {
       var components = this.getSearchComponents();
       var self = this, params = {urlParams:{}};
+      var uri = window.location.search;
+      var query = uri.substring(uri.indexOf("?") + 1, uri.length);
+      if (query != null && query.length >0) {
+        // ioQuery.queryToObject(query); // tried no reference error
+  //        params.urlParams = dojo.queryToObject(query);
+      }
       array.forEach(components,function(component){
         component.appendQueryParams(params);
       });

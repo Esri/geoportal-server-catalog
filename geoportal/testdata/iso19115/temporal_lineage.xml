@@ -1,0 +1,1436 @@
+<?xml version="1.0" encoding="UTF-8"?><gmi:MI_Metadata xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.isotc211.org/2005/gmi Q:/users/mize.jacqueline/ISO/ISOngdc/schema/gmi/gmi.xsd">
+  <gmd:fileIdentifier xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">tl_2013_39007_linearwater.shp.xml</gco:CharacterString>
+  </gmd:fileIdentifier>
+  <gmd:language xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">eng</gco:CharacterString>
+  </gmd:language>
+  <gmd:characterSet xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_CharacterSetCode" codeListValue="8859part1" codeSpace="006">8859part1</gmd:MD_CharacterSetCode>
+  </gmd:characterSet>
+  <gmd:parentIdentifier xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">TIGER/Line Shapefile, 2013, Series Information for the Linear Hydrography County-based Shapefile</gco:CharacterString>
+  </gmd:parentIdentifier>
+  <gmd:hierarchyLevel xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset ">dataset</gmd:MD_ScopeCode>
+  </gmd:hierarchyLevel>
+  <gmd:contact xmlns:gmd="http://www.isotc211.org/2005/gmd" xlink:href="https://www.ngdc.noaa.gov/docucomp/c5ceb003-1ed6-4126-8a16-bc08ce8fc267" xlink:title="U.S. Department of Commerce, U.S. Census Bureau, Geography Division, Geographic Products Branch"/>
+  <gmd:dateStamp xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2013-06-15</gco:Date>
+  </gmd:dateStamp>
+  <gmd:metadataStandardName xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">ISO 19115 Geographic Information - Metadata</gco:CharacterString>
+  </gmd:metadataStandardName>
+  <gmd:metadataStandardVersion xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">2009-02-15</gco:CharacterString>
+  </gmd:metadataStandardVersion>
+  <gmd:dataSetURI xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">http://www2.census.gov/geo/tiger/TIGER2013/LINEARWATER/tl_2013_39007_linearwater.zip</gco:CharacterString>
+  </gmd:dataSetURI>
+  <gmd:spatialRepresentationInfo xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_VectorSpatialRepresentation>
+      <gmd:geometricObjects>
+        <gmd:MD_GeometricObjects>
+          <gmd:geometricObjectType>
+            <gmd:MD_GeometricObjectTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_GeometricObjectTypeCode" codeListValue="curve" codeSpace="003">curve</gmd:MD_GeometricObjectTypeCode>
+          </gmd:geometricObjectType>
+          <gmd:geometricObjectCount>
+            <gco:Integer xmlns:gco="http://www.isotc211.org/2005/gco">812</gco:Integer>
+          </gmd:geometricObjectCount>
+        </gmd:MD_GeometricObjects>
+      </gmd:geometricObjects>
+    </gmd:MD_VectorSpatialRepresentation>
+  </gmd:spatialRepresentationInfo>
+  <gmd:referenceSystemInfo xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_ReferenceSystem>
+      <gmd:referenceSystemIdentifier>
+        <gmd:RS_Identifier>
+          <gmd:code xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+          <gmd:codeSpace>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Federal Information Processing Series (FIPS), ANSI, and feature names.</gco:CharacterString>
+          </gmd:codeSpace>
+        </gmd:RS_Identifier>
+      </gmd:referenceSystemIdentifier>
+    </gmd:MD_ReferenceSystem>
+  </gmd:referenceSystemInfo>
+  <gmd:identificationInfo xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_DataIdentification>
+      <gmd:citation>
+        <gmd:CI_Citation>
+          <gmd:title>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">TIGER/Line Shapefile, 2013,  county, Ashtabula County, OH, Linear Hydrography County-based Shapefile</gco:CharacterString>
+          </gmd:title>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2013</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="./resources/codeList.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:edition>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">2013</gco:CharacterString>
+          </gmd:edition>
+          <gmd:citedResponsibleParty xlink:href="https://www.ngdc.noaa.gov/docucomp/cf2b3bf2-5dd9-4fed-a495-1ddfb9a41de2" xlink:title="originator - U.S. Department of Commerce, U.S.&#10;                        Census Bureau, Geography Division"/>
+          <gmd:presentationForm>
+            <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+          </gmd:presentationForm>
+        </gmd:CI_Citation>
+      </gmd:citation>
+      <gmd:abstract>
+        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">The TIGER/Line shapefiles and related database files (.dbf) are an extract of selected geographic and cartographic information from the U.S. Census Bureau's Master Address File / Topologically Integrated Geographic Encoding and Referencing (MAF/TIGER) Database (MTDB).  The MTDB represents a seamless national file with no overlaps or gaps between parts, however, each TIGER/Line shapefile is designed to stand alone as an independent data set, or they can be combined to cover the entire nation.  Linear Water Features includes single-line drainage water features and artificial path features that run through double-line drainage features such as rivers and streams, and serve as a linear representation of these features.  The artificial path features may correspond to those in the USGS National Hydrographic Dataset (NHD).  However, in many cases the features do not match NHD equivalent feature and will not carry the NHD metadata codes.  These features have a MAF/TIGER Feature Classification Code (MTFCC) beginning with an "H" to indicate the super class of Hydrographic Features.</gco:CharacterString>
+      </gmd:abstract>
+      <gmd:purpose>
+        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">In order for others to use the information in the Census MAF/TIGER database in a geographic information system (GIS) or for other geographic applications, the Census Bureau releases to the public extracts of the database in the form of TIGER/Line Shapefiles.</gco:CharacterString>
+      </gmd:purpose>
+      <gmd:status>
+        <gmd:MD_ProgressCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ProgressCode" codeListValue="completed" codeSpace="001 ">completed</gmd:MD_ProgressCode>
+      </gmd:status>
+      <gmd:pointOfContact xlink:href="https://www.ngdc.noaa.gov/docucomp/c5ceb003-1ed6-4126-8a16-bc08ce8fc267" xlink:title="U.S. Department of Commerce, U.S. Census&#10;                        Bureau, Geography Division, Geographic Products Branch"/>
+      <gmd:resourceMaintenance>
+        <gmd:MD_MaintenanceInformation>
+          <gmd:maintenanceAndUpdateFrequency>
+            <gmd:MD_MaintenanceFrequencyCode codeList="http://www.tc211.org/ISO19139/resources/codeList.xml#MD_MaintenanceFrequencyCode" codeListValue="notPlanned" codeSpace="011">notPlanned</gmd:MD_MaintenanceFrequencyCode>
+          </gmd:maintenanceAndUpdateFrequency>
+          <gmd:maintenanceNote>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">No changes or updates will be made to this version of the TIGER/Line Shapefiles.  Future releases of TIGER/Line Shapefiles will reflect updates made to the Census MAF/TIGER database.</gco:CharacterString>
+          </gmd:maintenanceNote>
+        </gmd:MD_MaintenanceInformation>
+      </gmd:resourceMaintenance>
+      <gmd:descriptiveKeywords>
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">County or equivalent entity</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Linear</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Feature</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Hydrography</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme" codeSpace="005">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+              </gmd:title>
+              <gmd:date xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">United States</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">U.S.</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">County or Equivalent Entity</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Ashtabula</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">39007</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="place" codeSpace="002">place</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">ANSI INCITS 38:2009 (Formerly FIPS 5-2), 
+                              ANSI INCITS 31:2009 (Formerly FIPS 6-4),ANSI 
+                              INCITS 454:2009 (Formerly FIPS 8-6), ANSI INCITS 
+                              455:2009(Formerly FIPS 9-1), ANSI INCITS 446:2008                           (Geographic Names Information System (GNIS))</gco:CharacterString>
+              </gmd:title>
+              <gmd:date xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://gcmdservices.gsfc.nasa.gov/kms/concept/5fea4160-25a7-44b5-bfba-ef140fdffaf4">USGS</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Organization &gt; GOVERNMENT AGENCIES-U.S. FEDERAL AGENCIES</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2016-11-14</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://sweet.jpl.nasa.gov/2.3/realmHydroBody.owl#River">River</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://purl.obolibrary.org/obo/ENVO_00000012">Hydrographic Feature</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Feature &gt; Hydrologic Feature</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2016-11-14</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://purl.obolibrary.org/obo/CHEBI_15377">Water</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Material &gt; Environmental Material</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2016-11-14</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://www.vocabularyserver.com/usgs/index.php?tema=649&amp;/geography">Geography</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Science Domain &gt; Earth Science</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2016-11-14</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Cinergi keyword enhanced at Mon Nov 14 03:13:57 UTC 2016</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:resourceConstraints>
+        <gmd:MD_LegalConstraints>
+          <gmd:accessConstraints>
+            <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions" codeSpace="008 ">otherRestrictions</gmd:MD_RestrictionCode>
+          </gmd:accessConstraints>
+          <gmd:useConstraints>
+            <gmd:MD_RestrictionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_RestrictionCode" codeListValue="otherRestrictions" codeSpace="008 "/>
+          </gmd:useConstraints>
+          <gmd:otherConstraints>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Access Constraints: None</gco:CharacterString>
+          </gmd:otherConstraints>
+          <gmd:otherConstraints>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Use Constraints: The TIGER/Line Shapefile products are not copyrighted however TIGER/Line and Census TIGER are registered trademarks of the U.S. Census Bureau.  These products are free to use in a product or publication, however acknowledgement must be given to the U.S. Census Bureau as the source.
+The horizontal spatial accuracy information present in these files is provided for the purposes of statistical analysis and census operations only.  No warranty, expressed or implied is made with regard to the accuracy of the spatial accuracy, and no liability is assumed by the U.S. Government in general or the U.S. Census Bureau, specifically as to the spatial or attribute accuracy of the data.  The TIGER/Line Shapefiles may not be suitable for high-precision measurement applications such as engineering problems, property transfers, or other uses that might require highly accurate measurements of the earth's surface.Coordinates in the TIGER/Line shapefiles have six implied decimal places, but the positional accuracy of these coordinates is not as great as the six decimal places suggest.</gco:CharacterString>
+          </gmd:otherConstraints>
+          <gmd:otherConstraints>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Distribution Liability: No warranty, expressed or implied is made with regard to the accuracy of these data, and no liability is assumed by the U.S. Government in general or the U.S. Census Bureau in specific as to the spatial or attribute accuracy of the data.  The act of distribution shall not constitute any such warranty and no responsibility is assumed by the U.S. government in the use of these files.  The boundary information in the TIGER/Line Shapefiles is for statistical data collection and tabulation purposes only; their depiction and designation for statistical purposes do not constitute a determination of jurisdictional authority or rights of ownership or entitlement and they are not legal land descriptions.</gco:CharacterString>
+          </gmd:otherConstraints>
+        </gmd:MD_LegalConstraints>
+      </gmd:resourceConstraints>
+      <gmd:spatialRepresentationType>
+        <gmd:MD_SpatialRepresentationTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_SpatialRepresentationTypeCode" codeListValue="vector" codeSpace="001"/>
+      </gmd:spatialRepresentationType>
+      <gmd:language>
+        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">eng</gco:CharacterString>
+      </gmd:language>
+      <gmd:topicCategory>
+        <gmd:MD_TopicCategoryCode>inlandWaters</gmd:MD_TopicCategoryCode>
+      </gmd:topicCategory>
+      <gmd:environmentDescription>
+        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Technical Prerequisites: The TIGER/Line shapefiles contain geographic data only and do not include display mapping software or statistical data.  For information on how to use the TIGER/Line shapefile data with specific software package users shall contact the company that produced the software.</gco:CharacterString>
+      </gmd:environmentDescription>
+      <gmd:extent>
+        <gmd:EX_Extent id="boundingExtent">
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox id="boundingGeographicBoundingBox">
+              <gmd:westBoundLongitude>
+                <gco:Decimal xmlns:gco="http://www.isotc211.org/2005/gco">-81.009827</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal xmlns:gco="http://www.isotc211.org/2005/gco">-80.519158</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal xmlns:gco="http://www.isotc211.org/2005/gco">41.499327</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal xmlns:gco="http://www.isotc211.org/2005/gco">42.327132</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="boundingTemporalExtent1">
+                  <gml:description>Publication Date</gml:description>
+                  <gml:beginPosition>2012-06</gml:beginPosition>
+                  <gml:endPosition>2013-05</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+    </gmd:MD_DataIdentification>
+  </gmd:identificationInfo>
+  <gmd:contentInfo xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_FeatureCatalogueDescription>
+      <gmd:includedWithDataset>
+        <gco:Boolean xmlns:gco="http://www.isotc211.org/2005/gco">false</gco:Boolean>
+      </gmd:includedWithDataset>
+      <gmd:featureTypes>
+        <gco:LocalName xmlns:gco="http://www.isotc211.org/2005/gco" codeSpace="unknown">Linear Hydrography</gco:LocalName>
+      </gmd:featureTypes>
+      <gmd:featureCatalogueCitation>
+        <gmd:CI_Citation>
+          <gmd:title>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Feature Catolog for the  2013  Linear Hydrography County-based Shapefile</gco:CharacterString>
+          </gmd:title>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2013-06-15</gco:Date>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="./resources/codeList.xml#CI_DateTypeCode" codeListValue="publication " codeSpace="002"/>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:citedResponsibleParty xlink:href="https://www.ngdc.noaa.gov/docucomp/186104a8-278b-412d-9b61-d4d488142f3c " xlink:title="pointofContact - U.S. Department of Commerce, U.S. Census Bureau, Geography Division"/>
+          <gmd:otherCitationDetails>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">http://meta.geo.census.gov/data/existing/decennial/GEO/GPMB/TIGERline/TIGER2013/linearwater/2013_linearwater.ea.iso.xml</gco:CharacterString>
+          </gmd:otherCitationDetails>
+        </gmd:CI_Citation>
+      </gmd:featureCatalogueCitation>
+    </gmd:MD_FeatureCatalogueDescription>
+  </gmd:contentInfo>
+  <gmd:distributionInfo xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_Distribution>
+      <gmd:distributionFormat>
+        <gmd:MD_Format>
+          <gmd:name>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">TGRSHP (compressed)</gco:CharacterString>
+          </gmd:name>
+          <gmd:version xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+          <gmd:fileDecompressionTechnique>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">PK-ZIP, version 1.93 A or higher</gco:CharacterString>
+          </gmd:fileDecompressionTechnique>
+        </gmd:MD_Format>
+      </gmd:distributionFormat>
+      <gmd:distributor>
+        <gmd:MD_Distributor>
+          <gmd:distributorContact xlink:href="https://www.ngdc.noaa.gov/docucomp/f48e4893-a57f-4f2b-ad5d-0cca1b34ec62" xlink:title="distributor - U.S. Department of Commerce, U.S. Census Bureau, Geography Division, Geographic Products Branch"/>
+          <gmd:distributionOrderProcess>
+            <gmd:MD_StandardOrderProcess>
+              <gmd:fees>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">The online copy of the TIGER/Line Shapefiles may be accessed without charge.</gco:CharacterString>
+              </gmd:fees>
+              <gmd:orderingInstructions>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">To obtain more information about ordering TIGER/Line Shapefiles visit http://www.census.gov/geo/www/tiger</gco:CharacterString>
+              </gmd:orderingInstructions>
+            </gmd:MD_StandardOrderProcess>
+          </gmd:distributionOrderProcess>
+        </gmd:MD_Distributor>
+      </gmd:distributor>
+      <gmd:transferOptions>
+        <gmd:MD_DigitalTransferOptions>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>http://www2.census.gov/geo/tiger/TIGER2013/LINEARWATER/tl_2013_39007_linearwater.zip</gmd:URL>
+              </gmd:linkage>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+        </gmd:MD_DigitalTransferOptions>
+      </gmd:transferOptions>
+      <gmd:transferOptions>
+        <gmd:MD_DigitalTransferOptions>
+          <gmd:offLine>
+            <gmd:MD_Medium>
+              <gmd:name/>
+            </gmd:MD_Medium>
+          </gmd:offLine>
+        </gmd:MD_DigitalTransferOptions>
+      </gmd:transferOptions>
+    </gmd:MD_Distribution>
+  </gmd:distributionInfo>
+  <gmd:dataQualityInfo xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:DQ_DataQuality>
+      <gmd:scope>
+        <gmd:DQ_Scope>
+          <gmd:level>
+            <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/#MD_ScopeCode" codeListValue="dataset" codeSpace="005">dataset</gmd:MD_ScopeCode>
+          </gmd:level>
+        </gmd:DQ_Scope>
+      </gmd:scope>
+      <gmd:report>
+        <gmd:DQ_QuantitativeAttributeAccuracy>
+          <gmd:nameOfMeasure>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Attribute Accuracy</gco:CharacterString>
+          </gmd:nameOfMeasure>
+          <gmd:measureDescription>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Accurate against Federal Information Processing Series (FIPS), FIPS Publication 6-4, and FIPS-55 at the 100% level for the codes and base names.  The remaining attribute information has been examined but has not been fully tested for accuracy.</gco:CharacterString>
+          </gmd:measureDescription>
+          <gmd:result xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+        </gmd:DQ_QuantitativeAttributeAccuracy>
+      </gmd:report>
+      <gmd:report>
+        <gmd:DQ_AbsoluteExternalPositionalAccuracy>
+          <gmd:nameOfMeasure>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Horizontal Positional Accuracy</gco:CharacterString>
+          </gmd:nameOfMeasure>
+          <gmd:measureDescription>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">The Census Bureau uses root mean square error (RMSE) as stated in the FGDC-STD-007. 3-1998, Geospatial Positioning Accuracy Standards, Part 3: National Standard for Spatial Data Accuracy.</gco:CharacterString>
+          </gmd:measureDescription>
+          <gmd:evaluationMethodDescription>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">The Census Bureau uses Global Positioning System (GPS) coordinates at road centerline intersections to evaluate the horizontal spatial accuracy of source files that may be used to realign road features in the MAF/TIGER database and test the horizontal spatial accuracy of the road features in the TIGER/Line Shapefiles.  The test compares a survey-grade GPS coordinate to its associated road centerline intersection in the TIGER/Line Shapefiles.  The test is based on an independent collection of GPS coordinates for a random sample of road intersections from a centerline file that meet certain criteria.  The points are referred to as the sample points and are gathered through a private contractor working for the Census Bureau.  Since the collection method uses survey-quality GPS-based field techniques, the resulting control points are considered 'ground truth' against which the TIGER road centerline intersection coordinates are compared.  The distances between the coordinates are calculated and the Census Bureau determines the Circular Error 95% (CE95).  That is, the accuracy of the file in meters with 95% confidence.  The CE95 can be calculated from the mean and standard deviation by using the formula: mean of differences plus (2.65 times the standard deviation).  CE95 results reported for each file tested are determined using a spreadsheet with embedded statistical formula.  The use and applicability of the spreadsheet and its embedded formula have been verified by Census Bureau statisticians.  The basis of the calculation is the use of the root mean square error (RMSE).  This is the method as stated in the U.S. Government's Federal Geographic Data Committee Standard FGDC-STD-007.3-1998, Geospatial Positioning Accuracy Standards.  Part 3: National Standard for Spatial Data Accuracy.  The results of using this measure of accuracy are in compliance with Federal Spatial Data requirements.  In terms of the Census Bureau application, the dataset coordinate values are those taken from the centerline file and the coordinate values from an independent source of higher accuracy are those acquired through the Census Bureau's contractor.  Please note that the horizontal spatial accuracy, where reported, refers only to the realigned road features identified as matched to the positionally accurate source file with that accuracy.  It is not the spatial accuracy of the TIGER/Line Shapefile as a whole.</gco:CharacterString>
+          </gmd:evaluationMethodDescription>
+          <gmd:result>
+            <gmd:DQ_QuantitativeResult>
+              <gmd:valueUnit>
+                <gml:BaseUnit xmlns:gml="http://www.opengis.net/gml/3.2" id="meters">
+                  <gml:identifier codeSpace="meters ">meters</gml:identifier>
+                  <gml:unitsSystem xlink:href="http://www.bipm.org/en/si/ "/>
+                </gml:BaseUnit>
+              </gmd:valueUnit>
+              <gmd:value>
+                <gco:Record xmlns:gco="http://www.isotc211.org/2005/gco">6.565 meters for 913</gco:Record>
+              </gmd:value>
+              <gmd:value>
+                <gco:Record xmlns:gco="http://www.isotc211.org/2005/gco">5.093 meters for 589</gco:Record>
+              </gmd:value>
+              <gmd:value>
+                <gco:Record xmlns:gco="http://www.isotc211.org/2005/gco">3.193 meters for 6884</gco:Record>
+              </gmd:value>
+              <gmd:value>
+                <gco:Record xmlns:gco="http://www.isotc211.org/2005/gco">3.299 meters for 760</gco:Record>
+              </gmd:value>
+              <gmd:value>
+                <gco:Record xmlns:gco="http://www.isotc211.org/2005/gco">5.785 meters for 1014</gco:Record>
+              </gmd:value>
+            </gmd:DQ_QuantitativeResult>
+          </gmd:result>
+        </gmd:DQ_AbsoluteExternalPositionalAccuracy>
+      </gmd:report>
+      <gmd:report>
+        <gmd:DQ_CompletenessCommission>
+          <gmd:result xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+        </gmd:DQ_CompletenessCommission>
+      </gmd:report>
+      <gmd:report>
+        <gmd:DQ_CompletenessOmission>
+          <gmd:evaluationMethodDescription>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Data completeness of the TIGER/Line Shapefiles reflects the contents of the Census MAF/TIGER database at the time the TIGER/Line Shapefiles were created.</gco:CharacterString>
+          </gmd:evaluationMethodDescription>
+          <gmd:result xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+        </gmd:DQ_CompletenessOmission>
+      </gmd:report>
+      <gmd:report>
+        <gmd:DQ_ConceptualConsistency>
+          <gmd:nameOfMeasure>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Logical Consistency Report</gco:CharacterString>
+          </gmd:nameOfMeasure>
+          <gmd:measureDescription>
+            <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">There may be some inconsistencies in feature names along features.  An anomaly exists with the sporadic occurrence of road segments comprising a complete chain with different MAF/TIGER Feature Census Class Code (MTFCC) values assigned.  This problem could affect applications that use the MTFCC values for network analysis, routing, or for assigning symbology to a feature when creating a map.
+The Census Bureau performed automated tests to ensure logical consistency and limits of shapefiles.  Node/geometry and topology relationships are collected or generated to satisfy topological edit requirements.  These requirements include:
+(1) Complete chains must begin and end at nodes.
+(2) Complete chains must connect to each other at nodes.
+(3) Complete chains do not extend through nodes.
+(4) Left and right polygons are defined for each complete chain element and are consistent throughout the extract process.
+(5) The chains representing the limits of the files are free of gaps.</gco:CharacterString>
+          </gmd:measureDescription>
+          <gmd:result xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown"/>
+        </gmd:DQ_ConceptualConsistency>
+      </gmd:report>
+      <gmd:lineage>
+        <gmd:LI_Lineage>
+          <gmd:processStep>
+            <gmd:LI_ProcessStep>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">TIGER/Line Shapefiles are extracted from the Census MAF/TIGER database by nation, state, county, and entity.  Census MAF/TIGER data for all of the aforementioned geographic entities are then distributed among the shapefiles each containing attributes for line, polygon, or landmark geographic data.</gco:CharacterString>
+              </gmd:description>
+              <gmd:dateTime>
+                <gco:DateTime xmlns:gco="http://www.isotc211.org/2005/gco">2013-01-01T00:00:00</gco:DateTime>
+              </gmd:dateTime>
+              <gmd:source>
+                <gmd:LI_Source>
+                  <gmd:sourceCitation>
+                    <gmd:CI_Citation>
+                      <gmd:title>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">MAF/TIGER</gco:CharacterString>
+                      </gmd:title>
+                      <gmd:date>
+                        <gmd:CI_Date>
+                          <gmd:date>
+                            <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2013</gco:Date>
+                          </gmd:date>
+                          <gmd:dateType>
+                            <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="revision" codeSpace="003">revision</gmd:CI_DateTypeCode>
+                          </gmd:dateType>
+                        </gmd:CI_Date>
+                      </gmd:date>
+                    </gmd:CI_Citation>
+                  </gmd:sourceCitation>
+                </gmd:LI_Source>
+              </gmd:source>
+            </gmd:LI_ProcessStep>
+          </gmd:processStep>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">All line segments
+This was deliveried online.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Census MAF/TIGER database</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">MAF/TIGER</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unpublished material"/>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">U.S. Department of Commerce, U.S. Census Bureau, Geography Division</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase2">
+                          <gml:description>Publication Date</gml:description>
+                          <gml:beginPosition>2012-06</gml:beginPosition>
+                          <gml:endPosition>2013-05</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected road features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Geauga PAS Shape Files (GIS Dataset)</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2003-06-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">589
+				Geauga County
+				Geauga County Auditor's Office</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase3">
+                          <gml:description>Ground Condition</gml:description>
+                          <gml:beginPosition>2003-06-01</gml:beginPosition>
+                          <gml:endPosition>2003-06-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected hydrographic features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Geauga PAS Shape Files (GIS Dataset)</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2003-06-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">589
+				Geauga County
+				Geauga County Auditor's Office</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase4">
+                          <gml:description>Ground Condition</gml:description>
+                          <gml:beginPosition>2003-06-01</gml:beginPosition>
+                          <gml:endPosition>2003-06-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected road features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Trumbull Co., OH GIS Dataset</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2003-06-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">760
+				Trumbull County
+				Tax Map Department / Trumbull County Auditors Office</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase5">
+                          <gml:description>Ground Condition</gml:description>
+                          <gml:beginPosition>2003-06-01</gml:beginPosition>
+                          <gml:endPosition>2003-06-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected hydrographic features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Trumbull Co., OH GIS Dataset</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2003-06-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">760
+				Trumbull County
+				Tax Map Department / Trumbull County Auditors Office</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase6">
+                          <gml:description>Ground Condition</gml:description>
+                          <gml:beginPosition>2003-06-01</gml:beginPosition>
+                          <gml:endPosition>2003-06-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected railroad features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Trumbull Co., OH GIS Dataset</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2003-06-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">760
+				Trumbull County
+				Tax Map Department / Trumbull County Auditors Office</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase7">
+                          <gml:description>Ground Condition</gml:description>
+                          <gml:beginPosition>2003-06-01</gml:beginPosition>
+                          <gml:endPosition>2003-06-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected road features in the Census MAF/TIGER database.
+This was deliveried on 3.5 Floppy disk.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Erie Co. PA GIS Data Set</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">1998-01-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">913
+				Erie County
+				County Council</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase8">
+                          <gml:description>Publication Date</gml:description>
+                          <gml:beginPosition>1998-01-01</gml:beginPosition>
+                          <gml:endPosition>1998-01-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected road features in the Census MAF/TIGER database.
+This was deliveried on 3.5 Floppy disk.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Erie Co. PA GIS Data Set</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">1998-01-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">913
+				Erie County
+				Department of Public Safety</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase9">
+                          <gml:description>Publication Date</gml:description>
+                          <gml:beginPosition>1998-01-01</gml:beginPosition>
+                          <gml:endPosition>1998-01-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected hydrographic features in the Census MAF/TIGER database.
+This was deliveried via Internet Download.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Erie Co. PA GIS Data Set</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">1998-05-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">913
+				Erie County
+				County Council</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase10">
+                          <gml:description>Publication Date</gml:description>
+                          <gml:beginPosition>1998-05-01</gml:beginPosition>
+                          <gml:endPosition>1998-05-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected hydrographic features in the Census MAF/TIGER database.
+This was deliveried via Internet Download.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Erie Co. PA GIS Data Set</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">1998-05-01</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">913
+				Erie County
+				Department of Public Safety</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase11">
+                          <gml:description>Publication Date</gml:description>
+                          <gml:beginPosition>1998-05-01</gml:beginPosition>
+                          <gml:endPosition>1998-05-01</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected road features in the Census MAF/TIGER database.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Ashtabula OH, Harris Centerline Collect</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown date"/>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">1014
+				Harris Corporation</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase12">
+                          <gml:description>Unknown</gml:description>
+                          <gml:beginPosition indeterminatePosition="unknown"/>
+                          <gml:endPosition indeterminatePosition="unknown"/>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected railroad features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Crawford Co. PA Emg Mgmt Data set</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">0200-03-27</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">6884
+				Crawford County
+				Office of Emergency Services</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase13">
+                          <gml:description>Publication Date</gml:description>
+                          <gml:beginPosition>0200-03-27</gml:beginPosition>
+                          <gml:endPosition>0200-03-27</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected road features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Crawford Co. PA Emg Mgmt Data set</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2001-06-18</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">6884
+				Crawford County
+				Office of Emergency Services</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase14">
+                          <gml:description>Ground Condition</gml:description>
+                          <gml:beginPosition>2001-06-18</gml:beginPosition>
+                          <gml:endPosition>2001-06-18</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected hydrographic features in the Census MAF/TIGER database.
+This was deliveried on CD-ROM.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Crawford Co. PA Emg Mgmt Data set</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date>
+                        <gco:Date xmlns:gco="http://www.isotc211.org/2005/gco">2001-06-18</gco:Date>
+                      </gmd:date>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">6884
+				Crawford County
+				Office of Emergency Services</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase15">
+                          <gml:description>Unknown</gml:description>
+                          <gml:beginPosition>2001-06-18</gml:beginPosition>
+                          <gml:endPosition>2001-06-18</gml:endPosition>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+          <gmd:source>
+            <gmd:LI_Source>
+              <gmd:description>
+                <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">Coordinates to realign selected road features in the Census MAF/TIGER database.</gco:CharacterString>
+              </gmd:description>
+              <gmd:sourceCitation>
+                <gmd:CI_Citation>
+                  <gmd:title>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">2010 ADCAN GPS Feature Updates</gco:CharacterString>
+                  </gmd:title>
+                  <gmd:alternateTitle>
+                    <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">None</gco:CharacterString>
+                  </gmd:alternateTitle>
+                  <gmd:date>
+                    <gmd:CI_Date>
+                      <gmd:date xmlns:gco="http://www.isotc211.org/2005/gco" gco:nilReason="unknown date"/>
+                      <gmd:dateType>
+                        <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication" codeSpace="002">publication</gmd:CI_DateTypeCode>
+                      </gmd:dateType>
+                    </gmd:CI_Date>
+                  </gmd:date>
+                  <gmd:citedResponsibleParty>
+                    <gmd:CI_ResponsibleParty>
+                      <gmd:organisationName>
+                        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">7190
+				Census Bureau - Geography Division
+				US Census Bureau - Geo Div - LFGPB</gco:CharacterString>
+                      </gmd:organisationName>
+                      <gmd:role>
+                        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="resourceProvider" codeSpace="001">resourceProvider</gmd:CI_RoleCode>
+                      </gmd:role>
+                    </gmd:CI_ResponsibleParty>
+                  </gmd:citedResponsibleParty>
+                  <gmd:presentationForm>
+                    <gmd:CI_PresentationFormCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_PresentationFormCode" codeListValue="mapDigital" codeSpace="005">mapDigital</gmd:CI_PresentationFormCode>
+                  </gmd:presentationForm>
+                </gmd:CI_Citation>
+              </gmd:sourceCitation>
+              <gmd:sourceExtent>
+                <gmd:EX_Extent>
+                  <gmd:temporalElement>
+                    <gmd:EX_TemporalExtent>
+                      <gmd:extent>
+                        <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase16">
+                          <gml:description>Unknown</gml:description>
+                          <gml:beginPosition indeterminatePosition="unknown"/>
+                          <gml:endPosition indeterminatePosition="unknown"/>
+                        </gml:TimePeriod>
+                      </gmd:extent>
+                    </gmd:EX_TemporalExtent>
+                  </gmd:temporalElement>
+                </gmd:EX_Extent>
+              </gmd:sourceExtent>
+            </gmd:LI_Source>
+          </gmd:source>
+        </gmd:LI_Lineage>
+      </gmd:lineage>
+    </gmd:DQ_DataQuality>
+  </gmd:dataQualityInfo>
+  <gmd:metadataMaintenance xmlns:gmd="http://www.isotc211.org/2005/gmd">
+    <gmd:MD_MaintenanceInformation>
+      <gmd:maintenanceAndUpdateFrequency>
+        <gmd:MD_MaintenanceFrequencyCode codeList="http://www.tc211.org/ISO19139/resources/codeList.xml#MD_MaintenanceFrequencyCode" codeListValue="notPlanned" codeSpace="011">notPlanned</gmd:MD_MaintenanceFrequencyCode>
+      </gmd:maintenanceAndUpdateFrequency>
+      <gmd:maintenanceNote>
+        <gco:CharacterString xmlns:gco="http://www.isotc211.org/2005/gco">This metadata was automatically generated
+                  from the FGDC Content Standards for Digital Geospatial Metadata standard version
+                  FGDC-STD-001-1998 using the June 2011 version of the csdgm2iso19115-2_master.xslt
+                  stylesheet, which is based on NOAA's FGDC CSDGM to ISO 19115-2 transform. This
+                  stylesheet has been modified for Census use by sepereating into various sections.
+                  The Spatial Reference Information is not currently mapped over to ISO but will be
+                  mapped in future versions.</gco:CharacterString>
+      </gmd:maintenanceNote>
+      <gmd:contact xlink:href="https://www.ngdc.noaa.gov/docucomp/cf2b3bf2-5dd9-4fed-a495-1ddfb9a41de2" xlink:title="originator - U.S. Department of Commerce, U.S. Census Bureau, Geography Division"/>
+    </gmd:MD_MaintenanceInformation>
+  </gmd:metadataMaintenance>
+</gmi:MI_Metadata>
