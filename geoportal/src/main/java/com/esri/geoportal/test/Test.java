@@ -426,7 +426,7 @@ public class Test {
     request.setBody(body);
     AppResponse response = request.execute();
     LOGGER.info(response.getStatus().toString());
-    LOGGER.info(response.getEntity().toString());
+    //LOGGER.info(response.getEntity().toString());
     LOGGER.info(response.getMediaType().toString());
   }
   
@@ -586,7 +586,7 @@ public class Test {
             ResponseEntity<String> responseEntity = rest.exchange(url,HttpMethod.PUT,requestEntity,String.class);
             String response = responseEntity.getBody();
             if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
-              LOGGER.warn(response);
+              //LOGGER.warn(response);
             }
           } catch (Exception e) {
             e.printStackTrace();
@@ -794,7 +794,7 @@ public class Test {
           ResponseEntity<String> responseEntity = rest.exchange(url,HttpMethod.PUT,requestEntity,String.class);
           String response = responseEntity.getBody();
           if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
-            LOGGER.warn(response);
+            //LOGGER.warn(response);
           }
         } catch (Exception e) {
           e.printStackTrace();

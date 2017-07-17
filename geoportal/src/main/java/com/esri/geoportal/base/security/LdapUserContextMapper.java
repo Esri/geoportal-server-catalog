@@ -71,7 +71,7 @@ public class LdapUserContextMapper extends LdapUserDetailsMapper {
           newAuthorities.add(authority);
           hasRoles.put(authority.getAuthority().toUpperCase(),"y");
           for (Map.Entry<String,String> entry: map.entrySet()) {
-            if (entry.getKey().toUpperCase().equals(authority.getAuthority().toUpperCase())) {
+            if (entry.getKey().equalsIgnoreCase(authority.getAuthority())) {
               for (String v: entry.getValue().split(",")) {
                 if (v.trim().length() > 0) {
                   newRoles.add(v);

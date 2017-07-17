@@ -191,7 +191,7 @@ public class ElasticContext {
    * @throws Exception
    */
   protected void _createAlias(String index, String alias) throws Exception {
-    LOGGER.info("Creating alias: "+alias+" for index: "+index);
+    //LOGGER.info("Creating alias: "+alias+" for index: "+index);
     AdminClient client = this.getTransportClient().admin();
     client.indices().prepareAliases().addAlias(index,alias).get();
   }
@@ -202,7 +202,7 @@ public class ElasticContext {
    * @throws Exception
    */
   protected void _createIndex(String name) throws Exception {
-    LOGGER.info("Creating index: "+name);
+    //LOGGER.info("Creating index: "+name);
     String path = this.getMappingsFile();
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
     String json = JsonUtil.toJson(jso,false);

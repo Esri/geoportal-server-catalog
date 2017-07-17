@@ -1,12 +1,13 @@
 <div>
-  <form>
+  <form method="post">
     <fieldset class="form-group">
       <label for="${id}_un">${i18n.login.username}</label>
       <input id="${id}_un" type="text" class="form-control" data-dojo-attach-point="und">
     </fieldset>
     <fieldset class="form-group">
       <label for="${id}_pw">${i18n.login.password}</label>
-      <input id="${id}_pw" type="password" class="form-control" data-dojo-attach-point="pnd">
+      <input id="${id}_pw" type="password" autocomplete="off" 
+        class="form-control" data-dojo-attach-point="pnd">
     </fieldset>
   </form>
 </div>
