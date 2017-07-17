@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Geoportal Standalone Metadata Editor</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.19/esri/themes/calcite/dijit/calcite.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.19/esri/themes/calcite/esri/esri.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.19/esri/dijit/metadata/css/gxe.css"/>
+<link rel="stylesheet" href="//js.arcgis.com/3.19/esri/dijit/metadata/css/gxe-calcite.css"/>
+<script src="//js.arcgis.com/3.19"></script>
+<script>
+
+  var gxeWasInitialized = false;
+
+  var gxeAllowedTypeKeys = [
+    "arcgis", "fgdc", 
+    "iso-19115", "iso-19119", "iso-19115-2",
+    "inspire-iso-19115", "inspire-iso-19119", 
+    "gemini-iso-19115", "gemini-iso-19119"
+  ];
+
+  var gxeTypeDefinitions = [
+    {
+      key: "arcgis",
+      requiredPath: "esri/dijit/metadata/types/arcgis/base/DocumentType",
+      interrogationRules: [{
+         path: "/metadata/Esri/ArcGISFormat",
+         must: true
+      }]
+    },
+    {
+      key: "fgdc",
+      requiredPath: "esri/dijit/metadata/types/fgdc/base/DocumentType",
+      interrogationRules: [{
+         path: "/metadata/idinfo/citation",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19115",
+      requiredPath: "esri/dijit/metadata/types/iso/base/DataDocumentType",
+      interrogationRules: [{
+         path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19119",
+      requiredPath: "esri/dijit/metadata/types/iso/base/ServiceDocumentType",
+      interrogationRules: [{
+         path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19115-2",
+      requiredPath: "esri/dijit/metadata/types/iso/base/GmiDocumentType",
+      interrogationRules: [{
+         path: "/gmi:MI_Metadata",
+         must: true
+      }]
+    },
+    {
+      key: "inspire-iso-19115",
+      requiredPath: "esri/dijit/metadata/types/inspire/base/DataDocumentType",
+      interrogationRules: [
+        {
+          path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
+          must: true
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
+          value: "INSPIRE Metadata Implementing Rules"
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
+          value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 1.2)"
+        }
+      ]
+    },
+    {
+      key: "inspire-iso-19119",
+      requiredPath: "esri/dijit/metadata/types/inspire/base/ServiceDocumentType",
+      interrogationRules: [
+        {
+          path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
+          must: true
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
+          value: "INSPIRE Metadata Implementing Rules"
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
+          value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 1.2)"
+        }
+      ]
+    },
+    {
+      key: "gemini-iso-19115",
+      requiredPath: "esri/dijit/metadata/types/gemini/base/DataDocumentType",
+      interrogationRules: [
+        {
+          path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
+          must: true
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
+          value: "UK GEMINI"
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
+          value: "2.2"
+        }
+      ]
+    },
+    {
+      key: "gemini-iso-19119",
+      requiredPath: "esri/dijit/metadata/types/gemini/base/ServiceDocumentType",
+      interrogationRules: [
+        {
+          path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
+          must: true
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
+          value: "UK GEMINI"
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
+          value: "2.2"
+        }
+      ]
+    }   
+
+  ];
+
+  function openMetadataEditor() {
+    
+    require(["dojo/_base/lang",
+             "dojo/_base/array",
+             "dojo/Deferred",
+             "dijit/Dialog",
+             "esri/dijit/metadata/context/DescriptorMixin",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nArcGIS",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nFgdc",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nIso",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nInspire",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nGemini",
+             "dojo/domReady!"],
+      function(lang, array, Deferred, Dialog, DescriptorMixin, 
+        i18nArcGIS, i18nFgdc, i18nIso, i18nInspire, i18nGemini) {
+      
+        if (!DescriptorMixin.prototype.xtnWasExtended) {
+          lang.extend(DescriptorMixin, {
+            xtnWasExtended: true,
+            i18nArcGIS: i18nArcGIS,
+            i18nFgdc: i18nFgdc,
+            i18nIso: i18nIso,
+            i18nInspire: i18nInspire,
+            i18nGemini: i18nGemini
+          });
+        }
+      
+        var loadType = function(gxeContext,typeDefs,callback) {
+          var typeDef = typeDefs.shift();
+          window["require"]([typeDef.requiredPath],function(Type){
+            var type = new Type({interrogationRules:typeDef.interrogationRules});
+            gxeContext.documentTypes.index[type.key] = type;
+            gxeContext.documentTypes.list.push(type);
+            if (typeDefs.length === 0) {
+              callback();
+            } else {
+              loadType(gxeContext,typeDefs,callback);
+            }
+          });
+        };
+      
+        var loadTypes = function(gxeContext,typeDefinitions,callback) { 
+          gxeContext.documentTypes.index = {};
+          gxeContext.documentTypes.list = [];
+          var typeDefs = [], allowedTypeKeys = gxeContext.allowedTypeKeys;      
+          array.forEach(allowedTypeKeys,function(key) {
+            array.some(typeDefinitions,function(typeDef) {
+              if (typeDef.key === key) {
+                typeDefs.push(typeDef);
+                return true;
+              }
+            });
+          });
+          loadType(gxeContext,typeDefs,function(){
+            gxeContext.setAllowedTypeKeys(allowedTypeKeys);
+            callback();
+          });
+        };
+        
+        var loadingDialog = null;
+        document.getElementById("idLoading").innerHTML = "Loading editor...";
+        /*
+        if (!gxeWasInitialized) {
+          loadingDialog = new Dialog({
+            title: "Loading Editor...",
+            content: " ",
+            style: "width: 300px"
+          });
+          loadingDialog.show();
+        }
+        */
+        
+        require(["esri/dijit/metadata/context/GxeContext",
+                 "esri/dijit/metadata/context/GxeAdaptor",
+                 "esri/dijit/metadata/editor/EditorDialog",],
+          function(GxeContext, GxeAdaptor, EditorDialog) {
+
+	          var gxeContext = new GxeContext({
+	            allowedTypeKeys: gxeAllowedTypeKeys,
+	            allowSave: false,
+	            allowSaveAndClose: false,
+	            allowViewXml: true,
+	            arcgisMode: false,
+	            basemap: "hybrid",
+	            showValidateButton: true,
+	            startupTypeKey: null,
+	            validateOnSave: true,
+	            filePromptText: "Select an XML file.",
+	            asTemplateText: "Reset identifiers",
+	            xmlViewOnlyText: "The type of metadata associated with this item is not supported by the editor."
+	          });
+	          
+	          var gxeAdaptor = new GxeAdaptor({
+	            getAllowEditMetadata: function() {
+	              return true;
+	            },
+	            getAllowDeleteMetadata: function() {
+	              return false;
+	            },
+	            getOriginalXml: function() {
+	              return null;
+	            },
+	            saveXml: function(gxeDocument, xmlString, bPushToItem) {
+	              var dfd = new Deferred();
+	              dfd.resolve();
+	              return dfd;
+	            }
+	          });
+	          
+	          loadTypes(gxeContext,gxeTypeDefinitions,function(){
+	            gxeWasInitialized = true;
+	            if (loadingDialog) loadingDialog.hide();
+	            document.getElementById("idLoading").innerHTML = "";
+	            var dialog = new EditorDialog({
+	              gxeAdaptor: gxeAdaptor,
+	              gxeContext: gxeContext
+	            });
+	            dialog.show();
+	            dialog.editor.primaryToolbar.saveButton.style.visibility = "hidden";
+	          });
+          }
+        );
+        
+      }
+    );
+    
+  }
+  
+</script>
+
+<body class="calcite">
+  <div style="margin:20px;">
+    <button onclick="openMetadataEditor()">Open Metadata Editor</button>
+    <span id="idLoading" style="padding-left:10px;"></span>
+  </div>
+</body>
+</html>
