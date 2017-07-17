@@ -263,7 +263,7 @@ define([
   }, 
   
     _hideInfoWindow:function(){
-      if(this.map &&　this.map.infoWindow){
+      if(this.map && this.map.infoWindow){
         this.map.infoWindow.hide();
       }
     },
