@@ -29,10 +29,12 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.HashMap;
+import java.util.Locale;
 import java.util.Map;
 
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import javax.xml.XMLConstants;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.transform.OutputKeys;
@@ -397,9 +399,9 @@ public class CswRequest extends SearchRequest {
       for (String ns: namespace) {
         String nsPfx = null;
         String nsUri = null;
-        if (ns.toLowerCase().startsWith("xmlns(")) {
+        if (ns.toLowerCase(Locale.ENGLISH).startsWith("xmlns(")) {
           ns = ns.substring(6);
-          if (ns.toLowerCase().endsWith(")")) {
+          if (ns.endsWith(")")) {
             ns = ns.substring(0,ns.length() - 1);
           }
           if (ns.length() > 0) {
@@ -490,10 +492,14 @@ public class CswRequest extends SearchRequest {
    * @return the modified capabilities
    */
   protected String removeAllButFilter(String content) {
+    StringWriter sw = new StringWriter();
     try {
       InputSource inputSource = new InputSource(new StringReader(content));
       DocumentBuilderFactory factory = DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
+      factory.setExpandEntityReferences(false);
+      factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+      //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document dom = builder.parse(inputSource);
 
@@ -510,18 +516,24 @@ public class CswRequest extends SearchRequest {
         } else if (nd.getNodeType() == Node.TEXT_NODE) {
         }
       }
-
-      Transformer transformer = TransformerFactory.newInstance().newTransformer();
+      
+      TransformerFactory tFactory = TransformerFactory.newInstance();
+      tFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
+      tFactory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+      //tFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+      Transformer transformer = tFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
       transformer.setOutputProperty(OutputKeys.INDENT,"yes");
-      StreamResult streamResult = new StreamResult(new StringWriter());
+      StreamResult streamResult = new StreamResult(sw);
       DOMSource domSource = new DOMSource(dom);
       transformer.transform(domSource,streamResult);
-      String result = streamResult.getWriter().toString();
+      String result = sw.toString();
 
       return result;
     } catch (Exception e) {
       return content;
+    } finally {
+      try {if (sw != null) sw.close();} catch (Throwable t) {}
     }
   }
 

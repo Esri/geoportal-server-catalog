@@ -123,7 +123,7 @@ public class RealiasRequest extends AppRequest {
     if (alreadyAliased) {
       jb.add("status","alreadyAliased");
     } else {
-      LOGGER.info("Re-aliasing: "+name+" for index: "+indexName);
+      //LOGGER.info("Re-aliasing: "+name+" for index: "+indexName);
       req.addAlias(indexName,name).get();
       jb.add("status","completed");
     }

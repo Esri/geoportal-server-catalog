@@ -22,6 +22,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import javax.xml.XMLConstants;
 import javax.xml.transform.Result;
 import javax.xml.transform.Source;
 import javax.xml.transform.Templates;
@@ -108,6 +109,9 @@ public class XsltTemplate {
       throws TransformerConfigurationException {
     setSystemId(systemId);
     TransformerFactory factory = TransformerFactory.newInstance();
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
+    factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+    //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
     setTemplates(factory.newTemplates(new StreamSource(getSystemId())));
   }
 
@@ -256,6 +260,9 @@ public class XsltTemplate {
       throws TransformerException, TransformerConfigurationException {
     StringReader xslReader = new StringReader(xsl);
     TransformerFactory factory = TransformerFactory.newInstance();
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
+    factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+    //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
     Templates templates = factory.newTemplates(new StreamSource(xslReader));
     Transformer transformer = templates.newTransformer();
     if (mapParams != null) {

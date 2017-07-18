@@ -89,11 +89,11 @@ public class QFields {
   public QField match(QField field) {
     for (QField f: list) {
       if (field.namespaceUri == null) {
-        if (field.name.toLowerCase().equals(f.name.toLowerCase())) {
+        if (field.name.equalsIgnoreCase(f.name)) {
           return f;
         }
       } else {
-        if (field.namespaceUri.equals(f.namespaceUri) && field.name.toLowerCase().equals(f.name.toLowerCase())) {
+        if (field.namespaceUri.equals(f.namespaceUri) && field.name.equalsIgnoreCase(f.name)) {
           return f;
         }
       }
