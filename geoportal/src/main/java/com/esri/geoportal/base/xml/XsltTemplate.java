@@ -111,7 +111,7 @@ public class XsltTemplate {
     TransformerFactory factory = TransformerFactory.newInstance();
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
     factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-    factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+    //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
     setTemplates(factory.newTemplates(new StreamSource(getSystemId())));
   }
 
@@ -262,7 +262,7 @@ public class XsltTemplate {
     TransformerFactory factory = TransformerFactory.newInstance();
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
     factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-    factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+    //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
     Templates templates = factory.newTemplates(new StreamSource(xslReader));
     Transformer transformer = templates.newTransformer();
     if (mapParams != null) {

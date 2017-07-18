@@ -174,7 +174,7 @@ public class XmlUtil {
     TransformerFactory factory = TransformerFactory.newInstance();
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
     factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-    factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
+    //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
     Transformer transformer = factory.newTransformer();
     transformer.setOutputProperty(OutputKeys.ENCODING,DEFAULT_ENCODING);
     transformer.setOutputProperty(OutputKeys.METHOD,"xml");

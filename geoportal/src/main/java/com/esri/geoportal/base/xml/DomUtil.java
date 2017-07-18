@@ -60,7 +60,7 @@ public class DomUtil {
     factory.setNamespaceAware(true);
     factory.setExpandEntityReferences(false);
     factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-    factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
+    //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
     DocumentBuilder builder = factory.newDocumentBuilder();
     Document dom = builder.parse(source);
     return dom;

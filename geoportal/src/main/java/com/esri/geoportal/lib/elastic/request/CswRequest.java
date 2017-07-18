@@ -499,7 +499,7 @@ public class CswRequest extends SearchRequest {
       factory.setNamespaceAware(true);
       factory.setExpandEntityReferences(false);
       factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-      factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
+      //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
       DocumentBuilder builder = factory.newDocumentBuilder();
       Document dom = builder.parse(inputSource);
 
@@ -520,7 +520,7 @@ public class CswRequest extends SearchRequest {
       TransformerFactory tFactory = TransformerFactory.newInstance();
       tFactory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
       tFactory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-      tFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
+      //tFactory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
       Transformer transformer = tFactory.newTransformer();
       transformer.setOutputProperty(OutputKeys.ENCODING,"UTF-8");
       transformer.setOutputProperty(OutputKeys.INDENT,"yes");
