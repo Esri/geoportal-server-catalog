@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
+<title>gstest</title>
+<script>
+
+  var url1 = "http://urban.esri.com:8080/geoportal-search/opensearch";
+  var url2 = "http://urban.esri.com:3000/opensearch";
+  
+	function send(url,el) {
+	  var v = el.innerHTML.replace("&amp;","&");
+	  var u = url + "?" + v;
+	  window.open(u);
+	}
+	
+  function send1(el) {send(url1,el);}
+  function send2(el) {send(url2,el);}
+  
+</script>
+</head>
+<body>
+<div style="margin:20px;">
+  <fieldset>
+    <p>Tomcat - urbanm.esri.com:8080/geoportal-search/opensearch</p>
+	  <a href="#" onclick="send1(this)">q=map</a><br>
+	  <a href="#" onclick="send1(this)">q=data&amp;f=csw</a><br>
+	  <a href="#" onclick="send1(this)">target=gptdb1&amp;target=gptdb2</a><br>
+	  <a href="#" onclick="send1(this)">f=json&amp;target=["gptdb1","arcgis"]</a><br>
+	  <a href="#" onclick="send1(this)">target={"key":"abc","type":"geoportal","url":"http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"}</a><br>
+    <a href="#" onclick="send1(this)">target=[{"key":"123","type":"portal","url":"http://urbanvm.esri.com/arcgis"},{"key":"abc","type":"geoportal","url":"http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"}]</a><br>
+    <a href="#" onclick="send1(this)">target={"key":"123","type":"portal","url":"http://urbanvm.esri.com/arcgis","filter":"map"}</a><br>
+  </fieldset>
+  <fieldset style="margin-top:20px;">
+    <p>Node.js - urban.esri.com:3000/opensearch</p>
+    <a href="#" onclick="send2(this)">q=map</a><br>
+    <a href="#" onclick="send2(this)">q=data&amp;f=csw</a><br>
+    <a href="#" onclick="send2(this)">target=gptdb1&amp;target=gptdb2</a><br>
+    <a href="#" onclick="send2(this)">f=json&amp;target=["gptdb1","arcgis"]</a><br>
+    <a href="#" onclick="send2(this)">target={"key":"abc","type":"geoportal","url":"http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"}</a><br>
+    <a href="#" onclick="send2(this)">target=[{"key":"123","type":"portal","url":"http://urbanvm.esri.com/arcgis"},{"key":"abc","type":"geoportal","url":"http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"}]</a><br>
+    <a href="#" onclick="send2(this)">target={"key":"123","type":"portal","url":"http://urbanvm.esri.com/arcgis","filter":"map"}</a><br>
+  </fieldset>
+  <fieldset style="margin-top:20px;">
+    <p>Browser</p>
+    <a href="http://urban.esri.com/gs/gs/platform/gsapp.html" target="_blank">http://urban.esri.com/gs/gs/platform/gsapp.html</a><br>
+  </fieldset>
+</div>
+</body>
+</html>

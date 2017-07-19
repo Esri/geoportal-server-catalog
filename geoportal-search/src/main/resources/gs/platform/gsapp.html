@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<title>gsapp</title>
+<script>
+  var dojoConfig = {
+    locale: "en",
+    async: true,
+    parseOnLoad: true,
+    packages: [
+      {
+        name: "gs",
+        location: location.pathname.replace(/\/[^/]*$/,"") + "/../../gs",
+      }
+    ]
+  };
+</script>
+</head>
+<body>
+<div style="position:absolute;top:20px;left:20px;">
+  <div id="idSearch"></div>
+</div>
+<script src="https://js.arcgis.com/3.21/"></script>
+<script>
+  require(["dojo/ready","gs/widget/Search"],
+  function(ready,Search) {
+    ready(function() {
+      new Search({},"idSearch");
+    });
+  });
+</script>
+</body>
+</html>
