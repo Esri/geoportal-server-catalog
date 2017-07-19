@@ -1,0 +1,9 @@
+{
+  "name": "GeoportalSearch-Node",
+  "version": "1.0.0",
+  "devDependencies": {
+    "express": "4.15.2",
+    "body-parser": "1.17.1",
+    "request": "2.81.0"
+  }
+}
