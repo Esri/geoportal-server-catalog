@@ -1,5 +1,4 @@
-.gitignore
-
+node_modules/
 ignore/
 z_*
 zz_*
