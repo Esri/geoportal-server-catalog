@@ -7,7 +7,7 @@
 <title>gstest</title>
 <script>
 
-  var url1 = "http://urban.esri.com:8080/csw3/opensearch";
+  var url1 = "http://urban.esri.com:8080/geoportal-search/opensearch";
   var url2 = "http://urban.esri.com:3000/opensearch";
   
 	function send(url,el) {
@@ -24,7 +24,7 @@
 <body>
 <div style="margin:20px;">
   <fieldset>
-    <p>Tomcat - urbanm.esri.com:8080/csw3/opensearch</p>
+    <p>Tomcat - urbanm.esri.com:8080/geoportal-search/opensearch</p>
 	  <a href="#" onclick="send1(this)">q=map</a><br>
 	  <a href="#" onclick="send1(this)">q=data&amp;f=csw</a><br>
 	  <a href="#" onclick="send1(this)">target=gptdb1&amp;target=gptdb2</a><br>
@@ -38,7 +38,7 @@
     <a href="#" onclick="send2(this)">q=map</a><br>
     <a href="#" onclick="send2(this)">q=data&amp;f=csw</a><br>
     <a href="#" onclick="send2(this)">target=gptdb1&amp;target=gptdb2</a><br>
-    <a href="#" onclick="send2(this)">?f=json&amp;target=["gptdb1","arcgis"]</a><br>
+    <a href="#" onclick="send2(this)">f=json&amp;target=["gptdb1","arcgis"]</a><br>
     <a href="#" onclick="send2(this)">target={"key":"abc","type":"geoportal","url":"http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"}</a><br>
     <a href="#" onclick="send2(this)">target=[{"key":"123","type":"portal","url":"http://urbanvm.esri.com/arcgis"},{"key":"abc","type":"geoportal","url":"http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"}]</a><br>
     <a href="#" onclick="send2(this)">target={"key":"123","type":"portal","url":"http://urbanvm.esri.com/arcgis","filter":"map"}</a><br>

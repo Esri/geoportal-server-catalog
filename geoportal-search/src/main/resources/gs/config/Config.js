@@ -17,7 +17,7 @@
   
   gs.config.Config = gs.Object.create(gs.Proto,{
     
-    defaultTarget: {writable: true, value: "local"},
+    defaultTarget: {writable: true, value: "primary"},
     
     allowDynamicTarget: {writable: true, value: true},
     
@@ -29,11 +29,15 @@
       
       var targets = {
         
-        "_local": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
+        "primary": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
+          "searchUrl": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
+        }),
+        
+        "elastic1": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
           "searchUrl": "http://localhost:9200/metadata/item/_search"
         }),
         
-        "local": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
+        "elastic2": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
           "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search"
         }),
   

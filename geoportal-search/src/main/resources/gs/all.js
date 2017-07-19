@@ -98,7 +98,7 @@
     // these need to be loaded synchronously
     paths = files.common.concat(files.browser);
     var req = function() {
-      var path = paths.shift();
+      var path = "../"+paths.shift();
       localRequire([path],function(){
         if (paths.length === 0) {
           if (typeof callback === "function") callback();
