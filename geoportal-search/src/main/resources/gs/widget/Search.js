@@ -22,7 +22,8 @@ define(["dojo/_base/declare",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/Search.html",
-  "../all"],
+  "../all",
+  "dijit/form/TextBox"],
 function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _TemplatedMixin, 
   _WidgetsInTemplateMixin, template) {
 
@@ -44,7 +45,71 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
       });
     },
     
+    informExternal: function(text) {
+      try {
+        if (window && window.external && window.external.gsHasListener) {
+          window.external.gsListener(text);
+        }
+      } catch(ex) {
+        console.error(ex);
+        //alert(ex);
+      }
+    },
+    
+    processResult: function(result) {
+      
+    },
+    
     search: function() {
+      if (!this._wasLoaded) return; // TODO need a ui error message
+      
+      var self = this;
+      var q = this.qBox.get("value").trim();
+      var target = this.targetBox.get("value").trim();
+      
+      var parameterMap = {f: "pjson"};
+      if (q.length > 0) parameterMap.q = q;
+      if (target.length > 0) parameterMap.target = target;
+      
+      var textarea = this.textareaNode;
+      textarea.value = "Searching...";
+      
+      var requestInfo = {
+        "requestUrl": "/request",
+        "baseUrl": "/base",
+        "headerMap": {},
+        "parameterMap": parameterMap
+      };
+      console.warn("parameterMap",parameterMap);
+
+      var processor = gs.Object.create(gs.context.browser.WebProcessor);
+      processor.execute(requestInfo,function(status,mediaType,entity,task){
+        //console.log(status,mediaType,"\r\n",entity);
+        textarea.value = entity;
+        self.informExternal(entity);
+        
+        try {
+          //console.warn("entity",typeof entity,entity);
+          // TODO errors?
+          var result = JSON.parse(entity);
+          //console.warn("result",result);
+          self.processResult(result);
+        } catch(ex) {
+          console.error(ex);
+        }
+      });
+      
+    },
+    
+    searchClicked: function() {
+      this.search();
+    },
+    
+    searchClicked2: function() {
+      this.search();
+    },
+    
+    search2: function() {
       if (!this._wasLoaded) return; // TODO need a ui error message
       
       var inform = function(text) {
@@ -81,10 +146,6 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
         inform(entity);
       });
       
-    },
-    
-    searchClicked: function() {
-      this.search();
     }
 
   });

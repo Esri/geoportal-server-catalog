@@ -36,10 +36,10 @@
           // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
           //req.setRequestHeader("Content-type",dataContentType);
         }
-        req.send();
+        req.send(data);
       } else {
         req.open("GET",url);
-        req.send(data);
+        req.send();
       }
       return promise;
     }}
