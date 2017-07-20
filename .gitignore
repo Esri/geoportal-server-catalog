@@ -1,3 +1,7 @@
+geoportal/target/
+geoportal-search/target/
+geoportal-search/Projects/
+
 node_modules/
 ignore/
 z_*
@@ -18,7 +22,6 @@ zzz_*
 *.war
 *.ear
 
-target/
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup
