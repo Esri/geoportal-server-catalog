@@ -17,7 +17,7 @@
   
   gs.config.Config = gs.Object.create(gs.Proto,{
     
-    defaultTarget: {writable: true, value: "primary"},
+    defaultTarget: {writable: true, value: "arcgis"},
     
     allowDynamicTarget: {writable: true, value: true},
     
@@ -28,6 +28,10 @@
     makeTargets: {value: function() {
       
       var targets = {
+        
+        "arcgis": gs.Object.create(gs.target.portal.PortalTarget).mixin({
+          "portalBaseUrl": "https://www.arcgis.com"
+        }),
         
         "primary": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
           "searchUrl": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
@@ -47,10 +51,6 @@
         
         "gptdb2": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
           "searchUrl": "http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"
-        }),
-        
-        "arcgis": gs.Object.create(gs.target.portal.PortalTarget).mixin({
-          "portalBaseUrl": "https://www.arcgis.com"
         }),
         
         "portal1": gs.Object.create(gs.target.portal.PortalTarget).mixin({
