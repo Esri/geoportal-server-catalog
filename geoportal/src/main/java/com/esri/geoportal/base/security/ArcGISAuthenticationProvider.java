@@ -218,7 +218,6 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
     boolean isPublisher = false;
     if ((adminGroupId != null) && (adminGroupId.length() > 0)) {
       if (isInAdminGroup) isAdmin = true;
-      if (hasOrgAdminRole) isAdmin = true;
     } else {
       if (hasOrgAdminRole) isAdmin = true;
     }
