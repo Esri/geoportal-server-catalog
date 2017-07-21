@@ -21,6 +21,10 @@ import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
+import org.elasticsearch.action.search.SearchRequestBuilder;
+import org.elasticsearch.client.transport.TransportClient;
+import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.SearchHits;
 import org.springframework.security.access.AccessDeniedException;
 
 /**
@@ -41,7 +45,29 @@ public class AccessUtil {
    * @return the item id
    */
   public String determineId(String id) {
-    // TODO determineId
+    try {
+      ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+      TransportClient client = ec.getTransportClient();
+      GetResponse result = client.prepareGet(
+          ec.getItemIndexName(),ec.getItemIndexType(),id).get();
+      if (result.isExists()) {
+        //System.err.println("result.isExists: "+id+" - resultId = "+result.getId());
+        return id;
+      } else {
+        SearchRequestBuilder builder = client.prepareSearch(ec.getItemIndexName());
+        builder.setTypes(ec.getItemIndexType());
+        builder.setSize(1);
+        builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_FILEID,id));
+        SearchHits hits = builder.get().getHits();
+        // TODO what if there is more than one hit
+        if (hits.getTotalHits() == 1) {
+          //System.err.println("fileid exists: "+id+" - hitId = "+hits.getAt(0).getId());
+          return hits.getAt(0).getId();
+        }
+      }
+    } catch (Exception e) {
+      e.printStackTrace();
+    }
     return id;
   }
   
