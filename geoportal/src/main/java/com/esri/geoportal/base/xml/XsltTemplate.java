@@ -110,6 +110,7 @@ public class XsltTemplate {
     setSystemId(systemId);
     TransformerFactory factory = TransformerFactory.newInstance();
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET,"file");
     factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
     //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
     setTemplates(factory.newTemplates(new StreamSource(getSystemId())));
