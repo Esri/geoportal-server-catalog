@@ -115,7 +115,7 @@ HTTP GET/POST geoportal/rest/metadata/search
 Search for items.
 Optional Query Parameters:
   q - the search terms
-  f - the response format (json|atom|csw)
+  f - the response format (json|atom|csw|rss|csv|kml)
   from - the starting index
   size - the number of items to return
   bbox - the bounding envelope WGS84 (bbox=xmin,ymin,xmax,ymax)
@@ -146,7 +146,8 @@ Example: http://localhost:8080/geoportal/opensearch?q=*:*
 HTTP GET geoportal/opensearch/description
 The Opensearch description file.
 
-HTTP GET geoportal/csw
+HTTP GET geoportal/
+
 The Opensearch implementation.
 Example: http://localhost:8080/geoportal/csw
 Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetCapabilities&version=3.0.0
