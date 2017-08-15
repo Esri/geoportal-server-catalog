@@ -34,6 +34,7 @@ define({
       home: "Home",
       search: "Search",
       map: "Map",
+      about: "About",
       content: "Content",
       welcomePattern: "{name}",
       signIn: "Sign In",
