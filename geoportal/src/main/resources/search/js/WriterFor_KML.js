@@ -88,16 +88,15 @@ G.writers.kml = {
   },
   
   _writeAppResponse: function(appRequest,appResponse,xmlBuilder) {
-    // TODO
-    //var mediaType = new G.MediaType("application","vnd.google-earth.kml+xml");
-    var mediaType = new G.MediaType("text","xml");
+    var mediaType = new G.MediaType("application","vnd.google-earth.kml+xml");
+    //var mediaType = new G.MediaType("text","xml");
     var xml = xmlBuilder.getXml();
     if (appRequest.getPretty()) xml = G.XmlUtil.indent(xml);
     appResponse.setOk();
     appResponse.setMediaType(mediaType.withCharset("UTF-8"));
     appResponse.setEntity(xml);
-    //appResponse.addHeader("Content-Disposition",
-    //  "filename="+java.lang.System.currentTimeMillis()+".kml");
+    appResponse.addHeader("Content-Disposition",
+      "filename="+java.lang.System.currentTimeMillis()+".kml");
   },
   
   _writeEntry: function(request,itemId,itemString,xmlBuilder,options) {
