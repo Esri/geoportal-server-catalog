@@ -174,6 +174,19 @@ public class DateUtil {
   }
   
   /**
+   * Converts an ISO 8601 string to a date.
+   * @param iso the date
+   * @return the data
+   */
+  public static Date fromIso8601(String iso) {
+    if (iso == null) return null;
+    Calendar c1 = DatatypeConverter.parseDateTime(iso);
+    GregorianCalendar c = new GregorianCalendar(TimeZone.getTimeZone("UTC"));
+    c.setTimeInMillis(c1.getTimeInMillis());
+    return new Date(c.getTimeInMillis());
+  }
+  
+  /**
    * Generates a date string from the current time.
    * @return the date string
    */

@@ -14,7 +14,20 @@
  */
 load("classpath:search/js/WriterBase.js");
 
-G.writers.eros = {
+G.writers.rss = {
+  
+  DF: new java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZ"),
+  
+  fmt: function(iso) {
+    try {
+      var dt = G.DateUtil.fromIso8601(iso);
+      var v = this.DF.format(dt);
+      if (v) return v;
+    } catch(ex) {
+      //print("WriterFor_RSS: Unable to format date:",ex);
+    }
+    return iso;
+  },
   
   writeItem: function(appRequest,appResponse,itemId,itemString,responseString) {
     var now = G.nowAsString();
@@ -38,38 +51,25 @@ G.writers.eros = {
     var totalHits = searchHits.getTotalHits();
     var from = searchRequest.getFrom();
     var size = searchRequest.getSize();
-    
     var baseUrl = searchRequest.getBaseUrl();
-    var dscUrl = baseUrl+"/Eros/description"; // TODO
-    var feedId = baseUrl;
-    var feedTitle = "Results"; // TODO - "Results"
-    var authorName = baseUrl;
+    var dscUrl = baseUrl+"/opensearch/description";
     
-    xmlBuilder.writer.writeStartElement("atom","feed",G.URI_ATOM);
+    xmlBuilder.writer.writeStartElement("rss");
+    xmlBuilder.writer.writeAttribute("version","2.0");
     this._addNamespaces(xmlBuilder);
-    xmlBuilder.writeElement(G.URI_ATOM,"title",feedTitle);
-    xmlBuilder.writeElement(G.URI_ATOM,"id",feedId); 
-    xmlBuilder.writeElement(G.URI_ATOM,"updated",now); 
-    xmlBuilder.writer.writeStartElement(G.URI_ATOM,"author");
-    xmlBuilder.writeElement(G.URI_ATOM,"name",authorName);
-    xmlBuilder.writer.writeEndElement();
+    xmlBuilder.writer.writeStartElement("channel");
+    xmlBuilder.writeElement("title","Results");
+    xmlBuilder.writeElement("description","RSS Results");
+    xmlBuilder.writeElement("link",baseUrl);
+    xmlBuilder.writeElement("docs","http://www.rssboard.org/rss-specification");
+    xmlBuilder.writeElement("category","GeoRss");
     
     this._addLink("search","application/opensearchdescription+xml",dscUrl,xmlBuilder);
-    this._addLink("self","application/opensearchdescription+xml",baseUrl+"/Eros?start="+from+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
-    this._addLink("first","application/opensearchdescription+xml",baseUrl+"/Eros?start="+1+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
-    this._addLink("last","application/opensearchdescription+xml",baseUrl+"/Eros?start="+(size*Math.floor(totalHits/size))+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
-    if (from-size>=1) {
-      this._addLink("prev","application/opensearchdescription+xml",baseUrl+"/Eros?start="+(from-size)+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
-    }
-    if (from+size<=totalHits) {
-      this._addLink("next","application/opensearchdescription+xml",baseUrl+"/Eros?start="+(from+size)+"&max="+size+(searchRequest.getPretty()?"&pretty=true":""),xmlBuilder);
-    }
-    
     xmlBuilder.writeElement(G.URI_OPENSEARCH,"totalResults",""+totalHits);
     xmlBuilder.writeElement(G.URI_OPENSEARCH,"startIndex",""+from); // TODO startIndex??
     xmlBuilder.writeElement(G.URI_OPENSEARCH,"itemsPerPage",""+size);
     
-    this._addQuery(searchRequest,xmlBuilder);
+    //this._addQuery(searchRequest,xmlBuilder);
     
     var i,hit;
     for (i=0;i<numReturned;i++) {
@@ -77,6 +77,7 @@ G.writers.eros = {
       this._writeEntry(searchRequest,hit.getId(),hit.getSourceAsString(),xmlBuilder,options);
     }
     
+    xmlBuilder.writer.writeEndElement();
     xmlBuilder.writer.writeEndElement();
     xmlBuilder.writeEndDocument();
     this._writeAppResponse(searchRequest,appResponse,xmlBuilder);
@@ -97,13 +98,12 @@ G.writers.eros = {
 
   _addNamespaces: function(xmlBuilder) {
     xmlBuilder.writer.writeNamespace("atom",G.URI_ATOM);
-    xmlBuilder.writer.writeNamespace("geo",G.URI_GEO);
     xmlBuilder.writer.writeNamespace("georss",G.URI_GEORSS);
     xmlBuilder.writer.writeNamespace("georss10",G.URI_GEORSS10);
-    xmlBuilder.writer.writeNamespace("time",G.URI_TIME);
     xmlBuilder.writer.writeNamespace("opensearch",G.URI_OPENSEARCH);
-    xmlBuilder.writer.writeNamespace("dc",G.URI_DC);
-    xmlBuilder.writer.writeNamespace("sdi",G.URI_SDI);
+    //xmlBuilder.writer.writeNamespace("dc",G.URI_DC);
+    //xmlBuilder.writer.writeNamespace("geo",G.URI_GEO);
+    //xmlBuilder.writer.writeNamespace("time",G.URI_TIME);
   },
   
   _addQuery: function(request,xmlBuilder) {
@@ -137,81 +137,77 @@ G.writers.eros = {
   },
   
   _writeAppResponse: function(appRequest,appResponse,xmlBuilder) {
+    var mediaType = new G.MediaType("application","rss+xml");
     var xml = xmlBuilder.getXml();
     if (appRequest.getPretty()) xml = G.XmlUtil.indent(xml);
     appResponse.setOk();
-    appResponse.setMediaType(G.MediaType.APPLICATION_ATOM_XML_TYPE.withCharset("UTF-8"));
+    appResponse.setMediaType(mediaType.withCharset("UTF-8"));
     appResponse.setEntity(xml);
   },
   
   _writeEntry: function(request,itemId,itemString,xmlBuilder,options) {
     var i,v;
     var item = JSON.parse(itemString);
-    if (options.entryOnly) {
-      xmlBuilder.writer.writeStartElement("atom","entry",G.URI_ATOM);
-      this._addNamespaces(xmlBuilder);
-    } else {
-      xmlBuilder.writer.writeStartElement(G.URI_ATOM,"entry");
-    }
+    xmlBuilder.writer.writeStartElement("item");
     
     var title = G.chkStr(item["title"]);
+    var description = G.chkStr(item["description"]);
+    var itemType = G.chkStr(item["itemType"]);
+    var owner = G.chkStr(item["sys_owner_s"]);
+    var created = G.chkStr(item["sys_created_dt"]);
+    var modified = G.chkStr(item["sys_modified_dt"]);
+    var keywords = G.chkStrArray(item["keywords_s"]);
+    var credits = G.chkStrArray(item["credits_s"]);
+    var rights = G.chkStrArray(item["rights_s"]);
+    var extent = item["envelope_geo"];
     var resources = item["resources_nst"];
+    var links = G.buildLinks(request,itemId,item);
     
-    if (title === null || title.length === 0) title = "Empty";
+    if (title === null || title.length === 0) title = "";
+    if (description === null || description.length === 0) description = "";
+    if (owner === null || owner.length === 0) owner = "";
     
-    // atom:id is required
+    xmlBuilder.writeElement("guid",itemId);
     xmlBuilder.writeElement(G.URI_ATOM,"id",itemId);
+    xmlBuilder.writeElement("title",title);
     
-    // atom:title is required
-    xmlBuilder.writeElement(G.URI_ATOM,"title",title);
+    var snippet = G.getSnippet(xmlBuilder,title,description,links);
+    xmlBuilder.writer.writeStartElement("description");
+    xmlBuilder.writer.writeCData(snippet);
+    xmlBuilder.writer.writeEndElement();
     
-    // Eros elements
-    if (resources != null) {
-      var resourcesArray = G.chkObjArray(resources);
-      var urlTypes = request.getParameter("urlTypes");
-      var urlTypesArr = urlTypes && urlTypes.length>0? urlTypes.split(","): null;
-      // Eros type conversion table
-      var ETCT = {
-        "FeatureServer": "agsfeatureserver",
-        "ImageServer": "agsimageserver",
-        "MapServer": "agsmapserver",
-        "CSW": "csw",
-        "IMS": "image",
-        "SOS": "sos",
-        "WCS": "wcs",
-        "WFS": "wfs",
-        "WMS": "wms"
-      };
-      for (i=0;i<resourcesArray.length;i++) {
-        r = resourcesArray[i];
-        if (r.url_type_s && (!urlTypesArr || urlTypesArr.length==0 || urlTypesArr.indexOf(r.url_type_s)>=0)) {
-          var serviceType = ETCT[r.url_type_s];
-          if (serviceType) {
-            var baseUrl = request.getBaseUrl();
-            var itemXml = baseUrl+"/rest/metadata/item/"+encodeURIComponent(itemId)+"/xml";
+    if (modified != null && modified.length > 0) {
+      xmlBuilder.writeElement("pubDate",this.fmt(modified));
+    } else if (created != null && created.length > 0) {
+      xmlBuilder.writeElement("pubDate",this.fmt(created));
+    }
 
-            xmlBuilder.writeElement(G.URI_SDI,"metadataUrl",itemXml);
-            xmlBuilder.writeElement(G.URI_SDI,"serviceUrl",r.url_s);
-            xmlBuilder.writeElement(G.URI_SDI,"serviceType",serviceType);
-            xmlBuilder.writeElement(G.URI_SDI,"emailAddress","");
-
-            break;
-          }
-        }
+    if (links != null) {
+      for (i=0;i<links.length;i++) {
+        v = links[i];
+        this._addLink(v.rel,v.type,v.href,xmlBuilder);
       }
     }
-    
-    
-    // TODO resource time period??
-    
+
+    if (extent && extent.type && extent.type === "envelope" && extent.coordinates && extent.coordinates.length === 2) {
+      var topLeft = extent.coordinates[0];
+      var bottomRight = extent.coordinates[1];
+      if (topLeft != null && topLeft.length === 2 && bottomRight != null && bottomRight.length === 2) {
+        var coordinates = [topLeft[0],bottomRight[1],bottomRight[0],topLeft[1]];
+        var rssBox = coordinates[1]+" "+coordinates[0]+" "+coordinates[3]+" "+coordinates[2];
+        xmlBuilder.writeElement(G.URI_GEORSS,"box",rssBox);
+        xmlBuilder.writeElement(G.URI_GEORSS10,"box",rssBox);
+      }
+    }
+
     xmlBuilder.writer.writeEndElement();
   }
 };
 
 function writeItem(appRequest,appResponse,itemId,itemString,responseString) {
-  G.writers.eros.writeItem(appRequest,appResponse,itemId,itemString,responseString);
+  G.writers.rss.writeItem(appRequest,appResponse,itemId,itemString,responseString);
 }
 
 function writeItems(searchRequest,appResponse,searchResponse) {
-  G.writers.eros.writeItems(searchRequest,appResponse,searchResponse);
+  G.writers.rss.writeItems(searchRequest,appResponse,searchResponse);
 }

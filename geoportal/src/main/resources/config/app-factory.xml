@@ -38,6 +38,15 @@
   <beans:bean id="item.ErosWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
     <beans:property name="javascriptFile" value="search/js/WriterFor_EROS.js"/>
   </beans:bean>
+  <beans:bean id="item.RssWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
+    <beans:property name="javascriptFile" value="search/js/WriterFor_RSS.js"/>
+  </beans:bean>
+    <beans:bean id="item.CsvWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
+    <beans:property name="javascriptFile" value="search/js/WriterFor_CSV.js"/>
+  </beans:bean>
+    <beans:bean id="item.KmlWriter" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ScriptItemWriter">
+    <beans:property name="javascriptFile" value="search/js/WriterFor_KML.js"/>
+  </beans:bean>
   <beans:bean id="item.ItemWriterFactory" scope="prototype" class="com.esri.geoportal.lib.elastic.response.ItemWriterFactory">
 	  <beans:property name="map">
 	    <beans:map key-type="java.lang.String" value-type="java.lang.String">
@@ -57,6 +66,17 @@
 	      <beans:entry key="http://www.opengis.net/cat/csw/3.0" value="item.CswWriter" />
           <!-- Eros -->
 	      <beans:entry key="eros" value="item.ErosWriter" />
+        <!-- RSS -->
+        <beans:entry key="rss" value="item.RssWriter" />
+        <beans:entry key="georss" value="item.RssWriter" />
+        <beans:entry key="application/rss+xml" value="item.RssWriter" />
+        <!-- CSV -->
+        <beans:entry key="csv" value="item.CsvWriter" />
+        <beans:entry key="test/csv" value="item.CsvWriter" />
+        <!-- KML -->
+        <beans:entry key="kml" value="item.KmlWriter" />
+        <beans:entry key="application/vnd.google-earth.kml+xml" value="item.KmlWriter" />
+        <beans:entry key="http://www.opengis.net/kml/2.2" value="item.KmlWriter" />
 	    </beans:map>
 	  </beans:property>
   </beans:bean>

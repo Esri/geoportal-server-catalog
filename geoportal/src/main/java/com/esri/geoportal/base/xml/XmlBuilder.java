@@ -92,6 +92,19 @@ public class XmlBuilder {
   
   /**
    * Write an element.
+   * @param localName the local name
+   * @param value the text value
+   * @throws XMLStreamException
+   */
+  public void writeElement(String localName, String value) throws XMLStreamException {
+    if (value == null) return;
+    writer.writeStartElement(localName);
+    writer.writeCharacters(value);
+    writer.writeEndElement();
+  }
+  
+  /**
+   * Write an element.
    * @param namespaceURI the namespace uri
    * @param localName the local name
    * @param value the text value

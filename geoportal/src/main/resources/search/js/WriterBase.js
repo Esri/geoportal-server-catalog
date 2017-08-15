@@ -31,6 +31,7 @@ var G = {
   URI_GEOPOS: "http://www.w3.org/2003/01/geo/wgs84_pos#",
   URI_GEORSS: "http://www.georss.org/georss",
   URI_GEORSS10: "http://www.georss.org/georss/10",
+  URI_KML: "http://www.opengis.net/kml/2.2",
   URI_TIME: "http://a9.com/-/opensearch/extensions/time/1.0/",
   URI_OPENSEARCH: "http://a9.com/-/spec/opensearch/1.1/",
   URI_OWS: "http://www.opengis.net/ows/2.0",
@@ -85,6 +86,26 @@ var G = {
     else if (typeof v === "object" && typeof v.push === "undefined") return [v];
     else if (typeof v === "object" && typeof v.push === "function") return v;
     return null;
+  },
+  
+  getSnippet: function(xmlBuilder,title,description,links) {
+    var i,v,l1,l2;
+    if (description.length > 255) description = description.substring(0,255);
+    var v1 = "<div class=\"title\">"+G.XmlUtil.escape(title)+"</div>";
+    var v2 = "<div class=\"abstract\">"+G.XmlUtil.escape(description)+"</div>";
+    var v3 = "";
+    if (links) {
+      for (i=0;i<links.length;i++) {
+        v = links[i];
+        if (typeof v.href === "string" && v.href.length > 0) {
+          l1 = G.XmlUtil.escape(v.href);
+          l2 = "<div><a target=\"_blank\" href=\""+l1+"\">"+l1+"</a><div>";
+          v3 += l2;
+        }
+      }
+    }
+    var snippet = "<div class=\"snippet\">"+v1+v2+v3+"</div>";
+    return snippet;
   },
   
   newXmlBuilder: function() {
