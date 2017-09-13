@@ -19,6 +19,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.ldap.core.DirContextOperations;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
@@ -28,6 +30,8 @@ import org.springframework.security.ldap.userdetails.LdapUserDetailsMapper;
  * Provides LDAP user details.
  */
 public class LdapUserContextMapper extends LdapUserDetailsMapper {
+  
+  private static final Logger LOGGER = LoggerFactory.getLogger(LdapUserContextMapper.class);
   
   /** Instance variables. */
   private String defaultRole;
@@ -59,6 +63,7 @@ public class LdapUserContextMapper extends LdapUserDetailsMapper {
   @Override
   public UserDetails mapUserFromContext(DirContextOperations ctx, String username, 
       Collection<? extends GrantedAuthority> authorities) {
+    LOGGER.debug("LdapUserContextMapper::mapUserFromContext");
     UserDetails user = null;
 
     if (username != null && username.length() > 0) {

@@ -3,8 +3,8 @@
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:security="http://www.springframework.org/schema/security" 
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.1.xsd
-    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.0.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 	
   <security:ldap-server 
     id="ldapServer"  
@@ -12,7 +12,7 @@
     manager-dn="uid=admin, ou=system" 
     manager-password="secret" />
 	
-  <security:authentication-manager alias="authenticationManager">
+  <security:authentication-manager id="authenticationManager" alias="authenticationManager">
     <security:ldap-authentication-provider 
       server-ref="ldapServer"
       role-prefix="ROLE_"

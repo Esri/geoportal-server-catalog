@@ -10,9 +10,10 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <springframework.version>4.2.4.RELEASE</springframework.version>
-    <springsecurity.version>4.0.3.RELEASE</springsecurity.version>
     <log4j.version>2.9.0</log4j.version>
+    <springframework.version>4.3.10.RELEASE</springframework.version>
+    <springsecurity.version>4.2.3.RELEASE</springsecurity.version>
+    <jackson.version>2.9.0</jackson.version>
   </properties>  
   
   <dependencies>
@@ -25,7 +26,7 @@
       <scope>provided</scope>
     </dependency>
   
-    <!-- log4j / slf4j -->    
+    <!-- log4j / jcl / slf4j -->    
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
@@ -36,6 +37,11 @@
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
+    <dependency>
+      <groupId>org.apache.logging.log4j</groupId>
+      <artifactId>log4j-jcl</artifactId>
+      <version>${log4j.version}</version>
+    </dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
@@ -81,6 +87,12 @@
       <groupId>org.springframework</groupId>
       <artifactId>spring-core</artifactId>
       <version>${springframework.version}</version>
+      <exclusions>
+        <exclusion>
+          <groupId>commons-logging</groupId>
+          <artifactId>commons-logging</artifactId>
+        </exclusion>
+      </exclusions>
     </dependency>
     <dependency>
       <groupId>org.springframework</groupId>
@@ -107,29 +119,34 @@
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-ldap</artifactId>
-      <version>4.0.1.RELEASE</version>
+      <version>${springsecurity.version}</version>
     </dependency>
     <dependency>
       <groupId>org.springframework.security.oauth</groupId>
       <artifactId>spring-security-oauth2</artifactId>
-      <version>2.0.8.RELEASE</version>
-    </dependency> 
+      <version>2.2.0.RELEASE</version>
+    </dependency>
     <dependency>
       <groupId>org.springframework.security</groupId>
       <artifactId>spring-security-jwt</artifactId>
-      <version>1.0.3.RELEASE</version>
-    </dependency> 
+      <version>1.0.8.RELEASE</version>
+    </dependency>
     
     <!-- for spring mvc -->
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-core</artifactId>
-      <version>2.6.2</version>
+      <version>${jackson.version}</version>
+    </dependency>
+    <dependency>
+      <groupId>com.fasterxml.jackson.core</groupId>
+      <artifactId>jackson-annotations</artifactId>
+      <version>${jackson.version}</version>
     </dependency>
     <dependency>
       <groupId>com.fasterxml.jackson.core</groupId>
       <artifactId>jackson-databind</artifactId>
-      <version>2.6.2</version>
+      <version>${jackson.version}</version>
     </dependency>
     
     <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
