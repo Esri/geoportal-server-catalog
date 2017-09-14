@@ -150,21 +150,20 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n,
         }
       });
       
-            
-     $("#"+this.id+"_newOwner").typeahead(
-       {
-         hint: true,
-         highlight: true,
-         minLength: 1
-       },
-       {
-         name: 'usernames',
-         limit: Number.POSITIVE_INFINITY,
-         source: usernames
-       }
-     );
+      $("#"+this.id+"_newOwner").typeahead(
+        {
+          hint: true,
+          highlight: true,
+          minLength: 1
+        },
+        {
+          name: 'usernames',
+          limit: Number.POSITIVE_INFINITY,
+          source: usernames
+        }
+      );
 
-     this.newOwnerNode.focus();
+      this.newOwnerNode.focus();
     },
  
     show: function() {
