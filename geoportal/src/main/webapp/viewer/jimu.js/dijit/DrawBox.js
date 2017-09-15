@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,6 +43,10 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     drawLayer:null,
     drawLayerId:null,
     drawToolBar:null,
+    _isDisabled: false,
+    _shiftKey: false,
+    _ctrlKey: false,
+    _metaKey: false, //used for Mac
 
     //options:
     //note: 'types' is mutually exclusive with 'geoTypes' and the latter has high priority
@@ -76,11 +80,17 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     //clear
     //activate
     //deactivate
+    //enable
+    //disable
+    //isEnabled
 
     //events:
     //icon-selected
     //draw-end
     //clear
+    //user-clear
+    //draw-activate
+    //draw-deactivate
 
     //css classes:
     //draw-item
@@ -112,12 +122,59 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       this._initTypes();
       var items = query('.draw-item', this.domNode);
       this.own(items.on('click', lang.hitch(this, this._onItemClick)));
-      this.own(on(this.btnClear, 'click', lang.hitch(this, this.clear)));
+      this.own(on(this.btnClear, 'click', lang.hitch(this, this._onClickClear)));
+      //bind key events before draw-end
+      this.own(on(document.body, 'keydown', lang.hitch(this, function(event){
+        this._shiftKey = !!event.shiftKey;
+        this._ctrlKey = !!event.ctrlKey;
+        this._metaKey = !!event.metaKey;
+      })));
+      this.own(on(document.body, 'keyup', lang.hitch(this, function(event){
+        this._shiftKey = !!event.shiftKey;
+        this._ctrlKey = !!event.ctrlKey;
+        this._metaKey = !!event.metaKey;
+      })));
+
       if(this.map){
         this.setMap(this.map);
       }
       var display = this.showClear === true ? 'block' : 'none';
       html.setStyle(this.btnClear, 'display', display);
+      this.enable();
+    },
+
+    enable: function(){
+      this._isDisabled = false;
+      html.addClass(this.domNode, 'enabled');
+      html.removeClass(this.domNode, 'disabled');
+    },
+
+    disable: function(){
+      this._isDisabled = true;
+      html.addClass(this.domNode, 'disabled');
+      html.removeClass(this.domNode, 'enabled');
+      this.deactivate();
+    },
+
+    hideLayer: function(){
+      if(this.drawLayer){
+        this.drawLayer.hide();
+      }
+    },
+
+    showLayer: function(){
+      if(this.drawLayer){
+        this.drawLayer.show();
+      }
+    },
+
+    isEnabled: function(){
+      return !this._isDisabled;
+    },
+
+    isActive: function(){
+      var items = query('.draw-item.jimu-state-active', this.domNode);
+      return items && items.length > 0;
     },
 
     disableWebMapPopup:function(){
@@ -133,9 +190,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     },
 
     destroy:function(){
-      if(this.drawToolBar){
-        this.drawToolBar.deactivate();
-      }
+      this.deactivate();
 
       if(this.drawLayer){
         if(this.map){
@@ -192,10 +247,11 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
 
     deactivate:function(){
       this.enableWebMapPopup();
+      query('.draw-item', this.domNode).removeClass('jimu-state-active');
       if(this.drawToolBar){
         this.drawToolBar.deactivate();
+        this.emit('draw-deactivate');
       }
-      query('.draw-item', this.domNode).removeClass('jimu-state-active');
     },
 
     activate: function(tool){
@@ -226,8 +282,8 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       this.emit("icon-selected", target, geotype, commontype);
     },
 
-    onDrawEnd:function(graphic, geotype, commontype){
-      this.emit('draw-end', graphic, geotype, commontype);
+    onDrawEnd:function(graphic, geotype, commontype, shiftKey, ctrlKey, metaKey){
+      this.emit('draw-end', graphic, geotype, commontype, shiftKey, ctrlKey, metaKey);
     },
 
     onClear:function(){
@@ -243,6 +299,34 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
 
     removeGraphic:function(g){
       this.drawLayer.remove(g);
+    },
+
+    getFirstGraphic: function(){
+      var firstGraphic = null;
+      if(this.drawLayer && this.drawLayer.graphics.length > 0){
+        firstGraphic = this.drawLayer.graphics[0];
+      }
+      return firstGraphic;
+    },
+
+    show: function(){
+      html.removeClass(this.domNode, 'hidden');
+    },
+
+    hide: function(){
+      html.addClass(this.domNode, 'hidden');
+    },
+
+    getDrawItemIcons: function(){
+      return query('.draw-item', this.domNode);
+    },
+
+    _onClickClear: function(){
+      if(this._isDisabled){
+        return;
+      }
+      this.clear();
+      this.emit("user-clear");
     },
 
     _initDefaultSymbols:function(){
@@ -319,7 +403,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     },
 
     _onItemClick:function(event){
+      if(this._isDisabled){
+        return;
+      }
       var target = event.target || event.srcElement;
+      if(!html.hasClass(target, 'draw-item')){
+        return;
+      }
       var isSelected = html.hasClass(target, 'jimu-state-active');
 
       //toggle tools on and off
@@ -342,6 +432,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       }
       this.disableWebMapPopup();
       this.drawToolBar.activate(tool);
+      this.emit('draw-activate', tool);
       this.onIconSelected(itemIcon, geotype, commontype);
     },
 
@@ -357,6 +448,9 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       }else{
         geometry = event.geometry;
       }
+
+      geometry.geoType = geotype;
+      geometry.commonType = commontype;
 
       var type = geometry.type;
       var symbol = null;
@@ -386,7 +480,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
         this.deactivate();
       }
 
-      this.onDrawEnd(g, geotype, commontype);
+      this.onDrawEnd(g, geotype, commontype, this._shiftKey, this._ctrlKey, this._metaKey);
     }
 
   });

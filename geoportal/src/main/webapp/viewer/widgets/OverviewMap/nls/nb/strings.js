@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Oversiktskart"
-  })
-);
+define({
+  "_widgetLabel": "Oversiktskart"
+});

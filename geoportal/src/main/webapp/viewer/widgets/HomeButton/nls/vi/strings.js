@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Trang chủ"
-  })
-);
+define({
+  "_widgetLabel": "Trang chủ"
+});

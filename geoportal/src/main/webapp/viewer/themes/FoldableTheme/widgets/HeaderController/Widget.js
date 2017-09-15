@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -69,6 +69,8 @@ define([
         this.switchableElements.title = this.titleNode;
         this.switchableElements.links = this.linksNode;
         this.switchableElements.subtitle = this.subtitleNode;
+
+        this._handleTitleColorAndLogoLink(this.appConfig);
 
         if (this.position && this.position.height) {
           this.height = this.position.height;
@@ -272,11 +274,18 @@ define([
         if (!config) {
           return;
         }
+        if(this.openedId){
+          this._switchNodeToClose(this.openedId);
+        }
         this.openedId = ids[0];
         if (config.widgets && config.openType === 'openAll') {
-          this._showIconContent(config);
+          this._switchNodeToOpen(config.id);
         } else if (!config.widgets) {
-          this._showIconContent(config);
+          if(this._getIconNodeById(config.id)){
+            this._switchNodeToOpen(config.id);
+          }else{
+            this._showIconContent(config);
+          }
         }
       },
 
@@ -334,6 +343,24 @@ define([
         if ('links' in changedData) {
           this._createDynamicLinks(changedData.links);
         }
+
+        this._handleTitleColorAndLogoLink(appConfig);
+      },
+
+      _handleTitleColorAndLogoLink: function(appConfig){
+        if(appConfig.titleColor){
+          html.setStyle(this.titleNode, 'color', appConfig.titleColor);
+        }else{
+          html.setStyle(this.titleNode, 'color', '');
+        }
+
+        if(appConfig.logoLink){
+          html.setAttr(this.logoLinkNode, 'href', appConfig.logoLink);
+          html.setStyle(this.logoNode, 'cursor', 'pointer');
+        }else{
+          html.setAttr(this.logoLinkNode, 'href', 'javascript:void(0)');
+          html.setStyle(this.logoNode, 'cursor', 'default');
+        }
       },
 
       _setElementsSize: function() {
@@ -386,6 +413,7 @@ define([
           html.create('a', {
             href: link.url,
             target: '_blank',
+            rel: 'noopener noreferrer',
             innerHTML: utils.sanitizeHTML(link.label),
             'class': "jimu-link jimu-align-leading jimu-leading-margin1",
             style: {
@@ -423,9 +451,9 @@ define([
           if (this.popupLinksVisible) {
             this._hidePopupLink();
           }
-          html.setStyle(this.logoNode, {
-            cursor: 'default'
-          });
+          // html.setStyle(this.logoNode, {
+          //   cursor: 'default'
+          // });
         }
       },
 
@@ -592,6 +620,7 @@ define([
           href: link.url,
           'class': 'jimu-ellipsis',
           target: '_blank',
+          rel: "noopener noreferrer",
           innerHTML: utils.sanitizeHTML(link.label),
           title: link.label,
           style: {
@@ -757,14 +786,14 @@ define([
 
       _createIconNode: function(iconConfig) {
         var node, iconUrl;
-        if (iconConfig.label === this.nls.more) {
+        if (iconConfig.name === '__more') {
           iconUrl = this.folderUrl + 'images/more_icon.png';
         } else {
           iconUrl = iconConfig.icon;
         }
 
         node = html.create('div', {
-          'class': 'icon-node jimu-float-trailing',
+          'class': 'icon-node jimu-float-trailing' + ((this.openedId === iconConfig.id)? ' jimu-state-selected': ''),
           title: iconConfig.label,
           settingId: iconConfig.id,
           style: {
@@ -781,7 +810,7 @@ define([
           }
         }, node);
 
-        if (iconConfig.label === this.nls.more) {
+        if (iconConfig.name === '__more') {
           on(node, 'click', lang.hitch(this, this._showMorePane, iconConfig));
         } else {
           on(node, 'click', lang.hitch(this, function() {

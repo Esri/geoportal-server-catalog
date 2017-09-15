@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="14px" height="25px" viewBox="0 0 14 25" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41 (35326) - http://www.bohemiancoding.com/sketch -->
+    <title>marker_svg</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="specification" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="spec_builder" transform="translate(-485.000000, -3736.000000)">
+            <g id="icons-copy" transform="translate(485.000000, 3736.000000)">
+                <path d="M0,5.6875 L0,17.5625 L6.9991138,25 L14,17.5625 L14,5.69258148 C14,1.57903147 11.1879129,0 6.9991138,0 C2.81206362,0 0,1.57903147 0,5.6875 Z" id="Shape" fill="#FFFFFF"></path>
+                <path d="M6.999367,2 C4.00861687,2 2,3.12787963 2,6.0625 L2,16.6875 L6.999367,22 L12,16.6875 L12,6.06612963 L12,6.0625 C12,3.12787963 9.99136638,2 6.999367,2 L6.999367,2 Z" id="Shape" fill="#24B5CC"></path>
+            </g>
+        </g>
+    </g>
+</svg>

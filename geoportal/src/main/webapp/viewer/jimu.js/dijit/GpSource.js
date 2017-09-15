@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -197,6 +197,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     _updateOperationTip: function(){
       if(this.portalRadio.checked){
         this.operationTip.innerHTML = this.gpcPortal.operationTip;
+        //update style
+        var browserContainer = this.gpcPortal.browserContainer;
+        browserContainer.style.top = 0;
+        var operationTipHeight = this.operationTip.clientHeight;
+        if(operationTipHeight >= 19){
+          browserContainer.style.top = (operationTipHeight - 19) + 'px';
+        }
       }
       else if(this.urlRadio.checked){
         this.operationTip.innerHTML = this.gpcUrl.operationTip;

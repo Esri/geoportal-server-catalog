@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "סרגל קנה מידה"
-  })
-);
+define({
+  "_widgetLabel": "סרגל קנה מידה"
+});

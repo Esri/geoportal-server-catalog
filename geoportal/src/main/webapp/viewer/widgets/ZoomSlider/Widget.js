@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,6 +40,8 @@ define([
         this.inherited(arguments);
         this.own(on(this.map, 'zoom-end', lang.hitch(this, this._zoomHandler)));
         this._zoomHandler();
+        this.btnZoomIn.title = window.jimuNls.common.zoomIn;
+        this.btnZoomOut.title = window.jimuNls.common.zoomOut;
       },
 
       setPosition: function(position){

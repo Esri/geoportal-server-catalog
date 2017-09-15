@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Suumimise liugur"
-  })
-);
+define({
+  "_widgetLabel": "Suumimise liugur"
+});

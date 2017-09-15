@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,96 +15,23 @@
 ///////////////////////////////////////////////////////////////////////////
 
 define([
+  'dojo/on',
+  'dojo/Evented',
+  'dojo/_base/lang',
+  'dojo/_base/html',
   'dojo/_base/declare',
   'dijit/_WidgetBase',
   'dijit/_TemplatedMixin',
   'dijit/_WidgetsInTemplateMixin',
   'dojo/text!./templates/QueryableLayerSource.html',
-  'dojo/_base/lang',
-  'dojo/_base/html',
-  'dojo/on',
-  'dojo/Evented',
-  'jimu/dijit/QueryableLayerChooserFromMap',
+  'jimu/dijit/_QueryableLayerChooserWithButtons',
   'jimu/dijit/QueryableServiceChooserFromPortal',
   'jimu/dijit/_QueryableServiceChooserContent',
   'jimu/portalUrlUtils'
 ],
-function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
-  template, lang, html, on, Evented, QueryableLayerChooserFromMap,
-  QueryableServiceChooserFromPortal, _QueryableServiceChooserContent, portalUrlUtils) {
-
-  //define private dijit QueryableLayerChooserWithButtons
-  var baseClassArr = [_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented];
-  var QueryableLayerChooserWithButtons = declare(baseClassArr, {
-    baseClass: 'jimu-layer-chooser-with-buttons jimu-queryable-layer-chooser-with-buttons',
-    declaredClass: 'jimu.dijit.QueryableLayerChooserWithButtons',
-    templateString: '<div>' +
-      '<div class="chooser-container" data-dojo-attach-point="chooserContainer"></div>' +
-      '<div class="footer">' +
-        '<div class="jimu-btn jimu-float-trailing cancel" data-dojo-attach-point="btnCancel">' +
-          '${nls.cancel}' +
-        '</div>' +
-        '<div class="jimu-btn jimu-float-trailing ok jimu-trailing-margin1 jimu-state-disabled"' +
-        ' data-dojo-attach-point="btnOk">' +
-          '${nls.ok}' +
-        '</div>' +
-      '</div>' +
-    '</div>',
-
-    queryableLayerChooserArgs: null,
-
-    //events:
-    //ok
-    //cancel
-
-    //public methods:
-    //getSelectedItems
-
-    postMixInProperties: function(){
-      this.nls = lang.clone(window.jimuNls.common);
-    },
-
-    postCreate: function(){
-      this.inherited(arguments);
-      var args = this.queryableLayerChooserArgs;
-      this.queryableLayerChooserFromMap = new QueryableLayerChooserFromMap(args);
-      this.queryableLayerChooserFromMap.placeAt(this.chooserContainer);
-      html.setStyle(this.queryableLayerChooserFromMap.domNode, {
-        width: '100%',
-        height: '100%'
-      });
-
-      this.own(on(this.queryableLayerChooserFromMap, 'tree-click', lang.hitch(this, function(){
-        var items = this.getSelectedItems();
-        if(items.length > 0){
-          html.removeClass(this.btnOk, 'jimu-state-disabled');
-        }
-        else{
-          html.addClass(this.btnOk, 'jimu-state-disabled');
-        }
-      })));
-
-      this.own(on(this.btnOk, 'click', lang.hitch(this, function(){
-        var items = this.getSelectedItems();
-        if(items.length > 0){
-          this.emit('ok', items);
-        }
-      })));
-
-      this.own(on(this.btnCancel, 'click', lang.hitch(this, function(){
-        this.emit('cancel');
-      })));
-    },
-
-    getSelectedItems: function(){
-      return this.queryableLayerChooserFromMap.getSelectedItems();
-    },
-
-    startup: function(){
-      this.inherited(arguments);
-      this.queryableLayerChooserFromMap.startup();
-    }
-  });
+function(on, Evented, lang, html, declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template,
+  QueryableLayerChooserWithButtons, QueryableServiceChooserFromPortal, _QueryableServiceChooserContent,
+  portalUrlUtils) {
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
     templateString: template,
@@ -117,6 +44,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
 
     //QueryableLayerChooserFromMap options
     createMapResponse: null,
+    mustSupportStatistics: false,
 
     //QueryableServiceChooserFromPortal options
     portalUrl: null,
@@ -191,10 +119,10 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
           width: '100%',
           height: '100%'
         },
-        queryableLayerChooserArgs:{
-          multiple: this.multiple,
-          createMapResponse: this.createMapResponse
-        }
+        multiple: this.multiple,
+        createMapResponse: this.createMapResponse,
+        mustSupportStatistics: this.mustSupportStatistics,
+        onlyShowWebMapLayers: true
       };
       this.queryableLayerChooserFromMap = new QueryableLayerChooserWithButtons(args1);
       this.queryableLayerChooserFromMap.operationTip = this.nls.selectLayer;

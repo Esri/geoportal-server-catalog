@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "شريط المقياس"
-  })
-);
+define({
+  "_widgetLabel": "شريط المقياس"
+});

@@ -1,11 +1,14 @@
-<div>
+<div class="jimu-widget-splash-desktop">
   <div class="overlay" data-dojo-attach-point="overlayNode"></div>
-  <div class="envelope" data-dojo-attach-point="envelopeNode">
+  <div class="envelope buried" data-dojo-attach-point="envelopeNode">
+    <div class="splash-container splash-bg" data-dojo-attach-point="splashContainerBackground"></div>
     <div class="splash-container" data-dojo-attach-point="splashContainerNode">
-      <div class="custom-content" data-dojo-attach-point="customContentNode"></div>
+      <div class="custom-content" data-dojo-attach-point="customContentNode" style="font-family: 'Verdana','Avenir Light'"></div>
       <div class="footer" data-dojo-attach-point="footerNode">
-        <div data-dojo-attach-point="confirmCheck"></div>
-        <div class="jimu-btn jimu-float-trailing" data-dojo-attach-point="okNode" data-dojo-attach-event="onclick:onOkClick">${nls.ok}</div>
+        <div class="confirmcheck-container" data-dojo-attach-point="confirmCheckContainer">
+          <div data-dojo-attach-point="confirmCheck"></div>
+        </div>
+        <div class="jimu-btn jimu-float-trailing" data-dojo-attach-point="okNode" data-dojo-attach-event="onclick:onOkClick"></div>
       </div>
     </div>
   </div>

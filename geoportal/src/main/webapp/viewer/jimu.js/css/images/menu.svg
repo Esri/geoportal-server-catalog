@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="12px" height="12px" viewBox="0 0 12 12" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 44.1 (41455) - http://www.bohemiancoding.com/sketch -->
+    <title>menu</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Setting-3New" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="Chart3-Display-PieChart" transform="translate(-598.000000, -491.000000)">
+            <g id="Template" transform="translate(290.000000, 434.000000)">
+                <g id="Template_Number">
+                    <g id="highlight" transform="translate(20.000000, 57.000000)">
+                        <g id="menu" transform="translate(294.000000, 6.000000) rotate(-90.000000) translate(-294.000000, -6.000000) translate(288.000000, 0.000000)">
+                            <rect id="Rectangle-10" fill="#24B5CC" x="0" y="0" width="11.5" height="11.5"></rect>
+                            <path d="M2.15625,9.34375 L9.34375,9.34375 L9.34375,8.265625 L2.15625,8.265625 L2.15625,9.34375 L2.15625,9.34375 Z M2.15625,6.6484375 L9.34375,6.6484375 L9.34375,5.5703125 L2.15625,5.5703125 L2.15625,6.6484375 L2.15625,6.6484375 Z M2.15625,2.875 L2.15625,3.953125 L9.34375,3.953125 L9.34375,2.875 L2.15625,2.875 L2.15625,2.875 Z" id="Shape" fill="#FFFFFF"></path>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

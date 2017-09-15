@@ -1,8 +1,8 @@
 {
   "name": "GeoportalSearch",
   "platform": "HTML",
-  "version": "2.0.1",
-  "wabVersion": "2.0.1",
+  "version": "2.5",
+  "wabVersion": "2.5",
   "author": "Esri Inc.",
   "description": "Federated search widget",
   "copyright": "Esri Inc.",

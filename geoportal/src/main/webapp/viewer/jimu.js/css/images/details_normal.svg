@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41 (35326) - http://www.bohemiancoding.com/sketch -->
+    <title>details_normal</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="specification" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="spec_builder" transform="translate(-505.000000, -3491.000000)">
+            <g id="details_normal" transform="translate(505.000000, 3491.000000)">
+                <circle id="Oval-2" fill="#000000" opacity="0.5" cx="8" cy="8" r="8"></circle>
+                <g id="chevron-right" transform="translate(6.000000, 4.000000)" fill="#FFFFFF">
+                    <polygon id="Shape" points="0.945945946 0 1.33226763e-15 0.933333333 3.10810811 4 1.33226763e-15 7.06666667 0.945945946 8 5 4"></polygon>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

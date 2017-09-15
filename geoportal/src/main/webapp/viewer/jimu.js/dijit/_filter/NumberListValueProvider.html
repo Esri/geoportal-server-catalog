@@ -1,0 +1,20 @@
+﻿<div>
+    <table data-dojo-attach-point="numberListTable" style="width:100%;border-collapse:collapse;"
+        cellpadding="0" cellspacing="0">
+        <tbody>
+            <tr>
+                <td style="width:50%;">
+                    <input data-dojo-attach-point="_dijit1" data-dojo-type="dijit/form/NumberTextBox"
+                        data-dojo-props='"required":false,constraints:{min:0,pattern:"#####0.##########"}'
+                        style="width:100%;" />
+                </td>
+                <td>
+                    <select data-dojo-attach-point="rangeSelect" data-dojo-type="dijit/form/Select"
+                        style="width:100%;" class="operator-select dijit-form-Select restrict-select-width">
+                        <option value="none">${nls.none}</option>
+                    </select>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>

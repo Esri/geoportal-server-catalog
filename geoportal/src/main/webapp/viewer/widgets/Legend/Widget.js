@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -16,113 +16,135 @@
 
 define([
     'dojo/_base/declare',
-    'dojo/_base/array',
     'dojo/_base/lang',
-    'dojo/dom',
+    'dojo/_base/html',
     'dojo/on',
-    'dojo/aspect',
+    './Utils',
     'dijit/_WidgetsInTemplateMixin',
     'jimu/BaseWidget',
     'jimu/LayerInfos/LayerInfos',
-    'jimu/dijit/Message',
     'esri/dijit/Legend'
-  ],
-  function(
-    declare,
-    array,
-    lang,
-    dom,
-    on,
-    aspect,
-    _WidgetsInTemplateMixin,
-    BaseWidget,
-    LayerInfos,
-    Message,
-    Legend) {
-    var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
+], function(declare, lang, html, on, legendUtils,
+_WidgetsInTemplateMixin, BaseWidget, LayerInfos, Legend) {
 
-      name: 'Legend',
-      baseClass: 'jimu-widget-legend',
-      layerInfos: [],
-      legend: null,
-      startup: function() {
-        this.inherited(arguments);
+  var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
+    name: 'Legend',
+    baseClass: 'jimu-widget-legend',
+    legend: null,
+    _jimuLayerInfos: null,
 
-        LayerInfos.getInstance(this.map, this.map.itemInfo)
-          .then(lang.hitch(this, function(layerInfosObj) {
-            this.config.legend.map = this.map;
-            this.legend = new Legend(this.config.legend, this.legendDiv);
-            this.legend.startup();
-            this.removeLegendOfBasemap();
+    startup: function() {
+      this.inherited(arguments);
+    },
 
-            if (this.legend && this.legend._createLegend) {
-              aspect.after(this.legend, '_createLegend', lang.hitch(this, 'removeLegendOfBasemap'));
-            }
+    onOpen: function() {
+      /*
+      this.config.legend.map = this.map;
+      */
+      this._jimuLayerInfos = LayerInfos.getInstanceSync();
+      var legendParams = {
+        arrangement: this.config.legend.arrangement,
+        autoUpdate: this.config.legend.autoUpdate,
+        respectCurrentMapScale: this.config.legend.respectCurrentMapScale,
+        //respectVisibility: false,
+        map: this.map,
+        layerInfos: this._getLayerInfosParam()
+      };
+      this.legend = new Legend(legendParams, html.create("div", {}, this.domNode));
+      this.legend.startup();
+      this._bindEvent();
+    },
 
-            this.own(on(
-              layerInfosObj,
-              'layerInfosIsShowInMapChanged',
-              lang.hitch(this, 'onLayersVisibilityChange')
-            ));
-          }), lang.hitch(this, function(err) {
-            console.error(err);
-            new Message({
-              message: err.message || err
-            });
-          }));
-      },
+    onClose: function() {
+      this.legend.destroy();
+    },
 
-      onLayersVisibilityChange: function() {
-        this.legend.refresh();
-      },
 
-      _getInvalidLegendLayer: function() {
-        var invalidLegendLayers = [];
-        var basemapInMap = this.map.getBasemap();
+    _bindEvent: function() {
+      if(this.config.legend.autoUpdate) {
+        this.own(on(this._jimuLayerInfos,
+                    'layerInfosIsShowInMapChanged',
+                    lang.hitch(this, 'refreshLegend')));
 
-        if (this.map.itemInfo &&
-          this.map.itemInfo.itemData) { // created using arcgisUtils.createMap
-          array.forEach(this.map.itemInfo.itemData.baseMap.baseMapLayers, function(basemapLayer) {
-            invalidLegendLayers.push(basemapLayer.id);
-          });
+        this.own(on(this._jimuLayerInfos,
+                    'layerInfosChanged',
+                    lang.hitch(this, 'refreshLegend')));
 
-          array.forEach(this.map.itemInfo.itemData.operationalLayers, function(layer) {
-            if (layer.showLegend === false) {
-              invalidLegendLayers.push(layer.id);
-            }
-          });
-
-          array.forEach(this.map.layerIds, lang.hitch(this, function(layerId) {
-            var layer = this.map.getLayer(layerId);
-            if (layer._basemapGalleryLayerType) { // basemapgallery changed
-              invalidLegendLayers.push(layerId);
-            }
-          }));
-        } else { // created using esri/Map
-          array.forEach(this.map.layerIds, lang.hitch(this, function(layerId) {
-            var layer = this.map.getLayer(layerId);
-            if (!layer.isOperationalLayer) {
-              invalidLegendLayers.push(layerId);
-            }
-          }));
-        }
-
-        if (basemapInMap) {
-          invalidLegendLayers.push(basemapInMap);
-        }
-        return invalidLegendLayers;
-      },
-
-      removeLegendOfBasemap: function() {
-        array.forEach(this._getInvalidLegendLayer(), function(layerId) {
-          var baseNode = dom.byId(this.legend.id + '_' + layerId);
-          if (baseNode && baseNode.nodeType === 1) {
-            this.removedDiv.appendChild(baseNode);
-          }
-
-        }, this);
+        this.own(on(this._jimuLayerInfos,
+                    'layerInfosRendererChanged',
+                    lang.hitch(this, 'refreshLegend')));
       }
-    });
+    },
 
-    return clazz;
+    _getLayerInfosParam: function() {
+      var layerInfosParam;
+      /*
+      this.config.legend.layerInfos = [{
+        id: "NapervilleShelters_8858",
+        hideLayers: []
+      }, {
+        id: "Wildfire_6998",
+        hideLayers: []
+      }, {
+        id: "911CallsHotspot_3066",
+        hideLayers: [0, 1]
+      }];
+      */
+
+      if(this.config.legend.layerInfos === undefined) {
+        // widget has not been configed.
+        layerInfosParam = legendUtils.getLayerInfosParam();
+      } else {
+        // widget has been configed, respect config.
+        layerInfosParam = legendUtils.getLayerInfosParamByConfig(this.config.legend);
+      }
+
+      // filter layerInfosParam
+      //return this._filterLayerInfsParam(layerInfosParam);
+      return layerInfosParam;
+    },
+
+    refreshLegend: function() {
+      var layerInfos = this._getLayerInfosParam();
+      this.legend.refresh(layerInfos);
+    }
+
+    /*
+    _filterLayerInfsParam: function(layerInfosParam) {
+      var filteredLayerInfosParam;
+
+      filteredLayerInfosParam = array.filter(layerInfosParam, function(layerInfoParam) {
+        var result = true;
+        result = result && visiblilityFilter(layerInfoParam, this.config.legend)
+        return result;
+      }, this);
+
+      return filteredLayerInfosParam;
+      function visiblilityFilter(layerInfoParam, legendConfig) {
+        var filterResult;
+        if(legendConfig.autoUpdate) {
+          //filterResult = layerInfoParam.jimuLayerInfo.isShowInMap();
+          // filter sub layers
+          layerInfoParam.jimuLayerInfo.traversal(function(layerInfo) {
+            if(layerInfo.isLeaf()) {
+              if(layerInfo.isShowInMap()) {
+                filterResult = true;
+                if(layerInfo.originOperLayer.mapService &&
+                   layerInfo.originOperLayer.mapService.subId !== undefined) {
+                     layerInfoParam.hideLayers.push(layerInfo.originOperLayer.mapService.subId);
+                }
+              }
+            }
+          });
+
+          layerInfoParam.x = "abc";
+        } else {
+          filterResult = true;
+        }
+        return filterResult;
+      }
+    },
+  */
   });
+  return clazz;
+});

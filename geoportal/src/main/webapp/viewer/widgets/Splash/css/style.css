@@ -7,13 +7,16 @@
   margin: auto !important;
   z-index: 110;/*same with loading*/
 }
+.jimu-widget-splash .buried{
+  visibility: hidden;
+}
 .jimu-widget-splash .overlay{
   top: 0;
   left: 0;
   width: 100%;
   height: 100%;
   position: absolute;
-  background-color:rgba(0,0,0,0.3);
+  background-color:rgba(0,0,0,0.5);
 }
 .jimu-widget-splash-desktop .splash-container .jimu-checkbox,
 .jimu-widget-splash-mobile .splash-container .jimu-checkbox{
@@ -22,6 +25,7 @@
   overflow: auto;
   max-height: 50px;
   min-height: 25px;
+  margin-top: 20px;
   margin-bottom: 10px;
   display: block;
 }
@@ -38,6 +42,10 @@
 .jimu-rtl .jimu-widget-splash-mobile .splash-container .jimu-checkbox .label{
   margin-left: auto;
   margin-right: 5px;
+}
+.jimu-widget-splash-desktop .envelope{
+/*  min-width: 300px;
+  min-height: 100px;*/
 }
 .jimu-widget-splash-desktop .envelope,
 .jimu-widget-splash-mobile .envelope{
@@ -69,7 +77,8 @@
 }
 .jimu-widget-splash-desktop .splash-container .disable-btn,
 .jimu-widget-splash-mobile .splash-container .disable-btn{
-  background-color: #a0acbf;
+  background-color: #a0acbf !important;
+  color: rgb(255, 255, 255) !important;
 }
 .jimu-widget-splash-desktop .splash-container .jimu-checkbox .checkbox,
 .jimu-widget-splash-mobile .splash-container .jimu-checkbox .checkbox{
@@ -77,31 +86,75 @@
 }
 
 .jimu-widget-splash-desktop .envelope{
-  max-height: 500px;
-  max-width: 640px;
+  /*max-height: 500px;
+  max-width: 640px;*/
+  border: 1px solid rgba(255,255,255,0.3);
 }
-.jimu-widget-splash-desktop .splash-container{
+.jimu-widget-splash-desktop .splash-container,
+.jimu-widget-splash-desktop .splash-bg{
   position: absolute;
   display: inline-block;
-  background-color: #485566;
-  box-shadow: 0 0 4px rgba(160, 160, 160, 0.4);
+  /*background-color: #485566;
+  box-shadow: 0 0 4px rgba(160, 160, 160, 0.4);*/
+  margin: auto;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  overflow:auto;
 }
-.jimu-widget-splash-desktop .custom-content{
-  width: 560px;
-  margin: 20px 40px;
-  overflow: auto;
-  color: #fff;
-  max-height: 388px;
-}
-.jimu-widget-splash-desktop .splash-container .footer{
-  max-height: 100px;
-  margin: 0 40px 10px 40px;
-  position: relative;
+.jimu-widget-splash-desktop .splash-container{
+  z-index: 1;
   overflow: hidden;
 }
 
+.jimu-widget-splash .norepeat{
+  background: no-repeat;
+}
+.jimu-widget-splash .fill {
+  background-size: cover !important;
+}
+.jimu-widget-splash .fit {
+  background-size: contain !important;
+}
+.jimu-widget-splash .stretch {
+  background-size: 100% 100% !important;
+}
+.jimu-widget-splash .center {
+  background-size: initial !important;
+}
+.jimu-widget-splash .tile {
+  background-size: initial !important;
+}
 
-/*mobile*/
+.jimu-widget-splash-desktop .splash-bg{
+  z-index: 0;
+}
+
+.jimu-widget-splash-desktop .custom-content{
+  /* width: 560px; */
+  margin: 20px;
+  /* overflow: auto; */
+  color: #fff;
+  /* max-height: 388px; */
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+.jimu-widget-splash-desktop .splash-container .footer{
+  /* max-height: 100px; */
+  /* margin: 0 40px 10px 40px; */
+  position: absolute;
+  overflow: hidden;
+  bottom: 10px;
+  width: 100%;
+}
+.jimu-widget-splash .footer .confirmcheck-container{
+  margin: 0 20px;
+}
+.jimu-widget-splash .footer .jimu-btn {
+  margin: 0 20px;
+}
+/*mobile
 .jimu-widget-splash-mobile .envelope{
   background-color: #485566;
   box-shadow: 0 0 4px rgba(160, 160, 160, 0.4);
@@ -115,7 +168,7 @@
 .jimu-widget-splash-mobile .splash-container .custom-content{
   position: absolute;
   top: 0;
-  color: #fff;
+  color: #000;
   margin-bottom: 10px;
   left: 10px;
   right: 10px;
@@ -127,4 +180,4 @@
   bottom: 10px;
   left: 10px;
   right: 10px;
-}
+}*/

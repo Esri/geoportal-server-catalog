@@ -1,0 +1,47 @@
+<div>
+  <div class="titles">${nls.background}</div>
+
+  <div class="unit-item">
+    <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="colorFillBtn" data-dojo-props="group:'background'"></div>
+    <label class="">${nls.colorFill}</label>
+  </div>
+  <div class="hide indent" data-dojo-attach-point="colorFillOptions">
+    <div class="colorPicker" data-dojo-attach-point="backgroundColorPickerEditor"></div>
+  </div>
+
+  <div class="unit-item">
+    <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="imageFillBtn" data-dojo-props="group:'background'"></div>
+    <label class="">${nls.imageFill}</label>
+  </div>
+  <div class="hide indent" data-dojo-attach-point="imageFillOptions">
+    <div class="clearFix">
+      <div class="jimu-float-leading">
+        <div class="image-chooser-base" data-dojo-attach-point="imageChooser"></div>
+      </div>
+      <div class="file-name jimu-float-leading" data-dojo-attach-point="fileName">${nls.noFileChosen}</div>
+    </div>
+
+    <div class="hide clearFix types" data-dojo-attach-point="fillsType">
+      <div class="unit-item fillstype jimu-float-leading" data-dojo-attach-point="sizeFill">
+        <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="fill" data-dojo-props="group:'fillStyle'"></div>
+        <label class="">${nls.sizeFill}</label>
+      </div>
+      <div class="unit-item fillstype jimu-float-leading hide" data-dojo-attach-point="sizeFit">
+        <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="fit" data-dojo-props="group:'fillStyle'"></div>
+        <label class="">${nls.sizeFit}</label>
+      </div>
+      <div class="unit-item fillstype jimu-float-leading" data-dojo-attach-point="sizeStretch">
+        <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="stretch" data-dojo-props="group:'fillStyle'"></div>
+        <label class="">${nls.sizeStretch}</label>
+      </div>
+      <div class="unit-item fillstype jimu-float-leading hide" data-dojo-attach-point="sizeCenter">
+        <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="center" data-dojo-props="group:'fillStyle'"></div>
+        <label class="">${nls.sizeCenter}</label>
+      </div>
+      <div class="unit-item fillstype jimu-float-leading" data-dojo-attach-point="sizeTile">
+        <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="tile" data-dojo-props="group:'fillStyle'"></div>
+        <label class="">${nls.sizeTile}</label>
+      </div>
+    </div>
+  </div>
+</div>

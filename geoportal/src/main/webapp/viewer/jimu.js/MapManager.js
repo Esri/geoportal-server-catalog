@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,32 +14,37 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo/_base/declare',
+define([
+  'dojo/_base/declare',
   'dojo/_base/lang',
   'dojo/_base/array',
   'dojo/_base/html',
+  'dojo/query',
   'dojo/topic',
   'dojo/on',
   'dojo/aspect',
   'dojo/keys',
+  'dojo/i18n',
+  'dojo/_base/config',
   'esri/dijit/InfoWindow',
   'esri/dijit/PopupMobile',
   'esri/InfoTemplate',
   'esri/request',
+  'esri/arcgis/utils',
   'esri/geometry/Extent',
   'esri/geometry/Point',
   'require',
   './utils',
-  './dijit/LoadingShelter',
   'jimu/LayerInfos/LayerInfos',
+  'jimu/dijit/Message',
   'jimu/dijit/AppStatePopup',
   './MapUrlParamsHandler',
   './AppStateManager',
-  './PopupManager'
-], function(declare, lang, array, html, topic, on, aspect, keys, InfoWindow,
-  PopupMobile, InfoTemplate, esriRequest, Extent, Point, require,
-  jimuUtils, LoadingShelter, LayerInfos, AppStatePopup, MapUrlParamsHandler,
-  AppStateManager, PopupManager) {
+  './PopupManager',
+  './FilterManager'
+], function(declare, lang, array, html, query, topic, on, aspect, keys, i18n, dojoConfig, InfoWindow,
+  PopupMobile, InfoTemplate, esriRequest, arcgisUtils, Extent, Point, require, jimuUtils,
+  LayerInfos, Message, AppStatePopup, MapUrlParamsHandler, AppStateManager, PopupManager, FilterManager) {
   var instance = null,
     clazz = declare(null, {
       appConfig: null,
@@ -58,9 +63,9 @@ define(['dojo/_base/declare',
         this.id = mapDivId;
         this.appStateManager = AppStateManager.getInstance(this.urlParams);
         this.popupManager = PopupManager.getInstance(this);
+        this.filterManager = FilterManager.getInstance();
         this.nls = window.jimuNls;
         topic.subscribe("appConfigChanged", lang.hitch(this, this.onAppConfigChanged));
-        topic.subscribe("changeMapPosition", lang.hitch(this, this.onChangeMapPosition));
         topic.subscribe("syncExtent", lang.hitch(this, this.onSyncExtent));
 
         on(window, 'resize', lang.hitch(this, this.onWindowResize));
@@ -75,9 +80,6 @@ define(['dojo/_base/declare',
       _showMap: function(appConfig) {
         // console.timeEnd('before map');
         console.time('Load Map');
-        this.loading = new LoadingShelter();
-        this.loading.placeAt(this.mapDivId);
-        this.loading.startup();
         //for now, we can't create both 2d and 3d map
         if (appConfig.map['3D']) {
           if (appConfig.map.itemId) {
@@ -119,40 +121,27 @@ define(['dojo/_base/declare',
           this._mapInfoWindow = this.map.infoWindow;
           if(this._mapMobileInfoWindow){
             this._mapMobileInfoWindow.destroy();
+            // working around for bug of destroying _mapMobileInfoWindow is not completely.
+            query("div.esriMobileInfoView.esriMobilePopupInfoView").forEach(function(node){
+              html.destroy(node);
+            });
+            query("div.esriMobileNavigationBar").forEach(function(node){
+              html.destroy(node);
+            });
           }
           this._mapMobileInfoWindow =
           new PopupMobile(null, html.create("div", null, null, this.map.root));
           this.isMobileInfoWindow = false;
         }
-        if (window.appInfo.isRunInMobile && !this.isMobileInfoWindow) {
+        if (jimuUtils.inMobileSize() && !this.isMobileInfoWindow) {
           this.map.infoWindow.hide();
           this.map.setInfoWindow(this._mapMobileInfoWindow);
           this.isMobileInfoWindow = true;
-        } else if (!window.appInfo.isRunInMobile && this.isMobileInfoWindow) {
+        } else if (!jimuUtils.inMobileSize() && this.isMobileInfoWindow) {
           this.map.infoWindow.hide();
           this.map.setInfoWindow(this._mapInfoWindow);
           this.isMobileInfoWindow = false;
         }
-      },
-
-      onChangeMapPosition: function(position) {
-        var pos = lang.clone(this.mapPosition);
-        lang.mixin(pos, position);
-        this.setMapPosition(pos);
-      },
-
-      setMapPosition: function(position){
-        this.mapPosition = position;
-
-        var posStyle = jimuUtils.getPositionStyle(position);
-        html.setStyle(this.mapDivId, posStyle);
-        if (this.map && this.map.resize) {
-          this.map.resize();
-        }
-      },
-
-      getMapPosition: function(){
-        return this.mapPosition;
       },
 
       onSyncExtent: function(map){
@@ -227,11 +216,11 @@ define(['dojo/_base/declare',
           this.map = map;
           this.resetInfoWindow(true);
           console.log('map changed.');
-          topic.publish('mapChanged', this.map);
+          topic.publish('mapChanged', this.map, this.layerInfosObj);
         } else {
           this.map = map;
           this.resetInfoWindow(true);
-          topic.publish('mapLoaded', this.map);
+          topic.publish('mapLoaded', this.map, this.layerInfosObj);
         }
       },
 
@@ -262,8 +251,26 @@ define(['dojo/_base/declare',
           usePopupManager: true
         };
 
-        var mapDeferred = jimuUtils.createWebMap(webMapPortalUrl, webMapItemId,
-          this.mapDivId, webMapOptions);
+        if(!window.isBuilder && !appConfig.mode && appConfig.map.appProxy &&
+            appConfig.map.appProxy.mapItemId === appConfig.map.itemId) {
+          var layerMixins = [];
+          array.forEach(appConfig.map.appProxy.proxyItems, function(proxyItem){
+            if (proxyItem.useProxy && proxyItem.proxyUrl) {
+              layerMixins.push({
+                url: proxyItem.sourceUrl,
+                mixin: {
+                  url: proxyItem.proxyUrl
+                }
+              });
+            }
+          });
+
+          if(layerMixins.length > 0) {
+            webMapOptions.layerMixins = layerMixins;
+          }
+        }
+
+        var mapDeferred = this._createWebMapRaw(webMapPortalUrl, webMapItemId, this.mapDivId, webMapOptions);
 
         mapDeferred.then(lang.hitch(this, function(response) {
           var map = response.map;
@@ -286,42 +293,164 @@ define(['dojo/_base/declare',
           html.setStyle(map.root, 'zIndex', 0);
 
           map._initialExtent = map.extent;
+
+          this.layerInfosObj = LayerInfos.getInstanceSyncForInit(map, map.itemInfo);
+          if(appConfig.map.mapRefreshInterval && !appConfig.map.mapRefreshInterval.useWebMapRefreshInterval){
+            this._updateRefreshInterval(map.itemInfo.itemData, this.layerInfosObj, appConfig.map.mapRefreshInterval);
+          }
+          // this.layerInfosObj.traversalLayerInfosOfWebmap(lang.hitch(this, function(layerInfo){
+          //   layerInfo.getLayerObject().then(lang.hitch(this, function(layerObject){
+          //     if(layerObject.url && layerObject.declaredClass === "esri.layers.FeatureLayer"){
+          //       this._handleRefreshLayer(layerObject);
+          //     }
+          //   }), lang.hitch(this, function(err){
+          //     console.error("can't get layerObject", err);
+          //   }));
+          // }));
+
+          this._showUnreachableLayersTitleMessage();
           this._publishMapEvent(map);
           setTimeout(lang.hitch(this, this._checkAppState), 500);
-
-          this.loading.hide();
-
           this._addDataLoadingOnMapUpdate(map);
-        }), lang.hitch(this, function() {
-          this._destroyLoadingShelter();
+        }), lang.hitch(this, function(error) {
+          console.error(error);
+          this._showError(error);
           topic.publish('mapCreatedFailed');
         }));
       },
 
+      _handleRefreshLayer: function(featureLayer){
+        // var layerId = "Wildfire_5334";
+        //before refresh => update-start => after refresh => get data => graphic-remove => graphic-add => update-end
+        var _drawFeatures = featureLayer._mode._drawFeatures;
+        var _clearIf = featureLayer._mode._clearIIf;
+        var _cellMap = null;
+        featureLayer._mode._drawFeatures = function(response, cell) {
+          /*jshint unused: false*/
+          // console.log(response);
+          if (cell && typeof cell.row === 'number' && typeof cell.col === 'number') {
+            featureLayer._mode._removeCell(cell.row, cell.col);
+          }
+          _drawFeatures.apply(featureLayer._mode, arguments);
+        };
+        aspect.before(featureLayer, 'refresh', function() {
+          // console.log("before refresh");
+          _cellMap = featureLayer._mode._cellMap;
+          featureLayer._mode._clearIIf = function() {};
+        });
+        aspect.after(featureLayer, 'refresh', function() {
+          // console.log("after refresh");
+          featureLayer._mode._cellMap = _cellMap;
+          featureLayer._mode._clearIIf = _clearIf;
+        });
+
+        on(featureLayer, 'update-start', function(){
+          // console.log('update-start');
+          featureLayer.isUpdating = true;
+        });
+
+        on(featureLayer, 'update-end', function(){
+          // console.log('update-end');
+          featureLayer.isUpdating = false;
+        });
+
+        // on(featureLayer, 'graphic-add', function(){
+        //   console.log('graphic-add');
+        // });
+
+        // on(featureLayer, 'graphic-remove', function(){
+        //   console.log('graphic-remove');
+        // });
+
+        // on(featureLayer, 'graphics-clear', function(){
+        //   console.log('graphics-clear');
+        // });
+      },
+
+      _showError: function(err){
+        if(err && err.message){
+          html.create('div', {
+            'class': 'app-error',
+            innerHTML: err.message
+          }, document.body);
+        }
+      },
+
+      _createWebMapRaw: function(webMapPortalUrl, webMapItemId, mapDivId,  webMapOptions){
+        var mapDef = jimuUtils.createWebMap(webMapPortalUrl, webMapItemId, mapDivId, webMapOptions);
+        return mapDef.then(lang.hitch(this, function(response){
+          return response;
+        }), lang.hitch(this, function(error){
+          console.error(error);
+          if(error && error instanceof Error && error.message){
+            var cache = i18n.cache;
+            var key = "esri/nls/jsapi/" + dojoConfig.locale;
+            /*if(dojoConfig.locale !== 'en'){
+              key += "/" + dojoConfig.locale;
+            }*/
+            var esriLocaleNls = cache[key];
+            var str = lang.getObject("arcgis.utils.baseLayerError", false, esriLocaleNls);
+            if(str && error.message.indexOf(str) >= 0){
+              new Message({
+                message: window.jimuNls.map.basemapNotAvailable + window.jimuNls.map.displayDefaultBasemap
+              });
+              return arcgisUtils.getItem(webMapItemId).then(lang.hitch(this, function(itemInfo){
+                itemInfo.itemData.spatialReference = {
+                  wkid: 102100,
+                  latestWkid: 3857
+                };
+                itemInfo.itemData.baseMap = {
+                  baseMapLayers: [{
+                    url: "http://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
+                    opacity: 1,
+                    layerType: "ArcGISTiledMapServiceLayer",
+                    visibility: true,
+                    id: "defaultBasemap_0"
+                  }],
+                  title: "Topographic"
+                };
+                return jimuUtils.createWebMap(webMapPortalUrl, itemInfo, mapDivId, webMapOptions);
+              }));
+            }
+          }
+
+          throw error;
+        }));
+      },
+
+      _showUnreachableLayersTitleMessage: function() {
+        var unreachableLayersTitle = this.layerInfosObj.getUnreachableLayersTitle();
+        var layersTitleString = "";
+        var message = window.jimuNls.map.layerLoadedError ||
+          "The layer, ${layers} cannot be added to the map.";
+        if(message && unreachableLayersTitle && unreachableLayersTitle.length > 0) {
+          array.forEach(unreachableLayersTitle, lang.hitch(this, function(title) {
+            layersTitleString = layersTitleString +  title + ", ";
+          }));
+
+          new Message({
+            message: message.replace("${layers}", layersTitleString)
+          });
+        }
+      },
+
       _addDataLoadingOnMapUpdate: function(map) {
-        var loadHtml = '<div class="load-container">' +
-        '<div class="loader">Loading...</div>' +
-        '</div>';
+        var loadHtml = '<div class="map-loading">Loading...</div>';
         var loadContainer = html.toDom(loadHtml);
         html.place(loadContainer, map.root);
+        if(map.updating){
+          html.addClass(loadContainer, 'loading');
+        }
         on(map, 'update-start', lang.hitch(this, function() {
-          html.setStyle(loadContainer, 'display', '');
+          html.addClass(loadContainer, 'loading');
         }));
         on(map, 'update-end', lang.hitch(this, function() {
-          html.setStyle(loadContainer, 'display', 'none');
+          html.removeClass(loadContainer, 'loading');
         }));
         on(map, 'unload', lang.hitch(this, function() {
           html.destroy(loadContainer);
           loadContainer = null;
-          this._destroyLoadingShelter();
         }));
-      },
-
-      _destroyLoadingShelter: function() {
-        if (this.loading) {
-          this.loading.destroy();
-          this.loading = null;
-        }
       },
 
       _checkAppState: function() {
@@ -339,24 +468,20 @@ define(['dojo/_base/declare',
 
         if(useAppState){
           this.appStateManager.getWabAppState().then(lang.hitch(this, function(stateData) {
-            LayerInfos.getInstance(this.map, this.map.itemInfo)
-            .then(lang.hitch(this, function(layerInfosObj) {
-              this.layerInfosObj = layerInfosObj;
-              if(stateData.extent || stateData.layers) {
-                var appStatePopup = new AppStatePopup({
-                  nls: {
-                    title: this.nls.appState.title,
-                    restoreMap: this.nls.appState.restoreMap
-                  }
-                });
-                appStatePopup.placeAt('main-page');
-                on(appStatePopup, 'applyAppState', lang.hitch(this, function(){
-                  this._applyAppState(stateData, this.map);
-                }));
-                appStatePopup.startup();
-                appStatePopup.show();
-              }
-            }));
+            if (stateData.extent || stateData.layers) {
+              var appStatePopup = new AppStatePopup({
+                nls: {
+                  title: this.nls.appState.title,
+                  restoreMap: this.nls.appState.restoreMap
+                }
+              });
+              appStatePopup.placeAt('main-page');
+              on(appStatePopup, 'applyAppState', lang.hitch(this, function() {
+                this._applyAppState(stateData, this.map);
+              }));
+              appStatePopup.startup();
+              appStatePopup.show();
+            }
           }));
         }
       },
@@ -369,7 +494,6 @@ define(['dojo/_base/declare',
         if (stateData.extent) {
           map.setExtent(stateData.extent);
         }
-        this._publishMapEvent(map);
       },
 
       _processMapOptions: function(mapOptions) {
@@ -454,12 +578,46 @@ define(['dojo/_base/declare',
         this.appConfig = appConfig;
         if(reason === 'mapChange'){
           this._recreateMap(appConfig);
-        }
-        else if(reason === 'mapOptionsChange'){
+        }else if(reason === 'mapOptionsChange'){
           if(changedJson.lods){
             this._recreateMap(appConfig);
           }
+        }else if(reason === 'mapRefreshIntervalChange'){
+          var itemData = this.map && this.map.itemInfo.itemData;
+          if (itemData && this.layerInfosObj) {
+            this._updateRefreshInterval(itemData, this.layerInfosObj, changedJson);
+          }
         }
+      },
+
+      _updateRefreshInterval: function(itemData, layerInfosObj, refreshInterval){
+        var minutes = -1;
+
+        if (refreshInterval.useWebMapRefreshInterval) {
+          //Honor the individual interval of each layer
+          minutes = -1;
+        } else {
+          //Use a single interval for all layers
+          minutes = refreshInterval.minutes;
+        }
+
+        var operationalLayers = itemData.operationalLayers || [];
+        array.forEach(operationalLayers, lang.hitch(this, function(operationalLayer){
+          if(operationalLayer.refreshInterval > 0){
+            var layerInfo = layerInfosObj.getLayerInfoById(operationalLayer.id);
+            if(layerInfo){
+              layerInfo.getLayerObject().then(lang.hitch(this, function(layer){
+                if(layer && typeof layer.setRefreshInterval === 'function'){
+                  if(minutes < 0){
+                    layer.setRefreshInterval(operationalLayer.refreshInterval);
+                  }else{
+                    layer.setRefreshInterval(minutes);
+                  }
+                }
+              }));
+            }
+          }
+        }));
       },
 
       _recreateMap: function(appConfig){

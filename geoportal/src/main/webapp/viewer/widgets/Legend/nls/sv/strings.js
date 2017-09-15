@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Teckenförklaring"
-  })
-);
+define({
+  "_widgetLabel": "Teckenförklaring"
+});

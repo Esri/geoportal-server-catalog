@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Hartă de prezentare generală"
-  })
-);
+define({
+  "_widgetLabel": "Hartă de prezentare generală"
+});

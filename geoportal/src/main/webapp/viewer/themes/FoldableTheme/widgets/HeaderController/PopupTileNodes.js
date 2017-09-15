@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -253,7 +253,7 @@ define([
         var node, item;
         item = this.items[i];
         node = domConstruct.create('div', {
-          'class': 'icon-node jimu-float-leading',
+          'class': 'icon-node jimu-float-leading jimu-main-background',
           title: item.label,
           settingId: item.id,
           'data-widget-name': item.name
@@ -281,7 +281,7 @@ define([
       createEmptyItemNode: function(pageNode) {
         var node;
         node = domConstruct.create('div', {
-          'class': 'icon-node jimu-float-leading'
+          'class': 'icon-node jimu-float-leading jimu-main-background'
         }, pageNode);
         this.nodes.push(node);
         return node;
@@ -293,7 +293,7 @@ define([
           'class': 'close'
         }, this.domNode);
         domConstruct.create('div', {
-          'class': 'close-inner'
+          'class': 'close-inner jimu-main-background'
         }, node);
 
         on(node, 'click', lang.hitch(this, function() {

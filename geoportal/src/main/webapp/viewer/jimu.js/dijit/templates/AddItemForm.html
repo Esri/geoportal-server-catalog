@@ -1,0 +1,14 @@
+<div style="width: 100%" class="jimu-item-form">
+  <div data-dojo-type="dijit/form/Form" data-dojo-attach-point="itemForm" encType="multipart/form-data" action="" method="">
+    <div class="line">
+      <div class="input-label">${nls.title}</div>
+      <input type="text" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-attach-point="itemName"
+      required="true" class="input-item"/>
+    </div>
+    <div class="line line-margin">
+      <div class="input-label">${nls.folder}</div>
+      <input data-dojo-attach-point="itemFolder" data-dojo-type="dijit/form/FilteringSelect" trim="true" class="input-item"></input>
+    </div>
+  </div>
+  <div data-dojo-attach-point="shelter" data-dojo-type="jimu/dijit/LoadingShelter" data-dojo-props='hidden:true'></div>
+</div>

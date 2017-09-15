@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Mastelio juosta"
-  })
-);
+define({
+  "_widgetLabel": "Mastelio juosta"
+});

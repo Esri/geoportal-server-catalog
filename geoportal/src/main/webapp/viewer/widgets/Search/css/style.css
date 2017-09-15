@@ -1,5 +1,8 @@
+.jimu-widget-search{
+	min-height: 32px;
+}
 .jimu-widget-search .search-node.default-width-for-openAtStart{
-	width: 300px;
+	width: 274px;
 }
 
 .jimu-widget-search .result-item-selected{

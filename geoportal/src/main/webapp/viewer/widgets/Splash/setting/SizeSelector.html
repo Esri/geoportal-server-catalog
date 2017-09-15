@@ -1,0 +1,42 @@
+<div class="size-selector clearFix">
+  <div class="titles">${nls.size}</div>
+  <div class="sizes jimu-float-leading">
+    <div class="size-box-container">
+      <div class="size-box percent25" data-dojo-attach-point="percent25"></div>
+      25%
+    </div>
+    <div class="size-box-container">
+      <div class="size-box percent50" data-dojo-attach-point="percent50"></div>
+      50%
+    </div>
+    <div class="size-box-container">
+      <div class="size-box percent75" data-dojo-attach-point="percent75"></div>
+      75%
+    </div>
+    <div class="size-box-container">
+      <div class="size-box percent100" data-dojo-attach-point="percent100"></div>
+      100%
+    </div>
+    <div class="size-box-container">
+      <div class="size-box custom" data-dojo-attach-point="custom"></div>
+      ${nls.custom}
+    </div>
+  </div>
+  <div data-dojo-attach-point="wh" class="wh jimu-float-leading hide">
+    <div class="wh-item">
+      <div class="lable">${nls.width}</div>
+      <div class="inputs">
+        <input type="text" class="text-box" data-dojo-type="dijit/form/NumberTextBox" data-dojo-attach-point="width">
+        <span class="unit">px</span>
+      </div>
+    </div>
+    <div class="wh-item">
+      <div class="lable">${nls.height}</div>
+      <div class="inputs">
+        <input type="text" class="text-box" data-dojo-type="dijit/form/NumberTextBox" data-dojo-attach-point="height">
+        <span class="unit">px</span>
+      </div>
+    </div>
+  </div>
+</div>
+

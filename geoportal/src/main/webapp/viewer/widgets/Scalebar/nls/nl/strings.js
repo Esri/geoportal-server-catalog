@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Schaalbalk"
-  })
-);
+define({
+  "_widgetLabel": "Schaalbalk"
+});

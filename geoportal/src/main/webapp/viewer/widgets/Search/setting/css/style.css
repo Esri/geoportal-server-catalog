@@ -78,12 +78,14 @@
 .jimu-widget-search-setting .source-setting{
   width: 660px;
   position: relative;
+  height: 100%;
+  overflow: auto;
 }
 
 .jimu-widget-search-setting .source-setting .source-tips{
   display: none;
   font-size: 12px;
-  color: #a0acbf;
+  color: #999;
 }
 
 .jimu-widget-search-setting .source-setting .source-tips-show{
@@ -91,7 +93,7 @@
 }
 
 .jimu-widget-search-setting .general-setting .group-label{
-  margin-top: 20px;
+  margin-top: 15px;
   margin-bottom: 5px;
 }
 
@@ -108,15 +110,23 @@
   background: url(images/selector.png) no-repeat center;
 }
 
-.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row td{
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row td,
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .local-search-row td{
   padding-bottom: 35px;
   position: relative;
 }
 
-.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row .example{
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .local-search-row .first{
+  padding-left: 20px;
+}
+
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row .example,
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .local-search-row .example{
   position: absolute;
   top: 35px;
   left: 0;
+  font-size: 12px;
+  color: #999;
 }
 
 .jimu-rtl .jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row .example{
@@ -124,7 +134,8 @@
   right: 0;
 }
 
-.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .hide-country-code-row {
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .hide-country-code-row,
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .hide-local-search-table {
   display: none;
 }
 
@@ -186,9 +197,8 @@
 }
 
 .jimu-widget-search-setting .source-table > tbody > tr > .second .tip{
-  font-style: italic;
   font-size: 12px;
-  color: #a0acbf;
+  color: #999;
   width: 100%;
   display: inline-block;
 }

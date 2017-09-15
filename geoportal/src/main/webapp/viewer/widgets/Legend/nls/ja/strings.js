@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "凡例"
-  })
-);
+define({
+  "_widgetLabel": "凡例"
+});

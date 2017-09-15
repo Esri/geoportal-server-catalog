@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Giriş Sayfası"
-  })
-);
+define({
+  "_widgetLabel": "Giriş Sayfası"
+});

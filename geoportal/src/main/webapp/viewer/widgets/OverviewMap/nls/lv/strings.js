@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Pārskata karte"
-  })
-);
+define({
+  "_widgetLabel": "Pārskata karte"
+});

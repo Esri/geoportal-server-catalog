@@ -1,7 +1,9 @@
 <div>
   <!-- solve the bug of style delay loading -->
   <div class="header-section jimu-float-leading" data-dojo-attach-point="headerNode">
-    <img class="logo jimu-float-leading jimu-leading-margin1" data-dojo-attach-point="logoNode" data-dojo-attach-event="onload:_onLogoLoad">
+    <a data-dojo-attach-point="logoLinkNode" target="_blank">
+      <img class="logo jimu-float-leading jimu-leading-margin1" data-dojo-attach-point="logoNode" data-dojo-attach-event="onload:_onLogoLoad">
+    </a>
     <div class="titles jimu-float-leading jimu-leading-margin1" data-dojo-attach-point="titlesNode">
       <div class="jimu-title jimu-float-leading" data-dojo-attach-point="titleNode"></div>
       <div class="jimu-subtitle jimu-float-leading jimu-leading-margin5" data-dojo-attach-point="subtitleNode"></div>

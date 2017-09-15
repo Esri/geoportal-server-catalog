@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,6 +18,11 @@ define([
     './ConfigManager',
     './LayoutManager',
     './DataManager',
+    './WidgetManager',
+    './FeatureActionManager',
+    './SelectionManager',
+    './DataSourceManager',
+    './FilterManager',
     'dojo/_base/html',
     'dojo/_base/lang',
     'dojo/_base/array',
@@ -28,7 +33,6 @@ define([
     'dojo/Deferred',
     'dojo/promise/all',
     'dojo/io-query',
-    'dojo/domReady!',
     'esri/config',
     'esri/request',
     'esri/urlUtils',
@@ -37,13 +41,17 @@ define([
     './utils',
     'require',
     'dojo/i18n',
-    'dojo/i18n!./nls/main'
+    'dojo/i18n!./nls/main',
+    'esri/main'
   ],
-  function(ConfigManager, LayoutManager, DataManager, html, lang, array, on, mouse, topic, cookie,
-    Deferred, all, ioquery, domReady, esriConfig, esriRequest, urlUitls, IdentityManager,
-    portalUrlUtils, jimuUtils, require, i18n, mainBundle) {
+  function(ConfigManager, LayoutManager, DataManager, WidgetManager, FeatureActionManager, SelectionManager,
+    DataSourceManager, FilterManager, html, lang, array, on, mouse,
+    topic, cookie, Deferred, all, ioquery, esriConfig, esriRequest, urlUitls, IdentityManager,
+    portalUrlUtils, jimuUtils, require, i18n, mainBundle, esriMain) {
     /* global jimuConfig:true */
-    var mo = {};
+    var mo = {}, appConfig;
+
+    window.topic = topic;
 
     //set the default timeout to 3 minutes
     esriConfig.defaults.io.timeout = 60000 * 3;
@@ -63,6 +71,7 @@ define([
 
     //jimu nls
     window.jimuNls = mainBundle;
+    window.apiNls = esriMain.bundle;
 
     IdentityManager.setProtocolErrorHandler(function() {
       return true;
@@ -94,9 +103,37 @@ define([
       //Detect if request conatins the queryRelatedRecords operation
       //and then change the source url for that request to the corresponding mapservice.
       if (ioArgs.url.indexOf("/queryRelatedRecords?") !== -1) {
-        if (!jimuUtils.isHostedService(ioArgs.url)) { // hosted service doesn't depend on MapServer
+        var serviceUrl = ioArgs.url;
+        var proxyUrl = esriConfig.defaults.io.proxyUrl;
+        if(proxyUrl && ioArgs.url.indexOf(proxyUrl + "?") === 0){
+          //This request uses proxy.
+          //We should remove proxyUrl to get the real service url to detect if it is a hosted service or not.
+          serviceUrl = ioArgs.url.replace(proxyUrl + "?", "");
+        }
+        if (!jimuUtils.isHostedService(serviceUrl)) { // hosted service doesn't depend on MapServer
           ioArgs.url = ioArgs.url.replace("FeatureServer", "MapServer");
         }
+      }
+
+      //For getJobStatus of gp service running in safari.
+      //The url of requests sent to getJobStatus is the same. In safari, the requests will be blocked except
+      //the first one. Here a preventCache tag is added for this kind of request.
+      var reg = /GPServer\/.+\/jobs/;
+      if (reg.test(ioArgs.url)) {
+        ioArgs.preventCache = new Date().getTime();
+      }
+
+      // Use proxies to replace the premium content
+      if(!window.isBuilder && appConfig &&
+          !appConfig.mode &&
+          appConfig.appProxies &&
+          appConfig.appProxies.length > 0) {
+        array.some(appConfig.appProxies, function(proxyItem) {
+          if(ioArgs.url.indexOf(proxyItem.sourceUrl) >= 0) {
+            ioArgs.url = ioArgs.url.replace(proxyItem.sourceUrl, proxyItem.proxyUrl);
+            return true;
+          }
+        });
       }
 
       return ioArgs;
@@ -146,10 +183,10 @@ define([
       breakPoints: [600, 1280]
     }, jimuConfig);
 
-    window.wabVersion = '2.0.1';
-    // window.productVersion = 'Web AppBuilder for ArcGIS (Developer Edition) 2.0 Beta';
-    window.productVersion = 'Web AppBuilder for ArcGIS (Developer Edition) 2.0';
-    // window.productVersion = 'Portal for ArcGIS 10.4 Beta2';
+    window.wabVersion = '2.5';
+    // window.productVersion = 'Online 5.2';
+    window.productVersion = 'Web AppBuilder for ArcGIS (Developer Edition) 2.5';
+    // window.productVersion = 'Portal for ArcGIS 10.5.1';
 
     function initApp() {
       var urlParams, configManager, layoutManager;
@@ -165,10 +202,16 @@ define([
         }
       }
 
-      DataManager.getInstance();
-
-      html.setStyle(jimuConfig.loadingId, 'display', 'none');
-      html.setStyle(jimuConfig.mainPageId, 'display', 'block');
+      if(urlParams.mode){
+        html.setStyle(jimuConfig.loadingId, 'display', 'none');
+        html.setStyle(jimuConfig.mainPageId, 'display', 'block');
+      }
+      //the order of initialize these managers does mater because this will affect the order of event listener.
+      DataManager.getInstance(WidgetManager.getInstance());
+      FeatureActionManager.getInstance();
+      SelectionManager.getInstance();
+      DataSourceManager.getInstance();
+      FilterManager.getInstance();
 
       layoutManager = LayoutManager.getInstance({
         mapId: jimuConfig.mapId,
@@ -178,6 +221,8 @@ define([
 
       layoutManager.startup();
       configManager.loadConfig();
+      //load this module here to make load modules and load app parallelly
+      require(['dynamic-modules/preload']);
     }
 
     function getUrlParams() {
@@ -188,7 +233,26 @@ define([
       }
 
       p = ioquery.queryToObject(s.substr(1));
+
+      for(var k in p){
+        p[k] = jimuUtils.sanitizeHTML(p[k]);
+      }
       return p;
+    }
+
+    if(window.isBuilder){
+      topic.subscribe("app/appConfigLoaded", onAppConfigChanged);
+      topic.subscribe("app/appConfigChanged", onAppConfigChanged);
+    }else{
+      topic.subscribe("appConfigLoaded", onAppConfigChanged);
+      topic.subscribe("appConfigChanged", onAppConfigChanged);
+    }
+
+    function onAppConfigChanged(_appConfig){
+      appConfig = _appConfig;
+
+      html.setStyle(jimuConfig.loadingId, 'display', 'none');
+      html.setStyle(jimuConfig.mainPageId, 'display', 'block');
     }
 
     mo.initApp = initApp;

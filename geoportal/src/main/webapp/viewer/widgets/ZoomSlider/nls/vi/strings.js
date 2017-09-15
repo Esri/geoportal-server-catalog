@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Thanh trượt Thu phóng"
-  })
-);
+define({
+  "_widgetLabel": "Thanh trượt Thu phóng"
+});

@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "خريطة النظرة العامة"
-  })
-);
+define({
+  "_widgetLabel": "خريطة النظرة العامة"
+});

@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 44.1 (41455) - http://www.bohemiancoding.com/sketch -->
+    <title>radio_checked</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="S_Suitability-Modeler" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="configure" transform="translate(-262.000000, -403.000000)">
+            <g id="Group-4" transform="translate(220.000000, 50.000000)">
+                <g id="Starting-state" transform="translate(40.000000, 320.000000)">
+                    <g id="Group-2-Copy-3">
+                        <g id="radio_checked" transform="translate(2.000000, 33.000000)">
+                            <g id="Group-2">
+                                <path d="M8,15 C11.8477153,15 15,11.8477153 15,8 C15,4.15228475 11.8477153,1 8,1 C4.15228475,1 1,4.15228475 1,8 C1,11.8477153 4.15228475,15 8,15 Z" id="Shape-Copy-3" stroke="#24B5CC" stroke-width="2"></path>
+                                <circle id="Oval" fill="#24B5CC" cx="8" cy="8" r="4"></circle>
+                            </g>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

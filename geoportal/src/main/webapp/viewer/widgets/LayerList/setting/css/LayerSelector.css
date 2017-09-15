@@ -1,0 +1,250 @@
+.layer-selector{
+  position: relative;
+}
+
+.layer-selector .jimu-hr{
+  margin-top: 15px;
+}
+
+.layer-selector .layers-section{
+  margin-top: 0px;
+  z-index: 0;
+  position: relative;
+}
+
+
+.layer-selector .layers-section .layers-list{
+  width: 100%;
+}
+
+.layer-selector .layers-section .layer-list-title{
+  height: 16px;
+  font-size: 14px;
+  /*border: 1px solid #000000;*/
+  color: #86909c;
+  margin-top: 14px;
+}
+
+
+.layer-selector .layer-list-table{
+  width: 100%;
+  border-spacing: 0px;
+}
+
+.layer-selector .layers-list-body{
+  border: 0px solid #999;
+}
+
+.layer-selector .jimu-widget-row{
+
+}
+
+.layer-selector .layer-row{
+  background-color: #ffffff;
+  height: 25px;
+}
+
+/*
+.layer-selector .layer-row-mouseover{
+}
+
+.layer-selector .layer-row-mouseover td.col{
+  border-color: #15a4af;
+}
+
+
+.layer-selector .jimu-widget-row-selected{
+}
+
+.layer-selector .jimu-widget-row-selected td.col{
+  border-color: #15a4af;
+}
+*/
+
+.layer-selector .jimu-widget-row-active{
+  background-color: #009cff;
+}
+
+.layer-selector .jimu-widget-row-selected .col-layer-label{
+  color: #333;
+}
+.layer-selector .jimu-widget-row-active .col-layer-label{
+  color: #fff;
+}
+
+
+.layer-selector .col{
+  border: 1px solid #ffffff;
+}
+
+.layer-selector .col1{
+  border-right-width: 0;
+}
+
+.jimu-rtl .layer-selector .col1{
+  border-right-width: 1px;
+  border-left-width: 0;
+}
+
+.layer-selector .col2{
+  width: auto;
+  word-break: break-word;
+  /*cursor: pointer;*/
+  border-left-width: 0;
+  border-right-width: 0;
+  padding-left: 10px;
+}
+
+.layer-selector .col3{
+  width: 24px;
+  border-left-width: 0;
+}
+
+.jimu-rtl .layer-selector .col3{
+  border-left-width: 1px;
+  border-right-width: 0;
+}
+
+.layer-selector .begin-blank-div{
+  /*float: left;*/
+  width: 12px;
+  height: 2px;
+}
+
+.layer-selector .col-showLegend{
+  width: 17px;
+  text-align: center;
+}
+
+.layer-selector .showLegend-div{
+  width: 13px;
+  height: 13px;
+  cursor: pointer;
+  margin-left: 3px;
+  margin-top: 3px;
+  background-image: url("../../images/v_right.png");
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.jimu-rtl .layer-selector .showLegend-div{
+  background-image: url("../../images/v_left.png");
+  margin-left: 0;
+  margin-right: 3px;
+}
+
+.layer-selector .showLegend-div.unfold{
+  background-image: url("../../images/v.png");
+}
+
+.layer-selector .showLegend-div.hidden{
+  background-image: none;
+  cursor: auto; 
+}
+
+/*
+.layer-selector .showLegend-image{
+  margin-left: 3px;
+}
+
+.jimu-rtl .layer-selector .showLegend-image{
+  margin-left: 0;
+  margin-right: 3px;
+}
+*/
+
+.layer-selector  .layers-list-imageShowLegend-down{
+  -moz-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+  -webkit-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+  -o-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+  -ms-transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+  transform: scale(1) rotate(270deg) translateX(0px) translateY(0px) skewX(0deg) skewY(0deg);
+}
+
+.layer-selector  .layers-list-imageShowLegend-down-div{
+  background-color: #d9dde0;
+}
+
+.layer-selector .noLegend-div{
+  /*float: left;*/
+  width: 16px;
+  height: 16px;
+  text-align: right;
+  display: none;
+  background-image: url('../../images/noLegend.png');
+  background-repeat: no-repeat;
+  background-position: center;
+  margin-right: 5px;
+}
+
+.jimu-rtl .layer-selector .noLegend-div{
+  margin-right: auto;
+  margin-left: 5px;
+}
+
+.layer-selector .noLegend-div.table{
+  background-image: url('../../images/table.png');
+}
+
+/*
+.layer-selector .noLegend-image{
+  display: block;
+  margin: 0 auto;
+}
+*/
+
+.layer-selector .col-blank{
+  width:17px;
+}
+.layer-selector .col-select{
+  width: 17px;
+  /*text-align: center;*/
+}
+
+.layer-selector .col-reserve-blank{
+  width: 25px;
+}
+
+.layer-selector .col-content{
+  /*color: #686868;*/
+  font-size: 12px;
+}
+
+.layer-selector  .div-select{
+  position: relative;
+  font-size: 2px;
+  /*************/
+}
+
+.layer-selector  .div-select .checkbox{
+  cursor: auto;
+}
+
+.layer-selector .div-content{
+  position: relative;
+  /*************/
+  /*color: #686868;*/
+  font-size: 14px;
+  border: 0px solid;
+}
+
+.layer-selector .div-content.grayed-title{
+  opacity: 0.5;
+}
+
+.layer-selector .col-popupMenu{
+  width: 17px;
+  text-align: center;
+}
+.layer-selector .col-select .jimu-selection-box{
+  margin-top: 5px;
+}
+.layer-selector .layers-list-body .col-layer-label{
+  /*color: #686868;*/
+}
+
+.layer-selector .layer-sub-node{
+  display: none;
+  width:100%;
+  border-spacing: 0px;
+}

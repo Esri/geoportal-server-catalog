@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41.1 (35376) - http://www.bohemiancoding.com/sketch -->
+    <title>custom</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Spec" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="spec_builder" transform="translate(-479.000000, -6738.000000)">
+            <g id="01-copy-3" transform="translate(452.000000, 6463.000000)">
+                <g id="custom" transform="translate(20.000000, 268.000000)">
+                    <g id="Custom-button">
+                        <g id="custom" transform="translate(7.000000, 7.000000)">
+                            <rect id="Rectangle-22" fill="#AFAFAF" x="0" y="0" width="8" height="8"></rect>
+                            <rect id="Rectangle-22-Copy-2" fill="#939393" x="8" y="0" width="8" height="8"></rect>
+                            <rect id="Rectangle-22-Copy" fill="#CCCCCC" x="0" y="8" width="8" height="8"></rect>
+                            <rect id="Rectangle-22-Copy-3" fill="#525252" x="8" y="8" width="8" height="8"></rect>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

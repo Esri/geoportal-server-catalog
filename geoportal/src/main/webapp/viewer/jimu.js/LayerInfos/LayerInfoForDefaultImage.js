@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ define([
   'dojo/_base/lang',
   'dojo/Deferred',
   'dojo/promise/all',
+  'dojo/aspect',
   'esri/request',
   './LayerInfoForDefault'
-], function(declare, domConstruct, array, lang, Deferred, all, esriRequest, LayerInfoForDefault) {
+], function(declare, domConstruct, array, lang, Deferred, all, aspect, esriRequest, LayerInfoForDefault) {
   var clazz = declare(LayerInfoForDefault, {
     constructor: function() {
       this._addImageServiceLayerType();
@@ -180,6 +181,29 @@ define([
         def.resolve(resultValue);
       });
       return def;
+    },
+
+    /***************************************************
+     * methods for control service definition
+     ***************************************************/
+    _getServiceDefinition: function() {
+      var url = this.getUrl();
+      var requestProxy = this._serviceDefinitionBuffer.getRequest(this.subId);
+      return requestProxy.request(url);
+    },
+
+    /****************
+     * Event
+     ***************/
+    _bindEvent: function() {
+      var handle;
+      this.inherited(arguments);
+      if(this.layerObject && !this.layerObject.empty) {
+        handle = aspect.after(this.layerObject,
+                              'setRenderingRule',
+                              lang.hitch(this, this._onRendererChanged));
+        this._eventHandles.push(handle);
+      }
     }
 
   });

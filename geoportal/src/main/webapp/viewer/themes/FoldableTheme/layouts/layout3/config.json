@@ -28,6 +28,12 @@
           "bottom": 58
         }
       },
+      "widgets/ExtentNavigate/Widget": {
+        "position": {
+          "left": 12,
+          "bottom": 203
+        }
+      },
       "widgets/Scalebar/Widget":{
         "position": {
           "left": 12,
@@ -100,6 +106,12 @@
           "position": {
             "right": 12,
             "top": 142
+          }
+        },
+        "widgets/ExtentNavigate/Widget": {
+          "position": {
+            "right": 12,
+            "top": 211
           }
         },
         "widgets/Scalebar/Widget":{

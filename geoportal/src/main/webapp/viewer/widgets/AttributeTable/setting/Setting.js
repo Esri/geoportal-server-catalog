@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,8 @@ define([
     'dojo/Deferred',
     "dojo/query",
     "jimu/dijit/Popup",
-    'jimu/dijit/Message',
+    "jimu/dijit/Message",
+    "jimu/dijit/CheckBox",
     "jimu/dijit/LoadingShelter",
     "../utils"
   ],
@@ -43,6 +44,7 @@ define([
     query,
     Popup,
     Message,
+    CheckBox,
     LoadingShelter,
     utils
   ) {
@@ -51,7 +53,9 @@ define([
       baseClass: 'jimu-widget-attributetable-setting',
       currentFieldTable: null,
       _allLayerFields: null,
-      _layerInfos: null,
+      // _allLayerHasAttachments: null,
+      //this.config.layerInfos is [configInfo], not [layerInfo]
+      _layerInfos: null,//[layerInfo]
       _tableInfos: null,
       _delayedLayerInfos: null,
       _delayedLayerInfosAfterInit: null,
@@ -63,6 +67,7 @@ define([
           this.config.layerInfos = [];
         }
         this._allLayerFields = [];
+        // this._allLayerHasAttachments = [];
         this._layerInfos = [];
         this._tableInfos = [];
         this._delayedLayerInfos = [];
@@ -97,6 +102,11 @@ define([
           width: '20%',
           actions: ['edit'],
           'class': 'symbol'
+        }, {
+          name: 'showAttachments',
+          title: '',
+          type: 'checkbox',
+          hidden: true
         }];
 
         var args = {
@@ -214,19 +224,50 @@ define([
 
       openFieldsDialog: function(tr, fields, idx) {
         /*jshint unused:false*/
+        var defaultHasAttachment = false;
+        var layerInfo = this._layerInfos[idx];
+        var layerObject = layerInfo && layerInfo.layerObject;
+        if(layerObject){
+          defaultHasAttachment = layerObject.hasAttachments && layerObject.objectIdField;
+        }
+
+        var content = html.create("div");
         var table = this._createFieldsTable(fields, idx);
+        html.place(table.domNode, content);
+
+        var cbx = null;
+        if(defaultHasAttachment){
+          cbx = new CheckBox({
+            label: this.nls.showAttachments,
+            style: 'margin-top:10px;'
+          });
+          var rowData = this.displayFieldsTable.getRowData(tr);
+          cbx.setValue(rowData.showAttachments);
+          //cbx.setValue(this._allLayerHasAttachments[idx]);
+          cbx.placeAt(content);
+        }
+
         this.currentFieldTable = table;
+        var maxHeight = 600;
+        if(cbx){
+          maxHeight = 640;
+        }
 
         var fieldsPopup = new Popup({
           titleLabel: this.nls.configureLayerFields,
           width: 640,
-          maxHeight: 600,
+          maxHeight: maxHeight,
           autoHeight: true,
-          content: table,
+          content: content,
           buttons: [{
             label: this.nls.ok,
             onClick: lang.hitch(this, function() {
               this._allLayerFields[idx] = table.getData();
+              var value = cbx ? cbx.getValue() : false;
+              this.displayFieldsTable.editRow(tr, {
+                showAttachments: value
+              });
+
               fieldsPopup.close();
               fieldsPopup = null;
             })
@@ -386,12 +427,19 @@ define([
               this._tableInfos = tableInfos;
 
               if (this.config && this.config.layerInfos && this.config.layerInfos.length > 0) {
+                // user has configured AT config before.
                 // settting page should sync with webmap
+
                 var configInfosFromMap = utils.getConfigInfosFromLayerInfos(this._layerInfos);
+                // we want to use configInfosFromMap as the new this.config.layerInfos
+                // but we need to use this.config.layerInfos to mixin into configInfosFromMap
                 utils.merge(configInfosFromMap, this.config.layerInfos, 'id',
                   lang.hitch(this, function(mci, cli) {
+                    //mci short for map config layerInfo: layerInfo
+                    //cli short for config layer info: layerInfo
                     // mci.name = cli.name;
                     mci.show = cli.show;
+                    mci.showAttachments = cli.showAttachments;
                     mci.layer.url = cli.layer.url;
                     if (lang.getObject('layer.fields.length', false, mci) &&
                       lang.getObject('layer.fields.length', false, cli)) {
@@ -414,6 +462,8 @@ define([
 
                 def.resolve(configInfosFromMap);
               } else {
+                // user has not configured AT config before.
+                // this.config.layerInfos is null.
                 this._unSpportQueryCampsite.fromConfig = false;
                 this._unSpportQueryCampsite.layerNames = this._getUnsupportQueryLayerNames(
                   this._layerInfos
@@ -447,13 +497,13 @@ define([
       _init: function(layerInfos) {
         var unSupportQueryLayerNames = [];
         for (var i = 0; i < layerInfos.length; i++) {
-          var show = layerInfos[i].show &&
-            this._getSupportTableInfoById(layerInfos[i].id).isSupportQuery;
+          var show = layerInfos[i].show && this._getSupportTableInfoById(layerInfos[i].id).isSupportQuery;
           this.displayFieldsTable.addRow({
             label: layerInfos[i].name || layerInfos[i].title,
             url: layerInfos[i].layer.url,
             index: "" + i,
-            show: show
+            show: show,
+            showAttachments: !!layerInfos[i].showAttachments
           });
 
           this._allLayerFields.push(layerInfos[i].layer.fields);
@@ -543,6 +593,7 @@ define([
             json.layer.url = data[idx].url;
             json.layer.fields = this._allLayerFields[idx];
             json.show = data[idx].show;
+            json.showAttachments = data[idx].showAttachments;
             table.push(json);
           }));
         } else {
@@ -554,6 +605,7 @@ define([
             json.layer.url = data[i].url;
             json.layer.fields = this._allLayerFields[i];
             json.show = data[i].show;
+            json.showAttachments = data[i].showAttachments;
             table.push(json);
           }
         }

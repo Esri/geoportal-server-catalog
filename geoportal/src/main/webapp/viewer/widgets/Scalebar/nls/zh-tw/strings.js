@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "比例尺"
-  })
-);
+define({
+  "_widgetLabel": "比例尺"
+});

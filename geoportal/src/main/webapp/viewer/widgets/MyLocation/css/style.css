@@ -33,6 +33,13 @@
 
 .jimu-widget-mylocation .place-holder.tracking{
 	background-image: url("images/stop.png") !important;
+	background-color: #000;
+}
+.jimu-widget-mylocation .place-holder.nohttps{
+	background-image: url("images/locate_disabled.png") !important;
+}
+.jimu-widget-mylocation .nohttps:hover{
+	background-color: rgba(0,0,0,0) !important;
 }
 
 .jimu-widget-mylocation .place-holder{

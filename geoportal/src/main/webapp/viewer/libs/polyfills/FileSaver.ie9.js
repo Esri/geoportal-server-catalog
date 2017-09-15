@@ -13,8 +13,7 @@
 
 /*! @source http://purl.eligrey.com/github/FileSaver.js/blob/master/FileSaver.js */
 
-var saveTextAs = saveTextAs
-|| (function (textContent, fileName, charset) {
+var saveTextAs = saveTextAs || (function (textContent, fileName, charset) {
   fileName = fileName || 'download.txt';
   charset = charset || 'utf-8';
   textContent = (textContent || '').replace(/\r?\n/g, '\r\n');
@@ -38,11 +37,11 @@ var saveTextAs = saveTextAs
   var doc = saveTxtWindow.document;
   doc.open('text/html', 'replace');
   doc.charset = charset;
-  if (fileName.endsWithAny('.htm', '.html')) {
+  if (/htm$/.test(fileName) || /html$/.test(fileName)) {
     doc.close();
     doc.body.innerHTML = '\r\n' + textContent + '\r\n';
   } else {
-    if (!fileName.endsWithAny('.txt')) {
+    if (!/txt$/.test(fileName) && !/csv$/.test(fileName)) {
       fileName += '.txt';
     }
     doc.write(textContent);

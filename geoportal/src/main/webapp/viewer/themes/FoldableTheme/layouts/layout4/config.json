@@ -41,15 +41,22 @@
           "bottom": 14
         }
       },
+      "widgets/ExtentNavigate/Widget": {
+        "position": {
+          "left": 203,
+          "bottom": 14,
+          "height": 30
+        }
+      },
       "widgets/Scalebar/Widget":{
         "position": {
-          "left": 220,
+          "left": 288,
           "bottom": 5
         }
       },
       "widgets/Coordinate/Widget": {
         "position": {
-          "left": 395,
+          "left": 463,
           "bottom": 5
         }
       },
@@ -124,6 +131,12 @@
           "position": {
             "left": 12,
             "top": 142
+          }
+        },
+        "widgets/ExtentNavigate/Widget": {
+          "position": {
+            "top": 209,
+            "left": 12
           }
         },
         "widgets/Scalebar/Widget":{

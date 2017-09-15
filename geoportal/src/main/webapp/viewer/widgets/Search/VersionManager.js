@@ -2,6 +2,7 @@ define(['jimu/shared/BaseVersionManager'],
   function(BaseVersionManager) {
 
     function VersionManager() {
+      /*jshint maxlen:150*/
       this.versions = [{
         version: '1.0',
         upgrader: function(oldConfig) {
@@ -81,6 +82,7 @@ define(['jimu/shared/BaseVersionManager'],
               s.maxSuggestions = s.maxSuggestions || 6;
             }
           }
+
           function addZoomScale(sources) {
             for (var i = 0, len = sources.length; i < len; i++) {
               var s = sources[i];
@@ -92,6 +94,38 @@ define(['jimu/shared/BaseVersionManager'],
           addZoomScale(oldConfig.sources);
 
           return oldConfig;
+        }
+      }, {
+        version: '2.0',
+        upgrader: function(oldConfig) {
+          return oldConfig;
+        }
+      }, {
+        version: '2.0.1',
+        upgrader: function(oldConfig) {
+          return oldConfig;
+        }
+      }, {
+        version: '2.1',
+        upgrader: function(oldConfig) {
+          return oldConfig;
+        }
+      }, {
+        version: '2.2',
+        upgrader: function(oldConfig) {
+          var newConfig = oldConfig;
+          var _esriLocatorRegExp = /http(s)?:\/\/geocode(.){0,3}\.arcgis.com\/arcgis\/rest\/services\/World\/GeocodeServer/g;
+          for (var i = 0, len = newConfig.sources.length; i < len; i++) {
+            var source = newConfig.sources[i];
+            if (source.type === 'locator') {
+              _esriLocatorRegExp.lastIndex = 0;
+              source.enableLocalSearch = _esriLocatorRegExp.test(source.url);
+              source.localSearchMinScale = 300000;
+              source.localSearchDistance = 50000;
+            }
+          }
+
+          return newConfig;
         }
       }];
     }

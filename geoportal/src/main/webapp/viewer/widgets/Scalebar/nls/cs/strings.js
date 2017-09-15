@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Grafické měřítko"
-  })
-);
+define({
+  "_widgetLabel": "Grafické měřítko"
+});

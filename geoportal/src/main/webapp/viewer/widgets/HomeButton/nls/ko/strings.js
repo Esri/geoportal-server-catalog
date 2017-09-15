@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "홈"
-  })
-);
+define({
+  "_widgetLabel": "홈"
+});

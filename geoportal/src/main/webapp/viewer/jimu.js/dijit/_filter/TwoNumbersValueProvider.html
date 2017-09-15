@@ -1,0 +1,17 @@
+﻿<div>
+	<table data-dojo-attach-point="numberRangeTable" style="width:100%;border-collapse:collapse;" cellpadding="0" cellspacing="0">
+		<tbody>
+			<tr>
+				<td style="width:40%;">
+					<input data-dojo-attach-point="_dijit1" data-dojo-type="dijit/form/NumberTextBox" data-dojo-attach-event="blur:_onRangeNumberBlur" data-dojo-props='"required":false,intermediateChanges:true,constraints: {pattern: "#####0.##########"}' style="width:100%;" />
+				</td>
+				<td style="width:20%;text-align:center;">
+					<span>${nls.and}</span>
+				</td>
+				<td style="width:40%;">
+					<input data-dojo-attach-point="_dijit2" data-dojo-type="dijit/form/NumberTextBox" data-dojo-attach-event="blur:_onRangeNumberBlur" data-dojo-props='"required":false,intermediateChanges:true,constraints: {pattern: "#####0.##########"}' style="width:100%;" />
+				</td>
+			</tr>
+		</tbody>
+	</table>
+</div>

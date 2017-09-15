@@ -14,6 +14,9 @@
   overflow-x: hidden;
   overflow-y: auto;
 }
+.jimu-widget-frame.jimu-foldable-dijit>.jimu-panel-content{
+  padding: 14px;
+}
 .foldable-widget-frame{
   overflow: hidden;
 }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,86 +24,13 @@ define([
   'dojo/_base/html',
   'dojo/on',
   'dojo/Evented',
-  'jimu/dijit/FeaturelayerChooserFromMap',
+  'jimu/dijit/_FeaturelayerChooserWithButtons',
   'jimu/dijit/FeaturelayerChooserFromPortal',
   'jimu/dijit/_FeaturelayerServiceChooserContent',
   'jimu/portalUrlUtils'
 ],
-function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
-  template, lang, html, on, Evented, FeaturelayerChooserFromMap,
-  FeaturelayerChooserFromPortal, _FeaturelayerServiceChooserContent, portalUrlUtils) {
-  //define private dijit FeaturelayerChooserWithButtons
-  var baseClassArr = [_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented];
-  var FeaturelayerChooserWithButtons = declare(baseClassArr, {
-    baseClass: 'jimu-layer-chooser-with-buttons jimu-featurelayer-chooser-with-buttons',
-    declaredClass: 'jimu.dijit.FeaturelayerChooserWithButtons',
-    templateString: '<div>' +
-      '<div class="chooser-container" data-dojo-attach-point="flcDiv"></div>' +
-      '<div class="footer">' +
-        '<div class="jimu-btn jimu-float-trailing cancel" data-dojo-attach-point="btnCancel">' +
-          '${nls.cancel}' +
-        '</div>' +
-        '<div class="jimu-btn jimu-float-trailing ok jimu-trailing-margin1 jimu-state-disabled"' +
-        ' data-dojo-attach-point="btnOk">' +
-          '${nls.ok}' +
-        '</div>' +
-      '</div>' +
-    '</div>',
-
-    featureLayerChooserArgs: null,
-
-    //events:
-    //ok
-    //cancel
-
-    //public methods:
-    //getSelectedItems
-
-    postMixInProperties: function(){
-      this.nls = lang.clone(window.jimuNls.common);
-    },
-
-    postCreate: function(){
-      this.inherited(arguments);
-
-      this.flcMap = new FeaturelayerChooserFromMap(this.featureLayerChooserArgs);
-      this.flcMap.placeAt(this.flcDiv);
-      html.setStyle(this.flcMap.domNode, {
-        width: '100%',
-        height: '100%'
-      });
-
-      this.own(on(this.flcMap, 'tree-click', lang.hitch(this, function(){
-        var items = this.getSelectedItems();
-        if(items.length > 0){
-          html.removeClass(this.btnOk, 'jimu-state-disabled');
-        }
-        else{
-          html.addClass(this.btnOk, 'jimu-state-disabled');
-        }
-      })));
-
-      this.own(on(this.btnOk, 'click', lang.hitch(this, function(){
-        var items = this.getSelectedItems();
-        if(items.length > 0){
-          this.emit('ok', items);
-        }
-      })));
-
-      this.own(on(this.btnCancel, 'click', lang.hitch(this, function(){
-        this.emit('cancel');
-      })));
-    },
-
-    getSelectedItems: function(){
-      return this.flcMap.getSelectedItems();
-    },
-
-    startup: function(){
-      this.inherited(arguments);
-      this.flcMap.startup();
-    }
-  });
+function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, lang, html, on, Evented,
+  FeaturelayerChooserWithButtons, FeaturelayerChooserFromPortal, _FeaturelayerServiceChooserContent, portalUrlUtils) {
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
     templateString: template,
@@ -190,10 +117,9 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
           width: '100%',
           height: '100%'
         },
-        featureLayerChooserArgs:{
-          multiple: this.multiple,
-          createMapResponse: this.createMapResponse
-        }
+        multiple: this.multiple,
+        createMapResponse: this.createMapResponse,
+        onlyShowWebMapLayers: true
       };
       this.flcMap = new FeaturelayerChooserWithButtons(args1);
       this.flcMap.operationTip = this.nls.selectLayer;

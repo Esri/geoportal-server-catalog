@@ -41,10 +41,6 @@
   border-right: 1px solid #881328;
 }
 
-.jimu-widget-header-controller .icon-node.jimu-state-selected{
-  background-color: #881328 !important;
-}
-
 .esriPopup .titlePane {
   background-color: #c93048;
 }

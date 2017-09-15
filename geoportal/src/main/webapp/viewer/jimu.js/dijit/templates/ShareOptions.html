@@ -1,0 +1,23 @@
+<div class="shareOptions">
+  <div class="shareOptionsWrapper">
+    <div class="subTitle">${nls.shareMap}</div>
+    <div class="tips">${nls.shareMapTips}</div>
+    <div id="share-everyone-check_div" class="shareOptionItems" data-dojo-attach-point="share-everyone-check_div">
+      <input id="share-everyone-check" data-dojo-attach-point="shareEveryoneCheck" data-dojo-type="dijit/form/CheckBox" type="checkbox"/>
+      <label id="share-everyone-check-label" for="share-everyone-check" class="labels">${nls.everyone}</label>
+    </div>
+    <div id="share-account-check_div" class="shareOptionItems displaynone" data-dojo-attach-point="share-account-check_div">
+      <input id="share-account-check" data-dojo-attach-point="share-account-check" data-dojo-type="dijit/form/CheckBox" type="checkbox"/>
+      <label id="share-account-check-label" for="share-account-check" class="labels"></label>
+    </div>
+    <div id="share-groups-div" class="shareOptionItems displaynone" data-dojo-attach-point="share-groups-div">
+      <input id="share-groups-check" data-dojo-attach-point="shareGroupsCheck" data-dojo-type="dijit/form/CheckBox" type="checkbox"/>
+      <label id="share-groups-check-label" for="share-groups-check" class="labels">${nls.theseGroups}</label>
+      <div class="share-groups-wrapper">
+        <div data-dojo-type="dijit/layout/BorderContainer" gutters="false" design="headline" class="borderContainer">
+          <div id="share-groups-list" class="share-groups-list" dojotype="dijit.layout.ContentPane" region="middle" splitter="false"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

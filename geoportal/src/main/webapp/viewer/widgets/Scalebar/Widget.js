@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -87,6 +87,9 @@ define([
           lang.mixin(style, this.position);
           domStyle.set(this.domNode, utils.getPositionStyle(style));
           setTimeout(lang.hitch(this, function() {
+            if (!this.domNode) {
+              return;
+            }
             domStyle.set(this.domNode, utils.getPositionStyle(style));
           }), 1000);
         }), lang.hitch(this, function(err) {

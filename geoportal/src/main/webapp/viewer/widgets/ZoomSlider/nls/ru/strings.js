@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Бегунок увеличения"
-  })
-);
+define({
+  "_widgetLabel": "Бегунок увеличения"
+});

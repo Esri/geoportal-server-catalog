@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     OPERATORS: null,
     enableAskForValues: false,
     isHosted: false,
+    valueProviderFactory: null,
 
     postMixInProperties:function(){
       this.nls = window.jimuNls.filterBuilder;
@@ -124,6 +125,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
         OPERATORS: this.OPERATORS,
         enableAskForValues: this.enableAskForValues,
         isHosted: this.isHosted,
+        valueProviderFactory: this.valueProviderFactory,
         style:{
           margin:'15px auto 0 auto',
           border:0,

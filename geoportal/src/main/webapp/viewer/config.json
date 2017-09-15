@@ -11,7 +11,12 @@
       "red",
       "yellow"
     ],
-    "version": "2.0.1"
+    "version": "2.5",
+    "sharedTheme": {
+      "isPortalSupport": true,
+      "useHeader": false,
+      "useLogo": false
+    }
   },
   "portalUrl": "http://www.arcgis.com",
   "appId": "",
@@ -20,127 +25,163 @@
   "subtitle": "with Web AppBuilder for ArcGIS",
   "keepAppState": false,
   "logo": "images/app-logo.png",
-  "geometryService": "http://utility.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer",
+  "geometryService": "https://utility.arcgisonline.com/arcgis/rest/services/Geometry/GeometryServer",
   "links": [],
   "widgetOnScreen": {
     "widgets": [
-       {
+      {
         "uri": "widgets/AddToMap/Widget",
         "position": {
           "relativeTo": "browser"
         },
         "openAtStart": true,
-        "version": "2.0.1"
+        "version": "2.5"
       },
       {
         "uri": "widgets/Scalebar/Widget",
         "position": {
           "left": 7,
-          "bottom": 25
+          "bottom": 25,
+          "relativeTo": "map"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_Scalebar_Widget_2",
+        "name": "Scalebar"
       },
       {
         "uri": "widgets/Search/Widget",
         "position": {
           "left": 155,
-          "top": 5
+          "top": 5,
+          "relativeTo": "map"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_Search_Widget_3",
+        "name": "Search"
       },
       {
         "uri": "widgets/Coordinate/Widget",
         "position": {
           "left": 7,
-          "bottom": 5
+          "bottom": 5,
+          "relativeTo": "map"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_Coordinate_Widget_4",
+        "name": "Coordinate"
       },
       {
         "uri": "widgets/Legend/Widget",
-        "version": "2.0.1",
-        "position":{
-          "left":105,
+        "position": {
+          "left": 105,
           "top": 5
-        }
+        },
+        "version": "2.5",
+        "id": "widgets_Legend_Widget_18",
+        "name": "Legend"
       },
       {
         "uri": "widgets/LayerList/Widget",
-        "version": "2.0.1",
-        "position":{
+        "position": {
           "left": 55,
           "top": 5
-        }
-      },
-      {
-        "uri": "widgets/GeoportalSearch/Widget",
-        "version": "2.0.1",
-        "position":{
-          "left": 55,
-          "top": 55
-        }
+        },
+        "version": "2.5",
+        "id": "widgets_LayerList_Widget_19",
+        "name": "LayerList"
       },
       {
         "position": {
           "left": 55,
-          "top": 45
-        }
+          "top": 55,
+          "relativeTo": "map"
+        },
+        "placeholderIndex": 1,
+        "id": "_5",
+        "name": "GeoportalSearch",
+        "version": "2.5",
+        "closeable": true,
+        "uri": "widgets/GeoportalSearch/Widget",
+        "config": "configs/GeoportalSearch/config_GeoportalSearch.json"
       },
       {
         "position": {
           "left": 105,
-          "top": 45
-        }
+          "top": 45,
+          "relativeTo": "map"
+        },
+        "placeholderIndex": 1,
+        "id": "_6"
       },
       {
         "position": {
           "left": 155,
-          "top": 45
-        }
+          "top": 45,
+          "relativeTo": "map"
+        },
+        "placeholderIndex": 2,
+        "id": "_7"
       },
       {
         "position": {
           "left": 205,
-          "top": 45
-        }
+          "top": 45,
+          "relativeTo": "map"
+        },
+        "placeholderIndex": 3,
+        "id": "_8"
       },
       {
         "position": {
           "left": 255,
-          "top": 45
-        }
+          "top": 45,
+          "relativeTo": "map"
+        },
+        "placeholderIndex": 4,
+        "id": "_9"
       },
       {
         "uri": "widgets/OverviewMap/Widget",
         "position": {
           "bottom": 0,
           "right": 0,
-          "zIndex": 1
+          "zIndex": 1,
+          "relativeTo": "map"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_OverviewMap_Widget_10",
+        "name": "OverviewMap"
       },
       {
         "uri": "widgets/HomeButton/Widget",
         "position": {
           "left": 7,
-          "top": 75
+          "top": 75,
+          "relativeTo": "map"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_HomeButton_Widget_11",
+        "name": "HomeButton"
       },
       {
         "uri": "widgets/MyLocation/Widget",
         "position": {
           "left": 7,
-          "top": 110
+          "top": 110,
+          "relativeTo": "map"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_MyLocation_Widget_12",
+        "name": "MyLocation"
       },
       {
         "uri": "widgets/AttributeTable/Widget",
         "position": {
           "relativeTo": "browser"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_AttributeTable_Widget_13",
+        "name": "AttributeTable"
       },
       {
         "uri": "widgets/Splash/Widget",
@@ -148,18 +189,52 @@
         "position": {
           "relativeTo": "browser"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_Splash_Widget_14",
+        "name": "Splash"
       },
       {
         "uri": "widgets/ZoomSlider/Widget",
-        "visible": true,
         "position": {
           "top": 5,
-          "left": 7
+          "left": 7,
+          "relativeTo": "map"
         },
-        "version": "2.0.1"
+        "version": "2.5",
+        "id": "widgets_ZoomSlider_Widget_15",
+        "name": "ZoomSlider"
+      },
+      {
+        "uri": "widgets/ExtentNavigate/Widget",
+        "visible": false,
+        "position": {
+          "top": 150,
+          "left": 7,
+          "relativeTo": "map"
+        },
+        "id": "widgets_ExtentNavigate_Widget_16",
+        "name": "ExtentNavigate",
+        "version": "2.5"
+      },
+      {
+        "uri": "widgets/FullScreen/Widget",
+        "visible": false,
+        "position": {
+          "right": 8,
+          "top": 8,
+          "relativeTo": "map"
+        },
+        "version": "2.5",
+        "id": "widgets_FullScreen_Widget_17",
+        "name": "FullScreen"
       }
-    ]
+    ],
+    "panel": {
+      "uri": "jimu/OnScreenWidgetPanel",
+      "position": {
+        "relativeTo": "map"
+      }
+    }
   },
   "map": {
     "3D": false,
@@ -182,7 +257,9 @@
           "wkid": 102100
         }
       }
-    }
+    },
+    "id": "map",
+    "portalUrl": "http://www.arcgis.com/"
   },
   "widgetPool": {
     "panel": {
@@ -191,7 +268,8 @@
         "top": 5,
         "right": 5,
         "bottom": 5,
-        "zIndex": 5
+        "zIndex": 5,
+        "relativeTo": "map"
       }
     },
     "widgets": []
@@ -228,7 +306,7 @@
       "height": 29
     }
   },
-  "wabVersion": "2.0.1",
+  "wabVersion": "2.5",
   "isTemplateApp": true,
   "isWebTier": false,
   "httpProxy": {
@@ -236,5 +314,9 @@
     "alwaysUseProxy": false,
     "url": "./proxy.jsp",
     "rules": []
+  },
+  "dataSource": {
+    "dataSources": {},
+    "settings": {}
   }
 }

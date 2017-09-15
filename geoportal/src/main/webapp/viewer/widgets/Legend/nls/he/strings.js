@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "מקרא"
-  })
-);
+define({
+  "_widgetLabel": "מקרא"
+});

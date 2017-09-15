@@ -10,6 +10,7 @@ td, th{
   padding: 0;
 }*/
 
+@import url("popup.css");
 @import url("ColorPicker.css");
 @import url("dojo-override.css");
 @import url("spacing.css");
@@ -18,6 +19,10 @@ td, th{
 /* disable the blue color outline in chrome */
 *:focus{
   outline: none;
+}
+
+input[type="text"]::-ms-clear{
+  display: none;
 }
 
 /* enables the border box model at all elements which has a "jimu" class and the children of it*/
@@ -41,16 +46,6 @@ td, th{
 .esriControlsBR{
   z-index: auto;
 }
-
-/*about popup of map*/
-.esriPopup, .esriPopupMobile, .esriMobileNavigationBar, .esriMobilePopupInfoView{
-  z-index: 108
-}
-
-.esriRtl .esriPopupWrapper {
-  text-align: right;
-}
-/*end popup of map*/
 
 .jimu-rtl .esriControlsBR{
   left: 5px;
@@ -97,43 +92,107 @@ td, th{
   z-index: 0;
 }
 
-.map .load-container {
+.map-loading{
   float: left;
   position: absolute;
   overflow: hidden;
-  bottom: 40px;
+  bottom: 45px;
   right: 10px;
+  display: none;
 }
-.map .load-container .loader {
-  font-size: 20px;
-  width: 1.5em;
-  height: 1.5em;
-  border-radius: 50%;
-  position: relative;
-  text-indent: -9999em;
-  background: url("images/loadingmap.gif");
+.map-loading.loading{
+  display: block;
 }
-.jimu-rtl .load-container {
+.jimu-rtl .map-loading {
   right: auto;
   left: 10px;
 }
 
+.map-loading,
+.map-loading:after {
+  border-radius: 50%;
+  width: 24px;
+  height: 24px;
+}
+.map-loading {
+  font-size: 10px;
+  text-indent: -9999em;
+  border-top: 3px solid rgba(0, 0, 0, 0.2);
+  border-right: 3px solid rgba(0, 0, 0, 0.2);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.2);
+  border-left: 3px solid #ffffff;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation: load8 1.1s infinite linear;
+  animation: load8 1.1s infinite linear;
+  box-shadow: 0px 0px 2px 0px rgba(0, 0, 0, 0.2);
+}
+@-webkit-keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+@keyframes load8 {
+  0% {
+    -webkit-transform: rotate(0deg);
+    transform: rotate(0deg);
+  }
+  100% {
+    -webkit-transform: rotate(360deg);
+    transform: rotate(360deg);
+  }
+}
+
+
+
+
 /************* END **********************/
 
+/* Latin Extended */
 @font-face {
-  font-family: "Avenir Light";/*LT W01 35*/
-  src: url("./fonts/3511a780-31ca-4ee1-9083-89b1b7185748.eot?#iefix");
-  src: url("./fonts/3511a780-31ca-4ee1-9083-89b1b7185748.eot?#iefix") format("eot"), url("./fonts/c4352a95-7a41-48c1-83ce-d8ffd2a3b118.woff") format("woff"), url("./fonts/3e419b5b-c789-488d-84cf-a64009cc308e.ttf") format("truetype"), url("./fonts/ca038835-1be3-4dc5-ba25-be1df6121499.svg#ca038835-1be3-4dc5-ba25-be1df6121499") format("svg");
+  font-family: "Avenir Light";
+  src: url("./fonts/avenir-next/bb590848-4012-46d6-a8d5-48c9893a176b.woff2") format("woff2"),
+       url("./fonts/avenir-next/3a42a252-67ff-4186-88cf-762f56719ca1.woff") format("woff");
 }
+
 @font-face {
-  font-family: "Avenir Medium";/*LT W01 65*/
-  src: url("./fonts/212ab03d-5db2-4d6a-b94c-171cc702aa51.eot?#iefix");
-  src: url("./fonts/212ab03d-5db2-4d6a-b94c-171cc702aa51.eot?#iefix") format("eot"), url("./fonts/2cac77ec-9bc0-4ee7-87e4-27650190744f.woff") format("woff"), url("./fonts/aaf11848-aac2-4d09-9a9c-aac5ff7b8ff4.ttf") format("truetype"), url("./fonts/294099f3-8d00-4676-afc5-5e9d8d43ad69.svg#294099f3-8d00-4676-afc5-5e9d8d43ad69") format("svg");
+  font-family: "Avenir Medium";
+  src: url("./fonts/avenir-next/7195d5d0-582f-42d4-86ca-9da8dc31146e.woff2") format("woff2"),
+       url("./fonts/avenir-next/0417e965-6ae1-4395-8f71-f61ea767d523.woff") format("woff");
 }
+
 @font-face {
-  font-family: "Avenir Heavy";/*LT W01 85*/
-  src: url("./fonts/f61bf0f6-c193-4100-b940-12a1a01dcee5.eot?#iefix");
-  src: url("./fonts/f61bf0f6-c193-4100-b940-12a1a01dcee5.eot?#iefix") format("eot"), url("./fonts/7147ec3a-8ff8-4ec9-8c5c-bd1571dc6ae6.woff") format("woff"), url("./fonts/d1dc54b2-878d-4693-8d6e-b442e99fef68.ttf") format("truetype"), url("./fonts/731dd4d3-64da-427d-ba61-01575b3cf3f7.svg#731dd4d3-64da-427d-ba61-01575b3cf3f7") format("svg");
+  font-family: "Avenir Heavy";
+  src: url("./fonts/avenir-next/b86524f7-009e-4c08-a266-c43f1fb68e5e.woff2") format("woff2"),
+       url("./fonts/avenir-next/e40e6ac5-f2bd-4d65-baf7-b1e397d7fdcc.woff") format("woff");
+}
+
+/* Cyrillic */
+@font-face {
+  font-family: "Avenir Light";
+  src: url("./fonts/avenir-next/e8b9c8fa-dbfb-4576-9394-ae85e87cb003.woff2") format("woff2"),
+       url("./fonts/avenir-next/fb555151-cbda-4728-b28d-6e5f085c2d55.woff") format("woff");
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Avenir Medium";
+  src: url("./fonts/avenir-next/1704d161-44ab-4854-a066-fe47d583a3a6.woff2") format("woff2"),
+       url("./fonts/avenir-next/95aa7ca1-de33-40d9-ae40-ff045fcada66.woff") format("woff");
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+
+@font-face {
+  font-family: "Avenir Heavy";
+  src: url("./fonts/avenir-next/c4ec49e5-4817-4f05-9bee-cec6f46f9d61.woff2") format("woff2"),
+       url("./fonts/avenir-next/8e0e32b3-034a-41e8-bd15-c22974ebcdb5.woff") format("woff");
+  unicode-range: U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
 }
 
 @font-face {
@@ -144,8 +203,26 @@ td, th{
   font-style: normal;
 }
 
+
 body,html{
   font-family: 'Avenir Light', Verdana, Geneva, sans-serif;
+}
+
+/* Avenir Next doesn't support all vietnamese characters
+ * use Lucida Grande for vi */
+.vi,
+.vi body,
+.vi .top-nav-link,
+.vi .avenir-light,
+.vi .avenir-regular,
+.vi .top-nav,
+.vi .dropdown-link {
+    font-family: "Lucida Grande", "Arial", sans-serif;
+  }
+
+/*override original style of title and subtitle of theme after custmize font style*/
+div.attribute-custom-style{
+  font-weight: normal !important;
 }
 
 /***************************************************************************
@@ -481,7 +558,6 @@ classes can be used in the html
   height: 24px;
   font-size: 13px;
   cursor: pointer;
-  color: #538ec8;
 }
 
 .add-with-icon.jimu-state-disabled{
@@ -564,6 +640,15 @@ Navigation bar can have selected button*/
 .jimu-oe-row.jimu-state-selected{
  background-color: #009cff;
 }
+
+/* .jimu-not-selectable */
+.jimu-not-selectable{
+  user-select: none;
+  -ms-user-select: none;
+  -moz-user-select: none;
+  -webkit-user-select: none;
+}
+
 /***************************************************************************
 css for the dijits
 ****************************************************************************/
@@ -605,6 +690,10 @@ css for the dijits
   color: #818181;
 }
 
+.jimu-checkbox .label.not-visible{
+  display: none;
+}
+
 /*the css for DropMenu dijit*/
 .jimu-dropmenu{
   overflow: visible;
@@ -633,7 +722,7 @@ css for the dijits
   cursor: pointer;
 }
 .jimu-dropmenu .menu-item:hover{
-  color: #51b1fe;
+  color: #000000;
   text-decoration: underline;
 }
 .jimu-dropmenu .menu-item-line{
@@ -784,6 +873,62 @@ css for the dijits
   margin: 10px;
 }
 
+/*jimu-loading*/
+.jimu-loading,
+.jimu-loading:before,
+.jimu-loading:after {
+  border-radius: 50%;
+  width: 1.2em;
+  height: 1.2em;
+  -webkit-animation-fill-mode: both;
+  animation-fill-mode: both;
+  -webkit-animation: jimu-loading-anim 1.8s infinite ease-in-out;
+  animation: jimu-loading-anim 1.8s infinite ease-in-out;
+}
+.jimu-loading {
+  color: #929292;
+  text-indent: -9999em;
+  -webkit-transform: translateZ(0);
+  -ms-transform: translateZ(0);
+  transform: translateZ(0);
+  -webkit-animation-delay: -0.16s;
+  animation-delay: -0.16s;
+}
+.jimu-loading:before,
+.jimu-loading:after {
+  content: '';
+  position: absolute;
+  top: 0;
+}
+.jimu-loading:before {
+  left: -2em;
+  -webkit-animation-delay: -0.32s;
+  animation-delay: -0.32s;
+}
+.jimu-loading:after {
+  left: 2em;
+}
+@-webkit-keyframes jimu-loading-anim {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 2.5em 0 -1.3em;
+  }
+  40% {
+    box-shadow: 0 2.5em 0 0;
+  }
+}
+@keyframes jimu-loading-anim {
+  0%,
+  80%,
+  100% {
+    box-shadow: 0 2.5em 0 -1.3em;
+  }
+  40% {
+    box-shadow: 0 2.5em 0 0;
+  }
+}
+
 /**CSS for LoadingIndicator dijit***/
 .jimu-loading-indicator{
   position: absolute;
@@ -793,27 +938,12 @@ css for the dijits
   right: 0;
 }
 
-.jimu-loading-indicator .loading-section{
+.jimu-loading-indicator .jimu-loading{
   position: absolute;
-  width: 48px;
-  height: 48px;
   left: 50%;
   top: 50%;
-  margin-left: -32px;
-  margin-top: -32px;
-  background-color: #f4f4f4;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -o-border-radius: 50%;
-  border-radius: 50%;
-  -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  -moz-box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  -o-box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-
-.jimu-loading-indicator .loading-section .jimu-loading{
-  margin: 12px;
+  margin-left: -6px;
+  margin-top: -35px;
 }
 
 /**CSS for LoadingShelter dijit***/
@@ -839,30 +969,9 @@ css for the dijits
   top:50%;
   left:50%;
   margin-left:-24px;
-  margin-top:-24px;
+  margin-top:-48px;
   color:#000000;
   font-weight:bold;
-}
-.jimu-loading-shelter .loading-container .img-div{
-  position:absolute;
-  left:0;
-  top: 0;
-  width: 48px;
-  height: 48px;
-  background-color: #f4f4f4;
-  -webkit-border-radius: 50%;
-  -moz-border-radius: 50%;
-  -o-border-radius: 50%;
-  border-radius: 50%;
-  -webkit-box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  -moz-box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  -o-box-shadow: 0 0 10px rgba(0,0,0,0.3);
-  box-shadow: 0 0 10px rgba(0,0,0,0.3);
-}
-.jimu-loading-shelter .loading-container img{
-  width: 24px;
-  height: 24px;
-  margin: 12px;
 }
 .jimu-loading-shelter .loading-container p{
   position:absolute;
@@ -880,14 +989,11 @@ css for the dijits
   margin-left:auto;
   margin-right:-24px;
 }
-.jimu-rtl .jimu-loading-shelter .loading-container .img-div{
-  left:auto;
-  right: 0;
-}
 .jimu-rtl .jimu-loading-shelter .loading-container p{
   left: auto;
   right: 68px;
 }
+
 
 /**CSS for popup dijit***/
 .jimu-popup{
@@ -903,7 +1009,7 @@ css for the dijits
   padding: 0 10px;
   line-height: 40px;
   margin: 0 10px;
-  color: #596679;
+  color: #333;
   font-size: 14px;
   border-top-left-radius: 4px;
   border-top-right-radius: 4px;
@@ -925,7 +1031,7 @@ css for the dijits
 /*.jimu-popup .close-btn:hover{
   opacity: 1;
 }*/
-.jimu-popup .content{
+.jimu-popup > .content{
   font-size: 16px;
   overflow-x: hidden;
   overflow-y: auto;
@@ -972,6 +1078,7 @@ css for the dijits
 .jimu-message>.content{
   word-wrap: break-word;
   white-space: pre-line;
+  overflow-y: hidden;
 }
 
 /**CSS for search dijit***/
@@ -991,10 +1098,8 @@ css for the dijits
 .jimu-search .jimu-input{
   width: 100%;
   height: 100%;
-}
-
-.jimu-search .jimu-input::-ms-clear{
-  display: none;
+  font-family: 'Avenir Light';
+  font-size: 12px;
 }
 
 .jimu-search .search-btn{
@@ -1185,7 +1290,10 @@ widget:jimu-w
 .jimu-simple-table .head-section .simple-table-thead th.simple-table-field .jimu-checkbox > .label{
   position: absolute;
   left: 17px;
+  right: 0;
   top: 0;
+  text-overflow: ellipsis;
+  overflow: hidden;
 }
 
 .jimu-rtl .jimu-simple-table .head-section .simple-table-thead th.simple-table-field .jimu-checkbox > .label{
@@ -1214,7 +1322,7 @@ widget:jimu-w
   border-left: 1px solid #eef2f5;
   border-right: 1px solid #eef2f5;
   border-bottom: 1px solid #eef2f5;
-  background-color: #fafafc;
+  /*background-color: #fafafc;*/
   color: #7989a0;
 }
 
@@ -1313,15 +1421,83 @@ widget:jimu-w
 .jimu-color-picker{
   width: 36px;
   height: 36px;
-  -webkit-border-radius: 5px;
-  -moz-border-radius: 5px;
-  -o-border-radius: 5px;
-  -ms-border-radius: 5px;
-  border-radius: 5px;
   border-width: 1px;
   border-style: solid;
   border-color: #ccc;
   cursor: pointer;
+  text-align: center;
+}
+.jimu-color-picker:after{
+  content: "";
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+}
+.jimu-color-picker .color-label{
+  display: inline-block;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+.jimu-color-picker-btn{
+  width: 45px;
+  height: 26px;
+  border: 1px solid #D7D7D7;
+}
+
+.jimu-color-picker-btn > div{
+  display: inline-block;
+}
+
+.jimu-color-picker-btn .color-node {
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+  margin: 4px 5px;
+}
+
+.jimu-color-picker-btn .seperator {
+  width: 1px;
+  height: 16px;
+  margin: 4px 0;
+  background-color: #D7D7D7;
+}
+
+.jimu-color-picker-btn .action-node {
+  cursor: pointer;
+  width: 16px;
+  height: 24px;
+  background: url(images/share/arrow_down.svg) no-repeat center;
+  background-size: 6px 3px;
+}
+
+.jimu-color-picker-btn .action-node:hover {
+  background: url(images/share/arrow_down_hover.svg) no-repeat center;
+  background-size: 6px 3px;
+}
+
+.jimu-color-picker-dialog .dijitTooltipConnector{
+  display: none;
+}
+
+.jimu-color-picker-dialog .dijitTooltipContainer{
+  overflow: hidden;
+  background: #fff !important;
+  border-radius: 0;
+  border-style: none;
+  box-shadow: 0 0 10px;
+  padding-bottom: 10px;
+}
+
+.jimu-color-picker-dialog .dojoxColorPicker{
+  border-style: none;
+  border-radius: 0;
+}
+
+.jimu-color-picker-dialog .jimu-btn{
+  margin: 10px 12px 2px 0;
+  width: 80px;
+  line-height: 28px;
 }
 
 /*** CSS for Transparency dijit ***/
@@ -1358,6 +1534,17 @@ widget:jimu-w
   font-size: 14px;
 }
 
+.jimu-symbol-chooser .hidden{
+  display: none;
+}
+
+.jimu-symbol-chooser .image-file-tip{
+  display: inline-block;
+  width: 150px;
+  height: 30px;
+  line-height: 30px;
+}
+
 .jimu-symbol-chooser .symbol-section{
   width:100%;
   display:none;
@@ -1374,6 +1561,10 @@ widget:jimu-w
   vertical-align: middle;
   padding-top:5px;
   padding-bottom:5px;
+}
+
+.jimu-symbol-chooser .symbol-set-table > tbody > tr > td.custom-image-td{
+  padding-top: 10px;
 }
 
 .jimu-symbol-chooser .point-sym-class-select-tr > td{
@@ -1441,6 +1632,17 @@ widget:jimu-w
 
 .jimu-rtl .jimu-symbol-chooser.ie8 .line-icon-table .symbol-div-item .svg-node{
   right: -16px;
+}
+
+.jimu-symbol-chooser .custom-image-chooser{
+  width: 140px;
+  height: 30px;
+}
+
+.jimu-symbol-chooser .custom-image-chooser .display-text{
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .jimu-symbol-chooser .text-symbol-section .text-input{
@@ -1648,30 +1850,46 @@ widget:jimu-w
   overflow-y:hidden;
 }
 
+.jimu-draw-box.hidden{
+  display: none;
+}
+
 .jimu-draw-box .draw-items{
   -ms-overflow-y:hidden;
   overflow-y:hidden;
 }
 
-.jimu-draw-box .draw-items .draw-item{
-  width:40px;
-  height:40px;
-  background-repeat: no-repeat;
-  text-align: center;
+.jimu-draw-box .draw-items > div{
   float: left;
-  margin: 7px;
-  background-position: center center;
+  cursor: default;
 }
 
-.jimu-rtl .jimu-draw-box .draw-items .draw-item{
+.jimu-rtl .jimu-draw-box .draw-items > div{
   float: right;
 }
 
-.jimu-draw-box .drawings-clear{
-  text-decoration:underline;
-  cursor:pointer;
-  display:block;
-  margin-top:7px;
+.jimu-draw-box .draw-items .draw-item, .jimu-draw-box .drawings-clear{
+  width:40px;
+  height:40px;
+  line-height: 40px;
+  background-repeat: no-repeat;
+  text-align: center;
+  margin-top: 7px;
+  margin-bottom: 7px;
+  background-position: center center;
+  border: 1px solid #ccc;
+  border-radius: 2px;
+}
+
+.jimu-draw-box .draw-items .draw-item{
+  background-size: contain;
+  margin-right: 14px;
+  line-height: 40px;
+}
+
+.jimu-rtl .jimu-draw-box .draw-items .draw-item{
+  margin-right: 0;
+  margin-left: 14px;
 }
 
 /* css for dijit _BasicServiceBrower */
@@ -1769,17 +1987,17 @@ widget:jimu-w
   left: 0;
   right: 0;
   bottom: 0;
-  height: 33px;
+  height: 36px;
   overflow: hidden;
 }
 
 .jimu-basic-service-chooser-content .operations .ok{
-  margin-right: 10px;
+  margin-right: 14px;
 }
 
 .jimu-rtl .jimu-basic-service-chooser-content .operations .ok{
   margin-right: auto;
-  margin-left: 10px;
+  margin-left: 14px;
 }
 
 /* css for dijit _BasicServiceChooser */
@@ -1814,11 +2032,15 @@ widget:jimu-w
   width:100%;
 }
 
+.jimu-tab3 .control-node{
+  overflow: hidden;
+}
+
 .jimu-tab3 .control-table{
   width: 100%;
   /*table-layout: fixed;*/
   border-collapse: collapse;
-  font-size: 12px;
+  font-size: 14px;
   text-align: center;
 }
 
@@ -1827,6 +2049,10 @@ widget:jimu-w
   cursor: pointer;
   min-width: 0;
   white-space:nowrap;
+}
+
+.jimu-tab3.average .tab-item-td{
+  padding: 0;
 }
 
 .jimu-tab3 .tab-item-td.jimu-state-active{
@@ -1838,11 +2064,6 @@ widget:jimu-w
   width:100%;
   height:36px;
   line-height:36px;
-  /*-webkit-border-radius:3px;
-  -moz-border-radius:3px;
-  -o-border-radius:3px;
-  -ms-border-radius:3px;
-  border-radius:3px;*/
   margin: 0 auto;
   white-space: nowrap;
   overflow: hidden;
@@ -1871,37 +2092,37 @@ widget:jimu-w
 }
 
 .jimu-single-filter .setting-table .fields-td{
-  width: 200px;
-  padding-right: 10px;
+  width: 175px;
+  padding-right: 8px;
 }
 
 .jimu-single-filterRtl .setting-table .fields-td{
   padding-right: 0;
-  padding-left: 10px;
+  padding-left: 8px;
 }
 
 .jimu-single-filter .setting-table .operators-td{
-  width: 142px;
-  padding-right: 10px;
+  width: 130px;
+  padding-right: 8px;
 }
 
 .jimu-single-filterRtl .setting-table .operators-td{
   padding-right: 0;
-  padding-left: 10px;
+  padding-left: 8px;
 }
 
 .jimu-single-filter .setting-table .value-td{
   width: auto;
-  padding-right:10px;
+  padding-right:8px;
 }
 
 .jimu-single-filterRtl .setting-table .value-td{
   padding-right: 0;
-  padding-left: 10px;
+  padding-left: 8px;
 }
 
 .jimu-single-filter .setting-table .delete-td{
-  width: 30px;
+  width: 16px;
 }
 
 .jimu-single-filter .dijit-form-Select>tbody>tr>td{
@@ -1971,7 +2192,7 @@ widget:jimu-w
   height: 100% !important;
 }
 
-.jimu-single-filter .dijitSelectLabel.dijitValidationTextBoxLabel{
+.jimu-single-filter .operator-select .dijitSelectLabel.dijitValidationTextBoxLabel{
   max-width: 93px;
   overflow: hidden;
 }
@@ -1983,11 +2204,23 @@ widget:jimu-w
 
 .jimu-single-filter .radio-table-container{
   margin-top: 10px;
+  overflow: hidden;
 }
 
 .jimu-single-filter .radio-table{
   width:100%;
   border-collapse:collapse;
+}
+
+.jimu-single-filter .radio-table label{
+  position: relative;
+  left: -3px;
+}
+
+.jimu-rtl .jimu-single-filter .radio-table label{
+  position: relative;
+  left: auto;
+  right: -3px;
 }
 
 .jimu-single-filter .jimu-checkbox div.label{
@@ -2015,11 +2248,27 @@ widget:jimu-w
 }
 
 .jimu-single-filter .prompt-table>tbody>tr>td.first-td{
-  width: 70px;
+  width: 110px;
 }
 
 .jimu-single-filter .prompt-table>tbody>tr>td.second-td{
-  width: 250px;
+  width: auto;
+}
+
+.jimu-single-filter .dijitDateTextBox > .dijitInputField.dijitInputContainer{
+  height: 100%;
+}
+
+.jimu-single-filter .hidden{
+  display: none;
+}
+
+.jimu-single-filter .cascade-tr{
+  display: none;
+}
+
+.jimu-single-filter.unique-type.support-cascade .cascade-tr{
+  display: table-row;
 }
 
 /* css for dijit _FilterSet */
@@ -2088,6 +2337,11 @@ widget:jimu-w
   margin-right: auto;
 }
 
+html.hr .jimu-filter .allExpsBox > div{
+  padding-left: 5px;
+  padding-right: 5px;
+}
+
 /* css for dijit _Tree */
 .jimu-tree .jimu-tree-check-node{
   position: relative;
@@ -2106,9 +2360,9 @@ widget:jimu-w
   border-width: 1px;
 }
 
-.jimu-tree .dijitTreeRow{
+/*.jimu-tree .dijitTreeRow{
   border-radius: 3px;
-}
+}*/
 
 .jimu-tree .jimu-tree-not-leaf-node > .dijitTreeRowSelected{
   background-color: #fff;
@@ -2131,13 +2385,22 @@ widget:jimu-w
   padding:3px 0 1px;
 }
 
+.jimu-tree .jimu-tree-leaf-node > .dijitTreeRow > .dijitTreeExpando{
+  display: none;
+}
+
+.jimu-tree > .dijitTreeContainer > .jimu-tree-node > .dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeRow{
+  padding-left: 3px !important;
+}
+
+.jimu-rtl .jimu-tree > .dijitTreeContainer > .jimu-tree-node > .dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeRow{
+  padding-left: 0 !important;
+  padding-right: 3px !important;
+}
+
 /*css for jimu/dijit/ServiceURLInput*/
 .jimu-serviceurl-input{
   position: relative;
-}
-
-.jimu-serviceurl-input input[type="text"]::-ms-clear{
-  display: none;
 }
 
 .jimu-service-validating,
@@ -2234,7 +2497,8 @@ widget:jimu-w
   top: 50px;
   height: 20px;
   line-height: 1em;
-  color: rgb(140, 140, 140);
+  /*color: rgb(140, 140, 140);*/
+  font-size: 14px;
 }
 
 .jimu-item-selector .public-search-radios span{
@@ -2283,6 +2547,15 @@ widget:jimu-w
 
 .jimu-item-selector .signin-tip{
   width:100%;
+}
+
+.jimu-item-selector .groups-section{
+  font-size: 14px;
+}
+
+.jimu-item-selector .groups-section .groups-select{
+  height: 30px;
+  padding: 0 30px;
 }
 
 /* css for _ItemTable */
@@ -2364,6 +2637,8 @@ widget:jimu-w
 }
 
 .jimu-item-table .none-thumbnail-tip{
+  font-size: 12px;
+  color: #666666;
   max-height: 100%;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -2386,6 +2661,7 @@ widget:jimu-w
   -o-border-radius:0;
   -ms-border-radius:0;
   border-radius:0;
+  font-size: 12px;
 }
 
 .jimu-item-table .item-info{
@@ -2447,18 +2723,17 @@ widget:jimu-w
   position: absolute;
   width: 100%;
   left: 0;
-  height: 54px;
+  height: 36px;
   bottom: 0;
 }
 
 .jimu-service-chooser-from-portal .footer .jimu-btn{
-  margin-left: 10px;
-  margin-top: 10px;
+  margin-left: 14px;
 }
 
 .jimu-rtl .jimu-service-chooser-from-portal .footer .jimu-btn{
   margin-left: auto;
-  margin-right: 10px;
+  margin-right: 14px;
 }
 
 .jimu-service-chooser-from-portal .footer .back{
@@ -2582,9 +2857,14 @@ widget:jimu-w
   left: 0;
   right: 0;
   top: 0;
-  height: 20px;
+  /*height: 20px;*/
   line-height: 20px;
   background: #ffffff;
+}
+
+.jimu-basic-layer-chooser-from-map .error-tip-section .jimu-icon-error{
+  vertical-align: top;
+  margin-top: 4px;
 }
 
 .jimu-basic-layer-chooser-from-map .jimu-state-error-text{
@@ -2621,19 +2901,8 @@ widget:jimu-w
   cursor: pointer;
 }
 
-.jimu-gp-source .radio-table .portal-radio,.jimu-gp-source .radio-table .url-radio{
-  margin-left: 9px;
-  margin-right: 0;
-}
-
-.jimu-rtl .jimu-gp-source .radio-table .portal-radio{
-  margin-left: 0;
-  margin-right: 9px;
-}
-
 .jimu-gp-source .radio-table .url-radio{
   margin-left: 30px;
-  margin-right: 0;
 }
 
 .jimu-rtl .jimu-gp-source .radio-table .url-radio{
@@ -2720,8 +2989,32 @@ widget:jimu-w
 }
 
 .jimu-layer-source .operation-tip{
+  font-size: 12px;
   margin-top: 15px;
   margin-bottom: 15px;
+}
+
+/* css for jimu-dijit-data-source */
+.jimu-dijit-data-source{
+  position: relative;
+  width: 100%;
+  min-height: 400px;
+}
+
+.jimu-dijit-data-source .hidden{
+  display: none;
+}
+
+.jimu-dijit-data-source > .jimu-tab3{
+  height: 100%;
+}
+
+.jimu-dijit-data-source > .jimu-tab3 > .container-node.jimu-viewstack{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50px;
+  bottom: 0;
 }
 
 /* css for jimu-layer-chooser-with-buttons */
@@ -2750,10 +3043,73 @@ widget:jimu-w
   height: 36px;
 }
 
+/* css for jimu-dijit-framework-datasource-chooser */
+.jimu-dijit-framework-datasource-chooser .no-data-section{
+  display: none;
+}
+
+.jimu-dijit-framework-datasource-chooser .no-data-section .jimu-widget-note{
+  line-height: 24px;
+}
+
+.jimu-dijit-framework-datasource-chooser.no-data .no-data-section{
+  display: block;
+}
+
+/* css for jimu-dijit-framework-datasource-chooser-with-buttons */
+.jimu-dijit-framework-datasource-chooser-with-buttons{
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.jimu-dijit-framework-datasource-chooser-with-buttons .chooser-container{
+  position: absolute;
+  width: 100%;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 40px;
+  overflow-y: auto;
+}
+
+.jimu-dijit-framework-datasource-chooser-with-buttons .footer{
+  position: absolute;
+  width: 100%;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  height: 36px;
+}
+
 /* css for dijit SymbolPicker */
 .jimu-symbol-picker{
   display: inline-block;
   cursor: pointer;
+  border: 1px solid #D7D7D7;
+  height: 24px;
+  overflow: hidden;
+  padding: 0 4px;
+}
+
+.jimu-symbol-picker .symbol-node{
+  position: relative;
+  top: 4px;
+  height: 16px;
+}
+
+.jimu-symbol-picker .separator{
+  position: relative;
+  top: 4px;
+  width: 1px;
+  height: 16px;
+  background-color: #D7D7D7;
+  margin: 0 5px;
+}
+
+.jimu-symbol-picker .jimu-icon{
+  position: relative;
+  top: 8px;
 }
 
 /*css for map blink*/
@@ -2841,32 +3197,58 @@ widget:jimu-w
 /*css for layer chooser*/
 .jimu-layer-chooser-from-map-withdropbox{
   position: relative;
+  height: 30px;
+  border: solid 1px #aaaaaa;
+}
+
+.jimu-layer-chooser-from-map-withdropbox > table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+  cursor: pointer;
 }
 
 .jimu-layer-chooser-from-map-withdropbox .layer-name {
   height: 30px;
   line-height: 30px;
   width: 100%;
-  border: solid 1px #aaaaaa;
-  cursor: pointer;
 }
 
 .jimu-layer-chooser-from-map-withdropbox .drop-select {
+  position: relative;
   width: 30px;
   height: 30px;
-  cursor: pointer;
-  margin-top: -30px;
 }
 
 .jimu-layer-chooser-from-map-withdropbox .drop-select .jimu-icon-down-arrow-8{
-  position: relative;
+  position: absolute;
   left: 11px;
-  top: 9px;
+  top: 11px;
 }
 
-.jimu-layer-chooser-from-map-withdropbox .jimu-basic-layer-chooser-from-map .jimu-tree{
-  border: 1px solid;
-  border-color: #aaaaaa;
+.jimu-layer-chooser-from-map-withdropbox > .layer-chooser{
+  position: absolute;
+  width: 100%;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 0;
+  overflow: visible;
+}
+
+.jimu-layer-chooser-from-map-withdropbox .jimu-basic-layer-chooser-from-map{
+  border: 1px solid #ccc;
+}
+
+.jimu-layer-chooser-from-map-withdropbox-popup .layer-chooser-tree{
+  border: 1px solid #ccc;
+  -ms-overflow-x: hidden;
+  overflow-x: hidden;
+}
+
+.jimu-layer-chooser-from-map-withdropbox-popup .jimu-tree .dijitTreeNodeContainer > .dijitTreeNode > .dijitTreeRow{
+  border-left: 0 !important;
+  border-right: 0 !important;
 }
 
 /*css for _CropImage*/
@@ -3008,7 +3390,7 @@ widget:jimu-w
   right: auto;
 }
 
-/*css for ImageChooder*/
+/*css for ImageChooser*/
 .jimu-image-chooser {
   height: 100%;
   overflow: hidden;
@@ -3046,6 +3428,7 @@ widget:jimu-w
 }
 
 .jimu-image-chooser .hint{
+  position: relative;
   display: none;
   width: 100%;
   height: 100%;
@@ -3053,6 +3436,7 @@ widget:jimu-w
 }
 
 .jimu-image-chooser .hint .display-text{
+  width: 100%;
   white-space: nowrap;
   color: white;
   cursor: pointer;
@@ -3062,20 +3446,30 @@ widget:jimu-w
   height: 30px;
   line-height: 30px;
   border-radius: 5px;
-  padding: 0 6px;
+  padding: 0 10px;
   box-shadow: 0 0 2px gray;
 }
 
+.jimu-image-chooser:hover .hint .display-text{
+  background-color: #15a4fa;
+}
+
 .jimu-image-chooser .hint .disable-label{
-  background-color: #a0acbf;
+  background-color: #a0acbf!important;
   cursor: default;
 }
 
 .jimu-image-chooser .hint .display-image{
+  position: absolute;
   cursor: pointer;
-  display: inline-block;
   width: 100%;
   height: 100%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  margin: 0 0 !important;
+  width: auto !important;
+  height: auto !important;
 }
 
 .image-chooser-crop-popup .title {
@@ -3093,6 +3487,15 @@ widget:jimu-w
 }
 
 /* css for jimu-single-filter-parameter */
+
+.jimu-single-filter-parameter > table > tbody > .first-tr > td{
+  padding-bottom: 4px;
+}
+
+.jimu-single-filter-parameter > table > tbody > .third-tr > td{
+  padding-bottom: 10px;
+}
+
 .jimu-single-filter-parameter .dijit-form-Select>tbody>tr>td{
   height: 23px;
 }
@@ -3100,6 +3503,14 @@ widget:jimu-w
 .jimu-single-filter-parameter .dijit-form-Select>tbody>tr>td>.dijitButtonText{
   height: 20px;
   height: 20px !important;
+}
+
+.jimu-single-filter-parameter .dijit-form-FilteringSelect.loading > .dijitInputField.dijitInputContainer{
+  background: url(images/validating.gif) right no-repeat;
+}
+
+.jimu-rtl .jimu-single-filter-parameter .dijit-form-FilteringSelect.loading > .dijitInputField.dijitInputContainer{
+  background: url(images/validating.gif) left no-repeat;
 }
 
 .jimu-single-filter-parameter .dijit-form-FilteringSelect>div.dijitArrowButton.dijitDownArrowButton{
@@ -3165,9 +3576,321 @@ widget:jimu-w
   font-style: italic;
   font-size: 12px;
   color: #d9dde0;
-  margin-top: 5px;
 }
 
+/* css for jimu-dijit-spatial-filter-features */
+.jimu-dijit-spatial-filter-features .not-visible{
+  display: none;
+}
+
+.jimu-dijit-spatial-filter-features .layer-tip{
+  display: none;
+}
+
+.jimu-dijit-spatial-filter-features .jimu-draw-box .draw-items > div{
+  width: 30px;
+  height: 30px;
+  line-height: 30px;
+  margin: 0 7px;
+}
+
+.jimu-dijit-spatial-filter-features .selection-option{
+  margin-top: 5px;
+  overflow: hidden;
+}
+
+.jimu-dijit-spatial-filter-features .search-distance-div{
+  margin-top: 15px;
+}
+
+.jimu-dijit-spatial-filter-features>table{
+  width: 100%;
+  table-layout: fixed;
+  border-collapse: collapse;
+}
+
+/* jimu-multiple-layers-featureset-chooser */
+.jimu-multiple-layers-featureset-chooser{
+  /*overflow: hidden;*/
+  height: 40px;
+  white-space: nowrap;
+}
+
+.jimu-multiple-layers-featureset-chooser .hidden{
+  display: none !important;
+}
+
+.jimu-multiple-layers-featureset-chooser > *{
+  cursor: pointer;
+  vertical-align: middle;
+}
+
+.jimu-multiple-layers-featureset-chooser.disabled > *{
+  cursor: default;
+}
+
+.jimu-multiple-layers-featureset-chooser > div{
+  height: 40px;
+  line-height: 40px;
+  display: inline-block;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-item-btn{
+  width: 53%;
+  position: relative;
+  overflow: visible;
+  height: 40px;
+  line-height: 40px;
+  display: inline-block;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-item-btn .current-draw-item{
+  height: 40px;
+  font-size: 0px;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-item-btn .current-draw-item > div{
+  display: inline-block;
+  height: 100%;
+  vertical-align: middle;
+  font-size: 12px;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-select{
+  position: absolute;
+  left: 0;
+  right: 20px;
+  top: 0;
+  bottom: 0;
+  background-color: #009966;
+  color: #ffffff;
+  text-align: center;
+  white-space: nowrap;
+  border: 2px solid transparent;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jimu-rtl .jimu-multiple-layers-featureset-chooser .btn-select{
+  left: 20px;
+  right: 0;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-select:hover{
+  background-color: #006241;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-select:active{
+  background-color: #59A700;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-select.selected{
+  background-color: #009966;
+  border: 2px solid #006141;
+}
+
+.jimu-multiple-layers-featureset-chooser.disabled .btn-select{
+  background-color: #D2D2D2 !important;
+}
+
+.jimu-multiple-layers-featureset-chooser .current-draw-item .btn-select .select-icon{
+  display: inline-block;
+  text-align: center;
+  position: relative;
+  top: 8px;
+  width: 24px;
+  height: 24px;
+}
+
+.jimu-multiple-layers-featureset-chooser .current-draw-item.EXTENT .btn-select .select-icon{
+  background: url(images/select_rectangle.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .current-draw-item.POLYGON .btn-select .select-icon{
+  background: url(images/select_polygon.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .current-draw-item.CIRCLE .btn-select .select-icon{
+  background: url(images/select_circle.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .current-draw-item.POLYLINE .btn-select .select-icon{
+  background: url(images/select_polyline.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-select .select-text{
+  display: inline-block;
+  text-align: center;
+  margin-left: 10px;
+}
+
+.jimu-rtl .jimu-multiple-layers-featureset-chooser .btn-select .select-text{
+  margin-left: 0;
+  margin-right: 10px;
+}
+
+.jimu-multiple-layers-featureset-chooser .current-draw-item .arrow{
+  width: 20px;
+  border-left: 1px solid white;
+  background-color: #009966;
+  background-image: url(images/v-white.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+
+.jimu-rtl .jimu-multiple-layers-featureset-chooser .current-draw-item .arrow{
+  margin-right: 1px;
+  border-left: 0;
+  border-right: 1px solid white;
+}
+
+.jimu-multiple-layers-featureset-chooser.disabled .current-draw-item .arrow{
+  background-color: #D2D2D2 !important;
+}
+
+.jimu-multiple-layers-featureset-chooser.single-geotype .current-draw-item .arrow{
+  display: none !important;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items{
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 100%;
+  height: 164px;
+  background-color: white;
+  color: white;
+  z-index: 1;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item{
+  position: relative;
+  width: 100%;
+  height: 40px;
+  margin-top: 1px;
+  background-color: #009966;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item.selected,
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item:hover{
+  background-color: #006241;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item .draw-icon{
+  float: left;
+  width: 40px;
+  height: 40px;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item-rectangle .draw-icon{
+  background: url(images/select_rectangle.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item-polygon .draw-icon{
+  background: url(images/select_polygon.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item-circle .draw-icon{
+  background: url(images/select_circle.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item-polyline .draw-icon{
+  background: url(images/select_polyline.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .draw-items .draw-item .draw-text{
+  position: absolute;
+  left: 40px;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jimu-rtl .jimu-multiple-layers-featureset-chooser .draw-items .draw-item .draw-icon{
+  float: right;
+}
+
+.jimu-rtl .jimu-multiple-layers-featureset-chooser .draw-items .draw-item .draw-text{
+  left: 0;
+  right: 40px;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-clear{
+  width: 35%;
+  border: 1px solid #D7D7D7;
+  margin-left: 10%;
+  color: #000000;
+  text-align: center;
+  white-space: nowrap;
+  display: inline-block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-clear > div{
+  display: inline-block;
+  text-align: center;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-clear:hover{
+  border: 1px solid #D0021B;
+}
+
+.jimu-rtl .jimu-multiple-layers-featureset-chooser .btn-clear{
+  margin-left: 0;
+  margin-right: 10%;
+}
+
+.jimu-multiple-layers-featureset-chooser.disabled .btn-clear{
+  background-color: #D2D2D2 !important;
+  border: 0 !important;
+  color: #ffffff !important;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-clear .clear-icon{
+  position: relative;
+  top: 3px;
+  width: 16px;
+  height: 16px;
+  background: url(images/unselect_features.png) center center no-repeat;
+}
+
+.jimu-multiple-layers-featureset-chooser .btn-clear .clear-text{
+  margin-left: 10px;
+}
+
+.jimu-rtl .jimu-multiple-layers-featureset-chooser .btn-clear .clear-text{
+  margin-left: 0;
+  margin-right: 10px;
+}
+
+.jimu-multiple-layers-featureset-chooser-tooltipdialog{
+  padding: 5px 0 0 0 !important;
+}
+
+.jimu-multiple-layers-featureset-chooser-tooltipdialog .dijitTooltipContainer{
+  background: #F3F3F3;
+  opacity: 0.9;
+  box-shadow: 0 0 20px rgba(0,0,0,0.5);
+  border: 1px solid rgba(0,0,0,0.5);
+  border-radius: 0 !important;
+}
+
+.jimu-multiple-layers-featureset-chooser-tooltipdialog .dijitTooltipContainer .dialog-content{
+  font-size: 12px;
+}
+
+.jimu-multiple-layers-featureset-chooser-tooltipdialog .dijitTooltipContainer .dialog-content .title{
+  font-weight: bold;
+}
+
+.jimu-multiple-layers-featureset-chooser-tooltipdialog .dijitTooltipConnector{
+  display: none;
+}
+
+/* jimu-export-chooser */
 .jimu-export-chooser{
   position: fixed;
 }
@@ -3312,4 +4035,1547 @@ widget:jimu-w
 
 .jimu-appstate-popup.mobile .appstate-close:hover {
   background: url('images/close_hover.png') no-repeat center;
+}
+
+/*jimu.dijit.ServiceURLComboBox*/
+.jimu-dijit-ServiceURLComboBox>.jimu-service-valid,
+.jimu-dijit-ServiceURLComboBox>.jimu-service-invalid {
+  right: 16px;
+}
+.jimu-dijit-ServiceURLComboBox .jimu-service-validating{
+  right: 16px;
+}
+.jimu-rtl .jimu-dijit-ServiceURLComboBox>.jimu-service-valid,
+.jimu-rtl .jimu-dijit-ServiceURLComboBox>.jimu-service-invalid {
+  left: 16px;
+  right: auto;
+}
+.jimu-rtl .jimu-dijit-ServiceURLComboBox .jimu-service-validating{
+  left: 16px;
+  right: auto;
+
+}
+
+/**popup menu*/
+.popup-menu{
+  position: absolute;
+  left: 0;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  background: transparent;
+  z-index: 119;
+  cursor: default;
+}
+.popup-menu .menu-content {
+  min-width: 120px;
+  max-width: 300px;
+  height: auto;
+  background: #FFFFFF;
+  box-shadow: 0px 0px 4px 2px rgba(177, 177, 177, 0.5);
+  position: absolute;
+}
+.popup-menu .menu-title {
+  height: 40px;
+  margin: 0 5px;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1)
+}
+.popup-menu .menu-title .label {
+  max-width: calc(100% - 32px);
+  height: 40px;
+  line-height: 40px;
+  margin: 0 5px;
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+  font-family: "Avenir Medium";
+  font-size: 14px;
+  color: #474747;
+}
+.popup-menu .menu-title .close-btn {
+  font-size: 12px;
+  margin: 14px 5px;
+}
+.popup-menu .popup-menu-item {
+  width: 100%;
+  height: 40px;
+  cursor: pointer;
+}
+.popup-menu .popup-menu-item:hover {
+  background: #F3F3F3;
+}
+.popup-menu .popup-menu-item .icon {
+  width: 40px;
+  height: 40px;
+}
+.popup-menu .popup-menu-item .icon div {
+  width: 16px;
+  height: 16px;
+  margin: 12px;
+}
+.popup-menu .popup-menu-item .label {
+  height: 40px;
+  line-height: 40px;
+  color: #000000;
+  font-size: 12px;
+  font-family: 'Avenir Medium';
+  white-space: nowrap;
+  display: inline-block;
+  max-width: 240px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 10px;
+}
+
+/*PopupMenuButton*/
+.popup-menu-button {
+  width: 36px;
+  height: 36px;
+  background-color: #FFFFFF;
+  background: url(images/more_normal.svg) no-repeat center;
+  cursor: pointer;
+}
+.popup-menu-button:hover {
+  background-color: #E5E5E5;
+  -moz-border-radius:4px;
+  -webkit-border-radius:4px;
+  border-radius:4px;
+  background: url(images/more_hover.svg) no-repeat center;
+}
+.popup-menu-button.disabled {
+  background: url(images/more_disabled.svg) no-repeat center;
+  cursor: default;
+}
+
+/* css for shareBase start*/
+.share-container {
+  height: 16px;
+  line-height: 16px;
+  font-family: Avenir Light;
+  font-size: 12px;
+  color: #161616;
+}
+
+.share-container .displaynone {
+  display: none;
+}
+
+.share-container .shareClearFix {
+  *overflow: hidden;
+  *zoom: 1;
+}
+
+.share-container .shareClearFix:after {
+  display: table;
+  content: "";
+  width: 0;
+  clear: both;
+}
+
+.share-container .subTitle {
+  /*height: 19px;*/
+  line-height: 19px;
+  font-family: Avenir Medium;
+  /*font-weight: bold;*/
+  font-size: 14px;
+  color: #161616;
+  margin-top: 20px;
+  margin-bottom: 5px;
+}
+
+.share-container .content-absolute {
+  top: 40px;
+}
+
+/*.share-container .close-btn {
+  display: none;
+}*/
+/*
+.claro .share-container .dijitCheckBox,
+.claro .share-container .dijitCheckBoxIcon{
+  width: 16px;
+}*/
+/* css for shareBase end*/
+/* css for shareLink start*/
+.share-container .shareLink .displaynone {
+  display: none !important;
+}
+
+.share-container .shareLink .optionsText {
+  line-height: 16px;
+  margin-top: 5px;
+  font-family: Avenir Medium;
+  font-size: 12px;
+  color: #24B5CC;
+  cursor: pointer;
+  text-decoration: underline;
+  height: 28px;
+}
+
+.share-container .shareLink .shareUrlsWrapper {
+  /*width: 95%;*/
+}
+
+.share-container .shareLink .shareUrlsWrapper .linkToApp {
+  margin-top: 6px;
+}
+
+.share-container .shareLink .shareLinkUrl {
+  border: 1px #E2E2E2 solid;
+  height: 30px;
+  line-height: 30px;
+  width: 100%;
+}
+
+.share-container .shareLink .shareLinkUrl .dijitInputInner {
+  font-family: Avenir Medium;
+  font-size: 12px;
+}
+
+.share-container .shareLink .rotate {
+  transition: transform 0.1s;
+  transition: -webkit-transform 0.1s;
+  -webkit-transform: rotate(90deg);
+  transform: rotate(90deg);
+}
+
+.share-container .shareLink .socialNetworkIcons {
+  width: 20px;
+  height: 20px;
+  opacity: 0.5;
+  margin: 5px 3px;
+  display: inline-block;
+  cursor: pointer;
+}
+
+.share-container .shareLink .shareLinkIcons {
+  margin: 0 2px;
+}
+
+.share-container .shareLink .email {
+  background: url("images/share/email.png") no-repeat;
+}
+.share-container .shareLink .email:hover {
+  background: url("images/share/email_hover.png") no-repeat;
+}
+
+.share-container .shareLink .facebook {
+  background: url("images/share/facebook.png") no-repeat;
+}
+.share-container .shareLink .facebook:hover {
+  background: url("images/share/facebook_hover.png") no-repeat;
+}
+
+.share-container .shareLink .twitter {
+  background: url("images/share/twitter.png") no-repeat;
+}
+.share-container .shareLink .twitter:hover {
+  background: url("images/share/twitter_hover.png") no-repeat;
+}
+
+.share-container .shareLink .googlePlus {
+  background: url("images/share/gplus.png") no-repeat;
+}
+.share-container .shareLink .googlePlus:hover {
+  background: url("images/share/gplus_hover.png") no-repeat;
+}
+
+.share-container .shareLink .inputsText {
+  font-family: Avenir Light;
+  font-size: 12px;
+  color: #161616;
+}
+
+.share-container .shareLink textarea {
+  width: 100%;/*for ie*/
+}
+
+.share-container .shareLink .shareEmbedCode {
+  height: 80px;
+  padding: 6px 6px 6px 10px;
+  resize: none;
+}
+
+.share-container .shareLink .customSize {
+  display: inline-block;
+}
+
+.share-container .shareLink .sizeSelect {
+  display: inline-block;
+  margin-top: 8px;
+  margin-right: 5px;
+}
+
+.share-container .shareLink .sizeSelect table {
+  height: 26px;
+}
+
+.share-container .shareLink .customSize .sizeTextBox {
+  display: inline-block;
+  width: 60px;
+  /*padding: 5px;*/
+  margin: 2px;
+  height: 26px;
+}
+
+.share-container .shareLink .customSize .dijitTextBox .dijitInputInner {
+  font-size: 12px;
+  height: 22px;
+}
+
+.share-container .shareLink .timesConnector {
+  display: inline-block;
+  margin: 2px;
+  vertical-align: middle;
+}
+
+.share-container .shareLink .optionsRow {
+  margin: 6px 0 6px 5px;
+}
+
+.share-container .shareLink .backBtn{
+  height: 24px;
+  width: 24px;
+  background: url("images/share/arrow-back.svg") no-repeat;
+  background-position: 50% 50%;
+  cursor: pointer;
+  vertical-align: middle;
+  position: absolute;
+}
+.share-container .shareLink .backBtn:hover {
+  height: 24px;
+  width: 24px;
+  background: url("images/share/arrow-back_hover.svg") no-repeat;
+  background-position: 50% 50%;
+  cursor: pointer;
+  vertical-align: middle;
+}
+.jimu-rtl .share-container .shareLink .backBtn{
+  background: url("images/share/arrow-back-rtl.svg") no-repeat;
+  background-position: 50% 50%;
+}
+.jimu-rtl .share-container .shareLink .backBtn:hover {
+  background: url("images/share/arrow-back_hover-rtl.svg") no-repeat;
+  background-position: 50% 50%;
+}
+
+.share-container .shareLink .linkOptionsTitle{
+  text-align: center;
+  line-height: 24px;
+  font-weight: bold;
+  font-size: 15px;
+}
+
+.share-container .shareLink .optionsRow .labels {
+  margin-left: 22px;
+  font-family: Avenir Light;
+  font-size: 12px;
+  color: #000;
+}
+.jimu-rtl .share-container .shareLink .optionsRow .labels {
+  margin-right: 30px;
+  margin-left: auto;
+}
+
+.share-container .shareLink .optionsRow .optionsMore {
+  display: none;
+  margin: 6px 0 3px 30px;
+}
+.jimu-rtl .share-container .shareLink .optionsRow .optionsMore {
+  margin: 6px 30px 3px 0;
+}
+
+.share-container .shareLink .optionsRow .optionsMore table {
+  height: 21px;
+}
+
+.share-container .shareLink .optionsRow .optionsMore label {
+  width: 100px;
+  display: table-cell;
+  height: 30px;
+  line-height: 30px;
+  word-break: break-all;
+}
+
+.share-container .shareLink .optionsRow .optionsMore .queryFeature_layer{
+  margin-bottom: 4px;
+}
+
+.share-layerChooser-dropbox .jimu-icon-error{
+  margin-bottom: 6px;
+}
+
+.share-layerChooser-dropbox .error-tip-section{
+  height: 36px;
+}
+
+.share-container .shareLink .optionsRow .optionsMore .moreOptionsRow{
+  margin: 4px 0;
+}
+
+.share-container .shareLink .optionsRow .optionsMore .dijitTextBox,
+.share-container .shareLink .optionsRow .optionsMore .table-for-select{
+  min-width: 100px;
+  display: table-cell;
+}
+
+.share-container .shareLink .optionsRow .optionsMore .dijitSelect{
+  min-width: 110px;
+  line-height: 30px;
+  height: 30px;
+  font-size: 12px;
+  display: inline-table !important;
+  margin-bottom: 5px;
+}
+
+/*.share-container .shareLink .optionsRow .optionsMore .longinput{
+  width:80%;
+  margin: 3px 0;
+}*/
+
+.share-container .shareLink .optionsRow .markers {
+  display: inline-block;
+  height: 24px;
+  width: 24px;
+  background: url("images/share/marker.svg") no-repeat;
+  background-position: 50% 50%;
+  cursor: pointer;
+  vertical-align: middle;
+  margin: 0 2px 4px 2px;
+}
+
+.share-container .shareLink .optionsRow .markers:hover {
+  background: url("images/share/marker_hover.svg") no-repeat;
+  background-position: 50% 50%;
+}
+
+.share-container .shareLink .optionsRow .markers.selected {
+  background: url("images/share/marker_selected.svg") no-repeat;
+  background-position: 50% 50%;
+}
+
+.share-container .shareLink .optionsRow .preview {
+  height: 80px;
+  padding: 6px 6px 6px 10px;
+  resize: none;
+}
+
+.claro .share-container .shareLink .dijitRadio,
+.claro .share-container .shareLink .dijitRadioIcon {
+  background-repeat: no-repeat;
+  width: 16px;
+  height: 16px;
+  margin-right: 6px;
+}
+.claro .share-container .shareLink .shareCheckBoxes {
+  margin-right: 6px;
+}
+
+.claro .share-container .shareLink .shareTipsText {
+  font-family: Avenir Light;
+  font-size: 12px;
+  margin-top: 14px;
+  font-style: italic;
+}
+/* css for shareLink end*/
+/* css for shareOptions start*/
+.share-container .shareOptions .tips {
+  font-family: Avenir Light;
+  font-size: 12px;
+}
+
+.share-container .shareOptions .shareOptionItems {
+  margin: 6px 0;
+}
+
+.share-container .shareOptions .labels {
+  font-family: Avenir Light;
+  font-size: 12px;
+  margin-left: 4px;
+}
+
+.share-container .shareOptions .share-groups-wrapper {
+  border: 1px solid #E2E2E2;
+  margin: 12px 0 2px 30px;
+  /*padding: 5px;*/
+  background-color: #FFFFFF;
+  width: 90%;
+  line-height: 14px;
+  overflow: auto;
+}
+
+.share-container .shareOptions .borderContainer {
+  width: 95%;
+  height: 80px;
+}
+
+.share-container .borderContainer td {
+  height: 16px
+}
+
+.share-container .addMarker_moreOptions .dijitTextBox{
+  display: block;
+}
+/* css for shareOptions end*/
+
+/* feature action icons*/
+@font-face {
+  font-family: 'feature actions';
+
+  src: url('fonts/feature_actions.eot');
+  src: url('fonts/feature_actions.eot?#iefix') format('embedded-opentype'),
+  url('fonts/feature_actions.woff') format('woff'),
+  url('fonts/feature_actions.ttf') format('truetype'),
+  url('fonts/feature_actions.svg#feature_actions') format('svg');
+  font-weight: normal;
+  font-style: normal;
+}
+.feature-action {
+  font-family: 'feature actions' !important;
+  speak: none;
+  font-style: normal;
+  font-weight: normal;
+  font-variant: normal;
+  text-transform: none;
+  line-height: 1;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+	color: rgba(0,0,0,0.5);
+  cursor: pointer;
+  font-size: 16px;
+}
+.feature-action:hover,
+.feature-action.highlight {
+  color: rgb(0,0,0);
+}
+.feature-action.disabled {
+  color: rgba(0,0,0,0.25);
+  cursor: default;
+}
+.icon-select:before {
+  content: '\e900';
+}
+.icon-clear-selection:before {
+  content: '\e901';
+}
+.icon-export:before {
+  content: '\e902';
+}
+.icon-statistics:before {
+  content: '\e903';
+}
+.icon-add-as-stops:before {
+  content: '\e904';
+}
+.icon-add-to:before {
+  content: '\e905';
+}
+.icon-arrow-back:before {
+  content: '\e906';
+}
+.icon-checkbox-outline:before {
+  content: '\e907';
+}
+.icon-close:before {
+  content: '\e908';
+}
+.icon-copy-attributes:before {
+  content: '\e909';
+}
+.icon-create-layer:before {
+  content: '\e90a';
+}
+.icon-direction-from:before {
+  content: '\e90b';
+}
+.icon-direction-to:before {
+  content: '\e90c';
+}
+.icon-drive-document:before {
+  content: '\e90d';
+}
+.icon-edit:before {
+  content: '\e90e';
+}
+.icon-flash:before {
+  content: '\e90f';
+}
+.icon-follow:before {
+  content: '\e910';
+}
+.icon-launch:before {
+  content: '\e911';
+}
+.icon-more:before {
+  content: '\e912';
+}
+.icon-panto:before {
+  content: '\e913';
+}
+.icon-select-all:before {
+  content: '\e914';
+}
+.icon-set-as-incident:before {
+  content: '\e915';
+}
+.icon-set-as-input:before {
+  content: '\e916';
+}
+.icon-show-popup:before {
+  content: '\e917';
+}
+.icon-show-related-record:before {
+  content: '\e918';
+}
+.icon-switch-selection:before {
+  content: '\e919';
+}
+.icon-view-in-attribute:before {
+  content: '\e91a';
+}
+.icon-zoomto:before {
+  content: '\e91b';
+}
+.icon-arrow-forward:before {
+  content: '\e91c';
+}
+.icon-operation:before {
+  content: '\e91d';
+}
+.icon-add:before {
+  content: '\e91e';
+}
+.icon-edit-symbol:before{
+  content: '\e922';
+}
+.icon-arrow-left:before{
+  content: '\e923';
+}
+.icon-arrow-right:before{
+  content: '\e924';
+}
+.icon-save:before{
+  content: '\e925';
+}
+/* ~~ feature action icons*/
+
+/* for statistics */
+.stat-container{
+  font-size: 12px;
+}
+.stat-container .header{
+  margin-bottom: 10px;
+}
+.stat-container .header>span{
+  margin-right: 5px;
+}
+.stat-container .attrName{
+  color: #888888;
+  padding-right: 5px;
+}
+
+/* jimu-colorPalette start */
+.jimu-colorpalette{
+  padding: 10px 20px;
+  font-family: Avenir Light;
+  font-size: 12px;
+  color: #000000;
+  background-color: #fff;
+  box-shadow: 0 0 4px 0 rgba(0,0,0,0.50);
+}
+.jimu-colorpalette .btn{
+  vertical-align: middle;
+  margin: 10px 6px;
+  height:30px;
+}
+.jimu-colorpalette .btn-wapper{
+  background-color: #fff;
+  border: 1px solid #CCCCCC;
+  line-height: 30px;
+  height:30px;
+}
+.jimu-colorpalette .btn-wapper:hover{
+  cursor: pointer;
+  background: #EEEEEE;
+}
+.jimu-colorpalette .btn .icon{
+  display: inline-block;
+  width:16px;
+  height:16px;
+  margin: 6px;
+  background-position: 50% 50%;
+}
+.jimu-colorpalette .btn .icon.transparent{
+  background: url("images/transparent.svg") no-repeat;
+}
+.jimu-colorpalette .btn .icon.custom{
+  background: url("images/custom.svg") no-repeat;
+}
+.jimu-colorpalette .btn .text{
+  display: inline-block;
+}
+.jimu-colorpalette .btn-wapper.selected{
+  border: 1px solid #000000;
+}
+.jimu-colorpalette .dijitColorPalette .dijitPaletteCell:active .dijitPaletteImg,
+.jimu-colorpalette .dijitColorPalette .dijitPaletteTable .dijitPaletteCellSelected .dijitPaletteImg{
+  border: 1px solid #000000;
+  margin: 0;
+}
+.jimu-colorpalette .jimu-color-picker{
+  background-color: #FFF !important;
+  width: 100%;
+  height: 16px;
+  border: none;
+  text-align: left;
+}
+.jimu-colorpalette .jimu-color-records{
+  display: inline-block;
+}
+.jimu-colorpalette .dijitColorPalette{
+  border: none;
+}
+.jimu-colorpalette .dijitColorPalette .dijitPaletteCell {
+  padding:4px;
+}
+.jimu-colorpalette .dijitColorPalette .dijitPaletteImg{
+  padding:0;
+  margin: 0;
+  height: 26px;
+}
+.jimu-colorpalette .dijitColorPalette .dijitColorPaletteSwatch {
+  width: 16px;
+  height: 16px;
+  margin: 4px;
+  cursor: pointer;
+}
+/* jimu-colorPalette end */
+
+/* marker-feature-action start */
+.marker-feature-action-popup{
+  font-family: 'Avenir Light';
+  font-size: 12px;
+  color: #333333;
+  display: table;
+}
+.marker-feature-action-popup .clearFix {
+  *overflow: hidden;
+  *zoom: 1;
+}
+.marker-feature-action-popup .clearFix:after {
+  display: table;
+  content: "";
+  width: 0;
+  clear: both;
+}
+.marker-feature-action-popup .title{
+  font-weight: bold;
+}
+.marker-feature-action-popup .item{
+  display: table-row;
+  width: 100%;
+  height: 20px;
+  padding: 3px 0 5px 0;
+}
+.marker-feature-action-popup .sub-title{
+  display: table-cell;
+  font-size: 12px;
+  color: #888888;
+  min-width: 70px;
+  max-width: 120px;
+  padding: 2px 0;
+  overflow: hidden;
+}
+.marker-feature-action-popup .val{
+  display: table-cell;
+  font-size: 12px;
+  max-width: 200px;
+  padding: 0 5px;
+}
+.marker-feature-action-popup input{
+  display: table-cell;
+  font-family: 'Avenir Light';
+  resize: none;
+  max-width: 165px;
+  height: 20px;
+  line-height: 20px;
+  display: inline-block;
+  border: 1px solid #EEEEEE;
+  margin: 0 5px
+}
+.marker-feature-action-popup .hzLine {
+    border: none;
+    border-top: 1px solid #333333;
+    margin-top: 6px;
+    margin-bottom: 6px;
+}
+/* marker-feature-action end */
+
+/* jimu-color-picker-popup start */
+.jimu-color-picker-popup-dialog .jimu-colorpalette{
+  padding: 20px;
+  box-shadow: none;
+}
+.jimu-color-picker-popup-dialog .dijitTooltipContainer{
+  overflow: hidden;
+  background: #fff !important;
+  border-radius: 0;
+  border-style: none;
+  box-shadow: 0 0 12px #9A9A9A;
+  padding: 0;
+  border:none;
+}
+.jimu-color-picker-popup-dialog .dijitTooltipConnector {
+    display: none;
+}
+/* jimu-color-picker-popup end */
+
+/* item form style for feature action SaveAsHostedLayer */
+.jimu-item-form {
+  width: 100%;
+}
+
+.jimu-item-form .input-label {
+  display:inline-block;
+  width: 20%;
+}
+
+.jimu-item-form .input-item {
+  width: 70%;
+}
+
+.jimu-item-form .line-margin {
+  margin-top: 10px;
+}
+
+/*jimu-dijit-dropdownmenu*/
+.jimu-dijit-dropdownmenu{
+  display: inline-block;
+  position: relative;
+  width: 16px;
+  height: 16px;
+  overflow: hidden;
+  background: url(images/dropdown.svg) center center no-repeat;
+  cursor: pointer;
+}
+
+.jimu-dijit-dropdownmenu:hover,
+.jimu-dijit-dropdownmenu.showing{
+  background: url(images/dropdown_hover.svg) center center no-repeat;
+}
+
+.jimu-dijit-dropdownmenu-items-container{
+  position: absolute;
+  width: auto;
+  height: auto;
+  z-index: 110;
+  background: white;
+  cursor: pointer;
+  box-shadow: 0 2px 4px 0 rgba(0,0,0,0.50);
+  min-width: 166px;
+  max-width: 220px;
+  padding: 8px 0;
+  overflow-y: auto;
+}
+
+.jimu-dijit-dropdownmenu-items-container .dropdown-menu-item{
+  height: 24px;
+  line-height: 24px;
+  padding: 0 10px;
+}
+
+.jimu-dijit-dropdownmenu-items-container .dropdown-menu-item:hover{
+  background-color: #ccc;
+}
+
+.jimu-dijit-dropdownmenu-items-container .dropdown-menu-item.selected{
+  background-color: #333;
+  color: white;
+}
+
+.jimu-dijit-dropdownmenu-items-container .dropdown-menu-item.selected:hover{
+  background-color: #333;
+}
+
+.jimu-dijit-dropdownmenu-shelter{
+  position: fixed;
+  left: 0;
+  right: 0;
+  top: 0;
+  bottom: 0;
+  z-index: 109;
+}
+
+/*jimu-dijit-chart*/
+.jimu-dijit-chart .tooltip-div span {
+  display: block;
+}
+.jimu-dijit-chart .tooltip-div {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+}
+.jimu-rtl .jimu-dijit-chart .tooltip-div {
+  align-items: flex-end;
+}
+.jimu-dijit-chart .tooltip-div .tooltip-tr {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+.jimu-rtl .jimu-dijit-chart .tooltip-div .tooltip-tr {
+  flex-direction: row-reverse;
+}
+.jimu-dijit-chart .tooltip-div .colorEl {
+  display:inline-block;
+  border-radius:10px;
+  width:9px;
+  height:9px;
+}
+.jimu-dijit-chart .tooltip-div .marginRight5 {
+  margin-right: 5px;
+  margin-left: 0;
+}
+.jimu-rtl .jimu-dijit-chart .tooltip-div .marginRight5 {
+  margin-left: 5px;
+  margin-right: 0;
+}
+
+/**/
+.jimu-dijit-statistics-chart{
+  position: relative;
+}
+
+.jimu-dijit-statistics-chart .results-header{
+  display: none;
+  width: 100%;
+  height: 33px;
+}
+
+.jimu-dijit-statistics-chart.has-title .results-header{
+  display: block;
+}
+
+.jimu-dijit-statistics-chart .chart-title{
+  text-align: center;
+  width: 100%;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.jimu-dijit-statistics-chart .paging-section{
+  height: 5px;
+  margin-top: 10px;
+}
+
+.jimu-dijit-statistics-chart .paging-section ul{
+  margin: 0;
+  padding: 0;
+  height: 100%;
+  list-style: none;
+}
+
+.jimu-dijit-statistics-chart .paging-section ul li{
+  float: left;
+  height: 100%;
+}
+
+.jimu-rtl .jimu-dijit-statistics-chart .paging-section ul li{
+  float: right;
+}
+
+.jimu-dijit-statistics-chart .paging-section ul li a{
+  display: block;
+  width: 5px;
+  height: 100%;
+  padding:0 5px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  background-image: url(images/dot1.png);
+  cursor: pointer;
+}
+
+.jimu-dijit-statistics-chart .paging-section ul li a:hover,.jimu-dijit-statistics-chart .paging-section ul li.selected a{
+  background-image:url(images/dot2.png);
+}
+
+.jimu-dijit-statistics-chart .settings, .jimu-dijit-statistics-chart .zoomin{
+  cursor: pointer;
+  width: 16px;
+  height: 16px;
+}
+
+.jimu-dijit-statistics-chart .settings{
+  background: no-repeat center center url(images/setting_default.png);
+}
+
+.jimu-dijit-statistics-chart .zoomin{
+  background: no-repeat center center url(images/zoom_normal.png);
+  margin-left: 5px;
+}
+
+.jimu-rtl .jimu-dijit-statistics-chart .zoomin{
+  margin-left: 0;
+  margin-right: 5px;
+}
+
+.jimu-dijit-statistics-chart .chart-section{
+  position: relative;
+  width: 100%;
+}
+
+.jimu-dijit-statistics-chart .chart-section .arrow-td{
+  width: 15px;
+}
+
+.jimu-dijit-statistics-chart .chart-section .content-td{
+  width: auto;
+}
+
+.jimu-dijit-statistics-chart.no-more-than-one-chart .chart-section .arrow-td{
+  display: none;
+  width: 0;
+}
+
+.jimu-dijit-statistics-chart .chart-section .content-td{
+  width: 100%;
+}
+
+.jimu-dijit-statistics-chart .chart-section .arrow{
+  width:100%;
+  background-repeat: no-repeat;
+  background-position: center center;
+  cursor:pointer;
+  height: 60px;
+}
+
+.jimu-dijit-statistics-chart .chart-section .arrow:hover{
+  background-color:#cccccc;
+}
+
+.jimu-dijit-statistics-chart .chart-section .left-arrow{
+  background-image:url(images/left_arrow_8_default.png);
+}
+
+.jimu-rtl .jimu-dijit-statistics-chart .chart-section .left-arrow{
+  background-image:url(./images/right_arrow_8_default.png);
+}
+
+.jimu-dijit-statistics-chart.big-preview .chart-section .chart-container{
+  width:100%;
+  margin:0 auto;
+  overflow: auto;
+}
+
+.jimu-dijit-statistics-chart .chart-section .right-arrow{
+  background-image:url(images/right_arrow_8_default.png);
+}
+
+.jimu-rtl .jimu-dijit-statistics-chart .chart-section .right-arrow{
+  background-image:url(images/left_arrow_8_default.png);
+}
+
+.jimu-dijit-statistics-chart .chart-description{
+  margin-top: 20px;
+  max-height: 48px;
+  line-height: 16px;
+  overflow-y: auto;
+}
+
+.jimu-dijit-statistics-chart-tooltip {
+  padding-right:13px;
+  padding-left: 0px;
+}
+
+.jimu-rtl .jimu-dijit-statistics-chart-tooltip {
+  padding-right:0px;
+  padding-left: 13px;
+}
+
+/* jimu-dijit-statistics-chart-settings */
+.jimu-dijit-statistics-chart-settings{
+  position: relative;
+}
+
+.jimu-dijit-statistics-chart-settings .setting-item{
+  margin-bottom: 10px;
+}
+
+.jimu-dijit-statistics-chart-settings .setting-item label{
+  margin-left: 5px;
+}
+
+.jimu-rtl .jimu-dijit-statistics-chart-settings .setting-item label{
+  margin-left: 0;
+  margin-right: 5px;
+}
+
+.jimu-dijit-statistics-chart-settings .color-tip{
+  margin-bottom: 10px;
+}
+
+.jimu-dijit-statistics-chart-settings .single-color-section{
+  width: 220px;
+}
+
+.jimu-dijit-statistics-chart-settings .single-color-div{
+  height: 30px;
+  -webkit-border-radius: 5px;
+  -moz-border-radius: 5px;
+  -ms-border-radius: 5px;
+  -o-border-radius: 5px;
+  border-radius: 5px;
+  margin-bottom: 15px;
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section{
+  width: 210px;
+  max-height: 300px;
+  overflow: auto;
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .multi-color{
+  width: 180px;
+  height: 30px;
+  background-repeat: no-repeat;
+  background-position: center center;
+  cursor: pointer;
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .c1{
+  background-image: url(images/chart/c1.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .c2{
+  background-image: url(images/chart/c2.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .c3{
+  background-image: url(images/chart/c3.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .c4{
+  background-image: url(images/chart/c4.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g1{
+  background-image: url(images/chart/g1.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g2{
+  background-image: url(images/chart/g2.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g3{
+  background-image: url(images/chart/g3.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g4{
+  background-image: url(images/chart/g4.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g5{
+  background-image: url(images/chart/g5.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g6{
+  background-image: url(images/chart/g6.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g7{
+  background-image: url(images/chart/g7.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g8{
+  background-image: url(images/chart/g8.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g9{
+  background-image: url(images/chart/g9.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g10{
+  background-image: url(images/chart/g10.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g11{
+  background-image: url(images/chart/g11.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .g12{
+  background-image: url(images/chart/g12.png);
+}
+
+.jimu-dijit-statistics-chart-settings .multi-color-section .selected{
+  border: 2px solid #f4c6af;
+}
+
+.jimu-dijit-statistics-chart-settings .shelter{
+  display: none;
+  position: absolute;
+  width: 100%;
+  height: 100%;
+}
+/* begin jimu/layoutmanagers/GridMobileController */
+.jimu-dnd-mobile-controller {
+  position: absolute;
+  top: 10px;
+  left: 10px;
+  width: 30px;
+  height: 30px;
+  background: rgba(0,0,0,0.5);
+  color: #FFF;
+  cursor: pointer;
+}
+
+.jimu-dnd-mobile-controller .container-section {
+  position: absolute;
+  top: -10px;
+  left: -10px;
+  width: 160px;
+  height: auto;
+  max-height: 250px;
+  background: #222222;
+  color: #FFF;
+  z-index: 200;
+  animation: containerOut 300ms;
+  -moz-animation: containerOut 300ms;	/* Firefox */
+  -webkit-animation: containerOut 300ms;	/* Safari 和 Chrome */
+  -o-animation: containerOut 300ms;	/* Opera */
+  animation-delay: -300ms;
+  -moz-animation-delay: -300ms;
+  -webkit-animation-delay: -300ms;
+  -o-animation-delay: -300ms;
+  animation-fill-mode: forwards;
+  -moz-animation-fill-mode: forwards;
+  -webkit-animation-fill-mode: forwards;
+  -o-animation-fill-mode: forwards;
+}
+
+.jimu-dnd-mobile-controller .container-section.out,
+.jimu-dnd-mobile-controller .container-section.in {
+  animation-delay: 0s;
+  -moz-animation-delay: 0s;
+  -webkit-animation-delay: 0s;
+  -o-animation-delay: 0s;
+}
+
+.jimu-dnd-mobile-controller .container-section.in {
+  animation: containerIn 300ms;
+  -moz-animation: containerIn 300ms;	/* Firefox */
+  -webkit-animation: containerIn 300ms;	/* Safari 和 Chrome */
+  -o-animation: containerIn 300ms;	/* Opera */
+}
+
+@keyframes containerIn
+{
+  from {left: -170px;}
+  to {left: -10px;}
+}
+
+@-moz-keyframes containerIn { /* Firefox */
+  from {left: -170px;}
+  to {left: -10px;}
+}
+
+@-webkit-keyframes containerIn  /* Safari 和 Chrome */
+{
+  from {left: -170px;}
+  to {left: -10px;}
+}
+
+@-o-keyframes containerIn /* Opera */
+{
+  from {left: -170px;}
+  to {left: -10px;}
+}
+
+@keyframes containerOut
+{
+  from {left: -10px;}
+  to {left: -170px;}
+}
+
+@-moz-keyframes containerOut { /* Firefox */
+  from {left: -10px;}
+  to {left: -170px;}
+}
+
+@-webkit-keyframes containerOut  /* Safari 和 Chrome */
+{
+  from {left: -10px;}
+  to {left: -170px;}
+}
+
+@-o-keyframes containerOut /* Opera */
+{
+  from {left: -10px;}
+  to {left: -170px;}
+}
+
+.jimu-dnd-mobile-controller .container-section .row {
+  margin: 20px 0 20px 20px;
+  cursor: pointer;
+}
+
+.jimu-dnd-mobile-controller .container-section .row .column {
+  display: inline-block;
+  vertical-align: bottom;
+}
+
+.jimu-dnd-mobile-controller .container-section .row .widget-icon {
+  width: 20px;
+  height: 20px;
+  background-size: 20px !important;
+}
+
+.jimu-dnd-mobile-controller .container-section .row .widget-label {
+  margin-left: 15px;
+  line-height: 20px;
+  width: 100px;
+}
+/* End jimu/layoutmanagers/GridMobileController*/
+
+/* jimu-dijit-data-fields */
+.jimu-dijit-data-fields{
+  box-sizing: content-box;
+  width: 100%;
+  max-height: 200px;
+  overflow-y: auto;
+  border: 1px solid #ccc;
+  padding: 3px 0;
+}
+
+.jimu-dijit-data-fields .fields-content{
+
+}
+
+.jimu-dijit-data-fields .field-item{
+  height: 20px;
+  line-height: 20px;
+  font-size: 12px;
+}
+
+.jimu-dijit-data-fields .field-item span{
+  display: inline-block;
+  vertical-align: middle;
+}
+
+/*.jimu-dijit-data-fields .field-item.selected{
+  background: #e3ecf2;
+}*/
+
+.jimu-dijit-data-fields .field-item input{
+  margin-left: 10px;
+  margin-right: 10px;
+  vertical-align: middle;
+}
+
+.jimu-dijit-data-fields .operation{
+  display: none;
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 16px;
+  height: 50px;
+}
+
+.jimu-rtl .jimu-dijit-data-fields .operation{
+  right: auto;
+  left: 0;
+}
+
+.jimu-dijit-data-fields .operation div{
+  cursor: pointer;
+  width: 100%;
+  height: 14px;
+  /*background-repeat: no-repeat;
+  background-position: center center;*/
+}
+
+/*Do not show highlight rect in the layout*/
+.jimu-dijit-gridlayout .lm_stack_highlight{
+  display: none !important;
+}
+
+.jimu-dijit-gridlayout.lm_goldenlayout{
+  background: transparent;
+}
+
+.jimu-dijit-gridlayout .lm_content {
+  background: transparent;
+  border: 1px dashed #ccc;
+}
+
+.jimu-dijit-gridlayout.viewonly .lm_splitter{
+  display: none;
+}
+
+.jimu-dijit-gridlayout.viewonly .lm_content {
+  border: none;
+}
+
+.jimu-dijit-gridlayout.viewonly .lm_item_container > .lm_dragmask,
+.jimu-dijit-gridlayout.viewonly .lm_item_container > .lm_dragmask .lm_drag_handler {
+  display: none !important;
+}
+
+.jimu-dijit-gridlayout .lm_item_container > .lm_dragmask,
+.jimu-dijit-gridlayout .lm_item_container.lm_selected > .lm_dragmask .lm_drag_handler {
+  display: block !important;
+}
+
+.jimu-dijit-gridlayout .lm_item_container.lm_selected > .lm_dragmask {
+  border: 2px solid #24B5CC;
+}
+
+.jimu-dijit-gridlayout .lm_item_container > .lm_dragmask .lm_drag_handler {
+  position: absolute;
+  top: -1px;
+  right: -1px;
+  width: 16px;
+  height: 16px;
+  background-image: url(images/menu.svg);
+  background-size: 16px;
+  z-index: 30;
+  cursor: move;
+}
+
+.jimu-rtl .jimu-dijit-gridlayout .lm_item_container .lm_dragmask .lm_drag_handler {
+  right: auto;
+  left: 0;
+}
+
+/*.jimu-dijit-data-fields .up-icon{
+  background-image: url(images/up1.png);
+}
+
+.jimu-dijit-data-fields .up-icon.high-light{
+  background-image: url(images/up2.png);
+}
+
+.jimu-dijit-data-fields .down-icon{
+  background-image: url(images/down1.png);
+  margin-top: 10px;
+}
+
+.jimu-dijit-data-fields .down-icon.high-light{
+  background-image: url(images/down2.png);
+}*/
+/* jimu.dijit.DataPreviewTable */
+.jimu-data-preview-table{
+  font-size: 12px;
+}
+.jimu-popup.data-preview-popup .content,
+.jimu-popup.data-preview-popup .table-container{
+  overflow-x: auto;
+  overflow-y: hidden;
+  border: none;
+}
+.jimu-popup.data-preview-popup .table-container .dgrid{
+  width:100%;
+  height:100%;
+}
+.jimu-popup.data-preview-popup .dgrid-cell{
+  border: none;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+.jimu-popup.data-preview-popup .dgrid-header .dgrid-cell-padding {
+  padding: 5px 10px;
+}
+.jimu-popup.data-preview-popup .dgrid-header .dgrid-row-table{
+  font-family: Avenir Medium;
+  font-size: 14px;
+  color: #333333;
+}
+.jimu-popup.data-preview-popup .dgrid-header .dgrid-resize-header-container{
+  /*display: inline;*/
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
+.jimu-popup.data-preview-popup .dgrid-scroller{
+  margin-top: 30px;
+}
+.jimu-popup.data-preview-popup .dgrid-row .dgrid-cell-padding {
+  padding: 10px;
+}
+.jimu-rtl .jimu-popup.data-preview-popup .dgrid-row .dgrid-cell-padding {
+  text-align: right;
+}
+
+
+/**CSS for LoadingShelter dijit***/
+.jimu-agol-loading{
+  position:absolute;
+  top:0;
+  left:0;
+  right:0;
+  bottom:0;
+  height:100%;
+  width:100%;
+  z-index:110;
+  background: no-repeat center center;
+  font-size:14px;
+  line-height:20px;
+}
+.jimu-agol-loading .loading-container{
+  position:absolute;
+  width:100%;
+  top:50%;
+  color:#000000;
+  font-weight:bold;
+  text-align: center;
+}
+@keyframes agol-loading {
+    0%,80%,100% {
+        opacity: .75;
+        box-shadow: 0 0 #00ACC5;
+        height: 2rem
+    }
+
+    40% {
+        opacity: 1;
+        box-shadow: 0 -0.5rem #00ACC5;
+        height: 2.5rem
+    }
+}
+.jimu-agol-loading .loading-container .img-div:before,
+.jimu-agol-loading .loading-container .img-div:after,
+.jimu-agol-loading .loading-container .img-div {
+  background: #00ACC5;
+  animation: agol-loading 0.8s infinite ease-in-out;
+  width: 0.85rem;
+  height: 2rem
+}
+.jimu-agol-loading .loading-container .img-div{
+  text-indent: -9999em;
+  margin: auto;
+  position: absolute;
+  right: calc(50% - 0.425rem);
+  font-size: 11px;
+  animation-delay: 0.16s;
+}
+.jimu-agol-loading .loading-container .img-div:before,
+.jimu-agol-loading .loading-container .img-div:after {
+  position: absolute;
+  top: 0;
+  content: '';
+}
+.jimu-agol-loading .loading-container .img-div:before{
+  left: -1.25rem;
+}
+.jimu-agol-loading .loading-container .img-div:after{
+  left: 1.25rem;
+  animation-delay: 0.32s;
+}
+.jimu-agol-loading .loading-container p{
+  display:inline-block;
+  height: 48px;
+  line-height:48px;
+  white-space:nowrap;
+  margin-top: 40px;
 }

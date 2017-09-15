@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Ölçek çubuğu"
-  })
-);
+define({
+  "_widgetLabel": "Ölçek çubuğu"
+});

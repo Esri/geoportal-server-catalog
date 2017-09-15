@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -91,7 +91,6 @@ function (declare, lang, array, html, baseFx, Deferred, all, on, topic, when,
 
           utils.setVerticalCenter(panel.domNode);
           this.openPanel(panel);
-          this.panels.push(panel);
 
           on(panel.domNode, 'click', lang.hitch(this, this._onPanelClick, panel));
 
@@ -138,6 +137,12 @@ function (declare, lang, array, html, baseFx, Deferred, all, on, topic, when,
           def.reject();
           return def;
         }
+      }else{
+        if(!this.panels.some(function(p){
+          return p.id === panel.id;
+        })){
+          this.panels.push(panel);
+        }
       }
 
       if(!panel.started){
@@ -182,7 +187,7 @@ function (declare, lang, array, html, baseFx, Deferred, all, on, topic, when,
         return def;
       }
 
-      return this.playClosePanelAnimation(panel).then(function(){
+      return this.playClosePanelAnimation(panel).then(lang.hitch(this, function(){
         if(this.activePanel && this.activePanel.id === panel.id){
           this.activePanel.onDeActive();
           this.activePanel = null;
@@ -192,7 +197,7 @@ function (declare, lang, array, html, baseFx, Deferred, all, on, topic, when,
         if(panel.domNode){
           html.setStyle(panel.domNode, 'display', 'none');
         }
-      });
+      }));
     },
 
     minimizePanel: function(panel){
@@ -515,6 +520,14 @@ function (declare, lang, array, html, baseFx, Deferred, all, on, topic, when,
     },
 
     _onPanelClick: function(panel){
+      this._activePanel(panel);
+    },
+
+    activatePanel: function(panel){
+      if(panel.state !== 'opened'){
+        return;
+      }
+
       this._activePanel(panel);
     },
 

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,7 +42,7 @@ function(declare, _WidgetBase, lang, array, html, on, Evented, utils) {
     },
     postCreate: function(){
       this.btnNode = html.create('div', {
-        'class': 'jimu-icon-btn'
+        'class': 'popup-menu-button'//'jimu-icon-btn'
       }, this.domNode);
 
       this.own(on(this.btnNode, 'click', lang.hitch(this, this._onBtnClick)));

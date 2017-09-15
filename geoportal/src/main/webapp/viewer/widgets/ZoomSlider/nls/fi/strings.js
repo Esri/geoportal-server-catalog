@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Tarkennuksen liukusäädin"
-  })
-);
+define({
+  "_widgetLabel": "Tarkennuksen liukusäädin"
+});
