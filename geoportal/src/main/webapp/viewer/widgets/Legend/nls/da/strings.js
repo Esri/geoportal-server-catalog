@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Signaturforklaring"
-  })
-);
+define({
+  "_widgetLabel": "Signaturforklaring"
+});

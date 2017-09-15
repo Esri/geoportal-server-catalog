@@ -20,12 +20,13 @@ define([
   'dojo/Deferred',
   'dojo/promise/all',
   'esri/lang',
-  './_FeatureTable',
-  './_RelationshipTable',
+  'jimu/portalUrlUtils',
+  './table/_FeatureTable',
+  // './_RelationshipTable',
   './utils'
   ], function(declare, lang, array, Deferred, all,
-    esriLang,
-    _FeatureTable, _RelationshipTable, attrUtils) {
+    esriLang, portalUrlUtils,
+    _FeatureTable,/* _RelationshipTable,*/ attrUtils) {
     return declare(null, {
       _activeLayerInfoId: null,
       _activeRelationshipKey: null,
@@ -65,6 +66,7 @@ define([
         this.map = map;
       },
 
+      //updateConfig: boolean.
       updateLayerInfoResources: function(updateConfig) {
         var def = new Deferred();
         attrUtils.readConfigLayerInfosFromMap(this.map, false, true)
@@ -106,6 +108,9 @@ define([
         return lang.clone(this.config.layerInfos);
       },
 
+      //e.g. When Query create a new feature layer, AT get the layerInfoChanged event,
+      //AT needs to call addLayerInfo method to update this._layerInfosFromMap.
+      //But AT doesn't open this Query-created feature layer, so it doesn't call addConfigInfo().
       addLayerInfo: function(newLayerInfo) {
         if (this._layerInfosFromMap.length === 0) {
           this._delayedLayerInfos.push(newLayerInfo);
@@ -115,6 +120,8 @@ define([
         }
       },
 
+      //When user open AT from Query result page, AT will call addConfigInfo method to
+      //update this.config.layerInfos. this.config.layerInfos syncs with ContentPanes of AT.
       addConfigInfo: function(newLayerInfo) {
         if (!this._getConfigInfoById(newLayerInfo.id)) {
           var info = attrUtils.getConfigInfoFromLayerInfo(newLayerInfo);
@@ -142,7 +149,7 @@ define([
             if (this.config.layerInfos[i].id === infoId) {
               if (this.featureTableSet[infoId]) {
                 this.featureTableSet[infoId].destroy();
-                delete this.featureTableSet;
+                delete this.featureTableSet[infoId];
               }
               this.config.layerInfos.splice(i, 1);
               break;
@@ -151,7 +158,12 @@ define([
         }
       },
 
-      getQueryTable: function(tabId, enabledMatchingMap) {
+      // def.resolve({
+      //   isSupportQuery: tableInfo.isSupportQuery,
+      //   table: this.featureTableSet[tabId] // instance of _FeatureTable
+      // });
+      // tabId: id of layerInfo
+      getQueryTable: function(tabId, enabledMatchingMap, hideExportButton) {
         var def = new Deferred();
         this._activeLayerInfoId = tabId;
 
@@ -161,12 +173,27 @@ define([
               def.resolve(null);
               return;
             }
+
             var activeLayerInfo = queryTableInfo.layerInfo;
             var layerObject = queryTableInfo.layerObject;
             var tableInfo = queryTableInfo.tableInfo;
+            // prevent create duplicate table
+            // for asychronous request in both queryTable and queryRelationTable
+            if (this.featureTableSet[tabId]) {
+              def.resolve({
+                isSupportQuery: tableInfo.isSupportQuery,
+                table: this.featureTableSet[tabId]
+              });
+              return;
+            }
+
             if (lang.getObject('isSupportQuery', false, tableInfo)) {
               var configInfo = this._getConfigInfoById(tabId);
-              var configFields = configInfo.layer.fields;
+              if (!configInfo) {
+                this.addConfigInfo(activeLayerInfo);
+                configInfo = this._getConfigInfoById(tabId);
+              }
+              var configFields = lang.getObject('layer.fields', false, configInfo);
               var layerFields = layerObject && layerObject.fields;
               // remove fields not exist in layerObject.fields
               configInfo.layer.fields = this._clipValidFields(
@@ -177,6 +204,7 @@ define([
               var table = new _FeatureTable({
                 map: this.map,
                 matchingMap: enabledMatchingMap,
+                hideExportButton: hideExportButton,
                 layerInfo: activeLayerInfo,
                 configedInfo: configInfo,
                 nls: this.nls
@@ -204,27 +232,26 @@ define([
         return def;
       },
 
-      getRelationTable: function(originalInfoId, key) {
+      getRelationTable: function(originalInfoId, key, enabledMatchingMap, hideExportButton) {
         var def = new Deferred();
         var currentShip = this.relationshipsSet[key];
         this._activeRelationshipKey = key;
 
         if (currentShip) {
-          var rTable = this.relationshipTableSet[key];
-          if (!rTable) {
-            var originalInfo = this._getLayerInfoById(originalInfoId);
-            var ship = this.relationshipsSet[key];
-            var configInfo = this._getConfigInfoById(ship && ship.shipInfo && ship.shipInfo.id);
-            rTable = new _RelationshipTable({
-              relationship: ship,
-              configedInfo: configInfo,
-              originalInfo: originalInfo,
-              nls: this.nls
-            });
-            this.relationshipTableSet[key] = rTable;
-          }
+          var originalInfo = this._getLayerInfoById(originalInfoId);
+          var layerInfoId = lang.getObject('shipInfo.id', false, currentShip);
 
-          def.resolve(rTable);
+          this.getQueryTable(layerInfoId, enabledMatchingMap, hideExportButton)
+          .then(lang.hitch(this, function(tableResult) {
+            if (tableResult && tableResult.table) {
+              var table = tableResult.table;
+              table.set('relatedOriginalInfo', originalInfo);
+              table.set('relationship', currentShip);
+            }
+            def.resolve(tableResult);
+          }), lang.hitch(function() {
+            def.resolve(null);
+          }));
         } else {
           def.resolve(null);
         }
@@ -242,29 +269,6 @@ define([
       getCurrentTable: function(key) {
         return this.featureTableSet[key] || this.relationshipTableSet[key];
       },
-
-      // /*
-      // *if dgrid doesn't be displayed in browser when create table,header of table will be hidden.
-      // *so cancel the request to prevent createTable if tab doesn't be selected.
-      // */
-      // hangUpTableThread: function() {
-      //   var p = null;
-
-      //   for (p in this.featureTableSet) {
-      //     var table = this.featureTableSet[p];
-      //     if (table) {
-      //       table.actived = false;
-      //       table.cancelThread();
-      //     }
-      //   }
-
-      //   for (p in this.relationshipTableSet) {
-      //     var shipTable = this.relationshipTableSet[p];
-      //     if (shipTable) {
-      //       shipTable.cancelThread();
-      //     }
-      //   }
-      // },
 
       collectRelationShips: function(layerInfo, relatedTableInfos) {
         this._collectRelationShips(layerInfo, layerInfo.layerObject, relatedTableInfos);
@@ -309,7 +313,8 @@ define([
       _processDelayedLayerInfos: function() { // must be invoke after initialize this._layerInfos
         if (this._delayedLayerInfos.length > 0) {
           array.forEach(this._delayedLayerInfos, lang.hitch(this, function(delayedLayerInfo) {
-            if (!this._getLayerInfoById(delayedLayerInfo && delayedLayerInfo.id)) {
+            if (!this._getLayerInfoById(delayedLayerInfo && delayedLayerInfo.id) &&
+              this.map && this.map.getLayer(delayedLayerInfo.id)) {
               this._layerInfosFromMap.push(delayedLayerInfo);
             }
           }));
@@ -341,6 +346,12 @@ define([
         return null;
       },
 
+
+      // def.resolve({
+      //         layerInfo: activeLayerInfo,
+      //         layerObject: layerObject,
+      //         tableInfo: tableInfo
+      //       });
       _getQueryTableInfo: function(tabId) {
         var def = new Deferred();
         var activeLayerInfo = this._getLayerInfoById(tabId);
@@ -396,8 +407,10 @@ define([
 
             var tableInfos = array.filter(relatedTableInfos, lang.hitch(this, function(tableInfo) {
               var tableInfoUrl = tableInfo.getUrl();
+
               return esriLang.isDefined(tableInfoUrl) && esriLang.isDefined(relationUrl) &&
-              (tableInfoUrl.toLowerCase() === relationUrl.toLowerCase());
+                (portalUrlUtils.removeProtocol(tableInfoUrl.toString().toLowerCase()) ===
+                portalUrlUtils.removeProtocol(relationUrl.toString().toLowerCase()));
             }));
 
             if (tableInfos && tableInfos.length > 0) {
@@ -442,6 +455,15 @@ define([
               break;
             }
           }
+        }
+        if(validFields.length === 0 && sFields.length > 0){
+          var fieldInfos = lang.clone(rFields);
+          array.forEach(fieldInfos, lang.hitch(this, function(fieldInfo){
+            if(fieldInfo.type !== 'esriFieldTypeGeometry'){
+              fieldInfo.show = true;
+              validFields.push(fieldInfo);
+            }
+          }));
         }
         return validFields;
       }

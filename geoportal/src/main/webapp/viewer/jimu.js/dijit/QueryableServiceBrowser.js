@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,8 +23,8 @@ define([
 ],
 function(declare, _BasicServiceBrowser, lang, array, serviceBrowserRuleUtils) {
   return declare([_BasicServiceBrowser], {
+    declaredClass: 'jimu.dijit.QueryableServiceBrowser',
     baseClass: 'jimu-queryable-service-browser',
-    declaredClass: 'jimu-service-chooser-from-portal jimu.dijit.QueryableServiceBrowser',
 
     //This dijit will filter MapService,FeatureService and ImageService
 

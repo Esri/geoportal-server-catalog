@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,21 +20,20 @@ define([
   'dojo/_base/lang',
   'dojo/Deferred',
   'esri/request',
-  './LayerInfo',
-  './LayerInfoFactory'
+  './LayerInfo'
 ], function(declare, array, lang, Deferred, esriRequest,
-LayerInfo, LayerInfoFactory) {
+LayerInfo) {
   var clazz = declare(LayerInfo, {
 
-    constructor: function(operLayer, map, options, noLegend) {
+    constructor: function(operLayer, map, layerInfoFactory, noLegend) { //done
       /*jshint unused: false*/
       this.noLegend = noLegend;
     },
 
-    getExtent: function() {
+    getExtent: function() {//
     },
 
-    initVisible: function() {
+    _initVisible: function() { // done
       /*jshint unused: false*/
       var visible = false, i;
       var mapService = this.originOperLayer.mapService;
@@ -47,12 +46,12 @@ LayerInfo, LayerInfoFactory) {
             visible = visible || this.newSubLayers[i].isVisible();
           }*/
           //visible = true;
-          if(mapService.layerInfo.subLayerVisible[mapService.subId] > 0) {
+          if(mapService.layerInfo._subLayerVisible[mapService.subId]) {
             visible = true;
           }
         } else {
           //layer in map service.
-          if(mapService.layerInfo.subLayerVisible[mapService.subId] > 0) {
+          if(mapService.layerInfo._subLayerVisible[mapService.subId]) {
             visible = true;
           }
         }
@@ -60,32 +59,17 @@ LayerInfo, LayerInfoFactory) {
       this._visible = visible;
     },
 
-    _setTopLayerVisible: function(visible) {
+    _setTopLayerVisible: function(visible) { //done
       var mapService;
       // mapservice
       if(this.originOperLayer.mapService) {
-        //this.originOperLayer.mapService.layerInfo
-        //.setSubLayerVisible(this.originOperLayer.mapService.subId, visible);
         mapService = this.originOperLayer.mapService;
         if(this.originOperLayer.subLayers.length > 0) {
-          // //group in map service.
-          // for(i=0; i<this.newSubLayers.length; i++) {
-          //   subId = this.newSubLayers[i].originOperLayer.mapService.subId;
-          //   if(visible) {
-          //     mapService.layerInfo.subLayerVisible[subId]++;
-          //   } else {
-          //     mapService.layerInfo.subLayerVisible[subId]--;
-          //   }
-          //   if(mapService.layerInfo.subLayerVisible[subId] > 0) {
-          //     mapService.layerInfo.setSubLayerVisible(subId, true);
-          //   } else {
-          //     mapService.layerInfo.setSubLayerVisible(subId, false);
-          //   }
-          // }
+          //group in map service.
           if(visible) {
-            mapService.layerInfo.subLayerVisible[mapService.subId]++;
+            mapService.layerInfo._subLayerVisible[mapService.subId] = true;
           } else {
-            mapService.layerInfo.subLayerVisible[mapService.subId]--;
+            mapService.layerInfo._subLayerVisible[mapService.subId] = false;
           }
           this._visible = visible;
 
@@ -96,21 +80,21 @@ LayerInfo, LayerInfoFactory) {
                 layerInfo.isVisbleOrInvisilbe();
             }
           });
-          mapService.layerInfo.setSubLayerVisible(subLayersVisible);
+          mapService.layerInfo._setSubLayerVisible(subLayersVisible);
         }
       }
     },
 
-    setLayerVisiblefromTopLayer: function() {
+    setLayerVisiblefromTopLayer: function() { // done
     },
 
-    _visibleChanged: function(visible) {
+    _visibleChanged: function(visible) { //done
       /*jshint unused: false*/
       // does not publish event for grouplayer, pulish event on
       // LayerInfoForMapService.
     },
 
-    _sevVisible: function(visible) {
+    _sevVisible: function(visible) { //done
       this.visible = visible;
     },
 
@@ -125,13 +109,13 @@ LayerInfo, LayerInfoFactory) {
     //    selfType: dynamic | tiled | group
     // };
 
-    obtainNewSubLayers: function() {
+    obtainNewSubLayers: function() {//done
       var newSubLayers = [];
       array.forEach(this.originOperLayer.subLayers, function(subOperLayer){
         var subLayerInfo;
         // create sub layer
         subOperLayer.parentLayerInfo = this;
-        subLayerInfo = LayerInfoFactory.getInstance().create(subOperLayer);
+        subLayerInfo = this._layerInfoFactory.create(subOperLayer);
         newSubLayers.push(subLayerInfo);
         subLayerInfo.init();
       }, this);
@@ -139,14 +123,14 @@ LayerInfo, LayerInfoFactory) {
 
     },
 
-    getOpacity: function() {
+    getOpacity: function() { // done
     },
 
     setOpacity: function(opacity) {
       /*jshint unused: false*/
     },
 
-    getLayerObject: function() {
+    getLayerObject: function() {// done
       var def = new Deferred();
       if(this.layerObject.empty) {
         // *** will improve.
@@ -171,15 +155,36 @@ LayerInfo, LayerInfoFactory) {
       return def;
     },
 
-    getLayerType: function() {
+    getLayerType: function() {//done
       var def = new Deferred();
       def.resolve("GroupLayer");
       return def;
     },
 
-    _getShowLegendOfWebmap: function() {
+    _getShowLegendOfWebmap: function() {// done
       var subId = this.originOperLayer.mapService.subId;
       return this.originOperLayer.mapService.layerInfo._getSublayerShowLegendOfWebmap(subId);
+    },
+
+    getScaleRange: function() {//done
+      var scaleRange;
+      var mapService = this.originOperLayer.mapService;
+      var jsapiLayerInfo = mapService.layerInfo._getJsapiLayerInfoById(mapService.subId);
+
+      if(jsapiLayerInfo &&
+         (jsapiLayerInfo.minScale >= 0) &&
+         (jsapiLayerInfo.maxScale >= 0)) {
+        scaleRange = {
+          minScale: jsapiLayerInfo.minScale,
+          maxScale: jsapiLayerInfo.maxScale
+        };
+      } else {
+        scaleRange = {
+          minScale: 0,
+          maxScale: 0
+        };
+      }
+      return scaleRange;
     }
 
   });

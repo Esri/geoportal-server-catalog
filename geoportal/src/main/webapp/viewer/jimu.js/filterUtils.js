@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,8 +24,9 @@ define([
   'jimu/utils'
 ],
 function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) {
+
   //refer arcgisonline/sharing/dijit/dialog/FilterDlg.js
-  return declare([], {
+  var clazz = declare([], {
     _stringFieldType: 'esriFieldTypeString',
     _dateFieldType: 'esriFieldTypeDate',
     _numberFieldTypes: ['esriFieldTypeOID',
@@ -79,6 +80,7 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
     },
 
     OPERATORS:{
+      //string operators
       stringOperatorIs:'stringOperatorIs',
       stringOperatorIsNot:'stringOperatorIsNot',
       stringOperatorStartsWith:'stringOperatorStartsWith',
@@ -90,8 +92,8 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
 
       //new added
       //stringOperatorContainsCaseInSensitive:'stringOperatorContainsCaseInSensitive',
-      //
 
+      //number operators
       numberOperatorIs:'numberOperatorIs',
       numberOperatorIsNot:'numberOperatorIsNot',
       numberOperatorIsAtLeast:'numberOperatorIsAtLeast',
@@ -103,19 +105,27 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
       numberOperatorIsBlank:'numberOperatorIsBlank',
       numberOperatorIsNotBlank:'numberOperatorIsNotBlank',
 
+      //date operators
       dateOperatorIsOn:'dateOperatorIsOn',
       dateOperatorIsNotOn:'dateOperatorIsNotOn',
       dateOperatorIsBefore:'dateOperatorIsBefore',
       dateOperatorIsAfter:'dateOperatorIsAfter',
+      dateOperatorIsOnOrBefore:'dateOperatorIsOnOrBefore',
+      dateOperatorIsOnOrAfter:'dateOperatorIsOnOrAfter',
       dateOperatorIsBetween:'dateOperatorIsBetween',
       dateOperatorIsNotBetween:'dateOperatorIsNotBetween',
       dateOperatorIsBlank:'dateOperatorIsBlank',
       dateOperatorIsNotBlank:'dateOperatorIsNotBlank',
+      dateOperatorInTheLast:'dateOperatorInTheLast',
+      dateOperatorNotInTheLast:'dateOperatorNotInTheLast',
+
+      //not operators, date types used for dateOperatorInTheLast and dateOperatorNotInTheLast
+      dateOperatorMinutes:'dateOperatorMinutes',
+      dateOperatorHours:'dateOperatorHours',
       dateOperatorDays:'dateOperatorDays',
       dateOperatorWeeks:'dateOperatorWeeks',
       dateOperatorMonths:'dateOperatorMonths',
-      dateOperatorInTheLast:'dateOperatorInTheLast',
-      dateOperatorNotInTheLast:'dateOperatorNotInTheLast'
+      dateOperatorYears:'dateOperatorYears'
     },
 
     prepare: function(url, allFieldsInfos){
@@ -235,11 +245,8 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
     /****  stringify                               ****/
     /**************************************************/
     //builtCompleteFilter
-    //1. If return null, it means partsObj is not invalid because some part is null.
-    //2. If return Object but the expr property is empty, it means 'Ask for values' option
-    //is checked and some values are missing, so it can't build a filter string.
-    //3. If return Object and the expr property is not null,
-    //   it means it builds a valid filter string.
+    //1. If return null or empty string, it means we can't get a valid sql expresion
+    //2. If return a non-empty string, it means we can get a valid sql expression
     getExprByFilterObj: function(partsObj) {
       //check part if valid or not, if part is null, it is invalid
       var isValidParts = array.every(partsObj.parts, function(part){
@@ -332,6 +339,10 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
           else if(operator === this.OPERATORS.dateOperatorIsBetween ||
                   operator === this.OPERATORS.dateOperatorIsNotBetween){
             return jimuUtils.isNotEmptyString(value1) && jimuUtils.isNotEmptyString(value2);
+          }
+          else if(operator === this.OPERATORS.dateOperatorInTheLast ||
+                  operator === this.OPERATORS.dateOperatorNotInTheLast){
+            return value !== undefined && value !== null;
           }else{
             return jimuUtils.isNotEmptyString(value);
           }
@@ -373,7 +384,35 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
       return filterString;
     },
 
+    _preBuiltSingleFilterString: function(part){
+      if(part.fieldObj.shortType === 'string' && part.valueObj.value === "<Null>"){
+        if(part.operator === this.OPERATORS.stringOperatorIs){
+          return {
+            whereClause: part.fieldObj.name + " IS NULL"
+          };
+        }else if(part.operator === this.OPERATORS.stringOperatorIsNot){
+          return {
+            whereClause: part.fieldObj.name + " IS NOT NULL"
+          };
+        }
+      }
+
+      if(part.fieldObj.shortType === 'number' && part.valueObj.value === "<Null>"){
+        if(part.operator === this.OPERATORS.numberOperatorIs){
+          return {
+            whereClause: part.fieldObj.name + " IS NULL"
+          };
+        }else if(part.operator === this.OPERATORS.numberOperatorIsNot){
+          return {
+            whereClause: part.fieldObj.name + " IS NOT NULL"
+          };
+        }
+      }
+      return null;
+    },
+
     builtSingleFilterString: function(part, parameterizeCount) {
+
       if(this.isHosted){
         part.caseSensitive = false;
       }
@@ -382,6 +421,11 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
         return {
           whereClause: null
         };
+      }
+
+      var preBuildResult = this._preBuiltSingleFilterString(part);
+      if(preBuildResult){
+        return preBuildResult;
       }
 
       var value = part.valueObj.value;
@@ -599,8 +643,32 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
              (this.isHosted ? "" : "timestamp ") + "'" + this.formatDate(this.addDay(value)) + "'";
           }
           break;
-          //case this.OPERATORS.dateOperatorInTheLast:
-          //case this.OPERATORS.dateOperatorNotInTheLast:
+        case this.OPERATORS.dateOperatorIsOnOrBefore:
+          if (part.valueObj.type === 'field') {
+            whereClause = part.fieldObj.name + " <= " + value;
+          } else {
+            whereClause = part.fieldObj.name + " <= " +
+             (this.isHosted ? "" : "timestamp ") + "'" + this.formatDate(this.addDay(value)) + "'";
+          }
+          break;
+        case this.OPERATORS.dateOperatorIsOnOrAfter:
+          if (part.valueObj.type === 'field') {
+            whereClause = part.fieldObj.name + " >= " + value;
+          } else {
+            whereClause = part.fieldObj.name + " >= " +
+             (this.isHosted ? "" : "timestamp ") + "'" + this.formatDate(value) + "'";
+          }
+          break;
+        case this.OPERATORS.dateOperatorInTheLast:
+          whereClause = part.fieldObj.name + " BETWEEN CURRENT_TIMESTAMP - " +
+            this._convertRangeToDays(part.valueObj.value, part.valueObj.range) +
+            " AND CURRENT_TIMESTAMP";
+          break;
+        case this.OPERATORS.dateOperatorNotInTheLast:
+          whereClause = part.fieldObj.name + " NOT BETWEEN CURRENT_TIMESTAMP - " +
+            this._convertRangeToDays(part.valueObj.value, part.valueObj.range) +
+            " AND CURRENT_TIMESTAMP";
+          break;
         case this.OPERATORS.dateOperatorIsBetween:
           if (parameterizeValues) {
             whereClause = part.fieldObj.name + " BETWEEN '" + value1 + "' AND '" + value2 + "'";
@@ -632,6 +700,29 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
       return {
         whereClause: whereClause
       };
+    },
+
+    _convertRangeToDays: function(rangeCount, rangeType) {
+      var days = rangeCount;  // this.OPERATORS.dateOperatorDays
+
+      if (rangeType === this.OPERATORS.dateOperatorYears) {
+        // not accurate; same as AGOL approach
+        days = rangeCount * 365;
+      } else if (rangeType === this.OPERATORS.dateOperatorMonths) {
+        // not accurate; same as AGOL approach
+        days = rangeCount * 30;
+      } else if (rangeType === this.OPERATORS.dateOperatorWeeks) {
+        days = rangeCount * 7;
+      } else if (rangeType === this.OPERATORS.dateOperatorHours) {
+        days = rangeCount / 24;
+      } else if (rangeType === this.OPERATORS.dateOperatorMinutes) {
+        days = rangeCount / (24 * 60);
+      }
+
+      // Round days to 6 decimal places--enough for one minute (0.000694 days)
+      days = Math.round(days * 1000000) / 1000000;
+
+      return days;
     },
 
     formatDate: function(value){
@@ -857,7 +948,15 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
 
       if (savedStrings.length) {
         // put the strings back in
-        var replace = function(part, savedStrings){
+        var replace = function (part, savedStrings) {
+          if (part.valueObj === undefined ||
+            part.valueObj === null) {
+            return false;
+          }
+          if (part.valueObj.value === undefined ||
+            part.valueObj.value === null) {
+            return false;
+          }
           if (part.fieldObj.shortType !== "string") {
             return false;
           }
@@ -1074,6 +1173,20 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
       return part;
     },
 
+    _removeOperator: function(shortType, str, operatorSize) {
+      //PR 8530
+      var timestamp = "timestamp ";
+      str = str.substring(operatorSize).trim();  // remove operator
+
+      // Remove "timestamp" flag for non-hosted sources
+      if (shortType === "date" && !this.isHosted && str.toLowerCase().startsWith(timestamp)) {
+        // timestamp '2014-01-01'
+        str = str.substring(timestamp.length).trim();
+      }
+
+      return str;
+    },
+
     parseSingleExpr: function(part){
       //code for wab, try handle with case sensitive
       //samples: {expr: "UPPER(CITY_NAME) LIKE UPPER('%#0#%')"}
@@ -1109,13 +1222,7 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
       var lStr = str.toLowerCase();
 
       if (lStr.startsWith("= ")) {
-
-        if (part.fieldObj.shortType === "date" && !this.isHosted) {
-          // = timestamp '20014-01-01'
-          str = str.substring(12).trim();
-        } else {
-          str = str.substring(2).trim();
-        }
+        str = this._removeOperator(part.fieldObj.shortType, str, "= ".length);
 
         this.storeValue(str, part);//this.storeValue(str.substring(2).trim(), part);
         if (part.fieldObj.shortType === "date") {
@@ -1127,12 +1234,7 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
         }
 
       } else if (lStr.startsWith("< ")) {
-        if (part.fieldObj.shortType === "date" && !this.isHosted) {
-          // < timestamp '20014-01-01'
-          str = str.substring(12).trim();
-        } else {
-          str = str.substring(2).trim();
-        }
+        str = this._removeOperator(part.fieldObj.shortType, str, "< ".length);
 
         this.storeValue(str, part);//this.storeValue(str.substring(2).trim(), part);
         if (part.fieldObj.shortType === "date") {
@@ -1147,12 +1249,7 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
         }
 
       } else if (lStr.startsWith("> ")) {
-        if (part.fieldObj.shortType === "date" && !this.isHosted) {
-          // > timestamp '20014-01-01'
-          str = str.substring(12).trim();
-        } else {
-          str = str.substring(2).trim();
-        }
+        str = this._removeOperator(part.fieldObj.shortType, str, "> ".length);
 
         this.storeValue(str, part);//this.storeValue(str.substring(2).trim(), part);
         if (part.fieldObj.shortType === "date") {
@@ -1167,12 +1264,7 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
         }
 
       } else if (lStr.startsWith("<> ")) {
-        if (part.fieldObj.shortType === "date" && !this.isHosted) {
-          // <> timestamp '20014-01-01'
-          str = str.substring(13).trim();
-        } else {
-          str = str.substring(3).trim();
-        }
+        str = this._removeOperator(part.fieldObj.shortType, str, "<> ".length);
 
         this.storeValue(str, part);//this.storeValue(str.substring(3).trim(), part);
         if (part.fieldObj.shortType === "date") {
@@ -1184,14 +1276,34 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
         }
 
       } else if (lStr.startsWith("<= ")) {
+        str = this._removeOperator(part.fieldObj.shortType, str, "<= ".length);
 
-        this.storeValue(str.substring(3).trim(), part);
-        part.operator = this.OPERATORS.numberOperatorIsAtMost;
+        this.storeValue(str, part);
+        if (part.fieldObj.shortType === "date") {
+          part.operator = this.OPERATORS.dateOperatorIsOnOrBefore;
+        } else if (part.fieldObj.shortType === "number") {
+          part.operator = this.OPERATORS.numberOperatorIsAtMost;
+        } else {
+          part.error = {
+            msg: "operator (" + lStr + ") not supported for string",
+            code: 3
+          };
+        }
 
       } else if (lStr.startsWith(">= ")) {
+        str = this._removeOperator(part.fieldObj.shortType, str, ">= ".length);
 
-        this.storeValue(str.substring(3).trim(), part);
-        part.operator = this.OPERATORS.numberOperatorIsAtLeast;
+        this.storeValue(str, part);
+        if (part.fieldObj.shortType === "date") {
+          part.operator = this.OPERATORS.dateOperatorIsOnOrAfter;
+        } else if (part.fieldObj.shortType === "number") {
+          part.operator = this.OPERATORS.numberOperatorIsAtLeast;
+        } else {
+          part.error = {
+            msg: "operator (" + lStr + ") not supported for string",
+            code: 3
+          };
+        }
 
       } else if (lStr.startsWith("like ")) {
 
@@ -1235,98 +1347,10 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
         }
 
       } else if (lStr.startsWith("between ")) {
-
-        if (part.fieldObj.shortType === "date" && !this.isHosted) {
-          // between timestamp '20014-01-01'
-          str = str.substring(18).trim();
-        } else {
-          str = str.substring(8).trim();
-        }
-
-        pos = str.toLowerCase().indexOf(" and ");
-        if (pos > -1) {
-          this.storeValue1(str.substring(0, pos).trim(), part);
-          if (part.fieldObj.shortType === "date" && !this.isHosted) {
-            //  between timestamp '20014-01-01' and date '20014-01-01'
-            this.storeValue2(str.substring(pos + 15).trim(), part);
-          } else {
-            this.storeValue2(str.substring(pos + 5).trim(), part);
-          }
-        } else {
-          part.error = {
-            msg: "missing AND operator for BETWEEN",
-            code: 3
-          };
-        }
-
-        if (part.fieldObj.shortType === "date") {
-          if (typeof part.valueObj.value1 === "string") {
-            // interactive placeholder
-            part.operator = this.OPERATORS.dateOperatorIsBetween;
-          } else if (Math.abs(this.subtractDay(part.valueObj.value2).getTime() -
-                                               part.valueObj.value1.getTime()) < 1000) {
-            part.valueObj.value = part.valueObj.value1;
-            delete part.valueObj.value1;
-            delete part.valueObj.value2;
-            part.operator = this.OPERATORS.dateOperatorIsOn;
-          } else {
-            part.operator = this.OPERATORS.dateOperatorIsBetween;
-          }
-        } else if (part.fieldObj.shortType === "number" || part.fieldObj.shortType === "oid") {
-          part.operator = this.OPERATORS.numberOperatorIsBetween;
-        } else {
-          part.error = {
-            msg: "string field not supported for BETWEEN",
-            code: 3
-          };
-        }
+        this._updatePartForBetween(str, true, part);
 
       } else if (lStr.startsWith("not between ")) {
-
-        if (part.fieldObj.shortType === "date" && !this.isHosted) {
-          // not between timestamp '20014-01-01'
-          str = str.substring(22).trim();
-        } else {
-          str = str.substring(12).trim();
-        }
-
-        pos = str.toLowerCase().indexOf(" and ");
-        if (pos > -1) {
-          this.storeValue1(str.substring(0, pos).trim(), part);
-          if (part.fieldObj.shortType === "date" && !this.isHosted) {
-            // not between timestamp '20014-01-01' and timestamp '20014-01-01'
-            this.storeValue2(str.substring(pos + 15).trim(), part);
-          } else {
-            this.storeValue2(str.substring(pos + 5).trim(), part);
-          }
-        } else {
-          part.error = {
-            msg: "missing AND operator for NOT BETWEEN",
-            code: 3
-          };
-        }
-
-        if (part.fieldObj.shortType === "date") {
-          if (typeof part.valueObj.value1 === "string") {
-            // interactive placeholder
-            part.operator = this.OPERATORS.dateOperatorIsNotBetween;
-          } else if (Math.abs(this.subtractDay(part.valueObj.value2).getTime() -
-                                               part.valueObj.value1.getTime()) < 1000) {
-            part.valueObj.value = part.valueObj.value1;
-            delete part.valueObj.value1;
-            delete part.valueObj.value2;
-            part.operator = this.OPERATORS.dateOperatorIsNotOn;
-          } else {
-            part.operator = this.OPERATORS.dateOperatorIsNotBetween;
-          }
-        } else if (part.fieldObj.shortType === "number" || part.fieldObj.shortType === "oid") {
-          part.operator = this.OPERATORS.numberOperatorIsNotBetween;
-        } else {
-          part.error = {
-            msg: "string field not supported for NOT BETWEEN",
-            code: 3
-          };
-        }
+        this._updatePartForBetween(str, false, part);
 
       } else if (lStr === "is null") {
 
@@ -1394,6 +1418,129 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
 
     subtractDay: function(date){
       return new Date(date.getTime() - this.dayInMS);
+    },
+
+    /**
+     * Parses a single BETWEEN or NOT BETWEEN expression.
+     * @param {string} str Expression to parse
+     * @param {boolean} isBetween Indicates if expression to be handled as BETWEEN (true) or NOT BETWEEN (false)
+     * @param {object} part Parsed expression; input uses part.fieldObj.shortType; output produces part.operator,
+     * part.valueObj, part.error
+     */
+    _updatePartForBetween: function (str, isBetween, part) {
+      // Supported cases:
+      // ["NOT "] "BETWEEN <number> AND <number>"
+      // ["NOT "] "BETWEEN <param> AND <param>"  parameterized
+      // ["NOT "] "BETWEEN <datestring> AND <datestring>"  not hosted
+      // ["NOT "] "BETWEEN timestamp <datestring> AND timestamp <datestring>"  hosted
+      // ["NOT "] "BETWEEN CURRENT_TIMESTAMP - <number> AND CURRENT_TIMESTAMP"
+      var pos, left, right, rangeType, testRangeCount, rangeCount, epsilon = 0.0001,
+        betweenPrefix = isBetween ? "between " : "not between ";
+
+      // Remove "between " (isBetween true) or "not between" (otherwise) and, if present, "timestamp " from beginning
+      str = this._removeOperator(part.fieldObj.shortType, str, betweenPrefix.length);
+
+      // "AND" separator is required
+      pos = str.toLowerCase().indexOf(" and ");
+      if (pos > -1) {
+        left = str.substring(0, pos).trim();
+
+        // Pull out "in the last..." operator
+        if (left.startsWith("CURRENT_TIMESTAMP ")) {
+          left = left.substring("CURRENT_TIMESTAMP ".length).trim();
+          if (left.startsWith("-")) {
+            part.operator = isBetween ? this.OPERATORS.dateOperatorInTheLast : this.OPERATORS.dateOperatorNotInTheLast;
+            try {
+              // Guess rangeType by finding integer number of range units. Can't tell difference between 1 month and
+              // 30 days, however, or 1 year and 365 days.
+              rangeCount = parseFloat(left.substring(1).trim());
+
+              if (rangeCount >= 1) {
+                // days, weeks, months, years
+                rangeType = this.OPERATORS.dateOperatorDays;
+                testRangeCount = rangeCount / 365;
+                if (Math.abs(testRangeCount - Math.round(testRangeCount)) < epsilon) {
+                  rangeCount = Math.round(testRangeCount);
+                  rangeType = this.OPERATORS.dateOperatorYears;
+                } else {
+                  testRangeCount = rangeCount / 30;
+                  if (Math.abs(testRangeCount - Math.round(testRangeCount)) < epsilon) {
+                    rangeCount = Math.round(testRangeCount);
+                    rangeType = this.OPERATORS.dateOperatorMonths;
+                  } else {
+                    testRangeCount = rangeCount / 7;
+                    if (Math.abs(testRangeCount - Math.round(testRangeCount)) < epsilon) {
+                      rangeCount = Math.round(testRangeCount);
+                      rangeType = this.OPERATORS.dateOperatorWeeks;
+                    }
+                  }
+                }
+              } else {
+                // hours, minutes
+                rangeType = this.OPERATORS.dateOperatorMinutes;
+                rangeCount *= 24;
+                if (Math.abs(rangeCount - Math.round(rangeCount)) < epsilon) {
+                  rangeType = this.OPERATORS.dateOperatorHours;
+                } else {
+                  rangeCount *= 60;
+                }
+              }
+
+              part.valueObj.value = rangeCount;
+              part.valueObj.range = rangeType;
+            } catch (ignore) {
+              part.error = {
+                msg: "missing count for '" + (isBetween ? "" : "not ") + "in the last'",
+                code: 3
+              };
+            }
+          } else {
+            part.error = {
+              msg: "'" + (isBetween ? "" : "not ") + "in the next' not supported",
+              code: 3
+            };
+          }
+
+        } else {
+          // Remove " and " and, if present, "timestamp " from beginning of part after AND
+          right = this._removeOperator(part.fieldObj.shortType, str.substring(pos), " and ".length);
+
+          this.storeValue1(left, part);
+          this.storeValue2(right, part);
+
+          if (part.fieldObj.shortType === "date") {
+            part.operator = isBetween ? this.OPERATORS.dateOperatorIsBetween : this.OPERATORS.dateOperatorIsNotBetween;
+
+            // Check for case where values are Dates 24 hours apart--they're used as a range for "on"
+            if (typeof part.valueObj.value1 === "object" && typeof part.valueObj.value2 === "object") {
+              try {
+                if (Math.abs(this.subtractDay(part.valueObj.value2).getTime() -
+                                              part.valueObj.value1.getTime()) < 1000) {
+                  part.valueObj.value = part.valueObj.value1;
+                  delete part.valueObj.value1;
+                  delete part.valueObj.value2;
+                  part.operator = isBetween ? this.OPERATORS.dateOperatorIsOn : this.OPERATORS.dateOperatorIsNotOn;
+                }
+              } catch (ignore) {
+              }
+            }
+          } else if (part.fieldObj.shortType === "number" || part.fieldObj.shortType === "oid") {
+            part.operator =
+              isBetween ? this.OPERATORS.numberOperatorIsBetween : this.OPERATORS.numberOperatorIsNotBetween;
+          } else {
+            part.error = {
+              msg: part.fieldObj.shortType + " field not supported for " + (isBetween ? "" : "NOT ") + "BETWEEN",
+              code: 3
+            };
+          }
+        }
+
+      } else {
+        part.error = {
+          msg: "missing AND operator for " + (isBetween ? "" : "NOT ") + "BETWEEN",
+          code: 3
+        };
+      }
     },
 
     storeValue: function(str, part){
@@ -1528,4 +1675,6 @@ function(declare, lang, array, locale, esriLang, ItemFileWriteStore, jimuUtils) 
       return date;
     }
   });
+
+  return clazz;
 });

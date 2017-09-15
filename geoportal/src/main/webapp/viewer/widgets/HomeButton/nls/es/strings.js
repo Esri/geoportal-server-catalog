@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Inicio"
-  })
-);
+define({
+  "_widgetLabel": "Inicio"
+});

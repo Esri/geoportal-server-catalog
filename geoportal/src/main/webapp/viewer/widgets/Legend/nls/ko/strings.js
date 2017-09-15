@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "범례"
-  })
-);
+define({
+  "_widgetLabel": "범례"
+});

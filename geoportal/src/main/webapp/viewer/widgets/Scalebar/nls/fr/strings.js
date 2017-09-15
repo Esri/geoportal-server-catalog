@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Barre d’échelle"
-  })
-);
+define({
+  "_widgetLabel": "Barre d’échelle"
+});

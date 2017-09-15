@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,16 +21,11 @@ define([
     'dojo/_base/html',
     'dojo/on',
     'dojo/_base/lang',
+    'jimu/utils',
     'jimu/dijit/Message',
     'dojo/touch'
   ],
-  function(
-    declare,
-    BaseWidget,
-    LocateButton,
-    html,
-    on,
-    lang) {
+  function(declare, BaseWidget, LocateButton, html, on, lang, jimuUtils) {
     var clazz = declare([BaseWidget], {
 
       name: 'MyLocation',
@@ -39,11 +34,19 @@ define([
       startup: function() {
         this.inherited(arguments);
         this.placehoder = html.create('div', {
-          'class': 'place-holder'
+          'class': 'place-holder',
+          title: this.label
         }, this.domNode);
 
-        if (window.navigator.geolocation) {
+        this.isNeedHttpsButNot = jimuUtils.isNeedHttpsButNot();
+
+        if (true === this.isNeedHttpsButNot) {
+          console.log('LocateButton::navigator.geolocation requires a secure origin.');
+          html.addClass(this.placehoder, "nohttps");
+          html.setAttr(this.placehoder, 'title', this.nls.httpNotSupportError);
+        } else if (window.navigator.geolocation) {
           this.own(on(this.placehoder, 'click', lang.hitch(this, this.onLocationClick)));
+          this.own(on(this.map, 'zoom-end', lang.hitch(this, this._scaleChangeHandler)));
         } else {
           html.setAttr(this.placehoder, 'title', this.nls.browserError);
         }
@@ -59,6 +62,13 @@ define([
           this._createGeoLocate();
           this.geoLocate.locate();
           html.addClass(this.placehoder, "locating");
+        }
+      },
+      //use current scale in Tracking
+      _scaleChangeHandler: function() {
+        var scale = this.map.getScale();
+        if (scale && this.geoLocate && this.geoLocate.useTracking) {
+          this.geoLocate.scale = scale;
         }
       },
 
@@ -86,6 +96,17 @@ define([
           json.useTracking = true;
         }
         json.centerAt = true;
+        json.setScale = true;
+
+        var geoOptions = {
+          maximumAge: 0,
+          timeout: 15000,
+          enableHighAccuracy: true
+        };
+        if (json.geolocationOptions) {
+          json.geolocationOptions = lang.mixin(geoOptions, json.geolocationOptions);
+        }
+
         this.geoLocate = new LocateButton(json);
         this.geoLocate.startup();
 

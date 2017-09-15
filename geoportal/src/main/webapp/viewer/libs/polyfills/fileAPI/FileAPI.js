@@ -477,7 +477,9 @@
 						json = JSON.parse(str);
 					}
 					else {
-						json = (new Function('return ('+str.replace(/([\r\n])/g, '\\$1')+');'))();
+						console.error('window.JSON is not supported.');
+						return {};
+						// json = (new Function('return ('+str.replace(/([\r\n])/g, '\\$1')+');'))();
 					}
 				}
 				catch( err ){
@@ -3718,20 +3720,20 @@
 				 * @param {Object} [opts]
 				 */
 				publish: function (el, id, opts){
-					opts = opts || {};
-					el.innerHTML = _makeFlashHTML({
-						  id: id
-						, src: _getUrl(api.flashUrl, 'r=' + api.version)
-//						, src: _getUrl('http://v.demidov.boom.corp.mail.ru/uploaderfileapi/FlashFileAPI.swf?1')
-						, wmode: opts.camera ? '' : 'transparent'
-						, flashvars: 'callback=' + (opts.onEvent || 'FileAPI.Flash.onEvent')
-							+ '&flashId='+ id
-							+ '&storeKey='+ navigator.userAgent.match(/\d/ig).join('') +'_'+ api.version
-							+ (flash.isReady || (api.pingUrl ? '&ping='+api.pingUrl : ''))
-							+ '&timeout='+api.flashAbortTimeout
-							+ (opts.camera ? '&useCamera=' + _getUrl(api.flashWebcamUrl) : '')
-							+ '&debug='+(api.debug?"1":"")
-					}, opts);
+// 					opts = opts || {};
+// 					el.innerHTML = _makeFlashHTML({
+// 						  id: id
+// 						, src: _getUrl(api.flashUrl, 'r=' + api.version)
+// //						, src: _getUrl('http://v.demidov.boom.corp.mail.ru/uploaderfileapi/FlashFileAPI.swf?1')
+// 						, wmode: opts.camera ? '' : 'transparent'
+// 						, flashvars: 'callback=' + (opts.onEvent || 'FileAPI.Flash.onEvent')
+// 							+ '&flashId='+ id
+// 							+ '&storeKey='+ navigator.userAgent.match(/\d/ig).join('') +'_'+ api.version
+// 							+ (flash.isReady || (api.pingUrl ? '&ping='+api.pingUrl : ''))
+// 							+ '&timeout='+api.flashAbortTimeout
+// 							+ (opts.camera ? '&useCamera=' + _getUrl(api.flashWebcamUrl) : '')
+// 							+ '&debug='+(api.debug?"1":"")
+// 					}, opts);
 				},
 
 
@@ -4368,48 +4370,48 @@
 
 
 		function _makeFlashImage(opts, base64, fn){
-			var
-				  key
-				, flashId = api.uid()
-				, el = document.createElement('div')
-				, attempts = 10
-			;
+			// var
+			// 	  key
+			// 	, flashId = api.uid()
+			// 	, el = document.createElement('div')
+			// 	, attempts = 10
+			// ;
 
-			for( key in opts ){
-				el.setAttribute(key, opts[key]);
-				el[key] = opts[key];
-			}
+			// for( key in opts ){
+			// 	el.setAttribute(key, opts[key]);
+			// 	el[key] = opts[key];
+			// }
 
-			_css(el, opts);
+			// _css(el, opts);
 
-			opts.width	= '100%';
-			opts.height	= '100%';
+			// opts.width	= '100%';
+			// opts.height	= '100%';
 
-			el.innerHTML = _makeFlashHTML(api.extend({
-				  id: flashId
-				, src: _getUrl(api.flashImageUrl, 'r='+ api.uid())
-				, wmode: 'opaque'
-				, flashvars: 'scale='+ opts.scale +'&callback='+_wrap(function _(){
-					_unwrap(_);
-					if( --attempts > 0 ){
-						_setImage();
-					}
-					return true;
-				})
-			}, opts));
+			// el.innerHTML = _makeFlashHTML(api.extend({
+			// 	  id: flashId
+			// 	, src: _getUrl(api.flashImageUrl, 'r='+ api.uid())
+			// 	, wmode: 'opaque'
+			// 	, flashvars: 'scale='+ opts.scale +'&callback='+_wrap(function _(){
+			// 		_unwrap(_);
+			// 		if( --attempts > 0 ){
+			// 			_setImage();
+			// 		}
+			// 		return true;
+			// 	})
+			// }, opts));
 
-			function _setImage(){
-				try {
-					// Get flash-object by id
-					var img = flash.get(flashId);
-					img.setImage(base64);
-				} catch (e){
-					api.log('[err] FlashAPI.Preview.setImage -- can not set "base64":', e);
-				}
-			}
+			// function _setImage(){
+			// 	try {
+			// 		// Get flash-object by id
+			// 		var img = flash.get(flashId);
+			// 		img.setImage(base64);
+			// 	} catch (e){
+			// 		api.log('[err] FlashAPI.Preview.setImage -- can not set "base64":', e);
+			// 	}
+			// }
 
-			fn(false, el);
-			el = null;
+			// fn(false, el);
+			// el = null;
 		}
 
 

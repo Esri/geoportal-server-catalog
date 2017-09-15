@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,7 +14,9 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['dojo/_base/declare',
+define([
+    'dojo/Evented',
+    'dojo/_base/declare',
     'dijit/_WidgetBase',
     'dijit/_TemplatedMixin',
     'dojo/_base/lang',
@@ -30,7 +32,7 @@ define(['dojo/_base/declare',
     'jimu/dijit/Message',
     'jimu/dijit/LoadingShelter'
   ],
-  function(declare, _WidgetBase, _TemplatedMixin, lang, html,
+  function(Evented, declare, _WidgetBase, _TemplatedMixin, lang, html,
     on, template, has, request, esriLang, utils, _CropImage,
     Popup, Message, LoadingShelter) {
     var count = 0;
@@ -38,7 +40,7 @@ define(['dojo/_base/declare',
     //summary:
     //  popup the image file chooser dialog, when choose an image file,
     //  display the image file and return the image's base64 code
-    var ic = declare([_WidgetBase, _TemplatedMixin], {
+    var ic = declare([_WidgetBase, _TemplatedMixin, Evented], {
       templateString: template,
       declaredClass: "jimu.dijit.ImageChooser",
 
@@ -116,6 +118,8 @@ define(['dojo/_base/declare',
       },
 
       _processProperties: function() {
+        this.fileProperty = {};
+
         if (this.label && typeof this.label === 'string') {
           this.displayText.innerHTML = this.label;
           html.setStyle(this.hintText, 'display', 'block');
@@ -246,6 +250,7 @@ define(['dojo/_base/declare',
                 'message': message
               });
             } else {
+              this.fileProperty.fileName = fileName;
               if (window.isXT && this.cropImage && file.type !== 'image/gif') {
                 this._cropImageByUser(fileData);
               } else {
@@ -282,7 +287,7 @@ define(['dojo/_base/declare',
       },
 
       _readFileData: function(fileData) {
-        this.onImageChange(fileData);
+        this.onImageChange(fileData, this.fileProperty);
         if (this.displayImg) {
           html.setAttr(this.displayImg, 'src', fileData);
         }
@@ -291,6 +296,12 @@ define(['dojo/_base/declare',
             html.setAttr(this.selfImg, 'src', fileData);
           } else {
             this.selfImg.src = fileData;
+          }
+          //Center&Vertically
+          var layoutBox = html.getMarginBox(this.hintImage);
+          if (layoutBox && layoutBox.w && layoutBox.h) {
+            html.style(this.selfImg, "maxWidth", layoutBox.w + "px");
+            html.style(this.selfImg, "maxHeight", layoutBox.h + "px");
           }
         }
       },
@@ -307,7 +318,7 @@ define(['dojo/_base/declare',
           hidden: true
         });
         var cropPopup = new Popup({
-          titleLabel: 'Crop Image',
+          titleLabel: this.nls.cropImage,
           content: cropImage,
           // autoHeight: true,
           width: 500,
@@ -359,6 +370,8 @@ define(['dojo/_base/declare',
 
       onImageChange: function(fileData) {
         this.imageData = fileData;
+        this.emit("imageChange", this.imageData, this.fileProperty);
+        this.emit("change", this.imageData, this.fileProperty);
       }
     });
 

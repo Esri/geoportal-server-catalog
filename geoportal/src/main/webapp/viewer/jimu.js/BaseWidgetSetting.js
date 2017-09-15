@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,6 +30,12 @@ define([
 
     getConfig: function(){
       //implemented by sub class, should return the config object.
+      //if this function return a promise, the promise should resolve the config object.
+    },
+
+    getDataSources: function(){
+      //implemented by sub class, should return the data sources that this widget generates.
+      //if this function return a promise, the promise should resolve the data sources object.
     },
 
     // setConfig: function(/* jshint unused:false */ config){

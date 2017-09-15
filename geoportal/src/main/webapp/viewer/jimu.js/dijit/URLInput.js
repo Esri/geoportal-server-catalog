@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,6 +40,9 @@ function(declare, html, ValidationTextBox, regexp) {
     },
 
     validator:function(value){
+      if (false === this.required && "" === value) {
+        return true;
+      }
       //invalid if value is a number or a number string(e.g. 5 or "5")
       if(isFinite(value)){
         return false;
@@ -51,6 +54,7 @@ function(declare, html, ValidationTextBox, regexp) {
       });
 
       var reg = new RegExp(strReg, 'g');
+      reg.lastIndex = 0;
       var b1 = reg.test(value);
 
       if(this.rest){

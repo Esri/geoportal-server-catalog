@@ -1,0 +1,357 @@
+<!DOCTYPE HTML>
+<html lang="en" dir="ltr">
+
+<head id="reportHead">
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=Edge,chrome=1">
+  <title></title>
+  <script>
+    // Show/hide text area controls based on the value
+    function onPrintButtonClicked() {
+      var notesContainer, i;
+      notesContainer = document.getElementsByClassName("esriCTNotesContainer");
+      //process notes to show/hide based on contents
+      for (i = 0; i < notesContainer.length; i++) {
+        if (notesContainer[i]) {
+          //Hide the notes which are not having values
+          if (notesContainer[i].children[1].value.trim() === "") {
+            notesContainer[i].className += " esriCTHideReportNotes";
+          }
+          else {
+            //Removes hidden class if available
+            notesContainer[i].className =
+              notesContainer[i].className.replace("esriCTHideReportNotes", "");
+          }
+        }
+      }
+      //after processing notes, print the window
+      window.print();
+    }
+  </script>
+  <!-- Report prev page css -->
+  <style type="text/css">
+    .esriCTReportMapWait {
+      background: #fff url('data:image/gif;base64,R0lGODlhGAAYAPfRAPT09ODg4PLy8ufn5wC/7+Hh4evr6+7u7ujo6OLi4vPz8+3t7fHx8eXl5ebm5tbs8lLN7AvB7gK/7wTA7wbA7wO/7wG/7+vx8+Pj4xjD7lHN7Kfg7g/B7n3W7V7Q7PP09Kjg7uzy9HzW7YXY7V/Q7PHz9BnD7kDK7KXf7hLC7j/J7BXC7tXs8pzd7jTH7PL09Njt8iHE7dru83XT6ynF7Ory9Obo6Ovy9Nfu8xfC7Zze7nHU7Zfd7tTr8aDh8iPE7Zzg8SLF7mLQ7FfP7tXr8dfs8WvR6tzv9DrI7KLh8cPp8wjA73jV7bTl8dvv84/a7bTm86/k8ePv8sfm7k3M7Ony9EfK63DV787q8rPl8VDN7BrD7WHR7WDS7xvD7Z/h8hnD7U3O7o/d8bbl8YXT5qfi8V3P7FvM6aTi8d/t8VzP64zc8eTv8pjb7ArA7ijG7SbG7g3B7jnH6yTE7ZTV5WXQ7MPo8XTS6pPZ6wjA7lnQ7Znf8R/E7pbZ6nrX7kHJ697u8jTI7bvb4sLc4k7L62LP6xHC7p3e7qnd6n7V6wXA77zn8eLw9OTw9E/L6gnA7rrm8YvY6xjC7XDV7iDE7Zvf8Mvp8VHL6mrR61zP7Mrj6aPc6sbi6T/K7YzU5m/U7mrT7aHd7FnO7JPc7u/z9IfT5sDl7onX6tDs86Ph8SXF7rDg7C/G7EzM7GbR6xDB7h3D7azj8e7z9Kvj8UfL7HPT66Xg7ofc8tzu80XL7YDV693v9J3W5DvI61XM6hTC7izH7eXv8jnI7HfW7png8iXE7Z/g8EDK7QfA75Te8UfL7aTf7tfs8sXl7Zjf8c7s89Xt8////wAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACH/C05FVFNDQVBFMi4wAwEAAAAh/wtYTVAgRGF0YVhNUDw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuNi1jMDY3IDc5LjE1Nzc0NywgMjAxNS8wMy8zMC0yMzo0MDo0MiAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENDIDIwMTUgKE1hY2ludG9zaCkiIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6MkQ3RDc3ODNCNjdFMTFFNThFMERBOTlFOTM1QUJEQzYiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6MkQ3RDc3ODRCNjdFMTFFNThFMERBOTlFOTM1QUJEQzYiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDoyRDdENzc4MUI2N0UxMUU1OEUwREE5OUU5MzVBQkRDNiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDoyRDdENzc4MkI2N0UxMUU1OEUwREE5OUU5MzVBQkRDNiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PgH//v38+/r5+Pf29fTz8vHw7+7t7Ovq6ejn5uXk4+Lh4N/e3dzb2tnY19bV1NPS0dDPzs3My8rJyMfGxcTDwsHAv769vLu6ubi3trW0s7KxsK+urayrqqmop6alpKOioaCfnp2cm5qZmJeWlZSTkpGQj46NjIuKiYiHhoWEg4KBgH9+fXx7enl4d3Z1dHNycXBvbm1sa2ppaGdmZWRjYmFgX15dXFtaWVhXVlVUU1JRUE9OTUxLSklIR0ZFRENCQUA/Pj08Ozo5ODc2NTQzMjEwLy4tLCsqKSgnJiUkIyIhIB8eHRwbGhkYFxYVFBMSERAPDg0MCwoJCAcGBQQDAgEAACH5BAUKANEALAAAAAAYABgAAAjeAAEIHAjggQgVJigUwODAAAOCEAc+0FCBgEUCATJmHCAg4kBbESxCAPHgggIGBwZkLLDA4wgJBCA88AhAgMoABiC2sEDAA02CCDK2FPggJImfEIMW6AgAQkykEVUOAMAC5kyoBAVkFNDhKVaIKg2cILDhK8QDARxkIADDbNYACSgQuOB2oIKVARTUFXgXbgCmdbUmaBDgwF4AaBsGmLo3LIOtgTM+lFqXcs0CARCYVQp4QUbNUIMGGDrQwEbAEG1mzBnxAObFB5gKSLmSdETVGnOfxirAQIMEGQc79BgQACH5BAUKANEALAAAAAAUAAwAAAiFAKMJFBgCVZkdhYQZ+mHlzQ5jOAZKjFWHlYQJYCil4JCDAIFMayRG40Ej2q9cy+z4IGZJhygXFuKEGWiAQAQhWUpEK/FCYJVoUU5NICBwQYBSiUQqfYHoTDQBBQIgkPFBqVJN0QYEGGC169MAAQR4tWpg61irDgIcOKs0QVi2IqMqgCsxIAAh+QQFCgDRACwEAAAAFAAMAAAIbgABCBRgoEGCAhQynOjQQ6BDhwIGBJg4kYBFAhIgPHgI4ECBiQMOCFBwocgGCBYjtHgIUgBHhw9QWhjhMACCly9JYEQh8CbOlx4IRNj48ydKDUV/PiBQgWhSjihFPH0JgkCnqRyXmsD68AIBCgEBACH5BAUKANEALAwAAAAMABUAAAh9AAtgcGCAQbSDCKMFWLhwgICE0RQwODBgYYEFEBEKqDiISUaECDwRmPTxIKcJBNCUjKbLQqAXJYPBItBkZa1oQ1ZOycNnJbMVE1biyqFopQxJyFY+SLFkpSk3QUqWmEFAT0lAMThA+rgLEwEqJSNV4JCkpCACnxqtbHPjYEAAIfkEBQoA0QAsDAADAAwAFQAACHUAAQgEIGBAgAAGBioUiODggoUKGxYQAHGgwQEVBQo4SDGjwYQZDwRwkJFggAQlFRwseYEAhZIwCGQouYHAiZIQCHTI+ICAhB4Zc0LISIJAhAcVPRCw0ALig5wSRgwM8QBETqMoFBLYSqCCBqQKKZhQIYJIxYAAIfkEBQoA0QAsBAAMABQADAAACIYAowkcSLCgQAUBAhhcSFBAgAQMIx4I4CAiwwEBDFg06DAAg40FMQ6IZiPaB5AIAhQQEI2MEFk1IobA8yfAAoEECLRK5STmhxsCoQExE62CRoE85lTYokqHmFtQZl05FmNFhmEFx8z4IWFChBQrJryKwCHaniMGcUgBZYSQFzmXaHGpxMhgQAAh+QQFCgDRACwAAAwAFAAMAAAIbgApELgAoKDBgwgLmiDwIKHDgyoIgHhIUQQBCBQfEqnAMKNDDRc9JnwQgYAHkQURFEQhgQAJkQgCGBxh4WJDhwIGBJBp8FDJixtghAAg4IDOAAUWIHwAoSWBpzujDhDwkEWHExkoBEjQwAADgwEBACH5BAUKANEALAAAAwAMABUAAAiAAKMJHMJLoMGDfggUs3HQ4KJHEzZ9aChQCwFXFAWymDABS8ZoTwgo+xhNDYFRJJEQAELSBQEfJHtF+0LSUbRkJO9E60LqY6hoQZ59TOPCgjOSfaIBU/KRja9ocEg2o0EHwccSqwIEGCDg44ECWgccEACgoYABWtNmFGCgQYIAAQEAOw==') no-repeat center center;
+      height: 200px;
+    }
+
+    .esriCTHTMLData {
+      position: relative;
+      width: 100%;
+      height: auto;
+    }
+
+    .jimu-rtl .esriCTHTMLData {
+      direction: rtl;
+    }
+
+    .esriCTTable {
+      margin-top: 10px;
+      padding: 0;
+      border-collapse: collapse;
+      border-spacing: 0;
+      width: 100%;
+      page-break-inside: avoid;
+      table-layout: fixed;
+    }
+
+    .jimu-rtl .esriCTTable {
+      direction: rtl;
+    }
+
+    .esriCTTable th {
+      border: 1px solid gray;
+      background-color: #E4E4E4;
+      word-wrap: break-word;
+    }
+
+    .esriCTTable td {
+      border: 1px solid gray;
+      word-wrap: break-word;
+    }
+
+    .esriCTNumber {
+      text-align: right;
+    }
+
+    .esriCTSectionTitle {
+      font-size: 18px;
+      color: #0f96cc;
+      font-weight: bold;
+      margin: 30px 0px;
+      width: calc(100% - 10px);
+      word-break: break-all;
+    }
+
+    .jimu-rtl .esriCTSectionTitle {
+      float: right;
+      direction: rtl;
+    }
+
+    .jimu-rtl .esriCTReportMap .esriCTSectionTitle {
+      float: none;
+    }
+
+    .esriCTReportLogo {
+      float: left;
+      max-width: calc(50% - 10px);
+      margin: auto 10px auto 0;
+      max-height: 90%;
+      position: absolute;
+      top: 0;
+      bottom: 0;
+    }
+
+    .jimu-rtl .esriCTReportLogo {
+      float: right;
+      margin: auto 0 auto 10px;
+    }
+
+    .esriCTPrintTitleDiv {
+      height: 56px;
+      float: right;
+      min-width: 50%;
+    }
+
+    .jimu-rtl .esriCTPrintTitleDiv {
+      float: left;
+      direction: rtl;
+    }
+
+    .esriCTInputTitle {
+      height: 55px;
+      line-height: 55px;
+      border: none;
+      font-size: 25px;
+      width: 100%;
+      padding: 0px;
+    }
+
+    .esriCTInputTitle::-ms-clear {
+      display: none;
+    }
+
+    .esriCTReportMain {
+      background: #FFF;
+      border: solid 1px #000;
+      margin: 0 auto;
+      padding: 20px;
+      width: 797px;
+    }
+
+    .esriCTReportMap {
+      text-align: center;
+    }
+
+    .esriCTReportMapImg {
+      max-width: 96%;
+      margin-top: 10px;
+    }
+
+    .esriCTReportLandscapeMapImg {
+      max-width: 80%;
+    }
+
+    .esriCTReportMapFail {
+      height: 50px;
+    }
+
+    .esriCTReportFooter {
+      text-align: center;
+      font-size: 80%;
+      padding: 10px 0;
+      white-space: pre-wrap;
+    }
+
+    .esriCTPrintPage {
+      padding: 30px 0;
+      margin: 20px auto;
+      font-family: arial, sans-serif;
+      font-size: 13px;
+    }
+
+    .esriCTReportBar {
+      width: 100%;
+      position: fixed;
+      left: 0;
+      top: 0;
+      z-index: 6;
+      height: 50px;
+      background: #e2f1fc;
+      border-bottom: 1px solid #000;
+    }
+
+    .jimu-rtl .esriCTReportBar {
+      left: inherit;
+      right: 0;
+    }
+
+    .esriCTPrintButton,
+    .esriCTCloseButton {
+      color: #444;
+      font-family: Verdana, Helvetica, sans-serif;
+      font-size: 12px;
+      -moz-border-radius: 3px;
+      -webkit-border-radius: 3px;
+      border-radius: 3px;
+      border: 1px solid #8b8b8b;
+      box-shadow: none;
+      -webkit-box-shadow: none;
+      background: #F2F2F2;
+      background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNlNWU1ZTUiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+      background: -moz-linear-gradient(top, #F2F2F2 0%, #D1D1D1 100%);
+      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #F2F2F2), color-stop(100%, #D1D1D1));
+      background: -webkit-linear-gradient(top, #F2F2F2 0%, #D1D1D1 100%);
+      background: -o-linear-gradient(top, #F2F2F2 0%, #D1D1D1 100%);
+      background: -ms-linear-gradient(top, #F2F2F2 0%, #D1D1D1 100%);
+      background: linear-gradient(to bottom, #F2F2F2 0%, #D1D1D1 100%);
+      filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#F2F2F2', endColorstr='#D1D1D1', GradientType=0);
+      margin: 10px 20px;
+      line-height: 16px;
+      display: block;
+      padding: 5px 10px;
+      outline: 0;
+      text-decoration: none;
+      cursor: pointer;
+      font-weight: 400;
+      white-space: nowrap;
+      float: right;
+    }
+
+    .jimu-rtl .esriCTPrintButton,
+    .jimu-rtl .esriCTCloseButton {
+      float: left;
+    }
+
+    .esriCTPrintButton:hover,
+    .esriCTPrintButton:focus,
+    .esriCTCloseButton:hover,
+    .esriCTCloseButton:focus {
+      background: #E5E6E6;
+      background: url(data:image/svg+xml;base64,PD94bWwgdmVyc2lvbj0iMS4wIiA/Pgo8c3ZnIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgd2lkdGg9IjEwMCUiIGhlaWdodD0iMTAwJSIgdmlld0JveD0iMCAwIDEgMSIgcHJlc2VydmVBc3BlY3RSYXRpbz0ibm9uZSI+CiAgPGxpbmVhckdyYWRpZW50IGlkPSJncmFkLXVjZ2ctZ2VuZXJhdGVkIiBncmFkaWVudFVuaXRzPSJ1c2VyU3BhY2VPblVzZSIgeDE9IjAlIiB5MT0iMCUiIHgyPSIwJSIgeTI9IjEwMCUiPgogICAgPHN0b3Agb2Zmc2V0PSIwJSIgc3RvcC1jb2xvcj0iI2ZmZmZmZiIgc3RvcC1vcGFjaXR5PSIxIi8+CiAgICA8c3RvcCBvZmZzZXQ9IjEwMCUiIHN0b3AtY29sb3I9IiNlNWU1ZTUiIHN0b3Atb3BhY2l0eT0iMSIvPgogIDwvbGluZWFyR3JhZGllbnQ+CiAgPHJlY3QgeD0iMCIgeT0iMCIgd2lkdGg9IjEiIGhlaWdodD0iMSIgZmlsbD0idXJsKCNncmFkLXVjZ2ctZ2VuZXJhdGVkKSIgLz4KPC9zdmc+);
+      background: -moz-linear-gradient(top, #E5E6E6 0%, #A0A1A1 100%);
+      background: -webkit-gradient(linear, left top, left bottom, color-stop(0%, #E5E6E6), color-stop(100%, #A0A1A1));
+      background: -webkit-linear-gradient(top, #E5E6E6 0%, #A0A1A1 100%);
+      background: -o-linear-gradient(top, #E5E6E6 0%, #A0A1A1 100%);
+      background: -ms-linear-gradient(top, #E5E6E6 0%, #A0A1A1 100%);
+      background: linear-gradient(to bottom, #E5E6E6 0%, #A0A1A1 100%);
+      filter: progid: DXImageTransform.Microsoft.gradient(startColorstr='#E5E6E6', endColorstr='#A0A1A1', GradientType=0);
+    }
+
+    .esriCTReportHeader {
+      display: block;
+      width: 100%;
+      height: 60px;
+      border-bottom: 1px solid #000;
+      margin-bottom: 5px;
+      position: relative;
+    }
+
+    .esriCTReportBarMsg {
+      text-align: center;
+      margin-top: 16px;
+    }
+
+    .esriCTNotesContainer {
+      width: 100%;
+      margin-top: 30px;
+    }
+
+    .esriCTReportNotes {
+      resize: none;
+      width: calc(100% - 5px);
+      max-width: calc(100% - 5px);
+      font-family: "Arial";
+      font-size: 13px;
+      border: 1px solid gray;
+      overflow-y: hidden; /* prevents scroll bar flash */
+    }
+
+    .esriCTReportNotesParagraph {
+      display: none;
+      white-space: pre-wrap;
+    }
+
+    .jimu-rtl .esriCTReportNotes {
+      direction: rtl;
+    }
+
+    .esriCTHidden {
+      display: none;
+    }
+  </style>
+  <!-- Media print css -->
+  <style type="text/css" media="print">
+    .esriCTPrintPage {
+      padding: 0;
+      color: #000;
+      margin: 0;
+      float: none;
+      background: #fff url(none);
+    }
+
+    .esriCTTable {
+      page-break-inside: avoid;
+    }
+
+    .esriCTPageBreak {
+      page-break-after: always;
+    }
+
+    .esriCTReportFooter {
+      font-size: 75%;
+    }
+
+    .esriCTReportBar {
+      display: none;
+    }
+
+    .esriCTReportMain {
+      border: none;
+    }
+
+    .esriCTReportMapImg {
+      box-shadow: none;
+      border: none;
+    }
+
+    .esriCTReportNotes {
+      display: none;
+    }
+
+    .esriCTReportNotesParagraph {
+      display: block;
+    }
+
+    .esriCTHideReportNotes {
+      display: none;
+    }
+  </style>
+  <script>
+    function showError(evt) {
+      alert(document.getElementById('showErrorButton').innerHTML);
+    }
+  </script>
+</head>
+
+<body id="reportBody" class="esriCTPrintPage">
+  <button id="showErrorButton" style="display: none" onclick="showError()"></button>
+  <div class="esriCTReportBar">
+    <div id="closeButton" class="esriCTCloseButton" title="Close" onclick="window.close();">Close</div>
+    <div id="printButton" class="esriCTPrintButton" title="Print" onclick="onPrintButtonClicked();">Print</div>
+    <div id="reportBarMsg" class="esriCTReportBarMsg"></div>
+  </div>
+  <div id="reportMain" class="esriCTReportMain">
+    <div id="reportHeader" class="esriCTReportHeader">
+      <img id="reportLogo" class="esriCTReportLogo esriCTHidden" src="">
+      <div id="printTitleDiv" class="esriCTPrintTitleDiv">
+        <input id="reportTitle" type="text" class="esriCTInputTitle">
+      </div>
+    </div>
+    <div id="reportData"></div>
+    <div id="footNotes" class="esriCTReportFooter">
+    </div>
+  </div>
+</body>
+
+</html>

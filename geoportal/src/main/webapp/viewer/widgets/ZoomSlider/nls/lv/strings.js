@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Tālummaiņas slīdnis"
-  })
-);
+define({
+  "_widgetLabel": "Tālummaiņas slīdnis"
+});

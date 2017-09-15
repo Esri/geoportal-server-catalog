@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,14 +44,15 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
   template, lang, html, array, on, query, gfx, Color,
   symbolUtils, rendererUtils, SimpleRenderer, UniqueValueRenderer,
   ClassBreaksRenderer, jsonUtils, SimpleMarkerSymbol) {
+
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
-    templateString:template,
+    templateString: template,
     baseClass: 'jimu-renderer-chooser',
     declaredClass: 'jimu.dijit.RendererChooser',
-    renderer:null,
-    type:null,//available values:marker,line,fill
-    nls:null,
-    fields:[],
+    renderer: null,
+    type: null,//available values:marker,line,fill
+    nls: null,
+    fields: null,
 
     //public methods:
     //getRenderer
@@ -114,7 +115,11 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     _jimuUrl:window.location.protocol + "//" + window.location.host + require.toUrl("jimu"),
 
     postMixInProperties:function(){
+      if(!this.fields){
+        this.fields = [];
+      }
       this.nls = window.jimuNls.rendererChooser;
+      this.inherited(arguments);
     },
 
     postCreate:function(){
@@ -122,14 +127,8 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       this._initFields();
       this.own(on(this.rendererSelect, 'change', lang.hitch(this, this._onRendererSelectChange)));
       this.own(on(this.btnDefaultSym, 'click', lang.hitch(this, this._showDefaultSymbol)));
-      this.own(on(this.defaultSymbolChooser,
-                  'change',
-                  lang.hitch(this, this._onDefaultSymbolChange)));
-      this.own(
-        on(this.selectedSymbolChooser,
-           'change',
-           lang.hitch(this, this._onSelectedSymbolChange))
-      );
+      this.own(on(this.defaultSymbolChooser, 'change', lang.hitch(this, this._onDefaultSymbolChange)));
+      this.own(on(this.selectedSymbolChooser, 'change', lang.hitch(this, this._onSelectedSymbolChange)));
       this._bindUniqueSettingEvents();
       this._bindClassBreaksEvents();
       if(this.renderer){
@@ -677,17 +676,11 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       this.own(on(this.classCount, 'change', lang.hitch(this, this._updateClassBreaksTable)));
       this.own(on(this.selectedFrom, 'change', lang.hitch(this, this._onSelectedRangeChange)));
       this.own(on(this.selectedTo, 'change', lang.hitch(this, this._onSelectedRangeChange)));
-      this.own(
-        on(this.classBreakSelectedLabel,
-          'change',
-          lang.hitch(this, this._onClassBreakSelectedLabelChange))
-      );
+      this.own(on(this.classBreakSelectedLabel, 'change', lang.hitch(this, this._onClassBreakSelectedLabelChange)));
+
       //color
-      this.own(
-        on(this.classBreaksColorSelect,
-          'change',
-          lang.hitch(this, this._updateClassBreaksTable))
-      );
+      this.own(on(this.classBreaksColorSelect, 'change', lang.hitch(this, this._updateClassBreaksTable)));
+
       //size
       this.own(on(this.minSymbolSize, 'change', lang.hitch(this, this._updateClassBreaksTable)));
       this.own(on(this.maxSymbolSize, 'change', lang.hitch(this, this._updateClassBreaksTable)));

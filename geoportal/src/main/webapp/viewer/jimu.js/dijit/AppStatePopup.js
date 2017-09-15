@@ -22,6 +22,17 @@ define(['dojo/_base/declare',
     currentState: STATE_HIDE,
     timeoutHandler: undefined,
 
+    constructor: function(params) {
+      this.inherited(arguments);
+      if('animationDuration' in params) {
+        ANIMATION_DURATION = params.animationDuration;
+      }
+
+      if('autoCloseInterval' in params) {
+        AUTO_CLOSE_INTERVAL = params.autoCloseInterval;
+      }
+    },
+
     postCreate: function() {
       if(window.appInfo.isRunInMobile){
         html.addClass(this.domNode, 'mobile');

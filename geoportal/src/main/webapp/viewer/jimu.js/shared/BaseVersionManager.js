@@ -51,7 +51,7 @@ define(function() {
           versionIndex = i;
         }
       }
-
+      //if there is no version, we assume it's very old and will upgrade from the first version
       if(version === null){
         versionIndex = -1;
       }

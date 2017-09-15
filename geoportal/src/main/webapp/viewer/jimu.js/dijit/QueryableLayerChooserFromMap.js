@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,14 +15,20 @@
 ///////////////////////////////////////////////////////////////////////////
 
 define([
+  'dojo/_base/lang',
+  'dojo/_base/html',
   'dojo/_base/declare',
-  './LayerChooserFromMap',
-  'dojo/_base/html'
+  './LayerChooserFromMap'
 ],
-function(declare, LayerChooserFromMap, html) {
+function(lang, html, declare, LayerChooserFromMap) {
   return declare([LayerChooserFromMap], {
     baseClass: 'jimu-queryable-layer-chooser-from-map',
     declaredClass: 'jimu.dijit.QueryableLayerChooserFromMap',
+
+    //options:
+    showImageLayer: true,
+    mustSupportStatistics: false,
+    ignoreVirtualLayer: false,
 
     //public methods:
     //getSelectedItems return [{name, url, layerInfo}]
@@ -32,7 +38,28 @@ function(declare, LayerChooserFromMap, html) {
 
     postMixInProperties:function(){
       this.inherited(arguments);
-      this.filter = LayerChooserFromMap.createQueryableLayerFilter();
+
+      if(this.showImageLayer){
+        this.filter = LayerChooserFromMap.createQueryableLayerFilter(this.mustSupportStatistics);
+      }else{
+        this.filter = LayerChooserFromMap.createFeaturelayerFilter(
+          ['point', 'polyline', 'polygon'], false, true, this.mustSupportStatistics
+        );
+      }
+
+      if(this.ignoreVirtualLayer){
+        this.filter = LayerChooserFromMap.andCombineFilters(
+          [this.filter, lang.hitch(this, this._ignoreVirtualLayerFilter)]
+        );
+      }
+    },
+
+    _ignoreVirtualLayerFilter: function(layerInfo){
+      return layerInfo.getLayerType().then(function(layerType) {
+        var virtualLayer = layerType === 'ArcGISDynamicMapServiceLayer' ||
+          layerType === 'ArcGISTiledMapServiceLayer' || layerType === 'GroupLayer';
+        return !virtualLayer;
+      });
     },
 
     postCreate: function(){

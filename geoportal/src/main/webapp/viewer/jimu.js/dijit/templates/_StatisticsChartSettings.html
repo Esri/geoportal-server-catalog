@@ -1,0 +1,30 @@
+<div>
+	<div data-dojo-attach-point="divAxisX" class="setting-item">
+		<input data-dojo-attach-point="cbxAxisX" type="checkbox" />
+		<label data-dojo-attach-point="labelAxisX">${nls.horizontalAxis}</label>
+	</div>
+	<div data-dojo-attach-point="divAxisY" class="setting-item">
+		<input data-dojo-attach-point="cbxAxisY" type="checkbox" />
+		<label data-dojo-attach-point="labelAxisY">${nls.verticalAxis}</label>
+	</div>
+	<div data-dojo-attach-point="divPieLabel" class="setting-item">
+		<input data-dojo-attach-point="cbxPieLabel" type="checkbox" checked />
+		<label data-dojo-attach-point="labelPie">${nls.dataLabels}</label>
+	</div>
+	<div>
+		<div class="color-tip">${nls.color}</div>
+		<div data-dojo-attach-point="singleColorSection" class="single-color-section">
+			<div data-dojo-attach-point="colorDiv" class="single-color-div"></div>
+			<div data-dojo-attach-point="paletteContainer" class="palette-container"></div>
+		</div>
+		<div data-dojo-attach-point="multiColorSection" class="multi-color-section">
+			<div class="colorful-section">
+				<div data-dojo-attach-point="colorfulContainer"></div>
+			</div>
+			<div class="monochromatic-section">
+				<div data-dojo-attach-point="monochromaticContainer"></div>
+			</div>
+		</div>
+	</div>
+	<div class="shelter" data-dojo-attach-point="shelter"></div>
+</div>

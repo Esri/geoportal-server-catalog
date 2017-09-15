@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,11 +17,11 @@
 define([
   'dojo/_base/declare',
   'dojo/_base/array',
+  'dojo/_base/lang',
   'esri/graphicsUtils',
   './LayerInfo',
-  './LayerInfoFactory'
-], function(declare, array, graphicsUtils, LayerInfo,
-LayerInfoFactory) {
+  'esri/lang'
+], function(declare, array, lang, graphicsUtils, LayerInfo, esriLang) {
   return declare(LayerInfo, {
 
     constructor: function( /*operLayer, map*/ ) {
@@ -53,37 +53,50 @@ LayerInfoFactory) {
       return extent;
     },
 
-    _resetLayerObjectVisiblityBeforeInit: function() {
-      /* works code for restore at init.
-      // if(this._layerOption) {
-      //   // according to this._layerOption.visible to set this._visible first.
-      //   this._visible = this._layerOption.visible;
+    // _resetLayerObjectVisiblity: function(layerOptions) {
+    //   var layerOption  = layerOptions ? layerOptions[this.id]: null;
+    //   if(layerOption) {
+    //     // check/unchek all sublayers according to subLayerOption.visible.
+    //     array.forEach(this.newSubLayers, function(subLayerInfo) {
+    //       var subLayerOption  = layerOptions ? layerOptions[subLayerInfo.id]: null;
+    //       if(subLayerOption) {
+    //         subLayerInfo.layerObject.setVisibility(subLayerOption.visible);
+    //       }
+    //     }, this);
 
-      //   // check/unchek all sublayers according to subLayerInfo._layerOption.visible.
-      //   array.forEach(this.newSubLayers, function(subLayerInfo) {
-      //     if(subLayerInfo._layerOption) {
-      //       subLayerInfo._setTopLayerVisible(subLayerInfo._layerOption.visible);
-      //     }
-      //   }, this);
-      // }
-      */
+    //     // according to layerOption.visible to set this._visible after all sublayers setting.
+    //     this._setTopLayerVisible(layerOption.visible);
+    //   }
+    // },
 
-      /***code for resotre not at init***/
-      if(this._layerOption) {
-
-        // check/unchek all sublayers according to subLayerInfo._layerOption.visible.
-        array.forEach(this.newSubLayers, function(subLayerInfo) {
-          if(subLayerInfo._layerOption) {
-            subLayerInfo.layerObject.setVisibility(subLayerInfo._layerOption.visible);
+    _resetLayerObjectVisiblity: function(layerOptions) {
+      var layerOption  = layerOptions ? layerOptions[this.id]: null;
+      if(layerOption) {
+        // prepare checkedInfo for all sublayers according to subLayerOption.visible.
+        var subLayersCheckedInfo = {};
+        for ( var id in layerOptions) {
+          if(layerOptions.hasOwnProperty(id) &&
+             (typeof layerOptions[id] !== 'function')) {
+            subLayersCheckedInfo[id] = layerOptions[id].visible;
           }
-        }, this);
+        }
+        this._setSubLayerVisibleByCheckedInfo(subLayersCheckedInfo);
 
-        // according to this._layerOption.visible to set this._visible after all sublayers setting.
-        this._setTopLayerVisible(this._layerOption.visible);
+        // according to layerOption.visible to set this._visible after all sublayers setting.
+        this._setTopLayerVisible(layerOption.visible);
       }
     },
 
-    initVisible: function() {
+    _setSubLayerVisibleByCheckedInfo: function(checkedInfo) {
+      // check/unchek all sublayers according to subLayerOption.visible.
+      array.forEach(this.newSubLayers, function(subLayerInfo) {
+        if(esriLang.isDefined(checkedInfo[subLayerInfo.id])) {
+          subLayerInfo.layerObject.setVisibility(checkedInfo[subLayerInfo.id]);
+        }
+      }, this);
+    },
+
+    _initVisible: function() {
       var visible = false, i;
       for (i = 0; i < this.newSubLayers.length; i++) {
         visible = visible || this.newSubLayers[i].layerObject.visible;
@@ -110,7 +123,7 @@ LayerInfoFactory) {
     },
 
     /*
-    setSubLayerVisible: function(subLayerId, visible) {
+    _setSubLayerVisible: function(subLayerId, visible) {
       array.forEach(this.newSubLayers, function(subLayerInfo) {
         if ((subLayerInfo.layerObject.id === subLayerId || (subLayerId === null))) {
           subLayerInfo.layerObject.visible = visible;
@@ -131,16 +144,22 @@ LayerInfoFactory) {
       array.forEach(operLayer.featureCollection.layers, function(layerObj) {
         var subLayerInfo;
         if (this._getLayerIndexesInMapByLayerId(layerObj.layerObject.id)) {
-          subLayerInfo = LayerInfoFactory.getInstance().create({
+          // prepare for _extraSetLayerInfos.
+          lang.setObject("_wabProperties.originOperLayer.showLegend",
+                         this.originOperLayer.featureCollection.showLegend,
+                         layerObj.layerObject);
+
+          subLayerInfo = this._layerInfoFactory.create({
             layerObject: layerObj.layerObject,
             title: layerObj.layerObject.label ||
                    layerObj.layerObject.title ||
                    layerObj.layerObject.name ||
                    layerObj.layerObject.id || " ",
-            id: layerObj.id || " ",
+            id: layerObj.id || "-",
+            subId: layerObj.id || "-",
             collection: {"layerInfo": this},
             selfType: 'collection',
-            showLegend: layerObj.showLegend, //temporary code for support showLegend.
+            showLegend: this.originOperLayer.featureCollection.showLegend,
             parentLayerInfo: this
           });
 
@@ -189,6 +208,20 @@ LayerInfoFactory) {
       //   return true if 'showLegend' has not been cnfigured in webmp
       return this.originOperLayer.featureCollection.showLegend !== undefined ?
              this.originOperLayer.featureCollection.showLegend : true;
+    },
+
+    getScaleRange: function() {
+      var scaleRange;
+      var subLayers = this.getSubLayers();
+      if(subLayers[0]) {
+        scaleRange = subLayers[0].getScaleRange();
+      } else {
+        scaleRange = {
+          minScale: 0,
+          maxScale: 0
+        };
+      }
+      return scaleRange;
     }
 
   });

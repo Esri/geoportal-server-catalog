@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,29 +19,62 @@ define([
   'dojo/_base/lang',
   'dojo/_base/html',
   'dojo/Deferred',
+  'dojo/aspect',
   './LayerInfoForDefault',
-  'esri/layers/FeatureLayer'
-], function(declare, lang, html, Deferred, LayerInfoForDefault, FeatureLayer) {
+  './LayerObjectFacory',
+  'esri/dijit/PopupTemplate'
+], function(declare, lang, html, Deferred, aspect, LayerInfoForDefault, LayerObjectFacory,
+PopupTemplate) {
   return declare(LayerInfoForDefault, {
-    isTable:         null,
+    isTable:            null,
+    _layerObjectFacory: null,
     constructor: function() {
       this.newSubLayers = [];
       this.isTable = true;
+      // init _layerObjectFacory
+      this._layerObjectFacory = new LayerObjectFacory(this);
     },
 
     init: function() {
     },
 
+    _getLayerObject: function() {
+      var def = new Deferred();
+      this._layerObjectFacory.getLayerObject().then(lang.hitch(this, function(layerObject) {
+        if(this.layerObject.empty && layerObject) {
+          this.layerObject = layerObject;
+        }
+        def.resolve(layerObject);
+      }));
+      return def;
+    },
+
+    getLayerObject: function() {
+      return this._getLayerObject();
+    },
+
+    /*
     getLayerObject: function() {
       var def = new Deferred();
       if(this.layerObject.empty) {
         if(this.layerObject.url) {
+          var options = this._getLayerOptionsForCreateLayerObject();
           this.layerObject = new FeatureLayer(this.layerObject.url,
-                                              this.originOperLayer.options || {});
+                                        lang.mixin(options, this.originOperLayer.options || {}) || {});
           this.layerObject.on('load', lang.hitch(this, function() {
+            // change layer.name, need move to layerObject factory. Todo...
+            if(!this.layerObject.empty &&
+               this.layerObject.name &&
+               !lang.getObject("_wabProperties.originalLayerName", false, this.layerObject)) {
+              lang.setObject('_wabProperties.originalLayerName',
+                             this.layerObject.name,
+                             this.layerObject);
+              this.layerObject.name = this.title;
+            }
+            this._bindEventAfterLayerObjectLoaded();
             def.resolve(this.layerObject);
           }));
-          this.layerObject.on('error', lang.hitch(this, function(/*err*/) {
+          this.layerObject.on('error', lang.hitch(this, function(err) {
             //def.reject(err);
             def.resolve(null);
           }));
@@ -51,7 +84,7 @@ define([
           // this.layerObject.on('load', lang.hitch(this, function() {
           //   def.resolve(this.layerObject);
           // }));
-          // this.layerObject.on('error', lang.hitch(this, function(/*err*/) {
+          // this.layerObject.on('error', lang.hitch(this, function(err) {
           //   //def.reject(err);
           //   def.resolve(null);
           // }));
@@ -64,6 +97,7 @@ define([
       }
       return def;
     },
+    */
 
     getLayerType: function() {
       var def = new Deferred();
@@ -90,11 +124,50 @@ define([
       return legendsNode;
     },
 
+    // because of table's layerObject has not been loaded when init,
+    // according to this.originOperLayer.popupInfo to decide the value of controlPopupInfo.
+    // and it honor default popup enable setting of webmap.
     _initControlPopup: function() {
+      this.inherited(arguments);
       this.controlPopupInfo = {
-        enablePopup: undefined,
-        infoTemplate: undefined
+        enablePopup: this.originOperLayer.popupInfo ? true : false,
+        infoTemplate: this.originOperLayer.popupInfo ? new PopupTemplate(this.originOperLayer.popupInfo) : null
       };
+    },
+
+    _bindEventAfterLayerObjectLoaded: function() {
+      // bind filter change event
+      var handle = aspect.after(this.layerObject,
+                             'setDefinitionExpression',
+                             lang.hitch(this, this._onFilterChanged));
+      this._eventHandles.push(handle);
+    },
+
+    // Todo ...
+    getFilter: function() {
+      // summary:
+      //   get filter from layerObject.
+      // description:
+      //   return null if does not have or cannot get it.
+      var filter;
+      if(this.layerObject &&
+         !this.layerObject.empty &&
+         this.layerObject.getDefinitionExpression) {
+        filter = this.layerObject.getDefinitionExpression();
+      } else {
+        filter = this.getFilterOfWebmap();
+      }
+      return filter;
+    },
+
+    setFilter: function() {
+      // summary:
+      //   get filter from layerObject, this is a async method.
+      var fullArguments = arguments;
+      return this.getLayerObject().then(lang.hitch(this, function() {
+        this.inherited(fullArguments);
+        return;
+      }));
     }
   });
 });

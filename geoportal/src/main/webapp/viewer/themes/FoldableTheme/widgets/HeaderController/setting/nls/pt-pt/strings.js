@@ -1,9 +1,7 @@
-﻿define(
-   ({
-    group: "Nome",
-    openAll: "Abrir Todos no Painel",
-    dropDown: "Exibir Menu",
-    noGroup: "Não está definido qualquer grupo de widgets.",
-    groupSetLabel: "Definir as propriedades de grupos de widgets"
-  })
-);
+define({
+  "group": "Nome",
+  "openAll": "Abrir todos num painel",
+  "dropDown": "Exibir no menu pendente",
+  "noGroup": "Não está definido qualquer grupo de widgets.",
+  "groupSetLabel": "Definir as propriedades de grupos de widgets"
+});

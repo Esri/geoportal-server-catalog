@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -130,13 +130,20 @@ function(declare, lang, html, array, _WidgetBase) {
         }
         if(_v === view){
           html.setStyle(dom, 'display', 'block');
-          if(_v.domNode && !_v._started){
-            _v.startup();
-            _v._started = true;
+          if(_v.domNode){
+            if(!_v._started){
+              _v.startup();
+              _v._started = true;
+            }else if(typeof _v.onShown === 'function'){
+              _v.onShown();
+            }
           }
         }
         else{
           html.setStyle(dom, 'display', 'none');
+          if(_v.domNode && typeof _v.onHidden === 'function'){
+            _v.onHidden();
+          }
         }
       }));
       this._currentView = view;

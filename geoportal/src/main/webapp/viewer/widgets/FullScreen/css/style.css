@@ -1,0 +1,79 @@
+.jimu-widget-fullScreen {
+  border-radius: 4px;
+}
+.jimu-widget-fullScreen:not(.jimu-main-background) {
+  opacity: 0.8;
+  color: rgba(0, 0, 0, 0.8);
+}
+.jimu-widget-fullScreen:not(.jimu-main-background) .fullScreen{
+  background-color: rgba(0,0,0,0.2);
+}
+
+.jimu-widget-fullScreen:hover{
+  opacity: 1;
+}
+
+.jimu-widget-fullScreen .fullScreen {
+  width: 30px;
+  height: 30px;
+  text-align: center;
+  color: #fff;
+  line-height: 30px;
+  font-size: 14px;
+  margin-left: auto;
+  margin-right: auto;
+  cursor: pointer;
+  border-radius: 5px;
+}
+
+.jimu-widget-fullScreen .fullScreen:before{
+  font-family: 'Themefont';
+}
+
+.jimu-widget-fullScreen .fullScreen.restore:before {
+  content: "\a906";
+}
+
+.jimu-widget-fullScreen .fullScreen.maximize:before {
+  content: "\a905";
+}
+
+/*full-screen style for browsers*/
+:-webkit-full-screen {
+  width: 100%;
+  height: 100%;
+  background: #11ee11;
+}
+
+:-moz-full-screen {
+  width: 100%;
+  height: 100%;
+  background: #11ee11;
+}
+
+:-ms-fullscreen {
+  width: 100%;
+  height: 100%;
+  background: #11ee11;
+}
+
+:fullscreen {
+  width: 100%;
+  height: 100%;
+  background: #11ee11;
+}
+
+:full-screen {
+  width: 100%;
+  height: 100%;
+  background: #11ee11;
+}
+
+:fullscreen-ancestor {
+  z-index: -1;
+}
+
+/*display dijitPopups after fullScreen*/
+.body-fullscreened > .dijitPopup {
+  z-index: 2147483647 !important;
+}

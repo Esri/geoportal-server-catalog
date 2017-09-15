@@ -24,9 +24,11 @@
       <tr>
         <td class="first">
           <span class="inputs-label">${nls.timeout}</span>
-          <input type="text" data-dojo-type="dijit/form/NumberTextBox" required="true" placeHolder="15000"
-                 data-dojo-attach-point="timeout" data-dojo-props='style:{width:"100px"}, constraints:{min:10}'/>
-          <span style="margin: 0 10px">(ms)</span>
+          <div class="config-group">
+            <input type="text" data-dojo-type="dijit/form/NumberTextBox" required="true" placeHolder="15000"
+                   data-dojo-attach-point="timeout" data-dojo-props='style:{width:"100px"}, constraints:{min:10}'/>
+            <span style="margin: 0 10px">(ms)</span>
+          </div>
         </td>
         <!--<td class="second"></td>-->
         <td class="third">
@@ -36,10 +38,12 @@
       <tr>
         <td class="first">
           <span class="inputs-label">${nls.zoomScale}</span>
-          <span>1: </span>
-          <input type="text" data-dojo-type="dijit/form/NumberTextBox" required="true" placeHolder="50000"
-                 data-dojo-attach-point="scale" data-dojo-props='style:{width:"150px"},
-                 constraints:{min:1,pattern:"##############0.################"}'/>
+          <div class="config-group">
+            <span>1: </span>
+            <input type="text" data-dojo-type="dijit/form/NumberTextBox" required="true" placeHolder="50000"
+                   data-dojo-attach-point="scale" data-dojo-props='style:{width:"150px"},
+                   constraints:{min:1,pattern:"##############0.################"}'/>
+          </div>
         </td>
         <!--<td class="second"></td>-->
         <td class="third">

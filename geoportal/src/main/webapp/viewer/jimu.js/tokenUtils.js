@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -81,15 +81,7 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
     },
 
     isInConfigOrPreviewWindow: function(){
-      var b = false;
-      try{
-        b = !window.isBuilder && window.parent && window.parent !== window &&
-        window.parent.isBuilder;
-      }catch(e){
-        console.log(e);
-        b = false;
-      }
-      return !!b;
+      return jimuUtils.isInConfigOrPreviewWindow();
     },
 
     isStringStartWith: function(str, prefix){
@@ -116,7 +108,11 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
       var def = new Deferred();
       var thePortalUrl = portalUrlUtils.getStandardPortalUrl(_portalUrl);
       var sharingUrl = thePortalUrl + "/sharing";
-      var tokenUrl = thePortalUrl + "/sharing/rest/generateToken?f=json";
+      // var tokenUrl = thePortalUrl + "/sharing/rest/generateToken?f=json";
+      // The url should not include 'rest' because portal 10.3 doesn't support GET method with 'rest' and
+      // get following error
+      // {"error":{"code":405,"messageCode":"GWM_0005","message":"Method not supported.","details":[]}}
+      var tokenUrl = thePortalUrl + "/sharing/generateToken?f=json";
       var httpsTokenUrl = portalUrlUtils.setHttpsProtocol(tokenUrl);
       var httpsSharingUrl = portalUrlUtils.setHttpsProtocol(sharingUrl);
 
@@ -149,6 +145,9 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
             if(!credential.token){
               credential.token = response.token;
             }
+            if(!credential.expires){
+              credential.expires = response.expires;
+            }
 
             //#releated issue 4096
             /*****************************************
@@ -180,6 +179,32 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
 
             //should not save credential of iwa to cookie because the cookie is not useful
             def.resolve(true);
+
+            function setRegenerateTokenTimer(cre){
+              var creationTime = cre.creationTime || new Date().getTime();
+              var expires = cre.expires;
+              if(creationTime > 0 && expires > 0 && expires > creationTime){
+                var span = expires - creationTime;
+                var time = span * 0.8;
+                setTimeout(function() {
+                  dojoScript.get(httpsTokenUrl, {
+                    jsonp: 'callback'
+                  }).then(function(res) {
+                    if (res.token) {
+                      cre.token = res.token;
+                      cre.expires = res.expires;
+                      cre.creationTime = new Date().getTime();
+                      cre.refreshServerTokens();
+                      setRegenerateTokenTimer(cre);
+                    }
+                  }, function(err) {
+                    console.error(err);
+                  });
+                }, time);
+              }
+            }
+
+            setRegenerateTokenTimer(credential);
           }), lang.hitch(this, function(){
             def.resolve(true);
           }));
@@ -303,7 +328,9 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
       }
 
       return this._getTokenInfo(token).then(function(tokenInfo){
-        esriNS.id.registerToken(tokenInfo);
+        if(tokenInfo){
+          esriNS.id.registerToken(tokenInfo);
+        }
       });
     },
 
@@ -321,7 +348,8 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
             userId: res.user.username
           };
         }else{
-          throw Error(window.jimuNls.urlParams.invalidToken);
+          // throw Error(window.jimuNls.urlParams.invalidToken);
+          return null;
         }
       }), function(err){
         console.error(err);
@@ -378,9 +406,10 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
       if(!oAuthInfo){
         var oauthReturnUrl = window.location.protocol + "//" + window.location.host +
          require.toUrl("jimu") + "/oauth-callback.html";
+        //OAuth will lose 'persist' query parameter if set expiration to two weeks exectly.
         oAuthInfo = new OAuthInfo({
           appId: appId,
-          expiration: 14 * 24 * 60,
+          expiration: 14 * 24 * 60 - 1,
           portalUrl: portalUrl,
           authNamespace: '/',
           popup: true,
@@ -465,7 +494,37 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
       //find portal credential from esriNS.id.credentials
       credential = this._filterPortalCredential(thePortalUrl, esriNS.id.credentials);
 
+      if(!credential){
+        this._tryConvertArcGIScomCrendentialToOrgCredential();
+      }
+
       return credential;
+    },
+
+    _tryConvertArcGIScomCrendentialToOrgCredential: function(){
+      var portalUrl = this.portalUrl;
+      if(!portalUrl){
+        return;
+      }
+      portalUrl = portalUrlUtils.getStandardPortalUrl(portalUrl);
+      if(portalUrlUtils.isOrgOnline(portalUrl)){
+        var credential = this._filterPortalCredential(portalUrl, esriNS.id.credentials);
+        if(!credential){
+          var arcgiscomCredential = this._filterPortalCredential("http://www.arcgis.com", esriNS.id.credentials);
+          if(arcgiscomCredential){
+            //we need to register a new credential which server is this.portalUrl based on arcgiscomCredential
+            var sharingUrl = portalUrl + "/sharing/rest";
+            var auth = {
+              token: arcgiscomCredential.token,
+              scope: "portal",
+              userId: arcgiscomCredential.userId,
+              server: sharingUrl,
+              expires: arcgiscomCredential.expires
+            };
+            esriNS.id.registerToken(auth);
+          }
+        }
+      }
     },
 
     //save wab_auth cookie, register token, return credential
@@ -539,6 +598,8 @@ function(lang, array, aspect, Deferred, cookie, json, topic, dojoScript, esriNS,
 
     _filterPortalCredential: function(thePortalUrl, credentials){
       var credential = null;
+
+      thePortalUrl = portalUrlUtils.getStandardPortalUrl(thePortalUrl);
 
       if(credentials && credentials.length > 0){
         var filterCredentials = array.filter(credentials, lang.hitch(this, function(c){

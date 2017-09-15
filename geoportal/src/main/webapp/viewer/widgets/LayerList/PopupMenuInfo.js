@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -20,12 +20,12 @@ define([
   'dojo/_base/lang',
   'dojo/Deferred',
   'dojo/promise/all',
-  'jimu/portalUrlUtils',
   'jimu/WidgetManager',
+  'jimu/portalUrlUtils',
   'esri/lang',
   'esri/graphicsUtils',
   './NlsStrings'
-], function(declare, array, lang, Deferred, all, portalUrlUtils, WidgetManager, esriLang,
+], function(declare, array, lang, Deferred, all, WidgetManager, portalUrlUtils, esriLang,
   graphicsUtils, NlsStrings) {
   var clazz = declare([], {
 
@@ -48,20 +48,24 @@ define([
     _getATagLabel: function() {
       var url;
       var label;
-      var itemLayerId = this._layerInfo._isItemLayer && this._layerInfo._isItemLayer();
+      var itemLayerId = this._layerInfo.isItemLayer && this._layerInfo.isItemLayer();
+      var layerUrl = this._layerInfo.getUrl();
 
       if (itemLayerId) {
-        url = portalUrlUtils.getItemDetailsPageUrl(
-                portalUrlUtils.getStandardPortalUrl(this.layerListWidget.appConfig.portalUrl),
-                itemLayerId);
+        url = this._getItemDetailsPageUrl() || layerUrl;
         label = this.nls.itemShowItemDetails;
-      } else if (this._layerInfo.layerObject &&
-        this._layerInfo.layerObject.url &&
+      } else if (layerUrl &&
         (this._layerType === "CSVLayer" || this._layerType === "KMLLayer")) {
-        url = this._layerInfo.layerObject.url;
+        url = layerUrl;
         label = this.nls.itemDownload;
-      } else if (this._layerInfo.layerObject && this._layerInfo.layerObject.url) {
-        url = this._layerInfo.layerObject.url;
+      } else if (layerUrl && this._layerType === "WMSLayer") {
+        url = layerUrl + (layerUrl.indexOf("?") > -1 ? "&" : "?") + "SERVICE=WMS&REQUEST=GetCapabilities";
+        label = this.nls.itemDesc;
+      } else if (layerUrl && this._layerType === "WFSLayer") {
+        url = layerUrl + (layerUrl.indexOf("?") > -1 ? "&" : "?") + "SERVICE=WFS&REQUEST=GetCapabilities";
+        label = this.nls.itemDesc;
+      } else if (layerUrl) {
+        url = layerUrl;
         label = this.nls.itemDesc;
       } else {
         url = '';
@@ -72,6 +76,20 @@ define([
         url + '">' + label + '</a>';
     },
 
+    _getItemDetailsPageUrl: function() {
+      var itemUrl = "";
+      var portalUrl;
+      var appConfig = this.layerListWidget.appConfig;
+      var itemLayerInfo = lang.getObject("_wabProperties.itemLayerInfo", false, this._layerInfo.layerObject);
+      if(this._layerInfo.originOperLayer.itemId) {
+        portalUrl = portalUrlUtils.getStandardPortalUrl(appConfig.map.portalUrl || appConfig.portalUrl);
+        itemUrl = portalUrlUtils.getItemDetailsPageUrl(portalUrl, this._layerInfo.originOperLayer.itemId);
+      } else if(itemLayerInfo && itemLayerInfo.portalUrl && itemLayerInfo.itemId){
+        portalUrl = portalUrlUtils.getStandardPortalUrl(itemLayerInfo.portalUrl);
+        itemUrl = portalUrlUtils.getItemDetailsPageUrl(portalUrl, itemLayerInfo.itemId);
+      }
+      return itemUrl;
+    },
 
     _initCandidateMenuItems: function() {
       //descriptionTitle: NlsStrings.value.itemDesc,
@@ -103,6 +121,9 @@ define([
         key: 'controlPopup',
         label: this.nls.removePopup
       }, {
+        key: 'controlLabels',
+        label: this.nls.showLabels
+      }, {
         key: 'url',
         label: this._getATagLabel()
       }];
@@ -123,6 +144,35 @@ define([
       }, this);
     },
 
+    _isSupportedByAT: function() {
+      return true;
+    },
+
+    _isSupportedByAT_bk: function(attributeTableWidget, supportTableInfo) {
+      var isSupportedByAT;
+      var isLayerHasBeenConfigedInAT;
+      var ATConfig = attributeTableWidget.config;
+
+      if(ATConfig.layerInfos.length === 0) {
+        isLayerHasBeenConfigedInAT = true;
+      } else {
+        isLayerHasBeenConfigedInAT = array.some(ATConfig.layerInfos, function(layerInfo) {
+          if(layerInfo.id === this._layerInfo.id && layerInfo.show) {
+            return true;
+          }
+        }, this);
+      }
+      if (!supportTableInfo.isSupportedLayer ||
+          !supportTableInfo.isSupportQuery ||
+          supportTableInfo.otherReasonCanNotSupport ||
+          !isLayerHasBeenConfigedInAT) {
+        isSupportedByAT = false;
+      } else {
+        isSupportedByAT = true;
+      }
+      return isSupportedByAT;
+    },
+
     getDeniedItems: function() {
       // summary:
       //    the items that will be denied.
@@ -134,23 +184,31 @@ define([
       var defRet = new Deferred();
       var dynamicDeniedItems = [];
 
-      if (this._layerInfo.isFirst) {
+      if (this.layerListWidget.layerListView.isFirstDisplayedLayerInfo(this._layerInfo)) {
         dynamicDeniedItems.push({
           'key': 'moveup',
           'denyType': 'disable'
         });
       }
-      if (this._layerInfo.isLast) {
+      if (this.layerListWidget.layerListView.isLastDisplayedLayerInfo(this._layerInfo)) {
         dynamicDeniedItems.push({
           'key': 'movedown',
           'denyType': 'disable'
         });
       }
 
-      if (!this._layerInfo.layerObject || !this._layerInfo.layerObject.url) {
+      if (!this._layerInfo.getUrl()) {
         dynamicDeniedItems.push({
           'key': 'url',
           'denyType': 'disable'
+        });
+      }
+
+      // deny controlLabels
+      if (!this._layerInfo.canShowLabel()) {
+        dynamicDeniedItems.push({
+          'key': 'controlLabels',
+          'denyType': 'hidden'
         });
       }
 
@@ -180,9 +238,7 @@ define([
             'key': 'table',
             'denyType': 'hidden'
           });
-        } else if (!supportTableInfo.isSupportedLayer ||
-                   !supportTableInfo.isSupportQuery ||
-                   supportTableInfo.otherReasonCanNotSupport) {
+        } else if (!this._isSupportedByAT(attributeTableWidget, supportTableInfo)) {
           if(this._layerInfo.parentLayerInfo &&
              this._layerInfo.parentLayerInfo.isMapNotesLayerInfo()) {
             dynamicDeniedItems.push({
@@ -203,6 +259,7 @@ define([
       });
 
       return defRet;
+
     },
 
     getDisplayItems: function() {
@@ -232,6 +289,9 @@ define([
           break;
         case 'controlPopup':
           this._onControlPopup();
+          break;
+        case 'controlLabels':
+          this._onControlLabels();
           break;
 
       }
@@ -294,25 +354,23 @@ define([
 
     _onMoveUpItemClick: function(evt) {
       if (!this._layerInfo.isFirst) {
-        evt.layerListView.moveUpLayer(this._layerInfo.id);
+        evt.layerListView.moveUpLayer(this._layerInfo);
       }
     },
 
     _onMoveDownItemClick: function(evt) {
       if (!this._layerInfo.isLast) {
-        evt.layerListView.moveDownLayer(this._layerInfo.id);
+        evt.layerListView.moveDownLayer(this._layerInfo);
       }
     },
 
     _onTableItemClick: function(evt) {
       this._layerInfo.getSupportTableInfo().then(lang.hitch(this, function(supportTableInfo) {
         var widgetManager;
-        if(supportTableInfo.isSupportedLayer &&
-           supportTableInfo.isSupportQuery) {
-          widgetManager = WidgetManager.getInstance();
-
-          var attributeTableWidgetEle =
+        var attributeTableWidgetEle =
                     this.layerListWidget.appConfig.getConfigElementsByName("AttributeTable")[0];
+        if(this._isSupportedByAT(attributeTableWidgetEle, supportTableInfo)) {
+          widgetManager = WidgetManager.getInstance();
           widgetManager.triggerWidgetOpen(attributeTableWidgetEle.id)
           .then(lang.hitch(this, function() {
             evt.layerListWidget.publishData({
@@ -336,6 +394,17 @@ define([
         this._layerInfo.enablePopup();
       }
       this._layerInfo.map.infoWindow.hide();
+    },
+
+    _onControlLabels: function(evt) {
+      /*jshint unused: false*/
+      if(this._layerInfo.canShowLabel()) {
+        if(this._layerInfo.isShowLabels()) {
+          this._layerInfo.hideLabels();
+        } else {
+          this._layerInfo.showLabels();
+        }
+      }
     }
   });
 
@@ -371,6 +440,10 @@ define([
         key: 'separator'
       }, {
         key: 'controlPopup'
+      }, {
+        key: 'separator'
+      }, {
+        key: 'controlLabels'
       }, {
         key: 'separator'
       }, {

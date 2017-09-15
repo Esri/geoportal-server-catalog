@@ -1,0 +1,32 @@
+<div class="jimu-not-selectable">
+  <div class="draw-item-btn">
+    <div class="current-draw-item" data-dojo-attach-point="currentDrawItem">
+      <div class="btn-select" data-dojo-attach-point="btnSelect">
+        <div class="select-icon"></div>
+        <div class="select-text"></div>
+      </div>
+      <div class="arrow jimu-float-trailing" data-dojo-attach-event="click:_onArrowClicked"></div>
+    </div>
+    <div class="draw-items hidden" data-dojo-attach-point="drawItems">
+      <div class="draw-item draw-item-rectangle" data-dojo-attach-point="rectangleItem">
+        <div class="draw-icon"></div>
+        <div class="draw-text"></div>
+      </div>
+      <div class="draw-item draw-item-polygon" data-dojo-attach-point="polygonItem">
+        <div class="draw-icon"></div>
+        <div class="draw-text"></div>
+      </div>
+      <div class="draw-item draw-item-circle" data-dojo-attach-point="circleItem">
+        <div class="draw-icon"></div>
+        <div class="draw-text"></div>
+      </div>
+      <div class="draw-item draw-item-polyline" data-dojo-attach-point="polylineItem">
+        <div class="draw-icon"></div>
+        <div class="draw-text"></div>
+      </div>
+    </div>
+  </div>
+  <div class="btn-clear" data-dojo-attach-point="btnClear">
+    <div class="clear-icon"></div><div class="clear-text"></div>
+  </div>
+</div>

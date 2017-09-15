@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Controle Deslizante de Zoom"
-  })
-);
+define({
+  "_widgetLabel": "Controle Deslizante de Zoom"
+});

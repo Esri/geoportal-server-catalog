@@ -35,12 +35,11 @@ define([
   "esri/layers/WMSLayer",
   "esri/layers/WMTSLayer",
   "esri/layers/WMTSLayerInfo",
-  "esri/InfoTemplate",
-  "esri/layers/vector-tile"],
+  "esri/InfoTemplate"],
 function(declare, lang, array, Deferred, all, i18n, util, esriRequest,
   ArcGISDynamicMapServiceLayer, ArcGISImageServiceLayer, ArcGISTiledMapServiceLayer, CSVLayer, 
   FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, WFSLayer, WMSLayer, WMTSLayer, 
-  WMTSLayerInfo, InfoTemplate, vectorTile){
+  WMTSLayerInfo, InfoTemplate){
   
   return declare(null, {
     
@@ -117,7 +116,7 @@ function(declare, lang, array, Deferred, all, i18n, util, esriRequest,
           
         } else if (lc.indexOf("/vectortileserver") > 0 || 
             lc.indexOf("/resources/styles/root.json") > 0) { 
-          if (!vectorTile.supported()) {
+          if (!VectorTileLayer.supported()) {
             dfd.reject("Unsupported");
           } else {
             this.checkVectorTileUrl(url,null,{}).then(function(vturl){

@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "แถบสเกล"
-  })
-);
+define({
+  "_widgetLabel": "แถบสเกล"
+});

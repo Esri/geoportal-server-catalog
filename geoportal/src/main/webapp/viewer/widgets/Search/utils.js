@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -115,6 +115,10 @@ define([
                 searchInCurrentMapExtent: false,
                 type: "locator"
               };
+              json.enableLocalSearch = this._isEsriLocator(json.url);
+              json.localSearchMinScale = 300000;
+              json.localSearchDistance = 50000;
+
               validSources.push(json);
             }
           }

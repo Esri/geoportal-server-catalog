@@ -1,0 +1,148 @@
+<div class="shareLink">
+  <div class="shareLinkOptionsWrapper displaynone">
+    <div data-dojo-attach-point="backBtn" class="backBtn"></div>
+    <div class="linkOptionsTitle">${nls.linkOptions}</div>
+    <div class="subTitle">${nls.linkOptionsUrlParameters}</div>
+    <form data-id="shareOptionsRadios" data-dojo-attach-point="shareOptionsRadios">
+      <fieldset>
+        <div class="optionsRow">
+          <input data-dojo-attach-point="currentMapExtent" class="shareRadios jimu-float-leading jimu-radio-btn" type="radio" name="radios" data-id="currentMapExtent" data-dojo-type="dijit.form.RadioButton" data-dojo-props='checked:true' checked>
+          <div class="labels" data-forid="currentMapExtent">${nls.currentMapExtent}</div>
+        </div>
+        <div class="optionsRow" data-dojo-attach-point="chooseCenterWithLevelRow">
+          <input data-dojo-attach-point="chooseCenterWithLevel" class="shareRadios jimu-float-leading jimu-radio-btn" type="radio" name="radios" data-id="chooseCenterWithLevel" data-dojo-type="dijit.form.RadioButton">
+          <div class="labels" data-forid="chooseCenterWithLevel">${nls.chooseCenterWithLevel}</div>
+          <div class="optionsMore chooseCenterWithLevel_optionsMore">
+            <div data-dojo-attach-point="chooseCenterWithLevel_marker" class="markers"></div>
+            <select data-dojo-attach-point="chooseCenterWithLevel_levels" class="shareSelects" style="display: none !important;" data-dojo-type="dijit/form/Select"></select>
+          </div>
+        </div>
+        <div class="optionsRow">
+          <input data-dojo-attach-point="chooseCenterWithScale" class="shareRadios jimu-float-leading jimu-radio-btn" type="radio" name="radios" data-id="chooseCenterWithScale" data-dojo-type="dijit.form.RadioButton">
+          <div class="labels">${nls.chooseCenterWithScale}</div>
+          <div class="optionsMore chooseCenterWithScale_optionsMore">
+            <div data-dojo-attach-point="chooseCenterWithScale_marker" class="markers"></div>
+            <select data-dojo-attach-point="chooseCenterWithScale_scales" class="shareSelects" style="display: none !important;" data-dojo-type="dijit/form/Select"></select>
+          </div>
+        </div>
+
+        <div class="optionsRow" data-dojo-attach-point="findLocationRow">
+          <input data-dojo-attach-point="findLocation" class="shareRadios jimu-float-leading jimu-radio-btn" type="radio" name="radios" data-id="findLocation" data-dojo-type="dijit.form.RadioButton">
+          <div class="labels">${nls.findLocation}</div>
+          <div class="optionsMore findLocation_optionsMore">
+            <div class="moreOptions">
+              <input data-dojo-attach-point="findLocation_input" data-dojo-type="dijit.form.TextBox" placeholder="${nls.findLocation_inputPlaceholder}">
+            </div>
+          </div>
+        </div>
+        <div class="optionsRow">
+          <input data-dojo-attach-point="queryFeature" class="shareRadios jimu-float-leading jimu-radio-btn" type="radio" name="radios" data-id="queryFeature" data-dojo-type="dijit.form.RadioButton">
+          <div class="labels">${nls.queryFeature}</div>
+          <div class="optionsMore queryFeature_optionsMore">
+            <div class="moreOptions">
+              <div data-dojo-attach-point="queryFeature_layer" name="queryFeature_layer" class="queryFeature_layer"></div>
+              <select data-dojo-attach-point="queryFeature_field" name="queryFeature_field" data-dojo-type="dijit/form/Select"></select>
+              <select data-dojo-attach-point="queryFeature_value" name="queryFeature_value" data-dojo-type="dijit/form/Select"></select>
+            </div>
+          </div>
+        </div>
+        <div class="optionsRow">
+          <input data-dojo-attach-point="addMarker" class="shareRadios jimu-float-leading jimu-radio-btn" type="radio" name="radios" data-id="addMarker" data-dojo-type="dijit.form.RadioButton">
+          <div class="labels">${nls.addMarker}</div>
+          <div class="optionsMore addMarker_optionsMore">
+            <div data-dojo-attach-point="addMarker_marker" class="markers"></div>
+            <div class="moreOptions addMarker_moreOptions">
+              <div class="moreOptionsRow">
+                <label>${nls.WKID}</label>
+                <input data-dojo-attach-point="addMarker_spatialReference" name="spatialReference" data-dojo-type="dijit.form.TextBox">
+              </div>
+              <div class="moreOptionsRow">
+                <label>${nls.popupTitle}</label>
+                <input data-dojo-attach-point="addMarker_title" data-dojo-type="dijit.form.TextBox" placeholder="${nls.addMarker_titlePlaceholder}">
+              </div>
+              <div class="moreOptionsRow">
+                <label>${nls.symbol}</label>
+                <input data-dojo-attach-point="addMarker_symbolURL" data-dojo-type="dijit.form.TextBox" placeholder="${nls.addMarker_symbolURL}">
+              </div>
+              <div class="moreOptionsRow">
+                <label>${nls.label}</label>
+                <input data-dojo-attach-point="addMarker_label" data-dojo-type="dijit.form.TextBox" placeholder="${nls.addMarker_label}">
+              </div>
+              <div class="moreOptionsRow displaynone">
+                <label>${nls.zoomLevel}</label>
+                <div class="table-for-select">
+                  <select data-dojo-attach-point="addMarker_level" name="addMarker_level" data-dojo-type="dijit/form/Select"></select>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </fieldset>
+    </form>
+
+    <fieldset>
+      <div class="optionsRow shareClearFix">
+        <input data-id="share-options-overwirteMobileLayout" data-dojo-attach-point="overwirteMobileLayout" class="shareCheckBoxes jimu-float-leading" data-dojo-type="dijit.form.CheckBox" type="checkbox">
+        <div class="labels">${nls.overwirteMobileLayout}</div>
+        <div class="optionsMore share-options-overwirteMobileLayout_optionsMore">
+          <input type="text" data-dojo-type="dijit/form/NumberTextBox" required="true"
+                 data-dojo-attach-point="mobileLayout" data-dojo-props='style:{width:"100px"}, constraints:{min:300}'/>
+        </div>
+      </div>
+      <div class="optionsRow shareClearFix">
+        <input data-id="share-options-language" data-dojo-attach-point="setlanguage" class="shareCheckBoxes jimu-float-leading" data-dojo-type="dijit.form.CheckBox" type="checkbox">
+        <div class="labels">${nls.language}</div>
+        <div class="optionsMore share-options-language_optionsMore">
+          <select data-dojo-attach-point="setlanguage_languages" class="shareSelects" style="display:inline-block;" data-dojo-type="dijit/form/Select"></select>
+        </div>
+      </div>
+      <div class="optionsRow shareClearFix">
+        <input data-id="share-options-auth" data-dojo-attach-point="auth" class="shareCheckBoxes jimu-float-leading" data-dojo-type="dijit.form.CheckBox" type="checkbox">
+        <div class="labels">${nls.auth}</div>
+        <div  class="optionsMore share-options-auth_optionsMore">
+          <input data-dojo-attach-point="authtoken" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props='required:true'/>
+        </div>
+      </div>
+      <div class="optionsRow shareClearFix">
+        <div class="subTitle">${nls.linkPreview}</div>
+        <div data-dojo-attach-point="preview" class="preview inputsText" data-dojo-type="dijit/form/SimpleTextarea" data-dojo-props='required:true,readOnly:true'></div>
+      </div>
+    </fieldset>
+  </div>
+
+  <div class="shareUrlsWrapper">
+    <div data-dojo-attach-point="Text"></div>
+    <div class="linkShare" data-dojo-attach-point="LinkShareContainer">
+      <div data-dojo-attach-point="LinkText" class="subTitle linkToApp">${nls.shareLinkText}</div>
+      <input data-dojo-attach-point="_linkUrlTextBox" class="shareLinkUrl inputsText" data-dojo-type="dijit/form/TextBox" data-dojo-props='required:true,readOnly:true'/>
+      <div class="shareClearFix">
+        <span class="optionsText jimu-float-leading" data-dojo-attach-point="linkOptions">${nls.linkOptions}</span>
+        <div class="shareLinkIcons jimu-float-trailing" data-dojo-attach-point="socialNetworkLinks">
+          <div class="socialNetworkIcons email" data-dojo-attach-event="click:_toEmail" data-dojo-attach-point="emailShare" title="${nls.email}"></div>
+          <div class="socialNetworkIcons facebook" data-dojo-attach-event="click:_toFacebook" data-dojo-attach-point="FacebookShare" title="${nls.facebook}"></div>
+          <div class="socialNetworkIcons twitter" data-dojo-attach-event="click:_toTwitter" data-dojo-attach-point="TwitterShare" title="${nls.twitter}"></div>
+          <div class="socialNetworkIcons googlePlus" data-dojo-attach-point="googlePlusShare" title="${nls.googlePlus}"></div>
+        </div>
+      </div>
+    </div>
+    <div class="embedShare" data-dojo-attach-point="EmbedShareContainer">
+      <div data-dojo-attach-point="embedText" class="subTitle">${nls.embed}</div>
+      <input data-dojo-attach-point="_embedCodeTextArea" class="shareEmbedCode inputsText" data-dojo-type="dijit/form/SimpleTextarea" data-dojo-props='required:true,readOnly:true'/>
+      <div class="moreOptions" data-dojo-attach-event="click:_moreOptionsExpandCollapse">
+        <div class="moreOptionsIcon" data-dojo-attach-point="MoreOptionsIcon"></div>
+        <div class="optionsText">${nls.more}</div>
+      </div>
+      <div data-dojo-attach-point="MoreOptionsContainer" class="moreOptionsContainer inputsText displaynone">
+        <div class="sizeSelect" data-dojo-attach-point="SizeSelect"></div>
+        <div class="customSize disable" data-dojo-attach-point="CustomSizeContainer">
+          <div class="timesConnector">X</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="shareTips" data-dojo-attach-point="shareTips">
+      <!--<div class="infoIcon"></div>-->
+      <div data-dojo-attach-point="shareTipsText" class="shareTipsText">${nls.shareToWebTips}</div>
+    </div>
+  </div>
+</div>

@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "개요보기 맵"
-  })
-);
+define({
+  "_widgetLabel": "개요보기 맵"
+});

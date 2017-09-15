@@ -2,6 +2,16 @@ OPEN SOURCE ACKNOWLEDGEMENTS
 
 -----------------------------------------------------------------
 
+stemapp/libs/storejs/json.js
+
+JSON library
+http://www.JSON.org/json2.js
+
+Public Domain.
+NO WARRANTY EXPRESSED OR IMPLIED. USE AT YOUR OWN RISK.
+
+-----------------------------------------------------------------
+
 stemapp/libs/storejs/store.js
 
 store.js
@@ -35,11 +45,11 @@ THE SOFTWARE.
 stemapp/libs/usng/usng.js
 
 USNG (usng.js)
-http://dhost.info/usngweb/usng.js 
+http://dhost.info/usngweb/usng.js
 
 Copyright (c) 2009 Larry Moore, jane.larry@gmail.com
-Released under the MIT License; see 
-http://www.opensource.org/licenses/mit-license.php 
+Released under the MIT License; see
+http://www.opensource.org/licenses/mit-license.php
 or http://en.wikipedia.org/wiki/MIT_License
 
 Permission is hereby granted, free of charge, to any person
@@ -65,7 +75,7 @@ OTHER DEALINGS IN THE SOFTWARE.
 
 -----------------------------------------------------------------
 
-stemapp/libs/qrcorde.js
+stemapp/libs/qrcode.js
 
 QR Code Generator
 https://github.com/kazuhikoarase/qrcode-generator
@@ -78,7 +88,7 @@ URL: http://www.d-project.com/
 Licensed under the MIT license:
   http://www.opensource.org/licenses/mit-license.php
 
-The word "QR Code" is registered trademark of 
+The word "QR Code" is registered trademark of
 DENSO WAVE INCORPORATED
   http://www.denso-wave.com/qrcode/faqpatent-e.html
 
@@ -359,3 +369,58 @@ Apache License
    limitations under the License.
 
 -----------------------------------------------------------------
+stemapp/libs/jquery/jquery-1-11-1.js
+
+https://jquery.org/license/
+
+The jquery library is released under the MIT license.
+
+------------------------------------------------------------------
+stemapp/libs/goldenlayout
+
+https://github.com/deepstreamIO/golden-layout/blob/master/LICENSE
+
+The golden layout library is released under the MIT license.
+------------------------------------------------------------------
+stemapp/libs/echarts
+
+https://github.com/ecomfe/echarts/blob/master/LICENSE
+
+The echarts library is released under the BSD 3-Clause license.
+
+BSD 3-Clause License
+
+Copyright (c) 2017, Baidu Inc.
+All rights reserved.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+------------------------------------------------------------------
+stemapp/widgets/NearMe/libs/swiper.min.js
+
+https://github.com/nolimits4web/Swiper/blob/master/LICENSE
+
+The swiper library is released under the MIT license.
+------------------------------------------------------------------

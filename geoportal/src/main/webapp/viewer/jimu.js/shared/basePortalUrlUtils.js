@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -38,12 +38,6 @@ define(function() {
     }
 
     mo.getServerByUrl = function(_url){
-      //test: http://www.arcgis.com => www.arcgis.com
-      //test: https://www.arcgis.com/ => www.arcgis.com
-      //test: //www.arcgis.com => www.arcgis.com
-      //test: http://www.arcgis.com/sharing/rest => www.arcgis.com
-      //test: http://10.112.18.151:6080/arcgis/rest/services => 10.112.18.151:6080
-      //test: //www.arcgis.com/sharing/rest => www.arcgis.com
       _url = (_url || '').trim();
       _url = _url.replace(/^(http(s?):?)\/\//gi, '');
 
@@ -55,11 +49,6 @@ define(function() {
     };
 
     mo.getServerWithProtocol = function(_url){
-      //test: http://www.arcgis.com/sharing/rest => http://www.arcgis.com
-      //test: https://www.arcgis.com/sharing/rest => https://www.arcgis.com
-      //test: //www.arcgis.com/sharing/rest => //www.arcgis.com
-      //test: http://10.112.18.151:6080/arcgis/rest/services => http://10.112.18.151:6080
-
       var result = '';
       _url = (_url || '').trim();
 
@@ -114,28 +103,22 @@ define(function() {
       return domain1 !== '' && domain1 === domain2;
     };
 
+    mo.isOrgOnline = function(_url){
+      var server = mo.getServerByUrl(_url).toLowerCase();
+      return server.indexOf('.maps.arcgis.com') >= 0;
+    };
+
     mo.isOnline = function(_url){
-      //test: http://esridevbeijing.maps.arcgis.com => true
-      //test: http://www.arcgis.com => true
       var server = mo.getServerByUrl(_url).toLowerCase();
       return server.indexOf('.arcgis.com') >= 0;
     };
 
     mo.isArcGIScom = function(_url){
-      //test: http://esridevbeijing.maps.arcgis.com => false
-      //test: http://www.arcgis.com => true
       var server = mo.getServerByUrl(_url).toLowerCase();
       return server === 'www.arcgis.com' || server === 'arcgis.com';
     };
 
     mo.getStandardPortalUrl = function(_portalUrl){
-      //test: http://www.arcgis.com/sharing/rest//// => http://www.arcgis.com
-      //test: www.arcgis.com => http://www.arcgis.com
-      //test: http://www.arcgis.com/ => http://www.arcgis.com
-      //test: https://www.arcgis.com/ => https://www.arcgis.com
-      //test: 10.112.18.151 => http://10.112.18.151/arcgis
-      //test: 10.112.18.151/gis => http://10.112.18.151/gis
-      //test: http://analysis.arcgis.com => http://analysis.arcgis.com
       var server = mo.getServerByUrl(_portalUrl);
       if (server === '') {
         return '';
@@ -197,6 +180,8 @@ define(function() {
           defaultProtocol = 'http:';
           if (url.startWith('//')) {
             url = defaultProtocol + url; //http: + //js.arcgis.com
+          } else {
+            url = defaultProtocol + "//" + url;
           }
         }
 
@@ -300,7 +285,7 @@ define(function() {
       var portalUrl = mo.getStandardPortalUrl(_portalUrl);
       portalUrl = portalUrl.replace(/\/*$/g, '');
       if(portalUrl){
-        searchUrl = portalUrl + '/' + 'sharing/rest/search';
+        searchUrl = portalUrl + '/sharing/rest/search';
       }
       return searchUrl;
     };
@@ -332,11 +317,24 @@ define(function() {
       return itemDataUrl;
     };
 
+    mo.getItemGroupsUrl = function(_portalUrl, _itemId){
+      var itemDataUrl = '';
+      var itemUrl = mo.getItemUrl(_portalUrl, _itemId);
+      if(itemUrl){
+        itemDataUrl = itemUrl + '/groups';
+      }
+      return itemDataUrl;
+    };
+
     mo.getGenerateTokenUrl = function(_portalUrl){
       var tokenUrl = '';
+      _portalUrl = mo.getStandardPortalUrl(_portalUrl);
       if(_portalUrl){
-        _portalUrl = mo.getStandardPortalUrl(_portalUrl);
-        tokenUrl = _portalUrl + '/sharing/rest/generateToken';
+        // tokenUrl = _portalUrl + '/sharing/rest/generateToken';
+        // The url should not include 'rest' because portal 10.3 doesn't support GET method with 'rest' and
+        // get following error
+        // {"error":{"code":405,"messageCode":"GWM_0005","message":"Method not supported.","details":[]}}
+        tokenUrl = _portalUrl + '/sharing/generateToken';
       }
       return tokenUrl;
     };
@@ -444,6 +442,28 @@ define(function() {
         }
       }
       return userContentUrl;
+    };
+
+    mo.getUserContentItemUrl = function(_portalUrl, _user, _itemId){
+      var userContentUrl = '',userContentItemUrl = '';
+      if(_portalUrl && _user && _itemId) {
+        userContentUrl = mo.getUserContentUrl(_portalUrl, _user);
+        userContentItemUrl = userContentUrl + '/items/' + _itemId;
+      }
+      return userContentItemUrl;
+    };
+
+    mo.getItemResourceUrl = function(_portalUrl, _itemId, _customResUrl){
+      var contentUrl = '',itemResourceUrl = '';
+      if(_portalUrl && _itemId) {
+        contentUrl = mo.getContentUrl(_portalUrl);
+        if(_customResUrl){
+          itemResourceUrl = contentUrl + '/items/' + _itemId + '/resources/' + _customResUrl;
+        }else{
+          itemResourceUrl = contentUrl + '/items/' + _itemId + '/resources';
+        }
+      }
+      return itemResourceUrl;
     };
 
     mo.getAddItemUrl = function(_portalUrl, _user, _folderId){
@@ -621,6 +641,21 @@ define(function() {
       if(thePortalUrl){
         thePortalUrl = mo.setHttpProtocol(thePortalUrl);
         url = thePortalUrl + '/sharing/tools/newPrint';
+      }
+      return url;
+    };
+
+    mo.getSwitchAccoutnsUrl = function(_portalUrl, client_id, /*optional*/ redirect_uri){
+      var url = '';
+      var portalUrl = mo.getStandardPortalUrl(_portalUrl);
+      if(portalUrl){
+        url = portalUrl + "/home/pages/Account/manage_accounts.html#client_id=" + client_id;
+        if(redirect_uri){
+          url += "&redirect_uri=" + redirect_uri;
+        }
+      }
+      if(url){
+        url = mo.setHttpsProtocol(url);
       }
       return url;
     };

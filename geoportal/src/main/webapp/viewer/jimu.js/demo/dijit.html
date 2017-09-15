@@ -1,0 +1,1154 @@
+<!DOCTYPE HTML>
+
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Jimu Dijit Demo</title>
+    <link rel="stylesheet" href="//js.arcgis.com/3.20/dijit/themes/claro/claro.css">
+    <link rel="stylesheet" href="//js.arcgis.com/3.20/esri/css/esri.css">
+    <link rel="stylesheet" type="text/css" href="../css/jimu.css">
+    <link rel="stylesheet" type="text/css" href="../css/jimu-theme.css">
+    <link rel="stylesheet" type="text/css" href="../css/dojo-override.css">
+
+    <style type="text/css">
+      html,body{
+        width: 100%;
+        height: 100%;
+      }
+      .item{
+        display: inline-block;
+        vertical-align: top;
+        margin: 10px;
+        position: relative;
+        background-color: rgba(255,0,0,0.1);
+        min-height: 100px;
+        min-width: 100px;
+      }
+      .item .title{
+        width: 100%;
+        height: 20px;
+        background-color: rgba(0,255,0,0.1);
+      }
+      .item .content{
+        width: 100%;
+        position: relative;
+      }
+    </style>
+    <script type="text/javascript">
+      var url = window.location.href.split('?')[0];
+      window.dojoConfig = {
+        packages: [{
+          name: "jimu",
+          location: url.replace("demo/dijit.html", "")
+        },{
+          name:"libs",
+          location: url.replace("jimu.js/demo/dijit.html", "libs")
+        }]
+      };
+    </script>
+    <script src="//js.arcgis.com/3.20/"></script>
+    <script type="text/javascript" src="../../simpleLoader.js"></script>
+    <script type="text/javascript">
+      jimuConfig = {
+        layoutId: 'body'
+      };
+      require(['dojo/i18n!jimu/nls/main', 'dojo/_base/html', 'dojo/_base/lang', 'dojo/dom', 'dojo/on', 'dijit/layout/TabContainer',
+      'dijit/layout/ContentPane', 'jimu/dijit/LoadingShelter', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'dojo/domReady!'],
+
+      function (jimuNls, html, lang, dom, on, TabContainer, ContentPane, LoadingShelter, LoadingIndicator, jimuUtils) {
+        window.jimuNls = jimuNls;
+        var tab = new TabContainer({
+          style: "height: 100%; width: 100%;"
+        }, "dijits-tab");
+
+        var queryObject = jimuUtils.urlToObject(window.location.href).query;
+        if(queryObject && queryObject.theme){
+          var styleName = 'default';
+          if(queryObject.style){
+            styleName = queryObject.style;
+          }
+
+          loadThemeStyle(queryObject.theme, styleName);
+        }
+        //////////////////////////////
+        var simplesTab = new ContentPane({
+          title: "SimpleDijits"
+        });
+        tab.addChild(simplesTab);
+        simplesTab.selectHandle = function() {
+          if(simplesTab.loaded){
+            return;
+          }
+          showLoading(simplesTab);
+          require(['jimu/dijit/CheckBox', 'dijit/form/Select'],
+          function(CheckBox, Select){
+            simplesTab.loaded = true;
+            hideLoading();
+            var ckb = new CheckBox({
+              label: 'label1',
+              onChange: function(state) {
+                alert(state);
+              }
+            });
+            ckb.placeAt(simplesTab);
+            ckb.startup();
+
+            createLine(simplesTab.domNode);
+
+            var select = new Select({}, 'stateSelect')
+            select.placeAt(simplesTab);
+            select.startup();
+          });
+        };
+
+        ///////////////////////////////
+        var cropImageTab = new ContentPane({
+          title: "CropImage"
+        });
+        tab.addChild(cropImageTab);
+        cropImageTab.selectHandle = function() {
+          if (cropImageTab.loaded) {
+            return;
+          }
+
+          showLoading(simplesTab);
+          require(['jimu/dijit/_CropImage', 'jimu/dijit/Popup'],
+          function(_CropImage, Popup){
+            cropImageTab.loaded = true;
+            hideLoading();
+            var _cropImage = new _CropImage();
+            // _cropImage.placeAt(cropImageTab);
+            new Popup({
+              content: _cropImage.domNode,
+              buttons: [{
+                label: 'ok'
+              }]
+            });
+            _cropImage.startup();
+
+            createLine(cropImageTab.domNode);
+          });
+        };
+
+        //////////////////////////////
+        var jimutab = new ContentPane({
+          title: "JimuTab"
+        });
+        tab.addChild(jimutab);
+        jimutab.selectHandle = function(argument) {
+          if(jimutab.loaded){
+            return;
+          }
+          showLoading(jimutab);
+          require(['jimu/dijit/TabContainer', 'jimu/utils'], function(TabContainer, utils){
+            jimutab.loaded = true;
+            hideLoading();
+            var tab1 = new TabContainer({
+              tabs: [{
+                title: 'tc1',
+                content: dom.byId('tc1Node')
+              },{
+                title: 'tc2',
+                content: dom.byId('tc2Node')
+              }]
+            }, 'tab1');
+
+            var item1 = html.create('div', {
+              'class': 'item',
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            }, jimutab.domNode);
+            tab1.placeAt(item1);
+            tab1.startup();
+            utils.setVerticalCenter(tab1.domNode);
+
+            createLine(jimutab.domNode);
+
+            var tab2 = new TabContainer({
+              tabs: [{
+                title: 'tc1',
+                content: dom.byId('tc1Node2')
+              },{
+                title: 'tc2',
+                content: dom.byId('tc2Node2')
+              },{
+                title: 'tc3',
+                content: dom.byId('tc3Node2')
+              }],
+              selected: 'tc2'
+            }, 'tab2');
+            var item2 = html.create('div', {
+              'class': 'item',
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            }, jimutab.domNode);
+            tab2.placeAt(item2);
+            tab2.startup();
+            utils.setVerticalCenter(tab2.domNode);
+          });
+        };
+
+        //////////////////////////////
+        var dropmenuTab = new ContentPane({
+          title: "Dropmenu"
+        });
+        tab.addChild(dropmenuTab);
+        dropmenuTab.selectHandle = function(){
+          if(dropmenuTab.loaded){
+            return;
+          }
+          showLoading(dropmenuTab);
+          require(['jimu/dijit/DropMenu'], function(DropMenu){
+            dropmenuTab.loaded = true;
+            hideLoading();
+
+            html.place('dropmenuContainer', dropmenuTab.domNode);
+            var m1 = new DropMenu({
+              items: ['aaa', 'bbb', '', 'ccc']
+            }, 'dropMenu1');
+            on(m1, 'onMenuClick', function(item){
+              alert(item);
+            });
+
+            var m2 = new DropMenu({
+              items: ['aaa', 'bbb', '', 'ccc']
+            }, 'dropMenu2');
+            var m3 = new DropMenu({
+              items: ['aaa', 'bbb', '', 'ccc']
+            }, 'dropMenu3');
+            var m4 = new DropMenu({
+              items: ['aaa', 'bbb', '', 'ccc']
+            }, 'dropMenu4');
+          });
+        };
+
+        //////////////////////////////
+        var messageTab = new ContentPane({
+          title: "Message"
+        });
+        tab.addChild(messageTab);
+        messageTab.selectHandle = function(){
+          if(messageTab.loaded){
+            return;
+          }
+          showLoading(messageTab);
+
+          require(['jimu/dijit/Message', 'jimu/dijit/Popup'], function(Message, Popup){
+            messageTab.loaded = true;
+            hideLoading();
+
+            html.place('messageContainer', messageTab.domNode);
+
+            on(dom.byId('showMessage'), 'click', function(){
+              new Message({
+                message: 'This is the message'
+              });
+            });
+
+            on(dom.byId('showMessage2'), 'click', function(){
+              var msg2 = new Message({
+                message: 'This is the message2',
+                buttons: [
+                {
+                  label: 'OK',
+                  onClick: function(){
+                    alert('OK');
+                    msg2.close();
+                  }
+                }, {
+                  label: 'Cancel',
+                  onClick: function(){
+                    alert('Cancel');
+                    msg2.close();
+                  }
+                }
+                ]
+              });
+            });
+
+            html.place('popupContainer', messageTab.domNode);
+            on(dom.byId('showPopup'), 'click', function(){
+              new Popup({
+                content: 'This is the message',
+                titleLabel: "the popup"
+              });
+            });
+          });
+        };
+
+        //////////////////////////////
+        var searchTab = new ContentPane({
+          title: "Search"
+        });
+        tab.addChild(searchTab);
+        searchTab.selectHandle = function(){
+          if(searchTab.loaded){
+            return;
+          }
+          showLoading(searchTab);
+
+          require(['jimu/dijit/Search'], function(Search){
+            searchTab.loaded = true;
+            hideLoading();
+
+            html.place('searchContainer', searchTab.domNode);
+
+            var search1 = new Search({
+              placeholder: 'Search String',
+              style: "width:300px"
+            }, 'searchDijit');
+            search1.onSearch = function(text){
+              alert(text);
+            };
+            search1.startup();
+
+            var search2 = new Search({
+              placeholder: 'Search String',
+              searchWhenInput: true,
+              style: "width:300px"
+            }, 'searchDijit2');
+            search2.onSearch = function(text){
+              console.log(text);
+            };
+            search2.startup();
+          });
+        };
+
+        //////////////////////////////
+        var symbolChooserTab = new ContentPane({
+          title: "SymbolChooser"
+        });
+        tab.addChild(symbolChooserTab);
+        symbolChooserTab.selectHandle = function(){
+          if(symbolChooserTab.loaded){
+            return;
+          }
+          showLoading(symbolChooserTab);
+
+          require(['jimu/dijit/SymbolChooser'], function(SymbolChooser){
+            symbolChooserTab.loaded = true;
+            hideLoading();
+
+            var symbolChooser = new SymbolChooser({
+              type: "marker"
+            });
+            symbolChooser.placeAt(symbolChooserTab);
+            symbolChooser.startup();
+          });
+        };
+        //////////////////////////////
+      var transparencyTab = new ContentPane({
+        title: "Transparency"
+      });
+      tab.addChild(transparencyTab);
+      transparencyTab.selectHandle = function(){
+        if(transparencyTab.loaded){
+          return;
+        }
+        showLoading(transparencyTab);
+
+        require(['jimu/dijit/_Transparency'], function(Transparency){
+          transparencyTab.loaded = true;
+          hideLoading();
+
+          var transparency = new Transparency();
+          transparency.placeAt(transparencyTab);
+          transparency.startup();
+        });
+      };
+
+        //////////////////////////////
+        var extentChooserTab = new ContentPane({
+          title: "ExtentChooser"
+        });
+        tab.addChild(extentChooserTab);
+        extentChooserTab.selectHandle = function(){
+          if(extentChooserTab.loaded){
+            return;
+          }
+          showLoading(extentChooserTab);
+
+          require(['jimu/dijit/ExtentChooser'], function(ExtentChooser){
+            extentChooserTab.loaded = true;
+            hideLoading();
+
+            var extentChooser = new ExtentChooser({
+              style:"width:300px; height: 300px",
+              portalUrl:"http://www.arcgis.com",
+              itemId: "c03a526d94704bfb839445e80de95495"
+            });
+            extentChooser.placeAt(extentChooserTab);
+            extentChooser.startup();
+
+            var infoDiv = html.create('div', {}, extentChooserTab.domNode);
+            on(extentChooser, 'extent-change', function(extent){
+              infoDiv.innerHTML = JSON.stringify(extent.toJson());
+            });
+          });
+        };
+
+        //////////////////////////////
+        var imageChooserTab = new ContentPane({
+          title: "ImageChooser"
+        });
+        tab.addChild(imageChooserTab);
+        imageChooserTab.selectHandle = function(){
+          if(imageChooserTab.loaded){
+            return;
+          }
+          showLoading(imageChooserTab);
+
+          require(['jimu/dijit/ImageChooser'], function(ImageChooser){
+            imageChooserTab.loaded = true;
+            hideLoading();
+
+            html.place('imageChooserContainer', imageChooserTab.domNode);
+            //Image chooser is a transparent div, which is clickable and can be put over
+            //other element.
+            var ic = new ImageChooser({displayImg: dom.byId('previewImage')});
+            // html.setStyle(ic.domNode, {
+            //   width: 40 + 'px',
+            //   height: 40 + 'px'
+            // });
+            ic.placeAt('chooserContainer');
+
+            var infoDiv = html.create('div', {
+              style: 'width: 100%;height: 200px;word-wrap: break-word;margin-top: 100px;'
+            }, imageChooserTab.domNode);
+            on(ic, 'imageChange', function(fileData){
+              infoDiv.innerHTML = fileData;
+            });
+          });
+        };
+
+        //////////////////////////////
+        var rendererChooserTab = new ContentPane({
+          title: "RendererChooser"
+        });
+        tab.addChild(rendererChooserTab);
+        rendererChooserTab.selectHandle = function(){
+          if(rendererChooserTab.loaded){
+            return;
+          }
+          showLoading(rendererChooserTab);
+
+          require(['jimu/dijit/RendererChooser'], function(RendererChooser){
+            rendererChooserTab.loaded = true;
+            hideLoading();
+
+            var rc = new RendererChooser({
+              type:"marker",
+              fields:["field1","field2"]
+            });
+            rc.placeAt(rendererChooserTab);
+            rc.startup();
+          });
+        };
+
+        //////////////////////////////
+        var drawBoxTab = new ContentPane({
+          title: "DrawBox"
+        });
+        tab.addChild(drawBoxTab);
+        drawBoxTab.selectHandle = function(){
+          if(drawBoxTab.loaded){
+            return;
+          }
+          showLoading(drawBoxTab);
+          require(['esri/map','jimu/dijit/DrawBox'],function(Map,DrawBox){
+            drawBoxTab.loaded = true;
+            hideLoading();
+
+            html.place('drawboxContainer', drawBoxTab.domNode);
+
+            var map = new Map('drawBoxMapDiv');
+            map.setBasemap('osm');
+            var drawBox = new DrawBox({
+              types:['point','polyline','polygon'],
+              showClear:true
+            });
+            drawBox.placeAt('drawBoxDiv');
+            drawBox.startup();
+            drawBox.setMap(map);
+          });
+        };
+
+        //////////////////////////////
+        var gpServiceBrowserTab = new ContentPane({
+          title: "GpServiceBrowser"
+        });
+        tab.addChild(gpServiceBrowserTab);
+        gpServiceBrowserTab.selectHandle = function(){
+          if(gpServiceBrowserTab.loaded){
+            return;
+          }
+          showLoading(gpServiceBrowserTab);
+          require(['jimu/dijit/GpServiceBrowser'],function(GpServiceBrowser){
+            gpServiceBrowserTab.loaded = true;
+            hideLoading();
+
+            var gpsb = new GpServiceBrowser({
+              url: "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services"
+            });
+            gpsb.placeAt(gpServiceBrowserTab);
+            gpsb.startup();
+          });
+        };
+
+        //////////////////////////////
+        var featureLayerServiceBrowserTab = new ContentPane({
+          title: "FeatureLayerServiceBrowser"
+        });
+        tab.addChild(featureLayerServiceBrowserTab);
+        featureLayerServiceBrowserTab.selectHandle = function(){
+          if(featureLayerServiceBrowserTab.loaded){
+            return;
+          }
+          showLoading(featureLayerServiceBrowserTab);
+          require(['jimu/dijit/FeaturelayerServiceBrowser'],function(FeaturelayerServiceBrowser){
+            featureLayerServiceBrowserTab.loaded = true;
+            hideLoading();
+
+            var flsb = new FeaturelayerServiceBrowser({
+              url: "http://sampleserver1.arcgisonline.com/ArcGIS/rest/services",
+              types: ["point"]
+            });
+            flsb.placeAt(featureLayerServiceBrowserTab);
+            flsb.startup();
+          });
+        };
+
+        //////////////////////////////
+        var filterTab = new ContentPane({
+          title: "Filter"
+        });
+        tab.addChild(filterTab);
+        filterTab.selectHandle = function(){
+          if(filterTab.loaded){
+            return;
+          }
+          showLoading(filterTab);
+          require(['jimu/dijit/Filter'],function(Filter){
+            filterTab.loaded = true;
+            hideLoading();
+            var url = "http://sampleserver6.arcgisonline.com/arcgis/rest/services/SampleWorldCities/MapServer/0";
+              var filter = new Filter();
+              window.filter = filter;
+              filter.placeAt(filterTab);
+              filter.startup();
+              filter.buildByExpr(url,'1=1');
+          });
+        };
+
+        //////////////////////////////
+        var serviceUrlInputTab = new ContentPane({
+          title: "ServiceURLInput"
+        });
+        tab.addChild(serviceUrlInputTab);
+        serviceUrlInputTab.selectHandle = function(){
+          if(serviceUrlInputTab.loaded){
+            return;
+          }
+          showLoading(serviceUrlInputTab);
+          require(['jimu/dijit/ServiceURLInput'],function(ServiceURLInput){
+            serviceUrlInputTab.loaded = true;
+            hideLoading();
+
+            html.place('serviceURLInputContainer', serviceUrlInputTab.domNode);
+
+            var serviceURLInputDijit = new ServiceURLInput({}, 'serviceURLInput');
+            serviceURLInputDijit.setProcessFunction(function(evt){
+              console.log(evt.data);
+              if (evt.data){
+                return true;
+              }else{
+                return false;
+              }
+            }, function(err){
+              alert('invalid ServiceURL');
+            });
+          });
+        };
+        ////////////////////////////
+        var gpChooserFromMapTab = new ContentPane({
+          title: "GpChooserFromPortal"
+        });
+        tab.addChild(gpChooserFromMapTab);
+        gpChooserFromMapTab.selectHandle = function(){
+          if(gpChooserFromMapTab.loaded){
+            return;
+          }
+          showLoading(gpChooserFromMapTab);
+          require(['jimu/dijit/GpChooserFromPortal'], function(GpChooserFromPortal){
+            gpChooserFromMapTab.loaded = true;
+            hideLoading();
+
+            var args = {
+              portalUrl: "http://wabbuild.chn.esri.com/protal"
+            };
+            var gpChooserFromMap = new GpChooserFromPortal(args);
+            gpChooserFromMap.placeAt(gpChooserFromMapTab.domNode);
+            gpChooserFromMap.startup();
+          });
+        };
+        ////////////////////////////
+        var gpSourceTab = new ContentPane({
+          title: "GpSource"
+        });
+        tab.addChild(gpSourceTab);
+        gpSourceTab.selectHandle = function(){
+          if(gpSourceTab.loaded){
+            return;
+          }
+          showLoading(gpSourceTab);
+          require(['jimu/dijit/GpSource', 'dojo/on'], function(GpSource, on){
+            gpSourceTab.loaded = true;
+            hideLoading();
+
+            var args = {
+              multiple: false,
+              portalUrl: "http://wabbuild.chn.esri.com/protal"
+            };
+            var gpSource = new GpSource(args);
+            gpSource.placeAt(gpSourceTab);
+            gpSource.startup();
+
+            on(gpSource, 'ok', function(tasks){
+              console.log(tasks);
+            });
+
+            on(gpSource, 'cancel', function(){
+              console.log('cancel');
+            });
+          });
+        };
+        ////////////////////////////
+        var chartTc = new TabContainer({
+          style: "height: 100%; width: 100%;"
+        });
+        var chartTab = new ContentPane({
+          title: "Chart",
+          content: chartTc
+        });
+        tab.addChild(chartTab);
+        chartTab.selectHandle = function() {
+          if (chartTab.loaded) {
+            return;
+          }
+          require(['jimu/dijit/Chart'], function(Chart) {
+            chartTab.loaded = true;
+            
+            //column
+            var columnChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var columnChartCp = new ContentPane({
+              title: "Column chart",
+              content: columnChartDiv
+            });
+            chartTc.addChild(columnChartCp);
+            var axisConfig = {
+              type: 'column',
+              legend: true,
+              backgroundColor: '#EFEFEF',
+              toolbox: ["saveAsImage", "restore", "dataView", "magicType"],
+              stack: false,
+              axisPointer: true,
+              dataZoom: ["inside", "slider"],
+              labels: ["Apples", "Pears", "Plums", "Bananas", "Oranges"],
+              series: [{
+                name: 'Jane',
+                data: [3, 2, 5, 1, 2]
+              }, {
+                name: 'John',
+                data: [4, 0, 11, 1, 4]
+              }]
+            };
+            var columnConfig = lang.mixin(lang.clone(axisConfig), {
+              type: 'column'
+            });
+            var columnChart = new Chart({
+              chartDom: columnChartDiv,
+              config: lang.clone(columnConfig)
+            });
+            columnChart.placeAt(columnChartDiv);
+            //line
+            var lineChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var lineChartCp = new ContentPane({
+              title: "Line chart",
+              content: lineChartDiv
+            });
+            chartTc.addChild(lineChartCp);
+            var lineConfig = lang.mixin(lang.clone(axisConfig), {
+              type: 'line'
+            });
+
+            var lineChart = new Chart({
+              chartDom: lineChartDiv,
+              config: lineConfig
+            });
+            lineChart.placeAt(lineChartDiv);
+            //bar
+            var barChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var barChartCp = new ContentPane({
+              title: "Bar chart",
+              content: barChartDiv
+            });
+            chartTc.addChild(barChartCp);
+            var barConfig = lang.mixin(lang.clone(axisConfig), {
+              type: 'bar'
+            });
+
+            var barChart = new Chart({
+              chartDom: barChartDiv,
+              config: barConfig
+            });
+            barChart.placeAt(barChartDiv);
+            //pie
+            var noAxisConfig = {
+              type: 'pie',
+              legend: true,
+              backgroundColor: '#EFEFEF',
+              toolbox: ["saveAsImage", "restore", "dataView", "magicType"],
+              dataZoom: ["inside", "slider"],
+              labels: ["Apples", "Pears", "Plums", "Bananas", "Oranges"],
+              series: [{
+                name: 'Jane',
+                data: [3, 2, 5, 1, 4]
+              }]
+            };
+            var pieChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var pieChartCp = new ContentPane({
+              title: "Pie chart",
+              content: pieChartDiv
+            });
+            chartTc.addChild(pieChartCp);
+            var pieConfig = lang.mixin(lang.clone(noAxisConfig), {
+              type: 'pie'
+            });
+
+            var pieChart = new Chart({
+              chartDom: pieChartDiv,
+              config: pieConfig
+            });
+            pieChart.placeAt(pieChartDiv);
+            //doughnut (pie innerRadius)
+            var doughnutChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var doughnutChartCp = new ContentPane({
+              title: "doughnut(pie inner radius) chart",
+              content: doughnutChartDiv
+            });
+            chartTc.addChild(doughnutChartCp);
+            var doughnutConfig = lang.mixin(lang.clone(noAxisConfig), {
+              type: 'pie',
+              innerRadius: '40%'
+            });
+
+            var doughnutChart = new Chart({
+              chartDom: doughnutChartDiv,
+              config: doughnutConfig
+            });
+            doughnutChart.placeAt(doughnutChartDiv)
+              //funnel
+            var funnelChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var funnelChartCp = new ContentPane({
+              title: "Funnel chart",
+              content: funnelChartDiv
+            });
+            chartTc.addChild(funnelChartCp);
+            var funnelConfig = lang.mixin(lang.clone(noAxisConfig), {
+              type: 'funnel'
+            });
+
+            var funnelChart = new Chart({
+              chartDom: funnelChartDiv,
+              config: funnelConfig
+            });
+            funnelChart.placeAt(funnelChartDiv);
+            //gauge
+            var gaugeConfig = {
+              legend: true,
+              type: 'gauge',
+              toolbox: ["saveAsImage", "restore", "dataView", "magicType"],
+              backgroundColor: "#efefef",
+              min: 0,
+              max: 180,
+              labels: ["Apples"],
+              gaugeStyle: {
+                lineStyle: [{
+                  color: '#91c7ae',
+                  value: 60
+                }, {
+                  color: '#63869e',
+                  value: 120
+                }, {
+                  color: '#C23531',
+                  value: 180
+                }]
+              },
+              series: [{
+                name: 'Fruits',
+                data: [80]
+              }]
+            };
+            var gaugeChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var gaugeChartCp = new ContentPane({
+              title: "Gauge chart",
+              content: gaugeChartDiv
+            });
+            chartTc.addChild(gaugeChartCp);
+            var gaugeChart = new Chart({
+              chartDom: gaugeChartDiv,
+              config: gaugeConfig
+            });
+            gaugeChart.placeAt(gaugeChartDiv);
+            //liquidFill
+            var liquidFillConfig = {
+              "legend": true,
+              "type": "liquidFill",
+              "toolbox": ["saveAsImage", "restore", "dataView", "magicType"],
+              "backgroundColor": "#efefef",
+              "max": 180,
+              "labels": ["Apples"],
+              "series": [{
+                "name": "Fruits",
+                "data": [120]
+              }]
+            };
+            var liquidFillChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var liquidFillChartCp = new ContentPane({
+              title: "LiquidFill chart",
+              content: liquidFillChartDiv
+            });
+            chartTc.addChild(liquidFillChartCp);
+            var liquidFillChart = new Chart({
+              chartDom: liquidFillChartDiv,
+              config: liquidFillConfig
+            });
+            liquidFillChart.placeAt(liquidFillChartDiv);
+            //radar
+            var radarConfig = {
+              legend: true,
+              type: 'radar',
+              radarShape: 'circle',
+              toolbox: ["saveAsImage", "restore", "dataView", "magicType"],
+              labels: ['Jane', 'John'],
+              indicator: [{
+                name: 'Apples',
+                max: 10
+              }, {
+                name: 'Pears',
+                max: 10
+              }, {
+                name: 'Plums',
+                max: 10
+              }, {
+                name: 'Bananas',
+                max: 10
+              }, {
+                name: 'Oranges',
+                max: 10
+              }],
+              series: [{
+                name: 'Fruits:Jane vs John',
+                type: 'radar',
+                data: [
+                  [6, 4, 10, 3, 5],
+                  [8, 6, 9, 6, 7]
+                ]
+              }]
+            };
+            var radarChartDiv = html.create('div', {
+              style: {
+                width: '500px',
+                height: '400px'
+              }
+            });
+            var radarChartCp = new ContentPane({
+              title: "Radar chart",
+              content: radarChartDiv
+            });
+            chartTc.addChild(radarChartCp);
+
+            var radarChart = new Chart({
+              chartDom: radarChartDiv,
+              config: lang.clone(radarConfig)
+            });
+            radarChart.placeAt(radarChartDiv);
+          });
+        };
+        ////////////////////////////
+        ///
+        var cssComponents = new ContentPane({
+          title: "cssComponents"
+        });
+        tab.addChild(cssComponents);
+        cssComponents.selectHandle = function(){
+          html.place('cssComponents', cssComponents.domNode);
+        };
+
+        ////////////////////////////////////
+        var simpleTableTab = new ContentPane({
+          title: "SimpleTable"
+        });
+        tab.addChild(simpleTableTab);
+        simpleTableTab.selectHandle = function(){
+          if(simpleTableTab.loaded){
+            return;
+          }
+          showLoading(simpleTableTab);
+          require(['jimu/dijit/SimpleTable', 'dojo/on'], function(SimpleTable, on){
+            simpleTableTab.loaded = true;
+            hideLoading();
+
+            var fields = [{
+              name: 'show',
+              title: 'show',
+              width: 'auto',
+              type: 'checkbox',
+              'class': 'show'
+            }, {
+              name: 'label',
+              title: 'label',
+              width: '60%',
+              type: 'text'
+            }, {
+              name: 'url',
+              title: 'url',
+              type: 'text',
+              hidden: true
+            }, {
+              name: 'actions',
+              title: 'actions',
+              type: 'actions',
+              width: '20%',
+              actions: ['edit'],
+              'class': 'symbol'
+            }];
+
+            var args = {
+              fields: fields,
+              selectable: true,
+              autoHeight: false
+            };
+            var tableDijit = new SimpleTable(args);
+
+            tableDijit.addRow({
+              label: 'label1',
+              url: 'www.esri.com',
+              show: true
+            });
+
+            tableDijit.addRow({
+              label: 'label2',
+              url: 'www.arcgis.com',
+              show: false
+            });
+
+            tableDijit.addRow({
+              label: 'label4',
+              url: 'www.arcgis.com',
+              show: false
+            });
+
+            tableDijit.addRow({
+              label: 'label5',
+              url: 'www.arcgis.com',
+              show: false
+            });
+
+            tableDijit.placeAt(simpleTableTab);
+            tableDijit.startup();
+
+            html.setStyle(tableDijit.domNode, {
+              'height': '500px'
+            });
+          });
+        };
+
+        ////////////////////////
+        var loadingComponents = new ContentPane({
+          title: "Loading"
+        });
+        tab.addChild(loadingComponents);
+        loadingComponents.selectHandle = function(){
+          html.place('loadingComponents', loadingComponents.domNode);
+
+          var loadingShelter = new LoadingShelter();
+          loadingShelter.placeAt('loading-shelter');
+
+          var loadingIndicator = new LoadingIndicator();
+          loadingIndicator.placeAt('loading-indicator');
+        };
+        ////////////////////////////////////////////////////
+
+        tab.watch("selectedChildWidget", function(name, oval, nval){
+          console.log("selected child changed from ", oval.title, " to ", nval.title);
+          nval.selectHandle();
+        });
+
+        tab.startup();
+
+        var selectIndex = 0;
+        if(queryObject && queryObject.index){
+          selectIndex = queryObject.index;
+        }
+        if(selectIndex === 0){
+          simplesTab.selectHandle();
+        }else{
+          tab.selectChild(tab.getChildren()[selectIndex]);
+        }
+
+        function createLine(panel) {
+          html.create('div', {}, panel);
+        }
+
+        var loading;
+        function showLoading(panel){
+          if(!loading){
+            loading = new LoadingShelter();
+            loading.startup();
+          }
+          loading.placeAt(panel);
+          loading.show();
+        }
+
+        function hideLoading(){
+          loading.hide();
+        }
+
+        function loadThemeStyle(themeName, styleName) {
+          jimuUtils.loadStyleLink(themeName + '-common', require.toUrl('jimu') + '../themes/' + themeName + '/common.css');
+          jimuUtils.loadStyleLink(themeName + '-common', require.toUrl('jimu') + '../themes/' + themeName + '/styles/' + styleName + '/style.css');
+        }
+      });
+    </script>
+  </head>
+  <body class="claro" id="body">
+    <div id="dijits-tab"></div>
+
+    <div style="display: none">
+      <div id="tab1">
+        <div id="tc1Node">tab content 1</div>
+        <div id="tc2Node">tab content 2</div>
+      </div>
+
+      <div id="tab2" >
+        <div id="tc1Node2">tab content 1-2</div>
+        <div id="tc2Node2">tab content 2-2</div>
+        <div id="tc3Node2">tab content 3-2</div>
+      </div>
+
+      <div id="cropImage">
+      </div>
+
+      <select id="stateSelect">
+          <option value="" selected="selected">Select a state</option>
+          <option value="AL">Alabama</option>
+          <option value="AK">AlaskaAlaskaAlaskaAlaskaAlaska</option>
+          <option value="AZ">Arizona</option>
+          <option value="AR">Arkansas</option>
+          <option value="CA">California</option>
+      </select>
+
+      <div id="dropmenuContainer" class="item" style="width:300px; height:300px;">
+        <div id="dropMenu1" style="margin:5px;"></div>
+        <div id="dropMenu2" style="float:right;margin:5px;"></div>
+        <div id="dropMenu3" style="position: absolute; top: 260px;margin:5px;"></div>
+        <div id="dropMenu4" style="position: absolute; top: 260px; right: 0px;margin:5px;"></div>
+      </div>
+
+      <div id="messageContainer">
+        <div class="jimu-btn" id="showMessage">ShowMessage</div>
+        <div class="jimu-btn" id="showMessage2">ShowMessage2</div>
+      </div>
+
+      <div id="popupContainer">
+        <div class="jimu-btn" id="showPopup">ShowPopup</div>
+      </div>
+
+      <div id="searchContainer">
+        <div class="item">
+          <div class="title">Search</div>
+          <div class="content">
+            <div id="searchDijit" data-dojo-type="jimu/dijit/Search" data-dojo-props="placeholder: 'Search String'" style="width:300px"></div>
+          </div>
+        </div>
+
+        <div class="item">
+          <div class="title">Search while typing</div>
+          <div class="content">
+            <div id="searchDijit2" data-dojo-type="jimu/dijit/Search" data-dojo-props="placeholder: 'Search String2', searchWhenInput: true" style="width:300px"></div>
+          </div>
+        </div>
+      </div>
+
+      <div id="imageChooserContainer">
+        <div id="chooserContainer" style="position:absolute;width:40px;height:40px;z-index:999;"></div>
+        <img src="images/pic1.png" style="position:absolute;width:40px;height:40px;" id="previewImage">
+      </div>
+
+      <div id="drawboxContainer">
+        <div id="drawBoxMapDiv" style="width:500px;height:500px;"></div>
+        <div id="drawBoxDiv"></div>
+      </div>
+
+      <div id="serviceURLInputContainer">
+        <input type="text" id="serviceURLInput" />
+      </div>
+
+      <div id="cssComponents">
+        <div class="jimu-btn">jimu-btn</div>
+      </div>
+
+      <div id="loadingComponents">
+        <div id="loading-shelter" style="width: 300px;height: 300px; position: relative;border:solid"></div>
+        <div id="loading-indicator" style="width: 300px;height: 300px;  position: relative; border:solid"></div>
+      </div>
+    </div>
+  </body>
+
+</html>

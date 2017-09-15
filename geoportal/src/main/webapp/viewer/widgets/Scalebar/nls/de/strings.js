@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Maßstabsleiste"
-  })
-);
+define({
+  "_widgetLabel": "Maßstabsleiste"
+});

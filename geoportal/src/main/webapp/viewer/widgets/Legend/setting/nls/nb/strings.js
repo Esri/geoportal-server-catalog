@@ -1,9 +1,7 @@
-﻿define(
-   ({
-    left: "Juster mot venstre",
-    right: "Juster mot høyre",
-    arrangement: "Plassering",
-    autoUpdate: "Automatisk oppdatering",
-    respectCurrentMapScale: "Respekter gjeldende kartmålestokk"
-  })
-);
+define({
+  "left": "Venstrejuster",
+  "right": "Høyrejuster",
+  "arrangement": "Plassering",
+  "autoUpdate": "Automatisk oppdatering",
+  "respectCurrentMapScale": "Respekter gjeldende kartmålestokk"
+});

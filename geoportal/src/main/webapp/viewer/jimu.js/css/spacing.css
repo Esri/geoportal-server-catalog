@@ -141,6 +141,26 @@ html[dir='rtl'] th {
   right: 0;
 }
 
+.jimu-leading-margin5px{
+  margin-left: 5px;
+}
+.jimu-leading-margin10px{
+  margin-left: 10px;
+}
+.jimu-leading-margin20px{
+  margin-left: 20px;
+}
+
+.jimu-trailing-margin5px{
+  margin-right: 5px;
+}
+.jimu-trailing-margin10px{
+  margin-right: 10px;
+}
+.jimu-trailing-margin20px{
+  margin-right: 20px;
+}
+
 /* RTL related: margins, padding */
 .jimu-rtl .jimu-leading-margin0 {
   margin-right: 0;
@@ -269,4 +289,30 @@ html[dir='rtl'] th {
 .jimu-rtl .jimu-trailing-position0{
   right: auto;
   left: 0;
+}
+
+.jimu-rtl .jimu-leading-margin5px{
+  margin-left: auto;
+  margin-right: 5px;
+}
+.jimu-rtl .jimu-leading-margin10px{
+  margin-left: auto;
+  margin-right: 10px;
+}
+.jimu-rtl .jimu-leading-margin20px{
+  margin-left: auto;
+  margin-right: 20px;
+}
+
+.jimu-rtl .jimu-trailing-margin5px{
+  margin-right: auto;
+  margin-left: 5px;
+}
+.jimu-rtl .jimu-trailing-margin10px{
+  margin-right: auto;
+  margin-left: 10px;
+}
+.jimu-rtl .jimu-trailing-margin20px{
+  margin-right: auto;
+  margin-left: 20px;
 }

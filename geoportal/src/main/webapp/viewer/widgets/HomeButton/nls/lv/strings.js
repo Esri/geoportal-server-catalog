@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Sākums"
-  })
-);
+define({
+  "_widgetLabel": "Sākums"
+});

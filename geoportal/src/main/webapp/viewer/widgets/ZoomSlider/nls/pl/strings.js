@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Suwak powiększania"
-  })
-);
+define({
+  "_widgetLabel": "Suwak powiększania"
+});

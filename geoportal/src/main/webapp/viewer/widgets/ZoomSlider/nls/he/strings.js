@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "סרגל התמקדות"
-  })
-);
+define({
+  "_widgetLabel": "סרגל התמקדות"
+});

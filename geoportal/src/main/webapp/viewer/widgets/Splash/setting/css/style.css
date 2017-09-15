@@ -2,13 +2,329 @@
   margin:0;
   padding:0;
   font-size:14px;
-  margin-top: 20px;
 	position: absolute;
+	overflow-y: hidden;
 	top: 0;
 	bottom: 0;
 	left: 0;
 	right: 0;
+  letter-spacing: 0.38px;
 }
+
+.jimu-widget-splash-setting .instruction {
+	margin-bottom: 10px;
+}
+
+.jimu-widget-splash-setting .tabs {
+  font-family: "Avenir Light";
+  color: #000000;
+	height: 100%;
+}
+
+.jimu-widget-splash-setting .tabs .tab-description {
+	margin: 10px 0;
+}
+
+.jimu-widget-splash-setting .tabs .jimu-radio-checked .jimu-radio-inner {
+	width: 6px;
+	height: 6px;
+	margin: 4px;
+	border-radius: 50%;
+	background-color: #24B5CC;
+}
+
+.jimu-widget-splash-setting .tabs .jimu-radio{
+	border: 1px solid #ccc;
+  vertical-align: top;
+}
+
+.jimu-widget-splash-setting .jimu-tab>.control>.tab{
+	background-color: #fff;
+	border-top: 0;
+	border-left: 0;
+	border-right: 0;
+	border-bottom: 1px solid #dedede;
+	color:#898989;
+	font-family: "Avenir Medium";
+	font-size: 14px;
+	/*letter-spacing: 0.38px;*/
+}
+.jimu-widget-splash-setting .jimu-tab>.control>.tab.jimu-state-selected {
+	border-bottom: 3px solid #24b5cc;
+	font-family: "Avenir Heavy";
+	color: #000000;
+}
+
+
+.jimu-widget-splash-setting .tabs .titles {
+	font-weight: bold;
+	font-family: "Avenir Medium";
+	font-size: 14px;
+  /*color: #000000;
+  letter-spacing: 0.38px;*/
+	margin: 20px 0 10px 0;
+}
+.jimu-widget-splash-setting .tabs .hide{
+	display: none;
+}
+/*.jimu-widget-splash-setting .dijitTextBox .dijitInputField {
+	padding: 1px 14px 1px 10px;
+}*/
+.jimu-widget-splash-setting .tabs .indent{
+	margin-left: 20px;
+	margin-top: 10px;
+}
+
+.jimu-widget-splash-setting .tabs .unit-item{
+	margin: 15px 5px 5px 5px;
+	line-height: 18px;
+	height: 18px;
+	vertical-align: middle;
+}
+
+.jimu-widget-splash-setting .tabs .clearFix {
+	*overflow: hidden;
+	*zoom: 1;
+}
+
+.jimu-widget-splash-setting .tabs .clearFix:after {
+	display: table;
+	content: "";
+	width: 0;
+	clear: both;
+}
+.jimu-widget-splash-setting .tabs .view{
+	height: 100%;
+	overflow-y: auto;
+}
+.jimu-widget-splash-setting .tabs .jimu-tab>.jimu-viewstack{
+/*	min-height: 100000px;
+	overflow-y: auto;*/
+	padding-bottom: 30px;
+}
+
+/*.colorPickerEditor*/
+.jimu-widget-splash-setting .tabs .colorPickerEditor {
+	/*display: inline-block;
+	width: 25px;
+	height: 25px;*/
+}
+.jimu-widget-splash-setting .tabs .colorPickerEditor .jimu-color-picker{
+	display: inline-block;
+	width: 30px;
+	height: 30px;
+}
+.jimu-widget-splash-setting .tabs .colorPickerEditor .dijitSpinner.dijitNumberTextBox.dijitValidationTextBox{
+	width:66px;
+	height:30px;
+}
+
+.jimu-widget-splash-setting .dijitSliderImageHandleH{
+  top: -7px;
+}
+.jimu-widget-splash-setting .dijitSliderImageHandle.dijitSliderImageHandleH{
+  background-image: url("../../images/sliderball.png");
+  background-position: 0 0;
+}
+.jimu-widget-splash-setting .tabs .dijitSliderThumbHover{
+  background-image: url("../../images/sliderball_hover.png");
+  background-position: 0 0;
+}
+/*left*/
+.jimu-widget-splash-setting .dijitSlider .dijitSliderProgressBarH,
+.jimu-widget-splash-setting .dijitSlider .dijitSliderLeftBumper{
+  border-color: #24b5cc;
+  background-color: #24b5cc;
+  background-image: -webkit-linear-gradient(top, #24b5cc 0px, #24b5cc 1px, rgba(255, 255, 255, 0) 2px);
+  background-image: -o-linear-gradient(top, #24b5cc 0px, #24b5cc 1px, rgba(255, 255, 255, 0) 2px);
+  background-image: linear-gradient(top, #24b5cc 0px, #24b5cc 1px, rgba(255, 255, 255, 0) 2px);
+}
+.jimu-widget-splash-setting .dijitSlider .dijitSliderRemainingBarH,
+.jimu-widget-splash-setting .dijitSlider .dijitSliderRightBumper{
+  border-color: #d7d7d7;
+  background-color: #d7d7d7;
+}
+
+
+.jimu-widget-splash-setting .tabs .colorPickerEditor .trans{
+	font-family: "Avenir Light";
+	font-size: 12px;
+  padding: 0 10px 0 20px;
+  letter-spacing: 0.33px;
+}
+
+.jimu-widget-splash-setting .tabs .sliderbar {
+	width: 80px;
+}
+
+
+/* 1 content */
+.jimu-widget-splash-setting .content-tab{
+
+}
+.jimu-widget-splash-setting .content-tab .editor-container{
+}
+.jimu-widget-splash-setting .content-tab .editor-container .dijitEditorIFrameContainer textarea {
+	resize: none;
+}
+
+/* 2 appearance */
+.jimu-widget-splash-setting .appearance-tab{
+	overflow-y: auto;
+	height: 490px;
+}
+
+.jimu-widget-splash-setting .appearance-tab .size-selector .size-box-container{
+	display: inline-block;
+	text-align: center;
+	margin: 0 10px 0 0;
+	width: 80px;
+	-o-text-overflow: ellipsis;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.jimu-widget-splash-setting .appearance-tab .size-selector .size-box{
+	width:80px;
+	height:60px;
+	background: no-repeat;
+	margin-bottom: 5px;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent25{
+	background: url("../../images/percent25.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent25.selected{
+	background: url("../../images/percent25_selected.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent50{
+	background: url("../../images/percent50.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent50.selected{
+	background: url("../../images/percent50_selected.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent75{
+	background: url("../../images/percent75.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent75.selected{
+	background: url("../../images/percent75_selected.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent100{
+	background: url("../../images/percent100.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .percent100.selected{
+	background: url("../../images/percent100_selected.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .custom{
+	background: url("../../images/custom.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .custom.selected{
+	background: url("../../images/custom_selected.svg") center center no-repeat;;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .custom-label{
+	vertical-align: top;
+	line-height: 20px;
+}
+.jimu-rtl .jimu-widget-splash-setting .appearance-tab .sizes>:first-child{
+	margin-right: 0;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .wh{
+	margin: 0 14px;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .wh .wh-item{
+	display: inline-block;
+	margin-right: 10px;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .wh .wh-item .lable{
+	font-family: "Avenir Medium";
+	font-size: 12px;
+	color: #353535;
+	/*letter-spacing: 0.33px;*/
+	margin:0 0 5px 0;
+	width: 96px;
+	-o-text-overflow: ellipsis;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .wh .inputs{
+	width:96px;
+	border: 1px solid #d9dde0;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .wh .inputs .text-box{
+	width: 70px;
+	border: none;
+}
+.jimu-widget-splash-setting .appearance-tab .size-selector .wh .inputs .unit{
+	color: #898989;
+	letter-spacing: 0;
+}
+
+/* alignment */
+.jimu-widget-splash-setting .appearance-tab .align-selector .align-box-container{
+	display: inline-block;
+	text-align: center;
+	margin: 0 10px;
+	width:50px;
+	-o-text-overflow: ellipsis;
+	text-overflow: ellipsis;
+	overflow: hidden;
+	white-space: nowrap;
+}
+
+.jimu-widget-splash-setting .appearance-tab .align-selector .align-box{
+	width:40px;
+	height:36px;
+	background: no-repeat;
+	margin: 0 5px 5px 5px;
+}
+.jimu-widget-splash-setting .appearance-tab .align-selector .top{
+	background: url("../../images/top.svg") center center no-repeat;
+	border: none;
+}
+.jimu-widget-splash-setting .appearance-tab .align-selector .top.selected{
+	background: url("../../images/top_selected.svg") center center no-repeat;
+	border: 1px #24B5CC solid;
+}
+.jimu-widget-splash-setting .appearance-tab .align-selector .middle{
+	background: url("../../images/middle.svg") center center no-repeat;
+	border: none;
+}
+.jimu-widget-splash-setting .appearance-tab .align-selector .middle.selected{
+	background: url("../../images/middle_selected.svg") center center no-repeat;
+	border: 1px #24B5CC solid;
+}
+
+
+.jimu-widget-splash-setting .appearance-tab .jimu-image-chooser{
+	height:30px;
+	width:124px;
+	background: #24B5CC;
+	border: 1px solid #24B5CC;
+}
+.jimu-widget-splash-setting .appearance-tab .file-name{
+	font-size: 12px;
+	line-height: 33px;
+	height: 33px;
+	color: #000000;
+	margin: 0 20px 0 20px;
+}
+.jimu-widget-splash-setting .appearance-tab .types>:first-child{
+	margin-left: 0;
+}
+.jimu-rtl .jimu-widget-splash-setting .appearance-tab .types>:first-child{
+	margin-right: 0;
+}
+.jimu-widget-splash-setting .appearance-tab .fillstype{
+	margin: 10px 20px 0 20px;
+}
+
+.jimu-widget-splash-setting .appearance-tab .buttonText{
+  width: 290px;
+  margin-bottom: 10px;
+}
+
+
 .jimu-widget-splash-setting .instruction span{
 	color: #596679;
 }
@@ -22,22 +338,25 @@
 	background-color: #fafafc;
 }
 .jimu-widget-splash-setting .editor-container .dijitEditorIFrameContainer{
-	position: absolute;
-	top: 58px;
-	bottom: 0;
-	left: 0;
-	right: 0;
+	position: relative;
+	width: 100%;
+	overflow: hidden;
 }
+.jimu-widget-splash-setting .editor-container .dijitEditorIFrameContainer {
+	padding-top: 0;
+}
+
 .jimu-widget-splash-setting .editor-container .uploaderInsideNode embed {
 	display: none;
 }
 .jimu-widget-splash-setting .splash-footer{
-	position: absolute;
-	bottom: 5px;
+	/*position: absolute;
+	bottom: 5px;*/
 	color: #596679;
-	left: 0;
-	right: 0;
+/*	left: 0;
+	right: 0;*/
 	height: 155px;
+  margin-top: 20px;
 }
 .jimu-widget-splash-setting .splash-footer .require-continue{
 	position: absolute;
@@ -72,4 +391,7 @@
 .jimu-widget-splash-setting .splash-footer input{
 	width: 755px;
 	color: #7989a0;
+}
+.jimu-widget-splash-setting .dojoxEditorUploadNorm.dijitButtonDisabled {
+	background: #ccc url(../../css/images/uploadImageIcon_disabled.gif) no-repeat 2px 2px;
 }

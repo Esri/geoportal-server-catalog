@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Υπόμνημα"
-  })
-);
+define({
+  "_widgetLabel": "Υπόμνημα"
+});

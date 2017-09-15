@@ -1,3 +1,4 @@
+@import url("LayerSelector.css");
 
 .jimu-widget-layerList-setting {
   font-size: 14px;
@@ -5,9 +6,12 @@
 }
 
 .jimu-widget-layerList-setting .show-legend-checkbox {
-  margin-top: 20px;
-  margin-bottom: 40px;
+  /*
+  margin-top: 5px;
+  margin-bottom: 5px;
+  */
 }
+
 
 .jimu-widget-layerList-setting .show-legend-checkbox .label{
   margin-top: 20px;
@@ -25,12 +29,34 @@
 .jimu-widget-layerList-setting .title {
   font-size: 14px;
   color: #596679;
-  margin-bottom: 20px;
+  margin-top: 5px;
+  margin-bottom: 5px;
 }
 
 .jimu-widget-layerList-setting .control-popupmenu-part .label {
-  padding-bottom: 26px;
-  padding-left: 10px;
-  padding-right: 10px;
-  padding-top: 2px;
+  /*padding-bottom: 26px;*/
+  padding-left: 12px;
+  padding-right: 12px;
+}
+
+.jimu-widget-layerList-setting .control-popupmenu-table {
+  margin-left: 18px;
+  border-spacing: 0px;
+}
+
+.jimu-rtl .jimu-widget-layerList-setting .control-popupmenu-table {
+  margin-left: auto;
+  margin-right: 18px;
+}
+
+.jimu-widget-layerList-setting .control-popupmenu-part  tr{
+  height: 25px;
+}
+
+.jimu-widget-layerList-setting .layer-selector-div {
+  min-height: 100px;
+  max-height: 330px;
+  border: 1px solid #d9dde0;
+  border-radius: 1px;
+  overflow: auto;
 }

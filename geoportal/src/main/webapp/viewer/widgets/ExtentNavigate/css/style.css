@@ -1,0 +1,47 @@
+.jimu-widget-extent-navigate{
+  background-color: #ccc;
+  background-color: rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-size: 24px;
+  line-height: 25px;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+  color: #fff;
+  text-align: center;
+}
+
+.jimu-widget-extent-navigate .operation{
+  width: 30px;
+  height: 30px;
+  font-size: 16px;
+  line-height: 30px;
+}
+
+.jimu-widget-extent-navigate .operation:hover{
+  background-color: #848385;
+  background-color: rgba(0,0,0,0.4);
+}
+
+.jimu-widget-extent-navigate .operation.jimu-state-disabled{
+  color: #ddd;
+}
+
+.jimu-widget-extent-navigate .previous::before{
+  font-family: wab_2d;
+  content: "\ea2f";
+}
+
+.jimu-widget-extent-navigate .next::before{
+  font-family: wab_2d;
+  content: "\ea27";
+}
+
+.jimu-widget-extent-navigate.vertical .previous{
+  border-bottom: 1px solid #57585A;
+}
+
+.jimu-widget-extent-navigate.horizontal .previous{
+  border-right: 1px solid #57585A;
+}

@@ -58,6 +58,7 @@ define([
       var exportOptions = {
         datas: options.datas,
         fromClient: options.fromClient,
+        withGeometry: options.withGeometry,
         outFields: options.outFields,
         filterExpression : options.filterExpression
       };
@@ -225,10 +226,46 @@ define([
       var def = new Deferred();
       var _outFields = null;
       var data = options.datas;
+      var withGeometry = options.withGeometry;
 
       _outFields = options.outFields;
       if (!_outFields || !_outFields.length) {
         _outFields = layer.fields;
+      }
+      _outFields = lang.clone(_outFields);
+
+      if (withGeometry && !(data && data.length > 0)) {// only for fromClient or server
+        var name = "";
+        if (_outFields.indexOf('x') !== -1) {
+          name = '_x';
+        } else {
+          name = 'x';
+        }
+        _outFields.push({
+          'name': name,
+          alias: name,
+          format: {
+            'digitSeparator': false,
+            'places': 6
+          },
+          show: true,
+          type: "esriFieldTypeDouble"
+        });
+        if (_outFields.indexOf('y') !== -1) {
+          name = '_y';
+        } else {
+          name = 'y';
+        }
+        _outFields.push({
+          'name': name,
+          alias: name,
+          format: {
+            'digitSeparator': false,
+            'places': 6
+          },
+          show: true,
+          type: "esriFieldTypeDouble"
+        });
       }
 
       if (data && data.length > 0) {
@@ -237,9 +274,10 @@ define([
           'outFields': _outFields
         });
       } else {
+        // var g = null;
         if (options.fromClient) {
           data = array.map(layer.graphics, function(graphic) {
-            return graphic.attributes;
+            return withGeometry ? getAttrsWithXY(graphic) : lang.clone(graphic);
           });
           def.resolve({
             'data': data || [],
@@ -279,10 +317,10 @@ define([
         query.outFields = ["*"];
       }
 
-      query.returnGeometry = false;
+      query.returnGeometry = options.withGeometry;
       qt.execute(query, function(results) {
         var data = array.map(results.features, function(feature) {
-          return feature.attributes;
+          return getAttrsWithXY(feature);
         });
         def.resolve(data);
       }, function(err) {
@@ -368,7 +406,7 @@ define([
 
           if (typeCheck && typeCheck.domains &&
             typeCheck.domains[field.name] && typeCheck.domains[field.name].codedValues) {
-            codeValue = jimuUtils.fieldFormatter.getFormattedCodedValue(
+            codeValue = jimuUtils.fieldFormatter.getCodedValue(
               typeCheck.domains[field.name],
               data
             );
@@ -379,4 +417,24 @@ define([
 
       return data;
     };
+
+    function getAttrsWithXY(graphic) {
+      var attrs = lang.clone(graphic.attributes);
+      var geometry = graphic.geometry;
+      if (geometry && geometry.type === 'point') {
+        if ('x' in attrs) {
+          attrs._x = geometry.x;
+        } else {
+          attrs.x = geometry.x;
+        }
+
+        if ('y' in attrs) {
+          attrs._y = geometry.y;
+        } else {
+          attrs.y = geometry.y;
+        }
+      }
+
+      return attrs;
+    }
   });

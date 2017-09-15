@@ -9,28 +9,28 @@
         "height": 40,
         "relativeTo": "browser"
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "uri": "widgets/Scalebar/Widget",
       "position": {
         "left": 7,
         "bottom": 25
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "uri": "widgets/Search/Widget",
       "position": {
         "left": 55,
         "top": 5
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "uri": "widgets/Coordinate/Widget",
       "position": {
         "left": 7,
         "bottom": 5
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "position": {
         "left": 55,
@@ -63,7 +63,7 @@
         "bottom": 0,
         "zIndex": 1
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "uri": "widgets/HomeButton/Widget",
       "inPanel": false,
@@ -71,7 +71,7 @@
         "left": 7,
         "top": 75
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "uri": "widgets/MyLocation/Widget",
       "inPanel": false,
@@ -79,10 +79,10 @@
         "left": 7,
         "top": 110
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "uri": "widgets/AttributeTable/Widget",
-      "version": "2.0.1",
+      "version": "2.5",
       "position": {
         "relativeTo": "browser"
       }
@@ -92,7 +92,7 @@
       "position": {
         "relativeTo": "browser"
       },
-      "version": "2.0.1"
+      "version": "2.5"
     }, {
       "uri": "widgets/ZoomSlider/Widget",
       "visible": true,
@@ -100,7 +100,23 @@
         "top": 5,
         "left": 7
       },
-      "version": "2.0.1"
+      "version": "2.5"
+    }, {
+      "uri": "widgets/ExtentNavigate/Widget",
+      "visible": false,
+      "position": {
+        "top": 150,
+        "left": 7
+      },
+      "version": "2.5"
+    }, {
+      "uri": "widgets/FullScreen/Widget",
+      "visible": false,
+      "position": {
+        "right": 8,
+        "top": 8
+      },
+      "version": "2.5"
     }]
   },
 

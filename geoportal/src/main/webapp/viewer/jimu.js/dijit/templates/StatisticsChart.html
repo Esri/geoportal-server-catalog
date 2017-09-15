@@ -1,0 +1,29 @@
+<div>
+	<div class="results-header" data-dojo-attach-point="resultsHeader" style="margin-bottom:15px;">
+		<div class="chart-title jimu-float-leading" data-dojo-attach-point="chartTitle"></div>
+		<div class="paging-section jimu-float-leading">
+			<ul data-dojo-attach-point="pagingUl" data-dojo-attach-event="onclick:_onPagingUlClicked"></ul>
+		</div>
+		<div class="zoomin jimu-float-trailing" data-dojo-attach-point="zoominIcon"></div>
+		<div class="settings jimu-float-trailing" data-dojo-attach-point="settingsIcon"></div>
+	</div>
+	<div class="chart-section">
+		<table cellpadding="0" cellspacing="0" style="width:100%;table-layout:fixed;">
+			<tbody>
+				<tr>
+					<td class="arrow-td">
+						<div class="chart-section-item left-arrow arrow" data-dojo-attach-point="leftArrow" data-dojo-attach-event="onclick:_onLeftArrowClicked"></div>
+					</td>
+					<td class="content-td">
+						<div class="chart-section-item chart-container" data-dojo-attach-point="chartContainer" dir="ltr"
+						style="direction:ltr;overflow:hidden;"></div>
+					</td>
+					<td class="arrow-td">
+						<div class="chart-section-item right-arrow arrow" data-dojo-attach-point="rightArrow" data-dojo-attach-event="onclick:_onRightArrowClicked"></div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+	<div data-dojo-attach-point="loading" data-dojo-type="jimu/dijit/LoadingIndicator" data-dojo-props='hidden:true'></div>
+</div>

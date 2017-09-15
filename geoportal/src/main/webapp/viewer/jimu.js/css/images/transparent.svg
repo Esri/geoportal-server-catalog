@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41.1 (35376) - http://www.bohemiancoding.com/sketch -->
+    <title>transparent</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <rect id="path-1" x="0" y="0" width="16" height="16"></rect>
+        <mask id="mask-2" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="16" height="16" fill="white">
+            <use xlink:href="#path-1"></use>
+        </mask>
+    </defs>
+    <g id="Spec" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="spec_builder" transform="translate(-478.000000, -6490.000000)">
+            <g id="01-copy-3" transform="translate(452.000000, 6463.000000)">
+                <g id="Transparent" transform="translate(26.000000, 27.000000)">
+                    <g id="transparent">
+                        <use id="Rectangle-21" stroke="#666666" mask="url(#mask-2)" stroke-width="4" xlink:href="#path-1"></use>
+                        <polygon id="Rectangle-18" fill="#666666" points="1 13.7279221 13.7279221 1 15.1421356 2.41421356 2.41421356 15.1421356"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

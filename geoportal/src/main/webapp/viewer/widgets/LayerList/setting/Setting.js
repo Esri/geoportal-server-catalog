@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,14 +17,18 @@
 define([
     'dojo/_base/declare',
     'jimu/BaseWidgetSetting',
+    'jimu/LayerInfos/LayerInfos',
     'dijit/_WidgetsInTemplateMixin',
+    './LayerSelector',
     'dijit/form/CheckBox',
     'jimu/dijit/CheckBox'
   ],
   function(
     declare,
     BaseWidgetSetting,
-    _WidgetsInTemplateMixin) {
+    LayerInfos,
+    _WidgetsInTemplateMixin,
+    LayerSelector) {
     return declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
 
       baseClass: 'jimu-widget-layerList-setting',
@@ -32,7 +36,17 @@ define([
       startup: function() {
         this.inherited(arguments);
         this.setConfig(this.config);
+        this.createLayerSelector();
       },
+
+      createLayerSelector: function() {
+        var layerInfosObj = LayerInfos.getInstanceSync();
+        this.layerSelector = new LayerSelector({
+          operLayerInfos: layerInfosObj,
+          config: this.config
+        }).placeAt(this.layerSelectorDiv);
+      },
+
 
       setConfig: function(config) {
         this.showLegend.setValue(config.showLegend);
@@ -57,6 +71,7 @@ define([
         this.config.contextMenu.MoveupOrMovedown = this.moveupDown.getValue();
         this.config.contextMenu.OpenAttributeTable = this.table.getValue();
         this.config.contextMenu.DescriptionOrShowItemDetailsOrDownload = this.url.getValue();
+        this.config.layerOptions = this.layerSelector.getLayerOptions();
         return this.config;
       }
 

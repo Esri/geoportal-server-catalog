@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="7px" height="5px" viewBox="0 0 7 5" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 44.1 (41455) - http://www.bohemiancoding.com/sketch -->
+    <title>Triangle</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Layout-2New" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="CardWidget_Layout4" transform="translate(-875.000000, -297.000000)" fill="#939393">
+            <g id="Card2_HorizontalGauge" transform="translate(792.000000, 181.000000)">
+                <g id="HorizontalGauge" transform="translate(0.000000, 66.000000)">
+                    <g transform="translate(128.500000, 42.500000) rotate(-270.000000) translate(-128.500000, -42.500000) translate(86.000000, -86.000000)" id="Numbers+Triangles">
+                        <g transform="translate(50.000000, 0.000000)">
+                            <polygon id="Triangle" transform="translate(2.500000, 170.543803) rotate(-180.000000) translate(-2.500000, -170.543803) " points="5 170.543803 -1.70530257e-13 174.043803 -1.69642078e-13 167.043803"></polygon>
+                        </g>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>

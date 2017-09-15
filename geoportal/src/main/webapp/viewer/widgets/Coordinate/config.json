@@ -1,5 +1,6 @@
 {
   "spatialReferences": [],
   "decimalPlaces": 3,
-  "addSeparator": true
+  "addSeparator": true,
+  "displayOrderLonLat": true
 }

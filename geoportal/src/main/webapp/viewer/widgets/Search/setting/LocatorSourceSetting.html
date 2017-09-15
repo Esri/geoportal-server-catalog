@@ -10,7 +10,7 @@
             <div data-dojo-attach-point="locatorUrl" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props="required:true,trim:true,disabled:true,style:{width:'100%'}"></div>
           </td>
           <td class="third">
-            <span class="jimu-btn" data-dojo-attach-event="click:_onSetLocatorUrlClick">${nls.set}</span>
+            <span title="${nls.set}" class="jimu-btn" data-dojo-attach-event="click:_onSetLocatorUrlClick">${nls.set}</span>
           </td>
         </tr>
         <tr>
@@ -57,7 +57,7 @@
           </td>
           <td class="second">
             <div class="source-tips" title="${nls.locatorTips}" data-dojo-attach-point="tipsNode">
-              <em>${nls.locatorTips}</em>
+              ${nls.locatorTips}
             </div>
             <div data-dojo-attach-point="maxSuggestions" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="constraints:{min:1,places:0},style:{width:'100%'},value:6"></div>
           </td>
@@ -77,6 +77,33 @@
           <td class="second">
             <span class="jimu-float-leading" style="line-height:30px;">1: </span>
             <div class="jimu-float-trailing" data-dojo-attach-point="zoomScale" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="constraints:{min:1},style:{width:'96%'},value:50000"></div>
+          </td>
+        </tr>
+        <tr>
+          <td class="first" colspan="2">
+            <span class="source-label" data-dojo-attach-point="enableLocalSearch"></span>
+          </td>
+        </tr>
+        <tr data-dojo-attach-point="minScaleNode" class="local-search-row">
+          <td class="first">
+            <span class="source-label">${nls.minScale}</span>
+          </td>
+          <td class="second">
+            <span class="jimu-float-leading" style="line-height:30px;">1: </span>
+            <div class="jimu-float-trailing" data-dojo-attach-point="localSearchMinScale" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="constraints:{min:1},style:{width:'96%'},value:300000"></div>
+            <span class="example" title="${nls.minScaleHint}">${nls.minScaleHint}</span>
+          </td>
+        </tr>
+        <tr data-dojo-attach-point="radiusNode" class="local-search-row">
+          <td class="first">
+            <span class="source-label">${nls.radius}</span>
+          </td>
+          <td class="second">
+            <div class="jimu-float-leading" style="width:100%;">
+              <div class="jimu-float-leading" data-dojo-attach-point="localSearchDistance" data-dojo-type="dijit/form/NumberTextBox" data-dojo-props="constraints:{min:1},style:{width:'75%'},value:50000"></div>
+              <span class="jimu-float-trailing" style="line-height:30px;">${nls.meters}</span>
+            </div>
+            <span class="example" data-dojo-attach-point="radiusHintNode" title="${nls.radiusHint}">${nls.radiusHint}</span>
           </td>
         </tr>
       </tbody>

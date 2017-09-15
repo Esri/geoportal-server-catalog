@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Масштабная линейка"
-  })
-);
+define({
+  "_widgetLabel": "Масштабная линейка"
+});

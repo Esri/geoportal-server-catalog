@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,8 @@ define([
     mo.getPortalSignInUrlFromLocation = function(){
       var portalUrl = mo.getPortalUrlFromLocation();
       var url = portalUrl + 'home/signin.html';
+      //make sure the signin url begins with https
+      url = mo.setHttpsProtocol(url);
       return url;
     };
 

@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Domov"
-  })
-);
+define({
+  "_widgetLabel": "Domov"
+});

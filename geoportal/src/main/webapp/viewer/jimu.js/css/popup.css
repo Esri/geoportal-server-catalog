@@ -1,0 +1,214 @@
+.esriPopup, .esriPopupMobile, .esriMobileNavigationBar, .esriMobilePopupInfoView{
+  z-index: 108
+}
+
+.esriRtl .esriPopupWrapper {
+  text-align: right;
+}
+
+.esriPopup .esriPopupWrapper {
+  font-family: "Avenir Light";
+}
+
+.esriPopup .header,  .esriMobilePopupInfoView  .header{
+  font-family: "Avenir Heavy";
+}
+
+.esriPopup .contentPane {
+  background-color: #ffffff;
+}
+
+.esriPopup .actionsPane{
+  background-color: #ffffff;
+}
+
+.esriMobilePopupInfoView .esriMobileInfoViewItem .action{
+  margin-right: 10px;
+}
+.esriPopup .actionList {
+  overflow: hidden;
+}
+
+.esriPopup .actionList .popup-menu-button, .esriMobilePopupInfoView .esriMobileInfoViewItem .popup-menu-button{
+  float: right;
+  width: 36px;
+  height: 15px;
+}
+
+.esriMobilePopupInfoView .esriMobileInfoViewItem .popup-menu-button{
+  margin-top: 10px;
+  background-position: left;
+  float: left;
+}
+
+.jimu-rtl .esriPopup .actionList .popup-menu-button {
+  float: left;
+}
+
+/************related records popup projector begain************************/
+
+.esriPopup .esriViewPopup.second-page-mode, .esriMobileInfoView.esriMobilePopupInfoView .esriViewPopup.second-page-mode{
+  position: relative;
+  top: 30px;
+}
+
+.esriPopup .related-records-popup-projector{
+}
+
+.esriPopup .related-records-popup-projector.second-page-mode , .esriMobileInfoView.esriMobilePopupInfoView .related-records-popup-projector.second-page-mode{
+  min-height: 60px;
+  padding-top: 30px;
+}
+
+.esriPopup .related-records-popup-projector .operation-box , .esriMobileInfoView.esriMobilePopupInfoView .operation-box {
+  border-bottom: 1px solid #DDDDDD;
+  height: 28px;
+  line-height: 28px;
+  /*background-color: #ccc;*/
+  text-align: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  /*font-weight: bold;*/
+  font-family: "Avenir Heavy";
+  font-size: 13px;
+}
+
+.esriPopup .related-records-popup-projector .operation-box .previos-btn ,.esriMobileInfoView.esriMobilePopupInfoView .previos-btn{
+  /*
+  float: left;
+  margin-left: 10px;
+  */
+  position: absolute;
+  left: 10px;
+  cursor: pointer;
+  height: 100%;
+  line-height: 28px;
+}
+
+.jimu-rtl .esriPopup .related-records-popup-projector .operation-box .previos-btn , .jimu-rtl .esriMobileInfoView.esriMobilePopupInfoView .previos-btn{
+  /*
+  float: right;
+  margin-right: 10px;
+  margin-left: auto;
+  */
+  left: auto;
+  right: 10px;
+}
+
+.esriPopup .related-records-popup-projector .operation-box .operation-title , .esriMobileInfoView.esriMobilePopupInfoView .operation-title{
+  display: inline-block;
+  max-width: 80%;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+ .esriPopup .related-records-popup-projector .content-box .title-box, .esriMobileInfoView.esriMobilePopupInfoView .content-box .title-box{
+  font-family: "Avenir Heavy";
+  /*height: 25px;*/
+  line-height: 25px;
+  overflow: hidden;
+  position: relative;
+}
+
+ .esriPopup .related-records-popup-projector .content-box .title-box.font-normal, .esriMobileInfoView.esriMobilePopupInfoView .content-box .title-box.font-normal{
+  font-weight: normal;
+  color: #666666;
+}
+
+.esriPopup .related-records-popup-projector .content-box .hzLine, .esriMobileInfoView.esriMobilePopupInfoView .content-box .hzLine{
+  border: none;
+  border-top: 1px solid #333333;
+  margin-top: 6px;
+  margin-bottom: 6px;
+}
+
+.esriPopup .related-records-popup-projector .content-box .item, .esriMobileInfoView.esriMobilePopupInfoView .content-box .item{
+  position: relative;
+  cursor: pointer;
+  width: 100%;
+  background-color: #ffffff;
+  color: #000000;
+  background-image: url("./images/details_normal.svg");
+  background-repeat: no-repeat;
+  background-position: right 5px center;
+  height: 25px;
+  line-height: 25px;
+  padding-right: 20px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  overflow: hidden;
+}
+
+.jimu-rtl .esriPopup .related-records-popup-projector .content-box .item, .jimu-rtl .esriMobileInfoView.esriMobilePopupInfoView .content-box .item{
+  padding-left: 20px;
+  padding-right: auto;
+  background-position: left 5px center;
+  background-image: url("./images/details_rtl_normal.svg");
+}
+
+.esriPopup .related-records-popup-projector .content-box .item.oddLine, .esriMobileInfoView.esriMobilePopupInfoView .content-box .item.oddLine{
+  background-color: #f3f3f3;
+}
+
+.esriPopup .related-records-popup-projector .content-box .item:hover, .esriMobileInfoView.esriMobilePopupInfoView .content-box .item:hover{
+  /*box-shadow: 0 0 1px rgba(0, 0, 0, 1.0);
+  border-color: rgba(0, 0, 0, 1.0);
+  font-family: "Avenir Heavy";*/
+  background-image: url("./images/details_hover.svg");
+}
+
+.jimu-rtl .esriPopup .related-records-popup-projector .content-box .item:hover, .jimu-rtl .esriMobileInfoView.esriMobilePopupInfoView .content-box .item:hover{
+  background-image: url("./images/details_rtl_hover.svg");
+}
+
+/**hide titleInBody **/
+/*
+.esriPopup .esriViewPopup.second-page-mode .header,
+.esriPopup .esriViewPopup.second-page-mode .hzLine,
+.esriMobileInfoView.esriMobilePopupInfoView .esriViewPopup.second-page-mode .header,
+.esriMobileInfoView.esriMobilePopupInfoView .esriViewPopup.second-page-mode .hzLine{
+  display: none;
+}
+*/
+
+/**field selector**/
+/*
+.esriPopup .related-records-popup-projector .content-box .title-box .field-selector-box, .esriMobileInfoView.esriMobilePopupInfoView .content-box .title-box .field-selector-box{
+  border: 0px solid;
+  min-width: 20px;
+  min-height: 20px;
+  display: inline-block;
+  position: absolute;
+  right: 4px;
+  background-image: url("./images/v_normal.svg");
+  background-repeat: no-repeat;
+  background-position: center center;
+  cursor: pointer;
+}
+
+.esriPopup .related-records-popup-projector .content-box .title-box .field-selector-box:hover, .esriMobileInfoView.esriMobilePopupInfoView .content-box .title-box .field-selector-box:hover{
+  background-image: url("./images/v_hover.svg");
+}
+
+.esriPopup .related-records-popup-projector .content-box .title-box .field-selector, .esriMobileInfoView.esriMobilePopupInfoView .content-box .title-box .field-selector{
+  height: 20px;
+  display: none;
+}
+*/
+.esriPopup .related-records-popup-projector .content-box .title-box .jimu-dijit-dropdownmenu, .esriMobileInfoView.esriMobilePopupInfoView .content-box .title-box .jimu-dijit-dropdownmenu{
+  float: right;
+  right: 5px;
+  top: 4px;
+}
+.jimu-rtl .esriPopup .related-records-popup-projector .content-box .title-box .jimu-dijit-dropdownmenu, .jimu-rtl .esriMobileInfoView.esriMobilePopupInfoView .content-box .title-box .jimu-dijit-dropdownmenu{
+  float: left;
+  left: 5px;
+  right: auto;
+}
+
+
+
+/************related records popup projector end***************************/

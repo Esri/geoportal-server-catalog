@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,7 +34,11 @@ define(['dojo/_base/declare',
     return declare([_WidgetBase, _TemplatedMixin, Evented], {
       baseClass: 'jimu-symbol-picker',
       declaredClass: 'jimu.dijit.SymbolPicker',
-      templateString: '<div></div>',
+      templateString: '<div>' +
+                        '<div data-dojo-attach-point="symbolNode" class="symbol-node jimu-float-leading"></div>' +
+                        '<div class="separator jimu-float-leading"></div>' +
+                        '<div class="jimu-icon jimu-icon-down-arrow-8 jimu-float-leading"></div>' +
+                      '</div>',
       tooltipDialog: null,
       _isTooltipDialogOpened: false,
 
@@ -137,7 +141,7 @@ define(['dojo/_base/declare',
       reset: function(){
         this.type = null;
         this.symbol = null;
-        html.empty(this.domNode);
+        html.empty(this.symbolNode);
         this.symbolChooser.reset();
       },
 
@@ -163,11 +167,14 @@ define(['dojo/_base/declare',
       },
 
       _drawSymbol: function(symbol) {
-        html.empty(this.domNode);
+        html.empty(this.symbolNode);
         if (symbol) {
-          var symbolNode = jimuSymUtils.createSymbolNode(symbol);
-          if (symbolNode) {
-            html.place(symbolNode, this.domNode);
+          var symbolDom = jimuSymUtils.createSymbolNode(symbol, {
+            width: 16,
+            height: 16
+          });
+          if (symbolDom) {
+            html.place(symbolDom, this.symbolNode);
           }
         }
       },

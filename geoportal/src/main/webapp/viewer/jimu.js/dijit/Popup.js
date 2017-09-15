@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,10 +24,11 @@ define(['dojo/_base/declare',
     'dojo/touch',
     'dojo/query',
     'dojo/dnd/move',
-    'dijit/_WidgetBase'
+    'dijit/_WidgetBase',
+    'jimu/utils'
   ],
   function(declare, lang, array, html, baseFx, on, has, touch,
-    query, Move, _WidgetBase) {
+    query, Move, _WidgetBase, jimuUtils) {
     var count = 0;
     /* global jimuConfig */
     return declare(_WidgetBase, {
@@ -368,6 +369,10 @@ define(['dojo/_base/declare',
         count++;
       },
 
+      setTitleLabel: function(titleLabel) {
+        this.titleNode.innerHTML = jimuUtils.stripHTML(titleLabel);
+      },
+
       onMoving: function(mover) {
         html.setStyle(mover.node, 'opacity', 0.9);
       },
@@ -413,14 +418,17 @@ define(['dojo/_base/declare',
           }
         }
         var node = html.create('div', {
-          'class': 'jimu-btn jimu-float-trailing jimu-trailing-margin1 ' + appendedClasses,
-          'innerHTML': button.label
+          'class': 'jimu-btn jimu-popup-action-btn jimu-float-trailing jimu-trailing-margin1 ' +
+            appendedClasses,
+          'innerHTML': button.label,
+          'title': button.title || button.label
         }, this.buttonContainer);
         this.enabledButtons.unshift(node);
 
         var disableNode = html.create('div', {
           'class': 'jimu-btn jimu-state-disabled jimu-float-trailing jimu-trailing-margin1 ' +
-           appendedClasses,
+            appendedClasses,
+          'title': button.title || button.label,
           'innerHTML': button.label,
           'style': {
             display: 'none'
@@ -456,9 +464,31 @@ define(['dojo/_base/declare',
         // }
       },
 
+      setButtonProps: function(idx, props) {
+        if (typeof idx === 'number' && isFinite(idx)) {
+          idx = idx;
+        } else {
+          props = idx;
+          idx = 0;
+        }
+        if (!props || this.enabledButtons.length === 0) {
+          return;
+        }
+
+        for (var p in props) {
+          if (p === 'title') {
+            html.setAttr(this.enabledButtons[idx], 'title', props[p]);
+            html.setAttr(this.disabledButtons[idx], 'title', props[p]);
+          } else if (p === 'label') {
+            html.setProp(this.enabledButtons[idx], 'innerHTML', props[p]);
+            html.setProp(this.disabledButtons[idx], 'innerHTML', props[p]);
+          }
+        }
+      },
+
       enableButton: function(idx) {
         // var btn = null;
-        if (typeof idx === 'number') {
+        if (typeof idx === 'number' && isFinite(idx) && idx < this.enabledButtons.length) {
           html.setStyle(this.enabledButtons[idx], 'display', 'inline-block');
           html.setStyle(this.disabledButtons[idx], 'display', 'none');
 
@@ -479,7 +509,7 @@ define(['dojo/_base/declare',
 
       disableButton: function(idx) {
         // var btn = null;
-        if (typeof idx === 'number') {
+        if (typeof idx === 'number' && isFinite(idx) && idx < this.disabledButtons.length) {
           html.setStyle(this.disabledButtons[idx], 'display', 'inline-block');
           html.setStyle(this.enabledButtons[idx], 'display', 'none');
 
@@ -499,6 +529,42 @@ define(['dojo/_base/declare',
           //     this.pauseKeys.push(btn.key);
           //   }
           // }));
+        }
+      },
+
+      showButton: function(idx) {
+        // var btn = null;
+        // if (typeof idx === 'number' && isFinite(idx) && idx < this.enabledButtons.length) {
+        //   html.setStyle(this.enabledButtons[idx], 'display', 'inline-block');
+        //   html.setStyle(this.disabledButtons[idx], 'display', 'none');
+
+        //   // btn = this.buttons[idx];
+        //   // if (btn && btn.key && this.pauseKeys.indexOf(btn.key) > -1) {
+        //   //   this.pauseKeys.splice(this.pauseKeys.indexOf(btn.key), 1);
+        //   // }
+        // } else {
+        //   array.forEach(this.enabledButtons[idx], lang.hitch(this, function(itm) {
+        //     html.setStyle(itm, 'display', 'inline-block');
+        //   }));
+        //   array.forEach(this.disabledButtons[idx], lang.hitch(this, function(itm) {
+        //     html.setStyle(itm, 'display', 'none');
+        //   }));
+        //   // this.pauseKeys.splice(0, this.pauseKeys.length);
+        // }
+        this.enableButton(idx);
+      },
+
+      hideButton: function(idx) {
+        if (typeof idx === 'number' && isFinite(idx) && idx < this.disabledButtons.length) {
+          html.setStyle(this.disabledButtons[idx], 'display', 'none');
+          html.setStyle(this.enabledButtons[idx], 'display', 'none');
+        } else {
+          array.forEach(this.disabledButtons, lang.hitch(this, function(itm) {
+            html.setStyle(itm, 'display', 'none');
+          }));
+          array.forEach(this.enabledButtons, lang.hitch(this, function(itm) {
+            html.setStyle(itm, 'display', 'none');
+          }));
         }
       }
     });

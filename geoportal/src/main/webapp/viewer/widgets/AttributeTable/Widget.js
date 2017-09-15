@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,6 +25,7 @@ define([
     "dojo/Deferred",
     "dojo/promise/all",
     "esri/layers/FeatureLayer",
+    "esri/lang",
     'dojo/_base/lang',
     "dojo/on",
     'dojo/touch',
@@ -33,8 +34,9 @@ define([
     "dojo/_base/array",
     "dojo/query",
     'jimu/dijit/LoadingIndicator',
+    'jimu/FilterManager',
     './_ResourceManager',
-    './_TableFunctionController',
+    // './_TableFunctionController',
     './utils'
   ],
   function(
@@ -49,6 +51,7 @@ define([
     Deferred,
     all,
     FeatureLayer,
+    esriLang,
     lang,
     on,
     touch,
@@ -57,8 +60,8 @@ define([
     array,
     domQuery,
     LoadingIndicator,
+    FilterManager,
     _ResourceManager,
-    _TableFunctionController,
     attrUtils) {
     var clazz = declare([BaseWidget, _WidgetsInTemplateMixin], {
       /* global apiUrl */
@@ -71,14 +74,12 @@ define([
       _relatedDef: null,
 
       _resourceManager: null,
-      _tableFunctionController: null,
 
       _activeLayerInfoId: null,
-      _activeRelationshipKey: null,
 
       // TODO: layerType: FeatureLayer,  RelationshipTable
       _layerTypes: {
-        FEATURELAYER: 'FeatureLayer',
+        FEATURELAYER: 'FeatureLayerTable',
         RELATIONSHIPTABLE: 'RelationshipTable'
       },
 
@@ -93,18 +94,16 @@ define([
         this.AttributeTableDiv = null;
 
         this._delayedLayerInfos = [];
-        this.layerTabPages = [];
+        this.layerTabPages = [];//[ContentPane]
         // one layer may be have multiple relationships, so we use key-value to store relationships
-        this.relationTabPagesSet = {};
+        // this.relationTabPagesSet = {};
 
-        this.toolbarDiv = null;
-        this.tabContainer = null;
+        this.tabContainer = null;//TabContainer
 
         this.moveMode = false;
-        this.moveY = 0;
+        this.moveY = 0; //currentHeight - previousDomHeight
         this.previousDomHeight = 0;
         this.noGridHeight = 0;
-        this.toolbarHeight = 0;
         this.bottomPosition = 0;
         this.layerTabPagesIndex = -1;
 
@@ -117,6 +116,11 @@ define([
         // event handlers on draging
         this._dragingHandlers = [];
 
+        this._activeTable = null;// _FeatureTable
+        this._activeTableHandles = [];
+
+        this.filterManager = FilterManager.getInstance();
+
         this._createUtilitiesUI();
 
         this._resourceManager = new _ResourceManager({
@@ -125,17 +129,12 @@ define([
         });
         this._resourceManager.setConfig(this.config);
 
-        this._tableFunctionController = new _TableFunctionController({
-          map: this.map,
-          nls: this.nls,
-          hideExportButton: this.config.hideExportButton,
-          filterByMapExtent: this.config.filterByMapExtent
-        });
-
-        this._tableFunctionController.setResourceManager(this._resourceManager);
-
+        //eg: TabTheme maxmize or minimize
         this.own(topic.subscribe('changeMapPosition', lang.hitch(this, this._onMapPositionChange)));
         attrUtils.readLayerInfosObj(this.map).then(lang.hitch(this, function(layerInfosObj) {
+          if (!this.domNode || !layerInfosObj) {
+            return;
+          }
           this.own(on(
             layerInfosObj,
             'layerInfosIsShowInMapChanged',
@@ -143,16 +142,24 @@ define([
           this.own(layerInfosObj.on(
             'layerInfosChanged',
             lang.hitch(this, this.onLayerInfosChanged)));
+          this.own(layerInfosObj.on(
+            'layerInfosFilterChanged',
+            lang.hitch(this, this.onLayerInfosFilterChanged)));
         }));
+
+        // this.closeBtn = html.create('div', {
+        //   'class': 'esriAttributeTableCloseImage close-button'
+        // }, this.domNode);
+        // this.own(on(this.closeBtn, 'click', lang.hitch(this, '_onCloseBtnClicked')));
       },
 
       _createUtilitiesUI: function() {
-        this._createArrowUI();
+        this._createSwitchUI();//eg: LaunchPad Theme
 
         this._createBarUI();
       },
 
-      _createArrowUI: function() {
+      _createBarUI: function() {
         this.arrowDiv = html.create("div");
         html.addClass(this.arrowDiv, "jimu-widget-attributetable-move");
         html.create('div', {
@@ -173,11 +180,17 @@ define([
         return this.closeable || !this.isOnScreen;
       },
 
-      _createBarUI: function() {
+      _createSwitchUI: function() {
         if (!this._isOnlyTable()) {
-          this.switchBtn = html.create("div");
-          html.addClass(this.switchBtn, "jimu-widget-attributetable-switch");
-          html.place(this.switchBtn, this.domNode);
+          this.switchBtn = html.create("div", {
+            className: "jimu-widget-attributetable-switch"
+          }, this.domNode);
+          // html.addClass(this.switchBtn, "jimu-widget-attributetable-switch");
+          // html.place(this.switchBtn, this.domNode);
+          // this.highlightLine = html.create("div", {
+          //   className: "jimu-widget-attributetable-highlight-line"
+          // }, this.domNode);
+
           this.own(on(this.switchBtn, 'click', lang.hitch(this, this._switchTable)));
         }
       },
@@ -234,10 +247,15 @@ define([
         } else if (this._loadInfoDef && this._loadInfoDef.isFulfilled()) {
           this.showing = true;
           this._processDelayedLayerInfos();
-          this._tableFunctionController.active();
+          if (this._activeTable) {
+            this._activeTable.active();
+          }
         }
 
         this._changeHeight(this.openHeight);
+        // if (this.highlightLine) {
+        //   html.setStyle(this.highlightLine, 'display', 'none');
+        // }
         this._processOpenBarUI();
         return this._loadInfoDef;
       },
@@ -249,21 +267,32 @@ define([
           this._closeTable();
         }
 
-        this._tableFunctionController.deactive();
+        if (this._activeTable) {
+          this._activeTable.deactive();
+        }
       },
 
       _closeTable: function() {
         this._changeHeight(0);
         this.showRefreshing(false);
         this._processCloseBarUI();
-        this._tableFunctionController.deactive();
+        // this._tableFunctionController.deactive();
+        if (this._activeTable) {
+          this._activeTable.deactive();
+        }
 
         this.showing = false;
 
+        // if (this.highlightLine) {
+        //   html.setStyle(this.highlightLine, 'display', '');
+        // }
         // fix arrowDiv display bug on bottom when close table (only mobile)
         html.setStyle(this.arrowDiv, 'display', 'none');
         html.setStyle(this.domNode, 'overflow', 'hidden');
         setTimeout(lang.hitch(this, function() {
+          if (!this.domNode) {
+            return;
+          }
           html.setStyle(this.domNode, 'overflow', 'visible');
           html.setStyle(this.arrowDiv, 'display', 'block');
         }), 10);
@@ -291,7 +320,9 @@ define([
       },
 
       onLayerInfosIsShowInMapChanged: function() {
-        this._tableFunctionController.checkMapInteractiveFeature();
+        if (this._activeTable) {
+          this._activeTable.changeToolbarStatus();
+        }
       },
 
       onLayerInfosChanged: function(layerInfo, changeType, layerInfoSelf) {
@@ -310,7 +341,25 @@ define([
           if (this.getExistLayerTabPage(selfId)) {
             this.layerTabPageClose(selfId, true);
           }
+
+          if (this._resourceManager.getLayerInfoById(selfId)) {
+            this._resourceManager.removeLayerInfo(selfId);
+          }
+          if (this._resourceManager.getConfigInfoById(selfId)) {
+            this._resourceManager.removeConfigInfo(selfId);
+          }
         }
+      },
+
+      onLayerInfosFilterChanged: function(changedLayerInfos) {
+        array.some(changedLayerInfos, lang.hitch(this, function(info) {
+          if (this._activeTable && info.id === this._activeTable.layerInfo.id) {
+            if (!this._activeTable._relatedQuery) {
+              this._activeTable.startQuery();
+            }
+            return true;
+          }
+        }));
       },
 
       destroy: function() {
@@ -321,31 +370,36 @@ define([
         if (this.layerTabPages && this.layerTabPages.length > 0) {
           len = this.layerTabPages.length;
           for (i = 0; i < len; i++) {
+            var paneId = this.layerTabPages[i].paneId;
+            var table = lang.getObject('_resourceManager.featureTableSet.' + paneId, false, this);
+            if (table) {
+              var filterObj = table.getFilterObj();
+              if (filterObj && esriLang.isDefined(filterObj.expr)) {
+                this.filterManager.applyWidgetFilter(paneId, this.id, "");
+              }
+            }
             this.layerTabPages[i].destroy();
           }
           this.layerTabPages = null;
         }
 
-        if (this.relationTabPagesSet) {
-          for (var p in this.relationTabPagesSet) {
-            if (this.relationTabPagesSet[p]) {
-              this.relationTabPagesSet[p].destroy();
-            }
-          }
-          this.relationTabPagesSet = null;
-        }
+        // if (this.relationTabPagesSet) {
+        //   for (var p in this.relationTabPagesSet) {
+        //     if (this.relationTabPagesSet[p]) {
+        //       this.relationTabPagesSet[p].destroy();
+        //     }
+        //   }
+        //   this.relationTabPagesSet = null;
+        // }
 
         if (this.tabContainer) {
           this.tabContainer.destroy();
           this.tabContainer = null;
         }
 
-        if (this._tableFunctionController) {
-          this._tableFunctionController.destroy();
-        }
-
         this.AttributeTableDiv = null;
         this._loadInfoDef = null;
+        this._activeLayerInfoId = null;
         if (this._resourceManager) {
           this._resourceManager.empty();
         }
@@ -367,22 +421,31 @@ define([
       _changeHeight: function(h) {
         html.setStyle(this.domNode, "height", h + "px");
         if (this.tabContainer && this.tabContainer.domNode &&
-          (h - this.toolbarHeight - this.arrowDivHeight >= 0)) {
+          (h - this.arrowDivHeight >= 0)) {
           html.setStyle(
             this.tabContainer.domNode,
             "height",
-            (h - this.toolbarHeight - this.arrowDivHeight) + "px"
+            (h - this.arrowDivHeight) + "px"
           );
         }
 
-        this._tableFunctionController.changeHeight(h - this.noGridHeight);
+        if (this._activeTable) {
+          this._activeTable.changeHeight(h - this.noGridHeight);
+        }
 
+        // publish changeMapPosition to MapManager
         topic.publish('changeMapPosition', {
           bottom: h + this.bottomPosition
         });
+        // publish changeMapPosition to other widgets
+        this.publishData({
+          'changeMapPosition': {
+            bottom: h + this.bottomPosition
+          }
+        });
 
         if (h !== 0) {
-          var minOpenHeight = this.arrowDivHeight + this.toolbarHeight;
+          var minOpenHeight = this.arrowDivHeight;
 
           this.openHeight = (h >= minOpenHeight) ? h : this.normalHeight;
         }
@@ -427,14 +490,10 @@ define([
           this.showRefreshing(false);
         }
         html.setStyle(this.domNode, "bottom", this.bottomPosition + "px");
-        if (!this._resourceManager.isEmpty() && this.toolbarDiv) {
+        if (!this._resourceManager.isEmpty()) {
           setTimeout(lang.hitch(this, function() {
-            var tbHeight = html.getStyle(this.toolbarDiv, 'height');
             var ngHeight = this._getGridTopSectionHeight();
             var domHeight = html.getStyle(this.domNode, 'height');
-            if (tbHeight > 0) {
-              this.toolbarHeight = tbHeight;
-            }
             if (ngHeight > 0) {
               this.noGridHeight = ngHeight;
             }
@@ -445,13 +504,16 @@ define([
         }
       },
 
-      _startQueryOnLayerTab: function(tabId) {
+      _startQueryOnLayerTab: function(tabId, featureSet) {
         var layerInfo = this._resourceManager.getLayerInfoById(tabId);
         var tabPage = this.getExistLayerTabPage(tabId);
 
         if (layerInfo && tabPage) {
           this.showRefreshing(true);
-          this._resourceManager.getQueryTable(tabId).then(lang.hitch(this, function(result) {
+          this._resourceManager.getQueryTable(
+          tabId,
+          this.config.filterByMapExtent,
+          this.config.hideExportButton).then(lang.hitch(this, function(result) {
             //prevent overwrite by another asynchronous callback
             if (this._activeLayerInfoId !== tabId || !result) {
               return;
@@ -465,14 +527,17 @@ define([
                 table.placeAt(tabPage);
               }
 
-              this._tableFunctionController.setActiveTable(table, {
-                h: this.openHeight - this.noGridHeight
+              this.setActiveTable(table, {
+                h: this.openHeight - this.noGridHeight,
+                featureSet: featureSet
               });
             } else {
               var tip = html.toDom('<div>' + this.nls.unsupportQueryWarning + '</div>');
               tabPage.set('content', tip);
 
-              this._tableFunctionController.resetButtonStatus();
+              if (this._activeTable) {
+                this._activeTable.changeToolbarStatus();
+              }
             }
             this.showRefreshing(false);
           }), lang.hitch(this, function(err) {
@@ -484,28 +549,44 @@ define([
         }
       },
 
-      _startQueryOnRelationTab: function(relationShipKey, selectedIds, originalInfoId) {
-        var layerInfo = this._resourceManager.getLayerInfoById(originalInfoId);
-        var tabPage = this.getExistRelationTabPage(relationShipKey);
-        if (!(layerInfo && layerInfo.layerObject) || !tabPage) {
+      _startQueryOnRelationTab: function(infoId, relationShipKey, selectedIds, originalInfoId) {
+        var originalInfo = this._resourceManager.getLayerInfoById(originalInfoId);
+        var tabPage = this.getExistLayerTabPage(infoId);
+        if (!(originalInfo && originalInfo.layerObject) || !tabPage) {
           return;
         }
 
-        this._resourceManager.getRelationTable(originalInfoId, relationShipKey)
-        .then(lang.hitch(this, function(rTable) {
+        this._resourceManager.getRelationTable(originalInfoId, relationShipKey,
+          false, this.config.hideExportButton)
+        .then(lang.hitch(this, function(result) {
           //prevent overwrite by another asynchronous callback
-          if (this._activeRelationshipKey !== relationShipKey || !rTable) {
+          if (this._activeLayerInfoId !== infoId || !result) {
             return;
           }
-          if (rTable.getParent() !== tabPage) {
-            rTable.placeAt(tabPage);
-          }
+          //prevent overwrite by another asynchronous callback
+          tabPage = this.getExistLayerTabPage(infoId);
 
-          this._tableFunctionController.setActiveTable(rTable, {
-            h: this.openHeight - this.noGridHeight,
-            layer: layerInfo.layerObject,
-            selectedIds: selectedIds
-          });
+          if (result.isSupportQuery) {
+            var table = result.table;
+            if (table.getParent() !== tabPage) {
+              table.placeAt(tabPage);
+            }
+
+            this.setActiveTable(table, {
+              h: this.openHeight - this.noGridHeight,
+              layer: originalInfo.layerObject,
+              selectedIds: selectedIds
+            });
+
+          } else {
+            var tip = html.toDom('<div>' + this.nls.unsupportQueryWarning + '</div>');
+            tabPage.set('content', tip);
+
+            if (this._activeTable) {
+              this._activeTable.changeToolbarStatus();
+            }
+          }
+          this.showRefreshing(false);
         }));
       },
 
@@ -514,24 +595,27 @@ define([
           if (this.noGridHeight <= 0) {
             this.noGridHeight = this._getGridTopSectionHeight() + 5;
           }
+          var params = this.tabContainer.selectedChildWidget.params; // ContentPage.params
 
-          var layerType = this.tabContainer.selectedChildWidget.params.layerType;
-          var idOrKey = this.tabContainer.selectedChildWidget.params.paneId;
-          if (layerType === this._layerTypes.FEATURELAYER && this._activeLayerInfoId !== idOrKey) {
-            this._tableFunctionController.setActiveTable(null);
-            this._activeRelationshipKey = null;
-            this._activeLayerInfoId = idOrKey;
-            this._startQueryOnLayerTab(idOrKey);
-          } else if (layerType === this._layerTypes.RELATIONSHIPTABLE/* &&
-            this._activeRelationshipKey !== idOrKey*/) { // need key and oids to judgement
-            this._tableFunctionController.setActiveTable(null);
-            var params = this.tabContainer.selectedChildWidget.params;
-            // var _relKey = params.paneId;
+          var layerType = params.layerType;
+          var infoId = params.paneId;
+          var relKey = params.relKey;
+
+          if (layerType === this._layerTypes.FEATURELAYER &&
+            // change tab or the lasest operate is queryRelatedRecords
+            (this._activeLayerInfoId !== infoId || params.oids || params.featureSet)) {
+            this.setActiveTable(null);
+            delete params.oids;
+            this._activeLayerInfoId = infoId;
+            this._startQueryOnLayerTab(infoId, params.featureSet);
+
+          } else if (layerType === this._layerTypes.RELATIONSHIPTABLE) {
+            // need key and oids to judgement
+            this.setActiveTable(null);
             var selectIds = params.oids;
             var originalInfoId = params.originalInfoId;
-            this._activeRelationshipKey = idOrKey;
-            this._activeLayerInfoId = null;
-            this._startQueryOnRelationTab(idOrKey, selectIds, originalInfoId);
+            this._activeLayerInfoId = infoId;
+            this._startQueryOnRelationTab(infoId, relKey, selectIds, originalInfoId);
           }
         }
       },
@@ -605,30 +689,108 @@ define([
         } // else use openAtStart by widgetManager or controller
       },
 
+      _bindActiveTableEvents: function (){
+        var that = this;
+        if (that._activeTable) {
+          that._activeTableHandles.push(on(that._activeTable,
+            'show-related-records', function(evt) {
+              that._showRelatedRecords(evt);
+            })
+          );
+          that._activeTableHandles.push(on(that._activeTable,
+            'show-all-records', function(evt) {
+              var page = that.getExistLayerTabPage(evt.layerInfoId);
+              page.params.layerType = that._layerTypes.FEATURELAYER;
+            })
+          );
+          that._activeTableHandles.push(on(that._activeTable,
+            'refresh', function(evt) {
+              var page = that.getExistLayerTabPage(evt.layerInfoId);
+              // page.params.layerType = that._layerTypes.FEATURELAYER;
+              delete page.params.featureSet;
+            })
+          );
+          // that._activeTableHandles.push(on(that._activeTable,
+          //   'row-click', function() {
+          //     var tables = that._resourceManager.featureTableSet;
+          //     for (var p in tables) {
+          //       var t = tables[p];
+          //       if (t !== that._activeTable) {
+          //         t.clearSelection(false);
+          //       }
+          //     }
+          //   }));
+          that._activeTableHandles.push(on(that._activeTable, 'apply-filter', function(events) {
+            that.filterManager.applyWidgetFilter(events.layerInfoId, that.id, events.expr);
+            that._activeTable.startQuery();
+          }));
+        }
+      },
+
+      _unbindActiveTableEvents: function (){
+        var that = this;
+        var handlers = that._activeTableHandles;
+        while(handlers.length > 0) {
+          var h = handlers.pop();
+          if (h && h.remove) {
+            h.remove();
+          }
+        }
+      },
+
+      setActiveTable: function(table, options) {
+        if (this._activeTable) {
+          this._activeTable.cancelThread();
+          this._activeTable.deactive();
+          this._unbindActiveTableEvents();
+          this._activeTable = null;
+        }
+        if (table) {
+          this._activeTable = table;
+          this._activeTable.active();
+          this._activeTable.changeHeight(options.h);
+          if (!this._activeTable.tableCreated ||
+            (this._activeTable.tableCreated && this._activeTable.matchingMap) ||
+            (this._activeTable.tableCreated &&
+              !this._activeTable.matchingMap && options.featureSet) ||
+            (options.layer && options.selectedIds)) {// queryRecordsByRelationship
+
+            var validFeatureSet = lang.getObject('featureSet.features.length', false, options);
+            if (options.layer && options.selectedIds) {
+              this._activeTable.queryRecordsByRelationship(options);
+            } else if (validFeatureSet) {
+              var primaryId = options.featureSet.displayFieldName;
+              var featureIds = array.map(options.featureSet.features, function(f) {
+                return f.attributes[primaryId];
+              });
+              this._activeTable.startQuery(featureIds);
+            } else {
+              this._activeTable.startQuery();
+            }
+          }
+          this._bindActiveTableEvents();
+          this._activeTable.changeToolbarStatus();
+        }
+      },
+
       initDiv: function() {
         this.AttributeTableDiv = html.create("div", {}, this.domNode);
         html.addClass(this.AttributeTableDiv, "jimu-widget-attributetable-main");
 
-        var toolbarDiv = html.create("div");
-        this.toolbarDiv = toolbarDiv;
-        html.place(toolbarDiv, this.AttributeTableDiv);
-
-        html.place(this._tableFunctionController.domNode, toolbarDiv);
-        this._tableFunctionController.startup();
-        this.own(on(this._tableFunctionController, 'show-related-records',
-          lang.hitch(this, '_showRelatedRecords')));
-        this.own(on(this._tableFunctionController, 'click-close',
-          lang.hitch(this, '_onCloseBtnClicked')));
-
         var tabDiv = html.create("div");
         html.place(tabDiv, this.AttributeTableDiv);
 
-        var height = html.getStyle(toolbarDiv, "height");
-        this.toolbarHeight = height;
         this.tabContainer = new TabContainer({
           style: "width: 100%;"
         }, tabDiv);
-        html.setStyle(this.tabContainer.domNode, 'height', (this.normalHeight - height) + 'px');
+        html.setStyle(this.tabContainer.domNode, 'height', (this.normalHeight) + 'px');
+
+        //if(has("mozilla")){
+        //  this.tabContainer.tablist.containerNode.style.width = "50000px";
+        //}
+        //We need to startup tabContainer before call addChild method, or it will result in issue #8678
+        this.tabContainer.startup();
+
         var configInfos = this._resourceManager.getConfigInfos();
         var len = configInfos.length;
         for (var j = 0; j < len; j++) {
@@ -647,10 +809,10 @@ define([
             this.tabContainer.addChild(cp);
           }
         }
-        this.tabContainer.startup();
+
 
         if (len > 0) {
-          // toolbarHeight + tabListWrapperHeight + tolerance
+          // tabListWrapperHeight + tolerance
           this.noGridHeight = this._getGridTopSectionHeight() + 5;
         }
         // vertical center
@@ -688,7 +850,7 @@ define([
 
 
       _showRelatedRecords: function() {
-        var activeTable = this._tableFunctionController.getActiveTable();
+        var activeTable = this._activeTable;
         if (activeTable) {
           var layerInfo = activeTable.layerInfo;
           if (layerInfo && layerInfo.layerObject) {
@@ -703,60 +865,81 @@ define([
         }
       },
 
-      addNewLayerTab: function(infoId) {
+      addNewLayerTab: function(infoId, featureSet) {
         var layerInfo = this._resourceManager.getLayerInfoById(infoId);
         if (!layerInfo) {
           return;
         }
         var page = this.getExistLayerTabPage(infoId);
+        var json = {};
+        json.title = this.getLayerInfoLabel(layerInfo);
+        json.name = json.title;
+        json.paneId = this.getLayerInfoId(layerInfo);
+        json.closable = true;
+        json.layerType = this._layerTypes.FEATURELAYER;
+        json.featureSet = featureSet;
         if (page) {
+          lang.mixin(page.params, json);
           this.onOpen();
-          this.tabContainer.selectChild(page);
+          // this.tabContainer.selectChild(page);
         } else {
-          this._resourceManager.addConfigInfo(layerInfo);
+          if (!this._resourceManager.getConfigInfoById(layerInfo.id)) {
+            this._resourceManager.addConfigInfo(layerInfo);
+          }
+          if (!this._resourceManager.getLayerInfoById(layerInfo.id)) {
+            this._resourceManager.addLayerInfo(layerInfo);
+          }
           this.onOpen();
 
-          var json = {};
-          json.title = this.getLayerInfoLabel(layerInfo);
-          json.name = json.title;
-          json.paneId = this.getLayerInfoId(layerInfo);
-          json.closable = true;
-          json.layerType = this._layerTypes.FEATURELAYER;
           json.style = "height: 100%; width: 100%; overflow: visible";
-          var cp = new ContentPane(json);
-          this.layerTabPages.push(cp);
+          page = new ContentPane(json);
+          this.layerTabPages.push(page);
 
-          cp.set("title", json.name);
-          this.own(on(cp, "close", lang.hitch(this, this.layerTabPageClose, json.paneId, true)));
-          this.tabContainer.addChild(cp);
-          this.tabContainer.selectChild(cp);
+          page.set("title", json.name);
+          // tabContainer will remove the page and destroy the page by itself.
+          this.own(on(page, "close", lang.hitch(this, this.layerTabPageClose, json.paneId)));
+          this.tabContainer.addChild(page);
         }
+        this.tabContainer.selectChild(page); // goto tabChanged
       },
 
       addNewRelationTab: function(oids, relationShip, originalInfoId) {
-        var page = this.getExistRelationTabPage(relationShip._relKey);
+        var lInfo = relationShip && relationShip.shipInfo;
+        if (!lInfo) {
+          return;
+        }
+        var page = this.getExistLayerTabPage(relationShip.shipInfo.id);
+
+        var json = {};
+        json.oids = oids;
+        var paneTitle = lInfo.title || lInfo.name || relationShip.name;
+        json.title = paneTitle;
+        json.name = json.title;
+        json.paneId = lInfo.id;
+        json.relKey = relationShip._relKey;
+        json.originalInfoId = originalInfoId;
+        json.closable = true;
+        json.layerType = this._layerTypes.RELATIONSHIPTABLE;
 
         if (page) {
-          page.params.oids = oids;
-          this.tabContainer.selectChild(page);
+          lang.mixin(page.params, json);
         } else {
-          var json = {};
-          json.oids = oids;
-          json.title = relationShip.name;
-          json.name = json.title;
-          json.paneId = relationShip._relKey;
-          json.originalInfoId = originalInfoId;
-          json.closable = true;
-          json.layerType = this._layerTypes.RELATIONSHIPTABLE;
+          if (!this._resourceManager.getConfigInfoById(lInfo.id)) {
+            this._resourceManager.addConfigInfo(lInfo);
+          }
+          if (!this._resourceManager.getLayerInfoById(lInfo.id)) {
+            this._resourceManager.addLayerInfo(lInfo);
+          }
           json.style = "height: 100%; width: 100%; overflow: visible";
-          var cp = new ContentPane(json);
-          this.relationTabPagesSet[relationShip._relKey] = cp;
-          cp.set("title", json.name);
-          this.own(on(cp, "close", lang.hitch(this, this.relationTabPageClose, json.paneId)));
+          page = new ContentPane(json);
+          this.layerTabPages.push(page);
+          page.set("title", json.name);
+          // tabContainer will remove the page and destroy the page by itself.
+          this.own(on(page, "close", lang.hitch(this, this.layerTabPageClose, json.paneId)));
 
-          this.tabContainer.addChild(cp);
-          this.tabContainer.selectChild(cp);
+          this.tabContainer.addChild(page);
         }
+        this.tabContainer.selectChild(page); // goto tabChanged
       },
 
       onReceiveData: function(name, source, params) {
@@ -768,6 +951,7 @@ define([
               return;
             }
           }
+          params.layer = params.layer || params.layerInfo;
 
           if (!this.showing) {
             this._openTable().then(lang.hitch(this, function() {
@@ -792,22 +976,30 @@ define([
 
       _addLayerToTable: function(params) {
         var layer = null;
-        if (!lang.getObject('layer.id', false, params)) {
+        if (!(lang.getObject('layer.id', false, params) ||
+          lang.getObject('layerInfo.id', false, params))) {
           return;
         }
-        var layerInfo = this._resourceManager.getLayerInfoById(params.layer.id);
+        var layerInfo = this._resourceManager
+          .getLayerInfoById(
+            (params.layerInfo && params.layerInfo.id) ||
+            (params.layer && params.layer.id)
+          );
         layerInfo.getLayerObject().then(lang.hitch(this, function(layerObject) {
           if (layerObject) {
             layerObject.id = params.layer.id;
             if (layerObject.loaded) {
-              this.addNewLayerTab(layerInfo.id);
+              this.addNewLayerTab(layerInfo.id, params.featureSet);
             } else {
               this.own(on(layerObject, "load",
-                lang.hitch(this, this.addNewLayerTab, layerInfo.id)));
+                lang.hitch(this, this.addNewLayerTab, layerInfo.id, params.featureSet)));
             }
           } else if (params.url) {
             layer = new FeatureLayer(params.url);
-            this.own(on(layer, "load", lang.hitch(this, this.addNewLayerTab, layerInfo.id)));
+            this.own(
+              on(layer, "load",
+                lang.hitch(this, this.addNewLayerTab, layerInfo.id, params.featureSet))
+            );
           }
         }), lang.hitch(this, function(err) {
           new Message({
@@ -826,53 +1018,46 @@ define([
         return null;
       },
 
-      getExistRelationTabPage: function(name) {
-        return this.relationTabPagesSet[name];
-      },
-
       layerTabPageClose: function(paneId, isRemoveChild) {
         var len = this.layerTabPages.length;
+        var activeId = lang.getObject('_activeTable.layerInfo.id', false, this);
+        if (activeId === paneId) {
+          this.setActiveTable(null);
+        }
         for (var i = 0; i < len; i++) {
           if (this.layerTabPages[i] && this.layerTabPages[i].paneId === paneId) {
+            // this.featureTableSet
+
+            // var table = that._resourceManager.featureTableSet[paneId];
+            var table = lang.getObject('_resourceManager.featureTableSet.' + paneId, false, this);
+            if (table) {
+              var filterObj = table.getFilterObj();
+              if (filterObj && esriLang.isDefined(filterObj.expr)) {
+                this.filterManager.applyWidgetFilter(paneId, this.id, "");
+              }
+            }
             if (isRemoveChild === true) {
               this.tabContainer.removeChild(this.layerTabPages[i]);
+              this.layerTabPages[i].destroyRecursive();
             }
             if (this.layerTabPages && this.layerTabPages[i]) {
-              this.layerTabPages[i].destroyRecursive();
-              this.layerTabPages.splice(i, 1);
+              this.layerTabPages.splice(i, 1); // removed contentpane from memory
             }
 
-            this._resourceManager.removeConfigInfo(paneId);
+            this._resourceManager.removeConfigInfo(paneId); // destroy featureTable
             this._resourceManager.removeLayerInfo(paneId);
 
             if (len === 1) {
+              this._activeLayerInfoId = null;
               this.onClose();
               return;
             }  else if(paneId === this._activeLayerInfoId) {
-              var layerIndex = len - 2;
+              var layerIndex = len - 2; // show last contentpane
               this.tabContainer.selectChild(this.layerTabPages[layerIndex]);
             }
             break;
           }
         }
-      },
-
-      relationTabPageClose: function(relationShipKey) {
-        var page = this.getExistRelationTabPage(relationShipKey);
-        if (!page) {
-          return;
-        }
-
-        this.tabContainer.removeChild(page);
-
-        this._resourceManager.removeRelationTable(relationShipKey);
-        if (page) {
-          page.destroyDescendants();
-          page.destroy();
-          this.relationTabPagesSet[relationShipKey] = null;
-        }
-
-        this._activeRelationshipKey = null;
       },
 
       _processRelatedRecordsFromPopup: function(layerInfo, featureIds) {

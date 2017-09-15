@@ -2,8 +2,8 @@
   "name": "AttributeTable",
   "label": "Attribute Table",
   "platform": "HTML",
-  "version": "2.0.1",
-  "wabVersion": "2.0.1",
+  "version": "2.5",
+  "wabVersion": "2.5",
   "author": "Esri R&D Center Beijing",
   "description": "",
   "copyright": "",
@@ -15,5 +15,12 @@
     "keepConfigAfterMapSwitched": false,
     "supportMultiInstance": false,
     "hasVersionManager": true
-  }
+  },
+  "featureActions": [{
+    "name": "ShowRelatedRecords",
+    "uri": "actions/ShowRelatedRecordsFeatureAction"
+  }, {
+    "name": "ViewInTable",
+    "uri": "actions/ViewInAttributeTableFeatureAction"
+  }]
 }

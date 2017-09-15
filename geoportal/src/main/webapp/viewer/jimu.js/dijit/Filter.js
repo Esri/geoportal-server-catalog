@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 define([
+  'dojo/Evented',
   'dojo/_base/declare',
   'dijit/_WidgetBase',
   'dijit/_TemplatedMixin',
@@ -22,22 +23,23 @@ define([
   'dojo/text!./templates/Filter.html',
   'jimu/filterUtils',
   'jimu/utils',
+  'jimu/dijit/_filter/ValueProviderFactory',
   'dijit/registry',
   'dojo/_base/lang',
   'dojo/_base/html',
   'dojo/_base/array',
   'dojo/aspect',
-  'dojo/query',
   'dojo/Deferred',
   'esri/request',
   './_SingleFilter',
   './_FilterSet',
   './LoadingIndicator'
 ],
-function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
-  template, filterUtils, jimuUtils, registry, lang, html, array, aspect,
-  query, Deferred, esriRequest, SingleFilter, FilterSet) {
-  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, filterUtils], {
+function(Evented, declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
+  template, filterUtils, jimuUtils, ValueProviderFactory, registry, lang, html, array, aspect,
+  Deferred, esriRequest, SingleFilter, FilterSet) {
+
+  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, filterUtils, Evented], {
     templateString: template,
     baseClass: 'jimu-filter',
     declaredClass: 'jimu.dijit.Filter',
@@ -62,6 +64,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     _validOptions: false,
     _layerDefinition: null,
     _def: null,
+    valueProviderFactory: null,
 
     //options:
     noFilterTip: '',
@@ -110,6 +113,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         this._layerDefinition = null;
         this.expr = null;
         this.partsObj = null;
+        this.valueProviderFactory = null;
       }
     },
 
@@ -122,8 +126,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
 
       if(this.isBuilding()){
         def.reject('Filter is already building.');
-      }
-      else{
+      } else{
         this._def = null;
         this.reset();
         this.url = url;
@@ -143,13 +146,12 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
 
       if(this.isBuilding()){
         def.reject('Filter is already building.');
-      }
-      else{
+      } else{
         this._def = null;
         this.reset();
         this.url = url;
         this.isHosted = jimuUtils.isHostedService(this.url);
-        this.partsObj = partsObj;
+        this.partsObj = this._updatePartsObj(partsObj);
         this._layerDefinition = layerDefinition;
         this._def = this._init("partsObj");
         def = this._def;
@@ -158,8 +160,61 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       return def;
     },
 
+    _updatePartsObj: function(partsObj) {
+      //update interactiveObj.cascade: all previous none
+      array.forEach(partsObj, lang.hitch(this, function(item) {
+        if (item.parts) {
+          array.forEach(item.parts, lang.hitch(this, function(item2) {
+            if (item2.interactiveObj && item2.interactiveObj.cascade === true) {
+              item2.interactiveObj.cascade = "previous";
+            } else if (item2.interactiveObj.cascade === false) {
+              item2.interactiveObj.cascade = "none";
+            }
+          }));
+        } else {
+          if (item.interactiveObj && item.interactiveObj.cascade === true) {
+            item.interactiveObj.cascade = "previous";
+          } else if (item.interactiveObj.cascade === false) {
+            item.interactiveObj.cascade = "none";
+          }
+        }
+      }));
+
+      return partsObj;
+    },
+
     removeAllFilters: function(){
       this._destroyAllFilters();
+    },
+
+    _getLayerDefinitionRaw: function(url, /*optional*/ layerDefinition){
+      var def = new Deferred();
+      if(layerDefinition){
+        def.resolve(layerDefinition);
+      } else{
+        this.loading.show();
+        esriRequest({
+          url: url,
+          content: {f:'json'},
+          handleAs: 'json',
+          callbackParamName: 'callback'
+        }).then(lang.hitch(this, function(response){
+          if(!this.domNode){
+            def.reject();
+            return;
+          }
+          this.loading.hide();
+          def.resolve(response);
+        }), lang.hitch(this, function(err){
+          console.error(err);
+          def.reject();
+          if(!this.domNode){
+            return;
+          }
+          this.loading.hide();
+        }));
+      }
+      return def;
     },
 
     _validateLayerDefinition: function(_layerDefinition){
@@ -206,6 +261,10 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         html.removeClass(this.iconAddExp, 'jimu-state-disabled');
         html.removeClass(this.iconAddSet, 'jimu-state-disabled');
         this.createFieldsStore();
+        this.valueProviderFactory = new ValueProviderFactory({
+          url: this.url,
+          layerDefinition: this._layerDefinition
+        });
 
         if (mode === 'expr') {
           if (this._isString(this.expr)) {
@@ -215,19 +274,17 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
             }
             if(this._parseExpr(this.expr)){
               resolveDef();
-            }else{
+            } else{
               def.reject();
             }
-          }
-          else{
+          } else{
             def.reject();
           }
         } else if (mode === 'partsObj') {
           if (this._validatePartsObj(this.partsObj)) {
             this._parsePartsObj(this.partsObj);
             resolveDef();
-          }
-          else{
+          } else{
             def.reject();
           }
         } else{
@@ -240,8 +297,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
             }else{
               def.reject();
             }
-          }
-          else{
+          } else{
             //default is '1=1'
             this.removeAllFilters();
             resolveDef();
@@ -251,8 +307,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
 
       if(this._validateLayerDefinition(this._layerDefinition)){
         callback();
-      }
-      else{
+      } else{
         this.loading.show();
         esriRequest({
           url: this.url,
@@ -303,8 +358,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       if(validParts && json.parts.length > 0){
         json.expr = this.getExprByFilterObj(json);
         return json;
-      }
-      else{
+      } else{
         return null;
       }
     },
@@ -394,8 +448,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         if(item.parts){
           //FilterSet
           this._addFilterSet(item);
-        }
-        else if(item.fieldObj && item.operator && item.valueObj){
+        } else if(item.fieldObj && item.operator && item.valueObj){
           //SingleFilter
           this._addSingleFilter(item);
         }
@@ -416,14 +469,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         part: part,
         OPERATORS: lang.mixin({}, this.OPERATORS),
         enableAskForValues: this.enableAskForValues,
-        isHosted: this.isHosted
+        isHosted: this.isHosted,
+        valueProviderFactory: this.valueProviderFactory
       };
       var singleFilter = new SingleFilter(args);
       singleFilter.placeAt(this.allExpsBox);
       singleFilter.startup();
-      this.own(aspect.after(singleFilter,
-                            '_destroySelf',
-                            lang.hitch(this, this._checkFilterNumbers)));
+      this.own(aspect.after(singleFilter, '_destroySelf', lang.hitch(this, this._checkFilterNumbers)));
       this._checkFilterNumbers();
     },
 
@@ -437,14 +489,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         partsObj: partsObj,
         OPERATORS: lang.mixin({}, this.OPERATORS),
         enableAskForValues: this.enableAskForValues,
-        isHosted: this.isHosted
+        isHosted: this.isHosted,
+        valueProviderFactory: this.valueProviderFactory
       };
       var filterSet = new FilterSet(args);
       filterSet.placeAt(this.allExpsBox);
       filterSet.startup();
-      this.own(aspect.after(filterSet,
-                            '_destroySelf',
-                            lang.hitch(this, this._checkFilterNumbers)));
+      this.own(aspect.after(filterSet, '_destroySelf', lang.hitch(this, this._checkFilterNumbers)));
       this._checkFilterNumbers();
     },
 
@@ -459,8 +510,15 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     },
 
     _getAllSingleFiltersAndFilterSetsDoms: function(){
-      return query('.allExpsBox>.jimu-single-filter,.allExpsBox>.jimu-filter-set',
-                   this.contentSection);
+      var doms = [];
+      if(this.allExpsBox.childNodes && this.allExpsBox.childNodes.length > 0){
+        array.forEach(this.allExpsBox.childNodes, lang.hitch(this, function(childNode){
+          if(html.hasClass(childNode, 'jimu-single-filter') || html.hasClass(childNode, 'jimu-filter-set')){
+            doms.push(childNode);
+          }
+        }));
+      }
+      return doms;
     },
 
     _getAllSingleFiltersAndFilterSets:function(){
@@ -475,15 +533,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       var filterDoms = this._getAllSingleFiltersAndFilterSetsDoms();
       if(filterDoms.length > 1){
         html.setStyle(this.matchMsg, 'display', 'block');
-      }
-      else{
+      } else{
         html.setStyle(this.matchMsg, 'display', 'none');
       }
 
       if(filterDoms.length > 0){
         html.setStyle(this.noFilterTipSection, 'display', 'none');
-      }
-      else{
+      } else{
         html.setStyle(this.noFilterTipSection, 'display', 'block');
       }
 
@@ -493,11 +549,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         var cName = (index + 1) % 2 === 0 ? "even-filter" : "odd-filter";
         html.addClass(filterDom, cName);
       }));
+
+      this.emit("filter-number-change");
     },
 
     _showErrorOptions:function(strError){
       console.error(strError);
-      html.setStyle(this.contentSection, 'display', 'none');
+      // html.setStyle(this.contentSection, 'display', 'none');
       html.setStyle(this.errorSection, 'display', 'none');//block
       this.errorTip.innerHTML = strError;
       this.loading.hide();

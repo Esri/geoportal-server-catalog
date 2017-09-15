@@ -273,6 +273,9 @@ define([
           maxSuggestions: setting.maxSuggestions || 6,
           maxResults: setting.maxResults || 6,
           searchInCurrentMapExtent: !!setting.searchInCurrentMapExtent,
+          enableLocalSearch: !!setting.enableLocalSearch,
+          localSearchMinScale: setting.localSearchMinScale,
+          localSearchDistance: setting.localSearchDistance,
           type: "locator"
         });
         this._currentSourceSetting.setRelatedTr(relatedTr);

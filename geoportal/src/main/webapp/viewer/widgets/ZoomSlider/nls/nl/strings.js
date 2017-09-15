@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Zoomschuifregelaar"
-  })
-);
+define({
+  "_widgetLabel": "Zoomschuifregelaar"
+});

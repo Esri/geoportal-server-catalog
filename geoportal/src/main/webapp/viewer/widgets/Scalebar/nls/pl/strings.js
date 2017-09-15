@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Podziałka liniowa"
-  })
-);
+define({
+  "_widgetLabel": "Podziałka liniowa"
+});

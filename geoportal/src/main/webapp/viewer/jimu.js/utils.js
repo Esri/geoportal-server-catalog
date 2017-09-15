@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ define([
     'dojo/query',
     'dojo/NodeList-traverse',
     'dojo/Deferred',
+    'dojo/promise/all',
     'dojo/on',
     'dojo/json',
     'dojo/cookie',
@@ -42,18 +43,22 @@ define([
     'esri/geometry/webMercatorUtils',
     'esri/tasks/GeometryService',
     'esri/tasks/ProjectParameters',
+    'esri/tasks/FeatureSet',
+    'esri/symbols/PictureMarkerSymbol',
     'esri/urlUtils',
     'esri/request',
+    'esri/tasks/query',
+    'esri/tasks/QueryTask',
     'esri/graphicsUtils',
     'jimu/portalUrlUtils',
     './shared/utils'
   ],
 
-function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json, cookie,
+function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, all, on, json, cookie,
   dojoNumber, dateLocale, nlsBundle, base64, esriLang, arcgisUtils, PopupTemplate, SpatialReference,
-  Extent, Multipoint,
-  Polyline, Polygon, webMercatorUtils, GeometryService, ProjectParameters,
-  esriUrlUtils, esriRequest, graphicsUtils, portalUrlUtils, sharedUtils) {
+  Extent, Multipoint, Polyline, Polygon, webMercatorUtils, GeometryService, ProjectParameters, FeatureSet,
+  PictureMarkerSymbol, esriUrlUtils, esriRequest, EsriQuery, QueryTask, graphicsUtils, portalUrlUtils, sharedUtils
+) {
   /* global esriConfig, dojoConfig, ActiveXObject, testLoad */
   var mo = {};
 
@@ -152,14 +157,14 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
         id: id,
         rel: "stylesheet",
         type: "text/css",
-        href: hrefPath
+        href: hrefPath + '?wab_dv=' + window.deployVersion
       }, html.byId(beforeId), 'before');
     } else {
       styleLinkNode = html.create('link', {
         id: id,
         rel: "stylesheet",
         type: "text/css",
-        href: hrefPath
+        href: hrefPath + '?wab_dv=' + window.deployVersion
       }, document.getElementsByTagName('head')[0]);
     }
 
@@ -204,6 +209,9 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
       m2 = m[i].match(/(url\(["|']?)(.*)((?:['|"]?)\))/i);
       if(m2.length >= 4){
         var path = m2[2];
+        if(/^data:image\/.*;/.test(path)){
+          continue;
+        }
         if(!rpath.endWith('/')){
           rpath = rpath + '/';
         }
@@ -588,24 +596,6 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     setTimeout(doSet, 10);
   }
 
-  /**
-   * get uri info from the configured uri property,
-   * the info contains: folderUrl, name
-   */
-  function getUriInfo(uri) {
-    var pos, firstSeg, info = {},
-      amdFolder;
-
-    pos = uri.indexOf('/');
-    firstSeg = uri.substring(0, pos);
-
-    //config using package
-    amdFolder = uri.substring(0, uri.lastIndexOf('/') + 1);
-    info.folderUrl = require(mo.getRequireConfig()).toUrl(amdFolder);
-    info.amdFolder = amdFolder;
-    return info;
-  }
-
   mo.file = {
     loadFileAPI: function() {
       var def = new Deferred();
@@ -763,22 +753,76 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     }
   };
 
-  mo.processWidgetSetting = function(setting) {
-    if (!setting.uri) {
-      return setting;
-    }
-    lang.mixin(setting, getUriInfo(setting.uri));
+  ///////////////////widget json(in app config json) processing
 
-    if (!setting.icon) {
-      setting.icon = setting.amdFolder + 'images/icon.png';
-    }
-    if (!setting.thumbnail) {
-      setting.thumbnail = setting.amdFolder + 'images/thumbnail.png';
+  mo.getUriInfo = function getUriInfo(uri) {
+    var pos, firstSeg, info = {},
+      amdFolder;
+
+    pos = uri.indexOf('/');
+    firstSeg = uri.substring(0, pos);
+
+    //config using package
+    amdFolder = uri.substring(0, uri.lastIndexOf('/') + 1);
+    info.folderUrl = require(mo.getRequireConfig()).toUrl(amdFolder);
+    info.amdFolder = amdFolder;
+
+    info.url = info.folderUrl;//for backward compatibility
+
+    if(/^http(s)?:\/\//.test(uri) || /^\/\//.test(uri)){
+      info.isRemote = true;
     }
 
-    //setting.label has been processed when loading config.
-    return setting;
+    return info;
   };
+
+  mo.widgetJson = (function(){
+    var ret = {};
+
+    ret.addManifest2WidgetJson = function(widgetJson, manifest){
+      lang.mixin(widgetJson, manifest.properties);
+      widgetJson.name = manifest.name;
+      if(!widgetJson.label){
+        widgetJson.label = manifest.label;
+      }
+      widgetJson.manifest = manifest;
+      widgetJson.isRemote = manifest.isRemote;
+      if(widgetJson.isRemote){
+        widgetJson.itemId = manifest.itemId;
+      }
+      if(manifest.featureActions){
+        widgetJson.featureActions = manifest.featureActions;
+      }
+
+      if (!widgetJson.icon) {
+        widgetJson.icon = manifest.icon;
+      }
+
+      if (!widgetJson.thumbnail) {
+        widgetJson.thumbnail = manifest.thumbnail;
+      }
+
+      widgetJson.folderUrl = manifest.folderUrl;
+      widgetJson.amdFolder = manifest.amdFolder;
+    };
+
+    ret.removeManifestFromWidgetJson = function(widgetJson){
+      //we set property to undefined, instead of delete them.
+      //The reason is: configmanager can't hanle delete properties for now
+      if(!widgetJson.manifest){
+        return;
+      }
+      for(var p in widgetJson.manifest.properties){
+        widgetJson[p] = undefined;
+      }
+      widgetJson.name = undefined;
+      widgetJson.label = undefined;
+      widgetJson.featureActions = undefined;
+      widgetJson.manifest = undefined;
+    };
+    return ret;
+  })();
+
 
   mo.getRequireConfig = function() {
     /* global jimuConfig */
@@ -1242,27 +1286,272 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     return obj;
   };
 
+  /////////////widget and theme manifest processing/////////
+  mo.manifest = (function(){
+    var ret = {};
 
-  mo.addManifestProperies = function(manifest) {
-    manifest.icon = manifest.url + 'images/icon.png';
+    function addThemeManifestProperies(manifest) {
+      manifest.panels.forEach(function(panel) {
+        panel.uri = 'panels/' + panel.name + '/Panel.js';
+      });
 
-    if(manifest.category === "theme") {
-      addThemeManifestProperies(manifest);
-    } else {
-      addWidgetManifestProperties(manifest);
+      manifest.styles.forEach(function(style) {
+        style.uri = 'styles/' + style.name + '/style.css';
+      });
+
+      manifest.layouts.forEach(function(layout) {
+        layout.uri = 'layouts/' + layout.name + '/config.json';
+        layout.icon = 'layouts/' + layout.name + '/icon.png';
+        layout.RTLIcon = 'layouts/' + layout.name + '/icon_rtl.png';
+      });
     }
+
+    function addWidgetManifestProperties(manifest) {
+      //because tingo db engine doesn't support 2D, 3D property, so, change here
+      if (typeof manifest['2D'] !== 'undefined') {
+        manifest.support2D = manifest['2D'];
+      }
+      if (typeof manifest['3D'] !== 'undefined') {
+        manifest.support3D = manifest['3D'];
+      }
+
+      if (typeof manifest['2D'] === 'undefined' && typeof manifest['3D'] === 'undefined') {
+        manifest.support2D = true;
+      }
+
+      delete manifest['2D'];
+      delete manifest['3D'];
+
+      if (typeof manifest.properties === 'undefined') {
+        manifest.properties = {};
+      }
+
+      sharedUtils.processWidgetProperties(manifest);
+    }
+
+    ret.addManifestProperies = function(manifest) {
+      if(!manifest.icon){
+        manifest.icon = manifest.folderUrl + 'images/icon.png?wab_dv=' + window.deployVersion;
+      }
+
+      if (!manifest.thumbnail) {
+        manifest.thumbnail = manifest.folderUrl + 'images/thumbnail.png';
+      }
+
+      if(manifest.category === "theme") {
+        addThemeManifestProperies(manifest);
+      } else {
+        addWidgetManifestProperties(manifest);
+      }
+    };
+
+    ret.processManifestLabel = function(manifest, locale){
+      var langCode = locale.split('-')[0];
+      manifest.label = manifest.i18nLabels && (manifest.i18nLabels[locale] || manifest.i18nLabels[langCode] ||
+        manifest.i18nLabels.defaultLabel) ||
+        manifest.label ||
+        manifest.name;
+      if(manifest.layouts){
+        array.forEach(manifest.layouts, function(layout){
+          var key = 'i18nLabels_layout_' + layout.name;
+          layout.label = manifest[key] && (manifest[key][locale] ||
+            manifest[key].defaultLabel) ||
+            layout.label ||
+            layout.name;
+        });
+      }
+      if(manifest.styles){
+        array.forEach(manifest.styles, function(_style){
+          var key = 'i18nLabels_style_' + _style.name;
+          _style.label = manifest[key] && (manifest[key][locale] ||
+            manifest[key].defaultLabel) ||
+            _style.label ||
+            _style.name;
+        });
+      }
+    };
+
+    ret.addI18NLabel = function(manifest){
+      var def = new Deferred();
+      if(manifest.i18nLabels){
+        def.resolve(manifest);
+        return def;
+      }
+      manifest.i18nLabels = {};
+
+      if(manifest.properties && manifest.properties.hasLocale === false){
+        def.resolve(manifest);
+        return def;
+      }
+
+      //theme or widget label
+      var nlsFile;
+      if(manifest.isRemote){
+        nlsFile = manifest.amdFolder + 'nls/strings.js';
+      }else{
+        nlsFile = manifest.amdFolder + 'nls/strings';
+      }
+      require(mo.getRequireConfig(), ['dojo/i18n!' + nlsFile],
+      function(localeStrings){
+        var localesStrings = {};
+        localesStrings[dojoConfig.locale] = localeStrings;
+        sharedUtils.addI18NLabelToManifest(manifest, null, localesStrings);
+        def.resolve(manifest);
+      });
+
+      return def;
+    };
+    return ret;
+  })();
+
+  //return [{value,label}]
+  mo.getUniqueValues = function(featureOrImageLayerUrl, fieldName, where, _layerDefinition){
+    function getLayerDefinition(){
+      var def = new Deferred();
+      if(_layerDefinition){
+        def.resolve(_layerDefinition);
+      }else{
+        def = esriRequest({
+          url: featureOrImageLayerUrl,
+          content: {
+            f: 'json'
+          },
+          handleAs: 'json',
+          callbackParamName: 'callback'
+        });
+      }
+      return def;
+    }
+    return getLayerDefinition().then(function(layerDefinition){
+      return mo._getUniqueValues(featureOrImageLayerUrl, fieldName, where, layerDefinition).then(function(values){
+        var valueLabels = [];
+        var fieldInfo = mo.getFieldInfoByFieldName(layerDefinition.fields, fieldName);
+        var codedValueObj = null;//{value:label}
+        var numberFieldTypes = [
+          'esriFieldTypeOID',
+          'esriFieldTypeSmallInteger',
+          'esriFieldTypeInteger',
+          'esriFieldTypeSingle',
+          'esriFieldTypeDouble'
+        ];
+        var isNumberField = numberFieldTypes.indexOf(fieldInfo.type) >= 0;
+        if(fieldInfo){
+          if(isNumberField){
+            values = array.map(values, function(v){
+              var r = parseFloat(v);
+              if(isNaN(r)){
+                r = null;
+              }
+              return r;
+            });
+          }
+          if(fieldInfo.domain && fieldInfo.domain.codedValues && fieldInfo.domain.codedValues.length > 0){
+            codedValueObj = {};
+            array.forEach(fieldInfo.domain.codedValues, function(item){
+              codedValueObj[item.code] = item.name;
+            });
+          }else if(layerDefinition.typeIdField === fieldName){
+            codedValueObj = {};
+            array.forEach(layerDefinition.types, function(item){
+              codedValueObj[item.id] = item.name;
+            });
+          }
+        }
+        valueLabels = array.map(values, function(value){
+          var label = null;
+          if(value === null || value === undefined){
+            label = '<Null>';
+          }else{
+            if(codedValueObj && codedValueObj.hasOwnProperty(value)){
+              label = codedValueObj[value];
+            }else{
+              if(isNumberField){
+                label = mo.localizeNumber(value);
+              }else{
+                label = value;
+              }
+            }
+          }
+          return {
+            value: value,
+            label: label
+          };
+        });
+        return valueLabels;
+      });
+    });
   };
 
-  mo.getUniqueValues = function(url, fieldName){
+  mo._getUniqueValues = function(featureOrImageLayerUrl, fieldName, where, layerDefinition){
     var def = new Deferred();
-    var reqUrl = url.replace(/\/*$/g, '') + "/generateRenderer";
+    var url = featureOrImageLayerUrl.replace(/\/*$/g, '');
+    if(!where){
+      where = '1=1';
+    }
+
+    //MapService and FeatureServie both support QueryTask and generateRenderer.
+    //But QueryTask has the maxRecordCount limit, generateRenderer doesn't.
+    //ImageServer only supports QueryTask.
+    var reg = /\/ImageServer$/gi;
+    var isImageService = reg.test(url);
+    if(isImageService){
+      def = mo._getUniqueValuesByQueryTask(url, fieldName, where);
+    }else{
+      var fieldInfo = mo.getFieldInfoByFieldName(layerDefinition.fields, fieldName);
+      var codedValuesOrTypesCount = mo._getCodedValuesOrTypesCount(fieldInfo, layerDefinition);
+      if(codedValuesOrTypesCount > 0){
+        def = mo._getUniqueValuesByQueryTask(url, fieldName, where);
+      }else{
+        def = mo._getUniqueValuesByGenerateRenderer(url, fieldName, where);
+      }
+    }
+
+    return def;
+  };
+
+  mo._getCodedValuesOrTypesCount = function(fieldInfo, layerDefinition) {
+    if (fieldInfo) {
+      if (fieldInfo.domain && fieldInfo.domain.type === 'codedValue' && fieldInfo.domain.codedValues) {
+        return fieldInfo.domain.codedValues.length;
+      }
+      if (layerDefinition.typeIdField === fieldInfo.name && layerDefinition.types) {
+        return layerDefinition.types.length;
+      }
+    }
+    return 0;
+  };
+
+  mo._getUniqueValuesByQueryTask = function(url, fieldName, where){
+    var queryParams = new EsriQuery();
+    queryParams.where = where;
+    queryParams.returnDistinctValues = true;
+    queryParams.returnGeometry = false;
+    queryParams.outFields = [fieldName];
+    var queryTask = new QueryTask(url);
+    return queryTask.execute(queryParams).then(function(response){
+      var values = [];
+      if(response.features && response.features.length > 0){
+        array.forEach(response.features, function(feature){
+          if(feature && feature.attributes){
+            values.push(feature.attributes[fieldName]);
+          }
+        });
+      }
+      return values;
+    });
+  };
+
+  mo._getUniqueValuesByGenerateRenderer = function(featureLayerUrl, fieldName, where){
+    var def = new Deferred();
+    var reqUrl = featureLayerUrl.replace(/\/*$/g, '') + "/generateRenderer";
     var classificationDef = {"type":"uniqueValueDef", "uniqueValueFields":[fieldName]};
     var str = json.stringify(classificationDef);
     esriRequest({
       url: reqUrl,
       content: {
         classificationDef: str,
-        f: 'json'
+        f: 'json',
+        where: where
       },
       handleAs: 'json',
       callbackParamName:'callback'
@@ -1279,6 +1568,11 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
       def.reject(err);
     }));
     return def;
+  };
+
+  mo.isCodedValuesSupportFilter = function(layerDefinition, codedValueLength){
+    var version = parseFloat(layerDefinition.currentVersion);
+    return codedValueLength <= parseFloat(layerDefinition.maxRecordCount) && version > 10.1;
   };
 
   mo.combineRadioCheckBoxWithLabel = function(inputDom, labelDom){
@@ -1303,6 +1597,20 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
       labelDom.setAttribute('for', inputId);
       html.setStyle(labelDom, 'cursor', 'pointer');
     }
+  };
+
+  //return handle array, the handles can be owned by widget
+  mo.groupRadios = function(radios, /*optional*/ listener){
+    var handles = [];
+    var name = "radiogroup_" + mo.getRandomString();
+    array.forEach(radios, function(radio){
+      radio.name = name;
+      if(listener){
+        var handle = on(radio, 'change', listener);
+        handles.push(handle);
+      }
+    });
+    return handles;
   };
 
   mo.convertExtentToPolygon = function(extent){
@@ -1334,11 +1642,15 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     function combinePoints(geos){
       //geos is an array of point or multipoint
       var mpJson = {
-        "points": [],
+        "points": [],//each element is [x,y]
         "spatialReference": geos[0].spatialReference.toJson()
       };
       array.forEach(geos, function(geo){
-        mpJson.points = mpJson.points.concat(geo.points);
+        if(geo.type === 'point'){
+          mpJson.points = mpJson.points.concat([[geo.x, geo.y]]);
+        }else if(geo.type === 'multipoint'){
+          mpJson.points = mpJson.points.concat(geo.points);
+        }
       });
       var multipoint = new Multipoint(mpJson);
       return multipoint;
@@ -1431,6 +1743,17 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     return geometry;
   };
 
+  mo.combineGeometriesByGraphics = function(graphics){
+    var geometry = null;
+    if(graphics && graphics.length > 0){
+      var geometries = array.map(graphics, function(graphic){
+        return graphic.geometry;
+      });
+      geometry = mo.combineGeometries(geometries);
+    }
+    return geometry;
+  };
+
   mo.isFeaturelayerUrlSupportQuery = function(featureLayerUrl, capabilities){
     var isSupportQuery = false;
     var isFeatureService = (/\/featureserver\//gi).test(featureLayerUrl);
@@ -1452,123 +1775,6 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
 
   mo.isStringEndWith = function(s, endS){
     return (s.lastIndexOf(endS) + endS.length === s.length);
-  };
-
-  function addThemeManifestProperies(manifest) {
-    manifest.panels.forEach(function(panel) {
-      panel.uri = 'panels/' + panel.name + '/Panel.js';
-    });
-
-    manifest.styles.forEach(function(style) {
-      style.uri = 'styles/' + style.name + '/style.css';
-    });
-
-    manifest.layouts.forEach(function(layout) {
-      layout.uri = 'layouts/' + layout.name + '/config.json';
-      layout.icon = 'layouts/' + layout.name + '/icon.png';
-      layout.RTLIcon = 'layouts/' + layout.name + '/icon_rtl.png';
-    });
-  }
-
-  function addWidgetManifestProperties(manifest) {
-    //because tingo db engine doesn't support 2D, 3D property, so, change here
-    if (typeof manifest['2D'] !== 'undefined') {
-      manifest.support2D = manifest['2D'];
-    }
-    if (typeof manifest['3D'] !== 'undefined') {
-      manifest.support3D = manifest['3D'];
-    }
-
-    if (typeof manifest['2D'] === 'undefined' && typeof manifest['3D'] === 'undefined') {
-      manifest.support2D = true;
-    }
-
-    delete manifest['2D'];
-    delete manifest['3D'];
-
-    if (typeof manifest.properties === 'undefined') {
-      manifest.properties = {};
-    }
-
-    sharedUtils.processWidgetProperties(manifest);
-  }
-
-  mo.processManifestLabel = function(manifest, locale){
-    var langCode = locale.split('-')[0];
-    manifest.label = manifest.i18nLabels && (manifest.i18nLabels[locale] || manifest.i18nLabels[langCode] ||
-      manifest.i18nLabels.defaultLabel) ||
-      manifest.label ||
-      manifest.name;
-    if(manifest.layouts){
-      array.forEach(manifest.layouts, function(layout){
-        var key = 'i18nLabels_layout_' + layout.name;
-        layout.label = manifest[key] && (manifest[key][locale] ||
-          manifest[key].defaultLabel) ||
-          layout.label ||
-          layout.name;
-      });
-    }
-    if(manifest.styles){
-      array.forEach(manifest.styles, function(_style){
-        var key = 'i18nLabels_style_' + _style.name;
-        _style.label = manifest[key] && (manifest[key][locale] ||
-          manifest[key].defaultLabel) ||
-          _style.label ||
-          _style.name;
-      });
-    }
-  };
-
-  mo.addManifest2WidgetJson = function(widgetJson, manifest){
-    lang.mixin(widgetJson, manifest.properties);
-    widgetJson.name = manifest.name;
-    if(!widgetJson.label){
-      widgetJson.label = manifest.label;
-    }
-    widgetJson.manifest = manifest;
-  };
-
-  mo.addI18NLabel = function(manifest){
-    var def = new Deferred();
-    if(manifest.i18nLabels){
-      def.resolve(manifest);
-      return def;
-    }
-    manifest.i18nLabels = {};
-
-    if(manifest.properties && manifest.properties.hasLocale === false){
-      def.resolve(manifest);
-      return def;
-    }
-
-    //theme or widget label
-    var key = manifest.category === 'widget'? '_widgetLabel': '_themeLabel';
-    require(mo.getRequireConfig(), ['dojo/i18n!' + manifest.amdFolder + 'nls/strings'],
-      function(localeStrings){
-      manifest.i18nLabels[dojoConfig.locale] = localeStrings[key];
-
-      //theme's layout and style label
-      if(manifest.category === 'theme'){
-        if(manifest.layouts){
-          manifest.layouts.forEach(function(layout){
-            manifest['i18nLabels_layout_' + layout.name] = {};
-            manifest['i18nLabels_layout_' + layout.name][dojoConfig.locale] =
-            localeStrings['_layout_' + layout.name];
-          });
-        }
-
-        if(manifest.styles){
-          manifest.styles.forEach(function(style){
-            manifest['i18nLabels_style_' + style.name] = {};
-            manifest['i18nLabels_style_' + style.name][dojoConfig.locale] =
-            localeStrings['_style_' + style.name];
-          });
-        }
-      }
-      def.resolve(manifest);
-    });
-
-    return def;
   };
 
   /*
@@ -1758,6 +1964,9 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
             if (e === -1) {
               e = str.length;
             }
+            var nl = str.indexOf('\r\n', s) > -1 ? str.indexOf('\r\n', s) :
+              str.indexOf('\n', s) > -1 ? str.indexOf('\n', s) : e;
+            e = nl < e ? nl : e;
             var link = str.substring(s, e);
             str = str.substring(0, s) +
               '<A href="' + link + '" target="_blank">' + link + '</A>' +
@@ -1765,7 +1974,12 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
           }
         }
       }
-      return str || "";
+
+      if(typeof str === undefined || str === null){
+        return '';
+      }
+
+      return str;
     },
 
     getFormattedNumber: function(num, format) {
@@ -1988,15 +2202,28 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
           }
         }, this);
       }else{
-        array.forEach(os2.groups, function(group2, i){
-          if(group2.panel && group2.panel.position &&
-            !group2.panel.position.relativeTo){
-            group2.panel.position.relativeTo = 'map';
-          }
-          if(os1.groups[i] && group2.panel.position){
-            os1.groups[i].panel.position = group2.panel.position;
-          }
-        });
+        var managerName;
+        if(config1.layoutDefinition){
+          managerName = config1.layoutDefinition.manager;
+        }else{
+          managerName = 'jimu/layoutManagers/AbsolutePositionLayoutManager';
+        }
+
+        if(managerName === 'jimu/layoutManagers/AbsolutePositionLayoutManager'){
+          array.forEach(os2.groups, function(group2, i){
+            if(group2.panel && group2.panel.position &&
+              !group2.panel.position.relativeTo){
+              group2.panel.position.relativeTo = 'map';
+            }
+            if(os1.groups[i] && group2.panel && group2.panel.position){
+              os1.groups[i].panel.position = group2.panel.position;
+            }
+          });
+        }else if(managerName === 'jimu/layoutManagers/GridLayoutManager'){
+          os1.groups = handleGridLayoutOnScreenGroupChange(os1.groups, os2.groups.map(function(g){
+            return g.id;
+          }));
+        }
       }
     }
 
@@ -2021,6 +2248,49 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     }
     return mixinConfig;
   };
+
+  function handleGridLayoutOnScreenGroupChange(oldGroups, newGroupIds){
+    var oldGroupIds = oldGroups.map(function(g){
+      return g.id;
+    });
+
+    array.forEach(newGroupIds, function(gId){
+      if(oldGroupIds.indexOf(gId) < 0){// new add group
+        oldGroups.push({
+          id: gId,
+          widgets: []
+        });
+      }
+    }, this);
+
+    var removedGroups = [];
+    oldGroups = array.filter(oldGroups, function(g){
+      if(newGroupIds.indexOf(g.id) < 0){// group is removed
+        removedGroups.push(g);
+        return false;
+      }else{
+        return true;
+      }
+    }, this);
+
+    if(oldGroups.length === 0){
+      return [];
+    }
+    //put widgets in removed groups into the last group
+    var toAddGroup = oldGroups[oldGroups.length - 1];
+    array.forEach(removedGroups, function(removedGroup){
+      toAddGroup.widgets = toAddGroup.widgets.concat(removedGroup.widgets);
+    }, this);
+
+    oldGroups = oldGroups.sort(function(g1, g2){
+      return newGroupIds.indexOf(g1.id) - newGroupIds.indexOf(g2.id);
+    });
+
+    return oldGroups;
+  }
+
+  mo.handleGridLayoutOnScreenGroupChange = handleGridLayoutOnScreenGroupChange;
+
   /**********************************
    * About template
    **********************************/
@@ -2501,6 +2771,15 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     }
   };
 
+  mo.encodeHTML = function (source) {
+    return String(source)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  };
+
   mo.removeSuffixSlashes = function(url){
     return url.replace(/\/*$/g, '');
   };
@@ -2555,6 +2834,45 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     }
 
     return displayValue;
+  };
+
+  //return {fieldName,label,tooltip,visible,format,stringFieldOption}
+  mo.getDefaultPortalFieldInfo = function(serviceFieldInfo){
+    //serviceFieldInfo: {name,alias,type,...}
+    var fieldName = serviceFieldInfo.name;
+    var item = {
+      fieldName: fieldName,
+      label: serviceFieldInfo.alias || fieldName,
+      tooltip: '',
+      visible: false,
+      format: null,
+      stringFieldOption: 'textbox'
+    };
+
+    //https://developers.arcgis.com/javascript/jsapi/field-amd.html#type
+    var type = serviceFieldInfo.type;
+    switch (type) {
+      case 'esriFieldTypeSmallInteger':
+      case 'esriFieldTypeInteger':
+        item.format = {
+          places: 0,
+          digitSeparator: true
+        };
+        break;
+      case 'esriFieldTypeSingle':
+      case 'esriFieldTypeDouble':
+        item.format = {
+          places: 2,
+          digitSeparator: true
+        };
+        break;
+      case 'esriFieldTypeDate':
+        item.format = {
+          dateFormat: "longMonthDayYear"
+        };
+        break;
+    }
+    return item;
   };
 
   mo._tryLocaleNumber = function(value) {
@@ -2635,6 +2953,770 @@ function(lang, array, html, has, config, ioQuery, query, nlt, Deferred, on, json
     } else {
       return v;
     }
+  };
+
+  mo.detectUserAgent = function() {
+    var os = {}, browser = {},
+      ua = navigator.userAgent, platform = navigator.platform,
+      webkit = ua.match(/Web[kK]it[\/]{0,1}([\d.]+)/),
+      android = ua.match(/(Android);?[\s\/]+([\d.]+)?/),
+      osx = !!ua.match(/\(Macintosh\; Intel /),
+      ipad = ua.match(/(iPad).*OS\s([\d_]+)/),
+      ipod = ua.match(/(iPod)(.*OS\s([\d_]+))?/),
+      iphone = !ipad && ua.match(/(iPhone\sOS)\s([\d_]+)/),
+      webos = ua.match(/(webOS|hpwOS)[\s\/]([\d.]+)/),
+      win = /Win\d{2}|Windows/.test(platform),
+      wp = ua.match(/Windows Phone ([\d.]+)/),
+      touchpad = webos && ua.match(/TouchPad/),
+      kindle = ua.match(/Kindle\/([\d.]+)/),
+      silk = ua.match(/Silk\/([\d._]+)/),
+      blackberry = ua.match(/(BlackBerry).*Version\/([\d.]+)/),
+      bb10 = ua.match(/(BB10).*Version\/([\d.]+)/),
+      rimtabletos = ua.match(/(RIM\sTablet\sOS)\s([\d.]+)/),
+      playbook = ua.match(/PlayBook/),
+      chrome = ua.match(/Chrome\/([\d.]+)/) || ua.match(/CriOS\/([\d.]+)/),
+      firefox = ua.match(/Firefox\/([\d.]+)/),
+      firefoxos = ua.match(/\((?:Mobile|Tablet); rv:([\d.]+)\).*Firefox\/[\d.]+/),
+      ie = ua.match(/MSIE\s([\d.]+)/) || ua.match(/Trident\/[\d](?=[^\?]+).*rv:([0-9.].)/),
+      webview = !chrome && ua.match(/(iPhone|iPod|iPad).*AppleWebKit(?!.*Safari)/),
+      safari = webview || ua.match(/Version\/([\d.]+)([^S](Safari)|[^M]*(Mobile)[^S]*(Safari))/);
+
+    browser.webkit = !!webkit;
+    if (browser.webkit) {
+      browser.version = webkit[1];
+    }
+
+    if (android) {
+      os.android = true;
+      os.version = android[2];
+    }
+    if (iphone && !ipod) {
+      os.ios = os.iphone = true;
+      os.version = iphone[2].replace(/_/g, '.');
+    }
+    if (ipad) {
+      os.ios = os.ipad = true;
+      os.version = ipad[2].replace(/_/g, '.');
+    }
+    if (ipod) {
+      os.ios = os.ipod = true;
+      os.version = ipod[3] ? ipod[3].replace(/_/g, '.') : null;
+    }
+    if (wp) {
+      os.wp = true;
+      os.version = wp[1];
+    }
+    if (webos) {
+      os.webos = true;
+      os.version = webos[2];
+    }
+    if (touchpad) {
+      os.touchpad = true;
+    }
+    if (blackberry) {
+      os.blackberry = true;
+      os.version = blackberry[2];
+    }
+    if (bb10) {
+      os.bb10 = true;
+      os.version = bb10[2];
+    }
+    if (rimtabletos) {
+      os.rimtabletos = true;
+      os.version = rimtabletos[2];
+    }
+    if (playbook) {
+      browser.playbook = true;
+    }
+    if (kindle) {
+      os.kindle = true;
+      os.version = kindle[1];
+    }
+    if (silk) {
+      browser.silk = true;
+      browser.version = silk[1];
+    }
+    if (!silk && os.android && ua.match(/Kindle Fire/)) {
+      browser.silk = true;
+    }
+    if (chrome) {
+      browser.chrome = true;
+      browser.version = chrome[1];
+    }
+    if (firefox) {
+      browser.firefox = true;
+      browser.version = firefox[1];
+    }
+    if (firefoxos) {
+      os.firefoxos = true;
+      os.version = firefoxos[1];
+    }
+    if (ie) {
+      browser.ie = true;
+      browser.version = ie[1];
+    }
+    if (safari && (osx || os.ios || win)) {
+      browser.safari = true;
+      if (!os.ios) {
+        browser.version = safari[1];
+      }
+    }
+    if (webview) {
+      browser.webview = true;
+    }
+
+    os.tablet = !!(ipad || playbook || (android && !ua.match(/Mobile/)) ||
+    (firefox && ua.match(/Tablet/)) || (ie && !ua.match(/Phone/) && ua.match(/Touch/)));
+    os.phone = !!(!os.tablet && !os.ipod && (android || iphone || webos || blackberry || bb10 ||
+    (chrome && ua.match(/Android/)) || (chrome && ua.match(/CriOS\/([\d.]+)/)) ||
+    (firefox && ua.match(/Mobile/)) || (ie && ua.match(/Touch/))));
+
+    return {
+      os: os,
+      browser: browser
+    };
+  };
+  mo.isMobileUa = function() {
+    var uaInfo = mo.detectUserAgent();
+    if (true === uaInfo.os.phone || true === uaInfo.os.tablet) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  mo.inMobileSize = function(){
+    var layoutBox = html.getMarginBox(document.body);
+    if (layoutBox.w <= window.jimuConfig.breakPoints[0] ||
+      layoutBox.h <= window.jimuConfig.breakPoints[0]) {
+      html.addClass(window.jimuConfig.layoutId, 'jimu-ismobile');
+      return true;
+    } else {
+      html.removeClass(window.jimuConfig.layoutId, 'jimu-ismobile');
+      return false;
+    }
+  };
+
+  mo.getObjectIdField = function(layerDefinition){
+    if(layerDefinition.objectIdField){
+      return layerDefinition.objectIdField;
+    }else{
+      var fieldInfos = layerDefinition.fields;
+      for(var i = 0; i < fieldInfos.length; i++){
+        var fieldInfo = fieldInfos[i];
+        if(fieldInfo.type === 'esriFieldTypeOID'){
+          return fieldInfo.name;
+        }
+      }
+    }
+    return null;
+  };
+
+  //if browser(such as Chrome50) have window.isSecureContext, and not in https origin, return true
+  //for example: if true===isNendHttpsButNot(), MyLocateButton should be disabled
+  mo.isNeedHttpsButNot = function() {
+    //copy from: https://devtopia.esri.com/WebGIS/arcgis-js-api/issues/6614
+    var hasGeolocation = navigator.geolocation;
+    var hasSecureContext = window.hasOwnProperty("isSecureContext");
+    var isSecureContext = (hasSecureContext && window.isSecureContext) ||
+      (!hasSecureContext && window.location.protocol === "https:");
+    if (!isSecureContext || !hasGeolocation) {
+      return true;
+    } else {
+      return false;
+    }
+  };
+
+  /**
+   * @param graphics Array of esri/Graphic
+   * @return esri/tasks/FeatureSet
+   */
+  mo.toFeatureSet = function(graphics) {
+    var fs = new FeatureSet();
+    //if it's object, we consider it as a feature.
+    if(Object.prototype.toString.call(graphics) === '[object Object]'){
+      graphics = [graphics];
+    }
+    fs.features = graphics;
+
+    if(graphics.length > 0){
+      var g;
+      // Find the first graphic whose geometry has value.
+      array.some(graphics, function(graphic) {
+        if(graphic.geometry) {
+          g = graphic;
+          return true;
+        }
+      });
+      if(g) {
+        var layer = g.getLayer(), fieldAliases = {};
+        if(layer) {
+          fs.displayFieldName = layer.displayField;
+
+          array.forEach(layer.fields, lang.hitch(this, function(fieldInfo) {
+            var fieldName = fieldInfo.name;
+            var fieldAlias = fieldInfo.alias || fieldName;
+            fieldAliases[fieldName] = fieldAlias;
+          }));
+
+          fs.fieldAliases = fieldAliases;
+        }
+        fs.geometryType = g.geometry.type;
+        fs.spatialReference = g.geometry.spatialReference;
+      }
+    }
+    return fs;
+  };
+
+  mo.showValidationErrorTipForFormDijit = function(_dijit){
+    try{
+      if (!_dijit.validate() && _dijit.domNode) {
+        if (_dijit.focusNode) {
+          _dijit.focusNode.focus();
+          setTimeout(lang.hitch(this, function() {
+            _dijit.focusNode.blur();
+          }), 100);
+        }
+      }
+    }catch(e){
+      console.error(e);
+    }
+  };
+
+  mo.getFeatureLayerDefinition = function(featureLayer){
+    var layerDefinition = null;
+    var features = featureLayer.graphics;
+    featureLayer.graphics = [];
+    var json = featureLayer.toJson();
+    featureLayer.graphics = features;
+    if(json){
+      layerDefinition = json.layerDefinition;
+    }
+    return layerDefinition;
+  };
+
+  mo.simulateClickEvent = function(dom){
+    if(has('safari')){
+      //create an event
+      var mouseEvent = document.createEvent("MouseEvents");
+      //initialize the event
+      mouseEvent.initEvent("click",/* bubble */ true, /* cancelable */ true);
+      //trigger the evevnt
+      dom.dispatchEvent(mouseEvent);
+    }else{
+      dom.click();
+    }
+  };
+
+  mo.getFeatureSetByLayerAndFeatures = function(layer, features){
+    var featureSet = new FeatureSet();
+    featureSet.fields = lang.clone(layer.fields);
+    featureSet.features = features;
+    featureSet.geometryType = layer.geometryType;
+    featureSet.fieldAliases = {};
+    array.forEach(featureSet.fields, lang.hitch(this, function(fieldInfo) {
+      var fieldName = fieldInfo.name;
+      var fieldAlias = fieldInfo.alias || fieldName;
+      featureSet.fieldAliases[fieldName] = fieldAlias;
+    }));
+    return featureSet;
+  };
+
+  mo.featureAction = (function(){
+    var result = {};
+
+    //options: {extentFactor}
+    result.zoomTo = function(map, arr, /*optional*/ options) {
+      if(!options){
+        options = {};
+      }
+      if(!options.hasOwnProperty('extentFactor')){
+        options.extentFactor = 1.2;
+      }
+      if (map && arr && arr.length > 0) {
+        var isGeometries = array.every(arr, function(a) {
+          return a && a.spatialReference && a.type;
+        });
+        var isGraphics = array.every(arr, function(a) {
+          return a && a.geometry && a.geometry.spatialReference && a.geometry.type;
+        });
+        if (isGraphics || isGeometries) {
+          if (isGeometries) {
+            arr = array.map(arr, function(a) {
+              return {
+                geometry: a
+              };
+            });
+          }
+
+          if (arr.length === 1 && arr[0].type === 'point') {
+            var levelOrFactor = 15;
+            levelOrFactor = map.getMaxZoom() > -1 ? map.getMaxZoom() : 0.1;
+            map.centerAndZoom(arr[0].geometry, levelOrFactor);
+          } else {
+            var extent = graphicsUtils.graphicsExtent(arr);
+            map.setExtent(extent.expand(options.extentFactor));
+          }
+        }
+      }
+    };
+
+    result.flash = function(graphics, layer) {
+      var isGraphics = array.every(graphics || [], function(g) {
+        return g && g.geometry;
+      });
+      if (!isGraphics) {
+        return;
+      }
+
+      var features = graphics;
+      var first = features[0];
+      var featureSymbols = array.map(features, function(f){
+        return f.symbol;
+      });
+      var gurdSymbol = first.symbol ||
+        lang.getObject('renderer.symbol', false, layer);
+      var cSymbol = null;
+      if (layer && layer.geometryType === 'esriGeometryPoint') {
+        cSymbol = new PictureMarkerSymbol(require.toUrl('jimu') + '/images/flash.gif', 20, 20);
+      } else {
+        cSymbol = lang.clone(gurdSymbol);
+        if (cSymbol) {
+          if (cSymbol.outline) {
+            cSymbol.outline.setColor("#ffc500");
+          } else {
+            cSymbol.setColor("#ffc500");
+          }
+        }
+      }
+
+      function changeSymbol(s, flash) {
+        array.forEach(features, function(f, idx) {
+          f.setSymbol(flash ? s : featureSymbols[idx] || gurdSymbol);
+        });
+      }
+
+      function flash(cb) {
+        return function() {
+          setTimeout(function() {
+            changeSymbol(cSymbol, true);
+            if (features[0] && layer) {
+              layer.redraw();
+            }
+            setTimeout(function() {
+              changeSymbol(null, false);
+              if (features[0] && layer) {
+                layer.redraw();
+              }
+              cb();
+            }, 200);
+          }, 200);
+        };
+      }
+
+      if (first && gurdSymbol && cSymbol && layer) {
+        if (layer.geometryType === 'esriGeometryPoint') {
+          changeSymbol(cSymbol, true);
+          layer.redraw();
+          setTimeout(function() {
+            changeSymbol(null, false);
+            layer.redraw();
+          }, 2000);
+        } else {
+          flash(flash(flash(function() {})))();
+        }
+      }
+    };
+
+    result.panTo = function(map, graphics) {
+      var isGraphics = array.every(graphics || [], function(g) {
+        return g && g.geometry;
+      });
+      if (!isGraphics) {
+        return;
+      }
+
+      var center;
+      if(graphics.length > 0){
+        var extent = graphicsUtils.graphicsExtent(graphics);
+        center = extent.getCenter();
+      }else{
+        var geometry = graphics[0].geometry;
+        if(geometry.type === 'polyline' || geometry.type === 'polygon'){
+          center = geometry.getExtent().getCenter();
+        }else if(geometry.type === 'extent'){
+          center = geometry.getCenter();
+        }else if(geometry.type === 'multipoint'){
+          if(geometry.points.length > 1){
+            center = geometry.getExtent().getCenter();
+          }else{
+            center = geometry.getPoint(0);
+          }
+        }else{
+          center = geometry;
+        }
+      }
+
+      map.centerAt(center);
+    };
+
+    result.showPopup = function(map, graphics) {
+      var isGraphics = array.every(graphics || [], function(g) {
+        return g && g.geometry;
+      });
+      if (!isGraphics) {
+        return;
+      }
+
+      var popup = map.infoWindow;
+      popup.setFeatures(graphics);
+      var f = graphics[0];
+      if (f.geometry.type === 'point') {
+        popup.show(f.geometry, {
+          closetFirst: true
+        });
+      } else {
+        popup.show(f.geometry.getExtent().getCenter(), {
+          closetFirst: true
+        });
+      }
+    };
+
+    return result;
+  }());
+
+  mo.isInConfigOrPreviewWindow = function(){
+    var b = false;
+    try{
+      b = !window.isBuilder && window.parent && window.parent !== window &&
+        window.parent.isBuilder;
+    }catch(e){
+      console.log(e);
+      b = false;
+    }
+    return !!b;
+  };
+
+  //for cross-origin frame
+  mo.getAppHref = function(){
+    var href = "";
+    if (mo.isInConfigOrPreviewWindow()) {
+      href = window.parent.location.href;
+    } else {
+      href = window.location.href;
+    }
+    return href;
+  };
+
+  mo.getAppIdFromUrl = function() {
+    var isDeployedApp = true,
+      href = mo.getAppHref();// window.top.location.href;
+    if (href.indexOf("id=") !== -1 || href.indexOf("appid=") !== -1 ||
+      href.indexOf("apps") !== -1) {
+      isDeployedApp = false;
+    }
+
+    if (isDeployedApp === true) {
+      // deployed app use pathname as key
+      return href;
+    } else {
+      // xt or integration use id of app as key
+      var urlParams = this.urlToObject(window.location.href);
+      if (urlParams.query) {
+        if (urlParams.query.id || urlParams.query.appid) {
+          return urlParams.query.id || urlParams.query.appid;
+        }
+      }
+
+      // if there is no id/appid in url
+      if (window.appInfo) {
+        if (window.appInfo.id) {
+          //id in appInfo
+          return window.appInfo.id;
+        } else if (window.appInfo.appPath) {
+          //parse id from appPath
+          var list = window.appInfo.appPath.split("/");
+          if (list.length && list.length > 2) {
+            return list[list.length - 2];
+          }
+        } else {
+          console.error("CAN NOT getAppIdFromUrl");
+        }
+      }
+    }
+  };
+
+  mo.getEditorContentHeight = function(content, dom, domParam) {
+    var def = new Deferred();
+    this._content = content;
+    this._dom = dom;
+    this._domParam = domParam;
+    var timeoutHandler = setTimeout(lang.hitch(this, function() {
+      clearTimeout(timeoutHandler);
+      timeoutHandler = null;
+
+      var h = 0;
+      var scrollerWidth = 20;
+      var polyfill = 8;
+      var contentWidth = this._domParam.contentWidth;//defaultWidth - marginLeftRight;
+      try {
+        var fakeContent = document.createElement('div');
+        fakeContent.setAttribute('id', 'fakeContent');
+        html.setStyle(fakeContent, "background-size", "contain");
+        fakeContent.innerHTML = this._content;
+        this._dom.appendChild(fakeContent);
+        if (fakeContent) {
+          //to adjust images
+          var contentImgs = query('img', fakeContent);
+          if (contentImgs && contentImgs.length) {
+            contentImgs.style({
+              maxWidth: (contentWidth - scrollerWidth) + 'px'
+            });
+          }
+
+          html.setStyle(fakeContent, "position", "absolute");
+          html.setStyle(fakeContent, "width", contentWidth + "px");
+          html.setStyle(fakeContent, "left", "-99999px");
+          html.setStyle(fakeContent, "top", "-99999px");
+          html.setStyle(fakeContent, "visibility", "hidden");
+
+          var box = html.getContentBox(fakeContent);
+          if (box.h) {
+            //content height
+            h = box.h;
+            //+ content margin top + content margin bottom + polyfill
+            h += (this._domParam.contentMarginTop + this._domParam.footerHeight + polyfill);
+          }
+          //TODO delete
+          // if (h) {
+          //   this._dom.removeChild(fakeContent);
+          // }
+        }
+      } catch (err) {
+        console.error("can't getEditorContentHeight" + err);
+        h = 200;
+      }
+
+      def.resolve(h);
+    }), 1500);
+    return def;
+  };
+
+  mo.getBase64Data = function(url) {
+    var def = new Deferred();
+    if (url && url.startWith('data:image')) {
+      def.resolve(url);
+    } else {
+      try {
+        esriRequest({
+          url: url,
+          handleAs: 'arraybuffer'
+        }).then(function(response){
+          var reader = new FileReader();
+          reader.onloadend = function () {
+            def.resolve(reader.result);
+          };
+          reader.onerror = function () {
+            def.resolve(null);
+          };
+          reader.readAsDataURL(new Blob([response], {
+            type: 'image/png'
+          }));
+        }, function(){
+          def.resolve(null);
+        });
+      }catch(err) {
+        console.warn(err);
+        def.resolve(null);
+      }
+    }
+    return def;
+  };
+
+  mo.getEditorTextColor = function(colorRecordID, forceAttr) {
+    return {
+      name: "dijit.editor.plugins.EditorTextColor",
+      custom: {
+        recordUID: mo.getColorRecordName(colorRecordID),
+        forceAttr: forceAttr
+      }
+    };
+  };
+  mo.getEditorBackgroundColor = function(colorRecordID) {
+    return {
+      name: "dijit.editor.plugins.EditorBackgroundColor",
+      custom: {
+        recordUID: mo.getColorRecordName(colorRecordID)
+      }
+    };
+  };
+  mo.getColorRecordName = function(id){
+    return "wab_cr_" + (id || "");
+  };
+  mo.b64toBlob = function(b64Data, contentType, sliceSize) {
+    contentType = contentType || '';
+    sliceSize = sliceSize || 512;
+    var byteCharacters = window.atob(b64Data.replace(/^data:image\/(png|jpg|jpeg|gif);base64,/, ''));
+    var byteArrays = [];
+    for (var offset = 0; offset < byteCharacters.length; offset += sliceSize) {
+      var slice = byteCharacters.slice(offset, offset + sliceSize);
+      var byteNumbers = new Array(slice.length);
+      for (var i = 0; i < slice.length; i++) {
+        byteNumbers[i] = slice.charCodeAt(i);
+      }
+      var byteArray = new Uint8Array(byteNumbers);
+      byteArrays.push(byteArray);
+    }
+    var blob = new Blob(byteArrays, {
+      type: contentType
+    });
+    return blob;
+  };
+  mo.subtractionArray = function(arr1, arr2) {
+    //return arr1 = arr1 - arr2
+    for (var i = arr1.length - 1; i >= 0; i--) {
+      var a = arr1[i];
+      for (var j = arr2.length - 1; j >= 0; j--) {
+        var b = arr2[j];
+        if (a === b) {
+          arr1.splice(i, 1);
+          arr2.splice(j, 1);
+          break;
+        }
+      }
+    }
+    return arr1;
+  };
+  mo.resourcesUrlToBlob = function(resourcesUrl) {
+    return esriRequest({
+      url: resourcesUrl,
+      handleAs: "blob"
+    });
+  };
+  mo.processItemResourceOfAppConfig = function(appConfig, cb){
+    //Traverse appConfig and get all the data that matches the cb.test,
+    //along with its direct parent object, passed to the callback function(cb.func)
+
+    //cb:{test,func}
+    //args:all parameters that need to be passed to the callback function(cb.func)
+    //
+    //Return: if cb.func return a promise(defs.length > 0),this function will return a deferred
+    //        else return {appConfig,normalReturnValues}
+    var normalReturnValues = [];
+    var defs = [];
+    var callbackReturn;
+
+    function processObject(obj) {
+      for (var key in obj) {
+        if (typeof obj[key] === 'object') {
+          if (Array.isArray(obj[key])) {
+            processArray(obj, key);
+          } else {
+            processObject(obj[key]);
+          }
+        } else if (typeof obj[key] === 'string') {
+          processString(obj, key);
+        }
+      }
+    }
+
+    function processString(obj, key, i){
+      if(typeof i === 'number'){
+        if (cb.test(obj[key][i])) {
+          callbackReturn = cb.func({
+            obj: obj,
+            key: key,
+            i:i
+          });
+          if(typeof callbackReturn.then === 'function'){
+            defs.push(callbackReturn);
+          }else{
+            normalReturnValues.push(callbackReturn);
+          }
+        }
+      }else{
+        if (cb.test(obj[key])) {
+          callbackReturn = cb.func({
+            obj: obj,
+            key: key
+          });
+          if(typeof callbackReturn.then === 'function'){
+            defs.push(callbackReturn);
+          }else{
+            normalReturnValues.push(callbackReturn);
+          }
+        }
+      }
+    }
+
+    function processArray(obj, key){
+      for (var i = 0; i < obj[key].length; i++) {
+        if (typeof obj[key][i] === 'string') {
+          processString(obj, key, i);
+        }else if (typeof obj[key][i] === 'object') {
+          processObject(obj[key][i]);
+        }
+      }
+    }
+
+    processObject(appConfig);
+
+    if(defs.length > 0){
+      return all(defs).then(function(result){
+        if(normalReturnValues.length > 0){
+          result = result.concat(normalReturnValues);
+        }
+        return {
+          appConfig: appConfig,
+          result: result
+        };
+      });
+    }else{
+      return {
+        appConfig: appConfig,
+        result: normalReturnValues
+      };
+    }
+  };
+  mo.isEsriDomain = function(url){
+    return /^https?:\/\/(?:[\w\-\_]+\.)+(?:esri|arcgis)\.com/.test(url);
+  };
+  mo.uniqueArray = function(array) {
+    var n = [];
+    for (var i = 0; i < array.length; i++) {
+      if (n.indexOf(array[i]) === -1) {
+        n.push(array[i]);
+      }
+    }
+    return n;
+  };
+  mo.isNotEmptyObject = function(obj, includeArray) {
+    if(!!includeArray){
+      return mo.isObject(obj) && Object.keys(obj).length > 0 && Array.isArray(obj);
+    }else{
+      return mo.isObject(obj) && Object.keys(obj).length > 0;
+    }
+  };
+  mo.getMinOfArray = function(array) {
+    return Number(Math.min.apply(Math, array));
+  };
+  mo.getDataSchemaFromLayerDefinition = function(layerDefinition){
+    var oIdField = layerDefinition.fields.filter(function(f){
+      return f.type === 'esriFieldTypeOID';
+    });
+    if(oIdField.length > 0){
+      oIdField = oIdField[0];
+    }else{
+      oIdField = null;
+    }
+
+    return {
+      geometryType: layerDefinition.geometryType,
+      fields: layerDefinition.fields,
+      displayField: layerDefinition.displayField,
+      objectIdField: oIdField,
+      typeIdField: layerDefinition.typeIdField
+    };
   };
 
   return mo;

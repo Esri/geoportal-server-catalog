@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -83,6 +83,7 @@ define([
       "DECIMETERS": "Decimeters",
       "DEGREE": "Decimal_Degrees",
       "DECIMAL_DEGREES": "Decimal_Degrees",
+      "DEGREES_DECIMAL_MINUTES":"Degrees_Decimal_Minutes",
       "DEGREE_MINUTE_SECONDS": "Degree_Minutes_Seconds",
       "MGRS": "MGRS",
       "USNG": "USNG"
@@ -229,7 +230,13 @@ define([
               basemap.type === "BingMapsHybrid" || basemap.type === "BingMapsAerial");
             var isWebTiled = basemap && basemap.type === 'WebTiledLayer';
             var isVectorTile = basemap && basemap.type === 'VectorTileLayer';
-            if (basemap && basemap.url) {
+            if("WMS" === basemap.type){
+              //support WMS basemap
+              this._getWMSBaseMapInfo().then(lang.hitch(this, function (options) {
+                this._configured = false;
+                def.resolve(options);
+              }));
+            } else if (basemap && basemap.url) {
               esriRequest({
                 url: basemap.url,
                 handleAs: "json",
@@ -456,7 +463,7 @@ define([
           this.enableRealtime = false;
           this.coordinateInfo.innerHTML = "";
           html.addClass(this.coordinateInfoMenu, 'coordinate-info-menu-empty');
-          html.setAttr(this.locateButton, 'title', this.nls.disableClick);
+          html.setAttr(this.locateButton, 'title', this.nls.enableClick);
         }
         html.removeClass(this.locateContainer, 'coordinate-locate-container-active');
         this.enableWebMapPopup();
@@ -498,10 +505,12 @@ define([
           if (html.hasClass(this.locateContainer, 'coordinate-locate-container-active')) {
             this.coordinateInfo.innerHTML = this.nls.hintMessage;
             this.disableWebMapPopup();
+            html.setAttr(this.locateButton, 'title', this.nls.disableClick);
           } else {
             this.coordinateInfo.innerHTML = "";
             html.addClass(this.coordinateInfoMenu, 'coordinate-info-menu-empty');
             this.enableWebMapPopup();
+            html.setAttr(this.locateButton, 'title', this.nls.enableClick);
           }
         }
       },
@@ -521,14 +530,23 @@ define([
         wkid = parseInt(wkid, 10);
 
         if (selected) {
-          label = "<b>" + label + name + "</b>&nbsp;(" + wkid + ")&lrm;&nbsp;";
+          label = "<b>" + label + name + "</b>&nbsp;" + this._rtlTheBrackets(wkid) + "&nbsp;";
         } else {
-          label = label + name + "&nbsp;&nbsp;(" + wkid + ")&lrm;&nbsp;";
+          label = label + name + "&nbsp;&nbsp;" + this._rtlTheBrackets(wkid) + "&nbsp;";
         }
         if (wkid === mapWkid) {
           label += this.nls.defaultLabel;
         }
         return label;
+      },
+
+      _rtlTheBrackets: function(str) {
+        var rlmFlag = "&rlm;";
+        if (window.isRTL) {
+          return rlmFlag + "(" + str + ")";
+        } else {
+          return "(" + str + ")";
+        }
       },
 
       addMenuItem: function(name, wkid, outputUnit, tfWkid, forward, _options) {
@@ -564,6 +582,10 @@ define([
 
         num = num.toFixed(fix) + patchStr;
         return this.separator(num, decimalPlaces);*/
+        if(isNaN(num)){
+          return "";
+        }
+
         return utils.localizeNumberByFieldInfo(num, {
           format: {
             places: this.config.decimalPlaces,
@@ -764,8 +786,7 @@ define([
         } else {
           // use default units
           if (options.defaultUnit === outUnit) {
-            this.coordinateInfo.innerHTML = this._toFormat(x) +
-              "  " + this._toFormat(y);
+            this._displayCoordinatesByOrder(this._toFormat(x), this._toFormat(y));
             this.coordinateInfo.innerHTML += " " + this._unitToNls(outUnit);
             return;
           }
@@ -826,7 +847,11 @@ define([
           this.coordinateInfo.innerHTML = usng.LLtoUSNG(y, x, 5);
         }
 
-        this.coordinateInfo.innerHTML += " " + this._unitToNls(outUnit);
+        if (isNaN(y) && isNaN(x)) {
+          this.coordinateInfo.innerHTML = "";
+        } else {
+          this.coordinateInfo.innerHTML += " " + this._unitToNls(outUnit);
+        }
       },
 
       _displayDegOrDms: function(outUnit, y, x) {
@@ -840,12 +865,20 @@ define([
         if ("DEGREE_MINUTE_SECONDS" === outUnit) {
           lat_string = this.degToDMS(y, 'LAT');
           lon_string = this.degToDMS(x, 'LON');
-          this.coordinateInfo.innerHTML = lat_string + "  " + lon_string;
+          this._displayCoordinatesByOrder(lat_string, lon_string);
+        } else if ("DEGREES_DECIMAL_MINUTES" === outUnit){
+          //for hack DEGREES_DECIMAL_MINUTES
+          lat_string = this.degToDDM(y);
+          lon_string = this.degToDDM(x);
+          this._displayCoordinatesByOrder(lat_string, lon_string);
         } else {
-          this.coordinateInfo.innerHTML = this._toFormat(y) +
-            "  " + this._toFormat(x);
+          this._displayCoordinatesByOrder(this._toFormat(x), this._toFormat(y));
 
-          this.coordinateInfo.innerHTML += " " + this._unitToNls(outUnit);
+          if (isNaN(y) && isNaN(x)) {
+            this.coordinateInfo.innerHTML = "";
+          } else {
+            this.coordinateInfo.innerHTML += " " + this._unitToNls(outUnit);
+          }
         }
       },
 
@@ -854,10 +887,22 @@ define([
         x = x * options.unitRate;
         y = y * options.unitRate;
 
-        this.coordinateInfo.innerHTML = this._toFormat(x) +
-          "  " + this._toFormat(y);
+        this._displayCoordinatesByOrder(this._toFormat(x), this._toFormat(y));
 
-        this.coordinateInfo.innerHTML += " " + this._unitToNls(outUnit);
+        if (isNaN(y) && isNaN(x)) {
+          this.coordinateInfo.innerHTML = "";
+        } else {
+          this.coordinateInfo.innerHTML += " " + this._unitToNls(outUnit);
+        }
+      },
+
+      _displayCoordinatesByOrder: function(x, y) {
+        var displayOrderLonLat = this.config.displayOrderLonLat;//X,Y
+        if (displayOrderLonLat) {
+          this.coordinateInfo.innerHTML = x + "  " + y;
+        } else {
+          this.coordinateInfo.innerHTML = y + "  " + x;
+        }
       },
 
       onFoldContainerClick: function() {
@@ -902,6 +947,90 @@ define([
         return (decDir === 'LAT') ?
           deg + "&deg;" + min_string + "&prime;" + sec_string + "&Prime;" + dir :
           deg + "&deg;" + min_string + "&prime;" + sec_string + "&Prime;" + dir;
+      },
+      //for hack Degrees Decimal Minutes
+      degToDDM: function (decDeg) {
+        /** @type {number} */
+        var d = Math.abs(decDeg);
+        /** @type {number} */
+        var deg = Math.floor(d);
+        d = d - deg;
+        /** @type {number} */
+        var min = Math.floor(d * 60);
+        /** @type {number} */
+        var sec = Math.floor((d - min / 60) * 60 * 60);
+        if (sec === 60) { // can happen due to rounding above
+          min++;
+          sec = 0;
+        }
+        if (min === 60) { // can happen due to rounding above
+          deg++;
+          min = 0;
+        }
+
+        var dm = utils.localizeNumberByFieldInfo((min + (sec / 60)), {
+          format: {
+            places: this.config.decimalPlaces,
+            digitSeparator: this.config.addSeparator
+          }
+        });
+
+        return deg + "&deg;" + dm + "&prime;";
+      },
+      _getWMSBaseMapInfo: function () {
+        var def = new Deferred();
+        require(['jimu/SpatialReference/srUtils'], lang.hitch(this, function (srUtils) {
+          srUtils.loadResource().then(lang.hitch(this, function () {
+            var mapWkid = this.map.spatialReference.wkid;
+            portalUtils.getUnits(this.appConfig.portalUrl).then(lang.hitch(this, function (units) {
+              if (srUtils.isValidWkid(mapWkid)) {
+                var item = {
+                  wkid: srUtils.standardizeWkid(mapWkid),
+                  label: srUtils.getSRLabel(parseInt(mapWkid, 10))
+                };
+
+                if (srUtils.isProjectedCS(item.wkid)) {
+                  item.outputUnit = units === "english" ? "FOOT" : "METER";
+                } else {
+                  item.outputUnit = item.outputUnit || srUtils.getCSUnit(item.wkid);
+                }
+
+                var _options = {
+                  sameSRWithMap: srUtils.isSameSR(item.wkid, this.map.spatialReference.wkid),
+                  isGeographicCS: srUtils.isGeographicCS(item.wkid),
+                  isGeographicUnit: srUtils.isGeographicUnit(item.outputUnit),
+                  isProjectedCS: srUtils.isProjectedCS(item.wkid),
+                  isProjectUnit: srUtils.isProjectUnit(item.outputUnit),
+                  spheroidCS: srUtils.isProjectedCS(item.wkid) ?
+                    srUtils.getGeoCSByProj(item.wkid) : item.wkid,
+                  defaultUnit: srUtils.getCSUnit(item.wkid),
+                  unitRate: srUtils.getUnitRate(srUtils.getCSUnit(item.wkid), item.outputUnit)
+                };
+
+                //default show mercator is degrees.
+                if (this.map.spatialReference.isWebMercator()) {
+                  _options.isGeographicUnit = true;
+                  _options.isProjectUnit = false;
+                  _options.unitRate = 1;
+                  item.outputUnit = "DECIMAL_DEGREES";
+                }
+                //for hack DEGREES_DECIMAL_MINUTES
+                if (item.outputUnit === "DEGREES_DECIMAL_MINUTES") {
+                  _options.isGeographicUnit = true;
+                  _options.unitRate = 1;
+                }
+
+                item.options = _options;
+                def.resolve(item);
+              }
+            }), lang.hitch(this, function (err) {
+              console.error(err);
+              def.reject(err);
+            }));
+          }));
+        }));
+
+        return def;
       }
       /*,
       separator: function(nStr, places) {

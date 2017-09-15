@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Zoom-skyder"
-  })
-);
+define({
+  "_widgetLabel": "Zoom-skyder"
+});

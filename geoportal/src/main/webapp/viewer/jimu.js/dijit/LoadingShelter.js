@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,9 +39,8 @@ function(declare, _WidgetBase, _TemplatedMixin, template, html) {
         html.setStyle(this.domNode, 'display', 'none');
       }
       html.setStyle(this.domNode, {width: '100%', height: '100%'});
-      this.loadingImg.src = require.toUrl('jimu') + '/images/loading2.gif';
       if(!this.showLoading){
-        html.setStyle(this.imgDiv, 'display', 'none');
+        html.setStyle(this.loadingNode, 'display', 'none');
       }
       if(typeof this.loadingText === 'string'){
         this.textNode.innerHTML = this.loadingText;

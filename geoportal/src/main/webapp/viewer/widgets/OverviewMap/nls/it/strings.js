@@ -1,5 +1,3 @@
-﻿define(
-   ({
-    _widgetLabel: "Mappa d\'insieme"
-  })
-);
+define({
+  "_widgetLabel": "Mappa d'insieme"
+});

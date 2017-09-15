@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -39,6 +39,8 @@ define(['./basePortalUrlUtils'], function(basePortalUrlUtils) {
   mo.processWidgetProperties = processWidgetManifestProperties;
 
   mo.getControllerWidgets = getControllerWidgets;
+
+  mo.addI18NLabelToManifest = addI18NLabelToManifest;
 
   mo.isHostedService = function (url) {
     //http://services.arcgis.com/XXX/arcgis/rest/services/s/FeatureServer
@@ -190,6 +192,96 @@ define(['./basePortalUrlUtils'], function(basePortalUrlUtils) {
     var segs = uri.split('/');
     segs.pop();
     return segs.join('/') + '/';
+  }
+
+  /**
+   * @param {Object} manifest
+   * @param {Object} defaultStrings
+   * @param {Object} {
+   *  locale, localeString
+   * }
+   */
+  function addI18NLabelToManifest(manifest, defaultStrings, localesStrings){
+    manifest.i18nLabels = {};
+    //theme or widget label
+    var key = manifest.category === 'widget'? '_widgetLabel': '_themeLabel';
+    //add default labels
+    if(defaultStrings && defaultStrings.root && defaultStrings.root[key]){
+      manifest.i18nLabels.defaultLabel = defaultStrings.root[key];
+
+      //theme's layout and style label
+      if(manifest.category === 'theme'){
+        if(manifest.layouts){
+          manifest.layouts.forEach(function(layout){
+            manifest['i18nLabels_layout_' + layout.name] = {};
+            manifest['i18nLabels_layout_' + layout.name].defaultLabel =
+              defaultStrings.root['_layout_' + layout.name];
+          });
+        }
+
+        if(manifest.styles){
+          manifest.styles.forEach(function(style){
+            manifest['i18nLabels_style_' + style.name] = {};
+            manifest['i18nLabels_style_' + style.name].defaultLabel =
+              defaultStrings.root['_style_' + style.name];
+          });
+        }
+      }
+
+      if(manifest.category === 'widget'){
+        if(manifest.featureActions){
+          manifest.featureActions.forEach(function(action){
+            manifest['i18nLabels_featureAction_' + action.name] = {};
+            manifest['i18nLabels_featureAction_' + action.name].defaultLabel =
+              defaultStrings.root['_featureAction_' + action.name];
+          });
+        }
+      }
+    }
+    //add locale labels
+    for(var p in localesStrings){
+      var localeStrings = localesStrings[p];
+      addOneLocale(p, localeStrings);
+    }
+
+    function addOneLocale(p, localeStrings){
+      if(localeStrings[key]){
+        manifest.i18nLabels[p] = localeStrings[key];
+      }
+
+      //theme's layout and style label
+      if(manifest.category === 'theme'){
+        if(manifest.layouts){
+          manifest.layouts.forEach(function(layout){
+            if(!manifest['i18nLabels_layout_' + layout.name]){
+              manifest['i18nLabels_layout_' + layout.name] = {};
+            }
+            manifest['i18nLabels_layout_' + layout.name][p] = localeStrings['_layout_' + layout.name];
+          });
+        }
+
+        if(manifest.styles){
+          manifest.styles.forEach(function(style){
+            if(!manifest['i18nLabels_style_' + style.name]){
+              manifest['i18nLabels_style_' + style.name] = {};
+            }
+            manifest['i18nLabels_style_' + style.name][p] = localeStrings['_style_' + style.name];
+          });
+        }
+      }
+
+      if(manifest.category === 'widget'){
+        if(manifest.featureActions){
+          manifest.featureActions.forEach(function(action){
+            if(!manifest['i18nLabels_featureAction_' + action.name]){
+              manifest['i18nLabels_featureAction_' + action.name] = {};
+            }
+            manifest['i18nLabels_featureAction_' + action.name][p] =
+              localeStrings['_featureAction_' + action.name];
+          });
+        }
+      }
+    }
   }
   return mo;
 });

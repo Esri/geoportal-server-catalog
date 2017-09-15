@@ -1,4 +1,4 @@
-<div style="width:100%;height:100%;">
+<div class="jimu-widget-coordinate-setting">
   <div class="settings-section" data-dojo-attach-point="searchesSection">
     <p>${nls.state}</p>
     <div class="add-output-coordinate" data-dojo-attach-event="onclick: onAddClick">
@@ -13,6 +13,20 @@
       <div class="separator">
         <div class="check" data-dojo-attach-point="separator"></div>
       </div>
+    </div>
+
+    <div class="displayOrder">
+      <span class="jimu-float-leading displayOrderTips">${nls.displayOrderLonLatTips}</span>
+      <span class="order">
+        <div class="jimu-float-leading order-btn">
+          <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="lonLat" data-dojo-props="group:'displayOrderLonLat'"></div>
+          <label>${nls.lonLatTips}</label>
+        </div>
+        <div class="jimu-float-leading order-btn">
+          <div data-dojo-type="jimu/dijit/RadioBtn" data-dojo-attach-point="latLon" data-dojo-props="group:'displayOrderLonLat'"></div>
+          <label>${nls.latLonTips}</label>
+        </div>
+      </span>
     </div>
   </div>
 </div>

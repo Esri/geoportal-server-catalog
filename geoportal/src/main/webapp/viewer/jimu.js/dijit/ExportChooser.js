@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2016 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,11 +26,12 @@ define([
   'dojo/dom-class',
   'dojo/dom-style',
   'dojo/dom-geometry',
-  'dojo/on'
+  'dojo/on',
+  'dojo/Evented'
 ],
 function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, lang, array,
-  domConstruct, domClass, domStyle, domGeom, on) {
-  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+  domConstruct, domClass, domStyle, domGeom, on, Evented) {
+  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
     templateString: template,
     baseClass: 'jimu-export-chooser',
     declaredClass: 'jimu.dijit.ExportChooser',
@@ -75,11 +76,12 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
         var format = target.getAttribute('data-value');
         this.dataSource.setFormat(format);
         this.dataSource.download();
+        this.emit('start-downloading', format);
       }
     },
 
     show: function(anchorX, anchorY){
-      var leftPosition, size, offset;
+      var left, top, size, offset = 5;
 
       domStyle.set(this.domNode, {
         left: '-1000px',
@@ -88,19 +90,38 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       });
 
       size = domGeom.getMarginSize(this.domNode);
-      offset = size.w / 2;
 
-      if(anchorX - offset < 0){
-        leftPosition = 0;
-      }else if(anchorX + offset > window.innerWidth){
-        leftPosition = window.innerWidth - size.w;
-      }else{
-        leftPosition = anchorX - offset;
+      if(window.isRTL) {
+        if(anchorX + size.w > window.innerWidth){ // beyond right side of the browser
+          left = window.innerWidth - size.w;
+        }else if(anchorX < 0){// beyond left side of the browser
+          left = 0;
+        }else{
+          left = anchorX;
+        }
+      } else {
+        if(anchorX - size.w < 0){ // beyond left side of the browser
+          left = 0;
+        }else if(anchorX > window.innerWidth){ // beyond right side of the browser
+          left = window.innerWidth - size.w;
+        }else{
+          left = anchorX - size.w;
+        }
+      }
+
+      if(size.h > window.innerHeight) {
+        top = 0;
+      }else if(anchorY + size.h > window.innerHeight){
+        top = window.innerHeight - size.h;
+      }else if(anchorY + size.h + offset < window.innerHeight){
+        top = anchorY + offset;
+      }else {
+        top = anchorY;
       }
 
       domStyle.set(this.domNode, {
-        left: leftPosition + 'px',
-        top: anchorY + 'px'
+        left: left + 'px',
+        top: top + 'px'
       });
     },
 

@@ -1,9 +1,7 @@
-﻿define(
-   ({
-    left: "ซ้าย",
-    right: "ขวา",
-    arrangement: "การจัดเรียง",
-    autoUpdate: "อัพเดทอัตโนมัติ",
-    respectCurrentMapScale: "เชื่อในมาตราส่วนแผนที่ปัจจุบัน"
-  })
-);
+define({
+  "left": "ชิดขอบซ้าย",
+  "right": "ชิดขอบขวา",
+  "arrangement": "การจัดเรียง",
+  "autoUpdate": "อัพเดตอัตโนมัติ",
+  "respectCurrentMapScale": "ใช้ตามมาตราส่วนแผนที่ปัจจุบัน"
+});
