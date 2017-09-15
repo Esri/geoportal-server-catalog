@@ -348,6 +348,7 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
 
   @Override
   public Authentication authenticate(Authentication authentication) throws AuthenticationException {
+    LOGGER.debug("ArcGISAuthenticationProvider::authenticate");
     String username = authentication.getName();
     String password = authentication.getCredentials().toString();
     String referer = getThisReferer();
