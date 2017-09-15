@@ -25,6 +25,12 @@ body {
 	border: none;
 }
 
+/*
+.calcite .modal-dialog .modal-content .modal-header .close {
+  font-size: 21px;
+}
+*/
+
 .g-modal-plot .modal-dialog {
   width: 800px;
 }

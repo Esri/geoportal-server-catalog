@@ -7,12 +7,11 @@
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
 <link rel="shortcut icon" type="image/x-icon" href="images/favicon.ico" />
-<link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
-<link rel="stylesheet" href="//js.arcgis.com/3.17/esri/themes/calcite/dijit/calcite.css">
-<link rel="stylesheet" href="//js.arcgis.com/3.17/esri/themes/calcite/esri/esri.css">
-<link rel="stylesheet" href="//js.arcgis.com/3.17/esri/dijit/metadata/css/gxe.css"/>
-<link rel="stylesheet" href="//js.arcgis.com/3.17/esri/dijit/metadata/css/gxe-calcite.css"/>
-<link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.css">
+<link rel="stylesheet" href="./lib/calcite-bootstrap/css/calcite-bootstrap.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.22/esri/themes/calcite/dijit/calcite.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.22/esri/themes/calcite/esri/esri.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.22/esri/dijit/metadata/css/gxe.css"/>
+<link rel="stylesheet" href="//js.arcgis.com/3.22/esri/dijit/metadata/css/gxe-calcite.css"/>
 <link rel="stylesheet" href="./app/style/main.css">
 <link rel="stylesheet" href="./lib/typeahead.css">
 
@@ -27,6 +26,7 @@
 <script type="text/javascript">
   var dojoConfig = {
     locale: "en",
+    async: true,
     parseOnLoad: true,
     packages: [
       {
@@ -36,14 +36,11 @@
     ]
   };
 </script>
-
-<script src="//cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.js"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
-<script src="//js.arcgis.com/3.17/"></script>
-<script src="lib/calcite-bootstrap/scripts/vendor.js"></script>
-<script src="lib/calcite-bootstrap/scripts/plugins.js"></script>
-<script src="lib/typeahead.js"></script>
- 
+<script src="./lib/d3-3.5.5.js"></script>
+<script src="./lib/jquery-3.2.1.min.js"></script>
+<script src="./lib/bootstrap-3.3.7.min.js"></script>
+<script src="./lib/typeahead.js"></script>
+<script src="//js.arcgis.com/3.22/"></script>
 <script>
 require(["app"],function() {
   require(["dojo/ready","app/context/AppContext","app/context/AppStarter"],
