@@ -423,6 +423,7 @@ public class SearchRequest extends _SearchRequestBase {
     // TODO configure field names
     String field = "envelope_geo";
     String bbox = Val.trim(this.getParameter("bbox"));
+    String rel = Val.trim(this.getParameter("spatialRel"));
     if (bbox != null && bbox.length() > 0) {
       String[] a = bbox.split(",");
       if (a.length >= 4) {
@@ -441,12 +442,26 @@ public class SearchRequest extends _SearchRequestBase {
           if ((xmax > 180.0) && (xmin <= 180.0)) xmax = 180.0;
           if ((ymin < -90.0) && (ymax >= -90.0)) ymin = -90.0;
           if ((ymax > 90.0) && (ymin <= 90.0)) ymax = 90.0;
+          
+          // spatialRel INTERSECTS WITHIN CONTAINS DISJOINT
+          String relation = "intersects";
+          if (rel != null && rel.length() > 0) {
+            rel = rel.toLowerCase();
+            if (rel.equals("intersects") || rel.equals("within") || 
+                rel.equals("contains") || rel.equals("disjoint")) {
+              relation = rel;
+            }
+          }
                     
           String txt = "{\"type\":\"envelope\",\"coordinates\":[["+xmin+","+ymax+"],["+xmax+","+ymin+"]]}";
           JsonStructure env = JsonUtil.toJsonStructure(txt);
           JsonObjectBuilder jso = Json.createObjectBuilder();
           jso.add("geo_shape",Json.createObjectBuilder()
-              .add(field,Json.createObjectBuilder().add("shape",env)));
+            .add(field,Json.createObjectBuilder()
+              .add("shape",env)
+              .add("relation",relation)
+            )
+          );
           filters.add(jso.build());
         } catch (NumberFormatException nfe) {
           throw new InvalidParameterException("bbox");
