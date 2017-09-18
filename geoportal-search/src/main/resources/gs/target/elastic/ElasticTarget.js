@@ -34,9 +34,7 @@
         this.schema = this.newSchema(task);
       }
       
-      // q=&id=&from=&size=&bbox=&time=&filter=&pretty=
-      
-      // TODO pretty bbox time sort
+      // q=&id=&from=&size=&bbox=&spatialRel=&time=&filter=&pretty=
       
       var searchCriteria = {};
       var qAll = "*:*";
@@ -120,10 +118,10 @@
       if (!spatialInfo) return;
       
       var field = spatialInfo.field;
-      var relation = "intersects";  // intersects|within // TODO query parameter?
+      var relation = "intersects";
       var hasField = (typeof field === "string" && field.length > 0);
       
-      var coords = null, query = null, field;
+      var coords = null, query = null, field, rel;
       var bbox = task.request.chkParam("bbox");
       if (typeof bbox === "string" && bbox.length > 0) {
         coords = bbox.split(","); 
@@ -131,6 +129,14 @@
   
       if (hasField && Array.isArray(coords) && coords.length > 3) {
         if (spatialInfo.type === "geo_shape") {
+          rel = task.request.chkParam("spatialRel");
+          if (typeof rel === "string" && rel.length > 0) {
+            rel = rel.toLowerCase();
+            if (rel === "intersects" || rel === "within" || 
+                rel === "contains" || rel === "disjoint") {
+              relation = rel;
+            }
+          }          
           query = {"geo_shape":{}};
           query["geo_shape"][field] = {
             "relation": relation,
