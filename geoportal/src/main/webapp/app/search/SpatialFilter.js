@@ -401,19 +401,18 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         qry.geo_shape[field] = {"shape":shp,"relation":relation};
         
         // TODO
-        qry = {"geo_bounding_box": {
-          "envelope_cen_pt" : {
-            "top_left" : {
-              "lat" : env.ymax,
-              "lon" : env.xmin
-            },
-            "bottom_right" : {
-              "lat" : env.ymin,
-              "lon" : env.xmax
-            }
-          }
-        }};
-       
+//        qry = {"geo_bounding_box": {
+//          "envelope_cen_pt" : {
+//            "top_left" : {
+//              "lat" : env.ymax,
+//              "lon" : env.xmin
+//            },
+//            "bottom_right" : {
+//              "lat" : env.ymin,
+//              "lon" : env.xmax
+//            }
+//          }
+//        }};
         
         return qry;
       };
