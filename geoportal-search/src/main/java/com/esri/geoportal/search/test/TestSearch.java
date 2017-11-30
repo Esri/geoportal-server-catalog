@@ -122,9 +122,11 @@ public class TestSearch {
     String targeta = baseUrl+"/opensearch?q=*:*&target=gptdb2"; 
     String targetb = baseUrl+"/opensearch?q=map&target=portal1";
     String targetc = baseUrl+"/opensearch?q=map&target=portal1&f=json";
+    
+    String custom1 = baseUrl+"/opensearch?target=customElastic";
         
     // csw3 csw10 os3 os6 os18
-    String requestUrl = csw11;
+    String requestUrl = custom1;
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();
     sr.execute(hsr);

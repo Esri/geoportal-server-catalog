@@ -37,6 +37,10 @@
           "searchUrl": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
         }),
         
+        "customElastic": gs.Object.create(gs.target.elastic.CustomElasticTarget).mixin({
+          "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search"
+        }),
+        
         "elastic1": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
           "searchUrl": "http://localhost:9200/metadata/item/_search"
         }),
