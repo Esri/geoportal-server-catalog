@@ -113,6 +113,7 @@
     makeRequest: {value: function(requestInfo) {
       var request = gs.Object.create(gs.base.Request).mixin({
         url: requestInfo.requestUrl,
+        body: requestInfo.requestBody,
         headerMap: requestInfo.headerMap,
         parameterMap: requestInfo.parameterMap,
       });
@@ -215,6 +216,7 @@
         requestInfo = JSON.parse(sRequestInfo); 
         request = gs.Object.create(gs.base.Request).mixin({
           url: requestInfo.requestUrl,
+          body: requestInfo.requestBody,
           headerMap: requestInfo.headerMap,
           parameterMap: requestInfo.parameterMap,
         });

@@ -147,10 +147,18 @@ public class SearchRequest {
   }
   
   public void execute(HttpServletRequest hsr) {
-    this.execute(hsr,null);
+    this.execute(hsr,null,null);
   }
   
   public void execute(HttpServletRequest hsr, MultivaluedMap<String, String> requestParams) {
+    this.execute(hsr,requestParams,null);
+  }
+  
+  public void execute(HttpServletRequest hsr, String body) {
+    this.execute(hsr,null,body);
+  }
+  
+  public void execute(HttpServletRequest hsr, MultivaluedMap<String, String> requestParams, String body) {
     try {
       String url = hsr.getRequestURL().toString();
       String qstr = hsr.getQueryString();
@@ -159,6 +167,8 @@ public class SearchRequest {
       }
       JsonObjectBuilder info = Json.createObjectBuilder();
       info.add("requestUrl",url);
+      if (body ==null) info.addNull("requestBody");
+      else info.add("requestBody",body);
       info.add("baseUrl",this.getBaseUrl(hsr));
       info.add("headerMap",this.getHeaderMap(hsr));
       if (requestParams != null) {

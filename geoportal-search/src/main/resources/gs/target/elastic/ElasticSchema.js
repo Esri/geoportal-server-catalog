@@ -28,6 +28,9 @@
     spatialInfo: {writable: true, value: {
     }},
     
+    modifiedPeriodInfo: {writable: true, value: {
+    }},
+    
     timePeriodInfo: {writable: true, value: {
     }},
     
