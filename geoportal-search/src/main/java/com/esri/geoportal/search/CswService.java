@@ -55,5 +55,13 @@ public class CswService extends Application {
       MultivaluedMap<String, String> requestParams) {
     new SearchRequest(asyncResponse).execute(hsr,requestParams);
   }
+ 
+  @POST
+  @Consumes({MediaType.APPLICATION_XML,MediaType.TEXT_XML,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
+  public void postString(@Suspended final AsyncResponse asyncResponse,
+      @Context HttpServletRequest hsr,
+      String body) {
+    new SearchRequest(asyncResponse).execute(hsr,body);
+  }
 
 }

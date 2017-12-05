@@ -22,6 +22,12 @@
     bboxField: {writable: true, value: "envelope_geo"},
     pointField: {writable: true, value: "envelope_cen_pt"},
     
+    modifiedPeriodInfo: {writable: true, value: {
+      field: "sys_modified_dt",
+      toField: null,
+      nestedPath: null
+    }},
+    
     sortables: {writable: true, value: {
       "title": "title.sort",
       "title.sort": "title.sort",
@@ -40,14 +46,6 @@
       toField: "timeperiod_nst.end_dt",
       nestedPath: "timeperiod_nst"
     }},
-
-    /*
-    timePeriodInfo: {writable: true, value: {
-      field: "sys_modified_dt",
-      toField: null,
-      nestedPath: null
-    }},
-    */
     
     buildAtomCategories: {value: function(task,item) {
       var categories = [], source = item["_source"];

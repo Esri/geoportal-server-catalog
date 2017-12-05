@@ -49,6 +49,7 @@
       "context/Processor",
       "provider/Provider",
       "provider/csw/CswProvider",
+      "provider/csw/GetRecordsParser",
       "provider/csw/OwsException",
       "provider/opensearch/OpensearchProvider",
       "target/Target",

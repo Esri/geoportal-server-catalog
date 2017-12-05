@@ -14,42 +14,47 @@
  */
 
 (function(){
-  
+
   gs.provider.csw.OwsException = gs.Object.create(gs.Proto,{
-  
+
     OWSCODE_InvalidFormat: {writable: true, value: "InvalidFormat"},
     OWSCODE_InvalidParameterValue: {writable: true, value: "InvalidParameterValue"},
     OWSCODE_MissingParameterValue: {writable: true, value: "MissingParameterValue"},
     OWSCODE_NoApplicableCode: {writable: true, value: "NoApplicableCode"},
     OWSCODE_OperationNotSupported: {writable: true, value: "OperationNotSupported"},
     OWSCODE_VersionNegotiationFailed: {writable: true, value: "VersionNegotiationFailed"},
-    
+
     code: {writable: true, value: null},
     locator: {writable: true, value: null},
     text: {writable: true, value: null},
-    
+
     getReport: {value: function(task) {
       var p1 = task.val.NL;
       var p2 = p1+"\t";
       var p3 = p2+"\t";
-      
+
       if (this.code === null) {
         this.code = this.OWSCODE_NoApplicableCode;
       }
       var version = "3.0.0";
+      var owsUri = task.uris.URI_OWS;
+      if (task.isCsw2) {
+        version = "1.2.0";
+        owsUri = "http://www.opengis.net/ows";
+      }
       var xml = task.val.XML_HEADER;
       xml += p1+"<ExceptionReport";
       xml += " version=\""+task.val.escXml(version)+"\"";
-      xml += " xmlns=\""+task.val.escXml(task.uris.URI_OWS)+"\"";
+      xml += " xmlns=\""+task.val.escXml(owsUri)+"\"";
       xml += ">";
-      
+
       xml += p2+"<Exception";
       xml += " exceptionCode=\""+task.val.escXml(this.code)+"\"";
       if (this.locator !== null && this.locator.length > 0) {
         xml += " locator=\""+task.val.escXml(this.locator)+"\"";
       }
       xml += ">";
-      
+
       xml += p3+"<ExceptionText>";
       var txt = this.text;
       if (txt === null) txt = "";
@@ -59,26 +64,26 @@
         xml += p1+task.val.escXml(txt);
       }
       xml += p3+"</ExceptionText>";
-      
+
       xml += p2+"</Exception>";
       xml += p1+"</ExceptionReport>";
       return xml;
     }},
-    
+
     put: {value: function(task,code,locator,text) {
       this.code = code;
       this.locator = locator;
       this.text = text;
       this.toResponse(task);
     }},
-    
+
     toResponse: {value: function(task) {
       var xml = this.getReport(task);
       var response = task.response;
       response.put(response.Status_BAD_REQUEST,response.MediaType_APPLICATION_XML,xml);
       task.hasError = true;
     }}
-    
+
   });
-  
+
 }());
