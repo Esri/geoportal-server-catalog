@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 
- 
 gsConfig = {
   isNashorn: true
 };
@@ -31,6 +30,13 @@ function execute(nhRequest,sRequestInfo) {
   var processor = gs.Object.create(gs.context.nashorn.NashornProcessor).mixin({
     newConfig: function() {
       var config = gs.Object.create(gs.config.Config);
+      if (requestInfo.geoportalElasticsearchUrl) {
+        var targets = config.getTargets();
+        targets["self"] = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
+          "searchUrl": requestInfo.geoportalElasticsearchUrl
+        });
+        config.defaultTarget = "self";
+      }
       return config;
     }
   });
@@ -38,7 +44,4 @@ function execute(nhRequest,sRequestInfo) {
   processor.execute(requestInfo,function(status,mediaType,entity,task){
     nhRequest.putResponse(status,mediaType,entity);
   });
-  
-  //print("done ...");
 }
-

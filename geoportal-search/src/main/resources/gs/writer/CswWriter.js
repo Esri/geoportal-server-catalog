@@ -137,7 +137,7 @@
       if (typeof entry.title === "string" && entry.title.length > 0) {
         title = entry.title;
       }
-      if (task.verbose) console.log("title",title);
+      //if (task.verbose) console.log("title",title);
   
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);

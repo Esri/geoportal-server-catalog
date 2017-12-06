@@ -342,6 +342,7 @@
         data = JSON.stringify(this.searchCriteria);
         if (task.verbose) console.log(data);
       }
+      if (task.verbose) console.log("sending url:",url,"data:",data);
       
       var promise = task.context.newPromise();
       var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);
