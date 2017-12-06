@@ -33,6 +33,10 @@
       return gs.context.SimplePromise.all(promises,this.newCounter());
     }},
     
+    newXmlInfo: {value: function(task,xmlString,nsmap) {
+      return null;
+    }},
+    
     newStringBuilder: {value: function() {
       return gs.Object.create(gs.base.StringBuilder).init();
     }},

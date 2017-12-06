@@ -14,58 +14,67 @@
  */
 
 (function(){
-  
+
   gs.config.Config = gs.Object.create(gs.Proto,{
-    
+
     defaultTarget: {writable: true, value: "arcgis"},
     
     allowDynamicTarget: {writable: true, value: true},
-    
+
     cswCapabilitiesFile: {writable: true, value: "gs/config/csw-capabilities.xml"},
-    
+
+    csw2CapabilitiesFile: {writable: true, value: "gs/config/csw2-capabilities.xml"},
+
     opensearchDescriptionFile: {writable: true, value: "gs/config/opensearch-description.xml"},
-  
+    
+    _targets: {writable: true, value: null},
+    
+    getTargets: {value: function() {
+      if (!this._targets) this._targets = this.makeTargets();
+      return this._targets;
+    }},
+
     makeTargets: {value: function() {
-      
+
       var targets = {
-        
+
         "arcgis": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "https://www.arcgis.com"
         }),
-        
+
         "primary": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
           "searchUrl": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
         }),
-        
+
         "customElastic": gs.Object.create(gs.target.elastic.CustomElasticTarget).mixin({
           "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search"
         }),
-        
+
         "elastic1": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
           "searchUrl": "http://localhost:9200/metadata/item/_search"
         }),
-        
+
         "elastic2": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
           "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search"
         }),
-  
+
         "gptdb1": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
           "searchUrl": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
         }),
-        
+
         "gptdb2": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
           "searchUrl": "http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"
         }),
-        
+
         "portal1": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "http://urbanvm.esri.com/arcgis"
         })
-        
+
       };
-  
+
       return targets;
     }}
-  
+
   });
-  
+
 }());

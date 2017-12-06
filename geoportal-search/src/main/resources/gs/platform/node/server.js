@@ -65,6 +65,7 @@ function execute(req, res, parameterMap) {
  
   var requestInfo = {
     "requestUrl": req.url,
+    "requestBody": req.body,
     "baseUrl": baseUrl,
     "headerMap": req.headers,
     "parameterMap": parameterMap

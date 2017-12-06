@@ -53,11 +53,6 @@
       var urlParams = {"f": "json"};
       var qAll = "modified:[0000000000000000000 TO 9999999999999999999]";
       
-      // TODO filter= time= sorting dates
-      
-      var sortField = task.request.chkParam("sortField");
-      var sortOrder = task.request.chkParam("sortOrder"); // asc/desc
-      
       var q = task.request.chkParam("q");
       if (q === "*" || q === "*:*") q = qAll;
       
@@ -73,7 +68,8 @@
       this.appendQ(urlParams,task.request.chkParam("filter"));
       this.appendQ(urlParams,this.requiredFilter);
       this.parseRequestId(task,urlParams);
-      this.parseRequestTimePeriod(task,urlParams);
+      this.parseRequestPeriod(task,urlParams);
+      this.parseRequestSort(task,urlParams);
       
       // TODO from / size
       var from = task.request.getFrom();
@@ -95,22 +91,12 @@
         urlParams.q = qAll;
       }
       
-      
-      // TODO sort is target specific?? sort by title, owner, date??
-      if (typeof sortField === "string" && sortField.length > 0) {
-        urlParams["sortField"] = sortField;
-      }
-      if (typeof sortOrder === "string" && sortOrder.length > 0) {
-        urlParams["sortOrder"] = sortOrder;
-      }
-      
       for (var k in urlParams) {
         if (urlParams.hasOwnProperty(k)) {
           this.urlParams = urlParams;
           break;
         }
       }
-      
     }},
     
     parseRequestId: {value:function(task,urlParams) {
@@ -124,7 +110,7 @@
       this.appendQ(urlParams,q);
     }},
     
-    parseRequestTimePeriod: {value:function(task,urlParams) {
+    parseRequestPeriod: {value:function(task,urlParams) {
       var wildCards = [0000000000000000000,9999999999999999999];
       
       var makeVal = function(value,isFrom) {
@@ -144,13 +130,49 @@
         return v;
       }
       
-      var timePeriod = task.request.getTimePeriod();
-      var from = timePeriod.from, to = timePeriod.to;
+      var period = task.request.getTimePeriod();
+      if (period.from === null && period.to === null) {
+        period = task.request.getModifiedPeriod();
+      }
+      var from = period.from, to = period.to;
       if (from !== null || to !== null) {
         from = makeVal(from,true);
         to = makeVal(to,false);
         this.appendQ(urlParams,"modified:["+from+" TO "+to+"]");
       }
+    }},
+    
+    parseRequestSort: {value:function(task,urlParams) {
+      // TODO sort is target specific?? sort by title, owner, date??
+      var sortField = task.request.chkParam("sortField");
+      var sortOrder = task.request.chkParam("sortOrder"); // asc/desc
+
+      
+      var sortField, sortOrder;
+      var sortParams = task.request.getParameterValues("sort");
+      if (sortParams !== null && sortParams.length === 1) {
+        var sortParam = sortParams[0];
+        var idx = sortParam.lastIndexOf(":");
+        if (idx !== -1) {
+          sortField = sortParam.substring(0,idx).trim();
+          sortOrder = sortParam.substring(idx + 1).trim();
+        } else {
+        }
+      } else {
+        sortField = task.request.chkParam("sortField");
+        sortOrder = task.request.chkParam("sortOrder"); // asc/desc
+      }
+      if (typeof sortField === "string" && sortField.length > 0) {
+        urlParams["sortField"] = sortField;
+        if (typeof sortOrder === "string" && sortOrder.trim().toLowerCase() === "desc") {
+          urlParams["sortOrder"] = "desc";
+        }
+        if (typeof sortOrder === "string" && 
+          (sortOrder.trim().toLowerCase() === "asc" || sortOrder.trim().toLowerCase() === "desc")) {
+          urlParams["sortOrder"] = sortOrder.trim().toLowerCase();
+        }
+      }
+      
     }},
     
     search: {value:function(task) {
@@ -170,8 +192,8 @@
           }
         }
         if (qstr !== null && qstr.length > 0) url += "?" + qstr;
-        if (task.verbose) console.log("portal search params",qstr);
       }
+      if (task.verbose) console.log("sending url:",url);
       
       var promise = task.context.newPromise();
       var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);
