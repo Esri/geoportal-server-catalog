@@ -199,7 +199,7 @@ public class TestSearch {
     
     String body = null;
     //body = makeGetRecordsXml();
-    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&version=2.0.2&target=gptdb1";
+    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&version=2.0.2&xtarget=gptdb1";
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();

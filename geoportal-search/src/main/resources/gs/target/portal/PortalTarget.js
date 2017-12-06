@@ -192,8 +192,8 @@
           }
         }
         if (qstr !== null && qstr.length > 0) url += "?" + qstr;
-        if (task.verbose) console.log("portal search params",qstr);
       }
+      if (task.verbose) console.log("sending url:",url);
       
       var promise = task.context.newPromise();
       var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);

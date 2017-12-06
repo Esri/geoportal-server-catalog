@@ -182,7 +182,7 @@
     
     makeTargets: {value: function(context,config,request) {
       var self = this, o, target, targets = [];
-      var cfgTargets = config.makeTargets() || {};
+      var cfgTargets = config.getTargets() || {};
       var values = request.getParameterValues("target");
       if (values === null || values.length === 0) {
         values = request.getParameterValues("targets");

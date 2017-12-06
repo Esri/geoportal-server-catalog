@@ -26,6 +26,13 @@
     csw2CapabilitiesFile: {writable: true, value: "gs/config/csw2-capabilities.xml"},
 
     opensearchDescriptionFile: {writable: true, value: "gs/config/opensearch-description.xml"},
+    
+    _targets: {writable: true, value: null},
+    
+    getTargets: {value: function() {
+      if (!this._targets) this._targets = this.makeTargets();
+      return this._targets;
+    }},
 
     makeTargets: {value: function() {
 
