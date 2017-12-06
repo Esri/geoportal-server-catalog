@@ -23,10 +23,9 @@
     isItemByIdRequest: {writable: true, value: false},
     queryIsZeroBased: {writable: true, value: false},
   
+    body: {writable: true, value: null},
     headerMap: {writable: true, value: null},
-  
     parameterMap: {writable: true, value: null},
-  
     url: {writable: true, value: null}, // TODO requestUrl
   
     chkBoolParam: {value: function(key,defaultValue) {
@@ -87,6 +86,10 @@
       if (ids.length === 0) ids = null;
       return ids;
     }},
+    
+    getModifiedPeriod: {value: function() {
+      return this._getPeriod("modified");
+    }},
   
     getParameter: {value: function(key) {
       return this._getValue(this.parameterMap,key);
@@ -105,22 +108,7 @@
     }},
   
     getTimePeriod: {value: function() {
-      var timePeriod = {from: null, to: null};
-      var time = this.chkParam("time");
-      if (typeof time === "string" && time.length > 0) {
-        var a = time.split("/"); 
-        a[0] = a[0].trim();
-        if (a.length === 1 && time.indexOf(",") !== -1) {
-          a = time.split(",");
-        }
-        if (a[0].length > 0) timePeriod.from = a[0];
-        if (a.length === 2) {
-          a[1] = a[1].trim();
-          if (a[1].length > 0) timePeriod.to = a[1];
-          // else if (a[0].length > 0) timePeriod.to = a[0]; //TODO range query, what if no slash? should to = from?
-        }
-      }
-      return timePeriod;
+      return this._getPeriod("time");
     }},
   
     // TODO getRequestUrlPath
@@ -160,6 +148,25 @@
     }},
   
     /* .......................................................................................... */
+    
+    _getPeriod: {value: function(name) {
+      var period = {from: null, to: null};
+      var v = this.chkParam(name);
+      if (typeof v === "string" && v.length > 0) {
+        var a = v.split("/"); 
+        a[0] = a[0].trim();
+        if (a.length === 1 && v.indexOf(",") !== -1) {
+          a = v.split(",");
+        }
+        if (a[0].length > 0) period.from = a[0];
+        if (a.length === 2) {
+          a[1] = a[1].trim();
+          if (a[1].length > 0) period.to = a[1];
+          // else if (a[0].length > 0) period.to = a[0]; //TODO range query, what if no slash? should to = from?
+        }
+      }
+      return period;
+    }},
   
     _getValue: {value: function(map, key) {
       var a = this._getValues(map, key);

@@ -14,22 +14,23 @@
  */
 
 (function(){
-  
+
   gs.context.node.NodeProcessor = gs.Object.create(gs.context.Processor,{
-    
+
     newConfig: {value: function() {
       // relative to server.js
       var config = gs.Object.create(gs.config.Config).mixin({
         cswCapabilitiesFile: "../../gs/config/csw-capabilities.xml",
+        csw2CapabilitiesFile: "../../gs/config/csw2-capabilities.xml",
         opensearchDescriptionFile: "../../gs/config/opensearch-description.xml"
       });
       return config;
     }},
-    
+
     newContext: {value: function() {
       return gs.Object.create(gs.context.node.NodeContext);
     }}
-  
+
   });
 
 }());

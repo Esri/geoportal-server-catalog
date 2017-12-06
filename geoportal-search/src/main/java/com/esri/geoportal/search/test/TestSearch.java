@@ -28,6 +28,75 @@ public class TestSearch {
     }
   }
   
+  public static String makeGetRecordsXml() throws Exception {
+    StringBuilder sb = new StringBuilder();
+    sb.append("<?xml version='1.0' encoding='UTF-8'?>");
+    sb.append("<csw:GetRecords xmlns:csw='http://www.opengis.net/cat/csw/2.0.2'");
+    sb.append("  xmlns:ogc='http://www.opengis.net/ogc'");
+    sb.append("  service='CSW' resultType='RESULTS'");
+    //sb.append("  startPosition='3' maxRecords='200'");
+    sb.append(">");
+    sb.append("  <csw:Query>");
+    sb.append("    <csw:ElementSetName>summary</csw:ElementSetName>");
+    sb.append("    <csw:Constraint version='1.1.0'>");
+    sb.append("      <ogc:Filter>");
+    sb.append("        <ogc:And>");
+    
+    sb.append("          <ogc:PropertyIsGreaterThanOrEqualTo>");
+    sb.append("            <ogc:PropertyName>modified</ogc:PropertyName>");
+    sb.append("            <ogc:Literal>2017-01-06T18:27:59.878Z</ogc:Literal>");
+    sb.append("          </ogc:PropertyIsGreaterThanOrEqualTo> ");
+    
+//    sb.append("          <ogc:PropertyIsLessThanOrEqualTo>");
+//    sb.append("            <ogc:PropertyName>modified</ogc:PropertyName>");
+//    sb.append("            <ogc:Literal>2017-01-06T18:27:59.878Z</ogc:Literal>");
+//    sb.append("          </ogc:PropertyIsLessThanOrEqualTo> ");
+    
+//    sb.append("          <ogc:PropertyIsBetween>");
+//    sb.append("            <ogc:PropertyName>modified</ogc:PropertyName>");
+//    sb.append("            <ogc:LowerBoundary>2005-01-06T18:27:59.878Z</ogc:LowerBoundary>");
+//    sb.append("            <ogc:UpperBoundary>2017-01-06T18:27:59.878Z</ogc:UpperBoundary>");
+//    sb.append("          </ogc:PropertyIsBetween> ");
+    
+//    sb.append("          <ogc:PropertyIsEqualTo>");
+//    sb.append("            <ogc:PropertyName>id</ogc:PropertyName>");
+//    sb.append("            <ogc:Literal>c75e9d46ef41449690df9133f9eb418f</ogc:Literal>");
+//    sb.append("          </ogc:PropertyIsEqualTo> ");
+//    sb.append("          <ogc:PropertyIsEqualTo>");
+//    sb.append("            <ogc:PropertyName>id</ogc:PropertyName>");
+//    sb.append("            <ogc:Literal>9a38ef2afab14d8a8ef15c84acffec01</ogc:Literal>");
+//    sb.append("          </ogc:PropertyIsEqualTo> ");
+    
+//    sb.append("          <ogc:PropertyIsEqualTo>");
+//    sb.append("            <ogc:PropertyName>anytext</ogc:PropertyName>");
+//    sb.append("            <ogc:Literal>data</ogc:Literal>");
+//    sb.append("          </ogc:PropertyIsEqualTo> ");
+    
+    sb.append("          <ogc:PropertyIsLike wildCard='*' escapeChar='\\' singleChar='?'>");
+    sb.append("            <ogc:PropertyName>title</ogc:PropertyName>");
+    sb.append("            <ogc:Literal>Track</ogc:Literal>");
+    sb.append("          </ogc:PropertyIsLike> ");
+    
+    sb.append("        </ogc:And>");
+    sb.append("      </ogc:Filter>");
+    sb.append("    </csw:Constraint>");
+    
+//    sb.append("    <ogc:SortBy>");
+//    sb.append("      <ogc:SortProperty>");
+//    sb.append("        <ogc:PropertyName>title</ogc:PropertyName>");
+//    sb.append("        <ogc:SortOrder>DESC</ogc:SortOrder>");
+//    sb.append("      </ogc:SortProperty>");  
+////    sb.append("      <ogc:SortProperty>");
+////    sb.append("        <ogc:PropertyName>modified</ogc:PropertyName>");
+////    sb.append("        <ogc:SortOrder>ASC</ogc:SortOrder>");
+////    sb.append("      </ogc:SortProperty>"); 
+//    sb.append("    </ogc:SortBy>");
+ 
+    sb.append("  </csw:Query>");
+    sb.append("</csw:GetRecords>");
+    return sb.toString();
+  }
+  
   @SuppressWarnings("unused")
   public static void test1() throws Exception {
     
@@ -124,12 +193,17 @@ public class TestSearch {
     String targetc = baseUrl+"/opensearch?q=map&target=portal1&f=json";
     
     String custom1 = baseUrl+"/opensearch?target=customElastic";
-        
+    
     // csw3 csw10 os3 os6 os18
     String requestUrl = custom1;
+    
+    String body = null;
+    //body = makeGetRecordsXml();
+    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&version=2.0.2&xtarget=gptdb1";
+    
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();
-    sr.execute(hsr);
+    sr.execute(hsr,body);
   }
   
   public static void test2() throws Exception {

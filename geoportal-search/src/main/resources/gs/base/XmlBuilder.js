@@ -181,7 +181,7 @@
           sa += "=\""+doc.val.escXml(a.value)+"\"";
         });
       }
-      if (sa.length === 0) sa = " ";
+      //if (sa.length === 0) sa = " ";
       if (v === null && !hasElements) {
         doc.sbXml.append("<"+name+sa+"/>");
       } else {

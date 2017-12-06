@@ -42,7 +42,26 @@
     newStringBuilder: {value: function() {
       return gs.Object.create(gs.context.nashorn.StringBuilder).init();
     }},
-  
+    
+    newXmlInfo: {value: function(task,xmlString,nsmap) {
+      var source = new org.xml.sax.InputSource(new java.io.StringReader(xmlString));
+      var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
+      factory.setNamespaceAware(true);
+      factory.setExpandEntityReferences(false);
+      factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+      //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
+      var builder = factory.newDocumentBuilder();
+      var dom = builder.parse(source);
+      var root = dom.getDocumentElement();
+      var xpathEvaluator = gs.context.nashornUtil.newXPathEvaluator(nsmap);
+      var xmlInfo = {
+        dom: dom,
+        root: root,
+        xpathEvaluator: xpathEvaluator
+      };
+      return xmlInfo;
+    }},
+    
     readResourceFile: {value: function(path,charset) {
       return gs.context.nashornUtil.readResourceFile(path,charset);
     }},
@@ -97,6 +116,128 @@
         if (v.length === 0) v = null;
       };
       return v;
+    },
+    
+    newXPathEvaluator: function(nsmap) {
+      var key;
+      var createFunc = function(value) {
+        if (typeof value === "function") return value;
+        return function() {return value};
+      };
+      var iface = function(map) {
+        var ifaceImpl = {};
+        for (key in map) {
+          ifaceImpl[key] = createFunc(map[key]);
+        }
+        return ifaceImpl;
+      };
+      
+      //var nsContext = new gs._jvmTypes.NamespaceContext(iface({
+      var nsContext = new javax.xml.namespace.NamespaceContext(iface({
+        getNamespaceURI: function(prefix) {
+          //console.log("getNamespaceURI",prefix);
+          if (nsmap) return nsmap[prefix];
+        },
+        getPrefix: function(uri) {
+          //console.log("getPrefix",uri);
+          if (nsmap) {
+            for (key in nsmap) {
+              if (nsmap[key] === uri) return key;
+            }
+          }
+          return null;
+        },
+        getPrefixes: function(uri) {
+          //console.log("getPrefixes",uri);
+          return null;
+        }
+      }));
+      
+      var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
+      xpath.setNamespaceContext(nsContext);
+      
+      var NODETYPE_ATTRIBUTE = org.w3c.dom.Node.ATTRIBUTE_NODE;
+      var NODETYPE_ELEMENT = org.w3c.dom.Node.ELEMENT_NODE;
+      var NODETYPE_TEXT = org.w3c.dom.Node.TEXT_NODE;
+      var XPATH_NODE = javax.xml.xpath.XPathConstants.NODE;
+      var XPATH_NODESET = javax.xml.xpath.XPathConstants.NODESET;
+      var XPATH_STRING = javax.xml.xpath.XPathConstants.STRING;
+      
+      var evaluator = {
+        forEachChild: function(node,callback) {
+          var r, self = this;
+          this.getChildren(node).forEach(function(child){
+            if (callback) {
+              r =callback({
+                node: child,
+                nodeInfo: self.getNodeInfo(child),
+                nodeText: self.getNodeText(child)
+              });
+              if (r === "break") return;
+            }
+          });
+        },
+        getNode: function(contextNode,xpathExpression) {
+          return xpath.evaluate(xpathExpression,contextNode,XPATH_NODE);
+        },
+        getNodes: function(contextNode,xpathExpression) {
+          var nl = xpath.evaluate(xpathExpression,contextNode,XPATH_NODESET);
+          return this._nodeListToArray(nl);
+        },
+        getString: function(contextNode,xpathExpression) {
+          return xpath.evaluate(xpathExpression,contextNode,XPATH_STRING);
+        },
+        
+        getAttributes: function(node) {
+          if (node) {
+            return this._nodeListToArray(node.getAtrtibutes());
+          }
+          return [];
+        },
+        getChildren: function(node) {
+          if (node) {
+            return this._nodeListToArray(node.getChildNodes());
+          }
+          return [];
+        },
+        getNodeInfo: function(node) {
+          var info = {
+            node: node,
+            nodeName: node.getNodeName(),
+            localName: node.getLocalName(),
+            namespaceURI: node.getNamespaceURI(),
+            isAttributeNode: node.getNodeType() === NODETYPE_ATTRIBUTE,
+            isElementNode: node.getNodeType() === NODETYPE_ELEMENT,
+            isTextNode: node.getNodeType() === NODETYPE_TEXT
+          };
+          return info;
+        },
+        getNodeText: function(node) {
+          var v;
+          if (node) {
+            if (node.getNodeType() === 1) {
+              v = node.getTextContent();
+              if (typeof v === "string") v = v.trim();
+            } else {
+              v = node.getNodeValue();
+            }
+            if (typeof v === "string") {
+              return v;
+            }
+          }
+          return null;
+        },
+        _nodeListToArray: function(nl) {
+          var i, a = [];
+          if (nl) {
+            for (i = 0; i < nl.getLength(); i++) {
+              a.push(nl.item(i));
+            }
+          }
+          return a;
+        }
+      };
+      return evaluator;
     },
     
     readResourceFile: function(path,charset) {
@@ -188,7 +329,7 @@
           sw.write(buffer,0,nRead); // TODO comment out this line and Invalid JSON: <json>:1:0 Expected json literal but found eof
         }
         result = sw.toString();
-        //console.warn("result",result);
+        //console.log("result",result);
       } catch(e) {
         print(e); // TODO printStackTrace
       } finally{

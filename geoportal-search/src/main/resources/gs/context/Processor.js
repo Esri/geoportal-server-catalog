@@ -113,6 +113,7 @@
     makeRequest: {value: function(requestInfo) {
       var request = gs.Object.create(gs.base.Request).mixin({
         url: requestInfo.requestUrl,
+        body: requestInfo.requestBody,
         headerMap: requestInfo.headerMap,
         parameterMap: requestInfo.parameterMap,
       });
@@ -181,7 +182,7 @@
     
     makeTargets: {value: function(context,config,request) {
       var self = this, o, target, targets = [];
-      var cfgTargets = config.makeTargets() || {};
+      var cfgTargets = config.getTargets() || {};
       var values = request.getParameterValues("target");
       if (values === null || values.length === 0) {
         values = request.getParameterValues("targets");
@@ -215,6 +216,7 @@
         requestInfo = JSON.parse(sRequestInfo); 
         request = gs.Object.create(gs.base.Request).mixin({
           url: requestInfo.requestUrl,
+          body: requestInfo.requestBody,
           headerMap: requestInfo.headerMap,
           parameterMap: requestInfo.parameterMap,
         });

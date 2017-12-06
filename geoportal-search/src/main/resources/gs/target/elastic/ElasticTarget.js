@@ -93,12 +93,17 @@
         }});
       }
       
+      var timePeriod = task.request.getTimePeriod();
+      var timePeriodInfo = this.schema.timePeriodInfo;
+      var modifiedPeriod = task.request.getModifiedPeriod();
+      var modifiedPeriodInfo = this.schema.modifiedPeriodInfo;
+      
+      
       this.parseRequestId(task,searchCriteria,musts);
       this.parseRequestBBox(task,searchCriteria,musts);
-      this.parseRequestTimePeriod(task,searchCriteria,musts);
+      this.parseRequestPeriod(task,searchCriteria,musts,timePeriod,timePeriodInfo);
+      this.parseRequestPeriod(task,searchCriteria,musts,modifiedPeriod,modifiedPeriodInfo);
       this.parseRequestSort(task,searchCriteria,musts);
-      
-      // temporal extent, date queries?
       
       if (musts.length > 0) {
         searchCriteria["query"] = {"bool":{"must":musts}};
@@ -171,76 +176,26 @@
       }
     }},
     
-    parseRequestSort: {value:function(task,searchCriteria,musts) {
-      var sortables = this.schema.sortables;
-      if (!sortables) return;
-      
-      var getField = function(v) {
-        v = v.toLowerCase();
-        for (var k in sortables) {
-          if (sortables.hasOwnProperty(k)) {
-            if (v === k.toLowerCase()) {
-              return sortables[k];
-              break;
-            }
-          }
-        }
-        return null;
-      };
-   
-      // TODO sort is target specific?? sort by title, owner, date??
-      var sort = [], sortField, sortOrder, sortOption;
-      var sortParams = task.request.getParameterValues("sort");
-      if (sortParams !== null && sortParams.length === 1) {
-        sortParams = sortParams[0].split(",");
-      }    
-      if (sortParams !== null && sortParams.length > 0) {
-        sortParams.forEach(function(sortParam){
-          var idx = sortParam.lastIndexOf(":");
-          if (idx !== -1) {
-            sortField = getField(sortParam.substring(0,idx));
-            if (typeof sortField === "string" && sortField.length > 0) {
-              sortOrder = sortParam.substring(idx + 1);
-              sortOption = {};
-              if (sortOrder === "desc") sortOption[sortField] = "desc";
-              else sortOption[sortField] = "asc";
-              sort.push(sortOption);
-            }
-          } else {
-            sortField = getField(sortParam);
-            if (typeof sortField === "string" && sortField.length > 0) {
-              sort.push(sortField);
-            }
-          }
-        });
-      }
-      if (sort.length > 0) {
-        searchCriteria["sort"] = sort;
-      }
-    }},
-    
-    parseRequestTimePeriod: {value:function(task,searchCriteria,musts) {
-      var timePeriodInfo = this.schema.timePeriodInfo;
-      if (!timePeriodInfo) return;
+    parseRequestPeriod: {value:function(task,searchCriteria,musts,period,periodInfo) {
+      if (!periodInfo) return;
       
       var isV5Plus = this.schema.isVersion5Plus;
       var fieldsOperator = "must";
-      var field = timePeriodInfo.field;
-      var toField = timePeriodInfo.toField;
-      var nestedPath = timePeriodInfo.nestedPath;
+      var field = periodInfo.field;
+      var toField = periodInfo.toField;
+      var nestedPath = periodInfo.nestedPath;
       
-      var timePeriod = task.request.getTimePeriod();
-      var from = timePeriod.from, to = timePeriod.to;
+      var from = period.from, to = period.to;
       if (from === "*") from = null;
       if (to === "*") to = null;
-      var hasTime = (from !== null || to !== null);
+      var hasValue = (from !== null || to !== null);
   
       var hasField = (typeof field === "string" && field.length > 0);
       var hasToField = (typeof toField === "string" && toField.length > 0);
       var isNested = (typeof nestedPath === "string" && nestedPath.length > 0);
       var query = null, condition = null, qFrom, qTo, qNested;
       
-      if (hasTime && hasField) {
+      if (hasValue && hasField) {
           
         if (hasToField) {
           if (from !== null) {
@@ -313,6 +268,71 @@
       
       if (query !== null) musts.push(query);
     }},
+    
+    parseRequestSort: {value:function(task,searchCriteria,musts) {
+      var sortables = this.schema.sortables;
+      if (!sortables) return;
+      
+      var getField = function(v) {
+        v = v.toLowerCase();
+        for (var k in sortables) {
+          if (sortables.hasOwnProperty(k)) {
+            if (v === k.toLowerCase()) {
+              return sortables[k];
+              break;
+            }
+          }
+        }
+        return null;
+      };
+   
+      var sort = [], sortField, sortOrder, sortOption;
+      var sortParams = task.request.getParameterValues("sort");
+      if (sortParams !== null && sortParams.length === 1) {
+        sortParams = sortParams[0].split(",");
+      }
+      if (sortParams !== null && sortParams.length > 0) {
+        sortParams.forEach(function(sortParam){
+          var idx = sortParam.lastIndexOf(":");
+          if (idx !== -1) {
+            sortField = getField(sortParam.substring(0,idx));
+            if (typeof sortField === "string" && sortField.length > 0) {
+              sortOrder = sortParam.substring(idx + 1);
+              sortOption = {};
+              if (sortOrder === "desc") sortOption[sortField] = "desc";
+              else sortOption[sortField] = "asc";
+              sort.push(sortOption);
+            }
+          } else {
+            sortField = getField(sortParam);
+            if (typeof sortField === "string" && sortField.length > 0) {
+              sort.push(sortField);
+            }
+          }
+        });
+      } else {
+        sortField = task.request.chkParam("sortField");
+        sortOrder = task.request.chkParam("sortOrder");
+        if (typeof sortField === "string" && sortField.length > 0) {
+          sortField = getField(sortField);
+        }
+        if (typeof sortField === "string" && sortField.length > 0) {
+          if (typeof sortOrder === "string" && 
+            (sortOrder.trim().toLowerCase() === "asc" || sortOrder.trim().toLowerCase() === "desc")){
+            sortOption = {};
+            sortOption[sortField] = sortOrder.trim().toLowerCase();
+            sort.push(sortOption);
+          } else {
+            sort.push(sortField);
+          }
+        }
+      }
+      if (sort.length > 0) {
+        searchCriteria["sort"] = sort;
+      }
+    }},
+    
+
       
     search: {value:function(task) {
       var i, data = null;
@@ -322,6 +342,7 @@
         data = JSON.stringify(this.searchCriteria);
         if (task.verbose) console.log(data);
       }
+      if (task.verbose) console.log("sending url:",url,"data:",data);
       
       var promise = task.context.newPromise();
       var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);

@@ -99,10 +99,15 @@
     }},
   
     _addNamespaces: {value: function(task,xmlBuilder) {
-      xmlBuilder.writeNamespace("csw",task.uris.URI_CSW);
+      if (task.isCsw2) {
+        xmlBuilder.writeNamespace("csw","http://www.opengis.net/cat/csw/2.0.2");
+        xmlBuilder.writeNamespace("ows","http://www.opengis.net/ows");
+      } else {
+        xmlBuilder.writeNamespace("csw",task.uris.URI_CSW);
+        xmlBuilder.writeNamespace("ows",task.uris.URI_OWS);
+      }
       xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("dct",task.uris.URI_DCT);
-      xmlBuilder.writeNamespace("ows",task.uris.URI_OWS);
     }},
   
     _marshallOptions: {value: function(task,options) {
@@ -132,6 +137,7 @@
       if (typeof entry.title === "string" && entry.title.length > 0) {
         title = entry.title;
       }
+      //if (task.verbose) console.log("title",title);
   
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);

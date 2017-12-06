@@ -23,6 +23,7 @@
     context: {writable: true, value: null},
     dfd: {writable: true, value: null},
     hasError: {writable: true, value: false},
+    isCsw2: {writable: true, value: false},
     provider: {writable: true, value: null},
     request: {writable: true, value: null},
     response: {writable: true, value: null},
