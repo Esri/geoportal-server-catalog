@@ -48,7 +48,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private ApplicationContext applicationContext;
   private ElasticContext elasticContext;
   private HarvesterContext harvesterContext;
-  private String version = "2.5.1";
+  private String version = "2.5.2";
   
   /** Constructor */
   public GeoportalContext() {}
