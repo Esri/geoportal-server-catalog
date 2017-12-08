@@ -332,8 +332,6 @@
       }
     }},
     
-
-      
     search: {value:function(task) {
       var i, data = null;
       var url = this.searchUrl;

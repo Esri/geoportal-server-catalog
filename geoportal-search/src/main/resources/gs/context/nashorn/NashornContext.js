@@ -76,9 +76,9 @@
         if (task.async) {
           new java.lang.Thread(function() {
             try {
-              if (task.verbose) console.warn("NashornContext sendHttpRequest.async");
+              if (task.verbose) console.log("NashornContext sendHttpRequest.async");
               result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType);
-              if (task.verbose) console.warn("NashornContext sendHttpRequest.async resolved",url);
+              if (task.verbose) console.log("NashornContext sendHttpRequest.async resolved",url);
               //print(typeof result, result.length);
               promise.resolve(result);
             } catch(err2) {
@@ -332,6 +332,7 @@
         //console.log("result",result);
       } catch(e) {
         print(e); // TODO printStackTrace
+        throw new Error(e.toString());
       } finally{
         try {if (wr !== null) wr.close();} catch(ef) {print(ef);}
         try {if (br !== null) br.close();} catch(ef) {print(ef);}

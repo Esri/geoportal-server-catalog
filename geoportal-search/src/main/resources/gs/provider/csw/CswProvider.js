@@ -290,7 +290,7 @@
       var str = "", url = task.request.url;
       var n = url.indexOf("?");
       if (n !== -1) str = url.substring(n + 1);
-      //console.warn("str",str);
+      //console.log("str",str);
 
       var i, l, qp = str.split("&"), map = {}, name, val, item;
       for (i = 0, l = qp.length; i < l; ++i){
@@ -335,8 +335,8 @@
 
       var qstr = pairs.join("&");
       if (qstr.length > 0) cswUrl = cswUrl + "?" + qstr;
-      //console.warn("qstr",qstr);
-      //console.warn("cswUrl",cswUrl);
+      //console.log("qstr",qstr);
+      //console.log("cswUrl",cswUrl);
 
       return cswUrl;
     }},
@@ -575,7 +575,6 @@
         promise.reject();
       });
       return promise;
-
     }}
 
   });
@@ -615,7 +614,6 @@
   /* ============================================================================================ */
 
   gs.provider.csw.QFields = gs.Object.create(gs.Proto,{
-
 
     list: {writable: true, value: null},
 

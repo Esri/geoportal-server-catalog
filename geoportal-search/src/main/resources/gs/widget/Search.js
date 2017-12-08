@@ -41,7 +41,7 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
       }));
       gs.reqAll(localRequire,function(){
         self._wasLoaded = true;
-        //console.warn("Search._wasLoaded",self._wasLoaded);
+        //console.log("Search._wasLoaded",self._wasLoaded);
       });
     },
     
@@ -80,19 +80,19 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
         "headerMap": {},
         "parameterMap": parameterMap
       };
-      console.warn("parameterMap",parameterMap);
+      console.log("parameterMap",parameterMap);
 
       var processor = gs.Object.create(gs.context.browser.WebProcessor);
-      processor.execute(requestInfo,function(status,mediaType,entity,task){
+      processor.execute(requestInfo,function(status,mediaType,entity,headers){
         //console.log(status,mediaType,"\r\n",entity);
         textarea.value = entity;
         self.informExternal(entity);
         
         try {
-          //console.warn("entity",typeof entity,entity);
+          //console.log("entity",typeof entity,entity);
           // TODO errors?
           var result = JSON.parse(entity);
-          //console.warn("result",result);
+          //console.log("result",result);
           self.processResult(result);
         } catch(ex) {
           console.error(ex);
@@ -140,7 +140,7 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
       };
       //requestInfo.requestUrl = "http://www.geoportal.com/geoportal/opensearch/description";
       var processor = gs.Object.create(gs.context.browser.WebProcessor);
-      processor.execute(requestInfo,function(status,mediaType,entity,task){
+      processor.execute(requestInfo,function(status,mediaType,entity,headers){
         //console.log(status,mediaType,"\r\n",entity);
         textarea.value = entity;
         inform(entity);

@@ -20,6 +20,7 @@
     MediaType_APPLICATION_ATOM_XML: {writable: true, value: "application/atom+xml"},
     MediaType_APPLICATION_JSON: {writable: true, value: "application/json"},
     MediaType_APPLICATION_XML: {writable: true, value: "application/xml"},
+    MediaType_TEXT_CSV: {writable: true, value: "text/csv"},
     MediaType_TEXT_PLAIN: {writable: true, value: "text/plain"},
     MediaType_TEXT_XML: {writable: true, value: "text/xml"},
     
@@ -29,8 +30,17 @@
     Status_OK: {writable: true, value: 200},
   
     entity: {writable: true, value: null},
+    headers: {writable: true, value: null},
     mediaType: {writable: true, value: null},
     status: {writable: true, value: null},
+    
+    addHeader: {value: function(name,value) {
+      if (!this.headers) this.headers= [];
+      this.headers.push({
+        name: name,
+        value: value
+      });
+    }},
   
     put: {value: function(status,mediaType,entity) {
       this.status = status;

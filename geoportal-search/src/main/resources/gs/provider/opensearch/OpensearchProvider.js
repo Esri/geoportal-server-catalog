@@ -87,15 +87,7 @@
         task.writer.write(task,searchResult);
         promise.resolve();
       })["catch"](function(error){
-        var msg = "Search error";
-        if (typeof error.message === "string" && error.message.length > 0) {
-          msg = error.message;
-        }
-        // TODO JSON?
-        var response = task.response;
-        response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_TEXT_PLAIN,msg);
-        task.hasError = true;
-        promise.reject();
+        promise.reject(error);
       });
       return promise;
     }}

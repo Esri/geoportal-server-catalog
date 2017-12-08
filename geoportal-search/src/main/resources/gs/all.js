@@ -65,7 +65,11 @@
       "writer/Writer",
       "writer/AtomWriter",
       "writer/CswWriter",
-      "writer/JsonWriter"
+      "writer/JsonWriter",
+      "writer/CsvWriter"
+      /*"writer/ErosWriter",
+      "writer/KmlWriter",
+      "writer/RssWriter"*/
     ],
     nashorn: [
       "context/nashorn/NashornContext",
