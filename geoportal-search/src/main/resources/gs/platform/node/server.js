@@ -72,7 +72,7 @@ function execute(req, res, parameterMap) {
   };
   //console.log("Processing request:",requestInfo);
   var processor = gs.Object.create(gs.context.node.NodeProcessor);
-  processor.execute(requestInfo,function(status,mediaType,entity,task){
+  processor.execute(requestInfo,function(status,mediaType,entity,headers){
     res.status(status);
     res.set("Content-Type",mediaType);
     res.send(entity);

@@ -20,28 +20,44 @@ load("classpath:gs/all.js");
 
 /* entry-point from the JVM */
 function execute(nhRequest,sRequestInfo) {
-  
-  var requestInfo = JSON.parse(sRequestInfo);
-  //requestInfo.taskOptions.verbose = true;
-  
-  // to override the base URL if you have a reverse proxy
-  //requestInfo.baseUrl = "https://www.geoportal.com/geoportal";
-  
-  var processor = gs.Object.create(gs.context.nashorn.NashornProcessor).mixin({
-    newConfig: function() {
-      var config = gs.Object.create(gs.config.Config);
-      if (requestInfo.geoportalElasticsearchUrl) {
-        var targets = config.getTargets();
-        targets["self"] = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
-          "searchUrl": requestInfo.geoportalElasticsearchUrl
-        });
-        config.defaultTarget = "self";
+  try {
+    var requestInfo = JSON.parse(sRequestInfo);
+    //requestInfo.taskOptions.verbose = true;
+    
+    // to override the base URL if you have a reverse proxy
+    //requestInfo.baseUrl = "https://www.geoportal.com/geoportal";
+    
+    var processor = gs.Object.create(gs.context.nashorn.NashornProcessor).mixin({
+      newConfig: function() {
+        var config = gs.Object.create(gs.config.Config);
+        if (requestInfo.geoportalElasticsearchUrl) {
+          var targets = config.getTargets();
+          targets["self"] = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
+            "searchUrl": requestInfo.geoportalElasticsearchUrl
+          });
+          config.defaultTarget = "self";
+        }
+        return config;
       }
-      return config;
-    }
-  });
+    });
   
-  processor.execute(requestInfo,function(status,mediaType,entity,task){
-    nhRequest.putResponse(status,mediaType,entity);
-  });
+    processor.execute(requestInfo,function(status,mediaType,entity,headers){
+      var hm = null;
+      if (Array.isArray(headers) && headers.length > 0) {
+        hm = new java.util.HashMap();
+        headers.forEach(function(header){
+          hm.put(header.name,header.value);
+        });
+      }
+      nhRequest.putResponse(status,mediaType,entity,hm);
+    });
+    
+  } catch(error) {
+    // TODO include the error message in the json response?
+    print("Error processing request.");
+    print(error);
+    var msg = "{\"error\": \"Error processing request.\"}";
+    nhRequest.putResponse(500,"application/json",msg,null);
+  }
+
 }

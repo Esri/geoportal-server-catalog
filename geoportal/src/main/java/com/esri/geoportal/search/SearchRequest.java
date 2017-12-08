@@ -36,6 +36,7 @@ import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
 public class SearchRequest {
@@ -232,7 +233,7 @@ public class SearchRequest {
       }
       JsonObjectBuilder info = Json.createObjectBuilder();
       info.add("requestUrl",url);
-      if (body ==null) info.addNull("requestBody");
+      if (body == null) info.addNull("requestBody");
       else info.add("requestBody",body);
       info.add("baseUrl",this.getBaseUrl(hsr));
       info.add("headerMap",this.getHeaderMap(hsr));
@@ -253,7 +254,7 @@ public class SearchRequest {
     } catch (Throwable t) {
       t.printStackTrace();
       String msg = "{\"error\": \"Error processing request.\"}";
-      putResponse(500,MediaType.APPLICATION_JSON,msg);
+      putResponse(500,MediaType.APPLICATION_JSON,msg,null);
     }
   }
   
@@ -263,12 +264,18 @@ public class SearchRequest {
    * @param mediaType the media type 
    * @param entity the response body
    */
-  public void putResponse(int status, String mediaType, String entity) {
+  public void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
     //System.err.println(entity);
     //System.err.println(entity.substring(0,1000));
     Status rStatus = Status.fromStatusCode(status);
     MediaType rMediaType = MediaType.valueOf(mediaType).withCharset("UTF-8");
-    this.response = Response.status(rStatus).entity(entity).type(rMediaType).build();
+    ResponseBuilder r = Response.status(rStatus).entity(entity).type(rMediaType);
+    if (headers != null) {
+      for (Map.Entry<String,String> entry: headers.entrySet()) {
+        r.header(entry.getKey(),entry.getValue());
+      }
+    }
+    this.response = r.build();
     if (this.asyncResponse != null) {
       this.asyncResponse.resume(this.response);
     }

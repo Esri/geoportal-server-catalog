@@ -25,7 +25,10 @@
       return gs.Object.create(gs.context.Counter);
     }},
     
-    newPromise: {value: function() {
+    newPromise: {value: function(name) {
+      if (typeof name === "string") {
+        return gs.Object.create(gs.context.SimplePromise).mixin({name: name});
+      }
       return gs.Object.create(gs.context.SimplePromise);
     }},
     
@@ -78,6 +81,7 @@
   gs.context.SimplePromise = gs.Object.create(gs.Proto,{
     
     isSimplePromise: {writable: true, value: true},
+    name: {writable: true, value: null},
     
     _callbacks: {writable: true, value: null},
     _errbacks: {writable: true, value: null},
@@ -85,6 +89,7 @@
     _result: {writable: true, value: null},
     _error: {writable: true, value: null},
     
+    _wasResolveCalled: {writable: true, value: false},
     _wasResolved: {writable: true, value: false},
     _wasRejected: {writable: true, value: false},
     _wasFulfilled: {writable: true, value: false},
@@ -128,7 +133,10 @@
     "catch": {value: function(errback) {
       if (!this._errbacks) this._errbacks = [];
       this._errbacks.push(errback);
-      this._checkErrback();
+      if (this._wasRejected) {
+        errback(this._error);
+      }
+      //this._checkErrback();
       return this;
     }},
     
@@ -145,40 +153,53 @@
     }},
     
     resolve: {value: function(result) {
+      this._wasResolveCalled = true;
       if (!this._wasFulfilled) {
         this._wasFulfilled = this._wasResolved = true;
         this._result = result;
-        this._checkCallback();
+        this._checkCallback(this._result);
       }
     }},
     
     then: {value: function(callback,errback) {
       if (!this._callbacks) this._callbacks = [];
       this._callbacks.push(callback);
-      this._checkCallback();
       if (errback) this["catch"](errback);
+      this._checkCallback(this._result);
       return this;
     }},
     
-    _checkCallback: {value: function() {
+    _checkCallback: {value: function(result) {
       if (this._wasResolved && this._callbacks && this._callbacks.length > 0) {
-        var self = this, result = this._result, callback;
+        var self = this, callback;
         while (this._callbacks.length > 0) {
           callback = this._callbacks.shift();
-          //console.warn("cb",typeof result);
-          var obj = callback(result);
+          var obj; 
+          try {
+            obj = callback(result);
+          } catch(ex) {
+            //console.log("Auto rejecting promise",ex); // TODO
+            self._wasResolved = self._wasFulfilled = false; // TODO??
+            self.reject(ex);
+            break; // TODO flag the stop?
+          }
           if (typeof obj !== "undefined" && obj !== self) {
             if (typeof obj === "object" && obj !== null && obj.isSimplePromise) {
               // chain
-              self._result = null;
+              //self._result = null;
               self._error = null;
               self._wasResolved = false;
               self._wasRejected = false;
               self._wasFulfilled = false;
               obj.then(function(result2){
-                self.resolve(result2);
+                self._wasResolved = self._wasFulfilled = true;
+                self._checkCallback(result2)
               })["catch"](function(error2){
-                self.reject(error2);
+                if (obj._wasResolveCalled) {
+                  self.resolve(obj._result);  // TODO??
+                  //self._wasResolved = self._wasFulfilled = true;
+                  //self._checkCallback(obj._result)
+                }
               });
               break;
             } else {
