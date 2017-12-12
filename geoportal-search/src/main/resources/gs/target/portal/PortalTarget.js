@@ -53,10 +53,10 @@
       var urlParams = {"f": "json"};
       var qAll = "modified:[0000000000000000000 TO 9999999999999999999]";
       
-      var q = task.request.chkParam("q");
+      var q = task.request.getQ();
       if (q === "*" || q === "*:*") q = qAll;
       
-      var orgid = task.request.chkParam("orgid");
+      var orgid = task.request.getOrgId();
       if (typeof orgid === "string" && orgid.length > 0) {
         if (orgid.indexOf("orgid:") !== 0) {
           orgid = "orgid:"+orgid;
@@ -65,7 +65,7 @@
       
       this.appendQ(urlParams,q);
       this.appendQ(urlParams,orgid);
-      this.appendQ(urlParams,task.request.chkParam("filter"));
+      this.appendQ(urlParams,task.request.getFilter());
       this.appendQ(urlParams,this.requiredFilter);
       this.parseRequestId(task,urlParams);
       this.parseRequestPeriod(task,urlParams);
@@ -84,7 +84,7 @@
         urlParams["num"] = size;
       } 
       
-      var bbox = task.request.chkParam("bbox");
+      var bbox = task.request.getBBox();
       if (typeof bbox === "string" && bbox.length > 0) {
         urlParams["bbox"] = bbox;
       } else if (typeof urlParams.q !== "string" || urlParams.q.length === 0) {
@@ -144,12 +144,10 @@
     
     parseRequestSort: {value:function(task,urlParams) {
       // TODO sort is target specific?? sort by title, owner, date??
-      var sortField = task.request.chkParam("sortField");
-      var sortOrder = task.request.chkParam("sortOrder"); // asc/desc
-
+      var sortField, sortOrder;
       
       var sortField, sortOrder;
-      var sortParams = task.request.getParameterValues("sort");
+      var sortParams = task.request.getSort();
       if (sortParams !== null && sortParams.length === 1) {
         var sortParam = sortParams[0];
         var idx = sortParam.lastIndexOf(":");
@@ -159,8 +157,8 @@
         } else {
         }
       } else {
-        sortField = task.request.chkParam("sortField");
-        sortOrder = task.request.chkParam("sortOrder"); // asc/desc
+        sortField = task.request.getSortField();
+        sortOrder = task.request.getSortOrder(); // asc/desc
       }
       if (typeof sortField === "string" && sortField.length > 0) {
         urlParams["sortField"] = sortField;

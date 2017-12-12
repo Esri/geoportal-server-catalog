@@ -71,6 +71,7 @@
       if (typeof url === "string" && url.length > 0) {
         links.push(gs.Object.create(gs.atom.Link).init({
           rel: "related", // TODO?
+          type: item["type"], // TODO?
           href: url
         }));
       }

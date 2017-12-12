@@ -72,8 +72,8 @@
     }},
     
     buildAtomLinks: {value: function(task,item) {
-      var links = [];
-      var id = item["_id"];
+      var links = [], serviceType, url;
+      var id = item["_id"], source = item["_source"];
       
       var searchUrl, baseUrl, idx;
       if (task.target && task.target.searchUrl) {
@@ -106,7 +106,25 @@
         }
       }
       
-      // TODO var resources = source["resources_nst"];
+      var resources = source["resources_nst"];
+      if (!Array.isArray(resources)) resources = [resources];
+      resources.forEach(function(resource){
+        if (resource) {
+          url = task.val.chkStr(resource.url_s);
+          //console.log(resource.url_type_s,resource.url_s);
+          if (url !== null && url.length > 0) {
+            serviceType = task.val.chkStr(resource.url_type_s);
+            if (serviceType === null || serviceType.length === 0) {
+              serviceType = ""; // TODO?
+            }
+            links.push(gs.Object.create(gs.atom.Link).init({
+              rel: "related", // TODO?
+              type: serviceType, // TODO?
+              href: url
+            }));
+          }
+        }
+      });
 
       return links;
     }},

@@ -201,6 +201,9 @@ public class TestSearch {
     //body = makeGetRecordsXml();
     requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&version=2.0.2&target=gptdb1&f=csv&q=data";
     requestUrl = baseUrl+"/opensearch?target=gptdb1&f=csv&q=data";
+    requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&qq=map&size=10&xpretty=true";
+    //requestUrl = baseUrl+"/opensearch/description?f=eros";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=eros&q=type:\"Feature Service\"&size=10&xpretty=true";
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();

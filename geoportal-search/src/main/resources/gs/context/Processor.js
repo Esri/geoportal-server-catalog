@@ -112,13 +112,7 @@
     makeTargets: {value: function(context,config,request) {
       var self = this, o, target, targets = [];
       var cfgTargets = config.getTargets() || {};
-      var values = request.getParameterValues("target");
-      if (values === null || values.length === 0) {
-        values = request.getParameterValues("targets");
-      }
-      if (values !== null && values.length === 1) {
-        //values = values[0].split(","); // TODO???
-      }
+      var values = request.getTargets();
       if (values !== null) {
         values.forEach(function(v){
           self._checkTarget(v,cfgTargets,targets,config);
@@ -179,9 +173,9 @@
       index(writers,csw,gs.Object.create(gs.writer.CswWriter));
       index(writers,json,gs.Object.create(gs.writer.JsonWriter));
       index(writers,csv,gs.Object.create(gs.writer.CsvWriter));
-      //index(writers,eros,gs.Object.create(gs.writer.ErosWriter));
-      //index(writers,kml,gs.Object.create(gs.writer.KmlWriter));
-      //index(writers,rss,gs.Object.create(gs.writer.RssWriter));
+      index(writers,eros,gs.Object.create(gs.writer.ErosWriter));
+      index(writers,kml,gs.Object.create(gs.writer.KmlWriter));
+      index(writers,rss,gs.Object.create(gs.writer.RssWriter));
       
       return writers;
     }},

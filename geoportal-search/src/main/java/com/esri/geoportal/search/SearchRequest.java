@@ -268,7 +268,7 @@ public class SearchRequest {
    * @param entity the response body
    */
   public void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
-    System.err.println(entity);
+    //System.err.println(entity);
     //System.err.println(entity.substring(0,1000));
     Status rStatus = Status.fromStatusCode(status);
     MediaType rMediaType = MediaType.valueOf(mediaType).withCharset("UTF-8");

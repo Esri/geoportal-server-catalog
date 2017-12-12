@@ -34,8 +34,6 @@
         this.schema = this.newSchema(task);
       }
       
-      // q=&id=&from=&size=&bbox=&spatialRel=&time=&filter=&pretty=
-      
       var searchCriteria = {};
       var qAll = "*:*";
       
@@ -58,7 +56,7 @@
         searchCriteria["size"] = size;
       } 
       
-      var q = task.request.chkParam("q");
+      var q = task.request.getQ();
       if (typeof q === "string" && q.length > 0) {
         var analyze_wildcard = task.request.chkBoolParam("analyze_wildcard",false);
         var lenient = task.request.chkBoolParam("lenient",false);
@@ -77,7 +75,7 @@
         }
       }
       
-      var filter = task.request.chkParam("filter");
+      var filter = task.request.getFilter();
       if (typeof filter === "string" && filter.length > 0) {
         musts.push({"query_string": {
           "analyze_wildcard": true,
@@ -127,14 +125,14 @@
       var hasField = (typeof field === "string" && field.length > 0);
       
       var coords = null, query = null, field, rel;
-      var bbox = task.request.chkParam("bbox");
+      var bbox = task.request.getBBox();
       if (typeof bbox === "string" && bbox.length > 0) {
         coords = bbox.split(","); 
       }
   
       if (hasField && Array.isArray(coords) && coords.length > 3) {
         if (spatialInfo.type === "geo_shape") {
-          rel = task.request.chkParam("spatialRel");
+          rel = task.request.getSpatialRel();
           if (typeof rel === "string" && rel.length > 0) {
             rel = rel.toLowerCase();
             if (rel === "intersects" || rel === "within" || 
@@ -287,7 +285,7 @@
       };
    
       var sort = [], sortField, sortOrder, sortOption;
-      var sortParams = task.request.getParameterValues("sort");
+      var sortParams = task.request.getSort();
       if (sortParams !== null && sortParams.length === 1) {
         sortParams = sortParams[0].split(",");
       }
@@ -311,8 +309,8 @@
           }
         });
       } else {
-        sortField = task.request.chkParam("sortField");
-        sortOrder = task.request.chkParam("sortOrder");
+        sortField = task.request.getSortField();
+        sortOrder = task.request.getSortOrder(); // asc/desc
         if (typeof sortField === "string" && sortField.length > 0) {
           sortField = getField(sortField);
         }
@@ -340,6 +338,7 @@
         data = JSON.stringify(this.searchCriteria);
         if (task.verbose) console.log(data);
       }
+      task.verbose = true;
       if (task.verbose) console.log("sending url:",url,"data:",data);
       
       var promise = task.context.newPromise();

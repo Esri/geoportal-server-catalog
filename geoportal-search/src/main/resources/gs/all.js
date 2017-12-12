@@ -63,13 +63,14 @@
       "target/portal/PortalTarget",
       "target/portal/PortalSchema",
       "writer/Writer",
+      "writer/XmlWriter",
       "writer/AtomWriter",
       "writer/CswWriter",
       "writer/JsonWriter",
-      "writer/CsvWriter"
-      /*"writer/ErosWriter",
+      "writer/CsvWriter",
+      "writer/ErosWriter",
       "writer/KmlWriter",
-      "writer/RssWriter"*/
+      "writer/RssWriter"
     ],
     nashorn: [
       "context/nashorn/NashornContext",

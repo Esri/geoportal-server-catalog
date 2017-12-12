@@ -54,7 +54,8 @@
     
     writeCharacters: {value: function(value) {
       if (value === null) return;
-      this.activeElement.value = value;
+      if (typeof this.activeElement.value !== "string") this.activeElement.value = "";
+      this.activeElement.value += value;
     }},
     
     writeElement: {value: function(namespaceURI, localName, value) {
