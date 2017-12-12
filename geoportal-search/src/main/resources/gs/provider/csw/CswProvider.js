@@ -35,7 +35,7 @@
     chkBBoxParam: {value: function(task) {
       if (task.hasError) return;
       var msg, ows;
-      var bbox = this.chkParam(task,"bbox");
+      var bbox = task.request.getBBox();
       if (bbox === null || bbox.length === 0) return;
       var a = bbox.split(",");
       if (a.length === 5) {

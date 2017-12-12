@@ -19,6 +19,8 @@
   
     MediaType_APPLICATION_ATOM_XML: {writable: true, value: "application/atom+xml"},
     MediaType_APPLICATION_JSON: {writable: true, value: "application/json"},
+    MediaType_APPLICATION_KML_XML: {writable: true, value: "application/vnd.google-earth.kml+xml"},
+    MediaType_APPLICATION_RSS_XML: {writable: true, value: "application/rss+xml"},
     MediaType_APPLICATION_XML: {writable: true, value: "application/xml"},
     MediaType_TEXT_CSV: {writable: true, value: "text/csv"},
     MediaType_TEXT_PLAIN: {writable: true, value: "text/plain"},

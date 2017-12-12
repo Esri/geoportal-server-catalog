@@ -30,6 +30,8 @@
   /* ============================================================================================== */
   
   gs.context.nashorn.NashornContext = gs.Object.create(gs.context.Context,{
+    
+    isNashorn: {writable: true, value: true},
   
     indentXml: {value: function(task,xml) {
       return gs.context.nashornUtil.indentXml(xml);

@@ -18,33 +18,32 @@
   gs.writer.CsvWriter = gs.Object.create(gs.writer.Writer,{
   
     write: {value: function(task,searchResult) {
-      //task.request.isItemByIdRequest = true;
       if (task.request.isItemByIdRequest) {
         if (!searchResult.items || searchResult.items.length === 0) {
           // TODO send JSON
           task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
         } else {
-          this._writeItems(task,searchResult);
+          this.writeItems(task,searchResult);
         }
       } else {
-        this._writeItems(task,searchResult);
+        this.writeItems(task,searchResult);
       }
     }},
     
     /* .......................................................................................... */
     
-    _esc: {value: function(v) {
+    esc: {value: function(v) {
       if (typeof v !== "string") return v;
       v = v.replace(/"/g,'""');
       if (v.search(/("|,|\n)/g) >= 0) v = "\""+v+"\"";
       return v;
     }},
   
-    _writeEntry: {value: function(task,stringBuilder,item,options) {
+    writeEntry: {value: function(task,stringBuilder,item,options) {
       var entry = task.target.itemToAtomEntry(task,item);
       
       var id = entry.id;
-      var title = "Empty";
+      var title = "Untitled";
       var description = "";
       var updated = options.now;
       if (typeof entry.title === "string" && entry.title.length > 0) {
@@ -59,9 +58,9 @@
         updated = entry.published;
       }
       
-      var line = this._esc(id);
-      line += ","+this._esc(title);
-      line += ","+this._esc(description);
+      var line = this.esc(id);
+      line += ","+this.esc(title);
+      line += ","+this.esc(description);
       
       var xmin = "", ymin = "", xmax = "", ymax = "";
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
@@ -89,16 +88,16 @@
         }
         //console.log("link.rel",link.rel,link.href);
       });
-      line += ","+this._esc(xmlLink);
-      line += ","+this._esc(urls[0]);
-      line += ","+this._esc(urls[1]);
-      line += ","+this._esc(urls[2]);
-      line += ","+this._esc(urls[3]);
+      line += ","+this.esc(xmlLink);
+      line += ","+this.esc(urls[0]);
+      line += ","+this.esc(urls[1]);
+      line += ","+this.esc(urls[2]);
+      line += ","+this.esc(urls[3]);
       
       stringBuilder.append(options.NL).append(line);
     }},
     
-    _writeItems: {value: function(task,searchResult) {
+    writeItems: {value: function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, NL: task.val.NL};
       var header = "Id,Title,Description,West,South,East,North,Link_Xml,Link_1,Link_2,Link_3,Link_4";
@@ -106,12 +105,12 @@
       stringBuilder.append(header);
       var items = searchResult.items ? searchResult.items : [];
       for (var i=0;i<items.length;i++) {
-        this._writeEntry(task,stringBuilder,items[i],options);
+        this.writeEntry(task,stringBuilder,items[i],options);
       }
-      this._writeResponse(task,stringBuilder.toString()); 
+      this.writeResponse(task,stringBuilder.toString()); 
     }},
     
-    _writeResponse: {value: function(task,data) {
+    writeResponse: {value: function(task,data) {
       var response = task.response;
       response.addHeader("Content-Disposition","filename="+Date.now()+".csv");
       response.put(response.Status_OK,response.MediaType_TEXT_CSV,data);

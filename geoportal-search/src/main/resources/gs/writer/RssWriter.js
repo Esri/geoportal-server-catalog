@@ -15,9 +15,9 @@
 
 (function(){
 
-  gs.writer.AtomWriter = gs.Object.create(gs.writer.XmlWriter,{
+  gs.writer.RssWriter = gs.Object.create(gs.writer.XmlWriter,{
     
-    mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_ATOM_XML},
+    mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_RSS_XML},
   
     addNamespaces: {value: function(task,xmlBuilder) {
       xmlBuilder.writeNamespace("atom",task.uris.URI_ATOM);
@@ -29,41 +29,64 @@
       xmlBuilder.writeNamespace("time",task.uris.URI_TIME);
     }},
     
+    formatDate: {value: function(task,iso) {
+      // TODO need a Node implementation
+      if (task.context.isNashorn) {
+        try {
+          var dt = Date.parse(iso);
+          if (!isNaN(dt)) {
+            if (!this.DF) {
+              this.DF = new java.text.SimpleDateFormat("EEE, dd MMM yyyy HH:mm:ss ZZ");
+            }
+            var v = this.DF.format(dt);
+            //console.log(iso,v);
+            if (v) return v;
+          }
+        } catch(ex) {
+          //console.log("RssWriter: Unable to format date:",ex);
+        }
+      }
+      return iso;
+    }},
+    
     writeEntry: {value: function(task,xmlBuilder,item,options) {
       var entry = task.target.itemToAtomEntry(task,item);
       if (!entry) return;
+      xmlBuilder.writeStartElement(null,"item");
       
-      if (options.entryOnly) {
-        xmlBuilder.writeStartElementPfx("atom","entry",task.uris.URI_ATOM);
-        this.addNamespaces(task,xmlBuilder);
-      } else {
-        xmlBuilder.writeStartElement(task.uris.URI_ATOM,"entry");
-      }
-      
-      // atom:id, atom:title, and atom:updated are required
       var id = entry.id;
       var title = "Untitled";
+      var description = "";
       var updated = options.now;
       if (typeof entry.title === "string" && entry.title.length > 0) {
         title = entry.title;
+      }
+      if (entry.summary && typeof entry.summary.value === "string") {
+        description = entry.summary.value;
       }
       if (typeof entry.updated === "string" && entry.updated.length > 0) {
         updated = entry.updated;
       } else if (typeof entry.published === "string" && entry.published.length > 0) {
         updated = entry.published;
       }
-  
+      
+      xmlBuilder.writeElement(null,"guid",id);
       xmlBuilder.writeElement(task.uris.URI_ATOM,"id",id);
-      xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
-      xmlBuilder.writeElement(task.uris.URI_ATOM,"title",title);
-      this.addElement(task,xmlBuilder,task.uris.URI_ATOM,"published",entry.published);
-      this.addElement(task,xmlBuilder,task.uris.URI_ATOM,"updated",updated);
-      this.addAtomText(task,xmlBuilder,task.uris.URI_ATOM,"summary",entry.summary);
-      this.addAtomObject(task,xmlBuilder,gs.atom.Person,entry.author);
-      this.addAtomObject(task,xmlBuilder,gs.atom.Person,entry.contributor);
+      xmlBuilder.writeElement(null,"title",title);
+      if (updated !== null && updated.length > 0) {
+        xmlBuilder.writeElement(null,"pubDate",this.formatDate(task,updated));
+      }
+      
+      xmlBuilder.writeElement(null,"description",description);
+      /*
+      var snippet = G.getSnippet(xmlBuilder,title,description,links);
+      xmlBuilder.writer.writeStartElement("description");
+      xmlBuilder.writer.writeCData(snippet);
+      xmlBuilder.writer.writeEndElement();
+      */
+    
       this.addAtomObject(task,xmlBuilder,gs.atom.Link,entry.link);
-      this.addAtomObject(task,xmlBuilder,gs.atom.Category,entry.category);
-      this.addAtomText(task,xmlBuilder,task.uris.URI_ATOM,"rights",entry.rights);
+      
       if (gs.atom.Point.isPrototypeOf(entry.point)) {
         entry.point.writeGeoRSSPoint(task,xmlBuilder);
       }
@@ -71,7 +94,6 @@
         entry.bbox.writeGeoRSSBox(task,xmlBuilder);
         entry.bbox.writeGeoRSSBox10(task,xmlBuilder);
       }
-      this.addAtomObject(task,xmlBuilder,task.uris.URI_ATOM,"content",entry.content);
       
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
       xmlBuilder.writeEndElement();
@@ -83,17 +105,17 @@
       var xmlBuilder = task.context.newXmlBuilder();
       xmlBuilder.writeStartDocument();
       
-      xmlBuilder.writeStartElementPfx("atom","feed",task.uris.URI_ATOM);
+      xmlBuilder.writeStartElement(null,"rss");
+      xmlBuilder.writeAttribute("version","2.0");
       this.addNamespaces(task,xmlBuilder);
-      xmlBuilder.writeElement(task.uris.URI_ATOM,"title","Results");
-      xmlBuilder.writeElement(task.uris.URI_ATOM,"id",task.baseUrl); 
-      xmlBuilder.writeElement(task.uris.URI_ATOM,"updated",now); // TODO
-      xmlBuilder.writeStartElement(task.uris.URI_ATOM,"author");
-      xmlBuilder.writeElement(task.uris.URI_ATOM,"name",task.baseUrl);
-      xmlBuilder.writeEndElement();
+      xmlBuilder.writeStartElement(null,"channel");
+      xmlBuilder.writeElement(null,"title","Results");
+      xmlBuilder.writeElement(null,"description","RSS Results");
+      xmlBuilder.writeElement(null,"link",task.baseUrl);
+      xmlBuilder.writeElement(null,"docs","http://www.rssboard.org/rss-specification");
+      xmlBuilder.writeElement(null,"category","GeoRss");
       
       this.writeOpensearchInfo(task,searchResult,xmlBuilder);
-      this.writeOpensearchQuery(task,xmlBuilder);
       var items = searchResult.items ? searchResult.items : [];
       if (searchResult.itemsPerPage > 0) {
         for (var i=0;i<items.length;i++) {

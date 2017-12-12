@@ -19,16 +19,15 @@
     
     chkBBoxParam: {value: function(task) {
       if (task.hasError) return;
-      var bbox = task.request.chkParam("bbox");
+      var bbox = task.request.getBBox();
       if (bbox === null || bbox.length === 0) return;
       var a = bbox.split(","); 
       if (a.length > 3) {
         var n = task.val.strToNum(a[0].trim(),1);
         if (n > 10000) {
-          // TODO send JSON
-          var msg = "invalidBoundingBoxCoords";
+          var msg = "{\"error\": \"invalidBoundingBoxCoords\"}";
           var response = task.response;
-          response.put(response.Status_BAD_REQUEST,response.MediaType_TEXT_PLAIN,msg);
+          response.put(response.Status_BAD_REQUEST,response.MediaType_APPLICATION_JSON,msg);
           task.hasError = true;
         }
       }

@@ -16,17 +16,113 @@
 (function(){
 
   gs.base.Request = gs.Object.create(gs.Proto,{
+    
+    // common request parameters
+    
+    // TODO: ElasticTarget also has analyze_wildcard and lenient (booleans)
   
     f: {writable: true, value: "atom"},
+    
     pretty: {writable: true, value: false},
+    
+    getBBox: {value: function() {
+      return this.chkParam("bbox");
+    }},
+    
+    getFilter: {value: function() {
+      return this.chkParam("filter");
+    }},
+    
+    getFrom: {value: function() {
+      var from = this.getParameter("from");
+      if (from === null) from = this.getParameter("start");
+      if (from === null) from = this.getParameter("startPosition");
+      return from;
+    }},
+    
+    getIds: {value: function() {
+      var ids = [];
+      var list = this.getParameterValues("id");
+      if (list === null) list = this.getParameterValues("recordIds");
+      if (Array.isArray(list) && list.length === 1) {
+        list = list[0].split(",");
+      }
+      if (Array.isArray(list)) {
+        list.forEach(function(id){
+          id = id.trim();
+          if (id.length > 0) ids.push(id);
+        });
+      }
+      if (ids.length === 0) ids = null;
+      return ids;
+    }},
+    
+    getModifiedPeriod: {value: function() {
+      return this._getPeriod("modified");
+    }},
+    
+    getOrgId: {value: function() {
+      return this.chkParam("orgid");
+    }},
+    
+    getQ: {value: function() {
+      return this.chkParam("q");
+    }},
+    
+    getSize: {value: function() {
+      var size = this.getParameter("size");
+      if (size === null) from = this.getParameter("num");
+      if (size === null) from = this.getParameter("maxRecords");
+      if (size === null) from = this.getParameter("max");
+      return size;
+    }},
+    
+    getSort: {value: function() {
+      return this.getParameterValues("sort");;
+    }},
+    
+    getSortField: {value: function() {
+      return this.chkParam("sortField");
+    }},
+    
+    getSortOrder: {value: function() {
+      return this.chkParam("sortOrder");
+    }},
+    
+    getSpatialRel: {value: function() {
+      return this.chkParam("spatialRel");
+    }},
+    
+    getTargets: {value: function() {
+      var values = this.getParameterValues("target");
+      if (values === null || values.length === 0) {
+        values = this.getParameterValues("targets");
+      }
+      if (values !== null && values.length === 1) {
+        //values = values[0].split(","); // TODO?
+      }
+      return values;
+    }},
+    
+    getTimePeriod: {value: function() {
+      return this._getPeriod("time");
+    }},
+    
+    /* .......................................................................................... */
   
+    // some task information
     isItemByIdRequest: {writable: true, value: false},
     queryIsZeroBased: {writable: true, value: false},
-  
+
+    /* .......................................................................................... */
+    
+    // http request information
     body: {writable: true, value: null},
     headerMap: {writable: true, value: null},
     parameterMap: {writable: true, value: null},
     url: {writable: true, value: null}, // TODO requestUrl
+    
+    /* .......................................................................................... */
   
     chkBoolParam: {value: function(key,defaultValue) {
       var v = this.chkParam(key);
@@ -55,13 +151,6 @@
       return gs.base.Val.trim(this.getParameter(key));
     }},
   
-    getFrom: {value: function() {
-      var from = this.getParameter("from");
-      if (from === null) from = this.getParameter("start");
-      if (from === null) from = this.getParameter("startPosition");
-      return from;
-    }},
-  
     getHeader: {value: function(key) {
       return this._getValue(this.headerMap,key);
     }},
@@ -70,45 +159,12 @@
       return this._getValues(this.headerMap,key);
     }},
   
-    getIds: {value: function() {
-      var ids = [];
-      var list = this.getParameterValues("id");
-      if (list === null) list = this.getParameterValues("recordIds");
-      if (Array.isArray(list) && list.length === 1) {
-        list = list[0].split(",");
-      }
-      if (Array.isArray(list)) {
-        list.forEach(function(id){
-          id = id.trim();
-          if (id.length > 0) ids.push(id);
-        });
-      }
-      if (ids.length === 0) ids = null;
-      return ids;
-    }},
-    
-    getModifiedPeriod: {value: function() {
-      return this._getPeriod("modified");
-    }},
-  
     getParameter: {value: function(key) {
       return this._getValue(this.parameterMap,key);
     }},
   
     getParameterValues: {value: function(key) {
       return this._getValues(this.parameterMap,key);
-    }},
-  
-    getSize: {value: function() {
-      var size = this.getParameter("size");
-      if (size === null) from = this.getParameter("num");
-      if (size === null) from = this.getParameter("maxRecords");
-      if (size === null) from = this.getParameter("max");
-      return size;
-    }},
-  
-    getTimePeriod: {value: function() {
-      return this._getPeriod("time");
     }},
   
     // TODO getRequestUrlPath
