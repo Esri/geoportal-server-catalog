@@ -255,19 +255,19 @@
       parser.parseBody(this,task);
       var startPosition = this.chkParam(task,"startPosition");
       if (startPosition !== null && startPosition.length > 0) {
-        var from = task.val.strToInt(startPosition,-1);
+        var start = task.val.strToInt(startPosition,-1);
         // TODO should this be >= 1
-        if (from >= 1) {
-          // TODO from = from - 1; is this correct indexOffset??
-          this.addOverrideParameter(task,"from",""+from);
+        if (start >= 1) {
+          // TODO start = start - 1; is this correct indexOffset??
+          this.addOverrideParameter(task,"start",""+start);
         }
       }
       var maxRecords = this.chkParam(task,"maxRecords");
       if (maxRecords !== null && maxRecords.length > 0) {
         if (maxRecords.toLowerCase !== "unlimited") {
-          var size = task.val.strToInt(maxRecords,-1);
-          if (size >= 0) {
-            this.addOverrideParameter(task,"size",""+size);
+          var num = task.val.strToInt(maxRecords,-1);
+          if (num >= 0) {
+            this.addOverrideParameter(task,"num",""+num);
           }
         }
       }

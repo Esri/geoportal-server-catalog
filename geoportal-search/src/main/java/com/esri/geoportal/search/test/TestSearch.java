@@ -204,15 +204,15 @@ public class TestSearch {
     
     String body = null;
     //body = makeGetRecordsXml();
-    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&xversion=2.0.2&target=gptdb1&id=zzz";
-    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecordById&target=gptdb1&id=zzz";
+    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&xversion=2.0.2&target=gptdb1";
+    //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecordById&target=gptdb1&id=zzz";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=csv&q=data";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&qq=map&size=10&xpretty=true";
     //requestUrl = baseUrl+"/opensearch/description?f=eros";
     //requestUrl = baseUrl+"/opensearch?target=arcgis&f=atom&sortField=Date&type=Feature Service,Map Service";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=json&type=MapServer,WMS";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=eros&xtype=MapServer,WMS";
-    //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&type=wms";
+    requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&type=wms";
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();

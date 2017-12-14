@@ -69,7 +69,7 @@
         links = [entry.link];
       }
       links.forEach(function(link){
-        if (link.rel === "alternate.xml") {
+        if (link.rel === "alternate" && link.type === "application/xml") {
           xmlLink = link.href;
         } else if (link.rel === "related") {
           if (urlIdx < 4) {

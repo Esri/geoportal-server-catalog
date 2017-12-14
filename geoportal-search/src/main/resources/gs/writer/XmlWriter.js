@@ -109,8 +109,8 @@
       var osqId = request.getParameter("id");
       var osqBBox = request.getParameter("bbox");
       var osqTime = request.getParameter("time");
-      var osqStartIndex = request.getParameter("from");
-      var osqCount = request.getParameter("size");
+      var osqStartIndex = request.getParameter("start");
+      var osqCount = request.getParameter("num");
       xmlBuilder.writeStartElement(uris.URI_OPENSEARCH,"Query");
       xmlBuilder.writeAttribute("role","request");
       if (osqQ !== null && osqQ.length > 0) {

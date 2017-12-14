@@ -173,6 +173,8 @@
     rel: {writable: true, value: null}, // alternate|enclosure|related|self|via 
     title: {writable: true, value: null},
     type: {writable: true, value: null}, // media type
+    
+    dctype: {writable: true, value: null}, // custom
   
     init: {value: function(options) {
       if (options !== null && typeof options === "object") {
@@ -182,6 +184,7 @@
         if (options["rel"]) this.rel = options["rel"];
         if (options["title"]) this.title = options["title"];
         if (options["type"]) this.type = options["type"];
+        if (options["dctype"]) this.dctype = options["dctype"];
       }
       return this;
     }},
@@ -190,6 +193,7 @@
       if ((this.href === null || this.href.length === 0)) return;
       xmlBuilder.writeStartElement(task.uris.URI_ATOM,"link");
       xmlBuilder.writeAttribute("rel",this.rel);
+      xmlBuilder.writeAttribute("dc:type",this.dctype);
       xmlBuilder.writeAttribute("type",this.type);    
       xmlBuilder.writeAttribute("href",this.href);
       xmlBuilder.writeAttribute("hreflang",this.hreflang);

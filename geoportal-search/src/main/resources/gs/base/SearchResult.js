@@ -26,18 +26,18 @@
     init: {value: function(task) {
       this.startIndex = 1;
       if (task.request.queryIsZeroBased) this.startIndex = 0;
-      var from = task.request.getFrom();
-      from = task.val.strToInt(from,null);
-      if (typeof from === "number" && from >= 0) {
-        if (from > 0 || task.request.queryIsZeroBased) {
-          this.startIndex = from;
+      var start = task.request.getStart();
+      start = task.val.strToInt(start,null);
+      if (typeof start === "number" && start >= 0) {
+        if (start > 0 || task.request.queryIsZeroBased) {
+          this.startIndex = start;
         }
       } 
-      var size = task.request.getSize();
-      size = task.val.strToInt(size,null);
-      if (typeof size === "number" && size >= 0) {
-        this.itemsPerPage = size;
-      } else if (typeof size === "number" && size < 0) {
+      var num = task.request.getNum();
+      num = task.val.strToInt(num,null);
+      if (typeof num === "number" && num >= 0) {
+        this.itemsPerPage = num;
+      } else if (typeof num === "number" && num < 0) {
         this.itemsPerPage = 0; 
       } 
       return this;

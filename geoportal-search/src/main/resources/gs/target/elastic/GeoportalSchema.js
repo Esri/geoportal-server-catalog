@@ -124,37 +124,42 @@
     }},
     
     buildAtomLinks: {value: function(task,item) {
-      var links = [], serviceType, url;
+      var links = [], dctype, idx, itemUrl, url;
       var id = item["_id"], source = item["_source"];
       
-      var searchUrl, baseUrl, idx;
-      if (task.target && task.target.searchUrl) {
-        var searchUrl = task.target.searchUrl;
-        var idx = searchUrl.indexOf("/elastic/");
+      if (task.target && typeof task.target.itemBaseUrl === "string" && 
+          task.target.itemBaseUrl.trim().length > 0) {
+        itemUrl = task.target.itemBaseUrl.trim()+"/"+encodeURIComponent(id);
+      } else if (task.target && typeof task.target.searchUrl === "string" && 
+          task.target.searchUrl.trim().length > 0) {
+        url = task.target.searchUrl;
+        idx = url.indexOf("/elastic/");
         if (idx > 0) {
-          baseUrl = searchUrl.substring(0,idx);
-          var itemUrl = baseUrl+"/rest/metadata/item/"+encodeURIComponent(id);
-          
-          var jsonUrl = itemUrl;
+          url = url.substring(0,idx);
+          itemUrl = url+"/rest/metadata/item/"+encodeURIComponent(id);
+        }
+      }
+      
+      if (typeof itemUrl === "string" && itemUrl.length > 0) {
+        var jsonUrl = itemUrl;
+        links.push(gs.Object.create(gs.atom.Link).init({
+          rel: "alternate",
+          type: "application/json",
+          href: jsonUrl
+        }));
+        if (item["sys_metadatatype_s"] !== "json") {
+          var htmlUrl = itemUrl+"/html";
           links.push(gs.Object.create(gs.atom.Link).init({
-            rel: "alternate.json",
-            type: "application/json",
-            href: jsonUrl
+            rel: "alternate",
+            type: "text/html",
+            href: htmlUrl
           }));
-          if (item["sys_metadatatype_s"] !== "json") {
-            var htmlUrl = itemUrl+"/html";
-            links.push(gs.Object.create(gs.atom.Link).init({
-              rel: "alternate.html",
-              type: "text/html",
-              href: htmlUrl
-            }));
-            var xmlUrl = itemUrl+"/xml";
-            links.push(gs.Object.create(gs.atom.Link).init({
-              rel: "alternate.xml", // TODO via???
-              type: "application/xml",
-              href: xmlUrl
-            }));
-          }
+          var xmlUrl = itemUrl+"/xml";
+          links.push(gs.Object.create(gs.atom.Link).init({
+            rel: "alternate",
+            type: "application/xml",
+            href: xmlUrl
+          }));
         }
       }
       
@@ -165,13 +170,10 @@
           url = task.val.chkStr(resource.url_s);
           //console.log(resource.url_type_s,resource.url_s);
           if (url !== null && url.length > 0) {
-            serviceType = task.val.chkStr(resource.url_type_s);
-            if (serviceType === null || serviceType.length === 0) {
-              serviceType = ""; // TODO?
-            }
+            dctype = task.val.chkStr(resource.url_type_s);
             links.push(gs.Object.create(gs.atom.Link).init({
               rel: "related", // TODO?
-              //type: serviceType, // TODO link.type vs link.scheme
+              dctype: dctype,
               href: url
             }));
           }

@@ -17,7 +17,7 @@
 
   gs.config.Config = gs.Object.create(gs.Proto,{
 
-    defaultTarget: {writable: true, value: "gptdb1"},
+    defaultTarget: {writable: true, value: "arcgis"},
     
     allowDynamicTarget: {writable: true, value: true},
 
@@ -41,21 +41,9 @@
         "arcgis": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "https://www.arcgis.com"
         }),
-
-        "primary": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
-          "searchUrl": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
-        }),
-
-        "customElastic": gs.Object.create(gs.target.elastic.CustomElasticTarget).mixin({
-          "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search"
-        }),
-
-        "elastic1": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
-          "searchUrl": "http://localhost:9200/metadata/item/_search"
-        }),
-
-        "elastic2": gs.Object.create(gs.target.elastic.ElasticTarget).mixin({
-          "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search"
+        
+        "portal1": gs.Object.create(gs.target.portal.PortalTarget).mixin({
+          "portalBaseUrl": "http://urbanvm.esri.com/arcgis"
         }),
 
         "gptdb1": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
@@ -63,11 +51,31 @@
         }),
 
         "gptdb2": gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
-          "searchUrl": "http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"
+          "searchUrl": "http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search",
+          "schemaMixin": {
+            "bboxField": null,
+            "pointField": "envelope_cen_pt",
+            "modifiedPeriodInfo": {
+              "field": "sys_modified_dt",
+            },
+            "sortables": {
+              "title": "title.sort",
+              "date": "sys_modified_dt",
+              "modified": "sys_modified_dt"
+            },
+            "spatialInfo": {
+              "field": "envelope_cen_pt",
+              "type": "geo_point"
+            },
+            "timePeriodInfo": null,
+            "typeAliases": null,
+            "typeInfo": null
+          }
         }),
-
-        "portal1": gs.Object.create(gs.target.portal.PortalTarget).mixin({
-          "portalBaseUrl": "http://urbanvm.esri.com/arcgis"
+        
+        "customElastic": gs.Object.create(gs.target.elastic.CustomElasticTarget).mixin({
+          "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search",
+          "itemBaseUrl": null
         })
 
       };

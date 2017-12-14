@@ -16,6 +16,8 @@
 (function(){
   
   gs.target.elastic.ElasticTarget = gs.Object.create(gs.target.Target, {
+    
+    itemBaseUrl: {writable: true, value: null},
       
     requiredFilter: {writable: true, value: null},
     
@@ -25,8 +27,11 @@
     
     schema: {writable: true, value: null},
     
+    schemaMixin: {writable: true, value: null},
+    
     newSchema: {value:function(task) {
-      return gs.Object.create(gs.target.elastic.ElasticSchema);
+      var schemaMixin = this.schemaMixin || {};
+      return gs.Object.create(gs.target.elastic.ElasticSchema).mixin(schemaMixin);
     }},
     
     parseRequest: {value:function(task) {
@@ -44,16 +49,16 @@
       var all = ["q","from","size","sort","df","analyzer","analyze_wildcard","default_operator","lenient",
                  "timeout","terminate_after","search_type","_source","stored_fields","track_scores","explain"];
       
-      var from = task.request.getFrom();
-      from = task.val.strToInt(from,null);
-      if (typeof from === "number" && !this.queryIsZeroBased) from = from - 1;
-      if (typeof from === "number" && from >= 0) {
-        searchCriteria["from"] = from;
+      var start = task.request.getStart();
+      start = task.val.strToInt(start,null);
+      if (typeof start === "number" && !this.queryIsZeroBased) start = start - 1;
+      if (typeof start === "number" && start >= 0) {
+        searchCriteria["from"] = start;
       }    
-      var size = task.request.getSize();
-      size = task.val.strToInt(size,null);
-      if (typeof size === "number" && size >= 0) {
-        searchCriteria["size"] = size;
+      var num = task.request.getNum();
+      num = task.val.strToInt(num,null);
+      if (typeof num === "number" && num >= 0) {
+        searchCriteria["size"] = num;
       } 
       
       var q = task.request.getQ();
@@ -395,6 +400,7 @@
         if (task.verbose) console.log(data);
       }
       if (task.verbose) console.log("sending url:",url,"data:",data);
+      //console.log("sending url:",url);
       
       var promise = task.context.newPromise();
       var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);

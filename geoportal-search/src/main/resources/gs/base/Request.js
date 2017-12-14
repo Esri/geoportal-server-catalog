@@ -33,13 +33,6 @@
       return this.chkParam("filter");
     }},
     
-    getFrom: {value: function() {
-      var from = this.getParameter("from");
-      if (from === null) from = this.getParameter("start");
-      if (from === null) from = this.getParameter("startPosition");
-      return from;
-    }},
-    
     getIds: {value: function() {
       var ids = [];
       var list = this.getParameterValues("id");
@@ -62,20 +55,20 @@
       return this._getPeriod("modified");
     }},
     
+    getNum: {value: function() {
+      var num = this.chkParam("num");
+      if (num === null) num = this.chkParam("size");
+      if (num === null) num = this.chkParam("maxRecords");
+      if (num === null) num = this.chkParam("max");
+      return num;
+    }},
+    
     getOrgId: {value: function() {
       return this.chkParam("orgid");
     }},
     
     getQ: {value: function() {
       return this.chkParam("q");
-    }},
-    
-    getSize: {value: function() {
-      var size = this.getParameter("size");
-      if (size === null) from = this.getParameter("num");
-      if (size === null) from = this.getParameter("maxRecords");
-      if (size === null) from = this.getParameter("max");
-      return size;
     }},
     
     getSort: {value: function() {
@@ -92,6 +85,13 @@
     
     getSpatialRel: {value: function() {
       return this.chkParam("spatialRel");
+    }},
+    
+    getStart: {value: function() {
+      var start = this.chkParam("start");
+      if (start === null) start = this.chkParam("from");
+      if (start === null) start = this.chkParam("startPosition");
+      return start;
     }},
     
     getTargets: {value: function() {

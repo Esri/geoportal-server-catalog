@@ -99,7 +99,7 @@
       if (typeof url === "string" && url.length > 0) {
         links.push(gs.Object.create(gs.atom.Link).init({
           rel: "related", // TODO?
-          //type: item["type"], // TODO link.type vs link.scheme
+          dctype: item["type"],
           href: url
         }));
       }
@@ -120,7 +120,7 @@
       
       if (itemUrl !== null) {
         links.push(gs.Object.create(gs.atom.Link).init({
-          rel: "alternate.json",
+          rel: "alternate",
           type: "application/json",
           href: itemUrl+"?f=json"
         }));
@@ -128,7 +128,7 @@
       
       if (itemDetailsUrl !== null) {
         links.push(gs.Object.create(gs.atom.Link).init({
-          rel: "alternate.html",
+          rel: "alternate",
           type: "text/html",
           href: itemDetailsUrl
         }));
@@ -136,7 +136,7 @@
       
       if (hasMetadata && metadataUrl !== null) {
         links.push(gs.Object.create(gs.atom.Link).init({
-          rel: "alternate.xml", // TODO via???
+          rel: "alternate", // TODO via???
           type: "application/xml",
           href: metadataUrl
         }));
