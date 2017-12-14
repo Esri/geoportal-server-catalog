@@ -18,20 +18,10 @@
   gs.writer.XmlWriter = gs.Object.create(gs.writer.Writer,{
     
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
-  
+        
     write: {value: function(task,searchResult) {
-      if (task.request.isItemByIdRequest) {
-        if (!searchResult.items || searchResult.items.length === 0) {
-          // TODO send JSON
-          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
-        } else {
-          if (task.provider.isCswProvider) {
-            // TODO should isItemByIdRequest be writeItems
-            this.writeItem(task,searchResult);
-          } else {
-            this.writeItems(task,searchResult);
-          }
-        }
+      if (task.provider.isCswProvider && task.request.isItemByIdRequest) {
+        this.writeItem(task,searchResult);
       } else {
         this.writeItems(task,searchResult);
       }

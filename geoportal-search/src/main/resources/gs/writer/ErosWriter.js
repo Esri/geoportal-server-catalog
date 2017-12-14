@@ -17,6 +17,21 @@
 
   gs.writer.ErosWriter = gs.Object.create(gs.writer.AtomWriter,{
     
+    erosTypes: {writable: true, value: {
+      "FeatureServer": "agsfeatureserver",
+      "Feature Service": "agsfeatureserver",
+      "ImageServer": "agsimageserver",
+      "Image Service": "agsimageserver",
+      "MapServer": "agsmapserver",
+      "Map Service": "agsmapserver",
+      "CSW": "csw",
+      "IMS": "image",
+      "SOS": "sos",
+      "WCS": "wcs",
+      "WFS": "wfs",
+      "WMS": "wms"
+    }},
+    
     addNamespaces: {value: function(task,xmlBuilder) {
       gs.writer.AtomWriter.addNamespaces.call(this,task,xmlBuilder); // call super
       xmlBuilder.writeNamespace("sdi",task.uris.URI_SDI);
@@ -28,25 +43,8 @@
     }},
     
     writeSDI: {value: function(task,xmlBuilder,item,options,entry) {
-      var i, r, resources;
-      
-      // Eros type conversion table
-      var ETCT = {
-        "FeatureServer": "agsfeatureserver",
-        "Feature Service": "agsfeatureserver",
-        "ImageServer": "agsimageserver",
-        "Image Service": "agsimageserver",
-        "MapServer": "agsmapserver",
-        "Map Service": "agsmapserver",
-        "CSW": "csw",
-        "IMS": "image",
-        "SOS": "sos",
-        "WCS": "wcs",
-        "WFS": "wfs",
-        "WMS": "wms"
-      };
-      
       var ok = false, k, lc, v;
+      var types = this.erosTypes;
       var metadataUrl, serviceUrl, serviceType, emailAddress = "";
       var links = entry.link;
       if (!Array.isArray(links)) links = [entry.link];
@@ -60,9 +58,9 @@
               v = null;
               if (typeof link.type === "string" && link.type.length > 0) {
                 lc = link.type.toLowerCase();
-                for (k in ETCT) {
+                for (k in types) {
                   if (k.toLowerCase() === lc) {
-                    v = ETCT[k];
+                    v = types[k];
                     break;
                   }
                 }

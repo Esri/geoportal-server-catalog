@@ -17,7 +17,7 @@
 
   gs.config.Config = gs.Object.create(gs.Proto,{
 
-    defaultTarget: {writable: true, value: "arcgis"},
+    defaultTarget: {writable: true, value: "gptdb1"},
     
     allowDynamicTarget: {writable: true, value: true},
 

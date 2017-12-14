@@ -28,10 +28,6 @@
     responseFields: {writable: true, value: null},
     supportsCsw2: {writable: true, value: true},
 
-    addOverrideParameter: {value: function(task,key,value) {
-      task.request.parameterMap[key] = value; // TODO remove keys ?
-    }},
-
     chkBBoxParam: {value: function(task) {
       if (task.hasError) return;
       var msg, ows;
@@ -559,20 +555,24 @@
       task.target.parseRequest(task);
       var p2 = task.target.search(task);
       p2.then(function(searchResult){
-        task.writer.write(task,searchResult);
-        promise.resolve();
+        if (task.request.isItemByIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
+          task.response.status = task.response.Status_NOT_FOUND;
+          ows = gs.Object.create(gs.provider.csw.OwsException);
+          ows.put(task,ows.OWSCODE_InvalidParameterValue,"id","Id not found.");
+          promise.resolve();
+        } else {
+          task.writer.write(task,searchResult);
+          promise.resolve();
+        }
       })["catch"](function(error){
         var msg = "Search error";
         if (typeof error.message === "string" && error.message.length > 0) {
           msg = error.message;
         }
+        task.response.status = task.response.Status_INTERNAL_SERVER_ERROR;
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_NoApplicableCode,null,msg);
-        var xml = ows.getReport(task);
-        var response = task.response;
-        response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_APPLICATION_XML,xml);
-        task.hasError = true;
-        promise.reject();
+        promise.resolve();
       });
       return promise;
     }}

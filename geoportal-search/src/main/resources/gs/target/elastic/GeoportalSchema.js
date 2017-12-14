@@ -47,6 +47,58 @@
       nestedPath: "timeperiod_nst"
     }},
     
+    typeAliases: {writable: true, value: {
+      "FeatureServer": ["FeatureServer","Feature Service"], // indexed as either FeatureServer or Feature Service
+      "Feature Service": ["FeatureServer","Feature Service"],
+      "MapServer": ["MapServer","Map Service"],
+      "Map Service": ["MapServer","Map Service"],
+      "ImageServer": ["ImageServer","Image Service"],
+      "Image Service": ["ImageServer","Image Service"],
+      "GeocodeServer": ["GeocodeServer","Geocoding Service"],
+      "Geocoding Service": ["GeocodeServer","Geocoding Service"],
+      "GeoDataServer": ["GeoDataServer","Geodata Service"],
+      "Geodata Service": ["GeoDataServer","Geodata Service"],
+      "GeometryServer": ["GeometryServer","Geometry Service"],
+      "Geometry Service": ["GeometryServer","Geometry Service"],
+      "GlobeServer": ["GlobeServer","Globe Service"],
+      "Globe Service": ["GlobeServer","Globe Service"],
+      "GPServer": ["GPServer","Geoprocessing  Service"],
+      "Geoprocessing  Service": ["GPServer","Geoprocessing  Service"],
+      "NAServer": ["NAServer","Network Analysis Service"],
+      "Network Analysis Service": ["NAServer","Network Analysis Service"],
+      "SceneServer": ["SceneServer","Scene Service"],
+      "Scene Service": ["SceneServer","Scene Service"],     
+      "VectorTileServer": ["VectorTileServer","Vector Tile Service"],
+      "Vector Tile Service": ["VectorTileServer","Vector Tile Service"],
+      
+      "kml": "KML", // indexed as upper case KML, this will make the url param case insensitive: type=kml
+      "wms": "WMS",
+      "wfs": "WFS",
+      "wcs": "WCS",
+      "wmts": "WMTS",
+      "wps": "WPS",
+      "sos": "SOS",
+      "csw": "CSW",
+      
+      "ims": ["IMS","ArcIMS"],
+      "arcims": ["IMS","ArcIMS"],
+      
+      "shp": ["shp","Shapefife"],
+      "Shapefife": ["shp","Shapefife"],
+      
+      "liveData": ["FeatureServer","Feature Service",
+                   "MapServer","Map Service",
+                   "ImageServer","Image Service",
+                   "SceneServer","Scene Service",
+                   "VectorTileServer","Vector Tile Service",
+                   "KML","WMS","WFS","WCS","WMTS"]
+    }},
+    
+    typeInfo: {writable: true, value: {
+      field: "resources_nst.url_type_s",
+      nestedPath: "resources_nst"
+    }},
+    
     buildAtomCategories: {value: function(task,item) {
       var categories = [], source = item["_source"];
       var itemType = task.val.chkStr(source["itemType_s"]);
@@ -119,7 +171,7 @@
             }
             links.push(gs.Object.create(gs.atom.Link).init({
               rel: "related", // TODO?
-              type: serviceType, // TODO?
+              //type: serviceType, // TODO link.type vs link.scheme
               href: url
             }));
           }

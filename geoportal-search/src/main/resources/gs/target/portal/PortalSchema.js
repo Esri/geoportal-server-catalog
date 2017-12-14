@@ -17,7 +17,34 @@
   
   gs.target.portal.PortalSchema = gs.Object.create(gs.target.TargetSchema, {
     
-    portalBaseUrl: {writable: true, value: "https://www.arcgis.com"},
+    fieldAliases: {writable: true, value: {
+      "date": "modified"
+    }},
+    
+    typeAliases: {writable: true, value: {
+      "FeatureServer": "Feature Service",
+      "MapServer": "Map Service",
+      "ImageServer": "Image Service",
+      "GeocodeServer": "Geocoding Service",
+      "GeoDataServer": "Geodata Service",
+      "GeometryServer": "Geometry Service",
+      "GlobeServer": "Globe Service",
+      "GPServer": "Geoprocessing  Service",
+      "NAServer": "Network Analysis Service",
+      "SceneServer": "Scene Service",
+      "VectorTileServer": "Vector Tile Service",
+      
+      "shp": "Shapefife",
+      
+      "liveData": ["Feature Service",
+                   "Map Service",
+                   "Image Service",
+                   "Scene Service",
+                   "Vector Tile Service",
+                   "KML","WMS","WFS","WCS","WMTS"]
+    }},
+    
+    target: {writable: true, value: null},
     
     buildAtomCategories: {value: function(task,item) {
       var categories = [];
@@ -49,12 +76,13 @@
       var links = [], ok, url;
       var itemDetailsUrl = null, itemUrl = null, metadataUrl = null, restUrl = null;
       
-      if (typeof this.portalBaseUrl === "string" && this.portalBaseUrl.length > 0) {
-        restUrl = this.portalBaseUrl+"/sharing/rest";
+      var portalBaseUrl = this.target.portalBaseUrl;
+      if (typeof portalBaseUrl === "string" && portalBaseUrl.length > 0) {
+        restUrl = portalBaseUrl+"/sharing/rest";
         itemUrl = restUrl+"/content/items/"+encodeURIComponent(item["id"]);
         metadataUrl = itemUrl+"/info/metadata/metadata.xml";
         //metadataUrl = itemUrl+"/info/metadata/metadata.xml?format=iso19139"; // TODO which metadata format?
-        itemDetailsUrl = this.portalBaseUrl+"/home/item.html?id="+encodeURIComponent(item["id"]);
+        itemDetailsUrl = portalBaseUrl+"/home/item.html?id="+encodeURIComponent(item["id"]);
       }
       
       var hasMetadata = false;
@@ -71,7 +99,7 @@
       if (typeof url === "string" && url.length > 0) {
         links.push(gs.Object.create(gs.atom.Link).init({
           rel: "related", // TODO?
-          type: item["type"], // TODO?
+          //type: item["type"], // TODO link.type vs link.scheme
           href: url
         }));
       }

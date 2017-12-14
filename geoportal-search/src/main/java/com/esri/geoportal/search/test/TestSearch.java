@@ -42,10 +42,15 @@ public class TestSearch {
     sb.append("      <ogc:Filter>");
     sb.append("        <ogc:And>");
     
-    sb.append("          <ogc:PropertyIsGreaterThanOrEqualTo>");
-    sb.append("            <ogc:PropertyName>modified</ogc:PropertyName>");
-    sb.append("            <ogc:Literal>2017-01-06T18:27:59.878Z</ogc:Literal>");
-    sb.append("          </ogc:PropertyIsGreaterThanOrEqualTo> ");
+    sb.append("          <ogc:PropertyIsEqualTo>");
+    sb.append("            <ogc:PropertyName>dc:type</ogc:PropertyName>");
+    sb.append("            <ogc:Literal>liveData</ogc:Literal>");
+    sb.append("          </ogc:PropertyIsEqualTo> ");
+    
+//    sb.append("          <ogc:PropertyIsGreaterThanOrEqualTo>");
+//    sb.append("            <ogc:PropertyName>modified</ogc:PropertyName>");
+//    sb.append("            <ogc:Literal>2017-01-06T18:27:59.878Z</ogc:Literal>");
+//    sb.append("          </ogc:PropertyIsGreaterThanOrEqualTo> ");
     
 //    sb.append("          <ogc:PropertyIsLessThanOrEqualTo>");
 //    sb.append("            <ogc:PropertyName>modified</ogc:PropertyName>");
@@ -72,10 +77,10 @@ public class TestSearch {
 //    sb.append("            <ogc:Literal>data</ogc:Literal>");
 //    sb.append("          </ogc:PropertyIsEqualTo> ");
     
-    sb.append("          <ogc:PropertyIsLike wildCard='*' escapeChar='\\' singleChar='?'>");
-    sb.append("            <ogc:PropertyName>title</ogc:PropertyName>");
-    sb.append("            <ogc:Literal>Track</ogc:Literal>");
-    sb.append("          </ogc:PropertyIsLike> ");
+//    sb.append("          <ogc:PropertyIsLike wildCard='*' escapeChar='\\' singleChar='?'>");
+//    sb.append("            <ogc:PropertyName>title</ogc:PropertyName>");
+//    sb.append("            <ogc:Literal>Track</ogc:Literal>");
+//    sb.append("          </ogc:PropertyIsLike> ");
     
     sb.append("        </ogc:And>");
     sb.append("      </ogc:Filter>");
@@ -199,11 +204,15 @@ public class TestSearch {
     
     String body = null;
     //body = makeGetRecordsXml();
-    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&version=2.0.2&target=gptdb1&f=csv&q=data";
-    requestUrl = baseUrl+"/opensearch?target=gptdb1&f=csv&q=data";
-    requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&qq=map&size=10&xpretty=true";
+    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&xversion=2.0.2&target=gptdb1&id=zzz";
+    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecordById&target=gptdb1&id=zzz";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=csv&q=data";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&qq=map&size=10&xpretty=true";
     //requestUrl = baseUrl+"/opensearch/description?f=eros";
-    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=eros&q=type:\"Feature Service\"&size=10&xpretty=true";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=atom&sortField=Date&type=Feature Service,Map Service";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=json&type=MapServer,WMS";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=eros&xtype=MapServer,WMS";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&type=wms";
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();

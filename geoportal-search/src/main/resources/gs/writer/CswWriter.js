@@ -19,11 +19,9 @@
     
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
   
-    write: {value: function(task,searchResult) {
-      //task.request.isItemByIdRequest = true;
+    __write: {value: function(task,searchResult) {
       if (task.request.isItemByIdRequest) {
         if (!searchResult.items || searchResult.items.length === 0) {
-          // TODO OWS exception
           task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
         } else {
           this.writeItem(task,searchResult);
