@@ -71,17 +71,16 @@
       this.parsePeriod(task,urlParams);
       this.parseSort(task,urlParams);
       
-      // TODO from / size
-      var from = task.request.getFrom();
-      from = task.val.strToInt(from,null);
-      if (typeof from === "number" && task.request.queryIsZeroBased) from = from + 1;
-      if (typeof from === "number" && from >= 1) {
-        urlParams["start"] = from;
+      var start = task.request.getStart();
+      start = task.val.strToInt(start,null);
+      if (typeof start === "number" && task.request.queryIsZeroBased) start = start + 1;
+      if (typeof start === "number" && start >= 1) {
+        urlParams["start"] = start;
       }
-      var size = task.request.getSize();
-      size = task.val.strToInt(size,null);
-      if (typeof size === "number" && size > 0) {
-        urlParams["num"] = size;
+      var num = task.request.getNum();
+      num = task.val.strToInt(num,null);
+      if (typeof num === "number" && num > 0) {
+        urlParams["num"] = num;
       } 
       
       this.parseBBox(task,urlParams,qAll); // must be last

@@ -51,13 +51,13 @@
       links.forEach(function(link){
         if (gs.atom.Link.isPrototypeOf(link)) {
           if (typeof link.href === "string" && link.href.length > 0) {
-            if (link.rel === "alternate.xml") {
+            if (link.rel === "alternate" && link.type === "application/xml") {
               metadataUrl = link.href;
             } else if (link.rel === "related" && !ok) {
               //console.log(link.rel,link.type,link.href);
               v = null;
-              if (typeof link.type === "string" && link.type.length > 0) {
-                lc = link.type.toLowerCase();
+              if (typeof link.dctype === "string" && link.dctype.length > 0) {
+                lc = link.dctype.toLowerCase();
                 for (k in types) {
                   if (k.toLowerCase() === lc) {
                     v = types[k];

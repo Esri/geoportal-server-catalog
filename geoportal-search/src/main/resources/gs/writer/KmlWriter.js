@@ -22,6 +22,7 @@
     addNamespaces: {value: function(task,xmlBuilder) {
       xmlBuilder.writeNamespace("kml",task.uris.URI_KML);
       xmlBuilder.writeNamespace("atom",task.uris.URI_ATOM);
+      xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("opensearch",task.uris.URI_OPENSEARCH);
     }},
     

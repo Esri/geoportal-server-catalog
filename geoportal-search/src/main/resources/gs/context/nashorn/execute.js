@@ -33,7 +33,8 @@ function execute(nhRequest,sRequestInfo) {
         if (requestInfo.geoportalElasticsearchUrl) {
           var targets = config.getTargets();
           targets["self"] = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
-            "searchUrl": requestInfo.geoportalElasticsearchUrl
+            "searchUrl": requestInfo.geoportalElasticsearchUrl,
+            "itemBaseUrl": requestInfo.baseUrl+"/rest/metadata/item"
           });
           config.defaultTarget = "self";
         }

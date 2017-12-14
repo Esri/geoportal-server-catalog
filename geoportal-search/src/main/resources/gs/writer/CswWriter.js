@@ -54,12 +54,31 @@
     addAtomLink: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
       if (value === null) return;
       if (!Array.isArray(value)) value = [value];
-      var self = this;
+      var scheme;
       value.forEach(function(v){
         if (gs.atom.Link.isPrototypeOf(v)) {
           if (typeof v.href === "string" && v.href.length > 0) {
             xmlBuilder.writeStartElement(namespaceURI,localName);
-            if (typeof v.rel === "string" && v.rel.length > 0) {
+            if (typeof v.dctype === "string" && v.dctype.length > 0) {
+              scheme = v.dctype;
+              if (task.isCsw2) {
+                // TODO use the schemes from Geoportal1?
+              }
+              xmlBuilder.writeAttribute("scheme",scheme);
+            } else if (v.rel === "alternate") {
+              scheme = v.rel;
+              if (v.type === "application/xml") {
+                scheme = "alternate.xml";
+                // TODO use the schemes from Geoportal1?
+              } else if (v.type === "text/html") {
+                scheme = "alternate.html";
+                // TODO use the schemes from Geoportal1?
+              } else if (v.type === "application/json") {
+                scheme = "alternate.json";
+                // TODO use the schemes from Geoportal1?
+              }
+              xmlBuilder.writeAttribute("scheme",scheme);
+            } else if (typeof v.rel === "string" && v.rel.length > 0) {
               xmlBuilder.writeAttribute("scheme",v.rel);
             }
             xmlBuilder.writeCharacters(v.href);
@@ -154,13 +173,15 @@
         this.addAtomText(task,xmlBuilder,task.uris.URI_DCT,"abstract",entry.summary);
         // dct:spatial (summary)
         // csw:TemporalExtent (summary)?
-        if (recordTypeName !== "SummaryRecord") {
+        if (recordTypeName === "SummaryRecord") {
+          this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
+        } else {
           this.addAtomText(task,xmlBuilder,task.uris.URI_DCT,"created",entry.published);
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"creator",entry.author);
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"contributor",entry.contributor);
           this.addAtomText(task,xmlBuilder,task.uris.URI_DC,"rights",entry.rights);
+          this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
         }
-        this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
       } 
       
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {

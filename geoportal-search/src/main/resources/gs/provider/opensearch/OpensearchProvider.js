@@ -88,11 +88,9 @@
       var p2 = task.target.search(task);
       p2.then(function(searchResult){
         if (isSingleIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
-          // TODO is this error only for the CSW3 test?
-          // TODO send JSON
-          console.log("sending Status_NOT_FOUND f=",task.request.f,task.request.url)
-          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
-          //task.writer.write(task,searchResult);
+          // TODO is this error only for the CSW ets-cat30 test?
+          var msg = "{\"error\": \"Id not found.\"}";
+          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_APPLICATION_JSON,msg);
           promise.resolve();
         } else {
           task.writer.write(task,searchResult);

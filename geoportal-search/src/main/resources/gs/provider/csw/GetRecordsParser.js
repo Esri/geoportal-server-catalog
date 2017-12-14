@@ -51,7 +51,6 @@
             if (ex && ex.message) msg += ex.message;
             ows = gs.Object.create(gs.provider.csw.OwsException);
             ows.put(task,ows.OWSCODE_NoApplicableCode,"",msg);
-            // TODO temporary ?
             //console.log("Error parsing GetRecords xml.");
             //console.error(ex);
           }
@@ -64,19 +63,19 @@
       
       var startPosition = xpathEvaluator.getString(root,"@startPosition");
       if (typeof startPosition === "string" && startPosition.length > 0) {
-        var from = task.val.strToInt(startPosition,-1);
+        var start = task.val.strToInt(startPosition,-1);
         // TODO should this be >= 1
-        if (from >= 1) {
-          // TODO from = from - 1; is this correct indexOffset??
-          cswProvider.addOverrideParameter(task,"from",""+from);
+        if (start >= 1) {
+          // TODO start = start - 1; is this correct indexOffset??
+          cswProvider.addOverrideParameter(task,"start",""+start);
         }
       }
       var maxRecords = xpathEvaluator.getString(root,"@maxRecords");
       if (typeof maxRecords === "string" && maxRecords.length > 0) {
         if (maxRecords.toLowerCase !== "unlimited") {
-          var size = task.val.strToInt(maxRecords,-1);
-          if (size >= 0) {
-            cswProvider.addOverrideParameter(task,"size",""+size);
+          var num = task.val.strToInt(maxRecords,-1);
+          if (num >= 0) {
+            cswProvider.addOverrideParameter(task,"num",""+num);
           }
         }
       }
