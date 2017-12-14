@@ -22,6 +22,8 @@
     bboxField: {writable: true, value: null},
     pointField: {writable: true, value: null},
     
+    fieldAliases: {writable: true, value: null},
+    
     sortables: {writable: true, value: {
     }},
     
@@ -32,6 +34,9 @@
     }},
     
     timePeriodInfo: {writable: true, value: {
+    }},
+    
+    typeInfo: {writable: true, value: {
     }},
     
     itemToAtomEntry: {value: function(task,item) {

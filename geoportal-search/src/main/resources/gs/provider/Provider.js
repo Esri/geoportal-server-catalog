@@ -16,8 +16,23 @@
 (function(){
 
   gs.provider.Provider = gs.Object.create(gs.Proto,{
+    
+    addOverrideParameter: {value: function(task,key,value) {
+      task.request.parameterMap[key] = value; // TODO remove keys ?
+    }},
   
     execute: {value: function(task) {}},
+    
+    preprocess: {value: function(task) {
+      var f = task.request.chkParam("f");
+      if (typeof f === "string" && f.toLowerCase() === "eros") {
+        if (typeof task.request.parameterMap["type"] === "undefined" && 
+            typeof task.request.parameterMap["types"] === "undefined") {
+          var keys = Object.keys(gs.writer.ErosWriter.erosTypes);
+          task.request.parameterMap["type"] = keys;
+        }
+      }
+    }},
   
     setWriter: {value: function(task) {
       var k, f = task.request.f;

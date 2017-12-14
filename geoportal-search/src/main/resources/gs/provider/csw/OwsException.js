@@ -80,7 +80,8 @@
     toResponse: {value: function(task) {
       var xml = this.getReport(task);
       var response = task.response;
-      response.put(response.Status_BAD_REQUEST,response.MediaType_APPLICATION_XML,xml);
+      if (response.status === null) response.status = response.Status_BAD_REQUEST;
+      response.put(response.status,response.MediaType_APPLICATION_XML,xml);
       task.hasError = true;
     }}
 

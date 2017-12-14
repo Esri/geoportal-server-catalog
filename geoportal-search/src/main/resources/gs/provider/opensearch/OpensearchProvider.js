@@ -17,6 +17,8 @@
   
   gs.provider.opensearch.OpensearchProvider = gs.Object.create(gs.provider.Provider,{
     
+    isSingleIdRequest: {writable: true, value: false},
+    
     chkBBoxParam: {value: function(task) {
       if (task.hasError) return;
       var bbox = task.request.getBBox();
@@ -68,7 +70,8 @@
         } else {
           var ids = task.request.getIds();
           if (Array.isArray(ids) && ids.length === 1) {
-            task.request.isItemByIdRequest = true;
+            this.isSingleIdRequest = true;
+            //task.request.isItemByIdRequest = true;
           }
           task.request.f = "atom";
           return this.search(task);
@@ -81,10 +84,20 @@
       task.request.parseF(task);
       this.setWriter(task);
       task.target.parseRequest(task);
+      var isSingleIdRequest = this.isSingleIdRequest;
       var p2 = task.target.search(task);
       p2.then(function(searchResult){
-        task.writer.write(task,searchResult);
-        promise.resolve();
+        if (isSingleIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
+          // TODO is this error only for the CSW3 test?
+          // TODO send JSON
+          console.log("sending Status_NOT_FOUND f=",task.request.f,task.request.url)
+          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
+          //task.writer.write(task,searchResult);
+          promise.resolve();
+        } else {
+          task.writer.write(task,searchResult);
+          promise.resolve();
+        }
       })["catch"](function(error){
         promise.reject(error);
       });

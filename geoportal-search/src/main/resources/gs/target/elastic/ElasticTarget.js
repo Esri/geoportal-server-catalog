@@ -97,11 +97,12 @@
       var modifiedPeriodInfo = this.schema.modifiedPeriodInfo;
       
       
-      this.parseRequestId(task,searchCriteria,musts);
-      this.parseRequestBBox(task,searchCriteria,musts);
-      this.parseRequestPeriod(task,searchCriteria,musts,timePeriod,timePeriodInfo);
-      this.parseRequestPeriod(task,searchCriteria,musts,modifiedPeriod,modifiedPeriodInfo);
-      this.parseRequestSort(task,searchCriteria,musts);
+      this.parseId(task,searchCriteria,musts);
+      this.parseTypes(task,searchCriteria,musts);
+      this.parseBBox(task,searchCriteria,musts);
+      this.parsePeriod(task,searchCriteria,musts,timePeriod,timePeriodInfo);
+      this.parsePeriod(task,searchCriteria,musts,modifiedPeriod,modifiedPeriodInfo);
+      this.parseSort(task,searchCriteria,musts);
       
       if (musts.length > 0) {
         searchCriteria["query"] = {"bool":{"must":musts}};
@@ -116,7 +117,7 @@
       
     }},
     
-    parseRequestBBox: {value:function(task,searchCriteria,musts) {
+    parseBBox: {value:function(task,searchCriteria,musts) {
       var spatialInfo = this.schema.spatialInfo;
       if (!spatialInfo) return;
       
@@ -167,14 +168,14 @@
       if (query !== null) musts.push(query);
     }},
     
-    parseRequestId: {value:function(task,searchCriteria,musts) {
+    parseId: {value:function(task,searchCriteria,musts) {
       var ids = task.request.getIds();
       if (Array.isArray(ids) && ids.length > 0) {
         musts.push({"terms":{"_id":ids}});
       }
     }},
     
-    parseRequestPeriod: {value:function(task,searchCriteria,musts,period,periodInfo) {
+    parsePeriod: {value:function(task,searchCriteria,musts,period,periodInfo) {
       if (!periodInfo) return;
       
       var isV5Plus = this.schema.isVersion5Plus;
@@ -248,12 +249,12 @@
             if (isNested) {
               if (isV5Plus) {
                 qNested = {"nested":{
-                  "path": this.nestedPath,
+                  "path": nestedPath,
                   "query": {"bool": {"must":[query]}}
                 }};
               } else {
                 qNested = {"query":{"nested":{
-                  "path": this.nestedPath,
+                  "path": nestedPath,
                   "query": {"bool": {"must":[query]}}
                 }}};
               }
@@ -267,7 +268,7 @@
       if (query !== null) musts.push(query);
     }},
     
-    parseRequestSort: {value:function(task,searchCriteria,musts) {
+    parseSort: {value:function(task,searchCriteria,musts) {
       var sortables = this.schema.sortables;
       if (!sortables) return;
       
@@ -277,7 +278,6 @@
           if (sortables.hasOwnProperty(k)) {
             if (v === k.toLowerCase()) {
               return sortables[k];
-              break;
             }
           }
         }
@@ -330,6 +330,62 @@
       }
     }},
     
+    parseTypes: {value:function(task,searchCriteria,musts) {
+      var shoulds = [], keys = [], query, qNested;
+      var schema = this.schema;
+      var types = task.request.getTypes();
+      var typeInfo = schema.typeInfo;
+      if (!typeInfo || !Array.isArray(types) || types.length === 0) return;
+      var field = typeInfo.field;
+      var nestedPath = typeInfo.nestedPath;
+      var hasField = (typeof field === "string" && field.length > 0);
+      var isNested = (typeof nestedPath === "string" && nestedPath.length > 0);
+      if (!hasField) return;
+      var isV5Plus = schema.isVersion5Plus;
+      
+      var appendType = function(v) {
+        var q;
+        if (typeof v === "string" && v.length > 0 && keys.indexOf(v) === -1) {
+          keys.push(v);
+          q = {"bool": {"must": {"term": {}}}};
+          q.bool.must.term[field] = v; // TODO escape?
+          shoulds.push(q);
+        }
+      };
+        
+      types.forEach(function(t){
+        var t2 = schema.translateTypeName(task,t);
+        if (Array.isArray(t2)) {
+          t2.forEach(function(t3){
+            appendType(t3);
+          })
+        } else {
+          appendType(t2);
+        }
+      });
+      
+      if (shoulds.length > 0) {
+        query = {"bool": {"should": shoulds}};
+        if (isNested) {
+          if (isV5Plus) {
+            qNested = {"nested":{
+              "path": nestedPath,
+              "query": query
+            }};
+          } else {
+            qNested = {"query":{"nested":{
+              "path": nestedPath,
+              "query": query
+            }}};
+          }
+          query = qNested;
+        }  
+        //console.log("types",JSON.stringify(query));
+      }
+      
+      if (query) musts.push(query);
+    }},
+    
     search: {value:function(task) {
       var i, data = null;
       var url = this.searchUrl;
@@ -338,7 +394,6 @@
         data = JSON.stringify(this.searchCriteria);
         if (task.verbose) console.log(data);
       }
-      task.verbose = true;
       if (task.verbose) console.log("sending url:",url,"data:",data);
       
       var promise = task.context.newPromise();

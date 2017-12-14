@@ -38,6 +38,7 @@
     
     executeTask: {value:function(context, task, responseHandler) {
       var self = this, msg, response;
+      task.provider.preprocess(task);
       task.dfd = task.provider.execute(task);
       task.dfd.then(function(){
         if (task.verbose) console.log("Processor.executeTask-complete");

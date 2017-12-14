@@ -43,6 +43,7 @@
     getIds: {value: function() {
       var ids = [];
       var list = this.getParameterValues("id");
+      if (list === null) list = this.getParameterValues("ids");
       if (list === null) list = this.getParameterValues("recordIds");
       if (Array.isArray(list) && list.length === 1) {
         list = list[0].split(",");
@@ -106,6 +107,23 @@
     
     getTimePeriod: {value: function() {
       return this._getPeriod("time");
+    }},
+    
+    getTypes: {value: function() {
+      var types = [];
+      var list = this.getParameterValues("type");
+      if (list === null) list = this.getParameterValues("types");
+      if (Array.isArray(list) && list.length === 1) {
+        list = list[0].split(",");
+      }
+      if (Array.isArray(list)) {
+        list.forEach(function(type){
+          type = type.trim();
+          if (type.length > 0) types.push(type);
+        });
+      }
+      if (types.length === 0) types = null;
+      return types;
     }},
     
     /* .......................................................................................... */

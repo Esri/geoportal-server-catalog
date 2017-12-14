@@ -114,11 +114,11 @@
       this.q += "("+qToAppend+")";
     }},
     
-    _getPropertyLiteral: {value: function(node,nodeInfo) {
+    _getPropertyLiteral: {value: function(node,nodeInfo,ignoreValidation) {
       var v = this.xmlInfo.xpathEvaluator.getString(node,"fes:Literal");
       if (typeof v !== "string") v = "";
       v = v.trim(); // TODO ?
-      if (v.length === 0) {
+      if (v.length === 0 && !ignoreValidation) {
         var locator = "Literal";
         var msg = locator+" is required for "+nodeInfo.localName;
         ows = gs.Object.create(gs.provider.csw.OwsException);
@@ -131,7 +131,8 @@
     _getPropertyName: {value: function(node,nodeInfo,ignoreValidation) {
       // dc:type - liveData, Format - content type, Subject - theme
       var queryables = ["anytext","id","title"]; 
-      var anytextAliases = ["","anytext","format","subject","dc:type"]
+      var anytextAliases = ["","anytext","format","subject"]
+      if (!ignoreValidation) anytextAliases.push("dc:type");
       
       var name = null, lc = "", locator, ows, msg;
       if (this.task.isCsw2) {
@@ -219,8 +220,9 @@
           var childNode = childInfo.node;
           var childNodeInfo = childInfo.nodeInfo;
           var peek = self._getPropertyName(childNode,childNodeInfo,true);
-          //console.log("ln",ln,"peek",peek);
+          console.log("ln",ln,"peek",peek);
           
+          // modified
           if ((peek === "modified" || peek === "dct:modified") && 
               (ln === "PropertyIsGreaterThan" || ln === "PropertyIsGreaterThanOrEqualTo" ||
                ln === "PropertyIsLessThan" || ln === "PropertyIsLessThanOrEqualTo" ||
@@ -240,6 +242,19 @@
             if (typeof v2 === "string" && v2.trim().length > 0) {
               self.modifiedTo = v2.trim();
             }
+            ln = "ignore";
+          }
+          
+          // liveData
+          if ((peek === "dc:type") && (ln === "PropertyIsEqualTo")) {
+            v = self._getPropertyLiteral(childNode,childNodeInfo,true);
+            if (typeof v === "string" && v.trim().toLowerCase() === "livedata") {
+              self.cswProvider.addOverrideParameter(self.task,"type","liveData");
+              ln = "ignore";
+            }
+          }
+          
+          if (ln === "ignore") {
           
           // logical clauses
           } else if (ln === "And") {
@@ -255,7 +270,7 @@
           } else if (ln === "PropertyIsEqualTo") {
             propName = self._getPropertyName(childNode,childNodeInfo);
             v = self._getPropertyLiteral(childNode,childNodeInfo);
-            if (propName.toLowerCase() !== "id") {
+            if (propName.toLowerCase() === "id") {
               self.ids.push(v);
             } else {
               if (propName.length > 0 && propName.toLowerCase() !== "anytext") {

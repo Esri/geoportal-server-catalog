@@ -41,15 +41,14 @@
     }},
     
     newSchema: {value:function(task) {
-      var schema =  gs.Object.create(gs.target.portal.PortalSchema);
-      schema.portalBaseUrl = this.portalBaseUrl;
+      var schema =  gs.Object.create(gs.target.portal.PortalSchema).mixin({
+        target: this
+      });
       return schema;
     }},
     
     parseRequest: {value:function(task) {
-      if (!this.schema) {
-        this.schema = this.newSchema(task);
-      }
+      if (!this.schema) this.schema = this.newSchema(task);
       var urlParams = {"f": "json"};
       var qAll = "modified:[0000000000000000000 TO 9999999999999999999]";
       
@@ -67,9 +66,10 @@
       this.appendQ(urlParams,orgid);
       this.appendQ(urlParams,task.request.getFilter());
       this.appendQ(urlParams,this.requiredFilter);
-      this.parseRequestId(task,urlParams);
-      this.parseRequestPeriod(task,urlParams);
-      this.parseRequestSort(task,urlParams);
+      this.parseId(task,urlParams);
+      this.parseTypes(task,urlParams);
+      this.parsePeriod(task,urlParams);
+      this.parseSort(task,urlParams);
       
       // TODO from / size
       var from = task.request.getFrom();
@@ -84,12 +84,7 @@
         urlParams["num"] = size;
       } 
       
-      var bbox = task.request.getBBox();
-      if (typeof bbox === "string" && bbox.length > 0) {
-        urlParams["bbox"] = bbox;
-      } else if (typeof urlParams.q !== "string" || urlParams.q.length === 0) {
-        urlParams.q = qAll;
-      }
+      this.parseBBox(task,urlParams,qAll); // must be last
       
       for (var k in urlParams) {
         if (urlParams.hasOwnProperty(k)) {
@@ -99,7 +94,16 @@
       }
     }},
     
-    parseRequestId: {value:function(task,urlParams) {
+    parseBBox: {value:function(task,urlParams,qAll) {
+      var bbox = task.request.getBBox();
+      if (typeof bbox === "string" && bbox.length > 0) {
+        urlParams["bbox"] = bbox;
+      } else if (typeof urlParams.q !== "string" || urlParams.q.length === 0) {
+        urlParams.q = qAll;
+      }
+    }},
+    
+    parseId: {value:function(task,urlParams) {
       var q = "", ids = task.request.getIds();
       if (Array.isArray(ids) && ids.length > 0) {
         ids.forEach(function(id){
@@ -110,7 +114,7 @@
       this.appendQ(urlParams,q);
     }},
     
-    parseRequestPeriod: {value:function(task,urlParams) {
+    parsePeriod: {value:function(task,urlParams) {
       var wildCards = [0000000000000000000,9999999999999999999];
       
       var makeVal = function(value,isFrom) {
@@ -142,7 +146,7 @@
       }
     }},
     
-    parseRequestSort: {value:function(task,urlParams) {
+    parseSort: {value:function(task,urlParams) {
       // TODO sort is target specific?? sort by title, owner, date??
       var sortField, sortOrder;
       
@@ -161,6 +165,9 @@
         sortOrder = task.request.getSortOrder(); // asc/desc
       }
       if (typeof sortField === "string" && sortField.length > 0) {
+        sortField = this.schema.translateFieldName(task,sortField);
+      }
+      if (typeof sortField === "string" && sortField.length > 0) {
         urlParams["sortField"] = sortField;
         if (typeof sortOrder === "string" && sortOrder.trim().toLowerCase() === "desc") {
           urlParams["sortOrder"] = "desc";
@@ -170,7 +177,34 @@
           urlParams["sortOrder"] = sortOrder.trim().toLowerCase();
         }
       }
+    }},
+    
+    parseTypes: {value:function(task,urlParams) {
+      var q = "", keys = [];
+      var schema = this.schema;
+      var types = task.request.getTypes();
+      if (!Array.isArray(types) || types.length === 0) return;
       
+      var appendType = function(v) {
+        if (typeof v === "string" && v.length > 0 && keys.indexOf(v) === -1) {
+          keys.push(v);
+          if (q.length > 0) q += " OR ";
+          q += "type:\""+v+"\"";
+        }
+      };
+     
+      types.forEach(function(t){
+        var t2 = schema.translateTypeName(task,t);
+        if (Array.isArray(t2)) {
+          t2.forEach(function(t3){
+            appendType(t3);
+          })
+        } else {
+          appendType(t2);
+        }
+      });
+      //console.log("parseTypes",q);
+      this.appendQ(urlParams,q);
     }},
     
     search: {value:function(task) {

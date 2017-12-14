@@ -18,16 +18,7 @@
   gs.writer.CsvWriter = gs.Object.create(gs.writer.Writer,{
   
     write: {value: function(task,searchResult) {
-      if (task.request.isItemByIdRequest) {
-        if (!searchResult.items || searchResult.items.length === 0) {
-          // TODO send JSON
-          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
-        } else {
-          this.writeItems(task,searchResult);
-        }
-      } else {
-        this.writeItems(task,searchResult);
-      }
+      this.writeItems(task,searchResult);
     }},
     
     /* .......................................................................................... */
