@@ -24,15 +24,17 @@
         var request = this.makeRequest(requestInfo);
         var targets = this.makeTargets(context,config,request);
         var tasks = this.makeTasks(context,config,requestInfo,targets);
+        var task = null;
         if (tasks.length === 0) {
           this._sendError(responseHandler,null,null,"Search error: no task");
         } else if (tasks.length === 1) {
+          task = tasks[0];
           this.executeTask(context,tasks[0],responseHandler);
         } else {
           this.executeTasks(context,tasks,responseHandler);
         }
       } catch(ex) {
-        this._sendError(responseHandler,null,ex,null);
+        this._sendError(responseHandler,task,ex,null);
       }
     }},
     
@@ -285,10 +287,21 @@
           response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_TEXT_PLAIN,msg);
         }
       }
-      if (error) console.log("Search error",error); // TODO?
       if (typeof responseHandler === "function") {
         // TODO include response.headers?
         responseHandler(response.status,response.mediaType,response.entity,response.headers);
+      }
+      
+      try {
+        var printErrors = true; // TODO?
+        if (printErrors) {
+          console.log("Search error",error);
+          if (error && task && task.context && task.context.isNashorn) {
+            error.printStackTrace();
+          }
+        }
+      } catch(ex) {
+        console.log(ex);
       }
     }}
   

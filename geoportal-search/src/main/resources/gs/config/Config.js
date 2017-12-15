@@ -42,6 +42,11 @@
           "portalBaseUrl": "https://www.arcgis.com"
         }),
         
+        "arcgisSDI": gs.Object.create(gs.target.portal.PortalTarget).mixin({
+          "portalBaseUrl": "https://www.arcgis.com",
+          "requiredFilter": "orgid:RhGiohBHzSBKt1MS"
+        }),
+        
         "portal1": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "http://urbanvm.esri.com/arcgis"
         }),

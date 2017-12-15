@@ -33,22 +33,12 @@
       return this.chkParam("filter");
     }},
     
+    getGroupIds: {value: function() {
+      return this._getIds(["group","groups"]);
+    }},
+    
     getIds: {value: function() {
-      var ids = [];
-      var list = this.getParameterValues("id");
-      if (list === null) list = this.getParameterValues("ids");
-      if (list === null) list = this.getParameterValues("recordIds");
-      if (Array.isArray(list) && list.length === 1) {
-        list = list[0].split(",");
-      }
-      if (Array.isArray(list)) {
-        list.forEach(function(id){
-          id = id.trim();
-          if (id.length > 0) ids.push(id);
-        });
-      }
-      if (ids.length === 0) ids = null;
-      return ids;
+      return this._getIds(["id","ids","recordIds"]);
     }},
     
     getModifiedPeriod: {value: function() {
@@ -63,8 +53,8 @@
       return num;
     }},
     
-    getOrgId: {value: function() {
-      return this.chkParam("orgid");
+    getOrgIds: {value: function() {
+      return this._getIds(["orgid","orgids"]);
     }},
     
     getQ: {value: function() {
@@ -222,6 +212,25 @@
     }},
   
     /* .......................................................................................... */
+    
+    _getIds: {value: function(aliases) {
+      var ids = [], self = this, list = null;
+      aliases.some(function(alias){
+        list = self.getParameterValues(alias);
+        if (list !== null) return true;
+      });
+      if (Array.isArray(list) && list.length === 1) {
+        list = list[0].split(",");
+      }
+      if (Array.isArray(list)) {
+        list.forEach(function(id){
+          id = id.trim();
+          if (id.length > 0) ids.push(id);
+        });
+      }
+      if (ids.length === 0) ids = null;
+      return ids;
+    }},
     
     _getPeriod: {value: function(name) {
       var period = {from: null, to: null};

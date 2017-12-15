@@ -38,10 +38,17 @@
     description: {value: function(task) {
       var promise = task.context.newPromise();
       var opensearchUrl = task.baseUrl+"/opensearch"; // TODO doc or config?
+      
+      var qstr = "", url = task.request.url;
+      var n = url.indexOf("?");
+      if (n !== -1) qstr = url.substring(n + 1).trim();
+      if (qstr.length > 0) qstr = "&"+qstr;    
+      
       var xml = task.context.readResourceFile(task.config.opensearchDescriptionFile,"UTF-8");
       xml = xml.trim();
       xml = xml.replace(/{opensearch.url}/g,task.val.escXml(opensearchUrl));
       xml = xml.replace(/{base.url}/g,task.val.escXml(task.baseUrl));
+      xml = xml.replace(/&amp;{args}/g,task.val.escXml(qstr));
       var response = task.response;
       response.put(response.Status_OK,response.MediaType_APPLICATION_XML,xml);
       promise.resolve();

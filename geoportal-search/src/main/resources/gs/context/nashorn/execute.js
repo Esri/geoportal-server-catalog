@@ -57,6 +57,7 @@ function execute(nhRequest,sRequestInfo) {
     // TODO include the error message in the json response?
     print("Error processing request.");
     print(error);
+    if (error) error.printStackTrace();
     var msg = "{\"error\": \"Error processing request.\"}";
     nhRequest.putResponse(500,"application/json",msg,null);
   }

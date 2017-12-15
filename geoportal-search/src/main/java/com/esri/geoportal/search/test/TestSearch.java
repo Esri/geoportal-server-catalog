@@ -204,7 +204,8 @@ public class TestSearch {
     
     String body = null;
     //body = makeGetRecordsXml();
-    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&xversion=2.0.2&target=gptdb1";
+    //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&xversion=2.0.2&target=gptdb1";
+    requestUrl = baseUrl+"/csw?service=CSW&request=GetCapabilities&target=arcgis";
     //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecordById&target=gptdb1&id=zzz";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=csv&q=data";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&qq=map&size=10&xpretty=true";
@@ -212,7 +213,21 @@ public class TestSearch {
     //requestUrl = baseUrl+"/opensearch?target=arcgis&f=atom&sortField=Date&type=Feature Service,Map Service";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=json&type=MapServer,WMS";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=eros&xtype=MapServer,WMS";
-    requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&type=wms";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&type=wms";
+    //requestUrl = baseUrl+"/opensearch/description?target=arcgis&orgid=2ycVue24EK6qzjat";
+    
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&id=a6f229e2f1474ba18ad1b6a6ce15d2d8,1e63a7a244b04f90993ab2474059f745";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&id=a6f229e2f1474ba18ad1b6a6ce15d2d8&id=1e63a7a244b04f90993ab2474059f745";   
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&orgid=2ycVue24EK6qzjat";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&orgid=RhGiohBHzSBKt1MS"; // sdi
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&orgid=2ycVue24EK6qzjat,RhGiohBHzSBKt1MS";
+    
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&group=699267a815f34c3398fa9bb17a0264cd";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&group=9edccfaf39dc49168584958541837fd6";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&group=699267a815f34c3398fa9bb17a0264cd,9edccfaf39dc49168584958541837fd6";
+
+    requestUrl = baseUrl+"/opensearch";
+    requestUrl = baseUrl+"/opensearch?target=arcgisSDI";
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();
