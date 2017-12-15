@@ -136,8 +136,9 @@
     getCapabilities: {value: function(task) {
       var msg, ows, xml, promise = task.context.newPromise();
       var cswUrl = task.baseUrl+"/csw"; // TODO
-      var opensearchDscUrl = task.baseUrl+"/opensearch/description"; // TODO
+      var opensearchDscUrl = task.baseUrl+"/opensearch/description";
       cswUrl = this.makeCapabilitiesHref(task,cswUrl);
+      opensearchDscUrl = this.makeCapabilitiesHref(task,opensearchDscUrl);
       var capabilitiesFile = task.config.cswCapabilitiesFile;
       if (this.isCsw2) capabilitiesFile = task.config.csw2CapabilitiesFile;
 

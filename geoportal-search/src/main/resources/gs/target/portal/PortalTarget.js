@@ -30,6 +30,21 @@
   //    print("PortalTarget::__init__");
   //  }},
     
+    appendIds: {value:function(task,urlParams,field,ids) {
+      var q = "";
+      if (Array.isArray(ids) && ids.length > 0) {
+        ids.forEach(function(id){
+          if (typeof id === "string" && id.trim().length > 0) {
+            if (q.length > 0) q += " OR ";
+            q += field+":\""+id.trim()+"\"";
+          }
+        });
+      } else if (typeof ids === "string" && ids.trim().length > 0) {
+        q = field+":\""+ids+"\"";
+      }
+      this.appendQ(urlParams,q);
+    }},
+    
     appendQ: {value:function(urlParams,q) {
       if (typeof q === "string" && q.length > 0) {
         if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
@@ -55,18 +70,12 @@
       var q = task.request.getQ();
       if (q === "*" || q === "*:*") q = qAll;
       
-      var orgid = task.request.getOrgId();
-      if (typeof orgid === "string" && orgid.length > 0) {
-        if (orgid.indexOf("orgid:") !== 0) {
-          orgid = "orgid:"+orgid;
-        }
-      }  
-      
       this.appendQ(urlParams,q);
-      this.appendQ(urlParams,orgid);
       this.appendQ(urlParams,task.request.getFilter());
       this.appendQ(urlParams,this.requiredFilter);
-      this.parseId(task,urlParams);
+      this.appendIds(task,urlParams,"id",task.request.getIds());
+      this.appendIds(task,urlParams,"orgid",task.request.getOrgIds());
+      this.appendIds(task,urlParams,"group",task.request.getGroupIds());
       this.parseTypes(task,urlParams);
       this.parsePeriod(task,urlParams);
       this.parseSort(task,urlParams);
@@ -100,17 +109,6 @@
       } else if (typeof urlParams.q !== "string" || urlParams.q.length === 0) {
         urlParams.q = qAll;
       }
-    }},
-    
-    parseId: {value:function(task,urlParams) {
-      var q = "", ids = task.request.getIds();
-      if (Array.isArray(ids) && ids.length > 0) {
-        ids.forEach(function(id){
-          if (q.length > 0) q += " OR ";
-          q += "id:"+id;
-        });
-      }
-      this.appendQ(urlParams,q);
     }},
     
     parsePeriod: {value:function(task,urlParams) {
@@ -225,6 +223,7 @@
         if (qstr !== null && qstr.length > 0) url += "?" + qstr;
       }
       if (task.verbose) console.log("sending url:",url);
+      //console.log("sending url:",url);
       
       var promise = task.context.newPromise();
       var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);
