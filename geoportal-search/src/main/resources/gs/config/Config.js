@@ -81,7 +81,11 @@
         "customElastic": gs.Object.create(gs.target.elastic.CustomElasticTarget).mixin({
           "searchUrl": "http://gptdb1.esri.com:9200/metadata/item/_search",
           "itemBaseUrl": null
-        })
+        }),
+        
+        "cswA": gs.Object.create(gs.target.csw.Csw2Target).mixin({
+          "getRecordsUrl": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
+        }),
 
       };
 

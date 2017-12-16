@@ -31,6 +31,7 @@
     
     newSchema: {value:function(task) {
       var schemaMixin = this.schemaMixin || {};
+      schemaMixin.target = this;
       return gs.Object.create(gs.target.elastic.ElasticSchema).mixin(schemaMixin);
     }},
     

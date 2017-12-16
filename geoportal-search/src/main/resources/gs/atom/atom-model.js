@@ -88,9 +88,9 @@
     }},
   
     writeOwsBoundingBox: {value: function(task,xmlBuilder) {
-      xmlBuilder.writeStartElement(task.uris.URI_OWS,"BoundingBox");
-      xmlBuilder.writeElement(task.uris.URI_OWS,"LowerCorner",this.xmin+" "+this.ymin);
-      xmlBuilder.writeElement(task.uris.URI_OWS,"UpperCorner",this.xmax+" "+this.ymax);
+      xmlBuilder.writeStartElement(task.uris.URI_OWS2,"BoundingBox");
+      xmlBuilder.writeElement(task.uris.URI_OWS2,"LowerCorner",this.xmin+" "+this.ymin);
+      xmlBuilder.writeElement(task.uris.URI_OWS2,"UpperCorner",this.xmax+" "+this.ymax);
       xmlBuilder.writeEndElement();
     }}
   

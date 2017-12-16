@@ -21,6 +21,8 @@
     
     schema: {writable: true, value: null},
     
+    schemaMixin: {writable: true, value: null},
+    
     itemToAtomEntry: {value: function(task,item) {
       return this.schema.itemToAtomEntry(task,item);
     }},
@@ -30,7 +32,8 @@
     }},
     
     newSchema: {value:function(task) {
-      return gs.Object.create(gs.target.TargetSchema);
+      var schemaMixin = this.schemaMixin || {};
+      return gs.Object.create(gs.target.TargetSchema).mixin(schemaMixin);
     }},
   
     parseRequest: {value:function(task) {}},

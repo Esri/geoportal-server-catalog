@@ -227,7 +227,8 @@ public class TestSearch {
     //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&group=699267a815f34c3398fa9bb17a0264cd,9edccfaf39dc49168584958541837fd6";
 
     requestUrl = baseUrl+"/opensearch";
-    requestUrl = baseUrl+"/opensearch?target=arcgisSDI";
+    requestUrl = baseUrl+"/opensearch?target=cswA";
+    
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();

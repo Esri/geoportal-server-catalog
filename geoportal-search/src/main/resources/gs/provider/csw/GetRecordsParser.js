@@ -31,14 +31,14 @@
       this.task = task;
       this.xmlInfo = null;
       var nsmap = {
-        "csw": "http://www.opengis.net/cat/csw/3.0",
-        "fes": "http://www.opengis.net/fes/2.0",
-        "gml": "http://www.opengis.net/gml",
-        "gml32": "http://www.opengis.net/gml/3.2"
+        "csw": task.uris.CSW3,
+        "fes": task.uris.URI_FES2,
+        "gml": task.uris.URI_GML,
+        "gml32": task.uris.URI_GML32
       };
       if (task.isCsw2) {
-        nsmap.csw = "http://www.opengis.net/cat/csw/2.0.2";
-        nsmap.fes = "http://www.opengis.net/ogc";
+        nsmap.csw = task.uris.CSW2;
+        nsmap.fes = task.uris.OWS;
       }
       var body = null, xmlInfo = null, ows, msg;
       if (task.request && task.request.body && typeof task.request.body === "string") {

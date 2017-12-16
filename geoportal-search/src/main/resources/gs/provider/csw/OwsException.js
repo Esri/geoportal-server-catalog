@@ -37,10 +37,10 @@
         this.code = this.OWSCODE_NoApplicableCode;
       }
       var version = "3.0.0";
-      var owsUri = task.uris.URI_OWS;
+      var owsUri = task.uris.URI_OWS2;
       if (task.isCsw2) {
         version = "1.2.0";
-        owsUri = "http://www.opengis.net/ows";
+        owsUri = task.uris.URI_OWS;
       }
       var xml = task.val.XML_HEADER;
       xml += p1+"<ExceptionReport";

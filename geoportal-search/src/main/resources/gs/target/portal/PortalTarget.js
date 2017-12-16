@@ -23,6 +23,8 @@
     
     schema: {writable: true, value: null},
     
+    schemaMixin: {writable: true, value: null},
+    
     urlParams: {writable: true, value: null},
     
   //  __init__: {value:function() {
@@ -56,10 +58,9 @@
     }},
     
     newSchema: {value:function(task) {
-      var schema =  gs.Object.create(gs.target.portal.PortalSchema).mixin({
-        target: this
-      });
-      return schema;
+      var schemaMixin = this.schemaMixin || {};
+      schemaMixin.target = this;
+      return gs.Object.create(gs.target.portal.PortalSchema).mixin(schemaMixin);
     }},
     
     parseRequest: {value:function(task) {
