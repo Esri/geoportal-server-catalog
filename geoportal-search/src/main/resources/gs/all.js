@@ -27,6 +27,7 @@
   if (!gs.provider.csw) gs.provider.csw = {};
   if (!gs.provider.opensearch) gs.provider.opensearch = {};
   if (!gs.target) gs.target = {};
+  if (!gs.target.csw) gs.target.csw = {};
   if (!gs.target.elastic) gs.target.elastic = {};
   if (!gs.target.portal) gs.target.portal = {};
   if (!gs.writer) gs.writer = {};
@@ -54,6 +55,8 @@
       "provider/opensearch/OpensearchProvider",
       "target/Target",
       "target/TargetSchema",
+      "target/csw/Csw2Target",
+      "target/csw/Csw2Schema",
       "target/elastic/ElasticTarget",
       "target/elastic/ElasticSchema",
       "target/elastic/GeoportalTarget",

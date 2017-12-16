@@ -18,18 +18,6 @@
   gs.writer.CswWriter = gs.Object.create(gs.writer.XmlWriter,{
     
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
-  
-    __write: {value: function(task,searchResult) {
-      if (task.request.isItemByIdRequest) {
-        if (!searchResult.items || searchResult.items.length === 0) {
-          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
-        } else {
-          this.writeItem(task,searchResult);
-        }
-      } else {
-        this.writeItems(task,searchResult);
-      }
-    }},
     
     /* .......................................................................................... */
     
@@ -120,11 +108,11 @@
   
     addNamespaces: {value: function(task,xmlBuilder) {
       if (task.isCsw2) {
-        xmlBuilder.writeNamespace("csw","http://www.opengis.net/cat/csw/2.0.2");
-        xmlBuilder.writeNamespace("ows","http://www.opengis.net/ows");
-      } else {
-        xmlBuilder.writeNamespace("csw",task.uris.URI_CSW);
+        xmlBuilder.writeNamespace("csw",task.uris.URI_CSW2);
         xmlBuilder.writeNamespace("ows",task.uris.URI_OWS);
+      } else {
+        xmlBuilder.writeNamespace("csw",task.uris.URI_CSW3);
+        xmlBuilder.writeNamespace("ows",task.uris.URI_OWS2);
       }
       xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("dct",task.uris.URI_DCT);

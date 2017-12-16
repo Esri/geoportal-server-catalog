@@ -166,11 +166,11 @@
       var XPATH_STRING = javax.xml.xpath.XPathConstants.STRING;
       
       var evaluator = {
-        forEachChild: function(node,callback) {
+        forEachAttribute: function(node,callback) {
           var r, self = this;
-          this.getChildren(node).forEach(function(child){
+          this.getAttributes(node).forEach(function(child){
             if (callback) {
-              r =callback({
+              r = callback({
                 node: child,
                 nodeInfo: self.getNodeInfo(child),
                 nodeText: self.getNodeText(child)
@@ -179,6 +179,20 @@
             }
           });
         },
+        forEachChild: function(node,callback) {
+          var r, self = this;
+          this.getChildren(node).forEach(function(child){
+            if (callback) {
+              r = callback({
+                node: child,
+                nodeInfo: self.getNodeInfo(child),
+                nodeText: self.getNodeText(child)
+              });
+              if (r === "break") return;
+            }
+          });
+        },
+        
         getNode: function(contextNode,xpathExpression) {
           return xpath.evaluate(xpathExpression,contextNode,XPATH_NODE);
         },
@@ -192,7 +206,7 @@
         
         getAttributes: function(node) {
           if (node) {
-            return this._nodeListToArray(node.getAtrtibutes());
+            return this._nodeListToArray(node.getAttributes());
           }
           return [];
         },

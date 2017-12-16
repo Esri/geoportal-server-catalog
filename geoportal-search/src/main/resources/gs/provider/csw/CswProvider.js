@@ -635,7 +635,7 @@
       this._add("dc:identifier",task.uris.URI_DC);                 // brief
       this._add("dc:title",task.uris.URI_DC).sortable = true;      // brief
       this._add("dc:type",task.uris.URI_DC).sortable = true;       // brief
-      this._add("ows:BoundingBox",task.uris.URI_OWS);              // brief
+      this._add("ows:BoundingBox",task.uris.URI_OWS2);             // brief
       this._add("dc:subject",task.uris.URI_DC);                    // summary
       //this._add("dc:format",task.uris.URI_DC);                   // summary
       //this._add("dc:relation",task.uris.URI_DC);                 // summary

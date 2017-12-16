@@ -15,14 +15,24 @@
 
 (function(){
   
-  gs.target.elastic.GeoportalTarget = gs.Object.create(gs.target.elastic.ElasticTarget, {
+  gs.target.csw.Csw2Schema = gs.Object.create(gs.target.TargetSchema, {
     
-    newSchema: {value:function(task) {
-      var schemaMixin = this.schemaMixin || {};
-      schemaMixin.target = this;
-      return gs.Object.create(gs.target.elastic.GeoportalSchema).mixin(schemaMixin);
+    itemToAtomEntry: {value: function(task,item) {
+      var entry = gs.Object.create(gs.atom.Entry);
+      entry.id = "unknown";
+      entry.title = "Unitiled";
+      return entry;
+    }},
+    
+    itemToJson: {value: function(task,item) {
+      var json = {
+        id: "unknown",
+        title: "Unitiled"
+      };
+      return json;
     }}
   
   });
 
 }());
+
