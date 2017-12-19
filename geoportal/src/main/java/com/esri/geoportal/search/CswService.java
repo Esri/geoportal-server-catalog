@@ -31,7 +31,7 @@ import javax.ws.rs.core.MultivaluedMap;
 /**
  * CSW service provider.
  */
-@ApplicationPath("csw")
+@ApplicationPath("newcsw")
 @Path("")
 public class CswService extends Application {
 
