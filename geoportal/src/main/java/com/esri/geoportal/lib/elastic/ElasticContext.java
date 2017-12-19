@@ -32,8 +32,11 @@ import org.elasticsearch.client.AdminClient;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.Settings;
+import org.elasticsearch.common.settings.Settings.Builder;
 import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
+import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -55,9 +58,17 @@ public class ElasticContext {
   private String itemIndexType = "item";
   private String mappingsFile = "config/elastic-mappings.json";
   private List<String> nodes;
-  private TransportClient transportClient;
+  private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
+  private boolean useHttps = false;
   private String xmlIndexType = "clob";
+  
+  private String xpackUsername = null;
+  private String xpackPassword = null;
+  
+  private String xpackSslKey = null;
+  private String xpackSslCertificate = null;
+  private String xpackSslCertificateAuthorities = null;
   
   /** Constructor */
   public ElasticContext() {}
@@ -154,7 +165,7 @@ public class ElasticContext {
     return transportClient;
   }
   /** The transport client. */
-  public void setTransportClient(TransportClient transportClient) {
+  public void setTransportClient(PreBuiltTransportClient transportClient) {
     this.transportClient = transportClient;
   }
   
@@ -165,6 +176,15 @@ public class ElasticContext {
   /** The transport port (default=9300) */
   public void setTransportPort(int transportPort) {
     this.transportPort = transportPort;
+  }
+  
+  /** Use HTTPS. */
+  public boolean getUseHttps() {
+    return useHttps;
+  }
+  /** Use HTTPS. */
+  public void setUseHttps(boolean useHttps) {
+    this.useHttps = useHttps;
   }
 
   /** The index name holding metadata xmls. */
@@ -180,6 +200,51 @@ public class ElasticContext {
   @SuppressWarnings("unused")
   private void setXmlIndexType(String xmlIndexType) {
     this.xmlIndexType = xmlIndexType;
+  }
+  
+  /** x-pack credential */
+  public String getXpackUsername() {
+    return this.xpackUsername;
+  }
+  /** x-pack credential */
+  public void setXpackUsername(String v) {
+    this.xpackUsername = v;
+  }
+  
+  /** x-pack credential */
+  public String getXpackPassword() {
+    return this.xpackPassword;
+  }
+  /** x-pack credential */
+  public void setXpackPassword(String v) {
+    this.xpackPassword = v;
+  }
+  
+  /** xpack.ssl.key */
+  public String getXpackSslKey() {
+    return this.xpackSslKey;
+  }
+  /** xpack.ssl.key */
+  public void setXpackSslKey(String v) {
+    this.xpackSslKey = v;
+  }
+  
+  /** xpack.ssl.certificate */
+  public String getXpackSslCertificate() {
+    return this.xpackSslCertificate;
+  }
+  /** xpack.ssl.certificate */
+  public void setXpackSslCertificate(String v) {
+    this.xpackSslCertificate = v;
+  }
+  
+  /** xpack.ssl.certificate_authorities */
+  public String getXpackSslCertificateAuthorities() {
+    return this.xpackSslCertificateAuthorities;
+  }
+  /** xpack.ssl.certificate_authorities */
+  public void setXpackSslCertificateAuthorities(String v) {
+    this.xpackSslCertificateAuthorities = v;
   }
   
   /** Methods =============================================================== */
@@ -299,18 +364,43 @@ public class ElasticContext {
     } else if (transportClient != null) {
       LOGGER.warn("Configuration warning: TransportClient has already been started.");
     } else {
+      boolean hasSettings = false;
+      boolean hasXpack = false;
+      Builder settings = Settings.builder();
       if (clusterName != null && clusterName.length() > 0) {
-        /* ES 2to5 */
-        //Settings settings = Settings.settingsBuilder().put("cluster.name",clusterName).build();
-        Settings settings = Settings.builder().put("cluster.name",clusterName).build();
-        /* ES 2to5 */
-        // transportClient = TransportClient.builder().settings(settings).build();
-        transportClient = new PreBuiltTransportClient(settings);
+        settings.put("cluster.name",clusterName);
+        hasSettings = true;
+      }
+      String user = this.getXpackUsername();
+      String pwd = this.getXpackPassword();
+      String sslKey = this.getXpackSslKey();
+      String sslCert = this.getXpackSslCertificate();
+      String sslCa = this.getXpackSslCertificateAuthorities();
+      if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
+        settings.put("xpack.security.user",user+":"+pwd);
+        hasXpack = true;
+      }
+      if (sslKey != null && sslKey.length() > 0) {
+        settings.put("xpack.ssl.key",sslKey);
+        settings.put("xpack.security.transport.ssl.enabled","true");
+        hasXpack = true;
+      }
+      if (sslCert != null && sslCert.length() > 0) {
+        settings.put("xpack.ssl.certificate",sslCert);
+        hasXpack = true;
+      }
+      if (sslCa != null && sslCa.length() > 0) {
+        settings.put("xpack.ssl.certificate_authorities",sslCa);
+        hasXpack = true;
+      }
+      if (hasXpack) {
+        transportClient = new PreBuiltXPackTransportClient(settings.build());
+      } else if (hasSettings) {
+        transportClient = new PreBuiltTransportClient(settings.build());
       } else {
-        /* ES 2to5 */
-        //transportClient = TransportClient.builder().build();
         transportClient = new PreBuiltTransportClient(Settings.EMPTY);
       }
+      
       for (String node: nodeNames) {
         InetAddress a = InetAddress.getByName(node);
         transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
