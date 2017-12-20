@@ -56,7 +56,7 @@
       return xml;
     }},
   
-    sendHttpRequest: {value: function(task,url,data,dataContentType) {
+    sendHttpRequest: {value: function(task,url,data,dataContentType,options) {
       return null;
     }}
   

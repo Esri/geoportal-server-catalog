@@ -19,7 +19,7 @@ gsConfig = {
 load("classpath:gs/all.js");
 
 /* entry-point from the JVM */
-function execute(nhRequest,sRequestInfo) {
+function execute(nhRequest,sRequestInfo,sSelfInfo) {
   try {
     var requestInfo = JSON.parse(sRequestInfo);
     //requestInfo.taskOptions.verbose = true;
@@ -27,15 +27,27 @@ function execute(nhRequest,sRequestInfo) {
     // to override the base URL if you have a reverse proxy
     //requestInfo.baseUrl = "https://www.geoportal.com/geoportal";
     
+    var selfInfo;
+    if (typeof sSelfInfo === "string" && sSelfInfo.length > 0) {
+      selfInfo = JSON.parse(sSelfInfo);
+      console.log("selfInfo",selfInfo);
+    }
+    
     var processor = gs.Object.create(gs.context.nashorn.NashornProcessor).mixin({
       newConfig: function() {
         var config = gs.Object.create(gs.config.Config);
-        if (requestInfo.geoportalElasticsearchUrl) {
+        if (selfInfo && selfInfo.elastic && selfInfo.elastic.searchUrl) {
+          // self target for a Geoportal instance
           var targets = config.getTargets();
           targets["self"] = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
-            "searchUrl": requestInfo.geoportalElasticsearchUrl,
+            "searchUrl": selfInfo.elastic.searchUrl,
             "itemBaseUrl": requestInfo.baseUrl+"/rest/metadata/item"
           });
+          if (typeof selfInfo.elastic.username === "string") {
+            // for x-pack
+            targets["self"].username = selfInfo.elastic.username;
+            targets["self"].password = selfInfo.elastic.password;
+          }
           config.defaultTarget = "self";
         }
         return config;

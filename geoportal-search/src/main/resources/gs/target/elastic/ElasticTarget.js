@@ -393,18 +393,27 @@
     }},
     
     search: {value:function(task) {
-      var i, data = null;
+      var i, data = null, options = null;
       var url = this.searchUrl;
       var dataContentType = "application/json";
       if (this.searchCriteria) {
         data = JSON.stringify(this.searchCriteria);
         if (task.verbose) console.log(data);
       }
+      if (typeof this.username === "string" && this.username.length > 0 && 
+          typeof this.password === "string" && this.password.length > 0) {
+        options = {
+          basicCredentials: {
+            username: this.username,
+            password: this.password
+          }
+        };
+      }
       if (task.verbose) console.log("sending url:",url,"data:",data);
       //console.log("sending url:",url);
       
       var promise = task.context.newPromise();
-      var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);
+      var p2 = task.context.sendHttpRequest(task,url,data,dataContentType,options);
       p2.then(function(result){
         //console.log("promise.then",result);
         try {

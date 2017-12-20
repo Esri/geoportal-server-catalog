@@ -229,7 +229,6 @@ public class TestSearch {
     requestUrl = baseUrl+"/opensearch";
     requestUrl = baseUrl+"/opensearch?target=cswA";
     
-    
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();
     sr.execute(hsr,body);

@@ -72,14 +72,14 @@
       return gs.context.nashornUtil.removeAllButFilter(xml);
     }},
   
-    sendHttpRequest: {value: function(task,url,data,dataContentType) {
+    sendHttpRequest: {value: function(task,url,data,dataContentType,options) {
       var result, promise = this.newPromise();
       try {
         if (task.async) {
           new java.lang.Thread(function() {
             try {
               if (task.verbose) console.log("NashornContext sendHttpRequest.async");
-              result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType);
+              result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType,options);
               if (task.verbose) console.log("NashornContext sendHttpRequest.async resolved",url);
               //print(typeof result, result.length);
               promise.resolve(result);
@@ -88,7 +88,7 @@
             }
           }).start();
         } else {
-          result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType);
+          result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType,options);
           promise.resolve(result);
         }
       } catch (err) {
@@ -300,7 +300,7 @@
       }
     },
     
-    sendHttpRequest: function(url, data, dataContentType) {
+    sendHttpRequest: function(url, data, dataContentType, options) {
       var result = null;
       var br = null, wr = null;
       var sw = new java.io.StringWriter();
@@ -310,6 +310,17 @@
         java.net.HttpURLConnection.setFollowRedirects(true);
         var con = u.openConnection();
         con.setInstanceFollowRedirects(true);
+        
+        if (options && options.basicCredentials &&
+            typeof options.basicCredentials.username === "string" && 
+            options.basicCredentials.username.length > 0 && 
+            typeof options.basicCredentials.password === "string" && 
+            options.basicCredentials.password.length > 0) {
+          var cred = options.basicCredentials.username+":"+options.basicCredentials.password;
+          cred = new java.lang.String(java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8")),"UTF-8");
+          con.setRequestProperty( "Authorization","Basic "+cred);
+        }
+        
         if (typeof data === "string" && data.length > 0) {
           con.setDoOutput(true);
           con.setRequestMethod("POST");
