@@ -93,28 +93,6 @@ public class SearchRequest {
     return engine;
   }
   
-  /** Get the Elasticsearch _search url */
-  private String getGeoportalElasticsearchUrl() {
-    /*
-    String[] nodes = null;
-    int port = 9200;
-    try {
-      nodes = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().nodesToArray();
-      port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
-    } catch (Throwable t) {
-      t.printStackTrace();
-    }
-    if ((nodes != null) && (nodes.length > 0)) {
-      for (String node: nodes) {
-        // TODO configure this a different way?
-        String url = "http://"+node+":"+port+"/metadata/item/_search";
-        return url;
-      }
-    }
-    */
-    return null;
-  }
-  
   /** Get the request header map. */
   private JsonObjectBuilder getHeaderMap(HttpServletRequest hsr) {
     JsonObjectBuilder headers = Json.createObjectBuilder();
@@ -186,6 +164,42 @@ public class SearchRequest {
     return params;
   }
   
+  /** Get the Elasticsearch info for this Geoportal */
+  private JsonObjectBuilder getSelfInfo() {
+    /*
+    JsonObjectBuilder info = Json.createObjectBuilder();
+    JsonObjectBuilder elastic = Json.createObjectBuilder();
+    info.add("elastic",elastic);
+    String[] nodes = null;
+    String scheme = "http://";
+    int port = 9200;
+    try {
+      nodes = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().nodesToArray();
+      port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
+      //if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
+      //  scheme = "https://";
+      //}
+      //String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackUsername();
+      //String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackPassword();
+      //if (username != null && password != null) {
+      //  elastic.add("username",username);
+      //  elastic.add("password",password);
+      //}
+    } catch (Throwable t) {
+      t.printStackTrace();
+    }
+    if ((nodes != null) && (nodes.length > 0)) {
+      for (String node: nodes) {
+        // TODO configure this a different way?
+        String url = scheme+node+":"+port+"/metadata/item/_search";
+        elastic.add("searchUrl",url);
+        return info;
+      }
+    }
+    */
+    return null;
+  }
+  
   /** Get the task options. */
   private JsonObjectBuilder getTaskOptions(HttpServletRequest hsr) {
     JsonObjectBuilder options = Json.createObjectBuilder();
@@ -228,7 +242,6 @@ public class SearchRequest {
    */
   public void execute(HttpServletRequest hsr, MultivaluedMap<String, String> requestParams, String body) {
     try {
-      String geoportalElasticsearchUrl = getGeoportalElasticsearchUrl();
       String url = hsr.getRequestURL().toString();
       String qstr = hsr.getQueryString();
       if (qstr != null && qstr.length() > 0) {
@@ -245,15 +258,18 @@ public class SearchRequest {
       } else {
         info.add("parameterMap",this.getParameterMap(hsr));
       }
-      if (geoportalElasticsearchUrl != null) {
-        info.add("geoportalElasticsearchUrl",geoportalElasticsearchUrl);
-      }
       info.add("taskOptions",this.getTaskOptions(hsr));
       String sRequestInfo = info.build().toString();
       
+      String sSelfInfo = null;
+      JsonObjectBuilder selfInfo = this.getSelfInfo();
+      if (selfInfo != null) {
+        sSelfInfo = selfInfo.build().toString();
+      }
+      
       ScriptEngine engine = this.getCachedEngine(this.javascriptFile);
       Invocable invocable = (Invocable)engine;
-      invocable.invokeFunction("execute",this,sRequestInfo);
+      invocable.invokeFunction("execute",this,sRequestInfo,sSelfInfo);
     } catch (Throwable t) {
       t.printStackTrace();
       String msg = "{\"error\": \"Error processing request.\"}";

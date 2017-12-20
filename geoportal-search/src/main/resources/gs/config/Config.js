@@ -85,7 +85,7 @@
         
         "cswA": gs.Object.create(gs.target.csw.Csw2Target).mixin({
           "getRecordsUrl": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
-        }),
+        })
 
       };
 
