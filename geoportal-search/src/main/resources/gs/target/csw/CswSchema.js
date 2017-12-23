@@ -15,24 +15,23 @@
 
 (function(){
   
-  gs.target.csw.Csw2Schema = gs.Object.create(gs.target.TargetSchema, {
+  gs.target.csw.CswSchema = gs.Object.create(gs.target.TargetSchema, {
     
     handleRecordToAtomEntry: {value:function(task,xmlInfo,recordInfo) {
       // TODO this needs to be completed
       var ln, ns, hasText, text;
       var entry = gs.Object.create(gs.atom.Entry);
-      var xmlDoc = xmlInfo.xpathEvaluator;
-      xmlDoc.forEachChild(recordInfo.node,function(childInfo){
-        if (childInfo.nodeInfo.isElementNode) {
-          //console.log(childInfo.nodeInfo.localName,childInfo.nodeInfo.namespaceURI);
-          ln = childInfo.nodeInfo.localName;
-          ns = childInfo.nodeInfo.namespaceURI;
+      xmlInfo.forEachChild(recordInfo.node,function(childInfo){
+        if (childInfo.isElementNode) {
+          //console.log(childInfo.localName,childInfo.namespaceURI);
+          ln = childInfo.localName;
+          ns = childInfo.namespaceURI;
           text = childInfo.nodeText;
           hasText = (typeof text === "string" && text.length > 0);
           if (ns === task.uris.URI_DC) {
             //console.log(childInfo.nodeInfo.localName,childInfo.nodeInfo.namespaceURI);
             if (ln === "identifier") {
-              console.log("identifier",text);
+              //console.log("identifier",text);
               //TODO
               //<dc:identifier scheme="urn:x-esri:specification:ServiceType:ArcIMS:Metadata:FileID">http://www.tnccmaps.org:80/arcgis/services/Paj/Paj_Influences_201711/MapServer/33</dc:identifier>
               //<dc:identifier scheme="urn:x-esri:specification:ServiceType:ArcIMS:Metadata:DocID">{72276FF9-009D-4D3B-ACE1-F1ED63D74F8F}</dc:identifier>
@@ -80,15 +79,6 @@
     
     itemToAtomEntry: {value: function(task,item) {
       return this.handleRecordToAtomEntry(task,item.xmlInfo,item.recordInfo);
-    }},
-    
-    itemToJson: {value: function(task,item) {
-      // TODO?
-      var json = {
-        id: "unknown",
-        title: "Unitiled"
-      };
-      return json;
     }}
   
   });

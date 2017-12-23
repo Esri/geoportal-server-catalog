@@ -83,8 +83,14 @@
           "itemBaseUrl": null
         }),
         
-        "cswA": gs.Object.create(gs.target.csw.Csw2Target).mixin({
+        "cswA": gs.Object.create(gs.target.csw.CswTarget).mixin({
+          "cswVersion": "2.0.2",
           "getRecordsUrl": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
+        }),
+        
+        "cswB": gs.Object.create(gs.target.csw.CswTarget).mixin({
+          "cswVersion": "3.0.0",
+          "getRecordsUrl": "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
         })
 
       };

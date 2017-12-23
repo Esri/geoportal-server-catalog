@@ -17,10 +17,8 @@
   
   gs.target.elastic.GeoportalTarget = gs.Object.create(gs.target.elastic.ElasticTarget, {
     
-    newSchema: {value:function(task) {
-      var schemaMixin = this.schemaMixin || {};
-      schemaMixin.target = this;
-      return gs.Object.create(gs.target.elastic.GeoportalSchema).mixin(schemaMixin);
+    getSchemaClass: {value:function() {
+      return gs.target.elastic.GeoportalSchema;
     }}
   
   });

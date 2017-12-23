@@ -31,11 +31,12 @@
     URI_GML: "http://www.opengis.net/gml",
     URI_GML32: "http://www.opengis.net/gml/3.2",
     URI_KML: "http://www.opengis.net/kml/2.2",
-    URI_TIME: "http://a9.com/-/opensearch/extensions/time/1.0/",
+    URI_OGC: "http://www.opengis.net/ogc",
     URI_OPENSEARCH: "http://a9.com/-/spec/opensearch/1.1/",
     URI_OWS: "http://www.opengis.net/ows",
     URI_OWS2: "http://www.opengis.net/ows/2.0",
-    URI_SDI: "http://www.geodata.gov/sdi_atom"
+    URI_SDI: "http://www.geodata.gov/sdi_atom",
+    URI_TIME: "http://a9.com/-/opensearch/extensions/time/1.0/"
   
   }
 

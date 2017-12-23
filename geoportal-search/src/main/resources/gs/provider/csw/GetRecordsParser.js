@@ -30,22 +30,14 @@
       this.cswProvider = cswProvider;
       this.task = task;
       this.xmlInfo = null;
-      var nsmap = {
-        "csw": task.uris.CSW3,
-        "fes": task.uris.URI_FES2,
-        "gml": task.uris.URI_GML,
-        "gml32": task.uris.URI_GML32
-      };
-      if (task.isCsw2) {
-        nsmap.csw = task.uris.CSW2;
-        nsmap.fes = task.uris.OWS;
-      }
       var body = null, xmlInfo = null, ows, msg;
+      var filterNode, sortByNode;
+      
       if (task.request && task.request.body && typeof task.request.body === "string") {
         body = task.request.body.trim();
         if (body.length > 0) {
           try {
-            this.xmlInfo = task.context.newXmlInfo(task,body,nsmap);
+            xmlInfo = this.xmlInfo = task.context.newXmlInfo(task,body);
           } catch(ex) {
             msg = "Error parsing GetRecords xml:";
             if (ex && ex.message) msg += ex.message;
@@ -56,38 +48,60 @@
           }
         }
       } 
-      if (!this.xmlInfo) return;
-      if (!this.xmlInfo.root || !this.xmlInfo.xpathEvaluator) return;
-      var root = this.xmlInfo.root;
-      var xpathEvaluator = this.xmlInfo.xpathEvaluator;
+      if (!xmlInfo || !xmlInfo.root) return;
       
-      var startPosition = xpathEvaluator.getString(root,"@startPosition");
-      if (typeof startPosition === "string" && startPosition.length > 0) {
-        var start = task.val.strToInt(startPosition,-1);
-        // TODO should this be >= 1
-        if (start >= 1) {
-          // TODO start = start - 1; is this correct indexOffset??
-          cswProvider.addOverrideParameter(task,"start",""+start);
+      var rootInfo = xmlInfo.getNodeInfo(xmlInfo.root);
+      if (rootInfo.localName === "GetRecords") {
+        if (rootInfo.namespaceURI === task.uris.URI_CSW2) {
+          task.isCsw2 = true;
         }
+      } else {
+        return; // TODO throw an error?
       }
-      var maxRecords = xpathEvaluator.getString(root,"@maxRecords");
-      if (typeof maxRecords === "string" && maxRecords.length > 0) {
-        if (maxRecords.toLowerCase !== "unlimited") {
-          var num = task.val.strToInt(maxRecords,-1);
-          if (num >= 0) {
-            cswProvider.addOverrideParameter(task,"num",""+num);
+      
+      xmlInfo.forEachAttribute(xmlInfo.root,function(attr){
+        if (attr.localName === "startPosition") {
+          var start = task.val.strToInt(attr.nodeText,-1);
+          // TODO should this be >= 1
+          if (start >= 1) {
+            // TODO start = start - 1; is this correct indexOffset??
+            cswProvider.addOverrideParameter(task,"start",""+start);
+          }
+        } else if (attr.localName === "maxRecords") {
+          var maxRecords = attr.nodeText;
+          if (maxRecords.toLowerCase !== "unlimited") {
+            var num = task.val.strToInt(maxRecords,-1);
+            if (num >= 0) {
+              cswProvider.addOverrideParameter(task,"num",""+num);
+            }
           }
         }
-      }
+      });
       
-      var elementSet = xpathEvaluator.getString(root,"csw:Query/csw:ElementSetName");
-      if (typeof elementSet === "string" && elementSet.trim().length > 0) {
-        cswProvider.addOverrideParameter(task,"ElementSetName",elementSet.trim());
-      }
+      xmlInfo.forEachChild(xmlInfo.root,function(level2){
+        if (level2.localName === "Query") {
+          xmlInfo.forEachChild(level2.node,function(level3){
+            if (level3.localName === "ElementSetName") {
+              var elementSet = level3.nodeText;
+              if (typeof elementSet === "string" && elementSet.trim().length > 0) {
+                cswProvider.addOverrideParameter(task,"ElementSetName",elementSet.trim());
+              }
+            } else if (level3.localName === "Constraint") {
+              xmlInfo.forEachChild(level3.node,function(level4){
+                if (level4.localName === "Filter") {
+                  filterNode = level4.node;
+                }
+              });
+            } else if (level3.localName === "SortBy") {
+              sortByNode = level3.node;
+            }
+          });
+        }
+      });
       
       try{
-        this._parseFilter();
-        this._parseSortBy();
+        if (filterNode) this._parseFilter(filterNode);
+        if (sortByNode) this._parseSortBy(sortByNode);
       } catch(ex) {
         if (ex && ex.message && ex.message === "OWSException") {
           // ignore this, the exception has already been set
@@ -113,8 +127,14 @@
       this.q += "("+qToAppend+")";
     }},
     
-    _getPropertyLiteral: {value: function(node,nodeInfo,ignoreValidation) {
-      var v = this.xmlInfo.xpathEvaluator.getString(node,"fes:Literal");
+    _getPropertyLiteral: {value: function(nodeInfo,ignoreValidation) {
+      var v;
+      this.xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
+        if (childInfo.localName === "Literal") {
+          v = childInfo.nodeText;
+          return "break";
+        } 
+      });
       if (typeof v !== "string") v = "";
       v = v.trim(); // TODO ?
       if (v.length === 0 && !ignoreValidation) {
@@ -124,23 +144,29 @@
         ows.put(this.task,ows.OWSCODE_InvalidParameterValue,locator,msg);
         throw new Error("OWSException");
       }
+      //console.log("_getPropertyLiteral",nodeInfo.localName,v);
       return v;
     }},
     
-    _getPropertyName: {value: function(node,nodeInfo,ignoreValidation) {
+    _getPropertyName: {value: function(nodeInfo,ignoreValidation) {
       // dc:type - liveData, Format - content type, Subject - theme
       var queryables = ["anytext","id","title"]; 
       var anytextAliases = ["","anytext","format","subject"]
       if (!ignoreValidation) anytextAliases.push("dc:type");
       
       var name = null, lc = "", locator, ows, msg;
-      if (this.task.isCsw2) {
-        locator = "PropertyName";
-        name = this.xmlInfo.xpathEvaluator.getString(node,"fes:PropertyName");
-      } else {
-        locator = "ValueReference";
-        name = this.xmlInfo.xpathEvaluator.getString(node,"fes:ValueReference");
-      }
+      
+      this.xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
+        if (childInfo.localName === "PropertyName") {
+          locator = "PropertyName";
+          name = childInfo.nodeText;
+          return "break";
+        } else if (childInfo.localName === "ValueReference") {
+          locator = "ValueReference";
+          name = childInfo.nodeText;
+          return "break";
+        }
+      });
       if (typeof name !== "string") name = "";
       name = name.trim();
       lc = name.toLowerCase();
@@ -160,41 +186,78 @@
       return name;
     }},
     
-    _getSpatialFilter: {value: function(node,nodeInfo) {
-      var xpathEvaluator = this.xmlInfo.xpathEvaluator;
-      var box, coords, msg, ows;
+    _getSpatialFilter: {value: function(nodeInfo) {
+      var xmlInfo = this.xmlInfo;
+      var a, box, coords, envelope, lowerCorner, upperCorner, msg, ows;
       
-      box = xpathEvaluator.getNode(node,"gml:Box");
-      if (!box) box = xpathEvaluator.getNode(node,"gml32:Box");
+      var spatialRel = null;
+      var lc = nodeInfo.localName.toLowerCase();
+      if (lc === "intersects" || lc === "within" ||
+          lc === "contains" || lc === "disjoint") {
+        spatialRel = lc;
+      }
+      
+      xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
+        if (childInfo.localName === "Box") {
+          box = childInfo.node;
+          xmlInfo.forEachChild(childInfo.node,function(childInfo2){
+            if (childInfo2.localName === "coordinates") {
+              coords = childInfo2.nodeText;
+            }
+          });
+        } else if (childInfo.localName === "Envelope") {
+          envelope = childInfo.node;
+          xmlInfo.forEachChild(childInfo.node,function(childInfo2){
+            if (childInfo2.localName === "lowerCorner") {
+              lowerCorner = childInfo2.nodeText;
+            } else if (childInfo2.localName === "upperCorner") {
+              upperCorner = childInfo2.nodeText;
+            }
+          });
+        }
+      });
       if (box) {
-        coords = xpathEvaluator.getNode(box,"gml:coordinates");
-        if (!coords) coords = xpathEvaluator.getNode(box32,"gml:coordinates");
         if (typeof coords === "string" && coords.length > 0) {
           this.cswProvider.addOverrideParameter(this.task,"bbox",coords);
-          var lc = nodeInfo.localName.toLowerCase();
-          if (lc === "intersects" || lc === "within" ||
-              lc === "contains" || lc === "disjoint") {
-            this.cswProvider.addOverrideParameter(this.task,"spatialRel",lc);
+          if (typeof spatialrel === "string" && spatialrel.length > 0) {
+            this.cswProvider.addOverrideParameter(this.task,"spatialRel",spatialrel);
           }
         } else {
           msg = "gml:coordinates are required for gml:Box";
           ows = gs.Object.create(gs.provider.csw.OwsException);
           ows.put(this.task,ows.OWSCODE_InvalidParameterValue,"gml:Box",msg);
         }
+      } else if (envelope) {
+        if (typeof lowerCorner === "string" && lowerCorner.length > 0 &&
+            typeof upperCorner === "string" && upperCorner.length > 0) {
+          a = lowerCorner.split(" ");
+          if (a.length === 2) {
+            coords = a[0]+","+a[1];
+            a = upperCorner.split(" ");
+            if (a.length === 2) {
+              coords += ","+a[0]+","+a[1];
+              this.cswProvider.addOverrideParameter(this.task,"bbox",coords);
+              if (typeof spatialrel === "string" && spatialrel.length > 0) {
+                this.cswProvider.addOverrideParameter(this.task,"spatialRel",spatialrel);
+              }
+            }
+          }
+        } else {
+          msg = "gml:lowerCorner and gml:upperCorner are required for gml:Envelope";
+          ows = gs.Object.create(gs.provider.csw.OwsException);
+          ows.put(this.task,ows.OWSCODE_InvalidParameterValue,"gml:Envelope",msg);
+        }
       } else {
-        msg = "gml:Box is required for "+nodeInfo.localName;
+        msg = "gml:Box or gml:Envelope is required for "+nodeInfo.localName;
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(this.task,ows.OWSCODE_InvalidParameterValue,nodeInfo.localName,msg);
         throw new Error("OWSException");
       }
     }},
     
-    _parseFilter: {value: function() {
-      var root = this.xmlInfo.root;
-      var xpathEvaluator = this.xmlInfo.xpathEvaluator;
-      var filter = xpathEvaluator.getNode(root,"csw:Query/csw:Constraint/fes:Filter");
-      if (!filter) return;
-      this._parseFilterClause(filter);
+    _parseFilter: {value: function(filterNode) {
+      if (!filterNode) return;
+      this._parseFilterClause(filterNode);
       if (typeof this.q === "string" && this.q.length > 0) {
         this.cswProvider.addOverrideParameter(this.task,"q",this.q);
       }
@@ -212,14 +275,11 @@
     
     _parseFilterClause: {value: function(node) {
       var self = this, propName, literal, nodeInfo;
-      var xpathEvaluator = this.xmlInfo.xpathEvaluator;
-      xpathEvaluator.forEachChild(node,function(childInfo){
-        if (childInfo.nodeInfo.isElementNode) {
-          var v, v2, ln = childInfo.nodeInfo.localName;
-          var childNode = childInfo.node;
-          var childNodeInfo = childInfo.nodeInfo;
-          var peek = self._getPropertyName(childNode,childNodeInfo,true);
-          console.log("ln",ln,"peek",peek);
+      this.xmlInfo.forEachChild(node,function(childInfo){
+        if (childInfo.isElementNode) {
+          var v, v2, ln = childInfo.localName;
+          var peek = self._getPropertyName(childInfo,true);
+          //console.log("ln",ln,"peek",peek);
           
           // modified
           if ((peek === "modified" || peek === "dct:modified") && 
@@ -228,12 +288,19 @@
                ln === "PropertyIsBetween")) {
             v = v2 = null;
             if (ln === "PropertyIsGreaterThan" || ln === "PropertyIsGreaterThanOrEqualTo") {
-              v = self._getPropertyLiteral(childNode,childNodeInfo);
+              v = self._getPropertyLiteral(childInfo);
             } else if (ln === "PropertyIsLessThan" || ln === "PropertyIsLessThanOrEqualTo") {
-              v2 = self._getPropertyLiteral(childNode,childNodeInfo); 
+              v2 = self._getPropertyLiteral(childInfo); 
             } else if (ln === "PropertyIsBetween") {
-              v = xpathEvaluator.getString(childNode,"fes:LowerBoundary");
-              v2 = xpathEvaluator.getString(childNode,"fes:UpperBoundary");
+              self.xmlInfo.forEachChild(childInfo.node,function(childInfo2){
+                if (childInfo2.localName === "LowerBoundary") {
+                  v = childInfo2.nodeText;
+                  return "break";
+                } else if (childInfo2.localName === "UpperBoundary") {
+                  v2 = childInfo2.nodeText;
+                  return "break";
+                }
+              });
             }
             if (typeof v === "string" && v.trim().length > 0) {
               self.modifiedFrom = v.trim();
@@ -246,7 +313,7 @@
           
           // liveData
           if ((peek === "dc:type") && (ln === "PropertyIsEqualTo")) {
-            v = self._getPropertyLiteral(childNode,childNodeInfo,true);
+            v = self._getPropertyLiteral(childInfo,true);
             if (typeof v === "string" && v.trim().toLowerCase() === "livedata") {
               self.cswProvider.addOverrideParameter(self.task,"type","liveData");
               ln = "ignore";
@@ -257,18 +324,18 @@
           
           // logical clauses
           } else if (ln === "And") {
-            self._parseFilterClause(childNode);
+            self._parseFilterClause(childInfo.node);
           } else if (ln === "Or") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Not") { 
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           
           // property clauses
           } else if (ln === "PropertyIsBetween") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "PropertyIsEqualTo") {
-            propName = self._getPropertyName(childNode,childNodeInfo);
-            v = self._getPropertyLiteral(childNode,childNodeInfo);
+            propName = self._getPropertyName(childInfo);
+            v = self._getPropertyLiteral(childInfo);
             if (propName.toLowerCase() === "id") {
               self.ids.push(v);
             } else {
@@ -278,71 +345,77 @@
               self._appendQ(v);
             }
           } else if (ln === "PropertyIsGreaterThan") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "PropertyIsGreaterThanOrEqualTo") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "PropertyIsLessThan") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "PropertyIsLessThanOrEqualTo") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "PropertyIsLike") {
-            propName = self._getPropertyName(childNode,childNodeInfo);
-            v = self._getPropertyLiteral(childNode,childNodeInfo);
+            propName = self._getPropertyName(childInfo);
+            v = self._getPropertyLiteral(childInfo);
             if (propName.length > 0 && propName.toLowerCase() !== "anytext") {
               v = propName+":("+v+")";
             }
             self._appendQ(v);
           } else if (ln === "PropertyIsNotEqualTo") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "PropertyIsNull") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
             
             
           // spatial clauses 
           } else if (ln === "BBOX") {
-            self._getSpatialFilter(childNode,childNodeInfo);
+            self._getSpatialFilter(childInfo);
           } else if (ln === "Beyond") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Contains") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Crosses") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Disjoint") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "DWithin") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Equals") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Intersects") {
-            self._getSpatialFilter(childNode,childNodeInfo);
+            self._getSpatialFilter(childInfo);
           } else if (ln === "Overlaps") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Touches") {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Within") {
-            self._getSpatialFilter(childNode,childNodeInfo);
+            self._getSpatialFilter(childInfo);
             
           } else {
-            self._throwUnsupportedOperator(childNode,childNodeInfo);
+            self._throwUnsupportedOperator(childInfo);
           }
         }
       });
     }},
     
-    _parseSortBy: {value: function() {
-      var a = [], sortField, sortOrder;
-      var xpathEvaluator = this.xmlInfo.xpathEvaluator;
-      var nodes = xpathEvaluator.getNodes(this.xmlInfo.root,"//fes:SortProperty");
-      nodes.forEach(function(node){
-        sortField = xpathEvaluator.getString(node,"fes:PropertyName");
-        sortOrder = xpathEvaluator.getString(node,"fes:SortOrder");
-        if (typeof sortField == "string" && sortField.trim().length > 0) {
-          sortField = sortField.trim();
-          if (typeof sortOrder === "string" && 
-            (sortOrder.trim().toLowerCase() === "asc" || sortOrder.trim().toLowerCase() === "desc")) {
-            sortField += ":"+sortOrder.trim().toLowerCase();
+    _parseSortBy: {value: function(sortByNode) {
+      var a = [], sortField, sortOrder, xmlInfo = this.xmlInfo;
+      xmlInfo.forEachChild(sortByNode,function(childInfo){
+        if (childInfo.localName === "SortProperty") {
+          sortField = sortOrder = null;
+          xmlInfo.forEachChild(childInfo.node,function(childInfo2){
+            if (childInfo2.localName === "PropertyName") {
+              sortField = childInfo2.nodeText;
+            } else if (childInfo2.localName === "SortOrder") {
+              sortOrder = childInfo2.nodeText;
+            }
+          });
+          if (typeof sortField == "string" && sortField.trim().length > 0) {
+            sortField = sortField.trim();
+            if (typeof sortOrder === "string" && 
+              (sortOrder.trim().toLowerCase() === "asc" || sortOrder.trim().toLowerCase() === "desc")) {
+              sortField += ":"+sortOrder.trim().toLowerCase();
+            }
+            a.push(sortField);
           }
-          a.push(sortField);
         }
       });
       if (a.length > 0) {
@@ -350,7 +423,7 @@
       }
     }},
     
-    _throwUnsupportedOperator: {value: function(node,nodeInfo) {
+    _throwUnsupportedOperator: {value: function(nodeInfo) {
       var locator = nodeInfo.localName;
       var msg = "Operator "+nodeInfo.nodeName+" is not supported.";
       var ows = gs.Object.create(gs.provider.csw.OwsException);

@@ -33,6 +33,7 @@ public class TestSearch {
     sb.append("<?xml version='1.0' encoding='UTF-8'?>");
     sb.append("<csw:GetRecords xmlns:csw='http://www.opengis.net/cat/csw/2.0.2'");
     sb.append("  xmlns:ogc='http://www.opengis.net/ogc'");
+    sb.append("  xmlns:gml='http://www.opengis.net/gml'");
     sb.append("  service='CSW' resultType='RESULTS'");
     //sb.append("  startPosition='3' maxRecords='200'");
     sb.append(">");
@@ -42,10 +43,10 @@ public class TestSearch {
     sb.append("      <ogc:Filter>");
     sb.append("        <ogc:And>");
     
-    sb.append("          <ogc:PropertyIsEqualTo>");
-    sb.append("            <ogc:PropertyName>dc:type</ogc:PropertyName>");
-    sb.append("            <ogc:Literal>liveData</ogc:Literal>");
-    sb.append("          </ogc:PropertyIsEqualTo> ");
+//    sb.append("          <ogc:PropertyIsEqualTo>");
+//    sb.append("            <ogc:PropertyName>dc:type</ogc:PropertyName>");
+//    sb.append("            <ogc:Literal>liveData</ogc:Literal>");
+//    sb.append("          </ogc:PropertyIsEqualTo> ");
     
 //    sb.append("          <ogc:PropertyIsGreaterThanOrEqualTo>");
 //    sb.append("            <ogc:PropertyName>modified</ogc:PropertyName>");
@@ -79,8 +80,37 @@ public class TestSearch {
     
 //    sb.append("          <ogc:PropertyIsLike wildCard='*' escapeChar='\\' singleChar='?'>");
 //    sb.append("            <ogc:PropertyName>title</ogc:PropertyName>");
-//    sb.append("            <ogc:Literal>Track</ogc:Literal>");
+//    sb.append("            <ogc:Literal>track</ogc:Literal>");
 //    sb.append("          </ogc:PropertyIsLike> ");
+    
+//    sb.append("          <ogc:BBOX>");
+//    sb.append("            <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>");
+//    sb.append("            <gml:Envelope>");
+//    sb.append("              <gml:lowerCorner>-180 -90</gml:lowerCorner>");
+//    sb.append("              <gml:upperCorner>-100 90</gml:upperCorner>");
+//    sb.append("            </gml:Envelope>");
+//    sb.append("          </ogc:BBOX> ");
+    
+//    sb.append("          <ogc:BBOX>");
+//    sb.append("            <ogc:PropertyName>Geometry</ogc:PropertyName>");
+//    sb.append("            <gml:Box>");
+//    sb.append("              <gml:coordinates>-180,-90,-100,90</gml:coordinates>");
+//    sb.append("            </gml:Box>");
+//    sb.append("          </ogc:BBOX> ");
+    
+//    sb.append("          <ogc:Intersects>");
+//    sb.append("            <ogc:PropertyName>Geometry</ogc:PropertyName>");
+//    sb.append("            <gml:Box>");
+//    sb.append("              <gml:coordinates>-180,-90,-100,90</gml:coordinates>");
+//    sb.append("            </gml:Box>");
+//    sb.append("          </ogc:Intersects> ");
+    
+//    sb.append("          <ogc:Within>");
+//    sb.append("            <ogc:PropertyName>Geometry</ogc:PropertyName>");
+//    sb.append("            <gml:Box>");
+//    sb.append("              <gml:coordinates>-180,-90,-100,90</gml:coordinates>");
+//    sb.append("            </gml:Box>");
+//    sb.append("          </ogc:Within> ");
     
     sb.append("        </ogc:And>");
     sb.append("      </ogc:Filter>");
@@ -91,10 +121,10 @@ public class TestSearch {
 //    sb.append("        <ogc:PropertyName>title</ogc:PropertyName>");
 //    sb.append("        <ogc:SortOrder>DESC</ogc:SortOrder>");
 //    sb.append("      </ogc:SortProperty>");  
-////    sb.append("      <ogc:SortProperty>");
-////    sb.append("        <ogc:PropertyName>modified</ogc:PropertyName>");
-////    sb.append("        <ogc:SortOrder>ASC</ogc:SortOrder>");
-////    sb.append("      </ogc:SortProperty>"); 
+//    sb.append("      <ogc:SortProperty>");
+//    sb.append("        <ogc:PropertyName>modified</ogc:PropertyName>");
+//    sb.append("        <ogc:SortOrder>ASC</ogc:SortOrder>");
+//    sb.append("      </ogc:SortProperty>"); 
 //    sb.append("    </ogc:SortBy>");
  
     sb.append("  </csw:Query>");
@@ -204,8 +234,8 @@ public class TestSearch {
     
     String body = null;
     //body = makeGetRecordsXml();
-    //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&xversion=2.0.2&target=gptdb1";
-    requestUrl = baseUrl+"/csw?service=CSW&request=GetCapabilities&target=arcgis";
+    requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&xversion=2.0.2&target=gptdb1";
+    //requestUrl = baseUrl+"/csw?service=CSW&request=GetCapabilities&target=arcgis";
     //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecordById&target=gptdb1&id=zzz";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=csv&q=data";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&f=atom&qq=map&size=10&xpretty=true";
@@ -226,8 +256,15 @@ public class TestSearch {
     //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&group=9edccfaf39dc49168584958541837fd6";
     //requestUrl = baseUrl+"/opensearch?target=arcgis&f=json&group=699267a815f34c3398fa9bb17a0264cd,9edccfaf39dc49168584958541837fd6";
 
-    requestUrl = baseUrl+"/opensearch";
-    requestUrl = baseUrl+"/opensearch?target=cswA";
+    //requestUrl = baseUrl+"/opensearch";
+    //requestUrl = baseUrl+"/opensearch?target=cswA";
+    //requestUrl = baseUrl+"/opensearch?target=cswB";
+    
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&bbox=-160,-70,-100,45";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&q=map";
+    requestUrl = baseUrl+"/opensearch?target=cswA&q=map&start=5&num=3";
+    //requestUrl = baseUrl+"/opensearch?target=cswB&q=map&start=5&num=3";
+    
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();

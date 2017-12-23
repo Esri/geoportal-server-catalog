@@ -21,6 +21,8 @@
       "date": "modified"
     }},
     
+    target: {writable: true, value: null},
+    
     typeAliases: {writable: true, value: {
       "FeatureServer": "Feature Service",
       "MapServer": "Map Service",
@@ -44,7 +46,6 @@
                    "KML","WMS","WFS","WCS","WMTS"]
     }},
     
-    target: {writable: true, value: null},
     
     buildAtomCategories: {value: function(task,item) {
       var categories = [];

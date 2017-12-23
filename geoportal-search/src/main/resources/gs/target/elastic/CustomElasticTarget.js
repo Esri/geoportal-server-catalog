@@ -16,10 +16,9 @@
 (function(){
   
   gs.target.elastic.CustomElasticTarget = gs.Object.create(gs.target.elastic.ElasticTarget, {
-    
-    newSchema: {value:function(task) {
-      var schemaMixin = this.schemaMixin || {};
-      return gs.Object.create(gs.target.elastic.CustomElasticSchema).mixin(schemaMixin);
+
+    getSchemaClass: {value:function() {
+      return gs.target.elastic.CustomElasticSchema;
     }}
   
   });
