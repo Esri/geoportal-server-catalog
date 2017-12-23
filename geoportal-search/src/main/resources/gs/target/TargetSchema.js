@@ -19,12 +19,21 @@
     
     fieldAliases: {writable: true, value: null},
     
+    target: {writable: true, value: null},
+    
     typeAliases: {writable: true, value: null},
   
     itemToAtomEntry: {value: function(task,item) {}},
     
     itemToJson: {value: function(task,item) {
-      return item;
+      // TODO
+      var entry = this.itemToAtomEntry();
+      var json = {};
+      if (entry) {
+        json.id = entry.id;
+        json.title = entry.title;
+      }
+      return json;
     }},
     
     translateFieldName: {value: function(task,name) {

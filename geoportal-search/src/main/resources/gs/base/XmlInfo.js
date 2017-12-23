@@ -17,47 +17,33 @@
   
   /* ============================================================================================ */
   
-  gs.Object = {
-  
-    create: function(proto,properties) {
-      var obj = Object.create(proto,properties);
-      if (typeof obj["__init__"] === "function") obj["__init__"]();
-      return obj;
-    }
-  
-  };
-  
-  /* ============================================================================================ */
-  
-  gs.Proto = Object.create(Object.prototype,{
-  
-    __init__: {value:function() {}},
+  gs.base.XmlInfo = gs.Object.create(gs.Proto,{
     
-    /* Example
-    __init__: {value:function() {
-      gs.base.Target.__init__.call(this); // call super.__init__
-      print("PortalTarget::__init__"); // custom initialization
-    }},
-    */
-  
-    init: {value: function() {
-      return this;
+    dom: {writable: true, value: null},
+    root: {writable: true, value: null},
+
+    forEachAttribute: {value: function(node) {
+      throw new Error("XmlInfo::forEachAttribute must be implemented");
     }},
     
-    mixin: {value: function(props) {
-      if (typeof props === "object" && props != null) {
-        for (var k in props) {
-          if (props.hasOwnProperty(k)) {
-            this[k] = props[k];
-          }
-        }
-      }
-      return this;
+    forEachChild: {value: function(node) {
+      throw new Error("XmlInfo::forEachChild must be implemented");
     }}
   
   });
   
   /* ============================================================================================ */
+  
+  gs.base.XmlNodeInfo = gs.Object.create(gs.Proto,{
+    
+    localName: {writable: true, value: null},
+    namespaceURI: {writable: true, value: null},
+    prefix: {writable: true, value: null},
+    value: {writable: true, value: null}
+    
+  });
+  
+  /* ============================================================================================ */
+  
 
 }());
-

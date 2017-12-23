@@ -90,8 +90,9 @@
       var promise = task.context.newPromise();
       task.request.parseF(task);
       this.setWriter(task);
-      task.target.parseRequest(task);
       var isSingleIdRequest = this.isSingleIdRequest;
+      task.target.prepare(task);
+      
       var p2 = task.target.search(task);
       p2.then(function(searchResult){
         if (isSingleIdRequest && (!searchResult.items || searchResult.items.length === 0)) {

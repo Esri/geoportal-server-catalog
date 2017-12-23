@@ -295,7 +295,7 @@
       try {
         var printErrors = true; // TODO?
         if (printErrors) {
-          console.log("Search error",error);
+          if (error) console.log("Search error",error);
           if (error && task && task.context && task.context.isNashorn) {
             error.printStackTrace();
           }

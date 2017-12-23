@@ -23,6 +23,10 @@
     
     schemaMixin: {writable: true, value: null},
     
+    getSchemaClass: {value:function() {
+      return gs.target.TargetSchema;
+    }},
+    
     itemToAtomEntry: {value: function(task,item) {
       return this.schema.itemToAtomEntry(task,item);
     }},
@@ -33,12 +37,30 @@
     
     newSchema: {value:function(task) {
       var schemaMixin = this.schemaMixin || {};
-      return gs.Object.create(gs.target.TargetSchema).mixin(schemaMixin);
+      schemaMixin.target = this;
+      return gs.Object.create(this.getSchemaClass()).mixin(schemaMixin);
     }},
   
-    parseRequest: {value:function(task) {}},
+    prepare: {value:function(task) {}},
   
     search: {value:function(task) {}},
+    
+    urlParamsToQueryString: {value:function(urlParams) {
+      var k, v, qstr = null;
+      if (urlParams) {
+        for (k in urlParams) {
+          if (urlParams.hasOwnProperty(k)) {
+            v = urlParams[k];
+            if (typeof v !== "undefined" && v !== null) {
+              if (qstr === null) qstr = "";
+              if (qstr.length > 0) qstr += "&";
+              qstr += encodeURIComponent(k)+"="+encodeURIComponent(urlParams[k]);            
+            }
+          }
+        }
+      }
+      return qstr;
+    }}
   
   });
 

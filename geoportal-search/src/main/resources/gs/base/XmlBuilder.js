@@ -30,7 +30,15 @@
     sbXml: {writable: true, value: null},
     
     getXml: {value: function() {
-      return this.sbXml.toString();
+      // <?xml version="1.0" encoding="UTF-8" standalone="no"?>
+      var v = this.sbXml.toString();
+      if (typeof v === "string") {
+        v = v.trim();
+        if (v.length > 0) {
+          v = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>" + v;
+        }
+      }
+      return v;
     }},
     
     init: {value: function(stringBuilder) {

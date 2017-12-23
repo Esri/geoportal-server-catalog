@@ -19,6 +19,8 @@
     
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
     
+    uris: {writable: true, value: null},
+    
     /* .......................................................................................... */
     
     addAtomCategory: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
@@ -117,6 +119,19 @@
       xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("dct",task.uris.URI_DCT);
     }},
+    
+    ensureUris: {value: function(task) {
+      if (this.uris) return this.uris;
+      var uris = this.uris = {};
+      if (task.isCsw2) {
+        uris.csw = task.uris.URI_CSW2;
+        uris.ows = task.uris.URI_OWS;
+      } else {
+        uris.csw = task.uris.URI_CSW3;
+        uris.ows = task.uris.URI_OWS2;
+      }
+      return uris;
+    }},
   
     marshallOptions: {value: function(task,options) {
       options.recordTypeName = "Record"; 
@@ -131,14 +146,15 @@
     }},
     
     writeEntry: {value: function(task,xmlBuilder,item,options) {
+      var uris = this.ensureUris(task);
       var recordTypeName = options.recordTypeName;
       if (options.entryOnly) {
         this.marshallOptions(task,options);
         recordTypeName = options.recordTypeName;
-        xmlBuilder.writeStartElementPfx("csw",recordTypeName,task.uris.URI_CSW);
+        xmlBuilder.writeStartElementPfx("csw",recordTypeName,uris.csw);
         this.addNamespaces(task,xmlBuilder);
       } else {
-        xmlBuilder.writeStartElement(task.uris.URI_CSW,recordTypeName);
+        xmlBuilder.writeStartElement(uris.csw,recordTypeName);
       }
       var entry = task.target.itemToAtomEntry(task,item);
       
@@ -208,17 +224,18 @@
         } 
       }
       
-      xmlBuilder.writeStartElementPfx("csw","GetRecordsResponse",task.uris.URI_CSW);
+      var uris = this.ensureUris(task);
+      xmlBuilder.writeStartElementPfx("csw","GetRecordsResponse",uris.csw);
       this.addNamespaces(task,xmlBuilder);
-      xmlBuilder.writeStartElement(task.uris.URI_CSW,"SearchStatus");
+      xmlBuilder.writeStartElement(uris.csw,"SearchStatus");
       xmlBuilder.writeAttribute("timestamp",now);
       xmlBuilder.writeEndElement();
       
-      xmlBuilder.writeStartElement(task.uris.URI_CSW,"SearchResults");
+      xmlBuilder.writeStartElement(uris.csw,"SearchResults");
       xmlBuilder.writeAttribute("numberOfRecordsMatched",""+totalHits);
       xmlBuilder.writeAttribute("numberOfRecordsReturned",""+numReturned);
       xmlBuilder.writeAttribute("nextRecord",""+nextRecord);
-      xmlBuilder.writeAttribute("recordSchema",task.uris.URI_CSW);
+      xmlBuilder.writeAttribute("recordSchema",uris.csw);
       if (options.elementSetName != null && options.elementSetName.length > 0) {
         xmlBuilder.writeAttribute("elementSetName",options.elementSetName);
       }

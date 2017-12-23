@@ -22,7 +22,7 @@ load("classpath:gs/all.js");
 function execute(nhRequest,sRequestInfo,sSelfInfo) {
   try {
     var requestInfo = JSON.parse(sRequestInfo);
-    //requestInfo.taskOptions.verbose = true;
+    requestInfo.taskOptions.verbose = true;
     
     // to override the base URL if you have a reverse proxy
     //requestInfo.baseUrl = "https://www.geoportal.com/geoportal";
@@ -62,6 +62,7 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
           hm.put(header.name,header.value);
         });
       }
+      if (requestInfo.taskOptions.verbose) print(entity);
       nhRequest.putResponse(status,mediaType,entity,hm);
     });
     

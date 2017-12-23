@@ -45,7 +45,7 @@
       return gs.Object.create(gs.context.nashorn.StringBuilder).init();
     }},
     
-    newXmlInfo: {value: function(task,xmlString,nsmap) {
+    newXmlInfo: {value: function(task,xmlString) {
       var source = new org.xml.sax.InputSource(new java.io.StringReader(xmlString));
       var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
@@ -55,13 +55,11 @@
       var builder = factory.newDocumentBuilder();
       var dom = builder.parse(source);
       var root = dom.getDocumentElement();
-      var xpathEvaluator = gs.context.nashornUtil.newXPathEvaluator(nsmap);
-      var xmlInfo = {
+      var xmlInfo = gs.Object.create(gs.context.nashorn.XmlInfo).mixin({
         dom: dom,
-        root: root,
-        xpathEvaluator: xpathEvaluator
-      };
-      return xmlInfo;
+        root: root
+      });
+      return xmlInfo;      
     }},
     
     readResourceFile: {value: function(path,charset) {
@@ -157,42 +155,10 @@
       
       var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
       xpath.setNamespaceContext(nsContext);
-      
-      var NODETYPE_ATTRIBUTE = org.w3c.dom.Node.ATTRIBUTE_NODE;
-      var NODETYPE_ELEMENT = org.w3c.dom.Node.ELEMENT_NODE;
-      var NODETYPE_TEXT = org.w3c.dom.Node.TEXT_NODE;
       var XPATH_NODE = javax.xml.xpath.XPathConstants.NODE;
       var XPATH_NODESET = javax.xml.xpath.XPathConstants.NODESET;
       var XPATH_STRING = javax.xml.xpath.XPathConstants.STRING;
-      
       var evaluator = {
-        forEachAttribute: function(node,callback) {
-          var r, self = this;
-          this.getAttributes(node).forEach(function(child){
-            if (callback) {
-              r = callback({
-                node: child,
-                nodeInfo: self.getNodeInfo(child),
-                nodeText: self.getNodeText(child)
-              });
-              if (r === "break") return;
-            }
-          });
-        },
-        forEachChild: function(node,callback) {
-          var r, self = this;
-          this.getChildren(node).forEach(function(child){
-            if (callback) {
-              r = callback({
-                node: child,
-                nodeInfo: self.getNodeInfo(child),
-                nodeText: self.getNodeText(child)
-              });
-              if (r === "break") return;
-            }
-          });
-        },
-        
         getNode: function(contextNode,xpathExpression) {
           return xpath.evaluate(xpathExpression,contextNode,XPATH_NODE);
         },
@@ -202,55 +168,6 @@
         },
         getString: function(contextNode,xpathExpression) {
           return xpath.evaluate(xpathExpression,contextNode,XPATH_STRING);
-        },
-        
-        getAttributes: function(node) {
-          if (node) {
-            return this._nodeListToArray(node.getAttributes());
-          }
-          return [];
-        },
-        getChildren: function(node) {
-          if (node) {
-            return this._nodeListToArray(node.getChildNodes());
-          }
-          return [];
-        },
-        getNodeInfo: function(node) {
-          var info = {
-            node: node,
-            nodeName: node.getNodeName(),
-            localName: node.getLocalName(),
-            namespaceURI: node.getNamespaceURI(),
-            isAttributeNode: node.getNodeType() === NODETYPE_ATTRIBUTE,
-            isElementNode: node.getNodeType() === NODETYPE_ELEMENT,
-            isTextNode: node.getNodeType() === NODETYPE_TEXT
-          };
-          return info;
-        },
-        getNodeText: function(node) {
-          var v;
-          if (node) {
-            if (node.getNodeType() === 1) {
-              v = node.getTextContent();
-              if (typeof v === "string") v = v.trim();
-            } else {
-              v = node.getNodeValue();
-            }
-            if (typeof v === "string") {
-              return v;
-            }
-          }
-          return null;
-        },
-        _nodeListToArray: function(nl) {
-          var i, a = [];
-          if (nl) {
-            for (i = 0; i < nl.getLength(); i++) {
-              a.push(nl.item(i));
-            }
-          }
-          return a;
         }
       };
       return evaluator;
@@ -383,6 +300,107 @@
     }
     
   };
+  
+  /* ============================================================================================== */
+  
+  gs.context.nashorn.XmlInfo = gs.Object.create(gs.base.XmlInfo,{
+    
+    NODETYPE_ATTRIBUTE: {writable: true, value: org.w3c.dom.Node.ATTRIBUTE_NODE},
+    NODETYPE_ELEMENT: {writable: true, value: org.w3c.dom.Node.ELEMENT_NODE},
+    NODETYPE_TEXT: {writable: true, value: org.w3c.dom.Node.TEXT_NODE},
+    
+    dom: {writable: true, value: null},
+    root: {writable: true, value: null},
+
+    forEachAttribute: {value: function(node,callback) {
+      var r, self = this;
+      this.getAttributes(node).forEach(function(child){
+        if (callback) {
+          r = callback(self.getNodeInfo(child,true));
+          if (r === "break") return;
+        }
+      });
+    }},
+    
+    forEachChild: {value: function(node,callback) {
+      var r, self = this;
+      this.getChildren(node).forEach(function(child){
+        if (callback) {
+          r = callback(self.getNodeInfo(child,true));
+          if (r === "break") return;
+        }
+      });
+    }},
+    
+    getAttributes: {value: function(node) {
+      if (node) {
+        return this._nodeListToArray(node.getAttributes());
+      }
+      return [];
+    }},
+    
+    getChildren: {value: function(node) {
+      if (node) {
+        return this._nodeListToArray(node.getChildNodes());
+      }
+      return [];
+    }},
+    
+    /*
+     * nodeInfo:
+     * {
+     *   node: ,
+     *   nodeText: , (if requested)
+     *   nodeName: ,
+     *   localName: ,
+     *   namespaceURI: ,
+     *   isAttributeNode: ,
+     *   isElementNode: ,
+     *   isTextNode: 
+     * }
+     */
+    getNodeInfo: {value: function(node,withText) {
+      var info = {
+        node: node,
+        nodeText: this.getNodeText(node),
+        nodeName: node.getNodeName(),
+        localName: node.getLocalName(),
+        namespaceURI: node.getNamespaceURI(),
+        isAttributeNode: node.getNodeType() === this.NODETYPE_ATTRIBUTE,
+        isElementNode: node.getNodeType() === this.NODETYPE_ELEMENT,
+        isTextNode: node.getNodeType() === this.NODETYPE_TEXT
+      };
+      if (withText) info.nodeText = this.getNodeText(node);
+      return info;
+    }},
+    
+    getNodeText: {value: function(node) {
+      var v;
+      if (node) {
+        if (node.getNodeType() === 1) {
+          v = node.getTextContent();
+          if (typeof v === "string") v = v.trim();
+        } else {
+          v = node.getNodeValue();
+        }
+        if (typeof v === "string") {
+          return v;
+        }
+      }
+      return null;
+    }},
+    
+    _nodeListToArray: {value: function(nl) {
+      var i, a = [];
+      if (nl) {
+        for (i = 0; i < nl.getLength(); i++) {
+          a.push(nl.item(i));
+        }
+      }
+      return a;
+    }}
+    
+  });
   
   /* ============================================================================================== */
 
