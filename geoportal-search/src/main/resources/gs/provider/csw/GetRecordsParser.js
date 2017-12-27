@@ -411,7 +411,8 @@
           if (typeof sortField == "string" && sortField.trim().length > 0) {
             sortField = sortField.trim();
             if (typeof sortOrder === "string" && 
-              (sortOrder.trim().toLowerCase() === "asc" || sortOrder.trim().toLowerCase() === "desc")) {
+               (sortOrder.trim().toLowerCase() === "asc" || 
+                sortOrder.trim().toLowerCase() === "desc")) {
               sortField += ":"+sortOrder.trim().toLowerCase();
             }
             a.push(sortField);

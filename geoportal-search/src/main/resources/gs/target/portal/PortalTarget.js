@@ -23,9 +23,68 @@
     
     /* ............................................................................................ */
     
+    _appendIds: {value:function(task,urlParams,field,ids) {
+      var q = "";
+      if (Array.isArray(ids) && ids.length > 0) {
+        ids.forEach(function(id){
+          if (typeof id === "string" && id.trim().length > 0) {
+            if (q.length > 0) q += " OR ";
+            q += field+":\""+id.trim()+"\"";
+          }
+        });
+      } else if (typeof ids === "string" && ids.trim().length > 0) {
+        q = field+":\""+ids+"\"";
+      }
+      this._appendQ(urlParams,q);
+    }},
+    
+    _appendPeriod: {value:function(task,targetRequest,period) {
+      if (!period) return;
+      var urlParams = targetRequest.urlParams;
+      var wildCards = [0000000000000000000,9999999999999999999];
+      
+      var makeVal = function(value,isFrom) {
+        var v = wildCards[0];
+        if (!isFrom) v = wildCards[1];
+        if (value !== null && value !== "*") {
+          // TODO what about millisecond values in the query?
+          if (typeof value === "string" && value.length > 0) {
+            v = new Date(value).getTime();
+            if (!isNaN(v)) {
+              v = ""+v;
+              while (v.length < 19) v = "0"+v;
+              
+            }
+          }
+        }
+        return v;
+      }
+      
+      var from = period.from, to = period.to;
+      if (from !== null || to !== null) {
+        from = makeVal(from,true);
+        to = makeVal(to,false);
+        this._appendQ(urlParams,"modified:["+from+" TO "+to+"]");
+      }
+    }},
+    
+    _appendQ: {value:function(urlParams,q) {
+      if (typeof q === "string" && q.length > 0) {
+        if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
+          urlParams.q = "("+urlParams.q+") AND ("+q+")";
+        } else {
+          urlParams.q = q;
+        }
+      }
+    }},
+    
+    /* ............................................................................................ */
+    
     getSchemaClass: {value:function() {
       return gs.target.portal.PortalSchema;
     }},
+    
+    /* ............................................................................................ */
     
     prepare: {value:function(task) {
       if (!this.schema) this.schema = this.newSchema(task);
@@ -39,7 +98,7 @@
       this.prepareFilter(task,targetRequest);
       this.prepareIds(task,targetRequest);
       this.prepareTypes(task,targetRequest);
-      this.prepareModifiedPeriod(task,targetRequest);
+      this.prepareModified(task,targetRequest);
       this.prepareTimePeriod(task,targetRequest);
       this.preparePaging(task,targetRequest);
       this.prepareSort(task,targetRequest);
@@ -76,9 +135,9 @@
       this._appendIds(task,urlParams,"group",task.request.getGroupIds());
     }},
     
-    prepareModifiedPeriod: {value:function(task,targetRequest) {
+    prepareModified: {value:function(task,targetRequest) {
       var period = task.request.getModifiedPeriod();
-      this._preparePeriod(task,targetRequest,period);
+      this._appendPeriod(task,targetRequest,period);
     }},
     
     prepareOther: {value:function(task,targetRequest) {
@@ -89,7 +148,9 @@
       var urlParams = targetRequest.urlParams;
       var start = task.request.getStart();
       start = task.val.strToInt(start,null);
-      if (typeof start === "number" && task.request.queryIsZeroBased) start = start + 1;
+      if (typeof start === "number" && task.request.queryIsZeroBased) {
+        start = start + 1;
+      }
       if (typeof start === "number" && start >= 1) {
         urlParams["start"] = start;
       }
@@ -112,38 +173,35 @@
     
     prepareSort: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
-      var sortField, sortOrder;
-      var sortParams = task.request.getSort();
-      if (sortParams !== null && sortParams.length === 1) {
-        var sortParam = sortParams[0];
-        var idx = sortParam.lastIndexOf(":");
-        if (idx !== -1) {
-          sortField = sortParam.substring(0,idx).trim();
-          sortOrder = sortParam.substring(idx + 1).trim();
-        } else {
-        }
-      } else {
-        sortField = task.request.getSortField();
-        sortOrder = task.request.getSortOrder(); // asc/desc
-      }
-      if (typeof sortField === "string" && sortField.length > 0) {
-        sortField = this.schema.translateFieldName(task,sortField);
+      var schema = this.schema;
+      var sortField = "", sortOrder = "";
+      var sortOptions = task.request.getSortOptions();
+      if (Array.isArray(sortOptions)) {
+        sortOptions.forEach(function(sortOption){
+          var field = schema.translateFieldName(task,sortOption.field);
+          if (typeof field === "string" && field.length > 0) {
+            if (sortField.length > 0) sortField += ",";
+            sortField += field;
+            if (sortOrder.length > 0) sortOrder += ",";
+            if (sortOption.order === "desc") {
+              sortOrder += "desc";
+            } else {
+              sortOrder += "asc";
+            }
+          }
+        });
       }
       if (typeof sortField === "string" && sortField.length > 0) {
         urlParams["sortField"] = sortField;
-        if (typeof sortOrder === "string" && sortOrder.trim().toLowerCase() === "desc") {
-          urlParams["sortOrder"] = "desc";
-        }
-        if (typeof sortOrder === "string" && 
-          (sortOrder.trim().toLowerCase() === "asc" || sortOrder.trim().toLowerCase() === "desc")) {
-          urlParams["sortOrder"] = sortOrder.trim().toLowerCase();
+        if (typeof sortOrder === "string" && sortOrder.length > 0) {
+          if (sortOrder !== "asc") urlParams["sortOrder"] = sortOrder;
         }
       }
     }},
     
     prepareTimePeriod: {value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
-      this._preparePeriod(task,targetRequest,period);
+      this._appendPeriod(task,targetRequest,period);
     }},
     
     prepareTypes: {value:function(task,targetRequest) {
@@ -226,69 +284,8 @@
       });
       
       return promise;
-    }},
-    
-    /* ............................................................................................ */
-    
-    _appendIds: {value:function(task,urlParams,field,ids) {
-      var q = "";
-      if (Array.isArray(ids) && ids.length > 0) {
-        ids.forEach(function(id){
-          if (typeof id === "string" && id.trim().length > 0) {
-            if (q.length > 0) q += " OR ";
-            q += field+":\""+id.trim()+"\"";
-          }
-        });
-      } else if (typeof ids === "string" && ids.trim().length > 0) {
-        q = field+":\""+ids+"\"";
-      }
-      this._appendQ(urlParams,q);
-    }},
-    
-    _appendQ: {value:function(urlParams,q) {
-      if (typeof q === "string" && q.length > 0) {
-        if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
-          urlParams.q = "("+urlParams.q+") AND ("+q+")";
-        } else {
-          urlParams.q = q;
-        }
-      }
-    }},
-    
-    _preparePeriod: {value:function(task,targetRequest,period) {
-      if (!period) return;
-      var urlParams = targetRequest.urlParams;
-      var wildCards = [0000000000000000000,9999999999999999999];
-      
-      var makeVal = function(value,isFrom) {
-        var v = wildCards[0];
-        if (!isFrom) v = wildCards[1];
-        if (value !== null && value !== "*") {
-          // TODO what about millisecond values in the query?
-          if (typeof value === "string" && value.length > 0) {
-            v = new Date(value).getTime();
-            if (!isNaN(v)) {
-              v = ""+v;
-              while (v.length < 19) v = "0"+v;
-              
-            }
-          }
-        }
-        return v;
-      }
-      
-      var period = task.request.getTimePeriod();
-      if (period.from === null && period.to === null) {
-        period = task.request.getModifiedPeriod();
-      }
-      var from = period.from, to = period.to;
-      if (from !== null || to !== null) {
-        from = makeVal(from,true);
-        to = makeVal(to,false);
-        this._appendQ(urlParams,"modified:["+from+" TO "+to+"]");
-      }
     }}
-  
+    
   });
 
 }());

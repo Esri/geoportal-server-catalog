@@ -17,6 +17,20 @@
   
   gs.target.csw.CswSchema = gs.Object.create(gs.target.TargetSchema, {
     
+    qClauseName: {writable: true, value: "PropertyIsLike"},
+    
+    qPropertyName: {writable: true, value: "AnyText"},
+    idPropertyName: {writable: true, value: "Id"},
+    modifiedPropertyName: {writable: true, value: "Modified"},
+    spatialPropertyName: {writable: true, value: "Geometry"},
+    timePeriodPropertyName: {writable: true, value: "TimePeriod"},
+    
+    sortables: {writable: true, value: {
+      "title": "title",
+      "date": "modified",
+      "modified": "modified"
+    }},
+    
     handleRecordToAtomEntry: {value:function(task,xmlInfo,recordInfo) {
       // TODO this needs to be completed
       var ln, ns, hasText, text;

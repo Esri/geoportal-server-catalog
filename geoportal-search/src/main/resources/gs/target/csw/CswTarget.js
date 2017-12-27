@@ -29,22 +29,17 @@
     
     getRecordsUrl: {writable: true, value: null},
     
-    qClauseName: "PropertyIsLike",
-    
-    qPropertyName: "AnyText",
-    
     requiredFilter: {writable: true, value: null},
     
     resultType: {writable: true, value: "RESULTS"},
     
     targetRequest: {writable: true, value: null},
     
-    
     /* ............................................................................................ */
     
-    appendPropertyClause: {value:function(task,targetRequest,type,property,literal) {
+    appendPropertyClause: {value:function(task,targetRequest,clauseName,propertyName,literal,literal2) {
       // TODO use fieldAliases
-      if (typeof property === "string" && property.length > 0 &&
+      if (typeof propertyName === "string" && propertyName.length > 0 &&
           typeof literal === "string" && literal.length > 0) {
         var uris = targetRequest.uris;
         var xmlBuilder = targetRequest.xmlBuilder;
@@ -52,14 +47,19 @@
         if (this.cswVersion === "2.0.2") {
           propertyTag = "PropertyName";
         }
-        xmlBuilder.writeStartElement(uris.fes,type);
-        if (type === "PropertyIsLike") {
+        xmlBuilder.writeStartElement(uris.fes,clauseName);
+        if (clauseName === "PropertyIsLike") {
           xmlBuilder.writeAttribute("wildcard","*");
           xmlBuilder.writeAttribute("singleChar","?");
           xmlBuilder.writeAttribute("escapeChar","\\");
         }
-        xmlBuilder.writeElement(uris.fes,propertyTag,property);
-        xmlBuilder.writeElement(uris.fes,"Literal",literal);
+        xmlBuilder.writeElement(uris.fes,propertyTag,propertyName);
+        if (clauseName === "PropertyIsBetween") {
+          xmlBuilder.writeElement(uris.fes,"LowerBoundary",literal);
+          xmlBuilder.writeElement(uris.fes,"UpperBoundary",literal2);
+        } else {
+          xmlBuilder.writeElement(uris.fes,"Literal",literal);
+        }
         xmlBuilder.writeEndElement();
       }
     }},
@@ -74,6 +74,25 @@
       }
     }},
     
+    appendSpatialClause: {value:function(task,targetRequest,clauseName,propertyName,bbox) {
+      if (typeof propertyName === "string" && propertyName.length > 0 &&
+        typeof bbox === "string" && bbox.length > 0) {
+        var uris = targetRequest.uris;
+        var xmlBuilder = targetRequest.xmlBuilder;
+        var propertyTag = "ValueReference";
+        if (this.cswVersion === "2.0.2") {
+          propertyTag = "PropertyName";
+        }
+        xmlBuilder.writeStartElement(uris.fes,clauseName);
+        xmlBuilder.writeElement(uris.fes,propertyTag,propertyName);
+        xmlBuilder.writeStartElement(uris.gml,"Box");
+        xmlBuilder.writeAttribute("srsName","http://www.opengis.net/gml/srs/epsg.xml#4326");
+        xmlBuilder.writeElement(uris.gml,"coordinates",bbox);
+        xmlBuilder.writeEndElement();
+        xmlBuilder.writeEndElement();
+      }
+    }},
+    
     buildGetRecordsUrl: {value:function(task,targetRequest) {
       // CSW3
       var urlParams = targetRequest.urlParams = {};
@@ -85,10 +104,11 @@
       this.prepareFilter(task,targetRequest);
       this.prepareIds(task,targetRequest);
       this.prepareTypes(task,targetRequest);
-      this.prepareModifiedPeriod(task,targetRequest);
+      this.prepareModified(task,targetRequest);
       this.prepareTimePeriod(task,targetRequest);
       this.prepareBBox(task,targetRequest);
       this.prepareOther(task,targetRequest);
+      this.prepareSort(task,targetRequest);
 
       targetRequest.urlParams = null;
       for (var k in urlParams) {
@@ -145,7 +165,7 @@
       this.prepareFilter(task,targetRequest);
       this.prepareIds(task,targetRequest);
       this.prepareTypes(task,targetRequest);
-      this.prepareModifiedPeriod(task,targetRequest);
+      this.prepareModified(task,targetRequest);
       this.prepareTimePeriod(task,targetRequest);
       this.prepareBBox(task,targetRequest);
       this.prepareOther(task,targetRequest);
@@ -185,6 +205,7 @@
             }
           });
           xmlInfo.forEachChild(result.node,function(recordInfo){
+            // TODO what about a non Dublin Core record, e.g. an ISO document
             if (recordInfo.localName === "BriefRecord" || 
                 recordInfo.localName === "SummaryRecord" ||
                 recordInfo.localName === "Record") {
@@ -210,6 +231,8 @@
       return task.context.newXmlInfo(task,xmlString);
     }},
     
+    /* ............................................................................................ */
+    
     prepare: {value:function(task) {
       if (!this.schema) {
         this.schema = this.newSchema(task);
@@ -228,6 +251,27 @@
     }},
     
     prepareBBox: {value:function(task,targetRequest) {
+      var urlParams = targetRequest.urlParams;
+      var xmlBuilder = targetRequest.xmlBuilder;
+      var bbox = task.request.getBBox();
+      if (typeof bbox === "string" && bbox.length > 0) {
+        var rel = task.request.getSpatialRel();
+        if (typeof rel === "string" && rel.length > 0) {
+          rel = rel.toLowerCase();
+        } 
+        if (urlParams) {
+          urlParams["bbox"] = bbox;
+          if (rel === "intersects" || rel === "within") {
+            urlParams["spatialRel"] = rel; // this isn't part of the 3.0.0 spec
+          }
+        }
+        if (xmlBuilder) {
+          var cn = "BBOX";
+          var pn = this.schema.spatialPropertyName;
+          if (rel === "within") cn = "Within";
+          this.appendSpatialClause(task,targetRequest,cn,pn,bbox);
+        }
+      } 
     }},
     
     prepareFilter: {value:function(task,targetRequest) {
@@ -236,16 +280,72 @@
       var v = task.request.getFilter();
       if (urlParams) this.appendQ(urlParams,v);
       if (xmlBuilder) {
-        var t = this.qClauseName;
-        var p = this.qPropertyName;
-        this.appendPropertyClause(task,targetRequest,t,p,v);
+        var cn = this.schema.qClauseName;
+        var pn = this.schema.qPropertyName;
+        this.appendPropertyClause(task,targetRequest,cn,pn,v);
       }
     }},
     
     prepareIds: {value:function(task,targetRequest) {
+      var urlParams = targetRequest.urlParams;
+      var xmlBuilder = targetRequest.xmlBuilder;
+      var uris = targetRequest.uris;
+      var self = this, pn = this.schema.idPropertyName;
+      if (typeof pn !== "string" || pn.length === 0) xmlBuilder = null;
+      var ids = task.request.getIds();
+      if (ids && ids.length === 1) {
+        if (urlParams) urlParams.id = ids[0];
+        if (xmlBuilder) {
+          self.appendPropertyClause(task,targetRequest,"PropertyIsEqualTo",pn,ids[0]);
+        }
+      } else if (ids && ids.length > 1) {
+        if (xmlBuilder) {
+          xmlBuilder.writeStartElement(uris.fes,"Or");
+        }
+        ids.forEach(function(id){
+          if (urlParams) {
+            if (Array.isArray(urlParams.id)) {
+              urlParams.id.push(id);
+            } else if (typeof urlParams.id === "undefined") {
+              urlParams.id = id;
+            } else {
+              urlParams.id = [urlParams.id];
+              urlParams.id.push(id);
+            }
+          }
+          if (xmlBuilder) {
+            self.appendPropertyClause(task,targetRequest,"PropertyIsEqualTo",pn,id);
+          }
+        });
+        if (xmlBuilder) {
+          xmlBuilder.writeEndElement();
+        }
+      }
     }},
     
-    prepareModifiedPeriod: {value:function(task,targetRequest) {
+    prepareModified: {value:function(task,targetRequest) {
+      var urlParams = targetRequest.urlParams;
+      var xmlBuilder = targetRequest.xmlBuilder;
+      var period = task.request.getModifiedPeriod();
+      var param = "";
+      var pn = this.schema.modifiedPropertyName;
+      if (period.from !== null) {
+        param = period.from;
+        if (xmlBuilder) {
+          this.appendPropertyClause(task,targetRequest,
+            "PropertyIsGreaterThanOrEqualTo",pn,period.from);
+        }
+      }
+      if (period.to !== null) {
+        param += "/"+period.to;
+        if (xmlBuilder) {
+          this.appendPropertyClause(task,targetRequest,
+            "PropertyIsLessThanOrEqualTo",pn,period.to);
+        }
+      }
+      if (urlParams && param.length > 0) {
+        urlParams["modified"] = param; // not in CSW 3.0.0 spec
+      }
     }},
 
     prepareOther: {value:function(task,targetRequest) {
@@ -275,9 +375,9 @@
       var v = task.request.getQ();
       if (urlParams) this.appendQ(urlParams,v);
       if (xmlBuilder) {
-        var t = this.qClauseName;
-        var p = this.qPropertyName;
-        this.appendPropertyClause(task,targetRequest,t,p,v);
+        var cn = this.schema.qClauseName;
+        var pn = this.schema.qPropertyName;
+        this.appendPropertyClause(task,targetRequest,cn,pn,v);
       }
     }},
     
@@ -285,13 +385,111 @@
     }},
     
     prepareSort: {value:function(task,targetRequest) {
+      var urlParams = targetRequest.urlParams;
+      var xmlBuilder = targetRequest.xmlBuilder;
+      var uris = targetRequest.uris;
+      var sortables = this.schema.sortables;
+      if (!sortables) return;
+      
+      var getField = function(v) {
+        v = v.toLowerCase();
+        for (var k in sortables) {
+          if (sortables.hasOwnProperty(k)) {
+            if (v === k.toLowerCase()) {
+              return sortables[k];
+            }
+          }
+        }
+        return null;
+      };
+      
+      var sort, sortOptions = task.request.getSortOptions();
+      if (Array.isArray(sortOptions)) {
+        sortOptions.forEach(function(sortOption){
+          var field = getField(sortOption.field);
+          if (typeof field === "string" && field.length > 0) {
+            if (!sort) sort = [];
+            sort.push({"field": field, "order": sortOption.order});
+          }
+        });
+      }
+      
+      if (sort && sort.length > 0 && urlParams) {
+        var param = "";
+        sort.forEach(function(sortOption){
+          if (param.length > 0) param += ",";
+          param += sortOption.field;
+          if (sortOption.order === "desc") param += ":D";
+          //else param += ":A";
+        });
+        urlParams["sortBy"] = param;
+      }
+    
+      if (sort && sort.length > 0 && xmlBuilder) {
+        xmlBuilder.writeStartElement(uris.fes,"SortBy");
+        sort.forEach(function(sortOption){
+          xmlBuilder.writeStartElement(uris.fes,"SortProperty");
+          xmlBuilder.writeElement(uris.fes,"PropertyName",sortOption.field);
+          if (typeof sortOption.order === "string" && sortOption.order.length > 0) {
+            xmlBuilder.writeElement(uris.fes,"SortOrder",sortOption.order.toUpperCase());
+          }
+          xmlBuilder.writeEndElement();
+        });
+        xmlBuilder.writeEndElement();
+      }
+      
     }},
     
     prepareTimePeriod: {value:function(task,targetRequest) {
+      // temporal extent of the data
+      var urlParams = targetRequest.urlParams;
+      var xmlBuilder = targetRequest.xmlBuilder;
+      var period = task.request.getTimePeriod();
+      var param = "";
+      var pn = this.schema.timePeriodPropertyName;
+      if (period.from !== null) {
+        param = period.from;
+        if (xmlBuilder) {
+          this.appendPropertyClause(task,targetRequest,
+            "PropertyIsGreaterThanOrEqualTo",pn,period.from);
+        }
+      }
+      if (period.to !== null) {
+        param += "/"+period.to;
+        if (xmlBuilder) {
+          this.appendPropertyClause(task,targetRequest,
+            "PropertyIsLessThanOrEqualTo",pn,period.to);
+        }
+      }
+      if (urlParams && param.length > 0) {
+        urlParams["time"] = param;
+      }
     }},
     
     prepareTypes: {value:function(task,targetRequest) {
+      // TODO liveData?
+      // TODO ISO topic categories?
+      // TODO IMS content types?
+      var schema = this.schema;
+      var types = task.request.getTypes();
+      if (!Array.isArray(types) || types.length === 0) return;
+      
+      /*
+      types.forEach(function(t){
+        var t2 = schema.translateTypeName(task,t);
+        if (Array.isArray(t2)) {
+          t2.forEach(function(t3){
+            //appendType(t3);
+          })
+        } else {
+          //appendType(t2);
+        }
+      });
+      */
+      
     }},
+    
+    /* ............................................................................................ */
     
     search: {value:function(task) {
       var self = this, data = null;
@@ -313,7 +511,7 @@
       var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);
       p2.then(function(response){
         //if (task.verbose) console.log("GetRecordsResponse:\r\n",response);
-        console.log("GetRecordsResponse:\r\n",response);
+        //console.log("GetRecordsResponse:\r\n",response); // TODO temporary
         try {
           var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
           self.handleGetRecordsResponse(task,response,searchResult);

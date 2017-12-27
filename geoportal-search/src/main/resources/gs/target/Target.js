@@ -52,9 +52,12 @@
           if (urlParams.hasOwnProperty(k)) {
             v = urlParams[k];
             if (typeof v !== "undefined" && v !== null) {
-              if (qstr === null) qstr = "";
-              if (qstr.length > 0) qstr += "&";
-              qstr += encodeURIComponent(k)+"="+encodeURIComponent(urlParams[k]);            
+              if (!Array.isArray(v)) v = [v];
+              v.forEach(function(v2){
+                if (qstr === null) qstr = "";
+                if (qstr.length > 0) qstr += "&";
+                qstr += encodeURIComponent(k)+"="+encodeURIComponent(v2);  
+              })
             }
           }
         }

@@ -91,6 +91,11 @@
         "cswB": gs.Object.create(gs.target.csw.CswTarget).mixin({
           "cswVersion": "3.0.0",
           "getRecordsUrl": "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+        }),
+        
+        "cswC": gs.Object.create(gs.target.csw.CswTarget).mixin({
+          "cswVersion": "3.0.0",
+          "getRecordsUrl": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
         })
 
       };
