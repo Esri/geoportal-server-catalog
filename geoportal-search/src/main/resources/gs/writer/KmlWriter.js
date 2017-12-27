@@ -31,7 +31,7 @@
       if (!entry) return;
       
       if (options.entryOnly) {
-        xmlBuilder.writeStartElementPfx("kml","Placemark",task.uris.URI_KML);
+        xmlBuilder.writeStartElementPfx("kml",task.uris.URI_KML,"Placemark");
         this.addNamespaces(task,xmlBuilder);
       } else {
         xmlBuilder.writeStartElement(task.uris.URI_KML,"Placemark");
@@ -98,7 +98,7 @@
       var xmlBuilder = task.context.newXmlBuilder();
       xmlBuilder.writeStartDocument();
 
-      xmlBuilder.writeStartElementPfx("kml","kml",task.uris.URI_KML);
+      xmlBuilder.writeStartElementPfx("kml",task.uris.URI_KML,"kml");
       this.addNamespaces(task,xmlBuilder);
       xmlBuilder.writeStartElement(task.uris.URI_KML,"Document");
       xmlBuilder.writeElement(task.uris.URI_KML,"name","Results");

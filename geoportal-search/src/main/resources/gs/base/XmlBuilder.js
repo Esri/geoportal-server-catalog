@@ -118,10 +118,10 @@
     
     writeStartElement: {value: function(namespaceURI, localName) {
       var prefix = this.prefixByUri[namespaceURI];
-      this.writeStartElementPfx(prefix,localName,namespaceURI);
+      this.writeStartElementPfx(prefix,namespaceURI,localName);
     }},
     
-    writeStartElementPfx: {value: function(prefix, localName, namespaceURI) {
+    writeStartElementPfx: {value: function(prefix, namespaceURI, localName) {
       var el = gs.Object.create(gs.base.XmlElement).init(prefix,localName,namespaceURI);
       if (this.activeElement) {
         this.activeElement.elements.push(el);
