@@ -61,16 +61,78 @@
       return this.chkParam("q");
     }},
     
-    getSort: {value: function() {
-      return this.getParameterValues("sort");;
-    }},
-    
-    getSortField: {value: function() {
-      return this.chkParam("sortField");
-    }},
-    
-    getSortOrder: {value: function() {
-      return this.chkParam("sortOrder");
+    getSortOptions: {value: function() {
+      // &sortField=title,modified&sortOrder=desc,asc // Portal syntax
+      // &sort=title:desc&sort=modified:asc // Elasticsearch syntax
+      // &sortBy=title:D,modified:A // CSW syntax
+      var idx, sortField, sortOrder, sortOptions = null;
+      var values = this.getParameterValues("sort");
+      if (values === null || values.length === 0) {
+        values = this.getParameterValues("sortBy");
+      }
+      if (values !== null && values.length === 1) {
+        values = values[0].split(",");
+      } else if (values === null || values.length === 0) {
+        var fields = this.getParameterValues("sortField");
+        if (fields !== null && fields.length === 1) {
+          fields = fields[0].split(",");
+        }
+        var order = this.getParameterValues("sortOrder");
+        if (order !== null && order.length === 1) {
+          order = order[0].split(",");
+        }
+        if (fields !== null && fields.length > 0) {
+          idx = -1;
+          fields.forEach(function(field){
+            idx++;
+            if (typeof field === "string") {
+              if (order !== null && order.length === fields.length) {
+                sortOrder = order[idx];
+                if (typeof sortOrder === "string" && sortOrder.length > 0) {
+                  field += ":"+sortOrder;
+                }
+              }
+              if (!values) values = [];
+              values.push(field);
+            }
+          });
+        }
+      }
+      if (values !== null && values.length > 0) {
+        values.forEach(function(value){
+          sortOrder = null;
+          idx = value.lastIndexOf(":");
+          if (idx !== -1) {
+            sortField = value.substring(0,idx).trim();
+            sortOrder = value.substring(idx + 1);
+            if (typeof sortOrder === "string") {
+              sortOrder = sortOrder.trim().toLowerCase();
+              if (sortOrder === "a") sortOrder = "asc"; // CSW
+              else if (sortOrder === "d") sortOrder = "desc"; // CSW
+            }
+            if (sortOrder !== "asc" && sortOrder !== "desc") sortOrder = null;
+          } else {
+            sortField = value;
+            if (typeof sortField === "string") sortField = sortField.trim();
+          }
+          if (typeof sortField === "string" && sortField.length > 0) {
+            if (!sortOptions) sortOptions = [];
+            if (typeof sortOrder === "string") {
+              sortOptions.push({"field": sortField, "order": sortOrder});
+            } else {
+              sortOptions.push({"field": sortField});
+            } 
+          }
+        });
+      }
+      /*
+      if (Array.isArray(sortOptions)) {
+        sortOptions.forEach(function(sortOption){
+          console.log("sortOption","field:",sortOption.field,"order:",sortOption.order)
+        });
+      }
+      */
+      return sortOptions;
     }},
     
     getSpatialRel: {value: function() {

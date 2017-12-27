@@ -22,15 +22,111 @@
     searchUrl: {writable: true, value: null},
     
     useSimpleQueryString: {writable: true, value: false}, // TODO?
-    
-    
+   
     _searchCriteria: {writable: true, value: null},
+    
+    /* ............................................................................................ */
+    
+    _appendPeriod: {value:function(task,targetRequest,period,periodInfo) {
+      if (!periodInfo) return;
+      
+      var isV5Plus = this.schema.isVersion5Plus;
+      var fieldsOperator = "must";
+      var field = periodInfo.field;
+      var toField = periodInfo.toField;
+      var nestedPath = periodInfo.nestedPath;
+      
+      var from = period.from, to = period.to;
+      if (from === "*") from = null;
+      if (to === "*") to = null;
+      var hasValue = (from !== null || to !== null);
+  
+      var hasField = (typeof field === "string" && field.length > 0);
+      var hasToField = (typeof toField === "string" && toField.length > 0);
+      var isNested = (typeof nestedPath === "string" && nestedPath.length > 0);
+      var query = null, condition = null, qFrom, qTo, qNested;
+      
+      if (hasValue && hasField) {
+          
+        if (hasToField) {
+          if (from !== null) {
+            if (to !== null) condition = {"gte":from,"lte":to};
+            else condition = {"gte":from};
+            qFrom = {"range": {}};
+            qFrom.range[field] = condition;
+            query = qFrom;
+          }
+          if (to !== null) {
+            condition = {"lte":to};
+            if (from != null) condition = {"gte":from,"lte":to};
+            else condition = {"lte":to};
+            qTo = {"range": {}};
+            qTo.range[toField] = condition;
+            query = qTo;
+          }
+          if (from !== null && to !== null) {
+            if (fieldsOperator === "must") {
+              query = {"bool": {"must":[qFrom,qTo]}};
+            } else {
+              query = {"bool": {"should":[qFrom,qTo]}};
+            }
+          }
+          if (query && isNested) {
+            if (isV5Plus) {
+              qNested = {"nested":{
+                "path": nestedPath,
+                "query": query
+              }};
+            } else {
+              qNested = {"query":{"nested":{
+                "path": nestedPath,
+                "query": query
+              }}};
+            }
+            query = qNested;
+          }  
+        }
+        
+        if (!hasToField) {
+          if (from !== null && to !== null) {
+            condition = {"gte":from,"lte":to};
+          } else if (from !== null) {
+            condition = {"gte":from};
+          } else if (to !== null) {
+            condition = {"lte":to};
+          }
+          if (condition !== null) {
+            query = {"range": {}};
+            query.range[field] = condition;
+            if (isNested) {
+              if (isV5Plus) {
+                qNested = {"nested":{
+                  "path": nestedPath,
+                  "query": {"bool": {"must":[query]}}
+                }};
+              } else {
+                qNested = {"query":{"nested":{
+                  "path": nestedPath,
+                  "query": {"bool": {"must":[query]}}
+                }}};
+              }
+              query = qNested;
+            }
+          } 
+        }
+  
+      }
+      
+      if (query !== null) targetRequest.musts.push(query);
+    }},
     
     /* ............................................................................................ */
     
     getSchemaClass: {value:function() {
       return gs.target.elastic.ElasticSchema;
     }},
+    
+    /* ............................................................................................ */
     
     prepare: {value:function(task) {
       if (!this.schema) {
@@ -48,7 +144,7 @@
       this.prepareFilter(task,targetRequest);
       this.prepareIds(task,targetRequest);
       this.prepareTypes(task,targetRequest);
-      this.prepareModifiedPeriod(task,targetRequest);
+      this.prepareModified(task,targetRequest);
       this.prepareTimePeriod(task,targetRequest);
       this.prepareBBox(task,targetRequest);
       this.preparePaging(task,targetRequest);
@@ -140,10 +236,10 @@
       }
     }},
     
-    prepareModifiedPeriod: {value:function(task,targetRequest) {
+    prepareModified: {value:function(task,targetRequest) {
       var period = task.request.getModifiedPeriod();
       var periodInfo = this.schema.modifiedPeriodInfo;
-      this._preparePeriod(task,targetRequest,period,periodInfo);
+      this._appendPeriod(task,targetRequest,period,periodInfo);
     }},
     
     prepareOther: {value:function(task,targetRequest) {
@@ -152,7 +248,9 @@
     preparePaging: {value:function(task,targetRequest) {
       var start = task.request.getStart();
       start = task.val.strToInt(start,null);
-      if (typeof start === "number" && !task.request.queryIsZeroBased) start = start - 1;
+      if (typeof start === "number" && !task.request.queryIsZeroBased) {
+        start = start - 1;
+      }
       if (typeof start === "number" && start >= 0) {
         targetRequest.searchCriteria["from"] = start;
       }    
@@ -210,48 +308,24 @@
         }
         return null;
       };
-   
-      var sort = [], sortField, sortOrder, sortOption;
-      var sortParams = task.request.getSort();
-      if (sortParams !== null && sortParams.length === 1) {
-        sortParams = sortParams[0].split(",");
-      }
-      if (sortParams !== null && sortParams.length > 0) {
-        sortParams.forEach(function(sortParam){
-          var idx = sortParam.lastIndexOf(":");
-          if (idx !== -1) {
-            sortField = getField(sortParam.substring(0,idx));
-            if (typeof sortField === "string" && sortField.length > 0) {
-              sortOrder = sortParam.substring(idx + 1);
-              sortOption = {};
-              if (sortOrder === "desc") sortOption[sortField] = "desc";
-              else sortOption[sortField] = "asc";
-              sort.push(sortOption);
+      
+      var sort = [], sortOptions = task.request.getSortOptions();
+      if (Array.isArray(sortOptions)) {
+        sortOptions.forEach(function(sortOption){
+          var field = getField(sortOption.field);
+          if (typeof field === "string" && field.length > 0) {
+            var option = {};
+            if (sortOption.order === "asc") {
+              option[field] = "asc";
+            } else if (sortOption.order === "desc") {
+              option[field] = "desc";
+            } else {
+              option = field;
             }
-          } else {
-            sortField = getField(sortParam);
-            if (typeof sortField === "string" && sortField.length > 0) {
-              sort.push(sortField);
-            }
+            sort.push(option);
           }
         });
-      } else {
-        sortField = task.request.getSortField();
-        sortOrder = task.request.getSortOrder(); // asc/desc
-        if (typeof sortField === "string" && sortField.length > 0) {
-          sortField = getField(sortField);
-        }
-        if (typeof sortField === "string" && sortField.length > 0) {
-          if (typeof sortOrder === "string" && 
-            (sortOrder.trim().toLowerCase() === "asc" || sortOrder.trim().toLowerCase() === "desc")){
-            sortOption = {};
-            sortOption[sortField] = sortOrder.trim().toLowerCase();
-            sort.push(sortOption);
-          } else {
-            sort.push(sortField);
-          }
-        }
-      }
+      } 
       if (sort.length > 0) {
         targetRequest.searchCriteria["sort"] = sort;
       }
@@ -260,7 +334,7 @@
     prepareTimePeriod: {value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
       var periodInfo = this.schema.timePeriodInfo;
-      this._preparePeriod(task,targetRequest,period,periodInfo);
+      this._appendPeriod(task,targetRequest,period,periodInfo);
     }},
     
     prepareTypes: {value:function(task,targetRequest) {
@@ -372,101 +446,6 @@
       });
       
       return promise;
-    }},
-    
-    /* ............................................................................................ */
-    
-    _preparePeriod: {value:function(task,targetRequest,period,periodInfo) {
-      if (!periodInfo) return;
-      
-      var isV5Plus = this.schema.isVersion5Plus;
-      var fieldsOperator = "must";
-      var field = periodInfo.field;
-      var toField = periodInfo.toField;
-      var nestedPath = periodInfo.nestedPath;
-      
-      var from = period.from, to = period.to;
-      if (from === "*") from = null;
-      if (to === "*") to = null;
-      var hasValue = (from !== null || to !== null);
-  
-      var hasField = (typeof field === "string" && field.length > 0);
-      var hasToField = (typeof toField === "string" && toField.length > 0);
-      var isNested = (typeof nestedPath === "string" && nestedPath.length > 0);
-      var query = null, condition = null, qFrom, qTo, qNested;
-      
-      if (hasValue && hasField) {
-          
-        if (hasToField) {
-          if (from !== null) {
-            if (to !== null) condition = {"gte":from,"lte":to};
-            else condition = {"gte":from};
-            qFrom = {"range": {}};
-            qFrom.range[field] = condition;
-            query = qFrom;
-          }
-          if (to !== null) {
-            condition = {"lte":to};
-            if (from != null) condition = {"gte":from,"lte":to};
-            else condition = {"lte":to};
-            qTo = {"range": {}};
-            qTo.range[toField] = condition;
-            query = qTo;
-          }
-          if (from !== null && to !== null) {
-            if (fieldsOperator === "must") {
-              query = {"bool": {"must":[qFrom,qTo]}};
-            } else {
-              query = {"bool": {"should":[qFrom,qTo]}};
-            }
-          }
-          if (query && isNested) {
-            if (isV5Plus) {
-              qNested = {"nested":{
-                "path": nestedPath,
-                "query": query
-              }};
-            } else {
-              qNested = {"query":{"nested":{
-                "path": nestedPath,
-                "query": query
-              }}};
-            }
-            query = qNested;
-          }  
-        }
-        
-        if (!hasToField) {
-          if (from !== null && to !== null) {
-            condition = {"gte":from,"lte":to};
-          } else if (from !== null) {
-            condition = {"gte":from};
-          } else if (to !== null) {
-            condition = {"lte":to};
-          }
-          if (condition !== null) {
-            query = {"range": {}};
-            query.range[field] = condition;
-            if (isNested) {
-              if (isV5Plus) {
-                qNested = {"nested":{
-                  "path": nestedPath,
-                  "query": {"bool": {"must":[query]}}
-                }};
-              } else {
-                qNested = {"query":{"nested":{
-                  "path": nestedPath,
-                  "query": {"bool": {"must":[query]}}
-                }}};
-              }
-              query = qNested;
-            }
-          } 
-        }
-  
-      }
-      
-      if (query !== null) targetRequest.musts.push(query);
     }}
     
   });

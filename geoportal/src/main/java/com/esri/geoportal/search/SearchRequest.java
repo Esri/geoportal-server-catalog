@@ -168,7 +168,6 @@ public class SearchRequest {
   private JsonObjectBuilder getSelfInfo() {
     JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
-    info.add("elastic",elastic);
     String[] nodes = null;
     String scheme = "http://";
     int port = 9200;
@@ -192,6 +191,7 @@ public class SearchRequest {
         // TODO configure this a different way?
         String url = scheme+node+":"+port+"/metadata/item/_search";
         elastic.add("searchUrl",url);
+        info.add("elastic",elastic);
         return info;
       }
     }

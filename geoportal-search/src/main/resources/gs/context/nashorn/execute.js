@@ -22,7 +22,7 @@ load("classpath:gs/all.js");
 function execute(nhRequest,sRequestInfo,sSelfInfo) {
   try {
     var requestInfo = JSON.parse(sRequestInfo);
-    requestInfo.taskOptions.verbose = true;
+    //requestInfo.taskOptions.verbose = true;
     
     // to override the base URL if you have a reverse proxy
     //requestInfo.baseUrl = "https://www.geoportal.com/geoportal";
@@ -30,7 +30,7 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
     var selfInfo;
     if (typeof sSelfInfo === "string" && sSelfInfo.length > 0) {
       selfInfo = JSON.parse(sSelfInfo);
-      console.log("selfInfo",selfInfo);
+      //console.log("selfInfo",sSelfInfo);
     }
     
     var processor = gs.Object.create(gs.context.nashorn.NashornProcessor).mixin({

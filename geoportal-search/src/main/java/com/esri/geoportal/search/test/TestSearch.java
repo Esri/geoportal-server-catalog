@@ -262,9 +262,24 @@ public class TestSearch {
     
     //requestUrl = baseUrl+"/opensearch?target=arcgis&bbox=-160,-70,-100,45";
     //requestUrl = baseUrl+"/opensearch?target=gptdb1&q=map";
-    requestUrl = baseUrl+"/opensearch?target=cswA&q=map&start=5&num=3";
-    //requestUrl = baseUrl+"/opensearch?target=cswB&q=map&start=5&num=3";
+    //requestUrl = baseUrl+"/opensearch?target=cswA&q=map&start=5&num=3&filter=data";
+    //requestUrl = baseUrl+"/opensearch?target=cswA&q=map&start=5&num=3&bbox=-175.2,-50,22,13&spatialRel=intersects";
+    //requestUrl = baseUrl+"/opensearch?target=cswB&sortField=title,modified&sortOrder=desc,asc";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&q=map&sort=title&sort=modified:desc";
+    //requestUrl = baseUrl+"/opensearch?target=arcgis&q=map&sort=title";
+    //requestUrl = baseUrl+"/opensearch?target=cswB&sort=title:desc&sort=modified:asc";
+    //requestUrl = baseUrl+"/opensearch?target=cswB&sort=title:desc,modified:asc";
+    //requestUrl = baseUrl+"/opensearch?target=cswB&sortBy=title:D,modified:A";
+    //requestUrl = baseUrl+"/opensearch?target=gptdb1&sortBy=title:desc,modified:asc";
     
+    requestUrl = baseUrl+"/opensearch?target=cswB&id=7ef72eb338a941d6833d5a0f4eb2eb13&id=b9d00efb4fb34e0fb4dab622d1e860c1";
+    requestUrl = baseUrl+"/opensearch?target=cswA&id={6BF4E410-6819-4B5C-9B77-8F083AC4CC15}&id={92C1A650-B17F-401F-81E2-76B85CDAC943}";
+    
+    // TODO this fails
+    requestUrl = baseUrl+"/opensearch?target=cswC&time=2006-08-31T00:00:00.000Z/2017-12-31T23:59:59.999Z";
+    
+    // "/opensearch?q=*:*&time=2016-08-31T00:00:00.000Z/2016-08-31T23:59:59.999Z";
+   
     
     HttpServletRequestFacade hsr = new HttpServletRequestFacade(requestUrl);
     SearchRequest sr = new SearchRequest();
