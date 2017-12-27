@@ -151,7 +151,7 @@
       if (options.entryOnly) {
         this.marshallOptions(task,options);
         recordTypeName = options.recordTypeName;
-        xmlBuilder.writeStartElementPfx("csw",recordTypeName,uris.csw);
+        xmlBuilder.writeStartElementPfx("csw",uris.csw,recordTypeName);
         this.addNamespaces(task,xmlBuilder);
       } else {
         xmlBuilder.writeStartElement(uris.csw,recordTypeName);
@@ -225,7 +225,7 @@
       }
       
       var uris = this.ensureUris(task);
-      xmlBuilder.writeStartElementPfx("csw","GetRecordsResponse",uris.csw);
+      xmlBuilder.writeStartElementPfx("csw",uris.csw,"GetRecordsResponse");
       this.addNamespaces(task,xmlBuilder);
       xmlBuilder.writeStartElement(uris.csw,"SearchStatus");
       xmlBuilder.writeAttribute("timestamp",now);

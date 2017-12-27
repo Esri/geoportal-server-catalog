@@ -137,7 +137,7 @@
  
       var xmlBuilder = targetRequest.xmlBuilder = this.newXmlBuilder(task);
       xmlBuilder.writeStartDocument();
-      xmlBuilder.writeStartElementPfx("csw","GetRecords",uris.csw);
+      xmlBuilder.writeStartElementPfx("csw",uris.csw,"GetRecords");
       xmlBuilder.writeNamespace("csw",uris.csw);
       xmlBuilder.writeNamespace("fes",uris.fes);
       xmlBuilder.writeNamespace("gml",uris.gml);

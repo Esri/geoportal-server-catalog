@@ -34,7 +34,7 @@
       if (!entry) return;
       
       if (options.entryOnly) {
-        xmlBuilder.writeStartElementPfx("atom","entry",task.uris.URI_ATOM);
+        xmlBuilder.writeStartElementPfx("atom",task.uris.URI_ATOM,"entry");
         this.addNamespaces(task,xmlBuilder);
       } else {
         xmlBuilder.writeStartElement(task.uris.URI_ATOM,"entry");
@@ -83,7 +83,7 @@
       var xmlBuilder = task.context.newXmlBuilder();
       xmlBuilder.writeStartDocument();
       
-      xmlBuilder.writeStartElementPfx("atom","feed",task.uris.URI_ATOM);
+      xmlBuilder.writeStartElementPfx("atom",task.uris.URI_ATOM,"feed");
       this.addNamespaces(task,xmlBuilder);
       xmlBuilder.writeElement(task.uris.URI_ATOM,"title","Results");
       xmlBuilder.writeElement(task.uris.URI_ATOM,"id",task.baseUrl); 
