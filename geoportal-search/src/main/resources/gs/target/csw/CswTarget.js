@@ -29,11 +29,7 @@
     
     getRecordsUrl: {writable: true, value: null},
     
-    requiredFilter: {writable: true, value: null},
-    
     resultType: {writable: true, value: "RESULTS"},
-    
-    targetRequest: {writable: true, value: null},
     
     /* ............................................................................................ */
     
@@ -109,14 +105,6 @@
       this.prepareBBox(task,targetRequest);
       this.prepareOther(task,targetRequest);
       this.prepareSort(task,targetRequest);
-
-      targetRequest.urlParams = null;
-      for (var k in urlParams) {
-        if (urlParams.hasOwnProperty(k)) {
-          targetRequest.urlParams = urlParams;
-          break;
-        }
-      }
     }},
     
     buildGetRecordsXml: {value:function(task,targetRequest) {
@@ -234,10 +222,9 @@
     /* ............................................................................................ */
     
     prepare: {value:function(task) {
-      if (!this.schema) {
-        this.schema = this.newSchema(task);
-      }
-      var targetRequest = this.targetRequest = {
+      var promise = task.context.newPromise("prepare");
+      if (!this.schema) this.schema = this.newSchema(task);
+      var targetRequest = {
         getRecordsXml: null,
         uris: null,
         urlParams: null,
@@ -248,6 +235,8 @@
       } else {
         this.buildGetRecordsUrl(task,targetRequest);
       }
+      promise.resolve(targetRequest);
+      return promise;
     }},
     
     prepareBBox: {value:function(task,targetRequest) {
@@ -492,26 +481,26 @@
     /* ............................................................................................ */
     
     search: {value:function(task) {
-      var self = this, data = null;
-      var url = this.getRecordsUrl;
-      
-      var dataContentType = "application/xml";
-      if (this.targetRequest && this.targetRequest.getRecordsXml) {
-        data = this.targetRequest.getRecordsXml;
-      } else if (this.targetRequest && this.targetRequest.urlParams) {
-        var qstr = this.urlParamsToQueryString(this.targetRequest.urlParams);
-        if (qstr !== null && qstr.length > 0) {
-          if (url.indexOf("?") === -1) url += "?" + qstr;
-          else url += "&" + qstr;
-        }
-      }
-      if (task.verbose) console.log("sending url:",url,"data:",data);
-      
+      var self = this;
       var promise = task.context.newPromise();
-      var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);
-      p2.then(function(response){
+      
+      this.prepare(task).then(function(targetRequest){
+        var url = self.getRecordsUrl;
+        var data = null, dataContentType = "application/xml";
+        if (targetRequest && targetRequest.getRecordsXml) {
+          data = targetRequest.getRecordsXml;
+        } else if (targetRequest && task.val.hasAnyProperty(targetRequest.urlParams)) {
+          var qstr = self.urlParamsToQueryString(targetRequest.urlParams);
+          if (qstr !== null && qstr.length > 0) {
+            if (url.indexOf("?") === -1) url += "?" + qstr;
+            else url += "&" + qstr;
+          }
+        }
+        if (task.verbose) console.log("sending url:",url,", postdata:",data);
+        return task.context.sendHttpRequest(task,url,data,dataContentType);
+        
+      }).then(function(response){
         //if (task.verbose) console.log("GetRecordsResponse:\r\n",response);
-        //console.log("GetRecordsResponse:\r\n",response); // TODO temporary
         try {
           var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
           self.handleGetRecordsResponse(task,response,searchResult);
@@ -520,6 +509,7 @@
         } catch(ex) {
           promise.reject(ex);
         }
+        
       })["catch"](function(error){
         promise.reject(error);
       });

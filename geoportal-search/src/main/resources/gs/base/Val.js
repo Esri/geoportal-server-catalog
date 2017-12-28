@@ -66,6 +66,17 @@
       }
       return sb;
     }},
+    
+    hasAnyProperty: {value: function(obj) {
+      if (typeof obj === "object" && obj !== null) {
+        for (var k in obj) {
+          if (obj.hasOwnProperty(k)) {
+            return true;
+          }
+        }        
+      }
+      return false;
+    }},
   
     millisToIso8601: {value: function(millis) {
       if (typeof millis === "undefined") return null;

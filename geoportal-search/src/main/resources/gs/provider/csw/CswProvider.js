@@ -553,9 +553,7 @@
       var promise = task.context.newPromise();
       task.request.parseF(task);
       this.setWriter(task);
-      task.target.prepare(task);
-      var p2 = task.target.search(task);
-      p2.then(function(searchResult){
+      task.target.search(task).then(function(searchResult){
         if (task.request.isItemByIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
           task.response.status = task.response.Status_NOT_FOUND;
           ows = gs.Object.create(gs.provider.csw.OwsException);

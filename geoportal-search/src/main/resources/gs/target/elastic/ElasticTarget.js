@@ -22,12 +22,10 @@
     searchUrl: {writable: true, value: null},
     
     useSimpleQueryString: {writable: true, value: false}, // TODO?
-   
-    _searchCriteria: {writable: true, value: null},
     
     /* ............................................................................................ */
     
-    _appendPeriod: {value:function(task,targetRequest,period,periodInfo) {
+    appendPeriod: {value:function(task,targetRequest,period,periodInfo) {
       if (!periodInfo) return;
       
       var isV5Plus = this.schema.isVersion5Plus;
@@ -129,9 +127,8 @@
     /* ............................................................................................ */
     
     prepare: {value:function(task) {
-      if (!this.schema) {
-        this.schema = this.newSchema(task);
-      }
+      var promise = task.context.newPromise();
+      if (!this.schema) this.schema = this.newSchema(task);
       var targetRequest = {
         musts: [],
         qAll: "*:*",
@@ -155,16 +152,11 @@
       //          "default_operator","lenient", "timeout","terminate_after",
       //          "search_type","_source","stored_fields","track_scores","explain"];
       
-      var searchCriteria = targetRequest.searchCriteria;
       if (targetRequest.musts.length > 0) {
-        searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
+        targetRequest.searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
       }
-      for (var k in searchCriteria) {
-        if (searchCriteria.hasOwnProperty(k)) {
-          this._searchCriteria = searchCriteria;
-          break;
-        }
-      }
+      promise.resolve(targetRequest);
+      return promise;
     }},
     
     prepareBBox: {value:function(task,targetRequest) {
@@ -239,7 +231,7 @@
     prepareModified: {value:function(task,targetRequest) {
       var period = task.request.getModifiedPeriod();
       var periodInfo = this.schema.modifiedPeriodInfo;
-      this._appendPeriod(task,targetRequest,period,periodInfo);
+      this.appendPeriod(task,targetRequest,period,periodInfo);
     }},
     
     prepareOther: {value:function(task,targetRequest) {
@@ -334,7 +326,7 @@
     prepareTimePeriod: {value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
       var periodInfo = this.schema.timePeriodInfo;
-      this._appendPeriod(task,targetRequest,period,periodInfo);
+      this.appendPeriod(task,targetRequest,period,periodInfo);
     }},
     
     prepareTypes: {value:function(task,targetRequest) {
@@ -396,55 +388,51 @@
     /* ............................................................................................ */
     
     search: {value:function(task) {
-      var i, data = null, options = null;
-      var url = this.searchUrl;
-      var dataContentType = "application/json";
-      if (this._searchCriteria) {
-        data = JSON.stringify(this._searchCriteria);
-        if (task.verbose) console.log(data);
-      }
-      if (typeof this.username === "string" && this.username.length > 0 && 
-          typeof this.password === "string" && this.password.length > 0) {
-        options = {
-          basicCredentials: {
-            username: this.username,
-            password: this.password
-          }
-        };
-      }
-      if (task.verbose || true) console.log("sending url:",url,"data:",data);
-      
+      var self = this;
       var promise = task.context.newPromise();
-      var p2 = task.context.sendHttpRequest(task,url,data,dataContentType,options);
-      p2.then(function(result){
-        //console.log("promise.then",result);
-        try {
-          var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
-          var response = JSON.parse(result);
-          searchResult.jsonResponse = response;
-          if (response && response.hits) {
-            searchResult.totalHits = response.hits.total;
-            if (task.verbose || true) console.log("totalHits=",searchResult.totalHits);
-            var hits = response.hits.hits;
-            if (Array.isArray(response.hits.hits)) {
-              searchResult.items = response.hits.hits;
-              if (task.verbose) {
-                i = 0;
-                response.hits.hits.forEach(function(item){
-                  console.log(i,item._source.title,item._id);
-                  i++;
-                });
-              }
+      
+      this.prepare(task).then(function(targetRequest){
+        var url = self.searchUrl, options;
+        var data = null, dataContentType = "application/json";
+        if (targetRequest && task.val.hasAnyProperty(targetRequest.searchCriteria)) {
+          data = JSON.stringify(targetRequest.searchCriteria);
+        }
+        if (typeof self.username === "string" && self.username.length > 0 && 
+            typeof self.password === "string" && self.password.length > 0) {
+          options = {
+            basicCredentials: {
+              username: self.username,
+              password: self.password
+            }
+          };
+        }
+        if (task.verbose) console.log("sending url:",url,", postdata:",data);
+        return task.context.sendHttpRequest(task,url,data,dataContentType,options);
+        
+      }).then(function(result){
+        var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
+        var response = JSON.parse(result);
+        searchResult.jsonResponse = response;
+        if (response && response.hits) {
+          searchResult.totalHits = response.hits.total;
+          if (task.verbose) console.log("totalHits=",searchResult.totalHits);
+          var hits = response.hits.hits;
+          if (Array.isArray(response.hits.hits)) {
+            searchResult.items = response.hits.hits;
+            if (task.verbose) {
+              var i = 0;
+              response.hits.hits.forEach(function(item){
+                console.log(i,item._source.title,item._id);
+                i++;
+              });
             }
           }
-          promise.resolve(searchResult);
-        } catch(ex) {
-          promise.reject(ex);
         }
+        promise.resolve(searchResult);
+        
       })["catch"](function(error){
         promise.reject(error);
       });
-      
       return promise;
     }}
     

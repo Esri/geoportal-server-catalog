@@ -19,11 +19,9 @@
     
     portalBaseUrl: {writable: true, value: "https://www.arcgis.com"},
     
-    _urlParams: {writable: true, value: null},
-    
     /* ............................................................................................ */
     
-    _appendIds: {value:function(task,urlParams,field,ids) {
+    appendIds: {value:function(task,urlParams,field,ids) {
       var q = "";
       if (Array.isArray(ids) && ids.length > 0) {
         ids.forEach(function(id){
@@ -35,10 +33,10 @@
       } else if (typeof ids === "string" && ids.trim().length > 0) {
         q = field+":\""+ids+"\"";
       }
-      this._appendQ(urlParams,q);
+      this.appendQ(urlParams,q);
     }},
     
-    _appendPeriod: {value:function(task,targetRequest,period) {
+    appendPeriod: {value:function(task,targetRequest,period) {
       if (!period) return;
       var urlParams = targetRequest.urlParams;
       var wildCards = [0000000000000000000,9999999999999999999];
@@ -64,11 +62,11 @@
       if (from !== null || to !== null) {
         from = makeVal(from,true);
         to = makeVal(to,false);
-        this._appendQ(urlParams,"modified:["+from+" TO "+to+"]");
+        this.appendQ(urlParams,"modified:["+from+" TO "+to+"]");
       }
     }},
     
-    _appendQ: {value:function(urlParams,q) {
+    appendQ: {value:function(urlParams,q) {
       if (typeof q === "string" && q.length > 0) {
         if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
           urlParams.q = "("+urlParams.q+") AND ("+q+")";
@@ -87,6 +85,7 @@
     /* ............................................................................................ */
     
     prepare: {value:function(task) {
+      var promise = task.context.newPromise();
       if (!this.schema) this.schema = this.newSchema(task);
       var targetRequest = {
         qAll: "modified:[0000000000000000000 TO 9999999999999999999]",
@@ -105,13 +104,8 @@
       this.prepareOther(task,targetRequest);
       this.prepareBBox(task,targetRequest); // must be last
       
-      var urlParams = targetRequest.urlParams;
-      for (var k in urlParams) {
-        if (urlParams.hasOwnProperty(k)) {
-          this._urlParams = urlParams;
-          break;
-        }
-      }
+      promise.resolve(targetRequest);
+      return promise;
     }},
     
     prepareBBox: {value:function(task,targetRequest) {
@@ -125,19 +119,19 @@
     }},
     
     prepareFilter: {value:function(task,targetRequest) {
-      this._appendQ(targetRequest.urlParams,task.request.getFilter());
+      this.appendQ(targetRequest.urlParams,task.request.getFilter());
     }},
     
     prepareIds: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
-      this._appendIds(task,urlParams,"id",task.request.getIds());
-      this._appendIds(task,urlParams,"orgid",task.request.getOrgIds());
-      this._appendIds(task,urlParams,"group",task.request.getGroupIds());
+      this.appendIds(task,urlParams,"id",task.request.getIds());
+      this.appendIds(task,urlParams,"orgid",task.request.getOrgIds());
+      this.appendIds(task,urlParams,"group",task.request.getGroupIds());
     }},
     
     prepareModified: {value:function(task,targetRequest) {
       var period = task.request.getModifiedPeriod();
-      this._appendPeriod(task,targetRequest,period);
+      this.appendPeriod(task,targetRequest,period);
     }},
     
     prepareOther: {value:function(task,targetRequest) {
@@ -164,11 +158,11 @@
     prepareQ: {value:function(task,targetRequest) {
       var q = task.request.getQ();
       if (q === "*" || q === "*:*") q = targetRequest.qAll;
-      this._appendQ(targetRequest.urlParams,q);
+      this.appendQ(targetRequest.urlParams,q);
     }},
     
     prepareRequiredFilter: {value:function(task,targetRequest) {
-      this._appendQ(targetRequest.urlParams,this.requiredFilter);
+      this.appendQ(targetRequest.urlParams,this.requiredFilter);
     }},
     
     prepareSort: {value:function(task,targetRequest) {
@@ -201,7 +195,7 @@
     
     prepareTimePeriod: {value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
-      this._appendPeriod(task,targetRequest,period);
+      this.appendPeriod(task,targetRequest,period);
     }},
     
     prepareTypes: {value:function(task,targetRequest) {
@@ -230,59 +224,63 @@
         }
       });
       //console.log("prepareTypes",q);
-      this._appendQ(urlParams,q);
+      this.appendQ(urlParams,q);
     }},
     
     /* ............................................................................................ */
     
     search: {value:function(task) {
-      var url = this.portalBaseUrl+"/sharing/rest/search";
-      var data = null, dataContentType = "application/x-www-form-urlencoded";
-      var qstr = this.urlParamsToQueryString(this._urlParams);
-      if (qstr !== null && qstr.length > 0) url += "?" + qstr;
-      if (task.verbose) console.log("sending url:",url);
-      //console.log("sending url:",url);
-      
+      var self = this;
       var promise = task.context.newPromise();
-      var p2 = task.context.sendHttpRequest(task,url,data,dataContentType);
-      p2.then(function(result){
-        //console.log("promise.then",result);
-        try {
-          var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
-          var response = JSON.parse(result);
-          searchResult.jsonResponse = response;
-          if (response) {
+      
+      this.prepare(task).then(function(targetRequest){
+        var url = self.portalBaseUrl+"/sharing/rest/search";
+        var data = null, dataContentType = "application/x-www-form-urlencoded";
+        if (targetRequest && targetRequest.getRecordsXml) {
+          data = targetRequest.getRecordsXml;
+        } else if (targetRequest && task.val.hasAnyProperty(targetRequest.urlParams)) {
+          var qstr = self.urlParamsToQueryString(targetRequest.urlParams);
+          if (qstr !== null && qstr.length > 0) {
+            if (url.indexOf("?") === -1) url += "?" + qstr;
+            else url += "&" + qstr;
+          }
+        }
+        if (task.verbose) console.log("sending url:",url,", postdata:",data);
+        return task.context.sendHttpRequest(task,url,data,dataContentType);
+        
+      }).then(function(result){
+        var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
+        var response = JSON.parse(result);
+        searchResult.jsonResponse = response;
+        if (response) {
+          if (task.verbose) {
+            console.log("hits",response.total,"start",response.start,
+              "num",response.num,"nextStart",response.nextStart);
+          }
+          searchResult.startIndex = response.start;
+          searchResult.totalHits = response.total;
+          if (task.request.queryIsZeroBased) {
+            searchResult.startIndex = searchResult.startIndex - 1;
+          }
+          if (searchResult.itemsPerPage > 0) {
+            searchResult.itemsPerPage = response.num;
+          }
+          if (response.results && response.results.push) {
+            searchResult.items = response.results;
             if (task.verbose) {
-              console.log("hits",response.total,"start",response.start,
-                "num",response.num,"nextStart",response.nextStart);
-            }
-            searchResult.startIndex = response.start;
-            searchResult.totalHits = response.total;
-            if (task.request.queryIsZeroBased) {
-              searchResult.startIndex = searchResult.startIndex - 1;
-            }
-            if (searchResult.itemsPerPage > 0) {
-              searchResult.itemsPerPage = response.num;
-            }
-            if (response.results && response.results.push) {
-              searchResult.items = response.results;
-              if (task.verbose) {
-                var i = 1;
-                searchResult.items.forEach(function(item){
-                  console.log(i,item.title,item.id);
-                  i++;
-                });
-              }
+              var i = 1;
+              searchResult.items.forEach(function(item){
+                console.log(i,item.title,item.id);
+                i++;
+              });
             }
           }
-          promise.resolve(searchResult);
-        } catch(ex) {
-          promise.reject(ex);
         }
+        promise.resolve(searchResult);
+        
       })["catch"](function(error){
         promise.reject(error);
       });
-      
       return promise;
     }}
     
