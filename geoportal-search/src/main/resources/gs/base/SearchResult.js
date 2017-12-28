@@ -22,6 +22,33 @@
     jsonResponse: {writable: true, value: null},
     startIndex: {writable: true, value: 1},
     totalHits: {writable: true, value: 0},
+    
+    calcNextRecord: {value: function(task) {
+      var items = this.items ? this.items : [];
+      var noNext = -1; // TODO 0 ?
+      var totalHits = this.totalHits;
+      var startIndex = this.startIndex;
+      var itemsPerPage = this.itemsPerPage;
+      var numReturned = items.length;
+      if (this.itemsPerPage === 0) numReturned = 0;
+      var nextRecord = noNext;
+      if (numReturned === 0 && totalHits > 0) {
+        if (task.request.queryIsZeroBased) {
+          if (startIndex === 0) nextRecord = 0;
+        } else {
+          if (startIndex === 0) nextRecord = 1;
+        }
+      } else if (numReturned > 0) {
+        nextRecord = startIndex + itemsPerPage;
+        if (task.request.queryIsZeroBased) {
+          if (nextRecord >= totalHits) nextRecord = noNext;
+        } else {
+          if (nextRecord > totalHits) nextRecord = noNext;
+        }
+
+      }
+      return nextRecord;
+    }},
   
     init: {value: function(task) {
       this.startIndex = 1;

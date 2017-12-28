@@ -26,14 +26,12 @@
     itemToAtomEntry: {value: function(task,item) {}},
     
     itemToJson: {value: function(task,item) {
-      // TODO
-      var entry = this.itemToAtomEntry();
-      var json = {};
+      var entry = this.itemToAtomEntry(task,item);
       if (entry) {
-        json.id = entry.id;
-        json.title = entry.title;
+        return entry.toJson(task);
+      } else {
+        return {};
       }
-      return json;
     }},
     
     translateFieldName: {value: function(task,name) {
