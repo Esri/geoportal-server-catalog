@@ -275,7 +275,7 @@ public class TestSearch {
     requestUrl = baseUrl+"/opensearch?target=cswB&id=7ef72eb338a941d6833d5a0f4eb2eb13&id=b9d00efb4fb34e0fb4dab622d1e860c1";
     requestUrl = baseUrl+"/opensearch?target=cswA&id={6BF4E410-6819-4B5C-9B77-8F083AC4CC15}&id={92C1A650-B17F-401F-81E2-76B85CDAC943}";
     
-    requestUrl = baseUrl+"/opensearch?target=cswA&q=data&num=500&sort=modified:desc";
+    requestUrl = baseUrl+"/opensearch?target=cswA&q=data";
     
     // TODO this fails
     //requestUrl = baseUrl+"/opensearch?target=cswC&time=2006-08-31T00:00:00.000Z/2017-12-31T23:59:59.999Z";
