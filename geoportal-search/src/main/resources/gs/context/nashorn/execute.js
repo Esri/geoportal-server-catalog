@@ -30,7 +30,6 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
     var selfInfo;
     if (typeof sSelfInfo === "string" && sSelfInfo.length > 0) {
       selfInfo = JSON.parse(sSelfInfo);
-      //console.log("selfInfo",sSelfInfo);
     }
     
     var processor = gs.Object.create(gs.context.nashorn.NashornProcessor).mixin({

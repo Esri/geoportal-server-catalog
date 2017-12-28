@@ -193,6 +193,7 @@
               self._wasFulfilled = false;
               obj.then(function(result2){
                 self._wasResolved = self._wasFulfilled = true;
+                self._result = result2;
                 self._checkCallback(result2)
               })["catch"](function(error2){
                 if (obj._wasResolveCalled) {
@@ -207,7 +208,6 @@
             }
           }
         }
-        
       }
     }},
     

@@ -71,7 +71,7 @@
     }},
   
     sendHttpRequest: {value: function(task,url,data,dataContentType,options) {
-      var result, promise = this.newPromise();
+      var result, promise = this.newPromise("sendHttpRequest");
       try {
         if (task.async) {
           new java.lang.Thread(function() {

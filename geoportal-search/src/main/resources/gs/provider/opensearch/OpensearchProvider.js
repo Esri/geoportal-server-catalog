@@ -91,10 +91,7 @@
       task.request.parseF(task);
       this.setWriter(task);
       var isSingleIdRequest = this.isSingleIdRequest;
-      task.target.prepare(task);
-      
-      var p2 = task.target.search(task);
-      p2.then(function(searchResult){
+      task.target.search(task).then(function(searchResult){
         if (isSingleIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
           // TODO is this error only for the CSW ets-cat30 test?
           var msg = "{\"error\": \"Id not found.\"}";

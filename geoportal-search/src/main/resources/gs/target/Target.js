@@ -19,9 +19,13 @@
     
     key: {writable: true, value: null},
     
+    requiredFilter: {writable: true, value: null},
+    
     schema: {writable: true, value: null},
     
     schemaMixin: {writable: true, value: null},
+    
+    /* ............................................................................................ */
     
     getSchemaClass: {value:function() {
       return gs.target.TargetSchema;
