@@ -15,8 +15,6 @@
 
 (function(){
   
-  /* ============================================================================================ */
-  
   gs.base.XmlInfo = gs.Object.create(gs.Proto,{
     
     dom: {writable: true, value: null},
@@ -28,22 +26,41 @@
     
     forEachChild: {value: function(node) {
       throw new Error("XmlInfo::forEachChild must be implemented");
+    }},
+    
+    getAttributes: {value: function(node) {
+      throw new Error("XmlInfo::getAttributes must be implemented");
+    }},
+    
+    getAttributeValue: {value: function(node,localName,namespaceURI) {
+      throw new Error("XmlInfo::getAttributeValue must be implemented");
+    }},
+    
+    getChildren: {value: function(node) {
+      throw new Error("XmlInfo::getChildren must be implemented");
+    }},
+    
+    /*
+     * nodeInfo:
+     * {
+     *   node: ,
+     *   nodeText: , (if requested)
+     *   nodeName: ,
+     *   localName: ,
+     *   namespaceURI: ,
+     *   isAttributeNode: ,
+     *   isElementNode: ,
+     *   isTextNode: 
+     * }
+     */
+    getNodeInfo: {value: function(node,withText) {
+      throw new Error("XmlInfo::getNodeInfo must be implemented");
+    }},
+    
+    getNodeText: {value: function(node) {
+      throw new Error("XmlInfo::getNodeText must be implemented");
     }}
   
   });
   
-  /* ============================================================================================ */
-  
-  gs.base.XmlNodeInfo = gs.Object.create(gs.Proto,{
-    
-    localName: {writable: true, value: null},
-    namespaceURI: {writable: true, value: null},
-    prefix: {writable: true, value: null},
-    value: {writable: true, value: null}
-    
-  });
-  
-  /* ============================================================================================ */
-  
-
 }());

@@ -500,7 +500,7 @@
         return task.context.sendHttpRequest(task,url,data,dataContentType);
         
       }).then(function(response){
-        //if (task.verbose) console.log("GetRecordsResponse:\r\n",response);
+        //if (task.verbose || true) console.log("GetRecordsResponse:\r\n",response);
         try {
           var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
           self.handleGetRecordsResponse(task,response,searchResult);
