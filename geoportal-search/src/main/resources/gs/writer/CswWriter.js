@@ -204,26 +204,6 @@
       this.marshallOptions(task,options);
       
       var items = searchResult.items ? searchResult.items : [];
-      var totalHits = searchResult.totalHits;
-      var startIndex = searchResult.startIndex;
-      var itemsPerPage = searchResult.itemsPerPage;
-      
-      var numReturned = items.length;
-      if (searchResult.itemsPerPage === 0) numReturned = 0;
-      var nextRecord = -1; // TODO 0 ?
-      if (numReturned === 0 && totalHits > 0) {
-        if (searchResult.queryIsZeroBased) {
-          nextRecord = 0;
-        } else {
-          nextRecord = 1;
-        }
-      } else if (numReturned > 0) {
-        nextRecord = startIndex + itemsPerPage;
-        if (nextRecord >= totalHits) {
-          nextRecord = -1; // TODO 0 ?
-        } 
-      }
-      
       var uris = this.ensureUris(task);
       xmlBuilder.writeStartElementPfx("csw",uris.csw,"GetRecordsResponse");
       this.addNamespaces(task,xmlBuilder);
@@ -232,14 +212,14 @@
       xmlBuilder.writeEndElement();
       
       xmlBuilder.writeStartElement(uris.csw,"SearchResults");
-      xmlBuilder.writeAttribute("numberOfRecordsMatched",""+totalHits);
-      xmlBuilder.writeAttribute("numberOfRecordsReturned",""+numReturned);
-      xmlBuilder.writeAttribute("nextRecord",""+nextRecord);
+      xmlBuilder.writeAttribute("numberOfRecordsMatched",""+searchResult.totalHits);
+      xmlBuilder.writeAttribute("numberOfRecordsReturned",""+items.length);
+      xmlBuilder.writeAttribute("nextRecord",""+searchResult.calcNextRecord(task));
       xmlBuilder.writeAttribute("recordSchema",uris.csw);
       if (options.elementSetName != null && options.elementSetName.length > 0) {
         xmlBuilder.writeAttribute("elementSetName",options.elementSetName);
       }
-      if (itemsPerPage > 0) {
+      if (searchResult.itemsPerPage > 0) {
         for (var i=0;i<items.length;i++) {
           this.writeEntry(task,xmlBuilder,items[i],options);
         }

@@ -54,7 +54,16 @@
     source: {writable: true, value: null},         // optional   (gs.atom.Entry)
   
     bbox: {writable: true, value: null},           // optional   (gs.atom.BBox, custom element)
-    point: {writable: true, value: null}           // optional   (gs.atom.Point, custom element)
+    point: {writable: true, value: null},          // optional   (gs.atom.Point, custom element)
+    
+    toJson: {value: function(task) {
+      // TODO complete this
+      var json = {
+        id: this.id,
+        title: this.title
+      };
+      return json;
+    }},
   
   });
   

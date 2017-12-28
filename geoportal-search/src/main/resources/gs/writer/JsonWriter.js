@@ -21,10 +21,51 @@
       var json;
       if (searchResult.jsonResponse) {
         json = searchResult.jsonResponse;
+        this.writeResponse(task,json);
       } else {
-        json = {}; // TODO?
+        if (task.provider.isCswProvider && task.request.isItemByIdRequest) {
+          this.writeItem(task,searchResult);
+        } else {
+          this.writeItems(task,searchResult);
+        }
       }
-      this.writeResponse(task,json);
+    }},
+    
+    writeEntry: {value: function(task,results,item,options) {
+      var json = task.target.itemToJson(task,item) || {};
+      results.push(json);
+      //this.beforeEndEntry(task,xmlBuilder,item,options,entry);
+    }},
+    
+    writeItem: {value: function(task,searchResult) {
+      var now = task.val.nowAsString();
+      var options = {now: now, entryOnly: true};
+      var results = [];
+      this.writeEntry(task,results,searchResult.items[0],options);
+      var response = {};
+      if (results.length > 0) response = results[0];
+      this.writeResponse(task,response);
+    }},
+    
+    writeItems: {value: function(task,searchResult) {
+      var now = task.val.nowAsString();
+      var options = {now: now, entryOnly: false};
+      
+      var items = searchResult.items ? searchResult.items : [];
+      var response = {
+        start: searchResult.startIndex,
+        num: items.length, // searchResult.itemsPerPage?
+        total: searchResult.totalHits,
+        nextStart: searchResult.calcNextRecord(task),
+        results: []
+      };
+      
+      if (searchResult.itemsPerPage > 0) {
+        for (var i=0;i<items.length;i++) {
+          this.writeEntry(task,response.results,items[i],options);
+        }
+      }
+      this.writeResponse(task,response);
     }},
     
     writeResponse: {value: function(task,json) {
