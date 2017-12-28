@@ -208,10 +208,10 @@
       var extent = task.val.chkStrArray(item["extent"]);
       if (extent && extent.length === 2) {
         entry.bbox = gs.Object.create(gs.atom.BBox).init({
-          xmin : extent[0][0],
-          ymin : extent[0][1],
-          xmax : extent[1][0],
-          ymax : extent[1][1]
+          xmin: extent[0][0],
+          ymin: extent[0][1],
+          xmax: extent[1][0],
+          ymax: extent[1][1]
         });
         
         // TODO center point?

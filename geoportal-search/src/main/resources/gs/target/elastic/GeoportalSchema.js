@@ -163,6 +163,13 @@
         }
       }
       
+      if (typeof source.thumbnail_s === "string" && source.thumbnail_s.indexOf("http") === 0) {
+        links.push(gs.Object.create(gs.atom.Link).init({
+          rel: "icon",
+          href: source.thumbnail_s
+        }));
+      }
+      
       var resources = source["resources_nst"];
       if (!Array.isArray(resources)) resources = [resources];
       resources.forEach(function(resource){
@@ -253,10 +260,10 @@
           if (topLeft != null && topLeft.length === 2 && 
               bottomRight != null && bottomRight.length === 2) {
             entry.bbox = gs.Object.create(gs.atom.BBox).init({
-              xmin : topLeft[0],
-              ymin : bottomRight[1],
-              xmax : bottomRight[0],
-              ymax : topLeft[1]
+              xmin: topLeft[0],
+              ymin: bottomRight[1],
+              xmax: bottomRight[0],
+              ymax: topLeft[1]
             });
           }
         }      

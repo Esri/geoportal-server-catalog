@@ -339,6 +339,32 @@
       return [];
     }},
     
+    getAttributeValue: {value: function(node,localName,namespaceURI) {
+      var value = null;
+      var ns = (typeof namespaceURI === "string" && namespaceURI.length > 0);
+      this.forEachAttribute(node,function(info){
+        if (localName === info.localName) {
+          if (ns) {
+            if (namespaceURI === info.namespaceURI) {
+              value = info.nodeText;
+              return "break";
+            }
+          } else {
+            value = info.nodeText;
+            return "break";;
+            /*
+            if (typeof info.namespaceURI !== "string" || 
+                info.namespaceURI.length === 0) {
+              value = info.nodeText;
+              return "break";
+            }
+            */
+          }
+        }
+      });
+      return value;
+    }},
+    
     getChildren: {value: function(node) {
       if (node) {
         return this._nodeListToArray(node.getChildNodes());
@@ -360,6 +386,7 @@
      * }
      */
     getNodeInfo: {value: function(node,withText) {
+      if (!node) return null;
       var info = {
         node: node,
         nodeText: this.getNodeText(node),
