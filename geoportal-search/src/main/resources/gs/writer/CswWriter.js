@@ -211,9 +211,12 @@
       xmlBuilder.writeAttribute("timestamp",now);
       xmlBuilder.writeEndElement();
       
+      var numReturned = items.length;
+      if (searchResult.itemsPerPage === 0) numReturned = 0;
+      
       xmlBuilder.writeStartElement(uris.csw,"SearchResults");
       xmlBuilder.writeAttribute("numberOfRecordsMatched",""+searchResult.totalHits);
-      xmlBuilder.writeAttribute("numberOfRecordsReturned",""+items.length);
+      xmlBuilder.writeAttribute("numberOfRecordsReturned",""+numReturned);
       xmlBuilder.writeAttribute("nextRecord",""+searchResult.calcNextRecord(task));
       xmlBuilder.writeAttribute("recordSchema",uris.csw);
       if (options.elementSetName != null && options.elementSetName.length > 0) {

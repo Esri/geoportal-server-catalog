@@ -21,6 +21,8 @@
       "date": "modified"
     }},
     
+    schemaType: {writable: true, value: "ArcGIS"},
+    
     target: {writable: true, value: null},
     
     typeAliases: {writable: true, value: {
@@ -218,6 +220,14 @@
       }
       
       return entry;
+    }},
+    
+    itemToJson: {value: function(task,item) {
+      var json = gs.target.TargetSchema.itemToJson.call(this,task,item); // call super
+      if (item) {
+        json._source = item;
+      }
+      return json;
     }}
   
   });

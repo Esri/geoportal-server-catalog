@@ -57,11 +57,154 @@
     point: {writable: true, value: null},          // optional   (gs.atom.Point, custom element)
     
     toJson: {value: function(task) {
-      // TODO complete this
-      var json = {
-        id: this.id,
-        title: this.title
+      var self = this, json = {}, v;
+      
+      var add = function(parent,name,value) {
+        if (Array.isArray(value)) {
+          value.forEach(function(v2){
+            add(parent,name,v2);
+          });
+        }
+        if (gs.atom.Text.isPrototypeOf(value)) {
+          value = value.value;
+        }
+        if (typeof value === "string" && value.length > 0) {
+          if (typeof parent[name] === "string") {
+            parent[name] = [parent[name]];
+          }
+          if (Array.isArray(parent[name])) {
+            parent[name].push(value);
+          } else {
+            parent[name] = value;
+          }
+        }
       };
+      
+      var addCategories = function(parent,name,value) {
+        if (Array.isArray(value)) {
+          value.forEach(function(v2){
+            addCategories(parent,name,v2);
+          });
+        }
+        if (gs.atom.Category.isPrototypeOf(value)) {
+          if (!parent[name]) parent[name] = []
+          v = {};
+          add(v,"label",value.label);
+          add(v,"scheme",value.scheme);
+          add(v,"term",value.term);
+          parent[name].push(v);
+        }
+      };
+      
+      var addLinks = function(parent,name,value) {
+        if (Array.isArray(value)) {
+          value.forEach(function(v2){
+            addLinks(parent,name,v2);
+          });
+        }
+        if (gs.atom.Link.isPrototypeOf(value)) {
+          if (!parent[name]) parent[name] = []
+          v = {};
+          add(v,"rel",value.rel);
+          add(v,"dctype",value.dctype);
+          add(v,"type",value.type);
+          add(v,"href",value.href);
+          add(v,"hreflang",value.hreflang);
+          add(v,"_length",value._length);
+          add(v,"title",value.title);
+          parent[name].push(v);
+        }
+      };
+      
+      var addPerson = function(parent,name,value) {
+        if (Array.isArray(value)) {
+          value.forEach(function(v2){
+            addPerson(parent,name,v2);
+          });
+        }
+        if (gs.atom.Person.isPrototypeOf(value)) {
+          v = {};
+          add(v,"email",value.email);
+          add(v,"name",value.name);
+          add(v,"uri",value.uri);
+          if (Array.isArray(parent[name])) {
+            parent[name].push(v);
+          } else if (parent[name]) {
+            parent[name] = [parent[name]];
+            parent[name].push(v);
+          } else {
+            parent[name] = v;
+          }
+        }
+      };
+ 
+      var addText = function(parent,name,value) {
+        if (Array.isArray(value)) {
+          value.forEach(function(v2){
+            addText(parent,name,v2);
+          });
+        }
+        if (gs.atom.Text.isPrototypeOf(value)) {
+          v = {};
+          add(v,"type",value.type);
+          add(v,"value",value.value);
+          add(v,"uri",value.uri);
+          if (Array.isArray(parent[name])) {
+            parent[name].push(v);
+          } else if (parent[name]) {
+            parent[name] = [parent[name]];
+            parent[name].push(v);
+          } else {
+            parent[name] = v;
+          }
+        }
+      };
+      
+      add(json,"id",this.id);
+      add(json,"title",this.title);
+      add(json,"description",this.summary); // addText?
+      add(json,"published",this.published);
+      add(json,"updated",this.updated);
+      addPerson(json,"author",this.author);
+      addPerson(json,"contributor",this.contributor);
+      addLinks(json,"links",this.link);
+      addCategories(json,"categories",this.category);
+      add(json,"rights",this.rights); // addText?
+      
+      if (gs.atom.Point.isPrototypeOf(this.point)) {
+        json["point"] = {
+          x: this.point.x,
+          y: this.point.y
+        };
+      }
+      
+      if (gs.atom.BBox.isPrototypeOf(this.bbox)) {
+        json["bbox"] = {
+          xmin: this.bbox.xmin,
+          ymin: this.bbox.ymin,
+          xmax: this.bbox.xmax,
+          ymax: this.bbox.ymax
+        };
+      }
+      
+      if (gs.atom.Point.isPrototypeOf(this.point)) {
+        json["point"] = {
+          x: this.point.x,
+          y: this.point.y
+        };
+      }
+      
+      if (gs.atom.Text.isPrototypeOf(this.content)) {
+        addText(json,"content",this.content);
+      } else if (gs.atom.Content.isPrototypeOf(this.content)) {
+        json["content"] = v = {};
+        add(v,"src",this.content.src);
+        add(v,"type",this.content.type);
+        add(v,"value",this.content.value);
+      }
+      
+      // TODO source?
+
       return json;
     }},
   
@@ -265,7 +408,7 @@
     writeGeoRSSPoint: {value: function(task,xmlBuilder) {
       var rssPoint = this.y+" "+this.x;
       xmlBuilder.writeElement(task.uris.URI_GEORSS,"point",rssPoint);
-    }},
+    }}
   
   });
   

@@ -19,7 +19,9 @@
   
     write: {value: function(task,searchResult) {
       var json;
-      if (searchResult.jsonResponse) {
+      if (searchResult.jsonResponse && 
+          typeof task.request.f === "string" && 
+          task.request.f.toLowerCase() === "srcjson") {
         json = searchResult.jsonResponse;
         this.writeResponse(task,json);
       } else {
@@ -52,14 +54,21 @@
       var options = {now: now, entryOnly: false};
       
       var items = searchResult.items ? searchResult.items : [];
+      var numReturned = items.length;
+      if (searchResult.itemsPerPage === 0) numReturned = 0;
       var response = {
         start: searchResult.startIndex,
-        num: items.length, // searchResult.itemsPerPage?
+        num: numReturned, // searchResult.itemsPerPage?
         total: searchResult.totalHits,
-        nextStart: searchResult.calcNextRecord(task),
-        results: []
+        nextStart: searchResult.calcNextRecord(task)
       };
+      if (task.target.schema && 
+          typeof task.target.schema .schemaType === "string" && 
+          task.target.schema.schemaType.length > 0) {
+        response.sourceType = task.target.schema.schemaType;
+      }
       
+      response.results = [];
       if (searchResult.itemsPerPage > 0) {
         for (var i=0;i<items.length;i++) {
           this.writeEntry(task,response.results,items[i],options);
