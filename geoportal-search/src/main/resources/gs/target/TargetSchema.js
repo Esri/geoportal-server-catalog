@@ -19,6 +19,8 @@
     
     fieldAliases: {writable: true, value: null},
     
+    schemaType: {writable: true, value: null},
+    
     target: {writable: true, value: null},
     
     typeAliases: {writable: true, value: null},

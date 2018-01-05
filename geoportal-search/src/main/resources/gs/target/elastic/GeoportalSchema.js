@@ -28,6 +28,8 @@
       nestedPath: null
     }},
     
+    schemaType: {writable: true, value: "Geoportal"},
+    
     sortables: {writable: true, value: {
       "title": "title.sort",
       "title.sort": "title.sort",
@@ -280,10 +282,6 @@
       }
   
       return entry;
-    }},
-    
-    itemToJson: {value: function(task,item) {
-      return item;
     }}
   
   });

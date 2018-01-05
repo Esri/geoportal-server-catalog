@@ -25,6 +25,8 @@
     spatialPropertyName: {writable: true, value: "Geometry"},
     timePeriodPropertyName: {writable: true, value: "TimePeriod"},
     
+    schemaType: {writable: true, value: "CSW"},
+    
     sortables: {writable: true, value: {
       "title": "title",
       "date": "modified",
@@ -32,8 +34,7 @@
     }},
     
     handleRecordToAtomEntry: {value:function(task,xmlInfo,recordInfo) {
-      // TODO this needs to be completed
-      var ln, ns, hasText, dctype, scheme, text;
+      var ln, ns, hasText, dctype, scheme, text, urlInfo;
       var x, y, xy, xmin, ymin, xmax, ymax;
       var links = [];
       var entry = gs.Object.create(gs.atom.Entry);
@@ -44,6 +45,7 @@
           ns = childInfo.namespaceURI;
           text = childInfo.nodeText;
           hasText = (typeof text === "string" && text.length > 0);
+          
           if (ns === task.uris.URI_DC) {
             //console.log(childInfo.nodeInfo.localName,childInfo.nodeInfo.namespaceURI);
             if (ln === "identifier") {
@@ -60,13 +62,49 @@
               }
             } else if (ln === "title") {
               entry.title = text;
-            } else if (ln === "type") {
-            } else if (ln === "subject") { 
-            } else if (ln === "format") { 
-            } else if (ln === "relation") {
+            } else if (ln === "type" || ln === "subject" || ln === "format") {
+              // dc:type scheme can be urn:x-esri:specification:ServiceType:ArcIMS:Metadata:ContentType
+              if (hasText) {
+                scheme = xmlInfo.getAttributeValue(childInfo.node,"scheme");
+                if (typeof scheme !== "string" || scheme.length === 0) {
+                  scheme = "dc:"+ln;
+                }
+                if (!entry.category) entry.category = [];
+                else if (!Array.isArray(entry.category)) entry.category = [entry.category];
+                entry.category.push(gs.Object.create(gs.atom.Category).init({
+                  scheme: scheme,
+                  term: text
+                }));
+              }
             } else if (ln === "creator") {
+              if (hasText) {
+                if (!entry.author) entry.author = [];
+                else if (!Array.isArray(entry.author)) entry.author = [entry.author];
+                entry.author.push(gs.Object.create(gs.atom.Person).init({
+                  tag: "author",
+                  name: text
+                }));
+              }
             } else if (ln === "contributor") {
+              if (hasText) {
+                if (!entry.contributor) entry.contributor = [];
+                else if (!Array.isArray(entry.contributor)) entry.contributor = [entry.contributor];
+                entry.contributor.push(gs.Object.create(gs.atom.Person).init({
+                  tag: "contributor",
+                  name: text
+                }));
+              }
             } else if (ln === "rights") {
+              if (hasText) {
+                if (!entry.rights) entry.rights = [];
+                else if (!Array.isArray(entry.rights)) entry.rights = [entry.rights];
+                entry.rights.push(gs.Object.create(gs.atom.Text).init({
+                  type: "text", // TODO ?
+                  value: text
+                }));
+              }
+            } else if (ln === "relation") {
+              // TODO ?
             }
           } else if (ns === task.uris.URI_DCT) {
             if (ln === "abstract") {
@@ -86,10 +124,15 @@
               }
             } else if (ln === "references") { 
               if (hasText) {
+                dctype = null;
                 scheme = xmlInfo.getAttributeValue(childInfo.node,"scheme");
                 //console.log(ln,text,"scheme =",scheme);
+                urlInfo = task.val.guessUrlType(text);
+                if (urlInfo && urlInfo.type) {
+                  dctype = urlInfo.type;
+                  //console.log(dctype,text);
+                }
                 if (scheme === "urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Server") {
-                  dctype = null; // TODO guess the service type
                   links.push(gs.Object.create(gs.atom.Link).init({
                     rel: "related",
                     dctype: dctype,
@@ -108,8 +151,10 @@
                   }));
                 }
               }
-            } else if (ln === "alternative") { 
-            } else if (ln === "spatial") { 
+            } else if (ln === "alternative") {
+              // TODO ?
+            } else if (ln === "spatial") {
+              // TODO ?
             }
           } else if (ln === "BoundingBox" || "WGS84BoundingBox") {
             // WGS84BoundingBox: LowerCorner x space y , UpperCorner x space y

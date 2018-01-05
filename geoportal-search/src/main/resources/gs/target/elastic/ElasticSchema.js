@@ -24,6 +24,8 @@
     
     fieldAliases: {writable: true, value: null},
     
+    schemaType: {writable: true, value: "Elasticsearch"},
+    
     sortables: {writable: true, value: {
     }},
     
@@ -49,7 +51,11 @@
     }},
     
     itemToJson: {value: function(task,item) {
-      return item;
+      var json = gs.target.TargetSchema.itemToJson.call(this,task,item); // call super
+      if (item["_source"]) {
+        json._source = item["_source"];
+      }
+      return json;
     }}
   
   });

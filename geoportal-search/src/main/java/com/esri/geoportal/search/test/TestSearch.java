@@ -275,7 +275,9 @@ public class TestSearch {
     requestUrl = baseUrl+"/opensearch?target=cswB&id=7ef72eb338a941d6833d5a0f4eb2eb13&id=b9d00efb4fb34e0fb4dab622d1e860c1";
     requestUrl = baseUrl+"/opensearch?target=cswA&id={6BF4E410-6819-4B5C-9B77-8F083AC4CC15}&id={92C1A650-B17F-401F-81E2-76B85CDAC943}";
     
-    requestUrl = baseUrl+"/opensearch?target=cswA&q=data&f=json";
+    requestUrl = baseUrl+"/opensearch?target=cswA&q=data&f=json&pretty=true&max=2";
+    
+    //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&maxRecords=0&q=data&pretty=true";
     
     //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecords&target=cswA&f=json&id={D228EA76-1454-4242-B926-39D55A6F37EB}";
     //requestUrl = baseUrl+"/csw?service=CSW&request=GetRecordById&target=cswA&f=kml&id={D228EA76-1454-4242-B926-39D55A6F37EB}";

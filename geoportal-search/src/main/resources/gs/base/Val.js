@@ -67,6 +67,70 @@
       return sb;
     }},
     
+    guessUrlType: {value: function(url) {
+      var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
+
+      var arcgisTypes = ["FeatureServer","GeocodeServer","GeoDataServer","GeometryServer",
+                         "GlobeServer","GPServer","ImageServer","MapServer","MobileServer",
+                         "NAServer","SceneServer","SchematicsServer","StreamServer",
+                         "VectorTileServer"]; 
+      var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS","CSW"];
+      var dataTypes = ["dbf","csv","gpx","pdf","shp","txt","xls","xlsx","zip"];
+      var kml = "KML";
+      var ims = "IMS";
+      
+      var i, v, lc, type = null;
+      var isHttp = (typeof url === "string" && 
+        (url.indexOf("http://") === 0 || url.indexOf("https://") === 0));
+      var isFtp = (typeof url === "string" && 
+        (url.indexOf("ftp://") === 0 || url.indexOf("ftps://") === 0));
+      if (isHttp) {
+        lc = url.toLowerCase();
+        if (lc.indexOf("service=") > 0) {
+          for (i=0;i<ogcTypes.length;i++) {
+            v = "service="+ogcTypes[i].toLowerCase();
+            if (lc.indexOf("?"+v) > 0 || lc.indexOf("&"+v) > 0) {
+              type = ogcTypes[i];
+              break;
+            }
+          }
+        } else if (lc.indexOf("/rest/services/") > 0) {
+          for (i=0;i<arcgisTypes.length;i++) {
+            v = "/"+arcgisTypes[i].toLowerCase();
+            if (endsWith(lc,v)) {
+              type = arcgisTypes[i];
+              break;
+            }
+          }
+        }
+        if (type === null) {
+          if (endsWith(lc,".kml") || endsWith(lc,".kmz") || 
+              lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 || 
+              lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
+            type = kml;
+          }
+        }
+        if (type === null) {
+          if (lc.indexOf("com.esri.esrimap.esrimap") >= 0) {
+            type = ims;
+          } else if (lc.indexOf("com.esri.wms.esrimap") >= 0) {
+            type = "WMS";
+          }
+        }
+        if (type === null) {
+          for (i=0;i<dataTypes.length;i++) {
+            if (endsWith(lc,"."+dataTypes[i])) {
+              type = dataTypes[i];
+              break;
+            }
+          }
+        }
+      }
+      if (type !== null && (isHttp || isFtp)) {
+        return {type: type, url: url};
+      }
+    }},
+    
     hasAnyProperty: {value: function(obj) {
       if (typeof obj === "object" && obj !== null) {
         for (var k in obj) {

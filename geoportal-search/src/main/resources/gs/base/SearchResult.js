@@ -30,13 +30,13 @@
       var startIndex = this.startIndex;
       var itemsPerPage = this.itemsPerPage;
       var numReturned = items.length;
-      if (this.itemsPerPage === 0) numReturned = 0;
+      if (itemsPerPage === 0) numReturned = 0;
       var nextRecord = noNext;
       if (numReturned === 0 && totalHits > 0) {
         if (task.request.queryIsZeroBased) {
           if (startIndex === 0) nextRecord = 0;
         } else {
-          if (startIndex === 0) nextRecord = 1;
+          if (startIndex === 1) nextRecord = 1;
         }
       } else if (numReturned > 0) {
         nextRecord = startIndex + itemsPerPage;

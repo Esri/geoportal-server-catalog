@@ -165,7 +165,7 @@
       
       var atom = ["atom","application/atom+xml","http://www.w3.org/2005/Atom"];
       var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0"];
-      var json = ["json","pjson","application/json"];
+      var json = ["json","pjson","srcjson","application/json"];
       var csv = ["csv","text/csv"];
       var eros = ["eros"];
       var kml = ["kml","application/vnd.google-earth.kml+xml","http://www.opengis.net/kml/2.2"];
