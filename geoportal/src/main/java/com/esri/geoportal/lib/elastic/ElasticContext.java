@@ -61,11 +61,13 @@ public class ElasticContext {
   private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
   private boolean useHttps = false;
-  private boolean useNetty3 = false;
   private String xmlIndexType = "clob";
   
   private String xpackUsername = null;
   private String xpackPassword = null;
+  
+  private String xpackHttpType = null;
+  private String xpackTransportType = null;
   
   private boolean xpackSecurityTransportSslEnabled = false;
   private String xpackSslKey = null;
@@ -188,15 +190,6 @@ public class ElasticContext {
   public void setUseHttps(boolean useHttps) {
     this.useHttps = useHttps;
   }
-  
-  /** Use Netty3. */
-  public boolean getUseNetty3() {
-    return useNetty3;
-  }
-  /** Use Netty3. */
-  public void setUseNetty3(boolean useNetty3) {
-    this.useNetty3 = useNetty3;
-  }
 
   /** The index name holding metadata xmls. */
   public String getXmlIndexName() {
@@ -230,6 +223,24 @@ public class ElasticContext {
   public void setXpackPassword(String v) {
     this.xpackPassword = v;
   }
+  
+  /** x-pack http.type security3 or security4 */
+  public String getXpackHttpType() {
+    return this.xpackHttpType;
+  }
+  /** x-pack http.type security3 or security4 */
+  public void setXpackHttpType(String v) {
+    this.xpackHttpType = v;
+  }
+  
+  /** x-pack transport.type security3 or security4 */
+  public String getXpackTransportType() {
+    return this.xpackTransportType;
+  }
+  /** x-pack transport.type security3 or security4 */
+  public void setXpackTransportType(String v) {
+    this.xpackTransportType = v;
+  }  
   
   /** xpack.security.transport.ssl.enabled */
   public boolean getXpackSecurityTransportSslEnabled() {
@@ -417,10 +428,15 @@ public class ElasticContext {
         settings.put("xpack.ssl.certificate_authorities",sslCa);
         hasXpack = true;
       }
-      if (this.getUseNetty3()) {
-        // This only works for earlier versions.
-        settings.put("transport.type","netty3");
-        settings.put("http.type","netty3");
+      if (this.getXpackHttpType() != null && this.getXpackHttpType().length() > 0) {
+        //System.out.println("*** x-pack http.type="+this.getXpackHttpType());
+        settings.put("http.type",this.getXpackHttpType());
+        hasXpack = true;
+      }
+      if (this.getXpackTransportType() != null && this.getXpackTransportType().length() > 0) {
+        //System.out.println("*** x-pack transport.type="+this.getXpackTransportType());
+        settings.put("transport.type",this.getXpackTransportType());
+        hasXpack = true;
       }
       if (hasXpack) {
         transportClient = new PreBuiltXPackTransportClient(settings.build());

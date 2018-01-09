@@ -30,9 +30,10 @@
 		     see https://www.elastic.co/guide/en/x-pack/current/java-clients.html -->
 		<!-- 
 		<beans:property name="useHttps" value="false" />
-		<beans:property name="useNetty3" value="false" />
 		<beans:property name="xpackUsername" value="" />
 		<beans:property name="xpackPassword" value="" />
+		<beans:property name="xpackHttpType" value="" />
+		<beans:property name="xpackTransportType" value="" />
 		<beans:property name="xpackSecurityTransportSslEnabled" value="false" />
 		<beans:property name="xpackSslKey" value="" />
 		<beans:property name="xpackSslCertificate" value="" />
