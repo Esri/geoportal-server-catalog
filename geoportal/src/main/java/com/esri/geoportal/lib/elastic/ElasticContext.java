@@ -61,11 +61,13 @@ public class ElasticContext {
   private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
   private boolean useHttps = false;
+  private boolean useNetty3 = false;
   private String xmlIndexType = "clob";
   
   private String xpackUsername = null;
   private String xpackPassword = null;
   
+  private boolean xpackSecurityTransportSslEnabled = false;
   private String xpackSslKey = null;
   private String xpackSslCertificate = null;
   private String xpackSslCertificateAuthorities = null;
@@ -186,6 +188,15 @@ public class ElasticContext {
   public void setUseHttps(boolean useHttps) {
     this.useHttps = useHttps;
   }
+  
+  /** Use Netty3. */
+  public boolean getUseNetty3() {
+    return useNetty3;
+  }
+  /** Use Netty3. */
+  public void setUseNetty3(boolean useNetty3) {
+    this.useNetty3 = useNetty3;
+  }
 
   /** The index name holding metadata xmls. */
   public String getXmlIndexName() {
@@ -218,6 +229,15 @@ public class ElasticContext {
   /** x-pack credential */
   public void setXpackPassword(String v) {
     this.xpackPassword = v;
+  }
+  
+  /** xpack.security.transport.ssl.enabled */
+  public boolean getXpackSecurityTransportSslEnabled() {
+    return this.xpackSecurityTransportSslEnabled;
+  }
+  /** xpack.security.transport.ssl.enabled */
+  public void setXpackSecurityTransportSslEnabled(boolean v) {
+    this.xpackSecurityTransportSslEnabled = v;
   }
   
   /** xpack.ssl.key */
@@ -373,6 +393,7 @@ public class ElasticContext {
       }
       String user = this.getXpackUsername();
       String pwd = this.getXpackPassword();
+      boolean sslEnabled = this.getXpackSecurityTransportSslEnabled();
       String sslKey = this.getXpackSslKey();
       String sslCert = this.getXpackSslCertificate();
       String sslCa = this.getXpackSslCertificateAuthorities();
@@ -380,9 +401,12 @@ public class ElasticContext {
         settings.put("xpack.security.user",user+":"+pwd);
         hasXpack = true;
       }
+      if (sslEnabled) {
+        settings.put("xpack.security.transport.ssl.enabled","true");
+        hasXpack = true;
+      }
       if (sslKey != null && sslKey.length() > 0) {
         settings.put("xpack.ssl.key",sslKey);
-        settings.put("xpack.security.transport.ssl.enabled","true");
         hasXpack = true;
       }
       if (sslCert != null && sslCert.length() > 0) {
@@ -392,6 +416,11 @@ public class ElasticContext {
       if (sslCa != null && sslCa.length() > 0) {
         settings.put("xpack.ssl.certificate_authorities",sslCa);
         hasXpack = true;
+      }
+      if (this.getUseNetty3()) {
+        // This only works for earlier versions.
+        settings.put("transport.type","netty3");
+        settings.put("http.type","netty3");
       }
       if (hasXpack) {
         transportClient = new PreBuiltXPackTransportClient(settings.build());
