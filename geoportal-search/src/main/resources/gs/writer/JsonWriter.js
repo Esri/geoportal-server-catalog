@@ -21,7 +21,7 @@
       var json;
       if (searchResult.jsonResponse && 
           typeof task.request.f === "string" && 
-          task.request.f.toLowerCase() === "srcjson") {
+          task.request.f.toLowerCase() === "json-source") {
         json = searchResult.jsonResponse;
         this.writeResponse(task,json);
       } else {
