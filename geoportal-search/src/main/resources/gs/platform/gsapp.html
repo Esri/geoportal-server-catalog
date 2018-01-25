@@ -26,10 +26,10 @@
 </div>
 <script src="https://js.arcgis.com/3.21/"></script>
 <script>
-  require(["dojo/ready","gs/widget/Search"],
-  function(ready,Search) {
+  require(["dojo/ready","gs/widget/Search","gs/widget/TestSearch"],
+  function(ready,Search,TestSearch) {
     ready(function() {
-      new Search({},"idSearch");
+      new TestSearch({},"idSearch");
     });
   });
 </script>

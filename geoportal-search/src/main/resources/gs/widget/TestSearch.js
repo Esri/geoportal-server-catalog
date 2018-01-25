@@ -13,21 +13,34 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
-  "./Search",
+  "require",
+  "dijit/_WidgetBase",
+  "dijit/_TemplatedMixin",
+  "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/TestSearch.html",
-  "dijit/form/TextBox"],
-function(declare, Search, template) {
+  "../all",],
+function(declare, localRequire, _WidgetBase, _TemplatedMixin,
+  _WidgetsInTemplateMixin, template) {
 
-  var oThisClass = declare([Search], {
+  //  {"f":"json","target":"cswB"}
+  //  {"f":"json","target":"cswA"}
+  //  {"f":"json","target":["arcgis","gptdb1"]}
+
+  var oThisClass = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
     templateString: template,
 
-    
+    _wasLoaded: false,
+
     postCreate: function() {
       this.inherited(arguments);
+      var self = this;
+      gs.reqAll(localRequire,function(){
+        self._wasLoaded = true;
+        //console.log("Search._wasLoaded",self._wasLoaded);
+      });
     },
-    
-    /*
+
     informExternal: function(text) {
       try {
         if (window && window.external && window.external.gsHasListener) {
@@ -38,55 +51,43 @@ function(declare, Search, template) {
         //alert(ex);
       }
     },
-    */
-    
+
     processResult: function(result) {
-      
+
     },
-    
+
     search: function() {
       if (!this._wasLoaded) return; // TODO need a ui error message
-      
       var self = this;
-      var q = this.qBox.get("value").trim();
-      var target = this.targetBox.get("value").trim();
-      
-      var parameterMap = {f: "pjson"};
-      if (q.length > 0) parameterMap.q = q;
-      if (target.length > 0) parameterMap.target = target;
-      
-      var textarea = this.textareaNode;
-      textarea.value = "Searching...";
-      
+      this.resultTextarea.value = "Searching...";
+
+      var parameterMap = {};
+      var sParams = this.requestTextarea.value.trim();
+      if (sParams.length > 0) {
+        try {
+          var params = JSON.parse(sParams);
+          parameterMap = params;
+          //console.log("params",params);
+        } catch(ex) {
+          this.resultTextarea.value = ""+ex;
+          return;
+        }
+      }
+
       var requestInfo = {
         "requestUrl": "/request",
         "baseUrl": "/base",
         "headerMap": {},
         "parameterMap": parameterMap
       };
-      console.log("parameterMap",parameterMap);
+      //requestInfo.requestUrl = "http://www.geoportal.com/geoportal/opensearch/description";
 
       var processor = gs.Object.create(gs.context.browser.WebProcessor);
       processor.execute(requestInfo,function(status,mediaType,entity,headers){
         //console.log(status,mediaType,"\r\n",entity);
-        textarea.value = entity;
+        self.resultTextarea.value = entity;
         self.informExternal(entity);
-        
-        try {
-          //console.log("entity",typeof entity,entity);
-          // TODO errors?
-          var result = JSON.parse(entity);
-          //console.log("result",result);
-          self.processResult(result);
-        } catch(ex) {
-          console.error(ex);
-        }
       });
-      
-    },
-    
-    searchClicked: function() {
-      //this.search();
     }
 
   });

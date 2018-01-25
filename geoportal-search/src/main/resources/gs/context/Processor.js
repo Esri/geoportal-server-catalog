@@ -14,17 +14,17 @@
  */
 
 (function(){
-  
+
   gs.context.Processor = gs.Object.create(gs.Proto,{
-    
+
     execute: {value:function(requestInfo, responseHandler) {
+      var task = null;
       try {
         var context = this.newContext();
         var config = this.newConfig();
         var request = this.makeRequest(requestInfo);
         var targets = this.makeTargets(context,config,request);
         var tasks = this.makeTasks(context,config,requestInfo,targets);
-        var task = null;
         if (tasks.length === 0) {
           this._sendError(responseHandler,null,null,"Search error: no task");
         } else if (tasks.length === 1) {
@@ -37,7 +37,7 @@
         this._sendError(responseHandler,task,ex,null);
       }
     }},
-    
+
     executeTask: {value:function(context, task, responseHandler) {
       var self = this, msg, response;
       task.provider.preprocess(task);
@@ -52,14 +52,14 @@
         self._sendError(responseHandler,task,error,null);
       });
     }},
-    
+
     executeTasks: {value:function(context, tasks, responseHandler) {
       var self = this, dfds = [];
       tasks.forEach(function(task){
         self.executeTask(context,task);
         dfds.push(task.dfd);
       });
-      
+
       var response, result, results = [], o;
       var promise = context.newPromiseAll(dfds);
       promise.then(function(){
@@ -86,7 +86,7 @@
         self._sendError(responseHandler,null,error,null);
       });
     }},
-    
+
     makeProvider: {value: function(task) {
       var provider = gs.Object.create(gs.provider.opensearch.OpensearchProvider);
       var v = task.request.getUrlPath();
@@ -98,10 +98,10 @@
           });
         }
         if (!isOsDsc) provider = gs.Object.create(gs.provider.csw.CswProvider);
-      } 
+      }
       return provider;
     }},
-    
+
     makeRequest: {value: function(requestInfo) {
       var request = gs.Object.create(gs.base.Request).mixin({
         url: requestInfo.requestUrl,
@@ -111,13 +111,15 @@
       });
       return request;
     }},
-    
+
     makeTargets: {value: function(context,config,request) {
       var self = this, o, target, targets = [];
       var cfgTargets = config.getTargets() || {};
       var values = request.getTargets();
+      //console.log("target values",values);
       if (values !== null) {
         values.forEach(function(v){
+          //console.log("target value",v);
           self._checkTarget(v,cfgTargets,targets,config);
         });
       }
@@ -134,12 +136,12 @@
       }
       return targets;
     }},
-    
+
     makeTasks: {value: function(context,config,requestInfo,targets) {
       var self = this, req, tasks = [];
       var sRequestInfo = JSON.stringify(requestInfo);
       targets.forEach(function(target){
-        requestInfo = JSON.parse(sRequestInfo); 
+        requestInfo = JSON.parse(sRequestInfo);
         request = gs.Object.create(gs.base.Request).mixin({
           url: requestInfo.requestUrl,
           body: requestInfo.requestBody,
@@ -155,14 +157,14 @@
       });
       return tasks;
     }},
-    
+
     makeWriters: {value: function(task) {
       var index = function(writers,keys,writer) {
         keys.forEach(function(k){
           writers[k.toLowerCase()] = writer;
         })
       };
-      
+
       var atom = ["atom","application/atom+xml","http://www.w3.org/2005/Atom"];
       var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0"];
       var json = ["json","pjson","json-source","application/json"];
@@ -170,7 +172,7 @@
       var eros = ["eros"];
       var kml = ["kml","application/vnd.google-earth.kml+xml","http://www.opengis.net/kml/2.2"];
       var rss = ["rss","georss","application/rss+xml"];
-      
+
       var writers = {};
       index(writers,atom,gs.Object.create(gs.writer.AtomWriter));
       index(writers,csw,gs.Object.create(gs.writer.CswWriter));
@@ -179,18 +181,18 @@
       index(writers,eros,gs.Object.create(gs.writer.ErosWriter));
       index(writers,kml,gs.Object.create(gs.writer.KmlWriter));
       index(writers,rss,gs.Object.create(gs.writer.RssWriter));
-      
+
       return writers;
     }},
-    
+
     newConfig: {value: function() {
       return gs.Object.create(gs.config.Config);
     }},
-    
+
     newContext: {value: function() {
       return gs.Object.create(gs.context.Context);
     }},
-    
+
     newTask: {value: function(context,config,request,options) {
       var task = gs.base.Task.newTask().mixin({
         config: config,
@@ -201,9 +203,9 @@
       task.writers = this.makeWriters(task);
       return task;
     }},
-    
+
     /* ............................................................................................ */
-    
+
     _checkTarget: {value: function(v, cfgTargets, targets, config) {
       //console.log("_checkTarget",v);
       var self = this, o = v, target = null;
@@ -263,7 +265,7 @@
         }
       }
     }},
-    
+
     _sendError: {value: function(responseHandler, task, error, message) {
       var response, asJson = true, msg = "Search error";
       if (task) {
@@ -291,7 +293,7 @@
         // TODO include response.headers?
         responseHandler(response.status,response.mediaType,response.entity,response.headers);
       }
-      
+
       try {
         var printErrors = true; // TODO?
         if (printErrors) {
@@ -304,7 +306,7 @@
         console.log(ex);
       }
     }}
-  
+
   });
-  
+
 }());
