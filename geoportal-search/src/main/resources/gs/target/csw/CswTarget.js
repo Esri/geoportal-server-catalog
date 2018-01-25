@@ -14,25 +14,25 @@
  */
 
 (function(){
-  
+
   gs.target.csw.CswTarget = gs.Object.create(gs.target.Target, {
-    
+
     // http://docs.opengeospatial.org/is/12-176r7/12-176r7.html
-    
+
     cswVersion: {writable: true, value: "3.0.0"},
-    
+
     elementSetName: {writable: true, value: "summary"},
-    
+
     getCapabilitiesUrl: {writable: true, value: null},
-    
+
     getRecordByIdUrl: {writable: true, value: null},
-    
+
     getRecordsUrl: {writable: true, value: null},
-    
+
     resultType: {writable: true, value: "RESULTS"},
-    
+
     /* ............................................................................................ */
-    
+
     appendPropertyClause: {value:function(task,targetRequest,clauseName,propertyName,literal,literal2) {
       // TODO use fieldAliases
       if (typeof propertyName === "string" && propertyName.length > 0 &&
@@ -59,7 +59,7 @@
         xmlBuilder.writeEndElement();
       }
     }},
-    
+
     appendQ: {value:function(urlParams,q) {
       if (typeof q === "string" && q.length > 0) {
         if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
@@ -69,7 +69,7 @@
         }
       }
     }},
-    
+
     appendSpatialClause: {value:function(task,targetRequest,clauseName,propertyName,bbox) {
       if (typeof propertyName === "string" && propertyName.length > 0 &&
         typeof bbox === "string" && bbox.length > 0) {
@@ -88,11 +88,11 @@
         xmlBuilder.writeEndElement();
       }
     }},
-    
+
     buildGetRecordsUrl: {value:function(task,targetRequest) {
       // CSW3
       var urlParams = targetRequest.urlParams = {};
-      urlParams["elementSetName"] = this.elementSetName;
+      urlParams.elementSetName = this.elementSetName;
       //urlParams["resultType"] = this.resultType;
       this.preparePaging(task,targetRequest);
       this.prepareRequiredFilter(task,targetRequest);
@@ -106,7 +106,7 @@
       this.prepareOther(task,targetRequest);
       this.prepareSort(task,targetRequest);
     }},
-    
+
     buildGetRecordsXml: {value:function(task,targetRequest) {
       var uris = targetRequest.uris = {};
       if (this.cswVersion === "2.0.2") {
@@ -122,7 +122,7 @@
       }
       uris.dc = task.uris.URI_DC;
       uris.dct = task.uris.URI_DCT;
- 
+
       var xmlBuilder = targetRequest.xmlBuilder = this.newXmlBuilder(task);
       xmlBuilder.writeStartDocument();
       xmlBuilder.writeStartElementPfx("csw",uris.csw,"GetRecords");
@@ -147,7 +147,7 @@
       xmlBuilder.writeAttribute("version","1.1.0");
       xmlBuilder.writeStartElement(uris.fes,"Filter");
       xmlBuilder.writeStartElement(uris.fes,"And");
-      
+
       this.prepareRequiredFilter(task,targetRequest);
       this.prepareQ(task,targetRequest);
       this.prepareFilter(task,targetRequest);
@@ -157,7 +157,7 @@
       this.prepareTimePeriod(task,targetRequest);
       this.prepareBBox(task,targetRequest);
       this.prepareOther(task,targetRequest);
-      
+
       xmlBuilder.writeEndElement(); // And
       xmlBuilder.writeEndElement(); // Filter
       xmlBuilder.writeEndElement(); // Constraint
@@ -167,14 +167,14 @@
       xmlBuilder.writeEndDocument();
       targetRequest.getRecordsXml = xmlBuilder.getXml();
     }},
-    
+
     handleGetRecordsResponse: {value:function(task,response,searchResult) {
       var msg, xmlInfo;
       try {
         xmlInfo = this.newXmlInfo(task,response);
       } catch(ex) {
         msg = "CswTarget: GetRecords returned an invalid XML";
-        console.log(msg,"\r\n",response); 
+        console.log(msg,"\r\n",response);
         throw ex;
       }
       if (!xmlInfo || !xmlInfo.root) return;
@@ -194,7 +194,7 @@
           });
           xmlInfo.forEachChild(result.node,function(recordInfo){
             // TODO what about a non Dublin Core record, e.g. an ISO document
-            if (recordInfo.localName === "BriefRecord" || 
+            if (recordInfo.localName === "BriefRecord" ||
                 recordInfo.localName === "SummaryRecord" ||
                 recordInfo.localName === "Record") {
               searchResult.items.push({
@@ -206,21 +206,21 @@
         }
       });
     }},
-    
+
     getSchemaClass: {value:function() {
       return gs.target.csw.CswSchema;
     }},
-    
+
     newXmlBuilder: {value:function(task) {
       return task.context.newXmlBuilder(task);
     }},
-    
+
     newXmlInfo: {value:function(task,xmlString) {
       return task.context.newXmlInfo(task,xmlString);
     }},
-    
+
     /* ............................................................................................ */
-    
+
     prepare: {value:function(task) {
       var promise = task.context.newPromise("prepare");
       if (!this.schema) this.schema = this.newSchema(task);
@@ -238,7 +238,7 @@
       promise.resolve(targetRequest);
       return promise;
     }},
-    
+
     prepareBBox: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
@@ -247,11 +247,11 @@
         var rel = task.request.getSpatialRel();
         if (typeof rel === "string" && rel.length > 0) {
           rel = rel.toLowerCase();
-        } 
+        }
         if (urlParams) {
-          urlParams["bbox"] = bbox;
+          urlParams.bbox = bbox;
           if (rel === "intersects" || rel === "within") {
-            urlParams["spatialRel"] = rel; // this isn't part of the 3.0.0 spec
+            urlParams.spatialRel = rel; // this isn't part of the 3.0.0 spec
           }
         }
         if (xmlBuilder) {
@@ -260,9 +260,9 @@
           if (rel === "within") cn = "Within";
           this.appendSpatialClause(task,targetRequest,cn,pn,bbox);
         }
-      } 
+      }
     }},
-    
+
     prepareFilter: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
@@ -274,7 +274,7 @@
         this.appendPropertyClause(task,targetRequest,cn,pn,v);
       }
     }},
-    
+
     prepareIds: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
@@ -311,7 +311,7 @@
         }
       }
     }},
-    
+
     prepareModified: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
@@ -333,13 +333,13 @@
         }
       }
       if (urlParams && param.length > 0) {
-        urlParams["modified"] = param; // not in CSW 3.0.0 spec
+        urlParams.modified = param; // not in CSW 3.0.0 spec
       }
     }},
 
     prepareOther: {value:function(task,targetRequest) {
     }},
-    
+
     preparePaging: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
@@ -347,17 +347,17 @@
       start = task.val.strToInt(start,null);
       if (typeof start === "number" && task.request.queryIsZeroBased) start = start + 1;
       if (typeof start === "number" && start >= 1) {
-        if (urlParams) urlParams["startPosition"] = start;
+        if (urlParams) urlParams.startPosition = start;
         if (xmlBuilder) xmlBuilder.writeAttribute("startPosition",""+start);
       }
       var num = task.request.getNum();
       num = task.val.strToInt(num,null);
       if (typeof num === "number" && num > 0) {
-        if (urlParams) urlParams["maxRecords"] = num;
+        if (urlParams) urlParams.maxRecords = num;
         if (xmlBuilder) xmlBuilder.writeAttribute("maxRecords",""+num);
-      } 
+      }
     }},
-    
+
     prepareQ: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
@@ -369,17 +369,17 @@
         this.appendPropertyClause(task,targetRequest,cn,pn,v);
       }
     }},
-    
+
     prepareRequiredFilter: {value:function(task,targetRequest) {
     }},
-    
+
     prepareSort: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var uris = targetRequest.uris;
       var sortables = this.schema.sortables;
       if (!sortables) return;
-      
+
       var getField = function(v) {
         v = v.toLowerCase();
         for (var k in sortables) {
@@ -391,7 +391,7 @@
         }
         return null;
       };
-      
+
       var sort, sortOptions = task.request.getSortOptions();
       if (Array.isArray(sortOptions)) {
         sortOptions.forEach(function(sortOption){
@@ -402,7 +402,7 @@
           }
         });
       }
-      
+
       if (sort && sort.length > 0 && urlParams) {
         var param = "";
         sort.forEach(function(sortOption){
@@ -411,9 +411,9 @@
           if (sortOption.order === "desc") param += ":D";
           //else param += ":A";
         });
-        urlParams["sortBy"] = param;
+        urlParams.sortBy = param;
       }
-    
+
       if (sort && sort.length > 0 && xmlBuilder) {
         xmlBuilder.writeStartElement(uris.fes,"SortBy");
         sort.forEach(function(sortOption){
@@ -426,9 +426,9 @@
         });
         xmlBuilder.writeEndElement();
       }
-      
+
     }},
-    
+
     prepareTimePeriod: {value:function(task,targetRequest) {
       // temporal extent of the data
       var urlParams = targetRequest.urlParams;
@@ -451,10 +451,10 @@
         }
       }
       if (urlParams && param.length > 0) {
-        urlParams["time"] = param;
+        urlParams.time = param;
       }
     }},
-    
+
     prepareTypes: {value:function(task,targetRequest) {
       // TODO liveData?
       // TODO ISO topic categories?
@@ -462,7 +462,7 @@
       var schema = this.schema;
       var types = task.request.getTypes();
       if (!Array.isArray(types) || types.length === 0) return;
-      
+
       /*
       types.forEach(function(t){
         var t2 = schema.translateTypeName(task,t);
@@ -475,15 +475,15 @@
         }
       });
       */
-      
+
     }},
-    
+
     /* ............................................................................................ */
-    
+
     search: {value:function(task) {
       var self = this;
       var promise = task.context.newPromise();
-      
+
       this.prepare(task).then(function(targetRequest){
         var url = self.getRecordsUrl;
         var data = null, dataContentType = "application/xml";
@@ -498,7 +498,7 @@
         }
         if (task.verbose) console.log("sending url:",url,", postdata:",data);
         return task.context.sendHttpRequest(task,url,data,dataContentType);
-        
+
       }).then(function(response){
         //if (task.verbose || true) console.log("GetRecordsResponse:\r\n",response);
         try {
@@ -509,14 +509,13 @@
         } catch(ex) {
           promise.reject(ex);
         }
-        
+
       })["catch"](function(error){
         promise.reject(error);
       });
       return promise;
     }}
-  
+
   });
 
 }());
-

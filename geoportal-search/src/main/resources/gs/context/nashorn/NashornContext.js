@@ -14,7 +14,7 @@
  */
 
 (function(){
-  
+
   if (typeof console === "undefined") {
     console = {};
     console.debug = print;
@@ -22,36 +22,36 @@
     console.warn = print;
     console.error = print;
   }
-  
+
   gs._jvmTypes = {
     CharArray: Java.type("char[]")
   };
-  
+
   /* ============================================================================================== */
-  
+
   gs.context.nashorn.NashornContext = gs.Object.create(gs.context.Context,{
-    
+
     isNashorn: {writable: true, value: true},
-  
+
     indentXml: {value: function(task,xml) {
       return gs.context.nashornUtil.indentXml(xml);
     }},
-    
+
     newCounter: {value: function() {
       return new Packages.java.util.concurrent.atomic.AtomicInteger();
     }},
-    
+
     newStringBuilder: {value: function() {
       return gs.Object.create(gs.context.nashorn.StringBuilder).init();
     }},
-    
+
     newXmlInfo: {value: function(task,xmlString) {
       var source = new org.xml.sax.InputSource(new java.io.StringReader(xmlString));
       var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
       factory.setExpandEntityReferences(false);
       factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-      //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
+      //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
       var builder = factory.newDocumentBuilder();
       var dom = builder.parse(source);
       var root = dom.getDocumentElement();
@@ -59,17 +59,17 @@
         dom: dom,
         root: root
       });
-      return xmlInfo;      
+      return xmlInfo;
     }},
-    
+
     readResourceFile: {value: function(path,charset) {
       return gs.context.nashornUtil.readResourceFile(path,charset);
     }},
-  
+
     removeAllButFilter: {value: function(xml) {
       return gs.context.nashornUtil.removeAllButFilter(xml);
     }},
-  
+
     sendHttpRequest: {value: function(task,url,data,dataContentType,options) {
       var result, promise = this.newPromise("sendHttpRequest");
       try {
@@ -91,16 +91,16 @@
         }
       } catch (err) {
         promise.reject(err);
-      }    
+      }
       return promise;
     }}
-  
+
   });
-  
+
   /* ============================================================================================== */
-  
+
   gs.context.nashornUtil = {
-    
+
     indentXml: function(xml) {
       // TODO removeBOM ??
       var header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -114,15 +114,15 @@
         v = v.trim();
         if (v.startsWith(header+"<")) v = v.replace(header,header+"\r\n");
         if (v.length === 0) v = null;
-      };
+      }
       return v;
     },
-    
+
     newXPathEvaluator: function(nsmap) {
       var key;
       var createFunc = function(value) {
         if (typeof value === "function") return value;
-        return function() {return value};
+        return function() {return value;};
       };
       var iface = function(map) {
         var ifaceImpl = {};
@@ -131,7 +131,7 @@
         }
         return ifaceImpl;
       };
-      
+
       //var nsContext = new gs._jvmTypes.NamespaceContext(iface({
       var nsContext = new javax.xml.namespace.NamespaceContext(iface({
         getNamespaceURI: function(prefix) {
@@ -152,7 +152,7 @@
           return null;
         }
       }));
-      
+
       var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
       xpath.setNamespaceContext(nsContext);
       var XPATH_NODE = javax.xml.xpath.XPathConstants.NODE;
@@ -172,7 +172,7 @@
       };
       return evaluator;
     },
-    
+
     readResourceFile: function(path,charset) {
       if (charset === null || charset.length == 0) charset = "UTF-8";
       var url = java.lang.Thread.currentThread().getContextClassLoader().getResource(path);
@@ -180,9 +180,9 @@
         java.nio.file.Paths.get(url.toURI())),charset);
       return content;
     },
-    
+
     removeAllButFilter: function(xml) {
-      // TODO removeBOM ?? 
+      // TODO removeBOM ??
       try {
         var inputSource = new org.xml.sax.InputSource(new java.io.StringReader(xml));
         var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -192,7 +192,7 @@
         //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
         var builder = factory.newDocumentBuilder();
         var dom = builder.parse(inputSource);
-  
+
         var root = dom.getDocumentElement();
         var nl = root.getChildNodes();
         for (var i=0;i<nl.getLength();i++) {
@@ -206,7 +206,7 @@
           } else if (nd.getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
           }
         }
-        
+
         var source = new javax.xml.transform.dom.DOMSource(dom);
         var streamResult = new javax.xml.transform.stream.StreamResult(new java.io.StringWriter());
         this.transform(source,streamResult,true);
@@ -216,7 +216,7 @@
         return xml;
       }
     },
-    
+
     sendHttpRequest: function(url, data, dataContentType, options) {
       var result = null;
       var br = null, wr = null;
@@ -227,17 +227,17 @@
         java.net.HttpURLConnection.setFollowRedirects(true);
         var con = u.openConnection();
         con.setInstanceFollowRedirects(true);
-        
+
         if (options && options.basicCredentials &&
-            typeof options.basicCredentials.username === "string" && 
-            options.basicCredentials.username.length > 0 && 
-            typeof options.basicCredentials.password === "string" && 
+            typeof options.basicCredentials.username === "string" &&
+            options.basicCredentials.username.length > 0 &&
+            typeof options.basicCredentials.password === "string" &&
             options.basicCredentials.password.length > 0) {
           var cred = options.basicCredentials.username+":"+options.basicCredentials.password;
           cred = new java.lang.String(java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8")),"UTF-8");
           con.setRequestProperty( "Authorization","Basic "+cred);
         }
-        
+
         if (typeof data === "string" && data.length > 0) {
           con.setDoOutput(true);
           con.setRequestMethod("POST");
@@ -267,7 +267,7 @@
         }
         //print("contentType="+contentType+" ... charset="+charset);
         br = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream(),charset));
-        var nRead = 0;;
+        var nRead = 0;
         var buffer = new gs._jvmTypes.CharArray(4096);
         while ((nRead = br.read(buffer,0,4096)) >= 0) {
           sw.write(buffer,0,nRead); // TODO comment out this line and Invalid JSON: <json>:1:0 Expected json literal but found eof
@@ -283,7 +283,7 @@
       }
       return result;
     },
-    
+
     transform: function(source,result,indent) {
       var factory = javax.xml.transform.TransformerFactory.newInstance();
       factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD,"");
@@ -298,17 +298,17 @@
       }
       transformer.transform(source,result);
     }
-    
+
   };
-  
+
   /* ============================================================================================== */
-  
+
   gs.context.nashorn.XmlInfo = gs.Object.create(gs.base.XmlInfo,{
-    
+
     NODETYPE_ATTRIBUTE: {writable: true, value: org.w3c.dom.Node.ATTRIBUTE_NODE},
     NODETYPE_ELEMENT: {writable: true, value: org.w3c.dom.Node.ELEMENT_NODE},
     NODETYPE_TEXT: {writable: true, value: org.w3c.dom.Node.TEXT_NODE},
-    
+
     dom: {writable: true, value: null},
     root: {writable: true, value: null},
 
@@ -321,7 +321,7 @@
         }
       });
     }},
-    
+
     forEachChild: {value: function(node,callback) {
       var r, self = this;
       this.getChildren(node).forEach(function(child){
@@ -331,14 +331,14 @@
         }
       });
     }},
-    
+
     getAttributes: {value: function(node) {
       if (node) {
         return this._nodeListToArray(node.getAttributes());
       }
       return [];
     }},
-    
+
     getAttributeValue: {value: function(node,localName,namespaceURI) {
       var value = null;
       var ns = (typeof namespaceURI === "string" && namespaceURI.length > 0);
@@ -351,9 +351,9 @@
             }
           } else {
             value = info.nodeText;
-            return "break";;
+            return "break";
             /*
-            if (typeof info.namespaceURI !== "string" || 
+            if (typeof info.namespaceURI !== "string" ||
                 info.namespaceURI.length === 0) {
               value = info.nodeText;
               return "break";
@@ -364,14 +364,14 @@
       });
       return value;
     }},
-    
+
     getChildren: {value: function(node) {
       if (node) {
         return this._nodeListToArray(node.getChildNodes());
       }
       return [];
     }},
-    
+
     /*
      * nodeInfo:
      * {
@@ -382,7 +382,7 @@
      *   namespaceURI: ,
      *   isAttributeNode: ,
      *   isElementNode: ,
-     *   isTextNode: 
+     *   isTextNode:
      * }
      */
     getNodeInfo: {value: function(node,withText) {
@@ -400,7 +400,7 @@
       if (withText) info.nodeText = this.getNodeText(node);
       return info;
     }},
-    
+
     getNodeText: {value: function(node) {
       var v;
       if (node) {
@@ -416,7 +416,7 @@
       }
       return null;
     }},
-    
+
     _nodeListToArray: {value: function(nl) {
       var i, a = [];
       if (nl) {
@@ -426,9 +426,9 @@
       }
       return a;
     }}
-    
+
   });
-  
+
   /* ============================================================================================== */
 
 }());
