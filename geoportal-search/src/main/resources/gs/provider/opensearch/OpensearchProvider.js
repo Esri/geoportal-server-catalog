@@ -14,16 +14,16 @@
  */
 
 (function(){
-  
+
   gs.provider.opensearch.OpensearchProvider = gs.Object.create(gs.provider.Provider,{
-    
+
     isSingleIdRequest: {writable: true, value: false},
-    
+
     chkBBoxParam: {value: function(task) {
       if (task.hasError) return;
       var bbox = task.request.getBBox();
       if (bbox === null || bbox.length === 0) return;
-      var a = bbox.split(","); 
+      var a = bbox.split(",");
       if (a.length > 3) {
         var n = task.val.strToNum(a[0].trim(),1);
         if (n > 10000) {
@@ -34,16 +34,16 @@
         }
       }
     }},
-    
+
     description: {value: function(task) {
       var promise = task.context.newPromise();
       var opensearchUrl = task.baseUrl+"/opensearch"; // TODO doc or config?
-      
+
       var qstr = "", url = task.request.url;
       var n = url.indexOf("?");
       if (n !== -1) qstr = url.substring(n + 1).trim();
-      if (qstr.length > 0) qstr = "&"+qstr;    
-      
+      if (qstr.length > 0) qstr = "&"+qstr;
+
       var xml = task.context.readResourceFile(task.config.opensearchDescriptionFile,"UTF-8");
       xml = xml.trim();
       xml = xml.replace(/{opensearch.url}/g,task.val.escXml(opensearchUrl));
@@ -54,7 +54,7 @@
       promise.resolve();
       return promise;
     }},
-    
+
     execute: {value: function(task) {
       var v = task.request.getUrlPath();
       var isDescription = task.val.endsWith(v,"/opensearch/description"); // TODO doc or config?
@@ -69,7 +69,7 @@
       if (isDescription) {
         return this.description(task);
       } else {
-        this.chkBBoxParam(task)
+        this.chkBBoxParam(task);
         if (task.hasError) {
           var promise = task.context.newPromise();
           promise.reject();
@@ -85,7 +85,7 @@
         }
       }
     }},
-    
+
     search: {value: function(task) {
       var promise = task.context.newPromise();
       task.request.parseF(task);
@@ -106,7 +106,7 @@
       });
       return promise;
     }}
-  
+
   });
-  
+
 }());

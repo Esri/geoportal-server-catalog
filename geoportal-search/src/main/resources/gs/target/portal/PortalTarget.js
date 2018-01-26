@@ -16,11 +16,11 @@
 (function(){
 
   gs.target.portal.PortalTarget = gs.Object.create(gs.target.Target, {
-    
+
     portalBaseUrl: {writable: true, value: "https://www.arcgis.com"},
-    
+
     /* ............................................................................................ */
-    
+
     appendIds: {value:function(task,urlParams,field,ids) {
       var q = "";
       if (Array.isArray(ids) && ids.length > 0) {
@@ -35,12 +35,12 @@
       }
       this.appendQ(urlParams,q);
     }},
-    
+
     appendPeriod: {value:function(task,targetRequest,period) {
       if (!period) return;
       var urlParams = targetRequest.urlParams;
       var wildCards = [0000000000000000000,9999999999999999999];
-      
+
       var makeVal = function(value,isFrom) {
         var v = wildCards[0];
         if (!isFrom) v = wildCards[1];
@@ -51,13 +51,13 @@
             if (!isNaN(v)) {
               v = ""+v;
               while (v.length < 19) v = "0"+v;
-              
+
             }
           }
         }
         return v;
-      }
-      
+      };
+
       var from = period.from, to = period.to;
       if (from !== null || to !== null) {
         from = makeVal(from,true);
@@ -65,7 +65,7 @@
         this.appendQ(urlParams,"modified:["+from+" TO "+to+"]");
       }
     }},
-    
+
     appendQ: {value:function(urlParams,q) {
       if (typeof q === "string" && q.length > 0) {
         if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
@@ -75,15 +75,15 @@
         }
       }
     }},
-    
+
     /* ............................................................................................ */
-    
+
     getSchemaClass: {value:function() {
       return gs.target.portal.PortalSchema;
     }},
-    
+
     /* ............................................................................................ */
-    
+
     prepare: {value:function(task) {
       var promise = task.context.newPromise();
       if (!this.schema) this.schema = this.newSchema(task);
@@ -103,11 +103,11 @@
       this.prepareSort(task,targetRequest);
       this.prepareOther(task,targetRequest);
       this.prepareBBox(task,targetRequest); // must be last
-      
+
       promise.resolve(targetRequest);
       return promise;
     }},
-    
+
     prepareBBox: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var bbox = task.request.getBBox();
@@ -117,27 +117,27 @@
         urlParams.q = targetRequest.qAll;
       }
     }},
-    
+
     prepareFilter: {value:function(task,targetRequest) {
       this.appendQ(targetRequest.urlParams,task.request.getFilter());
     }},
-    
+
     prepareIds: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       this.appendIds(task,urlParams,"id",task.request.getIds());
       this.appendIds(task,urlParams,"orgid",task.request.getOrgIds());
       this.appendIds(task,urlParams,"group",task.request.getGroupIds());
     }},
-    
+
     prepareModified: {value:function(task,targetRequest) {
       var period = task.request.getModifiedPeriod();
       this.appendPeriod(task,targetRequest,period);
     }},
-    
+
     prepareOther: {value:function(task,targetRequest) {
       // TODO token?
     }},
-    
+
     preparePaging: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var start = task.request.getStart();
@@ -152,19 +152,19 @@
       num = task.val.strToInt(num,null);
       if (typeof num === "number" && num > 0) {
         urlParams["num"] = num;
-      } 
+      }
     }},
-    
+
     prepareQ: {value:function(task,targetRequest) {
       var q = task.request.getQ();
       if (q === "*" || q === "*:*") q = targetRequest.qAll;
       this.appendQ(targetRequest.urlParams,q);
     }},
-    
+
     prepareRequiredFilter: {value:function(task,targetRequest) {
       this.appendQ(targetRequest.urlParams,this.requiredFilter);
     }},
-    
+
     prepareSort: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var schema = this.schema;
@@ -192,19 +192,19 @@
         }
       }
     }},
-    
+
     prepareTimePeriod: {value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
       this.appendPeriod(task,targetRequest,period);
     }},
-    
+
     prepareTypes: {value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var q = "", keys = [];
       var schema = this.schema;
       var types = task.request.getTypes();
       if (!Array.isArray(types) || types.length === 0) return;
-      
+
       var appendType = function(v) {
         if (typeof v === "string" && v.length > 0 && keys.indexOf(v) === -1) {
           keys.push(v);
@@ -212,13 +212,13 @@
           q += "type:\""+v+"\"";
         }
       };
-     
+
       types.forEach(function(t){
         var t2 = schema.translateTypeName(task,t);
         if (Array.isArray(t2)) {
           t2.forEach(function(t3){
             appendType(t3);
-          })
+          });
         } else {
           appendType(t2);
         }
@@ -226,13 +226,13 @@
       //console.log("prepareTypes",q);
       this.appendQ(urlParams,q);
     }},
-    
+
     /* ............................................................................................ */
-    
+
     search: {value:function(task) {
       var self = this;
       var promise = task.context.newPromise();
-      
+
       this.prepare(task).then(function(targetRequest){
         var url = self.portalBaseUrl+"/sharing/rest/search";
         var data = null, dataContentType = "application/x-www-form-urlencoded";
@@ -247,7 +247,7 @@
         }
         if (task.verbose) console.log("sending url:",url,", postdata:",data);
         return task.context.sendHttpRequest(task,url,data,dataContentType);
-        
+
       }).then(function(result){
         var searchResult = gs.Object.create(gs.base.SearchResult).init(task);
         var response = JSON.parse(result);
@@ -277,13 +277,13 @@
           }
         }
         promise.resolve(searchResult);
-        
+
       })["catch"](function(error){
         promise.reject(error);
       });
       return promise;
     }}
-    
+
   });
 
 }());

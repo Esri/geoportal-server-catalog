@@ -14,9 +14,9 @@
  */
 
 (function(){
-  
+
   gs.provider.csw.GetRecordsParser = gs.Object.create(gs.Proto,{
-    
+
     cswProvider: {writable: true, value: null},
     ids: {writable: true, value: null},
     modifiedFrom: {writable: true, value: null},
@@ -24,7 +24,7 @@
     q: {writable: true, value: null},
     task: {writable: true, value: null},
     xmlInfo: {writable: true, value: null},
-    
+
     parseBody: {value: function(cswProvider,task) {
       this.ids = [];
       this.cswProvider = cswProvider;
@@ -32,7 +32,7 @@
       this.xmlInfo = null;
       var body = null, xmlInfo = null, ows, msg;
       var filterNode, sortByNode;
-      
+
       if (task.request && task.request.body && typeof task.request.body === "string") {
         body = task.request.body.trim();
         if (body.length > 0) {
@@ -47,9 +47,9 @@
             //console.error(ex);
           }
         }
-      } 
+      }
       if (!xmlInfo || !xmlInfo.root) return;
-      
+
       var rootInfo = xmlInfo.getNodeInfo(xmlInfo.root);
       if (rootInfo.localName === "GetRecords") {
         if (rootInfo.namespaceURI === task.uris.URI_CSW2) {
@@ -58,7 +58,7 @@
       } else {
         return; // TODO throw an error?
       }
-      
+
       xmlInfo.forEachAttribute(xmlInfo.root,function(attr){
         if (attr.localName === "startPosition") {
           var start = task.val.strToInt(attr.nodeText,-1);
@@ -77,7 +77,7 @@
           }
         }
       });
-      
+
       xmlInfo.forEachChild(xmlInfo.root,function(level2){
         if (level2.localName === "Query") {
           xmlInfo.forEachChild(level2.node,function(level3){
@@ -98,7 +98,7 @@
           });
         }
       });
-      
+
       try{
         if (filterNode) this._parseFilter(filterNode);
         if (sortByNode) this._parseSortBy(sortByNode);
@@ -115,25 +115,25 @@
           //console.error(ex);
         }
       }
-      
+
     }},
-    
+
     /* .............................................................................................. */
-    
+
     _appendQ: {value: function(qToAppend) {
       if (typeof qToAppend !== "string" || qToAppend.length === 0) return;
       if (typeof this.q !== "string") this.q = "";
       if (this.q.length > 0) this.q += " AND ";
       this.q += "("+qToAppend+")";
     }},
-    
+
     _getPropertyLiteral: {value: function(nodeInfo,ignoreValidation) {
       var v;
       this.xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
         if (childInfo.localName === "Literal") {
           v = childInfo.nodeText;
           return "break";
-        } 
+        }
       });
       if (typeof v !== "string") v = "";
       v = v.trim(); // TODO ?
@@ -147,15 +147,15 @@
       //console.log("_getPropertyLiteral",nodeInfo.localName,v);
       return v;
     }},
-    
+
     _getPropertyName: {value: function(nodeInfo,ignoreValidation) {
       // dc:type - liveData, Format - content type, Subject - theme
-      var queryables = ["anytext","id","title"]; 
-      var anytextAliases = ["","anytext","format","subject"]
+      var queryables = ["anytext","id","title"];
+      var anytextAliases = ["","anytext","format","subject"];
       if (!ignoreValidation) anytextAliases.push("dc:type");
-      
+
       var name = null, lc = "", locator, ows, msg;
-      
+
       this.xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
         if (childInfo.localName === "PropertyName") {
           locator = "PropertyName";
@@ -185,18 +185,18 @@
       }
       return name;
     }},
-    
+
     _getSpatialFilter: {value: function(nodeInfo) {
       var xmlInfo = this.xmlInfo;
       var a, box, coords, envelope, lowerCorner, upperCorner, msg, ows;
-      
+
       var spatialRel = null;
       var lc = nodeInfo.localName.toLowerCase();
       if (lc === "intersects" || lc === "within" ||
           lc === "contains" || lc === "disjoint") {
         spatialRel = lc;
       }
-      
+
       xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
         if (childInfo.localName === "Box") {
           box = childInfo.node;
@@ -254,7 +254,7 @@
         throw new Error("OWSException");
       }
     }},
-    
+
     _parseFilter: {value: function(filterNode) {
       if (!filterNode) return;
       this._parseFilterClause(filterNode);
@@ -272,7 +272,7 @@
         this.cswProvider.addOverrideParameter(this.task,"modified","/"+this.modifiedTo);
       }
     }},
-    
+
     _parseFilterClause: {value: function(node) {
       var self = this, propName, literal, nodeInfo;
       this.xmlInfo.forEachChild(node,function(childInfo){
@@ -280,9 +280,9 @@
           var v, v2, ln = childInfo.localName;
           var peek = self._getPropertyName(childInfo,true);
           //console.log("ln",ln,"peek",peek);
-          
+
           // modified
-          if ((peek === "modified" || peek === "dct:modified") && 
+          if ((peek === "modified" || peek === "dct:modified") &&
               (ln === "PropertyIsGreaterThan" || ln === "PropertyIsGreaterThanOrEqualTo" ||
                ln === "PropertyIsLessThan" || ln === "PropertyIsLessThanOrEqualTo" ||
                ln === "PropertyIsBetween")) {
@@ -290,7 +290,7 @@
             if (ln === "PropertyIsGreaterThan" || ln === "PropertyIsGreaterThanOrEqualTo") {
               v = self._getPropertyLiteral(childInfo);
             } else if (ln === "PropertyIsLessThan" || ln === "PropertyIsLessThanOrEqualTo") {
-              v2 = self._getPropertyLiteral(childInfo); 
+              v2 = self._getPropertyLiteral(childInfo);
             } else if (ln === "PropertyIsBetween") {
               self.xmlInfo.forEachChild(childInfo.node,function(childInfo2){
                 if (childInfo2.localName === "LowerBoundary") {
@@ -310,7 +310,7 @@
             }
             ln = "ignore";
           }
-          
+
           // liveData
           if ((peek === "dc:type") && (ln === "PropertyIsEqualTo")) {
             v = self._getPropertyLiteral(childInfo,true);
@@ -319,17 +319,17 @@
               ln = "ignore";
             }
           }
-          
+
           if (ln === "ignore") {
-          
+
           // logical clauses
           } else if (ln === "And") {
             self._parseFilterClause(childInfo.node);
           } else if (ln === "Or") {
             self._throwUnsupportedOperator(childInfo);
-          } else if (ln === "Not") { 
+          } else if (ln === "Not") {
             self._throwUnsupportedOperator(childInfo);
-          
+
           // property clauses
           } else if (ln === "PropertyIsBetween") {
             self._throwUnsupportedOperator(childInfo);
@@ -363,9 +363,9 @@
             self._throwUnsupportedOperator(childInfo);
           } else if (ln === "PropertyIsNull") {
             self._throwUnsupportedOperator(childInfo);
-            
-            
-          // spatial clauses 
+
+
+          // spatial clauses
           } else if (ln === "BBOX") {
             self._getSpatialFilter(childInfo);
           } else if (ln === "Beyond") {
@@ -388,14 +388,14 @@
             self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Within") {
             self._getSpatialFilter(childInfo);
-            
+
           } else {
             self._throwUnsupportedOperator(childInfo);
           }
         }
       });
     }},
-    
+
     _parseSortBy: {value: function(sortByNode) {
       var a = [], sortField, sortOrder, xmlInfo = this.xmlInfo;
       xmlInfo.forEachChild(sortByNode,function(childInfo){
@@ -410,8 +410,8 @@
           });
           if (typeof sortField == "string" && sortField.trim().length > 0) {
             sortField = sortField.trim();
-            if (typeof sortOrder === "string" && 
-               (sortOrder.trim().toLowerCase() === "asc" || 
+            if (typeof sortOrder === "string" &&
+               (sortOrder.trim().toLowerCase() === "asc" ||
                 sortOrder.trim().toLowerCase() === "desc")) {
               sortField += ":"+sortOrder.trim().toLowerCase();
             }
@@ -423,7 +423,7 @@
         this.cswProvider.addOverrideParameter(this.task,"sort",a);
       }
     }},
-    
+
     _throwUnsupportedOperator: {value: function(nodeInfo) {
       var locator = nodeInfo.localName;
       var msg = "Operator "+nodeInfo.nodeName+" is not supported.";
@@ -431,7 +431,7 @@
       ows.put(this.task,ows.OWSCODE_InvalidParameterValue,locator,msg);
       throw new Error("OWSException");
     }}
-  
+
   });
 
 }());

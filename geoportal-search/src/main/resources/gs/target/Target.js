@@ -16,39 +16,39 @@
 (function(){
 
   gs.target.Target = gs.Object.create(gs.Proto,{
-    
+
     key: {writable: true, value: null},
-    
+
     requiredFilter: {writable: true, value: null},
-    
+
     schema: {writable: true, value: null},
-    
+
     schemaMixin: {writable: true, value: null},
-    
+
     /* ............................................................................................ */
-    
+
     getSchemaClass: {value:function() {
       return gs.target.TargetSchema;
     }},
-    
+
     itemToAtomEntry: {value: function(task,item) {
       return this.schema.itemToAtomEntry(task,item);
     }},
-    
+
     itemToJson: {value: function(task,item) {
       return this.schema.itemToJson(task,item);
     }},
-    
+
     newSchema: {value:function(task) {
       var schemaMixin = this.schemaMixin || {};
       schemaMixin.target = this;
       return gs.Object.create(this.getSchemaClass()).mixin(schemaMixin);
     }},
-  
+
     prepare: {value:function(task) {}},
-  
+
     search: {value:function(task) {}},
-    
+
     urlParamsToQueryString: {value:function(urlParams) {
       var k, v, qstr = null;
       if (urlParams) {
@@ -60,15 +60,15 @@
               v.forEach(function(v2){
                 if (qstr === null) qstr = "";
                 if (qstr.length > 0) qstr += "&";
-                qstr += encodeURIComponent(k)+"="+encodeURIComponent(v2);  
-              })
+                qstr += encodeURIComponent(k)+"="+encodeURIComponent(v2);
+              });
             }
           }
         }
       }
       return qstr;
     }}
-  
+
   });
 
 }());

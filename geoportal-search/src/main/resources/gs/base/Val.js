@@ -14,36 +14,36 @@
  */
 
 (function(){
-  
+
   gs.base.Val = gs.Object.create(gs.Proto,{
-  
+
     NL: {writable: true, value: "\r\n"},
     XML_HEADER: {writable: true, value: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"},
-  
+
     chkStr: {value: function(v) {
       if (typeof v === "undefined" || v === null) return null;
       return ""+v;
     }},
-  
+
     chkStrArray: {value: function(v) {
       if (typeof v === "undefined" || v === null) return null;
       else if (typeof v === "string") return [v];
       else if (typeof v.push === "function") return v;
       return null;
     }},
-  
+
     chkObjArray: {value: function(v) {
       if (typeof v === "undefined" || v === null) return null;
       else if (typeof v === "object" && typeof v.push === "undefined") return [v];
       else if (typeof v === "object" && typeof v.push === "function") return v;
       return null;
     }},
-  
+
     endsWith: {value: function(v,sfx) {
       if (typeof v !== "string") return null;
       return (v.indexOf(sfx,(v.length - sfx.length)) !== -1);
     }},
-  
+
     escXml: {value: function(s) {
       if (s === null) return null;
       if (s.length === 0) return s;
@@ -66,23 +66,23 @@
       }
       return sb;
     }},
-    
+
     guessUrlType: {value: function(url) {
       var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
 
       var arcgisTypes = ["FeatureServer","GeocodeServer","GeoDataServer","GeometryServer",
                          "GlobeServer","GPServer","ImageServer","MapServer","MobileServer",
                          "NAServer","SceneServer","SchematicsServer","StreamServer",
-                         "VectorTileServer"]; 
+                         "VectorTileServer"];
       var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS","CSW"];
       var dataTypes = ["dbf","csv","gpx","pdf","shp","txt","xls","xlsx","zip"];
       var kml = "KML";
       var ims = "IMS";
-      
+
       var i, v, lc, type = null;
-      var isHttp = (typeof url === "string" && 
+      var isHttp = (typeof url === "string" &&
         (url.indexOf("http://") === 0 || url.indexOf("https://") === 0));
-      var isFtp = (typeof url === "string" && 
+      var isFtp = (typeof url === "string" &&
         (url.indexOf("ftp://") === 0 || url.indexOf("ftps://") === 0));
       if (isHttp) {
         lc = url.toLowerCase();
@@ -104,8 +104,8 @@
           }
         }
         if (type === null) {
-          if (endsWith(lc,".kml") || endsWith(lc,".kmz") || 
-              lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 || 
+          if (endsWith(lc,".kml") || endsWith(lc,".kmz") ||
+              lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 ||
               lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
             type = kml;
           }
@@ -130,18 +130,18 @@
         return {type: type, url: url};
       }
     }},
-    
+
     hasAnyProperty: {value: function(obj) {
       if (typeof obj === "object" && obj !== null) {
         for (var k in obj) {
           if (obj.hasOwnProperty(k)) {
             return true;
           }
-        }        
+        }
       }
       return false;
     }},
-  
+
     millisToIso8601: {value: function(millis) {
       if (typeof millis === "undefined") return null;
       if (millis === null) return null;
@@ -150,7 +150,7 @@
           return '0' + number;
         }
         return number;
-      }
+      };
       var date = new Date(millis);
       var v = date.getUTCFullYear() +
         '-' + pad(date.getUTCMonth() + 1) +
@@ -162,11 +162,11 @@
         'Z';
       return v;
     }},
-  
+
     nowAsString: {value: function() {
       return this.millisToIso8601(Date.now());
     }},
-  
+
     strToInt: {value: function(v,defaultValue) {
       try {
         if (typeof v !== "string") v = this.chkStr(v);
@@ -174,12 +174,12 @@
           v = parseInt(v.trim(),10);
           if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
             return v;
-          } 
+          }
         }
       } catch(ex) {}
       return defaultValue;
     }},
-  
+
     strToNum: {value: function(v,defaultValue) {
       try {
         if (typeof v !== "string") v = this.chkStr(v);
@@ -187,17 +187,17 @@
           v = Number(v.trim());
           if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
             return v;
-          } 
+          }
         }
       } catch(ex) {}
       return defaultValue;
     }},
-  
+
     trim: {value: function(v) {
       if (typeof v === "string") return v.trim();
       return v;
     }}
-  
+
   });
-  
+
 }());
