@@ -25,6 +25,7 @@ function(declare, localRequire, _WidgetBase, _TemplatedMixin,
   //  {"f":"json","target":"cswB"}
   //  {"f":"json","target":"cswA"}
   //  {"f":"json","target":["arcgis","gptdb1"]}
+  //  {"f":"json","target":["gptdb1","cswA"]}
 
   var oThisClass = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
@@ -59,35 +60,46 @@ function(declare, localRequire, _WidgetBase, _TemplatedMixin,
     search: function() {
       if (!this._wasLoaded) return; // TODO need a ui error message
       var self = this;
-      this.resultTextarea.value = "Searching...";
+      try {
+        this.resultTextarea.value = "Searching...";
 
-      var parameterMap = {};
-      var sParams = this.requestTextarea.value.trim();
-      if (sParams.length > 0) {
-        try {
-          var params = JSON.parse(sParams);
-          parameterMap = params;
-          //console.log("params",params);
-        } catch(ex) {
-          this.resultTextarea.value = ""+ex;
-          return;
+        var parameterMap = {};
+        var sParams = this.requestTextarea.value.trim();
+        if (sParams.length > 0) {
+          try {
+            var params = JSON.parse(sParams);
+            parameterMap = params;
+            //console.log("params",params);
+          } catch(ex) {
+            this.resultTextarea.value = ""+ex;
+            return;
+          }
         }
+
+        var requestInfo = {
+          "requestUrl": "/request",
+          "baseUrl": "/base",
+          "headerMap": {},
+          "parameterMap": parameterMap
+        };
+        //requestInfo.requestUrl = "http://www.geoportal.com/geoportal/opensearch/description";
+
+        var processor = gs.Object.create(gs.context.browser.WebProcessor);
+        processor.execute(requestInfo,function(status,mediaType,entity,headers){
+          console.log(status,mediaType,"\r\n",entity);
+          self.resultTextarea.value = entity;
+          self.informExternal(entity);
+        });
+      } catch(error) {
+        var msg = "Error processing request.";
+        console.log(msg);
+        if (error) {
+          console.error(error);
+          msg = ""+error;
+        }
+        this.resultTextarea.value = msg;
       }
 
-      var requestInfo = {
-        "requestUrl": "/request",
-        "baseUrl": "/base",
-        "headerMap": {},
-        "parameterMap": parameterMap
-      };
-      //requestInfo.requestUrl = "http://www.geoportal.com/geoportal/opensearch/description";
-
-      var processor = gs.Object.create(gs.context.browser.WebProcessor);
-      processor.execute(requestInfo,function(status,mediaType,entity,headers){
-        //console.log(status,mediaType,"\r\n",entity);
-        self.resultTextarea.value = entity;
-        self.informExternal(entity);
-      });
     }
 
   });

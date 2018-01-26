@@ -91,6 +91,7 @@
 
     _wasResolveCalled: {writable: true, value: false},
     _wasResolved: {writable: true, value: false},
+    _wasRejectCalled: {writable: true, value: false},
     _wasRejected: {writable: true, value: false},
     _wasFulfilled: {writable: true, value: false},
 
@@ -145,6 +146,7 @@
     }},
 
     reject: {value: function(error) {
+      this._wasRejectCalled = true;
       if (!this._wasFulfilled) {
         this._wasFulfilled = this._wasRejected = true;
         this._error = error;
@@ -200,6 +202,8 @@
                   self.resolve(obj._result);  // TODO??
                   //self._wasResolved = self._wasFulfilled = true;
                   //self._checkCallback(obj._result)
+                } else if (obj._wasRejectCalled) {
+                  self.reject(obj._error);
                 }
               });
               break;

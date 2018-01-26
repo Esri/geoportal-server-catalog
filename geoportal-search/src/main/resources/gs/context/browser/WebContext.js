@@ -39,7 +39,7 @@
           promise.reject(new Error(req.statusText)); // TODO
         }
       };
-      req.onerror = function() {
+      req.onerror = function(e) {
         promise.reject(new Error("Network error")); // TODO
       };
       if (typeof data !== "undefined" && data !== null) {

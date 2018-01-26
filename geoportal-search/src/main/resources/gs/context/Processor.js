@@ -162,7 +162,7 @@
       var index = function(writers,keys,writer) {
         keys.forEach(function(k){
           writers[k.toLowerCase()] = writer;
-        })
+        });
       };
 
       var atom = ["atom","application/atom+xml","http://www.w3.org/2005/Atom"];
