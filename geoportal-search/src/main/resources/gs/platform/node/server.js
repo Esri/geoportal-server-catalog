@@ -16,7 +16,7 @@
 global.gs = {};
 global.gsConfig = {
   isNode: true
-}
+};
 
 require("../../../gs/all.js");
 gs._request = require("request");
@@ -26,7 +26,7 @@ var bodyParser = require('body-parser');
 var app = express();
 var port = 3000;
 
-//app.use(bodyParser.json()); 
+//app.use(bodyParser.json());
 app.use(bodyParser.urlencoded({extended: true}));
 
 app.listen(port, function () {
@@ -61,8 +61,8 @@ app.post("/opensearch/description", function (req, res) {
 function execute(req, res, parameterMap) {
 
   // TODO need X- headers
-  var baseUrl = req.protocol + "://" + req.hostname + ":" +port; 
- 
+  var baseUrl = req.protocol + "://" + req.hostname + ":" +port;
+
   var requestInfo = {
     "requestUrl": req.url,
     "requestBody": req.body,
@@ -93,8 +93,3 @@ function mixinParameters(req) {
   });
   return parameterMap;
 }
-
-
-
-
-

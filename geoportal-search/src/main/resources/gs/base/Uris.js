@@ -14,9 +14,9 @@
  */
 
 (function(){
-  
+
   gs.base.Uris = {
-  
+
     URI_ATOM: "http://www.w3.org/2005/Atom",
     URI_CSW: "http://www.opengis.net/cat/csw/3.0",
     URI_CSW2: "http://www.opengis.net/cat/csw/2.0.2",
@@ -37,7 +37,7 @@
     URI_OWS2: "http://www.opengis.net/ows/2.0",
     URI_SDI: "http://www.geodata.gov/sdi_atom",
     URI_TIME: "http://a9.com/-/opensearch/extensions/time/1.0/"
-  
-  }
+
+  };
 
 }());

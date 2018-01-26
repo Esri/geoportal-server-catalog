@@ -14,36 +14,36 @@
  */
 
 (function(){
-  
+
   /* ============================================================================================ */
-  
+
   gs.Object = {
   
     create: function(proto,properties) {
       var obj = Object.create(proto,properties);
-      if (typeof obj["__init__"] === "function") obj["__init__"]();
+      if (typeof obj.__init__ === "function") obj.__init__();
       return obj;
     }
-  
+
   };
-  
+
   /* ============================================================================================ */
-  
+
   gs.Proto = Object.create(Object.prototype,{
-  
+
     __init__: {value:function() {}},
-    
+
     /* Example
     __init__: {value:function() {
       gs.base.Target.__init__.call(this); // call super.__init__
       print("PortalTarget::__init__"); // custom initialization
     }},
     */
-  
+
     init: {value: function() {
       return this;
     }},
-    
+
     mixin: {value: function(props) {
       if (typeof props === "object" && props != null) {
         for (var k in props) {
@@ -54,10 +54,9 @@
       }
       return this;
     }}
-  
+
   });
-  
+
   /* ============================================================================================ */
 
 }());
-

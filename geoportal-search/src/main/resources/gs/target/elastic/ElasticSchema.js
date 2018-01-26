@@ -14,51 +14,50 @@
  */
 
 (function(){
-  
+
   gs.target.elastic.ElasticSchema = gs.Object.create(gs.target.TargetSchema, {
-    
+
     isVersion5Plus: {writable: true, value: true},
-  
+
     bboxField: {writable: true, value: null},
     pointField: {writable: true, value: null},
-    
+
     fieldAliases: {writable: true, value: null},
-    
+
     schemaType: {writable: true, value: "Elasticsearch"},
-    
+
     sortables: {writable: true, value: {
     }},
-    
+
     spatialInfo: {writable: true, value: {
     }},
-    
+
     modifiedPeriodInfo: {writable: true, value: {
     }},
-    
+
     timePeriodInfo: {writable: true, value: {
     }},
-    
+
     typeInfo: {writable: true, value: {
     }},
-    
+
     itemToAtomEntry: {value: function(task,item) {
       //console.log("ElasticSchema::itemToAtomEntry");
-      var source = item["_source"];
+      var source = item._source;
       var entry = gs.Object.create(gs.atom.Entry);
-      entry.id = item["_id"];
-      entry.title = task.val.chkStr(source["title"]);
+      entry.id = item._id;
+      entry.title = task.val.chkStr(source.title);
       return entry;
     }},
-    
+
     itemToJson: {value: function(task,item) {
       var json = gs.target.TargetSchema.itemToJson.call(this,task,item); // call super
-      if (item["_source"]) {
-        json._source = item["_source"];
+      if (item._source) {
+        json._source = item._source;
       }
       return json;
     }}
-  
+
   });
 
 }());
-
