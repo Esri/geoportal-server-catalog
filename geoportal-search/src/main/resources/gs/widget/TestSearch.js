@@ -56,9 +56,21 @@ function(declare, localRequire, _WidgetBase, _TemplatedMixin,
     ]
   }
 
+  {
+    "f":"json",
+    "target":[
+      {
+        "key":"abc",
+        "type":"geoportal",
+        "profile": "sampleProfile1",
+        "url":"http://gptdb2.esri.com:8080/geoportal/elastic/img/item/_search"
+      }
+    ]
+  }
+
   */
 
-  var oThisClass = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
+  var _def = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
     templateString: template,
 
@@ -82,10 +94,6 @@ function(declare, localRequire, _WidgetBase, _TemplatedMixin,
         console.error(ex);
         //alert(ex);
       }
-    },
-
-    processResult: function(result) {
-
     },
 
     search: function() {
@@ -123,7 +131,7 @@ function(declare, localRequire, _WidgetBase, _TemplatedMixin,
           }
         });
         processor.execute(requestInfo,function(status,mediaType,entity,headers){
-          console.log(status,mediaType,"\r\n",entity);
+          //console.log(status,mediaType,"\r\n",entity);
           self.resultTextarea.value = entity;
           self.informExternal(entity);
         });
@@ -142,5 +150,5 @@ function(declare, localRequire, _WidgetBase, _TemplatedMixin,
 
   });
 
-  return oThisClass;
+  return _def;
 });
