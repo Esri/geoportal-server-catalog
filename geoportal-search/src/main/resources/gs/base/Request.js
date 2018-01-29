@@ -16,52 +16,52 @@
 (function(){
 
   gs.base.Request = gs.Object.create(gs.Proto,{
-    
+
     // common request parameters
-    
+
     // TODO: ElasticTarget also has analyze_wildcard and lenient (booleans)
-  
+
     f: {writable: true, value: "atom"},
-    
+
     pretty: {writable: true, value: false},
-    
-    getBBox: {value: function() {
+
+    getBBox: {writable:true,value:function() {
       return this.chkParam("bbox");
     }},
-    
-    getFilter: {value: function() {
+
+    getFilter: {writable:true,value:function() {
       return this.chkParam("filter");
     }},
-    
-    getGroupIds: {value: function() {
+
+    getGroupIds: {writable:true,value:function() {
       return this._getIds(["group","groups"]);
     }},
-    
-    getIds: {value: function() {
+
+    getIds: {writable:true,value:function() {
       return this._getIds(["id","ids","recordIds"]);
     }},
-    
-    getModifiedPeriod: {value: function() {
+
+    getModifiedPeriod: {writable:true,value:function() {
       return this._getPeriod("modified");
     }},
-    
-    getNum: {value: function() {
+
+    getNum: {writable:true,value:function() {
       var num = this.chkParam("num");
       if (num === null) num = this.chkParam("size");
       if (num === null) num = this.chkParam("maxRecords");
       if (num === null) num = this.chkParam("max");
       return num;
     }},
-    
-    getOrgIds: {value: function() {
+
+    getOrgIds: {writable:true,value:function() {
       return this._getIds(["orgid","orgids"]);
     }},
-    
-    getQ: {value: function() {
+
+    getQ: {writable:true,value:function() {
       return this.chkParam("q");
     }},
-    
-    getSortOptions: {value: function() {
+
+    getSortOptions: {writable:true,value:function() {
       // &sortField=title,modified&sortOrder=desc,asc // Portal syntax
       // &sort=title:desc&sort=modified:asc // Elasticsearch syntax
       // &sortBy=title:D,modified:A // CSW syntax
@@ -121,7 +121,7 @@
               sortOptions.push({"field": sortField, "order": sortOrder});
             } else {
               sortOptions.push({"field": sortField});
-            } 
+            }
           }
         });
       }
@@ -134,19 +134,19 @@
       */
       return sortOptions;
     }},
-    
-    getSpatialRel: {value: function() {
+
+    getSpatialRel: {writable:true,value:function() {
       return this.chkParam("spatialRel");
     }},
-    
-    getStart: {value: function() {
+
+    getStart: {writable:true,value:function() {
       var start = this.chkParam("start");
       if (start === null) start = this.chkParam("from");
       if (start === null) start = this.chkParam("startPosition");
       return start;
     }},
-    
-    getTargets: {value: function() {
+
+    getTargets: {writable:true,value:function() {
       var values = this.getParameterValues("target");
       if (values === null || values.length === 0) {
         values = this.getParameterValues("targets");
@@ -156,12 +156,12 @@
       }
       return values;
     }},
-    
-    getTimePeriod: {value: function() {
+
+    getTimePeriod: {writable:true,value:function() {
       return this._getPeriod("time");
     }},
-    
-    getTypes: {value: function() {
+
+    getTypes: {writable:true,value:function() {
       var types = [];
       var list = this.getParameterValues("type");
       if (list === null) list = this.getParameterValues("types");
@@ -177,24 +177,24 @@
       if (types.length === 0) types = null;
       return types;
     }},
-    
+
     /* .......................................................................................... */
-  
+
     // some task information
     isItemByIdRequest: {writable: true, value: false},
     queryIsZeroBased: {writable: true, value: false},
 
     /* .......................................................................................... */
-    
+
     // http request information
     body: {writable: true, value: null},
     headerMap: {writable: true, value: null},
     parameterMap: {writable: true, value: null},
     url: {writable: true, value: null}, // TODO requestUrl
-    
+
     /* .......................................................................................... */
-  
-    chkBoolParam: {value: function(key,defaultValue) {
+
+    chkBoolParam: {writable:true,value:function(key,defaultValue) {
       var v = this.chkParam(key);
       if (typeof v === "string") {
         v = v.toLowerCase();
@@ -203,42 +203,42 @@
       }
       return defaultValue;
     }},
-  
-    chkIntParam: {value: function(key,defaultValue) {
+
+    chkIntParam: {writable:true,value:function(key,defaultValue) {
       try {
         var v = this.chkParam(key);
         if (typeof v === "string" && v.length > 0) {
           v = parseInt(v,10);
           if (typeof v === "number" && !isNaN(v) && isFinite(v)) {
             return v;
-          } 
+          }
         }
       } catch(ex) {}
       return defaultValue;
     }},
-  
-    chkParam: {value: function(key) {
+
+    chkParam: {writable:true,value:function(key) {
       return gs.base.Val.trim(this.getParameter(key));
     }},
-  
-    getHeader: {value: function(key) {
+
+    getHeader: {writable:true,value:function(key) {
       return this._getValue(this.headerMap,key);
     }},
-  
-    getHeaderValues: {value: function(key) {
+
+    getHeaderValues: {writable:true,value:function(key) {
       return this._getValues(this.headerMap,key);
     }},
-  
-    getParameter: {value: function(key) {
+
+    getParameter: {writable:true,value:function(key) {
       return this._getValue(this.parameterMap,key);
     }},
-  
-    getParameterValues: {value: function(key) {
+
+    getParameterValues: {writable:true,value:function(key) {
       return this._getValues(this.parameterMap,key);
     }},
-  
+
     // TODO getRequestUrlPath
-    getUrlPath: {value: function() {
+    getUrlPath: {writable:true,value:function() {
       if (typeof this.url === "string" && this.url.length > 0) {
         var n = this.url.indexOf("?");
         if (n !== -1) return this.url.substring(0,n);
@@ -246,8 +246,8 @@
       }
       return null;
     }},
-  
-    hasQueryParameters: {value: function() {
+
+    hasQueryParameters: {writable:true,value:function() {
       var k, map = this.parameterMap;
       if (map) {
         for (k in map) {
@@ -258,24 +258,24 @@
       }
       return false;
     }},
-  
-    parseF: {value: function(task) {
+
+    parseF: {writable:true,value:function(task) {
       var pretty = this.chkBoolParam("pretty",false);
       var f = this.chkParam("f");
       var outputSchema = this.chkParam("outputSchema");
       if (outputSchema !== null && outputSchema.length > 0) {
         f = outputSchema;
-      } 
+      }
       if (f !== null && f == "pjson") {
         pretty = true;
       }
       if (f !== null && f.length > 0) this.f = f;
       if (pretty) this.pretty = true;
     }},
-  
+
     /* .......................................................................................... */
-    
-    _getIds: {value: function(aliases) {
+
+    _getIds: {writable:true,value:function(aliases) {
       var ids = [], self = this, list = null;
       aliases.some(function(alias){
         list = self.getParameterValues(alias);
@@ -293,12 +293,12 @@
       if (ids.length === 0) ids = null;
       return ids;
     }},
-    
-    _getPeriod: {value: function(name) {
+
+    _getPeriod: {writable:true,value:function(name) {
       var period = {from: null, to: null};
       var v = this.chkParam(name);
       if (typeof v === "string" && v.length > 0) {
-        var a = v.split("/"); 
+        var a = v.split("/");
         a[0] = a[0].trim();
         if (a.length === 1 && v.indexOf(",") !== -1) {
           a = v.split(",");
@@ -312,8 +312,8 @@
       }
       return period;
     }},
-  
-    _getValue: {value: function(map, key) {
+
+    _getValue: {writable:true,value:function(map,key) {
       var a = this._getValues(map, key);
       if (a !== null) {
         if (a.length === 0) return "";
@@ -321,8 +321,8 @@
       }
       return null;
     }},
-  
-    _getValues: {value: function(map, key) {
+
+    _getValues: {writable:true,value:function(map,key) {
       var k, v, lc = key.toLowerCase();
       if (map) {
         for (k in map) {
@@ -342,7 +342,7 @@
       }
       return null;
     }}
-  
+
   });
 
 }());

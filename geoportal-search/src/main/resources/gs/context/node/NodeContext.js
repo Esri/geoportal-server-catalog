@@ -19,13 +19,13 @@
 
   gs.context.node.NodeContext = gs.Object.create(gs.context.Context,{
 
-    readResourceFile: {value: function(path,charset) {
+    readResourceFile: {writable:true,value:function(path,charset) {
       path = "../"+path; // TODO this is relative to where node was launched
       if (charset === null || charset.length == 0) charset = "UTF-8";
       return fs.readFileSync(path,{encoding:charset});
     }},
 
-    sendHttpRequest: {value: function(task,url,data,dataContentType) {
+    sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType) {
       var promise = this.newPromise();
       var options = {url: url};
       if (typeof data !== "undefined" && data !== null) {

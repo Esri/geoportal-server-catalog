@@ -17,16 +17,16 @@
 
   gs.provider.Provider = gs.Object.create(gs.Proto,{
 
-    addOverrideParameter: {value: function(task,key,value) {
+    addOverrideParameter: {writable:true,value:function(task,key,value) {
       task.request.parameterMap[key] = value; // TODO remove keys ?
     }},
 
-    execute: {value: function(task) {}},
+    execute: {writable:true,value:function(task) {}},
 
-    preprocess: {value: function(task) {
+    preprocess: {writable:true,value:function(task) {
       var f = task.request.chkParam("f");
       if (typeof f === "string" && f.toLowerCase() === "eros") {
-        if (typeof task.request.parameterMap.type === "undefined" && 
+        if (typeof task.request.parameterMap.type === "undefined" &&
             typeof task.request.parameterMap.types === "undefined") {
           var keys = Object.keys(gs.writer.ErosWriter.erosTypes);
           task.request.parameterMap.type = keys;
@@ -34,7 +34,7 @@
       }
     }},
 
-    setWriter: {value: function(task) {
+    setWriter: {writable:true,value:function(task) {
       var k, f = task.request.f;
       for (k in task.writers) {
         if (task.writers.hasOwnProperty(k)) {

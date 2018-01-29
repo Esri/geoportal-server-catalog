@@ -14,24 +14,24 @@
  */
 
 (function(){
-  
+
   gs.context.nashorn.StringBuilder = gs.Object.create(gs.base.StringBuilder,{
-  
+
     _sb: {writable: true, value: null},
-  
-    append: {value: function(value) {
+
+    append: {writable:true,value:function(value) {
       if (value === null) return this;
       if (typeof value !== "string") return this;
       if (this._sb === null) this._sb = new java.lang.StringBuilder();
       this._sb.append(value);
       return this;
     }},
-    
-    toString: {value: function() {
+
+    toString: {writable:true,value:function() {
       if (this._sb === null) return "";
       return this._sb.toString();
     }}
-  
+
   });
-  
+
 }());

@@ -16,10 +16,10 @@
 (function(){
 
   gs.writer.RssWriter = gs.Object.create(gs.writer.XmlWriter,{
-    
+
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_RSS_XML},
-  
-    addNamespaces: {value: function(task,xmlBuilder) {
+
+    addNamespaces: {writable:true,value:function(task,xmlBuilder) {
       xmlBuilder.writeNamespace("atom",task.uris.URI_ATOM);
       xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("opensearch",task.uris.URI_OPENSEARCH);
@@ -28,8 +28,8 @@
       xmlBuilder.writeNamespace("georss10",task.uris.URI_GEORSS10);
       xmlBuilder.writeNamespace("time",task.uris.URI_TIME);
     }},
-    
-    formatDate: {value: function(task,iso) {
+
+    formatDate: {writable:true,value:function(task,iso) {
       // TODO need a Node implementation
       if (task.context.isNashorn) {
         try {
@@ -48,12 +48,12 @@
       }
       return iso;
     }},
-    
-    writeEntry: {value: function(task,xmlBuilder,item,options) {
+
+    writeEntry: {writable:true,value:function(task,xmlBuilder,item,options) {
       var entry = task.target.itemToAtomEntry(task,item);
       if (!entry) return;
       xmlBuilder.writeStartElement(null,"item");
-      
+
       var id = entry.id;
       var title = "Untitled";
       var description = "";
@@ -69,14 +69,14 @@
       } else if (typeof entry.published === "string" && entry.published.length > 0) {
         updated = entry.published;
       }
-      
+
       xmlBuilder.writeElement(null,"guid",id);
       xmlBuilder.writeElement(task.uris.URI_ATOM,"id",id);
       xmlBuilder.writeElement(null,"title",title);
       if (updated !== null && updated.length > 0) {
         xmlBuilder.writeElement(null,"pubDate",this.formatDate(task,updated));
       }
-      
+
       xmlBuilder.writeElement(null,"description",description);
       /*
       var snippet = G.getSnippet(xmlBuilder,title,description,links);
@@ -84,9 +84,9 @@
       xmlBuilder.writer.writeCData(snippet);
       xmlBuilder.writer.writeEndElement();
       */
-    
+
       this.addAtomObject(task,xmlBuilder,gs.atom.Link,entry.link);
-      
+
       if (gs.atom.Point.isPrototypeOf(entry.point)) {
         entry.point.writeGeoRSSPoint(task,xmlBuilder);
       }
@@ -94,17 +94,17 @@
         entry.bbox.writeGeoRSSBox(task,xmlBuilder);
         entry.bbox.writeGeoRSSBox10(task,xmlBuilder);
       }
-      
+
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
       xmlBuilder.writeEndElement();
     }},
-    
-    writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: false};
       var xmlBuilder = task.context.newXmlBuilder();
       xmlBuilder.writeStartDocument();
-      
+
       xmlBuilder.writeStartElement(null,"rss");
       xmlBuilder.writeAttribute("version","2.0");
       this.addNamespaces(task,xmlBuilder);
@@ -114,7 +114,7 @@
       xmlBuilder.writeElement(null,"link",task.baseUrl);
       xmlBuilder.writeElement(null,"docs","http://www.rssboard.org/rss-specification");
       xmlBuilder.writeElement(null,"category","GeoRss");
-      
+
       this.writeOpensearchInfo(task,searchResult,xmlBuilder);
       var items = searchResult.items ? searchResult.items : [];
       if (searchResult.itemsPerPage > 0) {
@@ -126,7 +126,7 @@
       xmlBuilder.writeEndDocument();
       this.writeResponse(task,xmlBuilder);
     }}
-  
+
   });
 
 }());

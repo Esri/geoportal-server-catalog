@@ -14,20 +14,20 @@
  */
 
 (function(){
-  
+
   gs.target.TargetSchema = gs.Object.create(gs.Proto,{
-    
+
     fieldAliases: {writable: true, value: null},
-    
+
     schemaType: {writable: true, value: null},
-    
+
     target: {writable: true, value: null},
-    
+
     typeAliases: {writable: true, value: null},
-  
-    itemToAtomEntry: {value: function(task,item) {}},
-    
-    itemToJson: {value: function(task,item) {
+
+    itemToAtomEntry: {writable:true,value:function(task,item) {}},
+
+    itemToJson: {writable:true,value:function(task,item) {
       var entry = this.itemToAtomEntry(task,item);
       if (entry) {
         return entry.toJson(task);
@@ -35,8 +35,8 @@
         return {};
       }
     }},
-    
-    translateFieldName: {value: function(task,name) {
+
+    translateFieldName: {writable:true,value:function(task,name) {
       var k, lc = null, v, aliases = this.fieldAliases;
       if (aliases && typeof name === "string" && name.length > 0){
         lc = name.toLowerCase();
@@ -54,8 +54,8 @@
       }
       return name;
     }},
-    
-    translateTypeName: {value: function(task,name) {
+
+    translateTypeName: {writable:true,value:function(task,name) {
       var k, lc = null, v, aliases = this.typeAliases;
       if (aliases && typeof name === "string" && name.length > 0){
         lc = name.toLowerCase();
@@ -73,7 +73,7 @@
       }
       return name;
     }}
-  
+
   });
 
 }());

@@ -19,7 +19,7 @@
 
     isSingleIdRequest: {writable: true, value: false},
 
-    chkBBoxParam: {value: function(task) {
+    chkBBoxParam: {writable:true,value:function(task) {
       if (task.hasError) return;
       var bbox = task.request.getBBox();
       if (bbox === null || bbox.length === 0) return;
@@ -35,7 +35,7 @@
       }
     }},
 
-    description: {value: function(task) {
+    description: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       var opensearchUrl = task.baseUrl+"/opensearch"; // TODO doc or config?
 
@@ -55,7 +55,7 @@
       return promise;
     }},
 
-    execute: {value: function(task) {
+    execute: {writable:true,value:function(task) {
       var v = task.request.getUrlPath();
       var isDescription = task.val.endsWith(v,"/opensearch/description"); // TODO doc or config?
       if (!isDescription) {
@@ -86,7 +86,7 @@
       }
     }},
 
-    search: {value: function(task) {
+    search: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       task.request.parseF(task);
       this.setWriter(task);

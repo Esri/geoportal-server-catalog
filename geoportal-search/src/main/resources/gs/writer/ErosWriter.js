@@ -16,7 +16,7 @@
 (function(){
 
   gs.writer.ErosWriter = gs.Object.create(gs.writer.AtomWriter,{
-    
+
     erosTypes: {writable: true, value: {
       "FeatureServer": "agsfeatureserver",
       "Feature Service": "agsfeatureserver",
@@ -31,18 +31,18 @@
       "WFS": "wfs",
       "WMS": "wms"
     }},
-    
-    addNamespaces: {value: function(task,xmlBuilder) {
+
+    addNamespaces: {writable:true,value:function(task,xmlBuilder) {
       gs.writer.AtomWriter.addNamespaces.call(this,task,xmlBuilder); // call super
       xmlBuilder.writeNamespace("sdi",task.uris.URI_SDI);
     }},
-    
-    beforeEndEntry: {value: function(task,xmlBuilder,item,options,entry) {
+
+    beforeEndEntry: {writable:true,value:function(task,xmlBuilder,item,options,entry) {
       this.writeSDI(task,xmlBuilder,item,options,entry);
       gs.writer.AtomWriter.beforeEndEntry.call(this,task,xmlBuilder,item,options,entry); // call super
     }},
-    
-    writeSDI: {value: function(task,xmlBuilder,item,options,entry) {
+
+    writeSDI: {writable:true,value:function(task,xmlBuilder,item,options,entry) {
       var ok = false, k, lc, v;
       var types = this.erosTypes;
       var metadataUrl, serviceUrl, serviceType, emailAddress = "";
@@ -74,7 +74,7 @@
           }
         }
       });
-      
+
       if (ok) {
         if (typeof metadataUrl === "string" && metadataUrl.length > 0) {
           xmlBuilder.writeElement(task.uris.URI_SDI,"metadataUrl",metadataUrl);
@@ -84,7 +84,7 @@
         xmlBuilder.writeElement(task.uris.URI_SDI,"emailAddress",emailAddress);
       }
     }}
-  
+
   });
 
 }());

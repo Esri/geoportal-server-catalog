@@ -14,16 +14,16 @@
  */
 
 (function(){
-  
+
   gs.base.SearchResult = gs.Object.create(gs.Proto,{
-  
+
     items: {writable: true, value: null},
     itemsPerPage: {writable: true, value: 10},
     jsonResponse: {writable: true, value: null},
     startIndex: {writable: true, value: 1},
     totalHits: {writable: true, value: 0},
-    
-    calcNextRecord: {value: function(task) {
+
+    calcNextRecord: {writable:true,value:function(task) {
       var items = this.items ? this.items : [];
       var noNext = -1; // TODO 0 ?
       var totalHits = this.totalHits;
@@ -49,8 +49,8 @@
       }
       return nextRecord;
     }},
-  
-    init: {value: function(task) {
+
+    init: {writable:true,value:function(task) {
       this.startIndex = 1;
       if (task.request.queryIsZeroBased) this.startIndex = 0;
       var start = task.request.getStart();
@@ -59,18 +59,17 @@
         if (start > 0 || task.request.queryIsZeroBased) {
           this.startIndex = start;
         }
-      } 
+      }
       var num = task.request.getNum();
       num = task.val.strToInt(num,null);
       if (typeof num === "number" && num >= 0) {
         this.itemsPerPage = num;
       } else if (typeof num === "number" && num < 0) {
-        this.itemsPerPage = 0; 
-      } 
+        this.itemsPerPage = 0;
+      }
       return this;
     }}
-  
-  });
-  
-}());
 
+  });
+
+}());

@@ -17,46 +17,46 @@
 
   gs.context.Context = gs.Object.create(gs.Proto,{
 
-    indentXml: {value: function(task,xml) {
+    indentXml: {writable:true,value:function(task,xml) {
       return xml;
     }},
 
-    newCounter: {value: function() {
+    newCounter: {writable:true,value:function() {
       return gs.Object.create(gs.context.Counter);
     }},
 
-    newPromise: {value: function(name) {
+    newPromise: {writable:true,value:function(name) {
       if (typeof name === "string") {
         return gs.Object.create(gs.context.SimplePromise).mixin({name: name});
       }
       return gs.Object.create(gs.context.SimplePromise);
     }},
 
-    newPromiseAll: {value: function(promises) {
+    newPromiseAll: {writable:true,value:function(promises) {
       return gs.context.SimplePromise.all(promises,this.newCounter());
     }},
 
-    newXmlInfo: {value: function(task,xmlString,nsmap) {
+    newXmlInfo: {writable:true,value:function(task,xmlString,nsmap) {
       return null;
     }},
 
-    newStringBuilder: {value: function() {
+    newStringBuilder: {writable:true,value:function() {
       return gs.Object.create(gs.base.StringBuilder).init();
     }},
 
-    newXmlBuilder: {value: function(task) {
+    newXmlBuilder: {writable:true,value:function(task) {
       return gs.Object.create(gs.base.XmlBuilder).init(this.newStringBuilder());
     }},
 
-    readResourceFile: {value: function(path,charset) {
+    readResourceFile: {writable:true,value:function(path,charset) {
       return null;
     }},
 
-    removeAllButFilter: {value: function(xml) {
+    removeAllButFilter: {writable:true,value:function(xml) {
       return xml;
     }},
 
-    sendHttpRequest: {value: function(task,url,data,dataContentType,options) {
+    sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType,options) {
       return null;
     }}
 
@@ -65,11 +65,11 @@
   gs.context.Counter = gs.Object.create(gs.Proto,{
     count: {writable: true, value: 0},
 
-    get: {value: function() {
+    get: {writable:true,value:function() {
       return this.count;
     }},
 
-    incrementAndGet: {value: function() {
+    incrementAndGet: {writable:true,value:function() {
       this.count++;
       return this.count;
     }}
@@ -95,7 +95,7 @@
     _wasRejected: {writable: true, value: false},
     _wasFulfilled: {writable: true, value: false},
 
-    all: {value: function(promises,counter) {
+    all: {writable:true,value:function(promises,counter) {
       var dfds = Array.prototype.slice.call(promises);
       var promise = gs.Object.create(gs.context.SimplePromise);
       var i, results = [];
@@ -131,7 +131,7 @@
       return promise;
     }},
 
-    "catch": {value: function(errback) {
+    "catch": {writable:true,value:function(errback) {
       if (!this._errbacks) this._errbacks = [];
       this._errbacks.push(errback);
       if (this._wasRejected) {
@@ -141,11 +141,11 @@
       return this;
     }},
 
-    otherwise: {value: function(errback) {
+    otherwise: {writable:true,value:function(errback) {
       return this["catch"](errback);
     }},
 
-    reject: {value: function(error) {
+    reject: {writable:true,value:function(error) {
       this._wasRejectCalled = true;
       if (!this._wasFulfilled) {
         this._wasFulfilled = this._wasRejected = true;
@@ -154,7 +154,7 @@
       }
     }},
 
-    resolve: {value: function(result) {
+    resolve: {writable:true,value:function(result) {
       this._wasResolveCalled = true;
       if (!this._wasFulfilled) {
         this._wasFulfilled = this._wasResolved = true;
@@ -163,7 +163,7 @@
       }
     }},
 
-    then: {value: function(callback,errback) {
+    then: {writable:true,value:function(callback,errback) {
       if (!this._callbacks) this._callbacks = [];
       this._callbacks.push(callback);
       if (errback) this["catch"](errback);
@@ -171,7 +171,7 @@
       return this;
     }},
 
-    _checkCallback: {value: function(result) {
+    _checkCallback: {writable:true,value:function(result) {
       if (this._wasResolved && this._callbacks && this._callbacks.length > 0) {
         var self = this, callback;
         var obj;
@@ -215,7 +215,7 @@
       }
     }},
 
-    _checkErrback: {value: function() {
+    _checkErrback: {writable:true,value:function() {
       if (this._wasRejected && this._errbacks && this._errbacks.length > 0) {
         var error = this._error;
         this._errbacks.forEach(function(errback){
@@ -223,6 +223,62 @@
         });
       }
     }}
+
+    /*
+    _checkCallback2: {writable:true,value:function(result) {
+      if (this._wasResolved && this._callbacks && this._callbacks.length > 0) {
+        var callback, stop;
+        while (this._callbacks.length > 0) {
+          callback = this._callbacks.shift();
+          stop = this._checkCallback3(result,callback);
+          if (stop) break;
+        }
+      }
+    }},
+
+    _checkCallback3: {writable:true,value:function(result,callback) {
+      var self = this, obj;
+      var ret = {
+        stop: false,
+        result: null
+      };
+      try {
+        obj = callback(result);
+      } catch(ex) {
+        //console.log("Auto rejecting promise",ex); // TODO
+        this._wasResolved = this._wasFulfilled = false; // TODO??
+        this.reject(ex);
+        return true;
+      }
+      if (typeof obj !== "undefined" && obj !== self) {
+        if (typeof obj === "object" && obj !== null && obj.isSimplePromise) {
+          // chain
+          //this._result = null;
+          this._error = null;
+          this._wasResolved = false;
+          this._wasRejected = false;
+          this._wasFulfilled = false;
+          obj.then(function(result2){
+            self._wasResolved = self._wasFulfilled = true;
+            self._result = result2;
+            self._checkCallback(result2);
+          })["catch"](function(error2){
+            if (obj._wasResolveCalled) {
+              self.resolve(obj._result);  // TODO??
+              //self._wasResolved = self._wasFulfilled = true;
+              //self._checkCallback(obj._result)
+            } else if (obj._wasRejectCalled) {
+              self.reject(obj._error);
+            }
+          });
+          return true;
+        } else {
+          result = obj;
+        }
+      }
+      return false;
+    }}
+    */
 
   });
 

@@ -16,20 +16,20 @@
 (function(){
 
   gs.writer.XmlWriter = gs.Object.create(gs.writer.Writer,{
-    
+
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
-        
-    write: {value: function(task,searchResult) {
+
+    write: {writable:true,value:function(task,searchResult) {
       if (task.provider.isCswProvider && task.request.isItemByIdRequest) {
         this.writeItem(task,searchResult);
       } else {
         this.writeItems(task,searchResult);
       }
     }},
-    
+
     /* .......................................................................................... */
-    
-    addAtomObject: {value: function(task,xmlBuilder,atomType,atomObject) {
+
+    addAtomObject: {writable:true,value:function(task,xmlBuilder,atomType,atomObject) {
       if (Array.isArray(atomObject)) {
         atomObject.forEach(function(v){
           if (typeof v.write === "function") {
@@ -42,8 +42,8 @@
         }
       }
     }},
-    
-    addAtomText: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
+
+    addAtomText: {writable:true,value:function(task,xmlBuilder,namespaceURI,localName,value) {
       var self = this;
       if (Array.isArray(value)) {
         value.forEach(function(v){
@@ -57,24 +57,24 @@
         xmlBuilder.writeElement(namespaceURI,localName,value);
       }
     }},
-    
-    addElement: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
+
+    addElement: {writable:true,value:function(task,xmlBuilder,namespaceURI,localName,value) {
       if (typeof value === "string" && value.length > 0) {
         xmlBuilder.writeElement(namespaceURI,localName,value);
       }
     }},
-  
-    addNamespaces: {value: function(task,xmlBuilder) {
+
+    addNamespaces: {writable:true,value:function(task,xmlBuilder) {
     }},
-    
-    beforeEndEntry: {value: function(task,xmlBuilder,item,options,entry) {
+
+    beforeEndEntry: {writable:true,value:function(task,xmlBuilder,item,options,entry) {
       // TODO call schema before ending element
     }},
-    
-    writeEntry: {value: function(task,xmlBuilder,item,options) {
+
+    writeEntry: {writable:true,value:function(task,xmlBuilder,item,options) {
     }},
-    
-    writeItem: {value: function(task,searchResult) {
+
+    writeItem: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: true};
       var xmlBuilder = task.context.newXmlBuilder();
@@ -83,11 +83,11 @@
       xmlBuilder.writeEndDocument();
       this.writeResponse(task,xmlBuilder);
     }},
-    
-    writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
     }},
-    
-    writeOpensearchInfo: {value: function(task,searchResult,xmlBuilder) {
+
+    writeOpensearchInfo: {writable:true,value:function(task,searchResult,xmlBuilder) {
       var dscUrl = task.baseUrl+"/opensearch/description"; // TODO
       var totalHits = searchResult.totalHits;
       var startIndex = searchResult.startIndex;
@@ -102,8 +102,8 @@
       xmlBuilder.writeElement(task.uris.URI_OPENSEARCH,"startIndex",""+startIndex);
       xmlBuilder.writeElement(task.uris.URI_OPENSEARCH,"itemsPerPage",""+itemsPerPage);
     }},
-    
-    writeOpensearchQuery: {value: function(task,xmlBuilder) {
+
+    writeOpensearchQuery: {writable:true,value:function(task,xmlBuilder) {
       var uris = task.uris, request = task.request;
       var osqQ = request.getParameter("q");
       var osqId = request.getParameter("id");
@@ -133,17 +133,17 @@
       }
       xmlBuilder.writeEndElement();
     }},
-    
-    writeResponse: {value: function(task,xmlBuilder) {
+
+    writeResponse: {writable:true,value:function(task,xmlBuilder) {
       this.writeXmlResponse(task,this.mediaType,xmlBuilder.getXml());
     }},
-    
-    writeXmlResponse: {value: function(task,mediaType,xml) {
+
+    writeXmlResponse: {writable:true,value:function(task,mediaType,xml) {
       if (task.request.pretty) xml = task.context.indentXml(task,xml);
       var response = task.response;
       response.put(response.Status_OK,mediaType,xml);
     }}
-  
+
   });
 
 }());

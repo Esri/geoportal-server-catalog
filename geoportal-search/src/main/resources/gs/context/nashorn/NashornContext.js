@@ -33,19 +33,20 @@
 
     isNashorn: {writable: true, value: true},
 
-    indentXml: {value: function(task,xml) {
+    indentXml: {writable:true,value:function(task,xml) {
       return gs.context.nashornUtil.indentXml(xml);
     }},
 
-    newCounter: {value: function() {
+    newCounter: {writable:true,value:function() {
       return new Packages.java.util.concurrent.atomic.AtomicInteger();
     }},
 
-    newStringBuilder: {value: function() {
+    newStringBuilder: {writable:true,value:function() {
       return gs.Object.create(gs.context.nashorn.StringBuilder).init();
     }},
 
-    newXmlInfo: {value: function(task,xmlString) {
+    newXmlInfo: {writable:true,value:function(task,xmlString) {
+      if (typeof xmlString === "string") xmlString = xmlString.trim();
       var source = new org.xml.sax.InputSource(new java.io.StringReader(xmlString));
       var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
@@ -62,15 +63,15 @@
       return xmlInfo;
     }},
 
-    readResourceFile: {value: function(path,charset) {
+    readResourceFile: {writable:true,value:function(path,charset) {
       return gs.context.nashornUtil.readResourceFile(path,charset);
     }},
 
-    removeAllButFilter: {value: function(xml) {
+    removeAllButFilter: {writable:true,value:function(xml) {
       return gs.context.nashornUtil.removeAllButFilter(xml);
     }},
 
-    sendHttpRequest: {value: function(task,url,data,dataContentType,options) {
+    sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType,options) {
       var result, promise = this.newPromise("sendHttpRequest");
       try {
         if (task.async) {
@@ -312,7 +313,7 @@
     dom: {writable: true, value: null},
     root: {writable: true, value: null},
 
-    forEachAttribute: {value: function(node,callback) {
+    forEachAttribute: {writable:true,value:function(node,callback) {
       var r, self = this;
       this.getAttributes(node).forEach(function(child){
         if (callback) {
@@ -322,7 +323,7 @@
       });
     }},
 
-    forEachChild: {value: function(node,callback) {
+    forEachChild: {writable:true,value:function(node,callback) {
       var r, self = this;
       this.getChildren(node).forEach(function(child){
         if (callback) {
@@ -332,14 +333,14 @@
       });
     }},
 
-    getAttributes: {value: function(node) {
+    getAttributes: {writable:true,value:function(node) {
       if (node) {
         return this._nodeListToArray(node.getAttributes());
       }
       return [];
     }},
 
-    getAttributeValue: {value: function(node,localName,namespaceURI) {
+    getAttributeValue: {writable:true,value:function(node,localName,namespaceURI) {
       var value = null;
       var ns = (typeof namespaceURI === "string" && namespaceURI.length > 0);
       this.forEachAttribute(node,function(info){
@@ -365,7 +366,7 @@
       return value;
     }},
 
-    getChildren: {value: function(node) {
+    getChildren: {writable:true,value:function(node) {
       if (node) {
         return this._nodeListToArray(node.getChildNodes());
       }
@@ -385,7 +386,7 @@
      *   isTextNode:
      * }
      */
-    getNodeInfo: {value: function(node,withText) {
+    getNodeInfo: {writable:true,value:function(node,withText) {
       if (!node) return null;
       var info = {
         node: node,
@@ -401,7 +402,7 @@
       return info;
     }},
 
-    getNodeText: {value: function(node) {
+    getNodeText: {writable:true,value:function(node) {
       var v;
       if (node) {
         if (node.getNodeType() === 1) {
@@ -417,7 +418,7 @@
       return null;
     }},
 
-    _nodeListToArray: {value: function(nl) {
+    _nodeListToArray: {writable:true,value:function(nl) {
       var i, a = [];
       if (nl) {
         for (i = 0; i < nl.getLength(); i++) {

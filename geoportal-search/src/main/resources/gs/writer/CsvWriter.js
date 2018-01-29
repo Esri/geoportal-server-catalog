@@ -16,23 +16,23 @@
 (function(){
 
   gs.writer.CsvWriter = gs.Object.create(gs.writer.Writer,{
-  
-    write: {value: function(task,searchResult) {
+
+    write: {writable:true,value:function(task,searchResult) {
       this.writeItems(task,searchResult);
     }},
-    
+
     /* .......................................................................................... */
-    
-    esc: {value: function(v) {
+
+    esc: {writable:true,value:function(v) {
       if (typeof v !== "string") return v;
       v = v.replace(/"/g,'""');
       if (v.search(/("|,|\n)/g) >= 0) v = "\""+v+"\"";
       return v;
     }},
-  
-    writeEntry: {value: function(task,stringBuilder,item,options) {
+
+    writeEntry: {writable:true,value:function(task,stringBuilder,item,options) {
       var entry = task.target.itemToAtomEntry(task,item);
-      
+
       var id = entry.id;
       var title = "Untitled";
       var description = "";
@@ -48,11 +48,11 @@
       } else if (typeof entry.published === "string" && entry.published.length > 0) {
         updated = entry.published;
       }
-      
+
       var line = this.esc(id);
       line += ","+this.esc(title);
       line += ","+this.esc(description);
-      
+
       var xmin = "", ymin = "", xmax = "", ymax = "";
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
         xmin = entry.bbox.xmin;
@@ -61,7 +61,7 @@
         ymax = entry.bbox.ymax;
       }
       line += ","+xmin+","+ymin+","+xmax+","+ymax;
-      
+
       var links = [], xmlLink = "", urlIdx = 0, urls = ["","","",""];
       if (Array.isArray(entry.link)) {
         links = entry.link;
@@ -84,11 +84,11 @@
       line += ","+this.esc(urls[1]);
       line += ","+this.esc(urls[2]);
       line += ","+this.esc(urls[3]);
-      
+
       stringBuilder.append(options.NL).append(line);
     }},
-    
-    writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, NL: task.val.NL};
       var header = "Id,Title,Description,West,South,East,North,Link_Xml,Link_1,Link_2,Link_3,Link_4";
@@ -98,15 +98,15 @@
       for (var i=0;i<items.length;i++) {
         this.writeEntry(task,stringBuilder,items[i],options);
       }
-      this.writeResponse(task,stringBuilder.toString()); 
+      this.writeResponse(task,stringBuilder.toString());
     }},
-    
-    writeResponse: {value: function(task,data) {
+
+    writeResponse: {writable:true,value:function(task,data) {
       var response = task.response;
       response.addHeader("Content-Disposition","filename="+Date.now()+".csv");
       response.put(response.Status_OK,response.MediaType_TEXT_CSV,data);
     }}
-  
+
   });
 
 }());

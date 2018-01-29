@@ -14,22 +14,22 @@
  */
 
 (function(){
-  
+
   gs.target.elastic.GeoportalSchema = gs.Object.create(gs.target.elastic.ElasticSchema, {
-    
+
     isVersion5Plus: {writable: true, value: true},
-  
+
     bboxField: {writable: true, value: "envelope_geo"},
     pointField: {writable: true, value: "envelope_cen_pt"},
-    
+
     modifiedPeriodInfo: {writable: true, value: {
       field: "sys_modified_dt",
       toField: null,
       nestedPath: null
     }},
-    
+
     schemaType: {writable: true, value: "Geoportal"},
-    
+
     sortables: {writable: true, value: {
       "title": "title.sort",
       "title.sort": "title.sort",
@@ -37,18 +37,18 @@
       "modified": "sys_modified_dt",
       "sys_modified_dt": "sys_modified_dt"
     }},
-    
+
     spatialInfo: {writable: true, value: {
       field: "envelope_geo",
       type: "geo_shape" // geo_shape or geo_point
     }},
-    
+
     timePeriodInfo: {writable: true, value: {
       field: "timeperiod_nst.begin_dt",
       toField: "timeperiod_nst.end_dt",
       nestedPath: "timeperiod_nst"
     }},
-    
+
     typeAliases: {writable: true, value: {
       "FeatureServer": ["FeatureServer","Feature Service"], // indexed as either FeatureServer or Feature Service
       "Feature Service": ["FeatureServer","Feature Service"],
@@ -69,10 +69,10 @@
       "NAServer": ["NAServer","Network Analysis Service"],
       "Network Analysis Service": ["NAServer","Network Analysis Service"],
       "SceneServer": ["SceneServer","Scene Service"],
-      "Scene Service": ["SceneServer","Scene Service"],     
+      "Scene Service": ["SceneServer","Scene Service"],
       "VectorTileServer": ["VectorTileServer","Vector Tile Service"],
       "Vector Tile Service": ["VectorTileServer","Vector Tile Service"],
-      
+
       "kml": "KML", // indexed as upper case KML, this will make the url param case insensitive: type=kml
       "wms": "WMS",
       "wfs": "WFS",
@@ -81,13 +81,13 @@
       "wps": "WPS",
       "sos": "SOS",
       "csw": "CSW",
-      
+
       "ims": ["IMS","ArcIMS"],
       "arcims": ["IMS","ArcIMS"],
-      
+
       "shp": ["shp","Shapefife"],
       "Shapefife": ["shp","Shapefife"],
-      
+
       "liveData": ["FeatureServer","Feature Service",
                    "MapServer","Map Service",
                    "ImageServer","Image Service",
@@ -95,13 +95,13 @@
                    "VectorTileServer","Vector Tile Service",
                    "KML","WMS","WFS","WCS","WMTS"]
     }},
-    
+
     typeInfo: {writable: true, value: {
       field: "resources_nst.url_type_s",
       nestedPath: "resources_nst"
     }},
-    
-    buildAtomCategories: {value: function(task,item) {
+
+    buildAtomCategories: {writable:true,value:function(task,item) {
       var categories = [], source = item["_source"];
       var itemType = task.val.chkStr(source["itemType_s"]);
       var keywords = task.val.chkStrArray(source["keywords_s"]);
@@ -124,15 +124,15 @@
       }
       return categories;
     }},
-    
-    buildAtomLinks: {value: function(task,item) {
+
+    buildAtomLinks: {writable:true,value:function(task,item) {
       var links = [], dctype, idx, itemUrl, url;
       var id = item["_id"], source = item["_source"];
-      
-      if (task.target && typeof task.target.itemBaseUrl === "string" && 
+
+      if (task.target && typeof task.target.itemBaseUrl === "string" &&
           task.target.itemBaseUrl.trim().length > 0) {
         itemUrl = task.target.itemBaseUrl.trim()+"/"+encodeURIComponent(id);
-      } else if (task.target && typeof task.target.searchUrl === "string" && 
+      } else if (task.target && typeof task.target.searchUrl === "string" &&
           task.target.searchUrl.trim().length > 0) {
         url = task.target.searchUrl;
         idx = url.indexOf("/elastic/");
@@ -141,7 +141,7 @@
           itemUrl = url+"/rest/metadata/item/"+encodeURIComponent(id);
         }
       }
-      
+
       if (typeof itemUrl === "string" && itemUrl.length > 0) {
         var jsonUrl = itemUrl;
         links.push(gs.Object.create(gs.atom.Link).init({
@@ -164,14 +164,14 @@
           }));
         }
       }
-      
+
       if (typeof source.thumbnail_s === "string" && source.thumbnail_s.indexOf("http") === 0) {
         links.push(gs.Object.create(gs.atom.Link).init({
           rel: "icon",
           href: source.thumbnail_s
         }));
       }
-      
+
       var resources = source["resources_nst"];
       if (!Array.isArray(resources)) resources = [resources];
       resources.forEach(function(resource){
@@ -191,8 +191,8 @@
 
       return links;
     }},
-    
-    itemToAtomEntry: {value: function(task,item) {
+
+    itemToAtomEntry: {writable:true,value:function(task,item) {
       //console.log("GeoportalSchema::itemToAtomEntry");
       var source = item["_source"];
       var entry = gs.Object.create(gs.atom.Entry);
@@ -202,7 +202,7 @@
       entry.updated = task.val.chkStr(source["sys_modified_dt"]);
       entry.category = this.buildAtomCategories(task,item);
       entry.link = this.buildAtomLinks(task,item);
-      
+
       var summary = task.val.chkStr(source["description"]);
       if (summary !== null && summary.length > 0) {
         entry.summary = gs.Object.create(gs.atom.Text).init({
@@ -210,7 +210,7 @@
           value: summary
         });
       }
-      
+
       var author = task.val.chkStrArray(source["sys_owner_s"]);
       if (Array.isArray(author)) {
         author.forEach(function(v){
@@ -224,7 +224,7 @@
           }
         });
       }
-      
+
       var credits = task.val.chkStrArray(source["credits_s"]);
       if (Array.isArray(credits)) {
         credits.forEach(function(v){
@@ -238,7 +238,7 @@
           }
         });
       }
-      
+
       var rights = task.val.chkStrArray(source["rights_s"]);
       if (Array.isArray(rights)) {
         rights.forEach(function(v){
@@ -252,14 +252,14 @@
           }
         });
       }
-  
+
       if (this.bboxField) {
         var extent = source[this.bboxField];
-        if (extent && extent.type && extent.type === "envelope" && 
+        if (extent && extent.type && extent.type === "envelope" &&
             extent.coordinates && extent.coordinates.length === 2) {
           var topLeft = extent.coordinates[0];
           var bottomRight = extent.coordinates[1];
-          if (topLeft != null && topLeft.length === 2 && 
+          if (topLeft != null && topLeft.length === 2 &&
               bottomRight != null && bottomRight.length === 2) {
             entry.bbox = gs.Object.create(gs.atom.BBox).init({
               xmin: topLeft[0],
@@ -268,9 +268,9 @@
               ymax: topLeft[1]
             });
           }
-        }      
+        }
       }
-  
+
       if (this.pointField) {
         var point = source[this.pointField];
         if (point && typeof point.lon === "number" && typeof point.lat === "number") {
@@ -280,11 +280,10 @@
           });
         }
       }
-  
+
       return entry;
     }}
-  
+
   });
 
 }());
-

@@ -27,29 +27,29 @@
 
     /* ............................................................................................ */
 
-    getSchemaClass: {value:function() {
+    getSchemaClass: {writable:true,value:function() {
       return gs.target.TargetSchema;
     }},
 
-    itemToAtomEntry: {value: function(task,item) {
+    itemToAtomEntry: {writable:true,value:function(task,item) {
       return this.schema.itemToAtomEntry(task,item);
     }},
 
-    itemToJson: {value: function(task,item) {
+    itemToJson: {writable:true,value:function(task,item) {
       return this.schema.itemToJson(task,item);
     }},
 
-    newSchema: {value:function(task) {
+    newSchema: {writable:true,value:function(task) {
       var schemaMixin = this.schemaMixin || {};
       schemaMixin.target = this;
       return gs.Object.create(this.getSchemaClass()).mixin(schemaMixin);
     }},
 
-    prepare: {value:function(task) {}},
+    prepare: {writable:true,value:function(task) {}},
 
-    search: {value:function(task) {}},
+    search: {writable:true,value:function(task) {}},
 
-    urlParamsToQueryString: {value:function(urlParams) {
+    urlParamsToQueryString: {writable:true,value:function(urlParams) {
       var k, v, qstr = null;
       if (urlParams) {
         for (k in urlParams) {
