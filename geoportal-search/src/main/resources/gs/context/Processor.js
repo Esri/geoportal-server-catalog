@@ -265,6 +265,9 @@
               if (typeof o.filter === "string" && o.filter.length > 0) {
                 target.requiredFilter = o.filter;
               }
+              if (o.profile && gs.target.profiles[o.profile]) {
+                gs.target.profiles[o.profile].prepareTarget(target);
+              }
               targets.push(target);
             }
           }

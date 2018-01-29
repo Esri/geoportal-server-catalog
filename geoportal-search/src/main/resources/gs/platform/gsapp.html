@@ -6,6 +6,7 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.21/esri/themes/calcite/dijit/calcite.css">
+<link rel="stylesheet" href="../widget/style.css">
 <script>
   var dojoConfig = {
     locale: "en",
@@ -26,10 +27,24 @@
 </div>
 <script src="https://js.arcgis.com/3.21/"></script>
 <script>
-  require(["dojo/ready","gs/widget/Search","gs/widget/TestSearch"],
-  function(ready,Search,TestSearch) {
+  require(["dojo/ready",
+    "gs/widget/Search",
+    "gs/widget/WidgetContext",
+    "dojo/i18n!gs/widget/nls/strings",
+    "gs/widget/TestSearch"],
+  function(ready,Search,WidgetContext,i18n,TestSearch) {
     ready(function() {
-      new TestSearch({},"idSearch");
+      if (document.location.href.indexOf("test=true") === -1) {
+        var widgetContext = new WidgetContext({
+          i18n: i18n,
+          widgetFolder: "gs/widget",
+        });
+        new Search({
+          widgetContext: widgetContext
+        },"idSearch");
+      } else {
+        new TestSearch({},"idSearch");
+      }
     });
   });
 </script>
