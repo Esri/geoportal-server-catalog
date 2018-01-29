@@ -33,7 +33,8 @@
 
     /* ............................................................................................ */
 
-    appendPropertyClause: {value:function(task,targetRequest,clauseName,propertyName,literal,literal2) {
+    appendPropertyClause: {writable:true,value:function(task,targetRequest,
+        clauseName,propertyName,literal,literal2) {
       // TODO use fieldAliases
       if (typeof propertyName === "string" && propertyName.length > 0 &&
           typeof literal === "string" && literal.length > 0) {
@@ -60,7 +61,7 @@
       }
     }},
 
-    appendQ: {value:function(urlParams,q) {
+    appendQ: {writable:true,value:function(urlParams,q) {
       if (typeof q === "string" && q.length > 0) {
         if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
           urlParams.q = "("+urlParams.q+") AND ("+q+")";
@@ -70,7 +71,7 @@
       }
     }},
 
-    appendSpatialClause: {value:function(task,targetRequest,clauseName,propertyName,bbox) {
+    appendSpatialClause: {writable:true,value:function(task,targetRequest,clauseName,propertyName,bbox) {
       if (typeof propertyName === "string" && propertyName.length > 0 &&
         typeof bbox === "string" && bbox.length > 0) {
         var uris = targetRequest.uris;
@@ -89,7 +90,7 @@
       }
     }},
 
-    buildGetRecordsUrl: {value:function(task,targetRequest) {
+    buildGetRecordsUrl: {writable:true,value:function(task,targetRequest) {
       // CSW3
       var urlParams = targetRequest.urlParams = {};
       urlParams.elementSetName = this.elementSetName;
@@ -107,7 +108,7 @@
       this.prepareSort(task,targetRequest);
     }},
 
-    buildGetRecordsXml: {value:function(task,targetRequest) {
+    buildGetRecordsXml: {writable:true,value:function(task,targetRequest) {
       var uris = targetRequest.uris = {};
       if (this.cswVersion === "2.0.2") {
         uris.csw = task.uris.URI_CSW2;
@@ -168,7 +169,7 @@
       targetRequest.getRecordsXml = xmlBuilder.getXml();
     }},
 
-    handleGetRecordsResponse: {value:function(task,response,searchResult) {
+    handleGetRecordsResponse: {writable:true,value:function(task,response,searchResult) {
       var msg, xmlInfo;
       try {
         xmlInfo = this.newXmlInfo(task,response);
@@ -207,21 +208,21 @@
       });
     }},
 
-    getSchemaClass: {value:function() {
+    getSchemaClass: {writable:true,value:function() {
       return gs.target.csw.CswSchema;
     }},
 
-    newXmlBuilder: {value:function(task) {
+    newXmlBuilder: {writable:true,value:function(task) {
       return task.context.newXmlBuilder(task);
     }},
 
-    newXmlInfo: {value:function(task,xmlString) {
+    newXmlInfo: {writable:true,value:function(task,xmlString) {
       return task.context.newXmlInfo(task,xmlString);
     }},
 
     /* ............................................................................................ */
 
-    prepare: {value:function(task) {
+    prepare: {writable:true,value:function(task) {
       var promise = task.context.newPromise("prepare");
       if (!this.schema) this.schema = this.newSchema(task);
       var targetRequest = {
@@ -239,7 +240,7 @@
       return promise;
     }},
 
-    prepareBBox: {value:function(task,targetRequest) {
+    prepareBBox: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var bbox = task.request.getBBox();
@@ -263,7 +264,7 @@
       }
     }},
 
-    prepareFilter: {value:function(task,targetRequest) {
+    prepareFilter: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var v = task.request.getFilter();
@@ -275,7 +276,7 @@
       }
     }},
 
-    prepareIds: {value:function(task,targetRequest) {
+    prepareIds: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var uris = targetRequest.uris;
@@ -312,7 +313,7 @@
       }
     }},
 
-    prepareModified: {value:function(task,targetRequest) {
+    prepareModified: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var period = task.request.getModifiedPeriod();
@@ -337,10 +338,10 @@
       }
     }},
 
-    prepareOther: {value:function(task,targetRequest) {
+    prepareOther: {writable:true,value:function(task,targetRequest) {
     }},
 
-    preparePaging: {value:function(task,targetRequest) {
+    preparePaging: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var start = task.request.getStart();
@@ -358,7 +359,7 @@
       }
     }},
 
-    prepareQ: {value:function(task,targetRequest) {
+    prepareQ: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var v = task.request.getQ();
@@ -370,10 +371,10 @@
       }
     }},
 
-    prepareRequiredFilter: {value:function(task,targetRequest) {
+    prepareRequiredFilter: {writable:true,value:function(task,targetRequest) {
     }},
 
-    prepareSort: {value:function(task,targetRequest) {
+    prepareSort: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
       var uris = targetRequest.uris;
@@ -429,7 +430,7 @@
 
     }},
 
-    prepareTimePeriod: {value:function(task,targetRequest) {
+    prepareTimePeriod: {writable:true,value:function(task,targetRequest) {
       // temporal extent of the data
       var urlParams = targetRequest.urlParams;
       var xmlBuilder = targetRequest.xmlBuilder;
@@ -455,7 +456,7 @@
       }
     }},
 
-    prepareTypes: {value:function(task,targetRequest) {
+    prepareTypes: {writable:true,value:function(task,targetRequest) {
       // TODO liveData?
       // TODO ISO topic categories?
       // TODO IMS content types?
@@ -480,7 +481,7 @@
 
     /* ............................................................................................ */
 
-    search: {value:function(task) {
+    search: {writable:true,value:function(task) {
       var self = this;
       var promise = task.context.newPromise();
 

@@ -14,11 +14,11 @@
  */
 
 (function(){
-  
+
   gs.writer.Writer = gs.Object.create(gs.Proto,{
-  
-    write: {value: function(task,searchResult) {}}
-  
+
+    write: {writable:true,value:function(task,searchResult) {}}
+
   });
 
 }());

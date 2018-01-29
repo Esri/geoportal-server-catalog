@@ -16,10 +16,10 @@
 (function(){
 
   gs.writer.AtomWriter = gs.Object.create(gs.writer.XmlWriter,{
-    
+
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_ATOM_XML},
-  
-    addNamespaces: {value: function(task,xmlBuilder) {
+
+    addNamespaces: {writable:true,value:function(task,xmlBuilder) {
       xmlBuilder.writeNamespace("atom",task.uris.URI_ATOM);
       xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("opensearch",task.uris.URI_OPENSEARCH);
@@ -28,18 +28,18 @@
       xmlBuilder.writeNamespace("georss10",task.uris.URI_GEORSS10);
       xmlBuilder.writeNamespace("time",task.uris.URI_TIME);
     }},
-    
-    writeEntry: {value: function(task,xmlBuilder,item,options) {
+
+    writeEntry: {writable:true,value:function(task,xmlBuilder,item,options) {
       var entry = task.target.itemToAtomEntry(task,item);
       if (!entry) return;
-      
+
       if (options.entryOnly) {
         xmlBuilder.writeStartElementPfx("atom",task.uris.URI_ATOM,"entry");
         this.addNamespaces(task,xmlBuilder);
       } else {
         xmlBuilder.writeStartElement(task.uris.URI_ATOM,"entry");
       }
-      
+
       // atom:id, atom:title, and atom:updated are required
       var id = entry.id;
       var title = "Untitled";
@@ -52,7 +52,7 @@
       } else if (typeof entry.published === "string" && entry.published.length > 0) {
         updated = entry.published;
       }
-  
+
       xmlBuilder.writeElement(task.uris.URI_ATOM,"id",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_ATOM,"title",title);
@@ -72,26 +72,26 @@
         entry.bbox.writeGeoRSSBox10(task,xmlBuilder);
       }
       this.addAtomObject(task,xmlBuilder,task.uris.URI_ATOM,"content",entry.content);
-      
+
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
       xmlBuilder.writeEndElement();
     }},
-    
-    writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: false};
       var xmlBuilder = task.context.newXmlBuilder();
       xmlBuilder.writeStartDocument();
-      
+
       xmlBuilder.writeStartElementPfx("atom",task.uris.URI_ATOM,"feed");
       this.addNamespaces(task,xmlBuilder);
       xmlBuilder.writeElement(task.uris.URI_ATOM,"title","Results");
-      xmlBuilder.writeElement(task.uris.URI_ATOM,"id",task.baseUrl); 
+      xmlBuilder.writeElement(task.uris.URI_ATOM,"id",task.baseUrl);
       xmlBuilder.writeElement(task.uris.URI_ATOM,"updated",now); // TODO
       xmlBuilder.writeStartElement(task.uris.URI_ATOM,"author");
       xmlBuilder.writeElement(task.uris.URI_ATOM,"name",task.baseUrl);
       xmlBuilder.writeEndElement();
-      
+
       this.writeOpensearchInfo(task,searchResult,xmlBuilder);
       this.writeOpensearchQuery(task,xmlBuilder);
       var items = searchResult.items ? searchResult.items : [];
@@ -104,7 +104,7 @@
       xmlBuilder.writeEndDocument();
       this.writeResponse(task,xmlBuilder);
     }}
-  
+
   });
 
 }());

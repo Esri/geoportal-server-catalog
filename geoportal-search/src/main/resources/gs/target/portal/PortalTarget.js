@@ -21,7 +21,7 @@
 
     /* ............................................................................................ */
 
-    appendIds: {value:function(task,urlParams,field,ids) {
+    appendIds: {writable:true,value:function(task,urlParams,field,ids) {
       var q = "";
       if (Array.isArray(ids) && ids.length > 0) {
         ids.forEach(function(id){
@@ -36,7 +36,7 @@
       this.appendQ(urlParams,q);
     }},
 
-    appendPeriod: {value:function(task,targetRequest,period) {
+    appendPeriod: {writable:true,value:function(task,targetRequest,period) {
       if (!period) return;
       var urlParams = targetRequest.urlParams;
       var wildCards = [0000000000000000000,9999999999999999999];
@@ -66,7 +66,7 @@
       }
     }},
 
-    appendQ: {value:function(urlParams,q) {
+    appendQ: {writable:true,value:function(urlParams,q) {
       if (typeof q === "string" && q.length > 0) {
         if (typeof urlParams.q === "string" && urlParams.q.length > 0) {
           urlParams.q = "("+urlParams.q+") AND ("+q+")";
@@ -78,13 +78,13 @@
 
     /* ............................................................................................ */
 
-    getSchemaClass: {value:function() {
+    getSchemaClass: {writable:true,value:function() {
       return gs.target.portal.PortalSchema;
     }},
 
     /* ............................................................................................ */
 
-    prepare: {value:function(task) {
+    prepare: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       if (!this.schema) this.schema = this.newSchema(task);
       var targetRequest = {
@@ -108,7 +108,7 @@
       return promise;
     }},
 
-    prepareBBox: {value:function(task,targetRequest) {
+    prepareBBox: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var bbox = task.request.getBBox();
       if (typeof bbox === "string" && bbox.length > 0) {
@@ -118,27 +118,27 @@
       }
     }},
 
-    prepareFilter: {value:function(task,targetRequest) {
+    prepareFilter: {writable:true,value:function(task,targetRequest) {
       this.appendQ(targetRequest.urlParams,task.request.getFilter());
     }},
 
-    prepareIds: {value:function(task,targetRequest) {
+    prepareIds: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       this.appendIds(task,urlParams,"id",task.request.getIds());
       this.appendIds(task,urlParams,"orgid",task.request.getOrgIds());
       this.appendIds(task,urlParams,"group",task.request.getGroupIds());
     }},
 
-    prepareModified: {value:function(task,targetRequest) {
+    prepareModified: {writable:true,value:function(task,targetRequest) {
       var period = task.request.getModifiedPeriod();
       this.appendPeriod(task,targetRequest,period);
     }},
 
-    prepareOther: {value:function(task,targetRequest) {
+    prepareOther: {writable:true,value:function(task,targetRequest) {
       // TODO token?
     }},
 
-    preparePaging: {value:function(task,targetRequest) {
+    preparePaging: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var start = task.request.getStart();
       start = task.val.strToInt(start,null);
@@ -155,17 +155,17 @@
       }
     }},
 
-    prepareQ: {value:function(task,targetRequest) {
+    prepareQ: {writable:true,value:function(task,targetRequest) {
       var q = task.request.getQ();
       if (q === "*" || q === "*:*") q = targetRequest.qAll;
       this.appendQ(targetRequest.urlParams,q);
     }},
 
-    prepareRequiredFilter: {value:function(task,targetRequest) {
+    prepareRequiredFilter: {writable:true,value:function(task,targetRequest) {
       this.appendQ(targetRequest.urlParams,this.requiredFilter);
     }},
 
-    prepareSort: {value:function(task,targetRequest) {
+    prepareSort: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var schema = this.schema;
       var sortField = "", sortOrder = "";
@@ -193,12 +193,12 @@
       }
     }},
 
-    prepareTimePeriod: {value:function(task,targetRequest) {
+    prepareTimePeriod: {writable:true,value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
       this.appendPeriod(task,targetRequest,period);
     }},
 
-    prepareTypes: {value:function(task,targetRequest) {
+    prepareTypes: {writable:true,value:function(task,targetRequest) {
       var urlParams = targetRequest.urlParams;
       var q = "", keys = [];
       var schema = this.schema;
@@ -229,7 +229,7 @@
 
     /* ............................................................................................ */
 
-    search: {value:function(task) {
+    search: {writable:true,value:function(task) {
       var self = this;
       var promise = task.context.newPromise();
 

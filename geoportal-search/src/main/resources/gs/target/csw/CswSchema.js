@@ -14,26 +14,26 @@
  */
 
 (function(){
-  
+
   gs.target.csw.CswSchema = gs.Object.create(gs.target.TargetSchema, {
-    
+
     qClauseName: {writable: true, value: "PropertyIsLike"},
-    
+
     qPropertyName: {writable: true, value: "AnyText"},
     idPropertyName: {writable: true, value: "Id"},
     modifiedPropertyName: {writable: true, value: "Modified"},
     spatialPropertyName: {writable: true, value: "Geometry"},
     timePeriodPropertyName: {writable: true, value: "TimePeriod"},
-    
+
     schemaType: {writable: true, value: "CSW"},
-    
+
     sortables: {writable: true, value: {
       "title": "title",
       "date": "modified",
       "modified": "modified"
     }},
-    
-    handleRecordToAtomEntry: {value:function(task,xmlInfo,recordInfo) {
+
+    handleRecordToAtomEntry: {writable:true,value:function(task,xmlInfo,recordInfo) {
       var ln, ns, hasText, dctype, scheme, text, urlInfo;
       var x, y, xy, xmin, ymin, xmax, ymax;
       var links = [];
@@ -45,7 +45,7 @@
           ns = childInfo.namespaceURI;
           text = childInfo.nodeText;
           hasText = (typeof text === "string" && text.length > 0);
-          
+
           if (ns === task.uris.URI_DC) {
             //console.log(childInfo.nodeInfo.localName,childInfo.nodeInfo.namespaceURI);
             if (ln === "identifier") {
@@ -122,7 +122,7 @@
               if (hasText) {
                 entry.updated = text;
               }
-            } else if (ln === "references") { 
+            } else if (ln === "references") {
               if (hasText) {
                 dctype = null;
                 scheme = xmlInfo.getAttributeValue(childInfo.node,"scheme");
@@ -178,7 +178,7 @@
                 }
               }
             });
-            if (typeof xmin === "number" && typeof ymin === "number" && 
+            if (typeof xmin === "number" && typeof ymin === "number" &&
                 typeof xmax === "number" && typeof ymax === "number") {
               entry.bbox = gs.Object.create(gs.atom.BBox).init({
                 xmin: xmin,
@@ -190,16 +190,15 @@
           }
         }
       });
-      
+
       if(links.length > 0) entry.link = links;
       return entry;
     }},
-    
-    itemToAtomEntry: {value: function(task,item) {
+
+    itemToAtomEntry: {writable:true,value:function(task,item) {
       return this.handleRecordToAtomEntry(task,item.xmlInfo,item.recordInfo);
     }}
-  
+
   });
 
 }());
-

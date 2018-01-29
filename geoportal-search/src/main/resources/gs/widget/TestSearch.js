@@ -22,10 +22,41 @@ define(["dojo/_base/declare",
 function(declare, localRequire, _WidgetBase, _TemplatedMixin,
   _WidgetsInTemplateMixin, template) {
 
-  //  {"f":"json","target":"cswB"}
-  //  {"f":"json","target":"cswA"}
-  //  {"f":"json","target":["arcgis","gptdb1"]}
-  //  {"f":"json","target":["gptdb1","cswA"]}
+  /*
+
+  {"f":"json","target":"arcgis"}
+
+  {"f":"json","target":"cswB"}
+  {"f":"json","target":"cswA"}
+  {"f":"json","target":["arcgis","gptdb1"]}
+  {"f":"json","target":["gptdb1","cswA"]}
+
+  {"f":"json","target":["arcgis","gptdb1"]}
+
+  {
+    "f":"json",
+    "target":[
+      {
+        "key":"abc",
+        "type":"csw",
+        "url":"http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+      }
+    ]
+  }
+
+  {
+    "f":"json",
+    "target":[
+      {
+        "key":"abc",
+        "type":"csw",
+        "cswVersion": "2.0.2",
+        "url":"https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
+      }
+    ]
+  }
+
+  */
 
   var oThisClass = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
@@ -84,12 +115,19 @@ function(declare, localRequire, _WidgetBase, _TemplatedMixin,
         };
         //requestInfo.requestUrl = "http://www.geoportal.com/geoportal/opensearch/description";
 
-        var processor = gs.Object.create(gs.context.browser.WebProcessor);
+        var processor = gs.Object.create(gs.context.browser.WebProcessor).mixin({
+          newConfig: function() {
+            var config = gs.Object.create(gs.config.Config);
+            config.proxyUrl = "http://gptdb1.esri.com:8080/geoportal/proxy.jsp";
+            return config;
+          }
+        });
         processor.execute(requestInfo,function(status,mediaType,entity,headers){
           console.log(status,mediaType,"\r\n",entity);
           self.resultTextarea.value = entity;
           self.informExternal(entity);
         });
+
       } catch(error) {
         var msg = "Error processing request.";
         console.log(msg);

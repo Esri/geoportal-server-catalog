@@ -28,7 +28,7 @@
     locator: {writable: true, value: null},
     text: {writable: true, value: null},
 
-    getReport: {value: function(task) {
+    getReport: {writable:true,value:function(task) {
       var p1 = task.val.NL;
       var p2 = p1+"\t";
       var p3 = p2+"\t";
@@ -70,14 +70,14 @@
       return xml;
     }},
 
-    put: {value: function(task,code,locator,text) {
+    put: {writable:true,value:function(task,code,locator,text) {
       this.code = code;
       this.locator = locator;
       this.text = text;
       this.toResponse(task);
     }},
 
-    toResponse: {value: function(task) {
+    toResponse: {writable:true,value:function(task) {
       var xml = this.getReport(task);
       var response = task.response;
       if (response.status === null) response.status = response.Status_BAD_REQUEST;

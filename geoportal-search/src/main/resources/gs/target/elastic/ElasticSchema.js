@@ -41,7 +41,7 @@
     typeInfo: {writable: true, value: {
     }},
 
-    itemToAtomEntry: {value: function(task,item) {
+    itemToAtomEntry: {writable:true,value:function(task,item) {
       //console.log("ElasticSchema::itemToAtomEntry");
       var source = item._source;
       var entry = gs.Object.create(gs.atom.Entry);
@@ -50,7 +50,7 @@
       return entry;
     }},
 
-    itemToJson: {value: function(task,item) {
+    itemToJson: {writable:true,value:function(task,item) {
       var json = gs.target.TargetSchema.itemToJson.call(this,task,item); // call super
       if (item._source) {
         json._source = item._source;

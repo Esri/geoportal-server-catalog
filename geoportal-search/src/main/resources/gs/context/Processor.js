@@ -17,7 +17,7 @@
 
   gs.context.Processor = gs.Object.create(gs.Proto,{
 
-    execute: {value:function(requestInfo, responseHandler) {
+    execute: {writable:true,value:function(requestInfo, responseHandler) {
       var task = null;
       try {
         var context = this.newContext();
@@ -38,7 +38,7 @@
       }
     }},
 
-    executeTask: {value:function(context, task, responseHandler) {
+    executeTask: {writable:true,value:function(context, task, responseHandler) {
       var self = this, msg, response;
       task.provider.preprocess(task);
       task.dfd = task.provider.execute(task);
@@ -53,7 +53,7 @@
       });
     }},
 
-    executeTasks: {value:function(context, tasks, responseHandler) {
+    executeTasks: {writable:true,value:function(context, tasks, responseHandler) {
       var self = this, dfds = [];
       tasks.forEach(function(task){
         self.executeTask(context,task);
@@ -87,7 +87,7 @@
       });
     }},
 
-    makeProvider: {value: function(task) {
+    makeProvider: {writable:true,value:function(task) {
       var provider = gs.Object.create(gs.provider.opensearch.OpensearchProvider);
       var v = task.request.getUrlPath();
       if (task.val.endsWith(v,"/csw") || task.val.endsWith(v,"/csw/")) {
@@ -102,7 +102,7 @@
       return provider;
     }},
 
-    makeRequest: {value: function(requestInfo) {
+    makeRequest: {writable:true,value:function(requestInfo) {
       var request = gs.Object.create(gs.base.Request).mixin({
         url: requestInfo.requestUrl,
         body: requestInfo.requestBody,
@@ -112,7 +112,7 @@
       return request;
     }},
 
-    makeTargets: {value: function(context,config,request) {
+    makeTargets: {writable:true,value:function(context,config,request) {
       var self = this, o, target, targets = [];
       var cfgTargets = config.getTargets() || {};
       var values = request.getTargets();
@@ -137,7 +137,7 @@
       return targets;
     }},
 
-    makeTasks: {value: function(context,config,requestInfo,targets) {
+    makeTasks: {writable:true,value:function(context,config,requestInfo,targets) {
       var self = this, req, tasks = [];
       var sRequestInfo = JSON.stringify(requestInfo);
       targets.forEach(function(target){
@@ -158,7 +158,7 @@
       return tasks;
     }},
 
-    makeWriters: {value: function(task) {
+    makeWriters: {writable:true,value:function(task) {
       var index = function(writers,keys,writer) {
         keys.forEach(function(k){
           writers[k.toLowerCase()] = writer;
@@ -185,15 +185,15 @@
       return writers;
     }},
 
-    newConfig: {value: function() {
+    newConfig: {writable:true,value:function() {
       return gs.Object.create(gs.config.Config);
     }},
 
-    newContext: {value: function() {
+    newContext: {writable:true,value:function() {
       return gs.Object.create(gs.context.Context);
     }},
 
-    newTask: {value: function(context,config,request,options) {
+    newTask: {writable:true,value:function(context,config,request,options) {
       var task = gs.base.Task.newTask().mixin({
         config: config,
         context: context,
@@ -206,7 +206,7 @@
 
     /* ............................................................................................ */
 
-    _checkTarget: {value: function(v, cfgTargets, targets, config) {
+    _checkTarget: {writable:true,value:function(v, cfgTargets, targets, config) {
       //console.log("_checkTarget",v);
       var self = this, o = v, target = null;
       if (typeof v === "string") {
@@ -243,10 +243,16 @@
                 "portalBaseUrl": o.url
               });
             } else if (o.type === "geoportal") {
-              // TODO example  "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
+              // TODO example "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
               target = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
                 "searchUrl": o.url
               });
+            } else if (o.type === "csw") {
+              // TODO example "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+              target = gs.Object.create(gs.target.csw.CswTarget).mixin({
+                "getRecordsUrl": o.url
+              });
+              if (o.cswVersion) target.cswVersion = o.cswVersion;
             }
             if (target) {
               // TODO pass full parameters to the target (from, size, ...)
@@ -266,7 +272,7 @@
       }
     }},
 
-    _sendError: {value: function(responseHandler, task, error, message) {
+    _sendError: {writable:true,value:function(responseHandler, task, error, message) {
       var response, asJson = true, msg = "Search error";
       if (task) {
         response = task.response;

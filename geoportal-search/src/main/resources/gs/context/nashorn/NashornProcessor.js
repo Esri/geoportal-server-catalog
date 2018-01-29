@@ -14,20 +14,20 @@
  */
 
 (function(){
-  
+
   gs.context.nashorn.NashornProcessor = gs.Object.create(gs.context.Processor,{
-    
+
     /*
-    execute: {value:function(requestInfo,responseHandler) {
+    execute: {writable:true,value:function(requestInfo,responseHandler) {
       // call super.execute
       gs.context.Processor.execute.call(this,requestInfo,responseHandler);
     }},
     */
-    
-    newContext: {value: function() {
+
+    newContext: {writable:true,value:function() {
       return gs.Object.create(gs.context.nashorn.NashornContext);
     }}
-  
+
   });
-  
+
 }());

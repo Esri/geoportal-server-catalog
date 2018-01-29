@@ -14,17 +14,17 @@
  */
 
 (function(){
-  
+
   gs.target.portal.PortalSchema = gs.Object.create(gs.target.TargetSchema, {
-    
+
     fieldAliases: {writable: true, value: {
       "date": "modified"
     }},
-    
+
     schemaType: {writable: true, value: "ArcGIS"},
-    
+
     target: {writable: true, value: null},
-    
+
     typeAliases: {writable: true, value: {
       "FeatureServer": "Feature Service",
       "MapServer": "Map Service",
@@ -37,9 +37,9 @@
       "NAServer": "Network Analysis Service",
       "SceneServer": "Scene Service",
       "VectorTileServer": "Vector Tile Service",
-      
+
       "shp": "Shapefife",
-      
+
       "liveData": ["Feature Service",
                    "Map Service",
                    "Image Service",
@@ -47,11 +47,11 @@
                    "Vector Tile Service",
                    "KML","WMS","WFS","WCS","WMTS"]
     }},
-    
-    
-    buildAtomCategories: {value: function(task,item) {
+
+
+    buildAtomCategories: {writable:true,value:function(task,item) {
       var categories = [];
-      
+
       var itemType = task.val.chkStr(item["type"]);
       if (typeof itemType === "string" && itemType.length > 0) {
         categories.push(gs.Object.create(gs.atom.Category).init({
@@ -59,7 +59,7 @@
           term: itemType
         }));
       }
-      
+
       if (Array.isArray(item["tags"])) {
         item["tags"].forEach(function(v){
           v = task.val.chkStr(v);
@@ -71,14 +71,14 @@
           }
         });
       }
-      
+
       return categories;
     }},
-    
-    buildAtomLinks: {value: function(task,item) {
+
+    buildAtomLinks: {writable:true,value:function(task,item) {
       var links = [], ok, url;
       var itemDetailsUrl = null, itemUrl = null, metadataUrl = null, restUrl = null;
-      
+
       var portalBaseUrl = this.target.portalBaseUrl;
       if (typeof portalBaseUrl === "string" && portalBaseUrl.length > 0) {
         restUrl = portalBaseUrl+"/sharing/rest";
@@ -87,7 +87,7 @@
         //metadataUrl = itemUrl+"/info/metadata/metadata.xml?format=iso19139"; // TODO which metadata format?
         itemDetailsUrl = portalBaseUrl+"/home/item.html?id="+encodeURIComponent(item["id"]);
       }
-      
+
       var hasMetadata = false;
       if (Array.isArray(item["typeKeywords"])) {
         item["typeKeywords"].some(function(v){
@@ -97,7 +97,7 @@
           }
         });
       }
-      
+
       url = item["url"];
       if (typeof url === "string" && url.length > 0) {
         links.push(gs.Object.create(gs.atom.Link).init({
@@ -106,7 +106,7 @@
           href: url
         }));
       }
-      
+
       url = item["thumbnail"];
       if (typeof url === "string" && url.length > 0) {
         if (url.indexOf("thumbnail/") === 0 && itemUrl !== null) {
@@ -120,7 +120,7 @@
           }));
         }
       }
-      
+
       if (itemUrl !== null) {
         links.push(gs.Object.create(gs.atom.Link).init({
           rel: "alternate",
@@ -128,7 +128,7 @@
           href: itemUrl+"?f=json"
         }));
       }
-      
+
       if (itemDetailsUrl !== null) {
         links.push(gs.Object.create(gs.atom.Link).init({
           rel: "alternate",
@@ -136,7 +136,7 @@
           href: itemDetailsUrl
         }));
       }
-      
+
       if (hasMetadata && metadataUrl !== null) {
         links.push(gs.Object.create(gs.atom.Link).init({
           rel: "alternate", // TODO via???
@@ -144,11 +144,11 @@
           href: metadataUrl
         }));
       }
-  
+
       return links;
     }},
-    
-    itemToAtomEntry: {value: function(task,item) {
+
+    itemToAtomEntry: {writable:true,value:function(task,item) {
       var entry = gs.Object.create(gs.atom.Entry);
       entry.id = item["id"];
       entry.title =  task.val.chkStr(item["title"]);
@@ -156,7 +156,7 @@
       entry.updated = task.val.millisToIso8601(item["modified"]);
       entry.category = this.buildAtomCategories(task,item);
       entry.link = this.buildAtomLinks(task,item);
-      
+
       var summary = task.val.chkStr(item["description"]);
       if (summary !== null && summary.length > 0) {
         entry.summary = gs.Object.create(gs.atom.Text).init({
@@ -164,7 +164,7 @@
           value: summary
         });
       }
-      
+
       var author = task.val.chkStrArray(item["owner"]);
       if (Array.isArray(author)) {
         author.forEach(function(v){
@@ -178,7 +178,7 @@
           }
         });
       }
-      
+
       var credits = task.val.chkStrArray(item["accessInformation"]);
       if (Array.isArray(credits)) {
         credits.forEach(function(v){
@@ -192,7 +192,7 @@
           }
         });
       }
-      
+
       var rights = task.val.chkStrArray(item["licenseInfo"]);
       if (Array.isArray(rights)) {
         rights.forEach(function(v){
@@ -206,7 +206,7 @@
           }
         });
       }
-      
+
       var extent = task.val.chkStrArray(item["extent"]);
       if (extent && extent.length === 2) {
         entry.bbox = gs.Object.create(gs.atom.BBox).init({
@@ -215,21 +215,21 @@
           xmax: extent[1][0],
           ymax: extent[1][1]
         });
-        
+
         // TODO center point?
       }
-      
+
       return entry;
     }},
-    
-    itemToJson: {value: function(task,item) {
+
+    itemToJson: {writable:true,value:function(task,item) {
       var json = gs.target.TargetSchema.itemToJson.call(this,task,item); // call super
       if (item) {
         json._source = item;
       }
       return json;
     }}
-  
+
   });
 
 }());

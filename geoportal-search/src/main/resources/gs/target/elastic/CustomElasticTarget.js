@@ -14,13 +14,13 @@
  */
 
 (function(){
-  
+
   gs.target.elastic.CustomElasticTarget = gs.Object.create(gs.target.elastic.ElasticTarget, {
 
-    getSchemaClass: {value:function() {
+    getSchemaClass: {writable:true,value:function() {
       return gs.target.elastic.CustomElasticSchema;
     }}
-  
+
   });
 
 }());

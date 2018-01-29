@@ -16,11 +16,11 @@
 (function(){
 
   gs.writer.JsonWriter = gs.Object.create(gs.writer.Writer,{
-  
-    write: {value: function(task,searchResult) {
+
+    write: {writable:true,value:function(task,searchResult) {
       var json;
-      if (searchResult.jsonResponse && 
-          typeof task.request.f === "string" && 
+      if (searchResult.jsonResponse &&
+          typeof task.request.f === "string" &&
           task.request.f.toLowerCase() === "json-source") {
         json = searchResult.jsonResponse;
         this.writeResponse(task,json);
@@ -32,14 +32,14 @@
         }
       }
     }},
-    
-    writeEntry: {value: function(task,results,item,options) {
+
+    writeEntry: {writable:true,value:function(task,results,item,options) {
       var json = task.target.itemToJson(task,item) || {};
       results.push(json);
       //this.beforeEndEntry(task,xmlBuilder,item,options,entry);
     }},
-    
-    writeItem: {value: function(task,searchResult) {
+
+    writeItem: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: true};
       var results = [];
@@ -48,11 +48,11 @@
       if (results.length > 0) response = results[0];
       this.writeResponse(task,response);
     }},
-    
-    writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: false};
-      
+
       var items = searchResult.items ? searchResult.items : [];
       var numReturned = items.length;
       if (searchResult.itemsPerPage === 0) numReturned = 0;
@@ -62,12 +62,12 @@
         total: searchResult.totalHits,
         nextStart: searchResult.calcNextRecord(task)
       };
-      if (task.target.schema && 
-          typeof task.target.schema .schemaType === "string" && 
+      if (task.target.schema &&
+          typeof task.target.schema .schemaType === "string" &&
           task.target.schema.schemaType.length > 0) {
         response.sourceType = task.target.schema.schemaType;
       }
-      
+
       response.results = [];
       if (searchResult.itemsPerPage > 0) {
         for (var i=0;i<items.length;i++) {
@@ -76,8 +76,8 @@
       }
       this.writeResponse(task,response);
     }},
-    
-    writeResponse: {value: function(task,json) {
+
+    writeResponse: {writable:true,value:function(task,json) {
       var str;
       if (task.request.pretty) {
         str = JSON.stringify(json,null,2);
@@ -87,7 +87,7 @@
       var response = task.response;
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,str);
     }}
-  
+
   });
 
 }());

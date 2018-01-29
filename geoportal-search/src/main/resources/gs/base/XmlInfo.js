@@ -14,32 +14,32 @@
  */
 
 (function(){
-  
+
   gs.base.XmlInfo = gs.Object.create(gs.Proto,{
-    
+
     dom: {writable: true, value: null},
     root: {writable: true, value: null},
 
-    forEachAttribute: {value: function(node) {
+    forEachAttribute: {writable:true,value:function(node) {
       throw new Error("XmlInfo::forEachAttribute must be implemented");
     }},
-    
-    forEachChild: {value: function(node) {
+
+    forEachChild: {writable:true,value:function(node) {
       throw new Error("XmlInfo::forEachChild must be implemented");
     }},
-    
-    getAttributes: {value: function(node) {
+
+    getAttributes: {writable:true,value:function(node) {
       throw new Error("XmlInfo::getAttributes must be implemented");
     }},
-    
-    getAttributeValue: {value: function(node,localName,namespaceURI) {
+
+    getAttributeValue: {writable:true,value:function(node,localName,namespaceURI) {
       throw new Error("XmlInfo::getAttributeValue must be implemented");
     }},
-    
-    getChildren: {value: function(node) {
+
+    getChildren: {writable:true,value:function(node) {
       throw new Error("XmlInfo::getChildren must be implemented");
     }},
-    
+
     /*
      * nodeInfo:
      * {
@@ -50,17 +50,17 @@
      *   namespaceURI: ,
      *   isAttributeNode: ,
      *   isElementNode: ,
-     *   isTextNode: 
+     *   isTextNode:
      * }
      */
-    getNodeInfo: {value: function(node,withText) {
+    getNodeInfo: {writable:true,value:function(node,withText) {
       throw new Error("XmlInfo::getNodeInfo must be implemented");
     }},
-    
-    getNodeText: {value: function(node) {
+
+    getNodeText: {writable:true,value:function(node) {
       throw new Error("XmlInfo::getNodeText must be implemented");
     }}
-  
+
   });
-  
+
 }());

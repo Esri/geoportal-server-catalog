@@ -16,14 +16,14 @@
 (function(){
 
   gs.writer.CswWriter = gs.Object.create(gs.writer.XmlWriter,{
-    
+
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
-    
+
     uris: {writable: true, value: null},
-    
+
     /* .......................................................................................... */
-    
-    addAtomCategory: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
+
+    addAtomCategory: {writable:true,value:function(task,xmlBuilder,namespaceURI,localName,value) {
       if (value === null) return;
       if (!Array.isArray(value)) value = [value];
       var self = this;
@@ -40,8 +40,8 @@
         }
       });
     }},
-    
-    addAtomLink: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
+
+    addAtomLink: {writable:true,value:function(task,xmlBuilder,namespaceURI,localName,value) {
       if (value === null) return;
       if (!Array.isArray(value)) value = [value];
       var scheme;
@@ -77,8 +77,8 @@
         }
       });
     }},
-    
-    addAtomPerson: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
+
+    addAtomPerson: {writable:true,value:function(task,xmlBuilder,namespaceURI,localName,value) {
       if (value === null) return;
       if (!Array.isArray(value)) value = [value];
       var self = this;
@@ -90,8 +90,8 @@
         }
       });
     }},
-    
-    addAtomText: {value: function(task,xmlBuilder,namespaceURI,localName,value) {
+
+    addAtomText: {writable:true,value:function(task,xmlBuilder,namespaceURI,localName,value) {
       var self = this;
       if (Array.isArray(value)) {
         value.forEach(function(v){
@@ -107,8 +107,8 @@
         xmlBuilder.writeElement(namespaceURI,localName,value);
       }
     }},
-  
-    addNamespaces: {value: function(task,xmlBuilder) {
+
+    addNamespaces: {writable:true,value:function(task,xmlBuilder) {
       if (task.isCsw2) {
         xmlBuilder.writeNamespace("csw",task.uris.URI_CSW2);
         xmlBuilder.writeNamespace("ows",task.uris.URI_OWS);
@@ -119,8 +119,8 @@
       xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("dct",task.uris.URI_DCT);
     }},
-    
-    ensureUris: {value: function(task) {
+
+    ensureUris: {writable:true,value:function(task) {
       if (this.uris) return this.uris;
       var uris = this.uris = {};
       if (task.isCsw2) {
@@ -132,9 +132,9 @@
       }
       return uris;
     }},
-  
-    marshallOptions: {value: function(task,options) {
-      options.recordTypeName = "Record"; 
+
+    marshallOptions: {writable:true,value:function(task,options) {
+      options.recordTypeName = "Record";
       //options.elementSetName = "summary";
       var p = task.provider;
       if (typeof p.recordTypeName === "string" && p.recordTypeName.length > 0) {
@@ -144,8 +144,8 @@
         options.elementSetName = p.elementSetName;
       }
     }},
-    
-    writeEntry: {value: function(task,xmlBuilder,item,options) {
+
+    writeEntry: {writable:true,value:function(task,xmlBuilder,item,options) {
       var uris = this.ensureUris(task);
       var recordTypeName = options.recordTypeName;
       if (options.entryOnly) {
@@ -157,18 +157,18 @@
         xmlBuilder.writeStartElement(uris.csw,recordTypeName);
       }
       var entry = task.target.itemToAtomEntry(task,item);
-      
+
       var id = entry.id;
       var title = "Untitled";
       if (typeof entry.title === "string" && entry.title.length > 0) {
         title = entry.title;
       }
       //if (task.verbose) console.log("title",title);
-  
+
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);
-      //xmlBuilder.writeElement(task.uris.URI_DC,"type",itemType);   // TODO 
-    
+      //xmlBuilder.writeElement(task.uris.URI_DC,"type",itemType);   // TODO
+
       if (recordTypeName !== "BriefRecord") {
         this.addAtomCategory(task,xmlBuilder,task.uris.URI_DC,"subject",entry.category);
         // dc:format (summary) TODO
@@ -186,23 +186,23 @@
           this.addAtomText(task,xmlBuilder,task.uris.URI_DC,"rights",entry.rights);
           this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
         }
-      } 
-      
+      }
+
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
         entry.bbox.writeOwsBoundingBox(task,xmlBuilder);
       }
-      
+
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
       xmlBuilder.writeEndElement();
     }},
-    
-    writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: false};
       var xmlBuilder = task.context.newXmlBuilder();
       xmlBuilder.writeStartDocument();
       this.marshallOptions(task,options);
-      
+
       var items = searchResult.items ? searchResult.items : [];
       var uris = this.ensureUris(task);
       xmlBuilder.writeStartElementPfx("csw",uris.csw,"GetRecordsResponse");
@@ -210,10 +210,10 @@
       xmlBuilder.writeStartElement(uris.csw,"SearchStatus");
       xmlBuilder.writeAttribute("timestamp",now);
       xmlBuilder.writeEndElement();
-      
+
       var numReturned = items.length;
       if (searchResult.itemsPerPage === 0) numReturned = 0;
-      
+
       xmlBuilder.writeStartElement(uris.csw,"SearchResults");
       xmlBuilder.writeAttribute("numberOfRecordsMatched",""+searchResult.totalHits);
       xmlBuilder.writeAttribute("numberOfRecordsReturned",""+numReturned);
@@ -228,14 +228,12 @@
         }
       }
       xmlBuilder.writeEndElement();
-  
+
       xmlBuilder.writeEndElement();
       xmlBuilder.writeEndDocument();
       this.writeResponse(task,xmlBuilder);
     }}
-  
+
   });
 
 }());
-
-

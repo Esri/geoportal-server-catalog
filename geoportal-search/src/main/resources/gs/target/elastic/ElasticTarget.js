@@ -25,7 +25,7 @@
 
     /* ............................................................................................ */
 
-    appendPeriod: {value:function(task,targetRequest,period,periodInfo) {
+    appendPeriod: {writable:true,value:function(task,targetRequest,period,periodInfo) {
       if (!periodInfo) return;
 
       var isV5Plus = this.schema.isVersion5Plus;
@@ -120,13 +120,13 @@
 
     /* ............................................................................................ */
 
-    getSchemaClass: {value:function() {
+    getSchemaClass: {writable:true,value:function() {
       return gs.target.elastic.ElasticSchema;
     }},
 
     /* ............................................................................................ */
 
-    prepare: {value:function(task) {
+    prepare: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       if (!this.schema) this.schema = this.newSchema(task);
       var targetRequest = {
@@ -159,7 +159,7 @@
       return promise;
     }},
 
-    prepareBBox: {value:function(task,targetRequest) {
+    prepareBBox: {writable:true,value:function(task,targetRequest) {
       var spatialInfo = this.schema.spatialInfo;
       if (!spatialInfo) return;
 
@@ -210,7 +210,7 @@
       if (query !== null) targetRequest.musts.push(query);
     }},
 
-    prepareFilter: {value:function(task,targetRequest) {
+    prepareFilter: {writable:true,value:function(task,targetRequest) {
       // TODO array?
       var filter = task.request.getFilter();
       if (typeof filter === "string" && filter.length > 0) {
@@ -221,23 +221,23 @@
       }
     }},
 
-    prepareIds: {value:function(task,targetRequest) {
+    prepareIds: {writable:true,value:function(task,targetRequest) {
       var ids = task.request.getIds();
       if (Array.isArray(ids) && ids.length > 0) {
         targetRequest.musts.push({"terms":{"_id":ids}});
       }
     }},
 
-    prepareModified: {value:function(task,targetRequest) {
+    prepareModified: {writable:true,value:function(task,targetRequest) {
       var period = task.request.getModifiedPeriod();
       var periodInfo = this.schema.modifiedPeriodInfo;
       this.appendPeriod(task,targetRequest,period,periodInfo);
     }},
 
-    prepareOther: {value:function(task,targetRequest) {
+    prepareOther: {writable:true,value:function(task,targetRequest) {
     }},
 
-    preparePaging: {value:function(task,targetRequest) {
+    preparePaging: {writable:true,value:function(task,targetRequest) {
       var start = task.request.getStart();
       start = task.val.strToInt(start,null);
       if (typeof start === "number" && !task.request.queryIsZeroBased) {
@@ -253,7 +253,7 @@
       }
     }},
 
-    prepareQ: {value:function(task,targetRequest) {
+    prepareQ: {writable:true,value:function(task,targetRequest) {
       var q = task.request.getQ();
       if (typeof q === "string" && q.length > 0) {
         var analyze_wildcard = task.request.chkBoolParam("analyze_wildcard",false);
@@ -274,7 +274,7 @@
       }
     }},
 
-    prepareRequiredFilter: {value:function(task,targetRequest) {
+    prepareRequiredFilter: {writable:true,value:function(task,targetRequest) {
       // TODO array?
       var requiredFilter = this.requiredFilter;
       if (typeof requiredFilter === "string" && requiredFilter.length > 0) {
@@ -285,7 +285,7 @@
       }
     }},
 
-    prepareSort: {value:function(task,targetRequest) {
+    prepareSort: {writable:true,value:function(task,targetRequest) {
       var sortables = this.schema.sortables;
       if (!sortables) return;
 
@@ -323,13 +323,13 @@
       }
     }},
 
-    prepareTimePeriod: {value:function(task,targetRequest) {
+    prepareTimePeriod: {writable:true,value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
       var periodInfo = this.schema.timePeriodInfo;
       this.appendPeriod(task,targetRequest,period,periodInfo);
     }},
 
-    prepareTypes: {value:function(task,targetRequest) {
+    prepareTypes: {writable:true,value:function(task,targetRequest) {
       var shoulds = [], keys = [], query, qNested;
       var schema = this.schema;
       var types = task.request.getTypes();
@@ -387,7 +387,7 @@
 
     /* ............................................................................................ */
 
-    search: {value:function(task) {
+    search: {writable:true,value:function(task) {
       var self = this;
       var promise = task.context.newPromise();
 

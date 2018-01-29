@@ -14,14 +14,13 @@
  */
 
 (function(){
-  
+
   gs.context.browser.WebProcessor = gs.Object.create(gs.context.Processor,{
-    
-    newContext: {value: function() {
+
+    newContext: {writable:true,value:function() {
       return gs.Object.create(gs.context.browser.WebContext);
     }}
-  
+
   });
 
 }());
-

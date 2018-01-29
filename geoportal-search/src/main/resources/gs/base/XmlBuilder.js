@@ -29,7 +29,7 @@
 
     sbXml: {writable: true, value: null},
 
-    getXml: {value: function() {
+    getXml: {writable:true,value:function() {
       // <?xml version="1.0" encoding="UTF-8" standalone="no"?>
       var v = this.sbXml.toString();
       if (typeof v === "string") {
@@ -41,17 +41,17 @@
       return v;
     }},
 
-    init: {value: function(stringBuilder) {
+    init: {writable:true,value:function(stringBuilder) {
       this.sbXml = stringBuilder;
       return this;
     }},
 
-    writeAttribute: {value: function(localName, value) {
+    writeAttribute: {writable:true,value:function(localName,value) {
       if (value === null) return;
       this.writeAttributeNS(null,localName,value);
     }},
 
-    writeAttributeNS: {value: function(namespaceURI, localName, value) {
+    writeAttributeNS: {writable:true,value:function(namespaceURI,localName,value) {
       if (value === null) return;
       var prefix = null;
       if (namespaceURI !== null) prefix = this.prefixByUri[namespaceURI];
@@ -60,20 +60,20 @@
       this.activeElement.attributes.push(a);
     }},
 
-    writeCharacters: {value: function(value) {
+    writeCharacters: {writable:true,value:function(value) {
       if (value === null) return;
       if (typeof this.activeElement.value !== "string") this.activeElement.value = "";
       this.activeElement.value += value;
     }},
 
-    writeElement: {value: function(namespaceURI, localName, value) {
+    writeElement: {writable:true,value:function(namespaceURI,localName,value) {
       if (value === null) return;
       this.writeStartElement(namespaceURI,localName);
       this.writeCharacters(value);
       this.writeEndElement();
     }},
 
-    writeEndDocument: {value: function() {
+    writeEndDocument: {writable:true,value:function() {
       //console.log("writeEndDocument",this.stack.length);
       var self = this;
       var doc = {
@@ -93,7 +93,7 @@
       }
     }},
 
-    writeEndElement: {value: function() {
+    writeEndElement: {writable:true,value:function() {
       //console.log("end /",this.activeElement.prefix+":"+this.activeElement.localName);
       var el = this.stack.shift();
       if (this.stack.length > 0) {
@@ -103,25 +103,25 @@
       }
     }},
 
-    writeNamespace: {value: function(prefix, namespaceURI) {
+    writeNamespace: {writable:true,value:function(prefix,namespaceURI) {
       this.prefixes.push(prefix);
       this.prefixByUri[namespaceURI] = prefix;
       this.uriByPrefix[prefix] = namespaceURI;
     }},
 
-    writeStartDocument: {value: function() {
+    writeStartDocument: {writable:true,value:function() {
       this.stack = [];
       this.prefixes = [];
       this.prefixByUri = {};
       this.uriByPrefix = {};
     }},
 
-    writeStartElement: {value: function(namespaceURI, localName) {
+    writeStartElement: {writable:true,value:function(namespaceURI,localName) {
       var prefix = this.prefixByUri[namespaceURI];
       this.writeStartElementPfx(prefix,namespaceURI,localName);
     }},
 
-    writeStartElementPfx: {value: function(prefix, namespaceURI, localName) {
+    writeStartElementPfx: {writable:true,value:function(prefix,namespaceURI,localName) {
       var el = gs.Object.create(gs.base.XmlElement).init(prefix,localName,namespaceURI);
       if (this.activeElement) {
         this.activeElement.elements.push(el);
@@ -144,7 +144,7 @@
     prefix: {writable: true, value: null},
     value: {writable: true, value: null},
 
-    init: {value: function(prefix, localName, namespaceURI) {
+    init: {writable:true,value:function(prefix,localName,namespaceURI) {
       this.prefix = prefix;
       this.localName = localName;
       this.namespaceURI = namespaceURI;
@@ -164,14 +164,14 @@
     attributes: {writable: true, value: null},
     elements: {writable: true, value: null},
 
-    init: {value: function(prefix, localName, namespaceURI) {
+    init: {writable:true,value:function(prefix,localName,namespaceURI) {
       gs.base.XmlNode.init.call(this,prefix,localName,namespaceURI); // call super
       this.attributes = [];
       this.elements = [];
       return this;
     }},
 
-    write: {value: function(doc) {
+    write: {writable:true,value:function(doc) {
       var name = this.localName, sa = "", v = null;
       var hasElements = (this.elements && this.elements.length > 0);
       if (typeof this.prefix === "string" && this.prefix.length > 0) {

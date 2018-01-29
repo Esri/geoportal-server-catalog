@@ -56,7 +56,7 @@
     bbox: {writable: true, value: null},           // optional   (gs.atom.BBox, custom element)
     point: {writable: true, value: null},          // optional   (gs.atom.Point, custom element)
 
-    toJson: {value: function(task) {
+    toJson: {writable:true,value:function(task) {
       var self = this, json = {}, v;
 
       var add = function(parent,name,value) {
@@ -87,7 +87,7 @@
           });
         }
         if (gs.atom.Category.isPrototypeOf(value)) {
-          if (!parent[name]) parent[name] = []
+          if (!parent[name]) parent[name] = [];
           v = {};
           add(v,"label",value.label);
           add(v,"scheme",value.scheme);
@@ -219,7 +219,7 @@
     xmax: {writable: true, value: null},
     ymax: {writable: true, value: null},
 
-    init: {value: function(options) {
+    init: {writable:true,value:function(options) {
       if (options !== null && typeof options === "object") {
         this.xmin = options["xmin"];
         this.ymin = options["ymin"];
@@ -229,17 +229,17 @@
       return this;
     }},
 
-    writeGeoRSSBox: {value: function(task,xmlBuilder) {
+    writeGeoRSSBox: {writable:true,value:function(task,xmlBuilder) {
       var rssBox = this.ymin+" "+this.xmin+" "+this.ymax+" "+this.xmax;
       xmlBuilder.writeElement(task.uris.URI_GEORSS,"box",rssBox);
     }},
 
-    writeGeoRSSBox10: {value: function(task,xmlBuilder) {
+    writeGeoRSSBox10: {writable:true,value:function(task,xmlBuilder) {
       var rssBox = this.ymin+" "+this.xmin+" "+this.ymax+" "+this.xmax;
       xmlBuilder.writeElement(task.uris.URI_GEORSS10,"box",rssBox);
     }},
 
-    writeOwsBoundingBox: {value: function(task,xmlBuilder) {
+    writeOwsBoundingBox: {writable:true,value:function(task,xmlBuilder) {
       var uri = task.uris.URI_OWS2;
       if (task.isCsw2) uri = task.uris.URI_OWS;
       xmlBuilder.writeStartElement(uri,"BoundingBox");
@@ -258,7 +258,7 @@
     scheme: {writable: true, value: null},
     term: {writable: true, value: null}, // required
 
-    init: {value: function(options) {
+    init: {writable:true,value:function(options) {
       if (options !== null && typeof options === "object") {
         if (options["label"]) this.label = options["label"];
         if (options["scheme"]) this.scheme = options["scheme"];
@@ -267,7 +267,7 @@
       return this;
     }},
 
-    write: {value: function(task,xmlBuilder) {
+    write: {writable:true,value:function(task,xmlBuilder) {
       if ((this.term === null || this.term.length === 0)) return;
       xmlBuilder.writeStartElement(task.uris.URI_ATOM,"category");
       xmlBuilder.writeAttribute("scheme",this.scheme);
@@ -286,7 +286,7 @@
     type: {writable: true, value: null}, // usually text|html|xhtml
     value: {writable: true, value: null},
 
-    init: {value: function(options) {
+    init: {writable:true,value:function(options) {
       if (options !== null && typeof options === "object") {
         if (options["src"]) this.src = options["src"];
         if (options["type"]) this.type = options["type"];
@@ -295,7 +295,7 @@
       return this;
     }},
 
-    write: {value: function(task,xmlBuilder) {
+    write: {writable:true,value:function(task,xmlBuilder) {
       xmlBuilder.writeStartElement(task.uris.URI_ATOM,"content");
       xmlBuilder.writeAttribute("src",this.src);
       xmlBuilder.writeAttribute("type",this.type);
@@ -330,7 +330,7 @@
 
     dctype: {writable: true, value: null}, // custom
 
-    init: {value: function(options) {
+    init: {writable:true,value:function(options) {
       if (options !== null && typeof options === "object") {
         if (options["href"]) this.href = options["href"];
         if (options["hreflang"]) this.hreflang = options["hreflang"];
@@ -343,7 +343,7 @@
       return this;
     }},
 
-    write: {value: function(task,xmlBuilder) {
+    write: {writable:true,value:function(task,xmlBuilder) {
       if ((this.href === null || this.href.length === 0)) return;
       xmlBuilder.writeStartElement(task.uris.URI_ATOM,"link");
       xmlBuilder.writeAttribute("rel",this.rel);
@@ -368,7 +368,7 @@
 
     tag: {writable: true, value: "author"}, // author|contributor
 
-    init: {value: function(options) {
+    init: {writable:true,value:function(options) {
       if (options !== null && typeof options === "object") {
         if (options["tag"]) this.tag = options["tag"];
         if (options["email"]) this.email = options["email"];
@@ -378,7 +378,7 @@
       return this;
     }},
 
-    write: {value: function(task,xmlBuilder,tag) {
+    write: {writable:true,value:function(task,xmlBuilder,tag) {
       if ((this.name === null || this.name.length === 0)) return;
       if ((this.tag === null || this.tag.length === 0)) this.tag = "author";
       xmlBuilder.writeStartElement(task.uris.URI_ATOM,this.tag);
@@ -397,7 +397,7 @@
     x: {writable: true, value: null},
     y: {writable: true, value: null},
 
-    init: {value: function(options) {
+    init: {writable:true,value:function(options) {
       if (options !== null && typeof options === "object") {
         this.x = options["x"];
         this.y = options["y"];
@@ -405,7 +405,7 @@
       return this;
     }},
 
-    writeGeoRSSPoint: {value: function(task,xmlBuilder) {
+    writeGeoRSSPoint: {writable:true,value:function(task,xmlBuilder) {
       var rssPoint = this.y+" "+this.x;
       xmlBuilder.writeElement(task.uris.URI_GEORSS,"point",rssPoint);
     }}
@@ -419,7 +419,7 @@
     type: {writable: true, value: null}, // usually text|html|xhtml
     value: {writable: true, value: null},
 
-    init: {value: function(options) {
+    init: {writable:true,value:function(options) {
       if (options !== null && typeof options === "object") {
         if (options["type"]) this.type = options["type"];
         if (options["value"]) this.value = options["value"];
@@ -427,7 +427,7 @@
       return this;
     }},
 
-    write: {value: function(task,xmlBuilder,namespaceURI,localName) {
+    write: {writable:true,value:function(task,xmlBuilder,namespaceURI,localName) {
       xmlBuilder.writeStartElement(namespaceURI,localName);
       xmlBuilder.writeAttribute("type",this.type);
       if (typeof this.value === "string") {

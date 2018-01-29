@@ -16,27 +16,27 @@
 (function(){
 
   gs.writer.KmlWriter = gs.Object.create(gs.writer.XmlWriter,{
-    
+
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_KML_XML},
-  
-    addNamespaces: {value: function(task,xmlBuilder) {
+
+    addNamespaces: {writable:true,value:function(task,xmlBuilder) {
       xmlBuilder.writeNamespace("kml",task.uris.URI_KML);
       xmlBuilder.writeNamespace("atom",task.uris.URI_ATOM);
       xmlBuilder.writeNamespace("dc",task.uris.URI_DC);
       xmlBuilder.writeNamespace("opensearch",task.uris.URI_OPENSEARCH);
     }},
-    
-    writeEntry: {value: function(task,xmlBuilder,item,options) {
+
+    writeEntry: {writable:true,value:function(task,xmlBuilder,item,options) {
       var entry = task.target.itemToAtomEntry(task,item);
       if (!entry) return;
-      
+
       if (options.entryOnly) {
         xmlBuilder.writeStartElementPfx("kml",task.uris.URI_KML,"Placemark");
         this.addNamespaces(task,xmlBuilder);
       } else {
         xmlBuilder.writeStartElement(task.uris.URI_KML,"Placemark");
       }
-      
+
       var id = entry.id;
       var title = "Untitled";
       var description = null;
@@ -52,7 +52,7 @@
       this.addElement(task,xmlBuilder,task.uris.URI_KML,"description",description);
       this.addElement(task,xmlBuilder,task.uris.URI_KML,"styleUrl","#main");
       this.addAtomObject(task,xmlBuilder,gs.atom.Link,entry.link);
-      
+
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
         var xmin = entry.bbox.xmin;
         var ymin = entry.bbox.ymin;
@@ -87,12 +87,12 @@
           xmlBuilder.writeEndElement();
         }
       }
-      
+
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
       xmlBuilder.writeEndElement();
     }},
-    
-    writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: false};
       var xmlBuilder = task.context.newXmlBuilder();
@@ -104,7 +104,7 @@
       xmlBuilder.writeElement(task.uris.URI_KML,"name","Results");
       xmlBuilder.writeElement(task.uris.URI_KML,"open","1");
       this.writeStyle(xmlBuilder,"main","7d0000ff");
-      
+
       this.writeOpensearchInfo(task,searchResult,xmlBuilder);
       var items = searchResult.items ? searchResult.items : [];
       if (searchResult.itemsPerPage > 0) {
@@ -116,8 +116,8 @@
       xmlBuilder.writeEndDocument();
       this.writeResponse(task,xmlBuilder);
     }},
-    
-    writeStyle: {value: function(xmlBuilder,name,color) {
+
+    writeStyle: {writable:true,value:function(xmlBuilder,name,color) {
       xmlBuilder.writeStartElement(task.uris.URI_KML,"Style");
       xmlBuilder.writeAttribute("id",name);
       xmlBuilder.writeStartElement(task.uris.URI_KML,"LineStyle");
@@ -128,8 +128,8 @@
       xmlBuilder.writeEndElement();
       xmlBuilder.writeEndElement();
     }},
-    
-    writeResponse: {value: function(task,xmlBuilder) {
+
+    writeResponse: {writable:true,value:function(task,xmlBuilder) {
       task.response.addHeader("Content-Disposition","filename="+Date.now()+".kml");
       this.writeXmlResponse(task,this.mediaType,xmlBuilder.getXml());
     }}

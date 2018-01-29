@@ -20,31 +20,31 @@
     NL: {writable: true, value: "\r\n"},
     XML_HEADER: {writable: true, value: "<?xml version=\"1.0\" encoding=\"UTF-8\"?>"},
 
-    chkStr: {value: function(v) {
+    chkStr: {writable:true,value:function(v) {
       if (typeof v === "undefined" || v === null) return null;
       return ""+v;
     }},
 
-    chkStrArray: {value: function(v) {
+    chkStrArray: {writable:true,value:function(v) {
       if (typeof v === "undefined" || v === null) return null;
       else if (typeof v === "string") return [v];
       else if (typeof v.push === "function") return v;
       return null;
     }},
 
-    chkObjArray: {value: function(v) {
+    chkObjArray: {writable:true,value:function(v) {
       if (typeof v === "undefined" || v === null) return null;
       else if (typeof v === "object" && typeof v.push === "undefined") return [v];
       else if (typeof v === "object" && typeof v.push === "function") return v;
       return null;
     }},
 
-    endsWith: {value: function(v,sfx) {
+    endsWith: {writable:true,value:function(v,sfx) {
       if (typeof v !== "string") return null;
       return (v.indexOf(sfx,(v.length - sfx.length)) !== -1);
     }},
 
-    escXml: {value: function(s) {
+    escXml: {writable:true,value:function(s) {
       if (s === null) return null;
       if (s.length === 0) return s;
       var i, c, sb = "";
@@ -67,7 +67,7 @@
       return sb;
     }},
 
-    guessUrlType: {value: function(url) {
+    guessUrlType: {writable:true,value:function(url) {
       var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
 
       var arcgisTypes = ["FeatureServer","GeocodeServer","GeoDataServer","GeometryServer",
@@ -131,7 +131,7 @@
       }
     }},
 
-    hasAnyProperty: {value: function(obj) {
+    hasAnyProperty: {writable:true,value:function(obj) {
       if (typeof obj === "object" && obj !== null) {
         for (var k in obj) {
           if (obj.hasOwnProperty(k)) {
@@ -142,7 +142,7 @@
       return false;
     }},
 
-    millisToIso8601: {value: function(millis) {
+    millisToIso8601: {writable:true,value:function(millis) {
       if (typeof millis === "undefined") return null;
       if (millis === null) return null;
       var pad = function(number) {
@@ -163,11 +163,11 @@
       return v;
     }},
 
-    nowAsString: {value: function() {
+    nowAsString: {writable:true,value:function() {
       return this.millisToIso8601(Date.now());
     }},
 
-    strToInt: {value: function(v,defaultValue) {
+    strToInt: {writable:true,value:function(v,defaultValue) {
       try {
         if (typeof v !== "string") v = this.chkStr(v);
         if (typeof v === "string" && v.trim().length > 0) {
@@ -180,7 +180,7 @@
       return defaultValue;
     }},
 
-    strToNum: {value: function(v,defaultValue) {
+    strToNum: {writable:true,value:function(v,defaultValue) {
       try {
         if (typeof v !== "string") v = this.chkStr(v);
         if (typeof v === "string" && v.trim().length > 0) {
@@ -193,7 +193,7 @@
       return defaultValue;
     }},
 
-    trim: {value: function(v) {
+    trim: {writable:true,value:function(v) {
       if (typeof v === "string") return v.trim();
       return v;
     }}

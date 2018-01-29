@@ -17,10 +17,11 @@
 
   gs.context.browser.WebContext = gs.Object.create(gs.context.Context,{
 
-    newXmlInfo: {value: function(task,xmlString) {
+    newXmlInfo: {writable:true,value:function(task,xmlString) {
       // TODO if (window.DOMParser)
+      if (typeof xmlString === "string") xmlString = xmlString.trim();
       var parser = new DOMParser();
-      var dom = parser.parseFromString(xmlString, "text/xml");
+      var dom = parser.parseFromString(xmlString,"text/xml");
       var root = dom.documentElement; // TODO?
       var xmlInfo = gs.Object.create(gs.context.browser.XmlInfo).mixin({
         dom: dom,
@@ -29,7 +30,7 @@
       return xmlInfo;
     }},
 
-    sendHttpRequest: {value: function(task,url,data,dataContentType) {
+    sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType) {
       var promise = this.newPromise();
       var req = new XMLHttpRequest();
       req.onload = function() {
@@ -43,6 +44,11 @@
         promise.reject(new Error("Network error")); // TODO
       };
       if (typeof data !== "undefined" && data !== null) {
+        if (task.config.proxyUrl) {
+          // TODO only for POST?
+          url = task.config.proxyUrl+"?"+url;
+          //url = task.config.proxyUrl+"?"+encodeURI(url); // TODO?
+        }
         req.open("POST",url);
         if (typeof dataContentType === "string" && dataContentType.length > 0) {
           // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
@@ -69,7 +75,7 @@
     dom: {writable: true, value: null},
     root: {writable: true, value: null},
 
-    forEachAttribute: {value: function(node,callback) {
+    forEachAttribute: {writable:true,value:function(node,callback) {
       var r, self = this;
       this.getAttributes(node).forEach(function(child){
         if (callback) {
@@ -79,7 +85,7 @@
       });
     }},
 
-    forEachChild: {value: function(node,callback) {
+    forEachChild: {writable:true,value:function(node,callback) {
       var r, self = this;
       this.getChildren(node).forEach(function(child){
         if (callback) {
@@ -89,14 +95,14 @@
       });
     }},
 
-    getAttributes: {value: function(node) {
+    getAttributes: {writable:true,value:function(node) {
       if (node) {
         return this._nodeListToArray(node.attributes); // TODO?
       }
       return [];
     }},
 
-    getAttributeValue: {value: function(node,localName,namespaceURI) {
+    getAttributeValue: {writable:true,value:function(node,localName,namespaceURI) {
       var value = null;
       var ns = (typeof namespaceURI === "string" && namespaceURI.length > 0);
       this.forEachAttribute(node,function(info){
@@ -122,7 +128,7 @@
       return value;
     }},
 
-    getChildren: {value: function(node) {
+    getChildren: {writable:true,value:function(node) {
       if (node) {
         return this._nodeListToArray(node.childNodes);
       }
@@ -142,7 +148,7 @@
      *   isTextNode:
      * }
      */
-    getNodeInfo: {value: function(node,withText) {
+    getNodeInfo: {writable:true,value:function(node,withText) {
       if (!node) return null;
       var info = {
         node: node,
@@ -158,7 +164,7 @@
       return info;
     }},
 
-    getNodeText: {value: function(node) {
+    getNodeText: {writable:true,value:function(node) {
       var v;
       if (node) {
         if (node.nodeType === this.NODETYPE_ELEMENT) {
@@ -174,7 +180,7 @@
       return null;
     }},
 
-    _nodeListToArray: {value: function(nl) {
+    _nodeListToArray: {writable:true,value:function(nl) {
       var i, a = [];
       if (nl) {
         for (i = 0; i < nl.length; i++) {

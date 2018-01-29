@@ -25,7 +25,7 @@
     task: {writable: true, value: null},
     xmlInfo: {writable: true, value: null},
 
-    parseBody: {value: function(cswProvider,task) {
+    parseBody: {writable:true,value:function(cswProvider,task) {
       this.ids = [];
       this.cswProvider = cswProvider;
       this.task = task;
@@ -120,14 +120,14 @@
 
     /* .............................................................................................. */
 
-    _appendQ: {value: function(qToAppend) {
+    _appendQ: {writable:true,value:function(qToAppend) {
       if (typeof qToAppend !== "string" || qToAppend.length === 0) return;
       if (typeof this.q !== "string") this.q = "";
       if (this.q.length > 0) this.q += " AND ";
       this.q += "("+qToAppend+")";
     }},
 
-    _getPropertyLiteral: {value: function(nodeInfo,ignoreValidation) {
+    _getPropertyLiteral: {writable:true,value:function(nodeInfo,ignoreValidation) {
       var v;
       this.xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
         if (childInfo.localName === "Literal") {
@@ -148,7 +148,7 @@
       return v;
     }},
 
-    _getPropertyName: {value: function(nodeInfo,ignoreValidation) {
+    _getPropertyName: {writable:true,value:function(nodeInfo,ignoreValidation) {
       // dc:type - liveData, Format - content type, Subject - theme
       var queryables = ["anytext","id","title"];
       var anytextAliases = ["","anytext","format","subject"];
@@ -186,7 +186,7 @@
       return name;
     }},
 
-    _getSpatialFilter: {value: function(nodeInfo) {
+    _getSpatialFilter: {writable:true,value:function(nodeInfo) {
       var xmlInfo = this.xmlInfo;
       var a, box, coords, envelope, lowerCorner, upperCorner, msg, ows;
 
@@ -255,7 +255,7 @@
       }
     }},
 
-    _parseFilter: {value: function(filterNode) {
+    _parseFilter: {writable:true,value:function(filterNode) {
       if (!filterNode) return;
       this._parseFilterClause(filterNode);
       if (typeof this.q === "string" && this.q.length > 0) {
@@ -273,7 +273,7 @@
       }
     }},
 
-    _parseFilterClause: {value: function(node) {
+    _parseFilterClause: {writable:true,value:function(node) {
       var self = this, propName, literal, nodeInfo;
       this.xmlInfo.forEachChild(node,function(childInfo){
         if (childInfo.isElementNode) {
@@ -396,7 +396,7 @@
       });
     }},
 
-    _parseSortBy: {value: function(sortByNode) {
+    _parseSortBy: {writable:true,value:function(sortByNode) {
       var a = [], sortField, sortOrder, xmlInfo = this.xmlInfo;
       xmlInfo.forEachChild(sortByNode,function(childInfo){
         if (childInfo.localName === "SortProperty") {
@@ -424,7 +424,7 @@
       }
     }},
 
-    _throwUnsupportedOperator: {value: function(nodeInfo) {
+    _throwUnsupportedOperator: {writable:true,value:function(nodeInfo) {
       var locator = nodeInfo.localName;
       var msg = "Operator "+nodeInfo.nodeName+" is not supported.";
       var ows = gs.Object.create(gs.provider.csw.OwsException);
