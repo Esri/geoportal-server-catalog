@@ -14,7 +14,9 @@
  */
 define(["dojo/_base/declare",
   "dojo/_base/lang",
+  "dojo/_base/array",
   "require",
+  "dojo/dom-class",
   "dojo/on",
   "dojo/keys",
   "dojo/io-query",
@@ -24,15 +26,20 @@ define(["dojo/_base/declare",
   "dojo/text!./templates/Search.html",
   "./Paging",
   "./ResultsPane",
+  "./SearchBox",
   "../all",
   "dijit/form/TextBox"],
-function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _TemplatedMixin,
-  _WidgetsInTemplateMixin, template, Paging, ResultsPane) {
+function(declare, lang, array, localRequire, domClass, on, keys, ioQuery,
+  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, Paging,
+  ResultsPane, SearchBox) {
 
   var _def = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
     templateString: template,
 
+    components: null,
+    defaultFilter : null,
+    requiredFilter: null,
     widgetContext: null,
 
     _wasLoaded: false,
@@ -40,16 +47,31 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
     postCreate: function() {
       this.inherited(arguments);
       var self = this;
-      /*
-      this.own(on(this.qNode,"keyup",function(evt) {
-        if (evt.keyCode === keys.ENTER) self.search();
-      }));
-      */
       gs.reqAll(localRequire,function(){
         self._wasLoaded = true;
-        //console.log("Search._wasLoaded",self._wasLoaded);
       });
+      this.toggleLoading(false);
       this.init();
+    },
+
+    buildQueryParams: function(task) {
+      var qRequired = null;
+      if (typeof this.requiredFilter === "string" && this.requiredFilter.length > 0) {
+        qRequired = this.requiredFilter;
+      }
+      var params = {
+        q: qRequired,
+        canSortByRelevance: false
+      };
+      array.forEach(this.components,function(component) {
+        component.appendQueryParams(params,task);
+      });
+      delete params.canSortByRelevance;
+      if (params.q === null && typeof this.defaultFilter === "string" &&
+          this.defaultFilter.length > 0) {
+        params.q = this.defaultFilter;
+      }
+      return params;
     },
 
     informExternal: function(text) {
@@ -64,37 +86,48 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
     },
 
     init: function() {
-      console.log("widgetContext",this.widgetContext);
-      this.paging = new Paging({
+      //console.log("widgetContext",this.widgetContext);
+      this.components = [];
+      var mixins = {
         i18n: this.widgetContext.i18n,
         searchPane: this,
-        widgetContext: this.widgetContext,
-      },this.pagingNode);
+        widgetContext: this.widgetContext
+      };
+
+      this.searchBox = new SearchBox(mixins,this.searchBoxNode);
+      this.components.push(this.searchBox);
+      this.resultsPane = new ResultsPane(mixins,this.resultsPaneNode);
+      this.components.push(this.resultsPane);
+      this.paging = new Paging(mixins,this.pagingNode);
+      this.components.push(this.paging);
     },
 
     processResults: function(searchResponse) {
-      /*
-      array.forEach(self.getComponents(), function(component) {
+      array.forEach(this.components,function(component) {
         component.processResults(searchResponse);
       });
-      */
-      this.resultsPane.processResults(searchResponse);
-      this.paging.processResults(searchResponse);
     },
 
     search: function() {
       if (!this._wasLoaded) return; // TODO need a ui error message
+      var self = this, task = {};
+      this.toggleLoading(true);
 
-      var self = this;
-      var q = this.qBox.get("value").trim();
-      var target = this.targetBox.get("value").trim();
+      //var q = this.qBox.get("value").trim();
+      //var target = this.targetBox.get("value").trim();
 
+      var parameterMap = this.buildQueryParams(task);
+      parameterMap.f = "json";
+
+      /*
       var parameterMap = {f: "json"};
       if (q.length > 0) parameterMap.q = q;
       if (target.length > 0) parameterMap.target = target;
+      */
 
-      var textarea = this.textareaNode;
-      textarea.value = "Searching...";
+      // TODO show working message
+      //var textarea = this.textareaNode;
+      //textarea.value = "Searching...";
 
       var requestInfo = {
         "requestUrl": "/request",
@@ -102,12 +135,13 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
         "headerMap": {},
         "parameterMap": parameterMap
       };
-      console.log("parameterMap",parameterMap);
+      //console.log("parameterMap",parameterMap);
 
       var processor = gs.Object.create(gs.context.browser.WebProcessor);
       processor.execute(requestInfo,function(status,mediaType,entity,headers){
         //console.log(status,mediaType,"\r\n",entity);
-        textarea.value = entity;
+        //textarea.value = entity;
+        // TODO handle errors
         self.informExternal(entity);
 
         try {
@@ -119,12 +153,18 @@ function(declare, lang, localRequire, on, keys, ioQuery, _WidgetBase, _Templated
         } catch(ex) {
           console.error(ex);
         }
+
+        self.toggleLoading(false);
       });
 
     },
 
-    searchClicked: function() {
-      this.search();
+    toggleLoading: function(visible) {
+      if (visible) {
+        domClass.add(this.loadingNode,"loading");
+      } else {
+        domClass.remove(this.loadingNode,"loading");
+      }
     }
 
   });

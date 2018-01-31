@@ -1,10 +1,14 @@
 <div class="item-card">
   <div class="item-card-inner">
-    <div class="xthumbnail" data-dojo-attach-point="thumbnailNode"></div>
-    <h3 class="title" data-dojo-attach-point="titleNode"></h3>
-    <div class="info" data-dojo-attach-point="typeByOwnerNode"></div>
-    <div class="info" data-dojo-attach-point="dateNode"></div>
-    <div class="action-bar">
+    <div class="thumbnail-div">
+      <img class="thumbnail-placeholder" data-dojo-attach-point="thumbnailImage"/>
+    </div>
+    <div class="info-div">
+      <h3 class="title" data-dojo-attach-point="titleNode"></h3>
+      <div class="info" data-dojo-attach-point="typeByOwnerNode"></div>
+      <div class="info" data-dojo-attach-point="dateNode"></div>
+    </div>
+    <div class="action-bar" style="display:none;">
       <span class="message" data-dojo-attach-point="messageNode"></span>
       <a href="javascript:void(0)"
         data-dojo-attach-point="addButton"

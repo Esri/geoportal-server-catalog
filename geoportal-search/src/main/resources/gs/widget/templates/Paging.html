@@ -1,5 +1,8 @@
 <div class="search-paging">
 	<ul class="pagination pagination-sm">
+		<li class="search-count">
+		  <span data-dojo-attach-point="countNode">&nbsp;</span>
+		</li>
 		<li>
 			<a href="#" aria-label="First"
 				data-dojo-attach-point="firstButton"
@@ -17,7 +20,7 @@
 			</a>
 		</li>
 		<li class="current-page">
-		  <span data-dojo-attach-point="pageNode"></span>
+		  <span data-dojo-attach-point="pageNode">&nbsp;</span>
 		</li>
 		<li>
 			<a href="#" aria-label="Next"
@@ -26,9 +29,6 @@
 				title="${i18n.search.paging.nextTip}">
 				<span aria-hidden="true" class="esri-icon-right"></span>
 			</a>
-		</li>
-		<li class="search-count">
-		  <span data-dojo-attach-point="countNode"></span>
 		</li>
 	</ul>
 </div>

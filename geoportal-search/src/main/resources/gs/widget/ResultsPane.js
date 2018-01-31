@@ -50,7 +50,7 @@ function(declare, array, SearchComponent, template, ItemCard, util) {
 
     processResults: function(searchResponse) {
       this.destroyItems();
-      console.log("searchResponse",searchResponse);
+      this.itemsNode.scrollTop = 0;
       var results = searchResponse.results;
       if (results && results.length > 0) {
         var idsAdded = util.findLayersAdded(this.getMap(), null).itemIds;
