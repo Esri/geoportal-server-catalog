@@ -48,7 +48,7 @@ define({
         previousTip: "Previous",
         next: ">",
         nextTip: "Next",
-        pagePattern: "{page}"
+        pagePattern: "Page {page}"
       },
       resultCount: {
         countPattern: "{count} {type}",

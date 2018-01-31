@@ -34,9 +34,11 @@ function(declare, domClass, number, template, SearchComponent, util) {
 
     postCreate: function() {
       this.inherited(arguments);
+      this.domNode.style.display = "none";
       if (this.numPerPage === null) {
         this.numPerPage = 30;
       }
+      //this.updateCount({total: 0});
       this.enableOrDisable();
     },
 
@@ -136,18 +138,24 @@ function(declare, domClass, number, template, SearchComponent, util) {
       }
 
       var sPage = "";
-      if (nHits > nPer) {
-        var nPage = 1;
-        if (nStart > 1) {
-          nPage = Math.floor(nStart / nPer) + 1;
-        }
-        sPage = this.i18n.search.paging.pagePattern;
-        sPage = sPage.replace("{page}", "" + nPage);
+      if (nHits === 0) {
+        this.pageNode.innerHTML = "&nbsp;";
+        this.domNode.style.display = "none";
       } else {
-        sPage = this.i18n.search.paging.pagePattern;
-        sPage = sPage.replace("{page}", "" + 1);
+        this.domNode.style.display = "";
+        if (nHits > nPer) {
+          var nPage = 1;
+          if (nStart > 1) {
+            nPage = Math.floor(nStart / nPer) + 1;
+          }
+          sPage = this.i18n.search.paging.pagePattern;
+          sPage = sPage.replace("{page}", "" + nPage);
+        } else {
+          sPage = this.i18n.search.paging.pagePattern;
+          sPage = sPage.replace("{page}", "" + 1);
+        }
+        util.setNodeText(this.pageNode,sPage);
       }
-      util.setNodeText(this.pageNode, sPage);
       this.updateCount(searchResponse);
       this.enableOrDisable();
     },
@@ -161,7 +169,6 @@ function(declare, domClass, number, template, SearchComponent, util) {
       var v = this.i18n.search.resultCount.countPattern;
       v = v.replace("{count}",number.format(total));
       v = v.replace("{type}",type);
-      console.log(v,this.countNode);
       util.setNodeText(this.countNode,v);
     }
 

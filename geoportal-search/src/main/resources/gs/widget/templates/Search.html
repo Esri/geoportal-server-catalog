@@ -1,32 +1,22 @@
-<div style="padding:20px; border:1px solid #ccc">
-  <h4 style="margin:0;">Widget</h4>
+<div class="geoportal-search search-pane">
+  <!--<h4 style="margin:0;">Widget</h4>-->
   <div>
-    <div>
-	    <label>q
-	      <input data-dojo-type="dijit/form/TextBox"
-	        data-dojo-attach-point="qBox" data-dojo-props="trim:true"/>
-	    </label>
-	    <button data-dojo-attach-point="searchButton"
-	      data-dojo-attach-event="onclick: searchClicked"
-	      >Search
-	    </button>
+    <div class="search-bar main-search-bar">
+      <div data-dojo-attach-point="searchBoxNode"></div>
+      <div data-dojo-attach-point="loadingNode"></div>
+      <div style="clear:both"></div>
     </div>
+    <!--
     <div>
       <label>target
         <input data-dojo-type="dijit/form/TextBox"
           data-dojo-attach-point="targetBox" data-dojo-props="trim:true"/>
       </label>
     </div>
-  </div>
-  <div>
-    <textarea style="margin-top:10px;width:300px;height:50px"
-      data-dojo-attach-point="textareaNode">
-    </textarea>
+    -->
   </div>
   <div class="search-pane-content" data-dojo-attach-point="contentNode">
-    <div data-dojo-type="${widgetContext.widgetFolder}/ResultsPane"
-      data-dojo-attach-point="resultsPane">
-    </div>
+    <div data-dojo-attach-point="resultsPaneNode"></div>
   </div>
   <div class="search-pane-footer" data-dojo-attach-point="footerNode">
     <div data-dojo-attach-point="pagingNode"></div>
