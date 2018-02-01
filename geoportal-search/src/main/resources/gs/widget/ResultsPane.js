@@ -51,17 +51,21 @@ function(declare, array, SearchComponent, template, ItemCard, util) {
     processResults: function(searchResponse) {
       this.destroyItems();
       this.itemsNode.scrollTop = 0;
+      var self = this;
       var results = searchResponse.results;
       if (results && results.length > 0) {
         var idsAdded = util.findLayersAdded(this.getMap(), null).itemIds;
         array.forEach(searchResponse.results, function(result) {
           //console.warn(result.id,idsAdded);
-          this.addItem(new ItemCard({
-            item: result,
+          self.addItem(new ItemCard({
             canRemove: (idsAdded.indexOf(result.id) !== -1),
-            resultsPane: this
+            i18n: self.i18n,
+            item: result,
+            resultsPane: self,
+            searchPane: self.searchPane,
+            searchResponse: searchResponse
           }));
-        }, this);
+        });
       } else {
         this.showNoMatch();
       }

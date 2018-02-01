@@ -20,6 +20,7 @@ define(["dojo/_base/declare",
   "dojo/on",
   "dojo/keys",
   "dojo/io-query",
+  "dojo/_base/window",
   "dijit/_WidgetBase",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
@@ -29,7 +30,7 @@ define(["dojo/_base/declare",
   "./SearchBox",
   "../all",
   "dijit/form/TextBox"],
-function(declare, lang, array, localRequire, domClass, on, keys, ioQuery,
+function(declare, lang, array, localRequire, domClass, on, keys, ioQuery, win,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, Paging,
   ResultsPane, SearchBox) {
 
@@ -52,6 +53,23 @@ function(declare, lang, array, localRequire, domClass, on, keys, ioQuery,
       });
       this.toggleLoading(false);
       this.init();
+
+      this.own(on(win.doc,"click",function(e){
+        //console.log("win:click",e);
+        var dropdowns = document.getElementsByClassName("dropdown-content");
+        array.forEach(dropdowns,function(dropdown) {
+          //console.log("chk",dropdown === self._ddClicked);
+          //console.log("chk.dd",dropdown);
+          //console.log("chk._ddClicked",self._ddClicked);
+          //console.log("chk",dropdown === e.target.xtnDDContent);
+          if (!e || !e.target || dropdown !== e.target.xtnDDContent) {
+            if (dropdown.classList.contains("show")) {
+              dropdown.classList.remove("show");
+            }
+          }
+        });
+      }));
+
     },
 
     buildQueryParams: function(task) {
@@ -118,6 +136,7 @@ function(declare, lang, array, localRequire, domClass, on, keys, ioQuery,
 
       var parameterMap = this.buildQueryParams(task);
       parameterMap.f = "json";
+      //parameterMap.target = "gptdb1";
 
       /*
       var parameterMap = {f: "json"};

@@ -62,6 +62,7 @@ define({
           close: "Close",
           remove: "Remove",
           details: "Details",
+          links: "Links",
           done: "Done",
           editName: "Edit Name"
         },

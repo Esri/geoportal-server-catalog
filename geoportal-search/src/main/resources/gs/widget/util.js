@@ -12,8 +12,11 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-define(["dojo/_base/array"],
-function(array) {
+define(["dojo/_base/array",
+  "dojo/dom-geometry",
+  "dojo/dom-style",
+  "dojo/window"],
+function(array, domGeometry, domStyle, win) {
 
   var _def = {
 
@@ -39,9 +42,7 @@ function(array) {
     },
 
     findLayersAdded: function(map, itemId) {
-      var ids = [],
-        itemIds = [],
-        layers = [];
+      var ids = [], itemIds = [], layers = [];
       var response = {
         itemIds: itemIds,
         layers: layers
@@ -69,6 +70,31 @@ function(array) {
         }
       });
       return response;
+    },
+
+    mitigateDropdownClip: function(dd,ddul) {
+      // Dropdown menus clipped by scrollable container
+      var reposition = function() {
+        var cs = domStyle.getComputedStyle(dd);
+        var winBox = win.getBox();
+        var ddGeom = domGeometry.position(dd);
+        var ddulGeom = domGeometry.position(ddul);
+
+        var t = ddGeom.y + ddGeom.h;
+        var l = ddGeom.x;
+        domStyle.set(ddul,"top",t+"px");
+        domStyle.set(ddul,"left",l+"px");
+
+        var position = t;
+        var buttonHeight = ddGeom.h;
+        var menuHeight = ddulGeom.h;
+        var winHeight = winBox.h;
+        if (position > menuHeight && winHeight - position < buttonHeight + menuHeight) {
+          t = t - menuHeight - buttonHeight - 4;
+          domStyle.set(ddul,"top",t+"px");
+        }
+      };
+      reposition();
     },
 
     setNodeText: function(nd, text) {
