@@ -3,7 +3,6 @@ html, body {
   height: 100%;
   margin: 0;
   padding: 0;
-  overflow: hidden;
 }
 
 body {
@@ -25,6 +24,18 @@ body, div, dl, dt, dd, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset,
 input, textarea, p, blockquote, th, td {
   margin: 0;
   padding: 0;
+}
+
+.geoportal-search a {
+  color: #196fa6;
+  text-decoration: none;
+  line-height: 20px;
+  padding: 10px 5px;
+}
+
+.geoportal-search a[disabled] {
+  pointer-events: none;
+  opacity: 0.2;
 }
 
 .geoportal-search .pagination {
@@ -76,7 +87,7 @@ input, textarea, p, blockquote, th, td {
 }
 
 .geoportal-search.search-pane {
-  width: 400px;
+  width: 360px;
   padding: 10px;
   border: 1px solid #cccccc;
   border-radius: 5px;
@@ -134,7 +145,7 @@ input, textarea, p, blockquote, th, td {
 }
 
 .geoportal-search .item-card-inner {
-  height: 70px;
+  height: 80px;
   padding: 5px;
   margin-bottom: 4px;
   border-top: 0;
@@ -180,8 +191,37 @@ input, textarea, p, blockquote, th, td {
   white-space: nowrap;
 }
 
+.geoportal-search .item-card .info {
+  color: #898989;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .geoportal-search .item-card .action-bar {
   text-align: right;
+}
+
+.geoportal-search .dropdown-container {
+  display: inline-block;
+  position: relative;
+}
+.geoportal-search .dropdown-content {
+  display: none;
+  position: fixed;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  text-align: left;
+  z-index: 1;
+}
+.geoportal-search .dropdown-content a {
+  display: block;
+}
+.geoportal-search .dropdown-content.show {
+  display: block;
 }
 
 /* ........................................................... */

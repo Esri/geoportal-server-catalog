@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="//js.arcgis.com/3.21/esri/css/esri.css">
 -->
 <link rel="stylesheet" href="//js.arcgis.com/3.21/esri/css/esri.css">
-<link rel="stylesheet" href="../widget/style.css">
+<link rel="stylesheet" href="../widget/style/style.css">
 <script>
   var dojoConfig = {
     locale: "en",
@@ -30,6 +30,7 @@
   <div id="idSearch"></div>
 </div>
 <script src="https://js.arcgis.com/3.21/"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
 <script>
   require(["dojo/ready",
     "gs/widget/Search",
@@ -44,6 +45,7 @@
           widgetFolder: "gs/widget",
         });
         new Search({
+          i18n: i18n,
           widgetContext: widgetContext
         },"idSearch");
       } else {
