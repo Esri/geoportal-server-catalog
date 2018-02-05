@@ -42,7 +42,7 @@ function(declare, lang, on, keys, SearchComponent, template) {
 
     /* SearchComponent API ============================================= */
 
-    appendQueryParams: function(params) {
+    appendQueryParams: function(params,task) {
       var q = this.searchTextBox.value;
       if (q !== null) {
         q = lang.trim(q);

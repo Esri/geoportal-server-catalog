@@ -13,26 +13,26 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
+  "require",
   "dojo/_base/lang",
   "dojo/_base/array",
-  "require",
+  "dojo/_base/window",
   "dojo/dom-class",
   "dojo/on",
-  "dojo/keys",
-  "dojo/io-query",
-  "dojo/_base/window",
   "dijit/_WidgetBase",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
-  "dojo/text!./templates/Search.html",
+  "dojo/text!./templates/SearchPane.html",
+  "./BBoxOption",
   "./Paging",
   "./ResultsPane",
   "./SearchBox",
-  "../all",
-  "dijit/form/TextBox"],
-function(declare, lang, array, localRequire, domClass, on, keys, ioQuery, win,
-  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, Paging,
-  ResultsPane, SearchBox) {
+  "./SortOptions",
+  "./TargetOptions",
+  "../all"],
+function(declare, localRequire, lang, array, win, domClass, on,
+  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template,
+  BBoxOption, Paging, ResultsPane, SearchBox, SortOptions, TargetOptions) {
 
   var _def = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
@@ -41,27 +41,28 @@ function(declare, lang, array, localRequire, domClass, on, keys, ioQuery, win,
     components: null,
     defaultFilter : null,
     requiredFilter: null,
+    searchOnStart: true,
     widgetContext: null,
 
+    _checkSearchOnStart: true,
     _wasLoaded: false,
 
     postCreate: function() {
       this.inherited(arguments);
       var self = this;
-      gs.reqAll(localRequire,function(){
-        self._wasLoaded = true;
-      });
       this.toggleLoading(false);
-      this.init();
+
+      gs.reqAll(localRequire,function(){
+        self.init();
+        self._wasLoaded = true;
+        if (self._started && self._checkSearchOnStart && self.searchOnStart) {
+          self.search();
+        }
+      });
 
       this.own(on(win.doc,"click",function(e){
-        //console.log("win:click",e);
         var dropdowns = document.getElementsByClassName("dropdown-content");
         array.forEach(dropdowns,function(dropdown) {
-          //console.log("chk",dropdown === self._ddClicked);
-          //console.log("chk.dd",dropdown);
-          //console.log("chk._ddClicked",self._ddClicked);
-          //console.log("chk",dropdown === e.target.xtnDDContent);
           if (!e || !e.target || dropdown !== e.target.xtnDDContent) {
             if (dropdown.classList.contains("show")) {
               dropdown.classList.remove("show");
@@ -69,12 +70,24 @@ function(declare, lang, array, localRequire, domClass, on, keys, ioQuery, win,
           }
         });
       }));
-
     },
+
+    startup: function() {
+      if (this._started) {
+        return;
+      }
+      this.inherited(arguments);
+      if (this._wasLoaded && this._checkSearchOnStart && this.searchOnStart) {
+        this.search();
+      }
+    },
+
+    /* ...................................................................... */
 
     buildQueryParams: function(task) {
       var qRequired = null;
-      if (typeof this.requiredFilter === "string" && this.requiredFilter.length > 0) {
+      if (typeof this.requiredFilter === "string" &&
+          this.requiredFilter.length > 0) {
         qRequired = this.requiredFilter;
       }
       var params = {
@@ -104,25 +117,29 @@ function(declare, lang, array, localRequire, domClass, on, keys, ioQuery, win,
     },
 
     init: function() {
-      //console.log("widgetContext",this.widgetContext);
       this.components = [];
       var mixins = {
-        i18n: this.widgetContext.i18n,
+        i18n: this.i18n,
         searchPane: this,
-        widgetContext: this.widgetContext
       };
-
+      this.targetOptions = new TargetOptions(mixins,this.targetOptionsNode);
+      this.components.push(this.targetOptions);
+      this.targetOptions.startup(); // TODO?
       this.searchBox = new SearchBox(mixins,this.searchBoxNode);
       this.components.push(this.searchBox);
+      this.bboxOption = new BBoxOption(mixins,this.bboxOptionNode);
+      this.components.push(this.bboxOption);
       this.resultsPane = new ResultsPane(mixins,this.resultsPaneNode);
       this.components.push(this.resultsPane);
       this.paging = new Paging(mixins,this.pagingNode);
       this.components.push(this.paging);
+      this.sortOptions = new SortOptions(mixins,this.sortOptionsNode); // leave this last
+      this.components.push(this.sortOptions);
     },
 
-    processResults: function(searchResponse) {
+    processResults: function(searchResponse,task) {
       array.forEach(this.components,function(component) {
-        component.processResults(searchResponse);
+        component.processResults(searchResponse,task);
       });
     },
 
@@ -130,52 +147,34 @@ function(declare, lang, array, localRequire, domClass, on, keys, ioQuery, win,
       if (!this._wasLoaded) return; // TODO need a ui error message
       var self = this, task = {};
       this.toggleLoading(true);
-
-      //var q = this.qBox.get("value").trim();
-      //var target = this.targetBox.get("value").trim();
-
       var parameterMap = this.buildQueryParams(task);
       parameterMap.f = "json";
       //parameterMap.target = "gptdb1";
-
-      /*
-      var parameterMap = {f: "json"};
-      if (q.length > 0) parameterMap.q = q;
-      if (target.length > 0) parameterMap.target = target;
-      */
-
-      // TODO show working message
-      //var textarea = this.textareaNode;
-      //textarea.value = "Searching...";
+      //parameterMap.target = "cswA";
 
       var requestInfo = {
-        "requestUrl": "/request",
-        "baseUrl": "/base",
-        "headerMap": {},
-        "parameterMap": parameterMap
+        requestUrl: "/request",
+        baseUrl: "/base",
+        headerMap: {},
+        parameterMap: parameterMap
       };
-      //console.log("parameterMap",parameterMap);
-
-      var processor = gs.Object.create(gs.context.browser.WebProcessor);
+      var result, searchResponse;
+      var processor = this._proc = gs.Object.create(gs.context.browser.WebProcessor);
       processor.execute(requestInfo,function(status,mediaType,entity,headers){
-        //console.log(status,mediaType,"\r\n",entity);
-        //textarea.value = entity;
-        // TODO handle errors
-        self.informExternal(entity);
-
-        try {
-          //console.log("entity",typeof entity,entity);
-          // TODO errors?
-          var result = JSON.parse(entity);
-          //console.log("result",result);
-          self.processResults(result);
-        } catch(ex) {
-          console.error(ex);
+        if (processor === self._proc) {
+          //console.log(status,mediaType,"\r\n",entity);
+          self.informExternal(entity);
+          try {
+            result = JSON.parse(entity);
+            searchResponse = self.targetOptions.getPrimarySearchResponse(result,task);
+            self.processResults(searchResponse,task);
+          } catch(ex) {
+            // TODO handle errors
+            console.error(ex);
+          }
+          self.toggleLoading(false);
         }
-
-        self.toggleLoading(false);
       });
-
     },
 
     toggleLoading: function(visible) {

@@ -48,7 +48,7 @@ function(declare, array, SearchComponent, template, ItemCard, util) {
 
     /* SearchComponent API ============================================= */
 
-    processResults: function(searchResponse) {
+    processResults: function(searchResponse,task) {
       this.destroyItems();
       this.itemsNode.scrollTop = 0;
       var self = this;

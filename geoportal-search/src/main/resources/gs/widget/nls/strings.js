@@ -5,12 +5,15 @@ define({
       featureLayerTitlePattern: "{serviceName} - {layerName}",
       layerInaccessible: "The layer is inaccessible.",
       loadError: "AddData, unable to load:",
+      targetOptions: {
+        caption: "Catalog",
+      },
       searchBox: {
         search: "Search",
         placeholder: "Search..."
       },
       bboxOption: {
-        bbox: "Within map"
+        bbox: "BBox"
       },
       scopeOptions: {
         anonymousContent: "Content",
@@ -24,8 +27,10 @@ define({
         relevance: "Relevance",
         title: "Title",
         owner: "Owner",
+        /*
         rating: "Rating",
         views: "Views",
+        */
         date: "Date",
         switchOrder: "Switch"
       },

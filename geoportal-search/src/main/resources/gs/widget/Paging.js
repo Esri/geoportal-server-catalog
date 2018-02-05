@@ -104,12 +104,16 @@ function(declare, domClass, number, template, SearchComponent, util) {
 
     /* SearchComponent API ============================================= */
 
-    appendQueryParams: function(params) {
+    appendQueryParams: function(params,task) {
       params.start = this.start;
       params.num = this.numPerPage;
     },
 
-    processResults: function(searchResponse) {
+    processResults: function(searchResponse,task) {
+      if (typeof searchResponse.total !== "number") {
+        this.domNode.style.display = "none";
+        return;
+      }
       this.start = 1;
       var nPer = this.numPerPage;
       var nHits = searchResponse.total;

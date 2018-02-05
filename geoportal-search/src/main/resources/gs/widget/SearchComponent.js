@@ -30,11 +30,11 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
     /* SearchComponent API ============================================= */
 
-    appendQueryParams: function(params, task) {
+    appendQueryParams: function(params,task) {
       /*jshint unused:vars*/
     },
 
-    processResults: function(searchResponse) {
+    processResults: function(searchResponse,task) {
       /*jshint unused:vars*/
     },
 
@@ -49,6 +49,11 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
     },
 
     getMap: function() {
+      return {
+        geographicExtent: {
+          xmin: -117, xmax: -114, ymin: 40, ymax: 45
+        }
+      };
       if (this.searchPane && this.searchPane.wabWidget) {
         return this.searchPane.wabWidget.map;
       }

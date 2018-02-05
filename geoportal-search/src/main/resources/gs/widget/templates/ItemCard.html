@@ -1,20 +1,14 @@
 <div class="item-card">
   <div class="item-card-inner">
-    <div class="thumbnail-div">
-      <img class="thumbnail-placeholder" data-dojo-attach-point="thumbnailImage"/>
+    <div class="thumbnail-div thumbnail-placeholder"
+      data-dojo-attach-point="thumbnailDiv">
+      <img data-dojo-attach-point="thumbnailImage"/>
     </div>
     <div class="info-div">
       <h3 class="title" data-dojo-attach-point="titleNode"></h3>
       <div class="info" data-dojo-attach-point="typeNode"></div>
-      <div class="info">
-        <span data-dojo-attach-point="authorNode"></span>
-        <span data-dojo-attach-point="dateNode"></span>
-      </div>
-
-      <!--
       <div class="info" data-dojo-attach-point="authorNode"></div>
       <div class="info" data-dojo-attach-point="dateNode"></div>
-      -->
     </div>
     <div class="action-bar">
       <span class="message" data-dojo-attach-point="messageNode"></span>
@@ -29,10 +23,8 @@
           data-dojo-attach-point="linksButton"
           data-dojo-attach-event="onClick: linksClicked">
         </a>
-        <div class="dropdown-content" data-dojo-attach-point="linksContent">
-          <a href="#home">Home</a>
-          <a href="#about">About</a>
-          <a href="#contact">Contact</a>
+        <div class="dropdown-content"
+          data-dojo-attach-point="linksContent">
         </div>
       </div>
     </div>
