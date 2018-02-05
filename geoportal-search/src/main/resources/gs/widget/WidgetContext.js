@@ -20,6 +20,7 @@ function(declare, lang) {
   var _def = declare([], {
 
     i18n: null,
+    map: null,
     widgetFolder: "gs/widget",
 
     constructor: function(args) {
@@ -48,7 +49,13 @@ function(declare, lang) {
     },
 
     getMap: function() {
-      return null;
+      return this.map;
+    },
+
+    getMapGeographicExtent: function() {
+      if (this.map) {
+        return this.map.geographicExtent;
+      }
     },
 
     showError: function(title,error) {
@@ -61,7 +68,14 @@ function(declare, lang) {
 
     showMessages: function(title,subTitle,messages) {
       console.warn("wro/Context.showMessages",title,subTitle,messages);
-    }
+    },
+
+    supportsBBox: function() {
+      if (this.map) {
+        return true;
+      }
+      return false;
+    },
 
   });
 

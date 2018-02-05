@@ -49,13 +49,8 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
     },
 
     getMap: function() {
-      return {
-        geographicExtent: {
-          xmin: -117, xmax: -114, ymin: 40, ymax: 45
-        }
-      };
-      if (this.searchPane && this.searchPane.wabWidget) {
-        return this.searchPane.wabWidget.map;
+      if (this.searchPane && this.searchPane.widgetContext) {
+        return this.searchPane.widgetContext.getMap();
       }
       return null;
     },

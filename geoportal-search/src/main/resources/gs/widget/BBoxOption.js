@@ -33,13 +33,9 @@ function(declare, SearchComponent, template) {
     },
 
     getBBox: function() {
-      var ext, map = this.getMap();
-      if (map) {
-        // TODO may need to project?
-        ext = map.geographicExtent;
-        if (ext) {
-          return ext.xmin + "," + ext.ymin + "," + ext.xmax + "," + ext.ymax;
-        }
+      var ext = this.searchPane.widgetContext.getMapGeographicExtent();
+      if (ext) {
+        return ext.xmin + "," + ext.ymin + "," + ext.xmax + "," + ext.ymax;
       }
       return null;
     },

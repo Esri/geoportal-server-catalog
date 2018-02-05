@@ -27,8 +27,9 @@
 </script>
 </head>
 <body class="calcite">
-<div style="position:absolute;top:20px;left:20px;">
-  <div id="idSearch"></div>
+<div style="top:20px;left:20px;">
+  <div id="idSearch" style="display:inline-block;"></div>
+  <div id="idMap" style="display:inline-block;width:400px;height:400px;vertical-align: top;"></div>
 </div>
 <script src="https://js.arcgis.com/3.23/"></script>
 <!--
@@ -36,15 +37,22 @@
 -->
 <script>
   require(["dojo/ready",
+    "esri/map",
     "gs/widget/SearchPane",
     "gs/widget/WidgetContext",
     "dojo/i18n!gs/widget/nls/strings",
     "gs/widget/TestSearch"],
-  function(ready,SearchPane,WidgetContext,i18n,TestSearch) {
+  function(ready,Map,SearchPane,WidgetContext,i18n,TestSearch) {
     ready(function() {
       if (document.location.href.indexOf("test=true") === -1) {
+        var map = new Map("idMap", {
+          center: [-118, 34.5],
+          zoom: 8,
+          basemap: "topo"
+        });
         var widgetContext = new WidgetContext({
           i18n: i18n,
+          map: map,
           widgetFolder: "gs/widget",
         });
         var searchPane = new SearchPane({
