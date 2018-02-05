@@ -15,11 +15,21 @@
 
 (function(){
 
+  gs.target.profiles["CSW2_Geoportal1"] = {
+    type: "csw",
+    prepareTarget: function(target) {
+      target.mixin({
+        "schemaMixin": {
+          "liveDataPropertyName": "dc:type"
+        },
+      });
+    }
+  },
+
   /* */
-  gs.target.profiles.sampleProfile1 = {
+  gs.target.profiles["sampleProfile1"] = {
     type: "geoportal",
     prepareTarget: function(target) {
-      console.log("sampleProfile1::prepareTarget");
       target.mixin({
         "schemaMixin": {
           "bboxField": null,

@@ -24,6 +24,7 @@ define(["dojo/_base/declare",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/SearchPane.html",
   "./BBoxOption",
+  "./LiveDataOption",
   "./Paging",
   "./ResultsPane",
   "./SearchBox",
@@ -32,7 +33,8 @@ define(["dojo/_base/declare",
   "../all"],
 function(declare, localRequire, lang, array, win, domClass, on,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template,
-  BBoxOption, Paging, ResultsPane, SearchBox, SortOptions, TargetOptions) {
+  BBoxOption, LiveDataOption, Paging, ResultsPane, SearchBox, SortOptions,
+  TargetOptions) {
 
   var _def = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
@@ -128,6 +130,8 @@ function(declare, localRequire, lang, array, win, domClass, on,
       this.searchBox = new SearchBox(mixins,this.searchBoxNode);
       this.components.push(this.searchBox);
       this.bboxOption = new BBoxOption(mixins,this.bboxOptionNode);
+      this.components.push(this.bboxOption);
+      this.bboxOption = new LiveDataOption(mixins,this.liveDataOptionNode);
       this.components.push(this.bboxOption);
       this.resultsPane = new ResultsPane(mixins,this.resultsPaneNode);
       this.components.push(this.resultsPane);

@@ -79,7 +79,7 @@
       var kml = "KML";
       var ims = "IMS";
 
-      var i, v, lc, type = null;
+      var i, v, v2, lc, lc2, n, n2, type = null;
       var isHttp = (typeof url === "string" &&
         (url.indexOf("http://") === 0 || url.indexOf("https://") === 0));
       var isFtp = (typeof url === "string" &&
@@ -94,12 +94,28 @@
               break;
             }
           }
-        } else if (lc.indexOf("/rest/services/") > 0) {
+        } else if (lc.indexOf("/rest/services/") > 0 ||
+                   lc.indexOf("/arcgis/services/") > 0) {
           for (i=0;i<arcgisTypes.length;i++) {
-            v = "/"+arcgisTypes[i].toLowerCase();
-            if (endsWith(lc,v)) {
+            lc2 = arcgisTypes[i].toLowerCase();
+            if (endsWith(lc,"/"+lc2)) {
               type = arcgisTypes[i];
               break;
+            } else if (lc2 === "mapserver" || lc2 === "featureserver"){
+              v = "/"+lc2+"/";
+              n = lc.indexOf(v);
+              if (n > 0) {
+                v2 = lc.substring(n+v.length).trim();
+                try {
+                  if (v2.length > 0) {
+                    n2 = Number(v2);
+                    if (!isNaN(n2) && typeof n2 === "number" && isFinite(n2)) {
+                      type = arcgisTypes[i];
+                      break;
+                    }
+                  }
+                } catch(exn) {}
+              }
             }
           }
         }

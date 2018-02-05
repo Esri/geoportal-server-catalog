@@ -15,6 +15,9 @@ define({
       bboxOption: {
         bbox: "BBox"
       },
+      liveDataOption: {
+        liveData: "Live Data"
+      },
       scopeOptions: {
         anonymousContent: "Content",
         myContent: "My Content",

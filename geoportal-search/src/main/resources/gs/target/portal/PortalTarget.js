@@ -39,7 +39,7 @@
     appendPeriod: {writable:true,value:function(task,targetRequest,period) {
       if (!period) return;
       var urlParams = targetRequest.urlParams;
-      var wildCards = [0000000000000000000,9999999999999999999];
+      var wildCards = ["0000000000000000000","9999999999999999999"];
 
       var makeVal = function(value,isFrom) {
         var v = wildCards[0];

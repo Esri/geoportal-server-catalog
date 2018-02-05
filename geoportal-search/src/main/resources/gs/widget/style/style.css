@@ -125,6 +125,9 @@ input, textarea, p, blockquote, th, td {
   border: none;
   outline: none;
 }
+.geoportal-search .search-target-options > .dijitDropDownButton .dijitButtonContents {
+  outline: none;
+}
 
 .geoportal-search.targets-popup .target {
   width: 240px;
@@ -167,17 +170,22 @@ input, textarea, p, blockquote, th, td {
 }
 
 .geoportal-search .secondary-search-bar,
+.geoportal-search .search-target-options .dijitDropDownButton .dijitButtonText,
 .geoportal-search .search-sort-options .dijitSelect .dijitButtonText,
-.geoportal-search.sort-popup .dijitMenuItemLabel {
-  /*font-size: 10px;*/
+.xgeoportal-search.sort-popup .dijitMenuItemLabel {
+  font-size: 10px;
 }
 
-.geoportal-search .search-bbox-option {
-  /*padding-top: 6px;*/
-  margin-left: 24px;
+.geoportal-search .search-bbox-option,
+.geoportal-search .search-livedata-option,
+.geoportal-search .search-sort-options {
   display: inline-block;
   white-space: nowrap;
   vertical-align: middle;
+}
+
+.geoportal-search .search-bbox-option {
+  margin-left: 6px;
 }
 
 .geoportal-search .search-bbox-option .checkbox-inline,
@@ -185,10 +193,15 @@ input, textarea, p, blockquote, th, td {
   cursor: pointer;
 }
 
+.geoportal-search .search-livedata-option {
+  margin-left: 10px;
+}
+.geoportal-search .search-livedata-option .checkbox-inline,
+.geoportal-search .search-livedata-option .dijitCheckBox input  {
+  cursor: pointer;
+}
+
 .geoportal-search .search-sort-options {
-  display: inline-block;
-  white-space: nowrap;
-  vertical-align: middle;
 }
 .geoportal-search .search-sort-options .dijitArrowButton {
   padding: 2px;

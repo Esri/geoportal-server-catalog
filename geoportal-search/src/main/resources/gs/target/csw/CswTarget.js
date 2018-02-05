@@ -90,6 +90,30 @@
       }
     }},
 
+    appendType: {writable:true,value:function(task,targetRequest,v) {
+      if (typeof v === "string" && v.length > 0) {
+        var isLiveData = (typeof v === "string"  && v.toLowerCase() === "livedata");
+        var urlParams = targetRequest.urlParams;
+        var xmlBuilder = targetRequest.xmlBuilder;
+        if (urlParams) {
+          if (typeof urlParams.type === "string") {
+            urlParams.type = [urlParams.type];
+          }
+          if (Array.isArray(urlParams.type)) {
+            urlParams.type.push(v);
+          } else {
+            urlParams.type = v;
+          }
+        }
+        if (xmlBuilder && isLiveData) {
+          var prop = this.schema.liveDataPropertyName;
+          if (prop) {
+            this.appendPropertyClause(task,targetRequest,"PropertyIsEqualTo",prop,v);
+          }
+        }
+      }
+    }},
+
     buildGetRecordsUrl: {writable:true,value:function(task,targetRequest) {
       // CSW3
       var urlParams = targetRequest.urlParams = {};
@@ -427,7 +451,6 @@
         });
         xmlBuilder.writeEndElement();
       }
-
     }},
 
     prepareTimePeriod: {writable:true,value:function(task,targetRequest) {
@@ -460,23 +483,20 @@
       // TODO liveData?
       // TODO ISO topic categories?
       // TODO IMS content types?
+      var self = this;
       var schema = this.schema;
       var types = task.request.getTypes();
       if (!Array.isArray(types) || types.length === 0) return;
-
-      /*
       types.forEach(function(t){
         var t2 = schema.translateTypeName(task,t);
         if (Array.isArray(t2)) {
           t2.forEach(function(t3){
-            //appendType(t3);
-          })
+            self.appendType(task,targetRequest,t3);
+          });
         } else {
-          //appendType(t2);
+          self.appendType(task,targetRequest,t2);
         }
       });
-      */
-
     }},
 
     /* ............................................................................................ */

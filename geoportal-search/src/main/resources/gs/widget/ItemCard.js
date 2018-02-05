@@ -262,7 +262,7 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
     render: function(response,item) {
       this.determineType(response,item);
       //console.log("render.response",response);
-      //console.log("render.item",item);
+      console.log("render.item",item);
       //console.log("render.typeInfo",this.typeInfo);
       var pattern, v;
       var title = this.getTitle(response,item);

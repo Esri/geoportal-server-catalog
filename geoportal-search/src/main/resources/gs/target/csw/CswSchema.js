@@ -21,6 +21,7 @@
 
     qPropertyName: {writable: true, value: "AnyText"},
     idPropertyName: {writable: true, value: "Id"},
+    liveDataPropertyName: {writable: true, value: null},
     modifiedPropertyName: {writable: true, value: "Modified"},
     spatialPropertyName: {writable: true, value: "Geometry"},
     timePeriodPropertyName: {writable: true, value: "TimePeriod"},
@@ -138,17 +139,39 @@
                     dctype: dctype,
                     href: text
                   }));
-                } else if (scheme === "urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Document") {
+                } else if (scheme === "alternate.html") {
+                  links.push(gs.Object.create(gs.atom.Link).init({
+                    rel: "alternate",
+                    type: "text/html",
+                    href: text
+                  }));
+                } else if (scheme === "alternate.json") {
+                  links.push(gs.Object.create(gs.atom.Link).init({
+                    rel: "alternate",
+                    type: "application/json",
+                    href: text
+                  }));
+                } else if (scheme === "urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Document" ||
+                           scheme === "alternate.xml") {
                   links.push(gs.Object.create(gs.atom.Link).init({
                     rel: "alternate",
                     type: "application/xml",
                     href: text
                   }));
-                } else if (scheme === "urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail") {
+                } else if (scheme === "urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail" ||
+                           scheme === "icon") {
                   links.push(gs.Object.create(gs.atom.Link).init({
                     rel: "icon",
                     href: text
                   }));
+                } else {
+                  if (typeof dctype === "string" && dctype.length > 0) {
+                    links.push(gs.Object.create(gs.atom.Link).init({
+                      rel: "related",
+                      dctype: dctype,
+                      href: text
+                    }));
+                  }
                 }
               }
             } else if (ln === "alternative") {

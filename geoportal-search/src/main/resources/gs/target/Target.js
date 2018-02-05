@@ -25,6 +25,8 @@
 
     schemaMixin: {writable: true, value: null},
 
+    useProxy: {writable: true, value: false},
+
     /* ............................................................................................ */
 
     getSchemaClass: {writable:true,value:function() {
