@@ -45,7 +45,7 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       this.linksButton.innerHTML = this.i18n.search.item.actions.links;
       this.addButton.setAttribute("disabled","disabled");
       this.detailsButton.setAttribute("disabled","disabled");
-      //this.linksButton.setAttribute("disabled","disabled");
+      this.linksButton.setAttribute("disabled","disabled");
     },
 
     startup: function() {
@@ -108,6 +108,20 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
         });
       }
       */
+    },
+
+    addLink: function(typeName,href) {
+      //href = util.checkMixedContent(href); // TODO?
+      var v = href;
+      if (typeof typeName === "string" && typeName.length > 0) {
+        v = typeName + " " + href; // TODO i18n
+      }
+      var a = document.createElement("a");
+      a.href = href;
+      a.target = "_blank";
+      util.setNodeText(a,v);
+      this.linksContent.appendChild(a);
+      this.linksButton.removeAttribute("disabled");
     },
 
     detailsClicked: function() {
@@ -272,7 +286,7 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       }
       util.setNodeText(this.dateNode,date);
 
-      this._renderLinks(response,item);
+      this.renderLinks(response,item);
       /*
       if (this.canRemove) {
         util.setNodeText(this.addButton, i18n.search.item.actions.remove);
@@ -280,7 +294,7 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       */
     },
 
-    _renderLinks: function(response,item) {
+    renderLinks: function(response,item) {
       var self = this, links = item.links;
       var href, typeName;
       if (Array.isArray(links)) {
@@ -291,27 +305,30 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
             if (typeof href === "string" &&
                (href.indexOf("http://") === 0 ||
                 href.indexOf("https://") === 0)) {
-              href = util.checkMixedContent(href);
-              self.thumbnailImage.src = href;
+              self.thumbnailImage.src = util.checkMixedContent(href);
+              self.thumbnailDiv.classList.remove("thumbnail-placeholder");
             }
-          } else if (link.rel === "related") {
-            // handled by typeInfo
+          //} else if (link.rel === "related") {
           } else {
-            // link.rel === "alternate"
+            // link.rel === "alternate" link.rel === "related"
             if (typeof href === "string" &&
                (href.indexOf("http://") === 0 ||
                 href.indexOf("https://") === 0 ||
                 href.indexOf("ftp://") === 0 ||
                 href.indexOf("ftps://") === 0)) {
               typeName = "";
-              //href = util.checkMixedContent(href); // TODO?
               if (link.type === "text/html") {
+                typeName = "HTML";
               } else if (link.type === "application/json") {
+                typeName = "JSON";
               } else if (link.type === "application/xml") {
+                typeName = "XML";
               } else if (href.indexOf("http") === 0) {
+                typeName = "HTTP";
               } else if (href.indexOf("ftp") === 0) {
+                typeName = "FTP";
               }
-              //console.log("link.href",href);
+              self.addLink(typeName,href);
             }
           }
         });

@@ -1,3 +1,5 @@
+
+/*
 html, body {
   width: 100%;
   height: 100%;
@@ -7,9 +9,7 @@ html, body {
 
 body {
   font-family: Avenir, Verdana, Geneva, sans-serif;
-  /*
   font-family: "Avenir Next W01","Avenir Next","Avenir","Helvetica Neue","Helvetica","Arial",sans-serif;
-  */
   font-size: 12px;
   line-height: 1.66667;
   color: #4c4c4c;
@@ -25,12 +25,13 @@ input, textarea, p, blockquote, th, td {
   margin: 0;
   padding: 0;
 }
+*/
 
-.geoportal-search a {
+.geoportal-search .search-results-pane a {
   color: #196fa6;
   text-decoration: none;
   line-height: 20px;
-  padding: 10px 5px;
+  padding: 5px 5px;
 }
 
 .geoportal-search a[disabled] {
@@ -93,26 +94,63 @@ input, textarea, p, blockquote, th, td {
   border-radius: 5px;
 }
 
-.geoportal-search .loading {
+.geoportal-search .left-side {
+  float: left;
+}
+
+.geoportal-search .right-side {
+  float: right;
+}
+
+.geoportal-search .loading-node {
   display: inline-block;
-  background-image: url(images/LoadingAnimation16_Trans.gif);
-  background-repeat: no-repeat;
-  background-position: center;
+  visibility: hidden;
+  margin-left: 4px;
   width: 16px;
   height: 16px;
   vertical-align: middle;
+  background-image: url(images/LoadingAnimation16_Trans.gif);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.geoportal-search .loading-node.loading {
+  visibility: visible;
+}
+
+.geoportal-search .search-target-options {
+  display: inline-block;
+}
+.geoportal-search .search-target-options > .dijitDropDownButton > .dijitButtonNode {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+
+.geoportal-search.targets-popup .target {
+  width: 240px;
+  padding: 6px;
+  cursor: pointer;
+}
+.geoportal-search.targets-popup .target:hover {
+  background-color: #eeeeee;
+}
+.geoportal-search.targets-popup .target.active {
+  background-color: #aadbfa;
+}
+.geoportal-search.targets-popup .target .name {
+  width: 50%;
+}
+.geoportal-search.targets-popup .target .count {
+  float: right;
 }
 
 .geoportal-search .search-box {
   display: inline-block;
-  /*float: right;*/
-  /*
-  margin: auto;
-  text-align: center;
-  */
+  /*width: 90%;*/
 }
 .geoportal-search .search-box input {
-  width: 200px;
+  width: 280px;
+  /*width: 85%;*/
   padding: 5px 10px;
 }
 .geoportal-search .search-box .btn-confirm {
@@ -124,9 +162,61 @@ input, textarea, p, blockquote, th, td {
   cursor: pointer;
 }
 
+.geoportal-search .secondary-search-bar {
+  margin-top: 4px;
+}
+
+.geoportal-search .secondary-search-bar,
+.geoportal-search .search-sort-options .dijitSelect .dijitButtonText,
+.geoportal-search.sort-popup .dijitMenuItemLabel {
+  /*font-size: 10px;*/
+}
+
+.geoportal-search .search-bbox-option {
+  /*padding-top: 6px;*/
+  margin-left: 24px;
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.geoportal-search .search-bbox-option .checkbox-inline,
+.geoportal-search .search-bbox-option .dijitCheckBox input  {
+  cursor: pointer;
+}
+
+.geoportal-search .search-sort-options {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+.geoportal-search .search-sort-options .dijitArrowButton {
+  padding: 2px;
+}
+.geoportal-search .search-sort-options .sort-prompt {
+  display: none;
+}
+.geoportal-search .search-sort-options table.dijitSelect {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+.geoportal-search .search-sort-options .sort-order-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  background-image: url(images/sort-down-arrow.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.geoportal-search .search-sort-options .sort-order-icon.descending {
+  background-image: url(images/sort-up-arrow.png);
+}
+
 .geoportal-search .search-results-pane {
-  margin-top: 10px;
-  margin-bottom: 20px;
+  margin-top: 6px;
+  margin-bottom: 16px;
 }
 
 .geoportal-search .search-results {
@@ -168,8 +258,12 @@ input, textarea, p, blockquote, th, td {
 .geoportal-search .item-card .thumbnail-div {
   float: left;
   margin-right: 10px;
+  height: 60px;
+  width: 90px;
+  overflow: hidden;
 }
 .geoportal-search .item-card .thumbnail-div img {
+  margin: -1px;
   height: 60px;
   width: 90px;
   border: 0;

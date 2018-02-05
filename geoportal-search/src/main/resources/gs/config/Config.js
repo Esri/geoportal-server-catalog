@@ -27,7 +27,8 @@
 
     opensearchDescriptionFile: {writable: true, value: "gs/config/opensearch-description.xml"},
 
-    proxyUrl: {writable: true, value: null},
+    // TODO temporary
+    xproxyUrl: {writable: true, value: "http://gptdb1.esri.com:8080/geoportal/proxy.jsp"},
 
     _targets: {writable: true, value: null},
 

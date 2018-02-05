@@ -35,7 +35,10 @@
       "title.sort": "title.sort",
       "date": "sys_modified_dt",
       "modified": "sys_modified_dt",
-      "sys_modified_dt": "sys_modified_dt"
+      "sys_modified_dt": "sys_modified_dt",
+      "author": "sys_owner_s",
+      "owner": "sys_owner_s",
+      "sys_owner_s": "sys_owner_s"
     }},
 
     spatialInfo: {writable: true, value: {

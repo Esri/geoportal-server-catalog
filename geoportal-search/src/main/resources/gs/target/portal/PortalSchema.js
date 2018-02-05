@@ -18,7 +18,8 @@
   gs.target.portal.PortalSchema = gs.Object.create(gs.target.TargetSchema, {
 
     fieldAliases: {writable: true, value: {
-      "date": "modified"
+      "date": "modified",
+      "author": "owner"
     }},
 
     schemaType: {writable: true, value: "ArcGIS"},

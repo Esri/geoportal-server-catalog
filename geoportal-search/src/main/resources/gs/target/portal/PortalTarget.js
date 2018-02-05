@@ -188,7 +188,8 @@
       if (typeof sortField === "string" && sortField.length > 0) {
         urlParams["sortField"] = sortField;
         if (typeof sortOrder === "string" && sortOrder.length > 0) {
-          if (sortOrder !== "asc") urlParams["sortOrder"] = sortOrder;
+          //if (sortOrder !== "asc") urlParams["sortOrder"] = sortOrder;
+          urlParams["sortOrder"] = sortOrder;
         }
       }
     }},
