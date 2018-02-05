@@ -109,9 +109,29 @@ function(declare, array, lang, on, domClass, domConstruct, number,
           "url": "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
         },
         {
+          "name": "Geoportal2 (urban)",
+          "type": "geoportal",
+          "url": "http://urban.esri.com:8080/geoportal/elastic/metadata/item/_search"
+        },
+        {
+          "name": "CSW3 Geoportal2 (urban)",
+          "type": "csw",
+          "cswVersion": "3.0.0",
+          "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+        },
+        {
+          "name": "CSW2 Geoportal2 (urban)",
+          "type": "csw",
+          "cswVersion": "2.0.2",
+          "profile": "CSW2_Geoportal1",
+          "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+        },
+        {
           "name": "CSW2 Geoportal2 (gptogc)",
           "type": "csw",
           "cswVersion": "2.0.2",
+          "profile": "CSW2_Geoportal1",
+          "useProxy": true,
           "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
         }
         /*

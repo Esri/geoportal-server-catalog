@@ -53,6 +53,19 @@
         }
       }
       return this;
+    }},
+
+    safeMixin: {writable:true,value:function(props) {
+      if (typeof props === "object" && props != null) {
+        for (var k in props) {
+          if (props.hasOwnProperty(k)) {
+            if (typeof props[k] !== "function") {
+              this[k] = props[k];
+            }
+          }
+        }
+      }
+      return this;
     }}
 
   });

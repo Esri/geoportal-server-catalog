@@ -239,20 +239,22 @@
           if ((o.url.indexOf("http://") === 0) || (o.url.indexOf("https://") === 0)) {
             if (o.type === "portal") {
               // TODO example "http://urbanvm.esri.com/arcgis"
-              target = gs.Object.create(gs.target.portal.PortalTarget).mixin({
+              target = gs.Object.create(gs.target.portal.PortalTarget)
+              .safeMixin(o).mixin({
                 "portalBaseUrl": o.url
               });
             } else if (o.type === "geoportal") {
               // TODO example "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
-              target = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
+              target = gs.Object.create(gs.target.elastic.GeoportalTarget)
+              .safeMixin(o).mixin({
                 "searchUrl": o.url
               });
             } else if (o.type === "csw") {
               // TODO example "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
-              target = gs.Object.create(gs.target.csw.CswTarget).mixin({
+              target = gs.Object.create(gs.target.csw.CswTarget)
+              .safeMixin(o).mixin({
                 "getRecordsUrl": o.url
               });
-              if (o.cswVersion) target.cswVersion = o.cswVersion;
             }
             if (target) {
               // TODO pass full parameters to the target (from, size, ...)

@@ -31,6 +31,9 @@
     }},
 
     sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType) {
+      if (task.config.proxyUrl && task.target && task.target.useProxy) {
+        //url = task.config.proxyUrl+"?"+url;
+      }
       var promise = this.newPromise();
       var req = new XMLHttpRequest();
       req.onload = function() {
@@ -45,9 +48,14 @@
       };
       if (typeof data !== "undefined" && data !== null) {
         if (task.config.proxyUrl) {
-          // TODO only for POST?
-          url = task.config.proxyUrl+"?"+url;
-          //url = task.config.proxyUrl+"?"+encodeURI(url); // TODO?
+          // TODO only for POST? only for application/xml?
+          if (task.target && task.target.useProxy) {
+            url = task.config.proxyUrl+"?"+url;
+          }
+          // if (dataContentType === "application/xml") {
+          //   url = task.config.proxyUrl+"?"+url;
+          // }
+          //url = task.config.proxyUrl+"?"+url;
         }
         req.open("POST",url);
         if (typeof dataContentType === "string" && dataContentType.length > 0) {
