@@ -88,6 +88,7 @@ input, textarea, p, blockquote, th, td {
 }
 
 .geoportal-search.search-pane {
+  display: inline-block;
   width: 360px;
   padding: 10px;
   border: 1px solid #cccccc;
