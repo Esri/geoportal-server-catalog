@@ -41,11 +41,15 @@
     "gs/widget/SearchPane",
     "gs/widget/WidgetContext",
     "dojo/i18n!gs/widget/nls/strings",
-    "gs/widget/TestSearch"],
-  function(ready,Map,SearchPane,WidgetContext,i18n,TestSearch) {
+    "gs/widget/TestSearch",
+    "gs/widget/LayerLoader",
+    "esri/config"],
+  function(ready,Map,SearchPane,WidgetContext,i18n,TestSearch,LayerLoader,esriConfig) {
     ready(function() {
       if (document.location.href.indexOf("test=true") === -1) {
-        var map = new Map("idMap", {
+        esriConfig.defaults.io.proxyUrl = "http://gptdb1.esri.com:8080/geoportal/viewer/proxy.jsp";
+        esriConfig.defaults.io.alwaysUseProxy = false;
+        var map = window.map = new Map("idMap", {
           center: [-118, 34.5],
           zoom: 8,
           basemap: "topo"
@@ -60,6 +64,11 @@
           widgetContext: widgetContext
         },"idSearch");
         searchPane.startup();
+        var layerLoader = new LayerLoader({
+          i18n: i18n,
+          map: map
+        });
+        //layerLoader.addFeatureService("http://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_States_Generalized/FeatureServer/0");
       } else {
         new TestSearch({},"idSearch");
       }

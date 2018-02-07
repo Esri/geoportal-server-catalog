@@ -20,9 +20,10 @@ define(["dojo/_base/declare",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/ItemCard.html",
+  "./LayerLoader",
   "./util"],
 function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
-  _WidgetsInTemplateMixin, template, util, LayerLoader) {
+  _WidgetsInTemplateMixin, template, LayerLoader, util) {
 
   var _def = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -58,7 +59,27 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
 
     addClicked: function() {
       console.log("addClicked");
-      return;
+      var typeInfo = this.typeInfo;
+      var dfd, item = null, itemData = null;
+      if (typeInfo && typeInfo.serviceType && typeInfo.url) {
+        var layerLoader = new LayerLoader({
+          i18n: this.i18n,
+          map: this.resultsPane.getMap()
+        });
+        if (typeInfo.portalItem && typeInfo.portalItemUrl) {
+          dfd = layerLoader.addItem(typeInfo.serviceType,typeInfo.url,
+            typeInfo.portalItem,typeInfo.portalItemUrl);
+        } else {
+          dfd = layerLoader.addLayer(typeInfo.serviceType,typeInfo.url,item,itemData);
+        }
+        dfd.then(function(result){
+        }).otherwise(function(error){
+          // TODO popup a message
+          console.warn("Error adding layer",typeInfo.url);
+          console.error(error);
+        });
+      }
+
       /*
       var self = this,
         btn = this.addButton;
@@ -152,10 +173,12 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       };
       var typeInfo = {
         canAdd: false,
+        detailsUrl: null,
+        portalItem: null,
+        portalItemUrl: null,
         serviceType: null,
         type: null,
-        url: null,
-        detailsUrl: null
+        url: null
       };
       var self = this;
       if (Array.isArray(item.links)) {
@@ -174,6 +197,15 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
                   link.href.indexOf("https://") === 0)) {
                 typeInfo.detailsUrl = link.href;
                 self.detailsButton.removeAttribute("disabled");
+              }
+            } else if (link.type === "application/json") {
+              if (typeof link.href === "string" &&
+                 (link.href.indexOf("http://") === 0 ||
+                  link.href.indexOf("https://") === 0)) {
+                if (response.sourceType === "ArcGIS") {
+                  typeInfo.portalItem = item._source;
+                  typeInfo.portalItemUrl = link.href;
+                }
               }
             }
           }
@@ -262,7 +294,7 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
     render: function(response,item) {
       this.determineType(response,item);
       //console.log("render.response",response);
-      console.log("render.item",item);
+      //console.log("render.item",item);
       //console.log("render.typeInfo",this.typeInfo);
       var pattern, v;
       var title = this.getTitle(response,item);
