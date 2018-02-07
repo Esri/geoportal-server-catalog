@@ -130,7 +130,6 @@ function(array, DjUrl, domGeometry, domStyle, win, esriConfig, esriRequest) {
     readItemJsonData: function(itemUrl) {
       var n = itemUrl.indexOf("?");
       if (n !== -1) itemUrl = itemUrl.substring(0,n);
-      console.log("itemUrl",itemUrl);
       var url = this.checkMixedContent(itemUrl);
       url = itemUrl + "/data";
       this.addCors(url);

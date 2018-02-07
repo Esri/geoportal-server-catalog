@@ -20,7 +20,7 @@ define(["dojo/_base/declare",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/ItemCard.html",
-  "./LayerLoader",
+  "./layers/LayerLoader",
   "./util"],
 function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
   _WidgetsInTemplateMixin, template, LayerLoader, util) {
@@ -58,7 +58,6 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
     },
 
     addClicked: function() {
-      console.log("addClicked");
       var typeInfo = this.typeInfo;
       var dfd, item = null, itemData = null;
       if (typeInfo && typeInfo.serviceType && typeInfo.url) {
@@ -168,6 +167,8 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
         "image service": "Image Service",
         "mapserver": "Map Service",
         "map service": "Map Service",
+        "vectortileserver": "Vector Tile Service",
+        "vector tile service": "Vector Tile Service",
         "wms": "WMS",
         "kml": "KML"
       };
