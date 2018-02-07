@@ -227,6 +227,14 @@
       var json = gs.target.TargetSchema.itemToJson.call(this,task,item); // call super
       if (item) {
         json._source = item;
+        /*
+        var enc, portalBaseUrl, itemDetailsUrl;
+        portalBaseUrl = this.target.portalBaseUrl;
+        if (typeof portalBaseUrl === "string" && portalBaseUrl.length > 0) {
+          enc = encodeURIComponent(item.id);
+          itemUrl = portalBaseUrl+"/sharing/rest/content/items/"+enc;
+        }
+        */
       }
       return json;
     }}

@@ -97,6 +97,7 @@ function(declare, array, lang, on, domClass, domConstruct, number,
           "type": "portal",
           "url": "https://www.arcgis.com"
         },
+        /*
         {
           "name": "Geoportal2 (gptdb1)",
           "type": "geoportal",
@@ -134,6 +135,7 @@ function(declare, array, lang, on, domClass, domConstruct, number,
           "useProxy": true,
           "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
         }
+        */
         /*
         {
           "name": "CSW2 Geoportal2 (gptogc)",

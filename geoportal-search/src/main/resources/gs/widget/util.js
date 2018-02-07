@@ -13,12 +13,31 @@
  * limitations under the License.
  */
 define(["dojo/_base/array",
+  "dojo/_base/url",
   "dojo/dom-geometry",
   "dojo/dom-style",
-  "dojo/window"],
-function(array, domGeometry, domStyle, win) {
+  "dojo/window",
+  "esri/config",
+  "esri/request"],
+function(array, DjUrl, domGeometry, domStyle, win, esriConfig, esriRequest) {
 
   var _def = {
+
+    addCors: function(uri) {
+      var corsUri = null;
+      if (typeof uri === "string" && uri.length > 0) {
+        if ((uri.indexOf("http://") === 0) || (uri.indexOf("https://") === 0)) {
+          corsUri = (new DjUrl(uri)).host; // host or authority?
+        } else {
+          corsUri = uri;
+        }
+      }
+      if (typeof corsUri === "string" && corsUri.length > 0) {
+        if (esriConfig.defaults.io.corsEnabledServers.indexOf(corsUri) === -1) {
+          esriConfig.defaults.io.corsEnabledServers.push(corsUri);
+        }
+      }
+    },
 
     checkMixedContent: function(uri) {
       if ((typeof window.location.href === "string") &&
@@ -72,6 +91,17 @@ function(array, domGeometry, domStyle, win) {
       return response;
     },
 
+    generateId: function() {
+      var t = null;
+      if (typeof Date.now === "function") {
+        t = Date.now();
+      } else {
+        t = (new Date()).getTime();
+      }
+      var r = ("" + Math.random()).replace("0.", "r");
+      return (t + "" + r).replace(/-/g, "");
+    },
+
     mitigateDropdownClip: function(dd,ddul) {
       // Dropdown menus clipped by scrollable container
       var reposition = function() {
@@ -95,6 +125,31 @@ function(array, domGeometry, domStyle, win) {
         }
       };
       reposition();
+    },
+
+    readItemJsonData: function(itemUrl) {
+      var n = itemUrl.indexOf("?");
+      if (n !== -1) itemUrl = itemUrl.substring(0,n);
+      console.log("itemUrl",itemUrl);
+      var url = this.checkMixedContent(itemUrl);
+      url = itemUrl + "/data";
+      this.addCors(url);
+      return esriRequest({
+        url: url,
+        content: {f: "json"},
+        handleAs: "json"
+      },{});
+    },
+
+    readRestInfo: function(url) {
+      url = this.checkMixedContent(url);
+      this.addCors(url);
+      return esriRequest({
+        url: url,
+        content: {f: "json"},
+        handleAs: "json",
+        callbackParamName: "callback"
+      },{});
     },
 
     setNodeText: function(nd, text) {
@@ -121,5 +176,4 @@ function(array, domGeometry, domStyle, win) {
   };
 
   return _def;
-
 });
