@@ -99,7 +99,7 @@ function(declare, array, layerUtil, util, WMSLayer, WMSLayerInfo,
         if (wkid && layer.spatialReference) {
           layer.spatialReference.wkid = wkid;
         }
-        layerUtil.addMapLayer(self.map,layer);
+        layerUtil.addMapLayer(self.map,layer,item,self.referenceId);
       });
       return dfd;
     },

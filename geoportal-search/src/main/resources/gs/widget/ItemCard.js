@@ -21,9 +21,10 @@ define(["dojo/_base/declare",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/ItemCard.html",
   "./layers/LayerLoader",
+  "./layers/layerUtil",
   "./util"],
 function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
-  _WidgetsInTemplateMixin, template, LayerLoader, util) {
+  _WidgetsInTemplateMixin, template, LayerLoader, layerUtil, util) {
 
   var _def = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -32,11 +33,10 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
 
     canRemove: false,
     item: null,
+    referenceId: null,
     resultsPane: null,
     searchResponse: null,
     typeInfo: null,
-
-    _dfd: null,
 
     postCreate: function() {
       this.inherited(arguments);
@@ -58,25 +58,66 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
     },
 
     addClicked: function() {
+      var self = this, btn = this.addButton;
+      if (domClass.contains(btn,"disabled")) {
+        return;
+      }
+      domClass.add(btn,"disabled");
+
       var typeInfo = this.typeInfo;
       var dfd, item = null, itemData = null;
       if (typeInfo && typeInfo.serviceType && typeInfo.url) {
-        var layerLoader = new LayerLoader({
-          i18n: this.i18n,
-          map: this.resultsPane.getMap()
-        });
-        if (typeInfo.portalItem && typeInfo.portalItemUrl) {
-          dfd = layerLoader.addItem(typeInfo.serviceType,typeInfo.url,
-            typeInfo.portalItem,typeInfo.portalItemUrl);
+        if (this.canRemove) {
+          var map = this.resultsPane.getMap();
+          util.setNodeText(self.messageNode,self.i18n.search.item.messages.removing);
+          var lyrs = layerUtil.findLayersAdded(map,this.referenceId).layers;
+          array.forEach(lyrs,function(lyr) {
+            //console.warn("removingLayer",lyr);
+            // TODO what about Pro?
+            map.removeLayer(lyr);
+          });
+          this.canRemove = false;
+          util.setNodeText(self.messageNode,"");
+          util.setNodeText(self.addButton,self.i18n.search.item.actions.add);
+          domClass.remove(btn,"disabled");
         } else {
-          dfd = layerLoader.addLayer(typeInfo.serviceType,typeInfo.url,item,itemData);
+          util.setNodeText(self.messageNode,self.i18n.search.item.messages.adding);
+          var layerLoader = new LayerLoader({
+            i18n: this.i18n,
+            map: this.resultsPane.getMap(),
+            referenceId: this.referenceId
+          });
+          if (typeInfo.portalItem && typeInfo.portalItemUrl) {
+            dfd = layerLoader.addItem(typeInfo.serviceType,typeInfo.url,
+              typeInfo.portalItem,typeInfo.portalItemUrl);
+          } else {
+            dfd = layerLoader.addLayer(typeInfo.serviceType,typeInfo.url,item,itemData);
+          }
+          dfd.then(function(result){
+            if (result) {
+              self.canRemove = true;
+              util.setNodeText(self.messageNode,"");
+              util.setNodeText(self.addButton,self.i18n.search.item.actions.remove);
+              domClass.remove(btn,"disabled");
+            } else {
+              util.setNodeText(self.messageNode,self.i18n.search.item.messages.addFailed);
+              domClass.remove(btn,"disabled");
+            }
+          }).otherwise(function(error){
+            // TODO popup a message
+            console.warn("Add layer failed",typeInfo.url);
+            console.error(error);
+            util.setNodeText(self.messageNode,self.i18n.search.item.messages.addFailed);
+            domClass.remove(btn,"disabled");
+            if (error && typeof error.message === "string" && error.message.length > 0) {
+              // TODO show this message
+              //console.warn("msg",error.message);
+              //util.setNodeText(self.messageNode,error.message);
+              console.log("");
+            }
+          });
         }
-        dfd.then(function(result){
-        }).otherwise(function(error){
-          // TODO popup a message
-          console.warn("Error adding layer",typeInfo.url);
-          console.error(error);
-        });
+
       }
 
       /*
@@ -172,6 +213,8 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
         "wms": "WMS",
         "kml": "KML"
       };
+
+      this.referenceId = response.sourceKey+"-refid-"+item.id;
       var typeInfo = {
         canAdd: false,
         detailsUrl: null,
@@ -320,11 +363,9 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       util.setNodeText(this.dateNode,date);
 
       this.renderLinks(response,item);
-      /*
       if (this.canRemove) {
-        util.setNodeText(this.addButton, i18n.search.item.actions.remove);
+        util.setNodeText(this.addButton,this.i18n.search.item.actions.remove);
       }
-      */
     },
 
     renderLinks: function(response,item) {
@@ -365,6 +406,15 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
             }
           }
         });
+      }
+    },
+
+    setCanRemove: function(canRemove) {
+      this.canRemove = !!canRemove;
+      if (this.canRemove) {
+        util.setNodeText(this.addButton,this.i18n.search.item.actions.remove);
+      } else {
+        util.setNodeText(this.addButton,this.i18n.search.item.actions.add);
       }
     }
 

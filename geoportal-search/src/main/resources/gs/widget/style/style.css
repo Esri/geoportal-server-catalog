@@ -311,6 +311,11 @@ input, textarea, p, blockquote, th, td {
   text-align: right;
 }
 
+.geoportal-search .item-card .action-bar .message {
+  font-size: 9px;
+  font-style: italic;
+}
+
 .geoportal-search .dropdown-container {
   display: inline-block;
   position: relative;

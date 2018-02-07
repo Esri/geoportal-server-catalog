@@ -22,13 +22,15 @@ function(array, Deferred, util, agsUtils, InfoTemplate, PopupTemplate) {
 
   var _def = {
 
-    addMapLayer: function(map,layer,item) {
+    addMapLayer: function(map,layer,item,referenceId) {
       //console.warn("_addLayer",layer);
       //console.warn("map",this.map);
       if (map && layer) {
         layer.xtnAddData = true; // TODO?
         if (item) {
           layer.xtnItemId = item.id; // TODO?
+          layer.xtnReferenceId = referenceId; // TODO?
+          console.log("layer.xtnReferenceId",layer.xtnReferenceId);
           if (!layer.arcgisProps && item) {
             layer.arcgisProps = {
               title: item.title
@@ -94,15 +96,15 @@ function(array, Deferred, util, agsUtils, InfoTemplate, PopupTemplate) {
     },
 
     findLayersAdded: function(map,itemId) {
-      var ids = [], itemIds = [], layers = [];
+      var ids = [], referenceIds = [], layers = [];
       var response = {
-        itemIds: itemIds,
+        referenceIds: referenceIds,
         layers: layers
       };
       if (!map) {
         return response;
       }
-      var checkId = (typeof itemId === "string" && itemId.length > 0);
+      var checkId = (typeof referenceId === "string" && referenceId.length > 0);
       array.forEach(map.layerIds, function(id) {
         ids.push(id);
       });
@@ -111,12 +113,13 @@ function(array, Deferred, util, agsUtils, InfoTemplate, PopupTemplate) {
       });
       array.forEach(ids, function(id) {
         var lyr = map.getLayer(id);
-        if (lyr && typeof lyr.xtnItemId === "string" && lyr.xtnItemId.length > 0) {
+        if (lyr && typeof lyr.xtnReferenceId === "string" &&
+            lyr.xtnReferenceId.length > 0) {
           //console.warn("found added layer",lyr);
-          if (!checkId || lyr.xtnItemId === itemId) {
+          if (!checkId || lyr.xtnReferenceId === referenceId) {
             layers.push(lyr);
-            if (itemIds.indexOf(lyr.xtnItemId) === -1) {
-              itemIds.push(lyr.xtnItemId);
+            if (referenceIds.indexOf(lyr.xtnReferenceId) === -1) {
+              referenceIds.push(lyr.xtnReferenceId);
             }
           }
         }
