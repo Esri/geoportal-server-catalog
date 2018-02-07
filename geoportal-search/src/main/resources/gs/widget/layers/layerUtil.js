@@ -14,12 +14,15 @@
  */
 define(["dojo/_base/array",
   "dojo/Deferred",
-  "./util"],
-function(array, Deferred, util) {
+  "../util",
+  "esri/arcgis/utils",
+  "esri/InfoTemplate",
+  "esri/dijit/PopupTemplate"],
+function(array, Deferred, util, agsUtils, InfoTemplate, PopupTemplate) {
 
   var _def = {
 
-    addLayer: function(map,layer,item) {
+    addMapLayer: function(map,layer,item) {
       //console.warn("_addLayer",layer);
       //console.warn("map",this.map);
       if (map && layer) {
@@ -32,7 +35,7 @@ function(array, Deferred, util) {
             };
             layer._titleForLegend = item.title;
           }
-          if (!esriLang.isDefined(layer.title)) {
+          if (typeof layer.title !== "string" || layer.title.length === 0) {
             layer.title = item.title;
           }
           // TODO is Web AppBuilder?
@@ -46,6 +49,48 @@ function(array, Deferred, util) {
         }
         map.addLayer(layer);
       }
+    },
+
+    checkUrl: function(url) {
+      return agsUtils._checkUrl(url);
+    },
+
+    getDefaultPortalFieldInfo: function(serviceFieldInfo){
+      //serviceFieldInfo: {name,alias,type,...}
+      var fieldName = serviceFieldInfo.name;
+      var item = {
+        fieldName: fieldName,
+        label: serviceFieldInfo.alias || fieldName,
+        tooltip: "",
+        visible: false,
+        format: null,
+        stringFieldOption: "textbox"
+      };
+
+      //https://developers.arcgis.com/javascript/jsapi/field-amd.html#type
+      var type = serviceFieldInfo.type;
+      switch (type) {
+        case "esriFieldTypeSmallInteger":
+        case "esriFieldTypeInteger":
+          item.format = {
+            places: 0,
+            digitSeparator: true
+          };
+          break;
+        case "esriFieldTypeSingle":
+        case "esriFieldTypeDouble":
+          item.format = {
+            places: 2,
+            digitSeparator: true
+          };
+          break;
+        case "esriFieldTypeDate":
+          item.format = {
+            dateFormat: "longMonthDayYear"
+          };
+          break;
+      }
+      return item;
     },
 
     findLayersAdded: function(map,itemId) {
@@ -77,6 +122,52 @@ function(array, Deferred, util) {
         }
       });
       return response;
+    },
+
+    newInfoTemplate: function(popupInfo,title) {
+      if (popupInfo) {
+        try {
+          var popupTemplate = new PopupTemplate({
+            description: popupInfo.description,
+            title: popupInfo.title,
+            showAttachments: popupInfo.showAttachments,
+            fieldInfos: popupInfo.fieldInfos,
+            mediaInfos: popupInfo.mediaInfos
+          });
+          return popupTemplate;
+        } catch (ex) {
+          console.error(ex);
+        }
+      }
+      var infoTemplate = new InfoTemplate();
+      if (typeof title === "string" && title.length > 0) {
+        infoTemplate.setTitle(title);
+      }
+      return infoTemplate;
+    },
+
+    newPopupInfo: function(object,title) {
+      var self = this;
+      if (object && object.fields) {
+        var popupInfo = {
+          title: object.name,
+          fieldInfos: [],
+          description: null,
+          showAttachments: true,
+          mediaInfos: []
+        };
+        if (typeof title === "string" && title.length > 0) {
+          popupInfo.title = title;
+        }
+        array.forEach(object.fields,function(field){
+          var fieldInfo = self.getDefaultPortalFieldInfo(field);
+          fieldInfo.visible = true;
+          fieldInfo.isEditable = field.editable;
+          popupInfo.fieldInfos.push(fieldInfo);
+        });
+        return popupInfo;
+      }
+      return null;
     },
 
     waitForLayer: function(i18n,layer) {

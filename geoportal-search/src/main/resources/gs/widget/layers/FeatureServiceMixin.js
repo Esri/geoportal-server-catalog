@@ -12,17 +12,103 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-define(["dojo/_base/array",
+define(["dojo/_base/declare",
+  "dojo/_base/array",
+  "dojo/promise/all",
   "dojo/Deferred",
-  "./util",
+  "./layerUtil",
+  "../util",
   "esri/lang",
   "esri/dijit/PopupTemplate",
+  "esri/layers/FeatureLayer",
   "esri/renderers/jsonUtils"],
-function(array, Deferred, util, esriLang, PopupTemplate, jsonRendererUtils) {
+function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate,
+  FeatureLayer, jsonRendererUtils) {
 
-  var _def = {
+  var _def = declare(null, {
 
-    makeFeatureLayerTitle: function(pattern,serviceName,layerName) {
+    addFeatureService: function(serviceUrl,item,itemData) {
+      var self = this, dfd = new Deferred();
+      var layerIds = null, layerDfds = [], featureLayers = [];
+
+      util.readRestInfo(serviceUrl).then(function(response) {
+        console.warn("addFeatureService.serviceInfo",response);
+        if (response && typeof response.type === "string" &&
+           (response.type === "Feature Layer" || response.type === "Table")) {
+          // a single layer registered from a service /FeatureServer/1 or /MapServer/2
+          console.log("aaaaaaaa");
+          var layer = new FeatureLayer(serviceUrl, {
+            id: util.generateId(),
+            outFields: ["*"]
+          });
+          layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
+        } else {
+          var list = [];
+          if (response && response.layers && response.layers.length > 0) {
+            array.forEach(response.layers,function(lyr){
+              list.push(lyr);
+            });
+          }
+          if (response && response.tables && response.tables.length > 0) {
+            array.forEach(response.tables,function(tbl){
+              list.push(tbl);
+            });
+          }
+          if (list.length > 0) {
+            array.forEach(list, function(lyr) {
+              var bAdd = true;
+              if (layerIds !== null && layerIds.length > 0) {
+                bAdd = array.some(layerIds, function(lid) {
+                  return (lid === lyr.id);
+                });
+              }
+              if (bAdd) {
+                var layer = new FeatureLayer(serviceUrl + "/" + lyr.id, {
+                  id: util.generateId(),
+                  outFields: ["*"]
+                });
+                layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
+              }
+            });
+          } else {
+            // TODO popup a message here?
+            console.warn("No layers or tables...");
+          }
+        }
+        return all(layerDfds);
+
+      }).then(function(results) {
+        console.warn("addFeatureService.layerDfds",results);
+        array.forEach(results, function(result) {
+          featureLayers.push(result);
+        });
+        featureLayers.reverse();
+        return featureLayers;
+
+      }).then(function() {
+        array.forEach(featureLayers, function(layer) {
+          var opLayer = self._processFeatureLayer(layer,item,itemData);
+          if (esriLang.isDefined(opLayer.title)) {
+            layer.arcgisProps = {
+              title: opLayer.title
+            };
+            layer._titleForLegend = opLayer.title;
+            if (!esriLang.isDefined(layer.title)) {
+              layer.title = opLayer.title;
+            }
+          }
+          layerUtil.addMapLayer(self.map,layer);
+        });
+      }).then(function() {
+        dfd.resolve(featureLayers);
+      }).otherwise(function(error) {
+        console.error(error);
+        dfd.reject(error);
+      });
+      return dfd;
+    },
+
+    _makeFeatureLayerTitle: function(pattern,serviceName,layerName) {
       var n, v, regexp;
       try {
         if (serviceName && layerName && (serviceName === layerName)) {
@@ -45,10 +131,10 @@ function(array, Deferred, util, esriLang, PopupTemplate, jsonRendererUtils) {
       return v;
     },
 
-    processFeatureLayer: function(i18n,featureLayer,item,itemData) {
+    _processFeatureLayer: function(featureLayer,item,itemData) {
       if (!item) return featureLayer;
       var self = this;
-      var dlPattern = i18n.search.featureLayerTitlePattern;
+      var dlPattern = this.i18n.search.featureLayerTitlePattern;
       var opLayer = null;
       if (itemData && itemData.layers && (itemData.layers.length > 0)) {
         array.some(itemData.layers, function(info) {
@@ -116,13 +202,13 @@ function(array, Deferred, util, esriLang, PopupTemplate, jsonRendererUtils) {
               }
             }
             if (!isCustomTemplate) {
-              self.setFeatureLayerInfoTemplate(featureLayer,info.popupInfo);
+              self._setFeatureLayerInfoTemplate(featureLayer,info.popupInfo);
             }
             opLayer = {
               url: featureLayer.url,
               id: featureLayer.id,
               itemId: item.id,
-              title: self.makeFeatureLayerTitle(dlPattern,item.title,featureLayer.name)
+              title: self._makeFeatureLayerTitle(dlPattern,item.title,featureLayer.name)
             };
             return true;
           }
@@ -134,24 +220,22 @@ function(array, Deferred, util, esriLang, PopupTemplate, jsonRendererUtils) {
           url: featureLayer.url,
           id: featureLayer.id,
           itemId: item.id,
-          title: self.makeFeatureLayerTitle(dlPattern,item.title,featureLayer.name)
+          title: self._makeFeatureLayerTitle(dlPattern,item.title,featureLayer.name)
         };
-        self.setFeatureLayerInfoTemplate(featureLayer,null,opLayer.title);
+        self._setFeatureLayerInfoTemplate(featureLayer,null,opLayer.title);
         return opLayer;
       }
     },
 
-    setFeatureLayerInfoTemplate: function(featureLayer,popupInfo,title) {
-      /*
+    _setFeatureLayerInfoTemplate: function(featureLayer,popupInfo,title) {
       if (!popupInfo) {
-        popupInfo = this._newPopupInfo(featureLayer,title);
+        popupInfo = layerUtil.newPopupInfo(featureLayer,title);
       }
-      var template = this._newInfoTemplate(popupInfo, title);
+      var template = layerUtil.newInfoTemplate(popupInfo,title);
       featureLayer.setInfoTemplate(template);
-      */
-    },
+    }
 
-  };
+  });
 
   return _def;
 
