@@ -17,8 +17,9 @@ define(["dojo/_base/declare",
   "./SearchComponent",
   "dojo/text!./templates/ResultsPane.html",
   "./ItemCard",
+  "./layers/layerUtil",
   "./util"],
-function(declare, array, SearchComponent, template, ItemCard, util) {
+function(declare, array, SearchComponent, template, ItemCard, layerUtil, util) {
 
   var _def = declare([SearchComponent], {
 
@@ -32,6 +33,7 @@ function(declare, array, SearchComponent, template, ItemCard, util) {
     addItem: function(itemCard) {
       itemCard.placeAt(this.itemsNode);
       itemCard.startup();
+      return itemCard;
     },
 
     destroyItems: function() {
@@ -54,17 +56,21 @@ function(declare, array, SearchComponent, template, ItemCard, util) {
       var self = this;
       var results = searchResponse.results;
       if (results && results.length > 0) {
-        var idsAdded = util.findLayersAdded(this.getMap(), null).itemIds;
+        var idsAdded = layerUtil.findLayersAdded(this.getMap(),null).referenceIds;
+        console.log("idsAdded",idsAdded);
         array.forEach(searchResponse.results, function(result) {
           //console.warn(result.id,idsAdded);
-          self.addItem(new ItemCard({
-            canRemove: (idsAdded.indexOf(result.id) !== -1),
+          var itemCard = self.addItem(new ItemCard({
+            canRemove: false,
             i18n: self.i18n,
             item: result,
             resultsPane: self,
             searchPane: self.searchPane,
             searchResponse: searchResponse
           }));
+          if (idsAdded.indexOf(itemCard.referenceId) !== -1) {
+            itemCard.setCanRemove(true);
+          }
         });
       } else {
         this.showNoMatch();

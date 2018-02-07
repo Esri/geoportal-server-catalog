@@ -153,7 +153,7 @@ function(declare, Deferred, layerUtil, util, esriLang, ArcGISImageServiceLayer,
           function(error2){dfd.reject(error2);}
         );
         */
-        layerUtil.addMapLayer(self.map,layer);
+        layerUtil.addMapLayer(self.map,layer,item,self.referenceId);
         dfd.resolve(layer);
       }).otherwise(function(error){
         dfd.reject(error);

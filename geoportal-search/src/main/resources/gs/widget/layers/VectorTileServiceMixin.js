@@ -41,7 +41,7 @@ function(declare, Deferred, layerUtil, util, esriRequest, VectorTileLayer) {
         }
       }).then(function(layer) {
         if (layer) {
-          layerUtil.addMapLayer(self.map,layer);
+          layerUtil.addMapLayer(self.map,layer,item,self.referenceId);
         }
         dfd.resolve(layer);
       }).otherwise(function(error) {

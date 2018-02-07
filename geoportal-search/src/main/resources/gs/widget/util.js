@@ -60,37 +60,6 @@ function(array, DjUrl, domGeometry, domStyle, win, esriConfig, esriRequest) {
       return value.replace(r, "\\$1");
     },
 
-    findLayersAdded: function(map, itemId) {
-      var ids = [], itemIds = [], layers = [];
-      var response = {
-        itemIds: itemIds,
-        layers: layers
-      };
-      if (!map) {
-        return response;
-      }
-      var checkId = (typeof itemId === "string" && itemId.length > 0);
-      array.forEach(map.layerIds, function(id) {
-        ids.push(id);
-      });
-      array.forEach(map.graphicsLayerIds, function(id) {
-        ids.push(id);
-      });
-      array.forEach(ids, function(id) {
-        var lyr = map.getLayer(id);
-        if (lyr && typeof lyr.xtnItemId === "string" && lyr.xtnItemId.length > 0) {
-          //console.warn("found added layer",lyr);
-          if (!checkId || lyr.xtnItemId === itemId) {
-            layers.push(lyr);
-            if (itemIds.indexOf(lyr.xtnItemId) === -1) {
-              itemIds.push(lyr.xtnItemId);
-            }
-          }
-        }
-      });
-      return response;
-    },
-
     generateId: function() {
       var t = null;
       if (typeof Date.now === "function") {

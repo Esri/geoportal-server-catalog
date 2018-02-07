@@ -31,7 +31,7 @@ function(declare, layerUtil, util, KMLLayer) {
         if (layer && item) {
           layer.title = item.title;
         }
-        layerUtil.addMapLayer(self.map,layer);
+        layerUtil.addMapLayer(self.map,layer,item,self.referenceId);
       });
       return dfd;
     }

@@ -66,6 +66,7 @@
           typeof task.target.schema .schemaType === "string" &&
           task.target.schema.schemaType.length > 0) {
         response.sourceType = task.target.schema.schemaType;
+        response.sourceKey = task.target.key;
       }
 
       response.results = [];
