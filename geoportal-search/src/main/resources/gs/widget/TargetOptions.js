@@ -180,6 +180,15 @@ function(declare, array, lang, on, domClass, domConstruct, number,
         }
       } else {
         searchResponse = result;
+        v = "-";
+        if (task.target === this._activeTarget) {
+          if (result && typeof result.total === "number") {
+            v = number.format(result.total);
+          }
+        }
+        if (this._activeTarget) {
+          this._activeTarget.nodeInfo.countNode.innerHTML = v;
+        }
       }
       if (!searchResponse) {
         searchResponse = {error: "No search response."};

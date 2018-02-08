@@ -27,6 +27,28 @@ input, textarea, p, blockquote, th, td {
 }
 */
 
+.geoportal-search.search-pane {
+  width: 310px;
+}
+
+.geoportal-search .search-results {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.geoportal-search .search-box input {
+  width: 200px;
+  /*width: 85%;*/
+  padding: 5px 10px;
+}
+
+.geoportal-search.search-pane {
+  display: inline-block;
+  padding: 6px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+}
+
 .geoportal-search .search-results-pane a {
   color: #196fa6;
   text-decoration: none;
@@ -69,7 +91,9 @@ input, textarea, p, blockquote, th, td {
 .geoportal-search .pagination > li > span {
   position: relative;
   float: left;
-  padding: 6px 12px;
+  /*padding: 6px 12px;*/
+  font-size: 12px;
+  padding: 4px 8px;
   line-height: 1.5;
   text-decoration: none;
   color: #196fa6;
@@ -85,14 +109,6 @@ input, textarea, p, blockquote, th, td {
 .geoportal-search .pagination > .disabled > a:focus {
   color: #a9a9a9;
   cursor: not-allowed;
-}
-
-.geoportal-search.search-pane {
-  display: inline-block;
-  width: 360px;
-  padding: 10px;
-  border: 1px solid #cccccc;
-  border-radius: 5px;
 }
 
 .geoportal-search .left-side {
@@ -152,11 +168,7 @@ input, textarea, p, blockquote, th, td {
   display: inline-block;
   /*width: 90%;*/
 }
-.geoportal-search .search-box input {
-  width: 280px;
-  /*width: 85%;*/
-  padding: 5px 10px;
-}
+
 .geoportal-search .search-box .btn-confirm {
   padding: 4px 8px;
   margin-bottom: 1px;
@@ -186,7 +198,7 @@ input, textarea, p, blockquote, th, td {
 }
 
 .geoportal-search .search-bbox-option {
-  margin-left: 6px;
+  /*margin-left: 6px;*/
 }
 
 .geoportal-search .search-bbox-option .checkbox-inline,
@@ -195,7 +207,8 @@ input, textarea, p, blockquote, th, td {
 }
 
 .geoportal-search .search-livedata-option {
-  margin-left: 10px;
+  /*margin-left: 10px;*/
+  margin-left: 4px;
 }
 .geoportal-search .search-livedata-option .checkbox-inline,
 .geoportal-search .search-livedata-option .dijitCheckBox input  {
@@ -230,13 +243,9 @@ input, textarea, p, blockquote, th, td {
 
 .geoportal-search .search-results-pane {
   margin-top: 6px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
 }
 
-.geoportal-search .search-results {
-  max-height: 400px;
-  overflow-y: auto;
-}
 
 .geoportal-search .search-paging {
   /*float: right;*/
