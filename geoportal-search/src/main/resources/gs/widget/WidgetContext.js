@@ -1,61 +1,59 @@
-///////////////////////////////////////////////////////////////////////////
-// Copyright © 2017 Esri. All Rights Reserved.
-//
-// Licensed under the Apache License Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//    http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-///////////////////////////////////////////////////////////////////////////
+/* See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * Esri Inc. licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 define(["dojo/_base/declare",
-  "dojo/_base/lang"],
-function(declare, lang) {
+  "dojo/_base/lang",
+  "./layers/LayerLoader"],
+function(declare, lang, LayerLoader) {
 
   var _def = declare([], {
 
     i18n: null,
     map: null,
+    supportsRemove: true,
     widgetFolder: "gs/widget",
 
     constructor: function(args) {
       lang.mixin(this, args);
     },
 
-    checkMixedContent: function(uri) {
-      if ((typeof window.location.href === "string") &&
-          (window.location.href.indexOf("https://") === 0)) {
-        if ((typeof uri === "string") && (uri.indexOf("http://") === 0)) {
-          uri = "https:" + uri.substring("5");
-        }
-      }
-      return uri;
+    addItem: function(serviceType,serviceUrl,item,itemUrl,referenceId) {
+      var layerLoader = new LayerLoader({
+        i18n: this.i18n,
+        map: this.getMap(),
+        referenceId: referenceId
+      });
+      return layerLoader.addItem(serviceType,serviceUrl,item,itemUrl);
     },
 
-    generateRandomId: function() {
-      var t = null;
-      if (typeof Date.now === "function") {
-        t = Date.now();
-      } else {
-        t = (new Date()).getTime();
+    addLayer: function(serviceType,serviceUrl,referenceId) {
+      var layerLoader = new LayerLoader({
+        i18n: this.i18n,
+        map: this.getMap(),
+        referenceId: referenceId
+      });
+      return layerLoader.addLayer(serviceType,serviceUrl);
+    },
+
+    getGeographicExtent: function() {
+      if (this.map) {
+        return this.map.geographicExtent;
       }
-      var r = ("" + Math.random()).replace("0.", "r");
-      return (t + "" + r).replace(/-/g, "");
     },
 
     getMap: function() {
       return this.map;
-    },
-
-    getMapGeographicExtent: function() {
-      if (this.map) {
-        return this.map.geographicExtent;
-      }
     },
 
     showError: function(title,error) {
@@ -68,14 +66,7 @@ function(declare, lang) {
 
     showMessages: function(title,subTitle,messages) {
       console.warn("wro/Context.showMessages",title,subTitle,messages);
-    },
-
-    supportsBBox: function() {
-      if (this.map) {
-        return true;
-      }
-      return false;
-    },
+    }
 
   });
 

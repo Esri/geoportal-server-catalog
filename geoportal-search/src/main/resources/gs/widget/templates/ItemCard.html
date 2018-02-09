@@ -18,13 +18,27 @@
       <a href="javascript:void(0)"
         data-dojo-attach-point="detailsButton"
         data-dojo-attach-event="onClick: detailsClicked"></a>
+      <!--
       <div class="dropdown-container">
         <a href="javascript:void(0)"
           data-dojo-attach-point="linksButton"
           data-dojo-attach-event="onClick: linksClicked">
         </a>
+
         <div class="dropdown-content"
           data-dojo-attach-point="linksContent">
+        </div>
+
+      </div>
+      -->
+      <div class="links-dropdown"
+        data-dojo-type="dijit/form/DropDownButton",
+        data-dojo-attach-point="linksDropdown">
+        <span data-dojo-attach-point="linksCaptionNode"></span>
+        <div data-dojo-type="dijit/TooltipDialog"
+          data-dojo-attach-point="linksTooltipDialog"
+          data-dojo-props="'class':'geoportal-search dd-popup'">
+          <div data-dojo-attach-point="linksContent"></div>
         </div>
       </div>
     </div>

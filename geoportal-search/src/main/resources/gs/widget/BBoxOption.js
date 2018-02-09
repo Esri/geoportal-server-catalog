@@ -33,7 +33,7 @@ function(declare, SearchComponent, template) {
     },
 
     getBBox: function() {
-      var ext = this.searchPane.widgetContext.getMapGeographicExtent();
+      var ext = this.searchPane.widgetContext.getGeographicExtent();
       if (ext) {
         return ext.xmin + "," + ext.ymin + "," + ext.xmax + "," + ext.ymax;
       }

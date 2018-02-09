@@ -56,8 +56,11 @@ function(declare, array, SearchComponent, template, ItemCard, layerUtil, util) {
       var self = this;
       var results = searchResponse.results;
       if (results && results.length > 0) {
-        var idsAdded = layerUtil.findLayersAdded(this.getMap(),null).referenceIds;
-        console.log("idsAdded",idsAdded);
+        var supportsRemove = this.getWidgetContext().supportsRemove;
+        var idsAdded = [];
+        if (supportsRemove) {
+          idsAdded = layerUtil.findLayersAdded(this.getMap(),null).referenceIds;
+        }
         array.forEach(searchResponse.results, function(result) {
           //console.warn(result.id,idsAdded);
           var itemCard = self.addItem(new ItemCard({
@@ -66,9 +69,10 @@ function(declare, array, SearchComponent, template, ItemCard, layerUtil, util) {
             item: result,
             resultsPane: self,
             searchPane: self.searchPane,
-            searchResponse: searchResponse
+            searchResponse: searchResponse,
+            supportsRemove: supportsRemove
           }));
-          if (idsAdded.indexOf(itemCard.referenceId) !== -1) {
+          if (supportsRemove && idsAdded.indexOf(itemCard.referenceId) !== -1) {
             itemCard.setCanRemove(true);
           }
         });
