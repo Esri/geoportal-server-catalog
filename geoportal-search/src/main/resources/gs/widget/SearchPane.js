@@ -62,6 +62,7 @@ function(declare, localRequire, lang, array, win, domClass, on,
         }
       });
 
+      /*
       this.own(on(win.doc,"click",function(e){
         var dropdowns = document.getElementsByClassName("dropdown-content");
         array.forEach(dropdowns,function(dropdown) {
@@ -72,6 +73,7 @@ function(declare, localRequire, lang, array, win, domClass, on,
           }
         });
       }));
+      */
     },
 
     startup: function() {

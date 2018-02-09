@@ -27,6 +27,13 @@ input, textarea, p, blockquote, th, td {
 }
 */
 
+.geoportal-search-pro .geoportal-search.search-pane {
+  width: 310px;
+}
+.geoportal-search-pro .dijitPopup {
+  max-width: 98%;
+}
+
 .geoportal-search.search-pane {
   width: 310px;
 }
@@ -40,6 +47,11 @@ input, textarea, p, blockquote, th, td {
   width: 200px;
   /*width: 85%;*/
   padding: 5px 10px;
+}
+
+
+.geoportal-search-pro .search-results {
+  max-height: 240px;
 }
 
 .geoportal-search.search-pane {
@@ -56,7 +68,8 @@ input, textarea, p, blockquote, th, td {
   padding: 5px 5px;
 }
 
-.geoportal-search a[disabled] {
+.geoportal-search a[disabled],
+.geoportal-search a.disabled {
   pointer-events: none;
   opacity: 0.2;
 }
@@ -137,12 +150,14 @@ input, textarea, p, blockquote, th, td {
 .geoportal-search .search-target-options {
   display: inline-block;
 }
-.geoportal-search .search-target-options > .dijitDropDownButton > .dijitButtonNode {
+.geoportal-search .search-target-options > .dijitDropDownButton > .dijitButtonNode,
+.geoportal-search .item-card .action-bar > .dijitDropDownButton > .dijitButtonNode {
   background-color: transparent;
   border: none;
   outline: none;
 }
-.geoportal-search .search-target-options > .dijitDropDownButton .dijitButtonContents {
+.geoportal-search .search-target-options > .dijitDropDownButton .dijitButtonContents,
+ .geoportal-search .item-card .action-bar > .dijitDropDownButton .dijitButtonContents {
   outline: none;
 }
 
@@ -318,6 +333,7 @@ input, textarea, p, blockquote, th, td {
 
 .geoportal-search .item-card .action-bar {
   text-align: right;
+  white-space: nowrap;
 }
 
 .geoportal-search .item-card .action-bar .message {
@@ -344,6 +360,24 @@ input, textarea, p, blockquote, th, td {
 }
 .geoportal-search .dropdown-content.show {
   display: block;
+}
+
+.geoportal-search .item-card .links-dropdown {
+  margin-top: -4px;
+}
+
+/* .calcite .dijitButtonContents* */
+.geoportal-search .item-card .links-dropdown .dijitButtonContents {
+  padding: 0px;
+}
+
+.geoportal-search.dd-popup a {
+  display: block;
+  color: #196fa6;
+  text-decoration: none;
+  line-height: 20px;
+  padding: 5px 5px;
+  outline: none;
 }
 
 /* ........................................................... */

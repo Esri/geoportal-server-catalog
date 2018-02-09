@@ -55,6 +55,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
       return null;
     },
 
+    getWidgetContext: function() {
+      if (this.searchPane) {
+        return this.searchPane.widgetContext;
+      }
+      return null;
+    },
+
     search: function() {
       if (this.searchPane) {
         this.searchPane.search();

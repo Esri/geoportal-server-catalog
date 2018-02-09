@@ -20,11 +20,13 @@ define(["dojo/_base/declare",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/ItemCard.html",
-  "./layers/LayerLoader",
   "./layers/layerUtil",
-  "./util"],
+  "./util",
+  "dijit/popup",
+  "dijit/TooltipDialog",
+  "dijit/form/DropDownButton"],
 function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
-  _WidgetsInTemplateMixin, template, LayerLoader, layerUtil, util) {
+  _WidgetsInTemplateMixin, template, layerUtil, util, popup) {
 
   var _def = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -36,17 +38,20 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
     referenceId: null,
     resultsPane: null,
     searchResponse: null,
+    supportsRemove: false,
     typeInfo: null,
 
     postCreate: function() {
       this.inherited(arguments);
-      this.linksButton.xtnDDContent = this.linksContent;
+      //this.linksButton.xtnDDContent = this.linksContent;
       this.addButton.innerHTML = this.i18n.search.item.actions.add;
       this.detailsButton.innerHTML = this.i18n.search.item.actions.details;
-      this.linksButton.innerHTML = this.i18n.search.item.actions.links;
+      //this.linksButton.innerHTML = this.i18n.search.item.actions.links;
+      this.linksCaptionNode.innerHTML = this.i18n.search.item.actions.links;
       this.addButton.setAttribute("disabled","disabled");
       this.detailsButton.setAttribute("disabled","disabled");
-      this.linksButton.setAttribute("disabled","disabled");
+      //this.linksButton.setAttribute("disabled","disabled");
+      this.linksDropdown.set("disabled",true);
     },
 
     startup: function() {
@@ -64,13 +69,15 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       }
       domClass.add(btn,"disabled");
 
+      var widgetContext = this.resultsPane.getWidgetContext();
       var typeInfo = this.typeInfo;
+      var referenceId = this.referenceId;
       var dfd, item = null, itemData = null;
       if (typeInfo && typeInfo.serviceType && typeInfo.url) {
         if (this.canRemove) {
           var map = this.resultsPane.getMap();
-          util.setNodeText(self.messageNode,self.i18n.search.item.messages.removing);
-          var lyrs = layerUtil.findLayersAdded(map,this.referenceId).layers;
+          //util.setNodeText(self.messageNode,self.i18n.search.item.messages.removing);
+          var lyrs = layerUtil.findLayersAdded(map,referenceId).layers;
           array.forEach(lyrs,function(lyr) {
             //console.warn("removingLayer",lyr);
             // TODO what about Pro?
@@ -81,23 +88,21 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
           util.setNodeText(self.addButton,self.i18n.search.item.actions.add);
           domClass.remove(btn,"disabled");
         } else {
-          util.setNodeText(self.messageNode,self.i18n.search.item.messages.adding);
-          var layerLoader = new LayerLoader({
-            i18n: this.i18n,
-            map: this.resultsPane.getMap(),
-            referenceId: this.referenceId
-          });
+          //util.setNodeText(self.messageNode,self.i18n.search.item.messages.adding);
+
           if (typeInfo.portalItem && typeInfo.portalItemUrl) {
-            dfd = layerLoader.addItem(typeInfo.serviceType,typeInfo.url,
-              typeInfo.portalItem,typeInfo.portalItemUrl);
+            dfd = widgetContext.addItem(typeInfo.serviceType,typeInfo.url,
+              typeInfo.portalItem,typeInfo.portalItemUrl,referenceId);
           } else {
-            dfd = layerLoader.addLayer(typeInfo.serviceType,typeInfo.url,item,itemData);
+            dfd = widgetContext.addLayer(typeInfo.serviceType,typeInfo.url,referenceId);
           }
           dfd.then(function(result){
             if (result) {
-              self.canRemove = true;
+              if (self.supportsRemove) {
+                self.canRemove = true;
+                util.setNodeText(self.addButton,self.i18n.search.item.actions.remove);
+              }
               util.setNodeText(self.messageNode,"");
-              util.setNodeText(self.addButton,self.i18n.search.item.actions.remove);
               domClass.remove(btn,"disabled");
             } else {
               util.setNodeText(self.messageNode,self.i18n.search.item.messages.addFailed);
@@ -119,59 +124,28 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
         }
 
       }
-
-      /*
-      var self = this,
-        btn = this.addButton;
-      if (domClass.contains(btn, "disabled")) {
-        return;
-      }
-      domClass.add(btn, "disabled");
-
-      if (this.canRemove) {
-        var map = this.resultsPane.getMap();
-        util.setNodeText(self.messageNode, i18n.search.item.messages.removing);
-        var lyrs = util.findLayersAdded(map, this.item.id).layers;
-        array.forEach(lyrs, function(lyr) {
-          //console.warn("removingLayer",lyr);
-          map.removeLayer(lyr);
-        });
-        this.canRemove = false;
-        util.setNodeText(self.messageNode, "");
-        util.setNodeText(this.addButton, i18n.search.item.actions.add);
-        domClass.remove(btn, "disabled");
-
-      } else {
-        util.setNodeText(self.messageNode, i18n.search.item.messages.adding);
-        var loader = new LayerLoader();
-        loader.addItem(this.item, this.resultsPane.getMap()).then(function(result) {
-          //console.warn("addClicked.result",result);
-          if (result) {
-            self.canRemove = true;
-            util.setNodeText(self.messageNode, "");
-            util.setNodeText(self.addButton, i18n.search.item.actions.remove);
-            domClass.remove(btn, "disabled");
-          } else {
-            util.setNodeText(self.messageNode, i18n.search.item.messages.addFailed);
-            domClass.remove(btn, "disabled");
-          }
-        }).otherwise(function(error) {
-          console.warn("Add layer failed.");
-          console.warn(error);
-          util.setNodeText(self.messageNode, i18n.search.item.messages.addFailed);
-          domClass.remove(btn, "disabled");
-          if (error && typeof error.message === "string" && error.message.length > 0) {
-            // TODO show this message
-            //console.warn("msg",error.message);
-            //util.setNodeText(self.messageNode,error.message);
-            console.log('');
-          }
-        });
-      }
-      */
     },
 
     addLink: function(typeName,href) {
+      //href = util.checkMixedContent(href); // TODO?
+      var self = this, v = href;
+      if (typeof typeName === "string" && typeName.length > 0) {
+        v = typeName + " " + href; // TODO i18n
+      }
+      var a = document.createElement("a");
+      a.href = href;
+      a.target = "_blank";
+      a.onclick = function(){
+        popup.close(self.linksTooltipDialog);
+      };
+      util.setNodeText(a,v);
+      this.linksContent.appendChild(a);
+      this.linksDropdown.set("disabled",false);
+      //this.linksButton.removeAttribute("disabled");
+    },
+
+    /*
+    addLinkOld: function(typeName,href) {
       //href = util.checkMixedContent(href); // TODO?
       var v = href;
       if (typeof typeName === "string" && typeName.length > 0) {
@@ -184,6 +158,7 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       this.linksContent.appendChild(a);
       this.linksButton.removeAttribute("disabled");
     },
+    */
 
     detailsClicked: function() {
       if (this.typeInfo && this.typeInfo.detailsUrl) {
@@ -208,10 +183,12 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
         "image service": "Image Service",
         "mapserver": "Map Service",
         "map service": "Map Service",
-        "vectortileserver": "Vector Tile Service",
-        "vector tile service": "Vector Tile Service",
         "wms": "WMS",
         "kml": "KML"
+        /*
+        "vectortileserver": "Vector Tile Service",
+        "vector tile service": "Vector Tile Service",
+        */
       };
 
       this.referenceId = response.sourceKey+"-refid-"+item.id;
@@ -323,15 +300,12 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
     },
 
     linksClicked: function() {
+      /*
       if (this.searchPane) {
         this.searchPane._ddClicked = this.linksContent;
       }
       this.linksContent.classList.toggle("show");
       util.mitigateDropdownClip(this.linksButton,this.linksContent);
-      /*
-      if (openDropdown.classList.contains('show')) {
-        openDropdown.classList.remove('show');
-      }
       */
     },
 
