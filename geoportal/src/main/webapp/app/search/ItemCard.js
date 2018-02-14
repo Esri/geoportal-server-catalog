@@ -18,6 +18,7 @@ define(["dojo/_base/declare",
         "dojo/string",
         "dojo/topic",
         "dojo/request/xhr",
+        "dojo/on",
         "app/context/app-topics",
         "dojo/dom-class",
         "dojo/dom-construct",
@@ -25,6 +26,8 @@ define(["dojo/_base/declare",
         "dijit/_TemplatedMixin",
         "dijit/_WidgetsInTemplateMixin",
         "dijit/Tooltip",
+        "dijit/TooltipDialog",
+        "dijit/popup",
         "dojo/text!./templates/ItemCard.html",
         "dojo/i18n!app/nls/resources",
         "app/context/AppClient",
@@ -35,8 +38,8 @@ define(["dojo/_base/declare",
         "app/content/MetadataEditor",
         "app/context/metadata-editor",
         "app/content/UploadMetadata"], 
-function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConstruct,
-    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, template, i18n, 
+function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
+    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, template, i18n, 
     AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
     MetadataEditor, gxeConfig, UploadMetadata) {
   
@@ -165,6 +168,40 @@ function(declare, lang, array, string, topic, xhr, appTopics, domClass, domConst
               topic.publish(appTopics.AddToMapClicked,serviceType);
             }
           },actionsNode);
+          
+          // create clickable 'Preview' link
+          var previewNode = domConstruct.create("a",{
+            href: "javascript:void(0)",
+            innerHTML: i18n.item.actions.preview
+          },actionsNode);
+          // create preview area: a placeholder for the map
+          var previewArea = domConstruct.create("div", {
+            innerHTML: "Click outside this dialog to close."
+          });
+          // create tooltip dialog with preview area in it
+          var myTooltipDialog = new TooltipDialog({
+              style: "width: 300px;",
+              content: previewArea,
+              title: "Preview",
+              onBlur: function() {
+                popup.close(myTooltipDialog);
+              },
+              onShow: function() {
+                myTooltipDialog.focus();
+                console.log('Showing');
+              },
+              onHide: function() {
+                console.log('Hidding');
+              }
+          });
+          // install 'onclick' event handler to show tooltip dialog
+          on(previewNode, "click", function() {
+            popup.open({
+              popup: myTooltipDialog,
+              around: previewNode
+            });
+          });
+          
           return true;
         }
       });

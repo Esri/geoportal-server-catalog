@@ -217,6 +217,7 @@ define({
         json: "JSON",
         links: "Links",
         addToMap: "Add to Map",
+        preview: "Preview",
         options: {
           caption: "Options",
           changeOwner: "Change Owner",
