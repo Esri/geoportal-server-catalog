@@ -156,7 +156,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       if (links.length === 0) return;
       var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
       var actionsNode = this.actionsNode;
-      array.some(links, function(u){
+      array.some(links, lang.hitch(this, function(u){
         var serviceType = new ServiceType();
         serviceType.checkUrl(u);
         //console.warn("serviceType",serviceType.isSet(),serviceType);
@@ -179,32 +179,33 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             innerHTML: "Click outside this dialog to close."
           });
           // create tooltip dialog with preview area in it
-          var myTooltipDialog = new TooltipDialog({
-              style: "width: 300px;",
+          var tooltipDialog = new TooltipDialog({
+              style: "width: 450px; height: 300px;",
               content: previewArea,
-              title: "Preview",
               onBlur: function() {
-                popup.close(myTooltipDialog);
+                popup.close(tooltipDialog);
               },
               onShow: function() {
-                myTooltipDialog.focus();
+                tooltipDialog.focus();
                 console.log('Showing');
               },
               onHide: function() {
                 console.log('Hidding');
               }
           });
+          this.own(tooltipDialog);
           // install 'onclick' event handler to show tooltip dialog
-          on(previewNode, "click", function() {
+          this.own(on(previewNode, "click", function() {
             popup.open({
-              popup: myTooltipDialog,
-              around: previewNode
+              popup: tooltipDialog,
+              around: previewNode,
+              padding: { x: 20, y: 20 }
             });
-          });
+          }));
           
           return true;
         }
-      });
+      }));
     },
     
     _renderItemLinks: function(itemId,item) {
