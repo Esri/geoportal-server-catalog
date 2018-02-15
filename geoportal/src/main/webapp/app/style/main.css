@@ -400,7 +400,7 @@ body {
   z-index: 99;
 }
 
-.dijitTooltipContainer {
+.dijitTooltipContainer, .dijitTooltipContainer > div, .dijitTooltipContainer > div > div, .dijitTooltipContainer > div > div > div {
   width: 100%;
   height: 100%;
 }
