@@ -37,11 +37,12 @@ define(["dojo/_base/declare",
         "app/content/ChangeOwner",
         "app/content/MetadataEditor",
         "app/context/metadata-editor",
-        "app/content/UploadMetadata"], 
+        "app/content/UploadMetadata",
+        "app/preview/PreviewPane"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, template, i18n, 
     AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
-    MetadataEditor, gxeConfig, UploadMetadata) {
+    MetadataEditor, gxeConfig, UploadMetadata, PreviewPane) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -175,10 +176,8 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             innerHTML: i18n.item.actions.preview
           },actionsNode);
           // create preview area: a placeholder for the map
-          var previewArea = domConstruct.create("div", {
-            innerHTML: "Click outside this dialog to close."
-          });
-          // create tooltip dialog with preview area in it
+          var previewArea = domConstruct.create("div");
+          var previewPane;
           var tooltipDialog = new TooltipDialog({
               style: "width: 450px; height: 300px;",
               content: previewArea,
@@ -187,10 +186,17 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
               },
               onShow: function() {
                 tooltipDialog.focus();
-                console.log('Showing');
+                if (!previewPane) {
+                  previewPane = new PreviewPane({serviceType: serviceType});
+                  previewPane.placeAt(previewArea);
+                  previewPane.startup();
+                }
               },
               onHide: function() {
-                console.log('Hidding');
+                if (previewPane) {
+                  previewPane.destroy();
+                  previewPane = null;
+                }
               }
           });
           this.own(tooltipDialog);
@@ -198,8 +204,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           this.own(on(previewNode, "click", function() {
             popup.open({
               popup: tooltipDialog,
-              around: previewNode,
-              padding: { x: 20, y: 20 }
+              around: previewNode
             });
           }));
           
