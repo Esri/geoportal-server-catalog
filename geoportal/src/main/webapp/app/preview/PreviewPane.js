@@ -24,10 +24,12 @@ define(["dojo/_base/declare",
         "dijit/_TemplatedMixin",
         "dijit/_WidgetsInTemplateMixin",
         "dojo/text!./templates/PreviewPane.html",
-        "dojo/i18n!app/nls/resources"
+        "dojo/i18n!app/nls/resources",
+        "esri/map"
       ], 
 function(declare, lang, array, query, domClass, topic, appTopics, registry,
-         _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n
+         _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
+         Map
          ) {
 
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -37,11 +39,9 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
     
     postCreate: function() {
       this.inherited(arguments);
-      console.log(this.serviceType);
-    },
-    
-    startup: function() {
-      this.inherited(arguments);
+      var mapProps = this.map || AppContext.appConfig.searchMap || {};
+      if (mapProps) mapProps = lang.clone(mapProps);
+      this.map = new Map(this.mapNode, mapProps);
     }
 
   });
