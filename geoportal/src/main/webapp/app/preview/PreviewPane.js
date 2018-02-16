@@ -19,6 +19,7 @@ define(["dojo/_base/declare",
         "dojo/dom-class",
         "dojo/topic",
         "app/context/app-topics",
+        "app/preview/PreviewUtil",
         "dijit/registry",
         "dijit/_WidgetBase",
         "dijit/_TemplatedMixin",
@@ -27,7 +28,7 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "esri/map"
       ], 
-function(declare, lang, array, query, domClass, topic, appTopics, registry,
+function(declare, lang, array, query, domClass, topic, appTopics, PreviewUtil, registry,
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
          Map
          ) {
@@ -42,6 +43,8 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
       this.map = new Map(this.mapNode, mapProps);
+      
+      PreviewUtil.addService(this.map, this.serviceType);
     }
 
   });

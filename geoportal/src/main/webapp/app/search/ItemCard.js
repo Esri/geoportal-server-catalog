@@ -38,11 +38,12 @@ define(["dojo/_base/declare",
         "app/content/MetadataEditor",
         "app/context/metadata-editor",
         "app/content/UploadMetadata",
+        "app/preview/PreviewUtil",
         "app/preview/PreviewPane"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
     _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, template, i18n, 
     AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
-    MetadataEditor, gxeConfig, UploadMetadata, PreviewPane) {
+    MetadataEditor, gxeConfig, UploadMetadata, PreviewUtil, PreviewPane) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -170,43 +171,45 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             }
           },actionsNode);
           
-          // create clickable 'Preview' link
-          var previewNode = domConstruct.create("a",{
-            href: "javascript:void(0)",
-            innerHTML: i18n.item.actions.preview
-          },actionsNode);
-          // create preview area: a placeholder for the map
-          var previewArea = domConstruct.create("div");
-          var previewPane;
-          var tooltipDialog = new TooltipDialog({
-              style: "width: 450px; height: 300px;",
-              content: previewArea,
-              onBlur: function() {
-                popup.close(tooltipDialog);
-              },
-              onShow: function() {
-                tooltipDialog.focus();
-                if (!previewPane) {
-                  previewPane = new PreviewPane({serviceType: serviceType});
-                  previewPane.placeAt(previewArea);
-                  previewPane.startup();
+          // create clickable 'Preview' link if allowes
+          if (PreviewUtil.canPreview(serviceType)) {
+            var previewNode = domConstruct.create("a",{
+              href: "javascript:void(0)",
+              innerHTML: i18n.item.actions.preview
+            },actionsNode);
+            // create preview area: a placeholder for the map
+            var previewArea = domConstruct.create("div");
+            var previewPane;
+            var tooltipDialog = new TooltipDialog({
+                style: "width: 450px; height: 300px;",
+                content: previewArea,
+                onBlur: function() {
+                  popup.close(tooltipDialog);
+                },
+                onShow: function() {
+                  tooltipDialog.focus();
+                  if (!previewPane) {
+                    previewPane = new PreviewPane({serviceType: serviceType});
+                    previewPane.placeAt(previewArea);
+                    previewPane.startup();
+                  }
+                },
+                onHide: function() {
+                  if (previewPane) {
+                    previewPane.destroy();
+                    previewPane = null;
+                  }
                 }
-              },
-              onHide: function() {
-                if (previewPane) {
-                  previewPane.destroy();
-                  previewPane = null;
-                }
-              }
-          });
-          this.own(tooltipDialog);
-          // install 'onclick' event handler to show tooltip dialog
-          this.own(on(previewNode, "click", function() {
-            popup.open({
-              popup: tooltipDialog,
-              around: previewNode
             });
-          }));
+            this.own(tooltipDialog);
+            // install 'onclick' event handler to show tooltip dialog
+            this.own(on(previewNode, "click", function() {
+              popup.open({
+                popup: tooltipDialog,
+                around: previewNode
+              });
+            }));
+          }
           
           return true;
         }
