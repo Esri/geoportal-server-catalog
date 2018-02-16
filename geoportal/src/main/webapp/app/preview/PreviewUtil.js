@@ -1,0 +1,67 @@
+/* See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * Esri Inc. licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+define([
+  "dojo/_base/lang",
+  "dojo/_base/array",
+  "esri/request",
+  "esri/layers/ArcGISDynamicMapServiceLayer",
+  "esri/layers/FeatureLayer",
+  "esri/layers/ArcGISImageServiceLayer"
+],
+function (lang, array,
+          esriRequest, 
+          ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer) {
+  
+  var _layerFactories = {
+    "MapServer": function(map, url) {
+      var layer = new ArcGISDynamicMapServiceLayer(url, {});
+      map.addLayer(layer);
+    },
+    
+    "FeatureServer": function(map, url) {
+      esriRequest({url: url + "?f=pjson"}).then(function(response){
+        array.forEach(response.layers, function(layer) {
+          if (layer.defaultVisibility) {
+            var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
+            map.addLayer(layer);
+          }
+        });
+      });
+    },
+    
+    "ImageServer": function(map, url) {
+      var layer = new ArcGISImageServiceLayer(url);
+      map.addLayer(layer);
+    }
+  };
+  
+  var oThisObject = {
+    
+    canPreview: function(serviceType) {
+      var factory = _layerFactories[serviceType.type];
+      return !!factory;
+    },
+    
+    addService: function(map, serviceType) {
+      var factory = _layerFactories[serviceType.type];
+      if (factory) {
+        factory(map, serviceType.url);
+      }
+    }
+    
+  };
+  
+  return oThisObject;
+});
