@@ -92,25 +92,36 @@
 	<!-- Templates -->
 	<xsl:template match="/">
 		<html>
+		  <head>
+				<style>
+			    body {font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt; line-height: 16pt; color: #333333;}
+			    pre {font-family: Verdana, Arial, Helvetica, sans-serif; font-size: 10pt; line-height: 16pt; color: #333333;}
+			    b {font-size: 10pt; font-style: italic; color: #333333;}
+			    a:link {color: #B66B36; text-decoration: underline;}
+			    a:visited {color: #B66B36; text-decoration: underline;}
+			    a:hover {color: #4E6816; text-decoration: underline;}
+			    li {font-size: 10pt; line-height: 14pt; color: #333333;}
+			    .title {font-size: 14pt; color: #333333; font-weight: bold; margin-bottom: 8px;}
+			  </style>
+		  </head>
 			<body>
-					<font size="+3">
-			        <xsl:element name="a">
-					<xsl:attribute name="name">
-					<xsl:value-of select="'title'" />
-					</xsl:attribute>
-						<xsl:value-of select="//gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString"/>
-					</xsl:element>		
-					</font>
-					<font size="+3">
-			        <xsl:element name="a">
-					<xsl:attribute name="name">
-					<xsl:value-of select="'title'" />
-					</xsl:attribute>
-						<xsl:value-of select="//gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString"/>
-					</xsl:element>		
-					</font>
-					<br></br>
-					<br></br>
+					<div class="title">
+				    <xsl:element name="a">
+						<xsl:attribute name="name">
+						<xsl:value-of select="'title'" />
+						</xsl:attribute>
+							<xsl:value-of select="//gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString"/>
+						</xsl:element>		
+					</div>
+					<div class="title">
+				    <xsl:element name="a">
+						<xsl:attribute name="name">
+						<xsl:value-of select="'title'" />
+						</xsl:attribute>
+							<xsl:value-of select="//gmd:identificationInfo/srv:SV_ServiceIdentification/gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString"/>
+						</xsl:element>		
+					</div>
+					<!-- <br></br><br></br> -->
 						<xsl:for-each select="./*/*">
 							<xsl:variable name="transname" select="name()"/>
 							<xsl:if test="contains($transname,'gmd:spatialRepresentationInfo') or contains($transname,'gmd:referenceSystemInfo') or contains($transname,'gmd:metadataExtensionInfo') or contains($transname,'gmd:identificationInfo') or contains($transname,'gmd:contentInfo') or contains($transname,'gmd:distributionInfo') or contains($transname,'gmd:dataQualityInfo') or contains($transname,'gmd:portrayalCatalogueInfo') or contains($transname,'gmd:metadataConstraints') or contains($transname,'gmd:applicationSchemaInfo') or contains($transname,'gmd:metadataMaintenance') or contains($transname,'gmd:metadataMaintenanceInfo') or contains($transname,'gmi:acquisitionInformation') or contains($transname,'gfc:FC_FeatureCatalogue')">
