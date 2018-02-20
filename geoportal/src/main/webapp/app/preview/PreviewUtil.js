@@ -42,8 +42,8 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
-        if (response && response.layer && response.layer.initialExtent) {
-          var extent = new Extent(response.layer.initialExtent);
+        if (response && response.layer && response.layer.fullExtent) {
+          var extent = new Extent(response.layer.fullExtent);
           map.setExtent(extent, true);
         }
       });
@@ -61,9 +61,12 @@ function (lang, array, domConstruct, i18n,
             map.addLayer(layer);
           }
         });
-        if (response && response.initialExtent) {
-          var extent = new Extent(response.initialExtent);
-          map.setExtent(extent);
+        if (response && response.fullExtent) {
+          var extent = new Extent(response.fullExtent);
+          map.setExtent(extent, true);
+          if (map.getZoom() > 0 ) {
+            map.setZoom(map.getZoom() - 1);
+          }
         }
       }, function(error){
         _handleError(map, error);
@@ -76,9 +79,9 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
-        if (response && response.layer && response.layer.initialExtent) {
-          var extent = new Extent(response.layer.initialExtent);
-          map.setExtent(extent);
+        if (response && response.layer && response.layer.fullExtent) {
+          var extent = new Extent(response.layer.fullExtent);
+          map.setExtent(extent, true);
         }
       });
       map.addLayer(layer);
