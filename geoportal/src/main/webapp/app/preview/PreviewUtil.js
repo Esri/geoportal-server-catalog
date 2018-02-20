@@ -64,9 +64,6 @@ function (lang, array, domConstruct, i18n,
         if (response && response.fullExtent) {
           var extent = new Extent(response.fullExtent);
           map.setExtent(extent, true);
-          if (map.getZoom() > 0 ) {
-            map.setZoom(map.getZoom() - 1);
-          }
         }
       }, function(error){
         _handleError(map, error);
