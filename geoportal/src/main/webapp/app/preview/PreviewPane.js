@@ -45,6 +45,11 @@ function(declare, lang, array, query, domClass, topic, appTopics, PreviewUtil, r
       this.map = new Map(this.mapNode, mapProps);
       
       PreviewUtil.addService(this.map, this.serviceType);
+    },
+    
+    destroy: function() {
+      this.map.destroy();
+      this.inherited(arguments);
     }
 
   });
