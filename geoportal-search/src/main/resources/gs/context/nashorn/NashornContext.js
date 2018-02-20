@@ -14,7 +14,7 @@
  */
 
 (function(){
-  
+
   if (typeof console === "undefined") {
     console = {};
     console.debug = print;
@@ -22,63 +22,64 @@
     console.warn = print;
     console.error = print;
   }
-  
+
   gs._jvmTypes = {
     CharArray: Java.type("char[]")
   };
-  
+
   /* ============================================================================================== */
-  
+
   gs.context.nashorn.NashornContext = gs.Object.create(gs.context.Context,{
-  
-    indentXml: {value: function(task,xml) {
+
+    isNashorn: {writable: true, value: true},
+
+    indentXml: {writable:true,value:function(task,xml) {
       return gs.context.nashornUtil.indentXml(xml);
     }},
-    
-    newCounter: {value: function() {
+
+    newCounter: {writable:true,value:function() {
       return new Packages.java.util.concurrent.atomic.AtomicInteger();
     }},
-    
-    newStringBuilder: {value: function() {
+
+    newStringBuilder: {writable:true,value:function() {
       return gs.Object.create(gs.context.nashorn.StringBuilder).init();
     }},
-    
-    newXmlInfo: {value: function(task,xmlString,nsmap) {
+
+    newXmlInfo: {writable:true,value:function(task,xmlString) {
+      if (typeof xmlString === "string") xmlString = xmlString.trim();
       var source = new org.xml.sax.InputSource(new java.io.StringReader(xmlString));
       var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
       factory.setNamespaceAware(true);
       factory.setExpandEntityReferences(false);
       factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
-      //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
+      //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
       var builder = factory.newDocumentBuilder();
       var dom = builder.parse(source);
       var root = dom.getDocumentElement();
-      var xpathEvaluator = gs.context.nashornUtil.newXPathEvaluator(nsmap);
-      var xmlInfo = {
+      var xmlInfo = gs.Object.create(gs.context.nashorn.XmlInfo).mixin({
         dom: dom,
-        root: root,
-        xpathEvaluator: xpathEvaluator
-      };
+        root: root
+      });
       return xmlInfo;
     }},
-    
-    readResourceFile: {value: function(path,charset) {
+
+    readResourceFile: {writable:true,value:function(path,charset) {
       return gs.context.nashornUtil.readResourceFile(path,charset);
     }},
-  
-    removeAllButFilter: {value: function(xml) {
+
+    removeAllButFilter: {writable:true,value:function(xml) {
       return gs.context.nashornUtil.removeAllButFilter(xml);
     }},
-  
-    sendHttpRequest: {value: function(task,url,data,dataContentType) {
-      var result, promise = this.newPromise();
+
+    sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType,options) {
+      var result, promise = this.newPromise("sendHttpRequest");
       try {
         if (task.async) {
           new java.lang.Thread(function() {
             try {
-              if (task.verbose) console.warn("NashornContext sendHttpRequest.async");
-              result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType);
-              if (task.verbose) console.warn("NashornContext sendHttpRequest.async resolved",url);
+              if (task.verbose) console.log("NashornContext sendHttpRequest.async");
+              result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType,options);
+              if (task.verbose) console.log("NashornContext sendHttpRequest.async resolved",url);
               //print(typeof result, result.length);
               promise.resolve(result);
             } catch(err2) {
@@ -86,21 +87,21 @@
             }
           }).start();
         } else {
-          result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType);
+          result = gs.context.nashornUtil.sendHttpRequest(url,data,dataContentType,options);
           promise.resolve(result);
         }
       } catch (err) {
         promise.reject(err);
-      }    
+      }
       return promise;
     }}
-  
+
   });
-  
+
   /* ============================================================================================== */
-  
+
   gs.context.nashornUtil = {
-    
+
     indentXml: function(xml) {
       // TODO removeBOM ??
       var header = "<?xml version=\"1.0\" encoding=\"UTF-8\"?>";
@@ -114,15 +115,15 @@
         v = v.trim();
         if (v.startsWith(header+"<")) v = v.replace(header,header+"\r\n");
         if (v.length === 0) v = null;
-      };
+      }
       return v;
     },
-    
+
     newXPathEvaluator: function(nsmap) {
       var key;
       var createFunc = function(value) {
         if (typeof value === "function") return value;
-        return function() {return value};
+        return function() {return value;};
       };
       var iface = function(map) {
         var ifaceImpl = {};
@@ -131,7 +132,7 @@
         }
         return ifaceImpl;
       };
-      
+
       //var nsContext = new gs._jvmTypes.NamespaceContext(iface({
       var nsContext = new javax.xml.namespace.NamespaceContext(iface({
         getNamespaceURI: function(prefix) {
@@ -152,31 +153,13 @@
           return null;
         }
       }));
-      
+
       var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
       xpath.setNamespaceContext(nsContext);
-      
-      var NODETYPE_ATTRIBUTE = org.w3c.dom.Node.ATTRIBUTE_NODE;
-      var NODETYPE_ELEMENT = org.w3c.dom.Node.ELEMENT_NODE;
-      var NODETYPE_TEXT = org.w3c.dom.Node.TEXT_NODE;
       var XPATH_NODE = javax.xml.xpath.XPathConstants.NODE;
       var XPATH_NODESET = javax.xml.xpath.XPathConstants.NODESET;
       var XPATH_STRING = javax.xml.xpath.XPathConstants.STRING;
-      
       var evaluator = {
-        forEachChild: function(node,callback) {
-          var r, self = this;
-          this.getChildren(node).forEach(function(child){
-            if (callback) {
-              r =callback({
-                node: child,
-                nodeInfo: self.getNodeInfo(child),
-                nodeText: self.getNodeText(child)
-              });
-              if (r === "break") return;
-            }
-          });
-        },
         getNode: function(contextNode,xpathExpression) {
           return xpath.evaluate(xpathExpression,contextNode,XPATH_NODE);
         },
@@ -186,60 +169,11 @@
         },
         getString: function(contextNode,xpathExpression) {
           return xpath.evaluate(xpathExpression,contextNode,XPATH_STRING);
-        },
-        
-        getAttributes: function(node) {
-          if (node) {
-            return this._nodeListToArray(node.getAtrtibutes());
-          }
-          return [];
-        },
-        getChildren: function(node) {
-          if (node) {
-            return this._nodeListToArray(node.getChildNodes());
-          }
-          return [];
-        },
-        getNodeInfo: function(node) {
-          var info = {
-            node: node,
-            nodeName: node.getNodeName(),
-            localName: node.getLocalName(),
-            namespaceURI: node.getNamespaceURI(),
-            isAttributeNode: node.getNodeType() === NODETYPE_ATTRIBUTE,
-            isElementNode: node.getNodeType() === NODETYPE_ELEMENT,
-            isTextNode: node.getNodeType() === NODETYPE_TEXT
-          };
-          return info;
-        },
-        getNodeText: function(node) {
-          var v;
-          if (node) {
-            if (node.getNodeType() === 1) {
-              v = node.getTextContent();
-              if (typeof v === "string") v = v.trim();
-            } else {
-              v = node.getNodeValue();
-            }
-            if (typeof v === "string") {
-              return v;
-            }
-          }
-          return null;
-        },
-        _nodeListToArray: function(nl) {
-          var i, a = [];
-          if (nl) {
-            for (i = 0; i < nl.getLength(); i++) {
-              a.push(nl.item(i));
-            }
-          }
-          return a;
         }
       };
       return evaluator;
     },
-    
+
     readResourceFile: function(path,charset) {
       if (charset === null || charset.length == 0) charset = "UTF-8";
       var url = java.lang.Thread.currentThread().getContextClassLoader().getResource(path);
@@ -247,9 +181,9 @@
         java.nio.file.Paths.get(url.toURI())),charset);
       return content;
     },
-    
+
     removeAllButFilter: function(xml) {
-      // TODO removeBOM ?? 
+      // TODO removeBOM ??
       try {
         var inputSource = new org.xml.sax.InputSource(new java.io.StringReader(xml));
         var factory = javax.xml.parsers.DocumentBuilderFactory.newInstance();
@@ -259,7 +193,7 @@
         //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
         var builder = factory.newDocumentBuilder();
         var dom = builder.parse(inputSource);
-  
+
         var root = dom.getDocumentElement();
         var nl = root.getChildNodes();
         for (var i=0;i<nl.getLength();i++) {
@@ -273,7 +207,7 @@
           } else if (nd.getNodeType() == org.w3c.dom.Node.TEXT_NODE) {
           }
         }
-        
+
         var source = new javax.xml.transform.dom.DOMSource(dom);
         var streamResult = new javax.xml.transform.stream.StreamResult(new java.io.StringWriter());
         this.transform(source,streamResult,true);
@@ -283,8 +217,8 @@
         return xml;
       }
     },
-    
-    sendHttpRequest: function(url, data, dataContentType) {
+
+    sendHttpRequest: function(url, data, dataContentType, options) {
       var result = null;
       var br = null, wr = null;
       var sw = new java.io.StringWriter();
@@ -294,6 +228,17 @@
         java.net.HttpURLConnection.setFollowRedirects(true);
         var con = u.openConnection();
         con.setInstanceFollowRedirects(true);
+
+        if (options && options.basicCredentials &&
+            typeof options.basicCredentials.username === "string" &&
+            options.basicCredentials.username.length > 0 &&
+            typeof options.basicCredentials.password === "string" &&
+            options.basicCredentials.password.length > 0) {
+          var cred = options.basicCredentials.username+":"+options.basicCredentials.password;
+          cred = new java.lang.String(java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8")),"UTF-8");
+          con.setRequestProperty( "Authorization","Basic "+cred);
+        }
+
         if (typeof data === "string" && data.length > 0) {
           con.setDoOutput(true);
           con.setRequestMethod("POST");
@@ -323,7 +268,7 @@
         }
         //print("contentType="+contentType+" ... charset="+charset);
         br = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream(),charset));
-        var nRead = 0;;
+        var nRead = 0;
         var buffer = new gs._jvmTypes.CharArray(4096);
         while ((nRead = br.read(buffer,0,4096)) >= 0) {
           sw.write(buffer,0,nRead); // TODO comment out this line and Invalid JSON: <json>:1:0 Expected json literal but found eof
@@ -332,13 +277,14 @@
         //console.log("result",result);
       } catch(e) {
         print(e); // TODO printStackTrace
+        throw new Error(e.toString());
       } finally{
         try {if (wr !== null) wr.close();} catch(ef) {print(ef);}
         try {if (br !== null) br.close();} catch(ef) {print(ef);}
       }
       return result;
     },
-    
+
     transform: function(source,result,indent) {
       var factory = javax.xml.transform.TransformerFactory.newInstance();
       factory.setAttribute(javax.xml.XMLConstants.ACCESS_EXTERNAL_DTD,"");
@@ -353,9 +299,137 @@
       }
       transformer.transform(source,result);
     }
-    
+
   };
-  
+
+  /* ============================================================================================== */
+
+  gs.context.nashorn.XmlInfo = gs.Object.create(gs.base.XmlInfo,{
+
+    NODETYPE_ATTRIBUTE: {writable: true, value: org.w3c.dom.Node.ATTRIBUTE_NODE},
+    NODETYPE_ELEMENT: {writable: true, value: org.w3c.dom.Node.ELEMENT_NODE},
+    NODETYPE_TEXT: {writable: true, value: org.w3c.dom.Node.TEXT_NODE},
+
+    dom: {writable: true, value: null},
+    root: {writable: true, value: null},
+
+    forEachAttribute: {writable:true,value:function(node,callback) {
+      var r, self = this;
+      this.getAttributes(node).forEach(function(child){
+        if (callback) {
+          r = callback(self.getNodeInfo(child,true));
+          if (r === "break") return;
+        }
+      });
+    }},
+
+    forEachChild: {writable:true,value:function(node,callback) {
+      var r, self = this;
+      this.getChildren(node).forEach(function(child){
+        if (callback) {
+          r = callback(self.getNodeInfo(child,true));
+          if (r === "break") return;
+        }
+      });
+    }},
+
+    getAttributes: {writable:true,value:function(node) {
+      if (node) {
+        return this._nodeListToArray(node.getAttributes());
+      }
+      return [];
+    }},
+
+    getAttributeValue: {writable:true,value:function(node,localName,namespaceURI) {
+      var value = null;
+      var ns = (typeof namespaceURI === "string" && namespaceURI.length > 0);
+      this.forEachAttribute(node,function(info){
+        if (localName === info.localName) {
+          if (ns) {
+            if (namespaceURI === info.namespaceURI) {
+              value = info.nodeText;
+              return "break";
+            }
+          } else {
+            value = info.nodeText;
+            return "break";
+            /*
+            if (typeof info.namespaceURI !== "string" ||
+                info.namespaceURI.length === 0) {
+              value = info.nodeText;
+              return "break";
+            }
+            */
+          }
+        }
+      });
+      return value;
+    }},
+
+    getChildren: {writable:true,value:function(node) {
+      if (node) {
+        return this._nodeListToArray(node.getChildNodes());
+      }
+      return [];
+    }},
+
+    /*
+     * nodeInfo:
+     * {
+     *   node: ,
+     *   nodeText: , (if requested)
+     *   nodeName: ,
+     *   localName: ,
+     *   namespaceURI: ,
+     *   isAttributeNode: ,
+     *   isElementNode: ,
+     *   isTextNode:
+     * }
+     */
+    getNodeInfo: {writable:true,value:function(node,withText) {
+      if (!node) return null;
+      var info = {
+        node: node,
+        nodeText: this.getNodeText(node),
+        nodeName: node.getNodeName(),
+        localName: node.getLocalName(),
+        namespaceURI: node.getNamespaceURI(),
+        isAttributeNode: node.getNodeType() === this.NODETYPE_ATTRIBUTE,
+        isElementNode: node.getNodeType() === this.NODETYPE_ELEMENT,
+        isTextNode: node.getNodeType() === this.NODETYPE_TEXT
+      };
+      if (withText) info.nodeText = this.getNodeText(node);
+      return info;
+    }},
+
+    getNodeText: {writable:true,value:function(node) {
+      var v;
+      if (node) {
+        if (node.getNodeType() === 1) {
+          v = node.getTextContent();
+          if (typeof v === "string") v = v.trim();
+        } else {
+          v = node.getNodeValue();
+        }
+        if (typeof v === "string") {
+          return v;
+        }
+      }
+      return null;
+    }},
+
+    _nodeListToArray: {writable:true,value:function(nl) {
+      var i, a = [];
+      if (nl) {
+        for (i = 0; i < nl.getLength(); i++) {
+          a.push(nl.item(i));
+        }
+      }
+      return a;
+    }}
+
+  });
+
   /* ============================================================================================== */
 
 }());

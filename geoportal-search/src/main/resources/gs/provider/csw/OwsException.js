@@ -28,7 +28,7 @@
     locator: {writable: true, value: null},
     text: {writable: true, value: null},
 
-    getReport: {value: function(task) {
+    getReport: {writable:true,value:function(task) {
       var p1 = task.val.NL;
       var p2 = p1+"\t";
       var p3 = p2+"\t";
@@ -37,10 +37,10 @@
         this.code = this.OWSCODE_NoApplicableCode;
       }
       var version = "3.0.0";
-      var owsUri = task.uris.URI_OWS;
+      var owsUri = task.uris.URI_OWS2;
       if (task.isCsw2) {
         version = "1.2.0";
-        owsUri = "http://www.opengis.net/ows";
+        owsUri = task.uris.URI_OWS;
       }
       var xml = task.val.XML_HEADER;
       xml += p1+"<ExceptionReport";
@@ -70,17 +70,18 @@
       return xml;
     }},
 
-    put: {value: function(task,code,locator,text) {
+    put: {writable:true,value:function(task,code,locator,text) {
       this.code = code;
       this.locator = locator;
       this.text = text;
       this.toResponse(task);
     }},
 
-    toResponse: {value: function(task) {
+    toResponse: {writable:true,value:function(task) {
       var xml = this.getReport(task);
       var response = task.response;
-      response.put(response.Status_BAD_REQUEST,response.MediaType_APPLICATION_XML,xml);
+      if (response.status === null) response.status = response.Status_BAD_REQUEST;
+      response.put(response.status,response.MediaType_APPLICATION_XML,xml);
       task.hasError = true;
     }}
 

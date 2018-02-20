@@ -15,8 +15,9 @@
 define(["dojo/_base/declare",
   "jimu/BaseWidget",
   "dijit/_WidgetsInTemplateMixin",
-  "./gs/widget/Search"],
-function(declare, BaseWidget, _WidgetsInTemplateMixin,Search) {
+  "./gs/widget/SearchPane",
+  "./gs/widget/WidgetContext"],
+function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane, WidgetContext) {
 
   var oThisClass = declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -36,9 +37,16 @@ function(declare, BaseWidget, _WidgetsInTemplateMixin,Search) {
     },
 
     _init: function() {
-      new Search({
+      var widgetContext = new WidgetContext({
+        i18n: this.nls,
+        map: this.map,
         wabWidget: this
+      });
+      var searchPane = new SearchPane({
+        i18n: widgetContext.i18n,
+        widgetContext: widgetContext
       },this.widgetNode);
+      searchPane.startup();
     }
 
   });

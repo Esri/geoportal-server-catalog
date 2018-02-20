@@ -14,24 +14,24 @@
  */
 
 (function(){
-  
+
   gs.base.StringBuilder = gs.Object.create(gs.Proto,{
-  
+
     _value: {writable: true, value: ""},
-  
-    append: {value: function(value) {
+
+    append: {writable:true,value:function(value) {
       if (value === null) return this;
       if (typeof value !== "string") return this;
       if (this._value === null) this._value = "";
       this._value += value;
       return this;
     }},
-    
-    toString: {value: function() {
+
+    toString: {writable:true,value:function() {
       if (this._value === null) return "";
       return this._value;
     }}
-  
+
   });
 
 }());

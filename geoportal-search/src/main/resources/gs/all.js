@@ -14,7 +14,7 @@
  */
 
 (function(){
-  
+
   if (typeof gs === "undefined") gs = {};
   if (!gs.atom) gs.atom = {};
   if (!gs.base) gs.base = {};
@@ -27,10 +27,12 @@
   if (!gs.provider.csw) gs.provider.csw = {};
   if (!gs.provider.opensearch) gs.provider.opensearch = {};
   if (!gs.target) gs.target = {};
+  if (!gs.target.csw) gs.target.csw = {};
   if (!gs.target.elastic) gs.target.elastic = {};
   if (!gs.target.portal) gs.target.portal = {};
+  if (!gs.target.profiles) gs.target.profiles = {};
   if (!gs.writer) gs.writer = {};
-  
+
   var i, paths;
   var files = {
     common: [
@@ -44,6 +46,7 @@
       "base/Uris",
       "base/Val",
       "base/XmlBuilder",
+      "base/XmlInfo",
       "config/Config",
       "context/Context",
       "context/Processor",
@@ -54,6 +57,8 @@
       "provider/opensearch/OpensearchProvider",
       "target/Target",
       "target/TargetSchema",
+      "target/csw/CswTarget",
+      "target/csw/CswSchema",
       "target/elastic/ElasticTarget",
       "target/elastic/ElasticSchema",
       "target/elastic/GeoportalTarget",
@@ -62,10 +67,16 @@
       "target/elastic/CustomElasticSchema",
       "target/portal/PortalTarget",
       "target/portal/PortalSchema",
+      "target/profiles/profiles",
       "writer/Writer",
+      "writer/XmlWriter",
       "writer/AtomWriter",
       "writer/CswWriter",
-      "writer/JsonWriter"
+      "writer/JsonWriter",
+      "writer/CsvWriter",
+      "writer/ErosWriter",
+      "writer/KmlWriter",
+      "writer/RssWriter"
     ],
     nashorn: [
       "context/nashorn/NashornContext",
@@ -74,14 +85,14 @@
     ],
     node: [
       "context/node/NodeContext",
-      "context/node/NodeProcessor" 
+      "context/node/NodeProcessor"
     ],
     browser: [
       "context/browser/WebContext",
-      "context/browser/WebProcessor" 
+      "context/browser/WebProcessor"
     ]
   };
-  
+
   if (typeof gsConfig !== "undefined" && gsConfig.isNashorn) {
     paths = files.common.concat(files.nashorn);
     for (i=0;i<paths.length;i++) {
@@ -93,7 +104,7 @@
       require("./"+paths[i]+".js");
     }
   }
-  
+
   gs.reqAll = function(localRequire, callback) {
     // for the Dojo based widget
     // these need to be loaded synchronously
@@ -112,4 +123,3 @@
   };
 
 }());
-

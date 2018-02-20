@@ -14,13 +14,13 @@
  */
 
 (function(){
-  
+
   gs.target.elastic.GeoportalTarget = gs.Object.create(gs.target.elastic.ElasticTarget, {
-    
-    newSchema: {value:function(task) {
-      return gs.Object.create(gs.target.elastic.GeoportalSchema);
+
+    getSchemaClass: {writable:true,value:function() {
+      return gs.target.elastic.GeoportalSchema;
     }}
-  
+
   });
 
 }());

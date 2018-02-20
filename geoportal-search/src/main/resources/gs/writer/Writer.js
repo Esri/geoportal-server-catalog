@@ -14,17 +14,11 @@
  */
 
 (function(){
-  
+
   gs.writer.Writer = gs.Object.create(gs.Proto,{
-  
-    write: {value: function(task,searchResult) {}},
-  
-    writeXmlResponse: {value: function(task,xml) {
-      if (task.request.pretty) xml = task.context.indentXml(task,xml);
-      var response = task.response;
-      response.put(response.Status_OK,response.MediaType_APPLICATION_XML,xml);
-    }}
-  
+
+    write: {writable:true,value:function(task,searchResult) {}}
+
   });
 
 }());

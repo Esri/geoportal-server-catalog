@@ -14,61 +14,52 @@
  */
 
 (function(){
-  
+
   gs.context.Processor = gs.Object.create(gs.Proto,{
-    
-    execute: {value:function(requestInfo, responseHandler) {
-      var context = this.newContext();
-      var config = this.newConfig();
-      var request = this.makeRequest(requestInfo);
-      var targets = this.makeTargets(context,config,request);
-      var tasks = this.makeTasks(context,config,requestInfo,targets);
-      if (tasks.length === 0) {
-        // TODO error here??
-        if (typeof responseHandler === "function") {
-          // TODO json response?
-          var response = gs.Object.create(gs.base.Response);
-          responseHandler(response.Status_OK,response.mediaType.MediaType_TEXT_PLAIN,"No task.");
+
+    execute: {writable:true,value:function(requestInfo, responseHandler) {
+      var task = null;
+      try {
+        var context = this.newContext();
+        var config = this.newConfig();
+        var request = this.makeRequest(requestInfo);
+        var targets = this.makeTargets(context,config,request);
+        var tasks = this.makeTasks(context,config,requestInfo,targets);
+        if (tasks.length === 0) {
+          this._sendError(responseHandler,null,null,"Search error: no task");
+        } else if (tasks.length === 1) {
+          task = tasks[0];
+          this.executeTask(context,tasks[0],responseHandler);
+        } else {
+          this.executeTasks(context,tasks,responseHandler);
         }
-      } else if (tasks.length === 1) {
-        this.executeTask(context,tasks[0],responseHandler);
-      } else {
-        this.executeTasks(context,tasks,responseHandler);
+      } catch(ex) {
+        this._sendError(responseHandler,task,ex,null);
       }
     }},
-    
-    executeTask: {value:function(context, task, responseHandler) {
-      var msg, response;
+
+    executeTask: {writable:true,value:function(context, task, responseHandler) {
+      var self = this, msg, response;
+      task.provider.preprocess(task);
       task.dfd = task.provider.execute(task);
-      task.dfd.then(function(result){
+      task.dfd.then(function(){
+        if (task.verbose) console.log("Processor.executeTask-complete");
         response = task.response;
         if (typeof responseHandler === "function") {
-          responseHandler(response.status,response.mediaType,response.entity,task);
+          responseHandler(response.status,response.mediaType,response.entity,response.headers);
         }
       })["catch"](function(error){
-        response = task.response;
-        if (!task.hasError) {
-          // TODO JSON?
-          msg = "Search error";
-          if (typeof error.message === "string" && error.message.length > 0) {
-            msg = error.message;
-          }
-          response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_TEXT_PLAIN,msg);
-          task.hasError = true;
-        }
-        if (typeof responseHandler === "function") {
-          responseHandler(response.status,response.mediaType,response.entity,task);
-        }
+        self._sendError(responseHandler,task,error,null);
       });
     }},
-    
-    executeTasks: {value:function(context, tasks, responseHandler) {
+
+    executeTasks: {writable:true,value:function(context, tasks, responseHandler) {
       var self = this, dfds = [];
       tasks.forEach(function(task){
         self.executeTask(context,task);
         dfds.push(task.dfd);
       });
-      
+
       var response, result, results = [], o;
       var promise = context.newPromiseAll(dfds);
       promise.then(function(){
@@ -86,16 +77,17 @@
         result = JSON.stringify(results); // TODO pretty? JSON.stringify(results,null,2);
         response = gs.Object.create(gs.base.Response);
         response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,result);
+        if (result.headers) response.headers = result.headers;
         if (typeof responseHandler === "function") {
-          responseHandler(response.status,response.mediaType,response.entity,tasks);
+          responseHandler(response.status,response.mediaType,response.entity,response.headers);
         }
       })["catch"](function(error){
-        // TODO JSON error
-        console.warn("Error",error);
+        // TODO collect the errors?
+        self._sendError(responseHandler,null,error,null);
       });
     }},
-    
-    makeProvider: {value: function(task) {
+
+    makeProvider: {writable:true,value:function(task) {
       var provider = gs.Object.create(gs.provider.opensearch.OpensearchProvider);
       var v = task.request.getUrlPath();
       if (task.val.endsWith(v,"/csw") || task.val.endsWith(v,"/csw/")) {
@@ -106,11 +98,11 @@
           });
         }
         if (!isOsDsc) provider = gs.Object.create(gs.provider.csw.CswProvider);
-      } 
+      }
       return provider;
     }},
-    
-    makeRequest: {value: function(requestInfo) {
+
+    makeRequest: {writable:true,value:function(requestInfo) {
       var request = gs.Object.create(gs.base.Request).mixin({
         url: requestInfo.requestUrl,
         body: requestInfo.requestBody,
@@ -119,23 +111,117 @@
       });
       return request;
     }},
-    
-    _checkTarget: {value: function(v, cfgTargets, targets, config) {
-      //console.warn("_checkTarget",v);
+
+    makeTargets: {writable:true,value:function(context,config,request) {
+      var self = this, o, target, targets = [];
+      var cfgTargets = config.getTargets() || {};
+      var values = request.getTargets();
+      //console.log("target values",values);
+      if (values !== null) {
+        values.forEach(function(v){
+          //console.log("target value",v);
+          self._checkTarget(v,cfgTargets,targets,config);
+        });
+      }
+      if (targets.length === 0) {
+        o = config.defaultTarget;
+        if (cfgTargets.hasOwnProperty(o)) {
+          target = cfgTargets[o];
+          //target.key = o;
+          targets.push(target);
+        }
+      }
+      if (targets.length === 0) {
+        // TODO exception here??
+      }
+      return targets;
+    }},
+
+    makeTasks: {writable:true,value:function(context,config,requestInfo,targets) {
+      var self = this, req, tasks = [];
+      var sRequestInfo = JSON.stringify(requestInfo);
+      targets.forEach(function(target){
+        requestInfo = JSON.parse(sRequestInfo);
+        request = gs.Object.create(gs.base.Request).mixin({
+          url: requestInfo.requestUrl,
+          body: requestInfo.requestBody,
+          headerMap: requestInfo.headerMap,
+          parameterMap: requestInfo.parameterMap,
+        });
+        task = self.newTask(context,config,request,{
+          baseUrl: requestInfo.baseUrl
+        }).mixin(requestInfo.taskOptions);
+        task.target = target;
+        task.response.target = target.key;
+        tasks.push(task);
+      });
+      return tasks;
+    }},
+
+    makeWriters: {writable:true,value:function(task) {
+      var index = function(writers,keys,writer) {
+        keys.forEach(function(k){
+          writers[k.toLowerCase()] = writer;
+        });
+      };
+
+      var atom = ["atom","application/atom+xml","http://www.w3.org/2005/Atom"];
+      var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0"];
+      var json = ["json","pjson","json-source","application/json"];
+      var csv = ["csv","text/csv"];
+      var eros = ["eros"];
+      var kml = ["kml","application/vnd.google-earth.kml+xml","http://www.opengis.net/kml/2.2"];
+      var rss = ["rss","georss","application/rss+xml"];
+
+      var writers = {};
+      index(writers,atom,gs.Object.create(gs.writer.AtomWriter));
+      index(writers,csw,gs.Object.create(gs.writer.CswWriter));
+      index(writers,json,gs.Object.create(gs.writer.JsonWriter));
+      index(writers,csv,gs.Object.create(gs.writer.CsvWriter));
+      index(writers,eros,gs.Object.create(gs.writer.ErosWriter));
+      index(writers,kml,gs.Object.create(gs.writer.KmlWriter));
+      index(writers,rss,gs.Object.create(gs.writer.RssWriter));
+
+      return writers;
+    }},
+
+    newConfig: {writable:true,value:function() {
+      return gs.Object.create(gs.config.Config);
+    }},
+
+    newContext: {writable:true,value:function() {
+      return gs.Object.create(gs.context.Context);
+    }},
+
+    newTask: {writable:true,value:function(context,config,request,options) {
+      var task = gs.base.Task.newTask().mixin({
+        config: config,
+        context: context,
+        request: request,
+      }).mixin(options);
+      task.provider = this.makeProvider(task);
+      task.writers = this.makeWriters(task);
+      return task;
+    }},
+
+    /* ............................................................................................ */
+
+    _checkTarget: {writable:true,value:function(v, cfgTargets, targets, config) {
+      //console.log("_checkTarget",v);
       var self = this, o = v, target = null;
       if (typeof v === "string") {
         v = v.trim();
         if (v.length > 0) {
           try {
             o = JSON.parse(v);
-            //console.warn("o",o);
+            //console.log("o",o);
           } catch(ex) {
-            //console.warn(ex);
+            //console.log(ex);
             o = v;
           }
         }
       }
-      //console.warn(typeof o,o);
+      //console.log(typeof o,o);
       if (typeof o === "string") {
         if (cfgTargets.hasOwnProperty(o)) {
           target = cfgTargets[o];
@@ -153,13 +239,21 @@
           if ((o.url.indexOf("http://") === 0) || (o.url.indexOf("https://") === 0)) {
             if (o.type === "portal") {
               // TODO example "http://urbanvm.esri.com/arcgis"
-              target = gs.Object.create(gs.target.portal.PortalTarget).mixin({
+              target = gs.Object.create(gs.target.portal.PortalTarget)
+              .safeMixin(o).mixin({
                 "portalBaseUrl": o.url
               });
             } else if (o.type === "geoportal") {
-              // TODO example  "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
-              target = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
+              // TODO example "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
+              target = gs.Object.create(gs.target.elastic.GeoportalTarget)
+              .safeMixin(o).mixin({
                 "searchUrl": o.url
+              });
+            } else if (o.type === "csw") {
+              // TODO example "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+              target = gs.Object.create(gs.target.csw.CswTarget)
+              .safeMixin(o).mixin({
+                "getRecordsUrl": o.url
               });
             }
             if (target) {
@@ -173,100 +267,57 @@
               if (typeof o.filter === "string" && o.filter.length > 0) {
                 target.requiredFilter = o.filter;
               }
+              if (o.profile && gs.target.profiles[o.profile]) {
+                gs.target.profiles[o.profile].prepareTarget(target);
+              }
               targets.push(target);
             }
           }
         }
       }
     }},
-    
-    makeTargets: {value: function(context,config,request) {
-      var self = this, o, target, targets = [];
-      var cfgTargets = config.getTargets() || {};
-      var values = request.getParameterValues("target");
-      if (values === null || values.length === 0) {
-        values = request.getParameterValues("targets");
+
+    _sendError: {writable:true,value:function(responseHandler, task, error, message) {
+      var response, asJson = true, msg = "Search error";
+      if (task) {
+        response = task.response;
+      } else {
+        response = gs.Object.create(gs.base.Response);
       }
-      if (values !== null && values.length === 1) {
-        //values = values[0].split(","); // TODO???
+      if (typeof message === "string" && message.length > 0) {
+        msg = message;
+      } else if (error && typeof error.message === "string" && error.message.length > 0) {
+        // TODO return the message?
+        msg = "Search error: "+error.message;
       }
-      if (values !== null) {
-        values.forEach(function(v){
-          self._checkTarget(v,cfgTargets,targets,config);
-        });
-      }
-      if (targets.length === 0) {
-        o = config.defaultTarget;
-        if (cfgTargets.hasOwnProperty(o)) {
-          target = cfgTargets[o];
-          //target.key = o;
-          targets.push(target);
+      if (!task || !task.hasError) {
+        if (task) task.hasError = true;
+        // TODO asJson?
+        if (asJson) {
+          msg = JSON.stringify({"error": msg});
+          response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_APPLICATION_JSON,msg);
+        } else {
+          response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_TEXT_PLAIN,msg);
         }
       }
-      if (targets.length === 0) {
-        // TODO exception here??
+      if (typeof responseHandler === "function") {
+        // TODO include response.headers?
+        responseHandler(response.status,response.mediaType,response.entity,response.headers);
       }
-      return targets;
-    }},
-    
-    makeTasks: {value: function(context,config,requestInfo,targets) {
-      var self = this, req, tasks = [];
-      var sRequestInfo = JSON.stringify(requestInfo);
-      targets.forEach(function(target){
-        requestInfo = JSON.parse(sRequestInfo); 
-        request = gs.Object.create(gs.base.Request).mixin({
-          url: requestInfo.requestUrl,
-          body: requestInfo.requestBody,
-          headerMap: requestInfo.headerMap,
-          parameterMap: requestInfo.parameterMap,
-        });
-        task = self.newTask(context,config,request,{
-          baseUrl: requestInfo.baseUrl
-        }).mixin(requestInfo.taskOptions);
-        task.target = target;
-        task.response.target = target.key;
-        tasks.push(task);
-      });
-      return tasks;
-    }},
-    
-    makeWriters: {value: function(task) {
-      var index = function(writers,keys,writer) {
-        keys.forEach(function(k){
-          writers[k.toLowerCase()] = writer;
-        })
-      };
-      
-      var atom = ["atom","application/atom+xml","http://www.w3.org/2005/Atom"];
-      var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0"];
-      var json = ["json","pjson","application/json"];
-      
-      var writers = {};
-      index(writers,atom,gs.Object.create(gs.writer.AtomWriter));
-      index(writers,csw,gs.Object.create(gs.writer.CswWriter));
-      index(writers,json,gs.Object.create(gs.writer.JsonWriter));
-      return writers;
-    }},
-    
-    newConfig: {value: function() {
-      return gs.Object.create(gs.config.Config);
-    }},
-    
-    newContext: {value: function() {
-      return gs.Object.create(gs.context.Context);
-    }},
-    
-    newTask: {value: function(context,config,request,options) {
-      var task = gs.base.Task.newTask().mixin({
-        config: config,
-        context: context,
-        request: request,
-      }).mixin(options);
-      task.provider = this.makeProvider(task);
-      task.writers = this.makeWriters(task);
-      return task;
+
+      try {
+        var printErrors = true; // TODO?
+        if (printErrors) {
+          if (error) console.log("Search error",error);
+          if (error && task && task.context && task.context.isNashorn) {
+            error.printStackTrace();
+          }
+        }
+      } catch(ex) {
+        console.log(ex);
+      }
     }}
-  
+
   });
-  
+
 }());

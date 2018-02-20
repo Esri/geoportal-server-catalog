@@ -16,83 +16,79 @@
 (function(){
 
   gs.writer.JsonWriter = gs.Object.create(gs.writer.Writer,{
-  
-    write: {value: function(task,searchResult) {
-      // TODO when to return a single atom entry?
-      //task.request.isItemByIdRequest = true;
-      /*
-      if (task.request.isItemByIdRequest) {
-        if (!searchResult.items || searchResult.items.length === 0) {
-          // // TODO send JSON
-          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_TEXT_PLAIN,null);
+
+    write: {writable:true,value:function(task,searchResult) {
+      var json;
+      if (searchResult.jsonResponse &&
+          typeof task.request.f === "string" &&
+          task.request.f.toLowerCase() === "json-source") {
+        json = searchResult.jsonResponse;
+        this.writeResponse(task,json);
+      } else {
+        if (task.provider.isCswProvider && task.request.isItemByIdRequest) {
+          this.writeItem(task,searchResult);
         } else {
-          if (task.provider.isCswProvider) {
-            this._writeItem(task,searchResult);
-          } else {
-            this._writeItems(task,searchResult);
-          }
+          this.writeItems(task,searchResult);
         }
-      } else {
-        this._writeItems(task,searchResult);
       }
-      */
-      var result;
-      if (searchResult.jsonResponse) {
-        result = searchResult.jsonResponse;
-      } else {
-        result = {}; // TODO?
-      }
-      if (task.request.pretty) result = JSON.stringify(result,null,2);
-      else result = JSON.stringify(result);
-      this._writeResponse(task,result);
     }},
-    
-    /* .......................................................................................... */
-    
-    _writeItem: {value: function(task,searchResult) {
+
+    writeEntry: {writable:true,value:function(task,results,item,options) {
+      var json = task.target.itemToJson(task,item) || {};
+      results.push(json);
+      //this.beforeEndEntry(task,xmlBuilder,item,options,entry);
+    }},
+
+    writeItem: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: true};
-      var xmlBuilder = task.context.newXmlBuilder();
-      xmlBuilder.writeStartDocument();
-      this._writeEntry(task,xmlBuilder,searchResult.items[0],options);
-      xmlBuilder.writeEndDocument();
-      this._writeResponse(task,xmlBuilder);
+      var results = [];
+      this.writeEntry(task,results,searchResult.items[0],options);
+      var response = {};
+      if (results.length > 0) response = results[0];
+      this.writeResponse(task,response);
     }},
-    
-    _writeItems: {value: function(task,searchResult) {
+
+    writeItems: {writable:true,value:function(task,searchResult) {
       var now = task.val.nowAsString();
       var options = {now: now, entryOnly: false};
-      
+
       var items = searchResult.items ? searchResult.items : [];
-      var totalHits = searchResult.totalHits;
-      var startIndex = searchResult.startIndex;
-      var itemsPerPage = searchResult.itemsPerPage;
-      
-      var result = {
-        items: []
+      var numReturned = items.length;
+      if (searchResult.itemsPerPage === 0) numReturned = 0;
+      var response = {
+        start: searchResult.startIndex,
+        num: numReturned, // searchResult.itemsPerPage?
+        total: searchResult.totalHits,
+        nextStart: searchResult.calcNextRecord(task)
+      };
+      if (task.target.schema &&
+          typeof task.target.schema .schemaType === "string" &&
+          task.target.schema.schemaType.length > 0) {
+        response.sourceType = task.target.schema.schemaType;
+        response.sourceKey = task.target.key;
       }
-      
-      //xmlBuilder.writeElement(task.uris.URI_OPENSEARCH,"totalResults",""+totalHits);
-      //xmlBuilder.writeElement(task.uris.URI_OPENSEARCH,"startIndex",""+startIndex);
-      //xmlBuilder.writeElement(task.uris.URI_OPENSEARCH,"itemsPerPage",""+itemsPerPage);
-      
-      if (itemsPerPage > 0) {
+
+      response.results = [];
+      if (searchResult.itemsPerPage > 0) {
         for (var i=0;i<items.length;i++) {
-          var entry = task.target.itemToJson(task,items[i]);
-          result.items.push(entry);
+          this.writeEntry(task,response.results,items[i],options);
         }
       }
-      
-      if (task.request.pretty) result = JSON.stringify(result,null,2);
-      else result = JSON.stringify(result);
-      this._writeResponse(task,result);
+      this.writeResponse(task,response);
     }},
-    
-    _writeResponse: {value: function(task,result) {
+
+    writeResponse: {writable:true,value:function(task,json) {
+      var str;
+      if (task.request.pretty) {
+        str = JSON.stringify(json,null,2);
+      } else {
+        str = JSON.stringify(json);
+      }
       var response = task.response;
-      response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,result);
+      response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,str);
     }}
-  
+
   });
 
 }());

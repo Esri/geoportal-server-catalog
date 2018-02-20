@@ -28,14 +28,10 @@
     responseFields: {writable: true, value: null},
     supportsCsw2: {writable: true, value: true},
 
-    addOverrideParameter: {value: function(task,key,value) {
-      task.request.parameterMap[key] = value; // TODO remove keys ?
-    }},
-
-    chkBBoxParam: {value: function(task) {
+    chkBBoxParam: {writable:true,value:function(task) {
       if (task.hasError) return;
       var msg, ows;
-      var bbox = this.chkParam(task,"bbox");
+      var bbox = task.request.getBBox();
       if (bbox === null || bbox.length === 0) return;
       var a = bbox.split(",");
       if (a.length === 5) {
@@ -58,11 +54,11 @@
       }
     }},
 
-    chkParam: {value: function(task,key) {
+    chkParam: {writable:true,value:function(task,key) {
       return task.request.chkParam(key);
     }},
 
-    execute: {value: function(task) {
+    execute: {writable:true,value:function(task) {
       if (!task.request.hasQueryParameters()) {
         return this.getCapabilities(task);
       }
@@ -137,11 +133,12 @@
       }
     }},
 
-    getCapabilities: {value: function(task) {
+    getCapabilities: {writable:true,value:function(task) {
       var msg, ows, xml, promise = task.context.newPromise();
       var cswUrl = task.baseUrl+"/csw"; // TODO
-      var opensearchDscUrl = task.baseUrl+"/opensearch/description"; // TODO
+      var opensearchDscUrl = task.baseUrl+"/opensearch/description";
       cswUrl = this.makeCapabilitiesHref(task,cswUrl);
+      opensearchDscUrl = this.makeCapabilitiesHref(task,opensearchDscUrl);
       var capabilitiesFile = task.config.cswCapabilitiesFile;
       if (this.isCsw2) capabilitiesFile = task.config.csw2CapabilitiesFile;
 
@@ -229,7 +226,7 @@
       return promise;
     }},
 
-    getRecordById: {value: function(task) {
+    getRecordById: {writable:true,value:function(task) {
       var msg, ows;
       task.request.isItemByIdRequest = true;
       var id = task.request.getParameter("id");
@@ -252,26 +249,26 @@
       }
     }},
 
-    getRecords: {value: function(task) {
+    getRecords: {writable:true,value:function(task) {
       var msg, ows;
       this.inputIndexOffset = 1; // TODO?
       var parser = gs.Object.create(gs.provider.csw.GetRecordsParser);
       parser.parseBody(this,task);
       var startPosition = this.chkParam(task,"startPosition");
       if (startPosition !== null && startPosition.length > 0) {
-        var from = task.val.strToInt(startPosition,-1);
+        var start = task.val.strToInt(startPosition,-1);
         // TODO should this be >= 1
-        if (from >= 1) {
-          // TODO from = from - 1; is this correct indexOffset??
-          this.addOverrideParameter(task,"from",""+from);
+        if (start >= 1) {
+          // TODO start = start - 1; is this correct indexOffset??
+          this.addOverrideParameter(task,"start",""+start);
         }
       }
       var maxRecords = this.chkParam(task,"maxRecords");
       if (maxRecords !== null && maxRecords.length > 0) {
         if (maxRecords.toLowerCase !== "unlimited") {
-          var size = task.val.strToInt(maxRecords,-1);
-          if (size >= 0) {
-            this.addOverrideParameter(task,"size",""+size);
+          var num = task.val.strToInt(maxRecords,-1);
+          if (num >= 0) {
+            this.addOverrideParameter(task,"num",""+num);
           }
         }
       }
@@ -285,12 +282,12 @@
       }
     }},
 
-    makeCapabilitiesHref: {value: function(task,cswUrl) {
+    makeCapabilitiesHref: {writable:true,value:function(task,cswUrl) {
       // TODO encoding decoding ?
       var str = "", url = task.request.url;
       var n = url.indexOf("?");
       if (n !== -1) str = url.substring(n + 1);
-      //console.warn("str",str);
+      //console.log("str",str);
 
       var i, l, qp = str.split("&"), map = {}, name, val, item;
       for (i = 0, l = qp.length; i < l; ++i){
@@ -335,13 +332,13 @@
 
       var qstr = pairs.join("&");
       if (qstr.length > 0) cswUrl = cswUrl + "?" + qstr;
-      //console.warn("qstr",qstr);
-      //console.warn("cswUrl",cswUrl);
+      //console.log("qstr",qstr);
+      //console.log("cswUrl",cswUrl);
 
       return cswUrl;
     }},
 
-    parseKvp: {value: function(task) {
+    parseKvp: {writable:true,value:function(task) {
       if (task.hasError) return;
       task.request.f = "csw";
       this.kvpNsPrefixByUri = {};
@@ -356,7 +353,7 @@
       task.request.parseF(task);
     }},
 
-    parseKvpElementNames: {value: function(task) {
+    parseKvpElementNames: {writable:true,value:function(task) {
       if (task.hasError) return;
       var msg, ows, self = this;
       var defaultSetName = this.elementSetName;
@@ -440,7 +437,7 @@
       this.responseFields = responseFields;
     }},
 
-    parseKvpNamespace: {value: function(task) {
+    parseKvpNamespace: {writable:true,value:function(task) {
       if (task.hasError) return;
       var msg, ows, self = this;
 
@@ -488,7 +485,7 @@
       //for (var k in this.kvpNsPrefixByUri) console.log(k,":",this.kvpNsPrefixByUri[k]);
     }},
 
-    parseKvpOutput: {value: function(task) {
+    parseKvpOutput: {writable:true,value:function(task) {
       if (task.hasError) return;
       var lc, msg, ows;
       var outputSchema = this.chkParam(task,"outputSchema");
@@ -527,7 +524,7 @@
 
     }},
 
-    parseKvpTypeNames: {value: function(task) {
+    parseKvpTypeNames: {writable:true,value:function(task) {
       if (task.hasError) return;
       var msg, ows;
       var typeNames = this.chkParam(task,"typeNames");
@@ -552,30 +549,31 @@
       }
     }},
 
-    search: {value: function(task) {
+    search: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       task.request.parseF(task);
       this.setWriter(task);
-      task.target.parseRequest(task);
-      var p2 = task.target.search(task);
-      p2.then(function(searchResult){
-        task.writer.write(task,searchResult);
-        promise.resolve();
+      task.target.search(task).then(function(searchResult){
+        if (task.request.isItemByIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
+          task.response.status = task.response.Status_NOT_FOUND;
+          ows = gs.Object.create(gs.provider.csw.OwsException);
+          ows.put(task,ows.OWSCODE_InvalidParameterValue,"id","Id not found.");
+          promise.resolve();
+        } else {
+          task.writer.write(task,searchResult);
+          promise.resolve();
+        }
       })["catch"](function(error){
         var msg = "Search error";
         if (typeof error.message === "string" && error.message.length > 0) {
           msg = error.message;
         }
+        task.response.status = task.response.Status_INTERNAL_SERVER_ERROR;
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_NoApplicableCode,null,msg);
-        var xml = ows.getReport(task);
-        var response = task.response;
-        response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_APPLICATION_XML,xml);
-        task.hasError = true;
-        promise.reject();
+        promise.resolve();
       });
       return promise;
-
     }}
 
   });
@@ -590,7 +588,7 @@
     qname: {writable: true, value: null},
     sortable: {writable: true, value: false},
 
-    init: {value: function(name, namespaceUri, nsUriByPrefix) {
+    init: {writable:true,value:function(name, namespaceUri, nsUriByPrefix) {
       this.name = name;
       this.qname = name;
       var chkByPrefix = true;
@@ -616,27 +614,26 @@
 
   gs.provider.csw.QFields = gs.Object.create(gs.Proto,{
 
-
     list: {writable: true, value: null},
 
-    add: {value: function(field) {
+    add: {writable:true,value:function(field) {
       if (!this.list) this.list = [];
       this.list.push(field);
       return field;
     }},
 
-    _add: {value: function(name,namespaceUri) {
+    _add: {writable:true,value:function(name,namespaceUri) {
       var field = gs.Object.create(gs.provider.csw.QField);
       field.init(name,namespaceUri,null);
       return this.add(field);
     }},
 
-    makeAll: {value: function(task) {
+    makeAll: {writable:true,value:function(task) {
       this.list = [];
       this._add("dc:identifier",task.uris.URI_DC);                 // brief
       this._add("dc:title",task.uris.URI_DC).sortable = true;      // brief
       this._add("dc:type",task.uris.URI_DC).sortable = true;       // brief
-      this._add("ows:BoundingBox",task.uris.URI_OWS);              // brief
+      this._add("ows:BoundingBox",task.uris.URI_OWS2);             // brief
       this._add("dc:subject",task.uris.URI_DC);                    // summary
       //this._add("dc:format",task.uris.URI_DC);                   // summary
       //this._add("dc:relation",task.uris.URI_DC);                 // summary
@@ -653,7 +650,7 @@
       this._add("dct:references",task.uris.URI_DCT);               // summary? should this be full? - Links
     }},
 
-    match: {value: function(field) {
+    match: {writable:true,value:function(field) {
       var found = null, lc = field.name.toLowerCase();
       if (this.list) {
         this.list.some(function(f){
@@ -668,7 +665,7 @@
       return found;
     }},
 
-    size: {value: function() {
+    size: {writable:true,value:function() {
       if (this.list) return this.list.length;
       return 0;
     }}
