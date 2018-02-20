@@ -181,7 +181,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             var previewArea = domConstruct.create("div");
             var previewPane;
             var tooltipDialog = new TooltipDialog({
-                style: "width: 450px; height: 300px;",
+                style: "width: 450px; height: 320px;",
                 content: previewArea,
                 onBlur: function() {
                   popup.close(tooltipDialog);
