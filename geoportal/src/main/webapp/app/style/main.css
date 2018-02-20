@@ -407,12 +407,16 @@ body {
 
 .g-preview-error {
   position: absolute; 
-  color: red; 
+  color: black; 
   background-color: white; 
-  left: 40%; 
+  left: 32%; 
+  right: 32%;
   top: 50%; 
   z-index: 1; 
   padding: 3px;
-  border: #000000 solid thin
+  border: #000000 solid thin;
+  border-radius: 4px;
+  opacity: 0.7;
+  text-align: center;
 }
 
