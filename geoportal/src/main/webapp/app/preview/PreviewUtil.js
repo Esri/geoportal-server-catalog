@@ -44,7 +44,7 @@ function (lang, array, domConstruct, i18n,
       layer.on("load", function(response) {
         if (response && response.layer && response.layer.initialExtent) {
           var extent = new Extent(response.layer.initialExtent);
-          map.setExtent(extent);
+          map.setExtent(extent, true);
         }
       });
       map.addLayer(layer);
