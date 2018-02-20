@@ -207,6 +207,9 @@ define({
             termDesc: "Term - descending",
           }
         }
+      },
+      preview: {
+        error: "Error loading preview"
       }
     },
     

@@ -15,18 +15,24 @@
 define([
   "dojo/_base/lang",
   "dojo/_base/array",
+  "dojo/dom-construct",
+  "dojo/i18n!app/nls/resources",
   "esri/request",
   "esri/geometry/Extent",
   "esri/layers/ArcGISDynamicMapServiceLayer",
   "esri/layers/FeatureLayer",
   "esri/layers/ArcGISImageServiceLayer"
 ],
-function (lang, array,
+function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
           ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer) {
   
   var _handleError = function(map, error) {
-    console.log(error);
+    console.error(error);
+    domConstruct.create("div",{
+      innerHTML: i18n.search.preview.error, 
+      class: "g-preview-error"
+    }, map.container, "first");
   };
   
   var _layerFactories = {
