@@ -14,30 +14,37 @@
  */
 
 (function(){
-  
+
   /* ============================================================================================ */
-  
+
   gs.Object = {
-  
+
     create: function(proto,properties) {
       var obj = Object.create(proto,properties);
-      if (typeof obj["__init__"] === "function") obj["__init__"]();
+      if (typeof obj.__init__ === "function") obj.__init__();
       return obj;
     }
-  
+
   };
-  
+
   /* ============================================================================================ */
-  
+
   gs.Proto = Object.create(Object.prototype,{
-  
-    __init__: {value:function() {}},
-  
-    init: {value: function() {
+
+    __init__: {writable:true,value:function() {}},
+
+    /* Example
+    __init__: {writable:true,value:function() {
+      gs.base.Target.__init__.call(this); // call super.__init__
+      print("PortalTarget::__init__"); // custom initialization
+    }},
+    */
+
+    init: {writable:true,value:function() {
       return this;
     }},
-    
-    mixin: {value: function(props) {
+
+    mixin: {writable:true,value:function(props) {
       if (typeof props === "object" && props != null) {
         for (var k in props) {
           if (props.hasOwnProperty(k)) {
@@ -46,11 +53,23 @@
         }
       }
       return this;
+    }},
+
+    safeMixin: {writable:true,value:function(props) {
+      if (typeof props === "object" && props != null) {
+        for (var k in props) {
+          if (props.hasOwnProperty(k)) {
+            if (typeof props[k] !== "function") {
+              this[k] = props[k];
+            }
+          }
+        }
+      }
+      return this;
     }}
-  
+
   });
-  
+
   /* ============================================================================================ */
 
 }());
-

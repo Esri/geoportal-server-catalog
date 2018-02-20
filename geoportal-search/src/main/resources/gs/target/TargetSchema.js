@@ -14,15 +14,66 @@
  */
 
 (function(){
-  
+
   gs.target.TargetSchema = gs.Object.create(gs.Proto,{
-  
-    itemToAtomEntry: {value: function(task,item) {}},
-    
-    itemToJson: {value: function(task,item) {
-      return item;
+
+    fieldAliases: {writable: true, value: null},
+
+    schemaType: {writable: true, value: null},
+
+    target: {writable: true, value: null},
+
+    typeAliases: {writable: true, value: null},
+
+    itemToAtomEntry: {writable:true,value:function(task,item) {}},
+
+    itemToJson: {writable:true,value:function(task,item) {
+      var entry = this.itemToAtomEntry(task,item);
+      if (entry) {
+        return entry.toJson(task);
+      } else {
+        return {};
+      }
+    }},
+
+    translateFieldName: {writable:true,value:function(task,name) {
+      var k, lc = null, v, aliases = this.fieldAliases;
+      if (aliases && typeof name === "string" && name.length > 0){
+        lc = name.toLowerCase();
+        for (k in aliases) {
+          if (aliases.hasOwnProperty(k)) {
+            v = aliases[k];
+            if (k === name) {
+              return v;
+            } else {
+              if (lc === null) lc = name.toLowerCase();
+              if (k.toLowerCase() === lc) return v;
+            }
+          }
+        }
+      }
+      return name;
+    }},
+
+    translateTypeName: {writable:true,value:function(task,name) {
+      var k, lc = null, v, aliases = this.typeAliases;
+      if (aliases && typeof name === "string" && name.length > 0){
+        lc = name.toLowerCase();
+        for (k in aliases) {
+          if (aliases.hasOwnProperty(k)) {
+            v = aliases[k];
+            if (k === name) {
+              return v;
+            } else {
+              if (lc === null) lc = name.toLowerCase();
+              if (k.toLowerCase() === lc) return v;
+            }
+          }
+        }
+      }
+      return name;
     }}
-  
+
   });
 
 }());

@@ -37,13 +37,14 @@ public class HttpServletRequestFacade extends HttpServletRequestImpl {
    * @param queryString the query string
    */
   public HttpServletRequestFacade(String requestURL) {
-    this.requestURL= requestURL;
+    this.requestURL = requestURL;
     
     String queryString = null;
     if (requestURL != null) {
       int idx = requestURL.indexOf("?");
       if (idx != -1) {
         queryString = requestURL.substring(idx+1);
+        this.requestURL = requestURL.substring(0,idx);
       }
     }
     

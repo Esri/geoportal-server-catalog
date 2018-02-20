@@ -16,27 +16,61 @@
 (function(){
 
   gs.target.Target = gs.Object.create(gs.Proto,{
-    
+
     key: {writable: true, value: null},
-    
+
+    requiredFilter: {writable: true, value: null},
+
     schema: {writable: true, value: null},
-    
-    itemToAtomEntry: {value: function(task,item) {
+
+    schemaMixin: {writable: true, value: null},
+
+    useProxy: {writable: true, value: false},
+
+    /* ............................................................................................ */
+
+    getSchemaClass: {writable:true,value:function() {
+      return gs.target.TargetSchema;
+    }},
+
+    itemToAtomEntry: {writable:true,value:function(task,item) {
       return this.schema.itemToAtomEntry(task,item);
     }},
-    
-    itemToJson: {value: function(task,item) {
+
+    itemToJson: {writable:true,value:function(task,item) {
       return this.schema.itemToJson(task,item);
     }},
-    
-    newSchema: {value:function(task) {
-      return gs.Object.create(gs.target.TargetSchema);
+
+    newSchema: {writable:true,value:function(task) {
+      var schemaMixin = this.schemaMixin || {};
+      schemaMixin.target = this;
+      return gs.Object.create(this.getSchemaClass()).mixin(schemaMixin);
     }},
-  
-    parseRequest: {value:function(task) {}},
-  
-    search: {value:function(task) {}},
-  
+
+    prepare: {writable:true,value:function(task) {}},
+
+    search: {writable:true,value:function(task) {}},
+
+    urlParamsToQueryString: {writable:true,value:function(urlParams) {
+      var k, v, qstr = null;
+      if (urlParams) {
+        for (k in urlParams) {
+          if (urlParams.hasOwnProperty(k)) {
+            v = urlParams[k];
+            if (typeof v !== "undefined" && v !== null) {
+              if (!Array.isArray(v)) v = [v];
+              v.forEach(function(v2){
+                if (qstr === null) qstr = "";
+                if (qstr.length > 0) qstr += "&";
+                qstr += encodeURIComponent(k)+"="+encodeURIComponent(v2);
+              });
+            }
+          }
+        }
+      }
+      return qstr;
+    }}
+
   });
 
 }());

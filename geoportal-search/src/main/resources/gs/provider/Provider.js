@@ -16,12 +16,27 @@
 (function(){
 
   gs.provider.Provider = gs.Object.create(gs.Proto,{
-  
-    execute: {value: function(task) {}},
-  
-    setWriter: {value: function(task) {
+
+    addOverrideParameter: {writable:true,value:function(task,key,value) {
+      task.request.parameterMap[key] = value; // TODO remove keys ?
+    }},
+
+    execute: {writable:true,value:function(task) {}},
+
+    preprocess: {writable:true,value:function(task) {
+      var f = task.request.chkParam("f");
+      if (typeof f === "string" && f.toLowerCase() === "eros") {
+        if (typeof task.request.parameterMap.type === "undefined" &&
+            typeof task.request.parameterMap.types === "undefined") {
+          var keys = Object.keys(gs.writer.ErosWriter.erosTypes);
+          task.request.parameterMap.type = keys;
+        }
+      }
+    }},
+
+    setWriter: {writable:true,value:function(task) {
       var k, f = task.request.f;
-      for (var k in task.writers) {
+      for (k in task.writers) {
         if (task.writers.hasOwnProperty(k)) {
           if (typeof k === "string" && typeof f === "string") {
             if (k.toLowerCase() === f.toLowerCase()) {
@@ -32,7 +47,7 @@
         }
       }
     }}
-  
+
   });
-  
+
 }());

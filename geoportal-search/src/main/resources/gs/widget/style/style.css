@@ -1,0 +1,443 @@
+
+/*
+html, body {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+body {
+  font-family: Avenir, Verdana, Geneva, sans-serif;
+  font-family: "Avenir Next W01","Avenir Next","Avenir","Helvetica Neue","Helvetica","Arial",sans-serif;
+  font-size: 12px;
+  line-height: 1.66667;
+  color: #4c4c4c;
+  background-color: #f8f8f8;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body, div, dl, dt, dd, li, h1, h2, h3, h4, h5, h6, pre, form, fieldset,
+input, textarea, p, blockquote, th, td {
+  margin: 0;
+  padding: 0;
+}
+*/
+
+.geoportal-search-pro .geoportal-search.search-pane {
+  width: 310px;
+}
+.geoportal-search-pro .dijitPopup {
+  max-width: 98%;
+}
+
+.geoportal-search.search-pane {
+  width: 310px;
+}
+
+.geoportal-search .search-results {
+  max-height: 340px;
+  overflow-y: auto;
+}
+
+.geoportal-search .search-box input {
+  width: 200px;
+  /*width: 85%;*/
+  padding: 5px 10px;
+}
+
+
+.geoportal-search-pro .search-results {
+  max-height: 240px;
+}
+
+.geoportal-search.search-pane {
+  display: inline-block;
+  padding: 6px;
+  border: 1px solid #cccccc;
+  border-radius: 5px;
+}
+
+.geoportal-search .search-results-pane a {
+  color: #196fa6;
+  text-decoration: none;
+  line-height: 20px;
+  padding: 5px 5px;
+}
+
+.geoportal-search a[disabled],
+.geoportal-search a.disabled {
+  pointer-events: none;
+  opacity: 0.2;
+}
+
+.geoportal-search .pagination {
+  display: inline-block;
+  padding-left: 0;
+  margin: 24px 0;
+  border-radius: 0px;
+}
+.geoportal-search .pagination > li {
+  display: inline;
+}
+.geoportal-search .pagination-sm > li:first-child > a,
+.geoportal-search .pagination-sm > li:first-child > span {
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+}
+.geoportal-search .pagination > li:first-child > a,
+.geoportal-search .pagination > li:first-child > span {
+  margin-left: 0;
+  border-bottom-left-radius: 0px;
+  border-top-left-radius: 0px;
+}
+.geoportal-search .pagination-sm > li > a,
+.geoportal-search .pagination-sm > li > span {
+  padding: 5px 10px;
+  font-size: 12px;
+  line-height: 1.5;
+}
+.geoportal-search .pagination > li > a,
+.geoportal-search .pagination > li > span {
+  position: relative;
+  float: left;
+  /*padding: 6px 12px;*/
+  font-size: 12px;
+  padding: 4px 8px;
+  line-height: 1.5;
+  text-decoration: none;
+  color: #196fa6;
+  background-color: #ffffff;
+  border: 1px solid #cccccc;
+  margin-left: -1px;
+}
+.geoportal-search .pagination > .disabled > span,
+.geoportal-search .pagination > .disabled > span:hover,
+.geoportal-search .pagination > .disabled > span:focus,
+.geoportal-search .pagination > .disabled > a,
+.geoportal-search .pagination > .disabled > a:hover,
+.geoportal-search .pagination > .disabled > a:focus {
+  color: #a9a9a9;
+  cursor: not-allowed;
+}
+
+.geoportal-search .left-side {
+  float: left;
+}
+
+.geoportal-search .right-side {
+  float: right;
+}
+
+.geoportal-search .loading-node {
+  display: inline-block;
+  visibility: hidden;
+  margin-left: 4px;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  background-image: url(images/LoadingAnimation16_Trans.gif);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+.geoportal-search .loading-node.loading {
+  visibility: visible;
+}
+
+.geoportal-search .search-target-options {
+  display: inline-block;
+}
+.geoportal-search .search-target-options > .dijitDropDownButton > .dijitButtonNode,
+.geoportal-search .item-card .action-bar > .dijitDropDownButton > .dijitButtonNode {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+.geoportal-search .search-target-options > .dijitDropDownButton .dijitButtonContents,
+ .geoportal-search .item-card .action-bar > .dijitDropDownButton .dijitButtonContents {
+  outline: none;
+}
+
+.geoportal-search.targets-popup .target {
+  width: 240px;
+  padding: 6px;
+  cursor: pointer;
+}
+.geoportal-search.targets-popup .target:hover {
+  background-color: #eeeeee;
+}
+.geoportal-search.targets-popup .target.active {
+  background-color: #aadbfa;
+}
+.geoportal-search.targets-popup .target .name {
+  width: 50%;
+}
+.geoportal-search.targets-popup .target .count {
+  float: right;
+}
+
+.geoportal-search .search-box {
+  display: inline-block;
+  /*width: 90%;*/
+}
+
+.geoportal-search .search-box .btn-confirm {
+  padding: 4px 8px;
+  margin-bottom: 1px;
+  line-height: 1.4;
+  border: 1px solid #b7b7b7;
+  background-color: #ffffff;
+  cursor: pointer;
+}
+
+.geoportal-search .secondary-search-bar {
+  margin-top: 4px;
+}
+
+.geoportal-search .secondary-search-bar,
+.geoportal-search .search-target-options .dijitDropDownButton .dijitButtonText,
+.geoportal-search .search-sort-options .dijitSelect .dijitButtonText,
+.xgeoportal-search.sort-popup .dijitMenuItemLabel {
+  font-size: 10px;
+}
+
+.geoportal-search .search-bbox-option,
+.geoportal-search .search-livedata-option,
+.geoportal-search .search-sort-options {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+}
+
+.geoportal-search .search-bbox-option {
+  /*margin-left: 6px;*/
+}
+
+.geoportal-search .search-bbox-option .checkbox-inline,
+.geoportal-search .search-bbox-option .dijitCheckBox input  {
+  cursor: pointer;
+}
+
+.geoportal-search .search-livedata-option {
+  /*margin-left: 10px;*/
+  margin-left: 4px;
+}
+.geoportal-search .search-livedata-option .checkbox-inline,
+.geoportal-search .search-livedata-option .dijitCheckBox input  {
+  cursor: pointer;
+}
+
+.geoportal-search .search-sort-options {
+}
+.geoportal-search .search-sort-options .dijitArrowButton {
+  padding: 2px;
+}
+.geoportal-search .search-sort-options .sort-prompt {
+  display: none;
+}
+.geoportal-search .search-sort-options table.dijitSelect {
+  background-color: transparent;
+  border: none;
+  outline: none;
+}
+.geoportal-search .search-sort-options .sort-order-icon {
+  display: inline-block;
+  width: 16px;
+  height: 16px;
+  vertical-align: middle;
+  background-image: url(images/sort-down-arrow.png);
+  background-position: center center;
+  background-repeat: no-repeat;
+}
+.geoportal-search .search-sort-options .sort-order-icon.descending {
+  background-image: url(images/sort-up-arrow.png);
+}
+
+.geoportal-search .search-results-pane {
+  margin-top: 6px;
+  margin-bottom: 8px;
+}
+
+
+.geoportal-search .search-paging {
+  /*float: right;*/
+  margin: auto;
+  text-align: right;
+}
+
+.geoportal-search ul.pagination {
+  margin: 0;
+}
+
+.geoportal-search .item-card-inner {
+  height: 80px;
+  padding: 5px;
+  margin-bottom: 4px;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border: 1px solid #e0e0e0;
+  border-bottom-color: #e0e0e0;
+  border-radius: 5px;
+  background: #ffffff;
+}
+
+/*
+.geoportal-search .item-card .thumbnail-div,
+.geoportal-search .item-card .info-div {
+  display: inline-block;
+  vertical-align: top;
+}
+*/
+
+.geoportal-search .item-card .thumbnail-div {
+  float: left;
+  margin-right: 10px;
+  height: 60px;
+  width: 90px;
+  overflow: hidden;
+}
+.geoportal-search .item-card .thumbnail-div img {
+  margin: -1px;
+  height: 60px;
+  width: 90px;
+  border: 0;
+}
+.geoportal-search .item-card .thumbnail-placeholder {
+  background-image: url(images/placeholder_project120x80.png);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.geoportal-search .item-card .title {
+  margin: 0 5px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #4c4c4c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.geoportal-search .item-card .info {
+  color: #898989;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.geoportal-search .item-card .action-bar {
+  text-align: right;
+  white-space: nowrap;
+}
+
+.geoportal-search .item-card .action-bar .message {
+  font-size: 9px;
+  font-style: italic;
+}
+
+.geoportal-search .dropdown-container {
+  display: inline-block;
+  position: relative;
+}
+.geoportal-search .dropdown-content {
+  display: none;
+  position: fixed;
+  background-color: #f9f9f9;
+  min-width: 160px;
+  overflow: auto;
+  box-shadow: 0px 8px 16px 0px rgba(0,0,0,0.2);
+  text-align: left;
+  z-index: 1;
+}
+.geoportal-search .dropdown-content a {
+  display: block;
+}
+.geoportal-search .dropdown-content.show {
+  display: block;
+}
+
+.geoportal-search .item-card .links-dropdown {
+  margin-top: -4px;
+}
+
+/* .calcite .dijitButtonContents* */
+.geoportal-search .item-card .links-dropdown .dijitButtonContents {
+  padding: 0px;
+}
+
+.geoportal-search.dd-popup a {
+  display: block;
+  color: #196fa6;
+  text-decoration: none;
+  line-height: 20px;
+  padding: 5px 5px;
+  outline: none;
+}
+
+/* ........................................................... */
+
+
+/*
+.jimu-widget-add-data .search-pane .search-paging .pagination {
+  margin: 0;
+}
+.jimu-widget-add-data .search-pane .search-paging,
+.jimu-widget-add-data .search-pane .search-result-count {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: 1;
+}
+.jimu-widget-add-data .search-pane .pagination > li > span,
+.jimu-widget-add-data .search-pane .pagination > li > span:focus,
+.jimu-widget-add-data .search-pane .pagination > li > span:hover {
+  color: inherit;
+  border-color: transparent;
+  background-color: transparent;
+}
+.jimu-widget-add-data .search-pane .pagination > li.current-page > span {
+  padding-left: 15px;
+  padding-right: 15px;
+}
+.jimu-widget-add-data .search-pane .pagination [class*=" esri-icon-"],
+.jimu-widget-add-data .search-pane .pagination [class^="esri-icon-"] {
+  position: relative;
+  top: 1px;
+}
+
+.jimu-widget-add-data .search-paging,
+.jimu-widget-add-data .search-result-count {
+  display: inline-block;
+}
+.jimu-widget-add-data .search-paging ul {
+  margin: 0;
+  padding: 0;
+}
+.jimu-widget-add-data .search-paging li {
+  display: inline-block;
+}
+.jimu-widget-add-data .search-paging li.disabled a,
+.jimu-widget-add-data .search-paging li.disabled a:hover,
+.jimu-widget-add-data .search-paging li.disabled a:active,
+.jimu-widget-add-data .search-paging li.disabled a:focus {
+  cursor: default;
+  opacity: 0.35;
+}
+
+.jimu-widget-add-data .search-paging,
+.jimu-widget-add-data .search-result-count {
+  display: inline-block;
+}
+.jimu-widget-add-data .search-paging ul {
+  margin: 0;
+  padding: 0;
+}
+.jimu-widget-add-data .search-paging li {
+  display: inline-block;
+}
+*/

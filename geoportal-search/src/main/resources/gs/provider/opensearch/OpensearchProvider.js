@@ -14,40 +14,48 @@
  */
 
 (function(){
-  
+
   gs.provider.opensearch.OpensearchProvider = gs.Object.create(gs.provider.Provider,{
-    
-    chkBBoxParam: {value: function(task) {
+
+    isSingleIdRequest: {writable: true, value: false},
+
+    chkBBoxParam: {writable:true,value:function(task) {
       if (task.hasError) return;
-      var bbox = task.request.chkParam("bbox");
+      var bbox = task.request.getBBox();
       if (bbox === null || bbox.length === 0) return;
-      var a = bbox.split(","); 
+      var a = bbox.split(",");
       if (a.length > 3) {
         var n = task.val.strToNum(a[0].trim(),1);
         if (n > 10000) {
-          // TODO send JSON
-          var msg = "invalidBoundingBoxCoords";
+          var msg = "{\"error\": \"invalidBoundingBoxCoords\"}";
           var response = task.response;
-          response.put(response.Status_BAD_REQUEST,response.MediaType_TEXT_PLAIN,msg);
+          response.put(response.Status_BAD_REQUEST,response.MediaType_APPLICATION_JSON,msg);
           task.hasError = true;
         }
       }
     }},
-    
-    description: {value: function(task) {
+
+    description: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       var opensearchUrl = task.baseUrl+"/opensearch"; // TODO doc or config?
+
+      var qstr = "", url = task.request.url;
+      var n = url.indexOf("?");
+      if (n !== -1) qstr = url.substring(n + 1).trim();
+      if (qstr.length > 0) qstr = "&"+qstr;
+
       var xml = task.context.readResourceFile(task.config.opensearchDescriptionFile,"UTF-8");
       xml = xml.trim();
       xml = xml.replace(/{opensearch.url}/g,task.val.escXml(opensearchUrl));
       xml = xml.replace(/{base.url}/g,task.val.escXml(task.baseUrl));
+      xml = xml.replace(/&amp;{args}/g,task.val.escXml(qstr));
       var response = task.response;
       response.put(response.Status_OK,response.MediaType_APPLICATION_XML,xml);
       promise.resolve();
       return promise;
     }},
-    
-    execute: {value: function(task) {
+
+    execute: {writable:true,value:function(task) {
       var v = task.request.getUrlPath();
       var isDescription = task.val.endsWith(v,"/opensearch/description"); // TODO doc or config?
       if (!isDescription) {
@@ -61,7 +69,7 @@
       if (isDescription) {
         return this.description(task);
       } else {
-        this.chkBBoxParam(task)
+        this.chkBBoxParam(task);
         if (task.hasError) {
           var promise = task.context.newPromise();
           promise.reject();
@@ -69,37 +77,36 @@
         } else {
           var ids = task.request.getIds();
           if (Array.isArray(ids) && ids.length === 1) {
-            task.request.isItemByIdRequest = true;
+            this.isSingleIdRequest = true;
+            //task.request.isItemByIdRequest = true;
           }
           task.request.f = "atom";
           return this.search(task);
         }
       }
     }},
-    
-    search: {value: function(task) {
+
+    search: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       task.request.parseF(task);
       this.setWriter(task);
-      task.target.parseRequest(task);
-      var p2 = task.target.search(task);
-      p2.then(function(searchResult){
-        task.writer.write(task,searchResult);
-        promise.resolve();
-      })["catch"](function(error){
-        var msg = "Search error";
-        if (typeof error.message === "string" && error.message.length > 0) {
-          msg = error.message;
+      var isSingleIdRequest = this.isSingleIdRequest;
+      task.target.search(task).then(function(searchResult){
+        if (isSingleIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
+          // TODO is this error only for the CSW ets-cat30 test?
+          var msg = "{\"error\": \"Id not found.\"}";
+          task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_APPLICATION_JSON,msg);
+          promise.resolve();
+        } else {
+          task.writer.write(task,searchResult);
+          promise.resolve();
         }
-        // TODO JSON?
-        var response = task.response;
-        response.put(response.Status_INTERNAL_SERVER_ERROR,response.MediaType_TEXT_PLAIN,msg);
-        task.hasError = true;
-        promise.reject();
+      })["catch"](function(error){
+        promise.reject(error);
       });
       return promise;
     }}
-  
+
   });
-  
+
 }());
