@@ -16,17 +16,31 @@ define([
   "dojo/_base/lang",
   "dojo/_base/array",
   "esri/request",
+  "esri/geometry/Extent",
   "esri/layers/ArcGISDynamicMapServiceLayer",
   "esri/layers/FeatureLayer",
   "esri/layers/ArcGISImageServiceLayer"
 ],
 function (lang, array,
-          esriRequest, 
+          esriRequest, Extent,
           ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer) {
+  
+  var _handleError = function(map, error) {
+    console.log(error);
+  };
   
   var _layerFactories = {
     "MapServer": function(map, url) {
       var layer = new ArcGISDynamicMapServiceLayer(url, {});
+      layer.on("error", function(error) {
+        _handleError(map, error);
+      });
+      layer.on("load", function(response) {
+        if (response && response.layer && response.layer.initialExtent) {
+          var extent = new Extent(response.layer.initialExtent);
+          map.setExtent(extent);
+        }
+      });
       map.addLayer(layer);
     },
     
@@ -35,14 +49,32 @@ function (lang, array,
         array.forEach(response.layers, function(layer) {
           if (layer.defaultVisibility) {
             var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
+            layer.on("error", function(error) {
+              _handleError(map, error);
+            });
             map.addLayer(layer);
           }
         });
+        if (response && response.initialExtent) {
+          var extent = new Extent(response.initialExtent);
+          map.setExtent(extent);
+        }
+      }, function(error){
+        _handleError(map, error);
       });
     },
     
     "ImageServer": function(map, url) {
       var layer = new ArcGISImageServiceLayer(url);
+      layer.on("error", function(error) {
+        _handleError(map, error);
+      });
+      layer.on("load", function(response) {
+        if (response && response.layer && response.layer.initialExtent) {
+          var extent = new Extent(response.layer.initialExtent);
+          map.setExtent(extent);
+        }
+      });
       map.addLayer(layer);
     }
   };
