@@ -154,6 +154,61 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       topic.publish(appTopics.OnMouseLeaveResultItem,{item:this.item});
     },
     
+    _renderPreview: function(actionsNode, serviceType) {
+      
+      // declare preview pane
+      var previewPane;
+      
+      // create preview area 
+      var previewArea = domConstruct.create("div");
+      var tooltipDialog = new TooltipDialog({
+          style: "width: 470px; height: 320px;",
+          content: previewArea,
+          
+          onBlur: function() {
+            // cause to hide dialog whenever user clicks outside the map
+            popup.close(tooltipDialog);
+          },
+          
+          onKeyPress: function(event) {
+            // cause to hide dialog whenever ESC key is being pressed
+            if (event.keyCode === 27) {
+              popup.close(tooltipDialog);
+            }
+          },
+          
+          onShow: function() {
+            // focus automatically
+            tooltipDialog.focus();
+            
+            // create new preview pane
+            previewPane = new PreviewPane({serviceType: serviceType}, previewArea);
+            previewPane.startup();
+          },
+          
+          onHide: function() {
+            // destroy preview pane
+            previewPane.destroy();
+            previewPane = null;
+          }
+      });
+      this.own(tooltipDialog);
+      
+      // create clickable link to launch preview dialog
+      var previewNode = domConstruct.create("a",{
+        href: "javascript:void(0)",
+        innerHTML: i18n.item.actions.preview
+      },actionsNode);
+      
+      // install 'onclick' event handler to show tooltip dialog
+      this.own(on(previewNode, "click", function() {
+        popup.open({
+          popup: tooltipDialog,
+          around: previewNode
+        });
+      }));
+    },
+    
     _renderAddToMap: function(item,links) {
       if (links.length === 0) return;
       var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
@@ -173,42 +228,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           
           // create clickable 'Preview' link if allowes
           if (PreviewUtil.canPreview(serviceType)) {
-            var previewNode = domConstruct.create("a",{
-              href: "javascript:void(0)",
-              innerHTML: i18n.item.actions.preview
-            },actionsNode);
-            // create preview area: a placeholder for the map
-            var previewArea = domConstruct.create("div");
-            var previewPane;
-            var tooltipDialog = new TooltipDialog({
-                style: "width: 470px; height: 320px;",
-                content: previewArea,
-                onBlur: function() {
-                  popup.close(tooltipDialog);
-                },
-                onShow: function() {
-                  tooltipDialog.focus();
-                  if (!previewPane) {
-                    previewPane = new PreviewPane({serviceType: serviceType});
-                    previewPane.placeAt(previewArea);
-                    previewPane.startup();
-                  }
-                },
-                onHide: function() {
-                  if (previewPane) {
-                    previewPane.destroy();
-                    previewPane = null;
-                  }
-                }
-            });
-            this.own(tooltipDialog);
-            // install 'onclick' event handler to show tooltip dialog
-            this.own(on(previewNode, "click", function() {
-              popup.open({
-                popup: tooltipDialog,
-                around: previewNode
-              });
-            }));
+            this._renderPreview(actionsNode, serviceType);
           }
           
           return true;

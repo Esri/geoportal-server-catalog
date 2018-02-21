@@ -14,13 +14,7 @@
  */
 define(["dojo/_base/declare",
         "dojo/_base/lang",
-        "dojo/_base/array",
-        "dojo/query",
-        "dojo/dom-class",
-        "dojo/topic",
-        "app/context/app-topics",
         "app/preview/PreviewUtil",
-        "dijit/registry",
         "dijit/_WidgetBase",
         "dijit/_TemplatedMixin",
         "dijit/_WidgetsInTemplateMixin",
@@ -28,7 +22,7 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "esri/map"
       ], 
-function(declare, lang, array, query, domClass, topic, appTopics, PreviewUtil, registry,
+function(declare, lang, PreviewUtil, 
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
          Map
          ) {
@@ -40,14 +34,18 @@ function(declare, lang, array, query, domClass, topic, appTopics, PreviewUtil, r
     
     postCreate: function() {
       this.inherited(arguments);
+      
+      // create map instance
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
       this.map = new Map(this.mapNode, mapProps);
       
+      // add service
       PreviewUtil.addService(this.map, this.serviceType);
     },
     
     destroy: function() {
+      // make sure to destroy map instance
       this.map.destroy();
       this.inherited(arguments);
     }

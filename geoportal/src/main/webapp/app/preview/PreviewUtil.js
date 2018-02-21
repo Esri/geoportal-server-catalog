@@ -27,6 +27,7 @@ function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
           ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer) {
   
+  // universal error handler
   var _handleError = function(map, error) {
     console.error(error);
     domConstruct.create("div",{
@@ -35,7 +36,10 @@ function (lang, array, domConstruct, i18n,
     }, map.container, "first");
   };
   
+  // layer factories each for each supported service type
   var _layerFactories = {
+    
+    // map server
     "MapServer": function(map, url) {
       var layer = new ArcGISDynamicMapServiceLayer(url, {});
       layer.on("error", function(error) {
@@ -50,6 +54,7 @@ function (lang, array, domConstruct, i18n,
       map.addLayer(layer);
     },
     
+    // feature server
     "FeatureServer": function(map, url) {
       esriRequest({url: url + "?f=pjson"}).then(function(response){
         array.forEach(response.layers, function(layer) {
@@ -70,6 +75,7 @@ function (lang, array, domConstruct, i18n,
       });
     },
     
+    // image server
     "ImageServer": function(map, url) {
       var layer = new ArcGISImageServiceLayer(url);
       layer.on("error", function(error) {
@@ -87,11 +93,13 @@ function (lang, array, domConstruct, i18n,
   
   var oThisObject = {
     
+    // check if service is supported
     canPreview: function(serviceType) {
       var factory = _layerFactories[serviceType.type];
       return !!factory;
     },
     
+    // create layer for the service and add it to the map
     addService: function(map, serviceType) {
       var factory = _layerFactories[serviceType.type];
       if (factory) {
