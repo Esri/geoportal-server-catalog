@@ -21,11 +21,12 @@ define([
   "esri/geometry/Extent",
   "esri/layers/ArcGISDynamicMapServiceLayer",
   "esri/layers/FeatureLayer",
-  "esri/layers/ArcGISImageServiceLayer"
+  "esri/layers/ArcGISImageServiceLayer",
+  "esri/layers/WMSLayer"
 ],
 function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
-          ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer) {
+          ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer, WMSLayer) {
   
   // universal error handler
   var _handleError = function(map, error) {
@@ -57,18 +58,20 @@ function (lang, array, domConstruct, i18n,
     // feature server
     "FeatureServer": function(map, url) {
       esriRequest({url: url + "?f=pjson"}).then(function(response){
-        array.forEach(response.layers, function(layer) {
-          if (layer.defaultVisibility) {
-            var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
-            layer.on("error", function(error) {
-              _handleError(map, error);
-            });
-            map.addLayer(layer);
+        if (response && response.layers) {
+          array.forEach(response.layers, function(layer) {
+            if (layer.defaultVisibility) {
+              var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
+              layer.on("error", function(error) {
+                _handleError(map, error);
+              });
+              map.addLayer(layer);
+            }
+          });
+          if (response.fullExtent) {
+            var extent = new Extent(response.fullExtent);
+            map.setExtent(extent, true);
           }
-        });
-        if (response && response.fullExtent) {
-          var extent = new Extent(response.fullExtent);
-          map.setExtent(extent, true);
         }
       }, function(error){
         _handleError(map, error);
@@ -85,6 +88,37 @@ function (lang, array, domConstruct, i18n,
         if (response && response.layer && response.layer.fullExtent) {
           var extent = new Extent(response.layer.fullExtent);
           map.setExtent(extent, true);
+        }
+      });
+      map.addLayer(layer);
+    },
+    
+    // WMS server
+    "WMS": function(map, url) {
+      var layer = new WMSLayer(url);
+      layer.on("error", function(error) {
+        _handleError(map, error);
+      });
+      var extentSet = false;
+      layer.on("load", function(response) {
+        if (response && response.layer) {
+          var visibleLayers = lang.clone(layer.visibleLayers);
+          var visibleLayersModified = false;
+          array.forEach(response.layer.layerInfos, function(lyr) {
+            var name = lyr.name;
+            if (visibleLayers.indexOf(name) < 0) {
+              visibleLayers.push(name);
+               visibleLayersModified = true;
+            }
+            if (visibleLayersModified) {
+              layer.setVisibleLayers(visibleLayers);
+            }
+          });
+          if (!extentSet && response.layer.fullExtent) {
+            var extent = new Extent(response.layer.fullExtent);
+            map.setExtent(extent, true);
+            extentSet = true;
+          }
         }
       });
       map.addLayer(layer);
