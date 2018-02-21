@@ -22,11 +22,18 @@ define([
   "esri/layers/ArcGISDynamicMapServiceLayer",
   "esri/layers/FeatureLayer",
   "esri/layers/ArcGISImageServiceLayer",
-  "esri/layers/WMSLayer"
+  "esri/layers/WMSLayer",
+  "esri/geometry/webMercatorUtils",
+  "esri/tasks/GeometryService",
+  "esri/tasks/ProjectParameters"
 ],
 function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
-          ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer, WMSLayer) {
+          ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer, WMSLayer,
+          webMercatorUtils, GeometryService, ProjectParameters) {
+            
+  // declare publicly available geometry server
+  var _gs = new GeometryService("https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
   
   // universal error handler
   var _handleError = function(map, error) {
@@ -35,6 +42,26 @@ function (lang, array, domConstruct, i18n,
       innerHTML: i18n.search.preview.error, 
       class: "g-preview-error"
     }, map.container, "first");
+  };
+  
+  // sets new extent of the map; uses projection if new extent is not compatible with the map
+  var _setExtent = function(map, extent) {
+    if (!webMercatorUtils.canProject(extent, map)) {
+      var params = new ProjectParameters();
+      params.geometries = [extent];
+      params.outSR = map.spatialReference;
+      
+      _gs.project(params, function(result) {
+        if (result.length > 0) {
+          extent = new Extent(result[0]);
+          map.setExtent(extent, true);
+        }
+      }, function(error) {
+        console.error(error);
+      });
+    } else {
+      map.setExtent(extent, true);
+    }
   };
   
   // layer factories each for each supported service type
@@ -49,7 +76,7 @@ function (lang, array, domConstruct, i18n,
       layer.on("load", function(response) {
         if (response && response.layer && response.layer.fullExtent) {
           var extent = new Extent(response.layer.fullExtent);
-          map.setExtent(extent, true);
+          _setExtent(map, extent);
         }
       });
       map.addLayer(layer);
@@ -70,7 +97,7 @@ function (lang, array, domConstruct, i18n,
           });
           if (response.fullExtent) {
             var extent = new Extent(response.fullExtent);
-            map.setExtent(extent, true);
+            _setExtent(map, extent);
           }
         }
       }, function(error){
@@ -87,7 +114,7 @@ function (lang, array, domConstruct, i18n,
       layer.on("load", function(response) {
         if (response && response.layer && response.layer.fullExtent) {
           var extent = new Extent(response.layer.fullExtent);
-          map.setExtent(extent, true);
+          _setExtent(map, extent);
         }
       });
       map.addLayer(layer);
@@ -116,7 +143,7 @@ function (lang, array, domConstruct, i18n,
           });
           if (!extentSet && response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
-            map.setExtent(extent, true);
+            _setExtent(map, extent);
             extentSet = true;
           }
         }
@@ -125,6 +152,7 @@ function (lang, array, domConstruct, i18n,
     }
   };
   
+  // This is an object to be returned as a widget
   var oThisObject = {
     
     // check if service is supported
