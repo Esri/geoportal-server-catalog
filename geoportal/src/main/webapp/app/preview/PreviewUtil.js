@@ -85,19 +85,31 @@ function (lang, array, domConstruct, i18n,
     // feature server
     "FeatureServer": function(map, url) {
       esriRequest({url: url + "?f=pjson"}).then(function(response){
-        if (response && response.layers) {
-          array.forEach(response.layers, function(layer) {
-            if (layer.defaultVisibility) {
-              var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
-              layer.on("error", function(error) {
-                _handleError(map, error);
-              });
-              map.addLayer(layer);
+        if (response) {
+          if (response.layers) {
+            array.forEach(response.layers, function(layer) {
+              if (layer.defaultVisibility) {
+                var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
+                layer.on("error", function(error) {
+                  _handleError(map, error);
+                });
+                map.addLayer(layer);
+              }
+            });
+            if (response.fullExtent) {
+              var extent = new Extent(response.fullExtent);
+              _setExtent(map, extent);
             }
-          });
-          if (response.fullExtent) {
-            var extent = new Extent(response.fullExtent);
-            _setExtent(map, extent);
+          } else if (url.match(/MapServer\/\d+$/)) {
+            var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
+            layer.on("error", function(error) {
+              _handleError(map, error);
+            });
+            map.addLayer(layer);
+            if (response.extent) {
+              var extent = new Extent(response.extent);
+              _setExtent(map, extent);
+            }
           }
         }
       }, function(error){
@@ -152,18 +164,26 @@ function (lang, array, domConstruct, i18n,
     }
   };
   
+  _getType = function(serviceType) {
+    var type = serviceType.type;
+    if (type === "MapServer" && serviceType.url.match(/MapServer\/\d+$/)) {
+      type = "FeatureServer";
+    }
+    return type;
+  };
+  
   // This is an object to be returned as a widget
   var oThisObject = {
     
     // check if service is supported
     canPreview: function(serviceType) {
-      var factory = _layerFactories[serviceType.type];
+      var factory = _layerFactories[_getType(serviceType)];
       return !!factory;
     },
     
     // create layer for the service and add it to the map
     addService: function(map, serviceType) {
-      var factory = _layerFactories[serviceType.type];
+      var factory = _layerFactories[_getType(serviceType)];
       if (factory) {
         factory(map, serviceType.url);
       }
