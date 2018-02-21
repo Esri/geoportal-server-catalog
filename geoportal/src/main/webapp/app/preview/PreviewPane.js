@@ -14,6 +14,7 @@
  */
 define(["dojo/_base/declare",
         "dojo/_base/lang",
+        "dojo/on",
         "app/preview/PreviewUtil",
         "dijit/_WidgetBase",
         "dijit/_TemplatedMixin",
@@ -22,7 +23,7 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "esri/map"
       ], 
-function(declare, lang, PreviewUtil, 
+function(declare, lang, on, PreviewUtil, 
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
          Map
          ) {
@@ -39,6 +40,14 @@ function(declare, lang, PreviewUtil,
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
       this.map = new Map(this.mapNode, mapProps);
+      
+      this.own(on(this.map, "update-start", lang.hitch(this, function() {
+        esri.show(this.loading);
+      })));
+      
+      this.own(on(this.map, "update-end", lang.hitch(this, function() {
+        esri.hide(this.loading);
+      })));
       
       // add service
       PreviewUtil.addService(this.map, this.serviceType);
