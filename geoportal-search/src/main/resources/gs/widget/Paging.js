@@ -38,7 +38,6 @@ function(declare, domClass, number, template, SearchComponent, util) {
       if (this.numPerPage === null) {
         this.numPerPage = 30;
       }
-      //this.updateCount({total: 0});
       this.enableOrDisable();
     },
 
@@ -118,7 +117,7 @@ function(declare, domClass, number, template, SearchComponent, util) {
       var nPer = this.numPerPage;
       var nHits = searchResponse.total;
       var nStart = searchResponse.start;
-      //var nStart = searchResponse.queryParams.start; // TODO?
+      //var nStart = searchResponse.queryParams.start;
       if (nStart < 1) {
         nStart = 1;
       }
@@ -128,7 +127,7 @@ function(declare, domClass, number, template, SearchComponent, util) {
       if (nStart > 1) {
         this.hasLess = true;
         this.previousStart = nStart - searchResponse.num;
-        //this.previousStart = nStart - searchResponse.queryParams.num; // TODO?
+        //this.previousStart = nStart - searchResponse.queryParams.num;
         if (this.previousStart < 1) {
           this.previousStart = 1;
         }
