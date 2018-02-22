@@ -26,7 +26,6 @@ function(declare, Deferred, WidgetContext) {
       var dfd = new Deferred();
       try {
         //alert(serviceType+"\r\n"+serviceUrl+"\r\n"+referenceId);
-        alert("addingItem: "+item.id);
         if (window && window.external && window.external.gsHasListener) {
           window.external.gsAddItem(serviceType,serviceUrl,item.id,referenceId,
             function(result){
