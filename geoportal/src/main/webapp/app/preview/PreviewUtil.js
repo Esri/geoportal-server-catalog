@@ -74,17 +74,19 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
-        if (response && response.layer && response.layer.fullExtent) {
-          var extent = new Extent(response.layer.fullExtent);
-          _setExtent(map, extent);
+        if (response && response.layer) {
+          if (response.layer.fullExtent) {
+            var extent = new Extent(response.layer.fullExtent);
+            _setExtent(map, extent);
+          }
         } else {
-          _handleError(map, "Invalid response from the server");
+          _handleError(map, "Invalid response received from the server");
         }
       });
       map.addLayer(layer);
     },
    
-    // A single feature layer from the map server
+    // A single feature layer from the map server; see: _getType() function
     "FeatureLayer": function(map, url) {
       esriRequest({url: url + "?f=pjson"}).then(function(response) {
         if (response) {
@@ -98,7 +100,7 @@ function (lang, array, domConstruct, i18n,
             _setExtent(map, extent);
           }
         } else {
-          _handleError(map, "Invalid response from the server");
+          _handleError(map, "Invalid response received from the server");
         }
       }, function(error){
         _handleError(map, error);
@@ -123,7 +125,7 @@ function (lang, array, domConstruct, i18n,
             _setExtent(map, extent);
           }
         } else {
-          _handleError(map, "Invalid response from the server");
+          _handleError(map, "Invalid response received from the server");
         }   
       }, function(error){
         _handleError(map, error);
@@ -137,9 +139,13 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
-        if (response && response.layer && response.layer.fullExtent) {
-          var extent = new Extent(response.layer.fullExtent);
-          _setExtent(map, extent);
+        if (response && response.layer) {
+          if (response.layer.fullExtent) {
+            var extent = new Extent(response.layer.fullExtent);
+            _setExtent(map, extent);
+          }
+        } else {
+          _handleError(map, "Invalid response received from the server");
         }
       });
       map.addLayer(layer);
@@ -160,7 +166,7 @@ function (lang, array, domConstruct, i18n,
             var name = lyr.name;
             if (visibleLayers.indexOf(name) < 0) {
               visibleLayers.push(name);
-               visibleLayersModified = true;
+              visibleLayersModified = true;
             }
             if (visibleLayersModified) {
               layer.setVisibleLayers(visibleLayers);
@@ -172,7 +178,7 @@ function (lang, array, domConstruct, i18n,
             extentSet = true;
           }
         } else {
-          _handleError(map, "Invalid response from the server");
+          _handleError(map, "Invalid response received from the server");
         }
       });
       map.addLayer(layer);
