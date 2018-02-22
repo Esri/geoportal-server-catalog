@@ -14,6 +14,7 @@
  */
 
 (function(){
+  /*jshint -W069 */
 
   gs.target.elastic.ElasticTarget = gs.Object.create(gs.target.Target, {
 

@@ -32,11 +32,10 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
       var layerIds = null, layerDfds = [], featureLayers = [];
 
       util.readRestInfo(serviceUrl).then(function(response) {
-        console.warn("addFeatureService.serviceInfo",response);
+        //console.warn("addFeatureService.serviceInfo",response);
         if (response && typeof response.type === "string" &&
            (response.type === "Feature Layer" || response.type === "Table")) {
           // a single layer registered from a service /FeatureServer/1 or /MapServer/2
-          console.log("aaaaaaaa");
           var layer = new FeatureLayer(serviceUrl, {
             id: util.generateId(),
             outFields: ["*"]
@@ -78,7 +77,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
         return all(layerDfds);
 
       }).then(function(results) {
-        console.warn("addFeatureService.layerDfds",results);
+        //console.warn("addFeatureService.layerDfds",results);
         array.forEach(results, function(result) {
           featureLayers.push(result);
         });

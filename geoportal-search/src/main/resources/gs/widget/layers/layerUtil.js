@@ -30,7 +30,7 @@ function(array, Deferred, util, agsUtils, InfoTemplate, PopupTemplate) {
         if (item) {
           layer.xtnItemId = item.id; // TODO?
           layer.xtnReferenceId = referenceId; // TODO?
-          console.log("layer.xtnReferenceId",layer.xtnReferenceId);
+          //console.log("layer.xtnReferenceId",layer.xtnReferenceId);
           if (!layer.arcgisProps && item) {
             layer.arcgisProps = {
               title: item.title

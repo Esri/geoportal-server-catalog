@@ -95,11 +95,9 @@ function(declare, on, domClass, SearchComponent, template) {
           params.sortOrder = sortOrder;
         }
       } else if (!params.canSortByRelevance) {
+        //TODO?
         //params.sortField = "title";
         //params.sortOrder = "asc";
-        // TODO?
-        //params.sortField = "numviews";
-        //params.sortOrder = "desc";
       }
     }
 

@@ -43,14 +43,11 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
 
     postCreate: function() {
       this.inherited(arguments);
-      //this.linksButton.xtnDDContent = this.linksContent;
       this.addButton.innerHTML = this.i18n.search.item.actions.add;
       this.detailsButton.innerHTML = this.i18n.search.item.actions.details;
-      //this.linksButton.innerHTML = this.i18n.search.item.actions.links;
       this.linksCaptionNode.innerHTML = this.i18n.search.item.actions.links;
       this.addButton.setAttribute("disabled","disabled");
       this.detailsButton.setAttribute("disabled","disabled");
-      //this.linksButton.setAttribute("disabled","disabled");
       this.linksDropdown.set("disabled",true);
     },
 
@@ -76,10 +73,8 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       if (typeInfo && typeInfo.serviceType && typeInfo.url) {
         if (this.canRemove) {
           var map = this.resultsPane.getMap();
-          //util.setNodeText(self.messageNode,self.i18n.search.item.messages.removing);
           var lyrs = layerUtil.findLayersAdded(map,referenceId).layers;
           array.forEach(lyrs,function(lyr) {
-            //console.warn("removingLayer",lyr);
             // TODO what about Pro?
             map.removeLayer(lyr);
           });
