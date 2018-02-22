@@ -31,7 +31,7 @@ import javax.ws.rs.core.MultivaluedMap;
 /**
  * Opensearch service provider.
  */
-@ApplicationPath("newopensearch")
+@ApplicationPath("opensearch")
 @Path("")
 public class OpensearchService extends Application {
 
