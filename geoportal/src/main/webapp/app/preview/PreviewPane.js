@@ -32,22 +32,20 @@ function(declare, lang, on, PreviewUtil,
 
     i18n: i18n,
     templateString: template,
+    tout: null,
     
     postCreate: function() {
       this.inherited(arguments);
+      this.tout = null;
       
       // create map instance
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
       this.map = new Map(this.mapNode, mapProps);
       
-      this.own(on(this.map, "update-start", lang.hitch(this, function() {
-        esri.show(this.loading);
-      })));
+      this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
       
-      this.own(on(this.map, "update-end", lang.hitch(this, function() {
-        esri.hide(this.loading);
-      })));
+      this.own(on(this.map, "update-end", lang.hitch(this, this._hideLoading)));
       
       // add service
       PreviewUtil.addService(this.map, this.serviceType);
@@ -57,6 +55,25 @@ function(declare, lang, on, PreviewUtil,
       // make sure to destroy map instance
       this.map.destroy();
       this.inherited(arguments);
+    },
+    
+    _showLoading: function() {
+      esri.show(this.loading);
+      if (this.tout == null) {
+        this.tout = setTimeout(lang.hitch(this, this._hideLoading), 10000);
+      }
+    },
+    
+    _hideLoading: function() {
+      this._clearTimeout();
+      esri.hide(this.loading);
+    },
+    
+    _clearTimeout: function() {
+      if (this.tout != null) {
+        clearTimeout(this.tout);
+        this.tout = null;
+      }
     }
 
   });
