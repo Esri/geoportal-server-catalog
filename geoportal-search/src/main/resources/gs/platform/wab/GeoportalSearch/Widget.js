@@ -16,13 +16,16 @@ define(["dojo/_base/declare",
   "jimu/BaseWidget",
   "dijit/_WidgetsInTemplateMixin",
   "./gs/widget/SearchPane",
-  "./gs/widget/WidgetContext"],
-function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane, WidgetContext) {
+  "./gs/widget/WidgetContext",
+  "dojo/i18n!./gs/widget/nls/strings"],
+function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
+  WidgetContext, i18n) {
 
   var oThisClass = declare([BaseWidget, _WidgetsInTemplateMixin], {
 
-    name: "GeoportalSearch",
     baseClass: "jimu-widget-geoportal-search",
+    i18n: i18n,
+    name: "GeoportalSearch",
 
     postCreate: function() {
       this.inherited(arguments);
@@ -38,9 +41,10 @@ function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane, WidgetContext
 
     _init: function() {
       var widgetContext = new WidgetContext({
-        i18n: this.nls,
+        i18n: i18n,
         map: this.map,
-        wabWidget: this
+        wabWidget: this,
+        widgetConfig: this.config
       });
       var searchPane = new SearchPane({
         i18n: widgetContext.i18n,

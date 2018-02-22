@@ -14,15 +14,21 @@
  */
 define(["dojo/_base/declare",
   "jimu/BaseWidgetSetting",
-  "dijit/_WidgetsInTemplateMixin"],
-function(declare, BaseWidgetSetting, _WidgetsInTemplateMixin) {
+  "dijit/_WidgetsInTemplateMixin",
+  "../gs/widget/Settings",
+  "dojo/i18n!../gs/widget/nls/strings"],
+function(declare, BaseWidgetSetting, _WidgetsInTemplateMixin, Settings, i18n) {
 
   var oThisClass = declare([BaseWidgetSetting, _WidgetsInTemplateMixin], {
 
     baseClass: "jimu-widget-geoportal-search-setting",
+    _settings: null,
 
     postCreate: function() {
       this.inherited(arguments);
+      this._settings = new Settings({
+        i18n: i18n
+      },this.settingsNode);
     },
 
     startup: function() {
@@ -34,14 +40,16 @@ function(declare, BaseWidgetSetting, _WidgetsInTemplateMixin) {
     },
 
     getConfig: function() {
-      if (!this.config) {
-        this.config = {};
+      if (!this._settings.validate()) {
+        return false;
       }
+      this.config = this._settings.getConfig() || {};
       return this.config;
     },
 
     setConfig: function(config) {
       this.config = config || {};
+      this._settings.setConfig(this.config);
     }
 
   });
