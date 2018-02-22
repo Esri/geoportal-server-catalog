@@ -207,6 +207,9 @@ define({
             termDesc: "Term - descending",
           }
         }
+      },
+      preview: {
+        error: "Error loading preview"
       }
     },
     
@@ -217,6 +220,7 @@ define({
         json: "JSON",
         links: "Links",
         addToMap: "Add to Map",
+        preview: "Preview",
         options: {
           caption: "Options",
           changeOwner: "Change Owner",

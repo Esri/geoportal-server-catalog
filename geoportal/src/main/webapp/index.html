@@ -50,6 +50,7 @@ require(["app"],function() {
   function(ready,AppContext,AppStarter) {
     window.AppContext = new AppContext();
     ready(function() {
+      esri.config.defaults.io.proxyUrl = "viewer/proxy.jsp";
       (new AppStarter()).startupApp();
     });
   });
