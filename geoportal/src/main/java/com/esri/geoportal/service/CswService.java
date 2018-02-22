@@ -44,7 +44,7 @@ import javax.ws.rs.core.UriInfo;
 /**
  * CSW service provider.
  */
-@ApplicationPath("csw")
+@ApplicationPath("deprecatedcsw")
 @Path("")
 public class CswService extends Application {
 
