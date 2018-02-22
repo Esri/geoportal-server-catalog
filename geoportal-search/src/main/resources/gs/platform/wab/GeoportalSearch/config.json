@@ -1,2 +1,22 @@
 {
+  "targets": [
+    {
+      "name": "ArcGIS Online",
+      "tag": "arcgis",
+      "type": "portal",
+      "url": "https://www.arcgis.com",
+      "enabled": true,
+      "requiredFilter": null,
+      "profile": null
+    },
+    {
+      "name": "gptdb1",
+      "tag": "gptdb1",
+      "type": "geoportal",
+      "url": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search",
+      "enabled": true,
+      "requiredFilter": null,
+      "profile": null
+    }
+  ]
 }

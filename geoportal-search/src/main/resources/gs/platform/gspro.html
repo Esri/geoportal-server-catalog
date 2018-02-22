@@ -25,6 +25,28 @@
       }
     ]
   };
+  var widgetConfig = {
+    "targets": [
+      {
+        "name": "ArcGIS Online",
+        "tag": "arcgis",
+        "type": "portal",
+        "url": "https://www.arcgis.com",
+        "enabled": true,
+        "requiredFilter": null,
+        "profile": null
+      },
+      {
+        "name": "gptdb1",
+        "tag": "gptdb1",
+        "type": "geoportal",
+        "url": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search",
+        "enabled": true,
+        "requiredFilter": null,
+        "profile": null
+      }
+    ]
+  };
 </script>
 </head>
 <body class="calcite geoportal-search-pro">
@@ -52,6 +74,7 @@
         var widgetContext = new WidgetContext({
           i18n: i18n,
           map: null,
+          widgetConfig: widgetConfig,
           widgetFolder: "gs/widget",
         });
         var searchPane = new SearchPane({
