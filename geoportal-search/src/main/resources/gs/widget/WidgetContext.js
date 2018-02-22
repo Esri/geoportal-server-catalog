@@ -22,6 +22,7 @@ function(declare, lang, LayerLoader) {
     i18n: null,
     map: null,
     supportsRemove: true,
+    widgetConfig: null,
     widgetFolder: "gs/widget",
 
     constructor: function(args) {

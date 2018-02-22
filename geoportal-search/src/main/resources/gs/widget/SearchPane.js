@@ -38,6 +38,7 @@ function(declare, localRequire, lang, array, win, domClass, on,
 
   var _def = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
 
+    i18n: null,
     templateString: template,
 
     components: null,
@@ -61,19 +62,6 @@ function(declare, localRequire, lang, array, win, domClass, on,
           self.search();
         }
       });
-
-      /*
-      this.own(on(win.doc,"click",function(e){
-        var dropdowns = document.getElementsByClassName("dropdown-content");
-        array.forEach(dropdowns,function(dropdown) {
-          if (!e || !e.target || dropdown !== e.target.xtnDDContent) {
-            if (dropdown.classList.contains("show")) {
-              dropdown.classList.remove("show");
-            }
-          }
-        });
-      }));
-      */
     },
 
     startup: function() {

@@ -41,6 +41,7 @@ function(array, Deferred, util, agsUtils, InfoTemplate, PopupTemplate) {
             layer.title = item.title;
           }
           // TODO is Web AppBuilder?
+          /*
           layer._wabProperties =  {
             itemLayerInfo: {
               itemId: item.id,
@@ -48,6 +49,7 @@ function(array, Deferred, util, agsUtils, InfoTemplate, PopupTemplate) {
               portalUrl: item.portalUrl // TODO?
             }
           };
+          */
         }
         map.addLayer(layer);
       }
