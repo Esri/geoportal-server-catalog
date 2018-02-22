@@ -40,17 +40,17 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
     /* utilities ======================================================= */
 
-    getConfig: function() {
-      if (this.searchPane && this.searchPane.wabWidget &&
-          this.searchPane.wabWidget.config) {
-        return this.searchPane.wabWidget.config;
-      }
-      return {};
-    },
-
     getMap: function() {
       if (this.searchPane && this.searchPane.widgetContext) {
         return this.searchPane.widgetContext.getMap();
+      }
+      return null;
+    },
+
+    getWidgetConfig: function() {
+      var context = this.getWidgetContext();
+      if (context) {
+        return context.widgetConfig;
       }
       return null;
     },

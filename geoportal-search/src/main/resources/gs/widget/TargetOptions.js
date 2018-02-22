@@ -91,66 +91,23 @@ function(declare, array, lang, on, domClass, domConstruct, number,
     },
 
     getConfiguredTargets: function() {
-      var targets = [
-        {
-          "name": "ArcGIS Online",
-          "type": "portal",
-          "url": "https://www.arcgis.com"
-        },
-        /*
-        {
-          "name": "Geoportal2 (gptdb1)",
-          "type": "geoportal",
-          "url": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search"
-        },
-        {
-          "name": "CSW3 Geoportal2 (gptdb1)",
-          "type": "csw",
-          "cswVersion": "3.0.0",
-          "url": "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
-        },
-        {
-          "name": "Geoportal2 (urban)",
-          "type": "geoportal",
-          "url": "http://urban.esri.com:8080/geoportal/elastic/metadata/item/_search"
-        },
-        {
-          "name": "CSW3 Geoportal2 (urban)",
-          "type": "csw",
-          "cswVersion": "3.0.0",
-          "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
-        },
-        {
-          "name": "CSW2 Geoportal2 (urban)",
-          "type": "csw",
-          "cswVersion": "2.0.2",
-          "profile": "CSW2_Geoportal1",
-          "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
-        },
-        {
-          "name": "CSW2 Geoportal2 (gptogc)",
-          "type": "csw",
-          "cswVersion": "2.0.2",
-          "profile": "CSW2_Geoportal1",
-          "useProxy": true,
-          "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
-        }
-        */
-        /*
-        {
-          "name": "CSW2 Geoportal2 (gptogc)",
-          "type": "csw",
-          "cswVersion": "2.0.2",
-          "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
-        },
-        {
-          "name": "CSW3 Geoportal2 (gptdb1)",
-          "type": "csw",
-          "cswVersion": "3.0.0",
-          "url": "http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
-        }
-        */
-      ];
+      var targets = null;
+      var cfg = this.getWidgetConfig() || {};
+      if (cfg && Array.isArray(cfg.targets) && cfg.targets.length > 0) {
+        targets = cfg.targets;
+      } else {
+        targets = [
+          {
+            "name": "ArcGIS Online",
+            "tag": "arcgis",
+            "type": "portal",
+            "url": "https://www.arcgis.com",
+            "enabled": true,
+            "requiredFilter": null,
+            "profile": null
+          }
+        ];
+      }
       return targets;
     },
 

@@ -144,22 +144,6 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       //this.linksButton.removeAttribute("disabled");
     },
 
-    /*
-    addLinkOld: function(typeName,href) {
-      //href = util.checkMixedContent(href); // TODO?
-      var v = href;
-      if (typeof typeName === "string" && typeName.length > 0) {
-        v = typeName + " " + href; // TODO i18n
-      }
-      var a = document.createElement("a");
-      a.href = href;
-      a.target = "_blank";
-      util.setNodeText(a,v);
-      this.linksContent.appendChild(a);
-      this.linksButton.removeAttribute("disabled");
-    },
-    */
-
     detailsClicked: function() {
       if (this.typeInfo && this.typeInfo.detailsUrl) {
         var url = util.checkMixedContent(this.typeInfo.detailsUrl);
@@ -256,9 +240,7 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       var author = item.author;
       if (author) {
         if (Array.isArray(author)) {
-          if (author.length > 1) {
-            console.log("***** multiple authors",author);
-          }
+          //if (author.length > 1) console.log("***** multiple authors",author);
           if (author.length > 0) {
             // TODO concatenate multiples
             return author[0].name;
@@ -319,6 +301,10 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       var type = this.getType(response,item);
       var author = this.getAuthor(response,item);
       var date = this.getDate(response,item);
+      if (typeof type === "string" && type.length > 0 &&
+          typeof this.i18n.search.item.types[type] === "string") {
+        type = this.i18n.search.item.types[type];
+      }
 
       util.setNodeText(this.titleNode,title);
       util.setNodeTitle(this.titleNode,title);

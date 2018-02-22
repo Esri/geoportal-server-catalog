@@ -1,10 +1,9 @@
 define({
   root: ({
-
     search: {
       featureLayerTitlePattern: "{serviceName} - {layerName}",
       layerInaccessible: "The layer is inaccessible.",
-      loadError: "AddData, unable to load:",
+      loadError: "GeoportalSearch, unable to load:",
       targetOptions: {
         caption: "Catalog",
       },
@@ -18,22 +17,11 @@ define({
       liveDataOption: {
         liveData: "Live Data"
       },
-      scopeOptions: {
-        anonymousContent: "Content",
-        myContent: "My Content",
-        myOrganization: "My Organization",
-        curated: "Curated",
-        ArcGISOnline: "ArcGIS Online"
-      },
       sortOptions: {
-        prompt: "Sort By:",
+        prompt: "Sort",
         relevance: "Relevance",
         title: "Title",
         owner: "Owner",
-        /*
-        rating: "Rating",
-        views: "Views",
-        */
         date: "Date",
         switchOrder: "Switch"
       },
@@ -63,16 +51,12 @@ define({
         itemSingular: "Item",
         itemPlural: "Items"
       },
-
       item: {
         actions: {
           add: "Add",
-          close: "Close",
           remove: "Remove",
           details: "Details",
-          links: "Links",
-          done: "Done",
-          editName: "Edit Name"
+          links: "Links"
         },
         messages: {
           adding: "Adding...",
@@ -82,10 +66,6 @@ define({
           unsupported: "Unsupported"
         },
         typeByOwnerPattern: "{type} by {owner}",
-        dateFormat: "MMMM d, yyyy",
-        datePattern: "{date}",
-        ratingsCommentsViewsPattern: "{ratings} {ratingsIcon} {comments} {commentsIcon} {views} {viewsIcon}",
-        ratingsCommentsViewsLabels: {"ratings": "ratings", "comments": "comments", "views": "views"},
         types: {
           "Map Service": "Map Service",
           "Feature Service": "Feature Service",
@@ -94,8 +74,19 @@ define({
           "WMS": "WMS",
           "KML": "KML"
         }
+      },
+      settings: {
+        addTarget: "Add",
+        target: {
+          caption: "Catalog",
+          _delete: "Delete",
+          name: "Name",
+          url: "URL",
+          type: "Type",
+          profile: "Profile",
+          filter: "Filter"
+        }
       }
     }
-
   })
 });

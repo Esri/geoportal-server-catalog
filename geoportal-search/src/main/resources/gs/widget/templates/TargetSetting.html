@@ -1,0 +1,50 @@
+<div class="target-setting">
+  <form data-dojo-type="dijit/form/Form"
+    data-dojo-attach-point="inputForm">
+    ${i18n.search.settings.target.caption}
+    <div class="form-group">
+      <label for="${id}_name" class="control-label"
+        >${i18n.search.settings.target.name}</label>
+      <input id="${id}_name"
+        data-dojo-type="dijit/form/ValidationTextBox"
+        data-dojo-attach-point="nameTextBox"
+        data-dojo-props="trim:true,required:true"/>
+      <a href="javascript:void(0)" class="gap"
+        data-dojo-attach-point="deleteButton"
+        data-dojo-attach-event="onClick: deleteClicked"
+        >${i18n.search.settings.target._delete}</a>
+    </div>
+    <div class="form-group">
+      <label for="${id}_url" class="control-label"
+        >${i18n.search.settings.target.url}</label>
+      <input id="${id}_url"
+        data-dojo-type="dijit/form/ValidationTextBox"
+        data-dojo-attach-point="urlTextBox"
+        data-dojo-props="trim:true,required:true"/>
+    </div>
+    <div class="form-group">
+      <label for="${id}_type" class="control-label"
+        >${i18n.search.settings.target.type}</label>
+      <input id="${id}_type"
+        data-dojo-type="dijit/form/ValidationTextBox"
+        data-dojo-attach-point="typeTextBox"
+        data-dojo-props="trim:true,required:true"/>
+    </div>
+    <div class="form-group">
+      <label for="${id}_profile" class="control-label"
+        >${i18n.search.settings.target.profile}</label>
+      <input id="${id}_profile"
+        data-dojo-type="dijit/form/ValidationTextBox"
+        data-dojo-attach-point="profileTextBox"
+        data-dojo-props="trim:true,required:false"/>
+    </div>
+    <div class="form-group">
+      <label for="${id}_filter" class="control-label"
+        >${i18n.search.settings.target.filter}</label>
+      <input id="${id}_filter"
+        data-dojo-type="dijit/form/ValidationTextBox"
+        data-dojo-attach-point="filterTextBox"
+        data-dojo-props="trim:true,required:false"/>
+    </div>
+  </form>
+</div>
