@@ -14,6 +14,7 @@
  */
 
 (function(){
+  /*jshint -W069 */
 
   gs.target.elastic.GeoportalSchema = gs.Object.create(gs.target.elastic.ElasticSchema, {
 

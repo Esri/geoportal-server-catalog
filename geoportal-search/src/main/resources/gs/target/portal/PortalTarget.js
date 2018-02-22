@@ -14,6 +14,7 @@
  */
 
 (function(){
+  /*jshint -W069 */
 
   gs.target.portal.PortalTarget = gs.Object.create(gs.target.Target, {
 
