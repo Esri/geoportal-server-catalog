@@ -36,7 +36,7 @@ import javax.ws.rs.core.UriInfo;
 /**
  * Opensearch service provider.
  */
-@ApplicationPath("opensearch")
+@ApplicationPath("deprecatedopensearch")
 @Path("")
 public class OpensearchService extends Application {
   
