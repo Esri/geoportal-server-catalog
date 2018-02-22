@@ -77,41 +77,54 @@ function (lang, array, domConstruct, i18n,
         if (response && response.layer && response.layer.fullExtent) {
           var extent = new Extent(response.layer.fullExtent);
           _setExtent(map, extent);
+        } else {
+          _handleError(map, "Invalid response from the server");
         }
       });
       map.addLayer(layer);
+    },
+   
+    // A single feature layer from the map server
+    "FeatureLayer": function(map, url) {
+      esriRequest({url: url + "?f=pjson"}).then(function(response) {
+        if (response) {
+          var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
+          layer.on("error", function(error) {
+            _handleError(map, error);
+          });
+          map.addLayer(layer);
+          if (response.extent) {
+            var extent = new Extent(response.extent);
+            _setExtent(map, extent);
+          }
+        } else {
+          _handleError(map, "Invalid response from the server");
+        }
+      }, function(error){
+        _handleError(map, error);
+      });
     },
     
     // feature server
     "FeatureServer": function(map, url) {
       esriRequest({url: url + "?f=pjson"}).then(function(response){
-        if (response) {
-          if (response.layers) {
-            array.forEach(response.layers, function(layer) {
-              if (layer.defaultVisibility) {
-                var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
-                layer.on("error", function(error) {
-                  _handleError(map, error);
-                });
-                map.addLayer(layer);
-              }
-            });
-            if (response.fullExtent) {
-              var extent = new Extent(response.fullExtent);
-              _setExtent(map, extent);
+        if (response && response.layers) {
+          array.forEach(response.layers, function(layer) {
+            if (layer.defaultVisibility) {
+              var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
+              layer.on("error", function(error) {
+                _handleError(map, error);
+              });
+              map.addLayer(layer);
             }
-          } else if (url.match(/MapServer\/\d+$/)) {
-            var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
-            layer.on("error", function(error) {
-              _handleError(map, error);
-            });
-            map.addLayer(layer);
-            if (response.extent) {
-              var extent = new Extent(response.extent);
-              _setExtent(map, extent);
-            }
+          });
+          if (response.fullExtent) {
+            var extent = new Extent(response.fullExtent);
+            _setExtent(map, extent);
           }
-        }
+        } else {
+          _handleError(map, "Invalid response from the server");
+        }   
       }, function(error){
         _handleError(map, error);
       });
@@ -158,6 +171,8 @@ function (lang, array, domConstruct, i18n,
             _setExtent(map, extent);
             extentSet = true;
           }
+        } else {
+          _handleError(map, "Invalid response from the server");
         }
       });
       map.addLayer(layer);
@@ -167,7 +182,7 @@ function (lang, array, domConstruct, i18n,
   _getType = function(serviceType) {
     var type = serviceType.type;
     if (type === "MapServer" && serviceType.url.match(/MapServer\/\d+$/)) {
-      type = "FeatureServer";
+      type = "FeatureLayer";
     }
     return type;
   };
