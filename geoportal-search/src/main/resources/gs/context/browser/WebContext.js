@@ -31,9 +31,7 @@
     }},
 
     sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType) {
-      if (task.config.proxyUrl && task.target && task.target.useProxy) {
-        //url = task.config.proxyUrl+"?"+url;
-      }
+      var usingProxy = false;
       var promise = this.newPromise();
       var req = new XMLHttpRequest();
       req.onload = function() {
@@ -51,6 +49,7 @@
           // TODO only for POST? only for application/xml?
           if (task.target && task.target.useProxy) {
             url = task.config.proxyUrl+"?"+url;
+            usingProxy = true;
           }
           // if (dataContentType === "application/xml") {
           //   url = task.config.proxyUrl+"?"+url;
@@ -59,8 +58,12 @@
         }
         req.open("POST",url);
         if (typeof dataContentType === "string" && dataContentType.length > 0) {
-          // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
-          //req.setRequestHeader("Content-type",dataContentType);
+          if (usingProxy) {
+            req.setRequestHeader("Content-type",dataContentType);
+          } else {
+            // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
+            //req.setRequestHeader("Content-type",dataContentType);
+          }
         }
         req.send(data);
       } else {
