@@ -17,6 +17,7 @@
     <security:headers>
        <security:frame-options policy="SAMEORIGIN"/>
        <security:header name="Access-Control-Allow-Origin" value="*" />
+       <security:header name="Access-Control-Allow-Headers" value="Content-Type, Authorization, X-Requested-With" />
     </security:headers>
     <security:custom-filter ref="oauthResourceFilter" before="PRE_AUTH_FILTER" />
     <security:http-basic />
