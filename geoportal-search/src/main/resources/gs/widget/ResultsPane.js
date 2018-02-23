@@ -43,8 +43,7 @@ function(declare, array, SearchComponent, template, ItemCard, layerUtil, util) {
     },
 
     showNoMatch: function() {
-      // TODO i18n i18n.search.resultsPane.noMatch
-      util.setNodeText(this.noMatchNode,"?No match");
+      util.setNodeText(this.noMatchNode,this.i18n.search.resultsPane.noMatch);
       this.noMatchNode.style.display = "block";
     },
 

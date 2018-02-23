@@ -21,6 +21,7 @@ function(declare, lang, LayerLoader) {
 
     i18n: null,
     map: null,
+    proxyUrl: null,
     supportsRemove: true,
     widgetConfig: null,
     widgetFolder: "gs/widget",

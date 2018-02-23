@@ -17,9 +17,10 @@ define(["dojo/_base/declare",
   "dijit/_WidgetsInTemplateMixin",
   "./gs/widget/SearchPane",
   "./gs/widget/WidgetContext",
-  "dojo/i18n!./gs/widget/nls/strings"],
+  "dojo/i18n!./gs/widget/nls/strings",
+  "esri/config"],
 function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
-  WidgetContext, i18n) {
+  WidgetContext, i18n, esriConfig) {
 
   var oThisClass = declare([BaseWidget, _WidgetsInTemplateMixin], {
 
@@ -43,6 +44,7 @@ function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
       var widgetContext = new WidgetContext({
         i18n: i18n,
         map: this.map,
+        proxyUrl: esriConfig.defaults.io.proxyUrl,
         wabWidget: this,
         widgetConfig: this.config
       });
