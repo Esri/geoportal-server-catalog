@@ -35,7 +35,7 @@ define({
         wms: "WMS"
       },
       resultsPane: {
-        noMatch: "No results were found."
+        noMatch: "No results"
       },
       paging: {
         first: "<<",

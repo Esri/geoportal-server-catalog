@@ -17,6 +17,28 @@
       "enabled": true,
       "requiredFilter": null,
       "profile": null
+    },
+    {
+      "name": "CSW3 Geoportal2 (urban)",
+      "type": "csw",
+      "cswVersion": "3.0.0",
+      "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+    },
+    {
+      "name": "CSW2 Geoportal2 (urban)",
+      "type": "csw",
+      "cswVersion": "2.0.2",
+      "profile": "CSW2_Geoportal1",
+      "useProxy": false,
+      "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+    },
+    {
+      "name": "CSW2 Geoportal2 (gptogc)",
+      "type": "csw",
+      "cswVersion": "2.0.2",
+      "profile": "CSW2_Geoportal1",
+      "useProxy": true,
+      "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
     }
   ]
 }
