@@ -182,6 +182,35 @@ function (lang, array, domConstruct, i18n,
         }
       });
       map.addLayer(layer);
+    },
+    
+    "Shapefile": function(map, url) {
+      esriRequest({
+        url:url,
+        handleAs:"arraybuffer"
+      }).then(function(content){
+        
+        var formData = new FormData();
+        formData.append("file", new Blob([content], {type: "multipart/form-data"}));
+        
+        esriRequest({
+          url: "http://www.arcgis.com/sharing/rest/content/features/generate",
+          content: {
+            f: "json",
+            filetype: "shapefile",
+            publishParameters: JSON.stringify({name: "features"})
+          },
+          form: formData,
+          usePost: true,
+          handleAs: "json"
+        }).then(function(features) {
+          console.log("Features ->", features);
+        }, function(err) {
+          _handleError(map, "Invalid response received from the server");
+        });
+      }, function(error){
+        _handleError(map, "Invalid response received from the server");
+      });
     }
   };
   
