@@ -203,8 +203,30 @@ function (lang, array, domConstruct, i18n,
           form: formData,
           usePost: true,
           handleAs: "json"
-        }).then(function(features) {
-          console.log("Features ->", features);
+        }).then(function(result) {
+          
+          var layers = [];
+          var totalExtent = null;
+          
+          array.forEach(result.featureCollection.layers, function(layerInfo) {
+            var layer = new FeatureLayer(layerInfo);
+            layers.push(layer);
+            
+            if (layer.fullExtent) {
+              if (totalExtent == null) {
+                totalExtent = layer.fullExtent;
+              } else {
+                totalExtent = totalExtent.union(layer.fullExtent);
+              }
+            }
+          });
+          
+          if (layers.length > 0) {
+            map.addLayers(layers);
+            if (totalExtent) {
+              _setExtent(map, totalExtent);
+            }
+          }
         }, function(err) {
           _handleError(map, "Invalid response received from the server");
         });
