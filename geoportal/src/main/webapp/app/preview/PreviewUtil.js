@@ -37,6 +37,7 @@ function (lang, array, domConstruct, i18n,
   
   // universal error handler
   var _handleError = function(map, error) {
+    map.emit("update-end-always", map);
     console.error(error);
     map.errorNode = domConstruct.create("div",{
       innerHTML: i18n.search.preview.error, 
@@ -194,6 +195,8 @@ function (lang, array, domConstruct, i18n,
     },
     
     "Shapefile": function(map, url) {
+      map.emit("update-start-forced", map);
+      
       esriRequest({
         url:url,
         handleAs:"arraybuffer"
@@ -236,6 +239,8 @@ function (lang, array, domConstruct, i18n,
               _setExtent(map, totalExtent);
             }
           }
+          
+          map.emit("update-end-always", map);
         }, function(err) {
           _handleError(map, "Invalid response received from the server");
         });
