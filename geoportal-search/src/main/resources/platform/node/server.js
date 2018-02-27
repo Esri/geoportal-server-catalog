@@ -18,7 +18,7 @@ global.gsConfig = {
   isNode: true
 };
 
-require("../../../gs/all.js");
+require("../../gs/all.js");
 gs._request = require("request");
 
 var express = require("express");

@@ -59,7 +59,8 @@
         req.open("POST",url);
         if (typeof dataContentType === "string" && dataContentType.length > 0) {
           if (usingProxy) {
-            req.setRequestHeader("Content-type",dataContentType);
+            // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
+            //req.setRequestHeader("Content-type",dataContentType);
           } else {
             // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
             //req.setRequestHeader("Content-type",dataContentType);

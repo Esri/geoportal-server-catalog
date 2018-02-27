@@ -1,9 +1,10 @@
 <!DOCTYPE html>
 <html>
 <head>
-<title>gsapp</title>
+<title>gspro</title>
 <meta http-equiv="content-type" content="text/html; charset=utf-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta http-equiv="cache-control" content="no-cache">
 <!--
 <link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.21/esri/themes/calcite/dijit/calcite.css">
@@ -11,7 +12,7 @@
 -->
 <link rel="stylesheet" href="//js.arcgis.com/3.23/esri/themes/calcite/dijit/calcite.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.23/esri/css/esri.css">
-<link rel="stylesheet" href="../widget/style/style.css">
+<link rel="stylesheet" href="../gs/widget/style/style.css?z1">
 <script>
   var dojoConfig = {
     locale: "en",
@@ -20,7 +21,7 @@
     packages: [
       {
         name: "gs",
-        location: location.pathname.replace(/\/[^/]*$/,"") + "/../../gs",
+        location: location.pathname.replace(/\/[^/]*$/,"") + "/../gs",
       }
     ]
   };
@@ -43,36 +44,14 @@
         "enabled": true,
         "requiredFilter": null,
         "profile": null
-      },
-      {
-        "name": "CSW3 Geoportal2 (urban)",
-        "type": "csw",
-        "cswVersion": "3.0.0",
-        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
-      },
-      {
-        "name": "CSW2 Geoportal2 (urban)",
-        "type": "csw",
-        "cswVersion": "2.0.2",
-        "profile": "CSW2_Geoportal1",
-        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
-      },
-      {
-        "name": "CSW2 Geoportal2 (gptogc)",
-        "type": "csw",
-        "cswVersion": "2.0.2",
-        "profile": "CSW2_Geoportal1",
-        "useProxy": true,
-        "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
       }
     ]
   };
 </script>
 </head>
-<body class="calcite">
+<body class="calcite geoportal-search-pro">
 <div style="top:20px;left:20px;">
   <div id="idSearch" style="display:inline-block;"></div>
-  <div id="idMap" style="display:inline-block;width:800px;height:600px;vertical-align: top;"></div>
 </div>
 <script src="https://js.arcgis.com/3.23/"></script>
 <!--
@@ -80,35 +59,21 @@
 -->
 <script>
   require(["dojo/ready",
-    "esri/config",
     "esri/map",
     "gs/widget/SearchPane",
-    "gs/widget/WidgetContext",
+    "gs/widget/WidgetContextForPro",
     "dojo/i18n!gs/widget/nls/strings",
     "gs/widget/TestSearch",
     "gs/widget/layers/LayerLoader",
-    "gs/widget/Settings"],
-  function(ready,esriConfig,Map,SearchPane,WidgetContext,i18n,TestSearch,
-      LayerLoader,Settings) {
+    "esri/config"],
+  function(ready,Map,SearchPane,WidgetContext,i18n,TestSearch,LayerLoader,esriConfig) {
     ready(function() {
-      if (document.location.href.indexOf("test=true") !== -1) {
-        new TestSearch({},"idSearch");
-      } else if (document.location.href.indexOf("settings=true") !== -1) {
-        var settings = new Settings({
-          i18n: i18n
-        },"idSearch");
-        settings.setConfig(widgetConfig);
-      } else {
+      if (document.location.href.indexOf("test=true") === -1) {
         esriConfig.defaults.io.proxyUrl = "http://gptdb1.esri.com:8080/geoportal/viewer/proxy.jsp";
         esriConfig.defaults.io.alwaysUseProxy = false;
-        var map = window.map = new Map("idMap", {
-          center: [-118, 34.5],
-          zoom: 8,
-          basemap: "topo"
-        });
         var widgetContext = new WidgetContext({
           i18n: i18n,
-          map: map,
+          map: null,
           widgetConfig: widgetConfig,
           widgetFolder: "gs/widget",
         });
@@ -119,9 +84,11 @@
         searchPane.startup();
         var layerLoader = new LayerLoader({
           i18n: i18n,
-          map: map
+          map: null
         });
         //layerLoader.addFeatureService("http://services.arcgis.com/P3ePLMYs2RVChkJx/arcgis/rest/services/USA_States_Generalized/FeatureServer/0");
+      } else {
+        new TestSearch({},"idSearch");
       }
     });
   });
