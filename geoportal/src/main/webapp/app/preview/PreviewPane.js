@@ -14,6 +14,7 @@
  */
 define(["dojo/_base/declare",
         "dojo/_base/lang",
+        "dojo/dom-construct",
         "dojo/on",
         "app/preview/PreviewUtil",
         "dijit/_WidgetBase",
@@ -23,7 +24,7 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "esri/map"
       ], 
-function(declare, lang, on, PreviewUtil, 
+function(declare, lang, domConstruct, on, PreviewUtil, 
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
          Map
          ) {
@@ -37,6 +38,11 @@ function(declare, lang, on, PreviewUtil,
     postCreate: function() {
       this.inherited(arguments);
       this.tout = null;
+      this.mapNode = domConstruct.create("div", { style: "width: 100%; height: 100%;"}, this.mapPlaceholder);
+    },
+    
+    startup: function() {
+      this.inherited(arguments);
       
       // create map instance
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
