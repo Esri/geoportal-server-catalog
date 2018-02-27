@@ -182,18 +182,14 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             tooltipDialog.focus();
             
             // create new preview pane
-            if (previewPane == null) {
-              previewPane = new PreviewPane({serviceType: serviceType}, previewArea);
-              previewPane.startup();
-            }
+            previewPane = new PreviewPane({serviceType: serviceType}, previewArea);
+            previewPane.startup();
           },
           
           onHide: function() {
             // destroy preview pane
-            if (previewPane != null) {
-              previewPane.destroy();
-              previewPane = null;
-            }
+            previewPane.destroy();
+            previewPane = null;
           }
       });
       this.own(tooltipDialog);
