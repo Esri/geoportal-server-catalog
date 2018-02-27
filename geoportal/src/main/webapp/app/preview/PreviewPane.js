@@ -34,6 +34,7 @@ function(declare, lang, domConstruct, on, PreviewUtil,
     i18n: i18n,
     templateString: template,
     tout: null,
+    forcedLoading: false,
     
     postCreate: function() {
       this.inherited(arguments);
@@ -52,7 +53,21 @@ function(declare, lang, domConstruct, on, PreviewUtil,
 
         this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
 
-        this.own(on(this.map, "update-end", lang.hitch(this, this._hideLoading)));
+        this.own(on(this.map, "update-start-forced", lang.hitch(this, function(args) {
+          this._showLoading(args);
+          this.forcedLoading = true;
+        })));
+
+        this.own(on(this.map, "update-end", lang.hitch(this, function(args) { 
+          if (!this.forcedLoading) {
+            this._hideLoading(args); 
+          }
+        })));
+        
+        this.own(on(this.map, "update-end-always", lang.hitch(this, function(args) {
+          this._hideLoading(args);
+          this.forcedLoading = false;
+        })));
 
         // add service
         PreviewUtil.addService(this.map, this.serviceType);
