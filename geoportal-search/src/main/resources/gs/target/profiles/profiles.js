@@ -14,6 +14,7 @@
  */
 
 (function(){
+  /*jshint -W069 */
 
   gs.target.profiles["CSW2_Geoportal1"] = {
     type: "csw",
@@ -24,9 +25,9 @@
         },
       });
     }
-  },
+  };
 
-  /* */
+  /*
   gs.target.profiles["sampleProfile1"] = {
     type: "geoportal",
     prepareTarget: function(target) {
@@ -53,5 +54,6 @@
       });
     }
   };
+  */
 
 }());

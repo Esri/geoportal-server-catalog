@@ -9,16 +9,16 @@
 
   var url1 = "http://urban.esri.com:8080/geoportal-search/opensearch";
   var url2 = "http://urban.esri.com:3000/opensearch";
-  
+
 	function send(url,el) {
 	  var v = el.innerHTML.replace("&amp;","&");
 	  var u = url + "?" + v;
 	  window.open(u);
 	}
-	
+
   function send1(el) {send(url1,el);}
   function send2(el) {send(url2,el);}
-  
+
 </script>
 </head>
 <body>
@@ -45,7 +45,7 @@
   </fieldset>
   <fieldset style="margin-top:20px;">
     <p>Browser</p>
-    <a href="http://urban.esri.com/gs/gs/platform/gsapp.html" target="_blank">http://urban.esri.com/gs/gs/platform/gsapp.html</a><br>
+    <a href="http://urban.esri.com/gs/platform/gsapp.html" target="_blank">http://urban.esri.com/gs/platform/gsapp.html</a><br>
   </fieldset>
 </div>
 </body>
