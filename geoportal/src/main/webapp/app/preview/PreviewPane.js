@@ -63,14 +63,14 @@ function(declare, lang, domConstruct, on, PreviewUtil,
       this.inherited(arguments);
     },
     
-    _showLoading: function() {
+    _showLoading: function(args) {
       esri.show(this.loading);
       if (this.tout == null) {
-        this.tout = setTimeout(lang.hitch(this, this._hideLoading), 10000);
+        this.tout = setTimeout(lang.hitch(this, function() { this._hideLoading(args); }), 10000);
       }
     },
     
-    _hideLoading: function() {
+    _hideLoading: function(args) {
       this._clearTimeout();
       esri.hide(this.loading);
     },

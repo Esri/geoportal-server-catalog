@@ -38,7 +38,7 @@ function (lang, array, domConstruct, i18n,
   // universal error handler
   var _handleError = function(map, error) {
     console.error(error);
-    domConstruct.create("div",{
+    map.errorNode = domConstruct.create("div",{
       innerHTML: i18n.search.preview.error, 
       class: "g-preview-error"
     }, map.container, "first");
@@ -74,6 +74,7 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
+        domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           if (response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
@@ -93,6 +94,9 @@ function (lang, array, domConstruct, i18n,
           var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
           layer.on("error", function(error) {
             _handleError(map, error);
+          });
+          layer.on("load", function(error) {
+            domConstruct.destroy(map.errorNode);
           });
           map.addLayer(layer);
           if (response.extent) {
@@ -117,6 +121,9 @@ function (lang, array, domConstruct, i18n,
               layer.on("error", function(error) {
                 _handleError(map, error);
               });
+              layer.on("load", function(error) {
+                domConstruct.destroy(map.errorNode);
+              });
               map.addLayer(layer);
             }
           });
@@ -139,6 +146,7 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
+        domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           if (response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
@@ -159,6 +167,7 @@ function (lang, array, domConstruct, i18n,
       });
       var extentSet = false;
       layer.on("load", function(response) {
+        domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           var visibleLayers = lang.clone(layer.visibleLayers);
           var visibleLayersModified = false;
