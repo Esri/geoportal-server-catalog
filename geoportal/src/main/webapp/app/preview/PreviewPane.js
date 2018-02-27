@@ -43,23 +43,26 @@ function(declare, lang, domConstruct, on, PreviewUtil,
     
     startup: function() {
       this.inherited(arguments);
-      
-      // create map instance
-      var mapProps = this.map || AppContext.appConfig.searchMap || {};
-      if (mapProps) mapProps = lang.clone(mapProps);
-      this.map = new Map(this.mapNode, mapProps);
-      
-      this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
-      
-      this.own(on(this.map, "update-end", lang.hitch(this, this._hideLoading)));
-      
-      // add service
-      PreviewUtil.addService(this.map, this.serviceType);
+
+      if (this.map == null) {
+        // create map instance
+        var mapProps = this.map || AppContext.appConfig.searchMap || {};
+        if (mapProps) mapProps = lang.clone(mapProps);
+        this.map = new Map(this.mapNode, mapProps);
+
+        this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
+
+        this.own(on(this.map, "update-end", lang.hitch(this, this._hideLoading)));
+
+        // add service
+        PreviewUtil.addService(this.map, this.serviceType);
+      }
     },
     
     destroy: function() {
       // make sure to destroy map instance
       this.map.destroy();
+      this.map = null;
       this.inherited(arguments);
     },
     
