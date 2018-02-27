@@ -37,8 +37,9 @@ function (lang, array, domConstruct, i18n,
   
   // universal error handler
   var _handleError = function(map, error) {
+    map.emit("update-end-always", map);
     console.error(error);
-    domConstruct.create("div",{
+    map.errorNode = domConstruct.create("div",{
       innerHTML: i18n.search.preview.error, 
       class: "g-preview-error"
     }, map.container, "first");
@@ -74,6 +75,7 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
+        domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           if (response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
@@ -93,6 +95,9 @@ function (lang, array, domConstruct, i18n,
           var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
           layer.on("error", function(error) {
             _handleError(map, error);
+          });
+          layer.on("load", function(error) {
+            domConstruct.destroy(map.errorNode);
           });
           map.addLayer(layer);
           if (response.extent) {
@@ -117,6 +122,9 @@ function (lang, array, domConstruct, i18n,
               layer.on("error", function(error) {
                 _handleError(map, error);
               });
+              layer.on("load", function(error) {
+                domConstruct.destroy(map.errorNode);
+              });
               map.addLayer(layer);
             }
           });
@@ -139,6 +147,7 @@ function (lang, array, domConstruct, i18n,
         _handleError(map, error);
       });
       layer.on("load", function(response) {
+        domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           if (response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
@@ -159,6 +168,7 @@ function (lang, array, domConstruct, i18n,
       });
       var extentSet = false;
       layer.on("load", function(response) {
+        domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           var visibleLayers = lang.clone(layer.visibleLayers);
           var visibleLayersModified = false;
@@ -182,6 +192,61 @@ function (lang, array, domConstruct, i18n,
         }
       });
       map.addLayer(layer);
+    },
+    
+    "Shapefile": function(map, url) {
+      map.emit("update-start-forced", map);
+      
+      esriRequest({
+        url:url,
+        handleAs:"arraybuffer"
+      }).then(function(content){
+        
+        var formData = new FormData();
+        formData.append("file", new Blob([content], {type: "multipart/form-data"}));
+        
+        esriRequest({
+          url: "http://www.arcgis.com/sharing/rest/content/features/generate",
+          content: {
+            f: "json",
+            filetype: "shapefile",
+            publishParameters: JSON.stringify({name: "features"})
+          },
+          form: formData,
+          usePost: true,
+          handleAs: "json"
+        }).then(function(result) {
+          
+          var layers = [];
+          var totalExtent = null;
+          
+          array.forEach(result.featureCollection.layers, function(layerInfo) {
+            var layer = new FeatureLayer(layerInfo);
+            layers.push(layer);
+            
+            if (layer.fullExtent) {
+              if (totalExtent == null) {
+                totalExtent = layer.fullExtent;
+              } else {
+                totalExtent = totalExtent.union(layer.fullExtent);
+              }
+            }
+          });
+          
+          if (layers.length > 0) {
+            map.addLayers(layers);
+            if (totalExtent) {
+              _setExtent(map, totalExtent);
+            }
+          }
+          
+          map.emit("update-end-always", map);
+        }, function(err) {
+          _handleError(map, "Invalid response received from the server");
+        });
+      }, function(error){
+        _handleError(map, "Invalid response received from the server");
+      });
     }
   };
   
