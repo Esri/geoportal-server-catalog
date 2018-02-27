@@ -111,6 +111,8 @@ function(declare, lang, VectorTileLayer) {
           } else if (endsWith(lc,".xml") &&
             (lc.indexOf("rss") > 0 || lc.indexOf("georss") > 0)) { 
             type = "GeoRSS";
+          } else if (endsWith(lc,".zip")) { 
+            type = "Shapefile";
           }
         }
       }
