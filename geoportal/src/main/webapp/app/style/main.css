@@ -269,6 +269,13 @@ body {
 	height: 60px;
 }
 
+/* Style for descriptions creates a cap of a few lines of text  */
+.g-item-card .g-item-description {
+  max-height: 46px;
+  overflow: hidden;
+  width: 85%;
+}
+
 .g-item-card .g-item-actions {
   padding: 2px;
   clear: both;
