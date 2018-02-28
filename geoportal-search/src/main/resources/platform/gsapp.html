@@ -32,7 +32,7 @@
         "type": "portal",
         "url": "https://www.arcgis.com",
         "enabled": true,
-        "requiredFilter": null,
+        "requiredFilter": "map",
         "profile": null
       },
       {
@@ -41,29 +41,31 @@
         "type": "geoportal",
         "url": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search",
         "enabled": true,
-        "requiredFilter": null,
+        "requiredFilter": "map",
         "profile": null
       },
       {
         "name": "CSW3 Geoportal2 (urban)",
         "type": "csw",
-        "cswVersion": "3.0.0",
-        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+        "xcswVersion": "3.0.0",
+        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords",
+        "requiredFilter": "map",
       },
       {
         "name": "CSW2 Geoportal2 (urban)",
-        "type": "csw",
-        "cswVersion": "2.0.2",
+        "type": "csw2",
+        "xcswVersion": "2.0.2",
         "profile": "CSW2_Geoportal1",
         "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
       },
       {
         "name": "CSW2 Geoportal2 (gptogc)",
-        "type": "csw",
-        "cswVersion": "2.0.2",
+        "type": "csw2",
+        "xcswVersion": "2.0.2",
         "profile": "CSW2_Geoportal1",
         "useProxy": true,
-        "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
+        "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords",
+        "requiredFilter": "map",
       }
     ]
   };

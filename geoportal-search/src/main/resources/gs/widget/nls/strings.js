@@ -84,7 +84,8 @@ define({
           url: "URL",
           type: "Type",
           profile: "Profile",
-          filter: "Filter"
+          filter: "Filter",
+          useProxy: "Use proxy"
         }
       }
     }
