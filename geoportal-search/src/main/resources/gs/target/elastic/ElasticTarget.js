@@ -16,6 +16,15 @@
 (function(){
   /*jshint -W069 */
 
+  gs.target.types["elasticsearch"] = {
+    newInstance: function(options,safeOptions) {
+      if (options && options.url) options.searchUrl = options.url;
+      var target = gs.Object.create(gs.target.elastic.ElasticTarget);
+      target.safeMixin(options).mixin(safeOptions);
+      return target;
+    }
+  };
+
   gs.target.elastic.ElasticTarget = gs.Object.create(gs.target.Target, {
 
     itemBaseUrl: {writable: true, value: null},
