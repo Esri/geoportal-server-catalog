@@ -85,7 +85,10 @@ define({
           type: "Type",
           profile: "Profile",
           filter: "Filter",
-          useProxy: "Use proxy"
+          enabled: "Enabled",
+          useProxy: "Use Proxy",
+          disableContentType: "Disable Content-Type Header",
+          examples: "Examples"
         }
       }
     }
