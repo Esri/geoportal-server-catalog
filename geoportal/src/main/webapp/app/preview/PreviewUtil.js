@@ -173,15 +173,14 @@ function (lang, array, domConstruct, i18n,
           var visibleLayers = lang.clone(layer.visibleLayers);
           var visibleLayersModified = false;
           array.forEach(response.layer.layerInfos, function(lyr) {
-            var name = lyr.name;
-            if (visibleLayers.indexOf(name) < 0) {
-              visibleLayers.push(name);
+            if (visibleLayers.indexOf(lyr.name) < 0) {
+              visibleLayers.push(lyr.name);
               visibleLayersModified = true;
             }
-            if (visibleLayersModified) {
-              layer.setVisibleLayers(visibleLayers);
-            }
           });
+          if (visibleLayersModified) {
+            layer.setVisibleLayers(visibleLayers);
+          }
           if (!extentSet && response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
             _setExtent(map, extent);
