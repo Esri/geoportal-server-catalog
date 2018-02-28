@@ -32,6 +32,7 @@
 
     sendHttpRequest: {writable:true,value:function(task,url,data,dataContentType) {
       var usingProxy = false;
+      var disableContentType = task.target && task.target.disableContentType;
       var promise = this.newPromise();
       var req = new XMLHttpRequest();
       req.onload = function() {
@@ -58,12 +59,9 @@
         }
         req.open("POST",url);
         if (typeof dataContentType === "string" && dataContentType.length > 0) {
-          if (usingProxy) {
-            // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
-            //req.setRequestHeader("Content-type",dataContentType);
-          } else {
-            // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
-            //req.setRequestHeader("Content-type",dataContentType);
+          // TODO Request header field Content-type is not allowed by Access-Control-Allow-Headers in preflight response.
+          if (!disableContentType) {
+            req.setRequestHeader("Content-type",dataContentType);
           }
         }
         req.send(data);
