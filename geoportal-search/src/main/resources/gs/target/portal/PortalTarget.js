@@ -16,6 +16,15 @@
 (function(){
   /*jshint -W069 */
 
+  gs.target.types["portal"] = {
+    newInstance: function(options,safeOptions) {
+      if (options && options.url) options.portalBaseUrl = options.url;
+      var target = gs.Object.create(gs.target.portal.PortalTarget);
+      target.safeMixin(options).mixin(safeOptions);
+      return target;
+    }
+  };
+
   gs.target.portal.PortalTarget = gs.Object.create(gs.target.Target, {
 
     portalBaseUrl: {writable: true, value: "https://www.arcgis.com"},
