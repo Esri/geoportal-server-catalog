@@ -279,7 +279,7 @@
       // TODO array?
       var requiredFilter = this.requiredFilter;
       if (typeof requiredFilter === "string" && requiredFilter.length > 0) {
-        musts.push({"query_string": {
+        targetRequest.musts.push({"query_string": {
           "analyze_wildcard": true,
           "query": requiredFilter
         }});

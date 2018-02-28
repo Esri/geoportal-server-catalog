@@ -18,7 +18,8 @@ define(["dojo/_base/declare",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/TargetSetting.html",
   "dijit/form/Form",
-  "dijit/form/ValidationTextBox"],
+  "dijit/form/ValidationTextBox",
+  "dijit/form/CheckBox"],
 function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template) {
 
   var _def = declare([_WidgetBase,_TemplatedMixin,_WidgetsInTemplateMixin], {
@@ -36,6 +37,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       this.typeTextBox.set("value",props.type);
       this.profileTextBox.set("value",props.profile);
       this.filterTextBox.set("value",props.requiredFilter);
+      this.useProxyCheckBox.set("value",!!props.useProxy);
     },
 
     destroy: function() {
@@ -61,6 +63,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       chkStr("type",this.typeTextBox.get("value"));
       chkStr("profile",this.profileTextBox.get("value"));
       chkStr("requiredFilter",this.filterTextBox.get("value"));
+      props.useProxy = !!this.useProxyCheckBox.get("value");
       return props;
     },
 

@@ -26,6 +26,11 @@
   margin-right: 10px;
 }
 
+.geoportal-search.settings .note {
+  font-style: italic;
+  font-size: 10px;
+}
+
 /*
 .geoportal-search.settings .targets {
   max-height: 500px;
