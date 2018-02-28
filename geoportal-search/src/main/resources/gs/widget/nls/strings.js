@@ -6,6 +6,7 @@ define({
       loadError: "GeoportalSearch, unable to load:",
       targetOptions: {
         caption: "Catalog",
+        enabled: "Enabled"
       },
       searchBox: {
         search: "Search",
