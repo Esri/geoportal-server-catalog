@@ -28,41 +28,50 @@
     "targets": [
       {
         "name": "ArcGIS Online",
-        "tag": "arcgis",
-        "type": "portal",
         "url": "https://www.arcgis.com",
-        "enabled": true,
-        "requiredFilter": "map",
-        "profile": null
+        "type": "portal",
+        "profile": null,
+        "requiredFilter": null,
+        "enabled": true
       },
       {
-        "name": "gptdb1",
-        "tag": "gptdb1",
-        "type": "geoportal",
+        "name": "gptdb1 (geoportal)",
         "url": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search",
+        "type": "geoportal",
+        "profile": null,
+        "requiredFilter": null,
+        "enabled": true
+      },
+      {
+        "name": "gptdb1 (elasticsearch)",
+        "url": "http://gptdb1.esri.com:9200/metadata/item/_search",
+        "type": "elasticsearch",
+        "profile": null,
+        "requiredFilter": null,
         "enabled": true,
-        "requiredFilter": "map",
-        "profile": null
+        "useProxy": true
       },
       {
         "name": "CSW3 Geoportal2 (urban)",
-        "type": "csw",
         "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords",
-        "requiredFilter": "map",
+        "type": "csw3",
+        "profile": null,
+        "enabled": true
       },
       {
         "name": "CSW2 Geoportal2 (urban)",
+        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords",
         "type": "csw2",
         "profile": "CSW2_Geoportal1",
-        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+        "enabled": true
       },
       {
         "name": "CSW2 Geoportal2 (gptogc)",
+        "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords",
         "type": "csw2",
         "profile": "CSW2_Geoportal1",
-        "useProxy": true,
-        "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords",
-        "requiredFilter": "map",
+        "enabled": true,
+        "useProxy": true
       }
     ]
   };
