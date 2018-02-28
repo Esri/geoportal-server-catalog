@@ -42,7 +42,11 @@
 
         "arcgis": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "https://www.arcgis.com"
-        }),
+        })
+
+        /*
+
+        Some Examples
 
         "arcgisSDI": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "https://www.arcgis.com",
@@ -99,6 +103,7 @@
           "cswVersion": "3.0.0",
           "getRecordsUrl": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
         })
+        */
 
       };
 
