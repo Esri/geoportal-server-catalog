@@ -29,6 +29,7 @@
         data-dojo-type="dijit/form/ValidationTextBox"
         data-dojo-attach-point="typeTextBox"
         data-dojo-props="trim:true,required:true"/>
+        <span class="gap note">e.g. portal geoportal csw2 csw3</span>
     </div>
     <div class="form-group">
       <label for="${id}_profile" class="control-label"
@@ -37,6 +38,7 @@
         data-dojo-type="dijit/form/ValidationTextBox"
         data-dojo-attach-point="profileTextBox"
         data-dojo-props="trim:true,required:false"/>
+        <span class="gap note">e.g. CSW2_Geoportal1</span>
     </div>
     <div class="form-group">
       <label for="${id}_filter" class="control-label"
@@ -45,6 +47,13 @@
         data-dojo-type="dijit/form/ValidationTextBox"
         data-dojo-attach-point="filterTextBox"
         data-dojo-props="trim:true,required:false"/>
+    </div>
+    <div class="form-group">
+      <label for="${id}_useProxy" class="control-label"
+        >${i18n.search.settings.target.useProxy}</label>
+      <input id="${id}_useProxy" type="checkbox"
+        data-dojo-type="dijit/form/CheckBox"
+        data-dojo-attach-point="useProxyCheckBox"/>
     </div>
   </form>
 </div>
