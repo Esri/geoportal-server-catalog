@@ -13,6 +13,10 @@
   height: 24px;
 }
 
+.calcite .search-sort-options .dijitButtonContents {
+  padding: 0px;
+}
+
 /* ........................................................................ */
 
 .geoportal-search.settings a {
