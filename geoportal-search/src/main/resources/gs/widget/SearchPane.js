@@ -23,6 +23,7 @@ define(["dojo/_base/declare",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
   "dojo/text!./templates/SearchPane.html",
+  "dijit/Dialog",
   "./BBoxOption",
   "./LiveDataOption",
   "./Paging",
@@ -32,7 +33,7 @@ define(["dojo/_base/declare",
   "./TargetOptions",
   "../all"],
 function(declare, localRequire, lang, array, win, domClass, on,
-  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template,
+  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, Dialog,
   BBoxOption, LiveDataOption, Paging, ResultsPane, SearchBox, SortOptions,
   TargetOptions) {
 
@@ -175,6 +176,15 @@ function(declare, localRequire, lang, array, win, domClass, on,
           self.toggleLoading(false);
         }
       });
+    },
+
+    showSettings: function() {
+      var dialog = new Dialog({
+        title: "My Dialog",
+        content: "Test content.",
+        style: "width: 100%; height: 100%;"
+      });
+      dialog.show();
     },
 
     toggleLoading: function(visible) {
