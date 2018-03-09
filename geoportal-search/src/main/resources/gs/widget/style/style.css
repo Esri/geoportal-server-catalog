@@ -14,10 +14,10 @@
 
 .geoportal-search-pro .geoportal-search.search-pane {
   width: 95%;
-  height: 400px;
+  height: 98%;
 }
 .geoportal-search-pro .dijitPopup {
-  max-width: 98%;
+  max-width: 95%;
 }
 
 /* ........................................................................ */
@@ -54,7 +54,7 @@
 .geoportal-search .secondary-search-bar {
   position: absolute;
   width: 100%;
-  top: 40px;
+  top: 35px;
 }
 
 .geoportal-search .search-pane-content {
@@ -62,7 +62,7 @@
 	width: 100%;
 	left: 0;
 	right: 0;
-	top: 75px;
+	top: 70px;
 	bottom: 44px;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -139,8 +139,12 @@
   outline: none;
 }
 .geoportal-search .search-target-options > .dijitDropDownButton .dijitButtonContents,
- .geoportal-search .item-card .action-bar > .dijitDropDownButton .dijitButtonContents {
+.geoportal-search .item-card .action-bar > .dijitDropDownButton .dijitButtonContents {
   outline: none;
+}
+.geoportal-search .search-target-options .dijitButtonText > span {
+	display: inline-block;
+	margin-bottom: 1px;
 }
 
 .geoportal-search.targets-popup .target {
@@ -196,6 +200,7 @@
 
 .geoportal-search .search-livedata-option {
   margin-left: 4px;
+	margin-right: 10px;
 }
 .geoportal-search .search-livedata-option .checkbox-inline,
 .geoportal-search .search-livedata-option .dijitCheckBox input  {
