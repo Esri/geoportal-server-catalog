@@ -40,6 +40,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
       if (!settings) settings = this.targetWidget;
       this.componentLabelInput.value = settings.label;
       this.fieldInput.value = settings.field;
+      this.nestedPathInput.value = settings.nestedPath;
       this.intervalInput.value = settings.interval;
       this.ticksInput.value = settings.ticks;
       this.placesInput.value = settings.places;
@@ -76,6 +77,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
       
       this.targetWidget.label = chkInput(this.componentLabelInput,this.targetWidget.label);
       this.targetWidget.field = chkInput(this.fieldInput,this.targetWidget.field);
+      this.targetWidget.nestedPath = chkInput(this.nestedPathInput,null);
       this.targetWidget.interval = chkNum(this.intervalInput,this.targetWidget.interval);
       this.targetWidget.ticks = chkInt(this.ticksInput,1,10,this.targetWidget.ticks);
       this.targetWidget.places = chkInt(this.placesInput,0,10,this.targetWidget.places);
