@@ -174,22 +174,25 @@ public class SearchRequest {
     try {
       nodes = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().nodesToArray();
       port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
-      //if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
-      //  scheme = "https://";
-      //}
-      //String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackUsername();
-      //String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackPassword();
-      //if (username != null && password != null) {
-      //  elastic.add("username",username);
-      //  elastic.add("password",password);
-      //}
+      if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
+        scheme = "https://";
+      }
+      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackUsername();
+      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackPassword();
+      if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+        elastic.add("username",username);
+        elastic.add("password",password);
+      }
     } catch (Throwable t) {
       t.printStackTrace();
     }
     if ((nodes != null) && (nodes.length > 0)) {
       for (String node: nodes) {
         // TODO configure this a different way?
-        String url = scheme+node+":"+port+"/metadata/item/_search";
+        String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
+        String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
+        String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
+        System.err.println("elasticUrl: "+url);
         elastic.add("searchUrl",url);
         info.add("elastic",elastic);
         return info;
