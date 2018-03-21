@@ -193,7 +193,6 @@ public class SearchRequest {
         String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
         String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
         String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
-        System.err.println("elasticUrl: "+url);
         elastic.add("searchUrl",url);
         info.add("elastic",elastic);
         return info;
