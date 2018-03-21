@@ -26,12 +26,49 @@ var G = {
 
   analyzeTimePeriod: function(task,params) {
     //print("analyzeTimePeriod");
+    
+    var chkYear = function(v) {
+      var c, i, y = "";
+      var result = {
+        isNegative: false,
+        isInteger: false,
+        year: null,
+        value: v
+      };
+      if (typeof v === "string") {
+        if (v.indexOf("-") === 0) {
+          v = v.substring(1);
+          result.isNegative = true;
+        }
+        if (v.length > 0) {
+          result.isInteger = true;
+          for (i=0;i<v.length;i++) {
+            c = v.charAt(i);
+            if (c >= '0' && c <= '9') {
+              y += c;
+            } else {
+              result.isInteger = false;
+              break;
+            }
+          }
+          if (y.length > 0) {
+            if (result.isNegative) y = "-" + y;
+            result.year = y;
+          }
+        }
+      }
+      return result;
+    };
+    
+    
     if (!params) return;
     //"instant_dt": null, "instant_indeterminate_s": null,
     var data = {
       "begin_dt": null,
+      "begin_year_l": null,
       "begin_indeterminate_s": null,
       "end_dt": null,
+      "end_year_l": null,
       "end_indeterminate_s": null,
     };
     if (params.instant) {
@@ -51,13 +88,26 @@ var G = {
     }
     if (params.begin) {
       if (typeof params.begin.date === "string" && !params.begin.date.startsWith("9999")) {
-        data["begin_dt"] = this.DateUtil.checkIsoDateTime(params.begin.date,false);
+        params.begin.yearInfo = chkYear(params.begin.date);
+        if (params.begin.yearInfo.year != null) {
+          data["begin_year_l"] = params.begin.yearInfo.year;
+        }
+        if (!params.begin.yearInfo.isNegative) {
+          data["begin_dt"] = this.DateUtil.checkIsoDateTime(params.begin.date,false);
+        }
+        
       }
       data["begin_indeterminate_s"] = this.Val.chkStr(params.begin.indeterminate,null);
     }
     if (params.end) {
       if (typeof params.end.date === "string" && !params.end.date.startsWith("9999")) {
-        data["end_dt"] = this.DateUtil.checkIsoDateTime(params.end.date,true);
+        params.end.yearInfo = chkYear(params.end.date);
+        if (params.end.yearInfo.year != null) {
+          data["end_year_l"] = params.end.yearInfo.year;
+        }
+        if (!params.end.yearInfo.isNegative) {
+          data["end_dt"] = this.DateUtil.checkIsoDateTime(params.end.date,true);
+        }
       }
       data["end_indeterminate_s"] = this.Val.chkStr(params.end.indeterminate,null);
     }
