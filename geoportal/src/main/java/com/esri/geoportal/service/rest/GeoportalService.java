@@ -20,6 +20,7 @@ import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 
 import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -63,14 +64,28 @@ public class GeoportalService {
       
       jso.add("version",gc.getVersion());
       jso.add("metadataIndexName",gc.getElasticContext().getItemIndexName());
+      jso.add("supportsApprovalStatus",gc.getSupportsApprovalStatus());
+      jso.add("supportsGroupBasedAccess",gc.getSupportsGroupBasedAccess());
       
       if (user != null && user.getUsername() != null) {
-        jso.add("user",Json.createObjectBuilder()
+        JsonObjectBuilder jsoUser = Json.createObjectBuilder()
           .add("username",user.getUsername())
           .add("isAdmin",user.isAdmin())
           .add("isPublisher",user.isPublisher())
-          .add("isAnonymous",user.isAnonymous())
-        );
+          .add("isAnonymous",user.isAnonymous());
+        if (gc.getSupportsGroupBasedAccess()) {
+          JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
+          String[] groups = user.getGroupNames();
+          if (groups != null) {
+            for (String group: groups) {
+              jsaGroups.add(Json.createObjectBuilder()
+                .add("name",group)
+              );
+            }         
+          }
+          jsoUser.add("groups",jsaGroups);
+        }
+        jso.add("user",jsoUser);
       }
       
       ArcGISAuthenticationProvider ap = gc.getBeanIfDeclared("arcgisAuthenticationProvider",

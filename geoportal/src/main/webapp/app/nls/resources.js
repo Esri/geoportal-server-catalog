@@ -236,12 +236,30 @@ define({
     },
     
     content: {
+      updateButton: "Update",
+      approvalStatus: {
+        caption: "Approval Status",
+        status: "Status",
+        none: "None",
+        approved: "Approved",
+        disapproved: "Disapproved",
+        incomplete: "Incomplete",
+        posted: "Posted",
+        draft: "Draft"
+      },
       changeOwner: {
         caption: "Change Owner",
-        button: "Update",
         currentOwner: "Current Owner:",
         newOwner: "New Owner:",
         bulkPattern: "Apply change to all items owned by {username}"
+      },
+      groupAccess: {
+        caption: "Access"
+      },
+      applyTo: {
+        itemPattern: "Apply change to this item only",
+        ownerPattern: "Apply change to all items owned by {username}",
+        sourcePattern: "Apply change to all items harvested from {sitename}"
       },
       uploadMetadata: {
         caption: "Upload Metadata",

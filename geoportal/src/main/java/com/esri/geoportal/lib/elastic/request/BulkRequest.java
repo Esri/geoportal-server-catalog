@@ -97,7 +97,7 @@ public class BulkRequest extends AppRequest {
   /** Methods =============================================================== */
   
   /**
-   * Append the scroller hit to the buld request.
+   * Append the scroller hit to the bulk request.
    * @param ec the Elastic context
    * @param request the request
    * @param hit the hit

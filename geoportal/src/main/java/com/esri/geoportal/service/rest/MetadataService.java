@@ -25,6 +25,9 @@ import com.esri.geoportal.lib.elastic.request.PublishMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.RealiasRequest;
 import com.esri.geoportal.lib.elastic.request.ReindexRequest;
 import com.esri.geoportal.lib.elastic.request.SearchRequest;
+import com.esri.geoportal.lib.elastic.request.SetAccessRequest;
+import com.esri.geoportal.lib.elastic.request.SetApprovalStatusRequest;
+import com.esri.geoportal.lib.elastic.request.SetOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
 
@@ -47,6 +50,9 @@ import javax.ws.rs.core.SecurityContext;
 @Path("/metadata")
 public class MetadataService {
   
+  /*
+   * @Deprecated use SetOwnerRequest
+   */
   @PUT
   @Path("/bulk/changeOwner")
   public Response bulkChangeOwner(
@@ -199,6 +205,69 @@ public class MetadataService {
       @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(sc);
     return this.search(user,pretty,hsr,body);
+  }
+  
+  @PUT
+  @Path("/setAccess")
+  public Response setAccess(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(sc);
+    try {
+      SetAccessRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetAccessRequest",SetAccessRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  @PUT
+  @Path("/setApprovalStatus")
+  public Response setApprovalStatus(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(sc);
+    try {
+      SetApprovalStatusRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetApprovalStatusRequest",SetApprovalStatusRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  @PUT
+  @Path("/setOwner")
+  public Response setOwner(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(sc);
+    try {
+      SetOwnerRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetOwnerRequest",SetOwnerRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
   }
   
   @POST 
