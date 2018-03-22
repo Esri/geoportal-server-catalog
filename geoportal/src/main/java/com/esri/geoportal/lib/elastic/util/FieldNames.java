@@ -27,6 +27,18 @@ public class FieldNames {
   
   /* sys (item) ==================================================== */
   
+  /** FIELD_SRC_URI = "src_uri_s" */
+  public static String FIELD_SRC_URI = "src_uri_s";
+  
+  /** FIELD_SYS_ACCESS = "sys_access_s" */
+  public static String FIELD_SYS_ACCESS = "sys_access_s";
+  
+  /** FIELD_SYS_ACCESS_GROUPS = "sys_access_groups_s" */
+  public static String FIELD_SYS_ACCESS_GROUPS = "sys_access_groups_s";
+  
+  /** FIELD_SYS_APPROVAL_STATUS = "sys_approval_status_s" */
+  public static String FIELD_SYS_APPROVAL_STATUS = "sys_approval_status_s";
+  
   /** FIELD_SYS_CREATED = "sys_created_dt" */
   public static String FIELD_SYS_CREATED = "sys_created_dt";
   

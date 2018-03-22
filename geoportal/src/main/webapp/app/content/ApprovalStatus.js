@@ -13,19 +13,17 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
-        "dojo/_base/lang",
-        "dojo/on",
-        "dojo/keys",
-        "dojo/topic",
-        "app/context/app-topics",
-        "app/common/Templated",
-        "dojo/text!./templates/ChangeOwner.html",
-        "dojo/i18n!app/nls/resources",
-        "app/common/ConfirmationDialog",
-        "app/common/ModalDialog",
-        "app/context/AppClient"],
-function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, 
-  ConfirmationDialog, ModalDialog, AppClient) {
+  "dojo/topic",
+  "app/context/app-topics",
+  "app/common/Templated",
+  "dojo/text!./templates/ApprovalStatus.html",
+  "dojo/i18n!app/nls/resources",
+  "app/common/ConfirmationDialog",
+  "app/common/ModalDialog",
+  "app/context/AppClient",
+  "app/content/ApplyTo"],
+function(declare, topic, appTopics, Templated, template, i18n, 
+  ConfirmationDialog, ModalDialog, AppClient, ApplyTo) {
 
   var oThisClass = declare([Templated], {
     
@@ -33,7 +31,7 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n,
     templateString: template,
     
     dialog: null,
-    title: i18n.content.changeOwner.caption,
+    title: i18n.content.approvalStatus.caption,
     okLabel: i18n.content.updateButton,
     
     item: null,
@@ -90,80 +88,9 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n,
     init: function() {
       var self = this;
       this.setNodeText(this.itemTitleNode,this.item.title);
-      this.setNodeText(this.currentOwnerNode,this.item.sys_owner_s);
-      if (AppContext.appConfig.allowBulkChangeOwner) {
-        var v = i18n.content.changeOwner.bulkPattern;
-        v = v.replace("{username}",this.item.sys_owner_s);
-        this.setNodeText(this.bulkLabelNode,v);
-      } else {
-        this.bulkNode.style.display = "none";
-      }
-      this.own(on(this.newOwnerNode,"keyup",function(evt) {
-        if (evt.keyCode === keys.ENTER) self.execute();
-      }));
-    },
-    
-    modalShown: function() {
-      
-      var client = new AppClient();
-      var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
-      url = client.appendAccessToken(url); // TODO append access_token?
-      
-      var usernames = new window.Bloodhound({
-        name: "usernames",
-        datumTokenizer: function(datum) {return window.Bloodhound.tokenizers.whitespace(datum);},
-        queryTokenizer: window.Bloodhound.tokenizers.whitespace,
-        remote: {
-          url: url,
-          prepare: function (query, settings) {
-            settings.type = "POST";
-            settings.contentType = "application/json; charset=UTF-8";
-            var data = {
-                "size": 500,
-                "query": {
-                  "match": {
-                    "sys_owner_s": {
-                      "query": query,
-                      "type": "phrase_prefix"
-                    }
-                  }
-                },
-                "aggregations": {
-                  "usernames": {
-                    "terms": {field: "sys_owner_s"}
-                  }
-                }
-            };
-            settings.data = JSON.stringify(data);
-            return settings;
-          },
-          transform: function(response) {
-            if (response.aggregations.usernames.buckets.length > 0) {
-              var names = $.map(response.aggregations.usernames.buckets, function(bucket) {
-                return bucket.key;
-              });
-              names.sort();
-              return names;
-            }
-            return [];
-          }
-        }
-      });
-      
-      $("#"+this.id+"_newOwner").typeahead(
-        {
-          hint: true,
-          highlight: true,
-          minLength: 1
-        },
-        {
-          name: 'usernames',
-          limit: Number.POSITIVE_INFINITY,
-          source: usernames
-        }
-      );
-
-      this.newOwnerNode.focus();
+      this.applyTo = new ApplyTo({
+        item: this.item
+      },this.applyToNode);
     },
  
     show: function() {
@@ -198,9 +125,6 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n,
             self.execute(false);
           }
         }
-      });
-      $(this.dialog.domNode).on('shown.bs.modal',function() {
-        self.modalShown();
       });
       this.dialog.show();
     }

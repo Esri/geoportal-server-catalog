@@ -13,37 +13,39 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
-        "dojo/_base/lang",
-        "dojo/_base/array",
-        "dojo/string",
-        "dojo/topic",
-        "dojo/request/xhr",
-        "dojo/on",
-        "app/context/app-topics",
-        "dojo/dom-class",
-        "dojo/dom-construct",
-        "dijit/_WidgetBase",
-        "dijit/_TemplatedMixin",
-        "dijit/_WidgetsInTemplateMixin",
-        "dijit/Tooltip",
-        "dijit/TooltipDialog",
-        "dijit/popup",
-        "dojo/text!./templates/ItemCard.html",
-        "dojo/i18n!app/nls/resources",
-        "app/context/AppClient",
-        "app/etc/ServiceType",
-        "app/etc/util",
-        "app/common/ConfirmationDialog",
-        "app/content/ChangeOwner",
-        "app/content/MetadataEditor",
-        "app/context/metadata-editor",
-        "app/content/UploadMetadata",
-        "app/preview/PreviewUtil",
-        "app/preview/PreviewPane"], 
+  "dojo/_base/lang",
+  "dojo/_base/array",
+  "dojo/string",
+  "dojo/topic",
+  "dojo/request/xhr",
+  "dojo/on",
+  "app/context/app-topics",
+  "dojo/dom-class",
+  "dojo/dom-construct",
+  "dijit/_WidgetBase",
+  "dijit/_TemplatedMixin",
+  "dijit/_WidgetsInTemplateMixin",
+  "dijit/Tooltip",
+  "dijit/TooltipDialog",
+  "dijit/popup",
+  "dojo/text!./templates/ItemCard.html",
+  "dojo/i18n!app/nls/resources",
+  "app/context/AppClient",
+  "app/etc/ServiceType",
+  "app/etc/util",
+  "app/common/ConfirmationDialog",
+  "app/content/ApprovalStatus",
+  "app/content/ChangeOwner",
+  "app/content/GroupAccess",
+  "app/content/MetadataEditor",
+  "app/context/metadata-editor",
+  "app/content/UploadMetadata",
+  "app/preview/PreviewUtil",
+  "app/preview/PreviewPane"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
-    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, template, i18n, 
-    AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
-    MetadataEditor, gxeConfig, UploadMetadata, PreviewUtil, PreviewPane) {
+  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, 
+  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ApprovalStatus, ChangeOwner, 
+  GroupAccess, MetadataEditor, gxeConfig, UploadMetadata, PreviewUtil, PreviewPane) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -298,6 +300,8 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       var isOwner = this._isOwner(item);
       var isAdmin = AppContext.appUser.isAdmin();
       var isPublisher = AppContext.appUser.isPublisher();
+      var supportsApprovalStatus = AppContext.geoportal.supportsApprovalStatus;
+      var supportsGroupBasedAccess = AppContext.geoportal.supportsGroupBasedAccess;
       var links = [];
       
       if (this._canEditMetadata(item,isOwner,isAdmin,isPublisher)) {
@@ -363,6 +367,30 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           innerHTML: i18n.item.actions.options.changeOwner,
           onclick: function() {
             var dialog = new ChangeOwner({item:item});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (supportsApprovalStatus && !isAdmin) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: "?ApprovalStatus",
+          onclick: function() {
+            var dialog = new ApprovalStatus({item:item});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (supportsGroupBasedAccess && (isAdmin || isOwner)) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: "?Access",
+          onclick: function() {
+            var dialog = new GroupAccess({item:item});
             dialog.show();
           }
         }));

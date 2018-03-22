@@ -25,6 +25,7 @@ import org.elasticsearch.search.SearchHit;
 
 /**
  * Bulk ownership change.
+ * @Deprecated use SetOwnerRequest
  */
 public class BulkChangeOwnerRequest extends BulkRequest {
   
