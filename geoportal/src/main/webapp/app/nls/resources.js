@@ -66,7 +66,8 @@ define({
         metadataType: "Metadata Type",
         organizations: "Organizations",
         keywords: "Keywords",
-        origin: "Source of Origin"
+        origin: "Source of Origin",
+        approvalStatus: "Approval Status"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -254,12 +255,19 @@ define({
         bulkPattern: "Apply change to all items owned by {username}"
       },
       groupAccess: {
-        caption: "Access"
+        caption: "Group Access",
+        access: "Access",
+        _public: "Public",
+        _private: "Private",
+        groups: "Groups"
       },
       applyTo: {
-        itemPattern: "Apply change to this item only",
-        ownerPattern: "Apply change to all items owned by {username}",
-        sourcePattern: "Apply change to all items harvested from {sitename}"
+        itemLabel: "Apply change to this item only",
+        ownerPattern: "Apply change to all items owned by: {username}",
+        sitePattern: "Apply change to all items harvested from: {sitename}",
+        itemLabelDelete: "Delete this item only",
+        ownerPatternDelete: "Delete all items owned by: {username}",
+        sitePatternDelete: "Delete all items harvested from: {sitename}"
       },
       uploadMetadata: {
         caption: "Upload Metadata",

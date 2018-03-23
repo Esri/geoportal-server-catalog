@@ -372,23 +372,23 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }));
       }
       
-      if (supportsApprovalStatus && !isAdmin) {
+      if (supportsApprovalStatus && isAdmin) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
-          innerHTML: "?ApprovalStatus",
+          innerHTML: i18n.content.approvalStatus.caption,
           onclick: function() {
-            var dialog = new ApprovalStatus({item:item});
+            var dialog = new ApprovalStatus({itemCard: this, item: item});
             dialog.show();
           }
         }));
       }
       
-      if (supportsGroupBasedAccess && (isAdmin || isOwner)) {
+      if (supportsGroupBasedAccess && (true || isAdmin || isOwner)) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
-          innerHTML: "?Access",
+          innerHTML: i18n.content.groupAccess.caption,
           onclick: function() {
             var dialog = new GroupAccess({item:item});
             dialog.show();
