@@ -1,20 +1,31 @@
 <div>
   <div class="form-group" data-dojo-attach-point="itemTitleNode"></div>
-  <div class="form-group">
-    <label>${i18n.content.changeOwner.currentOwner}</label>
-    <span data-dojo-attach-point="currentOwnerNode"></span>
+  <div class="form-group form-group-sm">
+    <div>
+      <label class="control-label"
+        >${i18n.content.groupAccess.access}</label>
+    </div>
+    <div>
+		  <div>
+		    <label class="radio-inline">
+		      <input type="radio" name="${id}_radio" data-dojo-attach-point="publicNode">
+		      <span>${i18n.content.groupAccess._public}</span>
+		    </label>
+		  </div>
+		  <div>
+		    <label class="radio-inline">
+		      <input type="radio" name="${id}_radio" data-dojo-attach-point="privateNode">
+		      <span>${i18n.content.groupAccess._private}</span>
+		    </label>
+		  </div>
+    </div>
   </div>
-  <div class="form-group g-scrollable-typeahead" style="position: relative;">
-	  <label for="${id}_newOwner">${i18n.content.changeOwner.newOwner}</label>
-	  <div>
-	    <input id="${id}_newOwner" type="text" class="form-control typeahead" 
-	      data-dojo-attach-point="newOwnerNode">
-	  </div>
+  <div class="form-group form-group-sm">
+    <div>
+      <label class="control-label"
+        >${i18n.content.groupAccess.groups}</label>
+    </div>
+    <ul class="g-access-groups" data-dojo-attach-point="groupsNode"></ul>
   </div>
-  <div class="form-group" data-dojo-attach-point="bulkNode">
-    <label class="checkbox-inline">
-      <input type="checkbox" data-dojo-attach-point="bulkCheckbox">
-      <span data-dojo-attach-point="bulkLabelNode"></span>
-    </label>
-  </div>
+  <div data-dojo-attach-point="applyToNode"></div>
 </div>

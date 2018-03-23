@@ -45,6 +45,7 @@ public class BulkEditRequest extends BulkRequest {
   /** Constructor. */
   public BulkEditRequest() {
     super();
+    this.setDocsPerRequest(10000);
   }
   
   /** The request body. */
@@ -100,7 +101,6 @@ public class BulkEditRequest extends BulkRequest {
     } else {
       au.ensurePublisher(user);
     }
-    //this.setDocsPerRequest(10000); // TODO?
     if (getProcessMessage() == null) setProcessMessage("Bulk edit");
     try {
       return super.execute();

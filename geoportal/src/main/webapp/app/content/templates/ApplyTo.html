@@ -1,21 +1,20 @@
 <div class="form-group">
-  <label class="control-label">?Apply to:</label>
-  <div class="g-indent">
-	  <label class="checkbox-inline">
-	    <input type="checkbox" data-dojo-attach-point="idNode">
-	    <span data-dojo-attach-point="idLabelNode">?This item</span>
+  <div data-dojo-attach-point="itemSection">
+	  <label class="radio-inline">
+	    <input type="radio" name="${id}_radio" data-dojo-attach-point="itemNode">
+	    <span data-dojo-attach-point="itemLabelNode"></span>
 	  </label>
   </div>
-  <div class="g-indent">
-    <label class="checkbox-inline">
-      <input type="checkbox" data-dojo-attach-point="ownerNode">
-      <span data-dojo-attach-point="ownerLabelNode">?This owner</span>
+  <div data-dojo-attach-point="ownerSection">
+    <label class="radio-inline">
+      <input type="radio" name="${id}_radio" data-dojo-attach-point="ownerNode">
+      <span data-dojo-attach-point="ownerLabelNode"></span>
     </label>
   </div>
-  <div class="g-indent">
-    <label class="checkbox-inline">
-      <input type="checkbox" data-dojo-attach-point="srcUriNode">
-      <span data-dojo-attach-point="srcUriLabelNode">?This src uri</span>
+  <div data-dojo-attach-point="siteSection">
+    <label class="radio-inline">
+      <input type="radio" name="${id}_radio" data-dojo-attach-point="siteNode">
+      <span data-dojo-attach-point="siteLabelNode"></span>
     </label>
   </div>
 </div>
