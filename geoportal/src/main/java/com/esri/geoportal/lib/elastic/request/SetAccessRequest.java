@@ -38,7 +38,7 @@ public class SetAccessRequest extends BulkEditRequest {
     /*
     http://localhost:8080/geoportal/rest/metadata/setAccess?id=68e65338e166458d8425775114487b31&access=private&group=g1&group=g2
     
-    id=&owner=&srcUri=&access=&group=&group=
+    id=&owner=&siteId=&access=&group=&group=
     */
     
     setAdminOnly(false);
@@ -82,11 +82,14 @@ public class SetAccessRequest extends BulkEditRequest {
       response.writeBadRequest(this,JsonUtil.newErrorResponse(msg,getPretty()));
       return response;
     }
+    /*
+    // TODO should this be enforced? 
     if (access.equals("public") && hasGroups) {
       String msg = "access must be private when groups are specified";
       response.writeBadRequest(this,JsonUtil.newErrorResponse(msg,getPretty()));
       return response;
     }
+    */
     
     JsonObjectBuilder jso = Json.createObjectBuilder();
     jso.add(FieldNames.FIELD_SYS_ACCESS,access);

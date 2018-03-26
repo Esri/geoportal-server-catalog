@@ -35,7 +35,7 @@ public class SetOwnerRequest extends BulkEditRequest {
     /*
     http://localhost:8080/geoportal/rest/metadata/setOwner?id=68e65338e166458d8425775114487b31&newOwner=publisher
     
-    id=&owner=&srcUri=&newOwner=
+    id=&owner=&siteId=&newOwner=
     */
     
     setAdminOnly(true);

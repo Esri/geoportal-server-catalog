@@ -37,7 +37,7 @@ public class SetApprovalStatusRequest extends BulkEditRequest {
     /*
     http://localhost:8080/geoportal/rest/metadata/setApprovalStatus?id=68e65338e166458d8425775114487b31&approvalStatus=draft
     
-    id=&owner=&srcUri=&approvalStatus=
+    id=&owner=&siteId=&approvalStatus=
     */
     
     setAdminOnly(true);

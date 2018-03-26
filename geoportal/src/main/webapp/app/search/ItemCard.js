@@ -34,18 +34,19 @@ define(["dojo/_base/declare",
   "app/etc/ServiceType",
   "app/etc/util",
   "app/common/ConfirmationDialog",
-  "app/content/ApprovalStatus",
   "app/content/ChangeOwner",
-  "app/content/GroupAccess",
   "app/content/MetadataEditor",
   "app/context/metadata-editor",
+  "app/content/SetAccess",
+  "app/content/SetApprovalStatus",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
   "app/preview/PreviewPane"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, 
-  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ApprovalStatus, ChangeOwner, 
-  GroupAccess, MetadataEditor, gxeConfig, UploadMetadata, PreviewUtil, PreviewPane) {
+  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
+  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, UploadMetadata, 
+  PreviewUtil, PreviewPane) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -316,8 +317,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }));
       }
       
-      if ((isOwner && isPublisher) || isAdmin) {
-        
+      var canManage = ((isOwner && isPublisher) || isAdmin);
+      
+      if (canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
@@ -326,7 +328,45 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             (new UploadMetadata({itemId:itemId})).show();
           }
         }));
-        
+      }
+      
+      if (isAdmin) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.changeOwner.caption,
+          onclick: function() {
+            var dialog = new ChangeOwner({item:item});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (supportsApprovalStatus && isAdmin) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.setApprovalStatus.caption,
+          onclick: function() {
+            var dialog = new SetApprovalStatus({itemCard: this, item: item});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (supportsGroupBasedAccess && canManage) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.setAccess.caption,
+          onclick: function() {
+            var dialog = new SetAccess({item:item});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
@@ -357,45 +397,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
               }
             });
           }
-        }));
+        }));        
       }
-      
-      if (isAdmin) {
-        links.push(domConstruct.create("a",{
-          "class": "small",
-          href: "javascript:void(0)",
-          innerHTML: i18n.item.actions.options.changeOwner,
-          onclick: function() {
-            var dialog = new ChangeOwner({item:item});
-            dialog.show();
-          }
-        }));
-      }
-      
-      if (supportsApprovalStatus && isAdmin) {
-        links.push(domConstruct.create("a",{
-          "class": "small",
-          href: "javascript:void(0)",
-          innerHTML: i18n.content.approvalStatus.caption,
-          onclick: function() {
-            var dialog = new ApprovalStatus({itemCard: this, item: item});
-            dialog.show();
-          }
-        }));
-      }
-      
-      if (supportsGroupBasedAccess && (true || isAdmin || isOwner)) {
-        links.push(domConstruct.create("a",{
-          "class": "small",
-          href: "javascript:void(0)",
-          innerHTML: i18n.content.groupAccess.caption,
-          onclick: function() {
-            var dialog = new GroupAccess({item:item});
-            dialog.show();
-          }
-        }));
-      }
-      
+
       if (links.length === 0) return;
       
       var dd = domConstruct.create("div",{
@@ -467,19 +471,20 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     },
     
     _renderServiceStatus: function(item) {
+      var type;
       var authKey = AppContext.appConfig.statusChecker.authKey;
       if (authKey && string.trim(authKey).length>0) {
         if (item && item.resources_nst) {
           if (item.resources_nst.length) {
             for (var i=0; i<item.resources_nst.length; i++) {
-              var type = this._translateService(item.resources_nst[i].url_type_s);
+              type = this._translateService(item.resources_nst[i].url_type_s);
               if (type) {
                 this._checkService(item._id,type);
                 break;
               }
             }
           } else {
-            var type = this._translateService(item.resources_nst.url_type_s);
+            type = this._translateService(item.resources_nst.url_type_s);
             if (type) {
               this._checkService(item._id,type);
             }

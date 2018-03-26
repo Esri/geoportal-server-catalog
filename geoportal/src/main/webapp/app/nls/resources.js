@@ -224,7 +224,6 @@ define({
         preview: "Preview",
         options: {
           caption: "Options",
-          changeOwner: "Change Owner",
           deleteItem: "Delete Item",
           editMetadata: "Edit Metadata",
           uploadMetadata: "Upload Metadata"
@@ -238,29 +237,6 @@ define({
     
     content: {
       updateButton: "Update",
-      approvalStatus: {
-        caption: "Approval Status",
-        status: "Status",
-        none: "None",
-        approved: "Approved",
-        disapproved: "Disapproved",
-        incomplete: "Incomplete",
-        posted: "Posted",
-        draft: "Draft"
-      },
-      changeOwner: {
-        caption: "Change Owner",
-        currentOwner: "Current Owner:",
-        newOwner: "New Owner:",
-        bulkPattern: "Apply change to all items owned by {username}"
-      },
-      groupAccess: {
-        caption: "Group Access",
-        access: "Access",
-        _public: "Public",
-        _private: "Private",
-        groups: "Groups"
-      },
       applyTo: {
         itemLabel: "Apply change to this item only",
         ownerPattern: "Apply change to all items owned by: {username}",
@@ -268,6 +244,28 @@ define({
         itemLabelDelete: "Delete this item only",
         ownerPatternDelete: "Delete all items owned by: {username}",
         sitePatternDelete: "Delete all items harvested from: {sitename}"
+      },
+      changeOwner: {
+        caption: "Change Owner",
+        currentOwner: "Current Owner:",
+        newOwner: "New Owner:"
+      },
+      setAccess: {
+        caption: "Set Access",
+        access: "Access",
+        _public: "Public",
+        _private: "Private",
+        groups: "Groups"
+      },
+      setApprovalStatus: {
+        caption: "Set Approval Status",
+        status: "Status",
+        none: "None",
+        approved: "Approved",
+        disapproved: "Disapproved",
+        incomplete: "Incomplete",
+        posted: "Posted",
+        draft: "Draft"
       },
       uploadMetadata: {
         caption: "Upload Metadata",
