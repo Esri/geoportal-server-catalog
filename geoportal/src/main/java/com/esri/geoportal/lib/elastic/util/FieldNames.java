@@ -27,8 +27,8 @@ public class FieldNames {
   
   /* sys (item) ==================================================== */
   
-  /** FIELD_SRC_URI = "src_uri_s" */
-  public static String FIELD_SRC_URI = "src_uri_s";
+  /** FIELD_SITE_ID = "src_source_uri_s" */
+  public static String FIELD_SITE_ID = "src_source_uri_s";
   
   /** FIELD_SYS_ACCESS = "sys_access_s" */
   public static String FIELD_SYS_ACCESS = "sys_access_s";

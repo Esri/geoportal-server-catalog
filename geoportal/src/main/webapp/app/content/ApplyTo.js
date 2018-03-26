@@ -45,7 +45,7 @@ function(declare, lang, Templated, template, i18n) {
         params.confirmationText = this.ownerLabelNode.innerHTML;
         params.isBulkUpdate = true;
       } else if (this.siteNode.checked) {
-        params.urlParams.srcUri = this._forSiteId;
+        params.urlParams.siteId = this._forSiteId;
         params.confirmationText = this.siteLabelNode.innerHTML;
         params.isBulkUpdate = true;
       }
@@ -57,7 +57,7 @@ function(declare, lang, Templated, template, i18n) {
       var isAdmin = AppContext.appUser.isAdmin();
       var owner = this.item.sys_owner_s;
       var site = this.item.src_source_name_s;
-      var siteId = this.item.src_uri_s;
+      var siteId = this.item.src_source_uri_s;
       
       isAdmin = true; // TODO temporary
       

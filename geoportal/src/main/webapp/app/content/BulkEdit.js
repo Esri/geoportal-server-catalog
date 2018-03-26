@@ -29,7 +29,7 @@ function(declare, topic, appTopics, Templated, i18n,
     templateString: "<div></div>",
     
     dialog: null,
-    title: i18n.content.approvalStatus.caption,
+    title: "?Bulk Edit",
     okLabel: i18n.content.updateButton,
     
     item: null,
@@ -40,21 +40,25 @@ function(declare, topic, appTopics, Templated, i18n,
       this.inherited(arguments);
     },
     
+    applyLocally: function(item) {
+    },
+    
     execute: function(params) {
       if (this._working) return;
       var self = this;
-      console.log("execute.params", params);
+      this._working = true;
+      this.dialog.okCancelBar.showWorking(i18n.general.working,true);
+      //console.log("execute.params", params);
       var client = new AppClient();
       var dfd = client.bulkEdit(params.action,params.urlParams);
       dfd.then(function(response){
-        console.log("execute.response",response);
-        // TODO self.item.sys_owner_s = v;
+        //console.log("execute.response",response);
         // wait for real-time update
         setTimeout(function(){
           if (params.isBulkUpdate) {
             topic.publish(appTopics.BulkUpdate,{});
           } else {
-            // TODO topic.publish(appTopics.ItemOwnerChanged,{item:self.item});
+            self.applyLocally(self.item);
           }
           self.dialog.hide();
         },1500);
@@ -81,6 +85,9 @@ function(declare, topic, appTopics, Templated, i18n,
     
     makeRequestParams: function() {
       return null;
+    },
+    
+    modalShown: function() {
     },
  
     show: function() {
@@ -111,6 +118,9 @@ function(declare, topic, appTopics, Templated, i18n,
             self.execute(params);
           }
         }
+      });
+      $(this.dialog.domNode).on('shown.bs.modal',function() {
+        self.modalShown();
       });
       this.dialog.show();
     }

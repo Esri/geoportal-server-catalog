@@ -144,9 +144,9 @@ public class BulkEditRequest extends BulkRequest {
     }
   }
   
-  /** Filter by src uri (i.e. harvesting site). */
-  protected void filterBySrcUri() {
-    filterByTerm(FieldNames.FIELD_SRC_URI,getParameter("srcUri"));
+  /** Filter by the harvesting site id. */
+  protected void filterBySiteId() {
+    filterByTerm(FieldNames.FIELD_SITE_ID,getParameter("siteId"));
   }
   
   /**
@@ -204,7 +204,7 @@ public class BulkEditRequest extends BulkRequest {
     filters = new ArrayList<QueryBuilder>();
     this.filterById();
     this.filterByOwner();
-    this.filterBySrcUri();
+    this.filterBySiteId();
     if (filters.size() == 0) {
       throw new RuntimeException("Bulk edit: the request had no filters");
     }

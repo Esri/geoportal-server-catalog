@@ -79,6 +79,7 @@ public class GeoportalService {
           if (groups != null) {
             for (String group: groups) {
               jsaGroups.add(Json.createObjectBuilder()
+                .add("id",group)
                 .add("name",group)
               );
             }         

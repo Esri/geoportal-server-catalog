@@ -16,7 +16,7 @@ define(["dojo/_base/declare",
   "dojo/topic",
   "app/context/app-topics",
   "app/content/BulkEdit",
-  "dojo/text!./templates/ApprovalStatus.html",
+  "dojo/text!./templates/SetApprovalStatus.html",
   "dojo/i18n!app/nls/resources",
   "app/content/ApplyTo"],
 function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
@@ -26,11 +26,18 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     i18n: i18n,
     templateString: template,
     
-    title: i18n.content.approvalStatus.caption,
+    title: i18n.content.setApprovalStatus.caption,
     okLabel: i18n.content.updateButton,
+    
+    _localValue: null,
 
     postCreate: function() {
       this.inherited(arguments);
+    },
+    
+    applyLocally: function(item) {
+      item["sys_approval_status_s"] = this._localValue;
+      topic.publish(appTopics.ItemApprovalStatusChanged,{item:item});
     },
     
     init: function() {
@@ -55,7 +62,7 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
         this.statusSelect.focus();
         return null;
       }
-      params.urlParams.approvalStatus = status;
+      this._localValue = params.urlParams.approvalStatus = status;
       this.applyTo.appendUrlParams(params);
       return params;
     }

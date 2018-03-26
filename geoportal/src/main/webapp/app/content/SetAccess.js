@@ -13,29 +13,42 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
+  "dojo/_base/lang",
+  "dojo/_base/array",
   "dojo/dom-construct",
   "dojo/topic",
   "app/context/app-topics",
   "app/content/BulkEdit",
-  "dojo/text!./templates/GroupAccess.html",
+  "dojo/text!./templates/SetAccess.html",
   "dojo/i18n!app/nls/resources",
   "app/content/ApplyTo"],
-function(declare, domConstruct, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
+function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit, 
+  template, i18n, ApplyTo) {
 
   var oThisClass = declare([BulkEdit], {
     
     i18n: i18n,
     templateString: template,
     
-    title: i18n.content.groupAccess.caption,
+    title: i18n.content.setAccess.caption,
     okLabel: i18n.content.updateButton,
+    
+    _checkboxes: null,
+    _localAccess: null,
+    _localGroups: null,
 
     postCreate: function() {
       this.inherited(arguments);
+      this._checkboxes = [];
     },
     
-    addGroup: function(group) {
-      return;
+    applyLocally: function(item) {
+      item["sys_access_s"] = this._localAccess;
+      item["sys_access_groups_s"] = this._localGroups;
+      topic.publish(appTopics.ItemAccessChanged,{item:item});
+    },
+    
+    addGroup: function(group,checked) {
       var li = domConstruct.create("li",{
       },this.groupsNode,"last");
       var lbl = domConstruct.create("label",{
@@ -45,27 +58,34 @@ function(declare, domConstruct, topic, appTopics, BulkEdit, template, i18n, Appl
         type: "checkbox",
         value: group.id
       },lbl,"last");
+      if (checked) chk.checked = true;
       var span = domConstruct.create("span",{
         innerHTML: group.name
       },lbl,"last");
+      this._checkboxes.push(chk);
     },
     
     init: function() {
+      var self = this;
       this.setNodeText(this.itemTitleNode,this.item.title);
       
       var v = this.item["sys_access_s"];
       if (v === "private") this.privateNode.checked = true;
       else this.publicNode.checked = true;
       
-      var groups = [];
-      for (var i=0;i<10;i++) {
-        var id = "grp1";
-        var name = "Group 1";
-        this.addGroup({
-          id: id,
-          name: name
-        })
-      }
+      var itemGroups = this.item["sys_access_groups_s"];
+      array.forEach(AppContext.appUser.getGroups(),function(group){
+        
+        var checked = false;
+        if (lang.isArray(itemGroups)) {
+          checked = array.some(itemGroups,function(groupId){
+            return (group.id === groupId);
+          });
+        } else if (group.id === itemGroups) {
+          checked = true;
+        }
+        self.addGroup(group,checked);
+      });
       
       this.applyTo = new ApplyTo({
         item: this.item,
@@ -79,9 +99,18 @@ function(declare, domConstruct, topic, appTopics, BulkEdit, template, i18n, Appl
         urlParams: {}
       };
     
+      var selectedGroups = [];
+      array.forEach(this._checkboxes,function(chk){
+        if (chk.checked) selectedGroups.push(chk.value);
+      });
+      if (selectedGroups.length > 0) {
+        params.urlParams.group = selectedGroups;
+      }
+      this._localGroups = selectedGroups;
+      
       var access = "public";
       if (this.privateNode.checked) access = "private";
-      params.urlParams.access = access;
+      this._localAccess = params.urlParams.access = access;
       
       this.applyTo.appendUrlParams(params);
       return params;
