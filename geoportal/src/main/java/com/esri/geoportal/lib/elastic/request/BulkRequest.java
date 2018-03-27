@@ -41,6 +41,7 @@ public class BulkRequest extends AppRequest {
   private boolean adminOnly = true;
   private int docsPerRequest = 1000;
   private String processMessage;
+  private String responseStatusAction = "updated";
   private int retryOnConflict = 1;
   private int scrollerPageSize = 1000;
     
@@ -74,6 +75,15 @@ public class BulkRequest extends AppRequest {
   /** The process message. */
   public void setProcessMessage(String processMessage) {
     this.processMessage = processMessage;
+  }
+  
+  /** The response status action (e.g. updated or deleted) */
+  public String getResponseStatusAction() {
+    return responseStatusAction;
+  }
+  /** The response status action (e.g. updated or deleted) */
+  public void setResponseStatusAction(String responseStatusAction) {
+    this.responseStatusAction = responseStatusAction;
   }
   
   /** How many retries for a version conflict. */
@@ -183,7 +193,7 @@ public class BulkRequest extends AppRequest {
   public void writeOk(AppResponse response, long count) {
     JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
     jsonBuilder.add("count",count);
-    jsonBuilder.add("status","updated");
+    jsonBuilder.add("status",this.getResponseStatusAction());
     response.writeOkJson(this,jsonBuilder);
   }
   
