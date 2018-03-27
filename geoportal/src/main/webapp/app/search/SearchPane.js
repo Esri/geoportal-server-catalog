@@ -77,9 +77,10 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       //var components = [this.searchBox,this.resultsPane];
       var components = [];
       array.forEach(this.getChildren(),function(child){
-        if (child.isSearchComponent) components.push(child);
+        if (child.isSearchComponent && !child.conditionallyDisabled) {
+          components.push(child);
+        }
       });
-      
       return components;
     },
     
