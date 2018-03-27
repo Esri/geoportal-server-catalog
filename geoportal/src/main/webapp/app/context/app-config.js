@@ -1,7 +1,5 @@
 define([],function(){var obj={
 // .......................................................................................
-
-  allowBulkChangeOwner: true,
   
   search: {
     allowSettings: true,

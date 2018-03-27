@@ -67,7 +67,9 @@ define({
         organizations: "Organizations",
         keywords: "Keywords",
         origin: "Source of Origin",
-        approvalStatus: "Approval Status"
+        approvalStatus: "Approval Status",
+        access: "Access",
+        accessGroups: "Access Groups"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -224,7 +226,6 @@ define({
         preview: "Preview",
         options: {
           caption: "Options",
-          deleteItem: "Delete Item",
           editMetadata: "Edit Metadata",
           uploadMetadata: "Upload Metadata"
         }
@@ -249,6 +250,9 @@ define({
         caption: "Change Owner",
         currentOwner: "Current Owner:",
         newOwner: "New Owner:"
+      },
+      deleteItems: {
+        caption: "Delete",
       },
       setAccess: {
         caption: "Set Access",

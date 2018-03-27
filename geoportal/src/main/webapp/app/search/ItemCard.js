@@ -35,6 +35,7 @@ define(["dojo/_base/declare",
   "app/etc/util",
   "app/common/ConfirmationDialog",
   "app/content/ChangeOwner",
+  "app/content/DeleteItems",
   "app/content/MetadataEditor",
   "app/context/metadata-editor",
   "app/content/SetAccess",
@@ -44,7 +45,7 @@ define(["dojo/_base/declare",
   "app/preview/PreviewPane"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, 
-  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
+  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
   MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, UploadMetadata, 
   PreviewUtil, PreviewPane) {
   
@@ -336,7 +337,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           href: "javascript:void(0)",
           innerHTML: i18n.content.changeOwner.caption,
           onclick: function() {
-            var dialog = new ChangeOwner({item:item});
+            var dialog = new ChangeOwner({item:item,itemCard:self});
             dialog.show();
           }
         }));
@@ -348,7 +349,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           href: "javascript:void(0)",
           innerHTML: i18n.content.setApprovalStatus.caption,
           onclick: function() {
-            var dialog = new SetApprovalStatus({itemCard: this, item: item});
+            var dialog = new SetApprovalStatus({item:item,itemCard:self});
             dialog.show();
           }
         }));
@@ -360,7 +361,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           href: "javascript:void(0)",
           innerHTML: i18n.content.setAccess.caption,
           onclick: function() {
-            var dialog = new SetAccess({item:item});
+            var dialog = new SetAccess({item:item,itemCard:self});
             dialog.show();
           }
         }));
@@ -370,35 +371,47 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
-          innerHTML: i18n.item.actions.options.deleteItem,
+          innerHTML: i18n.content.deleteItems.caption,
           onclick: function() {
-            var dialog = new ConfirmationDialog({
-              title: i18n.item.actions.options.deleteItem,
-              content: item.title,
-              okLabel: i18n.general.del,
-              status: "danger"
-            });
-            dialog.show().then(function(ok){
-              if (ok) {
-                dialog.okCancelBar.showWorking(i18n.general.deleting,false);
-                var client = new AppClient();
-                client.deleteItem(itemId).then(function(response){
-                  topic.publish(appTopics.ItemDeleted,{
-                    itemId: itemId,
-                    searchPane: self.searchPane
-                  });
-                  self.domNode.style.display = "none";
-                  dialog.hide();
-                }).otherwise(function(error){
-                  var msg = i18n.general.error;
-                  console.warn("deleteItem.error",error);
-                  dialog.okCancelBar.showError(msg,false);
-                });
-              }
-            });
+            var dialog = new DeleteItems({item:item,itemCard:self});
+            dialog.show();
           }
-        }));        
+        }));
       }
+      
+//      if (canManage) {
+//        links.push(domConstruct.create("a",{
+//          "class": "small",
+//          href: "javascript:void(0)",
+//          innerHTML: i18n.item.actions.options.deleteItem,
+//          onclick: function() {
+//            var dialog = new ConfirmationDialog({
+//              title: i18n.item.actions.options.deleteItem,
+//              content: item.title,
+//              okLabel: i18n.general.del,
+//              status: "danger"
+//            });
+//            dialog.show().then(function(ok){
+//              if (ok) {
+//                dialog.okCancelBar.showWorking(i18n.general.deleting,false);
+//                var client = new AppClient();
+//                client.deleteItem(itemId).then(function(response){
+//                  topic.publish(appTopics.ItemDeleted,{
+//                    itemId: itemId,
+//                    searchPane: self.searchPane
+//                  });
+//                  self.domNode.style.display = "none";
+//                  dialog.hide();
+//                }).otherwise(function(error){
+//                  var msg = i18n.general.error;
+//                  console.warn("deleteItem.error",error);
+//                  dialog.okCancelBar.showError(msg,false);
+//                });
+//              }
+//            });
+//          }
+//        }));        
+//      }
 
       if (links.length === 0) return;
       

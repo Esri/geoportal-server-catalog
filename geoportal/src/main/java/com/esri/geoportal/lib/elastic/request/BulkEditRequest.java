@@ -45,6 +45,7 @@ public class BulkEditRequest extends BulkRequest {
   /** Constructor. */
   public BulkEditRequest() {
     super();
+    this.setProcessMessage("BulkEditRequest");
     this.setDocsPerRequest(10000);
   }
   
@@ -101,7 +102,6 @@ public class BulkEditRequest extends BulkRequest {
     } else {
       au.ensurePublisher(user);
     }
-    if (getProcessMessage() == null) setProcessMessage("Bulk edit");
     try {
       return super.execute();
     } catch (Throwable t) {
@@ -220,7 +220,7 @@ public class BulkEditRequest extends BulkRequest {
       }
       q = bq;
     }
-    System.err.println("Bulk edit query .......................\r\n"+q.toString()); // TODO temporary
+    //System.err.println("Bulk edit query .......................\r\n"+q.toString()); // TODO temporary
     //if (filters.size() > 0) throw new RuntimeException("Bulk edit: temporary stop");
     return q;
   }

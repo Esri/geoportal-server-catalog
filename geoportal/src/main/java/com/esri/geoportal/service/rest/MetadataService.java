@@ -19,6 +19,7 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.request.BulkChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
+import com.esri.geoportal.lib.elastic.request.DeleteItemsRequest;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
 import com.esri.geoportal.lib.elastic.request.GetMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.PublishMetadataRequest;
@@ -71,6 +72,28 @@ public class MetadataService {
     } catch (Throwable t) {
       return this.writeException(t,pretty);
     }
+  }
+  
+  @DELETE
+  @Path("/deleteItems")
+  public Response delDeleteItems(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(sc);
+    return this.deleteItems(user,pretty,hsr,body);
+  }
+  
+  @PUT
+  @Path("/deleteItems")
+  public Response putDeleteItems(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(sc);
+    return this.deleteItems(user,pretty,hsr,body);
   }
   
   @DELETE 
@@ -352,6 +375,28 @@ public class MetadataService {
           "request.DeleteItemRequest",DeleteItemRequest.class);
       request.init(user,pretty);
       request.init(id);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  /**
+   * Delete one or more items.
+   * @param user the active user
+   * @param pretty for pretty JSON
+   * @param hsr the http request
+   * @param body the request body
+   * @return the response
+   */
+  protected Response deleteItems(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
+    try {
+      DeleteItemsRequest request = GeoportalContext.getInstance().getBean(
+          "request.DeleteItemsRequest",DeleteItemsRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
       AppResponse response = request.execute();
       return response.build();
     } catch (Throwable t) {
