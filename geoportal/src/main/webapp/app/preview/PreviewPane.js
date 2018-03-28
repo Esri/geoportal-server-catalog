@@ -50,6 +50,11 @@ function(declare, lang, domConstruct, on, PreviewUtil,
         var mapProps = this.map || AppContext.appConfig.searchMap || {};
         if (mapProps) mapProps = lang.clone(mapProps);
         this.map = new Map(this.mapNode, mapProps);
+        
+        this.own(on(this.map, "load", lang.hitch(this, function(){
+          // add service
+          PreviewUtil.addService(this.map, this.serviceType);
+        })));
 
         this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
 
@@ -68,9 +73,6 @@ function(declare, lang, domConstruct, on, PreviewUtil,
           this._hideLoading(args);
           this.forcedLoading = false;
         })));
-
-        // add service
-        PreviewUtil.addService(this.map, this.serviceType);
       }
     },
     
