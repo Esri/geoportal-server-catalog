@@ -27,6 +27,9 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.SecurityContext;
+
+import com.esri.geoportal.context.AppUser;
 
 /**
  * CSW service provider.
@@ -44,24 +47,30 @@ public class CswService extends Application {
 
   @GET
   public void get(@Suspended final AsyncResponse asyncResponse, 
+      @Context SecurityContext sc,
       @Context HttpServletRequest hsr) {
-    new SearchRequest(asyncResponse).execute(hsr);
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr);
   }
   
   @POST
   @Consumes({MediaType.APPLICATION_FORM_URLENCODED})
   public void post(@Suspended final AsyncResponse asyncResponse,
+      @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
       MultivaluedMap<String, String> requestParams) {
-    new SearchRequest(asyncResponse).execute(hsr,requestParams);
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr,requestParams);
   }
  
   @POST
   @Consumes({MediaType.APPLICATION_XML,MediaType.TEXT_XML,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
   public void postString(@Suspended final AsyncResponse asyncResponse,
+      @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
       String body) {
-    new SearchRequest(asyncResponse).execute(hsr,body);
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr,body);
   }
 
 }

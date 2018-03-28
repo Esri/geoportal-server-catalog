@@ -27,6 +27,9 @@ import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.MultivaluedMap;
+import javax.ws.rs.core.SecurityContext;
+
+import com.esri.geoportal.context.AppUser;
 
 /**
  * Opensearch service provider.
@@ -43,31 +46,39 @@ public class OpensearchService extends Application {
   }
 
   @GET
-  public void get(@Suspended final AsyncResponse asyncResponse, 
+  public void get(@Suspended final AsyncResponse asyncResponse,
+      @Context SecurityContext sc,
       @Context HttpServletRequest hsr) {
-    new SearchRequest(asyncResponse).execute(hsr);
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr);
   }
   
   @POST
   @Consumes({MediaType.APPLICATION_FORM_URLENCODED})
   public void post(@Suspended final AsyncResponse asyncResponse,
+      @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
       MultivaluedMap<String, String> requestParams) {
-    new SearchRequest(asyncResponse).execute(hsr,requestParams);
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr,requestParams);
   }
   
   @GET
   @Path("/description")
-  public void getDescription(@Suspended final AsyncResponse asyncResponse, 
+  public void getDescription(@Suspended final AsyncResponse asyncResponse,
+      @Context SecurityContext sc,
       @Context HttpServletRequest hsr) {
-    new SearchRequest(asyncResponse).execute(hsr);
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr);
   }
   
   @POST
   @Path("/description")
   public void postDescription(@Suspended final AsyncResponse asyncResponse, 
+      @Context SecurityContext sc,
       @Context HttpServletRequest hsr) {
-    new SearchRequest(asyncResponse).execute(hsr);
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr);
   }
 
 }

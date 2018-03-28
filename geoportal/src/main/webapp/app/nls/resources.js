@@ -266,6 +266,7 @@ define({
         status: "Status",
         none: "None",
         approved: "Approved",
+        reviewed: "Reviewed",
         disapproved: "Disapproved",
         incomplete: "Incomplete",
         posted: "Posted",

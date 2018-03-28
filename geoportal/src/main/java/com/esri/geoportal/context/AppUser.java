@@ -20,6 +20,7 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -43,10 +44,11 @@ public class AppUser {
   
   /**
    * Constructor.
+   * @param request the request
    * @param sc the security context
    */
-  public AppUser(SecurityContext sc) {
-    init(sc);
+  public AppUser(HttpServletRequest request, SecurityContext sc) {
+    init(request);
   }
   
   /**
@@ -85,10 +87,10 @@ public class AppUser {
   }
   
   /**
-   * Initialize based upon a security context.
-   * @param sc the security context
+   * Initialize based upon an HTTP request.
+   * @param sc the request
    */
-  private void init(SecurityContext sc) {
+  private void init(HttpServletRequest sc) {
     init(null,false,false);
     if (sc == null) return;
     Principal p = sc.getUserPrincipal();
@@ -101,6 +103,7 @@ public class AppUser {
     } else {
       isAnonymous = true;
     }
+    System.err.println("username: "+username+", isAdmin="+isAdmin);
     
     String pfx = "ROLE_";
     String[] gtpRoles = {"ADMIN","PUBLISHER","USER"};
@@ -124,7 +127,7 @@ public class AppUser {
             if (name != null) {
               if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
               if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
-                //System.err.println("authority: "+name);
+                System.err.println("authority: "+name);
                 grpNames.add(name);
               }
             }
@@ -135,7 +138,6 @@ public class AppUser {
     if (grpNames.size() > 0) {
       groupNames = grpNames.toArray(new String[grpNames.size()]);
     }
-    
   }
   
   /**
