@@ -61,7 +61,7 @@ public class CswService extends Application {
       @Context HttpServletRequest hsr,
       @Context UriInfo uriInfo,
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     String body = null;
     String qstr = hsr.getQueryString();
     if ((qstr == null) || (qstr.length() == 0)) {

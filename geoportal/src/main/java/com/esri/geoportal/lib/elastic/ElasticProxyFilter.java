@@ -1,0 +1,213 @@
+/* See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * Esri Inc. licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.esri.geoportal.lib.elastic;
+import java.io.BufferedReader;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Enumeration;
+import java.util.List;
+
+import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
+import javax.servlet.Filter;
+import javax.servlet.FilterChain;
+import javax.servlet.FilterConfig;
+import javax.servlet.ReadListener;
+import javax.servlet.ServletException;
+import javax.servlet.ServletInputStream;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletRequestWrapper;
+
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.context.AppUser;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.search.SearchRequest;
+
+/**
+ * A filter for proxy requests to Elasticsearch.
+ */
+public class ElasticProxyFilter implements Filter {
+  
+  /** Constructor */
+  public ElasticProxyFilter() {}
+  
+  @Override
+  public void destroy() {
+  }
+  
+  @Override
+  public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
+      throws IOException, ServletException {
+    System.err.println("ElasticProxyFilter.doFilter");
+    HttpServletRequest hsr = (HttpServletRequest)request;
+    GeoportalContext gc = GeoportalContext.getInstance();
+    if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
+      AppUser user = new AppUser(hsr,null);
+      if (!user.isAdmin()) {
+        String content = this.readCharacters(hsr);
+        String contentType = null;
+        //content = "{\"query\":{\"term\":{\"sys_owner_s\":\"publisher\"}}}"; 
+        //contentType = "application/json";
+        JsonObject jso = this.mergeAccessQuery(hsr,user,content);
+        if (jso.getBoolean("wasModified")) {
+          System.err.println("ElasticProxyFilter.doFilter.wasModified");
+          content = jso.getString("sBody"); 
+          contentType = "application/json";
+          System.err.println("ElasticProxyFilter.doFilter.content="+content);
+        }
+        hsr = new LocalRequestWrapper(hsr,content,contentType);
+      }
+    }
+    chain.doFilter(hsr,response);
+  }
+
+  @Override
+  public void init(FilterConfig filterConfig) {}
+  
+  private JsonObject mergeAccessQuery(HttpServletRequest hsr, AppUser user, String Body) 
+      throws ServletException{
+    System.err.println("ElasticProxyFilter.mergeAccessQuery");
+    String body = "{\"query\":{\"exists\":{\"field\":\"sys_owner_s\"}}}";
+    SearchRequest sr = new SearchRequest(user);
+    try {
+      String json = sr.mergeAccessQuery(hsr,user,body);
+      return (JsonObject)JsonUtil.toJsonStructure(json);
+    } catch (Throwable e) {
+      throw new ServletException(e);
+    }
+  }
+  
+  private String readCharacters(HttpServletRequest hsr) throws IOException {
+    StringBuilder sb = new StringBuilder();
+    BufferedReader br = null;
+    InputStreamReader ir = null;
+    InputStream st = null;
+    try {
+      char cbuf[] = new char[2048];
+      int n = 0;
+      int nLen = cbuf.length;
+      st =hsr.getInputStream();
+      ir = new InputStreamReader(st,"UTF-8");
+      br = new BufferedReader(ir);
+      while ((n = br.read(cbuf, 0, nLen)) >= 0) {
+        sb.append(cbuf, 0, n);
+      }
+    } finally {
+      try {if (br != null) br.close();} catch (Exception ef) {}
+      try {if (ir != null) ir.close();} catch (Exception ef) {}
+      try {if (st != null) st.close();} catch (Exception ef) {}
+    }
+    return sb.toString();
+  }
+  
+  /**
+   * Request wrapper.
+   */
+  private static class LocalRequestWrapper extends HttpServletRequestWrapper {
+
+    protected String content;
+    protected String contentType;
+
+    public LocalRequestWrapper(HttpServletRequest request, 
+        String content, String contentType) {
+      super(request);
+      this.content = content;
+      this.contentType = contentType;
+      //this.setCharacterEncoding(arg0); TODO?
+    }
+
+    @Override
+    public int getContentLength() {
+      if (content != null) {
+        return content.length();
+      } 
+      return super.getContentLength();
+    }
+
+    @Override
+    public String getContentType() {
+      if (contentType != null) {
+        return contentType;
+      }
+      return super.getContentType();
+    }
+    
+    @Override
+    public Enumeration<String> getHeaders(String name) {
+      //System.err.println("ElasticProxyRequestWrapper.getHeaders name="+name);
+      if (name.equals("content-length") && content != null) {
+        List<String> list = new ArrayList<String>();
+        list.add(""+content.length());
+        return Collections.enumeration(list);
+      }
+      if (name.equals("content-type") && contentType != null) {
+        List<String> list = new ArrayList<String>();
+        list.add(contentType);
+        return Collections.enumeration(list);
+      }
+      return super.getHeaders(name);
+    }
+
+
+    @Override
+    public ServletInputStream getInputStream() throws IOException {
+      if (content != null) {
+        ByteArrayInputStream stream = new ByteArrayInputStream(content.getBytes());
+        return new LocalInputStream(stream);
+      }
+      return super.getInputStream();
+    }
+  }
+  
+  /**
+   * Input stream.
+   */
+  private static class LocalInputStream extends ServletInputStream {
+    
+    private ByteArrayInputStream stream;
+    
+    public LocalInputStream(ByteArrayInputStream stream) {
+      this.stream = stream;
+    }
+
+    @Override
+    public boolean isFinished() {
+      return stream.available() == 0;
+    }
+
+    @Override
+    public boolean isReady() {
+      return true;
+    }
+
+    @Override
+    public void setReadListener(ReadListener arg0) {
+      throw new RuntimeException("LocalInputStream::setReadListener - Not implemented");
+    }
+
+    @Override
+    public int read() throws IOException {
+      return stream.read();
+    }
+  }
+   
+}
+

@@ -22,6 +22,7 @@ import com.esri.geoportal.context.GeoportalContext;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
 import javax.ws.rs.QueryParam;
@@ -38,8 +39,9 @@ public class GeoportalService {
   @GET
   public Response getSelf(
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return self(user,pretty);
   }
   
@@ -75,7 +77,7 @@ public class GeoportalService {
           .add("isAnonymous",user.isAnonymous());
         if (gc.getSupportsGroupBasedAccess()) {
           JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
-          String[] groups = user.getGroupNames();
+          String[] groups = user.getGroupNames(); // TODO should be objects with id/name
           if (groups != null) {
             for (String group: groups) {
               jsaGroups.add(Json.createObjectBuilder()
