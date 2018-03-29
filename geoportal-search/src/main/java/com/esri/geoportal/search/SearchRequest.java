@@ -45,6 +45,7 @@ public class SearchRequest {
   private static Map<String,ScriptEngine> ENGINES = Collections.synchronizedMap(new HashMap<String,ScriptEngine>());
   
   /** Instance variables. */
+  public Object appUser;
   private AsyncResponse asyncResponse;
   private String javascriptFile = "gs/context/nashorn/execute.js";
   private Response response;
@@ -55,6 +56,17 @@ public class SearchRequest {
   /** Construct with an async response. */
   public SearchRequest(AsyncResponse asyncResponse) {
     this.asyncResponse = asyncResponse;
+  }
+  
+  /** Construct with an async response and user. */
+  public SearchRequest(AsyncResponse asyncResponse, Object appUser) {
+    this.asyncResponse = asyncResponse;
+    this.appUser = appUser;
+  }
+  
+  /** Construct with a user. */
+  public SearchRequest(Object appUser) {
+    this.appUser = appUser;
   }
   
   /**
@@ -187,6 +199,32 @@ public class SearchRequest {
     } catch (Throwable t) {
       t.printStackTrace();
     }
+    try {
+      JsonObjectBuilder access = Json.createObjectBuilder();
+      access.add("supportsApprovalStatus",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsApprovalStatus());
+      access.add("supportsGroupBasedAccess",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess());    
+      com.esri.geoportal.context.AppUser user = null;
+      if (this.appUser != null && this.appUser instanceof com.esri.geoportal.context.AppUser) {
+        user = (com.esri.geoportal.context.AppUser)appUser;
+      }
+      if (user != null && user.getUsername() != null) {
+        access.add("username",user.getUsername());
+        access.add("isAdmin",user.isAdmin());
+        if (com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()) {
+          JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
+          String[] groups = user.getGroupNames(); // TODO should be ids
+          if (groups != null) {
+            for (String group: groups) {
+              jsaGroups.add(group);
+            }         
+          }
+          access.add("groups",jsaGroups);
+        }
+      }
+      elastic.add("access",access);
+    } catch (Throwable t) {
+      t.printStackTrace();
+    }
     if ((nodes != null) && (nodes.length > 0)) {
       for (String node: nodes) {
         // TODO configure this a different way?
@@ -277,6 +315,23 @@ public class SearchRequest {
       String msg = "{\"error\": \"Error processing request.\"}";
       putResponse(500,MediaType.APPLICATION_JSON,msg,null);
     }
+  }
+  
+  public String mergeAccessQuery(HttpServletRequest hsr, String body) 
+      throws Exception{
+    String url = hsr.getRequestURL().toString();
+    String qstr = hsr.getQueryString();
+    if (qstr != null && qstr.length() > 0) {
+      url += "?" + qstr;
+    }
+    String sSelfInfo = null;
+    JsonObjectBuilder selfInfo = this.getSelfInfo();
+    if (selfInfo != null) {
+      sSelfInfo = selfInfo.build().toString();
+    }
+    ScriptEngine engine = this.getCachedEngine(this.javascriptFile);
+    Invocable invocable = (Invocable)engine;
+    return (String)invocable.invokeFunction("mergeAccessQuery",sSelfInfo,url,body);
   }
   
   /**

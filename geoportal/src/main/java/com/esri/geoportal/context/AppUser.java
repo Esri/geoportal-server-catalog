@@ -71,17 +71,17 @@ public class AppUser {
     return username;
   }
   
-  /** True is this user has an ADMIN role. */
+  /** True if this user has an ADMIN role. */
   public boolean isAdmin() {
     return isAdmin;
   }
   
-  /** True is this user is anonymous. */
+  /** True if this user is anonymous. */
   public boolean isAnonymous() {
     return isAnonymous;
   }
   
-  /** True is this user has a PUBLISHER role */
+  /** True if this user has a PUBLISHER role */
   public boolean isPublisher() {
     return isPublisher;
   }
@@ -103,7 +103,7 @@ public class AppUser {
     } else {
       isAnonymous = true;
     }
-    System.err.println("username: "+username+", isAdmin="+isAdmin);
+    //System.err.println("username: "+username+", isAdmin="+isAdmin);
     
     String pfx = "ROLE_";
     String[] gtpRoles = {"ADMIN","PUBLISHER","USER"};
@@ -127,7 +127,7 @@ public class AppUser {
             if (name != null) {
               if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
               if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
-                System.err.println("authority: "+name);
+                //System.err.println("authority: "+name);
                 grpNames.add(name);
               }
             }

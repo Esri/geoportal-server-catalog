@@ -39,8 +39,6 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
-import com.esri.geoportal.context.AppUser;
-
 public class SearchRequest {
   
   /** The script engines. */
@@ -317,7 +315,7 @@ public class SearchRequest {
     }
   }
   
-  public String mergeAccessQuery(HttpServletRequest hsr, AppUser user, String body) 
+  public String mergeAccessQuery(HttpServletRequest hsr, String body) 
       throws Exception{
     String url = hsr.getRequestURL().toString();
     String qstr = hsr.getQueryString();
