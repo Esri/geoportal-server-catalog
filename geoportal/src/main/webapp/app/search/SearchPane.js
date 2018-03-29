@@ -93,8 +93,12 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
       var v, postData = null;
 
-      //var client = new AppClient();
-      //url = client.appendAccessToken(url);
+      if (AppContext.geoportal.supportsApprovalStatus || 
+          AppContext.geoportal.supportsGroupBasedAccess) {
+        var client = new AppClient();
+        url = client.appendAccessToken(url); 
+      }
+      
       var sProp = null, oProp = null, props = params.urlParams;
       for (sProp in props) {
         if (props.hasOwnProperty(sProp)) {

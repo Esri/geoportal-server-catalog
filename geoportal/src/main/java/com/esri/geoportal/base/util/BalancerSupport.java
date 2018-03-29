@@ -16,6 +16,7 @@ package com.esri.geoportal.base.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -86,7 +87,11 @@ public class BalancerSupport {
         if (p.length != 2) continue;
         if (p[0].equalsIgnoreCase("access_token")) continue;
         if (qsb.length() > 0) qsb.append("&");
-        qsb.append(p[0]).append("=").append(p[1]);
+        String v = p[1];
+        //try {v = URLEncoder.encode(v,"UTF-8");}
+        //catch (UnsupportedEncodingException e) {}
+        //System.err.println("v="+v);
+        qsb.append(p[0]).append("=").append(v);
       }
       if (qsb.length() > 0) query = qsb.toString();
       else query = null;

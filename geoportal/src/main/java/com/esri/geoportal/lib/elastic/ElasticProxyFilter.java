@@ -13,6 +13,11 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic;
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.context.AppUser;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.search.SearchRequest;
+
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -24,7 +29,6 @@ import java.util.Enumeration;
 import java.util.List;
 
 import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
 import javax.servlet.Filter;
 import javax.servlet.FilterChain;
 import javax.servlet.FilterConfig;
@@ -36,15 +40,16 @@ import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletRequestWrapper;
 
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.context.AppUser;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.search.SearchRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * A filter for proxy requests to Elasticsearch.
  */
 public class ElasticProxyFilter implements Filter {
+  
+  /** Logger. */
+  public static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxyFilter.class);
   
   /** Constructor */
   public ElasticProxyFilter() {}
@@ -56,39 +61,64 @@ public class ElasticProxyFilter implements Filter {
   @Override
   public void doFilter(ServletRequest request, ServletResponse response, FilterChain chain)
       throws IOException, ServletException {
-    System.err.println("ElasticProxyFilter.doFilter");
+    //System.err.println("ElasticProxyFilter.doFilter");
     HttpServletRequest hsr = (HttpServletRequest)request;
     GeoportalContext gc = GeoportalContext.getInstance();
+    AppUser user = null;
+    boolean checkAccess = false;
+    
     if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
-      AppUser user = new AppUser(hsr,null);
+      user = new AppUser(hsr,null);
       if (!user.isAdmin()) {
-        String content = this.readCharacters(hsr);
-        String contentType = null;
-        //content = "{\"query\":{\"term\":{\"sys_owner_s\":\"publisher\"}}}"; 
-        //contentType = "application/json";
-        JsonObject jso = this.mergeAccessQuery(hsr,user,content);
-        if (jso.getBoolean("wasModified")) {
-          System.err.println("ElasticProxyFilter.doFilter.wasModified");
-          content = jso.getString("sBody"); 
-          contentType = "application/json";
-          System.err.println("ElasticProxyFilter.doFilter.content="+content);
+        String path = hsr.getPathInfo();
+        // This will limit the ability to use other Elasticsearch indexes for non admin users
+        // _search, _count URI queries (q=) are problematic
+        if (path != null && (path.indexOf("_search") != -1 || path.indexOf("_count") != -1)) {
+          if (path.indexOf("_search/scroll") == -1) {
+            checkAccess = true;
+            String qstr = hsr.getQueryString();
+            if (qstr != null && qstr.length() > 0) {
+              String lc = "?" + qstr.toLowerCase();
+              if (lc.indexOf("?q=") != -1 || lc.indexOf("&q=") != -1) {
+                // TODO throw an exception here or rely on app-security.xml?
+              }
+            }
+          }
+        } else {
+          // TODO check others?
+          // TODO throw an exception here or rely on app-security.xml?
         }
-        hsr = new LocalRequestWrapper(hsr,content,contentType);
       }
     }
+    if (checkAccess) {
+      String content = null;
+      String contentType = null;
+      content = this.readCharacters(hsr);
+      if (content != null  && content.length() == 0) content = null;
+      //content = "{\"query\":{\"term\":{\"sys_owner_s\":\"publisher\"}}}"; 
+      //contentType = "application/json";
+      JsonObject jso = this.mergeAccessQuery(hsr,user,content);
+      if (jso.getBoolean("wasModified")) {
+        content = jso.getString("sBody"); 
+        contentType = "application/json";
+        LOGGER.debug("ElasticProxyFilter::modifiedQuery="+content);
+      }
+      hsr = new LocalRequestWrapper(hsr,content,contentType);
+    }
+    
     chain.doFilter(hsr,response);
   }
 
   @Override
   public void init(FilterConfig filterConfig) {}
   
-  private JsonObject mergeAccessQuery(HttpServletRequest hsr, AppUser user, String Body) 
+  private JsonObject mergeAccessQuery(HttpServletRequest hsr, AppUser user, String body) 
       throws ServletException{
-    System.err.println("ElasticProxyFilter.mergeAccessQuery");
-    String body = "{\"query\":{\"exists\":{\"field\":\"sys_owner_s\"}}}";
+    //System.err.println("ElasticProxyFilter.mergeAccessQuery");
+    //body = "{\"query\":{\"exists\":{\"field\":\"sys_owner_s\"}}}";
     SearchRequest sr = new SearchRequest(user);
     try {
-      String json = sr.mergeAccessQuery(hsr,user,body);
+      String json = sr.mergeAccessQuery(hsr,body);
       return (JsonObject)JsonUtil.toJsonStructure(json);
     } catch (Throwable e) {
       throw new ServletException(e);
@@ -104,11 +134,13 @@ public class ElasticProxyFilter implements Filter {
       char cbuf[] = new char[2048];
       int n = 0;
       int nLen = cbuf.length;
-      st =hsr.getInputStream();
-      ir = new InputStreamReader(st,"UTF-8");
-      br = new BufferedReader(ir);
-      while ((n = br.read(cbuf, 0, nLen)) >= 0) {
-        sb.append(cbuf, 0, n);
+      st = hsr.getInputStream();
+      if (st != null) {
+        ir = new InputStreamReader(st,"UTF-8");
+        br = new BufferedReader(ir);
+        while ((n = br.read(cbuf,0,nLen)) >= 0) {
+          sb.append(cbuf,0,n);
+        }
       }
     } finally {
       try {if (br != null) br.close();} catch (Exception ef) {}

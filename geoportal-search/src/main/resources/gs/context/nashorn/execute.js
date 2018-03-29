@@ -91,7 +91,6 @@ function mergeAccessQuery(sSelfInfo,sUrl,sBody) {
     if (accessQuery) {
       if (typeof sBody === "string" && sBody.indexOf("{") === 0) {
         body = JSON.parse(sBody);
-        print("mergeAccessQuery.body",body);
         if (body.query) {
           if (body.query.bool && body.query.bool.must) {
             body.query.bool.must.push(accessQuery);
@@ -134,7 +133,7 @@ function _makeAccessQuery(selfInfo) {
     supportsApprovalStatus = selfInfo.elastic.access.supportsApprovalStatus;
     supportsGroupBasedAccess = selfInfo.elastic.access.supportsGroupBasedAccess;
   }
-  isAdmin = false; // TODO temporary
+  //isAdmin = false; // TODO temporary
 
   var approvalQuery = null;
   var approvalShoulds = [];
