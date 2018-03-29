@@ -19,6 +19,8 @@ define([],function(){var obj={
     showDate: true,
     showOwner: true,
     showThumbnails: true,
+    showAccess: true,
+    showApprovalStatus: true,
     defaultSort: "title.sort:asc"
   },
   

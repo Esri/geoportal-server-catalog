@@ -17,6 +17,7 @@ define({
     
     general: {
       cancel: "Cancel",
+      clear: "Clear",
       close: "Close",
       del: "Delete",
       error: "Error",
@@ -259,7 +260,8 @@ define({
         access: "Access",
         _public: "Public",
         _private: "Private",
-        groups: "Groups"
+        groups: "Groups",
+        countPattern: "{count} selected"
       },
       setApprovalStatus: {
         caption: "Set Approval Status",

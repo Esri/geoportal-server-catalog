@@ -450,7 +450,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     _renderOwnerAndDate: function(item) {
       var owner = item.sys_owner_s;
       var date = item.sys_modified_dt;
-      var idx, text = "";
+      var idx, text = "", v;
       if (AppContext.appConfig.searchResults.showDate && typeof date === "string" && date.length > 0) {
         idx = date.indexOf("T");
         if (idx > 0) date =date.substring(0,idx);
@@ -460,6 +460,29 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         if (text.length > 0) text += " ";
         text += owner;
       }
+      
+      if (AppContext.appUser.isAdmin() || this._isOwner(item)) {
+        if (AppContext.appConfig.searchResults.showAccess && AppContext.geoportal.supportsGroupBasedAccess) {
+          v = item.sys_access_s;
+          if (text.length > 0) text += " ";
+          if (v === "private") {
+            text += i18n.content.setAccess._private;
+          } else {
+            text += i18n.content.setAccess._public;
+          }
+        }
+        if (AppContext.appConfig.searchResults.showApprovalStatus && AppContext.geoportal.supportsApprovalStatus) {
+          v = item.sys_approval_status_s;
+          if (typeof v === "string" && v.length > 0) {
+            v = i18n.content.setApprovalStatus[v];
+          }
+          if (typeof v === "string" && v.length > 0) {
+            if (text.length > 0) text += " ";
+            text += v;
+          }
+        }
+      }
+      
       if (text.length > 0) {
         util.setNodeText(this.ownerAndDateNode,text);
       }

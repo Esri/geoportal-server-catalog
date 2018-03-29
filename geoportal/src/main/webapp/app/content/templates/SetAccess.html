@@ -24,8 +24,12 @@
     <div>
       <label class="control-label"
         >${i18n.content.setAccess.groups}</label>
+      <a class="pull-right clearfix" href="javascript:void(0)" 
+        data-dojo-attach-event="onClick: clear">${i18n.general.clear}</a>
     </div>
     <ul class="g-access-groups" data-dojo-attach-point="groupsNode"></ul>
+    <div class="pull-right clearfix" data-dojo-attach-point="countNode"></div>
+    <div style="clear:both"></div>
   </div>
   <div data-dojo-attach-point="applyToNode"></div>
 </div>

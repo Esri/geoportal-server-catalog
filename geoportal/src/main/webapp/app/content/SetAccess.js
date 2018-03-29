@@ -49,6 +49,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
     },
     
     addGroup: function(group,checked) {
+      var self = this;
       var li = domConstruct.create("li",{
       },this.groupsNode,"last");
       var lbl = domConstruct.create("label",{
@@ -56,13 +57,23 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
       },li,"last");
       var chk = domConstruct.create("input",{
         type: "checkbox",
-        value: group.id
+        value: group.id,
+        onchange: function() {
+          self.updateCount();
+        }
       },lbl,"last");
       if (checked) chk.checked = true;
       var span = domConstruct.create("span",{
         innerHTML: group.name
       },lbl,"last");
       this._checkboxes.push(chk);
+    },
+    
+    clear: function() {
+      array.forEach(this._checkboxes,function(chk){
+        if (chk.checked) chk.checked = false;
+      });
+      this.updateCount();
     },
     
     init: function() {
@@ -103,6 +114,8 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
         item: this.item,
         itemCard: this.itemCard,
       },this.applyToNode);
+      
+      this.updateCount();
     },
     
     makeRequestParams: function() {
@@ -126,6 +139,19 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
       
       this.applyTo.appendUrlParams(params);
       return params;
+    },
+    
+    updateCount: function() {
+      var n = 0, hasGroups = false, msg = "";
+      array.forEach(this._checkboxes,function(chk){
+        hasGroups = true;
+        if (chk.checked) n++;
+      });
+      if (hasGroups) {
+        var pattern = i18n.content.setAccess.countPattern;
+        msg = pattern.replace("{count}",n);
+      }
+      this.countNode.innerHTML = msg;
     }
 
   });
