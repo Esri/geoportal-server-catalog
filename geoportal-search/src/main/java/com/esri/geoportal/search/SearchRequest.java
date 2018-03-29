@@ -39,6 +39,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+/**
+ * Search request (geoportal-search based).
+ */
 public class SearchRequest {
   
   /** The script engines. */
@@ -212,10 +215,10 @@ public class SearchRequest {
         access.add("isAdmin",user.isAdmin());
         if (com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()) {
           JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
-          String[] groups = user.getGroupNames(); // TODO should be ids
+          List<com.esri.geoportal.base.security.Group> groups = user.getGroups();
           if (groups != null) {
-            for (String group: groups) {
-              jsaGroups.add(group);
+            for (com.esri.geoportal.base.security.Group group: groups) {
+              jsaGroups.add(group.id);
             }         
           }
           access.add("groups",jsaGroups);

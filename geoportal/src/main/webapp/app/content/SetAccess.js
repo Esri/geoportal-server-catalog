@@ -74,8 +74,20 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
       else this.publicNode.checked = true;
       
       var itemGroups = this.item["sys_access_groups_s"];
-      array.forEach(AppContext.appUser.getGroups(),function(group){
-        
+      var groups = AppContext.appUser.getGroups();
+      if (lang.isArray(groups)) {
+        groups = groups.slice(0); // shallow clone
+        groups.sort(function(groupA,groupB){ 
+          try {
+            var a = groupA.name.toLowerCase();
+            var b = groupB.name.toLowerCase();
+            if (a === b) return 0;
+            if (a > b) return 1;
+          } catch(ex) {}
+          return -1;
+        });
+      }
+      array.forEach(groups,function(group){
         var checked = false;
         if (lang.isArray(itemGroups)) {
           checked = array.some(itemGroups,function(groupId){

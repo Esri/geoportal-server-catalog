@@ -27,13 +27,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
 
+import com.esri.geoportal.base.security.Group;
+
 /**
  * The user associated with a request.
  */
 public class AppUser {
 
   /* Instance variables. */
-  private String[] groupNames;
+  private List<Group> groups;
   private boolean isAdmin;
   private boolean isAnonymous;
   private boolean isPublisher;
@@ -61,9 +63,9 @@ public class AppUser {
     init(username,isAdmin,isPublisher);
   }
   
-  /** The group names to which this use belongs. */
-  public String[] getGroupNames() {
-    return groupNames;
+  /** The groups to which this use belongs. */
+  public List<Group> getGroups() {
+    return groups;
   }
   
   /** The username. */
@@ -95,6 +97,7 @@ public class AppUser {
     if (sc == null) return;
     Principal p = sc.getUserPrincipal();
     if (p == null) return;
+    groups = new ArrayList<Group>();
     username = p.getName();
     if (username != null && username.length() > 0) {
       isAnonymous = false;
@@ -108,7 +111,6 @@ public class AppUser {
     String pfx = "ROLE_";
     String[] gtpRoles = {"ADMIN","PUBLISHER","USER"};
     List<String> gptRoleList = Arrays.asList(gtpRoles);
-    ArrayList<String> grpNames = new ArrayList<String>();
     Collection<GrantedAuthority> authorities = null;
     if (p instanceof UsernamePasswordAuthenticationToken) {
       UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken)p;
@@ -128,15 +130,12 @@ public class AppUser {
               if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
               if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
                 //System.err.println("authority: "+name);
-                grpNames.add(name);
+                groups.add(new Group(name));
               }
             }
           }
         }          
       }
-    }
-    if (grpNames.size() > 0) {
-      groupNames = grpNames.toArray(new String[grpNames.size()]);
     }
   }
   

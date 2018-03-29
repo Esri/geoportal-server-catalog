@@ -14,10 +14,13 @@
  */
 package com.esri.geoportal.service.rest;
 import com.esri.geoportal.base.security.ArcGISAuthenticationProvider;
+import com.esri.geoportal.base.security.Group;
 import com.esri.geoportal.context.AppRequest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
+
+import java.util.List;
 
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
@@ -77,12 +80,12 @@ public class GeoportalService {
           .add("isAnonymous",user.isAnonymous());
         if (gc.getSupportsGroupBasedAccess()) {
           JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
-          String[] groups = user.getGroupNames(); // TODO should be objects with id/name
+          List<Group> groups = user.getGroups();
           if (groups != null) {
-            for (String group: groups) {
+            for (Group group: groups) {
               jsaGroups.add(Json.createObjectBuilder()
-                .add("id",group)
-                .add("name",group)
+                .add("id",group.id)
+                .add("name",group.name)
               );
             }         
           }
