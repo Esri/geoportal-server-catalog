@@ -253,11 +253,18 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         target: "_blank",
         innerHTML: i18n.item.actions.xml
       },actionsNode);
-      domConstruct.create("a",{
+      var jsonNode = domConstruct.create("a",{
         href: uri+"?pretty=true",
         target: "_blank",
         innerHTML: i18n.item.actions.json
       },actionsNode);
+      if (AppContext.geoportal.supportsApprovalStatus || 
+          AppContext.geoportal.supportsGroupBasedAccess) {
+        var client = new AppClient();
+        htmlNode.href = client.appendAccessToken(htmlNode.href); 
+        xmlNode.href = client.appendAccessToken(xmlNode.href);
+        jsonNode.href = client.appendAccessToken(jsonNode.href);
+      }
       var v = item.sys_metadatatype_s;
       if (typeof v === "string" && v === "json") {
         htmlNode.style.visibility = "hidden";
