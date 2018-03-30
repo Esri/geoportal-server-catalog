@@ -17,12 +17,17 @@ import com.esri.geoportal.base.util.BalancerSupport;
 import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
 import com.esri.geoportal.context.GeoportalContext;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+
 import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.api.ContentProvider;
 import org.eclipse.jetty.client.api.Request;
+import org.eclipse.jetty.client.util.StringContentProvider;
 import org.eclipse.jetty.proxy.BalancerServlet;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
@@ -32,7 +37,7 @@ import org.slf4j.LoggerFactory;
  * A proxy to Elasticsearch.
  */
 public class ElasticProxy extends BalancerServlet {
-  
+
   /** Properties */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxy.class);
   private static final long serialVersionUID = 1L;
@@ -107,6 +112,18 @@ public class ElasticProxy extends BalancerServlet {
   }
   
   @Override
+  protected ContentProvider proxyRequestContent(HttpServletRequest request, HttpServletResponse response,
+      Request proxyRequest) throws IOException {
+    //request.
+    //String v = "{\"query\":{\"term\":{\"sys_owner_s\":\"admix\"}}}";
+    //System.err.println(v);
+    //return new StringContentProvider(v);
+    //return new StringContentProvider(v,"UTF-8");
+    // StandardCharsets.UTF_8
+    return super.proxyRequestContent(request, response, proxyRequest);
+  }
+  
+  @Override
   protected String rewriteTarget(HttpServletRequest request) {
     String uri = balancerSupport.rewriteTarget(request);
     LOGGER.debug("ProxyTo: "+uri);
@@ -114,3 +131,4 @@ public class ElasticProxy extends BalancerServlet {
   }
   
 }
+

@@ -13,94 +13,64 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
-        "dojo/_base/lang",
-        "dojo/on",
-        "dojo/keys",
-        "dojo/topic",
-        "app/context/app-topics",
-        "app/common/Templated",
-        "dojo/text!./templates/ChangeOwner.html",
-        "dojo/i18n!app/nls/resources",
-        "app/common/ConfirmationDialog",
-        "app/common/ModalDialog",
-        "app/context/AppClient"],
-function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n, 
-  ConfirmationDialog, ModalDialog, AppClient) {
+  "dojo/keys",
+  "dojo/on",
+  "dojo/topic",
+  "app/context/app-topics",
+  "app/content/BulkEdit",
+  "dojo/text!./templates/ChangeOwner.html",
+  "dojo/i18n!app/nls/resources",
+  "app/content/ApplyTo",
+  "app/context/AppClient"],
+function(declare, keys, on, topic, appTopics, BulkEdit, template, i18n, 
+  ApplyTo, AppClient) {
 
-  var oThisClass = declare([Templated], {
+  var oThisClass = declare([BulkEdit], {
     
     i18n: i18n,
     templateString: template,
     
-    dialog: null,
     title: i18n.content.changeOwner.caption,
-    okLabel: i18n.content.changeOwner.button,
+    okLabel: i18n.content.updateButton,
     
-    item: null,
-    _working: false,
+    _localValue: null,
 
     postCreate: function() {
       this.inherited(arguments);
     },
     
-    execute: function(bulk) {
-      if (this._working) return;
-      var self = this;
-      var v = this.newOwnerNode.value;
-      if (v !== null) v = lang.trim(v);
-      if (v !== null && v.length > 0 ) {
-        this._working = true;
-        this.dialog.okCancelBar.showWorking(i18n.general.working,true);
-        var dfd, client = new AppClient();
-        if (bulk) {
-          dfd = client.bulkChangeOwner(this.item.sys_owner_s,v);
-        } else {
-          dfd = client.changeOwner(this.item._id,v);
-        }
-        dfd.then(function(response){
-          self.item.sys_owner_s = v;
-          // wait for real-time update
-          setTimeout(function(){
-            if (bulk) topic.publish(appTopics.BulkUpdate,{});
-            else topic.publish(appTopics.ItemOwnerChanged,{item:self.item});  
-            self.dialog.hide();
-          },1500);
-        }).otherwise(function(error){
-          self._working = false;
-          var msg = i18n.general.error;
-          var err = client.checkError(error);
-          if (err && err.message) {
-            msg = self.checkForErrorTranslation(err.message);
-          }
-          self.handleError(msg,error);
-        });
-      } else {
-        this.newOwnerNode.focus();
-        //self.handleError(?required field?);
-      }
-    },
-    
-    handleError: function(msg,error) {
-      if (error) console.warn(error);
-      if (!this.dialog) return;
-      this.dialog.okCancelBar.enableOk();
-      this.dialog.okCancelBar.showError(msg,false);
+    applyLocally: function(item) {
+      item["sys_owner_s"] = this._localValue;
+      topic.publish(appTopics.ItemOwnerChanged,{item:item});
     },
     
     init: function() {
       var self = this;
       this.setNodeText(this.itemTitleNode,this.item.title);
-      this.setNodeText(this.currentOwnerNode,this.item.sys_owner_s);
-      if (AppContext.appConfig.allowBulkChangeOwner) {
-        var v = i18n.content.changeOwner.bulkPattern;
-        v = v.replace("{username}",this.item.sys_owner_s);
-        this.setNodeText(this.bulkLabelNode,v);
-      } else {
-        this.bulkNode.style.display = "none";
-      }
+      this.setNodeText(this.currentOwnerNode,this.item.sys_owner_s);      
       this.own(on(this.newOwnerNode,"keyup",function(evt) {
         if (evt.keyCode === keys.ENTER) self.execute();
       }));
+      this.applyTo = new ApplyTo({
+        item: this.item,
+        itemCard: this.itemCard,
+      },this.applyToNode);
+    },
+    
+    makeRequestParams: function() {
+      var params = {
+        action: "setOwner",
+        urlParams: {}
+      };
+      var v = this.newOwnerNode.value;
+      if (typeof v === "string") v = v.trim();
+      if (typeof v !== "string" || v.length === 0) {
+        this.newOwnerNode.focus();
+        return null;
+      }
+      this._localValue = params.urlParams.newOwner = v;
+      this.applyTo.appendUrlParams(params);
+      return params;
     },
     
     modalShown: function() {
@@ -164,45 +134,6 @@ function(declare, lang, on, keys, topic, appTopics, Templated, template, i18n,
       );
 
       this.newOwnerNode.focus();
-    },
- 
-    show: function() {
-      var self = this;
-      this.init();
-      this.dialog = new ModalDialog({
-        content: this.domNode,
-        title: this.title,
-        okLabel: this.okLabel,
-        onHide: function() {
-          self.destroyRecursive(false);
-        }, 
-        onOkClicked: function() {
-          if (self._working) return;
-          var v = self.newOwnerNode.value;
-          if (v === null || lang.trim(v).length === 0) {
-            self.newOwnerNode.focus();
-            return;
-          }
-          if (AppContext.appConfig.allowBulkChangeOwner && self.bulkCheckbox.checked) {
-            var cd = new ConfirmationDialog({
-              title: self.title,
-              content: self.bulkLabelNode.innerHTML,
-              okLabel: self.okLabel,
-              hideOnOk: true,
-              status: "danger"
-            });
-            cd.show().then(function(ok){
-              if (ok) self.execute(true);
-            });
-          } else {
-            self.execute(false);
-          }
-        }
-      });
-      $(this.dialog.domNode).on('shown.bs.modal',function() {
-        self.modalShown();
-      });
-      this.dialog.show();
     }
 
   });

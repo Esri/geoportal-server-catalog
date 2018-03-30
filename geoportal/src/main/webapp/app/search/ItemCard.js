@@ -13,37 +13,41 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
-        "dojo/_base/lang",
-        "dojo/_base/array",
-        "dojo/string",
-        "dojo/topic",
-        "dojo/request/xhr",
-        "dojo/on",
-        "app/context/app-topics",
-        "dojo/dom-class",
-        "dojo/dom-construct",
-        "dijit/_WidgetBase",
-        "dijit/_TemplatedMixin",
-        "dijit/_WidgetsInTemplateMixin",
-        "dijit/Tooltip",
-        "dijit/TooltipDialog",
-        "dijit/popup",
-        "dojo/text!./templates/ItemCard.html",
-        "dojo/i18n!app/nls/resources",
-        "app/context/AppClient",
-        "app/etc/ServiceType",
-        "app/etc/util",
-        "app/common/ConfirmationDialog",
-        "app/content/ChangeOwner",
-        "app/content/MetadataEditor",
-        "app/context/metadata-editor",
-        "app/content/UploadMetadata",
-        "app/preview/PreviewUtil",
-        "app/preview/PreviewPane"], 
+  "dojo/_base/lang",
+  "dojo/_base/array",
+  "dojo/string",
+  "dojo/topic",
+  "dojo/request/xhr",
+  "dojo/on",
+  "app/context/app-topics",
+  "dojo/dom-class",
+  "dojo/dom-construct",
+  "dijit/_WidgetBase",
+  "dijit/_TemplatedMixin",
+  "dijit/_WidgetsInTemplateMixin",
+  "dijit/Tooltip",
+  "dijit/TooltipDialog",
+  "dijit/popup",
+  "dojo/text!./templates/ItemCard.html",
+  "dojo/i18n!app/nls/resources",
+  "app/context/AppClient",
+  "app/etc/ServiceType",
+  "app/etc/util",
+  "app/common/ConfirmationDialog",
+  "app/content/ChangeOwner",
+  "app/content/DeleteItems",
+  "app/content/MetadataEditor",
+  "app/context/metadata-editor",
+  "app/content/SetAccess",
+  "app/content/SetApprovalStatus",
+  "app/content/UploadMetadata",
+  "app/preview/PreviewUtil",
+  "app/preview/PreviewPane"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
-    _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, template, i18n, 
-    AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, 
-    MetadataEditor, gxeConfig, UploadMetadata, PreviewUtil, PreviewPane) {
+  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, 
+  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
+  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, UploadMetadata, 
+  PreviewUtil, PreviewPane) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -70,11 +74,21 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     postCreate: function() {
       this.inherited(arguments);
       var self = this;
-      topic.subscribe(appTopics.ItemOwnerChanged,function(params){
+      this.own(topic.subscribe(appTopics.ItemOwnerChanged,function(params){
         if (self.item && self.item === params.item) {
           self._renderOwnerAndDate(self.item);
         }
-      });
+      }));
+      this.own(topic.subscribe(appTopics.ItemApprovalStatusChanged,function(params){
+        if (self.item && self.item === params.item) {
+          self._renderOwnerAndDate(self.item);
+        }
+      }));
+      this.own(topic.subscribe(appTopics.ItemAccessChanged,function(params){
+        if (self.item && self.item === params.item) {
+          self._renderOwnerAndDate(self.item);
+        }
+      }));
     },
     
     render: function(hit) {
@@ -249,11 +263,18 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         target: "_blank",
         innerHTML: i18n.item.actions.xml
       },actionsNode);
-      domConstruct.create("a",{
+      var jsonNode = domConstruct.create("a",{
         href: uri+"?pretty=true",
         target: "_blank",
         innerHTML: i18n.item.actions.json
       },actionsNode);
+      if (AppContext.geoportal.supportsApprovalStatus || 
+          AppContext.geoportal.supportsGroupBasedAccess) {
+        var client = new AppClient();
+        htmlNode.href = client.appendAccessToken(htmlNode.href); 
+        xmlNode.href = client.appendAccessToken(xmlNode.href);
+        jsonNode.href = client.appendAccessToken(jsonNode.href);
+      }
       var v = item.sys_metadatatype_s;
       if (typeof v === "string" && v === "json") {
         htmlNode.style.visibility = "hidden";
@@ -298,6 +319,8 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       var isOwner = this._isOwner(item);
       var isAdmin = AppContext.appUser.isAdmin();
       var isPublisher = AppContext.appUser.isPublisher();
+      var supportsApprovalStatus = AppContext.geoportal.supportsApprovalStatus;
+      var supportsGroupBasedAccess = AppContext.geoportal.supportsGroupBasedAccess;
       var links = [];
       
       if (this._canEditMetadata(item,isOwner,isAdmin,isPublisher)) {
@@ -312,8 +335,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }));
       }
       
-      if ((isOwner && isPublisher) || isAdmin) {
-        
+      var canManage = ((isOwner && isPublisher) || isAdmin);
+      
+      if (canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
@@ -322,52 +346,90 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             (new UploadMetadata({itemId:itemId})).show();
           }
         }));
-        
-        links.push(domConstruct.create("a",{
-          "class": "small",
-          href: "javascript:void(0)",
-          innerHTML: i18n.item.actions.options.deleteItem,
-          onclick: function() {
-            var dialog = new ConfirmationDialog({
-              title: i18n.item.actions.options.deleteItem,
-              content: item.title,
-              okLabel: i18n.general.del,
-              status: "danger"
-            });
-            dialog.show().then(function(ok){
-              if (ok) {
-                dialog.okCancelBar.showWorking(i18n.general.deleting,false);
-                var client = new AppClient();
-                client.deleteItem(itemId).then(function(response){
-                  topic.publish(appTopics.ItemDeleted,{
-                    itemId: itemId,
-                    searchPane: self.searchPane
-                  });
-                  self.domNode.style.display = "none";
-                  dialog.hide();
-                }).otherwise(function(error){
-                  var msg = i18n.general.error;
-                  console.warn("deleteItem.error",error);
-                  dialog.okCancelBar.showError(msg,false);
-                });
-              }
-            });
-          }
-        }));
       }
       
       if (isAdmin) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
-          innerHTML: i18n.item.actions.options.changeOwner,
+          innerHTML: i18n.content.changeOwner.caption,
           onclick: function() {
-            var dialog = new ChangeOwner({item:item});
+            var dialog = new ChangeOwner({item:item,itemCard:self});
             dialog.show();
           }
         }));
       }
       
+      if (supportsApprovalStatus && isAdmin) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.setApprovalStatus.caption,
+          onclick: function() {
+            var dialog = new SetApprovalStatus({item:item,itemCard:self});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (supportsGroupBasedAccess && canManage) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.setAccess.caption,
+          onclick: function() {
+            var dialog = new SetAccess({item:item,itemCard:self});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (canManage) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.deleteItems.caption,
+          onclick: function() {
+            var dialog = new DeleteItems({item:item,itemCard:self});
+            dialog.show();
+          }
+        }));
+      }
+      
+//      if (canManage) {
+//        links.push(domConstruct.create("a",{
+//          "class": "small",
+//          href: "javascript:void(0)",
+//          innerHTML: i18n.item.actions.options.deleteItem,
+//          onclick: function() {
+//            var dialog = new ConfirmationDialog({
+//              title: i18n.item.actions.options.deleteItem,
+//              content: item.title,
+//              okLabel: i18n.general.del,
+//              status: "danger"
+//            });
+//            dialog.show().then(function(ok){
+//              if (ok) {
+//                dialog.okCancelBar.showWorking(i18n.general.deleting,false);
+//                var client = new AppClient();
+//                client.deleteItem(itemId).then(function(response){
+//                  topic.publish(appTopics.ItemDeleted,{
+//                    itemId: itemId,
+//                    searchPane: self.searchPane
+//                  });
+//                  self.domNode.style.display = "none";
+//                  dialog.hide();
+//                }).otherwise(function(error){
+//                  var msg = i18n.general.error;
+//                  console.warn("deleteItem.error",error);
+//                  dialog.okCancelBar.showError(msg,false);
+//                });
+//              }
+//            });
+//          }
+//        }));        
+//      }
+
       if (links.length === 0) return;
       
       var dd = domConstruct.create("div",{
@@ -398,7 +460,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     _renderOwnerAndDate: function(item) {
       var owner = item.sys_owner_s;
       var date = item.sys_modified_dt;
-      var idx, text = "";
+      var idx, text = "", v;
       if (AppContext.appConfig.searchResults.showDate && typeof date === "string" && date.length > 0) {
         idx = date.indexOf("T");
         if (idx > 0) date =date.substring(0,idx);
@@ -408,6 +470,31 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         if (text.length > 0) text += " ";
         text += owner;
       }
+      
+      if (AppContext.appUser.isAdmin() || this._isOwner(item)) {
+        if (AppContext.appConfig.searchResults.showAccess && 
+            AppContext.geoportal.supportsGroupBasedAccess) {
+          v = item.sys_access_s;
+          if (text.length > 0) text += " - ";
+          if (v === "private") {
+            text += i18n.content.setAccess._private;
+          } else {
+            text += i18n.content.setAccess._public;
+          }
+        }
+        if (AppContext.appConfig.searchResults.showApprovalStatus && 
+            AppContext.geoportal.supportsApprovalStatus) {
+          v = item.sys_approval_status_s;
+          if (typeof v === "string" && v.length > 0) {
+            v = i18n.content.setApprovalStatus[v];
+          }
+          if (typeof v === "string" && v.length > 0) {
+            if (text.length > 0) text += " - ";
+            text += v;
+          }
+        }
+      }
+      
       if (text.length > 0) {
         util.setNodeText(this.ownerAndDateNode,text);
       }
@@ -439,19 +526,20 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     },
     
     _renderServiceStatus: function(item) {
+      var type;
       var authKey = AppContext.appConfig.statusChecker.authKey;
       if (authKey && string.trim(authKey).length>0) {
         if (item && item.resources_nst) {
           if (item.resources_nst.length) {
             for (var i=0; i<item.resources_nst.length; i++) {
-              var type = this._translateService(item.resources_nst[i].url_type_s);
+              type = this._translateService(item.resources_nst[i].url_type_s);
               if (type) {
                 this._checkService(item._id,type);
                 break;
               }
             }
           } else {
-            var type = this._translateService(item.resources_nst.url_type_s);
+            type = this._translateService(item.resources_nst.url_type_s);
             if (type) {
               this._checkService(item._id,type);
             }

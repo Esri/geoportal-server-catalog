@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.util;
+import com.esri.geoportal.base.security.Group;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.elasticsearch.action.get.GetRequestBuilder;
@@ -25,12 +28,17 @@ import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
 
 /**
  * Access utilities.
  */
 public class AccessUtil {
+  
+  /** Logger. */
+  public static final Logger LOGGER = LoggerFactory.getLogger(AccessUtil.class);
   
   /** Instance variables. */
   protected String accessDeniedMessage = "Access denied.";
@@ -118,8 +126,76 @@ public class AccessUtil {
    * @param id the item id
    * @throws AccessDeniedException if not
    */
+  @SuppressWarnings({ "unchecked", "rawtypes" })
   public void ensureReadAccess(AppUser user, String id) {
-    // TODO ensure read access
+    if (user.isAdmin()) return;
+    GeoportalContext gc = GeoportalContext.getInstance();
+    if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
+      String v;
+      ElasticContext ec = gc.getElasticContext();
+      GetResponse response = ec.getTransportClient().prepareGet(
+          ec.getItemIndexName(),ec.getItemIndexType(),id).get();
+      
+      String username = user.getUsername();
+      if (username != null && username.length() > 0) {
+        v = (String)response.getSource().get(FieldNames.FIELD_SYS_OWNER);
+        if (v != null && v.equalsIgnoreCase(username)) return;
+      }
+
+      if (gc.getSupportsApprovalStatus()) {
+        v = (String)response.getSource().get(FieldNames.FIELD_SYS_APPROVAL_STATUS);
+        if (v != null && v.length() > 0) {
+          if (!v.equalsIgnoreCase("approved") && !v.equalsIgnoreCase("reviewed")) {
+            throw new AccessDeniedException(accessDeniedMessage);
+          }
+        };
+      }
+      
+      if (gc.getSupportsGroupBasedAccess()) {
+        v = (String)response.getSource().get(FieldNames.FIELD_SYS_ACCESS);
+        if (v != null && v.equalsIgnoreCase("private")) {
+          boolean ok = false;
+          Object o = response.getSource().get(FieldNames.FIELD_SYS_ACCESS_GROUPS);
+          if (o != null) {
+            List<String> l = null;
+            if (o instanceof String) {
+              v = (String)o;
+              if (v.length() == 0) {
+                ok = true;
+              } else {
+                l = new ArrayList<String>();
+                l.add(v);
+              }
+            } else if (o instanceof List) {
+              l = (List)o;
+            } else {
+              LOGGER.error("Field "+FieldNames.FIELD_SYS_ACCESS_GROUPS+" for item "+id+" is not a List.");
+              throw new AccessDeniedException(accessDeniedMessage);
+            }
+            if (!ok) {
+              if (l.size() == 0) {
+                ok = true;
+              } else {
+                List<Group> groups = user.getGroups();
+                if (groups != null) {
+                  for (Group group: groups) {
+                    for (String groupId: l) {
+                      if (group.id.equals(groupId)) {
+                        ok = true;
+                        break;
+                      }
+                    }
+                    if (ok) break;
+                  }         
+                }
+              }              
+            }
+          }
+          if (!ok) throw new AccessDeniedException(accessDeniedMessage);
+        }
+      }
+      
+    }
   }
 
   /**
