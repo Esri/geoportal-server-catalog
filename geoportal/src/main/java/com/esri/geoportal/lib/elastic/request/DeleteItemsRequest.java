@@ -45,8 +45,6 @@ public class DeleteItemsRequest extends BulkEditRequest {
   public AppResponse execute() throws Exception {
     /*
     http://localhost:8080/geoportal/rest/metadata/deteteItems?id=68e65338e166458d8425775114487b31
-    
-    id=&owner=&siteId=
     */
     
     setAdminOnly(false);

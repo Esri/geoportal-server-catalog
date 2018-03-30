@@ -27,9 +27,15 @@ public class FieldNames {
   
   /* sys (item) ==================================================== */
   
-  /** FIELD_SITE_ID = "src_source_uri_s" */
-  public static String FIELD_SITE_ID = "src_source_uri_s";
+  /** FIELD_SRC_SOURCE_REF = "src_source_ref_s" */
+  public static String FIELD_SRC_SOURCE_REF = "src_source_ref_s";
   
+  /** FIELD_SRC_SOURCE_URI = "src_source_uri_s" */
+  public static String FIELD_SRC_SOURCE_URI = "src_source_uri_s";
+  
+  /** FIELD_SRC_TASK_REF = "src_task_ref_s" */
+  public static String FIELD_SRC_TASK_REF = "src_task_ref_s";
+
   /** FIELD_SYS_ACCESS = "sys_access_s" */
   public static String FIELD_SYS_ACCESS = "sys_access_s";
   
