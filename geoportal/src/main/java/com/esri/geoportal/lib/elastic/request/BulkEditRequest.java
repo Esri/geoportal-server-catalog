@@ -43,6 +43,7 @@ public class BulkEditRequest extends BulkRequest {
   /*
   
   url params: id=&owner=&sourceUri=&sourceRef=&taskRef=
+  url params: query=
   request body: {"query": ...}
   
   */
@@ -135,8 +136,13 @@ public class BulkEditRequest extends BulkRequest {
   /** Filter by a query contained within the request body. */
   protected void filterByQuery() {
     String errMsg = "Bulk edit: the request body contains an invalid query";
+    System.err.println("filterByQuery.body="+this.body);
     String content = this.body;
     if (content != null) content = content.trim();
+    if (content == null || content.length() == 0) {
+      content = getParameter("query");
+      if (content != null) content = content.trim();
+    }
     if (content != null && content.length() > 0) {
       if (content.startsWith("{")) {
         try {

@@ -55,13 +55,19 @@ function(declare, lang, Deferred, dojoRequest) {
       return dojoRequest.put(url,info);
     },
     
-    bulkEdit: function(action,urlParams) {
+    bulkEdit: function(action,urlParams,postData,dataContentType) {
       var url = this.getRestUri()+"/metadata/"+action;
       this.appendAccessToken(urlParams);
       var options = {
         handleAs: "json",
         query: urlParams
       };
+      if (postData) {
+        options.data = postData;
+        if (dataContentType) {
+          options.headers = {"Content-Type": dataContentType};
+        }
+      }
       return dojoRequest.put(url,options);
     },
     

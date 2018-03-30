@@ -1,6 +1,13 @@
 define([],function(){var obj={
 // .......................................................................................
   
+  bulkEdit: {
+    allowByOwner: true,
+    allowBySourceUri: true,
+    allowByTaskRef: true,
+    allowByQuery: true
+  },
+  
   search: {
     allowSettings: true,
     useSimpleQueryString: false

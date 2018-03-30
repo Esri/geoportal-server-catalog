@@ -112,6 +112,7 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
       s = s.replace("{count}",""+djNumber.format(nHits,{}));
       s = s.replace("{type}",sType);
       this.setNodeText(this.countNode,s);
+      if (this.searchPane) this.searchPane.lastQueryCount = nHits;
     },
     
     _renderPaging: function(searchResponse) {

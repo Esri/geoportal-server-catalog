@@ -243,9 +243,13 @@ define({
         itemLabel: "Apply change to this item only",
         ownerPattern: "Apply change to all items owned by: {name}",
         sourceUriPattern: "Apply change to all items harvested from: {name}",
+        taskRefPattern: "Apply change to all items associated with harvesting task: {name}",
+        queryPattern: "Apply change to all selected items: {count}",
         itemLabelDelete: "Delete this item only",
         ownerPatternDelete: "Delete all items owned by: {name}",
-        sourceUriPatternDelete: "Delete all items harvested from: {name}"
+        sourceUriPatternDelete: "Delete all items harvested from: {name}",
+        taskRefPatternDelete: "Delete all items associated with harvesting task: {name}",
+        queryPatternDelete: "Delete all selected items: {count}"
       },
       changeOwner: {
         caption: "Change Owner",
