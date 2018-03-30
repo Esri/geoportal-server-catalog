@@ -38,8 +38,12 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
     i18n: i18n,
     templateString: template,
     
-    searchOnStart: true,
     defaultSort: null,
+    searchOnStart: true,
+    
+    lastQuery: null,
+    lastQueryCount: 0,
+    lastQueryWasMyContent: false,
     
     _dfd: null,
     
@@ -123,9 +127,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       if (params.queries && params.queries.length > 0) {
         if (postData === null) postData = {};
         postData.query = {"bool":{"must":params.queries}};
-      } else {
-
-      }
+      } 
       if (params.aggregations) {
         if (postData === null) postData = {};
         postData.aggregations = params.aggregations;
@@ -148,6 +150,13 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       dfd.then(function(response) {
         if (!dfd.isCanceled()) {
           //console.warn("search-response",response);
+          self.lastQueryCount = 0;
+          self.lastQueryWasMyContent = !!params.wasMyContent;
+          if (postData && postData.query) {
+            self.lastQuery = JSON.stringify({"query": postData.query});
+          } else {
+            self.lastQuery = null;
+          }
           response.urlParams = params.urlParams;
           array.forEach(components,function(component){
             component.processResults(response);

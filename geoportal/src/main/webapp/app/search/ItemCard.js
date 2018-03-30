@@ -462,22 +462,24 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       }
       
       if (AppContext.appUser.isAdmin() || this._isOwner(item)) {
-        if (AppContext.appConfig.searchResults.showAccess && AppContext.geoportal.supportsGroupBasedAccess) {
+        if (AppContext.appConfig.searchResults.showAccess && 
+            AppContext.geoportal.supportsGroupBasedAccess) {
           v = item.sys_access_s;
-          if (text.length > 0) text += " ";
+          if (text.length > 0) text += " - ";
           if (v === "private") {
             text += i18n.content.setAccess._private;
           } else {
             text += i18n.content.setAccess._public;
           }
         }
-        if (AppContext.appConfig.searchResults.showApprovalStatus && AppContext.geoportal.supportsApprovalStatus) {
+        if (AppContext.appConfig.searchResults.showApprovalStatus && 
+            AppContext.geoportal.supportsApprovalStatus) {
           v = item.sys_approval_status_s;
           if (typeof v === "string" && v.length > 0) {
             v = i18n.content.setApprovalStatus[v];
           }
           if (typeof v === "string" && v.length > 0) {
-            if (text.length > 0) text += " ";
+            if (text.length > 0) text += " - ";
             text += v;
           }
         }

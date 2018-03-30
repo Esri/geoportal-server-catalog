@@ -50,7 +50,8 @@ function(declare, topic, appTopics, Templated, i18n,
       this.dialog.okCancelBar.showWorking(i18n.general.working,true);
       //console.log("execute.params", params);
       var client = new AppClient();
-      var dfd = client.bulkEdit(params.action,params.urlParams);
+      var dfd = client.bulkEdit(params.action,params.urlParams,
+        params.postData,params.dataContentType);
       dfd.then(function(response){
         //console.log("execute.response",response);
         // wait for real-time update

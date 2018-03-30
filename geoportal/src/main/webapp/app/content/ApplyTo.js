@@ -14,10 +14,11 @@
  */
 define(["dojo/_base/declare",
   "dojo/_base/lang",
+  "dojo/number",
   "app/common/Templated",
   "dojo/text!./templates/ApplyTo.html",
   "dojo/i18n!app/nls/resources"],
-function(declare, lang, Templated, template, i18n) {
+function(declare, lang, djNumber, Templated, template, i18n) {
 
   var oThisClass = declare([Templated], {
     
@@ -31,6 +32,8 @@ function(declare, lang, Templated, template, i18n) {
     _forItemId: null,
     _forOwner: null,
     _forSourceUri: null,
+    _forTaskRef: null,
+    _forQuery: null,
 
     postCreate: function() {
       this.inherited(arguments);
@@ -48,6 +51,16 @@ function(declare, lang, Templated, template, i18n) {
         params.urlParams.sourceUri = this._forSourceUri;
         params.confirmationText = this.sourceUriLabelNode.innerHTML;
         params.isBulkUpdate = true;
+      } else if (this.taskRefNode.checked) {
+        params.urlParams.taskRef = this._forTaskRef;
+        params.confirmationText = this.taskRefLabelNode.innerHTML;
+        params.isBulkUpdate = true;
+      } else if (this.queryNode.checked) {
+        params.postData = this._forQuery;
+        params.dataContentType = "application/json";
+        //params.urlParams.query = this._forQuery;
+        params.confirmationText = this.queryLabelNode.innerHTML;
+        params.isBulkUpdate = true;
       }
     },
     
@@ -55,22 +68,33 @@ function(declare, lang, Templated, template, i18n) {
       this.itemNode.checked = true;
       this._forItemId = this.item._id;
       var nOptions = 1;
+      var cfg = AppContext.appConfig.bulkEdit || {};
       var isAdmin = AppContext.appUser.isAdmin();
       var owner = this.item.sys_owner_s;
       var sourceName = this.item.src_source_name_s;
       var sourceUri = this.item.src_source_uri_s;
+      var taskRef = this.item.src_task_ref_s;
+      var activeQuery = this.itemCard.searchPane.lastQuery;
+      var numSelected = this.itemCard.searchPane.lastQueryCount;
+      var wasMyContent = this.itemCard.searchPane.lastQueryWasMyContent;
       
       var itemLabel = i18n.content.applyTo.itemLabel;
       var ownerPattern = i18n.content.applyTo.ownerPattern;
       var sourceUriPattern = i18n.content.applyTo.sourceUriPattern;
+      var taskRefPattern = i18n.content.applyTo.taskRefPattern;
+      var queryPattern = i18n.content.applyTo.queryPattern;
       if (this.forDelete) {
         itemLabel = i18n.content.applyTo.itemLabelDelete;
         ownerPattern = i18n.content.applyTo.ownerPatternDelete;
         sourceUriPattern = i18n.content.applyTo.sourceUriPatternDelete;
+        taskRefPattern = i18n.content.applyTo.taskRefPatternDelete;
+        queryPattern = i18n.content.applyTo.queryPatternDelete;
       }
+      
       this.itemLabelNode.innerHTML = itemLabel;
       
-      if (isAdmin && typeof owner === "string" && owner.length > 0) {
+      if (isAdmin && cfg.allowByOwner && 
+          typeof owner === "string" && owner.length > 0) {
         ownerPattern = ownerPattern.replace("{name}",owner);
         this.ownerLabelNode.innerHTML = ownerPattern;
         this._forOwner = owner;
@@ -78,7 +102,9 @@ function(declare, lang, Templated, template, i18n) {
       } else {
         this.ownerSection.style.display = "none";
       }
-      if (typeof sourceUri === "string" && sourceUri.length > 0 && 
+      
+      if (cfg.allowBySourceUri && 
+          typeof sourceUri === "string" && sourceUri.length > 0 && 
           typeof sourceName === "string" && sourceName.length > 0) {
         sourceUriPattern = sourceUriPattern.replace("{name}",sourceName);
         this.sourceUriLabelNode.innerHTML = sourceUriPattern;
@@ -86,6 +112,25 @@ function(declare, lang, Templated, template, i18n) {
         nOptions++;
       } else {
         this.sourceUriSection.style.display = "none";
+      }
+      
+      if (cfg.allowByTaskRef && typeof taskRef === "string" && taskRef.length > 0) {
+        taskRefPattern = taskRefPattern.replace("{name}",taskRef);
+        this.taskRefLabelNode.innerHTML = taskRefPattern;
+        this._forTaskRef = taskRef;
+        nOptions++;
+      } else {
+        this.taskRefSection.style.display = "none";
+      }
+      
+      if (cfg.allowByQuery && (isAdmin || wasMyContent) &&
+          typeof activeQuery === "string" && activeQuery.length > 0 && numSelected > 1) {
+        queryPattern = queryPattern.replace("{count}",djNumber.format(numSelected,{}));
+        this.queryLabelNode.innerHTML = queryPattern;
+        this._forQuery = activeQuery;
+        nOptions++;
+      } else {
+        this.querySection.style.display = "none";
       }
       
       if (nOptions === 1) {
