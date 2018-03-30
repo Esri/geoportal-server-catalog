@@ -241,11 +241,11 @@ define({
       updateButton: "Update",
       applyTo: {
         itemLabel: "Apply change to this item only",
-        ownerPattern: "Apply change to all items owned by: {username}",
-        sitePattern: "Apply change to all items harvested from: {sitename}",
+        ownerPattern: "Apply change to all items owned by: {name}",
+        sourceUriPattern: "Apply change to all items harvested from: {name}",
         itemLabelDelete: "Delete this item only",
-        ownerPatternDelete: "Delete all items owned by: {username}",
-        sitePatternDelete: "Delete all items harvested from: {sitename}"
+        ownerPatternDelete: "Delete all items owned by: {name}",
+        sourceUriPatternDelete: "Delete all items harvested from: {name}"
       },
       changeOwner: {
         caption: "Change Owner",

@@ -38,7 +38,7 @@ public class SetAccessRequest extends BulkEditRequest {
     /*
     http://localhost:8080/geoportal/rest/metadata/setAccess?id=68e65338e166458d8425775114487b31&access=private&group=g1&group=g2
     
-    id=&owner=&siteId=&access=&group=&group=
+    access=&group=&group=
     */
     
     setAdminOnly(false);

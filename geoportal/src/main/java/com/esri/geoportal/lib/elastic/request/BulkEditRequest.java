@@ -13,7 +13,9 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
+import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.Val;
+import com.esri.geoportal.base.util.exception.UsageException;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.lib.elastic.ElasticContext;
@@ -25,6 +27,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.JsonObject;
+
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
@@ -35,6 +39,13 @@ import org.elasticsearch.search.SearchHit;
  * Bulk request.
  */
 public class BulkEditRequest extends BulkRequest {
+  
+  /*
+  
+  url params: id=&owner=&sourceUri=&sourceRef=&taskRef=
+  request body: {"query": ...}
+  
+  */
   
   /** Instance variables. */
   private String body;
@@ -94,7 +105,6 @@ public class BulkEditRequest extends BulkRequest {
   
   @Override
   public AppResponse execute() throws Exception {
-    AppResponse response = new AppResponse();
     AppUser user = this.getUser();
     AccessUtil au = new AccessUtil();
     if (getAdminOnly()) {
@@ -102,21 +112,7 @@ public class BulkEditRequest extends BulkRequest {
     } else {
       au.ensurePublisher(user);
     }
-    try {
-      return super.execute();
-    } catch (Throwable t) {
-      response.writeException(this,t);
-      return response;
-    }
-  }
-  
-  /** Filter by term. */
-  protected void filterByTerm(String field, String value) {
-    if (value != null) value = value.trim();
-    if (value != null && value.length() > 0) {
-      QueryBuilder q = QueryBuilders.termQuery(field,value);
-      filters.add(q);
-    }
+    return super.execute();
   }
   
   /** Filter by id. */
@@ -136,17 +132,58 @@ public class BulkEditRequest extends BulkRequest {
     filterByTerm(FieldNames.FIELD_SYS_OWNER,getParameter("owner"));
   }
   
+  /** Filter by a query contained within the request body. */
+  protected void filterByQuery() {
+    String errMsg = "Bulk edit: the request body contains an invalid query";
+    String content = this.body;
+    if (content != null) content = content.trim();
+    if (content != null && content.length() > 0) {
+      if (content.startsWith("{")) {
+        try {
+          JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(content);
+          JsonObject jsQuery = jso.getJsonObject("query");
+          String v = JsonUtil.toJson(jsQuery);
+          QueryBuilder q = QueryBuilders.wrapperQuery(v);
+          filters.add(q);
+        } catch (Exception e) {
+          throw new UsageException(errMsg);
+        }
+      } else {
+        throw new UsageException(errMsg);
+      }      
+    }
+  }
+  
+  /** Filter by the harvesting source reference. */
+  protected void filterBySourceRef() {
+    filterByTerm(FieldNames.FIELD_SRC_SOURCE_REF,getParameter("sourceRef"));
+  }
+  
+  /** Filter by the harvesting source uri. */
+  protected void filterBySourceUri() {
+    filterByTerm(FieldNames.FIELD_SRC_SOURCE_URI,getParameter("sourceUri"));
+  }
+  
+  /** Filter by the harvesting task reference. */
+  protected void filterByTaskRef() {
+    filterByTerm(FieldNames.FIELD_SRC_TASK_REF,getParameter("taskRef"));
+  }
+  
+  /** Filter by term. */
+  protected void filterByTerm(String field, String value) {
+    if (value != null) value = value.trim();
+    if (value != null && value.length() > 0) {
+      QueryBuilder q = QueryBuilders.termQuery(field,value);
+      filters.add(q);
+    }
+  }
+  
   /** Filter by user (to ensure you're updating your own documents). */
   protected void filterByUser() {
     AppUser user = this.getUser();
     if (!user.isAdmin()) {
       filterByTerm(FieldNames.FIELD_SYS_OWNER,user.getUsername());
     }
-  }
-  
-  /** Filter by the harvesting site id. */
-  protected void filterBySiteId() {
-    filterByTerm(FieldNames.FIELD_SITE_ID,getParameter("siteId"));
   }
   
   /**
@@ -204,9 +241,12 @@ public class BulkEditRequest extends BulkRequest {
     filters = new ArrayList<QueryBuilder>();
     this.filterById();
     this.filterByOwner();
-    this.filterBySiteId();
+    this.filterBySourceUri();
+    this.filterBySourceRef();
+    this.filterByTaskRef();
+    this.filterByQuery();
     if (filters.size() == 0) {
-      throw new RuntimeException("Bulk edit: the request had no filters");
+      throw new UsageException("Bulk edit: the request had no filters");
     }
     this.filterByUser();
 
@@ -221,7 +261,7 @@ public class BulkEditRequest extends BulkRequest {
       q = bq;
     }
     //System.err.println("Bulk edit query .......................\r\n"+q.toString()); // TODO temporary
-    //if (filters.size() > 0) throw new RuntimeException("Bulk edit: temporary stop");
+    //if (filters.size() > 0) throw new UsageException("Bulk edit: temporary stop");
     return q;
   }
     
