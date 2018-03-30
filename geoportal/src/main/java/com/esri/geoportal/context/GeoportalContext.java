@@ -48,7 +48,9 @@ public class GeoportalContext implements ApplicationContextAware {
   private ApplicationContext applicationContext;
   private ElasticContext elasticContext;
   private HarvesterContext harvesterContext;
-  private String version = "2.5.2";
+  private boolean supportsApprovalStatus = false;
+  private boolean supportsGroupBasedAccess = false;
+  private String version = "2.5.3";
   
   /** Constructor */
   public GeoportalContext() {}
@@ -96,13 +98,30 @@ public class GeoportalContext implements ApplicationContextAware {
   public HarvesterContext getHarvesterContext() {
     return harvesterContext;
   }
-
   /**
    * Sets harvester context.
    * @param harvesterContext harvester context 
    */
   public void setHarvesterContext(HarvesterContext harvesterContext) {
     this.harvesterContext = harvesterContext;
+  }
+  
+  /** Support for document approval status. */
+  public boolean getSupportsApprovalStatus() {
+    return supportsApprovalStatus;
+  }
+  /** Support for document approval status. */
+  public void setSupportsApprovalStatus(boolean supportsApprovalStatus) {
+    this.supportsApprovalStatus = supportsApprovalStatus;
+  }
+  
+  /** Support for group based document access. */
+  public boolean getSupportsGroupBasedAccess() {
+    return supportsGroupBasedAccess;
+  }
+  /** Support for group based document access. */
+  public void setSupportsGroupBasedAccess(boolean supportsGroupBasedAccess) {
+    this.supportsGroupBasedAccess = supportsGroupBasedAccess;
   }
   
   /** The version. */

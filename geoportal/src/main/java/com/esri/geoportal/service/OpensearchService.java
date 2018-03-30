@@ -54,7 +54,7 @@ public class OpensearchService extends Application {
       @Context HttpServletRequest hsr,
       @Context UriInfo uriInfo) {
     // http://localhost:8080/geoportal2/opensearch/description
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     boolean pretty = false;
     return description(user,pretty,hsr);
   }
@@ -64,7 +64,7 @@ public class OpensearchService extends Application {
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     String body = null;
     return this.search(user,pretty,hsr,body);
   }
@@ -75,7 +75,7 @@ public class OpensearchService extends Application {
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.search(user,pretty,hsr,body);
   }
   

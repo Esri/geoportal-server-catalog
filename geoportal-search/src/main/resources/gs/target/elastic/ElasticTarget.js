@@ -27,6 +27,8 @@
 
   gs.target.elastic.ElasticTarget = gs.Object.create(gs.target.Target, {
 
+    accessQuery: {writable: true, value: null},
+    
     itemBaseUrl: {writable: true, value: null},
 
     searchUrl: {writable: true, value: null},
@@ -154,6 +156,7 @@
       this.prepareModified(task,targetRequest);
       this.prepareTimePeriod(task,targetRequest);
       this.prepareBBox(task,targetRequest);
+      this.prepareAccessQuery(task,targetRequest);
       this.preparePaging(task,targetRequest);
       this.prepareSort(task,targetRequest);
       this.prepareOther(task,targetRequest);
@@ -167,6 +170,14 @@
       }
       promise.resolve(targetRequest);
       return promise;
+    }},
+    
+    prepareAccessQuery: {writable:true,value:function(task,targetRequest) {
+      var query = this.accessQuery;
+      if (query !== null && typeof query === "object") {
+        //console.log("Setting access query...",JSON.stringify(query));
+        targetRequest.musts.push(query);
+      }
     }},
 
     prepareBBox: {writable:true,value:function(task,targetRequest) {
@@ -224,7 +235,7 @@
       // TODO array?
       var filter = task.request.getFilter();
       if (typeof filter === "string" && filter.length > 0) {
-        musts.push({"query_string": {
+        targetRequest.musts.push({"query_string": {
           "analyze_wildcard": true,
           "query": filter
         }});

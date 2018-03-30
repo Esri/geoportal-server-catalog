@@ -22,12 +22,16 @@ function(declare, lang, array, Templated, util) {
   var oThisClass = declare([Templated], {
   
     activeQClauses: null,
+    conditionallyDisabled: false,
     isSearchComponent: true,
     searchOptions: null,
     searchPane: null,
     
     postCreate: function() {
       this.inherited(arguments);
+      if (this.conditionallyDisabled) {
+        if (this.domNode) this.domNode.style.display = "none";
+      }
     },
     
     /* SearchComponent API ============================================= */

@@ -19,12 +19,16 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.request.BulkChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
+import com.esri.geoportal.lib.elastic.request.DeleteItemsRequest;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
 import com.esri.geoportal.lib.elastic.request.GetMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.PublishMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.RealiasRequest;
 import com.esri.geoportal.lib.elastic.request.ReindexRequest;
 import com.esri.geoportal.lib.elastic.request.SearchRequest;
+import com.esri.geoportal.lib.elastic.request.SetAccessRequest;
+import com.esri.geoportal.lib.elastic.request.SetApprovalStatusRequest;
+import com.esri.geoportal.lib.elastic.request.SetOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
 
@@ -47,14 +51,18 @@ import javax.ws.rs.core.SecurityContext;
 @Path("/metadata")
 public class MetadataService {
   
+  /*
+   * @Deprecated use SetOwnerRequest
+   */
   @PUT
   @Path("/bulk/changeOwner")
   public Response bulkChangeOwner(
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @QueryParam("owner") String owner, 
       @QueryParam("newOwner") String newOwner, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     try {
       BulkChangeOwnerRequest request = GeoportalContext.getInstance().getBeanIfDeclared(
         "request.BulkChangeOwnerRequest",BulkChangeOwnerRequest.class,new BulkChangeOwnerRequest());
@@ -67,13 +75,36 @@ public class MetadataService {
     }
   }
   
+  @DELETE
+  @Path("/deleteItems")
+  public Response delDeleteItems(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    return this.deleteItems(user,pretty,hsr,body);
+  }
+  
+  @PUT
+  @Path("/deleteItems")
+  public Response putDeleteItems(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    return this.deleteItems(user,pretty,hsr,body);
+  }
+  
   @DELETE 
   @Path("/item/{id}")
   public Response delete(
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @PathParam("id") String id, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.deleteItem(user,pretty,id);
   }
   
@@ -81,6 +112,7 @@ public class MetadataService {
   @Path("/item/{id}")
   public Response get(
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @PathParam("id") String id,
       @QueryParam("pretty") boolean pretty,
       @QueryParam("f") String f,
@@ -90,7 +122,7 @@ public class MetadataService {
     //boolean includeMetadata = !inclIsFalse;
     boolean inclIsTrue = (incl != null && incl.equalsIgnoreCase("true"));
     boolean includeMetadata = inclIsTrue;
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.getItem(user,pretty,id,f,includeMetadata);
   }
   
@@ -98,8 +130,9 @@ public class MetadataService {
   @Path("/item/{id}/xml")
   public Response getXml(
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @PathParam("id") String id) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.getMetadata(user,id);
   }
   
@@ -107,8 +140,9 @@ public class MetadataService {
   @Path("/item/{id}/html")
   public Response getHtml(
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @PathParam("id") String id) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     boolean pretty = false;
     return this.transformMetadata(user,pretty,true,id,null,null);
   }
@@ -118,10 +152,11 @@ public class MetadataService {
   public Response put(
       String body,
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty,
       @QueryParam("async") boolean async) {
     //System.err.println("request-count="+requestCount.getAndIncrement()+" ...");
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     if (async) {
       new Thread(() -> {
         this.publishMetadata(user,pretty,null,body);
@@ -138,9 +173,10 @@ public class MetadataService {
   public Response putWithId(
       String body,
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @PathParam("id") String id, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.publishMetadata(user,pretty,id,body);
   }
   
@@ -148,10 +184,11 @@ public class MetadataService {
   @Path("/item/{id}/owner/{newOwner}")
   public Response putOwner(
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @PathParam("id") String id, 
       @PathParam("newOwner") String newOwner, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.changeOwner(user,pretty,id,newOwner);
   }
   
@@ -162,7 +199,7 @@ public class MetadataService {
       @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty,
       @QueryParam("indexName") String indexName) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.realias(user,pretty,indexName);
   }
   
@@ -175,7 +212,7 @@ public class MetadataService {
       @QueryParam("fromIndexName") String fromIndexName,
       @QueryParam("toIndexName") String toIndexName,
       @QueryParam("fromVersionCue") String fromVersionCue) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.reindex(user,pretty,fromIndexName,toIndexName,fromVersionCue);
   }
   
@@ -185,7 +222,7 @@ public class MetadataService {
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     String body = null;
     return this.search(user,pretty,hsr,body);
   }
@@ -197,8 +234,71 @@ public class MetadataService {
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.search(user,pretty,hsr,body);
+  }
+  
+  @PUT
+  @Path("/setAccess")
+  public Response setAccess(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    try {
+      SetAccessRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetAccessRequest",SetAccessRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  @PUT
+  @Path("/setApprovalStatus")
+  public Response setApprovalStatus(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    try {
+      SetApprovalStatusRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetApprovalStatusRequest",SetApprovalStatusRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  @PUT
+  @Path("/setOwner")
+  public Response setOwner(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    try {
+      SetOwnerRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetOwnerRequest",SetOwnerRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
   }
   
   @POST 
@@ -206,8 +306,9 @@ public class MetadataService {
   public Response transformUsingPost(
       String xml,
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @QueryParam("xslt") String xslt) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     boolean pretty = false;
     return this.transformMetadata(user,pretty,false,null,xml,xslt);
   }
@@ -230,8 +331,9 @@ public class MetadataService {
   public Response validateUsingPost(
       String xml,
       @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
+    AppUser user = new AppUser(hsr,sc);
     return this.validateMetadata(user,pretty,xml);
   }
   
@@ -283,6 +385,28 @@ public class MetadataService {
           "request.DeleteItemRequest",DeleteItemRequest.class);
       request.init(user,pretty);
       request.init(id);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  /**
+   * Delete one or more items.
+   * @param user the active user
+   * @param pretty for pretty JSON
+   * @param hsr the http request
+   * @param body the request body
+   * @return the response
+   */
+  protected Response deleteItems(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
+    try {
+      DeleteItemsRequest request = GeoportalContext.getInstance().getBean(
+          "request.DeleteItemsRequest",DeleteItemsRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
       AppResponse response = request.execute();
       return response.build();
     } catch (Throwable t) {

@@ -1,0 +1,21 @@
+<div>
+  <div class="form-group" data-dojo-attach-point="itemTitleNode"></div>
+  <div class="form-group form-group-sm">
+    <div>
+	    <label for="${id}_sel1" class="control-label"
+	      >${i18n.content.setApprovalStatus.status}</label>
+    </div>
+    <div>
+      <select id="${id}_sel1" class="form-control" data-dojo-attach-point="statusSelect">
+        <option value="none"></option>
+        <option value="approved">${i18n.content.setApprovalStatus.approved}</option>
+        <option value="reviewed">${i18n.content.setApprovalStatus.reviewed}</option>
+        <option value="disapproved">${i18n.content.setApprovalStatus.disapproved}</option>
+        <option value="incomplete">${i18n.content.setApprovalStatus.incomplete}</option>
+        <option value="posted">${i18n.content.setApprovalStatus.posted}</option>
+        <option value="draft">${i18n.content.setApprovalStatus.draft}</option>
+      </select>
+    </div>
+  </div>
+  <div data-dojo-attach-point="applyToNode"></div>
+</div>

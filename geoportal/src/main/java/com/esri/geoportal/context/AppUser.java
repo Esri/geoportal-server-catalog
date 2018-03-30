@@ -14,7 +14,20 @@
  */
 package com.esri.geoportal.context;
 import java.security.Principal;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Iterator;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
+
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.oauth2.provider.OAuth2Authentication;
+
+import com.esri.geoportal.base.security.Group;
 
 /**
  * The user associated with a request.
@@ -22,6 +35,7 @@ import javax.ws.rs.core.SecurityContext;
 public class AppUser {
 
   /* Instance variables. */
+  private List<Group> groups;
   private boolean isAdmin;
   private boolean isAnonymous;
   private boolean isPublisher;
@@ -32,10 +46,11 @@ public class AppUser {
   
   /**
    * Constructor.
+   * @param request the request
    * @param sc the security context
    */
-  public AppUser(SecurityContext sc) {
-    init(sc);
+  public AppUser(HttpServletRequest request, SecurityContext sc) {
+    init(request);
   }
   
   /**
@@ -48,35 +63,41 @@ public class AppUser {
     init(username,isAdmin,isPublisher);
   }
   
+  /** The groups to which this use belongs. */
+  public List<Group> getGroups() {
+    return groups;
+  }
+  
   /** The username. */
   public String getUsername() {
     return username;
   }
   
-  /** True is this user has an ADMIN role. */
+  /** True if this user has an ADMIN role. */
   public boolean isAdmin() {
     return isAdmin;
   }
   
-  /** True is this user is anonymous. */
+  /** True if this user is anonymous. */
   public boolean isAnonymous() {
     return isAnonymous;
   }
   
-  /** True is this user has a PUBLISHER role */
+  /** True if this user has a PUBLISHER role */
   public boolean isPublisher() {
     return isPublisher;
   }
   
   /**
-   * Initialize based upon a security context.
-   * @param sc the security context
+   * Initialize based upon an HTTP request.
+   * @param sc the request
    */
-  private void init(SecurityContext sc) {
+  private void init(HttpServletRequest sc) {
     init(null,false,false);
     if (sc == null) return;
     Principal p = sc.getUserPrincipal();
     if (p == null) return;
+    groups = new ArrayList<Group>();
     username = p.getName();
     if (username != null && username.length() > 0) {
       isAnonymous = false;
@@ -84,6 +105,37 @@ public class AppUser {
       isPublisher = sc.isUserInRole("PUBLISHER");
     } else {
       isAnonymous = true;
+    }
+    //System.err.println("username: "+username+", isAdmin="+isAdmin);
+    
+    String pfx = "ROLE_";
+    String[] gtpRoles = {"ADMIN","PUBLISHER","USER"};
+    List<String> gptRoleList = Arrays.asList(gtpRoles);
+    Collection<GrantedAuthority> authorities = null;
+    if (p instanceof UsernamePasswordAuthenticationToken) {
+      UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken)p;
+      if (auth.isAuthenticated()) authorities = auth.getAuthorities();
+    } else if (p instanceof OAuth2Authentication) {
+      OAuth2Authentication auth = (OAuth2Authentication)p;
+      if (auth.isAuthenticated()) authorities = auth.getAuthorities();
+    }
+    if (authorities != null) {
+      Iterator<GrantedAuthority> iterator = authorities.iterator();
+      if (iterator != null) {
+        while (iterator.hasNext()){
+          GrantedAuthority authority = iterator.next();
+          if (authority != null) {
+            String name = authority.getAuthority();
+            if (name != null) {
+              if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
+              if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
+                //System.err.println("authority: "+name);
+                groups.add(new Group(name));
+              }
+            }
+          }
+        }          
+      }
     }
   }
   

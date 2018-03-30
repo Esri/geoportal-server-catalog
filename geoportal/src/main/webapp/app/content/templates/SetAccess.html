@@ -1,0 +1,35 @@
+<div>
+  <div class="form-group" data-dojo-attach-point="itemTitleNode"></div>
+  <div class="form-group form-group-sm">
+    <div>
+      <label class="control-label"
+        >${i18n.content.setAccess.access}</label>
+    </div>
+    <div>
+		  <div>
+		    <label class="radio-inline">
+		      <input type="radio" name="${id}_radio" data-dojo-attach-point="publicNode">
+		      <span>${i18n.content.setAccess._public}</span>
+		    </label>
+		  </div>
+		  <div>
+		    <label class="radio-inline">
+		      <input type="radio" name="${id}_radio" data-dojo-attach-point="privateNode">
+		      <span>${i18n.content.setAccess._private}</span>
+		    </label>
+		  </div>
+    </div>
+  </div>
+  <div class="form-group form-group-sm">
+    <div>
+      <label class="control-label"
+        >${i18n.content.setAccess.groups}</label>
+      <a class="pull-right clearfix" href="javascript:void(0)" 
+        data-dojo-attach-event="onClick: clear">${i18n.general.clear}</a>
+    </div>
+    <ul class="g-access-groups" data-dojo-attach-point="groupsNode"></ul>
+    <div class="pull-right clearfix" data-dojo-attach-point="countNode"></div>
+    <div style="clear:both"></div>
+  </div>
+  <div data-dojo-attach-point="applyToNode"></div>
+</div>

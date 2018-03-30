@@ -17,6 +17,7 @@ define({
     
     general: {
       cancel: "Cancel",
+      clear: "Clear",
       close: "Close",
       del: "Delete",
       error: "Error",
@@ -66,7 +67,10 @@ define({
         metadataType: "Metadata Type",
         organizations: "Organizations",
         keywords: "Keywords",
-        origin: "Source of Origin"
+        origin: "Source of Origin",
+        approvalStatus: "Approval Status",
+        access: "Access",
+        accessGroups: "Access Groups"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -223,8 +227,6 @@ define({
         preview: "Preview",
         options: {
           caption: "Options",
-          changeOwner: "Change Owner",
-          deleteItem: "Delete Item",
           editMetadata: "Edit Metadata",
           uploadMetadata: "Upload Metadata"
         }
@@ -236,12 +238,45 @@ define({
     },
     
     content: {
+      updateButton: "Update",
+      applyTo: {
+        itemLabel: "Apply change to this item only",
+        ownerPattern: "Apply change to all items owned by: {name}",
+        sourceUriPattern: "Apply change to all items harvested from: {name}",
+        taskRefPattern: "Apply change to all items associated with harvesting task: {name}",
+        queryPattern: "Apply change to all selected items: {count}",
+        itemLabelDelete: "Delete this item only",
+        ownerPatternDelete: "Delete all items owned by: {name}",
+        sourceUriPatternDelete: "Delete all items harvested from: {name}",
+        taskRefPatternDelete: "Delete all items associated with harvesting task: {name}",
+        queryPatternDelete: "Delete all selected items: {count}"
+      },
       changeOwner: {
         caption: "Change Owner",
-        button: "Update",
         currentOwner: "Current Owner:",
-        newOwner: "New Owner:",
-        bulkPattern: "Apply change to all items owned by {username}"
+        newOwner: "New Owner:"
+      },
+      deleteItems: {
+        caption: "Delete",
+      },
+      setAccess: {
+        caption: "Set Access",
+        access: "Access",
+        _public: "Public",
+        _private: "Private",
+        groups: "Groups",
+        countPattern: "{count} selected"
+      },
+      setApprovalStatus: {
+        caption: "Set Approval Status",
+        status: "Status",
+        none: "None",
+        approved: "Approved",
+        reviewed: "Reviewed",
+        disapproved: "Disapproved",
+        incomplete: "Incomplete",
+        posted: "Posted",
+        draft: "Draft"
       },
       uploadMetadata: {
         caption: "Upload Metadata",

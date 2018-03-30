@@ -127,6 +127,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent, Dr
         var query = {"term": {sys_owner_s: AppContext.appUser.getUsername()}};
         if (!params.queries) params.queries = [];
         params.queries.push(query);
+        params.wasMyContent = true
       }
     },
     

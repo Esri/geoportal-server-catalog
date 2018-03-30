@@ -16,6 +16,8 @@
 	<beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
 		<beans:property name="elasticContext" ref="elasticContext" />
 		<beans:property name="harvesterContext" ref="harvesterContext" />
+		<beans:property name="supportsApprovalStatus" value="false" />
+		<beans:property name="supportsGroupBasedAccess" value="false" />
 	</beans:bean>
 
 	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContext">
