@@ -80,13 +80,15 @@ public class ElasticProxyFilter implements Filter {
             if (qstr != null && qstr.length() > 0) {
               String lc = "?" + qstr.toLowerCase();
               if (lc.indexOf("?q=") != -1 || lc.indexOf("&q=") != -1) {
-                // TODO throw an exception here or rely on app-security.xml?
+                // Throw an exception here or rely on app-security.xml?
+                throw new ServletException("Parameter q is not supported, Post a {query: ...}");
               }
             }
           }
         } else {
           // TODO check others?
-          // TODO throw an exception here or rely on app-security.xml?
+          // Throw an exception here or rely on app-security.xml?
+          throw new ServletException("This endpoint is not supported.");
         }
       }
     }

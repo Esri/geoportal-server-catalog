@@ -74,11 +74,21 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     postCreate: function() {
       this.inherited(arguments);
       var self = this;
-      topic.subscribe(appTopics.ItemOwnerChanged,function(params){
+      this.own(topic.subscribe(appTopics.ItemOwnerChanged,function(params){
         if (self.item && self.item === params.item) {
           self._renderOwnerAndDate(self.item);
         }
-      });
+      }));
+      this.own(topic.subscribe(appTopics.ItemApprovalStatusChanged,function(params){
+        if (self.item && self.item === params.item) {
+          self._renderOwnerAndDate(self.item);
+        }
+      }));
+      this.own(topic.subscribe(appTopics.ItemAccessChanged,function(params){
+        if (self.item && self.item === params.item) {
+          self._renderOwnerAndDate(self.item);
+        }
+      }));
     },
     
     render: function(hit) {
