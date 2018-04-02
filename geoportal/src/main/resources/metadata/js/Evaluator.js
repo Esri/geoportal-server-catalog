@@ -63,18 +63,19 @@ G._metadataTypes =  {
     schematronXslt: null
   },*/
   
-},
+//},
 // smr 2018-03-30
 // change detailsXLST; make path //gmi:
+// 2018-04-02 use evaluators.iso
 "iso19115-2": {
   key: "iso19115-2",
-  evaluator: G.evaluators.cinergi, 
+  evaluator: G.evaluators.iso, 
   interrogationXPath: "//gmi:MI_Metadata",
   identifier: "http://www.isotc211.org/2005/gmi",
   detailsXslt: "metadata/details/iso-details/ISO19139ToHTML.xsl",
   xsdLocation: null,
   schematronXslt: null
-},
+}/*,
   
   
   "fgdc": {
@@ -104,7 +105,7 @@ G._metadataTypes =  {
         interrogationXPath: "/oai_dc:dc/dc:title",
         identifier: "http://www.openarchives.org/OAI/2.0/oai_dc/",
         //detailsXslt: "metadata/details/rdf-details.xslt",
-    }
+    }*/
 };
 
 G._initializeTask = function(mdoc) {
