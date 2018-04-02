@@ -1,5 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
-<xsl:stylesheet version="1.0" xmlns:res="http://www.esri.com/metadata/res/" xmlns:xsl="http://www.w3.org/1999/XSL/Transform" xmlns:gmd="http://www.isotc211.org/2005/gmd" >
+<xsl:stylesheet version="1.0" xmlns:res="http://www.esri.com/metadata/res/" 
+  xmlns:xsl="http://www.w3.org/1999/XSL/Transform" 
+  xmlns:gmd="http://www.isotc211.org/2005/gmd" 
+  xmlns:gmi="http://www.isotc211.org/2005/gmi">
 
 <!-- An XSLT template for displaying metadata that is stored in the ArcGIS metadata format.
 Modified from ESRI xslt, for use by ESRI Geoportal 
@@ -16,6 +19,7 @@ is done ISO19139usgin.xslt. Leave it here so nothing in Geoportal gets broken...
   <xsl:import href = "Imports\auxLanguages.xslt" />
   <xsl:import href = "Imports\auxCountries.xslt" />
   <xsl:import href = "Imports\auxUCUM.xslt" />
+  <xsl:import href = "ISO19139ToSchemaOrgDataset1.0.xslt"/>
 
   <xsl:output method="xml" indent="yes" encoding="UTF-8" doctype-public="-//W3C//DTD XHTML 1.0 Strict//EN" doctype-system="http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd" />
   
@@ -34,6 +38,11 @@ is done ISO19139usgin.xslt. Leave it here so nothing in Geoportal gets broken...
     <meta http-equiv="content-type" content="text/html; charset=UTF-8"/>
     <xsl:call-template name="styles" />
     <xsl:call-template name="scripts" />
+    <script type="application/ld+json">
+      <xsl:text>&#10;</xsl:text>
+      <xsl:apply-templates select="//gmd:MD_Metadata | //gmi:MI_Metadata"/>
+      <xsl:text>&#10;</xsl:text>
+    </script>
   </head>
 
   <body oncontextmenu="return true">
