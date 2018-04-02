@@ -35,21 +35,25 @@ G._metadataTypes =  {
         interrogationXPath: "/gmi:MI_Metadata/gmd:contact/gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString[text()='Earthcube CINERGI Metadata Pipeline']",
         //identifier: "http://www.isotc211.org/2005/gmi",
         identifier: "CINERGI_ISO19115",
-        detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
-  //      xsdLocation: "https://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd",
-   //     schematronXslt: null
+   //     detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
+        detailsXslt: "metadata/details/iso-details/ISO19139ToHTML.xsl",
+        xsdLocation: null,
+        schematronXslt: null
     },
     "iso19115": {
-    key: "iso19115",
-    evaluator: G.evaluators.iso,
-    interrogationXPath: "/gmd:MD_Metadata",
-    identifier: "http://www.isotc211.org/2005/gmd",
-    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
-    //xsdLocation: "http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd",
-    //schematronXslt: "metadata/schematron/Gemini2_R2r2-schematron.xslt",
-    toKnownXslt: null
+    	// smr 2018-03-30 make interrogation path // instead of /
+    	// change the details XSLT to the USGIN presentation
+        key: "iso19115",
+        evaluator: G.evaluators.iso,
+        interrogationXPath: "//gmd:MD_Metadata",
+        identifier: "http://www.isotc211.org/2005/gmd",
+        detailsXslt: "metadata/details/iso-details/ISO19139ToHTML.xsl",
+        xsdLocation: null,
+        //schematronXslt: "metadata/schematron/Gemini2_R2r2-schematron.xslt",
+        toKnownXslt: null
+    	
   },
-  "iso19115-2": {
+/*  "iso19115-2": {
     key: "iso19115-2",
     evaluator: G.evaluators.cinergi, // we enhance these
     interrogationXPath: "/gmi:MI_Metadata",
@@ -57,7 +61,22 @@ G._metadataTypes =  {
     detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
     xsdLocation: null,
     schematronXslt: null
-  },
+  },*/
+  
+},
+// smr 2018-03-30
+// change detailsXLST; make path //gmi:
+"iso19115-2": {
+  key: "iso19115-2",
+  evaluator: G.evaluators.cinergi, 
+  interrogationXPath: "//gmi:MI_Metadata",
+  identifier: "http://www.isotc211.org/2005/gmi",
+  detailsXslt: "metadata/details/iso-details/ISO19139ToHTML.xsl",
+  xsdLocation: null,
+  schematronXslt: null
+},
+  
+  
   "fgdc": {
     key: "fgdc",
     evaluator: G.evaluators.fgdc,
