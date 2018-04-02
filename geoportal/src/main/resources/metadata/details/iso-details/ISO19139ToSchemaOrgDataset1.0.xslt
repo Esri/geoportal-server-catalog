@@ -96,7 +96,7 @@ ISO The template includes root element xpath for ISO19139 and ISO19139-1 (see li
 
         <xsl:choose>
             <xsl:when test="string-length(normalize-space($personName)) > 0 and string-length($organisationName) = 0">
-                <xsl:text>    "@type":"Person",&#10;      "additionalType": "geolink:Person",&#10;</xsl:text>
+                <xsl:text>    "@type":"Person",&#10;      "additionalType": "http://schema.geolink.org/1.0/base/main#Person",&#10;</xsl:text>
                 <xsl:if test="string-length($agentID) > 0">
                     <xsl:text>      "@id": "</xsl:text>
                     <xsl:value-of select="string($agentID)"/>
@@ -525,7 +525,7 @@ ISO The template includes root element xpath for ISO19139 and ISO19139-1 (see li
         </xsl:choose>
     </xsl:template>
 
-    <xsl:template match="//gmd:MD_Metadata | gmi:MI_Metadata">
+    <xsl:template match="gmd:MD_Metadata | gmi:MI_Metadata">
         <!-- Define variables for content elements -->
         <xsl:variable name="additionalContexts">
             <xsl:text>"datacite": "http://purl.org/spar/datacite/",&#10;
@@ -1038,7 +1038,7 @@ ISO The template includes root element xpath for ISO19139 and ISO19139-1 (see li
         <xsl:value-of select="$datasetURI"/>
         <xsl:text>",&#10;</xsl:text>
         <xsl:text>  "@type": "Dataset",&#10;</xsl:text>
-        <xsl:text>  "additionalType": [&#10;    "geolink:Dataset",&#10;    "vivo:Dataset"&#10;  ],&#10;</xsl:text>
+        <xsl:text>  "additionalType": [&#10;    "http://schema.geolink.org/1.0/base/main#Dataset",&#10;    "vivo:Dataset"&#10;  ],&#10;</xsl:text>
 
         <xsl:text>  "name": "</xsl:text>
         <!-- escape (with '\') any double quotes (&#34;) that show up in  the name string -->
@@ -1203,7 +1203,9 @@ ISO The template includes root element xpath for ISO19139 and ISO19139-1 (see li
                         <xsl:text>[&#10;</xsl:text>
                     </xsl:if>
                     <xsl:for-each select="$publisher/gmd:CI_ResponsibleParty">
-                        <xsl:apply-templates select="."/>
+                        <xsl:apply-templates select=".">
+                            <xsl:with-param name="role" select="string('publisher')"/>
+                        </xsl:apply-templates>
                         <xsl:if test="position() != last()">
                             <xsl:text>,&#10;</xsl:text>
                         </xsl:if>
@@ -1227,9 +1229,25 @@ ISO The template includes root element xpath for ISO19139 and ISO19139-1 (see li
 
         <xsl:if test="$hasSpatial">
             <xsl:text>  "spatialCoverage": </xsl:text>
-            <xsl:if test="count(//gmd:geographicElement) + count(gmd:extent//gmd:description) > 1">
+            <xsl:if test="count(//gmd:geographicElement) + count(//gmd:extent//gmd:description/gco:CharacterString) > 1">
                 <xsl:text>[&#10;</xsl:text>
             </xsl:if>
+            <!-- have to handle gmd:extent description(s) first, then geographicElements -->
+            <xsl:for-each select="//gmd:extent//gmd:description/gco:CharacterString">
+                <xsl:text>{&#10;</xsl:text>
+                <xsl:text>"@type": "Place",&#10;</xsl:text>
+                <xsl:text>"description": "</xsl:text>
+                <xsl:value-of select="normalize-space(string(.))"/>
+                <xsl:text>"}</xsl:text>
+                <xsl:if test="following::gmd:extent//gmd:description">
+                    <xsl:text>,&#10;</xsl:text>
+                </xsl:if>
+            </xsl:for-each>
+            
+            <xsl:if test="//gmd:geographicElement and //gmd:extent//gmd:description/gco:CharacterString">
+                <xsl:text>,&#10;</xsl:text>
+            </xsl:if>
+            
             <xsl:for-each select="//gmd:geographicElement">
                 <xsl:variable name="thisElement">
                     <xsl:apply-templates select="."/>
@@ -1241,7 +1259,7 @@ ISO The template includes root element xpath for ISO19139 and ISO19139-1 (see li
                     <xsl:text>,&#10;</xsl:text>
                 </xsl:if>
             </xsl:for-each>
-            <xsl:if test="count(//gmd:geographicElement) > 1">
+            <xsl:if test="count(//gmd:geographicElement) + count(//gmd:extent//gmd:description) > 1">
                 <xsl:text>]</xsl:text>
             </xsl:if>
             <xsl:if test="$hasVariables">
