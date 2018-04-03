@@ -16,8 +16,6 @@ package com.esri.geoportal.service.rest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.request.BulkChangeOwnerRequest;
-import com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemsRequest;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
@@ -340,27 +338,6 @@ public class MetadataService {
   
   /** ======================================================================= */
   
-  /**
-   * Change owner.
-   * @param user the active user
-   * @param pretty for pretty JSON
-   * @param id the item id
-   * @param newOwner the new owner
-   * @return the response
-   */
-  protected Response changeOwner(AppUser user, boolean pretty, String id, String newOwner) {
-    try {
-      ChangeOwnerRequest request = GeoportalContext.getInstance().getBean(
-          "request.ChangeOwnerRequest",ChangeOwnerRequest.class);
-      request.init(user,pretty);
-      request.init(id,newOwner);
-      AppResponse response = request.execute();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-
   /**
    * Delete an item.
    * @param user the active user
