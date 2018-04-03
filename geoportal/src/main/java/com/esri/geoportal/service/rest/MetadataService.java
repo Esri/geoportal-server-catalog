@@ -62,17 +62,7 @@ public class MetadataService {
       @QueryParam("owner") String owner, 
       @QueryParam("newOwner") String newOwner, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(hsr,sc);
-    try {
-      BulkChangeOwnerRequest request = GeoportalContext.getInstance().getBeanIfDeclared(
-        "request.BulkChangeOwnerRequest",BulkChangeOwnerRequest.class,new BulkChangeOwnerRequest());
-      request.init(user,pretty);
-      request.init(owner,newOwner);
-      AppResponse response = request.execute();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
+    return (new AppResponse()).buildDeprecated("Deprecated endpoint: use /rest/metadata/setOwner");
   }
   
   @DELETE
@@ -188,8 +178,7 @@ public class MetadataService {
       @PathParam("id") String id, 
       @PathParam("newOwner") String newOwner, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(hsr,sc);
-    return this.changeOwner(user,pretty,id,newOwner);
+    return (new AppResponse()).buildDeprecated("Deprecated endpoint: use /rest/metadata/setOwner");
   }
   
   @GET 
@@ -592,6 +581,15 @@ public class MetadataService {
     } catch (Throwable t) {
       return this.writeException(t,pretty);
     }
+  }
+  
+  /**
+   * Write a deprecated response.
+   * @param message the message
+   * @return the response
+   */
+  protected Response writeDeprecated(String message) {
+    return (new AppResponse()).buildDeprecated(message);
   }
   
   /**

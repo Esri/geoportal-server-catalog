@@ -35,8 +35,9 @@ import javax.ws.rs.core.UriInfo;
 
 /**
  * Opensearch service provider.
+ * @Deprecated switched to geoportal-search implementation
  */
-@ApplicationPath("Eros")
+@ApplicationPath("deprecatedEros")
 @Path("")
 public class ErosService extends Application {
   
@@ -47,88 +48,88 @@ public class ErosService extends Application {
     return resources;
   }
   
-  @GET
-  @Path("/description")
-  public Response getDescription(
-      @Context SecurityContext sc,
-      @Context HttpServletRequest hsr,
-      @Context UriInfo uriInfo) {
-    // http://localhost:8080/geoportal2/Eros/description
-    AppUser user = new AppUser(hsr,sc);
-    boolean pretty = false;
-    return description(user,pretty,hsr);
-  }
-  
-  @GET 
-  public Response searchUsingGet(
-      @Context SecurityContext sc,
-      @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(hsr,sc);
-    String body = null;
-    return this.search(user,pretty,hsr,body);
-  }
-  
-  @POST 
-  public Response searchUsingPost(
-      String body,
-      @Context SecurityContext sc,
-      @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(hsr,sc);
-    return this.search(user,pretty,hsr,body);
-  }
-  
-  /**
-   * Return the Eros descriptor.
-   * @param user the active user
-   * @param pretty for pretty response
-   * @param hsr the http request
-   * @return the response
-   */
-  protected Response description(AppUser user, boolean pretty, HttpServletRequest hsr) {
-    try {
-      ErosRequest request = GeoportalContext.getInstance().getBean(
-          "request.ErosRequest",ErosRequest.class);
-      request.init(user,pretty);
-      request.initBaseUrl(hsr,null);
-      AppResponse response = request.description();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-  
-  /**
-   * Search.
-   * @param user the active user
-   * @param hsr the http request
-   * @param body the request body
-   * @return the response
-   */
-  protected Response search(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
-    try {
-      ErosRequest request = GeoportalContext.getInstance().getBean(
-          "request.ErosRequest",ErosRequest.class);
-      request.init(user,pretty);
-      request.initBaseUrl(hsr,null);
-      request.setParameterMap(hsr.getParameterMap());
-      request.setBody(body);
-      AppResponse response = request.execute();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-  
-  /**
-   * Write an exception response.
-   * @param t the cause
-   * @param pretty for pretty JSON
-   * @return the response
-   */
-  protected Response writeException(Throwable t, boolean pretty) {
-    return (new AppResponse()).buildException(t,pretty);
-  }
+//  @GET
+//  @Path("/description")
+//  public Response getDescription(
+//      @Context SecurityContext sc,
+//      @Context HttpServletRequest hsr,
+//      @Context UriInfo uriInfo) {
+//    // http://localhost:8080/geoportal2/Eros/description
+//    AppUser user = new AppUser(hsr,sc);
+//    boolean pretty = false;
+//    return description(user,pretty,hsr);
+//  }
+//  
+//  @GET 
+//  public Response searchUsingGet(
+//      @Context SecurityContext sc,
+//      @Context HttpServletRequest hsr,
+//      @QueryParam("pretty") boolean pretty) {
+//    AppUser user = new AppUser(hsr,sc);
+//    String body = null;
+//    return this.search(user,pretty,hsr,body);
+//  }
+//  
+//  @POST 
+//  public Response searchUsingPost(
+//      String body,
+//      @Context SecurityContext sc,
+//      @Context HttpServletRequest hsr,
+//      @QueryParam("pretty") boolean pretty) {
+//    AppUser user = new AppUser(hsr,sc);
+//    return this.search(user,pretty,hsr,body);
+//  }
+//  
+//  /**
+//   * Return the Eros descriptor.
+//   * @param user the active user
+//   * @param pretty for pretty response
+//   * @param hsr the http request
+//   * @return the response
+//   */
+//  protected Response description(AppUser user, boolean pretty, HttpServletRequest hsr) {
+//    try {
+//      ErosRequest request = GeoportalContext.getInstance().getBean(
+//          "request.ErosRequest",ErosRequest.class);
+//      request.init(user,pretty);
+//      request.initBaseUrl(hsr,null);
+//      AppResponse response = request.description();
+//      return response.build();
+//    } catch (Throwable t) {
+//      return this.writeException(t,pretty);
+//    }
+//  }
+//  
+//  /**
+//   * Search.
+//   * @param user the active user
+//   * @param hsr the http request
+//   * @param body the request body
+//   * @return the response
+//   */
+//  protected Response search(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
+//    try {
+//      ErosRequest request = GeoportalContext.getInstance().getBean(
+//          "request.ErosRequest",ErosRequest.class);
+//      request.init(user,pretty);
+//      request.initBaseUrl(hsr,null);
+//      request.setParameterMap(hsr.getParameterMap());
+//      request.setBody(body);
+//      AppResponse response = request.execute();
+//      return response.build();
+//    } catch (Throwable t) {
+//      return this.writeException(t,pretty);
+//    }
+//  }
+//  
+//  /**
+//   * Write an exception response.
+//   * @param t the cause
+//   * @param pretty for pretty JSON
+//   * @return the response
+//   */
+//  protected Response writeException(Throwable t, boolean pretty) {
+//    return (new AppResponse()).buildException(t,pretty);
+//  }
 
 }
