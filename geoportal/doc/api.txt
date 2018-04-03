@@ -1,29 +1,34 @@
 Geoportal Server API
 
-HTTP [any] geoportal/elastic/*
+HTTP [any]      geoportal/elastic/*
 
-HTTP GET      geoportal/rest/geoportal
+HTTP GET        geoportal/rest/geoportal
 
-HTTP PUT      geoportal/rest/metadata/bulk/changeOwner
-HTTP GET      geoportal/rest/metadata/item/{id}
-HTTP GET      geoportal/rest/metadata/item/{id}/xml
-HTTP GET      geoportal/rest/metadata/item/{id}/html
-HTTP PUT      geoportal/rest/metadata/item
-HTTP PUT      geoportal/rest/metadata/item/{id}
-HTTP PUT      geoportal/rest/metadata/item/{id}/owner/{newOwner}
-HTTP DELETE   geoportal/rest/metadata/item/{id}
-HTTP GET      geoportal/rest/metadata/realias
-HTTP GET      geoportal/rest/metadata/reindex
-HTTP GET/POST geoportal/rest/metadata/search
-HTTP POST/PUT geoportal/rest/metadata/transform
-HTTP POST/PUT geoportal/rest/metadata/validate
+HTTP DELETE/PUT geoportal/rest/metadata/deleteItems
+HTTP GET        geoportal/rest/metadata/item/{id}
+HTTP GET        geoportal/rest/metadata/item/{id}/xml
+HTTP GET        geoportal/rest/metadata/item/{id}/html
+HTTP PUT        geoportal/rest/metadata/item
+HTTP PUT        geoportal/rest/metadata/item/{id}
+HTTP DELETE     geoportal/rest/metadata/item/{id}
+HTTP GET        geoportal/rest/metadata/realias
+HTTP GET        geoportal/rest/metadata/reindex
+HTTP GET/POST   geoportal/rest/metadata/search
+HTTP PUT        geoportal/rest/metadata/setAccess
+HTTP PUT        geoportal/rest/metadata/setApprovalStatus
+HTTP PUT        geoportal/rest/metadata/setOwner
+HTTP POST/PUT   geoportal/rest/metadata/transform
+HTTP POST/PUT   geoportal/rest/metadata/validate
 
-HTTP GET      geoportal/opensearch
-HTTP GET      geoportal/opensearch/description
+HTTP GET        geoportal/opensearch
+HTTP GET        geoportal/opensearch/description
 
-HTTP GET      geoportal/csw
+HTTP GET/POST   geoportal/csw
 
-HTTP POST     geoportal/oauth/token
+HTTP POST       geoportal/oauth/token
+
+DEPRECATED: HTTP PUT geoportal/rest/metadata/bulk/changeOwner - use geoportal/rest/metadata/setOwner
+DEPRECATED: HTTP PUT geoportal/rest/metadata/item/{id}/owner/{newOwner}- use geoportal/rest/metadata/setOwner
 
 ------------------------------------------------------------------------------------------
 
@@ -42,25 +47,30 @@ HTTP GET geoportal/rest/geoportal
 Provides information on the Geoportal application itself.
 Response Content Type: application/json
 Optional Query Parameters:
-  pretty - boolean for formatted json (default=false)
+  pretty - for an indented response (default=false)
   
 ------------------------------------------------------------------------------------------
-
-HTTP PUT geoportal/rest/metadata/bulk/changeOwner
-Transfers ownership of all documents owner by a user.
+  
+HTTP DELETE/PUT geoportal/rest/metadata/deleteItems
+Delete one or more items.
 Response Content Type: application/json
-Required Query Parameters:
-  owner - the current owner
-  newOwner - the new owner
 Optional Query Parameters:
-  pretty - boolean for formatted json (default=false)
+  id - delete this item id only (field: _id)
+  owner - delete all items owned by this user (field: sys_owner_s)
+  sourceUri - delete all items associated with this harvesting uri (field: src_source_uri_s)
+  sourceRef - delete all items associated with this harvesting reference (field: src_source_ref_s)
+  taskRef - delete all items associated with this harvesting task reference (field: src_task_ref_s)
+  pretty - for an indented response (default=false)
+Optional Request Body (application/json - Elasticsearch Query DSL):
+  Apply delete all items matching the supplied query
+  Example: {"query":{"term":{"fileid":"myfileid"}}}
 
 HTTP GET geoportal/rest/metadata/item/{id}
 Gets the item associated with the supplied identifier.
 Response Content Type: application/json
 Optional Query Parameters:
   includeMetadata - boolean indicating whether the metadata xml should be included (default=false)
-  pretty - boolean for formatted json (default=false)
+  pretty - for an indented response (default=false)
   
 HTTP GET geoportal/rest/metadata/item/{id}/xml
 Gets the metadata document associated with the supplied identifier.
@@ -76,7 +86,7 @@ Available only to users with a Publisher role.
 Request Content Type: application/xml
 Response Content Type: application/json
 Optional Query Parameters:
-  pretty - boolean for formatted json (default=false)
+  pretty - for an indented response (default=false)
   
 HTTP PUT geoportal/rest/metadata/item/{id}
 Publishes a metadata document using the supplied identifier.
@@ -84,21 +94,14 @@ Available only to users with a Publisher role.
 Request Content Type: application/xml
 Response Content Type: application/json
 Optional Query Parameters:
-  pretty - boolean for formatted json (default=false)
-
-HTTP PUT geoportal/rest/metadata/item/{id}/owner/{newOwner}
-Changes the owner associated with the supplied identifier.
-Only an Admin can change ownership.
-Response Content Type: application/json
-Optional Query Parameters:
-  pretty - boolean for formatted json (default=false)
+  pretty - for an indented response (default=false)
 
 HTTP DELETE geoportal/rest/metadata/item/{id}
 Delete the item associated with the supplied identifier.
 Only the item owner (or an Admin) can delete and item.
 Response Content Type: application/json
 Optional Query Parameters:
-  pretty - boolean for formatted json (default=false)
+  pretty - for an indented response (default=false)
 
 HTTP GET geoportal/rest/metadata/realias
 Reset the index associated with the metadata alias.
@@ -120,8 +123,62 @@ Optional Query Parameters:
   size - the number of items to return
   bbox - the bounding envelope WGS84 (bbox=xmin,ymin,xmax,ymax)
   time - time period for the resource (time=start/end)
-  pretty - boolean for formatted json or xml (default=false)
+  pretty - for an indented response (default=false)
 Example: http://localhost:8080/geoportal/rest/metadata/search?q=*:*
+
+HTTP PUT geoportal/rest/metadata/setAccess
+Set the access level for one or more items (fields: sys_access_s and sys_access_groups_s).
+Only available if supportsGroupBasedAccess is set to true within app-context.xml.
+Response Content Type: application/json
+Required Query Parameters:
+  access - the access level: public or private
+  group - the group key, 
+          can be supplied multiple times (e.g. ?access=private&group=a&group=b&group=c)
+Optional Query Parameters:
+  id - apply change to this item id only (field: _id)
+  owner - apply change to all items owned by this user (field: sys_owner_s)
+  sourceUri - apply change to all items associated with this harvesting uri (field: src_source_uri_s)
+  sourceRef - apply change to all items associated with this harvesting reference (field: src_source_ref_s)
+  taskRef - apply change to all items associated with this harvesting task reference (field: src_task_ref_s)
+  pretty - for an indented response (default=false)
+Optional Request Body (application/json - Elasticsearch Query DSL):
+  Apply change to all items matching the supplied query
+  Example: {"query":{"term":{"fileid":"myfileid"}}}
+  
+HTTP PUT geoportal/rest/metadata/setApprovalStatus
+Set the approval status for one or more items (field: sys_approval_status_s).
+Only an Admin can change approval status.
+Only available if supportsApprovalStatus is set to true within app-context.xml.
+Response Content Type: application/json
+Required Query Parameters:
+  approvalStatus - the new approval status: approved, reviewed, disapproved, incomplete, posted or draft
+Optional Query Parameters:
+  id - apply change to this item id only (field: _id)
+  owner - apply change to all items owned by this user (field: sys_owner_s)
+  sourceUri - apply change to all items associated with this harvesting uri (field: src_source_uri_s)
+  sourceRef - apply change to all items associated with this harvesting reference (field: src_source_ref_s)
+  taskRef - apply change to all items associated with this harvesting task reference (field: src_task_ref_s)
+  pretty - for an indented response (default=false)
+Optional Request Body (application/json - Elasticsearch Query DSL):
+  Apply change to all items matching the supplied query
+  Example: {"query":{"term":{"fileid":"myfileid"}}}
+  
+HTTP PUT geoportal/rest/metadata/setOwner
+Set the owner for one or more items (field: sys_owner_s).
+Only an Admin can change ownership.
+Response Content Type: application/json
+Required Query Parameters:
+  newOwner - the new owner
+Optional Query Parameters:
+  id - apply change to this item id only (field: _id)
+  owner - apply change to all items owned by this user (field: sys_owner_s)
+  sourceUri - apply change to all items associated with this harvesting uri (field: src_source_uri_s)
+  sourceRef - apply change to all items associated with this harvesting reference (field: src_source_ref_s)
+  taskRef - apply change to all items associated with this harvesting task reference (field: src_task_ref_s)
+  pretty - for an indented response (default=false)
+Optional Request Body (application/json - Elasticsearch Query DSL):
+  Apply change to all items matching the supplied query
+  Example: {"query":{"term":{"fileid":"myfileid"}}}
   
 HTTP POST geoportal/rest/metadata/transform
 Transform an xml document.
@@ -135,20 +192,28 @@ Validate a metadata document.
 Request Content Type: application/xml
 Response Content Type: application/json
 Optional Query Parameters:
-  pretty - boolean for formatted json (default=false)
+  pretty - for an indented response (default=false)
   
 ------------------------------------------------------------------------------------------
 
 HTTP GET geoportal/opensearch
 The Opensearch implementation.
+Optional Query Parameters:
+  f - the response format (atom|json|csw|rss|csv|kml|eros|json-source)
+  q - the search terms
+  start - the starting index (1 is the first)
+  num - the number of items to return
+  bbox - the bounding envelope WGS84 (bbox=xmin,ymin,xmax,ymax)
+  time - time period for the resource (time=start/end)
+  pretty - for an indented response (default=false)
 Example: http://localhost:8080/geoportal/opensearch?q=*:*
 
 HTTP GET geoportal/opensearch/description
 The Opensearch description file.
 
-HTTP GET geoportal/
+HTTP GET geoportal/csw
 
-The Opensearch implementation.
+The CSW implementation.
 Example: http://localhost:8080/geoportal/csw
 Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetCapabilities&version=3.0.0
 Example: http://localhost:8080/geoportal/csw?service=CSW&request=GetRecords&q=*:*
