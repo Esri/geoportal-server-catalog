@@ -96,7 +96,7 @@ function (lang, array, domConstruct, i18n,
           layer.on("error", function(error) {
             _handleError(map, error);
           });
-          layer.on("load", function(error) {
+          layer.on("load", function() {
             domConstruct.destroy(map.errorNode);
             if (response.extent) {
               var extent = new Extent(response.extent);
@@ -122,7 +122,7 @@ function (lang, array, domConstruct, i18n,
               layer.on("error", function(error) {
                 _handleError(map, error);
               });
-              layer.on("load", function(error) {
+              layer.on("load", function() {
                 domConstruct.destroy(map.errorNode);
                 if (response.fullExtent) {
                   var extent = new Extent(response.fullExtent);
