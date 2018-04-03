@@ -98,12 +98,12 @@ function (lang, array, domConstruct, i18n,
           });
           layer.on("load", function(error) {
             domConstruct.destroy(map.errorNode);
+            if (response.extent) {
+              var extent = new Extent(response.extent);
+              _setExtent(map, extent);
+            }
           });
           map.addLayer(layer);
-          if (response.extent) {
-            var extent = new Extent(response.extent);
-            _setExtent(map, extent);
-          }
         } else {
           _handleError(map, "Invalid response received from the server");
         }
@@ -124,14 +124,14 @@ function (lang, array, domConstruct, i18n,
               });
               layer.on("load", function(error) {
                 domConstruct.destroy(map.errorNode);
+                if (response.fullExtent) {
+                  var extent = new Extent(response.fullExtent);
+                  _setExtent(map, extent);
+                }
               });
               map.addLayer(layer);
             }
           });
-          if (response.fullExtent) {
-            var extent = new Extent(response.fullExtent);
-            _setExtent(map, extent);
-          }
         } else {
           _handleError(map, "Invalid response received from the server");
         }   
