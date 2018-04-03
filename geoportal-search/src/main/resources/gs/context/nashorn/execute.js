@@ -39,9 +39,6 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
       if (requestInfo && requestInfo.parameterMap && 
           typeof requestInfo.requestUrl === "string") {
         var hasF = !!requestInfo.parameterMap.f;
-        print("requestInfo.requestUrl",requestInfo.requestUrl);
-        print("requestInfo.parameterMap.f",requestInfo.parameterMap.f);
-        print("hasF",hasF);
         var v = requestInfo.requestUrl;
         if (v.indexOf("?") !== -1) v = v.substring(0,v.indexOf("?"));
         if (v.indexOf("/eros") != -1) {

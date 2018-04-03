@@ -60,7 +60,17 @@ public class OpensearchService extends Application {
       @Context HttpServletRequest hsr,
       MultivaluedMap<String, String> requestParams) {
     AppUser user = new AppUser(hsr,sc);
-    new SearchRequest(asyncResponse,user).execute(hsr,requestParams);
+    new SearchRequest(asyncResponse,user).execute(hsr);
+  }
+  
+  @POST
+  @Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
+  public void postString(@Suspended final AsyncResponse asyncResponse,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      String body) {
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr,body);
   }
   
   @GET
