@@ -44,7 +44,7 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
         if (v.indexOf("/eros") != -1) {
           if (!hasF) requestInfo.parameterMap.f = "eros";
         } else if (v.endsWith("/search") || v.endsWith("/search/")) {
-          if (!hasF || requestInfo.parameterMap.f === "json") {
+          if (!hasF && !requestInfo.parameterMap.target && !requestInfo.parameterMap.targets) {
             requestInfo.parameterMap.f = "json-source";
           }
         }
