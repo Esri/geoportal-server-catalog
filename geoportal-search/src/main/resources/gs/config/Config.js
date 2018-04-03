@@ -18,6 +18,9 @@
   gs.config.Config = gs.Object.create(gs.Proto,{
 
     defaultTarget: {writable: true, value: "arcgis"},
+    
+    // allow POSTing of Elasticsearch DSL (Domain Specific Language) queries and aggregations
+    allowDslSearches: {writable: true, value: true},
 
     allowDynamicTarget: {writable: true, value: true},
 
