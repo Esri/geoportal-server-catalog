@@ -20,6 +20,7 @@ import java.util.Map;
 
 /**
  * Search for items (base).
+ * @Deprecated switched to geoportal-search implementation
  */
 public abstract class _SearchRequestBase extends AppRequest {
 
