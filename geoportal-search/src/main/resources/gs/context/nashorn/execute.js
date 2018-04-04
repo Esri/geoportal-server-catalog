@@ -152,7 +152,6 @@ function _makeAccessQuery(selfInfo) {
     supportsApprovalStatus = selfInfo.elastic.access.supportsApprovalStatus;
     supportsGroupBasedAccess = selfInfo.elastic.access.supportsGroupBasedAccess;
   }
-  //isAdmin = false; // TODO temporary
 
   var approvalQuery = null;
   var approvalShoulds = [];
