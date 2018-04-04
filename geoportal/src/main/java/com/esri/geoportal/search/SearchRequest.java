@@ -183,11 +183,11 @@ public class SearchRequest {
   private JsonObjectBuilder getSelfInfo() {
     JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
-    String[] nodes = null;
+    String node = null;
     String scheme = "http://";
     int port = 9200;
     try {
-      nodes = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().nodesToArray();
+      node = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getNextNode();
       port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
       if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
         scheme = "https://";
@@ -227,16 +227,13 @@ public class SearchRequest {
     } catch (Throwable t) {
       t.printStackTrace();
     }
-    if ((nodes != null) && (nodes.length > 0)) {
-      for (String node: nodes) {
-        // TODO configure this a different way?
-        String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
-        String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
-        String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
-        elastic.add("searchUrl",url);
-        info.add("elastic",elastic);
-        return info;
-      }
+    if ((node != null) && (node.length() > 0)) {
+      String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
+      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
+      String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
+      elastic.add("searchUrl",url);
+      info.add("elastic",elastic);
+      return info;
     }
     return null;
   }
