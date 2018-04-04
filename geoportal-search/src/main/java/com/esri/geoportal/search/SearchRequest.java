@@ -181,65 +181,60 @@ public class SearchRequest {
   
   /** Get the Elasticsearch info for this Geoportal */
   private JsonObjectBuilder getSelfInfo() {
-    /*
-    JsonObjectBuilder info = Json.createObjectBuilder();
-    JsonObjectBuilder elastic = Json.createObjectBuilder();
-    String[] nodes = null;
-    String scheme = "http://";
-    int port = 9200;
-    try {
-      nodes = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().nodesToArray();
-      port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
-      if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
-        scheme = "https://";
-      }
-      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackUsername();
-      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackPassword();
-      if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-        elastic.add("username",username);
-        elastic.add("password",password);
-      }
-    } catch (Throwable t) {
-      t.printStackTrace();
-    }
-    try {
-      JsonObjectBuilder access = Json.createObjectBuilder();
-      access.add("supportsApprovalStatus",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsApprovalStatus());
-      access.add("supportsGroupBasedAccess",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess());    
-      com.esri.geoportal.context.AppUser user = null;
-      if (this.appUser != null && this.appUser instanceof com.esri.geoportal.context.AppUser) {
-        user = (com.esri.geoportal.context.AppUser)appUser;
-      }
-      if (user != null && user.getUsername() != null) {
-        access.add("username",user.getUsername());
-        access.add("isAdmin",user.isAdmin());
-        if (com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()) {
-          JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
-          List<com.esri.geoportal.base.security.Group> groups = user.getGroups();
-          if (groups != null) {
-            for (com.esri.geoportal.base.security.Group group: groups) {
-              jsaGroups.add(group.id);
-            }         
-          }
-          access.add("groups",jsaGroups);
-        }
-      }
-      elastic.add("access",access);
-    } catch (Throwable t) {
-      t.printStackTrace();
-    }
-    if ((nodes != null) && (nodes.length > 0)) {
-      for (String node: nodes) {
-        // TODO configure this a different way?
-        String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
-        String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
-        String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
-        elastic.add("searchUrl",url);
-        info.add("elastic",elastic);
-        return info;
-      }
-    }
-    */
+//    JsonObjectBuilder info = Json.createObjectBuilder();
+//    JsonObjectBuilder elastic = Json.createObjectBuilder();
+//    String node = null;
+//    String scheme = "http://";
+//    int port = 9200;
+//    try {
+//      node = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getNextNode();
+//      port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
+//      if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
+//        scheme = "https://";
+//      }
+//      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackUsername();
+//      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackPassword();
+//      if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+//        elastic.add("username",username);
+//        elastic.add("password",password);
+//      }
+//    } catch (Throwable t) {
+//      t.printStackTrace();
+//    }
+//    try {
+//      JsonObjectBuilder access = Json.createObjectBuilder();
+//      access.add("supportsApprovalStatus",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsApprovalStatus());
+//      access.add("supportsGroupBasedAccess",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess());    
+//      com.esri.geoportal.context.AppUser user = null;
+//      if (this.appUser != null && this.appUser instanceof com.esri.geoportal.context.AppUser) {
+//        user = (com.esri.geoportal.context.AppUser)appUser;
+//      }
+//      if (user != null && user.getUsername() != null) {
+//        access.add("username",user.getUsername());
+//        access.add("isAdmin",user.isAdmin());
+//        if (com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()) {
+//          JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
+//          List<com.esri.geoportal.base.security.Group> groups = user.getGroups();
+//          if (groups != null) {
+//            for (com.esri.geoportal.base.security.Group group: groups) {
+//              jsaGroups.add(group.id);
+//            }         
+//          }
+//          access.add("groups",jsaGroups);
+//        }
+//      }
+//      elastic.add("access",access);
+//    } catch (Throwable t) {
+//      t.printStackTrace();
+//    }
+//    if ((node != null) && (node.length() > 0)) {
+//      String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
+//      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
+//      String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
+//      elastic.add("searchUrl",url);
+//      info.add("elastic",elastic);
+//      return info;
+//    }
     return null;
   }
   
