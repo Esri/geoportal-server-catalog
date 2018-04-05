@@ -43,9 +43,12 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
     },
     
     applyLocally: function(item) {
-      item["sys_access_s"] = this._localAccess;
-      item["sys_access_groups_s"] = this._localGroups;
-      topic.publish(appTopics.ItemAccessChanged,{item:item});
+      //item["sys_access_s"] = this._localAccess;
+      //item["sys_access_groups_s"] = this._localGroups;
+      //topic.publish(appTopics.ItemAccessChanged,{item:item});
+      topic.publish(appTopics.RefreshSearchResultPage,{
+        searchPane: this.itemCard.searchPane
+      });
     },
     
     addGroup: function(group,checked) {
