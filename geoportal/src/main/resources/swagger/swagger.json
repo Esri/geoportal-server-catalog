@@ -341,19 +341,26 @@
           "required" : false,
           "type" : "boolean"
         }, {
+          "name" : "f",
+          "in" : "query",
+          "description" : "the response format",
+          "required" : false,
+          "type" : "string",
+          "enum" : [ "atom", "json", "csw", "rss", "csv", "kml", "eros", "json-source" ]
+        }, {
           "name" : "q",
           "in" : "query",
           "description" : "the search terms",
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "from",
+          "name" : "start",
           "in" : "query",
-          "description" : "the starting index",
+          "description" : "the starting index (1 is the first)",
           "required" : false,
           "type" : "integer"
         }, {
-          "name" : "size",
+          "name" : "num",
           "in" : "query",
           "description" : "the number of items to return",
           "required" : false,
@@ -367,16 +374,52 @@
         }, {
           "name" : "time",
           "in" : "query",
-          "description" : "the time period for the resource (time=start/end)",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "f",
+          "name" : "id",
           "in" : "query",
-          "description" : "the response format",
+          "description" : "an item id (multiples allowed: id=&id=&id=)",
           "required" : false,
-          "type" : "string",
-          "enum" : [ "json", "atom", "csw" ]
+          "type": "array",
+          "items": {
+            "type": "string"
+          }         
+         }, {
+          "name" : "modified",
+          "in" : "query",
+          "description" : "the modified date for the item (modified=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"               
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "a secondary filter (search terms)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "an item type (multiples allowed: type=&type=&type=)",
+          "required" : false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }              
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"   
+                       
+        }, {
+          "name" : "target",
+          "in" : "query",
+          "description" : "the target catalog, a JSON structure (object or array) with the following properties: url - the target url, type - the type (geoportal|portal|csw2|csw3|elasticsearch), profile - the profile, current profiles: CSW2_Geoportal1",
+          "required" : false,
+          "type" : "string"            
         } ],
         "responses" : {
           "default" : {
@@ -391,18 +434,18 @@
         "operationId" : "searchUsingPost",
         "consumes" : [ "application/x-www-form-urlencoded" ],
         "parameters" : [ {
-          "in" : "body",
-          "name" : "body",
-          "required" : false,
-          "schema" : {
-            "type" : "string"
-          }
-        }, {
           "name" : "pretty",
           "in" : "query",
           "description" : "for an indented response",
           "required" : false,
           "type" : "boolean"
+        }, {
+          "name" : "f",
+          "in" : "query",
+          "description" : "the response format",
+          "required" : false,
+          "type" : "string",
+          "enum" : [ "atom", "json", "csw", "rss", "csv", "kml", "eros", "json-source" ]
         }, {
           "name" : "q",
           "in" : "query",
@@ -410,13 +453,13 @@
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "from",
+          "name" : "start",
           "in" : "query",
-          "description" : "the starting index",
+          "description" : "the starting index (1 is the first)",
           "required" : false,
           "type" : "integer"
         }, {
-          "name" : "size",
+          "name" : "num",
           "in" : "query",
           "description" : "the number of items to return",
           "required" : false,
@@ -430,16 +473,52 @@
         }, {
           "name" : "time",
           "in" : "query",
-          "description" : "the time period for the resource (time=start/end)",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
           "required" : false,
           "type" : "string"
         }, {
-          "name" : "f",
+          "name" : "id",
           "in" : "query",
-          "description" : "the response format",
+          "description" : "an item id (multiples allowed: id=&id=&id=)",
           "required" : false,
-          "type" : "string",
-          "enum" : [ "json", "atom", "csw" ]
+          "type": "array",
+          "items": {
+            "type": "string"
+          }         
+         }, {
+          "name" : "modified",
+          "in" : "query",
+          "description" : "the modified date for the item (modified=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"               
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "a secondary filter (search terms)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "an item type (multiples allowed: type=&type=&type=)",
+          "required" : false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }              
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"   
+                       
+        }, {
+          "name" : "target",
+          "in" : "query",
+          "description" : "the target catalog, a JSON structure (object or array) with the following properties: url - the target url, type - the type (geoportal|portal|csw2|csw3|elasticsearch), profile - the profile, current profiles: CSW2_Geoportal1",
+          "required" : false,
+          "type" : "string"            
         } ],
         "responses" : {
           "default" : {
@@ -468,7 +547,7 @@
           "type": "array",
           "items": {
             "type": "string"
-          },
+          }
         }, {
           "name" : "id",
           "in" : "query",
