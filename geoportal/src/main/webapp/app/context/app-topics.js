@@ -28,6 +28,9 @@ define([],function(){var obj={
   /* params - {item:item} */
   OnMouseLeaveResultItem: "app/OnMouseLeaveResultItem",
   
+  /* params - {searchPane:obj} */
+  RefreshSearchResultPage: "app/RefreshSearchResultPage",
+  
   /* params - {geoportalUser:obj} */
   SignedIn: "app/SignedIn",
 

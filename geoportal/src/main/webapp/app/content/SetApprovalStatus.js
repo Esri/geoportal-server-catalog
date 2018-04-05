@@ -36,8 +36,11 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     },
     
     applyLocally: function(item) {
-      item["sys_approval_status_s"] = this._localValue;
-      topic.publish(appTopics.ItemApprovalStatusChanged,{item:item});
+      //item["sys_approval_status_s"] = this._localValue;
+      //topic.publish(appTopics.ItemApprovalStatusChanged,{item:item});
+      topic.publish(appTopics.RefreshSearchResultPage,{
+        searchPane: this.itemCard.searchPane
+      });
     },
     
     init: function() {

@@ -34,9 +34,14 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     },
     
     applyLocally: function(item) {
+      /*
       this.itemCard.domNode.style.display = "none";
       topic.publish(appTopics.ItemDeleted,{
         itemId: this.item._id,
+        searchPane: this.itemCard.searchPane
+      });
+      */
+      topic.publish(appTopics.RefreshSearchResultPage,{
         searchPane: this.itemCard.searchPane
       });
     },

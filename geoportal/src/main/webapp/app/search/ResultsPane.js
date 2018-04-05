@@ -41,9 +41,12 @@ function(declare, lang, array, aspect, domConstruct, template, i18n, SearchCompo
       this.addSort();
       this.paging = new Paging({});
       this.paging.placeAt(this.dropPane.toolsNode);
+      /*
+      // no longer needed
       this.own(aspect.after(this.paging,"search",lang.hitch(this,function(){
         this.search();
       })));
+      */
     },
     
     addSort: function() {

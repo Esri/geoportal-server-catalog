@@ -40,8 +40,11 @@ function(declare, keys, on, topic, appTopics, BulkEdit, template, i18n,
     },
     
     applyLocally: function(item) {
-      item["sys_owner_s"] = this._localValue;
-      topic.publish(appTopics.ItemOwnerChanged,{item:item});
+      //item["sys_owner_s"] = this._localValue;
+      //topic.publish(appTopics.ItemOwnerChanged,{item:item});
+      topic.publish(appTopics.RefreshSearchResultPage,{
+        searchPane: this.itemCard.searchPane
+      });
     },
     
     init: function() {
