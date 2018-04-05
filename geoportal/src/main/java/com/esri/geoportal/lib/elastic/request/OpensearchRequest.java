@@ -31,6 +31,7 @@ import org.elasticsearch.search.SearchHits;
 
 /**
  * An Opensearch request.
+ * @Deprecated switched to geoportal-search implementation
  */
 public class OpensearchRequest extends SearchRequest {
 

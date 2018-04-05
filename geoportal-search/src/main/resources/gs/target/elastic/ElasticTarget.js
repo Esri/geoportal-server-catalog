@@ -147,7 +147,23 @@
         searchCriteria: {},
         useSimpleQueryString: this.useSimpleQueryString
       };
-
+      
+      // allow Elasticsearch DSL searches
+      if (task.config.allowDslSearches) {
+        var body, sBody = task.request.body;
+        if (typeof sBody === "string" && sBody.indexOf("{") === 0) {
+          sBody = sBody.trim();
+          if (sBody.indexOf("{") === 0) {
+            body = JSON.parse(sBody);
+            if (body.query) {
+              targetRequest.musts.push(JSON.parse(JSON.stringify(body.query)));
+              delete body.query;
+              targetRequest.searchCriteria = body;
+            }
+          }
+        }
+      }
+      
       this.prepareRequiredFilter(task,targetRequest);
       this.prepareQ(task,targetRequest);
       this.prepareFilter(task,targetRequest);
@@ -167,6 +183,7 @@
 
       if (targetRequest.musts.length > 0) {
         targetRequest.searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
+        //console.log("targetRequest.searchCriteria="+(JSON.stringify(targetRequest.searchCriteria)));
       }
       promise.resolve(targetRequest);
       return promise;

@@ -19,6 +19,7 @@ import java.util.Map;
 
 /**
  * Response item writer factory.
+ * @Deprecated switched to geoportal-search implementation
  */
 public class ItemWriterFactory {
   

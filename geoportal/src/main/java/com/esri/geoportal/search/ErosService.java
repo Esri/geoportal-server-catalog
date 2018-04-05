@@ -32,16 +32,16 @@ import javax.ws.rs.core.SecurityContext;
 import com.esri.geoportal.context.AppUser;
 
 /**
- * Opensearch service provider.
+ * Eros service provider.
  */
-@ApplicationPath("opensearch")
+@ApplicationPath("Eros")
 @Path("")
-public class OpensearchService extends Application {
+public class ErosService extends Application {
 
   @Override
   public Set<Class<?>> getClasses() {
     Set<Class<?>> resources = new HashSet<Class<?>>();
-    resources.add(OpensearchService.class);
+    resources.add(ErosService.class);
     return resources;
   }
 
@@ -60,7 +60,7 @@ public class OpensearchService extends Application {
       @Context HttpServletRequest hsr,
       MultivaluedMap<String, String> requestParams) {
     AppUser user = new AppUser(hsr,sc);
-    new SearchRequest(asyncResponse,user).execute(hsr);
+    new SearchRequest(asyncResponse,user).execute(hsr,requestParams);
   }
   
   @POST
