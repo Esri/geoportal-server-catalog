@@ -18,7 +18,6 @@ import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.response.ItemWriter;
-import com.esri.geoportal.lib.elastic.response.ItemWriterFactory;
 import com.esri.geoportal.lib.elastic.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.util.ItemIO;
 
@@ -137,9 +136,7 @@ public class GetItemRequest extends AppRequest {
    * @return the item writer
    */
   public ItemWriter newWriter() {
-    ItemWriterFactory factory = GeoportalContext.getInstance().getBean(
-        "item.ItemWriterFactory",ItemWriterFactory.class);
-    return factory.newWriter(this.getF());
+    return new ItemWriter();
   }
   
   /**

@@ -18,6 +18,7 @@ import com.esri.geoportal.context.AppResponse;
 
 /**
  * Eros request.
+ * @Deprecated switched to geoportal-search implementation
  */
 public class ErosRequest extends OpensearchRequest {
   private static final String [] EROS_TYPES = {"FeatureServer","ImageServer","MapServer","CSW","IMS","SOS","WCS","WFS","WMS"};

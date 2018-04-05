@@ -136,7 +136,6 @@ public class BulkEditRequest extends BulkRequest {
   /** Filter by a query contained within the request body. */
   protected void filterByQuery() {
     String errMsg = "Bulk edit: the request body contains an invalid query";
-    System.err.println("filterByQuery.body="+this.body);
     String content = this.body;
     if (content != null) content = content.trim();
     if (content == null || content.length() == 0) {

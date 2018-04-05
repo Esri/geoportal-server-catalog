@@ -76,6 +76,13 @@ public class ElasticProxyFilter implements Filter {
         if (path != null && (path.indexOf("_search") != -1 || path.indexOf("_count") != -1)) {
           if (path.indexOf("_search/scroll") == -1) {
             checkAccess = true;
+            if (path.indexOf("/metadata/_search") != -1 || 
+                path.indexOf("/metadata/_count") != -1 ||
+                path.indexOf("/metadata/clob/_search") != -1 ||
+                path.indexOf("/metadata/clob/_count") != -1) {
+              // Throw an exception here or rely on app-security.xml?
+              throw new ServletException("This endpoint is not supported.");
+            }
             String qstr = hsr.getQueryString();
             if (qstr != null && qstr.length() > 0) {
               String lc = "?" + qstr.toLowerCase();
@@ -116,8 +123,6 @@ public class ElasticProxyFilter implements Filter {
   
   private JsonObject mergeAccessQuery(HttpServletRequest hsr, AppUser user, String body) 
       throws ServletException{
-    //System.err.println("ElasticProxyFilter.mergeAccessQuery");
-    //body = "{\"query\":{\"exists\":{\"field\":\"sys_owner_s\"}}}";
     SearchRequest sr = new SearchRequest(user);
     try {
       String json = sr.mergeAccessQuery(hsr,body);
@@ -200,7 +205,6 @@ public class ElasticProxyFilter implements Filter {
       return super.getHeaders(name);
     }
 
-
     @Override
     public ServletInputStream getInputStream() throws IOException {
       if (content != null) {
@@ -209,6 +213,15 @@ public class ElasticProxyFilter implements Filter {
       }
       return super.getInputStream();
     }
+    
+    @Override
+    public String getMethod() {
+      if (content != null && content.length() > 0) {
+        if (super.getMethod().equals("GET")) return "POST";
+      }
+      return super.getMethod();
+    }
+    
   }
   
   /**

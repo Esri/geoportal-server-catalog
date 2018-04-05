@@ -16,8 +16,6 @@ package com.esri.geoportal.service.rest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.request.BulkChangeOwnerRequest;
-import com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemsRequest;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
@@ -25,14 +23,15 @@ import com.esri.geoportal.lib.elastic.request.GetMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.PublishMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.RealiasRequest;
 import com.esri.geoportal.lib.elastic.request.ReindexRequest;
-import com.esri.geoportal.lib.elastic.request.SearchRequest;
 import com.esri.geoportal.lib.elastic.request.SetAccessRequest;
 import com.esri.geoportal.lib.elastic.request.SetApprovalStatusRequest;
 import com.esri.geoportal.lib.elastic.request.SetOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
+import com.esri.geoportal.search.SearchRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
@@ -40,8 +39,11 @@ import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
+import javax.ws.rs.container.AsyncResponse;
+import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.SecurityContext;
 
@@ -62,17 +64,7 @@ public class MetadataService {
       @QueryParam("owner") String owner, 
       @QueryParam("newOwner") String newOwner, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(hsr,sc);
-    try {
-      BulkChangeOwnerRequest request = GeoportalContext.getInstance().getBeanIfDeclared(
-        "request.BulkChangeOwnerRequest",BulkChangeOwnerRequest.class,new BulkChangeOwnerRequest());
-      request.init(user,pretty);
-      request.init(owner,newOwner);
-      AppResponse response = request.execute();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
+    return (new AppResponse()).buildDeprecated("Deprecated endpoint: use /rest/metadata/setOwner");
   }
   
   @DELETE
@@ -188,8 +180,7 @@ public class MetadataService {
       @PathParam("id") String id, 
       @PathParam("newOwner") String newOwner, 
       @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(hsr,sc);
-    return this.changeOwner(user,pretty,id,newOwner);
+    return (new AppResponse()).buildDeprecated("Deprecated endpoint: use /rest/metadata/setOwner");
   }
   
   @GET 
@@ -216,26 +207,35 @@ public class MetadataService {
     return this.reindex(user,pretty,fromIndexName,toIndexName,fromVersionCue);
   }
   
-  @GET 
+  @GET
   @Path("/search")
-  public Response searchUsingGet(
+  public void search1(@Suspended final AsyncResponse asyncResponse,
       @Context SecurityContext sc,
-      @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty) {
+      @Context HttpServletRequest hsr) {
     AppUser user = new AppUser(hsr,sc);
-    String body = null;
-    return this.search(user,pretty,hsr,body);
+    new SearchRequest(asyncResponse,user).execute(hsr);
   }
   
-  @POST 
+  @POST
   @Path("/search")
-  public Response searchUsingPost(
-      String body,
+  @Consumes({MediaType.APPLICATION_FORM_URLENCODED})
+  public void search2(@Suspended final AsyncResponse asyncResponse,
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr,
-      @QueryParam("pretty") boolean pretty) {
+      MultivaluedMap<String, String> requestParams) {
     AppUser user = new AppUser(hsr,sc);
-    return this.search(user,pretty,hsr,body);
+    new SearchRequest(asyncResponse,user).execute(hsr);
+  }
+  
+  @POST
+  @Path("/search")
+  @Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
+  public void search3(@Suspended final AsyncResponse asyncResponse,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      String body) {
+    AppUser user = new AppUser(hsr,sc);
+    new SearchRequest(asyncResponse,user).execute(hsr,body);
   }
   
   @PUT
@@ -351,27 +351,6 @@ public class MetadataService {
   
   /** ======================================================================= */
   
-  /**
-   * Change owner.
-   * @param user the active user
-   * @param pretty for pretty JSON
-   * @param id the item id
-   * @param newOwner the new owner
-   * @return the response
-   */
-  protected Response changeOwner(AppUser user, boolean pretty, String id, String newOwner) {
-    try {
-      ChangeOwnerRequest request = GeoportalContext.getInstance().getBean(
-          "request.ChangeOwnerRequest",ChangeOwnerRequest.class);
-      request.init(user,pretty);
-      request.init(id,newOwner);
-      AppResponse response = request.execute();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-
   /**
    * Delete an item.
    * @param user the active user
@@ -521,30 +500,7 @@ public class MetadataService {
       return this.writeException(t,pretty);
     }
   }
-  
-  /**
-   * Search.
-   * @param user the active user
-   * @param pretty for pretty JSON
-   * @param hsr the http request
-   * @param body the request body
-   * @return the response
-   */
-  protected Response search(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
-    try {
-      SearchRequest request = GeoportalContext.getInstance().getBean(
-          "request.SearchRequest",SearchRequest.class);
-      request.init(user,pretty);
-      request.initBaseUrl(hsr,null);
-      request.setParameterMap(hsr.getParameterMap());
-      request.setBody(body);
-      AppResponse response = request.execute();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-  
+    
   /**
    * Transform metadata.
    * @param user the active user
@@ -592,6 +548,15 @@ public class MetadataService {
     } catch (Throwable t) {
       return this.writeException(t,pretty);
     }
+  }
+  
+  /**
+   * Write a deprecated response.
+   * @param message the message
+   * @return the response
+   */
+  protected Response writeDeprecated(String message) {
+    return (new AppResponse()).buildDeprecated(message);
   }
   
   /**
