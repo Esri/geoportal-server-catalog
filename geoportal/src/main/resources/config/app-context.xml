@@ -26,7 +26,7 @@
 		<beans:property name="indexNameIsAlias" value="true" />
 		<beans:property name="autoCreateIndex" value="true" />
 		<beans:property name="allowFileId" value="false" />
-		<beans:property name="mappingsFile" value="config/elastic-mappings.json" />
+		<beans:property name="mappingsFile" value="config/elastic-mappings_hierarchy.json" />
 		<beans:property name="httpPort" value="9200" />
 		<beans:property name="transportPort" value="9300" />
 		

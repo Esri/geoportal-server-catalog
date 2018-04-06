@@ -1,0 +1,256 @@
+{
+  "settings": {
+    "analysis": {
+      "tokenizer": {
+        "category_tokenizer": {
+          "type": "path_hierarchy",
+          "delimiter": ">",
+          "reverse": false
+        },
+        "hierarchy_tokenizer": {
+          "type": "path_hierarchy",
+          "delimiter": "/",
+          "reverse": false
+        }
+      },
+      "analyzer": {
+        "default": {
+          "tokenizer": "standard",
+          "filter": [
+            "standard",
+            "lowercase",
+            "english_stemmer"
+          ]
+        },
+        "case_insensitive_sort": {
+          "tokenizer": "keyword",
+          "filter": [
+            "lowercase"
+          ]
+        },
+        "category_analyzer": {
+          "tokenizer": "category_tokenizer",
+          "filter": [
+            "lowercase",
+            "hierarchy_stop"
+          ]
+        },
+        "hierarchy_analyzer": {
+          "tokenizer": "hierarchy_tokenizer",
+          "filter": [
+            "hierarchy_stop"
+          ]
+        }
+      },
+      "filter": {
+        "english_stemmer": {
+          "type": "stemmer",
+          "name": "english"
+        },
+        "hierarchy_stop": {
+          "type":       "stop",
+          "ignore_case": true,
+          "stopwords":  ["category > unassigned", "unassigned"]
+        }
+      }
+    }
+  },
+  "mappings": {
+    "blob": {
+      "properties": {
+        "sys_blob": {
+          "type": "binary",
+          "store": true,
+          "doc_values": false
+        },
+        "sys_itemid": {
+          "type": "keyword"
+        },
+        "sys_meta": {
+          "type": "keyword",
+          "index": false,
+          "store": true,
+          "doc_values": false
+        }
+      }
+    },
+    "clob": {
+      "properties": {
+        "sys_clob": {
+          "type": "keyword",
+          "index": false,
+          "store": true,
+          "doc_values": false
+        },
+        "sys_itemid": {
+          "type": "keyword"
+        },
+        "sys_meta": {
+          "type": "keyword",
+          "index": false,
+          "store": true,
+          "doc_values": false
+        }
+      }
+    },
+    "item": {
+      "properties": {
+        "title": {
+          "type": "text",
+          "fields": {
+            "sort": {
+              "type": "keyword"
+            }
+          }
+        },
+        "fileid": {
+          "type": "keyword"
+        },
+        "description": {
+          "type": "text"
+        }
+      },
+      "dynamic_templates": [
+        {
+          "_s": {
+            "match": "*_s",
+            "mapping": {
+              "type": "keyword"
+            }
+          }
+        },
+        {
+          "_txt": {
+            "match": "*_txt",
+            "mapping": {
+              "type": "text"
+            }
+          }
+        },
+        {
+          "_b": {
+            "match": "*_b",
+            "mapping": {
+              "type": "boolean"
+            }
+          }
+        },
+        {
+          "_i": {
+            "match": "*_i",
+            "mapping": {
+              "type": "integer"
+            }
+          }
+        },
+        {
+          "_l": {
+            "match": "*_l",
+            "mapping": {
+              "type": "long"
+            }
+          }
+        },
+        {
+          "_f": {
+            "match": "*_f",
+            "mapping": {
+              "type": "float"
+            }
+          }
+        },
+        {
+          "_d": {
+            "match": "*_d",
+            "mapping": {
+              "type": "double"
+            }
+          }
+        },
+        {
+          "_dt": {
+            "match": "*_dt",
+            "mapping": {
+              "type": "date"
+            }
+          }
+        },
+        {
+          "_geo": {
+            "match": "*_geo",
+            "mapping": {
+              "type": "geo_shape"
+            }
+          }
+        },
+        {
+          "_pt": {
+            "match": "*_pt",
+            "mapping": {
+              "type": "geo_point"
+            }
+          }
+        },
+        {
+          "_nst": {
+            "match": "*_nst",
+            "mapping": {
+              "type": "nested"
+            }
+          }
+        },
+        {
+          "_obj": {
+            "match": "*_obj",
+            "mapping": {
+              "type": "object"
+            }
+          }
+        },
+        {
+          "_blob": {
+            "match": "*_blob",
+            "mapping": {
+              "type": "binary",
+              "store": true,
+              "doc_values": false
+            }
+          }
+        },
+        {
+          "_clob": {
+            "match": "*_clob",
+            "mapping": {
+              "type": "keyword",
+              "index": false,
+              "store": true,
+              "doc_values": false
+            }
+          }
+        },
+        {
+          "_cat": {
+            "match": "*_cat",
+            "mapping": {
+              "type": "string",
+              "fielddata": true,
+              "analyzer": "category_analyzer",
+              "search_analyzer": "category_analyzer"
+            }
+          }
+        },
+        {
+          "_hier": {
+            "match": "*_hier",
+            "mapping": {
+              "type": "string",
+              "fielddata": true,
+              "analyzer": "hierarchy_analyzer",
+              "search_analyzer": "hierarchy_analyzer"
+            }
+          }
+        }
+      ]
+    }
+  }
+}
