@@ -41,7 +41,7 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
         var hasF = !!requestInfo.parameterMap.f;
         var v = requestInfo.requestUrl;
         if (v.indexOf("?") !== -1) v = v.substring(0,v.indexOf("?"));
-        if (v.indexOf("/eros") != -1) {
+        if (v.indexOf("/Eros") != -1) {
           if (!hasF) requestInfo.parameterMap.f = "eros";
         } else if (v.endsWith("/search") || v.endsWith("/search/")) {
           if (!hasF && !requestInfo.parameterMap.target && !requestInfo.parameterMap.targets) {
@@ -174,7 +174,7 @@ function _makeAccessQuery(selfInfo) {
   var accessQuery = null;
   var accessShoulds = [];
   if (!isAdmin && supportsGroupBasedAccess) {
-    // isAdmin || sys_owner_s === username
+    // isAdmin || sys_owner_s === username ||
     // sys_access_s is missing || sys_access_s === "public" ||
     // one of the current user's groups is in sys_access_groups_s
     if (typeof username === "string" && username.length > 0) {
