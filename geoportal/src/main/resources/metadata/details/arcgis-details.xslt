@@ -81,6 +81,8 @@
 	</xsl:template>
 
 	<xsl:template match="text()">
-		<xsl:value-of select="."/>
+        <dd>
+		    <xsl:value-of select="."/>
+        </dd>
 	</xsl:template>
 </xsl:stylesheet>
