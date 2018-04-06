@@ -50,7 +50,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private HarvesterContext harvesterContext;
   private boolean supportsApprovalStatus = false;
   private boolean supportsGroupBasedAccess = false;
-  private String version = "2.5.3";
+  private String version = "2.6.0";
   
   /** Constructor */
   public GeoportalContext() {}
