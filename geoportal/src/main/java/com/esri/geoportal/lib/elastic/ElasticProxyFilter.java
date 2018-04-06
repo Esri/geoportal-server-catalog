@@ -71,24 +71,30 @@ public class ElasticProxyFilter implements Filter {
       user = new AppUser(hsr,null);
       if (!user.isAdmin()) {
         String path = hsr.getPathInfo();
+        String idxName = gc.getElasticContext().getIndexName();
+        String itmType = gc.getElasticContext().getItemIndexType();
         // This will limit the ability to use other Elasticsearch indexes for non admin users
         // _search, _count URI queries (q=) are problematic
         if (path != null && (path.indexOf("_search") != -1 || path.indexOf("_count") != -1)) {
           if (path.indexOf("_search/scroll") == -1) {
-            checkAccess = true;
-            if (path.indexOf("/metadata/_search") != -1 || 
-                path.indexOf("/metadata/_count") != -1 ||
-                path.indexOf("/metadata/clob/_search") != -1 ||
-                path.indexOf("/metadata/clob/_count") != -1) {
+            if (path.indexOf("/"+idxName+"/_search") != -1 || 
+                path.indexOf("/"+idxName+"/_count") != -1 ||
+                path.indexOf("/"+idxName+"/clob/_search") != -1 ||
+                path.indexOf("/"+idxName+"/clob/_count") != -1 ||
+                path.indexOf(",") != -1) {
               // Throw an exception here or rely on app-security.xml?
               throw new ServletException("This endpoint is not supported.");
             }
-            String qstr = hsr.getQueryString();
-            if (qstr != null && qstr.length() > 0) {
-              String lc = "?" + qstr.toLowerCase();
-              if (lc.indexOf("?q=") != -1 || lc.indexOf("&q=") != -1) {
-                // Throw an exception here or rely on app-security.xml?
-                throw new ServletException("Parameter q is not supported, Post a {query: ...}");
+            if (path.indexOf("/"+idxName+"/"+itmType+"/_search") != -1 || 
+                path.indexOf("/"+idxName+"/"+itmType+"/_count") != -1) {
+              checkAccess = true;
+              String qstr = hsr.getQueryString();
+              if (qstr != null && qstr.length() > 0) {
+                String lc = "?" + qstr.toLowerCase();
+                if (lc.indexOf("?q=") != -1 || lc.indexOf("&q=") != -1) {
+                  // Throw an exception here or rely on app-security.xml?
+                  throw new ServletException("Parameter q is not supported, Post a {query: ...}");
+                }
               }
             }
           }
