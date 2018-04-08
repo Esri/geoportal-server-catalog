@@ -49,7 +49,9 @@
 						<xsl:value-of select="local-name()"/>
 					</xsl:with-param>
 				</xsl:call-template>
+				<xsl:text> </xsl:text>
 				<xsl:value-of select="@value"/>
+				<br/>
 			</xsl:when>
 			<xsl:when test="./*[@value]">
 				<dt>
@@ -58,8 +60,10 @@
 							<xsl:value-of select="local-name()"/>
 						</xsl:with-param>
 					</xsl:call-template>
+					<dd>
+						<xsl:apply-templates select="*"/>
+					</dd>
 				</dt>
-				<xsl:apply-templates select="*"/>
 			</xsl:when>
 			<xsl:when test="*">
 				<dt>
