@@ -184,6 +184,7 @@ public class PublishMetadataRequest extends AppRequest {
   protected void prePublish(ElasticContext ec, AccessUtil au, AppResponse response, MetadataDocument mdoc) 
       throws Exception {
     mdoc.setRequiresXmlWrite(true);
+    GeoportalContext gc = GeoportalContext.getInstance();
     ItemIO itemio = new ItemIO();
     JsonObjectBuilder jb = null;
     JsonObject eval = null, supplied = null;
@@ -312,6 +313,14 @@ public class PublishMetadataRequest extends AppRequest {
       jb.add(FieldNames.FIELD_SYS_MODIFIED,now);
       if (mdoc.hasXml()) jb.add(FieldNames.FIELD_SYS_XMLMODIFIED,now);
       setOwner = true;
+      if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
+          gc.getDefaultAccessLevel().length() > 0) {
+        jb.add(FieldNames.FIELD_SYS_ACCESS,gc.getDefaultAccessLevel());
+      }
+      if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null && 
+          gc.getDefaultApprovalStatus().length() > 0) {
+        jb.add(FieldNames.FIELD_SYS_APPROVAL_STATUS,gc.getDefaultApprovalStatus());
+      }
     } else {
       jb.add(FieldNames.FIELD_SYS_MODIFIED,now);
       String v = null;
