@@ -360,7 +360,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }));
       }
       
-      if (supportsApprovalStatus && isAdmin) {
+      if (supportsApprovalStatus && canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",

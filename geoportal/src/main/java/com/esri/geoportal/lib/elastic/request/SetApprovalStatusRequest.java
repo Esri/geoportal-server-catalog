@@ -40,7 +40,7 @@ public class SetApprovalStatusRequest extends BulkEditRequest {
     approvalStatus=
     */
     
-    setAdminOnly(true);
+    setAdminOnly(false);
     setProcessMessage("SetApprovalStatus");
     AppResponse response = new AppResponse();
     if (!GeoportalContext.getInstance().getSupportsApprovalStatus()) {
@@ -62,6 +62,9 @@ public class SetApprovalStatusRequest extends BulkEditRequest {
       String msg = "approvalStatus must be approved, reviewed, disapproved, incomplete, posted or draft";
       response.writeBadRequest(this,JsonUtil.newErrorResponse(msg,getPretty()));
       return response;
+    }
+    if (status.equals("approved") || status.equals("reviewed") || status.equals("disapproved")) {
+      setAdminOnly(true);
     }
     
     JsonObjectBuilder jso = Json.createObjectBuilder();
