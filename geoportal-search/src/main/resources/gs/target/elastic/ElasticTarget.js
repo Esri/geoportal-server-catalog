@@ -18,10 +18,15 @@
 
   gs.target.types["elasticsearch"] = {
     newInstance: function(options,safeOptions) {
+      // dynamic target specification on the URL, disable for now,
+      // will need a whitelist approach before re-enabling
+      /*
       if (options && options.url) options.searchUrl = options.url;
       var target = gs.Object.create(gs.target.elastic.ElasticTarget);
       target.safeMixin(options).mixin(safeOptions);
       return target;
+      */
+      return null;
     }
   };
 
