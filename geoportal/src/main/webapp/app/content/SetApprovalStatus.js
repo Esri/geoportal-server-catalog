@@ -45,6 +45,11 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     
     init: function() {
       this.setNodeText(this.itemTitleNode,this.item.title);
+      if (!AppContext.appUser.isAdmin()) {
+        $(this.statusSelect).find("option[value='approved']").remove();
+        $(this.statusSelect).find("option[value='reviewed']").remove();
+        $(this.statusSelect).find("option[value='disapproved']").remove();
+      }
       var v = this.item["sys_approval_status_s"];
       if (typeof v === "string" && v.length > 0) {
         $(this.statusSelect).val(v);
