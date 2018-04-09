@@ -69,7 +69,7 @@ public class SetApprovalStatusRequest extends BulkEditRequest {
     
     JsonObjectBuilder jso = Json.createObjectBuilder();
     jso.add(FieldNames.FIELD_SYS_APPROVAL_STATUS,status);
-    jso.add(FieldNames.FIELD_SYS_MODIFIED,DateUtil.nowAsString()); // TODO should this be set?
+    //jso.add(FieldNames.FIELD_SYS_MODIFIED,DateUtil.nowAsString()); // TODO should this be set?
     setUpdateSource(jso.build().toString());
     
     //System.err.println("updateSource="+this.getUpdateSource());
