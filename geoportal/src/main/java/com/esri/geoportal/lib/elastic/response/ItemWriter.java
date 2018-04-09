@@ -16,15 +16,12 @@ package com.esri.geoportal.lib.elastic.response;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
-import com.esri.geoportal.lib.elastic.request.SearchRequest;
 
 import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.search.SearchResponse;
-
 /**
  * Response item writer.
  */
@@ -79,19 +76,5 @@ public class ItemWriter {
     String json = makeGetResponseString(request,getResponse);
     request.writeOk(response,json);
   }
-  
-  /**
-   * Write a search response.
-   * @param request the request
-   * @param response the app response
-   * @param searchResponse the SearchResponse
-   * @throws Exception
-   */
-  public void write(SearchRequest request, AppResponse response, SearchResponse searchResponse) 
-      throws Exception {
-    String json = searchResponse.toString();
-    json = JsonUtil.toJson(JsonUtil.toJsonStructure(json),request.getPretty());
-    response.writeOkJson(request,json);
-  }
-  
+   
 }
