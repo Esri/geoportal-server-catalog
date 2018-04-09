@@ -417,7 +417,7 @@
         }, {
           "name" : "target",
           "in" : "query",
-          "description" : "the target catalog, a JSON structure (object or array) with the following properties: url - the target url, type - the type (geoportal|portal|csw2|csw3|elasticsearch), profile - the profile, current profiles: CSW2_Geoportal1",
+          "description" : "the target catalog, a JSON structure (object or array) with the following properties: url - the target url, type - the type (geoportal|portal|csw2|csw3), profile - the profile, current profiles: CSW2_Geoportal1",
           "required" : false,
           "type" : "string"            
         } ],
