@@ -21,8 +21,6 @@ import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.request.BulkChangeOwnerRequest;
-import com.esri.geoportal.lib.elastic.request.ChangeOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
 import com.esri.geoportal.lib.elastic.request.GetMetadataRequest;
@@ -85,16 +83,14 @@ public class Test {
   public static void main(String[] args) {
     AbstractApplicationContext context = null;
     try {
-      context = new ClassPathXmlApplicationContext("config/app-context.xml");
+      //context = new ClassPathXmlApplicationContext("config/app-context.xml");
       //org.apache.logging.log4j
-      
       
       //Test.test1();
       //Test.testPublishMetadata();
       //Test.testPublishJson();
       //Test.testGetItem();
       //Test.testGetMetadata();
-      //Test.testChangeOwner();
       //Test.testDeleteMetadata();
       //Test.testTransformMetadata();
       //Test.testValidateMetadata();
@@ -108,7 +104,7 @@ public class Test {
       //Test.testKvp();
       //Test.testDump();
       //Test.testLoad();
-      //Test.testBulkChangeOwner();
+      
     } catch (Throwable t) {
       LOGGER.error(t.getClass().getName());
       LOGGER.error("Exception",t);
@@ -224,29 +220,6 @@ public class Test {
     AppResponse response = request.execute();
     LOGGER.info(response.getStatus().toString());
     if (response.getEntity() != null) LOGGER.info(response.getEntity().toString());
-  }
-  
-  public static void testChangeOwner() throws Exception {
-    AppUser user = new AppUser("admin",true,true);
-    //user = new AppUser("publisher",false,true);
-    //user = null;
-    boolean pretty = true;
-    String newOwner = "publisher888";
-    newOwner = "publisher";
-    String id = "88884444";
-    //id = "3333";
-    //id = null;
-    
-     
-    //ChangeOwnerRequest request = new ChangeOwnerRequest(); 
-    
-    ChangeOwnerRequest request = GeoportalContext.getInstance().getBean(
-        "request.ChangeOwnerRequest",ChangeOwnerRequest.class);
-    request.init(user,pretty);
-    request.init(id,newOwner);
-    AppResponse response = request.execute();
-    LOGGER.info(response.getStatus().toString());
-    LOGGER.info(response.getEntity().toString());
   }
   
   public static void testDeleteMetadata() throws Exception {
@@ -754,28 +727,5 @@ public class Test {
     String newOwner = null;
     req.add(ec.getTransportClient().prepareUpdate(index,type,id).setDoc(ownerField,newOwner));
   }
-  
-  public static void testBulkChangeOwner() throws Exception {
-    AppUser user = new AppUser("admin",true,true);
-    //user = new AppUser("publisher",false,true);
-    //user = null;
-    boolean pretty = true;
-    String currentOwner = "admin";
-    String newOwner = "publisher";
-    //currentOwner = null;
-    //newOwner = "";
-    
-    currentOwner = "publisher";
-    newOwner = "admin";
-    
-    BulkChangeOwnerRequest request = GeoportalContext.getInstance().getBeanIfDeclared(
-        "request.BulkChangeOwnerRequest",BulkChangeOwnerRequest.class, new BulkChangeOwnerRequest());
-    request.init(user,pretty);
-    request.init(currentOwner,newOwner);
-    AppResponse response = request.execute();
-    LOGGER.info(response.getStatus().toString());
-    LOGGER.info(response.getEntity().toString());
-  }
-
 
 }
