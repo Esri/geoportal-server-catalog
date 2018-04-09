@@ -264,7 +264,7 @@ define({
         access: "Access",
         _public: "Public",
         _private: "Private",
-        groups: "Groups",
+        groups: "Share with Groups",
         countPattern: "{count} selected"
       },
       setApprovalStatus: {
