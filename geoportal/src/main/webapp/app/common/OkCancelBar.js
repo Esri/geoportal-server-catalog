@@ -61,7 +61,12 @@ function(declare, lang, on, query, domClass, Templated, template, i18n) {
       if (this.showOk) this.okButton.removeAttribute("disabled");
     },
     
+    hideLoading: function() {
+      this.loadingIndicator.style.display = "none";
+    },
+    
     hideWorking: function(bEnableOk) {
+      this.hideLoading();
       this.workingArea.innerHTML= "";
       domClass.remove(this.workingArea,"text-danger");
       if (bEnableOk) this.enableOk();
@@ -89,13 +94,19 @@ function(declare, lang, on, query, domClass, Templated, template, i18n) {
     
     showError: function(msg,error,bDisableOk) {
       if (bDisableOk) this.disableOk();
+      this.hideLoading();
       this.workingArea.innerHTML = "";
       domClass.add(this.workingArea,"text-danger");
       this.setNodeText(this.workingArea,msg);
     },
     
+    showLoading: function() {
+      this.loadingIndicator.style.display = "inline-block";
+    },
+    
     showWorking: function(msg,bDisableOk) {
       if (bDisableOk) this.disableOk();
+      this.showLoading();
       this.workingArea.innerHTML = "";
       domClass.remove(this.workingArea,"text-danger");
       this.setNodeText(this.workingArea,msg);
