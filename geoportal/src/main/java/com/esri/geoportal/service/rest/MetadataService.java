@@ -25,6 +25,7 @@ import com.esri.geoportal.lib.elastic.request.RealiasRequest;
 import com.esri.geoportal.lib.elastic.request.ReindexRequest;
 import com.esri.geoportal.lib.elastic.request.SetAccessRequest;
 import com.esri.geoportal.lib.elastic.request.SetApprovalStatusRequest;
+import com.esri.geoportal.lib.elastic.request.SetFieldRequest;
 import com.esri.geoportal.lib.elastic.request.SetOwnerRequest;
 import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
@@ -270,6 +271,27 @@ public class MetadataService {
     try {
       SetApprovalStatusRequest request = GeoportalContext.getInstance().getBean(
           "request.SetApprovalStatusRequest",SetApprovalStatusRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  @PUT
+  @Path("/setField")
+  public Response setField(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    try {
+      SetFieldRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetFieldRequest",SetFieldRequest.class);
       request.init(user,pretty);
       request.setParameterMap(hsr.getParameterMap());
       request.setBody(body);

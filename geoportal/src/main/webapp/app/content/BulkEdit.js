@@ -41,6 +41,9 @@ function(declare, topic, appTopics, Templated, i18n,
     },
     
     applyLocally: function(item) {
+      topic.publish(appTopics.RefreshSearchResultPage,{
+        searchPane: this.itemCard.searchPane
+      });
     },
     
     execute: function(params) {

@@ -278,6 +278,12 @@ define({
         posted: "Posted",
         draft: "Draft"
       },
+      setField: {
+        caption: "Set Field",
+        prompt: "It is recommended that you prefix new fields names with user_ . For multiple values: [\"value1\",\"value2\"]",
+        field: "Field",
+        value: "Value",
+      },
       uploadMetadata: {
         caption: "Upload Metadata",
         button: "Upload"
