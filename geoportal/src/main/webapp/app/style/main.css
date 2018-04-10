@@ -35,6 +35,14 @@ body {
 	margin-left: 20px;
 }
 
+.g-loading {
+	margin-right: 4px;
+  width: 16px;
+  height: 16px;
+  background-image: url("images/LoadingAnimation16_Trans.gif");
+  vertical-align: middle;
+}
+
 .g-modal-plot .modal-dialog {
   width: 800px;
 }
