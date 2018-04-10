@@ -119,7 +119,11 @@ public class ItemIO {
         boolean bAdd = false;
         if (!hasEvaluatedJson) {
           bAdd = true;
-        } else if (name.startsWith("_") || name.startsWith("sys_") || name.startsWith("src_") || name.startsWith("app_")) {
+        } else if (name.startsWith("_") || 
+                   name.startsWith("sys_") || 
+                   name.startsWith("src_") || 
+                   name.startsWith("app_") ||
+                   name.startsWith("user_")) {
           bAdd = true;
         }
         if (bAdd) {
