@@ -40,13 +40,14 @@ define(["dojo/_base/declare",
   "app/context/metadata-editor",
   "app/content/SetAccess",
   "app/content/SetApprovalStatus",
+  "app/content/SetField",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
   "app/preview/PreviewPane"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, 
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
-  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, UploadMetadata, 
+  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata, 
   PreviewUtil, PreviewPane) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -360,7 +361,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }));
       }
       
-      if (supportsApprovalStatus && isAdmin) {
+      if (supportsApprovalStatus && canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
@@ -379,6 +380,18 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           innerHTML: i18n.content.setAccess.caption,
           onclick: function() {
             var dialog = new SetAccess({item:item,itemCard:self});
+            dialog.show();
+          }
+        }));
+      }
+      
+      if (canManage) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.setField.caption,
+          onclick: function() {
+            var dialog = new SetField({item:item,itemCard:self});
             dialog.show();
           }
         }));

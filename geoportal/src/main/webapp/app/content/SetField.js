@@ -16,7 +16,7 @@ define(["dojo/_base/declare",
   "dojo/topic",
   "app/context/app-topics",
   "app/content/BulkEdit",
-  "dojo/text!./templates/SetApprovalStatus.html",
+  "dojo/text!./templates/SetField.html",
   "dojo/i18n!app/nls/resources",
   "app/content/ApplyTo"],
 function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
@@ -26,34 +26,16 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     i18n: i18n,
     templateString: template,
     
-    title: i18n.content.setApprovalStatus.caption,
+    title: i18n.content.setField.caption,
     okLabel: i18n.content.updateButton,
-    
-    _localValue: null,
 
     postCreate: function() {
       this.inherited(arguments);
-    },
-    
-    applyLocally: function(item) {
-      //item["sys_approval_status_s"] = this._localValue;
-      //topic.publish(appTopics.ItemApprovalStatusChanged,{item:item});
-      topic.publish(appTopics.RefreshSearchResultPage,{
-        searchPane: this.itemCard.searchPane
-      });
+      this.promptNode.innerHTML = i18n.content.setField.prompt;
     },
     
     init: function() {
       this.setNodeText(this.itemTitleNode,this.item.title);
-      if (!AppContext.appUser.isAdmin()) {
-        $(this.statusSelect).find("option[value='approved']").remove();
-        $(this.statusSelect).find("option[value='reviewed']").remove();
-        $(this.statusSelect).find("option[value='disapproved']").remove();
-      }
-      var v = this.item["sys_approval_status_s"];
-      if (typeof v === "string" && v.length > 0) {
-        $(this.statusSelect).val(v);
-      }
       this.applyTo = new ApplyTo({
         item: this.item,
         itemCard: this.itemCard,
@@ -62,15 +44,28 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     
     makeRequestParams: function() {
       var params = {
-        action: "setApprovalStatus",
+        action: "setField",
         urlParams: {}
       };
-      var status = $(this.statusSelect).val();
-      if (typeof status !== "string" || status === "" || status === "none") {
-        this.statusSelect.focus();
+      var field = this.fieldInput.value;
+      if (typeof field === "string") field = field.trim();
+      if (typeof field !== "string" || field.length === 0) {
+        this.fieldInput.focus();
         return null;
       }
-      this._localValue = params.urlParams.approvalStatus = status;
+      if (field.toLowerCase().indexOf("sys_") === 0) {
+        this.fieldInput.focus();
+        return null;
+      }
+      params.urlParams.field = field; 
+      var value = this.valueInput.value;
+      if (typeof value === "string") value = value.trim();
+      if (typeof value !== "string" || value.length === 0) {
+        // TODO how to set a null or empty value
+        this.valueInput.focus();
+        return null;
+      }
+      params.urlParams.value = value; 
       this.applyTo.appendUrlParams(params);
       return params;
     }

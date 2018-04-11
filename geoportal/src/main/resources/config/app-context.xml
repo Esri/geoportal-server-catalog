@@ -17,7 +17,9 @@
 		<beans:property name="elasticContext" ref="elasticContext" />
 		<beans:property name="harvesterContext" ref="harvesterContext" />
 		<beans:property name="supportsApprovalStatus" value="false" />
+		<beans:property name="defaultApprovalStatus" value="" /> <!-- optional - approved|reviewed|disapproved|incomplete|posted|draft -->
 		<beans:property name="supportsGroupBasedAccess" value="false" />
+		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
 	</beans:bean>
 
 	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContext">
