@@ -46,6 +46,8 @@ public class GeoportalContext implements ApplicationContextAware {
   
   /** Instance variables. */
   private ApplicationContext applicationContext;
+  private String defaultAccessLevel;
+  private String defaultApprovalStatus;
   private ElasticContext elasticContext;
   private HarvesterContext harvesterContext;
   private boolean supportsApprovalStatus = false;
@@ -80,6 +82,24 @@ public class GeoportalContext implements ApplicationContextAware {
         }
       }
     }
+  }
+  
+  /** Default access level. */
+  public String getDefaultAccessLevel() {
+    return defaultAccessLevel;
+  }
+  /** Default access level . */
+  public void setDefaultAccessLevel(String defaultAccessLevel) {
+    this.defaultAccessLevel = defaultAccessLevel;
+  }
+  
+  /** Default approval status. */
+  public String getDefaultApprovalStatus() {
+    return defaultApprovalStatus;
+  }
+  /** Default approval status. */
+  public void setDefaultApprovalStatus(String defaultApprovalStatus) {
+    this.defaultApprovalStatus = defaultApprovalStatus;
   }
  
   /** The Elasticsearch context. */
