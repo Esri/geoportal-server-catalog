@@ -385,7 +385,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }));
       }
       
-      if (canManage) {
+      if (canManage && AppContext.appConfig.edit && AppContext.appConfig.edit.setField && 
+          AppContext.appConfig.edit.setField.allow && 
+          (isAdmin || !AppContext.appConfig.edit.setField.adminOnly)) {
         links.push(domConstruct.create("a",{
           "class": "small",
           href: "javascript:void(0)",
@@ -394,7 +396,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             var dialog = new SetField({item:item,itemCard:self});
             dialog.show();
           }
-        }));
+        }));        
       }
       
       if (canManage) {
