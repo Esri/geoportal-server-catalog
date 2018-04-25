@@ -1,6 +1,13 @@
 define([],function(){var obj={
 // .......................................................................................
   
+  edit: {
+    setField: {
+      allow: false,
+      adminOnly: false
+    }
+  },
+  
   bulkEdit: {
     allowByOwner: true,
     allowBySourceUri: true,

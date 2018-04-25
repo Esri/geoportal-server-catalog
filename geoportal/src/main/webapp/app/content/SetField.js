@@ -13,13 +13,17 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
+  "dojo/_base/lang",
+  "dojo/_base/array",
+  "dojo/dom-class",
   "dojo/topic",
   "app/context/app-topics",
   "app/content/BulkEdit",
   "dojo/text!./templates/SetField.html",
   "dojo/i18n!app/nls/resources",
   "app/content/ApplyTo"],
-function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
+function(declare, lang, array, domClass, topic, appTopics, BulkEdit, 
+  template, i18n, ApplyTo) {
 
   var oThisClass = declare([BulkEdit], {
     
@@ -31,7 +35,7 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
 
     postCreate: function() {
       this.inherited(arguments);
-      this.promptNode.innerHTML = i18n.content.setField.prompt;
+      //this.advancedPromptNode.innerHTML = i18n.content.setField.advanced.prompt;
     },
     
     init: function() {
@@ -40,6 +44,18 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
         item: this.item,
         itemCard: this.itemCard,
       },this.applyToNode);
+      
+      var value, tags = this.item["user_tags_s"];
+      if (typeof tags === "string") {
+        value = tags;
+      } else if (lang.isArray(tags)) {
+        value = "";
+        array.forEach(tags,function(v){
+          if (value.length > 0) value += ", ";
+          value += v;
+        });
+      }
+      if (typeof value === "string") this.tagsValueInput.value = value;
     },
     
     makeRequestParams: function() {
@@ -47,25 +63,38 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
         action: "setField",
         urlParams: {}
       };
-      var field = this.fieldInput.value;
-      if (typeof field === "string") field = field.trim();
-      if (typeof field !== "string" || field.length === 0) {
-        this.fieldInput.focus();
+      var field, value, values;
+      
+      if (domClass.contains(this.tagsPanel,"active")) {
+        field = "user_tags_s";
+        value = this.tagsValueInput.value;
+        if (value.indexOf("[") !== 0) {
+          values = [];
+          array.forEach(value.split(","),function(v){
+            v = v.trim();
+            if (v.length > 0) values.push(v);
+          });
+          value = JSON.stringify(values);
+        }
+      } else if (domClass.contains(this.advancedPanel,"active")) {
+        field = this.advancedFieldInput.value;
+        if (typeof field === "string") field = field.trim();
+        if (typeof field !== "string" || field.length === 0) {
+          this.advancedFieldInput.focus();
+          return null;
+        }
+        if (field.toLowerCase().indexOf("sys_") === 0) {
+          this.advancedFieldInput.focus();
+          return null;
+        }
+        value = this.advancedValueInput.value;
+        value = value.trim(); // TODO?
+      } else {
         return null;
       }
-      if (field.toLowerCase().indexOf("sys_") === 0) {
-        this.fieldInput.focus();
-        return null;
-      }
-      params.urlParams.field = field; 
-      var value = this.valueInput.value;
-      if (typeof value === "string") value = value.trim();
-      if (typeof value !== "string" || value.length === 0) {
-        // TODO how to set a null or empty value
-        this.valueInput.focus();
-        return null;
-      }
-      params.urlParams.value = value; 
+      
+      params.urlParams.field = field;
+      params.urlParams.value = value;
       this.applyTo.appendUrlParams(params);
       return params;
     }
