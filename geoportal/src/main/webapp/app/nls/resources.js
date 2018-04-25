@@ -280,9 +280,16 @@ define({
       },
       setField: {
         caption: "Set Field",
-        prompt: "It is recommended that you prefix new fields names with user_ . For multiple values: [\"value1\",\"value2\"]",
-        field: "Field",
-        value: "Value",
+        tags: {
+          caption: "Tags",
+          value: "User Tags (comma delimited)", 
+        }, 
+        advanced: {
+          caption: "Advanced",
+          prompt: "",
+          field: "Field Name",
+          value: "Value",
+        }
       },
       uploadMetadata: {
         caption: "Upload Metadata",
