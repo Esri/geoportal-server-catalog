@@ -62,11 +62,15 @@ public class SetFieldRequest extends BulkEditRequest {
       String msg = "Cannot set sys_ field values.";
       response.writeBadRequest(this,JsonUtil.newErrorResponse(msg,getPretty()));
       return response;
+    } else if (field.toLowerCase().startsWith("src_")) {
+      String msg = "Cannot set src_ field values.";
+      response.writeBadRequest(this,JsonUtil.newErrorResponse(msg,getPretty()));
+      return response;
     }
     
     JsonObjectBuilder jso = Json.createObjectBuilder();
     String value = getParameter("value");
-    if (value != null && value.length() > 0) {
+    if (value != null) {
       try {
         if (value.startsWith("[") && value.endsWith("]")) {
           JsonArray jsaValue = (JsonArray)JsonUtil.toJsonStructure(value);
@@ -75,7 +79,12 @@ public class SetFieldRequest extends BulkEditRequest {
           JsonObject jsoValue = (JsonObject)JsonUtil.toJsonStructure(value);
           jso.add(field,jsoValue);
         } else {
-          if (field.endsWith("_b")) {
+          if (value.length() == 0) {
+            //jso.add(field,value);
+            jso.addNull(field);
+          } else if (value.equalsIgnoreCase("null")) {
+            jso.addNull(field);
+          } else if (field.endsWith("_b")) {
             jso.add(field, Boolean.parseBoolean(value));
           } else if (field.endsWith("_d")) {
             jso.add(field,Double.parseDouble(value));
@@ -86,6 +95,7 @@ public class SetFieldRequest extends BulkEditRequest {
           } else if (field.endsWith("_l")) {
             jso.add(field,Long.parseLong(value));
           } else {
+            // _s _txt _dt _geo _pt _nst _obj _clob _blob
             jso.add(field,value);
           }
         }        
@@ -101,7 +111,17 @@ public class SetFieldRequest extends BulkEditRequest {
       response.writeMissingParameter(this,"value");
       return response;
     }
-    
+  
+    /*
+    String prop = "user_tags_s";
+    String v = "blue";
+    String src = "ctx._source."+prop+".add(params.value)";
+    HashMap<String,Object> params = new HashMap<String,Object>();
+    params.put("value",v);
+    Script script = new Script(ScriptType.INLINE,"painless",src,params);
+    this.setUpdateScript(script);
+    */
+        
     jso.add(FieldNames.FIELD_SYS_MODIFIED,DateUtil.nowAsString()); // TODO should this be set?
     setUpdateSource(jso.build().toString());
     
