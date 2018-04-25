@@ -1,25 +1,65 @@
 <div>
   <div class="form-group" data-dojo-attach-point="itemTitleNode"></div>
-  <p data-dojo-attach-point="promptNode"></p>
-  <div class="form-group form-group-sm">
-    <div>
-	    <label for="${id}_field" class="control-label"
-	      >${i18n.content.setField.field}</label>
-    </div>
-    <div>
-      <input id="${id}_field" type="text" class="form-control input-sm g-input-text" 
-        data-dojo-attach-point="fieldInput" >
-    </div>
-  </div>
-  <div class="form-group form-group-sm">
-    <div>
-      <label for="${id}_value" class="control-label"
-        >${i18n.content.setField.value}</label>
-    </div>
-    <div>
-      <input id="${id}_value" type="text" class="form-control input-sm g-input-text" 
-        data-dojo-attach-point="valueInput" >
-    </div>
-  </div>
+  <nav class="navbar">
+    <ul class="nav nav-tabs">
+      <li class="nav-item active">
+        <a class="nav-link" href="#${id}_tagsPanel" data-toggle="tab">${i18n.content.setField.tags.caption}</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#${id}_advancedPanel" data-toggle="tab">${i18n.content.setField.advanced.caption}</a>
+      </li>
+    </ul>
+  </nav>
+  <div class="tab-content">
+	  <div id="${id}_tagsPanel" role="tabpanel" class="tab-pane fade in active"
+	    data-dojo-attach-point="tagsPanel">
+	    <div class="form-group form-group-sm">
+	      <div>
+	        <label for="${id}_tagsValue" class="control-label"
+	          >${i18n.content.setField.tags.value}</label>
+	      </div>
+	      <div>
+	        <input id="${id}_tagsValue" type="text" class="form-control input-sm g-input-text" 
+	          data-dojo-attach-point="tagsValueInput" >
+	      </div>
+	    </div>
+	  </div>
+	  <div id="${id}_advancedPanel" role="tabpanel" class="tab-pane fade in" 
+	    data-dojo-attach-point="advancedPanel">
+		  <p data-dojo-attach-point="advancedPromptNode" style="font-style: italic;">
+		    <b>Experimental</b>
+		    <br>
+		    It is recommended that you prefix new field names with user_ (e.g. user_tags_s)
+		    <br>
+		    It is recommended that you suffix new field  names with a type:
+		    <br>
+		    &nbsp;&nbsp;_s: string, _txt: text (tokenized), _b: boolean, _i: integer, _l: long: _d - double, _f: float,
+		    <br>
+		    &nbsp;&nbsp;_obj: object, _nst: nested object
+		    <br>
+		    For multiple values: ["value1","value2"]
+		  </p>
+		  <div class="form-group form-group-sm">
+		    <div>
+		      <label for="${id}_advancedField" class="control-label"
+		        >${i18n.content.setField.advanced.field}</label>
+		    </div>
+		    <div>
+		      <input id="${id}_advancedField" type="text" class="form-control input-sm g-input-text" 
+		        data-dojo-attach-point="advancedFieldInput" >
+		    </div>
+		  </div>
+		  <div class="form-group form-group-sm">
+		    <div>
+		      <label for="${id}_advancedValue" class="control-label"
+		        >${i18n.content.setField.advanced.value}</label>
+		    </div>
+		    <div>
+		      <input id="${id}_advancedValue" type="text" class="form-control input-sm g-input-text" 
+		        data-dojo-attach-point="advancedValueInput" >
+		    </div>
+		  </div>
+	  </div> 
+  </div> 
   <div data-dojo-attach-point="applyToNode"></div>
 </div>
