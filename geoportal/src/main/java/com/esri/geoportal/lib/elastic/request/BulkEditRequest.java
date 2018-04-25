@@ -33,6 +33,7 @@ import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
 
 /**
@@ -52,6 +53,7 @@ public class BulkEditRequest extends BulkRequest {
   private String body;
   private List<QueryBuilder> filters = new ArrayList<QueryBuilder>();
   private Map<String,String[]> parameterMap;
+  private Script updateScript;
   private String updateSource;
     
   /** Constructor. */
@@ -79,6 +81,15 @@ public class BulkEditRequest extends BulkRequest {
     this.parameterMap = parameterMap;
   }
   
+  /** The update script. */
+  public Script getUpdateScript() {
+    return updateScript;
+  }
+  /** The update script. */
+  public void setUpdateScript(Script updateScript) {
+    this.updateScript = updateScript;
+  }
+  
   /** The update source (JSON field value pairs). */
   public String getUpdateSource() {
     return updateSource;
@@ -97,11 +108,19 @@ public class BulkEditRequest extends BulkRequest {
    * @param hit the hit
    */
   protected void appendHit(ElasticContext ec, BulkRequestBuilder request, SearchHit hit) {
-    request.add(ec.getTransportClient().prepareUpdate(
-      ec.getItemIndexName(),ec.getItemIndexType(),hit.getId())
-      .setDoc(this.getUpdateSource())
-      .setRetryOnConflict(getRetryOnConflict())
-    );
+    if (this.getUpdateScript() != null) {
+      request.add(ec.getTransportClient().prepareUpdate(
+        ec.getItemIndexName(),ec.getItemIndexType(),hit.getId())
+        .setScript(this.getUpdateScript())
+        .setRetryOnConflict(getRetryOnConflict())
+      );
+    } else {
+      request.add(ec.getTransportClient().prepareUpdate(
+        ec.getItemIndexName(),ec.getItemIndexType(),hit.getId())
+        .setDoc(this.getUpdateSource())
+        .setRetryOnConflict(getRetryOnConflict())
+      );
+    }
   }
   
   @Override
