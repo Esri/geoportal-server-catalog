@@ -1,15 +1,10 @@
 # geoportal-server-catalog
-As part of the evolution of Geoportal Server, the catalog capability has been separated into its own module. This because there are use cases where the catalog can be used without the need for harvesting or even metadata editing. 
+As part of the evolution of Geoportal Server, the catalog capability has been separated into its own module. This is because there are use cases where the catalog can be used without the need for harvesting or even metadata editing. 
 
 This repository thus contains the catalog capability of Geoportal Server, while it's sibling [geoportal-server-harvester](https://github.com/ArcGIS/geoportal-server-harvester) is the new harvester of Geoportal Server.
 
 ## Releases and Downloads
-- 2.5.2 - Released March 2, 2018, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
-- 2.5.1 - Released September 28, 2017, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
-- 2.5.0 - Released January 6, 2017, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
-- 2.0.2 - Released December 21, 2016, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
-- 2.0.1 - Released June 24, 2016, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
-- 2.0.0 - Released May 5, 2016, initial release of geoportal-server-catalog. Click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
+- 2.6.0 - Released May 7, 2018, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
 
 ## Can't Wait to Get Started?
 - Try the [sanbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
