@@ -29,7 +29,7 @@ G.evaluators.dc = {
 
   evalBase: function(task) {
     var item = task.item, root = task.root;
-      var dsc = G.getNode(task,root,"//rdf:Description | oai_dc:dc");
+      var dsc = G.getNode(task,root,"rdf:Description | ../oai_dc:dc");
 
       G.evalProp(task,item,dsc,"fileid","dc:identifier[contains(text(),'doi:')] |dc:identifier");
       //G.evalProp(task,item,root,"title","dc:title | rdf:Description/@rdf:about");
@@ -55,7 +55,8 @@ G.evaluators.dc = {
   },
     evalTitleAndDescription: function(task){
         var item = task.item, root = task.root;
-        var dsc = G.getNode(task,root,"rdf:Description | oai_dc:dc");
+        var dsc = G.getNode(task,root,"rdf:Description | ../oai_dc:dc");
+        
         // can't guarentee order of xpath, so we need to force it.
         // title dc:title | rdf:Description/@rdf:about
         if (G.hasNode(task,dsc,"dc:title ")){
