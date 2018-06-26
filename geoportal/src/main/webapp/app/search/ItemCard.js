@@ -253,34 +253,36 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     },
     
     _renderItemLinks: function(itemId,item) {
-      var actionsNode = this.actionsNode;
-      var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
-      var htmlNode = domConstruct.create("a",{
-        href: uri+"/html",
-        target: "_blank",
-        innerHTML: i18n.item.actions.html
-      },actionsNode);
-      var xmlNode = domConstruct.create("a",{
-        href: uri+"/xml",
-        target: "_blank",
-        innerHTML: i18n.item.actions.xml
-      },actionsNode);
-      var jsonNode = domConstruct.create("a",{
-        href: uri+"?pretty=true",
-        target: "_blank",
-        innerHTML: i18n.item.actions.json
-      },actionsNode);
-      if (AppContext.geoportal.supportsApprovalStatus || 
-          AppContext.geoportal.supportsGroupBasedAccess) {
-        var client = new AppClient();
-        htmlNode.href = client.appendAccessToken(htmlNode.href); 
-        xmlNode.href = client.appendAccessToken(xmlNode.href);
-        jsonNode.href = client.appendAccessToken(jsonNode.href);
-      }
-      var v = item.sys_metadatatype_s;
-      if (typeof v === "string" && v === "json") {
-        htmlNode.style.visibility = "hidden";
-        xmlNode.style.visibility = "hidden";
+      if (AppContext.appConfig.searchResults.showLinks) {
+        var actionsNode = this.actionsNode;
+        var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
+        var htmlNode = domConstruct.create("a",{
+          href: uri+"/html",
+          target: "_blank",
+          innerHTML: i18n.item.actions.html
+        },actionsNode);
+        var xmlNode = domConstruct.create("a",{
+          href: uri+"/xml",
+          target: "_blank",
+          innerHTML: i18n.item.actions.xml
+        },actionsNode);
+        var jsonNode = domConstruct.create("a",{
+          href: uri+"?pretty=true",
+          target: "_blank",
+          innerHTML: i18n.item.actions.json
+        },actionsNode);
+        if (AppContext.geoportal.supportsApprovalStatus || 
+            AppContext.geoportal.supportsGroupBasedAccess) {
+          var client = new AppClient();
+          htmlNode.href = client.appendAccessToken(htmlNode.href); 
+          xmlNode.href = client.appendAccessToken(xmlNode.href);
+          jsonNode.href = client.appendAccessToken(jsonNode.href);
+        }
+        var v = item.sys_metadatatype_s;
+        if (typeof v === "string" && v === "json") {
+          htmlNode.style.visibility = "hidden";
+          xmlNode.style.visibility = "hidden";
+        }
       }
     },
     
@@ -643,12 +645,14 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     },
     
     _renderUrlLinks: function(item) {
-      this._renderUrlLink(item.url_thumbnail_s, i18n.item.actions.urlLinks.thumbnail);
-      this._renderUrlLink(item.url_website_s, i18n.item.actions.urlLinks.website);
-      this._renderUrlLink(item.url_project_metadata_s, i18n.item.actions.urlLinks.projectMetadata);
-      this._renderUrlLink(item.url_granule_s, i18n.item.actions.urlLinks.granule);
-      this._renderUrlLink(item.url_http_download_s, i18n.item.actions.urlLinks.downloadHTTP);
-      this._renderUrlLink(item.url_ftp_download_s, i18n.item.actions.urlLinks.downloadFTP);
+      if (AppContext.appConfig.searchResults.showCustomLinks) {
+        this._renderUrlLink(item.url_thumbnail_s, i18n.item.actions.urlLinks.thumbnail);
+        this._renderUrlLink(item.url_website_s, i18n.item.actions.urlLinks.website);
+        this._renderUrlLink(item.url_project_metadata_s, i18n.item.actions.urlLinks.projectMetadata);
+        this._renderUrlLink(item.url_granule_s, i18n.item.actions.urlLinks.granule);
+        this._renderUrlLink(item.url_http_download_s, i18n.item.actions.urlLinks.downloadHTTP);
+        this._renderUrlLink(item.url_ftp_download_s, i18n.item.actions.urlLinks.downloadFTP);
+      }
     },
     
     _renderUrlLink: function(href, caption) {
