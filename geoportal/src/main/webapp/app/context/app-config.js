@@ -35,7 +35,9 @@ define([],function(){var obj={
     showThumbnails: true,
     showAccess: true,
     showApprovalStatus: true,
-    defaultSort: "title.sort:asc"
+    defaultSort: "title.sort:asc",
+    showLinks: true,
+    showCustomLinks: true
   },
   
   statusChecker: {
