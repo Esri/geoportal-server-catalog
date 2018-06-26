@@ -105,6 +105,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
       this._renderServiceStatus(item);
+      this._renderUrlLinks(item);
     },
     
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
@@ -639,6 +640,28 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }
       }
       return null;
+    },
+    
+    _renderUrlLinks: function(item) {
+      this._renderUrlLink(item.url_thumbnail_s, i18n.item.actions.urlLinks.thumbnail);
+      this._renderUrlLink(item.url_website_s, i18n.item.actions.urlLinks.website);
+      this._renderUrlLink(item.url_project_metadata_s, i18n.item.actions.urlLinks.projectMetadata);
+      this._renderUrlLink(item.url_granule_s, i18n.item.actions.urlLinks.granule);
+      this._renderUrlLink(item.url_http_download_s, i18n.item.actions.urlLinks.downloadHTTP);
+      this._renderUrlLink(item.url_ftp_download_s, i18n.item.actions.urlLinks.downloadFTP);
+    },
+    
+    _renderUrlLink: function(href, caption) {
+      var actionsNode = this.actionsNode;
+      
+      if (href && href.length > 0) {
+        var link = domConstruct.create("a",{
+          href: href, 
+          target: "_blank",
+          "class": "g-item-status",
+          innerHTML: caption
+        }, actionsNode);
+      }
     }
     
   });
