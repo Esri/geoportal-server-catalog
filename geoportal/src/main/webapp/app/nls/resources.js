@@ -229,6 +229,14 @@ define({
           caption: "Options",
           editMetadata: "Edit Metadata",
           uploadMetadata: "Upload Metadata"
+        },
+        urlLinks: {
+          thumbnail: "Thumbnail",
+          website: "Website",
+          projectMetadata: "Project metadata",
+          granule: "Granule",
+          downloadHTTP: "Download (HTTP)",
+          downloadFTP: "Download (FTP)"
         }
       },
       statusChecker: {
