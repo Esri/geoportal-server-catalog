@@ -81,6 +81,7 @@ public class Test {
   public static final Logger LOGGER = LoggerFactory.getLogger(Test.class);
   
   public static void main(String[] args) {
+    System.setProperty("catilina.base","c:/logs");
     AbstractApplicationContext context = null;
     try {
       //context = new ClassPathXmlApplicationContext("config/app-context.xml");
@@ -104,6 +105,10 @@ public class Test {
       //Test.testKvp();
       //Test.testDump();
       //Test.testLoad();
+      
+      //Test.httpGetItem();
+      //Test.httpDeleteItem();
+      Test.httpScroller();
       
     } catch (Throwable t) {
       LOGGER.error(t.getClass().getName());
@@ -191,9 +196,10 @@ public class Test {
     String id = "88884444";
     //id = "3333";
     //id = null;
-    id = "73848e979da84fa89c5e019e3646f02f";
+    //id = "73848e979da84fa89c5e019e3646f02f";
+    id = "1856b89306f74562bade208433c5e431";
     String f = "json";
-    f = "atom";
+    //f = "atom";
     //f = "csw";
     
     GetItemRequest request = GeoportalContext.getInstance().getBean(
@@ -726,6 +732,58 @@ public class Test {
     String originalOwner = null;
     String newOwner = null;
     req.add(ec.getTransportClient().prepareUpdate(index,type,id).setDoc(ownerField,newOwner));
+  }
+  
+  
+  public static void httpGetItem() throws Exception {
+    AppUser user = new AppUser("publisher",false,true);
+    boolean pretty = true;
+    boolean includeMetadata = true;
+    String id = "33139d016158408e806d2fdab476eb5b";
+    String f = "json";
+    
+    //GetItemRequest request = GeoportalContext.getInstance().getBean(
+    //    "request.GetItemRequest",GetItemRequest.class); 
+   
+    GetItemRequest request = new com.esri.geoportal.lib.elastic.http.request.GetItemRequest();
+    
+    request.setBaseUrl("http://urbanm.esri.com:8080/geoportal2");
+    request.init(user,pretty);
+    request.init(id,f,includeMetadata);
+    AppResponse response = request.execute();
+    //LOGGER.info(response.getStatus().toString());
+    if (response.getEntity() != null) LOGGER.info(response.getEntity().toString());
+  }
+  
+  public static void httpDeleteItem() throws Exception {
+    AppUser user = new AppUser("admin",true,true);
+    String id = "bf8dd33eee3d4f69a93855657a54d419";
+    DeleteItemRequest request = new com.esri.geoportal.lib.elastic.http.request.DeleteItemRequest();
+    request.init(user,false);
+    request.init(id);
+    AppResponse response = request.execute();
+    //LOGGER.info(response.getStatus().toString());
+    if (response.getEntity() != null) LOGGER.info(response.getEntity().toString());
+  }
+  
+  public static void httpScroller() throws Exception {
+    
+    com.esri.geoportal.lib.elastic.http.util.Scroller scroller = new com.esri.geoportal.lib.elastic.http.util.Scroller();
+    scroller.setIndexName("metadata");
+    scroller.setIndexType("item");
+    scroller.setPageSize(100);
+    //scroller.setMaxDocs(5000);
+    //scroller.setFetchSource(false);
+    
+    scroller.scroll(
+      new Consumer<com.esri.geoportal.lib.elastic.http.util.SearchHit>(){
+        @Override
+        public void accept(com.esri.geoportal.lib.elastic.http.util.SearchHit hit) {
+          //LOGGER.info(""+scroller.getTotalHits()+", "+hit.getIndex()+", "+hit.getId());
+        }
+      }
+    );
+    
   }
 
 }

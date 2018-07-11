@@ -6,10 +6,10 @@
   
   <!-- Extensibility classes that are instantiated on demand -->
   
-  <beans:bean id="request.DeleteItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.DeleteItemRequest"/>
+  <beans:bean id="request.DeleteItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.DeleteItemRequest"/>
   <beans:bean id="request.DeleteItemsRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.DeleteItemsRequest"/>
-  <beans:bean id="request.GetItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetItemRequest"/>
-  <beans:bean id="request.GetMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetMetadataRequest"/>
+  <beans:bean id="request.GetItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.GetItemRequest"/>
+  <beans:bean id="request.GetMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.GetMetadataRequest"/>
   <beans:bean id="request.PublishMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.PublishMetadataRequest"/>
   <beans:bean id="request.ReindexRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ReindexRequest"/>
   <beans:bean id="request.SetAccessRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.SetAccessRequest"/>
