@@ -38,16 +38,12 @@ public class ElasticClient {
     return baseUrl;
   }
   
+  public String getBulkUrl(String indexName) throws UnsupportedEncodingException {
+    return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8") + "/_bulk";
+  }
+  
   public String getIndexBaseUrl() {
     return indexBaseUrl;
-  }
-  
-  public String getScrollUrl() {
-    return baseUrl + "/_search/scroll";
-  }
-  
-  public String getTypeUrl(String indexName, String indexType) throws UnsupportedEncodingException {
-    return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8")+ "/" + URLEncoder.encode(indexType,"UTF-8");
   }
   
   public String getItemBaseUrl() {
@@ -57,6 +53,14 @@ public class ElasticClient {
   public String getItemUrl(String id) throws UnsupportedEncodingException {
     String url = itemBaseUrl +"/" + URLEncoder.encode(id,"UTF-8");
     return url;
+  }
+  
+  public String getScrollUrl() {
+    return baseUrl + "/_search/scroll";
+  }
+  
+  public String getTypeUrl(String indexName, String indexType) throws UnsupportedEncodingException {
+    return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8")+ "/" + URLEncoder.encode(indexType,"UTF-8");
   }
   
   public String getXmlUrl(String id) throws UnsupportedEncodingException {

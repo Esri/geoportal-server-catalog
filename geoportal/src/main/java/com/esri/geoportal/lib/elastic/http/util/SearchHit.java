@@ -33,5 +33,9 @@ public class SearchHit {
   public long getIndex() {
     return index;
   }
+  
+  public JsonObject getJsonObject() {
+    return json;
+  }
 
 }

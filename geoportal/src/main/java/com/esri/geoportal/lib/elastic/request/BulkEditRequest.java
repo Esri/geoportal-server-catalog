@@ -27,7 +27,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.Json;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -120,6 +122,33 @@ public class BulkEditRequest extends BulkRequest {
         .setDoc(this.getUpdateSource())
         .setRetryOnConflict(getRetryOnConflict())
       );
+    }
+  }
+  
+  /**
+   * Append the scroller hit to the bulk request (HTTP).
+   * @param ec the Elastic context
+   * @param request the request
+   * @param hit the hit
+   */
+  protected void appendHit(ElasticContext ec, StringBuilder data, com.esri.geoportal.lib.elastic.http.util.SearchHit hit) {
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
+    JsonObjectBuilder line1 = Json.createObjectBuilder();
+    // should "_retry_on_conflict" be "retry_on_conflict" at ES6?
+    line1.add("update", Json.createObjectBuilder()
+      .add("_id",hit.getId())
+      .add("_type",ec.getItemIndexType())
+      .add("_retry_on_conflict",this.getRetryOnConflict())
+    );
+    data.append(line1.build().toString()).append("\n");
+    if (getUpdateScript() != null) {
+      // TODO updateScript
+      System.out.println("updateScript="+getUpdateScript().toString());
+    } else {
+      JsonObjectBuilder line2 = Json.createObjectBuilder();
+      JsonObject src = (JsonObject)JsonUtil.toJsonStructure(getUpdateSource());
+      line2.add("doc",src);
+      data.append(line2.build().toString()).append("\n");
     }
   }
   
@@ -237,6 +266,24 @@ public class BulkEditRequest extends BulkRequest {
       }
     }
     return null;
+  }
+  
+  /**
+   * Create the HTTP scroller.
+   * @param ec the Elastic context
+   * @return the scroller
+   */
+  protected com.esri.geoportal.lib.elastic.http.util.Scroller newHttpScroller(ElasticContext ec) {
+    QueryBuilder q = this.newScrollerQuery(ec);
+    com.esri.geoportal.lib.elastic.http.util.Scroller scroller = new com.esri.geoportal.lib.elastic.http.util.Scroller();
+    scroller.setIndexName(ec.getItemIndexName());
+    scroller.setIndexType(ec.getItemIndexType());
+    scroller.setQuery(q.toString());
+    System.out.println("BulkEditRequest.query="+scroller.getQuery());
+    scroller.setFetchSource(false);
+    scroller.setPageSize(getScrollerPageSize());
+    //scroller.setMaxDocs(10);
+    return scroller;
   }
   
   /**
