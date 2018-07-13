@@ -135,10 +135,9 @@ public class Scroller {
   public void scroll(Consumer<SearchHit> callback) throws Exception {
     System.out.println("com.esri.geoportal.lib.elastic.http.util.Scroller"); // TODO temporary
     
-    // TODO don't return the source?
-    // TODO add the query
     // TODO add a match all query?
     
+    String query = this.getQuery();
     String contentType = "application/json;charset=utf-8";
     ElasticClient client = ElasticClient.newClient();
     String url = client.getTypeUrl(getIndexName(),getIndexType());
@@ -150,12 +149,19 @@ public class Scroller {
     request.add("size",this.getPageSize());
     request.add("sort",Json.createArrayBuilder().add("_doc"));
     //request.add("fields",Json.createArrayBuilder().add("title"));
-    if (!this.getFetchSource()) request.add("stored_fields","_none");
+    if (!getFetchSource()) request.add("stored_fields","_none");
+    if (query != null && query.length() > 0) {
+      JsonObject jsq = (JsonObject)JsonUtil.toJsonStructure(query);
+      request.add("query",jsq);
+    }
 
     String scrollId = null;
     long count = 0, loop = 0, max = getMaxDocs();
   
-    String result = client.sendPost(url,request.build().toString(),contentType);
+    String postData = request.build().toString();
+    System.out.println("Scroller.postData="+postData);
+    String result = client.sendPost(url,postData,contentType);
+    System.out.println("Scroller.result="+result);
     JsonObject response = (JsonObject)JsonUtil.toJsonStructure(result);
     scrollId = response.getString("_scroll_id");
     JsonObject hits = response.getJsonObject("hits");
