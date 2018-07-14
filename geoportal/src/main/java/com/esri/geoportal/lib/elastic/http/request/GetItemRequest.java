@@ -14,8 +14,8 @@
  */
 package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.lib.elastic.http.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 
 import java.io.FileNotFoundException;
 import javax.ws.rs.core.MediaType;
