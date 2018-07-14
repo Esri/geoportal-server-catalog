@@ -63,6 +63,7 @@ public class ElasticContext {
   private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
   private boolean useHttps = false;
+  private boolean useSeparateXmlItem = true;
   private String xmlIndexType = "clob";
   
   private String xpackUsername = null;
@@ -191,6 +192,15 @@ public class ElasticContext {
   /** Use HTTPS. */
   public void setUseHttps(boolean useHttps) {
     this.useHttps = useHttps;
+  }
+  
+  /** Store XMLs in a separate item type. */
+  public boolean getUseSeparateXmlItem() {
+    return useSeparateXmlItem;
+  }
+  /** Store XMLs in a separate item type. */
+  public void setUseSeparateXmlItem(boolean useSeparateXmlItem) {
+    this.useSeparateXmlItem = useSeparateXmlItem;
   }
 
   /** The index name holding metadata xmls. */

@@ -151,8 +151,4 @@ public class ElasticClient {
     return send("POST",url,data,dataContentType);
   }
   
-  public boolean useSeparateXmlItem() {
-    return true; // TODO
-  }
-  
 }

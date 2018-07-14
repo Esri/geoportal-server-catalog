@@ -23,9 +23,7 @@ import javax.json.JsonObjectBuilder;
  * Set the owner for one or more items.
  */
 public class SetOwnerRequest extends com.esri.geoportal.lib.elastic.request.SetOwnerRequest {
-  
-  /** Instance variables. */
-  private String id;
+ 
   
   /** Constructor. */
   public SetOwnerRequest() {

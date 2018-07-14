@@ -15,8 +15,11 @@
 package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.lib.elastic.http.AccessUtil;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
+import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
 
 import java.io.FileNotFoundException;
 import javax.json.JsonObject;
@@ -60,8 +63,9 @@ public class GetMetadataRequest extends com.esri.geoportal.lib.elastic.request.G
     id = au.determineId(id); // TODO
     au.ensureReadAccess(getUser(),id); // TODO
     
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ElasticClient client = ElasticClient.newClient();
-    boolean useSeparateXmlItem = client.useSeparateXmlItem();
+    boolean useSeparateXmlItem = ec.getUseSeparateXmlItem();
     String url = null, xmlField = null;
     if (useSeparateXmlItem) {
       xmlField = "sys_clob";
@@ -89,6 +93,7 @@ public class GetMetadataRequest extends com.esri.geoportal.lib.elastic.request.G
     } catch (FileNotFoundException e) {
       response.writeIdNotFound(this,id);
     }
+    
     return response;
   }
   

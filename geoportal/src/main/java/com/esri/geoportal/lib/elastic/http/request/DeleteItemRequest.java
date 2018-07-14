@@ -15,8 +15,10 @@
 package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.lib.elastic.http.AccessUtil;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 
 import java.io.FileNotFoundException;
 import javax.json.Json;
@@ -69,9 +71,10 @@ public class DeleteItemRequest extends com.esri.geoportal.lib.elastic.request.De
     id = au.determineId(id); // TODO
     au.ensureWriteAccess(getUser(),id); // TODO
     
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ElasticClient client = ElasticClient.newClient();
     String url = client.getItemUrl(id);
-    boolean useSeparateXmlItem = client.useSeparateXmlItem();
+    boolean useSeparateXmlItem = ec.getUseSeparateXmlItem();
     boolean deletingXml = false;
     
     try {
