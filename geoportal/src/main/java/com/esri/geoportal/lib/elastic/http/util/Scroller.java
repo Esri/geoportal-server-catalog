@@ -159,9 +159,9 @@ public class Scroller {
     long count = 0, loop = 0, max = getMaxDocs();
   
     String postData = request.build().toString();
-    System.out.println("Scroller.postData="+postData);
+    //System.out.println("Scroller.postData="+postData);
     String result = client.sendPost(url,postData,contentType);
-    System.out.println("Scroller.result="+result);
+    //System.out.println("Scroller.result="+result);
     JsonObject response = (JsonObject)JsonUtil.toJsonStructure(result);
     scrollId = response.getString("_scroll_id");
     JsonObject hits = response.getJsonObject("hits");
@@ -201,7 +201,7 @@ public class Scroller {
       } catch (Throwable t) {
         t.printStackTrace();
       }
-      System.out.println("processed:"+processed.get()+" total:"+this.getTotalHits());
+      //System.out.println("processed:"+processed.get()+" total:"+this.getTotalHits());
     }
     
   }

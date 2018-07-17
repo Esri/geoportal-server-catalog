@@ -11,7 +11,7 @@
   <beans:bean id="request.GetItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.GetItemRequest"/>
   <beans:bean id="request.GetMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.GetMetadataRequest"/>
   <beans:bean id="request.PublishMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.PublishMetadataRequest"/>
-  <beans:bean id="request.ReindexRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ReindexRequest"/>
+  <beans:bean id="request.ReindexRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.ReindexRequest"/>
   <beans:bean id="request.SetAccessRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.SetAccessRequest"/>
   <beans:bean id="request.SetApprovalStatusRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.SetApprovalStatusRequest"/>
   <beans:bean id="request.SetFieldRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.SetFieldRequest"/>

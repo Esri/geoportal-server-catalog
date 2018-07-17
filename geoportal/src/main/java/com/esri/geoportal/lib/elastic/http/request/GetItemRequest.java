@@ -14,6 +14,8 @@
  */
 package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 
@@ -97,8 +99,9 @@ public class GetItemRequest extends com.esri.geoportal.lib.elastic.request.GetIt
     id = au.determineId(id); // TODO
     au.ensureReadAccess(getUser(),id); // TODO
     
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ElasticClient client = ElasticClient.newClient();
-    String url = client.getItemUrl(id);
+    String url = client.getItemUrl(ec.getIndexName(),ec.getItemIndexType(),id);
     if (this.getPretty()) url += "?pretty=true";
     
     try {

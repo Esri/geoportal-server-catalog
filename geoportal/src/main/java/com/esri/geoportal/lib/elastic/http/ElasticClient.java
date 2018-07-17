@@ -16,12 +16,12 @@ package com.esri.geoportal.lib.elastic.http;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 import java.net.URLEncoder;
 
 /**
@@ -29,10 +29,11 @@ import java.net.URLEncoder;
  */
 public class ElasticClient {
   
-  private String baseUrl = "http://gptdb1.esri.com:9200";
-  private String indexBaseUrl = "http://gptdb1.esri.com:9200/metadata";
-  private String itemBaseUrl = "http://gptdb1.esri.com:9200/metadata/item";
+  private String baseUrl = "http://gptdb1.esri.com:9200"; // TODO
   
+  public String encode(String value) throws UnsupportedEncodingException {
+    return URLEncoder.encode(value,"UTF-8");
+  }
 
   public String getBaseUrl() {
     return baseUrl;
@@ -42,31 +43,21 @@ public class ElasticClient {
     return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8") + "/_bulk";
   }
   
-  public String getIndexBaseUrl() {
-    return indexBaseUrl;
-  }
-  
-  public String getItemBaseUrl() {
-    return itemBaseUrl;
-  }
-  
-  public String getItemUrl(String id) throws UnsupportedEncodingException {
-    String url = itemBaseUrl +"/" + URLEncoder.encode(id,"UTF-8");
-    return url;
+  public String getItemUrl(String indexName, String typeName, String id) throws UnsupportedEncodingException {
+    return this.getTypeUrl(indexName,typeName) + "/" + encode(id);
   }
   
   public String getScrollUrl() {
     return baseUrl + "/_search/scroll";
   }
   
-  public String getTypeUrl(String indexName, String indexType) throws UnsupportedEncodingException {
-    return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8")+ "/" + URLEncoder.encode(indexType,"UTF-8");
+  public String getTypeUrl(String indexName, String typeName) throws UnsupportedEncodingException {
+    return baseUrl + "/" + encode(indexName)+ "/" + encode(typeName);
   }
   
-  public String getXmlUrl(String id) throws UnsupportedEncodingException {
+  public String getXmlUrl(String indexName, String typeName, String id) throws UnsupportedEncodingException {
     if (!id.endsWith("_xml")) id += "_xml";
-    String url = indexBaseUrl + "/clob/" + URLEncoder.encode(id,"UTF-8"); // TODO
-    return url;
+    return this.getTypeUrl(indexName,typeName) + "/" + encode(id);
   }
   
   public static ElasticClient newClient() {
@@ -78,10 +69,12 @@ public class ElasticClient {
     BufferedReader br = null;
     DataOutputStream wr = null;
     StringWriter sw = new StringWriter();
+    HttpURLConnection con = null;
+    String charset = "UTF-8";
     try {
       URL u = new java.net.URL(url);
-      // HttpURLConnection.setFollowRedirects(true); // TODO?
-      HttpURLConnection con = (HttpURLConnection)u.openConnection();
+      HttpURLConnection.setFollowRedirects(true);
+      con = (HttpURLConnection)u.openConnection();
       con.setRequestMethod(method);
       con.setInstanceFollowRedirects(true);
 
@@ -98,18 +91,17 @@ public class ElasticClient {
 //      }
 
       if (data != null && data.length() > 0) {
+        //System.err.println("sendData="+data);
         con.setDoOutput(true);
-        //con.setRequestMethod("POST"); // TODO
-        byte[] postData = data.getBytes("UTF-8");
+        byte[] bytes = data.getBytes("UTF-8");
         if (dataContentType != null && dataContentType.length() > 0) {
           con.setRequestProperty( "Content-Type",dataContentType);
         }
         con.setRequestProperty("charset","UTF-8");
-        con.setRequestProperty("Content-Length",""+postData.length);
+        con.setRequestProperty("Content-Length",""+bytes.length);
         wr = new DataOutputStream(con.getOutputStream());
-        wr.write(postData);
+        wr.write(bytes);
       }
-      String charset = "UTF-8";
       String contentType = con.getContentType();
       if (contentType != null) {
         String[] a = contentType.split(";");
@@ -131,11 +123,28 @@ public class ElasticClient {
         sw.write(buffer,0,nRead);
       }
       result = sw.toString();
+//    } catch(IOException ex) {
+//      try {
+//        if (con != null && br == null) {
+//          int code = con.getResponseCode();
+//          System.err.println("code="+code);
+//          br = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
+//          int nRead = 0;
+//          char[] buffer = new char[4096];
+//          while ((nRead = br.read(buffer,0,4096)) >= 0) {
+//            sw.write(buffer,0,nRead);
+//          }
+//          System.err.println("error="+sw.toString());
+//        }
+//      } catch (Exception ex1) {
+//        ex1.printStackTrace();
+//      }
+//      throw ex;
     } finally {
       try {if (wr != null) wr.close();} catch(Exception ef) {ef.printStackTrace();}
       try {if (br != null) br.close();} catch(Exception ef) {ef.printStackTrace();}
     }
-    //System.out.println("result:\r\n"+result);
+    //System.err.println("result:\r\n"+result);
     return result;
   }
   
@@ -149,6 +158,10 @@ public class ElasticClient {
   
   public String sendPost(String url, String data, String dataContentType) throws Exception {
     return send("POST",url,data,dataContentType);
+  }
+  
+  public String sendPut(String url, String data, String dataContentType) throws Exception {
+    return send("PUT",url,data,dataContentType);
   }
   
 }
