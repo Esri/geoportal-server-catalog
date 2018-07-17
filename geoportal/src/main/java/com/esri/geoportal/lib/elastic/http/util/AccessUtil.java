@@ -46,6 +46,32 @@ public class AccessUtil {
   }
   
   /**
+   * Ensure that a user has an Admin role.
+   * @param user the user
+   * @throws AccessDeniedException if not
+   */
+  public void ensureAdmin(AppUser user) {
+    if (user == null || user.getUsername() == null || user.getUsername().length() == 0) {
+      throw new AccessDeniedException(accessDeniedMessage);
+    }
+    if (!user.isAdmin()) throw new AccessDeniedException(accessDeniedMessage);
+  }
+  
+  /**
+   * Ensure that a user has a Publisher role.
+   * @param user the user
+   * @throws AccessDeniedException if not
+   */
+  public void ensurePublisher(AppUser user) {
+    if (user == null || user.getUsername() == null || user.getUsername().length() == 0) {
+      throw new AccessDeniedException(accessDeniedMessage);
+    }
+    if (!user.isAdmin() && !user.isPublisher()) {
+      throw new AccessDeniedException(accessDeniedMessage);
+    }
+  }
+  
+  /**
    * Ensure that a user has read access to an item.
    * @param user the user
    * @param id the item id

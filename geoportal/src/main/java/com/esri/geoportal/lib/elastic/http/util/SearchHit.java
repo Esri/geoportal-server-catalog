@@ -13,7 +13,6 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.http.util;
-
 import javax.json.JsonObject;
 
 public class SearchHit {
@@ -36,6 +35,16 @@ public class SearchHit {
   
   public JsonObject getJsonObject() {
     return json;
+  }
+  
+  public String sourceAsString() {
+    if (this.json != null && this.json.containsKey("_source")) {
+      JsonObject source = this.json.getJsonObject("_source");
+      if (source != null) {
+        return source.toString();
+      }
+    }
+    return null;
   }
 
 }

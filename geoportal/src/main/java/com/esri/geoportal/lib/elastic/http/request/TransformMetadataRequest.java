@@ -21,8 +21,8 @@ import com.esri.geoportal.base.xml.XsltTemplates;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
-import com.esri.geoportal.lib.elastic.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import java.io.FileNotFoundException;
@@ -103,13 +103,13 @@ public class TransformMetadataRequest extends com.esri.geoportal.lib.elastic.req
     
     try {
       ItemUtil itemUtil = new ItemUtil();
-      JsonObject item = itemUtil.readItemJson(id);
+      JsonObject item = itemUtil.readItemJson(ec.getIndexName(),ec.getItemIndexType(),id);
       if (item == null) {
         response.writeIdNotFound(this,id);
       } else {
         String err = null, key = null, xml = null;
         if (ec.getUseSeparateXmlItem()) {
-          xml = itemUtil.readXml(id);
+          xml = itemUtil.readXml(ec.getIndexName(),id);
         } else {
           try {
             xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_XML);

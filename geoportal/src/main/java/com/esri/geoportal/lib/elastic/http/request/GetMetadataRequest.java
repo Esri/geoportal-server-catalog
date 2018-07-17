@@ -20,6 +20,7 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
+import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import java.io.FileNotFoundException;
 import javax.json.JsonObject;
@@ -68,11 +69,11 @@ public class GetMetadataRequest extends com.esri.geoportal.lib.elastic.request.G
     boolean useSeparateXmlItem = ec.getUseSeparateXmlItem();
     String url = null, xmlField = null;
     if (useSeparateXmlItem) {
-      xmlField = "sys_clob";
-      url = client.getXmlUrl(id);
+      xmlField = FieldNames.FIELD_SYS_CLOB;
+      url = client.getXmlUrl(ec.getIndexName(),ec.getXmlIndexType(),id);
     } else {
-      xmlField = "xml";
-      url = client.getItemUrl(id);
+      xmlField = FieldNames.FIELD_SYS_XML;
+      url = client.getItemUrl(ec.getIndexName(),ec.getItemIndexType(),id);
     }
     
     try {
