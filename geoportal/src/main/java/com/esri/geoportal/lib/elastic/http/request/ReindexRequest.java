@@ -131,7 +131,7 @@ public class ReindexRequest extends com.esri.geoportal.lib.elastic.request.Reind
     Scroller scroller = new Scroller();
     scroller.setIndexName(fromIndexName);
     scroller.setIndexType("item");
-    scroller.setMaxDocs(3); // TODO temporary
+    //scroller.setMaxDocs(3); // TODO temporary
     scroller.scroll(
       new Consumer<SearchHit>(){
         @Override
