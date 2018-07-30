@@ -43,6 +43,10 @@ public class ElasticClient {
     return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8") + "/_bulk";
   }
   
+  public String getIndexUrl(String indexName) throws UnsupportedEncodingException {
+    return baseUrl + "/" + encode(indexName);
+  }
+  
   public String getItemUrl(String indexName, String typeName, String id) throws UnsupportedEncodingException {
     return this.getTypeUrl(indexName,typeName) + "/" + encode(id);
   }
@@ -150,6 +154,10 @@ public class ElasticClient {
   
   public String sendDelete(String url) throws Exception {
     return send("DELETE",url,null,null);
+  }
+  
+  public String sendHead(String url) throws Exception {
+    return send("HEAD",url,null,null);
   }
   
   public String sendGet(String url) throws Exception {

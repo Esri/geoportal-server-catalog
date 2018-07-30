@@ -188,7 +188,7 @@ public class Scroller {
         response = (JsonObject)JsonUtil.toJsonStructure(result);
         //response = null;
         loop++;
-        System.out.println("loop: "+loop);
+        //System.out.println("loop: "+loop);
       }      
     } finally {
       try {
