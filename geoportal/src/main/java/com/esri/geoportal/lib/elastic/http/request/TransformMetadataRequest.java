@@ -109,7 +109,7 @@ public class TransformMetadataRequest extends com.esri.geoportal.lib.elastic.req
       } else {
         String err = null, key = null, xml = null;
         if (ec.getUseSeparateXmlItem()) {
-          xml = itemUtil.readXml(ec.getIndexName(),id);
+          xml = itemUtil.readXml(ec.getIndexName(),id,itemUtil.getItemSource(item));
         } else {
           try {
             xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_XML);

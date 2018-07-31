@@ -14,6 +14,10 @@
  */
 package com.esri.geoportal.lib.elastic.http.util;
 
+import java.util.Map;
+
+import javax.json.JsonObject;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -55,6 +59,25 @@ public class AccessUtil {
       throw new AccessDeniedException(accessDeniedMessage);
     }
     if (!user.isAdmin()) throw new AccessDeniedException(accessDeniedMessage);
+  }
+  
+  /**
+   * Ensures that a user owns an item.
+   * @param user the user
+   * @param ownerField the owner field name (username)
+   * @param source the Elasticsearch item source
+   * @throws AccessDeniedException if not
+   */
+  public void ensureOwner(AppUser user, String ownerField, JsonObject source) {
+    // TODO
+    if (!user.isAdmin()) {
+      String owner = null;
+      if (source != null && source.containsKey(ownerField)) {
+        owner = source.getString(ownerField,null);
+      }
+      boolean ok = (owner != null) && (owner.equalsIgnoreCase(user.getUsername()));
+      if (!ok) throw new AccessDeniedException(notOwnerMessage);
+    }
   }
   
   /**

@@ -18,15 +18,15 @@ import javax.json.JsonObject;
 public class SearchHit {
   
   private long index;
-  private JsonObject json;
+  private JsonObject item;
   
-  public SearchHit(JsonObject json, long index) {
-    this.json = json;
+  public SearchHit(JsonObject item, long index) {
+    this.item = item;
     this.index = index;
   }
   
   public String getId() {
-    return json.getString("_id");
+    return item.getString("_id");
   }
   
   public long getIndex() {
@@ -34,12 +34,12 @@ public class SearchHit {
   }
   
   public JsonObject getJsonObject() {
-    return json;
+    return item;
   }
   
   public String sourceAsString() {
-    if (this.json != null && this.json.containsKey("_source")) {
-      JsonObject source = this.json.getJsonObject("_source");
+    if (this.item != null && this.item.containsKey("_source")) {
+      JsonObject source = this.item.getJsonObject("_source");
       if (source != null) {
         return source.toString();
       }
