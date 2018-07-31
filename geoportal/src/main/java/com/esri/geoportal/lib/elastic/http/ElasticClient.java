@@ -16,7 +16,6 @@ package com.esri.geoportal.lib.elastic.http;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
-import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -24,12 +23,21 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLEncoder;
 
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+
 /**
  * An HTTP client for Elasticsearch.
  */
 public class ElasticClient {
   
-  private String baseUrl = "http://gptdb1.esri.com:9200"; // TODO
+  private String baseUrl;
+  private String basicCredentials;
+  
+  public ElasticClient(String baseUrl, String basicCredentials) {
+    this.baseUrl = baseUrl;
+    this.basicCredentials = basicCredentials;
+  }
   
   public String encode(String value) throws UnsupportedEncodingException {
     return URLEncoder.encode(value,"UTF-8");
@@ -65,7 +73,8 @@ public class ElasticClient {
   }
   
   public static ElasticClient newClient() {
-    return new ElasticClient();
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials());
   }
   
   public String send(String method, String url, String data, String dataContentType) throws Exception {
@@ -81,19 +90,10 @@ public class ElasticClient {
       con = (HttpURLConnection)u.openConnection();
       con.setRequestMethod(method);
       con.setInstanceFollowRedirects(true);
-
-      // TODO need to supply credentials
+      if (basicCredentials != null && basicCredentials.length() > 0) {
+        con.setRequestProperty( "Authorization",basicCredentials);
+      }
       
-//      if (options && options.basicCredentials &&
-//          typeof options.basicCredentials.username === "string" &&
-//          options.basicCredentials.username.length > 0 &&
-//          typeof options.basicCredentials.password === "string" &&
-//          options.basicCredentials.password.length > 0) {
-//        var cred = options.basicCredentials.username+":"+options.basicCredentials.password;
-//        cred = new java.lang.String(java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8")),"UTF-8");
-//        con.setRequestProperty( "Authorization","Basic "+cred);
-//      }
-
       if (data != null && data.length() > 0) {
         //System.err.println("sendData="+data);
         con.setDoOutput(true);

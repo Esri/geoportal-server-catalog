@@ -148,7 +148,8 @@ public class RealiasRequest extends com.esri.geoportal.lib.elastic.request.Reali
       ));
       request.add("actions",actions);
       String postData = request.build().toString();
-      result = client.sendPost(url,postData,"application/json;charset=utf-8");
+      String contentType = "application/json;charset=utf-8";
+      result = client.sendPost(url,postData,contentType);
       jb.add("status","completed");
     }
     response.writeOkJson(this,jb);
