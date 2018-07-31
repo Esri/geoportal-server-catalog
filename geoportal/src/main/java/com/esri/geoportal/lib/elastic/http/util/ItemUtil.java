@@ -198,18 +198,6 @@ public class ItemUtil {
   }
   
   /**
-   * Read the XML meta information (mimetype,hash,date,size).
-   * @param ec the context
-   * @param id the item id
-   * @return the meta information
-   * @throws Exception
-   */
-  private JsonObject readXmlMeta(ElasticContext ec, String id) throws Exception {
-    // TODO
-    return null;
-  }
-  
-  /**
    * Search for an item by file id.
    * @param indexName the index name
    * @param typeName the type name
@@ -234,7 +222,7 @@ public class ItemUtil {
     JsonObject hits = response.getJsonObject("hits");
     int total = hits.getInt("total");
     // TODO what if there is more than one hit
-    if (total > 0) {
+    if (total == 1) {
       JsonArray hitsArray = hits.getJsonArray("hits");
       JsonObject item = hitsArray.getJsonObject(0);
       return item;
