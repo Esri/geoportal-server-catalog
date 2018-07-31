@@ -44,7 +44,6 @@ public class ElasticContextHttp extends ElasticContext {
   /** Constructor */
   public ElasticContextHttp() {
     super();
-    System.err.println("Constructing ElasticContextHttp");
   }
   
   /**
@@ -66,7 +65,7 @@ public class ElasticContextHttp extends ElasticContext {
     String postData = request.build().toString();
     String contentType = "application/json;charset=utf-8";
     String result = client.sendPost(url,postData,contentType);
-    LOGGER.debug("_createAlias.result",result);
+    //LOGGER.debug("_createAlias.result",result);
   }
   
   /**
@@ -83,7 +82,7 @@ public class ElasticContextHttp extends ElasticContext {
     String postData = JsonUtil.toJson(jso,false);
     String contentType = "application/json;charset=utf-8";
     String result = client.sendPut(url,postData,contentType);
-    LOGGER.debug("_createAlias.result",result);    
+    //LOGGER.debug("_createIndex.result",result);    
   }
   
   /**
