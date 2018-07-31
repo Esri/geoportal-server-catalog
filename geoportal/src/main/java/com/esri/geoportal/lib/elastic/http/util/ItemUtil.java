@@ -23,6 +23,7 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.MurmurUtil;
 
 import javax.json.Json;
+import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
@@ -30,6 +31,18 @@ import javax.json.JsonObjectBuilder;
  * Item utilities.
  */
 public class ItemUtil {
+  
+  /**
+   * Get the item source.
+   * @param item the item
+   * @return the item source
+   */
+  public JsonObject getItemSource(JsonObject item) {
+    if (item != null && item.containsKey("_source")) {
+      return item.getJsonObject("_source");
+    }
+    return null;
+  }
   
   /**
    * Make a hash (Murmur).
@@ -106,10 +119,11 @@ public class ItemUtil {
    * Read an item's XML.
    * @param indexName the index name
    * @param id the item id
+   * @param itemSource the item _source
    * @return the xml
    * @throws Exception if an exception occurs
    */
-  public String readXml(String indexName, String id) throws Exception {
+  public String readXml(String indexName, String id, JsonObject itemSource) throws Exception {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     if (ec.getUseSeparateXmlItem()) {
       ElasticClient client = ElasticClient.newClient();
@@ -125,10 +139,14 @@ public class ItemUtil {
         }       
       }
     } else {
-      JsonObject item = readItemJson(indexName,ec.getItemIndexType(),id);
-      if (item != null) {
+      String field = FieldNames.FIELD_SYS_XML;
+      if (itemSource == null) {
+        JsonObject item = readItemJson(indexName,ec.getItemIndexType(),id);
+        itemSource = this.getItemSource(item);
+      }
+      if (itemSource != null && itemSource.containsKey(field)) {
         try {
-          String xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_XML);
+          String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
           return xml;
         } catch (Exception e) {
           e.printStackTrace();
@@ -142,12 +160,40 @@ public class ItemUtil {
    * Reads the XML hash.
    * @param ec the context
    * @param id the item id
+   * @param itemSource the item _source
    * @return the hash
    * @throws Exception
    */
-  public String readXmlHash(ElasticContext ec, String id) throws Exception {
-    JsonObject jso = readXmlMeta(ec,id);
-    if (jso != null) return JsonUtil.getString(jso,"hash");
+  public String readXmlHash(ElasticContext ec, String id, JsonObject itemSource) throws Exception {
+    JsonObject meta = null;
+    if (ec.getUseSeparateXmlItem()) {
+      ElasticClient client = ElasticClient.newClient();
+      String url = client.getXmlUrl(ec.getIndexName(),ec.getXmlIndexType(),id);
+      String result = client.sendGet(url);
+      if (result != null && result.length() > 0) {
+        JsonObject item = (JsonObject)JsonUtil.toJsonStructure(result);
+        try {
+          String v = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_META);
+          if (v != null && v.length() > 0) {
+            meta = (JsonObject)JsonUtil.toJsonStructure(v);
+          }
+        } catch (Exception e) {
+          e.printStackTrace();
+        }       
+      }
+    } else {
+      if (itemSource == null) {
+        JsonObject item = this.readItemJson(ec.getIndexName(),ec.getItemIndexType(),id);
+        itemSource = this.getItemSource(item);
+      }
+      String field = FieldNames.FIELD_SYS_XMLMETA;
+      if (itemSource != null && itemSource.containsKey(field)) {
+        meta = itemSource.getJsonObject(field);
+      }
+    }
+    if (meta != null && meta.containsKey("hash")) {
+      return JsonUtil.getString(meta,"hash");
+    }
     return null;
   }
   
@@ -158,8 +204,53 @@ public class ItemUtil {
    * @return the meta information
    * @throws Exception
    */
-  public JsonObject readXmlMeta(ElasticContext ec, String id) throws Exception {
+  private JsonObject readXmlMeta(ElasticContext ec, String id) throws Exception {
     // TODO
+    return null;
+  }
+  
+  /**
+   * Search for an item by file id.
+   * @param indexName the index name
+   * @param typeName the type name
+   * @param fileid  the item fileidid
+   * @return the item
+   * @throws Exception if an exception occurs
+   */
+  public JsonObject searchForFileId(String indexName, String typeName, String fileid) throws Exception {
+    if (fileid == null || fileid.length() == 0) return null;
+    ElasticClient client = ElasticClient.newClient();
+    String url = client.getTypeUrl(indexName,typeName);
+    url += "/_search";
+    String field = FieldNames.FIELD_FILEID;
+    JsonObjectBuilder request = Json.createObjectBuilder();
+    request.add("query",Json.createObjectBuilder().add(
+      "term",Json.createObjectBuilder().add(field,fileid)
+    ));
+    String postData = request.build().toString();
+    String contentType = "application/json;charset=utf-8";
+    String result = client.sendPost(url,postData,contentType);
+    JsonObject response = (JsonObject)JsonUtil.toJsonStructure(result);
+    JsonObject hits = response.getJsonObject("hits");
+    int total = hits.getInt("total");
+    // TODO what if there is more than one hit
+    if (total > 0) {
+      JsonArray hitsArray = hits.getJsonArray("hits");
+      JsonObject item = hitsArray.getJsonObject(0);
+      return item;
+    }
+    return null;
+  }
+  
+  
+  /**
+   * Get the item source as a string.
+   * @param item the item
+   * @return the item source string
+   */
+  public String sourceAsString(JsonObject item) {
+    JsonObject source = this.getItemSource(item);
+    if (source != null) return source.toString();
     return null;
   }
   
@@ -200,7 +291,6 @@ public class ItemUtil {
         itemJson = item.build().toString();
       }
     }
-    //System.err.println("itemId="+itemId);
     String itemUrl = client.getItemUrl(indexName,ec.getItemIndexType(),itemId);
     client.sendPut(itemUrl,itemJson,contentType);
   }

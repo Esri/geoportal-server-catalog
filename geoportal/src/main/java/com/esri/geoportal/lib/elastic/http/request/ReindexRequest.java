@@ -234,7 +234,7 @@ public class ReindexRequest extends com.esri.geoportal.lib.elastic.request.Reind
    */
   private String readXml(ElasticContext ec, ItemUtil itemUtil, String id, String indexName, String cue) 
       throws Exception {
-    return itemUtil.readXml(indexName,id);
+    return itemUtil.readXml(indexName,id,null);
   }
   
 }
