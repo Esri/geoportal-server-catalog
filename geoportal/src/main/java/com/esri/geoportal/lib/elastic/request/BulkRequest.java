@@ -168,7 +168,7 @@ public class BulkRequest extends AppRequest {
               // TODO what about partial failures??
               if (data.length() > 0) {
                 // TODO reuse the client?
-                System.out.println("bulk.post="+data);
+                //System.out.println("bulk.post="+data);
                 ElasticClient client = ElasticClient.newClient();
                 String url = client.getBulkUrl(ec.getIndexName());
                 client.sendPost(url,data.toString(),"text/plain;charset=utf-8");
