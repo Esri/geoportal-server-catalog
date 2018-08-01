@@ -85,7 +85,6 @@ public class ReindexRequest extends com.esri.geoportal.lib.elastic.request.Reind
 
   @Override
   public AppResponse execute() throws Exception {
-    System.out.println("com.esri.geoportal.lib.elastic.http.request.ReindexRequest"); // TODO temporary
     AppResponse response = new AppResponse();
     long tStart = System.currentTimeMillis();
     AtomicBoolean hadErrors = new AtomicBoolean(false);

@@ -31,52 +31,121 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
  */
 public class ElasticClient {
   
+  /** Instance variables. */
   private String baseUrl;
   private String basicCredentials;
   
-  public ElasticClient(String baseUrl, String basicCredentials) {
-    this.baseUrl = baseUrl;
-    this.basicCredentials = basicCredentials;
-  }
-  
-  public String encode(String value) throws UnsupportedEncodingException {
-    return URLEncoder.encode(value,"UTF-8");
-  }
-
-  public String getBaseUrl() {
-    return baseUrl;
-  }
-  
-  public String getBulkUrl(String indexName) throws UnsupportedEncodingException {
-    return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8") + "/_bulk";
-  }
-  
-  public String getIndexUrl(String indexName) throws UnsupportedEncodingException {
-    return baseUrl + "/" + encode(indexName);
-  }
-  
-  public String getItemUrl(String indexName, String typeName, String id) throws UnsupportedEncodingException {
-    return this.getTypeUrl(indexName,typeName) + "/" + encode(id);
-  }
-  
-  public String getScrollUrl() {
-    return baseUrl + "/_search/scroll";
-  }
-  
-  public String getTypeUrl(String indexName, String typeName) throws UnsupportedEncodingException {
-    return baseUrl + "/" + encode(indexName)+ "/" + encode(typeName);
-  }
-  
-  public String getXmlUrl(String indexName, String typeName, String id) throws UnsupportedEncodingException {
-    if (!id.endsWith("_xml")) id += "_xml";
-    return this.getTypeUrl(indexName,typeName) + "/" + encode(id);
-  }
-  
+  /**
+   * Create a new client.
+   * @return the client
+   */
   public static ElasticClient newClient() {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials());
   }
   
+  /**
+   * Constructor.
+   * @param baseUrl the Elasticsearch base URL
+   * @param basicCredentials basic credentials
+   */
+  public ElasticClient(String baseUrl, String basicCredentials) {
+    this.baseUrl = baseUrl;
+    this.basicCredentials = basicCredentials;
+  }
+  
+  /**
+   * URL encode a value.
+   * @param value the value
+   * @return the encoded value
+   * @throws UnsupportedEncodingException
+   */
+  public String encode(String value) throws UnsupportedEncodingException {
+    return URLEncoder.encode(value,"UTF-8");
+  }
+ 
+  /**
+   * Get the Elasticsearch base URL
+   * @return base URL
+   */
+  public String getBaseUrl() {
+    return baseUrl;
+  }
+  
+  /**
+   * Get a bulk update URL.
+   * @param indexName the index name
+   * @return the URL
+   * @throws UnsupportedEncodingException
+   */
+  public String getBulkUrl(String indexName) throws UnsupportedEncodingException {
+    return baseUrl + "/" + URLEncoder.encode(indexName,"UTF-8") + "/_bulk";
+  }
+  
+  /**
+   * Get an index URL.
+   * @param indexName the index name
+   * @return the URL
+   * @throws UnsupportedEncodingException
+   */
+  public String getIndexUrl(String indexName) throws UnsupportedEncodingException {
+    return baseUrl + "/" + encode(indexName);
+  }
+
+  /**
+   * Get an item URL.
+   * @param indexName the index name
+   * @param typeName the type name
+   * @param id the item id
+   * @return the URL
+   * @throws UnsupportedEncodingException
+   */
+  public String getItemUrl(String indexName, String typeName, String id) throws UnsupportedEncodingException {
+    return this.getTypeUrl(indexName,typeName) + "/" + encode(id);
+  }
+  
+  /**
+   * Get the scroll URL.
+   * @return the URL
+   * @throws UnsupportedEncodingException
+   */
+  public String getScrollUrl() {
+    return baseUrl + "/_search/scroll";
+  }
+  
+  /**
+   * Get a type URL.
+   * @param indexName the index name
+   * @param typeName the type name
+   * @return the URL
+   * @throws UnsupportedEncodingException
+   */
+  public String getTypeUrl(String indexName, String typeName) throws UnsupportedEncodingException {
+    return baseUrl + "/" + encode(indexName)+ "/" + encode(typeName);
+  }
+  
+  /**
+   * Get an XML URL.
+   * @param indexName the index name
+   * @param typeName the type name
+   * @param id the item id
+   * @return the URL
+   * @throws UnsupportedEncodingException
+   */
+  public String getXmlUrl(String indexName, String typeName, String id) throws UnsupportedEncodingException {
+    if (!id.endsWith("_xml")) id += "_xml";
+    return this.getTypeUrl(indexName,typeName) + "/" + encode(id);
+  }
+  
+  /**
+   * Send a request.
+   * @param method the HTTP method
+   * @param url the URL
+   * @param data the entity data
+   * @param dataContentType data the entity data content type
+   * @return the response
+   * @throws Exception if an exception occurs
+   */
   public String send(String method, String url, String data, String dataContentType) throws Exception {
     String result = null;
     BufferedReader br = null;
@@ -152,22 +221,56 @@ public class ElasticClient {
     return result;
   }
   
+  /**
+   * Send a DELETE request.
+   * @param url the URL
+   * @return the response
+   * @throws Exception if an exception occurs
+   */
   public String sendDelete(String url) throws Exception {
     return send("DELETE",url,null,null);
   }
   
+  /**
+   * Send a HEAD request.
+   * @param url the URL
+   * @return the response
+   * @throws Exception if an exception occurs
+   */
   public String sendHead(String url) throws Exception {
     return send("HEAD",url,null,null);
   }
-  
+
+  /**
+   * Send a GET request.
+   * @param url the URL
+   * @return the response
+   * @throws Exception if an exception occurs
+   */
   public String sendGet(String url) throws Exception {
     return send("GET",url,null,null);
   }
-  
+
+  /**
+   * Send a POST request.
+   * @param url the URL
+   * @param data the entity data
+   * @param dataContentType data the entity data content type
+   * @return the response
+   * @throws Exception if an exception occurs
+   */
   public String sendPost(String url, String data, String dataContentType) throws Exception {
     return send("POST",url,data,dataContentType);
   }
   
+  /**
+   * Send a PUT request.
+   * @param url the URL
+   * @param data the entity data
+   * @param dataContentType data the entity data content type
+   * @return the response
+   * @throws Exception if an exception occurs
+   */
   public String sendPut(String url, String data, String dataContentType) throws Exception {
     return send("PUT",url,data,dataContentType);
   }

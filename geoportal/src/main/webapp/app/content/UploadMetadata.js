@@ -110,7 +110,10 @@ function(declare, lang, array, aspect, domConstruct, topic, appTopics, Templated
           var text = e.target.result; 
           this._filename = file.name;
           this._text = text;
-          if (!this._working) dialog.okCancelBar.enableOk();
+          if (!this._working) {
+            dialog.okCancelBar.enableOk();
+            dialog.okCancelBar.hideWorking(true);
+          }
         } else {
           // TODO message here?
         }

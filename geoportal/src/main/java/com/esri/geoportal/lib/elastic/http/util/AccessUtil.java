@@ -21,7 +21,6 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import java.io.FileNotFoundException;
-import java.util.ArrayList;
 import java.util.List;
 
 import javax.json.Json;
@@ -127,7 +126,6 @@ public class AccessUtil {
     GeoportalContext gc = GeoportalContext.getInstance();
     if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
       String v;
-      ElasticContext ec = gc.getElasticContext();
       JsonObject source = null;
       try {
         source = this.readItemSource(id);
