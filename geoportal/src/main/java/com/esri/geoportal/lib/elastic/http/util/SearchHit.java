@@ -15,28 +15,53 @@
 package com.esri.geoportal.lib.elastic.http.util;
 import javax.json.JsonObject;
 
+/**
+ * A search hit.
+ */
 public class SearchHit {
   
+  /** Instance variables. */
   private long index;
   private JsonObject item;
   
+  /**
+   * Constructor.
+   * @param item the item
+   * @param index the index within the array of search hits
+   */
   public SearchHit(JsonObject item, long index) {
     this.item = item;
     this.index = index;
   }
   
+  /**
+   * The id.
+   * @return the id
+   */
   public String getId() {
     return item.getString("_id");
   }
   
+  /**
+   * The index within the array of search hits
+   * @return the index
+   */
   public long getIndex() {
     return index;
   }
   
+  /**
+   * The item.
+   * @return the item
+   */
   public JsonObject getJsonObject() {
     return item;
   }
   
+  /**
+   * The item _source as a string.
+   * @return the -source string
+   */
   public String sourceAsString() {
     if (this.item != null && this.item.containsKey("_source")) {
       JsonObject source = this.item.getJsonObject("_source");

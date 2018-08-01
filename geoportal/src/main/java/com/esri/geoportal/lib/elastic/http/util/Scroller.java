@@ -13,6 +13,8 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.http.util;
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
@@ -21,21 +23,6 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
-
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.lib.elastic.http.ElasticClient;
-
-//import org.elasticsearch.action.search.SearchRequestBuilder;
-//import org.elasticsearch.action.search.SearchResponse;
-//import org.elasticsearch.action.search.SearchScrollRequestBuilder;
-//import org.elasticsearch.client.transport.TransportClient;
-//import org.elasticsearch.common.unit.TimeValue;
-//import org.elasticsearch.search.SearchHit;
-//import org.elasticsearch.search.sort.SortBuilders;
-//
-//import com.esri.geoportal.context.GeoportalContext;
-//import com.esri.geoportal.lib.elastic.ElasticContext;
-
 
 /**
  * Scroll through a collection of documents.
@@ -133,7 +120,6 @@ public class Scroller {
    * @param callback the callback
    */
   public void scroll(Consumer<SearchHit> callback) throws Exception {
-    System.out.println("com.esri.geoportal.lib.elastic.http.util.Scroller"); // TODO temporary
     
     // TODO add a match all query?
     
@@ -143,7 +129,6 @@ public class Scroller {
     String url = client.getTypeUrl(getIndexName(),getIndexType());
     url += "/_search";
     url += "?scroll=" + getKeepAliveMillis() + "ms";
-    //System.err.println(url);
     
     JsonObjectBuilder request = Json.createObjectBuilder();
     request.add("size",this.getPageSize());
@@ -156,6 +141,7 @@ public class Scroller {
     }
 
     String scrollId = null;
+    @SuppressWarnings("unused")
     long count = 0, loop = 0, max = getMaxDocs();
   
     String postData = request.build().toString();

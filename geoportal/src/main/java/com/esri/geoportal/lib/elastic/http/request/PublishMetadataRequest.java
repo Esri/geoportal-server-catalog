@@ -91,7 +91,6 @@ public class PublishMetadataRequest extends com.esri.geoportal.lib.elastic.reque
   
   @Override
   public AppResponse execute() throws Exception {
-    System.out.println("com.esri.geoportal.lib.elastic.http.request.PublishMetadataRequest"); // TODO temporary
     //boolean asDraft = false; // TODO asDraft
     AppResponse response = new AppResponse();
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();

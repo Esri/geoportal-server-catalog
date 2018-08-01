@@ -13,17 +13,10 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.http.request;
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.search.SearchHit;
-
-import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.lib.elastic.ElasticContext;
-
+import javax.json.Json;
+import javax.json.JsonObjectBuilder;
 
 /**
  * Delete one or more items.

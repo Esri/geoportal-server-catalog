@@ -19,7 +19,6 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
-import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import java.io.FileNotFoundException;
@@ -53,7 +52,6 @@ public class GetMetadataRequest extends com.esri.geoportal.lib.elastic.request.G
 
   @Override
   public AppResponse execute() throws Exception {    
-    System.out.println("com.esri.geoportal.lib.elastic.http.request.GetMetadataRequest"); // TODO temporary
     AppResponse response = new AppResponse();
     String id = getId();
     if (id == null || id.length() == 0) {

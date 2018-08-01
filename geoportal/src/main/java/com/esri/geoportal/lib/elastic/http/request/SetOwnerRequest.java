@@ -34,8 +34,7 @@ public class SetOwnerRequest extends com.esri.geoportal.lib.elastic.request.SetO
   /** Methods =============================================================== */
 
   @Override
-  public AppResponse execute() throws Exception {    
-    System.out.println("com.esri.geoportal.lib.elastic.http.request.SetOwnerRequest"); // TODO temporary
+  public AppResponse execute() throws Exception {
     /*
     http://localhost:8080/geoportal/rest/metadata/setOwner?id=68e65338e166458d8425775114487b31&newOwner=publisher
     

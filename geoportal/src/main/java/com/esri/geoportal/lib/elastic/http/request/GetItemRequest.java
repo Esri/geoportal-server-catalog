@@ -88,7 +88,6 @@ public class GetItemRequest extends com.esri.geoportal.lib.elastic.request.GetIt
 
   @Override
   public AppResponse execute() throws Exception {    
-    System.out.println("com.esri.geoportal.lib.elastic.http.request.GetItemRequest"); // TODO temporary
     AppResponse response = new AppResponse();
     String id = getId();
     if (id == null || id.length() == 0) {

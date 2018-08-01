@@ -59,7 +59,6 @@ public class RealiasRequest extends com.esri.geoportal.lib.elastic.request.Reali
 
   @Override
   public AppResponse execute() throws Exception {
-    System.out.println("com.esri.geoportal.lib.elastic.http.request.RealiasRequest"); // TODO temporary
     AppResponse response = new AppResponse();
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     AccessUtil au = new AccessUtil();

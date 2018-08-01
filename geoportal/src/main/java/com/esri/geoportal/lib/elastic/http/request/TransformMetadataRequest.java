@@ -86,7 +86,6 @@ public class TransformMetadataRequest extends com.esri.geoportal.lib.elastic.req
   
   @Override
   public AppResponse execute() throws Exception {
-    System.out.println("com.esri.geoportal.lib.elastic.http.request.TransformMetadataRequest"); // TODO temporary
     if (!getForItemDetails()) {
       return this.transform();
     }
