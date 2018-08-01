@@ -143,10 +143,12 @@ public class BulkEditRequest extends BulkRequest {
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
     JsonObjectBuilder line1 = Json.createObjectBuilder();
     // should "_retry_on_conflict" be "retry_on_conflict" at ES6?
+    String retryName = "_retry_on_conflict";
+    if (ec.getIs6Plus()) retryName = "retry_on_conflict";
     line1.add("update", Json.createObjectBuilder()
       .add("_id",hit.getId())
       .add("_type",ec.getItemIndexType())
-      .add("_retry_on_conflict",this.getRetryOnConflict())
+      .add(retryName,this.getRetryOnConflict())
     );
     data.append(line1.build().toString()).append("\n");
     if (getUpdateScript() != null) {

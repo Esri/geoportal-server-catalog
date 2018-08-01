@@ -42,7 +42,6 @@ public class ElasticContextHttp extends ElasticContext {
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
   
   /** Instance variables . */
-  private boolean is6plus = false;
   private boolean wasStarted = false;
   
   /** Constructor */
@@ -135,11 +134,11 @@ public class ElasticContextHttp extends ElasticContext {
         if (version.indexOf(i+".") == 0) {
           int primaryVersion = i;
           //System.out.println("primaryVersion="+primaryVersion);
-          if (primaryVersion >= 6) is6plus = true;
+          if (primaryVersion >= 6) this.setIs6Plus(true);
           break;
         }
       }
-      if (is6plus && this.getUseSeparateXmlItem()) {
+      if (getIs6Plus() && this.getUseSeparateXmlItem()) {
         LOGGER.info("Elasticsearch is version "+version+", setting useSeparateXmlItem=false");
         setUseSeparateXmlItem(false);
       }
