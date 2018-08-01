@@ -224,7 +224,7 @@ public class ReindexRequest extends com.esri.geoportal.lib.elastic.request.Reind
   /**
    * Read an xml.
    * @param ec the context
-   * @param itemio the item io
+   * @param itemUtil item utilities
    * @param id the id
    * @param indexName the index name
    * @param cue the from index version cue
