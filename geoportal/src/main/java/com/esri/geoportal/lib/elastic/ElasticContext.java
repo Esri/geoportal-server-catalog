@@ -58,6 +58,7 @@ public class ElasticContext {
   private int httpPort = 9200;
   private String indexName = "metadata";
   private boolean indexNameIsAlias = true;
+  private boolean is6Plus = false;
   private String itemIndexType = "item";
   private String mappingsFile = "config/elastic-mappings.json";
   private List<String> nodes;
@@ -133,6 +134,15 @@ public class ElasticContext {
   /** Treat the index name as an alias. */
   public void setIndexNameIsAlias(boolean indexNameIsAlias) {
     this.indexNameIsAlias = indexNameIsAlias;
+  }
+  
+  /** Version 6+ */
+  public boolean getIs6Plus() {
+    return is6Plus;
+  }
+  /** Version 6+ */
+  public void setIs6Plus(boolean is6Plus) {
+    this.is6Plus = is6Plus;
   }
   
   /** The index name holding metadata items. */
