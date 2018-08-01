@@ -64,7 +64,7 @@ public class ElasticContext {
   private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
   private boolean useHttps = false;
-  private boolean useSeparateXmlItem = true;
+  private boolean useSeparateXmlItem = false;
   private String xmlIndexType = "clob";
   
   private String xpackUsername = null;
