@@ -1,3 +1,4 @@
+
 /* See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * Esri Inc. licenses this file to You under the Apache License, Version 2.0
@@ -91,7 +92,7 @@ public class ElasticContextHttp extends ElasticContext {
       JsonObjectBuilder jb = Json.createObjectBuilder();
       for (Entry<String, JsonValue> entry: jso.entrySet()) {
         String k = entry.getKey();
-        if (k.equals("mappings")) {
+        if (k != null && k.equals("mappings")) {
           JsonObject jso2 = (JsonObject)entry.getValue();
           JsonObjectBuilder jb2 = Json.createObjectBuilder(); 
           for (Entry<String, JsonValue> entry2: jso2.entrySet()) {
@@ -129,17 +130,58 @@ public class ElasticContextHttp extends ElasticContext {
       result = client.sendGet(client.getBaseUrl());
       JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
       String version = esinfo.getJsonObject("version").getString("number");
-      if (version.indexOf("6.") == 0) {
-        this.is6plus = true;
-        this.setUseSeparateXmlItem(false);
+      LOGGER.info("Elasticsearch version: "+version);
+      for (int i=1;i<20;i++) {
+        if (version.indexOf(i+".") == 0) {
+          int primaryVersion = i;
+          //System.out.println("primaryVersion="+primaryVersion);
+          if (primaryVersion >= 6) is6plus = true;
+          break;
+        }
+      }
+      if (is6plus && this.getUseSeparateXmlItem()) {
+        LOGGER.info("Elasticsearch is version "+version+", setting useSeparateXmlItem=false");
+        setUseSeparateXmlItem(false);
       }
       
+      boolean indexExists = false;
       try {
         client.sendHead(client.getIndexUrl(name));
-        // the index exists
-        return;
-      } catch (FileNotFoundException e) {
+        indexExists = true;
+      } catch (FileNotFoundException e) {}
+      
+      
+      if (indexExists) {
+        boolean hasClobDocType = false;
+        result = client.sendGet(client.getIndexUrl(name));
+        if (result != null && result.length() > 0 && result.indexOf("{") == 0) {
+          JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(result);
+          for (Entry<String, JsonValue> entry: jso.entrySet()) {
+            JsonObject jsoIndex = (JsonObject)entry.getValue();
+            for (Entry<String, JsonValue> indexEntry: jsoIndex.entrySet()) {
+              String indexK = indexEntry.getKey();
+              if (indexK != null && indexK.equals("mappings")) {
+                JsonObject jsoMappings = (JsonObject)indexEntry.getValue();
+                for (Entry<String, JsonValue> mappingEntry: jsoMappings.entrySet()) {
+                  String mappingK = mappingEntry.getKey();
+                  if (mappingK != null && mappingK.equals("clob")) {
+                    hasClobDocType = true;
+                    break;
+                  }
+                }
+              }
+              if (hasClobDocType) break;
+            }          
+          }
+        }
+        if (hasClobDocType && !this.getUseSeparateXmlItem()) {
+          LOGGER.info("Existing index has clob doc type, setting useSeparateXmlItem=true");
+          setUseSeparateXmlItem(true);
+        }
       }
+      
+      // return if the index exists
+      if (indexExists) return;
       
       if (name.equals(this.getItemIndexName())) {
         considerAsAlias = this.getIndexNameIsAlias();
