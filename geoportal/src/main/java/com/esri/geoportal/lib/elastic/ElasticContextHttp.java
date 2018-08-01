@@ -20,12 +20,14 @@ import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import java.io.FileNotFoundException;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,6 +41,7 @@ public class ElasticContextHttp extends ElasticContext {
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
   
   /** Instance variables . */
+  private boolean is6plus = false;
   private boolean wasStarted = false;
   
   /** Constructor */
@@ -64,6 +67,8 @@ public class ElasticContextHttp extends ElasticContext {
     request.add("actions",actions);
     String postData = request.build().toString();
     String contentType = "application/json;charset=utf-8";
+    
+    @SuppressWarnings("unused")
     String result = client.sendPost(url,postData,contentType);
     //LOGGER.debug("_createAlias.result",result);
   }
@@ -81,6 +86,29 @@ public class ElasticContextHttp extends ElasticContext {
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
     String postData = JsonUtil.toJson(jso,false);
     String contentType = "application/json;charset=utf-8";
+    
+    if (!this.getUseSeparateXmlItem()) {
+      JsonObjectBuilder jb = Json.createObjectBuilder();
+      for (Entry<String, JsonValue> entry: jso.entrySet()) {
+        String k = entry.getKey();
+        if (k.equals("mappings")) {
+          JsonObject jso2 = (JsonObject)entry.getValue();
+          JsonObjectBuilder jb2 = Json.createObjectBuilder(); 
+          for (Entry<String, JsonValue> entry2: jso2.entrySet()) {
+            String k2 = entry2.getKey();
+            if (!k2.equals("blob") && !k2.equals("clob")) {
+              jb2.add(entry2.getKey(),entry2.getValue());
+            }
+          }
+          jb.add("mappings",jb2.build());
+        } else {
+          jb.add(entry.getKey(),entry.getValue());
+        }
+      }
+      postData = jb.build().toString();
+    }
+
+    @SuppressWarnings("unused")
     String result = client.sendPut(url,postData,contentType);
     //LOGGER.debug("_createIndex.result",result);    
   }
@@ -95,8 +123,17 @@ public class ElasticContextHttp extends ElasticContext {
     LOGGER.debug("Checking index: "+name);
     try {
       if (name == null || name.trim().length() == 0) return;
-      
+      String result, url;
       ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials());
+      
+      result = client.sendGet(client.getBaseUrl());
+      JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
+      String version = esinfo.getJsonObject("version").getString("number");
+      if (version.indexOf("6.") == 0) {
+        this.is6plus = true;
+        this.setUseSeparateXmlItem(false);
+      }
+      
       try {
         client.sendHead(client.getIndexUrl(name));
         // the index exists
@@ -116,8 +153,8 @@ public class ElasticContextHttp extends ElasticContext {
         String idxName = null;
         int sfx = -1;
         
-        String url = client.getBaseUrl()+"/_aliases";
-        String result = client.sendGet(url);
+        url = client.getBaseUrl()+"/_aliases";
+        result = client.sendGet(url);
         if (result != null && result.length() > 0 && result.indexOf("{") == 0) {
           JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(result);
           if (!jso.isEmpty()) {
