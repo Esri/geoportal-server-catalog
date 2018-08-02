@@ -47,6 +47,7 @@ public class ElasticContextHttp extends ElasticContext {
   /** Constructor */
   public ElasticContextHttp() {
     super();
+    setUseSeparateXmlItem(false);
   }
   
   /**
