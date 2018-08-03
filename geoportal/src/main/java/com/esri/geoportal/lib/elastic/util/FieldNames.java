@@ -60,6 +60,12 @@ public class FieldNames {
   /** FIELD_SYS_SOURCEURI = "sys_sourceuri_s" */
   public static String FIELD_SYS_SOURCEURI = "sys_sourceuri_s";
   
+  /** FIELD_SYS_XML = "sys_xml_clob" */
+  public static String FIELD_SYS_XML = "sys_xml_clob";
+  
+  /** FIELD_SYS_XMLMETA = "sys_xmlmeta_obj" */
+  public static String FIELD_SYS_XMLMETA = "sys_xmlmeta_obj";
+  
   /** FIELD_SYS_XMLMODIFIED = "sys_xmlmodified_dt" */
   public static String FIELD_SYS_XMLMODIFIED = "sys_xmlmodified_dt";
   

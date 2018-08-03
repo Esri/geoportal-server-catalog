@@ -17,6 +17,7 @@ import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.Val;
 
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -57,12 +58,14 @@ public class ElasticContext {
   private int httpPort = 9200;
   private String indexName = "metadata";
   private boolean indexNameIsAlias = true;
+  private boolean is6Plus = false;
   private String itemIndexType = "item";
   private String mappingsFile = "config/elastic-mappings.json";
   private List<String> nodes;
   private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
   private boolean useHttps = false;
+  private boolean useSeparateXmlItem = true;
   private String xmlIndexType = "clob";
   
   private String xpackUsername = null;
@@ -133,6 +136,15 @@ public class ElasticContext {
     this.indexNameIsAlias = indexNameIsAlias;
   }
   
+  /** Version 6+ */
+  public boolean getIs6Plus() {
+    return is6Plus;
+  }
+  /** Version 6+ */
+  public void setIs6Plus(boolean is6Plus) {
+    this.is6Plus = is6Plus;
+  }
+  
   /** The index name holding metadata items. */
   public String getItemIndexName() {
     return this.indexName;
@@ -191,6 +203,15 @@ public class ElasticContext {
   /** Use HTTPS. */
   public void setUseHttps(boolean useHttps) {
     this.useHttps = useHttps;
+  }
+  
+  /** Store XMLs in a separate item type. */
+  public boolean getUseSeparateXmlItem() {
+    return useSeparateXmlItem;
+  }
+  /** Store XMLs in a separate item type. */
+  public void setUseSeparateXmlItem(boolean useSeparateXmlItem) {
+    this.useSeparateXmlItem = useSeparateXmlItem;
   }
 
   /** The index name holding metadata xmls. */
@@ -359,8 +380,46 @@ public class ElasticContext {
   }
   
   /**
+   * Gets the base URL.
+   * @param next round robin if true
+   * @return the base url
+   */
+  public String getBaseUrl(boolean next) {
+    String node = null;
+    if (next) {
+      node = getNextNode();
+    } else {
+      node = nodesToArray()[0];
+    }
+    int port = getHttpPort();
+    String scheme = "http://";
+    if (getUseHttps()) scheme = "https://";
+    String url = scheme+node+":"+port;
+    return url;
+  }
+  
+  /**
+   * Gets basic credentials if configured.
+   * @return the credentials
+   */
+  public String getBasicCredentials() {
+    String user = getXpackUsername();
+    String pwd = getXpackPassword();
+    if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
+      try {
+        String cred = user+":"+pwd;
+        byte[] bytes = java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8"));
+        String authString = "Basic "+(new String(bytes,"UTF-8"));
+        return authString;
+      } catch (UnsupportedEncodingException e) {
+      }
+    }
+    return null;
+  }
+  
+  /**
    * Gets the next node name (for a round robin balancer context).
-   * @param name the node name
+   * @return the node name
    */
   public String getNextNode() {
     String[] list = nodesToArray();
