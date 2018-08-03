@@ -6,17 +6,18 @@
   
   <!-- Extensibility classes that are instantiated on demand -->
   
-  <beans:bean id="request.DeleteItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.DeleteItemRequest"/>
-  <beans:bean id="request.DeleteItemsRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.DeleteItemsRequest"/>
-  <beans:bean id="request.GetItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetItemRequest"/>
-  <beans:bean id="request.GetMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.GetMetadataRequest"/>
-  <beans:bean id="request.PublishMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.PublishMetadataRequest"/>
-  <beans:bean id="request.ReindexRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ReindexRequest"/>
-  <beans:bean id="request.SetAccessRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.SetAccessRequest"/>
-  <beans:bean id="request.SetApprovalStatusRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.SetApprovalStatusRequest"/>
-  <beans:bean id="request.SetFieldRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.SetFieldRequest"/>
-  <beans:bean id="request.SetOwnerRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.SetOwnerRequest"/>
-  <beans:bean id="request.TransformMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.TransformMetadataRequest"/>
+  <beans:bean id="request.DeleteItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.DeleteItemRequest"/>
+  <beans:bean id="request.DeleteItemsRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.DeleteItemsRequest"/>
+  <beans:bean id="request.GetItemRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.GetItemRequest"/>
+  <beans:bean id="request.GetMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.GetMetadataRequest"/>
+  <beans:bean id="request.PublishMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.PublishMetadataRequest"/>
+  <beans:bean id="request.RealiasRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.RealiasRequest"/>
+  <beans:bean id="request.ReindexRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.ReindexRequest"/>
+  <beans:bean id="request.SetAccessRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.SetAccessRequest"/>
+  <beans:bean id="request.SetApprovalStatusRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.SetApprovalStatusRequest"/>
+  <beans:bean id="request.SetFieldRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.SetFieldRequest"/>
+  <beans:bean id="request.SetOwnerRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.SetOwnerRequest"/>
+  <beans:bean id="request.TransformMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.http.request.TransformMetadataRequest"/>
   <beans:bean id="request.ValidateMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest"/>
   
   <beans:bean id="metadata.Evaluator" scope="prototype" class="com.esri.geoportal.base.metadata.Evaluator">

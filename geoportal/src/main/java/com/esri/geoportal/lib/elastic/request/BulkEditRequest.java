@@ -18,6 +18,7 @@ import com.esri.geoportal.base.util.Val;
 import com.esri.geoportal.base.util.exception.UsageException;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
+import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
@@ -27,7 +28,10 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+import javax.json.Json;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
+import javax.json.JsonObjectBuilder;
 
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.index.query.BoolQueryBuilder;
@@ -35,6 +39,8 @@ import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.script.Script;
 import org.elasticsearch.search.SearchHit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * Bulk request.
@@ -49,8 +55,12 @@ public class BulkEditRequest extends BulkRequest {
   
   */
   
+  /** Logger. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(BulkEditRequest.class);
+  
   /** Instance variables. */
   private String body;
+  private List<JsonObject> httpFilters = new ArrayList<JsonObject>();
   private List<QueryBuilder> filters = new ArrayList<QueryBuilder>();
   private Map<String,String[]> parameterMap;
   private Script updateScript;
@@ -123,6 +133,35 @@ public class BulkEditRequest extends BulkRequest {
     }
   }
   
+  /**
+   * Append the scroller hit to the bulk request (HTTP).
+   * @param ec the Elastic context
+   * @param request the request
+   * @param hit the hit
+   */
+  protected void appendHit(ElasticContext ec, StringBuilder data, com.esri.geoportal.lib.elastic.http.util.SearchHit hit) {
+    // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
+    JsonObjectBuilder line1 = Json.createObjectBuilder();
+    // should "_retry_on_conflict" be "retry_on_conflict" at ES6?
+    String retryName = "_retry_on_conflict";
+    if (ec.getIs6Plus()) retryName = "retry_on_conflict";
+    line1.add("update", Json.createObjectBuilder()
+      .add("_id",hit.getId())
+      .add("_type",ec.getItemIndexType())
+      .add(retryName,this.getRetryOnConflict())
+    );
+    data.append(line1.build().toString()).append("\n");
+    if (getUpdateScript() != null) {
+      // TODO updateScript
+      System.out.println("updateScript="+getUpdateScript().toString());
+    } else {
+      JsonObjectBuilder line2 = Json.createObjectBuilder();
+      JsonObject src = (JsonObject)JsonUtil.toJsonStructure(getUpdateSource());
+      line2.add("doc",src);
+      data.append(line2.build().toString()).append("\n");
+    }
+  }
+  
   @Override
   public AppResponse execute() throws Exception {
     AppUser user = this.getUser();
@@ -144,6 +183,16 @@ public class BulkEditRequest extends BulkRequest {
     if (values != null && values.length > 0) {
       QueryBuilder q = QueryBuilders.idsQuery().addIds(values);
       filters.add(q);
+      
+      String type = GeoportalContext.getInstance().getElasticContext().getItemIndexType();
+      JsonArrayBuilder ja = Json.createArrayBuilder();
+      for (String v: values) ja.add(v);
+      JsonObjectBuilder jb = Json.createObjectBuilder();
+      jb.add("ids",Json.createObjectBuilder()
+        .add("type",type)
+        .add("values",ja)
+      );
+      httpFilters.add(jb.build());
     }
   }
   
@@ -165,10 +214,14 @@ public class BulkEditRequest extends BulkRequest {
       if (content.startsWith("{")) {
         try {
           JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(content);
-          JsonObject jsQuery = jso.getJsonObject("query");
-          String v = JsonUtil.toJson(jsQuery);
-          QueryBuilder q = QueryBuilders.wrapperQuery(v);
-          filters.add(q);
+          if (jso.containsKey("query")) {
+            JsonObject jsQuery = jso.getJsonObject("query");
+            String v = JsonUtil.toJson(jsQuery);
+            QueryBuilder q = QueryBuilders.wrapperQuery(v);
+            filters.add(q);
+            
+            httpFilters.add(jsQuery);            
+          }
         } catch (Exception e) {
           throw new UsageException(errMsg);
         }
@@ -199,6 +252,12 @@ public class BulkEditRequest extends BulkRequest {
     if (value != null && value.length() > 0) {
       QueryBuilder q = QueryBuilders.termQuery(field,value);
       filters.add(q);
+      
+      JsonObjectBuilder jb = Json.createObjectBuilder();
+      jb.add("term",Json.createObjectBuilder()
+        .add(field,value)
+      );
+      httpFilters.add(jb.build());
     }
   }
   
@@ -237,6 +296,59 @@ public class BulkEditRequest extends BulkRequest {
       }
     }
     return null;
+  }
+  
+  /**
+   * Create the HTTP scroller.
+   * @param ec the Elastic context
+   * @return the scroller
+   */
+  protected com.esri.geoportal.lib.elastic.http.util.Scroller newHttpScroller(ElasticContext ec) {
+    //QueryBuilder qtmp = this.newScrollerQuery(ec);
+    //System.out.println("BulkEditRequest.query.transport="+qtmp.toString());
+    
+    String q = this.newHttpScrollerQuery(ec);
+    LOGGER.debug("BulkEditRequest.query="+q); // TODO temporary
+    com.esri.geoportal.lib.elastic.http.util.Scroller scroller = new com.esri.geoportal.lib.elastic.http.util.Scroller();
+    scroller.setIndexName(ec.getItemIndexName());
+    scroller.setIndexType(ec.getItemIndexType());
+    scroller.setQuery(q);
+    scroller.setFetchSource(false);
+    scroller.setPageSize(getScrollerPageSize());
+    //scroller.setMaxDocs(10);
+    return scroller;
+  }
+  
+  /**
+   * Create the HTTP scroller query.
+   * @param ec the Elastic context
+   * @return the scroller query
+   */
+  protected String newHttpScrollerQuery(ElasticContext ec) {
+    filters = new ArrayList<QueryBuilder>(); // temporary
+    httpFilters = new ArrayList<JsonObject>();
+    this.filterById();
+    this.filterByOwner();
+    this.filterBySourceUri();
+    this.filterBySourceRef();
+    this.filterByTaskRef();
+    this.filterByQuery();
+    if (httpFilters.size() == 0) {
+      throw new UsageException("Bulk edit: the request had no filters");
+    }
+    this.filterByUser();
+    
+    JsonArrayBuilder ja = Json.createArrayBuilder();
+    for (JsonObject v: httpFilters) ja.add(v);
+    JsonObjectBuilder jb = Json.createObjectBuilder();
+    jb.add("bool",Json.createObjectBuilder()
+      .add("filter",ja)
+    );
+    String q = jb.build().toString();
+
+    //System.err.println("Bulk edit query .......................\r\n"+q); // TODO temporary
+    //if (filterArray.size() > 0) throw new UsageException("Bulk edit: temporary stop");
+    return q;
   }
   
   /**

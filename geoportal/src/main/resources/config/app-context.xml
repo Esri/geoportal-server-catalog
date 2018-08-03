@@ -22,7 +22,7 @@
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
 	</beans:bean>
 
-	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContext">
+	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContextHttp">
 		<beans:property name="clusterName" value="${es_cluster:elasticsearch}" />
 		<beans:property name="indexName" value="metadata" />
 		<beans:property name="indexNameIsAlias" value="true" />
