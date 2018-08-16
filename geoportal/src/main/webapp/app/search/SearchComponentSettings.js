@@ -43,6 +43,10 @@ function(declare, Templated, ModalDialog) {
       
     },
     
+    focus: function() {
+      this.componentLabelInput.focus();
+    },
+    
     showDialog: function() {
       var self = this, dialog = null;
       this.init();
@@ -52,6 +56,9 @@ function(declare, Templated, ModalDialog) {
         onHide: function() {
           self.destroyRecursive(false);
         }, 
+        onShow: function() {
+          self.focus();
+        },
         onOkClicked: function() {
           self.validateAndApply();
         }
