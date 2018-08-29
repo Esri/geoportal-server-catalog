@@ -337,6 +337,13 @@ var G = {
     if (typeof value === "undefined" || value === null) return;
     if (typeof value === "string" && value.length === 0) return;
     obj[name] = value;
+  },
+
+  clearProps: function(obj, name) {
+      if (obj[name]){
+          obj[name] = undefined;
+      }
+
   }
   
 };
