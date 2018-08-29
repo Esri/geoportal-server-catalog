@@ -55,12 +55,12 @@ https://github.com/Esri/geoportal-server-catalog/issues/187
         /* publisher is defined as a Core Queryable in CSW 2.x.
         /gmd:MD_Metadata/gmd:contact[4]/gmd:CI_ResponsibleParty[1]/gmd:role[1]/gmd:CI_RoleCode[1]/@codeListValue
           */
-    G.evalProps(task,item,root,"publisher","//gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode[@codeListValue=\"publisher\"]/../../gmd:organisationName/*/text() | //gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode[@codeListValue=\"pointOfContact\"]/../../gmd:organisationName/*/text()");
+    G.evalProps(task,item,root,"publisher_s","//gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode[@codeListValue=\"publisher\"]/../../gmd:organisationName/*/text() | //gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode[@codeListValue=\"pointOfContact\"]/../../gmd:organisationName/*/text()");
 
         /* creator is defined as a Core Queryable in CSW 2.x.
        SB puts authors in gmd:organisationName
          */
-        G.evalProps(task,item,root,"creator","//gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode[@codeListValue=\"originator\"]/../../gmd:organisationName/*/text() ");
+        G.evalProps(task,item,root,"creator_s","//gmd:CI_ResponsibleParty/gmd:role/gmd:CI_RoleCode[@codeListValue=\"originator\"]/../../gmd:organisationName/*/text() ");
 
         /*
           we want just links from the distribution, service and aggregation processes.
