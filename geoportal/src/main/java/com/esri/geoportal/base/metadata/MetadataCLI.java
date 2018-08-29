@@ -17,13 +17,15 @@ package com.esri.geoportal.base.metadata;
 import com.esri.geoportal.base.xml.XmlUtil;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
+import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.util.AccessUtil;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.commons.cli.*;
-import org.codehaus.jackson.map.ObjectMapper;
+import org.springframework.context.support.AbstractApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
 
 import java.io.File;
-
 /**
  *
  * run the javascript Evaluators.js scripts
@@ -54,6 +56,9 @@ public class MetadataCLI{
      *
      */
     public static void main( String[] args ) {
+        System.err.println("ignore errors. This needs to be reworked as a spring shell application");
+
+        AbstractApplicationContext context = null;
         Option help = Option.builder("h")
                 .required(false)
                 .longOpt("help")
@@ -82,7 +87,7 @@ public class MetadataCLI{
                         .hasArg()
                         .longOpt("metdatafile")
                         .desc("Metadata File")
-                       // .type(File.class)
+                        // .type(File.class)
                         .build();
         ;
 
@@ -97,12 +102,16 @@ public class MetadataCLI{
         options.addOption(help);
         //options.addOption(metadataJsDir);
         options.addOption(metadataFile);
-;
+        ;
         options.addOption(verbose);
         ;
         // create the parser
         CommandLineParser parser = new DefaultParser();
         try {
+            context = new ClassPathXmlApplicationContext("config/cli-context.xml"
+
+                    ,"**/cli-app-factory.xml"
+            );
             // parse the command line arguments
             CommandLine line = parser.parse(options, args);
             Boolean v = line.hasOption("v");
@@ -123,16 +132,29 @@ public class MetadataCLI{
 
     }
     public static void testScriptEvaluator( File metadata, Boolean verbose) throws Exception {
+        System.err.println("IGNORE errors above this line. This needs to be reworked as a spring shell application");
+
         ObjectMapper mapper = new ObjectMapper();
         AppUser user = null;
         boolean pretty = true;
+        Evaluator evaluator = GeoportalContext.getInstance().getBeanIfDeclared(
+                "metadata.Evaluator",Evaluator.class,new Evaluator());
         File p = metadata;
         String xml = XmlUtil.readFile(p.getAbsolutePath());
         MetadataDocument mdoc = new MetadataDocument();
+        mdoc.setItemId("test");
         mdoc.setXml(xml);
-
-
+        mdoc.interrogate();
+        mdoc.evaluate();
+        mdoc.validate();
+        System.err.println("typeKey="+mdoc.getMetadataType().getKey());
+        /*
+         originally the code tested just the javascript evaluators.
+         renable with a switch, later. Faster w/o the spring initialization.
+          */
+        /*
         Evaluator jsEvaluator = new Evaluator();
+
         // add all files from directory
         //File[] files =  metadataPath.listFiles();
         //String jsPath = metadataPath.getPath() + "metadata/js/Evaluator.js";
@@ -145,6 +167,7 @@ public class MetadataCLI{
         System.err.println("typeKey="+mdoc.getMetadataType().getKey());
         System.err.println("detailsXslt=" + jsEvaluator.getDetailsXslt(mdoc.getMetadataType().getKey()));
         jsEvaluator.evaluate(mdoc);
+        */
         System.err.println("title="+mdoc.getTitle());
         if (verbose) {
             System.err.println("xml=" + mdoc.getXml());

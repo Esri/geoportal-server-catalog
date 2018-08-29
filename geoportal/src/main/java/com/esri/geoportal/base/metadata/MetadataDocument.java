@@ -19,19 +19,17 @@ import com.esri.geoportal.base.xml.XmlUtil;
 import com.esri.geoportal.base.xml.XsltTemplate;
 import com.esri.geoportal.base.xml.XsltTemplates;
 import com.esri.geoportal.context.GeoportalContext;
-
-import java.io.IOException;
-
-import javax.xml.parsers.ParserConfigurationException;
-
 import org.w3c.dom.Document;
 import org.xml.sax.SAXException;
 
-/** 
- * A metadata document. 
+import javax.xml.parsers.ParserConfigurationException;
+import java.io.IOException;
+
+/**
+ * A metadata document.
  */
 public class MetadataDocument {
-  
+
   /** Instance variables. */
   private Document dom;
   private String evaluatedJson;
@@ -43,10 +41,10 @@ public class MetadataDocument {
   private String suppliedJson;
   private String title;
   private String xml;
-  
+
   /** Constructor */
   public MetadataDocument() {}
-  
+
   /** The dom. */
   public Document getDom() {
     return dom;
@@ -55,7 +53,7 @@ public class MetadataDocument {
   public void setDom(Document dom) {
     this.dom = dom;
   }
-  
+
   /** The metadata XML evaluated as JSON. */
   public String getEvaluatedJson() {
     return evaluatedJson;
@@ -73,7 +71,7 @@ public class MetadataDocument {
   public void setIsDraft(boolean isDraft) {
     this.isDraft = isDraft;
   }
-  
+
   /** Get the item id. */
   public String getItemId() {
     return this.itemId;
@@ -82,7 +80,7 @@ public class MetadataDocument {
   public void setItemId(String itemId) {
     this.itemId = itemId;
   }
-  
+
   /** The JSON source. */
   public String getJson() {
     return this.json;
@@ -100,7 +98,7 @@ public class MetadataDocument {
   public void setMetadataType(MetadataType metadataType) {
     this.metadataType = metadataType;
   }
-  
+
   /** True if the XML should be written to the store. */
   public boolean getRequiresXmlWrite() {
     return requiresXmlWrite;
@@ -109,7 +107,7 @@ public class MetadataDocument {
   public void setRequiresXmlWrite(boolean requiresXmlWrite) {
     this.requiresXmlWrite = requiresXmlWrite;
   }
-  
+
   /** The json supplied with a piblication request. */
   public String getSuppliedJson() {
     return suppliedJson;
@@ -136,7 +134,7 @@ public class MetadataDocument {
   public void setXml(String xml) {
     this.xml = xml;
   }
-  
+
   /** Methods =============================================================== */
 
   /**
@@ -148,11 +146,21 @@ public class MetadataDocument {
    */
   public Document ensureDom() throws ParserConfigurationException, SAXException, IOException {
     if (this.getDom() == null) {
-      this.setDom(DomUtil.makeDom(this.getXml(),true));
+      this.updateDom();
     }
     return this.getDom();
   }
-  
+  /**
+   * Forces an update to the dom
+   * @return the dom
+   * @throws ParserConfigurationException
+   * @throws SAXException
+   * @throws IOException
+   */
+  public Document updateDom() throws ParserConfigurationException, SAXException, IOException {
+    this.setDom(DomUtil.makeDom(this.getXml(),true));
+    return this.getDom();
+  }
   /**
    * Ensures the the minimal components.
    */
@@ -160,33 +168,33 @@ public class MetadataDocument {
     // TODO ensureMinimals()
     // An empty title is set to "Untitled", an invalid envelope is set to the extent of the world.
   }
-  
+
   /**
    * Evaluate the document.
    * @throws Exception if an exception occurs
    */
   public void evaluate() throws Exception {
     Evaluator evaluator = GeoportalContext.getInstance().getBeanIfDeclared(
-        "metadata.Evaluator",Evaluator.class,new Evaluator());
+            "metadata.Evaluator",Evaluator.class,new Evaluator());
     evaluator.evaluate(this);
   }
-  
+
   /** True if the document has evaluated json. */
   public boolean hasEvaluatedJson() {
     return (evaluatedJson != null && evaluatedJson.length() > 0);
   }
-  
+
   /** True if the document has supplied json. */
   public boolean hasSuppliedJson() {
     return (suppliedJson != null && suppliedJson.length() > 0);
   }
-  
+
   /** True if the document has an XML. */
   public boolean hasXml() {
     return (xml != null && xml.length() > 0);
   }
-  
-  /** 
+
+  /**
    * Interrogate the metadata type.
    * @throws UnrecognizedTypeException if the type is unrecognized
    * @throws Exception if an exception occurs
@@ -195,23 +203,26 @@ public class MetadataDocument {
     setXml(XmlUtil.identity(getXml())); // TODO may not be xml based
     if (hasXml()) ensureDom();
     Evaluator evaluator = GeoportalContext.getInstance().getBeanIfDeclared(
-        "metadata.Evaluator",Evaluator.class,new Evaluator());
+            "metadata.Evaluator",Evaluator.class,new Evaluator());
     evaluator.interrogate(this);
-    
+
     // execute an immediate transformation if required
     if (getMetadataType() != null) {
       String toKnownXslt = getMetadataType().getToKnownXslt();
       if (toKnownXslt != null && toKnownXslt.length() > 0) {
         XsltTemplate xsltTemplate = XsltTemplates.getCompiledTemplate(toKnownXslt);
         String result = xsltTemplate.transform(getXml());
-        setXml(result);
-        interrogate();
+        this.setXml(result);
+        if (hasXml()) this.updateDom();;
+        this.interrogate();
+
+        //evaluator.interrogate(this);
       }
     } else {
       throw new UnrecognizedTypeException();
     }
-  }  
-  
+  }
+
   /**
    * Prepare the document for publication.
    * @param xml the metadata xml
@@ -220,8 +231,8 @@ public class MetadataDocument {
    * @throws ValidationException if the metadata is invalid
    * @throws Exception if an exception occurs
    */
-  public void prepareForPublication(String xml, boolean asDraft) 
-      throws UnrecognizedTypeException, ValidationException, Exception {
+  public void prepareForPublication(String xml, boolean asDraft)
+          throws UnrecognizedTypeException, ValidationException, Exception {
     if (asDraft) this.setIsDraft(asDraft);
     this.setXml(xml);
     this.interrogate();
@@ -229,7 +240,7 @@ public class MetadataDocument {
     this.validate();
     this.ensureMinimals();
   }
-  
+
   /**
    * Validate the document.
    * @throws ValidationException if invalid
@@ -237,18 +248,18 @@ public class MetadataDocument {
   public void validate() throws ValidationException {
     // TODO globally turn off validation???
     Validator validator = GeoportalContext.getInstance().getBeanIfDeclared(
-        "metadata.Validator",Validator.class,new Validator());
+            "metadata.Validator",Validator.class,new Validator());
     validator.validate(this);
   }
-  
+
   /**
    * Validate the title .
    * @throws ValidationException if invalid
    */
   public void validateTitle() throws ValidationException {
     Validator validator = GeoportalContext.getInstance().getBeanIfDeclared(
-        "metadata.Validator",Validator.class,new Validator());
+            "metadata.Validator",Validator.class,new Validator());
     validator.validateTitle(this);
   }
-  
+
 }
