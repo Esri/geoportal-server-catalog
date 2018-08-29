@@ -13,6 +13,13 @@
  * limitations under the License.
  */
 package com.esri.geoportal.base.xml;
+import com.esri.geoportal.base.util.ResourcePath;
+import com.esri.geoportal.context.GeoportalContext;
+
+import javax.xml.XMLConstants;
+import javax.xml.transform.*;
+import javax.xml.transform.stream.StreamResult;
+import javax.xml.transform.stream.StreamSource;
 import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
@@ -21,20 +28,6 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-
-import javax.xml.XMLConstants;
-import javax.xml.transform.Result;
-import javax.xml.transform.Source;
-import javax.xml.transform.Templates;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerConfigurationException;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.stream.StreamResult;
-import javax.xml.transform.stream.StreamSource;
-
-import com.esri.geoportal.base.util.ResourcePath;
-import com.esri.geoportal.context.GeoportalContext;
 
 /**
  * Represents a compiled XSLT transformation stylesheet.
@@ -92,7 +85,7 @@ public class XsltTemplate {
    * @throws TransformerConfigurationException if a configuration exception occurs
    */
   protected void compileFromResourcePath(String resourcePath)
-      throws IOException, TransformerConfigurationException {
+          throws IOException, TransformerConfigurationException {
     URL url = (new ResourcePath()).makeUrl(resourcePath);
     compileFromSystemId(url.toExternalForm());
   }
@@ -106,12 +99,13 @@ public class XsltTemplate {
    * @throws TransformerConfigurationException if a configuration exception occurs
    */
   protected void compileFromSystemId(String systemId)
-      throws TransformerConfigurationException {
+          throws TransformerConfigurationException {
     setSystemId(systemId);
     TransformerFactory factory = TransformerFactory.newInstance();
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET,"file");
-    factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+    //factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
     //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
     setTemplates(factory.newTemplates(new StreamSource(getSystemId())));
   }
@@ -128,7 +122,7 @@ public class XsltTemplate {
    * @throws TransformerConfigurationException if a configuration exception occurs
    */
   public static XsltTemplate makeFromResourcePath(String resourcePath)
-      throws IOException, TransformerConfigurationException {
+          throws IOException, TransformerConfigurationException {
     XsltTemplate template = new XsltTemplate();
     template.compileFromResourcePath(resourcePath);
     return template;
@@ -144,7 +138,7 @@ public class XsltTemplate {
    * @throws TransformerConfigurationException if a configuration exception occurs
    */
   public static XsltTemplate makeFromSystemId(String systemId)
-      throws TransformerConfigurationException {
+          throws TransformerConfigurationException {
     XsltTemplate template = new XsltTemplate();
     template.compileFromSystemId(systemId);
     return template;
@@ -156,8 +150,8 @@ public class XsltTemplate {
    * @return XsltTemplate
    * @throws TransformerConfigurationException when template cannot be made
    */
-  public static XsltTemplate makeTemplate(String path) 
-      throws TransformerConfigurationException{
+  public static XsltTemplate makeTemplate(String path)
+          throws TransformerConfigurationException{
     XsltTemplate template = null;
     List<Exception> exceptions = new LinkedList<Exception>();
     path = path.trim();
@@ -174,7 +168,7 @@ public class XsltTemplate {
       return template;
     } catch (TransformerConfigurationException e) {
       exceptions.add(e);
-    } 
+    }
     if (!path.startsWith("/")) {
       path = "/" + path;
       return makeTemplate(path);
@@ -199,7 +193,7 @@ public class XsltTemplate {
    * @throws TransformerConfigurationException if a configuration exception occurs
    */
   public String transform(String xml)
-      throws TransformerException, TransformerConfigurationException {
+          throws TransformerException, TransformerConfigurationException {
     return transform(xml,null);
   }
 
@@ -213,7 +207,7 @@ public class XsltTemplate {
    */
   @SuppressWarnings("rawtypes")
   public String transform(String xml, Map mapParams)
-      throws TransformerException, TransformerConfigurationException {
+          throws TransformerException, TransformerConfigurationException {
     StringReader reader = new StringReader(xml);
     StringWriter writer = new StringWriter();
     this.transform(new StreamSource(reader), new StreamResult(writer), mapParams);
@@ -230,8 +224,8 @@ public class XsltTemplate {
    * @throws TransformerConfigurationException the transformer configuration exception
    */
   @SuppressWarnings("rawtypes")
-  public Result transform(Source source, Result result, Map mapParams) 
-      throws TransformerException, TransformerConfigurationException {
+  public Result transform(Source source, Result result, Map mapParams)
+          throws TransformerException, TransformerConfigurationException {
     if (getTemplates() == null) {
       String sMsg = "The XsltTemplate has not been compiled: "+getSystemId();
       throw new TransformerConfigurationException(sMsg);
@@ -258,7 +252,7 @@ public class XsltTemplate {
    */
   @SuppressWarnings("rawtypes")
   public String transform(String xsl, String xml, Map mapParams)
-      throws TransformerException, TransformerConfigurationException {
+          throws TransformerException, TransformerConfigurationException {
     StringReader xslReader = new StringReader(xsl);
     TransformerFactory factory = TransformerFactory.newInstance();
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
