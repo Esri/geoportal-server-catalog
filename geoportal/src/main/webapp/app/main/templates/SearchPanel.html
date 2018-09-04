@@ -8,7 +8,7 @@
           field: 'envelope_geo',
           pointField: 'envelope_cen_pt',
           allowAggregation: true,
-          open: false,
+          open: true,
           label:'${i18n.search.criteria.map}'">
       </div>
       <div data-dojo-type="app/search/TemporalFilter"
@@ -20,31 +20,18 @@
           open:false,
           label:'${i18n.search.criteria.timePeriod}'">
       </div>
-      <div data-dojo-type="app/search/TemporalFilter"
-        data-dojo-props="
-          field:'sys_modified_dt',
-          interval:'day',
-          open:false,
-          label:'${i18n.search.criteria.date}'">
-      </div>
-      <!--
-      <div data-dojo-type="app/search/NumericFilter"
-        data-dojo-props="
-          nestedPath:'timeperiod_nst',
-          field:'timeperiod_nst.begin_year_l',
-          interval:1000,
-          ticks:4,
-          places:0,
-          label:'Year (Paleo)'">
-      </div>
-      -->
-      <!--
-      <div data-dojo-type="app/search/DateFilter"
-        data-dojo-props="field:'sys_created_dt',interval:'day',allowHistogram:false,label:'Created'">
-      </div>
-      -->
+
       <div data-dojo-type="app/search/TermsAggregation"
         data-dojo-props="field:'sys_owner_s',open:false,label:'${i18n.search.criteria.owner}'">
+      </div>
+      <div data-dojo-type="app/search/TermsAggregation"
+        data-dojo-props="field:'disposition_s',open:false,label:'Disposition'">
+      </div>
+      <div data-dojo-type="app/search/TermsAggregation"
+        data-dojo-props="field:'datacategory_s',open:false,label:'Data Category'">
+      </div>
+      <div data-dojo-type="app/search/TermsAggregation"
+        data-dojo-props="field:'typemedia_s',open:false,label:'Type Media'">
       </div>
       <div data-dojo-type="app/search/TermsAggregation"
         data-dojo-props="field:'apiso_TopicCategory_s',open:false,label:'${i18n.search.criteria.topicCategory}'">

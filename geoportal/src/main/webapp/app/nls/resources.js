@@ -35,6 +35,7 @@ define({
       home: "Home",
       search: "Search",
       map: "Map",
+      help: "Help",
       about: "About",
       content: "Content",
       welcomePattern: "{name}",
