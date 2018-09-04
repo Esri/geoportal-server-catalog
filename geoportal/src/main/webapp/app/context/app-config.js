@@ -21,11 +21,11 @@ define([],function(){var obj={
   },
   
   searchMap: {
-    basemap: "streets",
+    basemap: "topo",
     autoResize: true, 
     wrapAround180: true,
-    center: [-98, 40], 
-    zoom: 3
+    center: [-84.5, 34], 
+    zoom: 5
   },
   
   searchResults: {

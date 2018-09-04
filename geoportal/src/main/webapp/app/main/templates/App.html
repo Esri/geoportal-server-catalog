@@ -9,6 +9,9 @@
 	      <a class="nav-link" href="#mapPanel" data-toggle="tab">${i18n.nav.map}</a>
 	    </li>
 	    <li class="nav-item">
+	      <a class="nav-link" href="#helpPanel" data-toggle="tab">${i18n.nav.help}</a>
+	    </li>
+	    <li class="nav-item">
 	      <a class="nav-link" href="#aboutPanel" data-toggle="tab">${i18n.nav.about}</a>
 	    </li>
 	  </ul>
@@ -61,6 +64,9 @@
     </div>
     <div id="mapPanel" role="tabpanel" class="tab-pane fade" >
       <div data-dojo-type="app/main/MapPanel" data-dojo-attach-point="mapPanel"></div>
+    </div>
+    <div id="helpPanel" role="tabpanel" class="tab-pane fade" >
+      <div data-dojo-type="app/main/HelpPanel" data-dojo-attach-point="helpPanel"></div>
     </div>
     <div id="aboutPanel" role="tabpanel" class="tab-pane fade" >
       <div data-dojo-type="app/main/AboutPanel" data-dojo-attach-point="aboutPanel"></div>
