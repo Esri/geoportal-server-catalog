@@ -7,6 +7,12 @@
             <span data-dojo-attach-point="closeText" class="closeText" title="${buttonCancel}">x</span>
         </span>
     </div>
-    <div data-dojo-attach-point="containerNode" class="dijitDialogPaneContent">
+    <div data-dojo-attach-point="containerNode" class="dijitDialogPaneContent" style="height: 400px; width: 600px;">
+      <table data-dojo-attach-point="table" style="width: 100%;">
+        <tr>
+          <th>${i18n.item.itemData.attribute}</th>
+          <th>${i18n.item.itemData.value}</th>
+        </tr>
+      </table>
     </div>
 </div>

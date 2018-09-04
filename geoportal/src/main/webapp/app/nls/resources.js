@@ -242,7 +242,9 @@ define({
         }
       },
       itemData: {
-        title: "Item data"
+        title: "Item data",
+        attribute: "Attribute",
+        value: "Value"
       },
       statusChecker: {
         unknown: "Unknown",
