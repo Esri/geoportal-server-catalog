@@ -43,12 +43,13 @@ define(["dojo/_base/declare",
   "app/content/SetField",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
-  "app/preview/PreviewPane"], 
+  "app/preview/PreviewPane",
+  "app/search/ItemData"], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, 
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
   MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata, 
-  PreviewUtil, PreviewPane) {
+  PreviewUtil, PreviewPane, ItemData) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
  
@@ -300,6 +301,14 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     
     _renderDataPopup: function(item) {
       console.log(item);
+      var itemData = new ItemData({
+        title: this.i18n.item.itemData.title,
+        item: item,
+        onHide: function() {
+          itemData.destroy();
+        }
+      });
+      itemData.show();
     },
     
     _renderLinksDropdown: function(item,links) {
