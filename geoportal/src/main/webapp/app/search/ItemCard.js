@@ -254,6 +254,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     
     _renderItemLinks: function(itemId,item) {
       if (AppContext.appConfig.searchResults.showLinks) {
+        var v = item.sys_metadatatype_s;
         var actionsNode = this.actionsNode;
         var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
         var htmlNode = domConstruct.create("a",{
@@ -271,6 +272,15 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           target: "_blank",
           innerHTML: i18n.item.actions.json
         },actionsNode);
+        if (v === "json") {
+          var dataNode = domConstruct.create("a",{
+            href: "#",
+            innerHTML: i18n.item.actions.data
+          },actionsNode);
+          this.own(on(dataNode, "click", lang.hitch({self: this, item: item}, function(evt){
+            this.self._renderDataPopup(item);
+          })));
+        }
         if (AppContext.geoportal.supportsApprovalStatus || 
             AppContext.geoportal.supportsGroupBasedAccess) {
           var client = new AppClient();
@@ -278,7 +288,6 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           xmlNode.href = client.appendAccessToken(xmlNode.href);
           jsonNode.href = client.appendAccessToken(jsonNode.href);
         }
-        var v = item.sys_metadatatype_s;
         if (typeof v === "string" && v === "json") {
           htmlNode.style.visibility = "hidden";
           xmlNode.style.visibility = "hidden";
@@ -287,6 +296,10 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           xmlNode.style.display = "none";
         }
       }
+    },
+    
+    _renderDataPopup: function(item) {
+      console.log(item);
     },
     
     _renderLinksDropdown: function(item,links) {

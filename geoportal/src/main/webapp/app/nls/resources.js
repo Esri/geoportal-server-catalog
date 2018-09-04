@@ -223,6 +223,7 @@ define({
         html: "HTML",
         xml: "XML",
         json: "JSON",
+        data: "Data",
         links: "Links",
         addToMap: "Add to Map",
         preview: "Preview",
