@@ -223,7 +223,7 @@ define({
         html: "HTML",
         xml: "XML",
         json: "JSON",
-        data: "Data",
+        data: "Details",
         links: "Links",
         addToMap: "Add to Map",
         preview: "Preview",
@@ -243,7 +243,7 @@ define({
         }
       },
       itemData: {
-        title: "Item data",
+        title: "Item Details",
         attribute: "Attribute",
         value: "Value"
       },

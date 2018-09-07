@@ -1,6 +1,6 @@
 /* Custom CSS */
 .g-drop-pane-tools {
-  visibility: hidden; /* TVA hide settings tool */
+  /*visibility: hidden; /* TVA hide settings tool */
 }
 
 .custom-banner {
@@ -16,5 +16,9 @@
 }
 
 .g-banner-title { 
-font-size: 32px;  
+    font-size: 32px;  
+}
+
+.g-mapframe-container {
+    top: 107px;
 }
