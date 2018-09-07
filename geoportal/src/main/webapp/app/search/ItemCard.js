@@ -171,7 +171,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       topic.publish(appTopics.OnMouseLeaveResultItem,{item:this.item});
     },
     
-    _renderPreview: function(actionsNode, serviceType) {
+    _renderPreview: function(item, actionsNode, serviceType) {
       
       // declare preview pane
       var previewPane;
@@ -214,6 +214,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       // create clickable link to launch preview dialog
       var previewNode = domConstruct.create("a",{
         href: "javascript:void(0)",
+        title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.preview, title: item.title}),
         innerHTML: i18n.item.actions.preview
       },actionsNode);
       
@@ -238,6 +239,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           domConstruct.create("a",{
             href: "javascript:void(0)",
             innerHTML: i18n.item.actions.addToMap,
+            title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.addToMap, title: item.title}),
             onclick: function() {
               topic.publish(appTopics.AddToMapClicked,serviceType);
             }
@@ -245,7 +247,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           
           // create clickable 'Preview' link if allowes
           if (PreviewUtil.canPreview(serviceType)) {
-            this._renderPreview(actionsNode, serviceType);
+            this._renderPreview(item, actionsNode, serviceType);
           }
           
           return true;
@@ -261,16 +263,19 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         var htmlNode = domConstruct.create("a",{
           href: uri+"/html",
           target: "_blank",
+          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.html, title: item.title}),
           innerHTML: i18n.item.actions.html
         },actionsNode);
         var xmlNode = domConstruct.create("a",{
           href: uri+"/xml",
           target: "_blank",
+          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
           innerHTML: i18n.item.actions.xml
         },actionsNode);
         var jsonNode = domConstruct.create("a",{
           href: uri+"?pretty=true",
           target: "_blank",
+          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
           innerHTML: i18n.item.actions.json
         },actionsNode);
         if (v === "json") {
@@ -323,6 +328,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         "data-toggle": "dropdown",
         "aria-haspopup": true,
         "aria-expanded": true,
+        title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.links, title: item.title}),
         innerHTML: i18n.item.actions.links
       },dd);
       domConstruct.create("span",{
@@ -337,6 +343,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           "class": "small",
           href: u,
           target: "_blank",
+          title: string.substitute(i18n.item.actions.titleFormat, {action: u, title: item.title}),
           innerHTML: u
         },ddli);
       });
