@@ -227,6 +227,7 @@ define({
         links: "Links",
         addToMap: "Add to Map",
         preview: "Preview",
+        titleFormat: "${action} link for ${title}",
         options: {
           caption: "Options",
           editMetadata: "Edit Metadata",

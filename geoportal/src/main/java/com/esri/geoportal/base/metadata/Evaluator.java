@@ -32,6 +32,9 @@ public class Evaluator {
 
   /** Instance variables. */
   private String javascriptFile = "metadata/js/Evaluator.js";
+  
+  /** Instance variables. */
+  private String javascriptFile2 = "metadata/js/JsonEvaluator.js";
 
   /** Constructor. */
   public Evaluator() {
@@ -41,6 +44,11 @@ public class Evaluator {
   /** Get a cached script engine. */
   protected ScriptEngine getCachedEngine() throws URISyntaxException, IOException, ScriptException {
     return ENGINES.getCachedEngine(javascriptFile);
+  }
+  
+  /** Get a cached script engine. */
+  protected ScriptEngine getCachedEngine2() throws URISyntaxException, IOException, ScriptException {
+    return ENGINES.getCachedEngine(javascriptFile2);
   }
 
   /** The Javascript file name. */
@@ -61,6 +69,17 @@ public class Evaluator {
     ScriptEngine engine = this.getCachedEngine();
     Invocable invocable = (Invocable)engine;
     invocable.invokeFunction("evaluate",mdoc);
+  }
+  
+  /**
+   * Evaluates a supplied JSON document.
+   * @param mdoc the document
+   * @throws Exception if an exception occurs
+   */
+  public void evaluateSuppliedJson(MetadataDocument mdoc) throws Exception {
+    ScriptEngine engine = this.getCachedEngine2();
+    Invocable invocable = (Invocable)engine;
+    invocable.invokeFunction("evaluateSuppliedJson",mdoc);
   }
   
   /**

@@ -171,6 +171,16 @@ public class MetadataDocument {
     evaluator.evaluate(this);
   }
   
+  /**
+   * Evaluate the supplied JSON document.
+   * @throws Exception if an exception occurs
+   */
+  public void evaluateSuppliedJson() throws Exception {
+    Evaluator evaluator = GeoportalContext.getInstance().getBeanIfDeclared(
+        "metadata.Evaluator",Evaluator.class,new Evaluator());
+    evaluator.evaluateSuppliedJson(this);
+  }
+  
   /** True if the document has evaluated json. */
   public boolean hasEvaluatedJson() {
     return (evaluatedJson != null && evaluatedJson.length() > 0);

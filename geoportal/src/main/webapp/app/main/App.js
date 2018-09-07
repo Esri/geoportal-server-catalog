@@ -40,10 +40,17 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
       this.updateUI();
       
       var ignoreMapPanelActivated = false; 
+      $("a[href='#searchPanel']").on("shown.bs.tab",function(e) {
+        location.hash = '#searchPanel';
+      });
       $("a[href='#mapPanel']").on("shown.bs.tab",function(e) {
+        location.hash = '#mapPanel';
         if (!ignoreMapPanelActivated && !self.mapPanel.mapWasInitialized) {
           self.mapPanel.ensureMap();
         }
+      });
+      $("a[href='#aboutPanel']").on("shown.bs.tab",function(e) {
+        location.hash = '#aboutPanel';
       });
       topic.subscribe(appTopics.AddToMapClicked,function(params){
         if (self.mapPanel.mapWasInitialized) {
@@ -66,6 +73,11 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
         self.updateUI();
       });
       
+      if (location.hash==null || location.hash.length==0) {
+        location.hash = '#searchPanel';
+      } else if ( $("a[href='"+location.hash+"']").length > 0) {
+        $("a[href='"+location.hash+"']").tab("show");
+      }
     },
     
     /* =================================================================================== */
