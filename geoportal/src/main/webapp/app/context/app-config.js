@@ -16,7 +16,7 @@ define([],function(){var obj={
   },
   
   search: {
-    allowSettings: true,
+    allowSettings: false,
     useSimpleQueryString: false
   },
   
@@ -37,7 +37,10 @@ define([],function(){var obj={
     showApprovalStatus: true,
     defaultSort: "title.sort:asc",
     showLinks: true,
-    showCustomLinks: true
+    showCustomLinks: true,
+    showJSONLink: true,
+    showXMLLink: false,
+    showHTMLLink: false
   },
   
   statusChecker: {
