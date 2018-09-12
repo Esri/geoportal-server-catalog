@@ -15,11 +15,13 @@
 package com.esri.geoportal.base.util;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.GregorianCalendar;
 import java.util.Locale;
 import java.util.TimeZone;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.DatatypeConverter;
 
@@ -125,6 +127,24 @@ public class DateUtil {
                 }
               }
             }
+          }
+          
+          // make sure all dates are with dashes
+          String [] dateTime = text.split("T");
+          if (dateTime.length>=1) {
+            String date = dateTime[0].replaceAll("-", "");
+            switch (date.length()) {
+              case 4:
+                dateTime[0] = date;
+                break;
+              case 6:
+                dateTime[0] = String.format("%s-%s", date.substring(0, 4), date.substring(4));
+                break;
+              case 8:
+                dateTime[0] = String.format("%s-%s-%s", date.substring(0, 4), date.substring(4, 6), date.substring(6));
+                break;
+            }
+            text = Arrays.stream(dateTime).collect(Collectors.joining("T"));
           }
 
           // TODO:
