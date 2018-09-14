@@ -459,3 +459,63 @@
 .jimu-draw-box.enabled .drawings-clear:hover{
   background-color: #B60016;
 }
+
+/* Accessibility Changes */
+
+.jimu-widget-zoomslider {
+    background-color: #ccc;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    cursor: pointer;
+    font-size: 24px;
+    line-height: 25px;
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+    color: rgb(255, 255, 255);
+    text-align: center;
+    font-family: verdana,helvetica;
+}
+
+.jimu-widget-homebutton .HomeButton .home {
+    background-color: rgba(0,0,0,0.5) !important;
+}
+
+.jimu-widget-mylocation .place-holder {
+    background-color: rgba(0,0,0,0.4) !important;
+}
+
+.jimu-widget-onscreen-icon {
+    background-color: #ccc;
+    background-color: rgba(0, 0, 0, 0.5) !important;
+    border: 1px solid #000000;
+    border: 1px solid rgba(0, 0, 0, 0.5);
+}
+
+.jimu-widget-homebutton .HomeButton .home {
+    background-color: rgba(0,0,0,0.4) !important;
+}
+
+.jimu-widget-homebutton .HomeButton .home:hover {
+    background-color: rgba(0,0,0,0.6) !important;
+}
+
+.jimu-widget-mylocation .place-holder {
+    background-color: rgba(0,0,0,0.4) !important;
+}
+
+.jimu-widget-mylocation .place-holder:hover {
+    background-color: rgba(0,0,0,0.6) !important;
+}
+
+div#dijit__WidgetBase_0:hover {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+div#dijit__WidgetBase_1:hover {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+}
+
+div#dijit__WidgetBase_2:hover {
+    background-color: rgba(0, 0, 0, 0.7) !important;
+}
