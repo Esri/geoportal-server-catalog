@@ -113,13 +113,11 @@ body {
   background-image: none;
   transition: none;
   background-color: transparent;
-  outline: none;
 }
 .g-app > .navbar-inverse .navbar-nav > li.active > a {
   background-image: linear-gradient(to bottom, transparent 90%, #cfe1ec 91%, #cfe1ec 100%);
   transition: color 150ms linear 0s, text-decoration 150ms linear 0s;
   background-color: transparent;
-  outline: none;
 }
 .g-app > .navbar-inverse .navbar-nav > li > a:hover {
   outline: thin dotted;
