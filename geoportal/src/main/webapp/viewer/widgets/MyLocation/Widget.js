@@ -35,6 +35,7 @@ define([
         this.inherited(arguments);
         this.placehoder = html.create('div', {
           'class': 'place-holder',
+          'tabindex': '0',
           title: this.label
         }, this.domNode);
 

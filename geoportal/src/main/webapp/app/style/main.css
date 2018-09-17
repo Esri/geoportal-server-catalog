@@ -468,6 +468,10 @@ a {
     text-decoration: none;
 }
 
+a.dropdown-toggle:focus {
+    outline: 5px auto -webkit-focus-ring-color;
+}
+
 .pagination > .disabled > span, .pagination > .disabled > span:hover, .pagination > .disabled > span:focus, .pagination > .disabled > a, .pagination > .disabled > a:hover, .pagination > .disabled > a:focus {
     color: #595959;
     background-color: #ffffff;
