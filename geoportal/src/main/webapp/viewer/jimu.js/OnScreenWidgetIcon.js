@@ -30,9 +30,11 @@ function(declare, lang, array, html, on, _WidgetBase, utils) {
     postCreate: function(){
       this.inherited(arguments);
       this.iconNode = html.create('img', {
-        src: this.widgetConfig.icon
+        src: this.widgetConfig.icon,
+        alt: this.widgetConfig.label
       }, this.domNode);
       html.setAttr(this.domNode, 'title', this.widgetConfig.label);
+      html.setAttr(this.domNode, 'tabindex', '0');
       html.setAttr(this.domNode, 'data-widget-name', this.widgetConfig.name);
       this.own(on(this.domNode, 'click', lang.hitch(this, function(){
         this.onClick();
