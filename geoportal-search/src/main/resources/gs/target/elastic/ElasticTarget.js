@@ -300,7 +300,7 @@
       var q = task.request.getQ();
       if (typeof q === "string" && q.length > 0) {
         var analyze_wildcard = task.request.chkBoolParam("analyze_wildcard",false);
-        var lenient = task.request.chkBoolParam("lenient",false);
+        var lenient = task.request.chkBoolParam("lenient",true);
         if (targetRequest.useSimpleQueryString) {
           targetRequest.musts.push({"simple_query_string": {
             "analyze_wildcard": analyze_wildcard,
@@ -450,6 +450,7 @@
           };
         }
         if (task.verbose) console.log("sending url:",url,", postdata:",data);
+        // console.log("sending url:",url,", postdata:",data);
         return task.context.sendHttpRequest(task,url,data,dataContentType,options);
 
       }).then(function(result){
