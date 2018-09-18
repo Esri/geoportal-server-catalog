@@ -17,9 +17,12 @@ td, th{
 @import url("sprite.css");
 
 /* disable the blue color outline in chrome */
+
+/* Accessbility Change - Keyboard access
 *:focus{
   outline: none;
 }
+*/
 
 input[type="text"]::-ms-clear{
   display: none;
@@ -493,7 +496,7 @@ classes can be used in the html
 }
 .jimu-input:focus{
   color: #686868;
-  outline: none;
+  /* outline: none; Accessibility Change - Keyboard Access */
   box-shadow: 0px 0px 5px 0px rgba(81, 177, 254, 0.4);
 }
 
@@ -1649,7 +1652,7 @@ widget:jimu-w
   height: 30px;
   border: 1px solid #ddd;
   border-radius: 3px;
-  outline: none;
+  /* outline: none; Accessibility Change - Keyboard Access */
 }
 
 /* CSS for LayerFieldChooser */
