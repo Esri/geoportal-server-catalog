@@ -214,6 +214,12 @@
       var bbox = task.request.getBBox();
       if (typeof bbox === "string" && bbox.length > 0) {
         coords = bbox.split(",");
+        if (coords.length > 3) {
+          if ((coords[0] < -180.0) && (coords[2] >= -180.0)) coords[0] = -180.0;
+          if ((coords[1] < -90.0) && (coords[3] >= -90.0)) coords[1] = -90.0;
+          if ((coords[2] > 180.0) && (coords[0] <= 180.0)) coords[2] = 180.0;
+          if ((coords[3] > 90.0) && (coords[1] <= 90.0)) coords[3] = 90.0;
+        }
       }
 
       if (hasField && Array.isArray(coords) && coords.length > 3) {
