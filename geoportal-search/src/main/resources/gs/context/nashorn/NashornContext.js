@@ -220,13 +220,15 @@
 
     sendHttpRequest: function(url, data, dataContentType, options) {
       var result = null;
-      var br = null, wr = null;
+      var br = null, br2 = null, wr = null;
       var sw = new java.io.StringWriter();
+      var sw2 = new java.io.StringWriter();
+      var con = null, buffer, nRead;
       try {
         var u = new java.net.URL(url);
         //print(u);
         java.net.HttpURLConnection.setFollowRedirects(true);
-        var con = u.openConnection();
+        con = u.openConnection();
         con.setInstanceFollowRedirects(true);
 
         if (options && options.basicCredentials &&
@@ -268,19 +270,43 @@
         }
         //print("contentType="+contentType+" ... charset="+charset);
         br = new java.io.BufferedReader(new java.io.InputStreamReader(con.getInputStream(),charset));
-        var nRead = 0;
-        var buffer = new gs._jvmTypes.CharArray(4096);
+        nRead = 0;
+        buffer = new gs._jvmTypes.CharArray(4096);
         while ((nRead = br.read(buffer,0,4096)) >= 0) {
           sw.write(buffer,0,nRead); // TODO comment out this line and Invalid JSON: <json>:1:0 Expected json literal but found eof
         }
         result = sw.toString();
         //console.log("result",result);
       } catch(e) {
-        print(e); // TODO printStackTrace
-        throw new Error(e.toString());
+        var msg;
+        try {
+          if (con) {
+            var estrm = con.getErrorStream();
+            if (estrm) {
+              br2 = new java.io.BufferedReader(new java.io.InputStreamReader(con.getErrorStream()));
+              nRead = 0;
+              buffer = new gs._jvmTypes.CharArray(4096);
+              while ((nRead = br2.read(buffer,0,4096)) >= 0) {
+                sw2.write(buffer,0,nRead);
+              }
+              msg = sw2.toString();              
+            }
+          }
+        } catch(ex2) {
+          console.log("Geoportal-Search: problem getting HTTP response error:");
+          console.error(ex);
+        }
+        //if (msg) print("Error msg:",msg);
+        if (msg) {
+          throw new Error(msg);
+        } else {
+          print(e); // TODO printStackTrace
+          throw new Error(e.toString());
+        }
       } finally{
         try {if (wr !== null) wr.close();} catch(ef) {print(ef);}
         try {if (br !== null) br.close();} catch(ef) {print(ef);}
+        try {if (br2 !== null) br2.close();} catch(ef) {print(ef);}
       }
       return result;
     },
