@@ -40,7 +40,7 @@ define([],function(){var obj={
     showCustomLinks: true,
     showJSONLink: true,
     showXMLLink: false,
-    showHTMLLink: false
+    showHTMLLink: true
   },
   
   statusChecker: {
