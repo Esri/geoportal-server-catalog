@@ -38,7 +38,7 @@ define([],function(){var obj={
     defaultSort: "title.sort:asc",
     showLinks: true,
     showCustomLinks: true,
-    showJSONLink: true,
+    showJSONLink: false,
     showXMLLink: false,
     showHTMLLink: true
   },
