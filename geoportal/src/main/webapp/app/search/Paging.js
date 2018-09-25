@@ -60,6 +60,12 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
           self._renderPaging();
         }
       });
+      topic.subscribe(appTopics.RefreshSearchResultPage,function(params){
+        if (params.searchPane && self.searchPane === params.searchPane) {
+          self.start = self._start;
+          self.search();
+        }
+      });
     },
 
     /* events ========================================================== */
@@ -112,6 +118,7 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
       s = s.replace("{count}",""+djNumber.format(nHits,{}));
       s = s.replace("{type}",sType);
       this.setNodeText(this.countNode,s);
+      if (this.searchPane) this.searchPane.lastQueryCount = nHits;
     },
     
     _renderPaging: function(searchResponse) {

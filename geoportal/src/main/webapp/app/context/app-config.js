@@ -1,7 +1,12 @@
 define([],function(){var obj={
 // .......................................................................................
-
-  allowBulkChangeOwner: true,
+  
+  bulkEdit: {
+    allowByOwner: true,
+    allowBySourceUri: true,
+    allowByTaskRef: true,
+    allowByQuery: true
+  },
   
   search: {
     allowSettings: true,
@@ -21,6 +26,8 @@ define([],function(){var obj={
     showDate: true,
     showOwner: true,
     showThumbnails: true,
+    showAccess: true,
+    showApprovalStatus: true,
     defaultSort: "title.sort:asc"
   },
   

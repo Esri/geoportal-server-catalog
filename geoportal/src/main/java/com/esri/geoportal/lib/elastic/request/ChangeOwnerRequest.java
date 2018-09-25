@@ -29,6 +29,7 @@ import org.elasticsearch.index.engine.DocumentMissingException;
 
 /**
  * Change an item owner.
+ * @Deprecated use SetOwnerRequest
  */
 public class ChangeOwnerRequest extends AppRequest {
   

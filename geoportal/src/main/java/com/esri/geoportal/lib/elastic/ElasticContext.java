@@ -23,6 +23,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Timer;
 import java.util.TimerTask;
+import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
@@ -51,6 +52,7 @@ public class ElasticContext {
   /** Instance variables . */
   private boolean allowFileId;
   private boolean autoCreateIndex;
+  private final AtomicLong balanceCounter = new AtomicLong();
   private String clusterName = null;
   private int httpPort = 9200;
   private String indexName = "metadata";
@@ -354,6 +356,16 @@ public class ElasticContext {
       LOGGER.error("Error executing ensureIndex()",e);
       throw e;
     }
+  }
+  
+  /**
+   * Gets the next node name (for a round robin balancer context).
+   * @param name the node name
+   */
+  public String getNextNode() {
+    String[] list = nodesToArray();
+    int index = (int)(balanceCounter.getAndIncrement() % list.length);
+    return list[index];
   }
   
   /**

@@ -6,6 +6,7 @@ define({
       loadError: "GeoportalSearch, unable to load:",
       targetOptions: {
         caption: "Catalog",
+        enabled: "Enabled"
       },
       searchBox: {
         search: "Search",
@@ -84,7 +85,11 @@ define({
           url: "URL",
           type: "Type",
           profile: "Profile",
-          filter: "Filter"
+          filter: "Filter",
+          enabled: "Enabled",
+          useProxy: "Use Proxy",
+          disableContentType: "Disable Content-Type Header",
+          examples: "Examples"
         }
       }
     }

@@ -50,6 +50,7 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Search for items.
+ * @Deprecated switched to geoportal-search implementation
  */
 public class SearchRequest extends _SearchRequestBase {
   

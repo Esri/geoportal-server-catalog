@@ -65,6 +65,18 @@ function(declare, array, lang, on, domClass, domConstruct, number,
       nodeInfo.node = domConstruct.create("div",{
         "class": "target"
       },this.targetsNode,"last");
+      nodeInfo.enabledCheckbox = domConstruct.create("input",{
+        "type": "checkbox",
+        "title": self.i18n.search.targetOptions.enabled,
+        "onclick": function(e) {
+          if (e) e.stopPropagation();
+        }
+      },nodeInfo.node,"last");
+      if (typeof target.enabled === "boolean" && !target.enabled) {
+        nodeInfo.enabledCheckbox.checked = false;
+      } else {
+        nodeInfo.enabledCheckbox.checked = true;
+      }
       nodeInfo.nameNode = domConstruct.create("span",{
         "class": "name",
         innerHTML: target.name
@@ -82,6 +94,7 @@ function(declare, array, lang, on, domClass, domConstruct, number,
         });
         domClass.add(nodeInfo.node,"active");
         self._activeTarget = target;
+        nodeInfo.enabledCheckbox.checked = true;
         self.search();
       };
       if (!this._activeTarget) {
@@ -166,8 +179,21 @@ function(declare, array, lang, on, domClass, domConstruct, number,
     /* SearchComponent API ============================================= */
 
     appendQueryParams: function(params,task) {
+      var self = this;
+      var targets = array.filter(this._targets,function(target) {
+        if (self._activeTarget === target) {
+          if (!target.nodeInfo.enabledCheckbox.checked) {
+            target.nodeInfo.enabledCheckbox.checked = true;
+          }
+          return target;
+        } else if (target.nodeInfo.enabledCheckbox.checked) {
+          return target;
+        } else {
+          target.nodeInfo.countNode.innerHTML = "-";
+        }
+      });
       if (this._activeTarget) {
-        params.target = this._targets;
+        params.target = targets;
         task.primaryTargetKey = this._activeTarget.key;
         task.target = this._activeTarget;
       }

@@ -101,6 +101,15 @@ public class AppResponse {
   }
   
   /**
+   * Build a deprecated response, HTTP 501.
+   * @param message the message
+   */
+  public Response buildDeprecated(String message) {
+    this.writeDeprecated(message);
+    return this.build();
+  }
+  
+  /**
    * Build an exception response.
    * @param t the cause
    * @param pretty for pretty JSON
@@ -154,6 +163,17 @@ public class AppResponse {
     setEntity(json);
     setMediaType(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8"));
     setStatus(Response.Status.BAD_REQUEST);
+  }
+  
+  /**
+   * Write a deprecated message to the response, HTTP 501.
+   * @param message the message
+   */
+  public void writeDeprecated(String message) {
+    String json = JsonUtil.newErrorResponse(message,true);
+    setEntity(json);
+    setMediaType(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8"));
+    setStatus(Response.Status.NOT_IMPLEMENTED);
   }
   
   /**

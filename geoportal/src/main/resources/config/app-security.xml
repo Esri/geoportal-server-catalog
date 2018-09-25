@@ -13,15 +13,15 @@
   <beans:import resource="authentication-simple.xml"/>
 
   <beans:import resource="app-oauth.xml"/>
-  <security:http realm="Geoportal" auto-config="true">
+  <security:http realm="Geoportal" pattern="/**" authentication-manager-ref="authenticationManager">
     <security:headers>
        <security:frame-options policy="SAMEORIGIN"/>
        <security:header name="Access-Control-Allow-Origin" value="*" />
        <security:header name="Access-Control-Allow-Headers" value="Content-Type, Authorization, X-Requested-With" />
     </security:headers>
-    <security:custom-filter ref="oauthResourceFilter" before="PRE_AUTH_FILTER" />
-    <security:http-basic />
     <security:csrf disabled="true"/>
+    <security:http-basic />
+    <security:custom-filter ref="oauthResourceFilter" before="PRE_AUTH_FILTER" />
     <security:intercept-url pattern="/" access="permitAll" />
     
     <!-- /rest/metadata/ - the metadata catalog -->
@@ -44,7 +44,7 @@
     <security:intercept-url pattern="/elastic/metadata/*/_search/**" access="permitAll" />
     <security:intercept-url pattern="/elastic/metadata/_mappings/**" method="GET" access="permitAll" />
     <security:intercept-url pattern="/elastic/metadata/*/_mappings/**" method="GET" access="permitAll" />
-    <security:intercept-url pattern="/elastic/_search/scroll/**" method="GET" access="hasRole('PUBLISHER')" />
+    <security:intercept-url pattern="/elastic/_search/scroll/**" access="hasRole('PUBLISHER')" />
     <security:intercept-url pattern="/elastic/**" access="hasRole('ADMIN')" />
     
     <!-- /harvester/ - proxied to the Harvester -->

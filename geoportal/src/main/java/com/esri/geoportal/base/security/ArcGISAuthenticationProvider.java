@@ -15,6 +15,7 @@
 package com.esri.geoportal.base.security;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.Val;
+import com.esri.geoportal.context.GeoportalContext;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
@@ -157,6 +158,7 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
   private List<GrantedAuthority> executeGetRoles(String username, String token, String referer) 
       throws AuthenticationException {
     List<GrantedAuthority> roles = new ArrayList<>();
+    List<String> groupKeys = new ArrayList<>();
     String adminGroupId = this.getGeoportalAdministratorsGroupId();
     String pubGroupId = this.getGeoportalPublishersGroupId();
     boolean allUsersCanPublish = this.getAllUsersCanPublish();
@@ -187,6 +189,7 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
     HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
     ResponseEntity<String> responseEntity = rest.exchange(url,HttpMethod.GET,requestEntity,String.class);
     String response = responseEntity.getBody();
+    //System.err.println(response);;
     //if (response != null) LOGGER.trace(response);
     if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
       throw new AuthenticationServiceException("Error communicating with the authentication service.");
@@ -205,6 +208,9 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
       for (int i=0;i<jsoGroups.size();i++) {
         JsonObject jsoGroup = jsoGroups.getJsonObject(i);
         String groupId = jsoGroup.getString("id");
+        String groupName = jsoGroup.getString("title");
+        String groupKey = groupId+"_..._"+groupName;
+        groupKeys.add(groupKey);
         if ((adminGroupId != null) && (adminGroupId.length() > 0) && adminGroupId.equals(groupId)) {
           isInAdminGroup = true;
         }
@@ -252,7 +258,13 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
     } else {
       throw new BadCredentialsException("Credential mis-match.");
     }
-
+    
+    GeoportalContext gc = GeoportalContext.getInstance();
+    if (gc.getSupportsGroupBasedAccess()) {
+      for (String groupKey: groupKeys) {
+        roles.add(new SimpleGrantedAuthority(groupKey));
+      }
+    }
     return roles;
   }
 

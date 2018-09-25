@@ -38,6 +38,13 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       }
     },
     
+    getGroups: function() {
+      if (this.geoportalUser) {
+        return this.geoportalUser.groups;
+      }
+      return null;
+    },
+    
     getMyProfileUrl: function() {
       if (AppContext.geoportal && AppContext.geoportal.arcgisOAuth && 
           AppContext.geoportal.arcgisOAuth.showMyProfileLink) {

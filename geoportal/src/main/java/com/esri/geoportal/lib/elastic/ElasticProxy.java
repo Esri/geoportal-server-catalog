@@ -21,6 +21,7 @@ import java.io.UnsupportedEncodingException;
 
 import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
+
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.api.Request;
 import org.eclipse.jetty.proxy.BalancerServlet;
@@ -32,7 +33,7 @@ import org.slf4j.LoggerFactory;
  * A proxy to Elasticsearch.
  */
 public class ElasticProxy extends BalancerServlet {
-  
+
   /** Properties */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxy.class);
   private static final long serialVersionUID = 1L;
@@ -103,7 +104,11 @@ public class ElasticProxy extends BalancerServlet {
       return new HttpClient(factory);
     }
     //return balancerSupport.newHttpClient();
-    return new HttpClient();
+    HttpClient client = new HttpClient();
+//    org.eclipse.jetty.client.HttpProxy proxy = new org.eclipse.jetty.client.HttpProxy("localhost",8888);
+//    org.eclipse.jetty.client.ProxyConfiguration proxyConfig = client.getProxyConfiguration();
+//    proxyConfig.getProxies().add(proxy);
+    return client;
   }
   
   @Override
@@ -114,3 +119,4 @@ public class ElasticProxy extends BalancerServlet {
   }
   
 }
+

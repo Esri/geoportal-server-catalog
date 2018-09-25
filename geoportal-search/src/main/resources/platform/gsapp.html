@@ -11,7 +11,7 @@
 -->
 <link rel="stylesheet" href="//js.arcgis.com/3.23/esri/themes/calcite/dijit/calcite.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.23/esri/css/esri.css">
-<link rel="stylesheet" href="../widget/style/style.css">
+<link rel="stylesheet" href="../gs/widget/style/style.css">
 <script>
   var dojoConfig = {
     locale: "en",
@@ -20,7 +20,7 @@
     packages: [
       {
         name: "gs",
-        location: location.pathname.replace(/\/[^/]*$/,"") + "/../../gs",
+        location: location.pathname.replace(/\/[^/]*$/,"") + "/../gs",
       }
     ]
   };
@@ -28,56 +28,68 @@
     "targets": [
       {
         "name": "ArcGIS Online",
-        "tag": "arcgis",
-        "type": "portal",
         "url": "https://www.arcgis.com",
-        "enabled": true,
+        "type": "portal",
+        "profile": null,
         "requiredFilter": null,
-        "profile": null
+        "enabled": true
       },
       {
-        "name": "gptdb1",
-        "tag": "gptdb1",
-        "type": "geoportal",
+        "name": "gptdb1 (geoportal)",
         "url": "http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search",
-        "enabled": true,
+        "type": "geoportal",
+        "profile": null,
         "requiredFilter": null,
-        "profile": null
+        "enabled": true,
+        "disableContentType": true
+      },
+      /*
+      {
+        "name": "gptdb1 (elasticsearch)",
+        "url": "http://gptdb1.esri.com:9200/metadata/item/_search",
+        "type": "elasticsearch",
+        "profile": null,
+        "requiredFilter": null,
+        "enabled": true,
+        "useProxy": true,
+        "disableContentType": true
       },
       {
         "name": "CSW3 Geoportal2 (urban)",
-        "type": "csw",
-        "cswVersion": "3.0.0",
-        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords",
+        "type": "csw3",
+        "profile": null,
+        "enabled": true
       },
       {
         "name": "CSW2 Geoportal2 (urban)",
-        "type": "csw",
-        "cswVersion": "2.0.2",
+        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords",
+        "type": "csw2",
         "profile": "CSW2_Geoportal1",
-        "url": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
+        "enabled": true
       },
+      */
       {
         "name": "CSW2 Geoportal2 (gptogc)",
-        "type": "csw",
-        "cswVersion": "2.0.2",
+        "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords",
+        "type": "csw2",
         "profile": "CSW2_Geoportal1",
+        "enabled": true,
         "useProxy": true,
-        "url": "https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords"
+        "disableContentType": true
       }
     ]
   };
 </script>
 </head>
 <body class="calcite">
-<div style="top:20px;left:20px;">
-  <div id="idSearch" style="display:inline-block;"></div>
-  <div id="idMap" style="display:inline-block;width:800px;height:600px;vertical-align: top;"></div>
+<div style="top:20px;left:20px">
+  <div class="geoportal-search-dev">
+    <div id="idSearch"></div>
+  </div>
+  <div id="idMap" style="display:inline-block;width:800px;height:600px;vertical-align:top;"></div>
 </div>
-<script src="https://js.arcgis.com/3.23/"></script>
-<!--
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
--->
+<script src="//js.arcgis.com/3.23/"></script>
 <script>
   require(["dojo/ready",
     "esri/config",
@@ -109,6 +121,7 @@
         var widgetContext = new WidgetContext({
           i18n: i18n,
           map: map,
+          proxyUrl: esriConfig.defaults.io.proxyUrl,
           widgetConfig: widgetConfig,
           widgetFolder: "gs/widget",
         });
