@@ -57,7 +57,8 @@
 
     execute: {writable:true,value:function(task) {
       var v = task.request.getUrlPath();
-      var isDescription = task.val.endsWith(v,"/opensearch/description"); // TODO doc or config?
+      var isDescription = task.val.endsWith(v,"/opensearch/description") || // TODO doc or config?
+                          task.val.endsWith(v,"/Eros/description"); 
       if (!isDescription) {
         var vals = task.request.getHeaderValues("Accept");
         if (vals !== null && vals.length > 0) {

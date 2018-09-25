@@ -73,16 +73,17 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
     },
     
     addEntry: function(term,count,missingVal) {
-      var v = term+" ("+count+")";
+      var name = this.chkName(term);
+      var v = name+" ("+count+")";
       var tipPattern = i18n.search.appliedFilters.tipPattern;
-      var tip = tipPattern.replace("{type}",this.label).replace("{value}",term);
+      var tip = tipPattern.replace("{type}",this.label).replace("{value}",name);
       var query = {"term": {}};
       query.term[this.field] = term;
       if (typeof missingVal === "string" && missingVal.length > 0 && missingVal === term) {
         query = {"missing": {"field": this.field}};
       }
       var qClause = new QClause({
-        label: term,
+        label: name,
         tip: tip,
         parentQComponent: this,
         removable: true,
@@ -97,6 +98,20 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
         })
       },nd);
       this.setNodeText(link,v);
+    },
+    
+    chkName: function(term){
+      var name = term;
+      if (this.field === "sys_access_groups_s" && typeof name === "string" &&
+          AppContext.geoportal.supportsGroupBasedAccess) {
+        array.some(AppContext.appUser.getGroups(),function(group){
+          if (group.id === name) {
+            name = group.name;
+            return true;
+          }
+        });
+      }
+      return name;
     },
     
     hasField: function() {

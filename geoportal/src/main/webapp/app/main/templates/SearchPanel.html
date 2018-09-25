@@ -28,6 +28,17 @@
           label:'${i18n.search.criteria.date}'">
       </div>
       <!--
+      <div data-dojo-type="app/search/NumericFilter"
+        data-dojo-props="
+          nestedPath:'timeperiod_nst',
+          field:'timeperiod_nst.begin_year_l',
+          interval:1000,
+          ticks:4,
+          places:0,
+          label:'Year (Paleo)'">
+      </div>
+      -->
+      <!--
       <div data-dojo-type="app/search/DateFilter"
         data-dojo-props="field:'sys_created_dt',interval:'day',allowHistogram:false,label:'Created'">
       </div>
@@ -50,7 +61,25 @@
       </div>    
       <div data-dojo-type="app/search/TermsAggregation"
         data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20}">
-      </div>    
+      </div> 
+      <div data-dojo-type="app/search/TermsAggregation"
+        data-dojo-props="
+          conditionallyDisabled: !AppContext.geoportal.supportsApprovalStatus,
+          field:'sys_approval_status_s',
+          label:'${i18n.search.criteria.approvalStatus}'">
+      </div>  
+      <div data-dojo-type="app/search/TermsAggregation"
+        data-dojo-props="
+          conditionallyDisabled: !AppContext.geoportal.supportsGroupBasedAccess,
+          field:'sys_access_s',
+          label:'${i18n.search.criteria.access}'">
+      </div>   
+      <div data-dojo-type="app/search/TermsAggregation"
+        data-dojo-props="
+          conditionallyDisabled: !AppContext.geoportal.supportsGroupBasedAccess,
+          field:'sys_access_groups_s',
+          label:'${i18n.search.criteria.accessGroups}'">
+      </div>  
     </div>
     <div class="g-search-pane-right">
       <div data-dojo-type="app/search/AppliedFilters" data-dojo-props="autoExpand:true"></div>

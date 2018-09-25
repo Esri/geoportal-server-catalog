@@ -8,6 +8,12 @@ define([],function(){var obj={
   BulkUpdate: "app/BulkUpdate",
   
   /* params - {item:obj} */
+  ItemAccessChanged: "app/ItemAccessChanged",
+  
+  /* params - {item:obj} */
+  ItemApprovalStatusChanged: "app/ItemApprovalStatusChanged",
+  
+  /* params - {item:obj} */
   ItemOwnerChanged: "app/ItemOwnerChanged",
   
   /* params - {response:obj} */
@@ -21,6 +27,9 @@ define([],function(){var obj={
   
   /* params - {item:item} */
   OnMouseLeaveResultItem: "app/OnMouseLeaveResultItem",
+  
+  /* params - {searchPane:obj} */
+  RefreshSearchResultPage: "app/RefreshSearchResultPage",
   
   /* params - {geoportalUser:obj} */
   SignedIn: "app/SignedIn",

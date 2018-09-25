@@ -16,8 +16,19 @@
 (function(){
   /*jshint -W069 */
 
+  gs.target.types["elasticsearch"] = {
+    newInstance: function(options,safeOptions) {
+      if (options && options.url) options.searchUrl = options.url;
+      var target = gs.Object.create(gs.target.elastic.ElasticTarget);
+      target.safeMixin(options).mixin(safeOptions);
+      return target;
+    }
+  };
+
   gs.target.elastic.ElasticTarget = gs.Object.create(gs.target.Target, {
 
+    accessQuery: {writable: true, value: null},
+    
     itemBaseUrl: {writable: true, value: null},
 
     searchUrl: {writable: true, value: null},
@@ -136,7 +147,23 @@
         searchCriteria: {},
         useSimpleQueryString: this.useSimpleQueryString
       };
-
+      
+      // allow Elasticsearch DSL searches
+      if (task.config.allowDslSearches) {
+        var body, sBody = task.request.body;
+        if (typeof sBody === "string" && sBody.indexOf("{") === 0) {
+          sBody = sBody.trim();
+          if (sBody.indexOf("{") === 0) {
+            body = JSON.parse(sBody);
+            if (body.query) {
+              targetRequest.musts.push(JSON.parse(JSON.stringify(body.query)));
+              delete body.query;
+              targetRequest.searchCriteria = body;
+            }
+          }
+        }
+      }
+      
       this.prepareRequiredFilter(task,targetRequest);
       this.prepareQ(task,targetRequest);
       this.prepareFilter(task,targetRequest);
@@ -145,6 +172,7 @@
       this.prepareModified(task,targetRequest);
       this.prepareTimePeriod(task,targetRequest);
       this.prepareBBox(task,targetRequest);
+      this.prepareAccessQuery(task,targetRequest);
       this.preparePaging(task,targetRequest);
       this.prepareSort(task,targetRequest);
       this.prepareOther(task,targetRequest);
@@ -155,9 +183,18 @@
 
       if (targetRequest.musts.length > 0) {
         targetRequest.searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
+        //console.log("targetRequest.searchCriteria="+(JSON.stringify(targetRequest.searchCriteria)));
       }
       promise.resolve(targetRequest);
       return promise;
+    }},
+    
+    prepareAccessQuery: {writable:true,value:function(task,targetRequest) {
+      var query = this.accessQuery;
+      if (query !== null && typeof query === "object") {
+        //console.log("Setting access query...",JSON.stringify(query));
+        targetRequest.musts.push(query);
+      }
     }},
 
     prepareBBox: {writable:true,value:function(task,targetRequest) {
@@ -215,7 +252,7 @@
       // TODO array?
       var filter = task.request.getFilter();
       if (typeof filter === "string" && filter.length > 0) {
-        musts.push({"query_string": {
+        targetRequest.musts.push({"query_string": {
           "analyze_wildcard": true,
           "query": filter
         }});
@@ -279,7 +316,7 @@
       // TODO array?
       var requiredFilter = this.requiredFilter;
       if (typeof requiredFilter === "string" && requiredFilter.length > 0) {
-        musts.push({"query_string": {
+        targetRequest.musts.push({"query_string": {
           "analyze_wildcard": true,
           "query": requiredFilter
         }});

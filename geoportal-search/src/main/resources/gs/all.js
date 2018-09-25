@@ -30,6 +30,7 @@
   if (!gs.target.csw) gs.target.csw = {};
   if (!gs.target.elastic) gs.target.elastic = {};
   if (!gs.target.portal) gs.target.portal = {};
+  if (!gs.target.types) gs.target.types = {};
   if (!gs.target.profiles) gs.target.profiles = {};
   if (!gs.writer) gs.writer = {};
 

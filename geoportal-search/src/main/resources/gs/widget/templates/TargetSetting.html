@@ -21,6 +21,17 @@
         data-dojo-type="dijit/form/ValidationTextBox"
         data-dojo-attach-point="urlTextBox"
         data-dojo-props="trim:true,required:true"/>
+        <div class="gap"
+          data-dojo-type="dijit/form/DropDownButton"
+          data-dojo-attach-point="urlDropDown">
+          <span>${i18n.search.settings.target.examples}</span>
+          <div data-dojo-type="dijit/TooltipDialog">
+            <div>https://www.arcgis.com</div>
+            <div>http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search</div>
+            <div>http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords</div>
+            <div>https://gptogc.esri.com/geoportal/csw?service=CSW&request=GetRecords</div>
+          </div>
+        </div>
     </div>
     <div class="form-group">
       <label for="${id}_type" class="control-label"
@@ -29,6 +40,7 @@
         data-dojo-type="dijit/form/ValidationTextBox"
         data-dojo-attach-point="typeTextBox"
         data-dojo-props="trim:true,required:true"/>
+        <span class="gap note">e.g. portal geoportal csw2 csw3</span>
     </div>
     <div class="form-group">
       <label for="${id}_profile" class="control-label"
@@ -37,6 +49,7 @@
         data-dojo-type="dijit/form/ValidationTextBox"
         data-dojo-attach-point="profileTextBox"
         data-dojo-props="trim:true,required:false"/>
+        <span class="gap note">e.g. CSW2_Geoportal1</span>
     </div>
     <div class="form-group">
       <label for="${id}_filter" class="control-label"
@@ -45,6 +58,28 @@
         data-dojo-type="dijit/form/ValidationTextBox"
         data-dojo-attach-point="filterTextBox"
         data-dojo-props="trim:true,required:false"/>
+        <span class="gap note">not applicable to csw</span>
+    </div>
+    <div class="form-group">
+      <label class="control-label"></label>
+      <label>
+        <input type="checkbox"
+          data-dojo-type="dijit/form/CheckBox"
+          data-dojo-attach-point="enabledCheckBox"/>
+        ${i18n.search.settings.target.enabled}
+      </label>
+      <label class="gap">
+        <input type="checkbox"
+          data-dojo-type="dijit/form/CheckBox"
+          data-dojo-attach-point="useProxyCheckBox"/>
+        ${i18n.search.settings.target.useProxy}
+      </label>
+      <label>
+        <input type="checkbox"
+          data-dojo-type="dijit/form/CheckBox"
+          data-dojo-attach-point="disableContentTypeCheckBox"/>
+        ${i18n.search.settings.target.disableContentType}
+      </label>
     </div>
   </form>
 </div>

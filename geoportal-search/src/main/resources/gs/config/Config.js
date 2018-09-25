@@ -18,6 +18,9 @@
   gs.config.Config = gs.Object.create(gs.Proto,{
 
     defaultTarget: {writable: true, value: "arcgis"},
+    
+    // allow POSTing of Elasticsearch DSL (Domain Specific Language) queries and aggregations
+    allowDslSearches: {writable: true, value: true},
 
     allowDynamicTarget: {writable: true, value: true},
 
@@ -42,7 +45,11 @@
 
         "arcgis": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "https://www.arcgis.com"
-        }),
+        })
+
+        /*
+
+        Some Examples
 
         "arcgisSDI": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "https://www.arcgis.com",
@@ -99,6 +106,7 @@
           "cswVersion": "3.0.0",
           "getRecordsUrl": "http://urban.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords"
         })
+        */
 
       };
 

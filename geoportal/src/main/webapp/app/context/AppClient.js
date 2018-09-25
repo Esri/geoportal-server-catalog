@@ -13,9 +13,13 @@ function(declare, lang, Deferred, dojoRequest) {
     appendAccessToken: function(url) {
       var accessToken = this.getAccessToken();
       if (accessToken) {
-        if (url.indexOf("?") === -1) url += "?";
-        else url += "&";
-        url += "access_token="+encodeURIComponent(accessToken);
+        if (typeof url === "string") {
+          if (url.indexOf("?") === -1) url += "?";
+          else url += "&";
+          url += "access_token="+encodeURIComponent(accessToken);
+        } else {
+          url.access_token = accessToken;
+        }
       }
       return url;
     },
@@ -49,6 +53,22 @@ function(declare, lang, Deferred, dojoRequest) {
       url = this.appendAccessToken(url);
       var info = {handleAs:"json"};
       return dojoRequest.put(url,info);
+    },
+    
+    bulkEdit: function(action,urlParams,postData,dataContentType) {
+      var url = this.getRestUri()+"/metadata/"+action;
+      this.appendAccessToken(urlParams);
+      var options = {
+        handleAs: "json",
+        query: urlParams
+      };
+      if (postData) {
+        options.data = postData;
+        if (dataContentType) {
+          options.headers = {"Content-Type": dataContentType};
+        }
+      }
+      return dojoRequest.put(url,options);
     },
     
     changeOwner: function(id,newOwner) {

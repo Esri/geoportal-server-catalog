@@ -53,6 +53,7 @@ import org.xml.sax.InputSource;
 
 /**
  * A CSW request.
+ * @Deprecated switched to geoportal-search implementation
  */
 public class CswRequest extends SearchRequest {
   

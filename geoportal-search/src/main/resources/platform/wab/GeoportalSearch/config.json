@@ -1,0 +1,12 @@
+{
+  "targets": [
+    {
+      "name": "ArcGIS Online",
+      "url": "https://www.arcgis.com",
+      "type": "portal",
+      "profile": null,
+      "requiredFilter": null,
+      "enabled": true
+    }
+  ]
+}

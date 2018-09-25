@@ -14,6 +14,16 @@
  */
 
 (function(){
+  /*jshint -W069 */
+
+  gs.target.types["csw"] = {
+    newInstance: function(options,safeOptions) {
+      if (options && options.url) options.getRecordsUrl = options.url;
+      var target = gs.Object.create(gs.target.csw.CswTarget);
+      target.safeMixin(options).mixin(safeOptions);
+      return target;
+    }
+  };
 
   gs.target.csw.CswTarget = gs.Object.create(gs.target.Target, {
 

@@ -43,6 +43,7 @@ import javax.ws.rs.core.UriInfo;
 
 /**
  * CSW service provider.
+ * @Deprecated switched to geoportal-search implementation
  */
 @ApplicationPath("deprecatedcsw")
 @Path("")
@@ -55,129 +56,129 @@ public class CswService extends Application {
     return resources;
   }
 
-  @GET
-  public Response csw(
-      @Context SecurityContext sc,
-      @Context HttpServletRequest hsr,
-      @Context UriInfo uriInfo,
-      @QueryParam("pretty") boolean pretty) {
-    AppUser user = new AppUser(sc);
-    String body = null;
-    String qstr = hsr.getQueryString();
-    if ((qstr == null) || (qstr.length() == 0)) {
-      Enumeration<String> en = hsr.getHeaders("Accept");
-      while (en.hasMoreElements()) {
-        String s = en.nextElement();
-        if ((s != null) && (s.indexOf("application/opensearchdescription+xml") != -1)) {
-          return this.opensearchDescription(user,pretty,hsr);
-        }
-      }
-      return this.getCapabilities(user,pretty,hsr,body);
-    }
-    return this.execute(user,pretty,hsr,body);
-  }
-
-  /**
-   * Execute a GetRecords or GetRecordById request.
-   * @param user the active user
-   * @param pretty for pretty response
-   * @param hsr the http request
-   * @param body String body the request body
-   * @return the response
-   */
-  protected Response execute(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
-    try {
-      CswRequest request = GeoportalContext.getInstance().getBean(
-          "request.CswRequest",CswRequest.class);
-      request.init(user,pretty);
-      request.initBaseUrl(hsr,null);
-      request.setParameterMap(hsr.getParameterMap());
-      request.setBody(body);
-
-      request.setAcceptHeader(hsr.getHeader("accept"));
-      String outputFormat = Val.trim(hsr.getParameter("outputFormat"));
-      if (outputFormat == null) {
-        String accept = hsr.getHeader("accept");
-        if (accept != null) {
-          if (accept.equalsIgnoreCase("application/atom+xml")) {
-            outputFormat = "application/atom+xml";
-            request.getOverrideParameters().put("outputFormat",outputFormat);
-          }
-        }
-      }
-      AppResponse response = request.execute();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-
-  /**
-   * Execute a GetCapabilities request.
-   * @param user the active user
-   * @param pretty for pretty response
-   * @param hsr the http request
-   * @param body String body the request body
-   * @return the response
-   */
-  protected Response getCapabilities(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
-    try {
-      CswRequest request = GeoportalContext.getInstance().getBean(
-          "request.CswRequest",CswRequest.class);
-      request.init(user,pretty);
-      request.initBaseUrl(hsr,null);
-      request.setParameterMap(hsr.getParameterMap());
-      request.setBody(body); 
-      request.setAcceptHeader(hsr.getHeader("accept"));
-      AppResponse response = request.getCapabilities();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-
-  /**
-   * Return the Opensearch descriptor.
-   * @param user the active user
-   * @param pretty for pretty response
-   * @param hsr the http request
-   * @return the response
-   */
-  protected Response opensearchDescription(AppUser user, boolean pretty, HttpServletRequest hsr) {
-    try {
-      OpensearchRequest request = GeoportalContext.getInstance().getBean(
-          "request.OpensearchRequest",OpensearchRequest.class);
-      request.init(user,pretty);
-      request.initBaseUrl(hsr,null);
-      AppResponse response = request.description();
-      return response.build();
-    } catch (Throwable t) {
-      return this.writeException(t,pretty);
-    }
-  }
-
-  /**
-   * Write an exception response.
-   * @param t the cause
-   * @param pretty for pretty JSON
-   * @return the response
-   */
-  protected Response writeException(Throwable t, boolean pretty) {
-    // TODO logging??
-    if (t instanceof OwsException) {
-      String xml = ((OwsException)t).getReport();
-      return Response.status(Status.BAD_REQUEST).entity(xml).type(
-          MediaType.APPLICATION_XML_TYPE.withCharset("UTF-8")).build();
-    } else {
-      Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
-      if (t instanceof AccessDeniedException) {
-        status = Response.Status.UNAUTHORIZED;
-      }
-      OwsException e = new OwsException(t);
-      String xml = e.getReport();
-      return Response.status(status).entity(xml).type(
-          MediaType.APPLICATION_XML_TYPE.withCharset("UTF-8")).build();
-    }
-  }
+//  @GET
+//  public Response csw(
+//      @Context SecurityContext sc,
+//      @Context HttpServletRequest hsr,
+//      @Context UriInfo uriInfo,
+//      @QueryParam("pretty") boolean pretty) {
+//    AppUser user = new AppUser(hsr,sc);
+//    String body = null;
+//    String qstr = hsr.getQueryString();
+//    if ((qstr == null) || (qstr.length() == 0)) {
+//      Enumeration<String> en = hsr.getHeaders("Accept");
+//      while (en.hasMoreElements()) {
+//        String s = en.nextElement();
+//        if ((s != null) && (s.indexOf("application/opensearchdescription+xml") != -1)) {
+//          return this.opensearchDescription(user,pretty,hsr);
+//        }
+//      }
+//      return this.getCapabilities(user,pretty,hsr,body);
+//    }
+//    return this.execute(user,pretty,hsr,body);
+//  }
+//
+//  /**
+//   * Execute a GetRecords or GetRecordById request.
+//   * @param user the active user
+//   * @param pretty for pretty response
+//   * @param hsr the http request
+//   * @param body String body the request body
+//   * @return the response
+//   */
+//  protected Response execute(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
+//    try {
+//      CswRequest request = GeoportalContext.getInstance().getBean(
+//          "request.CswRequest",CswRequest.class);
+//      request.init(user,pretty);
+//      request.initBaseUrl(hsr,null);
+//      request.setParameterMap(hsr.getParameterMap());
+//      request.setBody(body);
+//
+//      request.setAcceptHeader(hsr.getHeader("accept"));
+//      String outputFormat = Val.trim(hsr.getParameter("outputFormat"));
+//      if (outputFormat == null) {
+//        String accept = hsr.getHeader("accept");
+//        if (accept != null) {
+//          if (accept.equalsIgnoreCase("application/atom+xml")) {
+//            outputFormat = "application/atom+xml";
+//            request.getOverrideParameters().put("outputFormat",outputFormat);
+//          }
+//        }
+//      }
+//      AppResponse response = request.execute();
+//      return response.build();
+//    } catch (Throwable t) {
+//      return this.writeException(t,pretty);
+//    }
+//  }
+//
+//  /**
+//   * Execute a GetCapabilities request.
+//   * @param user the active user
+//   * @param pretty for pretty response
+//   * @param hsr the http request
+//   * @param body String body the request body
+//   * @return the response
+//   */
+//  protected Response getCapabilities(AppUser user, boolean pretty, HttpServletRequest hsr, String body) {
+//    try {
+//      CswRequest request = GeoportalContext.getInstance().getBean(
+//          "request.CswRequest",CswRequest.class);
+//      request.init(user,pretty);
+//      request.initBaseUrl(hsr,null);
+//      request.setParameterMap(hsr.getParameterMap());
+//      request.setBody(body); 
+//      request.setAcceptHeader(hsr.getHeader("accept"));
+//      AppResponse response = request.getCapabilities();
+//      return response.build();
+//    } catch (Throwable t) {
+//      return this.writeException(t,pretty);
+//    }
+//  }
+//
+//  /**
+//   * Return the Opensearch descriptor.
+//   * @param user the active user
+//   * @param pretty for pretty response
+//   * @param hsr the http request
+//   * @return the response
+//   */
+//  protected Response opensearchDescription(AppUser user, boolean pretty, HttpServletRequest hsr) {
+//    try {
+//      OpensearchRequest request = GeoportalContext.getInstance().getBean(
+//          "request.OpensearchRequest",OpensearchRequest.class);
+//      request.init(user,pretty);
+//      request.initBaseUrl(hsr,null);
+//      AppResponse response = request.description();
+//      return response.build();
+//    } catch (Throwable t) {
+//      return this.writeException(t,pretty);
+//    }
+//  }
+//
+//  /**
+//   * Write an exception response.
+//   * @param t the cause
+//   * @param pretty for pretty JSON
+//   * @return the response
+//   */
+//  protected Response writeException(Throwable t, boolean pretty) {
+//    // TODO logging??
+//    if (t instanceof OwsException) {
+//      String xml = ((OwsException)t).getReport();
+//      return Response.status(Status.BAD_REQUEST).entity(xml).type(
+//          MediaType.APPLICATION_XML_TYPE.withCharset("UTF-8")).build();
+//    } else {
+//      Response.Status status = Response.Status.INTERNAL_SERVER_ERROR;
+//      if (t instanceof AccessDeniedException) {
+//        status = Response.Status.UNAUTHORIZED;
+//      }
+//      OwsException e = new OwsException(t);
+//      String xml = e.getReport();
+//      return Response.status(status).entity(xml).type(
+//          MediaType.APPLICATION_XML_TYPE.withCharset("UTF-8")).build();
+//    }
+//  }
 
 }
