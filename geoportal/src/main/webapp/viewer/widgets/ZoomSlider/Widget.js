@@ -19,9 +19,11 @@ define([
     'dojo/_base/lang',
     'jimu/BaseWidget',
     'dojo/_base/html',
-    'dojo/on'
+    'dojo/on',
+    'dojo/keys',
+    
   ],
-  function(declare, lang, BaseWidget, html, on) {
+  function(declare, lang, BaseWidget, html, on, keys) {
     var clazz = declare([BaseWidget], {
       name: 'ZoomSlider',
 
@@ -73,9 +75,17 @@ define([
       _onBtnZoomInClicked: function(){
         this.map._extentUtil({ numLevels: 1});
       },
+      
+      _onBtnZoomInPress: function(evt){
+        if (evt.keyCode === keys.ENTER) this.map._extentUtil({ numLevels: 1});
+      },
 
       _onBtnZoomOutClicked: function(){
         this.map._extentUtil({ numLevels: -1});
+      },
+      
+      _onBtnZoomOutPress: function(evt){
+        if (evt.keyCode === keys.ENTER) this.map._extentUtil({ numLevels: -1});
       },
 
       _setOrientation: function(isVertical){
