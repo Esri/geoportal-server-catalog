@@ -81,7 +81,7 @@ G._metadataTypes =  {
     evaluator: G.evaluators.dc,
     interrogationXPath: "/rdf:RDF/rdf:Description/dc:title",
     identifier: "http://purl.org/dc/elements/1.1/",
-    detailsXslt: "metadata/details/rdf-details.xslt",
+      toKnownXslt: "metadata/xslt/qualifiedDCToISO19139v1.0.xslt",
   },
   "arcgis": {
     key: "arcgis",
@@ -96,6 +96,7 @@ G._metadataTypes =  {
         interrogationXPath: "/oai_dc:dc/dc:title",
         identifier: "http://www.openarchives.org/OAI/2.0/oai_dc/",
         //detailsXslt: "metadata/details/rdf-details.xslt",
+        toKnownXslt: "metadata/xslt/qualifiedDCToISO19139v1.0.xslt",
     }
 };
 
