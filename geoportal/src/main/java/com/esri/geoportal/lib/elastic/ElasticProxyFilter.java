@@ -26,6 +26,8 @@ import java.io.InputStreamReader;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
+import java.util.HashMap;
+import java.util.Hashtable;
 import java.util.List;
 
 import javax.json.JsonObject;
@@ -196,8 +198,39 @@ public class ElasticProxyFilter implements Filter {
     }
     
     @Override
+    public Enumeration<String> getHeaderNames() {
+      if (contentType != null) {
+        boolean hasContentType = false, hasContentLength = false, useht = false;
+        Hashtable<String,String> ht = new Hashtable<String,String>();
+        Enumeration<String> names = super.getHeaderNames();
+        if (names != null) {
+          while (names.hasMoreElements()) {
+            String name = (String)names.nextElement();
+            ht.put(name,name);
+            if (name.equals("content-type")) {
+              hasContentType = true;
+            } else if (name.equals("content-length")) {
+              hasContentLength = true;
+            }
+          }
+          if (!hasContentType) {
+            ht.put("content-type","content-type");
+            useht = true;
+          }
+          if (!hasContentLength && content != null) {
+            ht.put("content-length","content-length");
+            useht = true;
+          }
+          if (useht) {
+            return ht.keys();
+          }
+        }
+      }
+      return super.getHeaderNames();
+    }
+
+    @Override
     public Enumeration<String> getHeaders(String name) {
-      //System.err.println("ElasticProxyRequestWrapper.getHeaders name="+name);
       if (name.equals("content-length") && content != null) {
         List<String> list = new ArrayList<String>();
         list.add(""+content.length());

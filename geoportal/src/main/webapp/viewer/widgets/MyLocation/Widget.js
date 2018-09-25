@@ -20,12 +20,13 @@ define([
     "esri/dijit/LocateButton",
     'dojo/_base/html',
     'dojo/on',
+    'dojo/keys',
     'dojo/_base/lang',
     'jimu/utils',
     'jimu/dijit/Message',
     'dojo/touch'
   ],
-  function(declare, BaseWidget, LocateButton, html, on, lang, jimuUtils) {
+  function(declare, BaseWidget, LocateButton, html, on, keys, lang, jimuUtils) {
     var clazz = declare([BaseWidget], {
 
       name: 'MyLocation',
@@ -35,6 +36,8 @@ define([
         this.inherited(arguments);
         this.placehoder = html.create('div', {
           'class': 'place-holder',
+          'role':'button',
+          'tabindex': '0',
           title: this.label
         }, this.domNode);
 
@@ -46,6 +49,9 @@ define([
           html.setAttr(this.placehoder, 'title', this.nls.httpNotSupportError);
         } else if (window.navigator.geolocation) {
           this.own(on(this.placehoder, 'click', lang.hitch(this, this.onLocationClick)));
+          this.own(on(this.placehoder,"keyup",lang.hitch(this,function(evt) {
+            if (evt.keyCode === keys.ENTER) this.onLocationClick();
+          })));
           this.own(on(this.map, 'zoom-end', lang.hitch(this, this._scaleChangeHandler)));
         } else {
           html.setAttr(this.placehoder, 'title', this.nls.browserError);
