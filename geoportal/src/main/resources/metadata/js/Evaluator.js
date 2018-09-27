@@ -28,29 +28,29 @@ load("classpath:metadata/js/EvaluatorFor_ISO.js");
 load("classpath:metadata/js/EvaluatorFor_ISO_extended.js"); // add  extended class
 
 G._metadataTypes =  {
-    "iso19115base": {
-        key: "iso19115",
-        evaluator: G.evaluators.iso,
-        interrogationXPath: "", // will never be triggered. We will just extend it.
-        identifier: "http://www.isotc211.org/2005/gmd",
-        detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
-        //xsdLocation: "http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd",
-        //schematronXslt: "metadata/schematron/Gemini2_R2r2-schematron.xslt",
-        toKnownXslt: null
-    },
-    /* example extension of the ISO evaluator
-     */
-    "iso19115extended": {
-        key: "iso19115extended",
-        evaluator: G.evaluators.isoextended,
-        interrogationXPath: "/gmd:MD_Metadata/gmd:dataSetURI/gco:CharacterString[starts-with(text(),'https://www.sciencebase.gov/catalog/')] | /gmi:MI_Metadata/gmd:dataSetURI/gco:CharacterString[starts-with(text(),'https://www.sciencebase.gov/catalog/')]",
-        identifier: "http://www.isotc211.org/2005/gmd",
-        detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
-        //xsdLocation: "http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd",
-        //schematronXslt: "metadata/schematron/Gemini2_R2r2-schematron.xslt",
-        toKnownXslt: null
-    },
-    "iso19115": {
+  "iso19115base": {
+    key: "iso19115",
+    evaluator: G.evaluators.iso,
+    interrogationXPath: "", // will never be triggered. We will just extend it.
+    identifier: "http://www.isotc211.org/2005/gmd",
+    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
+    //xsdLocation: "http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd",
+    //schematronXslt: "metadata/schematron/Gemini2_R2r2-schematron.xslt",
+    toKnownXslt: null
+  },
+  /* example extension of the ISO evaluator
+   */
+  "iso19115extended": {
+    key: "iso19115extended",
+    evaluator: G.evaluators.isoextended,
+    interrogationXPath: "/gmd:MD_Metadata/gmd:dataSetURI/gco:CharacterString[starts-with(text(),'https://www.sciencebase.gov/catalog/')] | /gmi:MI_Metadata/gmd:dataSetURI/gco:CharacterString[starts-with(text(),'https://www.sciencebase.gov/catalog/')]",
+    identifier: "http://www.isotc211.org/2005/gmd",
+    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
+    //xsdLocation: "http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd",
+    //schematronXslt: "metadata/schematron/Gemini2_R2r2-schematron.xslt",
+    toKnownXslt: null
+  },
+  "iso19115": {
     key: "iso19115",
     evaluator: G.evaluators.iso,
     interrogationXPath: "/gmd:MD_Metadata",
@@ -81,7 +81,8 @@ G._metadataTypes =  {
     evaluator: G.evaluators.dc,
     interrogationXPath: "/rdf:RDF/rdf:Description/dc:title",
     identifier: "http://purl.org/dc/elements/1.1/",
-      toKnownXslt: "metadata/xslt/qualifiedDCToISO19139v1.0.xslt",
+    detailsXslt: "metadata/details/rdf-details.xslt",
+    //toKnownXslt: "metadata/xslt/qualifiedDCToISO19139v1.0.xslt",
   },
   "arcgis": {
     key: "arcgis",
@@ -90,14 +91,14 @@ G._metadataTypes =  {
     identifier: "ArcGIS-Metadata",
     detailsXslt: "metadata/details/arcgis-details.xslt",
   },
-    "oai_dc": {
-        key: "oai_dc",
-        evaluator: G.evaluators.dc,
-        interrogationXPath: "/oai_dc:dc/dc:title",
-        identifier: "http://www.openarchives.org/OAI/2.0/oai_dc/",
-        //detailsXslt: "metadata/details/rdf-details.xslt",
-        toKnownXslt: "metadata/xslt/qualifiedDCToISO19139v1.0.xslt",
-    }
+  "oai_dc": {
+    key: "oai_dc",
+    evaluator: G.evaluators.dc,
+    interrogationXPath: "/oai_dc:dc/dc:title",
+    identifier: "http://www.openarchives.org/OAI/2.0/oai_dc/",
+    detailsXslt: "metadata/details/rdf-details.xslt",
+    //toKnownXslt: "metadata/xslt/qualifiedDCToISO19139v1.0.xslt",
+  }
 };
 
 G._initializeTask = function(mdoc) {
