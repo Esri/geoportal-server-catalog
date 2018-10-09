@@ -56,7 +56,4 @@ limitations under the License.
 
 A copy of the license is available in the repository's [license](https://github.com/ArcGIS/geoportal-server-catalog/blob/master/LICENSE.txt) file.
 
-[](Esri Tags: Geoportal Server)
-[](Esri Language: CSW)
-[](Esri Language: Metadata)
 
