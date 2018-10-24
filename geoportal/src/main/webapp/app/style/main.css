@@ -17,6 +17,7 @@ body {
 }
 .calcite .dijitTitlePaneTitle {
   padding: 4px 6px;
+  overflow-y: hidden;
 }
 .calcite .dijitTitlePaneContentInner {
   padding: 8px;
