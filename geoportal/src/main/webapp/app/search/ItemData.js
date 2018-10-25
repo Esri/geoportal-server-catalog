@@ -29,8 +29,8 @@ define([
         
         postCreate: function() {
           this.inherited(arguments);
-          array.filter(Object.keys(this.item), function(key) { return key.startsWith("src_")})
-               .filter(function(key) { return !key.startsWith("src_source_") && !key.startsWith("src_uri_")  && !key.startsWith("src_task_ref_")})
+          array.filter(Object.keys(this.item), function(key) { return key.indexOf("src_")==0})
+               .filter(function(key) { return !key.indexOf("src_source_")==0 && !key.indexOf("src_uri_")==0  && !key.indexOf("src_task_ref_")==0})
                .map(lang.hitch(this, function(key) {return {key: key, value: this.item[key]}}))
                .filter(function(kvp) {return kvp.value!=null && (typeof kvp.value == "string"? kvp.value.trim().length>0: true)})
                .map(function(kvp) { return {key: kvp.key.replace(/^src_/g, "").replace(/_[^_]+$/gi,"").replace(/_+/gi," "), value: kvp.value}})
