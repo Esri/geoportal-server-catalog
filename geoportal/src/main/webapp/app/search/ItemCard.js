@@ -297,9 +297,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         if (typeof v === "string" && v === "json") {
           htmlNode.style.visibility = "hidden";
           xmlNode.style.visibility = "hidden";
+          jsonNode.style.visibility = "hidden";
           
           htmlNode.style.display = "none";
           xmlNode.style.display = "none";
+          jsonNode.style.display = "none";
         }
       }
     },
