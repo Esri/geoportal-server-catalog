@@ -17,12 +17,13 @@ define([
     "dojo/_base/lang",
     "dojo/_base/array",
     "dojo/dom-construct",
+    "dojox/html/entities",
     "dijit/Dialog",
     "dijit/_TemplatedMixin",
     "dijit/_WidgetsInTemplateMixin",
     "dojo/i18n!app/nls/resources",
     "dojo/text!./templates/ItemData.html"
-], function (declare, lang, array, domConstruct, Dialog, TemplatedMixin, _WidgetsInTemplateMixin, i18n, template) {
+], function (declare, lang, array, domConstruct, entities, Dialog, TemplatedMixin, _WidgetsInTemplateMixin, i18n, template) {
     return declare("app.management.panels.customColumn", [Dialog, TemplatedMixin, _WidgetsInTemplateMixin], {
         templateString: template,
         i18n: i18n,
@@ -41,8 +42,8 @@ define([
         
         _appendData: function(name, value) {
           var row = domConstruct.create("tr", null, this.table);
-          domConstruct.create("td", {innerHTML: name}, row);
-          domConstruct.create("td", {innerHTML: value}, row);
+          domConstruct.create("td", {innerHTML: entities.encode(""+name)}, row);
+          domConstruct.create("td", {innerHTML: entities.encode(""+value)}, row);
         }
     });
 });
