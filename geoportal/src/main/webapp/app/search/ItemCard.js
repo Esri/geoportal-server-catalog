@@ -311,6 +311,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       var itemData = new ItemData({
         title: this.i18n.item.itemData.title,
         item: item,
+        style: "width: 80%; max-width: 80%;",
         onHide: function() {
           itemData.destroy();
         }
