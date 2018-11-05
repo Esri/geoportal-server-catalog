@@ -464,9 +464,17 @@ body {
   overflow-x: hidden;
 }
 
-.g-attributes-table td {
+
+.g-attributes-table td, th {
   border-bottom: 1px solid lightgray;
   padding: 4px;
+}
+
+.g-attributes-name {
+  border-right: 1px solid lightgray;
+}
+
+.g-attributes-value {
   word-break: break-all;
 }
 
