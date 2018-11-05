@@ -467,6 +467,7 @@ body {
 .g-attributes-table td {
   border-bottom: 1px solid lightgray;
   padding: 4px;
+  word-break: break-all;
 }
 
 /* Accessibility Changes */
