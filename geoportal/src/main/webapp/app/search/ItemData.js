@@ -42,8 +42,8 @@ define([
         
         _appendData: function(name, value) {
           var row = domConstruct.create("tr", null, this.table);
-          domConstruct.create("td", {innerHTML: entities.encode(""+name)}, row);
-          domConstruct.create("td", {innerHTML: entities.encode(""+value)}, row);
+          domConstruct.create("td", {innerHTML: entities.encode(""+name), "class": "g-attributes-name"}, row);
+          domConstruct.create("td", {innerHTML: entities.encode(""+value), "class": "g-attributes-value"}, row);
         }
     });
 });
