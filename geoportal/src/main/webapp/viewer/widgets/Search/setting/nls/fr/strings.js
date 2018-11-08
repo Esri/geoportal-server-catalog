@@ -14,6 +14,7 @@ define({
   "generalSetting": "paramètres généraux",
   "allPlaceholder": "Texte d'espace réservé pour tout parcourir : ",
   "showInfoWindowOnSelect": "Afficher la fenêtre contextuelle de l'entité ou de l'emplacement trouvé",
+  "showInfoWindowOnSelect2": "Afficher la fenêtre contextuelle lorsque l’entité ou l’emplacement est trouvé.",
   "searchInCurrentMapExtent": "Rechercher uniquement dans l'étendue de la carte actuelle",
   "zoomScale": "Echelle de zoom",
   "locatorUrl": "URL du géocodeur",

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -19,11 +19,9 @@ define([
     'dojo/_base/lang',
     'jimu/BaseWidget',
     'dojo/_base/html',
-    'dojo/on',
-    'dojo/keys',
-    
+    'dojo/on'
   ],
-  function(declare, lang, BaseWidget, html, on, keys) {
+  function(declare, lang, BaseWidget, html, on) {
     var clazz = declare([BaseWidget], {
       name: 'ZoomSlider',
 
@@ -37,6 +35,8 @@ define([
       _cornerBottom: 'jimu-corner-bottom',
       _cornerLeading: 'jimu-corner-leading',
       _cornerTrailing: 'jimu-corner-trailing',
+
+      moveTopOnActive: false,
 
       postCreate: function(){
         this.inherited(arguments);
@@ -75,17 +75,9 @@ define([
       _onBtnZoomInClicked: function(){
         this.map._extentUtil({ numLevels: 1});
       },
-      
-      _onBtnZoomInPress: function(evt){
-        if (evt.keyCode === keys.ENTER) this.map._extentUtil({ numLevels: 1});
-      },
 
       _onBtnZoomOutClicked: function(){
         this.map._extentUtil({ numLevels: -1});
-      },
-      
-      _onBtnZoomOutPress: function(evt){
-        if (evt.keyCode === keys.ENTER) this.map._extentUtil({ numLevels: -1});
       },
 
       _setOrientation: function(isVertical){

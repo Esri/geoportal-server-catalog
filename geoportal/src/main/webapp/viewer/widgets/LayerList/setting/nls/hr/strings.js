@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Premjesti gore / Premjesti dolje",
   "attributeTable": "Prikaži u atributnoj tablici",
   "url": "Opis / Prikaži pojedinosti o stavci / Preuzimanje",
+  "expandAllLayers": "Proširi sve slojeve",
+  "expandAllLayersByDefault": "Proširi sve slojeve prema zadanim postavkama",
   "layerSelectorTitle": "Izaberite koji će se slojevi prikazati na popisu."
 });

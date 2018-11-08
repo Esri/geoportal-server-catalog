@@ -14,6 +14,7 @@ define({
   "generalSetting": "Algemene instellingen",
   "allPlaceholder": "Plaatshoudertekst om alles te zoeken: ",
   "showInfoWindowOnSelect": "Pop-up weergeven voor gevonden object of locatie",
+  "showInfoWindowOnSelect2": "Toon pop-up als het object of de locatie gevonden is.",
   "searchInCurrentMapExtent": "Alleen zoeken in huidige kaartextent",
   "zoomScale": "Schaal voor voor in-/uitzoomen",
   "locatorUrl": "Geocoder-URL",

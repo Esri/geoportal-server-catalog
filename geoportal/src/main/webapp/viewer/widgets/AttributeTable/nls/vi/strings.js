@@ -40,5 +40,21 @@ define({
   "sortDes": "Sắp xếp giảm dần",
   "statistics": "Thống kê",
   "attachments": "Tệp đính kèm",
-  "files": "tệp"
+  "files": "tệp",
+  "keepRichTextLabel": "Giữ nguyên định dạng rich text (RTF)",
+  "whatsThis": "Tại sao lại vậy?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} có chứa (các) trường văn bản có dạng rich text sau: ",
+      "line2": " mà có thể bao gồm các kiểu định dạng văn bản như phông chữ, màu sắc hoặc kích cỡ văn bản.",
+      "line3": "Khi được xuất sang CSV, các kiểu định dạng này sẽ được giữ nguyên dưới dạng các thẻ HTML. Nếu bạn không muốn giữ nguyên định dạng văn bản rich text, bạn có thể bỏ chọn tùy chọn \"Keep rich text format\" (Giữ nguyên định dạng rich text)."
+    },
+    "example": {
+      "label": "Ví dụ:",
+      "scenarios": {
+        "first": "sẽ được xuất ra dưới dạng văn bản sau theo mặc định:",
+        "second": "và văn bản sau mà không có định dạng rich text:"
+      }
+    }
+  }
 });

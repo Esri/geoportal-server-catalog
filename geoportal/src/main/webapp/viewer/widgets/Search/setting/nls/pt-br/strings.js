@@ -14,6 +14,7 @@ define({
   "generalSetting": "Configurações gerais",
   "allPlaceholder": "Texto de local reservado para pesquisar todos: ",
   "showInfoWindowOnSelect": "Mostrar pop-up do local ou feição localizada",
+  "showInfoWindowOnSelect2": "Mostrar pop-up quando a feição ou localização for encontrada.",
   "searchInCurrentMapExtent": "Somente pesquisar na extensão de mapa atual",
   "zoomScale": "Escala de zoom",
   "locatorUrl": "URL do Geocodificador",

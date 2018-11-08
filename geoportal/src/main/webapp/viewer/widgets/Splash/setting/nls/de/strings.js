@@ -25,7 +25,7 @@ define({
   "transparency": "Transparenz",
   "sizeFill": "Füllung",
   "sizeFit": "Einpassen",
-  "sizeStretch": "Zu füllende Streckung",
+  "sizeStretch": "Zum Füllen strecken",
   "sizeCenter": "Mittelpunkt",
   "sizeTile": "Kachel",
   "buttonColor": "Schaltflächenfarbe",

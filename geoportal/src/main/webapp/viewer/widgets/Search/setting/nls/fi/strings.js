@@ -14,6 +14,7 @@ define({
   "generalSetting": "Yleiset asetukset",
   "allPlaceholder": "Paikkamerkkiteksti haulle kaikkialta: ",
   "showInfoWindowOnSelect": "Näytä löydetyn kohteen tai sijainnin ponnahdusikkuna",
+  "showInfoWindowOnSelect2": "Näytä ponnahdusikkuna, kun kohde tai sijainti on löytynyt.",
   "searchInCurrentMapExtent": "Etsi vain nykyisestä karttalaajuudesta",
   "zoomScale": "Tarkennustaso",
   "locatorUrl": "Geokooderin URL-osoite",

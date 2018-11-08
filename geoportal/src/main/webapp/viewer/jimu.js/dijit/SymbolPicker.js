@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -46,6 +46,8 @@ define(['dojo/_base/declare',
       //you must set symbol or type
       symbol: null, //optional
       type: null, //optional, available values:marker,line,fill,text
+      cropImage: false, //optional
+      customZIndex: null, //optional
 
       //public methods:
       //reset
@@ -82,6 +84,8 @@ define(['dojo/_base/declare',
         });
 
         this.symbolChooser = new SymbolChooser({
+          cropImage: this.cropImage,
+          customZIndex: this.customZIndex,
           symbol: this.symbol,
           type: this.type
         });
@@ -117,6 +121,28 @@ define(['dojo/_base/declare',
           }
           var node = this.tooltipDialog.domNode;
           var isInternal = target === node || html.isDescendant(target, node);
+          //custom & cropImage=true
+          if(this.cropImage){
+            var ifCustomOption = this.symbolChooser._isCustomImageOptionSelected();
+            if(ifCustomOption){
+              var _imageChooser = this.symbolChooser.imageChooser;
+              var isCropOpen = _imageChooser.cropPopupOpen;
+              var isMsgOpen = _imageChooser.msgPopupOpen;
+              if(!isCropOpen && !isMsgOpen){
+                if(!isInternal){
+                  this._hideTooltipDialog();
+                }
+              }
+              if(!(_imageChooser.cropPopup && _imageChooser.cropPopup.domNode)){
+                _imageChooser.cropPopupOpen = false;
+              }
+              if(!(_imageChooser.msgPopup && _imageChooser.msgPopup.domNode)){
+                _imageChooser.msgPopupOpen = false;
+              }
+              return;
+            }
+          }
+          //custom & cropImage=false
           if(!isInternal){
             this._hideTooltipDialog();
           }

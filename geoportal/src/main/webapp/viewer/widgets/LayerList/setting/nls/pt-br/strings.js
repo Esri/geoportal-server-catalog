@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Mover para Cima / Mover para Baixo",
   "attributeTable": "Visualizar na Tabela de Atributos",
   "url": "Descrição / Mostrar Detalhes do Item / Download",
+  "expandAllLayers": "Expandir todas as camadas",
+  "expandAllLayersByDefault": "Expandir todas as camadas por padrão",
   "layerSelectorTitle": "Escolha quais camadas serão mostradas na lista."
 });

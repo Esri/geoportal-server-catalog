@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Mutare în sus/Mutare în jos",
   "attributeTable": "Vizualizare în tabelul de atribute",
   "url": "Descriere/Afişare detalii element/Descărcare",
+  "expandAllLayers": "Extindeți toate straturile tematice",
+  "expandAllLayersByDefault": "Extindeți toate straturile tematice în mod implicit",
   "layerSelectorTitle": "Alegeţi ce straturi tematice vor fi afişate în listă."
 });

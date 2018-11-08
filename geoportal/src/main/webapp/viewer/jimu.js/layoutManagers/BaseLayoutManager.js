@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -65,8 +65,11 @@ function(declare, lang, array, html, _WidgetBase, Deferred, all, jimuUtils, Widg
     },
 
     onEnter: function(appConfig, mapId){
+      var def = new Deferred();
       this.appConfig = appConfig;
       this.mapId = mapId;
+      def.resolve();
+      return def;
     },
 
     onLeave: function(){
@@ -105,6 +108,42 @@ function(declare, lang, array, html, _WidgetBase, Deferred, all, jimuUtils, Widg
 
     onWidgetPoolChange: function(appConfig, changeData){
       this.reloadControllerWidget(appConfig, changeData.controllerId);
+    },
+
+    onOnScreenOrderChange: function(appConfig, onscreenWidgets){
+      array.forEach(onscreenWidgets, lang.hitch(this, function(widgetConfig) {
+        if (!widgetConfig.uri) {
+          array.some(this.widgetPlaceholders, lang.hitch(this, function(phDijit) {
+            if (phDijit.index === widgetConfig.placeholderIndex) {
+              var style = jimuUtils.getPositionStyle({
+                top: widgetConfig.position.top,
+                left: widgetConfig.position.left,
+                right: widgetConfig.position.right,
+                bottom: widgetConfig.position.bottom,
+                width: 40,
+                height: 40
+              });
+              html.setStyle(phDijit.domNode, style);
+              return true;
+            }
+          }));
+        } else {
+          array.some(this.onScreenWidgetIcons, lang.hitch(this, function(iconDijit) {
+            if (iconDijit.configId === widgetConfig.id) {
+              html.setStyle(iconDijit.domNode, jimuUtils.getPositionStyle({
+                top: widgetConfig.position.top,
+                left: widgetConfig.position.left,
+                right: widgetConfig.position.right,
+                bottom: widgetConfig.position.bottom,
+                width: 40,
+                height: 40
+              }));
+              iconDijit.moveTo(widgetConfig.position);
+              return true;
+            }
+          }));
+        }
+      }));
     },
 
     onActionTriggered: function(actionInfo){
@@ -248,7 +287,11 @@ function(declare, lang, array, html, _WidgetBase, Deferred, all, jimuUtils, Widg
 
     destroyOnScreenOffPanelWidgets: function(){
       array.forEach(this.widgetManager.getOnScreenOffPanelWidgets(), function(widget){
-        this.widgetManager.destroyWidget(widget);
+        if(widget.isController){
+          this._destroyControllerWidget(widget);
+        }else{
+          this.widgetManager.destroyWidget(widget);
+        }
       }, this);
     },
 

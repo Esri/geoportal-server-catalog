@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="16px" height="16px" viewBox="0 0 16 16" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 45.1 (43504) - http://www.bohemiancoding.com/sketch -->
+    <title>arrow-back-black_normal</title>
+    <desc>Created with Sketch.</desc>
+    <defs></defs>
+    <g id="Filter-dijit" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="filter-dijit_more" transform="translate(-196.000000, -819.000000)" fill="#666666">
+            <g id="arrow-back-black_normal" transform="translate(196.000000, 819.000000)">
+                <polygon id="Shape" points="16 7 3.8 7 9.4 1.4 8 0 0 8 8 16 9.4 14.6 3.8 9 16 9"></polygon>
+            </g>
+        </g>
+    </g>
+</svg>

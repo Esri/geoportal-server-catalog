@@ -45,7 +45,7 @@
   font-size: 12px;
   font-weight: normal;
   color: #ffffff;
-  color: rgba(255, 255, 255, 0.8);
+  font-family: Avenir Medium;
 }
 
 /* css for jimu-footer */
@@ -59,23 +59,23 @@
 .jimu-link{
   font-size: 14px;
   font-weight: normal;
+  color: #ffffff;
+  font-family: Avenir Medium;
 }
 
 .jimu-link:link, .jimu-link:visited{
   text-decoration: none;
-  color: #95a2a9;
-  color: rgba(255, 255, 255, 0.7);
 }
 
 .jimu-link:hover{
-  text-decoration: none;
+  text-decoration: underline;
   color: #ffffff;
+  opacity: 1;
 }
 
 .jimu-link:active{
   text-decoration: none;
   color: #ececec;
-  color: rgba(255, 255, 255, 0.9);
 }
 
 /* css for jimu-widget- */
@@ -285,18 +285,6 @@
   color: #596679;
 }
 
-/* css for Filter dijit */
-.jimu-filter .odd-filter{
-  background: #eef2f5;
-  border-left: 1px solid #eef2f5;
-  border-right: 1px solid #eef2f5;
-}
-
-.jimu-filter .even-filter{
-  background: #ffffff;
-  border: 1px solid #eef2f5;
-}
-
 /* css for ItemSelector dijit */
 .jimu-item-selector .signin-tip{
   color: #d6d6d6;
@@ -458,64 +446,4 @@
 
 .jimu-draw-box.enabled .drawings-clear:hover{
   background-color: #B60016;
-}
-
-/* Accessibility Changes */
-
-.jimu-widget-zoomslider {
-    background-color: #ccc;
-    background-color: rgba(0, 0, 0, 0.5) !important;
-    cursor: pointer;
-    font-size: 24px;
-    line-height: 25px;
-    -webkit-user-select: none;
-    -moz-user-select: none;
-    -ms-user-select: none;
-    user-select: none;
-    color: rgb(255, 255, 255);
-    text-align: center;
-    font-family: verdana,helvetica;
-}
-
-.jimu-widget-homebutton .HomeButton .home {
-    background-color: rgba(0,0,0,0.5) !important;
-}
-
-.jimu-widget-mylocation .place-holder {
-    background-color: rgba(0,0,0,0.4) !important;
-}
-
-.jimu-widget-onscreen-icon {
-    background-color: #ccc;
-    background-color: rgba(0, 0, 0, 0.5) !important;
-    border: 1px solid #000000;
-    border: 1px solid rgba(0, 0, 0, 0.5);
-}
-
-.jimu-widget-homebutton .HomeButton .home {
-    background-color: rgba(0,0,0,0.4) !important;
-}
-
-.jimu-widget-homebutton .HomeButton .home:hover {
-    background-color: rgba(0,0,0,0.6) !important;
-}
-
-.jimu-widget-mylocation .place-holder {
-    background-color: rgba(0,0,0,0.4) !important;
-}
-
-.jimu-widget-mylocation .place-holder:hover {
-    background-color: rgba(0,0,0,0.6) !important;
-}
-
-div#dijit__WidgetBase_0:hover {
-    background-color: rgba(0, 0, 0, 0.7) !important;
-}
-
-div#dijit__WidgetBase_1:hover {
-    background-color: rgba(0, 0, 0, 0.7) !important;
-}
-
-div#dijit__WidgetBase_2:hover {
-    background-color: rgba(0, 0, 0, 0.7) !important;
 }

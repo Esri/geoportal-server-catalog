@@ -61,7 +61,8 @@ define([
     query: function(query, options) {
       var queryObj = new Query();
       var start = (options && options.start) || 0;
-      var count = /*options.count ||*/ this.batchCount;
+      // _export_count for export query
+      var count = /*options.count ||*/  options._export_count || this.batchCount;
       var filterIds = null;
 
       if (typeof query === 'function') {

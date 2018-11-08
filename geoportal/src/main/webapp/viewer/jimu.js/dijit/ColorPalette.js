@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -25,7 +25,7 @@ define(['dojo/Evented',
   'dojo/_base/Color',
   'dojo/query',
   "jimu/dijit/ColorChooser",
-  'jimu/dijit/ColorPicker',
+  'jimu/dijit/CustomColorPicker',
   'jimu/dijit/ColorRecords',
   'dijit/popup',
   'jimu/utils',
@@ -33,20 +33,22 @@ define(['dojo/Evented',
 ],
   function (Evented, declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     lang, html, on, Color, query,
-    ColorChooser, JimuColorPicker, ColorRecords, dojoPopup, jimuUtils, a11yclick) {
+    ColorChooser, CustomColorPicker, ColorRecords, dojoPopup, jimuUtils, a11yclick) {
     return declare([_WidgetBase, _WidgetsInTemplateMixin, _TemplatedMixin, Evented], {
       templateString: "<div></div>",
       baseClass: 'jimu-color-palette',
       declaredClass: 'jimu.dijit.ColorPalette',
       _TRANSPARENT_STR: "rgba(0, 0, 0, 0)",
 
-      value: "",//dojoColor
+      value: "",//typeof dojoColor
       _defaultAppearance: {
         showTransparent: true,
         showColorPalette: true,
-        showColorPickerOK: false,
         showCoustom: true,
-        showCoustomRecord: true
+        showColorPickerOK: false,//ok btn
+        showColorPickerApply: true,//apply btn
+        showCoustomRecord: true,
+        closeDialogWhenChange: false//close colorPalette dialog, when color changed
       },
       recordUID: "",//uid for colorRecords
 
@@ -66,22 +68,32 @@ define(['dojo/Evented',
 
         this._createContent();
       },
+
+      initUI: function () {
+        //restore init ui
+        var isTirggerEvent = false;
+        this._toggleCustomColorPicker("init", isTirggerEvent);
+      },
+
       _createContent: function () {
         this.appearance = lang.mixin(this._defaultAppearance, this.appearance);
 
         var tooltipDialogContent = html.create("div", { "class": "jimu-colorpalette" }, this.domNode);
 
+        this.initPanel = html.create("div", { "class": "init-panel" }, tooltipDialogContent);
+        this.customPanel = html.create("div", { "class": "custom-panel hide" }, tooltipDialogContent);
+
         if (this.appearance.showTransparent) {
-          this._createSpecialColors(tooltipDialogContent);
+          this._createSpecialColors( this.initPanel);
         }
         if (this.appearance.showColorPalette) {
-          this._createColorChooser(tooltipDialogContent);
+          this._createColorChooser( this.initPanel);
         }
         if (this.appearance.showCoustom) {
-          this._createJimuColorPicker(tooltipDialogContent);
+          this._createCustomColorPicker( this.initPanel);
         }
         if (this.appearance.showCoustom && this.appearance.showCoustomRecord) {
-          this._createCoustomRecord(tooltipDialogContent);
+          this._createCoustomRecord( this.initPanel);
         }
       },
       setColor: function (newColor) {
@@ -107,11 +119,19 @@ define(['dojo/Evented',
       getColor: function () {
         return this.value;
       },
-      changeColor: function(){
+      changeColor: function(isClose){
         if ("undefined" !== typeof this.value.a && 0 === this.value.a) {
           this.onChange(this.value);
         } else {
           this.onChange(this.value.toHex());
+        }
+
+        this.emit("change", this.value);
+
+        if (true === this.appearance.closeDialogWhenChange &&
+          isClose !== false//DO NOT close dialog, when apply click
+        ) {
+          this._closeDialog();
         }
       },
       refreshRecords: function () {
@@ -167,46 +187,63 @@ define(['dojo/Evented',
         })));
       },
 
-      //3. JimuColorPicker
-      _createJimuColorPicker: function (tooltipDialogContent) {
+      //3. customColorPicker
+      _createCustomColorPicker: function () {
         this.coustomtBtn = html.create("div", {
-          "class": "coustom btn"
-        }, tooltipDialogContent);
+          "class": "coustom btn",
+          "innerHTML": '<div class="btn-wapper"><div class="custom icon jimu-float-leading"></div>' +
+          '<div class="custom text jimu-float-leading">' + this.nls.custom + '</div></div>'
+        }, this.initPanel);
 
-        var customColorHtml = '<div class="btn-wapper"><div class="custom icon jimu-float-leading"></div>' +
-          '<div class="custom text jimu-float-leading">' + this.nls.custom + '</div></div>';
-        this.picker = new JimuColorPicker({
-          ensureMode: true,
+        this.own(on(this.coustomtBtn, 'click', lang.hitch(this, function () {
+          this._toggleCustomColorPicker("custom");
+        })));
+
+        this.picker = new CustomColorPicker({
           showOk: this.appearance.showColorPickerOK,
-          showLabel: false,
-          value: this.value.toHex(),
-          onChange: lang.hitch(this, function (colorHex) {
-            //JimuColorPicker use hex or RGB only, can't use Rgba
-            var color = new Color(colorHex);
-            this.setColor(color);
-            this.changeColor();
-
-            if (this.colorRecords && this.colorRecords.push) {
-              this.colorRecords.push(color);
-            }
-          }),
-          onClose: lang.hitch(this, function () {
-            this.emit("jimuColorPicker-popupClose");
-          })
+          showApply: this.appearance.showColorPickerApply,
+          value: this.value.toHex()
         });
-        this.picker.placeAt(this.coustomtBtn);
-        this.picker.setLabel(customColorHtml);//icon + text
-        //this.picker.setColor(this.value, false);
+
+        this.picker.placeAt(this.customPanel);
         this.picker.setColor(this.value);
-        // this.own(on(this.picker, 'popupopen', lang.hitch(this, function () {
-        //   this.emit("jimuColorPicker-popupOpen");
-        // })));
-        // this.own(on(this.picker, 'popupclose', lang.hitch(this, function () {
-        //   this.emit("jimuColorPicker-popupClose");
-        // })));
+
+        this.own(on(this.picker, 'ok', lang.hitch(this, function (color) {
+          this.setColor(new Color(color));
+          this.changeColor();
+
+          this._addAColorRecord(color);
+
+          this._toggleCustomColorPicker("init");
+          this._closeDialog();
+        })));
+        this.own(on(this.picker, 'apply', lang.hitch(this, function (color) {
+          this.setColor(new Color(color));
+          var isClose = false;
+          this.changeColor(isClose);
+
+          this._addAColorRecord(color);
+        })));
+        this.own(on(this.picker, 'cancel', lang.hitch(this, function () {
+          this._toggleCustomColorPicker("init");
+          this._closeDialog();
+        })));
       },
-      isJimuColorPickerTooltipDialogOpened: function(){
-        return this.picker.isTooltipDialogOpened();
+
+      _toggleCustomColorPicker: function (mode, isTirgger) {
+        if ("custom" === mode) {
+          html.removeClass(this.customPanel, "hide");
+          html.addClass(this.initPanel, "hide");
+        } else {
+          html.addClass(this.customPanel, "hide");
+          html.removeClass(this.initPanel, "hide");
+        }
+
+        if ("undefined" !== typeof isTirgger && false === isTirgger) {
+
+        } else {
+          this.emit("change-style");
+        }
       },
 
       //4. CoustomRecord
@@ -221,6 +258,11 @@ define(['dojo/Evented',
           this.setColor(new Color(color));
           this.changeColor();
         })));
+      },
+      _addAColorRecord: function(color){
+        if (this.colorRecords && this.colorRecords.push) {
+          this.colorRecords.push(color);//update colorRecord
+        }
       },
 
       ///////////////////////////////////////////////////////////////////////////////
@@ -241,22 +283,20 @@ define(['dojo/Evented',
           }
         }, this.domNode);
       },
-      getPickerTooltipDialog: function(){
-        var tooltipDialog = null;
-        if(this.picker && this.picker.tooltipDialog){
-          tooltipDialog = this.picker.tooltipDialog;
-        }
-        return tooltipDialog;
-      }//,
       // onChange: function (newColor) {
-      // /*jshint unused: false*/
-      // // if (this.showColorInBG) {
-      // //   html.setStyle(this.domNode, 'backgroundColor', newColor.toString());
-      // // }
-      // // if (this.showLabel) {
-      // //   this._changeLabel(newColor);
-      // // }
       //   this.emit("change", newColor);
-      // }
+      // },
+      onOpen: function(){
+        this.openDialog();
+      },
+      openDialog: function(){
+        this.initUI();
+      },
+      _closeDialog: function(){
+        this.emit("close");
+      },
+      onClose: function () {
+        this._closeDialog();//for parent call, like EditorBackgroundColor.js
+      }
     });
   });

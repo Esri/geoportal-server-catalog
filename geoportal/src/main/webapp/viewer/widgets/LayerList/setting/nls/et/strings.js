@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Liigu üles / Liigu alla",
   "attributeTable": "Vaata atribuuditabelis",
   "url": "Kirjeldus / Kuva sisuüksuse detailid / Allalaadimine",
+  "expandAllLayers": "Laienda kõik kihid",
+  "expandAllLayersByDefault": "Laienda kõik kihid vaikimisi",
   "layerSelectorTitle": "Valige loendis kuvatavad kihid."
 });

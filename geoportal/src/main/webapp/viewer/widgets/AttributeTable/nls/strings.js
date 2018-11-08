@@ -41,10 +41,27 @@ define({
     sortDes: "Sort descending",
     statistics: "Statistics",
     attachments: "Attachments",
-    files: "files"
+    files: "files",
+    keepRichTextLabel: "Keep rich text format",
+    whatsThis: "What's this?",
+    richTextMessage: {
+      explanatoryText: {
+        line1: "${layerName} contains the following rich text field(s): ",
+        line2: " that may include text formatting styles, such as fonts, colors or text sizes.",
+        line3: "When exported to CSV, the formatting styles will be preserved in the form of HTML tags. You can choose not to keep the rich text formats by unchecking the \"Keep rich text format\" box."
+      },
+      example: {
+        label: "For example:",
+        scenarios: {
+          first: "will be exported as the following text by default:",
+          second: "and the following text without rich text format:"
+        }
+      }
+    }
   }),
   "ar": 1,
   "bs": 1,
+  "ca": 1,
   "cs": 1,
   "da": 1,
   "de": 1,
@@ -56,6 +73,7 @@ define({
   "he": 1,
   "hi": 1,
   "hr": 1,
+  "hu": 1,
   "it": 1,
   "id": 1,
   "ja": 1,
@@ -69,6 +87,7 @@ define({
   "pt-pt": 1,
   "ro": 1,
   "ru": 1,
+  "sl": 1,
   "sr": 1,
   "sv": 1,
   "th": 1,

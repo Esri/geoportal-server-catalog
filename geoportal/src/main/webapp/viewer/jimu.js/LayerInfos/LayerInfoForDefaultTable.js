@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,7 +26,6 @@ define([
 ], function(declare, lang, html, Deferred, aspect, LayerInfoForDefault, LayerObjectFacory,
 PopupTemplate) {
   return declare(LayerInfoForDefault, {
-    isTable:            null,
     _layerObjectFacory: null,
     constructor: function() {
       this.newSubLayers = [];
@@ -43,6 +42,7 @@ PopupTemplate) {
       this._layerObjectFacory.getLayerObject().then(lang.hitch(this, function(layerObject) {
         if(this.layerObject.empty && layerObject) {
           this.layerObject = layerObject;
+          this._bindEventAfterLayerObjectLoaded();
         }
         def.resolve(layerObject);
       }));
@@ -99,6 +99,29 @@ PopupTemplate) {
     },
     */
 
+    getPopupInfoFromLayerObject: function() {
+      // trying get popupInfo from webmap.
+      var popupInfo = this.getPopupInfo();
+      if(!popupInfo && this.layerObject && !this.layerObject.empty) {
+        popupInfo = this._getDefaultPopupInfo(this.layerObject);
+      }
+      return popupInfo;
+    },
+
+    loadPopupInfo: function() {
+      var def = new Deferred();
+      var popupInfo = this.getPopupInfo();
+      if(popupInfo) {
+        def.resolve(popupInfo);
+      } else {
+        this.getLayerObject().then(lang.hitch(this, function() {
+          popupInfo = this._getDefaultPopupInfo(this.layerObject);
+          def.resolve(popupInfo);
+        }));
+      }
+      return def;
+    },
+
     getLayerType: function() {
       var def = new Deferred();
       def.resolve("Table");
@@ -154,20 +177,23 @@ PopupTemplate) {
          !this.layerObject.empty &&
          this.layerObject.getDefinitionExpression) {
         filter = this.layerObject.getDefinitionExpression();
+        if(filter === undefined) {
+          filter = this.getFilterOfWebmap();
+        }
       } else {
         filter = this.getFilterOfWebmap();
       }
       return filter;
-    },
-
-    setFilter: function() {
-      // summary:
-      //   get filter from layerObject, this is a async method.
-      var fullArguments = arguments;
-      return this.getLayerObject().then(lang.hitch(this, function() {
-        this.inherited(fullArguments);
-        return;
-      }));
     }
+
+    // setFilter: function() {
+    //   // summary:
+    //   //   set filter to layerObject, this is a async method.
+    //   var fullArguments = arguments;
+    //   return this.getLayerObject().then(lang.hitch(this, function() {
+    //     this.inherited(fullArguments);
+    //     return;
+    //   }));
+    // }
   });
 });

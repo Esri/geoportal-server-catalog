@@ -40,5 +40,21 @@ define({
   "sortDes": "Absteigend sortieren",
   "statistics": "Statistiken",
   "attachments": "Anlagen",
-  "files": "Dateien"
+  "files": "Dateien",
+  "keepRichTextLabel": "Rich Text Format beibehalten",
+  "whatsThis": "Erfahren Sie mehr",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} enthält das bzw. die folgende(n) Rich-Text-Feld(er): ",
+      "line2": " Darin können Textformatierungs-Styles wie Schriftarten, Farben oder Textgrößen enthalten sein.",
+      "line3": "Beim Exportieren in eine CSV-Datei werden die Formatierungs-Styles in Form von HTML-Tags beibehalten. Wenn Sie das Rich Text Format nicht beibehalten möchten, deaktivieren Sie das Kontrollkästchen \"Rich Text Format beibehalten\"."
+    },
+    "example": {
+      "label": "Beispiel:",
+      "scenarios": {
+        "first": "wird standardmäßig als folgender Text exportiert:",
+        "second": "und ohne Rich Text Format als folgender Text:"
+      }
+    }
+  }
 });

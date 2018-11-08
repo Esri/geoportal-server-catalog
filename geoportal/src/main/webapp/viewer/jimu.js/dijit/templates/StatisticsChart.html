@@ -7,7 +7,7 @@
 		<div class="zoomin jimu-float-trailing" data-dojo-attach-point="zoominIcon"></div>
 		<div class="settings jimu-float-trailing" data-dojo-attach-point="settingsIcon"></div>
 	</div>
-	<div class="chart-section">
+	<div data-dojo-attach-point="chartSection" class="chart-section">
 		<table cellpadding="0" cellspacing="0" style="width:100%;table-layout:fixed;">
 			<tbody>
 				<tr>
@@ -17,6 +17,9 @@
 					<td class="content-td">
 						<div class="chart-section-item chart-container" data-dojo-attach-point="chartContainer" dir="ltr"
 						style="direction:ltr;overflow:hidden;"></div>
+						<div class="fiald-render-info" data-dojo-attach-point="faildRenderInfo">
+							${nls.fieldDisplayChartTip}
+						</div>
 					</td>
 					<td class="arrow-td">
 						<div class="chart-section-item right-arrow arrow" data-dojo-attach-point="rightArrow" data-dojo-attach-event="onclick:_onRightArrowClicked"></div>

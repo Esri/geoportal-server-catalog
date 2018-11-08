@@ -424,3 +424,21 @@ https://github.com/nolimits4web/Swiper/blob/master/LICENSE
 
 The swiper library is released under the MIT license.
 ------------------------------------------------------------------
+stemapp/libs/moment/twix.js
+
+https://github.com/icambron/twix.js/blob/master/LICENSE.md
+
+The twix library is released under the MIT license.
+------------------------------------------------------------------
+stemapp/widgets/PublicNotification/Download_Avery.js
+
+https://github.com/MrRio/jsPDF/blob/master/MIT-LICENSE.txt
+
+The jsPDF library is released under the MIT license.
+------------------------------------------------------------------
+stemapp/widgets/EmergencyResponseGuide/js/jquery.easy-autocomplete.js
+
+https://github.com/pawelczak/EasyAutocomplete/blob/master/LICENSE.txt
+
+The EasyAutocomplete library is released under the MIT license.
+------------------------------------------------------------------

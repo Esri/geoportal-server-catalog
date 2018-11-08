@@ -42,7 +42,6 @@
             "#6f5553",
             "#c14089"
         ],
-        // "backgroundColor": "transparent",
         "textStyle": {},
         "title": {
             "textStyle": {
@@ -54,24 +53,20 @@
         },
         "line": {
             "itemStyle": {
-                "normal": {
-                    "borderWidth": 1
-                }
+                "normal": {}
             },
             "lineStyle": {
                 "normal": {
                     "width": "1"
                 }
             },
-            "symbolSize": "6",
+            "symbolSize": "5",
             "symbol": "circle",
             "smooth": false
         },
         "radar": {
             "itemStyle": {
-                "normal": {
-                    "borderWidth": 1
-                }
+                "normal": {}
             },
             "lineStyle": {
                 "normal": {
@@ -81,42 +76,6 @@
             "symbolSize": "6",
             "symbol": "circle",
             "smooth": false
-        },
-        "bar": {
-            "itemStyle": {
-                "normal": {
-                    "barBorderWidth": 0,
-                    "barBorderColor": "#ccc"
-                },
-                "emphasis": {
-                    "barBorderWidth": 0,
-                    "barBorderColor": "#ccc"
-                }
-            }
-        },
-        "pie": {
-            "itemStyle": {
-                "normal": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                },
-                "emphasis": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                }
-            }
-        },
-        "funnel": {
-            "itemStyle": {
-                "normal": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                },
-                "emphasis": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                }
-            }
         },
         "gauge": {
             "axisLine": {

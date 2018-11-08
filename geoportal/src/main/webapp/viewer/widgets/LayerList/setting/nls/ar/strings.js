@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "تحريك لأعلى / تحريك لأسفل",
   "attributeTable": "عرض في جدول البيانات",
   "url": "وصف/عرض تفاصيل العنصر/تنزيل",
+  "expandAllLayers": "توسيع كل الطبقات",
+  "expandAllLayersByDefault": "توسيع كل الطبقات افتراضيًا",
   "layerSelectorTitle": "اختر الطبقات التي ستُعرَض على القائمة."
 });

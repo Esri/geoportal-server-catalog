@@ -5,6 +5,12 @@ define({
   "actions": "Konfiguriraj polja sloja",
   "field": "Polje",
   "alias": "Alias",
+  "url": "URL",
+  "sortField": "Sortiraj polje",
+  "sortOrderTooltips": {
+    "toDescending": "Promijeni u silazni redoslijed",
+    "toAscending": "Promijeni u uzlazni redoslijed"
+  },
   "visible": "Vidljivo",
   "linkField": "Poveži polje",
   "noLayers": "Nema dostupnih slojeva geoobjekta",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Omogući izvoz u CSV",
   "expand": "Na početku proširite widget",
   "filterByExtent": "Omogućite filtriranje prema obuhvatu karte kao zadanu opciju",
+  "allowTextSelection": "Omogući odabir teksta",
+  "highlightColor": "Boja isticanja",
   "restore": "Vrati na zadanu vrijednost",
   "ok": "U redu",
   "cancel": "Odustani",

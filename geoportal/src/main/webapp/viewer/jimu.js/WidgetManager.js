@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -253,12 +253,17 @@ function(declare, lang, array, html, Deferred, topic, Evented, on, aspect,
         top: -9999,
         relativeTo: widget.position.relativeTo
       };
+      widget._isTestSizeFlag = true;//set flag for getSize
       widget.setPosition(position);
       this.openWidget(widget);
 
       widget._marginBox = widget.getMarginBox();
 
       this.closeWidget(widget);
+
+      if ("undefined" !== typeof widget._isTestSizeFlag) {
+        delete widget._isTestSizeFlag;//delete flag
+      }
       return widget._marginBox;
     },
 
@@ -317,7 +322,8 @@ function(declare, lang, array, html, Deferred, topic, Evented, on, aspect,
       aspect.after(widget, 'startup', lang.hitch(this, this._postWidgetStartup, widget));
       aspect.before(widget, 'destroy', lang.hitch(this, this._onDestroyWidget, widget));
 
-      on(widget.domNode, 'click', lang.hitch(this, this._onClickWidget, widget));
+      // on(widget.domNode, 'click', lang.hitch(this, this._onClickWidget, widget));
+      widget.domNode.addEventListener('click', lang.hitch(this, this._onClickWidget, widget), {capture: true});
 
       this.loaded.push(widget);
       return widget;
@@ -735,7 +741,7 @@ function(declare, lang, array, html, Deferred, topic, Evented, on, aspect,
         return def;
       }
 
-      require(utils.getRequireConfig(), [json.amdFolder + 'VersionManager'],
+      require(utils.getRequireConfig(), [json.amdFolder + (json.isRemote? 'VersionManager.js': 'VersionManager')],
       lang.hitch(this, function(VersionManager) {
         var versionManager = new VersionManager();
 
@@ -1153,6 +1159,8 @@ function(declare, lang, array, html, Deferred, topic, Evented, on, aspect,
           loadDef.then(function(data) {
             def.resolve(data);
           }, function(err) {
+            console.error('Load widget resource error. resource:', flag);
+            console.error(err);
             new Message({
               message: window.jimuNls.widgetManager.loadWidgetResourceError + ': ' + setting.uri
             });

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -761,7 +761,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         this.selectedTo.set('value', to);
       }
       var tr = this._selectedClassBreakTr;
-      if(tr){
+      if(tr && (tr.from !== from || tr.to !== to)){ // update label only when range changed
         tr.from = from;
         tr.to = to;
         var label = from + " — " + to;

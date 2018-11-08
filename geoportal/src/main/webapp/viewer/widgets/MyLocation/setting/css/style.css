@@ -15,6 +15,7 @@
   text-align: left;
   padding-right:15px;
   position: relative;
+  display: flex;
 }
 
 .jimu-widget-mylocation-setting .input-table > tbody > tr > .first .cb,.cb-label{
@@ -28,16 +29,12 @@
 .jimu-widget-mylocation-setting .input-table > tbody > tr > .first .inputs-label{
   min-width: 150px;
   padding-right: 20px;
-  display: inline-block;
+  display: flex;
 }
 
 .jimu-widget-mylocation-setting .input-table > tbody > tr > .first .config-group{
-  position: absolute;
-  display: inline-block;
-  top: 50%;
-  -webkit-transform: translate(0%, -50%);
-  -ms-transform: translate(0%, -50%);
-  transform: translate(0%, -50%);
+  display: flex;
+  align-items: center;
   min-width: 200px;
 }
 

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -112,14 +112,16 @@ function(declare, lang, array, html, query, on, _WidgetBase, _TemplatedMixin, Ev
       this.emit('change');
     },
 
-    selectFields: function(fieldNames) {
+    selectFields: function(fieldNames, notMoveFieldToFirst) {
       if (lang.isArrayLike(fieldNames)) {
         var names = lang.clone(fieldNames);
         names.reverse();
         array.forEach(names, lang.hitch(this, function(name) {
           var fieldItemDom = this._getFieldItemDivByName(name);
           if (fieldItemDom) {
-            html.place(fieldItemDom, fieldItemDom.parentNode, 'first');
+            if(!notMoveFieldToFirst){
+              html.place(fieldItemDom, fieldItemDom.parentNode, 'first');
+            }
             var cbx = query('input', fieldItemDom)[0];
             cbx.checked = true;
           }

@@ -1,9 +1,9 @@
 define({
-  "instruction": "Uzplaiksnījuma ekrāns tiek parādīts, pirms lietojumprogrammai var piekļūt.",
+  "instruction": "Uzplaiksnījuma ekrāns tiks parādīts, pirms iespējams piekļūt lietojumprogrammai.",
   "defaultContent": "Pievienojiet tekstu, saites un nelielus grafikus šeit.",
   "requireConfirm": "Pieprasīt apstiprinājumu, lai turpinātu",
   "noRequireConfirm": "Nepieprasīt apstiprinājumu, lai turpinātu",
-  "optionText": "Iespēja lietotājam startējot aplikāciju deaktivizēt uzplaiksnījuma ekrānu.",
+  "optionText": "Iespēja deaktivizēt uzplaiksnījuma ekrānu, lietotājam startējot lietojumprogrammu.",
   "confirmLabel": "Apstiprinājuma teksti: ",
   "confirmLabelColor": "Apstiprinājuma teksta krāsa",
   "defaultConfirmText": "Piekrītu iepriekš norādītajiem noteikumiem un nosacījumiem",
@@ -35,6 +35,6 @@ define({
   "alignTop": "Augšā",
   "alignMiddle": "Vidū",
   "maskColor": "Maskas krāsa",
-  "options": "Varianti",
+  "options": "Iespējas",
   "optionsDescription": "Iestatiet uzplaiksnījuma ekrāna uzvedību."
 });

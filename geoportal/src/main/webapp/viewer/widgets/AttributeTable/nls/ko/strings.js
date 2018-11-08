@@ -40,5 +40,21 @@ define({
   "sortDes": "내림차순 정렬",
   "statistics": "통계",
   "attachments": "첨부 파일",
-  "files": "파일"
+  "files": "파일",
+  "keepRichTextLabel": "서식 있는 텍스트 형식 유지",
+  "whatsThis": "이 항목은 무엇인가요?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName}에는 다음과 같은 서식 있는 텍스트 필드가 포함되어 있습니다. ",
+      "line2": " 글꼴, 색상 또는 텍스트 크기 등의 텍스트 형식 지정 스타일이 포함될 수 있습니다.",
+      "line3": "CSV로 내보낼 때 형식 지정 스타일은 HTML 태그 형태로 보존됩니다. \"서식 있는 텍스트 형식 유지\" 체크 박스의 선택을 취소하여 서식 있는 텍스트 형식을 유지하지 않도록 선택할 수 있습니다."
+    },
+    "example": {
+      "label": "예를 들면 다음과 같습니다.",
+      "scenarios": {
+        "first": "기본 설정에 따라 다음 텍스트로 내보내집니다.",
+        "second": "서식 있는 텍스트 형식이 없는 다음과 같은 텍스트입니다."
+      }
+    }
+  }
 });
