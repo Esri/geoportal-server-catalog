@@ -52,7 +52,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
             lyr = new ArcGISDynamicMapServiceLayer(serviceUrl, options);
             self._processDynamicLayer(response,lyr,itemData);
           }
-          self._waitThenAddDynamicLayer(dfd,lyr,item,itemData);
+          return self._waitThenAddDynamicLayer(dfd,lyr,item,itemData);
         }
       }).then(function(result) {
         dfd.resolve(result);
@@ -207,6 +207,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
       }).otherwise(function(error){
         dfd.reject(error);
       });
+      return dfd;
     }
 
   });
