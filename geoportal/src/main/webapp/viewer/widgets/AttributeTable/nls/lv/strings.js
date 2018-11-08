@@ -40,5 +40,21 @@ define({
   "sortDes": "Kārtot dilstošā secībā",
   "statistics": "Statistika",
   "attachments": "Pielikumi",
-  "files": "faili"
+  "files": "faili",
+  "keepRichTextLabel": "Saglabājiet bagātināta teksta formātu",
+  "whatsThis": "Kas tas ir?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} satur sekojošu bagātināta teksta lauku(us): ",
+      "line2": " tas var ietvert teksta formatēšanas stilus, piemēram, fontus, krāsas vai teksta izmērus.",
+      "line3": "Eksportējot uz CSV, formatējuma stili tiks saglabāti HTML tagu veidā. Varat izvēlēties nesaglabāt bagātinātā teksta formātus, noņemot atzīmi lodziņā “Saglabāt bagātināta teksta formātu”."
+    },
+    "example": {
+      "label": "Piemēram:",
+      "scenarios": {
+        "first": "pēc noklusējuma tiks eksportēts kā šāds teksts:",
+        "second": "un šāds teksts bez bagātināta teksta formāta:"
+      }
+    }
+  }
 });

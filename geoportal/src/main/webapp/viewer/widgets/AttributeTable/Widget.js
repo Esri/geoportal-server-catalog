@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -513,7 +513,8 @@ define([
           this._resourceManager.getQueryTable(
           tabId,
           this.config.filterByMapExtent,
-          this.config.hideExportButton).then(lang.hitch(this, function(result) {
+          this.config.hideExportButton,
+          this.config.allowTextSelection).then(lang.hitch(this, function(result) {
             //prevent overwrite by another asynchronous callback
             if (this._activeLayerInfoId !== tabId || !result) {
               return;
@@ -557,7 +558,7 @@ define([
         }
 
         this._resourceManager.getRelationTable(originalInfoId, relationShipKey,
-          false, this.config.hideExportButton)
+          false, this.config.hideExportButton, this.config.allowTextSelection)
         .then(lang.hitch(this, function(result) {
           //prevent overwrite by another asynchronous callback
           if (this._activeLayerInfoId !== infoId || !result) {
@@ -904,11 +905,13 @@ define([
       },
 
       addNewRelationTab: function(oids, relationShip, originalInfoId) {
-        var lInfo = relationShip && relationShip.shipInfo;
+        var relationshipInfo = this._resourceManager.getRelationShipInfo(relationShip);
+        var lInfo = relationShip && relationshipInfo;
         if (!lInfo) {
           return;
         }
-        var page = this.getExistLayerTabPage(relationShip.shipInfo.id);
+        var pageId = relationshipInfo.id;
+        var page = this.getExistLayerTabPage(pageId);
 
         var json = {};
         json.oids = oids;

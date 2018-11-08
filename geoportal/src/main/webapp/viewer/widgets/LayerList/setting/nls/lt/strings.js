@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Į viršų / į apačią",
   "attributeTable": "Peržiūrėti atributų lentelėje",
   "url": "Aprašymas / Rodyti elemento informaciją / Atsisiųsti",
+  "expandAllLayers": "Išskleisti visus sluoksnius",
+  "expandAllLayersByDefault": "Išskleisti visus sluoksnius pagal numatytuosius nustatymus",
   "layerSelectorTitle": "Pasirinkti, kurie sluoksniai bus rodomi sąraše."
 });

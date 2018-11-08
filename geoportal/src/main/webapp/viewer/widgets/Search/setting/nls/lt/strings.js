@@ -14,6 +14,7 @@ define({
   "generalSetting": "Bendrieji parametrai",
   "allPlaceholder": "Vietos rezervavimo tekstas visų elementų paieškai: ",
   "showInfoWindowOnSelect": "Rodyti kontekstinį langą, skirtą rastam elementui arba vietai",
+  "showInfoWindowOnSelect2": "Rodyti iškylantį langą, kai randamas elementas arba vieta.",
   "searchInCurrentMapExtent": "Ieškoti tik esamo žemėlapio aprėptyje",
   "zoomScale": "Mastelis",
   "locatorUrl": "Geokoderio URL",

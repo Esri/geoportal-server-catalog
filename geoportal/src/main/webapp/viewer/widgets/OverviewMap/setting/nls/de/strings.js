@@ -7,7 +7,7 @@ define({
   "minText": "Minimum",
   "maxText": "Maximum",
   "attachText": "Legen Sie fest, an welcher Ecke der Karte dieses Widget angefügt werden soll.",
-  "expandText": "Zuerst das Widget erweitern",
+  "expandText": "Das Widget initial einblenden",
   "topLeft": "Links oben",
   "topRight": "Rechts oben",
   "bottomLeft": "Links unten",

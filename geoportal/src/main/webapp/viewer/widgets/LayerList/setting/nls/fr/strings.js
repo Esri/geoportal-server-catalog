@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Remonter/Descendre",
   "attributeTable": "Afficher dans la table attributaire",
   "url": "Description/Afficher les détails des éléments/Télécharger",
+  "expandAllLayers": "Développer toutes les couches",
+  "expandAllLayersByDefault": "Développer toutes les couches par défaut",
   "layerSelectorTitle": "Choisissez les couches à afficher dans la liste."
 });

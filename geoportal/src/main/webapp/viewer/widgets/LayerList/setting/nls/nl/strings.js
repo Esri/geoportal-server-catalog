@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Omhoog / omlaag",
   "attributeTable": "Bekijken in Attribuuttabel",
   "url": "Beschrijving / Itemdetails weergeven / Downloaden",
+  "expandAllLayers": "Alle lagen uitvouwen",
+  "expandAllLayersByDefault": "Standaard alle lagen uitvouwen",
   "layerSelectorTitle": "Kies welke lagen worden aangegeven op de lijst."
 });

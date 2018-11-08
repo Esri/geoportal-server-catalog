@@ -263,3 +263,26 @@
 .esriPopup .titlePane {
   background-color: rgba(72, 85, 102, 0.9);
 }
+/*flexbox layout*/
+.jimu-widget-header-controller{
+  display: flex;
+  justify-content: space-between;
+}
+.jimu-widget-header-controller .header-section,
+.jimu-widget-header-controller .container-section {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  flex-wrap: nowrap;
+}
+.jimu-widget-header-controller .container-section {
+  flex-direction: row-reverse;
+}
+.jimu-widget-header-controller .titles,
+.jimu-widget-header-controller .links,
+.jimu-widget-header-controller .icon-node{
+  flex-shrink: 0;
+}
+.jimu-widget-header-controller .icon-node{
+  flex-basis: 40px;
+}

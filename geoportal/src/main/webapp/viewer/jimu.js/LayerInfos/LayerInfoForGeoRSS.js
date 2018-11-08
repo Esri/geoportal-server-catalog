@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -17,10 +17,11 @@
 define([
   'dojo/_base/declare',
   'dojo/_base/array',
-  'esri/graphicsUtils',
-  './LayerInfo',
-  'esri/lang'
-], function(declare, array, graphicsUtils, LayerInfo, esriLang) {
+  'dojo/Deferred',
+  'esri/lang',
+  'jimu/utils',
+  './LayerInfo'
+], function(declare, array, Deferred, esriLang, jimuUtils, LayerInfo) {
   return declare(LayerInfo, {
 
     constructor: function( /*operLayer, map*/ ) {
@@ -28,14 +29,16 @@ define([
       //this.layerObject = null;
     },
 
-    getExtent: function() {
-      var graphics = this.layerObject.items, extent;
+    _getExtent: function() {
+      var def = new Deferred();
+      var graphics = this.layerObject.items;
+      var defaultExtent = this.layerObject.fullExtent || this.layerObject.initialExtent;
       if (graphics.length === 0) {
-        return null;
+        def.resolve(defaultExtent);
       } else {
-        extent = graphicsUtils.graphicsExtent(graphics);
-        return this._convertGeometryToMapSpatialRef(extent);
+        def.resolve(jimuUtils.graphicsExtent(graphics));
       }
+      return def;
     },
 
     // _resetLayerObjectVisiblity: function(layerOptions) {
@@ -114,7 +117,7 @@ define([
       }, this);
 
       // GeoRss layer does not response event of 'visibility-change' when setTopLayerVisible.
-      // show send event at this point.
+      // so send event at this point.
       this._onVisibilityChanged();
     },
 
@@ -159,7 +162,30 @@ define([
         subLayerInfo.init();
       }, this);
 
+      this._markInvalidSubLayerInfoThatAsRootLayer(layerObjects);
       return newSubLayerInfos;
+    },
+
+    _markInvalidSubLayerInfoThatAsRootLayer: function(subLayerObjects) {
+      var subLayerInfo;
+      array.forEach(subLayerObjects, function(subLayerObject) {
+        subLayerInfo = this._getLayerInfosObj()._findTopLayerInfoById(subLayerObject.id);
+        if(subLayerInfo) {
+          subLayerInfo._flag._invalid = true;
+        }
+      }, this);
+    },
+
+    _needToRenew: function() {
+      var result;
+      var layerObjects = this.layerObject.getFeatureLayers();
+      var layerObjectsLength = layerObjects ? layerObjects.length : 0;
+      if( layerObjectsLength === this.newSubLayers.length) {
+        result = false;
+      } else {
+        result = true;
+      }
+      return result;
     },
 
     //indexes:[{

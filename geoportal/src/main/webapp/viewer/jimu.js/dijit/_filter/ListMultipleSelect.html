@@ -1,0 +1,27 @@
+<div class="jimu-list-multiple-select" data-dojo-attach-point="multipleSelect" >
+  <div class="selectedContainer" data-dojo-attach-point="selectedContainer">
+    <div class="jimu-multiple-items-list" data-dojo-attach-point="selectedListContent">
+    </div>
+  </div>
+  <div>
+    <!-- <div style="position:absolute;height:345px;width:100%;z-index:1;display:none;" data-dojo-attach-point="listContainerOverlay"></div> -->
+    <div class="searchKeyInput" data-dojo-attach-point="searchKeyInput" style="display:none;">
+      <input value="" placeholder="${jimuCommonNls.search}" data-dojo-type="dijit/form/ValidationTextBox"
+       data-dojo-attach-point="valueInput" data-dojo-props='"required":false,intermediateChanges:true' style="width:100%;" />
+    </div>
+    <div class="items-content loading-center" data-dojo-attach-point="listContainer">
+      <!-- <div data-dojo-attach-point="listContentStore"style="height:1px;visibility:hidden;overflow:hidden;">
+      </div> -->
+      <div class="jimu-multiple-items-list" data-dojo-attach-point="listContent">
+      </div>
+      <div data-dojo-attach-point="loadMoreDataBtn" class="jimu-list-multiple-select-Tips load-more-data-Tips">${jimuCommonNls.searchMore}</div>
+      <!-- <div data-dojo-attach-point="noDataTips" class="jimu-list-multiple-select-Tips no-data-Tips">${Nls.noData}</div> -->
+      <div data-dojo-attach-point="noDataTips" class="jimu-list-multiple-select-Tips no-data-Tips">${noDataNls}</div>
+      <!-- <div class="createNewItem" data-dojo-attach-point="createNewItem" data-dojo-attach-event="click:_createTarget">&nbsp;</div> -->
+    </div>
+  </div>
+  <div class="selectedToggleDiv" style="display:none;" data-dojo-attach-point="selectedToggleDiv">
+    <span class="selectedToggle" data-dojo-attach-point="selectedToggle"></span>
+    <span class="toggleTxt" title="${Nls.showSelected}">${Nls.showSelected}</span>
+  </div>
+</div>

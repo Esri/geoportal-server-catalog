@@ -5,6 +5,12 @@ define({
   "actions": "Cấu hình trường của lớp dữ liệu",
   "field": "Trường",
   "alias": "Bí danh",
+  "url": "URL",
+  "sortField": "Sắp xếp theo trường",
+  "sortOrderTooltips": {
+    "toDescending": "Thay đổi thứ tự sắp xếp thành giảm dần",
+    "toAscending": "Thay đổi thứ tự sắp xếp thành tăng dần"
+  },
   "visible": "Hiển thị",
   "linkField": "Trường liên kết",
   "noLayers": "Không có lớp đối tượng nào",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Cho phép xuất ra CSV",
   "expand": "Mở rộng tiện ích lúc ban đầu",
   "filterByExtent": "Bật lọc theo phạm vi bản đồ mặc định",
+  "allowTextSelection": "Cho phép chọn văn bản",
+  "highlightColor": "Màu sắc nổi bật",
   "restore": "Khôi phục về giá trị mặc định",
   "ok": "OK",
   "cancel": "Hủy",

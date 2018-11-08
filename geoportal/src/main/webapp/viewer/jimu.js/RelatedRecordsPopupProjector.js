@@ -19,6 +19,7 @@ define([
   'dojo/_base/array',
   'dojo/_base/html',
   'dojo/on',
+  "dojo/has",
   'dojo/query',
   'dojo/Deferred',
   "dijit/_WidgetBase",
@@ -34,7 +35,7 @@ define([
   'jimu/ConfigManager',
   'jimu/dijit/DropdownMenu',
   'jimu/LayerInfos/LayerInfos'
-  ], function(declare, lang, array, html, on, query, Deferred, _WidgetBase, _TemplatedMixin,
+  ], function(declare, lang, array, html, on, has, query, Deferred, _WidgetBase, _TemplatedMixin,
   UndoManager, OperationBase, RelationshipQuery, Popup, PopupMobile, graphicsUtils, PopupTemplate,
   jimuUtils, ConfigManager, DropdownMenu, jimuLayerInfos) {
     var clazz = declare([_WidgetBase, _TemplatedMixin], {
@@ -59,7 +60,10 @@ define([
       postCreate: function() {
         this.undoManager = new UndoManager();
         this.layerInfosObj = jimuLayerInfos.getInstanceSync();
-        this.originalJimuLayerInfo = this.layerInfosObj.getLayerInfoById(this.originalFeature.getLayer().id);
+        /* jscs:disable */
+        var originalFeatureLayerId =  lang.getObject("_wabProperties.referToFeatureLayerId", false, this.originalFeature) ||
+                                      this.originalFeature.getLayer().id;
+        this.originalJimuLayerInfo = this.layerInfosObj.getLayerInfoById(originalFeatureLayerId);
         this._temporaryData = {
           eventHandles: [],
           dijits: []
@@ -619,6 +623,7 @@ define([
         this.initTempPopup();
         this._initTempPopupForDisplayTitle();
         this._initZoomToBtn();
+        this._setScrollable();
       },
 
       initTempPopup: function() {
@@ -638,6 +643,9 @@ define([
         }
         if(this._zoomToBtnANode) {
           html.destroy(this._zoomToBtnANode);
+        }
+        if(this.toucemoveScrollHandle && this.toucemoveScrollHandle.remove) {
+          this.toucemoveScrollHandle.remove();
         }
       },
 
@@ -659,6 +667,7 @@ define([
           // projectorParentNode.removeChild(this.rrPopupProjector.domNode);
           this.setContent(esriViewPopupDomNode);
           html.place(this.rrPopupProjector.domNode, esriViewPopupDomNode, "after");
+          this._unsetScrollable();
         }
       },
 
@@ -668,7 +677,45 @@ define([
           projectorParentNode.removeChild(this.rrPopupProjector.domNode);
         }
         this.popup.setContent(content);
+        this._unsetScrollable();
       },
+
+      _setScrollable: function() {
+        var contentPane = query(".contentPane", this.popup.domNode)[0];
+        if (has("esri-touch") && contentPane) {
+          this.toucemoveScrollHandle = on(contentPane, "touchmove", lang.hitch(this, function (evt) {
+            evt.preventDefault();
+            var esriViewPopupDomNode = query(".esriViewPopup", this.popup.domNode)[0];
+            if(!esriViewPopupDomNode) {
+              return;
+            }
+            var child = contentPane.firstChild;
+            if (child instanceof Text) {
+              child = contentPane.childNodes[1];
+            }
+
+            if(this.rrPopupProjector.domNode) {
+              html.setStyle(this.rrPopupProjector.contentBox, {
+                "-webkit-transition-property": "-webkit-transform",
+                "-webkit-transform": "translate(" + child._currentX + "px, " + child._currentY + "px)"
+              });
+            }
+          }));
+        }
+      },
+
+      _unsetScrollable: function() {
+        html.setStyle(this.rrPopupProjector.contentBox, {
+          "-webkit-transition-property": "none",
+          "-webkit-transform": "none"
+        });
+
+        html.setStyle(this.rrPopupProjector.domNode, {
+          "-webkit-transition-property": "none",
+          "-webkit-transform": "none"
+        });
+      },
+
 
       getDisplayTitle: function(feature) {
         var displayTitle;

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,6 +41,8 @@ define([
 
       name: 'HomeButton',
       baseClass: 'jimu-widget-homebutton',
+
+      moveTopOnActive: false,
 
       postCreate: function() {
         this.own(topic.subscribe("appConfigChanged", lang.hitch(this, this.onAppConfigChanged)));

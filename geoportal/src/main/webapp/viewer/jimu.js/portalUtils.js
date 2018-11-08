@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,10 +27,11 @@ define([
     './Role',
     './utils',
     './portalUrlUtils',
-    './tokenUtils'
+    './tokenUtils',
+    './ServiceDefinitionManager'
   ],
   function(declare, lang, array, dojoConfig, Deferred, topic, dojoJson, xhr, esriRequest, Role, jimuUtils,
-    portalUrlUtils, tokenUtils) {
+    portalUrlUtils, tokenUtils, ServiceDefinitionManager) {
 
     //important attributes of portal relevant classes
     //attributes: portalUrl,credential,portal
@@ -50,32 +51,26 @@ define([
       },
 
       loadSelfInfo: function() {
-        var def = new Deferred();
-        var args = {
-          url: this.selfUrl,
-          content: {
-            f: 'json'
-          },
-          handleAs: 'json',
-          callbackParamName: 'callback',
-          preventCache: true
-        };
+        var url = this.selfUrl;
+
         if(this.isValidCredential()){
-          args.content.token = this.credential.token;
+          if(url.indexOf('?') > -1){
+            url += '&token=' + this.credential.token;
+          }else{
+            url += '?token=' + this.credential.token;
+          }
         }
-        esriRequest(args).then(lang.hitch(this, function(response) {
+
+        return ServiceDefinitionManager.getInstance().getServiceDefinition(url)
+        .then(lang.hitch(this, function(response) {
           var user = response.user;
           //This is important. Otherwise response.user will override this.user(PortalUser).
           delete response.user;
           lang.mixin(this, response);
           response.user = user;
           //this.selfInfo = lang.mixin({}, response);
-          def.resolve(response);
-        }), lang.hitch(this, function(err) {
-          console.error(err);
-          def.reject(err);
+          return response;
         }));
-        return def;
       },
 
       _checkCredential: function() {
@@ -1096,7 +1091,8 @@ define([
         var portal = this.getPortal(portalUrl);
         //must use double quotation marks around typeKeywords
         //such as typekeywords:"Web AppBuilder" or typekeywords:"Web AppBuilder,Web Map"
-        var q = 'typekeywords:"WABDefaultWebScene" access:public ' + this.webSceneQueryStr;
+        var q = 'typekeywords:"WABDefaultWebScene" orgid:' + portal.user.orgId +
+        ' access:public ' + this.webSceneQueryStr;
         var args = {
           q: q
         };
@@ -1119,71 +1115,45 @@ define([
         portalUrl = portalUrlUtils.getStandardPortalUrl(portalUrl);
         var portal = this.getPortal(portalUrl);
         portal.getUser().then(lang.hitch(this, function(user){
-          var url1 = "http://services.arcgisonline.com/ArcGIS/rest/services/" +
-                     "World_Imagery/MapServer";
-          var url2 = "http://elevation3d.arcgis.com/arcgis/rest/services/" +
-                     "WorldElevation3D/Terrain3D/ImageServer";
           var data = {
             "operationalLayers": [],
             "baseMap": {
-              "id": "151b431fe65-basemap-0",
+              "id": "basemap",
               "title": "Topographic",
               "baseMapLayers": [{
-                "id": "defaultBasemap",
-                "url": url1,
-                "layerType": "ArcGISTiledMapServiceLayer"
-              }],
+                  "url": "https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer",
+                  "id": "worldTopoBase",
+                  "layerType": "ArcGISTiledMapServiceLayer",
+                  "title": "Topo"
+                }
+              ],
               "elevationLayers": [{
-                "id": "globalElevation",
-                "url": url2,
-                "layerType": "ArcGISTiledElevationServiceLayer"
-              }]
+                  "url": "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer",
+                  "id": "globalElevation",
+                  "listMode": "hide",
+                  "layerType": "ArcGISTiledElevationServiceLayer",
+                  "title": "Elevation"
+                }
+              ]
             },
-            "version": "1.3",
-            "authoringApp": "WebSceneViewer",
-            "authoringAppVersion": "3.10.0.0",
-            "spatialReference": {
-              "wkid": 102100,
-              "latestWkid": 3857
+            "ground": {
+              "layers": [{
+                  "url": "https://elevation3d.arcgis.com/arcgis/rest/services/WorldElevation3D/Terrain3D/ImageServer",
+                  "id": "globalElevation",
+                  "listMode": "hide",
+                  "layerType": "ArcGISTiledElevationServiceLayer",
+                  "title": "Elevation"
+                }
+              ]
             },
             "viewingMode": "global",
-            "initialState": {
-              "viewpoint": {
-                "scale": 45188197.847224146,
-                "rotation": 0,
-                "targetGeometry": {
-                  "x": 144770.99872895706,
-                  "y": 3232837.215000455,
-                  "spatialReference": {
-                    "wkid": 102100,
-                    "latestWkid": 3857
-                  },
-                  "z": -127.7412482528016
-                },
-                "camera": {
-                  "position": {
-                    "x": 144770.99767624016,
-                    "y": 3182557.105058348,
-                    "spatialReference": {
-                      "wkid": 102100,
-                      "latestWkid": 3857
-                    },
-                    "z": 25512548.00000001
-                  },
-                  "heading": 0,
-                  "tilt": 0.0999986601088944
-                }
-              },
-              "environment": {
-                "lighting": {
-                  "datetime": 1426420488000,
-                  "displayUTCOffset": 0
-                }
-              }
+            "spatialReference": {
+              "latestWkid": 3857,
+              "wkid": 102100
             },
-            "presentation": {
-              "slides": []
-            }
+            "version": "1.11",
+            "authoringApp": "WebAppBuilder",
+            "authoringAppVersion": "2.9"
           };
           var text = dojoJson.stringify(data);
           var args = {
@@ -1381,13 +1351,13 @@ define([
 
         return result;
       },
-      getItemResources: function(num) {
+      getItemResources: function(portalUrl, appId, num) {
         //num: Maximum number of resources
         if (!num) {
           num = 100;
         }
-        var portalUrl = portalUrlUtils.getStandardPortalUrl(window.portalUrl);
-        var resourcesUrl = portalUrlUtils.getItemResourceUrl(portalUrl, window.appInfo.id);
+        portalUrl = portalUrlUtils.getStandardPortalUrl(portalUrl);
+        var resourcesUrl = portalUrlUtils.getItemResourceUrl(portalUrl, appId);
         return esriRequest({
           url: resourcesUrl,
           content: {
@@ -1398,14 +1368,11 @@ define([
           if (result && result.resources) {
             return result.resources;
           }
-        }, function(err) {
-          console.error(err.message || err);
-          return err;
         });
       },
-      addResource: function(itemId, blobFile, _resourceName, _prefixName) {
+      addResource: function(portalUrl, itemId, blobFile, _resourceName, _prefixName) {
         // _resourceName example: abc.jpg,must have a file name suffix
-        var portalUrl = portalUrlUtils.getStandardPortalUrl(window.portalUrl);
+        portalUrl = portalUrlUtils.getStandardPortalUrl(portalUrl);
         var portal = this.getPortal(portalUrl);
 
         var formData = new FormData();
@@ -1438,7 +1405,7 @@ define([
           });
         });
       },
-      removeResources: function(_resourceName, _prefixName) {
+      removeResources: function(portalUrl, appId, _resourceName, _prefixName) {
         var customResUrl = '';
         if (_prefixName) {
           customResUrl = _prefixName + '/' + _resourceName;
@@ -1449,10 +1416,10 @@ define([
           resource: customResUrl,
           f: 'json'
         };
-        var portalUrl = portalUrlUtils.getStandardPortalUrl(window.portalUrl);
+        portalUrl = portalUrlUtils.getStandardPortalUrl(portalUrl);
         var portal = this.getPortal(portalUrl);
-        return portal.getItemById(window.appInfo.id, true).then(function(item) {
-          var UserContentItemUrl = portalUrlUtils.getUserContentItemUrl(portalUrl, item.owner, window.appInfo.id);
+        return portal.getItemById(appId, true).then(function(item) {
+          var UserContentItemUrl = portalUrlUtils.getUserContentItemUrl(portalUrl, item.owner, appId);
           var removeResourcesUrl = UserContentItemUrl + '/removeResources';
           return esriRequest({
             url: removeResourcesUrl,

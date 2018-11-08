@@ -40,5 +40,21 @@ define({
   "sortDes": "降序排列",
   "statistics": "统计数据",
   "attachments": "附件",
-  "files": "文件"
+  "files": "文件",
+  "keepRichTextLabel": "保持富文本格式",
+  "whatsThis": "这是什么?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} 包含以下富文本字段： ",
+      "line2": " 可能包含文本格式化样式的字段，如字体、颜色或文本大小。",
+      "line3": "将格式化样式导出为 CSV 时，系统将以 HTML 标签的形式保留这些样式。 您可以选择不保持富文本格式，方法是取消选中“保持富文本格式”框。"
+    },
+    "example": {
+      "label": "例如：",
+      "scenarios": {
+        "first": "默认将作为以下文本导出：",
+        "second": "以及不含富文本格式的以下文本："
+      }
+    }
+  }
 });

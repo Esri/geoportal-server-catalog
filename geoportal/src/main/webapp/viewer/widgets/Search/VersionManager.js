@@ -127,6 +127,48 @@ define(['jimu/shared/BaseVersionManager'],
 
           return newConfig;
         }
+      }, {
+        version: '2.3',
+        upgrader: function(oldConfig){
+          return oldConfig;
+        }
+      }, {
+        version: '2.4',
+        upgrader: function(oldConfig){
+          return oldConfig;
+        }
+      }, {
+        version: '2.5',
+        upgrader: function(oldConfig){
+          return oldConfig;
+        }
+      }, {
+        version: '2.6',
+        upgrader: function(oldConfig){
+          return oldConfig;
+        }
+      }, {
+        version: '2.7',
+        upgrader: function(oldConfig){
+          return oldConfig;
+        }
+      }, {
+        version: '2.8',
+        upgrader: function(oldConfig){
+          return oldConfig;
+        }
+      }, {
+        version: '2.9',
+        upgrader: function(oldConfig){
+          var newConfig = oldConfig;
+          for(var i = 0; i < newConfig.sources.length; i++) {
+            var source = newConfig.sources[i];
+            if(source && source.zoomScale && source.zoomScale === 50000) {
+              source.zoomScale = null;
+            }
+          }
+          return newConfig;
+        }
       }];
     }
 
