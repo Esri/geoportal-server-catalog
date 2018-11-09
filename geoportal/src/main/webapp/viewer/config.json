@@ -83,7 +83,7 @@
         "version": "2.9",
         "closeable": true,
         "uri": "widgets/LayerList/Widget",
-        "config": "configs/LayerList/config__5.json"
+        "config": "configs/LayerList/config.json"
       },
       {
         "position": {
@@ -98,7 +98,7 @@
         "version": "2.9",
         "closeable": true,
         "uri": "widgets/Legend/Widget",
-        "config": "configs/Legend/config__6.json"
+        "config": "configs/Legend/config.json"
       },
       {
         "position": {
@@ -112,7 +112,7 @@
         "version": "2.0",
         "closeable": true,
         "uri": "widgets/GeoportalSearch/Widget",
-        "config": "configs/GeoportalSearch/config__7.json"
+        "config": "configs/GeoportalSearch/config.json"
       },
       {
         "position": {
