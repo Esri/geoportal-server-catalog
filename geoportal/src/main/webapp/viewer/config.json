@@ -237,7 +237,7 @@
       "right": 0,
       "bottom": 0
     },
-    "itemId": "9d98f7113f9b469c8c302b210db7b922",
+    "itemId": "6e03e8c26aad4b9c92a87c1063ddb0e3",
     "mapOptions": {
       "extent": {
         "xmin": -18000000,
@@ -250,7 +250,7 @@
       }
     },
     "id": "map",
-    "portalUrl": "https://piotravm.esri.com/portal/"
+    "portalUrl": "http://www.arcgis.com"
   },
   "widgetPool": {
     "panel": {

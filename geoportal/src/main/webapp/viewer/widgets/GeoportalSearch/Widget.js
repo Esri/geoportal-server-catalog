@@ -13,13 +13,14 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
+  "dojo/_base/array",
   "jimu/BaseWidget",
   "dijit/_WidgetsInTemplateMixin",
   "./gs/widget/SearchPane",
   "./gs/widget/WidgetContext",
   "dojo/i18n!./gs/widget/nls/strings",
   "esri/config"],
-function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
+function(declare, array, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
   WidgetContext, i18n, esriConfig) {
 
   var oThisClass = declare([BaseWidget, _WidgetsInTemplateMixin], {
@@ -41,6 +42,14 @@ function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
     },
 
     _init: function() {
+      var localGeoportalUrl = this._createLocalCatalogUrl();
+      if (localGeoportalUrl) {
+        array.forEach(this.config.targets, function(target){
+          if (target.type === "geoportal" && !target.url) {
+            target.url = localGeoportalUrl;
+          }
+        });
+      }
       var widgetContext = new WidgetContext({
         i18n: i18n,
         map: this.map,
@@ -53,6 +62,15 @@ function(declare, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
         widgetContext: widgetContext
       },this.widgetNode);
       searchPane.startup();
+    },
+    
+    _createLocalCatalogUrl: function() {
+      if (window && window.top && window.top.geoportalServiceInfo) {
+        var loc = window.top.location;
+        var gpt = window.top.geoportalServiceInfo;
+        return loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/item/_search";
+      }
+      return null;
     }
 
   });
