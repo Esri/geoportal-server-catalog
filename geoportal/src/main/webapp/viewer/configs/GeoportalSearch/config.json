@@ -9,6 +9,14 @@
       "enabled": true,
       "useProxy": false,
       "disableContentType": false
+    },
+    {
+      "name": "Local Catalog",
+      "url": "http://localhost:8090/geoportal/elastic/metadata/item/_search",
+      "type": "geoportal",
+      "profile": null,
+      "requiredFilter": null,
+      "enabled": true
     }
   ]
 }
