@@ -16,16 +16,18 @@ function(declare, lang, appConfig, AppUser, esriBasemaps) {
       lang.mixin(this, args);
       this.appUser = new AppUser();
       
+      
       if (esriBasemaps && this.appConfig && this.appConfig.searchMap && 
           typeof this.appConfig.searchMap.basemap === "string") {
         var basemap = this.appConfig.searchMap.basemap;
-        if (basemap.indexOf("http://") === 0 || basemap.indexOf("https://")) {
+        if (basemap.indexOf("http://") === 0 || basemap.indexOf("https://") === 0) {
           esriBasemaps.geoportalCustom = {
             baseMapLayers: [{url: basemap}]
           };
           this.appConfig.searchMap.basemap = "geoportalCustom";
         }
       }
+      
     }
 
   });
