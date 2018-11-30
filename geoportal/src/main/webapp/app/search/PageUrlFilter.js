@@ -16,8 +16,9 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
         "dojo/io-query",
-        "app/search/SearchComponent"], 
-function(declare, lang, array, ioQuery, SearchComponent) {
+        "app/search/SearchComponent",
+        "app/etc/util"],
+function(declare, lang, array, ioQuery, SearchComponent, Util) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -28,7 +29,9 @@ function(declare, lang, array, ioQuery, SearchComponent) {
       
       var self = this, uri = window.location.href;
       if (uri.indexOf("?") !== -1) {
-        var s = uri.substring(uri.indexOf("?")+1,uri.length);
+          var s = uri.substring(uri.indexOf("?")+1,uri.length);
+          var hash = s.substring(s.indexOf("#")+1,s.length);
+          s=s.substring(0,s.indexOf("#"));
         var o = ioQuery.queryToObject(s);
         if (o && typeof o.filter === "string") {
           this._addQuery(o.filter);
@@ -37,20 +40,37 @@ function(declare, lang, array, ioQuery, SearchComponent) {
             self._addQuery(v);
           });
         }
-      }
-    },
-    
-    _addQuery: function(v) {
-      if (typeof v === "string") {
-        v = lang.trim(v);
-        if (v.length > 0) {
-          this.queries.push({"query_string": {
-            "analyze_wildcard": true,
-            "query": v
-          }});
+        if (o && typeof o.fileid === "string")
+        {
+            this._addFileIdQuery(o.fileid);
         }
       }
     },
+
+      _addQuery: function(v) {
+          if (typeof v === "string") {
+              v = Util.escapeForLucene(lang.trim(v));
+
+              if (v.length > 0) {
+                  this.queries.push({"query_string": {
+                          "analyze_wildcard": true,
+                          "query": v
+                      }});
+              }
+          }
+      },
+      _addFileIdQuery: function(v) {
+          if (typeof v === "string") {
+              v = Util.escapeForLucene(lang.trim(v));
+
+              if (v.length > 0) {
+                  this.queries.push({"query_string": {
+                          "default_field": "fileid",
+                          "query": v
+                      }});
+              }
+          }
+      },
     
     /* SearchComponent API ============================================= */
     
