@@ -102,8 +102,23 @@ public class XsltTemplate {
           throws TransformerConfigurationException {
     setSystemId(systemId);
     TransformerFactory factory = TransformerFactory.newInstance();
-    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
-    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET,"file");
+    //factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
+   // factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET,"file");
+    /* have and issue with the default transformer.
+    https://stackoverflow.com/questions/45152707/transformerfactory-and-xalan-dependency-conflict
+    and
+    https://docs.oracle.com/javase/tutorial/jaxp/properties/usingProps.html
+     */
+    try {
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    } catch (IllegalArgumentException e) {
+      //jaxp 1.5 feature not supported
+    }
+    try {
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET,"file");
+    } catch (IllegalArgumentException e) {
+      //jaxp 1.5 feature not supported
+    }
     //factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
     factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, false);
     //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true);
