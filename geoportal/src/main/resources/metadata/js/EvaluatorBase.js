@@ -14,7 +14,7 @@
  */
 
 var G = {
-    
+
   DateUtil: Java.type("com.esri.geoportal.base.util.DateUtil"),
   Val: Java.type("com.esri.geoportal.base.util.Val"),
 
@@ -26,7 +26,7 @@ var G = {
 
   analyzeTimePeriod: function(task,params) {
     //print("analyzeTimePeriod");
-    
+
     var chkYear = function(v) {
       var c, i, y = "";
       var result = {
@@ -59,8 +59,8 @@ var G = {
       }
       return result;
     };
-    
-    
+
+
     if (!params) return;
     //"instant_dt": null, "instant_indeterminate_s": null,
     var data = {
@@ -95,7 +95,7 @@ var G = {
         if (!params.begin.yearInfo.isNegative) {
           data["begin_dt"] = this.DateUtil.checkIsoDateTime(params.begin.date,false);
         }
-        
+
       }
       data["begin_indeterminate_s"] = this.Val.chkStr(params.begin.indeterminate,null);
     }
@@ -126,7 +126,7 @@ var G = {
       if (data.begin_year_l != null) {
         this.writeMultiProp(task.item,"metadata_year_i", parseInt(data.begin_year_l));
       }
-    } 
+    }
   },
 
   checkResourceLink: function(url) {
@@ -134,7 +134,7 @@ var G = {
 
     var arcgisTypes = ["MapServer","ImageServer","FeatureServer","GlobeServer","GPServer","GeocodeServer",
                        "GeometryServer","NAServer","GeoDataServer ","MobileServer","SceneServer",
-                       "SchematicsServer","StreamServer","VectorTileServer"]; 
+                       "SchematicsServer","StreamServer","VectorTileServer"];
     var ogcTypes = ["WMS","WFS","WCS","WMTS","WPS","SOS","CSW"];
     var dataTypes = ["zip","shp"];
 
@@ -164,8 +164,8 @@ var G = {
         }
       }
       if (linkType === null) {
-        if (endsWith(lc,".kml") || endsWith(lc,".kmz") || 
-            lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 || 
+        if (endsWith(lc,".kml") || endsWith(lc,".kmz") ||
+            lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 ||
             lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
           linkType = "kml";
           linkUrl = url;
@@ -184,14 +184,18 @@ var G = {
   },
 
   checkValue: function(value,name,options) {
-    if (typeof value === "undefined" || value === null ) return;
-    if (options && options.dataType && typeof value !== "undefined" && value !== null) {
-      if (options.dataType === "IsoDateTime" && typeof value === "string") {
-        if (value.startsWith('9999')) return; // Data.Gov uses 9999-01-01 as default
-        var isEnd = (options.isEnd || false);
-        value = this.DateUtil.checkIsoDateTime(value,isEnd);
+      if (typeof value === "undefined" || value === null) return;
+      if (options && options.dataType && typeof value !== "undefined" && value !== null) {
+          if (options.dataType === "IsoDateTime" && typeof value === "string") {
+              if (value.startsWith('9999')) return; // Data.Gov uses 9999-01-01 as default
+              var isEnd = (options.isEnd || false);
+              value = this.DateUtil.checkIsoDateTime(value, isEnd);
+          }
+          if (typeof value === "string") {
+              value = value.trim();
+              value = this.Val.unescape(value);
+          }
       }
-    }
     return value;
   },
 

@@ -1,0 +1,643 @@
+<?xml version="1.0" encoding="UTF-8"?><gmi:MI_Metadata xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gml="http://www.opengis.net/gml/3.2" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:ows="http://www.opengis.net/ows" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xs="http://www.w3.org/2001/XMLSchema" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://standards.iso.org/ittf/PubliclyAvailableStandards/ISO_19139_Schemas/gmd/gmd.xsd">
+  <gmd:fileIdentifier>
+    <gco:CharacterString>urn:dciso:metadataabout:doi-10.5071-18thEUBCE2010-VP5.4.1</gco:CharacterString>
+  </gmd:fileIdentifier>
+  <gmd:language>
+    <gmd:LanguageCode codeList="http://www.loc.gov/standards/iso639-2/" codeListValue="eng">eng</gmd:LanguageCode>
+  </gmd:language>
+  <gmd:characterSet>
+    <gmd:MD_CharacterSetCode codeList="http://www.isotc211.org/2005/resources/codeList.xml#MD_CharacterSetCode" codeListValue="utf8"/>
+  </gmd:characterSet>
+  <gmd:hierarchyLevel>
+    <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset">Text</gmd:MD_ScopeCode>
+  </gmd:hierarchyLevel>
+  <gmd:hierarchyLevel>
+    <gmd:MD_ScopeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_ScopeCode" codeListValue="dataset">Conference paper</gmd:MD_ScopeCode>
+  </gmd:hierarchyLevel>
+  <gmd:contact>
+    <gmd:CI_ResponsibleParty>
+      <gmd:organisationName>
+        <gco:CharacterString>CINERGI Metadata catalog</gco:CharacterString>
+      </gmd:organisationName>
+      <gmd:contactInfo>
+        <gmd:CI_Contact>
+          <gmd:address>
+            <gmd:CI_Address>
+              <gmd:electronicMailAddress>
+                <gco:CharacterString>cinergi@sdsc.edu</gco:CharacterString>
+              </gmd:electronicMailAddress>
+            </gmd:CI_Address>
+          </gmd:address>
+        </gmd:CI_Contact>
+      </gmd:contactInfo>
+      <gmd:role>
+        <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+      </gmd:role>
+    </gmd:CI_ResponsibleParty>
+  </gmd:contact>
+  <gmd:dateStamp>
+    <gco:DateTime>2018-05-25T07:10:02-07:00</gco:DateTime>
+  </gmd:dateStamp>
+  <gmd:metadataStandardName>
+    <gco:CharacterString>ISO 19139 Geographic Information - Metadata - Implementation Specification</gco:CharacterString>
+  </gmd:metadataStandardName>
+  <gmd:metadataStandardVersion>
+    <gco:CharacterString>2007</gco:CharacterString>
+  </gmd:metadataStandardVersion>
+  <gmd:identificationInfo>
+    <gmd:MD_DataIdentification>
+      <gmd:citation>
+        <gmd:CI_Citation>
+          <gmd:title>
+            <gco:CharacterString>Biomass Produced from Trace Metal and Arsenic Phytoextraction as an Energy Source.</gco:CharacterString>
+          </gmd:title>
+          <gmd:date>
+            <gmd:CI_Date>
+              <gmd:date>
+                <gco:DateTime>2010-01-01T12:00:00</gco:DateTime>
+              </gmd:date>
+              <gmd:dateType>
+                <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="creation">creation</gmd:CI_DateTypeCode>
+              </gmd:dateType>
+            </gmd:CI_Date>
+          </gmd:date>
+          <gmd:identifier>
+            <gmd:MD_Identifier>
+              <gmd:code>
+                <gco:CharacterString>doi:10.5071/18thEUBCE2010-VP5.4.1</gco:CharacterString>
+              </gmd:code>
+            </gmd:MD_Identifier>
+          </gmd:identifier>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>&amp;#268;udic, V.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Stojiljkovi&amp;#263;, D.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Jovovi&amp;#263;, A.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Skreiberg, Ã&#152;.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Jovanovi&amp;#263;, L.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Risti&amp;#263;, M.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Todorovi&amp;#263;, D.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Tucakovi&amp;#263;, D.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:individualName>
+                <gco:CharacterString>Obradovi&amp;#263;, M.</gco:CharacterString>
+              </gmd:individualName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="author">author</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+          <gmd:citedResponsibleParty>
+            <gmd:CI_ResponsibleParty>
+              <gmd:organisationName>
+                <gco:CharacterString>ETA-Florence Renewable Energies</gco:CharacterString>
+              </gmd:organisationName>
+              <gmd:contactInfo gco:nilReason="missing"/>
+              <gmd:role>
+                <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="publisher">publisher</gmd:CI_RoleCode>
+              </gmd:role>
+            </gmd:CI_ResponsibleParty>
+          </gmd:citedResponsibleParty>
+        </gmd:CI_Citation>
+      </gmd:citation>
+      <gmd:abstract>
+        <gco:CharacterString>description: Abstract;   description: Environmental contamination in Eastern Europe caused in particular by old technologies of production but also with war conflicts is a serious problem. Phytoremediation is an emerging technology that employs the use of higher plants for the cleanup of contaminated environments. Major advantages of phytoextraction are the low energy input, low cost, and large public acceptance. The most limiting factor is the time required to successfully clean a contaminated site to reach the goals set by legislations. Phytoextraction is an environmentally sound method for cleaning up sites that are contaminated with toxic heavy metals and Arsenic. However, the method has been questioned because it produces a biomassÂ­rich secondary waste containing the extracted metals. Therefore, further treatment of this biomass is necessary. The whole process of thermal utilisation of solid biofuels (fuel supply, combustion system, solid and gaseous emissions) is influenced by the kind of solid biofuel used, its physical characteristics (e.g. moisture, ash content, gross calorific value) and its chemical composition.In our research we tested plants from polluted area: woody plants: Poplar (Populus ssp.), Ailanthus (Ailanthus glandulosa L.), and False acacia (Robinia pseudoacacia L.), weed plant: ragweed (Artemisia L.) and erect herb plant: verbascum; and plants from the control (unpolluted) area: woody plants: Poplar (Populus ssp.), Ailanthus (Ailanthus glandulosa L.), and False acacia (Robinia pseudoacacia L.) and weed plant: ragweed (Artemisia artemisiofolia L) for the biomass production and their capability to clean polluted sites. The plant samples used in this study were collected from contaminated industrial dumping site of the â&#128;&#158;Zorka â&#128;&#147; Zinc Metallurgyâ&#128;&#156; factory, located near Sabac, west Serbia. The site was established for disposal of the jarosite waste from 1955. Plant sampling was conducted from September 2003 to June 2009 during 3 expeditions of the affected area. This study evluated the potential of 2 plants growing on a contaminated site through 7 years and their characteristics: moisture and ash content, content of Pb, Cd, Zn, Cu, Ni, Cr, As in aboveground parts of the plants and in plants ash and gross calorific value. The plant with highest gross calorific value (19735 kJ/kg) was Verbascum. As metal hyperaccumulators were identified Verbascum for Pb and Artemisia and Verbascum for Cd. Trace metals concentration in ashes were changed over the years. Results of our research suggest real possibility of biomass generation as a tools for remedation and in the same time as a energy sources. The present paper discusses the influence of chemical biomass characteristics on its behavior during combustion process as well as possibilities and recommendations for controlling them.;   description: SeriesInformation;   description: Proceedings of the 18th European Biomass Conference and Exhibition, 3-7 May 2010, Lyon, France, pp. 2280-2285</gco:CharacterString>
+      </gmd:abstract>
+      <gmd:pointOfContact>
+        <gmd:CI_ResponsibleParty>
+          <gmd:individualName>
+            <gco:CharacterString>&amp;#268;udic, V.</gco:CharacterString>
+          </gmd:individualName>
+          <gmd:contactInfo gco:nilReason="missing"/>
+          <gmd:role>
+            <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="pointOfContact">pointOfContact</gmd:CI_RoleCode>
+          </gmd:role>
+        </gmd:CI_ResponsibleParty>
+      </gmd:pointOfContact>
+      <gmd:resourceFormat>
+        <gmd:MD_Format>
+          <gmd:name>
+            <gco:CharacterString>6 Pages</gco:CharacterString>
+          </gmd:name>
+          <gmd:version gco:nilReason="missing"/>
+        </gmd:MD_Format>
+      </gmd:resourceFormat>
+      <gmd:resourceFormat>
+        <gmd:MD_Format>
+          <gmd:name>
+            <gco:CharacterString>application/pdf</gco:CharacterString>
+          </gmd:name>
+          <gmd:version gco:nilReason="missing"/>
+        </gmd:MD_Format>
+      </gmd:resourceFormat>
+      <gmd:descriptiveKeywords>
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gco:CharacterString>Biomass</gco:CharacterString>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.ngdc.noaa.gov/metadata/published/xsd/schema/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced. File generated at  Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://purl.obolibrary.org/obo/CHEBI_33521">Metal</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://wiki.cs.rpi.edu/trac/metpetdb/wiki/Element#Arsenic">Arsenic</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://purl.obolibrary.org/obo/CHEBI_24431">Chemical</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://wiki.cs.rpi.edu/trac/metpetdb/wiki/Element#Zinc">Zinc</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString>Material &gt; Chemical</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2018-08-15</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString>Cinergi keyword enhanced.File generated at Wed Aug 15 19:10:56 UTC 2018</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced. File generated at  Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://hydro10.sdsc.edu/cinergi_ontology/cinergi.owl#Expedition">Expedition</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString>Activity &gt; Expedition</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2018-08-15</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString>Cinergi keyword enhanced.File generated at Wed Aug 15 19:10:56 UTC 2018</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced. File generated at  Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://edamontology.org/operation_3429">Generation</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString>Method &gt; Information Processing</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2018-08-15</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString>Cinergi keyword enhanced.File generated at Wed Aug 15 19:10:56 UTC 2018</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced. File generated at  Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://purl.obolibrary.org/obo/GO_0007610">Behavior</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString>Process &gt; Biological Process</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2018-08-15</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString>Cinergi keyword enhanced.File generated at Wed Aug 15 19:10:56 UTC 2018</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced. File generated at  Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://hydro10.sdsc.edu/cinergi_ontology/cinergi.owl#Moisture">Moisture</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://purl.obolibrary.org/obo/PATO_0000622">Erect</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString>Property &gt; Measure</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2018-08-15</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString>Cinergi keyword enhanced.File generated at Wed Aug 15 19:10:56 UTC 2018</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:descriptiveKeywords>
+        <!--Cinergi keyword enhanced. File generated at  Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:MD_Keywords>
+          <gmd:keyword>
+            <gmx:Anchor xlink:href="http://purl.obolibrary.org/obo/ENVO_00002264">Waste</gmx:Anchor>
+          </gmd:keyword>
+          <gmd:type>
+            <gmd:MD_KeywordTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#MD_KeywordTypeCode" codeListValue="theme">theme</gmd:MD_KeywordTypeCode>
+          </gmd:type>
+          <gmd:thesaurusName>
+            <gmd:CI_Citation>
+              <gmd:title>
+                <gco:CharacterString>Material &gt; Environmental Material</gco:CharacterString>
+              </gmd:title>
+              <gmd:date>
+                <gmd:CI_Date>
+                  <gmd:date>
+                    <gco:Date>2018-08-15</gco:Date>
+                  </gmd:date>
+                  <gmd:dateType>
+                    <gmd:CI_DateTypeCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_DateTypeCode" codeListValue="publication">publication</gmd:CI_DateTypeCode>
+                  </gmd:dateType>
+                </gmd:CI_Date>
+              </gmd:date>
+              <gmd:otherCitationDetails>
+                <gco:CharacterString>Cinergi keyword enhanced.File generated at Wed Aug 15 19:10:56 UTC 2018</gco:CharacterString>
+              </gmd:otherCitationDetails>
+            </gmd:CI_Citation>
+          </gmd:thesaurusName>
+        </gmd:MD_Keywords>
+      </gmd:descriptiveKeywords>
+      <gmd:aggregationInfo>
+        <gmd:MD_AggregateInformation>
+          <gmd:aggregateDataSetIdentifier>
+            <gmd:RS_Identifier>
+              <gmd:code>
+                <gco:CharacterString>isbn:978-88-89407-56-1</gco:CharacterString>
+              </gmd:code>
+            </gmd:RS_Identifier>
+          </gmd:aggregateDataSetIdentifier>
+          <gmd:associationType>
+            <gmd:DS_AssociationTypeCode codeList="http://www.isotc211.org/2005/resources/codeList.xml#DS_AssociationTypeCode" codeListValue="crossReference">relation</gmd:DS_AssociationTypeCode>
+          </gmd:associationType>
+        </gmd:MD_AggregateInformation>
+      </gmd:aggregationInfo>
+      <gmd:language>
+        <gco:CharacterString>eng</gco:CharacterString>
+      </gmd:language>
+      <gmd:characterSet/>
+      <gmd:topicCategory/>
+      <gmd:environmentDescription/>
+      <gmd:extent>
+        <!--CINERGI spatial enhancer generated extent at Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:EX_Extent>
+          <gmd:description>
+            <gco:CharacterString>Serbia</gco:CharacterString>
+          </gmd:description>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>49.29277000000007</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>49.30277000000007</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>53.50794000000007</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>53.517940000000074</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <!--CINERGI spatial enhancer generated extent at Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:EX_Extent>
+          <gmd:description>
+            <gco:CharacterString>France</gco:CharacterString>
+          </gmd:description>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>-99.21693999999997</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>-99.20693999999997</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>18.918750000000042</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>18.92875000000004</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <!--CINERGI spatial enhancer generated extent at Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:EX_Extent>
+          <gmd:description>
+            <gco:CharacterString>Lyon, Rhône, Auvergne-Rhône-Alpes</gco:CharacterString>
+          </gmd:description>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>4.771980000000058</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>4.885980000000059</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>45.70239000000005</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>45.816390000000055</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <!--CINERGI spatial enhancer generated extent at Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:EX_Extent>
+          <gmd:description>
+            <gco:CharacterString>Sabac, Macvanski Okrug, Centralna Srbija</gco:CharacterString>
+          </gmd:description>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>19.444570000000056</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>19.944570000000056</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>44.50724000000008</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>45.00724000000008</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <!--CINERGI spatial enhancer generated extent at Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:EX_Extent>
+          <gmd:description>
+            <gco:CharacterString>Eastern Europe</gco:CharacterString>
+          </gmd:description>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>27.888670000000047</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>28.888670000000047</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>51.22703000000007</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>52.22703000000007</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <!--CINERGI spatial enhancer generated extent at Wed Aug 15 19:10:56 UTC 2018-->
+        <gmd:EX_Extent>
+          <gmd:description>
+            <gco:CharacterString>Robinia</gco:CharacterString>
+          </gmd:description>
+          <gmd:geographicElement>
+            <gmd:EX_GeographicBoundingBox>
+              <gmd:westBoundLongitude>
+                <gco:Decimal>-1.660239999999935</gco:Decimal>
+              </gmd:westBoundLongitude>
+              <gmd:eastBoundLongitude>
+                <gco:Decimal>-1.6502399999999353</gco:Decimal>
+              </gmd:eastBoundLongitude>
+              <gmd:southBoundLatitude>
+                <gco:Decimal>52.624920000000024</gco:Decimal>
+              </gmd:southBoundLatitude>
+              <gmd:northBoundLatitude>
+                <gco:Decimal>52.63492000000003</gco:Decimal>
+              </gmd:northBoundLatitude>
+            </gmd:EX_GeographicBoundingBox>
+          </gmd:geographicElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+    </gmd:MD_DataIdentification>
+  </gmd:identificationInfo>
+  <gmd:distributionInfo>
+    <gmd:MD_Distribution>
+      <gmd:transferOptions>
+        <gmd:MD_DigitalTransferOptions>
+          <gmd:onLine>
+            <gmd:CI_OnlineResource>
+              <gmd:linkage>
+                <gmd:URL>https://doi.org/10.5071/18thEUBCE2010-VP5.4.1</gmd:URL>
+              </gmd:linkage>
+              <gmd:protocol>
+                <gco:CharacterString>WWW:LINK-1.0-http--link</gco:CharacterString>
+              </gmd:protocol>
+              <gmd:name>
+                <gco:CharacterString>Landing Page</gco:CharacterString>
+              </gmd:name>
+              <gmd:description>
+                <gco:CharacterString>Link to landing page referenced by identifier</gco:CharacterString>
+              </gmd:description>
+              <gmd:function>
+                <gmd:CI_OnLineFunctionCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_OnLineFunctionCode" codeListValue="information">dc:identifier</gmd:CI_OnLineFunctionCode>
+              </gmd:function>
+            </gmd:CI_OnlineResource>
+          </gmd:onLine>
+        </gmd:MD_DigitalTransferOptions>
+      </gmd:transferOptions>
+    </gmd:MD_Distribution>
+  </gmd:distributionInfo>
+  <gmd:metadataMaintenance>
+    <gmd:MD_MaintenanceInformation>
+      <gmd:maintenanceAndUpdateFrequency gco:nilReason="unknown"/>
+      <gmd:maintenanceNote>
+        <gco:CharacterString>This metadata record was generated by an xslt transformation from a dc metadata record; Transform by Stephen M. Richard, based on a transform by Damian Ulbricht.   Run on 2018-05-25T07:10:02-07:00</gco:CharacterString>
+      </gmd:maintenanceNote>
+      <gmd:contact>
+        <gmd:CI_ResponsibleParty>
+          <gmd:individualName>
+            <gco:CharacterString>CINERGI metadata curator</gco:CharacterString>
+          </gmd:individualName>
+          <gmd:contactInfo>
+            <gmd:CI_Contact>
+              <gmd:address>
+                <gmd:CI_Address>
+                  <gmd:electronicMailAddress>
+                    <gco:CharacterString>valentin@sdsc.edu</gco:CharacterString>
+                  </gmd:electronicMailAddress>
+                </gmd:CI_Address>
+              </gmd:address>
+            </gmd:CI_Contact>
+          </gmd:contactInfo>
+          <gmd:role>
+            <gmd:CI_RoleCode codeList="http://www.isotc211.org/2005/resources/Codelist/gmxCodelists.xml#CI_RoleCode" codeListValue="processor">processor</gmd:CI_RoleCode>
+          </gmd:role>
+        </gmd:CI_ResponsibleParty>
+      </gmd:contact>
+    </gmd:MD_MaintenanceInformation>
+  </gmd:metadataMaintenance>
+</gmi:MI_Metadata>
