@@ -162,6 +162,7 @@ function (lang, array, domConstruct, i18n,
     
     // WMS server
     "WMS": function(map, url) {
+      map.emit("update-start-forced", map);
       var layer = new WMSLayer(url.split('?')[0]);
       layer.on("error", function(error) {
         _handleError(map, error);
