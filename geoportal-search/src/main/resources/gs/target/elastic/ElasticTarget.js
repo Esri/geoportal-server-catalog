@@ -155,7 +155,7 @@
       
       // allow Elasticsearch DSL searches
       if (task.config.allowDslSearches) {
-        var body, sBody = task.request.body;
+        var body, sBody = task.request.getEsDsl()? task.request.getEsDsl(): task.request.body;
         if (typeof sBody === "string" && sBody.indexOf("{") === 0) {
           sBody = sBody.trim();
           if (sBody.indexOf("{") === 0) {
