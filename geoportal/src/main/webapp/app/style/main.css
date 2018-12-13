@@ -501,3 +501,12 @@ a.dropdown-toggle:focus {
 	clip-path: none;
 	text-decoration: none;
 }
+
+.g-open-search-result-links {
+  float: right;
+  padding: 1em;
+}
+
+.g-open-search-result-link {
+  margin-left: 1em;
+}
