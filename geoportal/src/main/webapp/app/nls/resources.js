@@ -214,6 +214,14 @@ define({
       },
       preview: {
         error: "Error loading preview"
+      },
+      links: {
+        atom: "ATOM result",
+        rss:  "RSS result",
+        json: "JSON result",
+        csv:  "CSV result",
+        csw:  "CSW result",
+        kml:  "KML result"
       }
     },
     
