@@ -158,6 +158,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
             self.lastQuery = null;
           }
           response.urlParams = params.urlParams;
+          response.postData = postData;
           array.forEach(components,function(component){
             component.processResults(response);
           });
