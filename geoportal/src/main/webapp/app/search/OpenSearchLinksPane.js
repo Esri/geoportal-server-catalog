@@ -31,6 +31,9 @@ define(["dojo/_base/declare",
 
             postCreate: function () {
               this.inherited(arguments);
+              if (!AppContext.appConfig.searchResults.showOpenSearchLinks) {
+                this.destroy();
+              }
             },
             
             _appendLink: function(name, url) {
