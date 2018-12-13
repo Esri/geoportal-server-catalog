@@ -17,7 +17,7 @@ define(["dojo/_base/declare",
         "dojo/_base/array",
         "dojo/dom-construct",
         "dojo/io-query",
-        "dojo/text!./templates/OpenSearchResultLinksPane.html",
+        "dojo/text!./templates/OpenSearchLinksPane.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent"],
     function (declare, lang, array, domConstruct, ioQuery, template, i18n, SearchComponent) {
@@ -34,7 +34,7 @@ define(["dojo/_base/declare",
             },
             
             _appendLink: function(name, url) {
-              domConstruct.create("a", {innerHTML: name, href: url, "class": "g-open-search-result-link", target: "_blank"}, this.contentNode );
+              domConstruct.create("a", {innerHTML: name, href: url, "class": "g-open-search-result-link", target: "_blank"}, this.linksNode );
             },
             
             _createLink: function(name, type, urlParams, postData) {
@@ -51,20 +51,23 @@ define(["dojo/_base/declare",
             /* SearchComponent API ============================================= */
 
             appendQueryParams: function (params) {
-              domConstruct.empty(this.contentNode);
+              domConstruct.empty(this.linksNode);
             },
 
             processError: function (searchError) {
-              domConstruct.empty(this.contentNode);
+              domConstruct.empty(this.linksNode);
             },
 
             processResults: function (searchResponse) {
-              this._createLink("ATOM", "atom", searchResponse.urlParams, searchResponse.postData);
-              this._createLink("CSW", "csw", searchResponse.urlParams, searchResponse.postData);
-              this._createLink("JSON", "json", searchResponse.urlParams, searchResponse.postData);
-              this._createLink("CSV", "csv", searchResponse.urlParams, searchResponse.postData);
-              this._createLink("KML", "kml", searchResponse.urlParams, searchResponse.postData);
-              this._createLink("RSS", "rss", searchResponse.urlParams, searchResponse.postData);
+              var postData = JSON.parse(this.searchPane.lastQuery);
+              postData = postData? postData: {};
+              
+              this._createLink("ATOM", "atom", searchResponse.urlParams, postData);
+              this._createLink("CSW", "csw", searchResponse.urlParams, postData);
+              this._createLink("JSON", "json", searchResponse.urlParams, postData);
+              this._createLink("CSV", "csv", searchResponse.urlParams, postData);
+              this._createLink("KML", "kml", searchResponse.urlParams, postData);
+              this._createLink("RSS", "rss", searchResponse.urlParams, postData);
             }
 
         });
