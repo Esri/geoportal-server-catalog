@@ -42,9 +42,9 @@ define(["dojo/_base/declare",
             
             _createLink: function(name, type, urlParams, postData) {
               var q = lang.mixin(
+                        { f: type},
                         urlParams, 
-                        { esdsl: JSON.stringify({ query: postData.query }) },
-                        { f: type}
+                        { esdsl: JSON.stringify({ query: postData.query }) }
                       );
               var sq = ioQuery.objectToQuery(q);
               var url = this.opensearchContext + sq;
