@@ -27,7 +27,7 @@ define(["dojo/_base/declare",
         "app/search/NumericFilter",
         "app/search/AppliedFilters",
         "app/search/ResultsPane",
-        "app/search/OpenSearchResultLinksPane"
+        "app/search/OpenSearchLinksPane"
       ], 
 function(declare, lang, Templated, template, i18n) {
 
