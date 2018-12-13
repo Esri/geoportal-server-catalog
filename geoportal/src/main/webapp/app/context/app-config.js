@@ -37,7 +37,8 @@ define([],function(){var obj={
     showApprovalStatus: true,
     defaultSort: "title.sort:asc",
     showLinks: true,
-    showCustomLinks: true
+    showCustomLinks: true,
+    showOpenSearchLinks: true
   },
   
   statusChecker: {
