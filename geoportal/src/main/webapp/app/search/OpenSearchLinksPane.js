@@ -36,11 +36,18 @@ define(["dojo/_base/declare",
               }
             },
             
-            _appendLink: function(name, url) {
-              domConstruct.create("a", {innerHTML: name, href: url, "class": "g-open-search-result-link", target: "_blank"}, this.linksNode );
+            _appendLink: function(name, alt, url) {
+              domConstruct.create("a", {
+                innerHTML: name, 
+                href: url, 
+                "class": "g-open-search-result-link", 
+                target: "_blank", 
+                title: alt, 
+                "aria-label": alt
+              }, this.linksNode );
             },
             
-            _createLink: function(name, type, urlParams, postData) {
+            _createLink: function(name, alt, type, urlParams, postData) {
               var q = lang.mixin(
                         { f: type},
                         urlParams, 
@@ -48,7 +55,7 @@ define(["dojo/_base/declare",
                       );
               var sq = ioQuery.objectToQuery(q);
               var url = this.opensearchContext + sq;
-              this._appendLink(name, url);
+              this._appendLink(name, alt, url);
             },
 
             /* SearchComponent API ============================================= */
@@ -65,12 +72,12 @@ define(["dojo/_base/declare",
               var postData = JSON.parse(this.searchPane.lastQuery);
               postData = postData? postData: {};
               
-              this._createLink("ATOM", "atom", searchResponse.urlParams, postData);
-              this._createLink("CSW", "csw", searchResponse.urlParams, postData);
-              this._createLink("JSON", "json", searchResponse.urlParams, postData);
-              this._createLink("CSV", "csv", searchResponse.urlParams, postData);
-              this._createLink("KML", "kml", searchResponse.urlParams, postData);
-              this._createLink("RSS", "rss", searchResponse.urlParams, postData);
+              this._createLink("ATOM", i18n.search.links.atom, "atom", searchResponse.urlParams, postData);
+              this._createLink("CSW", i18n.search.links.csw, "csw", searchResponse.urlParams, postData);
+              this._createLink("JSON", i18n.search.links.json, "json", searchResponse.urlParams, postData);
+              this._createLink("CSV", i18n.search.links.csv, "csv", searchResponse.urlParams, postData);
+              this._createLink("KML", i18n.search.links.kml, "kml", searchResponse.urlParams, postData);
+              this._createLink("RSS", i18n.search.links.rss, "rss", searchResponse.urlParams, postData);
             }
 
         });
