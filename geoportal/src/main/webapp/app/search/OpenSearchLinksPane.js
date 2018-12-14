@@ -37,7 +37,14 @@ define(["dojo/_base/declare",
             },
             
             _appendLink: function(name, alt, url) {
-              domConstruct.create("a", {innerHTML: name, href: url, "class": "g-open-search-result-link", target: "_blank", title: alt, "aria-label": alt}, this.linksNode );
+              domConstruct.create("a", {
+                innerHTML: name, 
+                href: url, 
+                "class": "g-open-search-result-link", 
+                target: "_blank", 
+                title: alt, 
+                "aria-label": alt
+              }, this.linksNode );
             },
             
             _createLink: function(name, alt, type, urlParams, postData) {
