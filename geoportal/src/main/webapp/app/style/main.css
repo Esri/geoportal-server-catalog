@@ -17,7 +17,6 @@ body {
 }
 .calcite .dijitTitlePaneTitle {
   padding: 4px 6px;
-  overflow-y: hidden;
 }
 .calcite .dijitTitlePaneContentInner {
   padding: 8px;
@@ -174,7 +173,11 @@ body {
   max-height: 200px;
   overflow-y: auto;
 }
-
+/* resolves map disappearing issue #63
+and will apply to all search facets */
+.g-search-pane-left .dijitTitlePaneTitle {
+    overflow-y:hidden !important;;
+}
 .g-entry-links > div {
   padding: 2px 0px;
 }
@@ -182,6 +185,7 @@ body {
 .g-spatial-filter-map {
   height: 300px !important;
   width: auto !important;
+
 }
 .g-spatial-filter-relations {
   margin-right: 12px;
