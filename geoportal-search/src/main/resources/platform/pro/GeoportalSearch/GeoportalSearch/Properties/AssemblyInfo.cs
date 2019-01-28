@@ -2,6 +2,8 @@
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+[assembly: System.Windows.ThemeInfo(System.Windows.ResourceDictionaryLocation.None, System.Windows.ResourceDictionaryLocation.SourceAssembly)]
+
 // General Information about an assembly is controlled through the following 
 // set of attributes. Change these attribute values to modify the information
 // associated with an assembly.
@@ -10,7 +12,7 @@ using System.Runtime.InteropServices;
 [assembly: AssemblyConfiguration("")]
 [assembly: AssemblyCompany("Acme")]
 [assembly: AssemblyProduct("GeoportalSearch")]
-[assembly: AssemblyCopyright("Copyright © Acme 2018")]
+[assembly: AssemblyCopyright("Copyright © Acme 2019")]
 [assembly: AssemblyTrademark("")]
 [assembly: AssemblyCulture("")]
 
@@ -20,7 +22,7 @@ using System.Runtime.InteropServices;
 [assembly: ComVisible(false)]
 
 // The following GUID is for the ID of the typelib if this project is exposed to COM
-[assembly: Guid("b14a512e-b881-495d-9463-20de3b7493ff")]
+[assembly: Guid("f8a3af36-62ae-41b9-ab28-b6242a7d3bed")]
 
 // Version information for an assembly consists of the following four values:
 //
