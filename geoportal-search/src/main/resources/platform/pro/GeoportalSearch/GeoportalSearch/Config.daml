@@ -1,40 +1,35 @@
-﻿<ArcGIS defaultAssembly="GeoportalSearch.dll" defaultNamespace="GeoportalSearch" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
-  <AddInInfo id="{b14a512e-b881-495d-9463-20de3b7493ff}" version="1.0" desktopVersion="2.1.10257">
+﻿<ArcGIS defaultAssembly="GeoportalSearch.dll" defaultNamespace="GeoportalSearch" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Users/kyle9645/AppData/Local/Programs/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
+  <AddInInfo id="{f8a3af36-62ae-41b9-ab28-b6242a7d3bed}" version="1.0" desktopVersion="2.2.12813">
     <Name>GeoportalSearch</Name>
-    <Description>GeoportalSearch</Description>
+    <Description>GeoportalSearch description</Description>
     <Image>Images\AddinDesktop32.png</Image>
-    <Author>Urban</Author>
-    <Company>Esri</Company>
-    <Date>3/1/2018 3:50:33 PM, 2018</Date>
+    <Author>kyle9645</Author>
+    <Company>Acme</Company>
+    <Date>1/17/2019 1:22:34 PM, 2019</Date>
     <Subject>Framework</Subject>
     <!-- Note subject can be one or more of these topics:
                     Content, Framework, Editing, Geodatabase, Geometry, Geoprocessing, Layouts, Map Authoring, Map Exploration -->
   </AddInInfo>
   <modules>
-    <insertModule id="GeoportalSearch_Module" className="Module1" autoLoad="false" caption="Module1">
-      <!-- uncomment to have the control hosted on a separate tab-->
+    <insertModule id="GeoportalSearch_Module" className="GeoportalModule" autoLoad="false" caption="Geoportal Module">
       <tabs>
-        <!--<tab id="GeoportalSearch_Tab1" caption="New Tab">
-          <group refID="GeoportalSearch_Group1"/>
-        </tab>-->
+        <tab id="GeoportalSearch_Tab1" caption="Geoportal">
+          <group refID="GeoportalSearch_Group1" />
+        </tab>
       </tabs>
       <groups>
-        <!-- comment this out if you have no controls on the Addin tab to avoid
-              an empty group-->
-        <group id="GeoportalSearch_Group1" caption="Group 1" appearsOnAddInTab="true">
-          <!-- host controls within groups -->
-          <button refID="GeoportalSearch_Dockpane1_ShowButton" size="large" />
+        <group id="GeoportalSearch_Group1" caption="Geoportal" appearsOnAddInTab="false">
+          <button refID="GeoportalSearch_GeoportalDockpane_ShowButton" size="large" />
         </group>
       </groups>
       <controls>
-        <!-- add your controls here -->
-        <button id="GeoportalSearch_Dockpane1_ShowButton" caption="Geoportal Search" className="Dockpane1_ShowButton" loadOnClick="true" smallImage="Images\GenericButtonPurple16.png" largeImage="Images\GenericButtonPurple32.png">
+        <button id="GeoportalSearch_GeoportalDockpane_ShowButton" caption="Geoportal Search" className="GeoportalDockpane_ShowButton" loadOnClick="true" smallImage="Images\GenericButtonPurple16.png" largeImage="Images\GenericButtonPurple32.png">
           <tooltip heading="Geoportal Search">Geoportal Search<disabledText /></tooltip>
         </button>
       </controls>
       <dockPanes>
-        <dockPane id="GeoportalSearch_Dockpane1" caption="Geoportal Search" className="Dockpane1ViewModel" dock="group" dockWith="esri_core_contentsDockPane">
-          <content className="Dockpane1View" />
+        <dockPane id="GeoportalSearch_GeoportalDockpane" caption="Geoportal Search" className="GeoportalDockpaneViewModel" dock="group" dockWith="esri_core_contentsDockPane">
+          <content className="GeoportalDockpaneView" />
         </dockPane>
       </dockPanes>
     </insertModule>
