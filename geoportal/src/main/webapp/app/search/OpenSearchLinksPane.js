@@ -72,6 +72,10 @@ define(["dojo/_base/declare",
               var postData = JSON.parse(this.searchPane.lastQuery);
               postData = postData? postData: {};
               
+              if (!searchResponse.urlParams.hasScorable && typeof searchResponse.urlParams.sort === "undefined") {
+                searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
+              }
+              
               this._createLink("ATOM", i18n.search.links.atom, "atom", searchResponse.urlParams, postData);
               this._createLink("CSW", i18n.search.links.csw, "csw", searchResponse.urlParams, postData);
               this._createLink("JSON", i18n.search.links.json, "json", searchResponse.urlParams, postData);
