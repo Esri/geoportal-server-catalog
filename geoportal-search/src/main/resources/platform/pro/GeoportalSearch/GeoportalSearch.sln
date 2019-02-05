@@ -1,9 +1,9 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
-VisualStudioVersion = 15.0.26430.14
+VisualStudioVersion = 15.0.28307.136
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoportalSearch", "GeoportalSearch\GeoportalSearch.csproj", "{B14A512E-B881-495D-9463-20DE3B7493FF}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "GeoportalSearch", "GeoportalSearch\GeoportalSearch.csproj", "{F8A3AF36-62AE-41B9-AB28-B6242A7D3BED}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -11,12 +11,15 @@ Global
 		Release|Any CPU = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
-		{B14A512E-B881-495D-9463-20DE3B7493FF}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{B14A512E-B881-495D-9463-20DE3B7493FF}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{B14A512E-B881-495D-9463-20DE3B7493FF}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{B14A512E-B881-495D-9463-20DE3B7493FF}.Release|Any CPU.Build.0 = Release|Any CPU
+		{F8A3AF36-62AE-41B9-AB28-B6242A7D3BED}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{F8A3AF36-62AE-41B9-AB28-B6242A7D3BED}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{F8A3AF36-62AE-41B9-AB28-B6242A7D3BED}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{F8A3AF36-62AE-41B9-AB28-B6242A7D3BED}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {0C1B672F-4460-441F-BF06-4E3371D965D0}
 	EndGlobalSection
 EndGlobal
