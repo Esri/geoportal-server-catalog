@@ -40,7 +40,7 @@ function(declare, lang, array, ioQuery, SearchComponent, QClause, Util) {
                   this._addQuery(o.filter);
               } else if (o && typeof o.fileid === "string")
               {
-                  this._addFileIdQuery(o.fileid)
+                  this._addFileIdQuery(o.fileid);
               }else if (o && lang.isArray(o.filter)) {
                   array.forEach(o.filter,function(v){
                       self._addQuery(v);
@@ -62,11 +62,11 @@ function(declare, lang, array, ioQuery, SearchComponent, QClause, Util) {
                       }};
                   this.queries.push(query);
                   var qClause = new QClause({
-                      label: "URLQuery",
+                      label: "filter from URL",
                       tip: v,
                       parentQComponent: this,
                       removable: false,
-                      urlParameterName: "q",
+                      urlParameterName: "filter",
                       urlParameterValue: v,
                       query: query
                   });
@@ -88,11 +88,11 @@ function(declare, lang, array, ioQuery, SearchComponent, QClause, Util) {
                   this.queries.push(query);
 
                   var qClause = new QClause({
-                      label: "fileid",
+                      label: "fileid from URL",
                       tip: v,
                       parentQComponent: this,
                       removable: false,
-                      urlParameterName: "q",
+                      urlParameterName: "fileid",
                       urlParameterValue: v,
                       query: query
                   });
