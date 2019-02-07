@@ -25,12 +25,12 @@ function (lang) {
       }
       return uri;
     },
-    
-    escapeForLucene: function(value) {
-      var a = ['+', '-', '&', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', '*', '?', ':', '\\'];
-      var r = new RegExp("(\\" + a.join("|\\") + ")", "g");
-      return value.replace(r, "\\$1");
-    },
+
+      escapeForLucene: function(value) {
+          var a = ['+', '-', '&', '!', '(', ')', '{', '}', '[', ']', '^', '"', '~', '*', '?', ':', '\\','/'];
+          var r = new RegExp("(\\" + a.join("|\\") + ")", "g");
+          return value.replace(r, "\\$1");
+      },
     
     setNodeText: function(nd,text) {
       nd.innerHTML = "";
