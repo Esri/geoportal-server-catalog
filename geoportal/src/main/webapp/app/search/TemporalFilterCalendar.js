@@ -44,7 +44,12 @@ function(declare, Calendar, Templated, ModalDialog, template, i18n) {
     },
     
     init: function() {
-      
+      if (this.targetWidget && this.targetWidget._brushExtent) {
+        if (this.targetWidget._brushExtent.length>0)
+          this.startDateCalendar.setValue(this.targetWidget._brushExtent[0]);
+        if (this.targetWidget._brushExtent.length>1)
+          this.endDateCalendar.setValue(this.targetWidget._brushExtent[1]);
+      }
     },
     
     focus: function() {
