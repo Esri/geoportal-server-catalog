@@ -13,11 +13,12 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
+        "dijit/Calendar",
         "app/common/Templated",
         "app/common/ModalDialog",
         "dojo/text!./templates/TemporalFilterCalendar.html",
-        "dojo/i18n!app/nls/resources"], 
-function(declare, Templated, ModalDialog, template, i18n) {
+        "dojo/i18n!app/nls/resources" ], 
+function(declare, Calendar, Templated, ModalDialog, template, i18n) {
   
   var oThisClass = declare([Templated], {
     

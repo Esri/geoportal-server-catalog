@@ -484,7 +484,6 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
     },
     
     onCalendarClick: function(event) {
-      console.log("Calendar");
       var d = new TemporalFilterCalendar({
         targetWidget: this
       });

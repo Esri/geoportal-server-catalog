@@ -381,6 +381,13 @@ body {
   vertical-align: top;
   cursor: pointer;
 }
+.g-start-date-calendar {
+  
+}
+.g-end-date-calendar {
+  float: right;
+}
+
 .g-temporal-d3 svg {
   /*font: 10px sans-serif;*/
   font-size: 9px;
