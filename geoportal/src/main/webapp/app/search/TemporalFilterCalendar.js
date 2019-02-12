@@ -76,6 +76,12 @@ function(declare, Calendar, Templated, ModalDialog, template, i18n) {
     },
     
     validateAndApply: function() {
+      if (!this.targetWidget._brushExtent) {
+        this.targetWidget._brushExtent = [];
+      }
+      this.targetWidget._brushExtent[0] = this.startDateCalendar.value;
+      this.targetWidget._brushExtent[1] = this.endDateCalendar.value;
+      this.targetWidget.applyBrushExtent();
       this.hideDialog();
     }
     
