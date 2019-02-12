@@ -480,6 +480,10 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
         this.setNodeText(this.brushExtentNode,"");
         setTimeout(function(){self._searchDisabled = false;},100);
       }
+    },
+    
+    onCalendarClick: function(event) {
+      console.log("Calendar");
     }
     
   });

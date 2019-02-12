@@ -374,6 +374,13 @@ body {
 .g-temporal-bar label {
   font-size: 11px;
 }
+.g-temporal-bar .calendar {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  vertical-align: top;
+  cursor: pointer;
+}
 .g-temporal-d3 svg {
   /*font: 10px sans-serif;*/
   font-size: 9px;
