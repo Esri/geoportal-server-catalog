@@ -96,6 +96,7 @@ define({
         rangePattern: "{from}..{to}",
         countPattern: "{count} aggregated here",
         searchTip: "Search",
+        searchLabel: "Search query:",
         interval: {
           year: "Year",
           quarter: "Quarter",

@@ -371,7 +371,9 @@ body {
   margin-left: 3px;
   margin-right: 10px;
 }
-
+.g-temporal-bar label {
+  font-size: 11px;
+}
 .g-temporal-d3 svg {
   /*font: 10px sans-serif;*/
   font-size: 9px;
