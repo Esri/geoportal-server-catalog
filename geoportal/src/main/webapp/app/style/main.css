@@ -381,11 +381,21 @@ body {
   vertical-align: top;
   cursor: pointer;
 }
-.g-start-date-calendar {
+.g-start-date {
   
 }
-.g-end-date-calendar {
+.g-end-date {
   float: right;
+}
+.g-start-date .g-start-date-calendar {
+  
+}
+.g-end-date .g-end-date-calendar {
+}
+.g-start-date .g-start-date-calendar-label {
+  
+}
+.g-end-date .g-end-date-calendar-label {
 }
 
 .g-temporal-d3 svg {
