@@ -63,8 +63,8 @@ function(declare, lang, aspect, DateTextBox, Templated, ModalDialog, template, i
     },
     
     init: function() {
-      this.startDateCalendar.setValue(this.startDate);
-      this.endDateCalendar.setValue(this.endDate);
+      this.startDateCalendar.set('value', this.startDate);
+      this.endDateCalendar.set('value', this.endDate);
     },
     
     focus: function() {
@@ -90,7 +90,7 @@ function(declare, lang, aspect, DateTextBox, Templated, ModalDialog, template, i
     },
     
     validateAndApply: function() {
-      this.targetWidget.updateRange(this.startDateCalendar.value, this.endDateCalendar.value);
+      this.targetWidget.updateRange(this.startDateCalendar.get('value'), this.endDateCalendar.get('value'));
       this.hideDialog();
     }
     
