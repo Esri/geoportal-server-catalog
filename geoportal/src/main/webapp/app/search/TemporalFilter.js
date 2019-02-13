@@ -493,11 +493,10 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
     },
     
     updateRange: function(startDate, endDate) {
-      console.log("Updating", startDate, endDate);
       this._fromDate = startDate;
       this._toDate = endDate;
-      var txt = this.formatDateRange(startDate,endDate,true);
-      this.setNodeText(this.brushExtentNode,txt);
+      this.intervalSelect.value = "day";
+      this.intervalChanged();
     }
     
   });
