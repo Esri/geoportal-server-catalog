@@ -29,6 +29,8 @@ function(declare, lang, aspect, DateTextBox, Templated, ModalDialog, template, i
     
     dialog: null,
     targetWidget: null,
+    startDate: null,
+    endDate: null,
     
     postCreate: function() {
       this.inherited(arguments);
@@ -55,12 +57,8 @@ function(declare, lang, aspect, DateTextBox, Templated, ModalDialog, template, i
     },
     
     init: function() {
-      if (this.targetWidget && this.targetWidget._brushExtent) {
-        if (this.targetWidget._brushExtent.length>0)
-          this.startDateCalendar.setValue(this.targetWidget._brushExtent[0]);
-        if (this.targetWidget._brushExtent.length>1)
-          this.endDateCalendar.setValue(this.targetWidget._brushExtent[1]);
-      }
+      this.startDateCalendar.setValue(this.startDate);
+      this.endDateCalendar.setValue(this.endDate);
     },
     
     focus: function() {
@@ -86,12 +84,7 @@ function(declare, lang, aspect, DateTextBox, Templated, ModalDialog, template, i
     },
     
     validateAndApply: function() {
-      if (!this.targetWidget._brushExtent) {
-        this.targetWidget._brushExtent = [];
-      }
-      this.targetWidget._brushExtent[0] = this.startDateCalendar.value;
-      this.targetWidget._brushExtent[1] = this.endDateCalendar.value;
-      this.targetWidget.applyBrushExtent();
+      this.targetWidget.updateRange(this.startDateCalendar.value, this.endDateCalendar.value);
       this.hideDialog();
     }
     
