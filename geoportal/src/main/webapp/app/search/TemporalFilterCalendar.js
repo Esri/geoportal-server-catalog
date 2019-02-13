@@ -39,9 +39,15 @@ function(declare, lang, aspect, DateTextBox, Templated, ModalDialog, template, i
       // the modal dialog box which has zIndex set to 1050.
       this.own(aspect.after(this.startDateCalendar, "openDropDown", lang.hitch(this, function(){
         this.startDateCalendar.dropDown._popupWrapper.style.zIndex=1100;
+        this.own(aspect.after(this.startDateCalendar.dropDown.monthWidget, "openDropDown", lang.hitch(this, function(){
+          this.startDateCalendar.dropDown.monthWidget.dropDown._popupWrapper.style.zIndex = 1101;
+        })));
       })));
       this.own(aspect.after(this.endDateCalendar, "openDropDown", lang.hitch(this, function(){
         this.endDateCalendar.dropDown._popupWrapper.style.zIndex=1100;
+        this.own(aspect.after(this.endDateCalendar.dropDown.monthWidget, "openDropDown", lang.hitch(this, function(){
+          this.endDateCalendar.dropDown.monthWidget.dropDown._popupWrapper.style.zIndex = 1101;
+        })));
       })));
     },
     
