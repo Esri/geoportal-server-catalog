@@ -485,9 +485,15 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
     
     onCalendarClick: function(event) {
       var d = new TemporalFilterCalendar({
-        targetWidget: this
+        targetWidget: this,
+        startDate: this._brushExtent[0],
+        endDate: this._brushExtent[1]
       });
       d.showDialog();
+    },
+    
+    updateRange: function(startDate, endDate) {
+      console.log("Updating", startDate, endDate);
     }
     
   });
