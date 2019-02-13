@@ -13,12 +13,14 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
-        "dijit/Calendar",
+        "dojo/_base/lang",
+        "dojo/aspect",
+        "dijit/form/DateTextBox",
         "app/common/Templated",
         "app/common/ModalDialog",
         "dojo/text!./templates/TemporalFilterCalendar.html",
         "dojo/i18n!app/nls/resources" ], 
-function(declare, Calendar, Templated, ModalDialog, template, i18n) {
+function(declare, lang, aspect, DateTextBox, Templated, ModalDialog, template, i18n) {
   
   var oThisClass = declare([Templated], {
     
@@ -30,6 +32,15 @@ function(declare, Calendar, Templated, ModalDialog, template, i18n) {
     
     postCreate: function() {
       this.inherited(arguments);
+      
+      // Setting zIndex in openDropDown is necessary, otherwise callendars will appear behind 
+      // the modal dialog box which has zIndex set to 1050.
+      this.own(aspect.after(this.startDateCalendar, "openDropDown", lang.hitch(this, function(){
+        this.startDateCalendar.dropDown._popupWrapper.style.zIndex=1100;
+      })));
+      this.own(aspect.after(this.endDateCalendar, "openDropDown", lang.hitch(this, function(){
+        this.endDateCalendar.dropDown._popupWrapper.style.zIndex=1100;
+      })));
     },
     
     getTitle: function() {
@@ -53,7 +64,6 @@ function(declare, Calendar, Templated, ModalDialog, template, i18n) {
     },
     
     focus: function() {
-      // this.componentLabelInput.focus();
     },
     
     showDialog: function() {
