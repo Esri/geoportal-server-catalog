@@ -3,7 +3,8 @@
     data-dojo-attach-point="dropPane" data-dojo-props="title:'${label}',open:${open}">
     <div class="g-temporal-d3" data-dojo-attach-point="svgNode"></div>
     <div class="g-temporal-bar pull-right">
-      <a href="javascript:void(0)" class="small" 
+      <label for="${id}_intervalLink">${i18n.search.temporalFilter.searchLabel}</label>
+      <a href="javascript:void(0)" class="small" id="${id}_intervalLink"
         title="${i18n.search.temporalFilter.searchTip}"
         data-dojo-attach-point="brushExtentNode"
         data-dojo-attach-event="onclick: applyBrushExtent">
@@ -20,6 +21,9 @@
         <option value="minute">${i18n.search.temporalFilter.interval.minute}</option>
         <option value="second">${i18n.search.temporalFilter.interval.second}</option>
       </select>
+      <img src="images/calendar.png" aria-label="Enter Time Interval" class="calendar" 
+           data-dojo-attach-event="onclick: onCalendarClick"
+      />
     </div>
   </div>
 </div>

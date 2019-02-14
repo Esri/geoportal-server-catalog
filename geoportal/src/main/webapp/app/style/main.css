@@ -375,6 +375,32 @@ and will apply to all search facets */
   margin-left: 3px;
   margin-right: 10px;
 }
+.g-temporal-bar label {
+  font-size: 11px;
+}
+.g-temporal-bar .calendar {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  vertical-align: top;
+  cursor: pointer;
+}
+.g-start-date {
+  
+}
+.g-end-date {
+  float: right;
+}
+.g-start-date .g-start-date-calendar {
+  
+}
+.g-end-date .g-end-date-calendar {
+}
+.g-start-date .g-start-date-calendar-label {
+  
+}
+.g-end-date .g-end-date-calendar-label {
+}
 
 .g-temporal-d3 svg {
   /*font: 10px sans-serif;*/
