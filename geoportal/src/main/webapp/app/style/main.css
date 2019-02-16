@@ -140,12 +140,12 @@ body {
 	padding: 0px;
 }
 .g-search-pane-left {
-	width: 25%; 
-	min-width: 100px; 
+	/*width: 25%; */
+	/*min-width: 100px; */
 	float: left; 
 }
 .g-search-pane-right {
-	width: 73%; 
+	/*width: 73%; */
 	float: right; 
 }
 
