@@ -169,6 +169,17 @@
       <version>1.3.1</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/net.sourceforge.saxon/saxon License MPL
+      If you have a bug in a transform, try enabling this library
+       mvn clean package
+       -->
+  <!--    <dependency>
+         <groupId>net.sourceforge.saxon</groupId>
+         <artifactId>saxon</artifactId>
+         <version>9.1.0.8</version>
+       </dependency>
+-->
+
   </dependencies> 
   
   <build>
