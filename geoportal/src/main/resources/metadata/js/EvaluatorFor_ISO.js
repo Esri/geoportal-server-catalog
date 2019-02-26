@@ -19,6 +19,7 @@ G.evaluators.iso = {
 
   evaluate: function(task) {
     this.evalBase(task);
+    this.evalKeywords(task);
     this.evalService(task);
     this.evalSpatial(task);
     this.evalTemporal(task);
@@ -35,7 +36,7 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"fileid","gmd:fileIdentifier/gco:CharacterString");
     G.evalProp(task,item,iden,"title","gmd:citation/gmd:CI_Citation/gmd:title/gco:CharacterString");
     G.evalProp(task,item,iden,"description","gmd:abstract/gco:CharacterString");
-    G.evalProps(task,item,root,"keywords_s","//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gmx:Anchor");
+   // G.evalProps(task,item,root,"keywords_s","//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gco:CharacterString | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/gmx:Anchor");
     G.evalProp(task,item,iden,"thumbnail_s","gmd:graphicOverview/gmd:MD_BrowseGraphic/gmd:fileName/gco:CharacterString");
     G.evalProps(task,item,root,"contact_organizations_s","//gmd:CI_ResponsibleParty/gmd:organisationName/gco:CharacterString");
     G.evalProps(task,item,root,"contact_people_s","//gmd:CI_ResponsibleParty/gmd:individualName/gco:CharacterString");
@@ -77,7 +78,31 @@ G.evaluators.iso = {
     G.evalProps(task,item,root,"apiso_Classification_s","//gmd:resourceConstraints/gmd:MD_SecurityConstraints/gmd:classification/gmd:MD_ClassificationCode/@codeListValue");
     G.writeProp(item,"apiso_HasSecurityConstraints_b",G.hasNode(task,root,"//gmd:resourceConstraints"));
   },
+    evalKeywords: function(task){
+        /* Add hierarchical keywords to keywords_hier, all to keywords_s
+        Looks for NOAA type keywords
+        "Earth Science > Oceans > Ocean Circulation > Fronts"
+         */
+        var self = this;
+        var item = task.item, root = task.root;
+        G.forEachNode(task,root,"//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/*/text() ",
+            function(node){
+                print("evalKeywords "+  G.getNodeText(node) );
+                var kw = G.getNodeText(node);
+                if (typeof kw === "undefined" || kw === null) return;
+                if (typeof kw === "string" && kw.length === 0) return;
+                if (kw.length >0)
+                {
+                    print("evalKeywords is text"+ node );
+                    if (kw.indexOf(">") !== -1) {
+                        G.writeMultiProp(task.item, "keywords_S", kw);
+                        G.writeMultiProp(task.item, "keywords_hier", kw);
+                    }
+                    G.writeMultiProp(task.item, "keywords_s", kw);
 
+                }
+            });
+    },
   evalInspire: function(task) {
     var item = task.item, root = task.root;
     G.evalProps(task,item,root,"apiso_InspireSpatialDataThemes_s","//gmd:title[gco:CharacterString='GEMET - INSPIRE themes, version 1.0']/../../../gmd:keyword/gco:CharacterString");

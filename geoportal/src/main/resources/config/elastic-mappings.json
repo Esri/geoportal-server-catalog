@@ -1,6 +1,18 @@
 {
   "settings": {
     "analysis": {
+      "tokenizer": {
+        "hierarchy_tokenizer": {
+          "type": "path_hierarchy",
+          "delimiter": ">",
+          "reverse": false
+        },
+        "category_tokenizer": {
+          "type": "path_hierarchy",
+          "delimiter": "/",
+          "reverse": false
+        }
+      },
       "analyzer": {
         "default": {
           "tokenizer": "standard",
@@ -9,12 +21,31 @@
         "case_insensitive_sort": {
           "tokenizer": "keyword",
           "filter": ["lowercase"] 
+        },
+        "category_analyzer": {
+          "tokenizer": "category_tokenizer",
+          "filter": [
+            "trim",
+            "hierarchy_stop"
+          ]
+        },
+        "hierarchy_analyzer": {
+          "tokenizer": "hierarchy_tokenizer",
+          "filter": [
+            "trim",
+            "hierarchy_stop"
+          ]
         }
       },
       "filter": {
         "english_stemmer": {
            "type": "stemmer",
            "name": "english"
+        },
+        "hierarchy_stop": {
+          "type":       "stop",
+          "ignore_case": true,
+          "stopwords":  ["category > unassigned", "unassigned"]
         }
       }
     }
@@ -189,6 +220,28 @@
               "index":false,
               "store": true,
               "doc_values": false
+            }
+          }
+        },
+        {
+          "_cat": {
+            "match": "*_cat",
+            "mapping": {
+              "type": "text",
+              "fielddata": true,
+              "analyzer": "category_analyzer",
+              "search_analyzer": "category_analyzer"
+            }
+          }
+        },
+        {
+          "_hier": {
+            "match": "*_hier",
+            "mapping": {
+              "type": "text",
+              "fielddata": true,
+              "analyzer": "hierarchy_analyzer",
+              "search_analyzer": "hierarchy_analyzer"
             }
           }
         }
