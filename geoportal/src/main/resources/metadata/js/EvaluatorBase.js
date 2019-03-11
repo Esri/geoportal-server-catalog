@@ -123,8 +123,8 @@ var G = {
     if (ok) {
       //this.writeMultiProp(task.item,"timeperiod_tp",data);
       this.writeMultiProp(task.item,"timeperiod_nst",data);
-      if (data.begin_year_l != null) {
-        this.writeMultiProp(task.item,"metadata_year_i", parseInt(data.begin_year_l));
+      if (data.begin_year_l !== null) {
+        this.writeMultiProp(task.item,"metadata_year_l", parseInt(data.begin_year_l));
       }
     } 
   },
