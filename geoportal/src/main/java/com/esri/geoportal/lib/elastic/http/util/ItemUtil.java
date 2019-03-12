@@ -125,34 +125,58 @@ public class ItemUtil {
    */
   public String readXml(String indexName, String id, JsonObject itemSource) throws Exception {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    if (ec.getUseSeparateXmlItem()) {
+    // see if XML is in itemSource document (eg comes from a v6 index)
+    // if not, then try the XML blob.
+    String field = FieldNames.FIELD_SYS_XML;
+    if (itemSource == null) {
+      JsonObject item = readItemJson(indexName, ec.getItemIndexType(), id);
+      itemSource = this.getItemSource(item);
+    }
+    if (itemSource != null && itemSource.containsKey(field)) {
+      try {
+        String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
+        return xml;
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } else {
       ElasticClient client = ElasticClient.newClient();
-      String url = client.getXmlUrl(indexName,ec.getXmlIndexType(),id);
+      String url = client.getXmlUrl(indexName, ec.getXmlIndexType(), id);
       String result = client.sendGet(url);
       if (result != null && result.length() > 0) {
-        JsonObject item = (JsonObject)JsonUtil.toJsonStructure(result);
+        JsonObject item = (JsonObject) JsonUtil.toJsonStructure(result);
         try {
           String xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_CLOB);
           return xml;
         } catch (Exception e) {
           e.printStackTrace();
-        }       
-      }
-    } else {
-      String field = FieldNames.FIELD_SYS_XML;
-      if (itemSource == null) {
-        JsonObject item = readItemJson(indexName,ec.getItemIndexType(),id);
-        itemSource = this.getItemSource(item);
-      }
-      if (itemSource != null && itemSource.containsKey(field)) {
-        try {
-          String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
-          return xml;
-        } catch (Exception e) {
-          e.printStackTrace();
-        }        
+        }
       }
     }
+//      if (result != null && result.length() > 0) {
+//        JsonObject item = (JsonObject)JsonUtil.toJsonStructure(result);
+//        try {
+//          String xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_CLOB);
+//          return xml;
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//    } else {
+//      String field = FieldNames.FIELD_SYS_XML;
+//      if (itemSource == null) {
+//        JsonObject item = readItemJson(indexName,ec.getItemIndexType(),id);
+//        itemSource = this.getItemSource(item);
+//      }
+//      if (itemSource != null && itemSource.containsKey(field)) {
+//        try {
+//          String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
+//          return xml;
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//    }
     return null;
   }
   

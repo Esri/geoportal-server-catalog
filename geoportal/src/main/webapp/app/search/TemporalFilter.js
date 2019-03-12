@@ -25,9 +25,10 @@ define(["dojo/_base/declare",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
-        "app/search/TemporalFilterSettings"], 
+        "app/search/TemporalFilterSettings",
+        "app/search/TemporalFilterCalendar"], 
 function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
-    template, i18n, SearchComponent, DropPane, QClause, TemporalFilterSettings) {
+    template, i18n, SearchComponent, DropPane, QClause, TemporalFilterSettings, TemporalFilterCalendar) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -480,6 +481,22 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
         this.setNodeText(this.brushExtentNode,"");
         setTimeout(function(){self._searchDisabled = false;},100);
       }
+    },
+    
+    onCalendarClick: function(event) {
+      var d = new TemporalFilterCalendar({
+        targetWidget: this,
+        startDate: this._brushExtent[0],
+        endDate: this._brushExtent[1]
+      });
+      d.showDialog();
+    },
+    
+    updateRange: function(startDate, endDate) {
+      this._fromDate = startDate;
+      this._toDate = endDate;
+      this.intervalSelect.value = "day";
+      this.intervalChanged();
     }
     
   });
