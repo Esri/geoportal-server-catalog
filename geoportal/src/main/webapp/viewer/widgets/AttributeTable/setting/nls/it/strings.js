@@ -5,6 +5,12 @@ define({
   "actions": "Configura campi layer",
   "field": "Campo",
   "alias": "Alias",
+  "url": "URL",
+  "sortField": "campo Ordinamento",
+  "sortOrderTooltips": {
+    "toDescending": "Cambia in ordine discendente",
+    "toAscending": "Cambia in ordine ascendente"
+  },
   "visible": "Visibile",
   "linkField": "Campo collegamento",
   "noLayers": "Nessun feature layer non disponibile",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Consenti esportazione in CSV",
   "expand": "Espandere innanzitutto il widget",
   "filterByExtent": "Abilita Filtra per estensione mappa per impostazione predefinita",
+  "allowTextSelection": "Consenti selezione testo",
+  "highlightColor": "Colore evidenziazione",
   "restore": "Ripristina valore predefinito",
   "ok": "OK",
   "cancel": "Annulla",

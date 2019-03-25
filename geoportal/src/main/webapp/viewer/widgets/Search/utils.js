@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -109,7 +109,7 @@ define([
                 name: geocode.name || this._getGeocodeName(geocode.url),
                 url: geocode.url,
                 singleLineFieldName: geocode.singleLineFieldName,
-                placeholder: geocode.placeholder ||
+                placeholder: "Find address or place" || geocode.placeholder ||
                   geocode.name || this._getGeocodeName(geocode.url),
                 maxResults: 6,
                 searchInCurrentMapExtent: false,

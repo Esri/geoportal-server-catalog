@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,7 +36,7 @@ define([
     iconClass: 'icon-create-layer',
 
     isFeatureSupported: function(featureSet, layer){
-      return featureSet.features.length > 1 &&
+      return featureSet.features.length > 0 &&
              featureSet.features[0].geometry &&
              layer &&
              layer.geometryType &&

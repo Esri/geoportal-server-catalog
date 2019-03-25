@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,10 +26,11 @@ define([
     'dojo/query',
     'dijit/registry',
     'jimu/utils',
-    'jimu/dijit/CheckBox'
+    'jimu/dijit/CheckBox',
+    'dijit/form/Select'
   ],
   function(declare, _WidgetBase, _TemplatedMixin, Evented, lang, html, array, on, query, registry,
-  jimuUtils, CheckBox) {
+  jimuUtils, CheckBox, Select) {
 
     return declare([_WidgetBase, _TemplatedMixin, Evented], {
       baseClass: 'jimu-simple-table',
@@ -94,6 +95,8 @@ define([
           //create //function
           //setValue //function
           //getValue //function
+        //if dropdown
+          //options: an array of objects in the format of: {label: value, name: value}
       */
 
       //public methods:
@@ -387,9 +390,10 @@ define([
               td = this._createCheckboxTd(tr, fieldMeta, fieldData);
             } else if (type === "empty") {
               td = this._createEmptyTd(tr, fieldMeta);
-            }
-            else if(type === "extension"){
+            } else if(type === "extension") {
               td = this._createExtensionTd(tr, fieldMeta, fieldData);
+            } else if(type === "dropdown") {
+              td = this._createDropdownTd(tr, fieldMeta, fieldData);
             }
             if(fieldMeta.hidden){
               html.addClass(td, 'hidden-column');
@@ -461,13 +465,21 @@ define([
       },
 
       _updateHeight: function(){
-        if(this.autoHeight){
-          var rows = this.getRows();
+        var rows = this.getRows();
+        //main height
+        if (this.autoHeight) {
           var trCount = rows.length > 0 ? rows.length : 1;
           // var count = trCount + 1;
-          var height = this._headHeight + this._rowHeight * trCount + 1;
+          var height = this._headHeight + (this._rowHeight ) * trCount + 1;
           html.setStyle(this.domNode, 'height', height + 'px');
           // this.bodyDiv.style.overflowY = 'hidden';
+        }
+        //background row-ines height for issue #10727
+        if (rows && rows.length > 0 && this.bodyTableDiv) {
+          var size = html.getMarginSize(rows[0]);
+          if (size && size.h) {
+            html.setStyle(this.bodyTableDiv, "backgroundSize", "1px " + size.h + "px");
+          }
         }
       },
 
@@ -567,6 +579,9 @@ define([
           html.setStyle(editableDiv, 'display', 'none');
           html.setStyle(editableInput, 'display', 'inline');
           editableInput.focus();
+          if (editableInput.select) {
+            editableInput.select();
+          }
         })));
         this.own(on(editableInput, 'blur', lang.hitch(this, function() {
           editableInput.value = lang.trim(editableInput.value);
@@ -768,6 +783,23 @@ define([
         return td;
       },
 
+      _createDropdownTd: function(tr, fieldMeta, fieldData){
+        var td = html.create('td', {
+          'class': fieldMeta.name
+        }, tr);
+        html.addClass(td, 'simple-table-cell');
+        html.addClass(td, 'dropdown-td');
+        if (fieldMeta['class']) {
+          html.addClass(td, fieldMeta['class']);
+        }
+        var dropdown = new Select({
+          options: fieldData
+        });
+        dropdown.placeAt(td);
+
+        return td;
+      },
+
       //tr is row you want to edit
       //rowData is like {name1:value1, name2: value2...}
       editRow: function(tr, rowData) {
@@ -818,9 +850,10 @@ define([
             this._editRadio(td, fieldMeta, fieldData);
           } else if (type === 'checkbox') {
             this._editCheckbox(td, fieldMeta, fieldData);
-          }
-          else if(type === 'extension'){
+          } else if (type === 'extension') {
             this._editExtension(td, fieldMeta, fieldData);
+          } else if (type === 'dropdown') {
+            this._editDropdown(td, fieldMeta, fieldData);
           }
         }));
         result.success = true;
@@ -875,6 +908,13 @@ define([
         if(fieldMeta.setValue && typeof fieldMeta.setValue === 'function'){
           fieldMeta.setValue(td, fieldData);
         }
+      },
+
+      _editDropdown: function(td, fieldMeta, fieldData) {
+        /*jshint unused: false*/
+        var dom = query('.dijitSelect', td)[0];
+        var dropdown = registry.byNode(dom);
+        dropdown.set('value', fieldData);
       },
 
       _getAllRows: function(){
@@ -972,11 +1012,14 @@ define([
               }else{
                 rowData[name] = null;
               }
-            }
-            else if(type === 'extension'){
+            } else if (type === 'extension') {
               if(fieldMeta.getValue && typeof fieldMeta.getValue === 'function'){
                 rowData[name] = fieldMeta.getValue(td, fieldMeta);
               }
+            } else if(type === 'dropdown') {
+              var dijitDom = query('.dijitSelect', td)[0];
+              var dropdown = registry.byNode(dijitDom);
+              rowData[name] = dropdown.get('value');
             }
           }
         }));

@@ -5,6 +5,12 @@ define({
   "actions": "Konfigurišite polja sloja",
   "field": "Polje",
   "alias": "Pseudonim",
+  "url": "URL adresa",
+  "sortField": "Sortiraj polje",
+  "sortOrderTooltips": {
+    "toDescending": "Promeni na opadajući raspored",
+    "toAscending": "Promeni na rastući raspored"
+  },
   "visible": "Vidljivo",
   "linkField": "Link polja",
   "noLayers": "Nema dostupnih slojeva geoobjekata",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Omogući izvoz u CSV",
   "expand": "Inicijalno proširi vidžet",
   "filterByExtent": "Podrazumevano omogući filter po obuhvatu mape",
+  "allowTextSelection": "Omogući selekciju teksta",
+  "highlightColor": "Istakni boju",
   "restore": "Vrati na podrazumevanu vrednost",
   "ok": "U redu",
   "cancel": "Otkaži",

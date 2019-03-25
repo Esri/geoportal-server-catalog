@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -78,13 +78,15 @@ define([
     });
 
     var ancestorWindow = jimuUtils.getAncestorWindow();
-    var parentHttps = false;
+    var parentHttps = false, patt = /^http(s?):\/\//gi;
 
     try {
       parentHttps = ancestorWindow.location.href.indexOf("https://") === 0;
     } catch (err) {
-      console.log(err);
-      parentHttps = window.location.protocol === "https:";
+      //if it's in different domain, we do not force https
+
+      // console.log(err);
+      // parentHttps = window.location.protocol === "https:";
     }
 
     esriRequest.setRequestPreCallback(function(ioArgs) {
@@ -94,7 +96,6 @@ define([
 
       //use https protocol
       if (parentHttps) {
-        var patt = /^http(s?):\/\//gi;
         ioArgs.url = ioArgs.url.replace(patt, '//');
       }
 
@@ -124,16 +125,36 @@ define([
       }
 
       // Use proxies to replace the premium content
-      if(!window.isBuilder && appConfig &&
-          !appConfig.mode &&
-          appConfig.appProxies &&
-          appConfig.appProxies.length > 0) {
-        array.some(appConfig.appProxies, function(proxyItem) {
-          if(ioArgs.url.indexOf(proxyItem.sourceUrl) >= 0) {
-            ioArgs.url = ioArgs.url.replace(proxyItem.sourceUrl, proxyItem.proxyUrl);
-            return true;
-          }
-        });
+      if(!window.isBuilder && appConfig && !appConfig.mode) {
+        if (appConfig.appProxies && appConfig.appProxies.length > 0) {
+          array.some(appConfig.appProxies, function(proxyItem) {
+            var sourceUrl = proxyItem.sourceUrl, proxyUrl = proxyItem.proxyUrl;
+            if (parentHttps) {
+              sourceUrl = sourceUrl.replace(patt, '//');
+              proxyUrl = proxyUrl.replace(patt, '//');
+            }
+            if(ioArgs.url.indexOf(sourceUrl) >= 0) {
+              ioArgs.url = ioArgs.url.replace(sourceUrl, proxyUrl);
+              return true;
+            }
+          });
+        }
+        if (appConfig.map.appProxy) {
+          array.some(appConfig.map.appProxy.proxyItems, function(proxyItem) {
+            if (!proxyItem.useProxy || !proxyItem.proxyUrl) {
+              return false;
+            }
+            var sourceUrl = proxyItem.sourceUrl, proxyUrl = proxyItem.proxyUrl;
+            if (parentHttps) {
+              sourceUrl = sourceUrl.replace(patt, '//');
+              proxyUrl = proxyUrl.replace(patt, '//');
+            }
+            if (ioArgs.url.indexOf(sourceUrl) >= 0) {
+              ioArgs.url = ioArgs.url.replace(sourceUrl, proxyUrl);
+              return true;
+            }
+          });
+        }
       }
 
       return ioArgs;
@@ -168,6 +189,12 @@ define([
       }
     };
 
+    // Polyfill isNaN for IE11
+    // Source: https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Number/isNaN
+    Number.isNaN = Number.isNaN || function (value) {
+      return value !== value;
+    };
+
     /*jshint unused: false*/
     if (typeof jimuConfig === 'undefined') {
       jimuConfig = {};
@@ -183,9 +210,10 @@ define([
       breakPoints: [600, 1280]
     }, jimuConfig);
 
-    window.wabVersion = '2.5';
-    // window.productVersion = 'Online 5.2';
-    window.productVersion = 'Web AppBuilder for ArcGIS (Developer Edition) 2.5';
+
+    window.wabVersion = '2.9';
+    // window.productVersion = 'Online 6.2';
+    window.productVersion = 'Web AppBuilder for ArcGIS (Developer Edition) 2.9';
     // window.productVersion = 'Portal for ArcGIS 10.5.1';
 
     function initApp() {
@@ -228,6 +256,10 @@ define([
     function getUrlParams() {
       var s = window.location.search,
         p;
+      // params that don't need to `sanitizeHTML`
+      var exceptUrlParams = {
+        query: true
+      };
       if (s === '') {
         return {};
       }
@@ -235,7 +267,9 @@ define([
       p = ioquery.queryToObject(s.substr(1));
 
       for(var k in p){
-        p[k] = jimuUtils.sanitizeHTML(p[k]);
+        if(!exceptUrlParams[k]){
+          p[k] = jimuUtils.sanitizeHTML(p[k]);
+        }
       }
       return p;
     }
@@ -248,13 +282,21 @@ define([
       topic.subscribe("appConfigChanged", onAppConfigChanged);
     }
 
-    function onAppConfigChanged(_appConfig){
+    function onAppConfigChanged(_appConfig, reason){
       appConfig = _appConfig;
+
+      if(reason === 'loadingPageChange'){
+        return;
+      }
 
       html.setStyle(jimuConfig.loadingId, 'display', 'none');
       html.setStyle(jimuConfig.mainPageId, 'display', 'block');
     }
-
+    //ie css
+    var ieVersion = jimuUtils.has('ie');
+    if(ieVersion > 10){
+      html.addClass(document.body, 'ie-gte-10');
+    }
     mo.initApp = initApp;
     return mo;
   });

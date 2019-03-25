@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -132,16 +132,19 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented
       var requestDef;
       if(jimuUtils.isStringEndWith(this._currentUrl, 'rest/services')){
         //rest/services
+        //http://sampleserver6.arcgisonline.com/arcgis/rest/services
         var baseUrl = this._currentUrl;
         requestDef = this._searchBaseServiceUrl(baseUrl, root);
       }
       else if(!this._isUrlContainsServiceType(this._currentUrl)){
         //folder
+        //http://sampleserver6.arcgisonline.com/arcgis/rest/services/Elevation
         var folderUrl = this._currentUrl;
         requestDef = this._searchFolderServiceUrl(folderUrl, root);
       }
       else{
         //service url contains ServiceType, such as 'MapServer','FeatureServer'...
+        //http://sampleserver6.arcgisonline.com/arcgis/rest/services/Elevation/WorldElevations/MapServer
         var serviceUrl = this._currentUrl;
         requestDef = this._searchServiceUrl(serviceUrl, root);
       }

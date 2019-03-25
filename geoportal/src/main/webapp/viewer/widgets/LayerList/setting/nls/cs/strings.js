@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Posunout nahoru / dolů",
   "attributeTable": "Zobrazit v atributové tabulce",
   "url": "Popis / Zobrazit podrobnosti položky / Stahování",
+  "expandAllLayers": "Rozbalit všechny vrstvy",
+  "expandAllLayersByDefault": "Ve výchozím nastavení zobrazit všechny vrstvy",
   "layerSelectorTitle": "Zvolte, které vrstvy se mají zobrazit v seznamu."
 });

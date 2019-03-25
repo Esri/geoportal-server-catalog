@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -116,7 +116,7 @@ define([
       startup: function() {
         this.inherited(arguments);
         this.resize();
-        // this.timeoutHandle = setTimeout(lang.hitch(this, this.resize), 100);
+        setTimeout(lang.hitch(this, this.resize), 100);
       },
 
       onAction: function(action, data) {
@@ -189,20 +189,7 @@ define([
       },
 
       resize: function() {
-        var headerNodeFloat = html.getStyle(this.headerNode, 'float');
-        var logoNodeFloat = html.getStyle(this.logoNode, 'float');
-        var titlesNodeFloat = html.getStyle(this.titlesNode, 'float');
-        var linksNodeFloat = html.getStyle(this.linksNode, 'float');
-        var allHasFloatStyle = (headerNodeFloat && headerNodeFloat !== 'none') &&
-          (logoNodeFloat && logoNodeFloat !== 'none') &&
-          (titlesNodeFloat && titlesNodeFloat !== 'none') &&
-          (linksNodeFloat && linksNodeFloat !== 'none');
-
-        if (allHasFloatStyle) {
-          this._resize();
-        } else {
-          setTimeout(lang.hitch(this, this.resize), 200);
-        }
+        this._resize();
       },
 
       _resize: function() {
@@ -365,9 +352,9 @@ define([
 
       _setElementsSize: function() {
         html.setStyle(this.logoNode, {
-          height: '30px',
+          height: '30px'
           // minWidth: '30px',
-          marginTop: ((this.height - 30) / 2) + 'px'
+          // marginTop: ((this.height - 30) / 2) + 'px'
         });
 
         html.setStyle(this.titleNode, {
@@ -725,7 +712,7 @@ define([
 
       _createIconNodes: function(box) {
         query('.icon-node', this.containerNode).remove();
-        this._closeDropMenu();
+        // this._closeDropMenu();
 
         var i, iconConfig, allIconConfigs = this.getAllConfigs();
         //by default, the icon is square
@@ -738,8 +725,8 @@ define([
           width: ret.containerWidth + 'px'
         };
         //add some margein to avoid mess layout
-        containerStyle[marginProperty] = (ret.emptyWidth - 5) + 'px';
-        html.setStyle(this.containerNode, containerStyle);
+        containerStyle[marginProperty] = (ret.emptyWidth - 20) + 'px';
+        // html.setStyle(this.containerNode, containerStyle);
 
         this.maxIconCount = Math.floor(ret.containerWidth / this.iconWidth);
         if (this.maxIconCount >= allIconConfigs.length) {
@@ -767,8 +754,8 @@ define([
         }
         //open the first openatstart widget
         if (openAtStartNode && !this.openAtStartWidget) {
+          this.openAtStartWidget = openAtStartNode.config.id;
           this._onIconClick(openAtStartNode);
-          this.openAtStartWidget = openAtStartNode.config.name;
         }
 
         if(this.openedId && this.getConfigById(this.openedId) &&
@@ -803,12 +790,16 @@ define([
           'data-widget-name': iconConfig.name
         }, this.containerNode);
 
-        html.create('img', {
+        var imgNode = html.create('img', {
           src: iconUrl,
           style: {
             marginTop: ((this.height - 24) / 2) + 'px'
           }
         }, node);
+
+        if(window.isRTL && iconConfig.mirrorIconForRTL){
+          html.addClass(imgNode, 'jimu-flipx');
+        }
 
         if (iconConfig.name === '__more') {
           on(node, 'click', lang.hitch(this, this._showMorePane, iconConfig));
@@ -972,8 +963,6 @@ define([
 
       _switchNodeToOpen: function(id) {
         var node = this._getIconNodeById(id);
-        query('.icon-node', this.domNode).removeClass('jimu-state-selected');
-        html.addClass(node, 'jimu-state-selected');
         this._showIconContent(node.config);
       },
 
@@ -1019,6 +1008,9 @@ define([
             this.openedId = iconConfig.id;
             var iconNode = this._getIconNodeById(iconConfig.id);
 
+            query('.icon-node', this.domNode).removeClass('jimu-state-selected');
+            html.addClass(iconNode, 'jimu-state-selected');
+
             //we don't call widget.startup because getWidgetMarginBox has started widget
             //widget.startup();
 
@@ -1033,6 +1025,11 @@ define([
           }));
         }else{
           this.panelManager.showPanel(iconConfig).then(lang.hitch(this, function(panel) {
+
+            var iconNode = this._getIconNodeById(iconConfig.id);
+            query('.icon-node', this.domNode).removeClass('jimu-state-selected');
+            html.addClass(iconNode, 'jimu-state-selected');
+
             this.openedId = iconConfig.id;
             this.own(aspect.after(panel, 'onClose', lang.hitch(this, function() {
               this._unSelectIcon(iconConfig.id);

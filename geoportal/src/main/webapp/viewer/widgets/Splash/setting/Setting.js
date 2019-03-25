@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -50,7 +50,7 @@ define([
     'dojox/editor/plugins/InsertAnchor',
     'dojox/editor/plugins/Blockquote',
     'dojox/editor/plugins/UploadImage',
-    './ChooseImage',
+    'jimu/dijit/EditorChooseImage',
     'jimu/dijit/EditorTextColor',
     'jimu/dijit/EditorBackgroundColor'
   ],
@@ -184,7 +184,7 @@ define([
           ],
           extraPlugins: [
             '|', 'createLink', 'unlink', 'pastefromword', '|', 'undo', 'redo',
-            '|', 'chooseImage', 'uploadImage', '|', 'viewsource', 'toolbarlinebreak',
+            '|', 'chooseImage', '|', 'viewsource', 'toolbarlinebreak',
             {
               name: "dijit._editor.plugins.FontChoice",
               command: "fontName",
@@ -278,7 +278,16 @@ define([
         return 'isfirst_' + encodeURIComponent(utils.getAppIdFromUrl());
       },
 
-      getConfig: function() {
+      isValid: function () {
+        return this.backgroundSelector.isValid() &&
+          this.buttonColorPicker.isValid() &&
+          this.confirmColorPicker.isValid();
+      },
+      getConfig: function () {
+        if (!this.isValid()) {
+          return false;
+        }
+
         this.config.splash.splashContent = this._getEditorValue();
         this.config.splash.size = this.sizeSelector.getValue();
 

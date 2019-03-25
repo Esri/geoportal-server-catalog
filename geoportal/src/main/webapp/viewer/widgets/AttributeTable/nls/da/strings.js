@@ -40,5 +40,21 @@ define({
   "sortDes": "Sortér faldende",
   "statistics": "Statistik",
   "attachments": "Vedhæftninger",
-  "files": "filer"
+  "files": "filer",
+  "keepRichTextLabel": "Behold rich text-format",
+  "whatsThis": "Hvad er dette?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} indeholder følgende rich text-felt(er): ",
+      "line2": " det kan omfatte teksttypografier, f.eks. skrifttyper, farver eller tekststørrelser.",
+      "line3": "Når de eksporteres til CSV, bevares typografierne i form af HTML-tags. Du kan vælge ikke at beholde rich text-formaterne ved at fjerne markeringen i feltet \"Behold rich text-format\"."
+    },
+    "example": {
+      "label": "For eksempel:",
+      "scenarios": {
+        "first": "bliver eksporteret som følgende tekst som standard:",
+        "second": "og følgende tekst uden rich text-format:"
+      }
+    }
+  }
 });

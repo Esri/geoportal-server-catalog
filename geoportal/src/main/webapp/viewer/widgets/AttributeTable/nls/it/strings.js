@@ -40,5 +40,21 @@ define({
   "sortDes": "Ordinamento decrescente",
   "statistics": "Statistiche",
   "attachments": "Allegati",
-  "files": "file"
+  "files": "file",
+  "keepRichTextLabel": "Mantieni Rich Text Format",
+  "whatsThis": "Guida rapida",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} contiene i seguenti campi Rich Text Format: ",
+      "line2": " che potrebbe includere stili di formattazione del testo, come caratteri, colori o dimensione testo.",
+      "line3": "In caso di esportazione in CSV, gli stili di formattazione verranno mantenuti sotto forma di tag HTML. È possibile scegliere di non mantenere i formati RTF deselezionando la casella \"Mantieni Rich Text Format."
+    },
+    "example": {
+      "label": "Ad esempio:",
+      "scenarios": {
+        "first": "viene esportato come il seguente testo per impostazione predefinita:",
+        "second": "e il seguente testo senza Rich Text Format:"
+      }
+    }
+  }
 });

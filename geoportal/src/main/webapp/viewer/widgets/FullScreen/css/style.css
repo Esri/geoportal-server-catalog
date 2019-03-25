@@ -13,6 +13,10 @@
   opacity: 1;
 }
 
+.jimu-widget-fullScreen.mobile{
+  display: none !important;
+}
+
 .jimu-widget-fullScreen .fullScreen {
   width: 30px;
   height: 30px;
@@ -38,35 +42,39 @@
   content: "\a905";
 }
 
+.jimu-widget-fullScreen .fullScreen.f11 {
+  background: #11ee11;
+}
+
 /*full-screen style for browsers*/
 :-webkit-full-screen {
   width: 100%;
   height: 100%;
-  background: #11ee11;
+  background: transparent;
 }
 
 :-moz-full-screen {
   width: 100%;
   height: 100%;
-  background: #11ee11;
+  background: transparent;
 }
 
 :-ms-fullscreen {
   width: 100%;
   height: 100%;
-  background: #11ee11;
+  background: transparent;
 }
 
 :fullscreen {
   width: 100%;
   height: 100%;
-  background: #11ee11;
+  background: transparent;
 }
 
 :full-screen {
   width: 100%;
   height: 100%;
-  background: #11ee11;
+  background: transparent;
 }
 
 :fullscreen-ancestor {

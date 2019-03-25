@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,8 +28,12 @@ define([
   'dojo/sniff',
   'dojo/query',
   'dojo/request/xhr',
+  'dojo/Deferred',
+  'dojox/gfx',
+  'dojo/promise/all',
   'jimu/utils',
   'jimu/symbolUtils',
+  'jimu/portalUrlUtils',
   'esri/symbols/jsonUtils',
   'esri/symbols/SimpleMarkerSymbol',
   'esri/symbols/PictureMarkerSymbol',
@@ -37,16 +41,19 @@ define([
   'esri/symbols/SimpleFillSymbol',
   'esri/symbols/TextSymbol',
   'esri/symbols/Font',
+  'esri/arcgis/Portal',
+  'esri/request',
   'jimu/dijit/ImageChooser',
   'jimu/dijit/ColorPicker',
   'jimu/dijit/_Transparency',
+  'jimu/dijit/LoadingIndicator',
   'dijit/form/Select',
   'dijit/form/NumberSpinner'
 ],
 function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
-  template, Evented, lang, html, array, on, has, query, xhr,
-  jimuUtils, jimuSymUtils, esriSymJsonUtils, SimpleMarkerSymbol, PictureMarkerSymbol,
-  SimpleLineSymbol, SimpleFillSymbol, TextSymbol, Font, ImageChooser) {
+  template, Evented, lang, html, array, on, has, query, xhr, Deferred, gfx, all,
+  jimuUtils, jimuSymUtils, portalUrlUtils, esriSymJsonUtils, SimpleMarkerSymbol, PictureMarkerSymbol,
+  SimpleLineSymbol, SimpleFillSymbol, TextSymbol, Font, Portal, request, ImageChooser) {
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
     templateString:template,
@@ -64,12 +71,41 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     //you must set symbol or type
     symbol: null,//optional
     type: null,//optional, available values:marker,line,fill,text
+    DEFAULT_PORTAL_URL: "//arcgis.com/",
+    _portalLoadTimeoutInMs: 3000,
+    _isOnline: true,
+    // Do not change the order of `_localTypes`, it matches local symbol data
+    _localTypes: [
+      'basic',
+      'A-Z',
+      'arrows',
+      'business',
+      'cartographic',
+      'nationalParkService',
+      'outdoorRecreation',
+      'peoplePlaces',
+      'safetyHealth',
+      'shapes',
+      'transportation',
+      'damage',
+      'disasters',
+      'emergencyManagement',
+      'generalInfrastructure',
+      'localGovernment',
+      'numbers',
+      'pointsOfInterest',
+      'stateGovernment',
+      'FireFly'
+    ],
+
+    cropImage: false, //optional
 
     //public methods:
     //reset
     //showBySymbol
     //showByType
-    //getSymbol
+    //getValidSymbol: Return a valid symbol. Return null if UI parameter is invalid.
+    //getSymbol: This method is deprecated. Pleause use getValidSymbol instead.
 
     //events:
     //change
@@ -77,6 +113,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
 
     postMixInProperties:function(){
       this.nls = window.jimuNls.symbolChooser;
+      this._setTemplateNls();
     },
 
     postCreate:function(){
@@ -155,20 +192,28 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       }
     },
 
-    getSymbol:function(){
+    getSymbol: function(){
+      return this._getSymbol(false);
+    },
+
+    getValidSymbol: function(){
+      return this._getSymbol(true);
+    },
+
+    _getSymbol:function(/*optional*/ checkValidity){
       var symbol = null;
 
       if(this.type === 'marker'){
-        symbol = this._getPointSymbolBySetting();
+        symbol = this._getPointSymbolBySetting(checkValidity);
       }
       else if(this.type === 'line'){
-        symbol = this._getLineSymbolBySetting();
+        symbol = this._getLineSymbolBySetting(checkValidity);
       }
       else if(this.type === 'fill'){
-        symbol = this._getFillSymbolBySetting();
+        symbol = this._getFillSymbolBySetting(checkValidity);
       }
       else if(this.type === 'text'){
-        symbol = this._getTextSymbolBySetting();
+        symbol = this._getTextSymbolBySetting(checkValidity);
       }
 
       var result = null;
@@ -433,10 +478,11 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         var def = this.pointSymClassSelect[defName];
         if (!def) {
           this._requestPointSymJson(fileName);
+        }else{
+          var option = this.pointSymClassSelect.getOptions(fileName);
+          var label = option ? option.label : "";
+          this.pointSymClassSelect.domNode.title = label;
         }
-        var option = this.pointSymClassSelect.getOptions(fileName);
-        var label = option ? option.label : "";
-        this.pointSymClassSelect.domNode.title = label;
       }
     },
 
@@ -453,28 +499,329 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       }
     },
 
+    _getLocalSymbols: function(name){
+      var fileName = name || this.pointSymClassSelect.get('value');
+      var module = "jimu/dijit/SymbolsInfo/" + fileName + ".json";
+      var url = this._getAbsoluteUrl(module);
+      return xhr(url, {
+        handleAs: 'json'
+      });
+    },
+
+    _getPortalSymbolsByType: function(fileName){
+      var typeId = fileName;
+      var def = new Deferred();
+      if(typeId){
+        // fetch symbols from portal
+        this._fetchSymbols(typeId)
+        .then(lang.hitch(this, function(symbols){
+          def.resolve(symbols);
+        }), lang.hitch(this, function(err){
+          def.reject(err);
+        }));
+      }else{
+        def.reject(null);
+      }
+      return def;
+    },
+
     _requestPointSymJson:function(fileName){
       var defName = 'def' + fileName;
       var def = this.pointSymClassSelect[defName];
       if (def) {
         return;
       }
-      var module = "jimu/dijit/SymbolsInfo/" + fileName + ".json";
-      var url = this._getAbsoluteUrl(module);
-      def = xhr(url, {
-        handleAs: 'json'
+
+      this.loadingShelter.show();
+
+      if(!this._isOnline && window.isXT){
+        this._offLineGetSymbols(fileName);
+        return;
+      }
+
+      if(!this._symbolTypes){
+        // fetch symbol types from portal
+        this._initPortal()
+        .then(lang.hitch(this, this._fetchSymbolTypes))
+        .then(lang.hitch(this, function(types){
+          // create options
+          this._clearOptions();
+          this._createOptions(types);
+          // fetch symbols from portal
+          this._handleGetPointSymbols(lang.hitch(this, this._getPortalSymbolsByType), fileName);
+        }), lang.hitch(this, function(err){
+          if(window.isXT){
+            this._offLineGetSymbols(fileName);
+          }else{
+            this.loadingShelter.hide();
+            console.error('Fetching symbols failed', err);
+          }
+        }));
+
+      }else{
+        // fetch symbols from portal
+        this._handleGetPointSymbols(lang.hitch(this, this._getPortalSymbolsByType), fileName);
+      }
+
+    },
+
+    _offLineGetSymbols: function(fileName){
+      this._isOnline = false;
+      if(this.pointSymClassSelect.options.length === 0){
+        var localTypes = [];
+        array.forEach(this._localTypes, lang.hitch(this, function(t, i){
+          localTypes.push({
+            id: i,
+            title: this.nls[t] || t
+          });
+        }));
+        this._clearOptions();
+        this._createOptions(localTypes);
+      }
+
+      this._handleGetPointSymbols(lang.hitch(this, this._getLocalSymbols), fileName);
+    },
+
+    _clearOptions: function(){
+      if(!this.pointSymClassSelect){
+        return;
+      }
+      var options = this.pointSymClassSelect.options;
+      this.pointSymClassSelect.removeOption(options);
+    },
+
+    _createOptions: function(types){
+      if(!this.pointSymClassSelect){
+        return;
+      }
+      var template = [];
+      var optionText = '';
+      var isSelected = false;
+      if(Object.prototype.toString.call(types) === '[object Array]' && types.length > 0){
+        array.forEach(types, lang.hitch(this, function(t){
+          optionText = t.title || t.name;
+          isSelected = optionText === this.nls.basic ? true : false;
+          if( optionText && (t.id || t.id === 0) ){
+            template.push({
+              label: optionText,
+              value: t.id,
+              selected: isSelected
+            });
+          }
+        }));
+      }
+      template.push({
+        label: this.nls.customImage,
+        value: 'custom'
       });
-      this.pointSymClassSelect[defName] = def;
-      def.then(lang.hitch(this, function(jsonSyms) {
-        if(!this.domNode){
-          return;
+
+      this.pointSymClassSelect.addOption(template);
+    },
+
+    _initPortal: function(){
+      var deferred = new Deferred();
+
+      if(this._portal){
+        deferred.resolve();
+      }else{
+        var portalUrl = portalUrlUtils.getStandardPortalUrl(window.portalUrl);
+        var portal = portalUrl ? portalUrl : this.DEFAULT_PORTAL_URL;
+        var portalInstance = new Portal.Portal(portal);
+
+        if (portalInstance.loaded) {
+          this._portal = portalInstance;
+          deferred.resolve();
+          return deferred.promise;
         }
-        var table = this._createSymbolIconTable(fileName, jsonSyms, 'point');
-        html.place(table, this.pointIconTables);
-        this._showSelectedPointSymIconTable();
+
+        this.own(
+          portalInstance.on("load", lang.hitch(this, function() {
+            this._portal = portalInstance;
+            deferred.resolve();
+          }))
+        );
+
+        setTimeout(function() {
+          deferred.reject();
+        }, this._portalLoadTimeoutInMs);
+      }
+
+      return deferred;
+    },
+
+    _handleGetPointSymbols: function(getFunc, name){
+      if(!this.pointSymClassSelect){
+        return;
+      }
+
+      var fileName = name || this.pointSymClassSelect.get('value');
+      var defName = 'def' + fileName;
+      var def = getFunc(fileName);
+
+      this.pointSymClassSelect[defName] = def;
+
+      def.then(lang.hitch(this, function(jsonSyms) {
+        this.loadingShelter.hide();
+        this._getPointSymbolsSucess(fileName, jsonSyms);
       }), lang.hitch(this, function(error) {
-        console.error('get point symbol failed', error);
+        this.loadingShelter.hide();
+        console.error('Fetching symbols failed', error);
       }));
+
+    },
+
+    _getPointSymbolsSucess: function(fileName, jsonSyms){
+      if(!this.domNode){
+        return;
+      }
+      var option = this.pointSymClassSelect.getOptions(fileName);
+      var label = option ? option.label : "";
+      this.pointSymClassSelect.domNode.title = label;
+      var table = this._createSymbolIconTable(fileName, jsonSyms, 'point');
+      html.place(table, this.pointIconTables);
+      this._showSelectedPointSymIconTable();
+    },
+
+    _fetchSymbols: function (id) {
+      var symbolItemTypes = [];
+      var def = new Deferred();
+
+      symbolItemTypes = this._symbolTypes.filter(function(type){
+        return type.id === id;
+      });
+
+      this._getSymbolListData(symbolItemTypes)
+      .then(lang.hitch(this, function (symbolItems) {
+        def.resolve(symbolItems);
+      }), lang.hitch(this, function(err){
+        console.warn('fetch symbols failed', err);
+        def.reject(err);
+      }));
+
+      return def;
+    },
+
+    _getSymbolListData: function (items) {
+      var xhrItems = array.filter(items, function(item) {
+        return item.dataUrl;
+      });
+
+      var itemDataPromises = array.map(xhrItems, function (item) {
+        return request({ url: item.dataUrl }).promise;
+      });
+
+      return all(itemDataPromises).then(function (data) {
+        return data[0];
+      });
+    },
+
+    _fetchSymbolTypes: function(){
+      var def = new Deferred();
+
+      if(this._symbolTypes){
+        def.resolve(this._symbolTypes);
+      }else{
+        this._getSymbolListGroupId()
+        .then(lang.hitch(this, this._getSymbolListItems))
+        .then(lang.hitch(this, function(symbolTypes){
+          this._symbolTypes = symbolTypes;
+          def.resolve(symbolTypes);
+        }), lang.hitch(this, function(err){
+          console.warn('fetch symbol types failed', err);
+          def.reject(err);
+        }));
+      }
+
+      return def;
+    },
+
+    _getSymbolListGroupId: function () {
+      var deferred = new Deferred();
+
+      if(!this._portal){
+        deferred.reject('no portal');
+      }
+
+      this._portal.queryGroups({
+        q: this._portal.symbolSetsGroupQuery
+      })
+      .then(function (groups) {
+        var firstGroup = groups.results[0];
+        deferred.resolve(firstGroup.id);
+      }, lang.hitch(this, function(err){
+        console.warn('get symbol list group id failed', err);
+        deferred.reject(err);
+      }));
+
+      return deferred;
+    },
+
+    _getSymbolListItems: function (groupId) {
+      var deferred = new Deferred(),
+          portal = this._portal,
+          query = "group:" + groupId + " AND type:\"Symbol Set\"",
+          symbolItems = [];
+
+      if(!this._portal){
+        deferred.reject('no portal');
+      }
+
+      if (gfx.renderer === "vml") {
+        query += " AND -typekeywords:\"by value\"";
+      }
+      else {
+        query += " AND (typekeywords:\"by value\" AND typekeywords:\"marker\")";
+      }
+
+      portal.queryItems({
+        q: query,
+        num: 20,
+        sortField: "title"
+      }).then(lang.hitch(this, function (items) {
+          var listItems = items.results,
+              typeKeywords,
+              title,
+              symbolItem,
+              isDefaultType;
+
+          array.forEach(listItems, function (item) {
+            typeKeywords = item.typeKeywords.join(" ");
+
+            if (typeKeywords.indexOf("marker") > -1) {
+              title = item.title;
+
+              symbolItem = {
+                name: title,
+                id: item.id,
+                title: item.title,
+                keywords: typeKeywords,
+                dataUrl: item.itemDataUrl
+              };
+
+              isDefaultType = typeKeywords.indexOf("default") > -1;
+              if (isDefaultType) {
+                symbolItem.defaultType = true;
+                symbolItems.unshift(symbolItem);
+              }
+              else {
+                symbolItems.push(symbolItem);
+              }
+
+            }
+          }, this);
+
+          if (symbolItems.length > 0) {
+            deferred.resolve(symbolItems);
+          }
+          else {
+            deferred.reject();
+          }
+        }),
+        function () {
+          deferred.reject();
+        });
+
+      return deferred;
     },
 
     _onPointSymIconItemClick:function(event){
@@ -538,12 +885,24 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       html.addClass(this.pointOulineWidthTr, 'hidden');
     },
 
-    _getPointSymbolBySetting:function(){
+    _getPointSymbolBySetting:function(checkValidity){
       if(!this.symbol){
         return null;
       }
+
+      if(checkValidity){
+        if(!this.pointSize.validate()){
+          return null;
+        }
+      }
+
       var size = parseFloat(this.pointSize.get('value'));
       if(this.isSimpleMarkerSymbol(this.symbol)){
+        if(checkValidity){
+          if(!this.pointOutlineWidth.validate()){
+            return null;
+          }
+        }
         this.symbol.setSize(size);
         var color = this.pointColor.getColor();
         var opacity = this.pointAlpha.getAlpha(); //parseFloat(this.pointAlpha.get('value'));
@@ -567,7 +926,8 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
 
     _initImageChooser: function(){
       this.imageChooser = new ImageChooser({
-        cropImage: false,
+        cropImage: this.cropImage,
+        customZIndex: this.customZIndex,
         showSelfImg: false,
         goldenWidth: 16,
         goldenHeight: 16,
@@ -695,7 +1055,12 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       this._onLineSymbolChange();
     },
 
-    _getLineSymbolBySetting:function(){
+    _getLineSymbolBySetting:function(checkValidity){
+      if(checkValidity){
+        if(!this.lineWidth.validate()){
+          return null;
+        }
+      }
       this.symbol = new SimpleLineSymbol();
       var color = this.lineColor.getColor();
       var style = this.lineStylesSelect.get('value');
@@ -708,7 +1073,6 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       this._updatePreview(this.lineSymPreview);
       return this.symbol;
     },
-
 
     /* fill section */
     _initFillSection:function(){
@@ -803,7 +1167,12 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       this._onFillSymbolChange();
     },
 
-    _getFillSymbolBySetting:function(){
+    _getFillSymbolBySetting:function(checkValidity){
+      if(checkValidity){
+        if(!this.fillOutlineWidth.validate()){
+          return null;
+        }
+      }
       this.symbol = new SimpleFillSymbol();
       var color = this.fillColor.getColor();
       color.a = this.fillAlpha.getAlpha();//parseFloat(this.fillAlpha.get('value').toFixed(2));
@@ -862,29 +1231,62 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       return symbol && symbol.declaredClass === 'esri.symbol.TextSymbol';
     },
 
-    _updateTextPreview:function(){
+    _updateTextPreview:function(fontFamily){
       var colorHex = this.textColor.getColor().toHex();
       var size = parseInt(this.textFontSize.get('value'), 10) + 'px';
       html.setStyle(this.textPreview, {
         color: colorHex,
-        fontSize: size
+        fontSize: size,
+        fontFamily: fontFamily
       });
       this.textPreview.innerHTML = this.inputText.value;
     },
 
-    _getTextSymbolBySetting:function(){
+    _getTextSymbolBySetting:function(checkValidity){
+      if(checkValidity){
+        if(!this.textFontSize.validate()){
+          return null;
+        }
+      }
       this.symbol = new TextSymbol();
       var text = this.inputText.value;
       var color = this.textColor.getColor();
       var size = parseInt(this.textFontSize.get('value'), 10);
-      var font = new Font();
+      var font = new Font();// Default font family : Serif
       font.setSize(size);
       this.symbol.setText(text);
       this.symbol.setColor(color);
       this.symbol.setFont(font);
-      this._updateTextPreview();
+      this._updateTextPreview(font.family);
       return this.symbol;
-    }
+    },
 
+    _setTemplateNls: function () {
+      //TODO should be delete when nls added
+      if ("undefined" === typeof this.nls.damage) {
+        this.nls.damage = "Damage";
+      }
+      if ("undefined" === typeof this.nls.disasters) {
+        this.nls.disasters = "Disasters";
+      }
+      if ("undefined" === typeof this.nls.emergencyManagement) {
+        this.nls.emergencyManagement = "Emergency Management";
+      }
+      if ("undefined" === typeof this.nls.generalInfrastructure) {
+        this.nls.generalInfrastructure = "General Infrastructure";
+      }
+      if ("undefined" === typeof this.nls.localGovernment) {
+        this.nls.localGovernment = "Local Government";
+      }
+      if ("undefined" === typeof this.nls.numbers) {
+        this.nls.numbers = "Numbers";
+      }
+      if ("undefined" === typeof this.nls.pointsOfInterest) {
+        this.nls.pointsOfInterest = "Points of Interest";
+      }
+      if ("undefined" === typeof this.nls.stateGovernment) {
+        this.nls.stateGovernment = "State Government";
+      }
+    }
   });
 });

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -44,6 +44,8 @@ define([
       baseClass: "jimu-widget-scalebar",
       name: "Scalebar",
       scalebar: null,
+
+      moveTopOnActive: false,
 
       startup: function() {
         this.inherited(arguments);

@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Flytt opp / Flytt ned",
   "attributeTable": "Vis i attributtabell",
   "url": "Beskrivelse / Vis elementdetaljer / Last ned",
+  "expandAllLayers": "Vis alle lag",
+  "expandAllLayersByDefault": "Vis alle lag som standard",
   "layerSelectorTitle": "Velg hvilke lag som skal vises i listen."
 });

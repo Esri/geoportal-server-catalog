@@ -40,5 +40,21 @@ define({
   "sortDes": "Sortera fallande",
   "statistics": "Statistik",
   "attachments": "Bilagor",
-  "files": "filer"
+  "files": "filer",
+  "keepRichTextLabel": "Bevara RTF-format",
+  "whatsThis": "Vad är detta?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} innehåller följande RTF-fält: ",
+      "line2": " , som kan inkludera textformatering som typsnitt, färg och textstorlekar.",
+      "line3": "Om det exporteras till CSV bevaras formateringen som HTML-taggar. Du kan välja att inte bevara RTF-formateringen genom att avmarkera rutan Bevara RTF-format."
+    },
+    "example": {
+      "label": "Exempel:",
+      "scenarios": {
+        "first": "exporteras som standard som följande text:",
+        "second": "och följande text utan RTF-format:"
+      }
+    }
+  }
 });

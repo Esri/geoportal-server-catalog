@@ -14,6 +14,7 @@ define({
   "generalSetting": "Setări generale",
   "allPlaceholder": "Text substituent pentru căutarea tuturor: ",
   "showInfoWindowOnSelect": "Afişaţi fereastra pop-up pentru obiectul spaţial sau locul găsit",
+  "showInfoWindowOnSelect2": "Afișare pop-up când se găsește caracteristica sau amplasarea.",
   "searchInCurrentMapExtent": "Căutaţi doar în extinderea de hartă curentă",
   "zoomScale": "Scară de transfocare",
   "locatorUrl": "URL geocodificator",

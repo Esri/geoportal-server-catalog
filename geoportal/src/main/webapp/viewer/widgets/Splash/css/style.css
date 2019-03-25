@@ -37,6 +37,7 @@
   color: #fff;
   float: none !important;
   display: inline;
+  vertical-align: middle;
 }
 .jimu-rtl .jimu-widget-splash-desktop .splash-container .jimu-checkbox .label,
 .jimu-rtl .jimu-widget-splash-mobile .splash-container .jimu-checkbox .label{
@@ -144,15 +145,24 @@
   /* max-height: 100px; */
   /* margin: 0 40px 10px 40px; */
   position: absolute;
-  overflow: hidden;
+  /* overflow: hidden; */
   bottom: 10px;
   width: 100%;
 }
 .jimu-widget-splash .footer .confirmcheck-container{
   margin: 0 20px;
 }
+.jimu-widget-splash .footer .confirmcheck-container .jimu-checkbox .checkbox{
+  margin: 2px;
+}
+.jimu-widget-splash .footer .confirmcheck-container .jimu-checkbox .dijitCheckBoxFocused{
+  box-shadow: 0 0 0px 2px rgba(136, 176, 245, 1);
+}
 .jimu-widget-splash .footer .jimu-btn {
-  margin: 0 20px;
+  margin: 0 20px 2px 20px;
+}
+.jimu-widget-splash .footer .jimu-btn:focus {
+  box-shadow: 0 0 0px 2px rgba(136, 176, 245, 1);
 }
 /*mobile
 .jimu-widget-splash-mobile .envelope{

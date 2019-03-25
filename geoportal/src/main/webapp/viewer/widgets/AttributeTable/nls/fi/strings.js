@@ -40,5 +40,21 @@ define({
   "sortDes": "Lajittele laskevasti",
   "statistics": "Tilastotiedot",
   "attachments": "Liitteet",
-  "files": "tiedostot"
+  "files": "tiedostot",
+  "keepRichTextLabel": "Säilytä RTF-muoto",
+  "whatsThis": "Mikä tämä on?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} sisältää seuraavat RTF-kentät: ",
+      "line2": " jotka voivat sisältää tekstinmuotoilutyylejä, kuten fontteja, värejä tai tekstin kokoja.",
+      "line3": "Kun tiedosto viedään CSV-muotoon, muotoilutyylit säilytetään HTML-tunnisteina. Voit määrittää, ettei RTF-muotoja säilytetä, poistamalla Säilytä RTF-muoto -valintaruudun valinnan."
+    },
+    "example": {
+      "label": "Esimerkki:",
+      "scenarios": {
+        "first": "viedään oletusarvoisesti seuraavana tekstinä:",
+        "second": "ja seuraavana tekstinä ilman RTF-muotoa:"
+      }
+    }
+  }
 });

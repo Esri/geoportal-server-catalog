@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,6 +35,7 @@ define([
       _enabled: false,
       cascade: "none",//none,previous,all
       filterCodedValue: false,
+      fieldPopupInfo: null,//maybe null
 
       //options
       nls: null,
@@ -42,12 +43,13 @@ define([
       layerDefinition: null,
       fieldInfo: null,
       partObj: null,
-      runtime: true,//if true, means used in FilterParameters. if false, means used in Filter.
+      runtime: true,//If true, means used at widget runtime. If false, means used in widget setting page.
       //partObj.valueObj.type must be set
       //partObj.valueObj.value, partObj.valueObj.value1 and partObj.valueObj.value2 are optional
       staticValues: null,//[{value,label}]
       codedValues: null,//[{value,label}] for coded values and sub types
       layerInfo: null,//optional, jimu/LayerInfos/LayerInfo
+      popupInfo: null,//optional
       operatorInfo: null,
       filterCodedValueIfPossible: false,
 
@@ -101,6 +103,18 @@ define([
         }else{
           this.filterCodedValue = false;
         }
+        if(this.popupInfo){
+          if(this.popupInfo.fieldInfos && this.popupInfo.fieldInfos.length > 0){
+            array.some(this.popupInfo.fieldInfos, lang.hitch(this, function(fieldPopupInfo){
+              if(fieldPopupInfo.fieldName === this.fieldName){
+                this.fieldPopupInfo = fieldPopupInfo;
+                return true;
+              }else{
+                return false;
+              }
+            }));
+          }
+        }
       },
 
       getDijits: function(){
@@ -119,11 +133,25 @@ define([
             html.addClass(dijit.domNode, dijit.declaredClass.replace(/\./g, '-'));
           }
           this.own(on(dijit, 'change', lang.hitch(this, this._onChanged)));
+          this.own(on(dijit, 'enter', lang.hitch(this, this._onEnter)));
         }));
       },
 
       _onChanged: function(){
+        if(this._onEnterTriggered){
+          return;
+        }
         this.emit('change');
+      },
+
+      _onEnterTriggered: false,
+
+      _onEnter: function(){
+        this._onEnterTriggered = true;
+        this.emit('change');
+        setTimeout(lang.hitch(this, function(){
+          this._onEnterTriggered = false;
+        }), 100);
       },
 
       tryLocaleNumber: function(value) {
@@ -164,7 +192,11 @@ define([
         var dijits = this.getDijits();
         if(dijits.length > 0){
           var statusArr = array.map(dijits, lang.hitch(this, function(dijit){
-            return this.getStatusForDijit(dijit);
+            if(typeof dijit.getStatus === 'function'){
+              return dijit.getStatus();
+            }else{
+              return this.getStatusForDijit(dijit);
+            }
           }));
           status = Math.min.apply(statusArr, statusArr);
         }
@@ -202,6 +234,7 @@ define([
         return false;
       },
 
+      //Filter related dijits doesn't call this method. GroupFilter and some other widgets call it.
       getFilterExpr: function(){
         var expr = "1=1";
         var expr1 = this.getLayerFilterExpr();
@@ -214,6 +247,7 @@ define([
         return expr;
       },
 
+      //This method id only called by getFilterExpr.
       getLayerFilterExpr: function(){
         var expr = "1=1";
         if(this.layerInfo){
@@ -225,8 +259,79 @@ define([
         return expr;
       },
 
+      _getWebMapFilterExpr: function(){
+        var expr = "";
+        if(this.layerInfo){
+          expr = this.layerInfo.getFilterOfWebmap();
+        }
+        if(!expr){
+          expr = "1=1";
+        }
+        return expr;
+      },
+
+      //used for ListValueProvider
+      getDropdownFilterExpr: function(){
+        var expr = "1=1";
+        var expr1 = this._getWebMapFilterExpr();
+        if(this.cascade === "all" || this.cascade === "previous"){
+          var expr2 = this.getCascadeFilterExpr();
+          expr = "(" + expr1 + ") AND (" + expr2 + ")";
+        }else{
+          expr = expr1;
+        }
+        return expr;
+      },
+
       getCascadeFilterExpr: function(){
         return "1=1";
+      },
+
+      getDropdownFilterPartsObj: function(){
+        var partsObj = {parts:[]};
+        if(this.cascade === "all" || this.cascade === "previous"){
+          partsObj = this.getCascadeFilterPartsObj();
+        }
+        return partsObj;
+      },
+
+      getCascadeFilterPartsObj: function(){
+        return {};
+      },
+
+      //get codedvalue list by partsObj
+      //partsObj: eg: {logicalOperator:"AND",parts:[]}
+      getCodedValueListByPartsObj: function(layerDefinition, fieldName, partsObj, /*optional*/codedValues){
+        var fieldInfo = jimuUtils.getFieldInfoByFieldName(layerDefinition.fields, fieldName);
+        var typeIdField = layerDefinition.typeIdField;
+        var valueLabels = null;
+        var typeIdFieldValue;
+
+        var parts = partsObj.parts;
+        for(var key in parts){
+          var part = parts[key];
+          if(part.fieldObj.name === typeIdField){ //not considering the subtypeid exists twice or more
+            typeIdFieldValue = part.valueObj.value;
+            valueLabels = jimuUtils._getCodedValueBySubTypeId(layerDefinition, fieldName, typeIdFieldValue, fieldInfo);
+            break;
+          }
+        }
+
+        var selectedValue;
+        if(!valueLabels){
+          if(codedValues){
+            valueLabels = codedValues;
+          }else{
+            valueLabels = jimuUtils._getAllCodedValue(layerDefinition, fieldInfo);
+          }
+        }
+        if(valueLabels && valueLabels.length > 0){
+          selectedValue = valueLabels[0].value;
+        }
+        return {
+          selectedValue: selectedValue,
+          valueLabels: valueLabels
+        };
       },
 
       isDefined: function(value){
@@ -243,6 +348,10 @@ define([
 
       isEnabled: function(){
         return this._enabled;
+      },
+
+      destroy: function(){
+        this.inherited(arguments);
       }
 
     });

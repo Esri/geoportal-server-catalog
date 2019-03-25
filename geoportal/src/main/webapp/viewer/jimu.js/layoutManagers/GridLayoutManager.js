@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -41,7 +41,7 @@ function(declare, lang, array, html, topic, on, domConstruct, domGeometry,
   /* global $:true */
   var instance = null, clazz;
   var LAYOUT_TYPE_STACK = 'stack', LAYOUT_TYPE_COMPONENT = 'component';
-  var PORTRAIT_MODE = 1, LANDSCAPE_MODE = 2;
+  var PORTRAIT_MODE = 1, LANDSCAPE_MODE = 2, DEBOUNCE_LIMIE = 200;
 
   clazz = declare([BaseLayoutManager], {
     isEditing: false,
@@ -520,7 +520,7 @@ function(declare, lang, array, html, topic, on, domConstruct, domGeometry,
                   if (contentItem.container.width > 0 && contentItem.container.height > 0) {
                     panel.resize();
                   }
-                }), 200));
+                }), DEBOUNCE_LIMIE));
                 panel.resize();
                 this.panelManager.openPanel(panel);
               }
@@ -534,7 +534,7 @@ function(declare, lang, array, html, topic, on, domConstruct, domGeometry,
                     panel.resize();
                   }
                 }
-              }), 200));
+              }), DEBOUNCE_LIMIE));
             }
             panel.resize();
             this.panelManager.openPanel(panel);
@@ -644,6 +644,10 @@ function(declare, lang, array, html, topic, on, domConstruct, domGeometry,
           }
         }));
         this.layout.on( 'initialised', lang.hitch(this, function(){
+          var container = $(this.layoutContainer);
+          var width = container.width();
+          var height = container.height() > 0 ? container.height() : $('#' + this.layoutId).height();
+          this.layout.updateSize(width, height);
           def.resolve();
         }));
         this.layout.on( 'stackCreated', lang.hitch(this, function(stack){
@@ -854,10 +858,11 @@ function(declare, lang, array, html, topic, on, domConstruct, domGeometry,
 
     onEnter: function(appConfig, mapId){
       this.appConfig = appConfig;
+      this.mapId = mapId;
       this.isEditing = false;
       this.createMapDiv(mapId);
       // create layout
-      this._createLayout(false, false, true);
+      return this._createLayout(false, false, true);
     },
 
     onLeave: function(){
@@ -1025,11 +1030,11 @@ function(declare, lang, array, html, topic, on, domConstruct, domGeometry,
         };
 
         this.mobilePanel = new Panel(options);
-        this.own(on(this.mobilePanel, 'resized', lang.hitch(this, function(pos) {
+        this.own(on(this.mobilePanel, 'resized', debounce(lang.hitch(this, function(pos) {
           if (this.mobileController) {
             this.mobileController.setPanelPosition(pos);
           }
-        })));
+        }), DEBOUNCE_LIMIE)));
         domConstruct.place(this.mobilePanel.domNode, container);
         def.resolve();
       }));
@@ -1127,6 +1132,13 @@ function(declare, lang, array, html, topic, on, domConstruct, domGeometry,
 
     openWidget: function(widgetId){
       var contentItem, parent;
+      //check on screen widgets, we don't check not-closeable off-panel widget
+      array.forEach(this.onScreenWidgetIcons, function(widgetIcon){
+        if(widgetIcon.configId === widgetId){
+          widgetIcon.switchToOpen();
+        }
+      }, this);
+      //check grid items
       contentItem = this._findContentItemById(widgetId, LAYOUT_TYPE_COMPONENT);
       if(contentItem) {
         parent = contentItem.parent;

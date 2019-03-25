@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2015 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -290,7 +290,7 @@ define([
         var fields = this._generateFields(featureSet);
 
         var datas = array.map(featureSet.features, function(feature){
-          var attributes = feature.attributes;
+          var attributes = lang.clone(feature.attributes);
           if (featureSet.geometryType === 'esriGeometryPoint' ||
           featureSet.geometryType === 'point') {
             if (feature.geometry) {
@@ -317,16 +317,7 @@ define([
           layerId = feature._layer.id;
         }
 
-        fields = fields || featureSet.fields;
-        var layerInfos = LayerInfos.getInstanceSync();
-        var layerInfo = layerInfos.getLayerInfoById(layerId);
-        if (layerInfo) {
-          var popupInfo = layerInfo.getPopupInfo();
-          array.forEach(fields, lang.hitch(this, function(field) {
-            field.fieldInfo = this._findFieldInfo(popupInfo, field.name);
-          }));
-        }
-
+        fields = lang.clone(fields || featureSet.fields);
         if(!fields || fields.length === 0){
           fields = [];
           var attributes = feature.attributes;
@@ -337,6 +328,15 @@ define([
               });
             }
           }
+        }
+
+        var layerInfos = LayerInfos.getInstanceSync();
+        var layerInfo = layerInfos.getLayerInfoById(layerId);
+        if (layerInfo) {
+          var popupInfo = layerInfo.getPopupInfo();
+          array.forEach(fields, lang.hitch(this, function(field) {
+            field.fieldInfo = this._findFieldInfo(popupInfo, field.name);
+          }));
         }
 
         if(featureSet.fieldAliases){
@@ -526,7 +526,8 @@ define([
         saveTextAs(text, filename, 'utf-8');
       }else{
         var blob = new Blob([text], {type: 'text/plain;charset=utf-8'});
-        saveAs(blob, filename);
+        // Use saveAs(blob, name, true) to turn off the auto-BOM stuff
+        saveAs(blob, filename, true);
       }
     }
 

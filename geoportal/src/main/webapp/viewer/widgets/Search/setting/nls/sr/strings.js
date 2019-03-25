@@ -14,6 +14,7 @@ define({
   "generalSetting": "Opšte postavke",
   "allPlaceholder": "Tekst čuvara mesta za pretragu svega: ",
   "showInfoWindowOnSelect": "Prikaži iskačući prozor za pronađeni geoobjekat ili lokaciju",
+  "showInfoWindowOnSelect2": "Prikaži iskačući prozor kada se pronađe geoobjekat ili lokacija.",
   "searchInCurrentMapExtent": "Pretraži samo u trenutnom obuhvatu mape",
   "zoomScale": "Skala zumiranja",
   "locatorUrl": "URL adresa geokodera",

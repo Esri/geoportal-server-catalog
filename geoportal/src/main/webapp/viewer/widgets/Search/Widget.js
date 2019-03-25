@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2015 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,14 +32,15 @@ define([
     'esri/dijit/Search',
     'esri/tasks/locator',
     'esri/layers/FeatureLayer',
-    'esri/InfoTemplate',
+    'esri/dijit/PopupTemplate',
     'esri/lang',
+    'esri/tasks/query',
     './utils',
     'dojo/NodeList-dom'
   ],
   function(declare, lang, array, html, when, on, aspect, query, keys, Deferred, all,
     BaseWidget, LayerInfos, jimuUtils, Search, Locator,
-    FeatureLayer, InfoTemplate, esriLang, utils) {
+    FeatureLayer, PopupTemplate, esriLang, FeatureQuery, utils) {
     //To create a widget, you need to derive from BaseWidget.
     return declare([BaseWidget], {
       name: 'Search',
@@ -93,8 +94,8 @@ define([
                 enableButtonMode: false,
                 enableLabel: false,
                 enableInfoWindow: true,
-                enableHighlight: esriLang.isDefined(this.config.showInfoWindowOnSelect) ?
-                  !!this.config.showInfoWindowOnSelect : true,
+                enableHighlight: true,/*esriLang.isDefined(this.config.showInfoWindowOnSelect) ?
+                  !!this.config.showInfoWindowOnSelect : true,*/
                 showInfoWindowOnSelect: esriLang.isDefined(this.config.showInfoWindowOnSelect) ?
                   !!this.config.showInfoWindowOnSelect : true,
                 map: this.map,
@@ -121,9 +122,13 @@ define([
                   this._onClearSearch();
                 }
               })));
+
+              /*
               this.own(
                 aspect.before(this.searchDijit, 'select', lang.hitch(this, '_captureSelect'))
                 );
+              */
+
               this.own(
                 on(this.searchDijit, 'search-results', lang.hitch(this, '_onSearchResults'))
               );
@@ -152,6 +157,7 @@ define([
               this.own(
                 on(this.searchDijit, 'clear-search', lang.hitch(this, '_onClearSearch'))
               );
+              /*
               this.own(
                 aspect.after(this.map.infoWindow, 'show', lang.hitch(this, function() {
                   if (this.searchDijit &&
@@ -172,6 +178,7 @@ define([
                   }
                 }))
               );
+              */
 
               this.fetchData('framework');
             }));
@@ -265,7 +272,8 @@ define([
               maxSuggestions: source.maxSuggestions,
               maxResults: source.maxResults || 6,
               zoomScale: source.zoomScale || 50000,
-              useMapExtent: !!source.searchInCurrentMapExtent
+              useMapExtent: !!source.searchInCurrentMapExtent,
+              _zoomScaleOfConfigSource: source.zoomScale
             };
 
             if (source.enableLocalSearch) {
@@ -273,6 +281,10 @@ define([
                 minScale: source.localSearchMinScale,
                 distance: source.localSearchDistance
               };
+            }
+
+            if (source.zoomScale) {
+              _source.autoNavigate = false;
             }
 
             def.resolve(_source);
@@ -283,7 +295,27 @@ define([
 
             this.own(on(searchLayer, 'load', lang.hitch(this, function(result) {
               var flayer = result.layer;
-              var template = this._getInfoTemplate(flayer, source, source.displayField);
+
+              // identify the data source
+              var sourceLayer = this.map.getLayer(source.layerId);
+              var sourceLayerInfo = this.layerInfosObj.getLayerInfoById(source.layerId);
+              var showInfoWindowOnSelect;
+              var enableInfoWindow;
+              if(sourceLayer) {
+                // pure feature service layer defined in the map
+                showInfoWindowOnSelect = false;
+                enableInfoWindow = false;
+              } else if (sourceLayerInfo){
+                // feature service layer defined in the map
+                showInfoWindowOnSelect = false;
+                enableInfoWindow = false;
+              } else {
+                // data source from the outside
+                showInfoWindowOnSelect = esriLang.isDefined(this.config.showInfoWindowOnSelect) ?
+                  !!this.config.showInfoWindowOnSelect : true;
+                enableInfoWindow = true;
+              }
+
               var fNames = null;
               if (source.searchFields && source.searchFields.length > 0) {
                 fNames = source.searchFields;
@@ -296,10 +328,12 @@ define([
                   }
                 });
               }
+
               var convertedSource = {
                 featureLayer: flayer,
                 outFields: ["*"],
                 searchFields: fNames,
+                autoNavigate: false,
                 displayField: source.displayField || "",
                 exactMatch: !!source.exactMatch,
                 name: jimuUtils.stripHTML(source.name || ""),
@@ -307,19 +341,33 @@ define([
                 maxSuggestions: source.maxSuggestions || 6,
                 maxResults: source.maxResults || 6,
                 zoomScale: source.zoomScale || 50000,
-                infoTemplate: template,
+                //infoTemplate: lang.clone(template),
                 useMapExtent: !!source.searchInCurrentMapExtent,
-                _featureLayerId: source.layerId
+                showInfoWindowOnSelect: showInfoWindowOnSelect,
+                enableInfoWindow: enableInfoWindow,
+                _featureLayerId: source.layerId,
+                _zoomScaleOfConfigSource: source.zoomScale
               };
+              /*
               if (!template) {
                 delete convertedSource.infoTemplate;
               }
+              */
               if (convertedSource._featureLayerId) {
                 var layerInfo = this.layerInfosObj
                   .getLayerInfoById(convertedSource._featureLayerId);
-                flayer.setDefinitionExpression(layerInfo.getFilter());
+                if(layerInfo) {
+                  flayer.setDefinitionExpression(layerInfo.getFilter());
+                }
               }
-              def.resolve(convertedSource);
+
+              //var template = this._getInfoTemplate(flayer, source, source.displayField);
+              this._getInfoTemplate(flayer, source).then(lang.hitch(this, function(infoTemplate){
+                convertedSource.infoTemplate = lang.clone(infoTemplate);
+                def.resolve(convertedSource);
+              }), lang.hitch(this, function() {
+                def.resolve(convertedSource);
+              }));
             })));
 
             this.own(on(searchLayer, 'error', function() {
@@ -334,6 +382,44 @@ define([
         return sourceDefs;
       },
 
+      _getInfoTemplate: function(fLayer, source) {
+        var def = new Deferred();
+        var layerInfo = this.layerInfosObj.getLayerInfoById(source.layerId);
+        var template;
+        //var template = layerInfo && layerInfo.getInfoTemplate();
+        //var validTemplate = layerInfo && template;
+
+        if (layerInfo) {
+          def = layerInfo.loadInfoTemplate();
+        } else { // (added by user in setting) or (only configured fieldInfo)
+          /*
+          template = new InfoTemplate();
+          template.setTitle('&nbsp;');
+          template.setContent(
+            lang.hitch(this, '_formatContent', source.name, fLayer, source.displayField)
+          );
+          def.resolve(template);
+          */
+
+          var fieldNames = [];
+          array.filter(fLayer.fields, function(field) {
+            if(field.name.toLowerCase() !== "shape") {
+              fieldNames.push(field.name);
+            }
+          });
+
+          //var displayValue = graphic.attributes[source.displayField];
+          var title =  source.name + ": {" + source.displayField + "}";
+          var popupInfo = jimuUtils.getDefaultPopupInfo(fLayer, title, fieldNames);
+          if(popupInfo) {
+            template = new PopupTemplate(popupInfo);
+          }
+          def.resolve(template);
+        }
+        return def;
+      },
+
+      /*
       _getInfoTemplate: function(fLayer, source, displayField) {
         var layerInfo = this.layerInfosObj.getLayerInfoById(source.layerId);
         var template = layerInfo && layerInfo.getInfoTemplate();
@@ -354,6 +440,7 @@ define([
           return template;
         }
       },
+      */
 
       _getSourcePopupInfo: function(source) {
         if (source._featureLayerId) {
@@ -365,6 +452,7 @@ define([
         return null;
       },
 
+      // this funciton is deprecated.
       _captureSelect: function(e) {
         var sourceIndex = this.searchDijit.activeSourceIndex;
         if (sourceIndex === 'all') {
@@ -373,6 +461,7 @@ define([
         if (isFinite(sourceIndex) && esriLang.isDefined(sourceIndex)) {
           var source = this.searchDijit.sources[sourceIndex];
           if (source && 'featureLayer' in source) {
+
             var popupInfo = this._getSourcePopupInfo(source);
             var notFormatted = (popupInfo && popupInfo.showAttachments) ||
               (popupInfo && popupInfo.description &&
@@ -451,6 +540,7 @@ define([
         return content;
       },
 
+      // this funciton is deprecated.
       _getFormatedAttrs: function(attrs, fields, typeIdField, types, popupInfo) {
         function getFormatInfo(fieldName) {
           if (popupInfo && esriLang.isDefined(popupInfo.fieldInfos)) {
@@ -657,15 +747,77 @@ define([
         }
       },
 
+
+      _zoomToScale: function(zoomScale, features) {
+        this.map.setScale(zoomScale);
+        jimuUtils.featureAction.panTo(this.map, features);
+      },
+
+      _showPopupByFeatures: function(layerInfo, features, selectEvent) {
+        /*jshint unused: false*/
+        var location = null;
+        var isPoint = false;
+
+        if(this.config.showInfoWindowOnSelect) {
+          //this.map.infoWindow.clearFeatures();
+          //this.map.infoWindow.hide();
+          this.map.infoWindow.setFeatures(features);
+          if (features[0].geometry.type === "point") {
+            location = features[0].geometry;
+            isPoint = true;
+          } else {
+            var extent = features[0].geometry && features[0].geometry.getExtent();
+            location = extent && extent.getCenter();
+          }
+          if(location) {
+            this.map.infoWindow.show(location, {
+              closetFirst: true
+            });
+          }
+        } else {
+          // hightlight result
+          this.map.infoWindow.setFeatures(features);
+          this.map.infoWindow.updateHighlight(this.map, features[0]);
+          this.map.infoWindow.showHighlight();
+        }
+
+        // zoomto result
+        if(selectEvent.source._zoomScaleOfConfigSource) {
+          this._zoomToScale(selectEvent.source.zoomScale, features);
+        } else {
+          var featureSet = jimuUtils.toFeatureSet(features);
+          jimuUtils.zoomToFeatureSet(this.map, featureSet);
+        }
+      },
+
+      _loadInfoTemplateAndShowPopup: function(layerInfo, selectedFeature, selectEvent) {
+        if(layerInfo) {
+          this.searchDijit.clearGraphics();
+          var layerObjectInMap = this.map.getLayer(layerInfo.id);
+          if(layerInfo.isPopupEnabled() && layerObjectInMap) {
+            this._showPopupByFeatures(layerInfo, [selectedFeature], selectEvent);
+          } else {
+            layerInfo.loadInfoTemplate().then(lang.hitch(this, function(infoTemplate) {
+              //temporary set infoTemplate to selectedFeature.
+              selectedFeature.setInfoTemplate(lang.clone(infoTemplate));
+              this._showPopupByFeatures(layerInfo, [selectedFeature], selectEvent);
+              // clear infoTemplate for selectedFeature;
+              var handle = aspect.before(this.map, 'onClick', lang.hitch(this, function() {
+                selectedFeature.setInfoTemplate(null);
+                handle.remove();
+              }));
+            }));
+          }
+        }
+      },
+
       _onSelectResult: function(e) {
         var result = e.result;
-        if (!(result && result.name)) {
-          return;
-        }
         var dataSourceIndex = e.sourceIndex;
         var sourceResults = this.searchResults[dataSourceIndex];
         var dataIndex = 0;
-        var that = this;
+        var resultFeature = e.result.feature;
+        var sourceLayerId = e.source._featureLayerId;
 
         var getGraphics = function(layer, fid) {
           var graphics = layer.graphics;
@@ -673,18 +825,6 @@ define([
             return g.attributes[layer.objectIdField] === fid;
           });
           return gs;
-        };
-        var showPopupByFeatures = function(features) {
-          var location = null;
-          that.map.infoWindow.setFeatures(features);
-          if (features[0].geometry.type === "point") {
-            location = features[0].geometry;
-          } else {
-            location = features[0].geometry.getExtent().getCenter();
-          }
-          that.map.infoWindow.show(location, {
-            closetFirst: true
-          });
         };
 
         for (var i = 0, len = sourceResults.length; i < len; i++) {
@@ -700,35 +840,79 @@ define([
             var dIdx = html.getAttr(li, 'data-index');
             var dsIndex = html.getAttr(li, 'data-source-index');
 
-            if (title === result.name &&
+            if (result &&
+              result.name &&
+              title === result.name.toString() &&
               dIdx === dataIndex.toString() &&
               dsIndex === dataSourceIndex.toString()) {
               html.addClass(li, 'result-item-selected');
             }
           }));
 
-        var layer = this.map.getLayer(e.source._featureLayerId);
+        //var layer = this.map.getLayer(sourceLayerId);
+        var layerInfo = this.layerInfosObj.getLayerInfoById(sourceLayerId);
 
-        if (layer && this.config.showInfoWindowOnSelect) {
-          var gs = getGraphics(layer, e.result.feature.__attributes[layer.objectIdField]);
-          if (gs.length > 0) {
-            showPopupByFeatures(gs);
-          } else {
-            var handle = on(layer, 'update-end', lang.hitch(this, function() {
-              if (this.domNode) {
-                var gs = getGraphics(layer, e.result.feature.__attributes[layer.objectIdField]);
-                if (gs.length > 0) {
-                  showPopupByFeatures(gs);
+        if (layerInfo) {
+          layerInfo.getLayerObject().then(lang.hitch(this, function(layer) {
+            var gs = getGraphics(layer, resultFeature.attributes[layer.objectIdField]);
+            if (gs && gs.length > 0) {
+              //this._showPopupByFeatures(gs);
+              this._loadInfoTemplateAndShowPopup(layerInfo, gs[0], e);
+            } else {
+              /*
+              var handle = on(layer, 'update-end', lang.hitch(this, function() {
+                if (this.domNode) {
+                  var gs = getGraphics(layer, resultFeature.attributes[layer.objectIdField]);
+                  if (gs.length > 0) {
+                    this._showPopupByFeatures(gs);
+                  }
                 }
-              }
 
-              if (handle && handle.remove) {
-                handle.remove();
-              }
-            }));
-            this.own(handle);
+                if (handle && handle.remove) {
+                  handle.remove();
+                }
+              }));
+              this.own(handle);
+              */
+
+              var featureQuery = new FeatureQuery();
+              featureQuery.where = layer.objectIdField + " = " +
+                                 resultFeature.attributes[layer.objectIdField];
+              featureQuery.outSpatialReference = this.map.spatialReference;
+
+              layer.selectFeatures(featureQuery,
+                                   FeatureLayer.SELECTION_NEW,
+                                   lang.hitch(this, function(selectedFeatures) {
+                var selectedFeature = null;
+                if(selectedFeatures && selectedFeatures.length > 0) {
+                  selectedFeature = selectedFeatures[0];
+                  layer.add(selectedFeature);
+
+                  this._loadInfoTemplateAndShowPopup(layerInfo, selectedFeature, e);
+                }
+              }), lang.hitch(this, function() {
+                // show popupInfo of searchResult.
+                var selectedFeature = resultFeature;
+                this._loadInfoTemplateAndShowPopup(layerInfo, selectedFeature, e);
+              }));
+            }
+          }));
+
+        } else if (e.source.featureLayer && !e.source.locator){
+          // outside resource result:
+          // zoomTo by zoomToExtent, popup by search dijit
+          if(e.source._zoomScaleOfConfigSource) {
+            this._zoomToScale(e.source._zoomScaleOfConfigSource, [e.result.feature]);
+          } else {
+            jimuUtils.zoomToExtent(this.map, e.result.extent);
           }
+        } else {
+          if(e.source._zoomScaleOfConfigSource) {
+            this._zoomToScale(e.source._zoomScaleOfConfigSource, [e.result.feature]);
+          }
+          //result of geocoder service will be popuped and zoomto by search dijit;
         }
+
         // publish select result to other widgets
         this.publishData({
           'selectResult': e
@@ -739,6 +923,7 @@ define([
         html.setStyle(this.searchResultsNode, 'display', 'none');
         this.searchResultsNode.innerHTML = "";
         this.searchResults = null;
+        //this.map.infoWindow.hideHighlight();
       },
 
       _hideResultMenu: function() {
@@ -777,6 +962,26 @@ define([
         }
 
         this.inherited(arguments);
+      },
+
+      _hidePopup: function() {
+        if (this.map.infoWindow.isShowing) {
+          this.map.infoWindow.hide();
+        }
+      },
+
+      onActive: function() {
+        this._mapClickHandle = aspect.before(this.map, 'onClick', lang.hitch(this, function() {
+          this._hidePopup();
+          return arguments;
+        }));
+      },
+
+      onDeActive: function() {
+        if (this._mapClickHandle && this._mapClickHandle.remove) {
+          this._mapClickHandle.remove();
+        }
+        this._hidePopup();
       }
     });
   });

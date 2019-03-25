@@ -14,6 +14,7 @@ define({
   "generalSetting": "الإعدادات العامة",
   "allPlaceholder": "نص العنصر النائب للبحث في كل: ",
   "showInfoWindowOnSelect": "عرض عناصر منبثقة للمعلم أو الموقع الذي يتم العثور عليه",
+  "showInfoWindowOnSelect2": "عرض العنصر المنبثق عند العثور على المعلم أو الموقع.",
   "searchInCurrentMapExtent": "البحث في مدى الخريطة الحالي فقط",
   "zoomScale": "تدرج التكبير/التصغير",
   "locatorUrl": "عنوان URL للمكود الجغرافي",

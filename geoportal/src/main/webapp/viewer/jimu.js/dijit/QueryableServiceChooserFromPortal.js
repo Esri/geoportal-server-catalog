@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -119,8 +119,13 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     },
 
     _onBtnOkClicked: function(){
+      var portalItem = this.selector.getSelectedItem();
       var items = this.getSelectedItems();
-      if(items.length > 0){
+      if(portalItem && items.length > 0){
+        array.forEach(items, lang.hitch(this, function(item){
+          item.portalUrl = portalItem.portalUrl;
+          item.itemId = portalItem.id;
+        }));
         this.emit('ok', items);
       }
     },

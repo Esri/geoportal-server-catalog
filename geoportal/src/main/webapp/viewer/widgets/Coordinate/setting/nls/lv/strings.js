@@ -11,7 +11,7 @@ define({
   "warning": "Lūdzu, ievadiet derīgu telpiskās atskaites WKID!",
   "tfWarning": "Lūdzu, ievadiet derīgu dotā lieluma transformācijas WKID!",
   "spinnerLabel": "Noapaļot koordinātas līdz: ",
-  "decimalPlace": "decimāl vietas",
+  "decimalPlace": "decimālvietai (ām)",
   "separator": "Rādīt tūkstošdaļu atdalītājus",
   "getVersionError": "Nevar iegūt ģeometrijas servisa versiju",
   "add": "Pievienot izvades koordinātu sistēmu",

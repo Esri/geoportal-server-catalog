@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,13 +24,14 @@ define([
   'dijit/_TemplatedMixin',
   'dijit/_WidgetsInTemplateMixin',
   'dojo/text!./templates/QueryableLayerSource.html',
+  'jimu/dijit/RadioBtn',
   'jimu/dijit/_QueryableLayerChooserWithButtons',
   'jimu/dijit/QueryableServiceChooserFromPortal',
   'jimu/dijit/_QueryableServiceChooserContent',
   'jimu/portalUrlUtils'
 ],
 function(on, Evented, lang, html, declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template,
-  QueryableLayerChooserWithButtons, QueryableServiceChooserFromPortal, _QueryableServiceChooserContent,
+  RadioBtn, QueryableLayerChooserWithButtons, QueryableServiceChooserFromPortal, _QueryableServiceChooserContent,
   portalUrlUtils) {
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
@@ -50,7 +51,7 @@ function(on, Evented, lang, html, declare, _WidgetBase, _TemplatedMixin, _Widget
     portalUrl: null,
 
     //public methods:
-    //getSelectedItems
+    //getSelectedItems: return items, [{name,url,definition, /*optional*/ portalUrl, /*optional*/ itemId}]
     //getSelectedRadioType
 
     //events:
@@ -206,18 +207,41 @@ function(on, Evented, lang, html, declare, _WidgetBase, _TemplatedMixin, _Widget
     },
 
     _initRadios: function(){
-      var name = "queryableLayerSourceRadios_" + this._getRandomString();
-      this.mapRadio.name = name;
-      html.setAttr(this.mapRadio, 'id', "mapRadio_" + this._getRandomString());
-      html.setAttr(this.mapLabel, 'for', this.mapRadio.id);
+      var group = "queryableLayerSourceRadios_" + this._getRandomString();
+      var radioChangeHandler = lang.hitch(this, this._onRadioClicked);
 
-      this.portalRadio.name = name;
-      html.setAttr(this.portalRadio, 'id', "portalRadio_" + this._getRandomString());
-      html.setAttr(this.portalLabel, 'for', this.portalRadio.id);
+      this.mapRadio = new RadioBtn({
+        group: group,
+        onStateChange: radioChangeHandler,
+        checked: true
+      });
+      this.mapRadio.placeAt(this.mapTd, 'first');
 
-      this.urlRadio.name = name;
-      html.setAttr(this.urlRadio, 'id', "urlRadio_" + this._getRandomString());
-      html.setAttr(this.urlLabel, 'for', this.urlRadio.id);
+      this.portalRadio = new RadioBtn({
+        group: group,
+        onStateChange: radioChangeHandler,
+        checked: false
+      });
+      this.portalRadio.placeAt(this.portalTd, 'first');
+
+      this.urlRadio = new RadioBtn({
+        group: group,
+        onStateChange: radioChangeHandler,
+        checked: false
+      });
+      this.urlRadio.placeAt(this.urlTd, 'first');
+
+      this.own(on(this.mapLabel, 'click', lang.hitch(this, function(){
+        this.mapRadio.check();
+      })));
+
+      this.own(on(this.portalLabel, 'click', lang.hitch(this, function(){
+        this.portalRadio.check();
+      })));
+
+      this.own(on(this.urlLabel, 'click', lang.hitch(this, function(){
+        this.urlRadio.check();
+      })));
     },
 
     _getRandomString: function(){

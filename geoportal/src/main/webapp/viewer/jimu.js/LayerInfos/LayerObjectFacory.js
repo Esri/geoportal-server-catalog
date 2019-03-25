@@ -1,6 +1,6 @@
 
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -43,58 +43,65 @@ ArcGISImageServiceVectorLayer) {
     },
 
     getLayerObject: function() {
+      var url = this._layerInfo.getUrl();
       var requestProxy = this._layerObjectBuffer.getRequest(this._layerInfo.subId);
-      return requestProxy.request();
+      return requestProxy.request(url);
+    },
+
+    getLayerObjectWithUrl: function(url) {
+      var requestProxy = this._layerObjectBuffer.getRequest(this._layerInfo.subId + "_url");
+      return requestProxy.request(url);
     },
 
     /***************************************************
      * methods for get layer object
      ***************************************************/
-    _getLayerObject: function() {
+    _getLayerObject: function(url) {
       var layerObject;
       var def = new Deferred();
-      var url = this._layerInfo.getUrl();
+      //var url = this._layerInfo.getUrl();
       this._layerInfo.getLayerType().then(lang.hitch(this, function(layerType) {
 
         var options = lang.mixin(this._getLayerOptionsForCreateLayerObject(),
                              this._layerInfo.originOperLayer.options || {}) || {};
         switch (layerType) {
-        case "FeatureLayer":
-          layerObject = new FeatureLayer(url, options);
-          break;
-        case "RasterLayer":
-          layerObject = new RasterLayer(url);
-          break;
-        case "StreamLayer":
-          layerObject = new StreamLayer(url);
-          break;
-        case "ArcGISImageServiceLayer":
-          layerObject = new ArcGISImageServiceLayer(url);
-          break;
-        case "ArcGISImageServiceVectorLayer":
-          layerObject = new ArcGISImageServiceVectorLayer(url);
-          break;
-        case "Table":
-          if(this._layerInfo.layerObject &&
-             this._layerInfo.layerObject.url){
+          case "FeatureLayer":
             layerObject = new FeatureLayer(url, options);
-          } else if (this._layerInfo.layerObject &&
-                     this._layerInfo.layerObject.featureCollectionData) {
-            layerObject = new FeatureLayer(this._layerInfo.layerObject.featureCollectionData,
-                                                 options);
-            def.resolve(layerObject);
+            break;
+          case "RasterLayer":
+            layerObject = new RasterLayer(url);
+            break;
+          case "StreamLayer":
+            layerObject = new StreamLayer(url);
+            break;
+          case "ArcGISImageServiceLayer":
+            layerObject = new ArcGISImageServiceLayer(url);
+            break;
+          case "ArcGISImageServiceVectorLayer":
+            layerObject = new ArcGISImageServiceVectorLayer(url);
+            break;
+          case "Table":
+            if(this._layerInfo.layerObject &&
+               this._layerInfo.layerObject.url){
+              layerObject = new FeatureLayer(url, options);
+            } else if (this._layerInfo.layerObject &&
+                       this._layerInfo.layerObject.featureCollectionData) {
+              layerObject = new FeatureLayer(this._layerInfo.layerObject.featureCollectionData,
+                                                   options);
+              this._setLayerObjectProperties(layerObject);
+              def.resolve(layerObject);
+              return def;
+            } else {
+              def.resolve(null);
+              return def;
+            }
+            break;
+          case "GroupLayer":
+            def = this._getGroupLayerObject();
             return def;
-          } else {
+          default:
             def.resolve(null);
             return def;
-          }
-          break;
-        case "GroupLayer":
-          def = this._getGroupLayerObject();
-          return def;
-        default:
-          def.resolve(null);
-          return def;
         }
 
         var loadHandle = layerObject.on('load', lang.hitch(this, function() {
@@ -189,6 +196,11 @@ ArcGISImageServiceVectorLayer) {
         layerObject.name = this._layerInfo.title;
       }
       layerObject.id = this._layerInfo.id;
+
+      // set infoTemplate
+      this._layerInfo.loadInfoTemplate().then(lang.hitch(this, function(infoTemplate) {
+        layerObject.infoTemplate = infoTemplate;
+      }));
     }
 
   });

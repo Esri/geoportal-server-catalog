@@ -40,5 +40,21 @@ define({
   "sortDes": "Seřadit sestupně",
   "statistics": "Statistika",
   "attachments": "Přílohy",
-  "files": "soubory"
+  "files": "soubory",
+  "keepRichTextLabel": "Ponechat formát Rich Text",
+  "whatsThis": "Co je to?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} obsahuje následující pole ve formátu rich text: ",
+      "line2": " které mohou obsahovat styly formátování jako typy písma, barvu a velikost.",
+      "line3": "Při exportu do CSV bude formátování zachováno pomocí HTML tagů. Pokud si nepřejete zachovat formátování, nechte políčko “Ponechat formát Rich Text“ nezaškrtnuté."
+    },
+    "example": {
+      "label": "Například:",
+      "scenarios": {
+        "first": "bude ve výchozím nastavení exportován jako následující text:",
+        "second": "a následující text bez formátu rich text:"
+      }
+    }
+  }
 });

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,7 +86,7 @@ define(['dojo/_base/lang',
   //used to create dgrid
   //
   //pInfos: PopupInfo
-  exports.generateColumnsFromFields = function(pInfos, fields, typeIdField, types,
+  exports.generateColumnsFromFields = function(gridColumns, pInfos, fields, typeIdField, types,
     supportsOrder, supportsStatistics) {
     function getFormatInfo(fieldName) {
       if (pInfos && esriLang.isDefined(pInfos.fieldInfos)) {
@@ -100,6 +100,20 @@ define(['dojo/_base/lang',
 
       return null;
     }
+
+    function getIsHidden(techFieldName, field) {
+      // Overriding order of column's "hidden" property:
+      // grid's column settings --> Attribute Table's settings -->
+      // Field configuration from map popup --> default field visibilities from the layer / table
+      if(gridColumns && gridColumns[techFieldName]) {
+        return gridColumns[techFieldName].hidden;
+      } else if (field) {
+        return !field.show && esriLang.isDefined(field.show);
+      } else {
+        return false;
+      }
+    }
+
     var columns = {};
     columns.selectionHandle = {
       label: "",
@@ -130,8 +144,8 @@ define(['dojo/_base/lang',
       columns[techFieldName] = {
         label: _field.alias || _field.name,
         className: techFieldName,
-        hidden: fields.length === 1 ? false : !_field.show && esriLang.isDefined(_field.show),
-        unhidable: fields.length === 1 ? false :
+        hidden: fields.length === 1 ? false : getIsHidden(techFieldName, _field),
+        unhidable: fields.length === 1 ? false : 
           !_field.show && esriLang.isDefined(_field.show) && _field._pk,
         field: _field.name,
         sortable: false,
@@ -171,7 +185,7 @@ define(['dojo/_base/lang',
             if (typeIdField && types && types.length > 0) {
               var typeChecks = array.filter(types, lang.hitch(exports, function(item) {
                 // value of typeIdFild has been changed above
-                return item.name === obj[typeIdField];
+                return item.id === obj[typeIdField];
               }));
               var typeCheck = (typeChecks && typeChecks[0]) || null;
 
@@ -403,6 +417,10 @@ define(['dojo/_base/lang',
       for (var j = 0, len2 = rFields.length; j < len2; j++) {
         var rf = rFields[j];
         if (rf.name === sf.name) {
+          // update alias if needed
+          if(rf.alias !== sf.alias) {
+            sf.alias = rf.alias;
+          }
           validFields.push(sf);
           break;
         }
