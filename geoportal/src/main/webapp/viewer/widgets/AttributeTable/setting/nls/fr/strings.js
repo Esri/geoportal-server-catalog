@@ -5,6 +5,12 @@ define({
   "actions": "Configurer les champs de couche",
   "field": "Champ",
   "alias": "Alias",
+  "url": "URL",
+  "sortField": "Champ de tri",
+  "sortOrderTooltips": {
+    "toDescending": "Tri décroissant",
+    "toAscending": "Tri croissant"
+  },
   "visible": "Visible",
   "linkField": "Hyperlien",
   "noLayers": "Aucune couche d'entités disponible",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Autoriser l'export au format CSV",
   "expand": "Ouvert au démarrage",
   "filterByExtent": "Activer Filtrer selon l’étendue de la carte par défaut",
+  "allowTextSelection": "Autoriser la sélection de texte",
+  "highlightColor": "Couleur de mise en surbrillance",
   "restore": "Rétablir la valeur par défaut",
   "ok": "OK",
   "cancel": "Annuler",

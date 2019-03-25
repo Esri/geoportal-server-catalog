@@ -1,5 +1,5 @@
 /*
-Copyright ©2014 Esri. All rights reserved.
+// Copyright © 2014 - 2018 Esri. All rights reserved.
 
 TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
 Unpublished material - all rights reserved under the
@@ -76,7 +76,7 @@ define([
     //search-none-tip
 
     _defaultThumbnail:{
-      "Web Mapping Application": "webapp.png",
+      "Web Mapping Application": "desktopapp.png",
       "Mobile Application": "mobileapp.png"
     },
 

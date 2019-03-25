@@ -8,7 +8,7 @@ define({
   "maxText": "maksimums",
   "attachText": "Norādiet, kuram kartes stūrim pievienot šo logrīku.",
   "expandText": "Sākotnēji izvērst logrīku",
-  "topLeft": "Apakšējā kreisajā stūrī",
+  "topLeft": "Augšējā kreisajā stūrī",
   "topRight": "Augšējā labajā stūrī",
   "bottomLeft": "Apakšējā kreisajā stūrī",
   "bottomRight": "Apakšējā labajā stūrī"

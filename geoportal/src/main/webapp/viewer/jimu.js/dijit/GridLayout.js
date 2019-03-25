@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -40,64 +40,17 @@ function(declare, lang, array, _WidgetBase, domGeometry, domClass, Evented, debo
 
     _layout: null, // instance of goldenLayout
     _coordinates: null, // an object whose key is component id and value is component coordinate.
+    _isCreatingLayout: null,
 
     postCreate: function(){
       this.inherited(arguments);
-      this._coordinates = {};
-      var config = {
-        settings: {
-          hasHeaders: false,
-          resizeEnabled: this.editable,
-          reorderEnabled: this.editable,
-          selectionEnabled: this.editable
-        },
-        dimensions: {
-          borderWidth: 1,
-          dragProxyWidth: 0,
-          dragProxyHeight: 0
-        },
-        content: this.layoutDefinition
-      };
-      require(['libs/goldenlayout/goldenlayout'], lang.hitch(this, function(GoldenLayout){
-        this._layout = new GoldenLayout(config, this.container);
-        this._layout.registerComponent(COMPONENT_NAME, lang.hitch(this, function(container, componentState){
-          var targetDijit;
-          container.parent.config.id = componentState.id;
-          array.some(this.components, function(item) {
-            if (item.id === componentState.id) {
-              targetDijit = item.dijit;
-              container.getElement().html(item.dijit.domNode);
-              return true;
-            }
-          }, this);
-          container.on('resize', debounce(lang.hitch(this, function() {
-            if (container.width > 0 && container.height > 0 && targetDijit &&
-              typeof targetDijit.resize === 'function') {
-              targetDijit.resize(container.width, container.height);
-            }
-          }), 200));
-          container.on('select', lang.hitch(this, function() {
-            if(this.editable) {
-              container.parent.select();
-            }
-            this.emit('mask-click', container.parent.config.id);
-          }));
-        }));
-        this._layout.on( 'initialised', lang.hitch(this, function(){
-          this._resetCoordinate();
-          this.emit("initialised");
-        }));
-        this._layout.on('stateChanged', lang.hitch(this, function(){
-          this._resetCoordinate();
-        }));
-        this._layout.init();
+      this._isCreatingLayout = false;
+      this._createLayout(this.layoutDefinition);
+    },
 
-        if (!this.editable) {
-          domClass.add(this._layout.root.childElementContainer[0], 'viewonly');
-        }
-        domClass.add(this._layout.root.childElementContainer[0], 'jimu-dijit-gridlayout');
-        setTimeout(lang.hitch(this, this.resize), 100);
-      }));
+    restoreLayout: function(layoutDefinition) {
+      layoutDefinition = layoutDefinition || this.layoutDefinition;
+      this._createLayout(layoutDefinition);
     },
 
     destroy: function() {
@@ -152,6 +105,74 @@ function(declare, lang, array, _WidgetBase, domGeometry, domClass, Evented, debo
       } else if ((!contentItem || contentItem.length === 0) && visible === true) {
         this._showComponent(componentId);
       }
+    },
+
+    _createLayout: function(layoutDefinition) {
+      if (this._isCreatingLayout) {
+        return;
+      }
+      this._coordinates = {};
+      this._isCreatingLayout = true;
+      var config = {
+        settings: {
+          hasHeaders: false,
+          resizeEnabled: this.editable,
+          reorderEnabled: this.editable,
+          selectionEnabled: this.editable
+        },
+        dimensions: {
+          borderWidth: 1,
+          dragProxyWidth: 0,
+          dragProxyHeight: 0
+        },
+        content: layoutDefinition
+      };
+      var oldLayout = this._layout;
+
+      require(['libs/goldenlayout/goldenlayout'], lang.hitch(this, function(GoldenLayout){
+        this._layout = new GoldenLayout(config, this.container);
+        this._layout.registerComponent(COMPONENT_NAME, lang.hitch(this, function(container, componentState){
+          var targetDijit;
+          container.parent.config.id = componentState.id;
+          array.some(this.components, function(item) {
+            if (item.id === componentState.id) {
+              targetDijit = item.dijit;
+              container.getElement().html(item.dijit.domNode);
+              return true;
+            }
+          }, this);
+          container.on('resize', debounce(lang.hitch(this, function() {
+            if (container.width > 0 && container.height > 0 && targetDijit &&
+              typeof targetDijit.resize === 'function') {
+              targetDijit.resize(container.width, container.height);
+            }
+          }), 200));
+          container.on('select', lang.hitch(this, function() {
+            if(this.editable) {
+              container.parent.select();
+            }
+            this.emit('mask-click', container.parent.config.id);
+          }));
+        }));
+        this._layout.on( 'initialised', lang.hitch(this, function(){
+          this._resetCoordinate();
+          this.emit("initialised");
+          this._isCreatingLayout = false;
+          if (oldLayout) {
+            oldLayout.destroy();
+          }
+        }));
+        this._layout.on('stateChanged', lang.hitch(this, function(){
+          this._resetCoordinate();
+        }));
+        this._layout.init();
+
+        if (!this.editable) {
+          domClass.add(this._layout.root.childElementContainer[0], 'viewonly');
+        }
+        domClass.add(this._layout.root.childElementContainer[0], 'jimu-dijit-gridlayout');
+        setTimeout(lang.hitch(this, this.resize), 100);
+      }));
     },
 
     _hideComponent: function(contentItem) {

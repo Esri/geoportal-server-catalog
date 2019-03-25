@@ -968,10 +968,11 @@ function(BaseVersionManager, utils) {
           return true;
         }
         function findWidget(onScreenWidgets, url, idx) {
-          if (!idx) {
-            var idx = 0;
+          var i = 0, len;
+          if (idx) {
+            i = idx;
           }
-          for (var i = 0, len = onScreenWidgets.length; i < len; i++) {
+          for (len = onScreenWidgets.length; i < len; i++) {
             var widget = onScreenWidgets[i];
             if (widget && widget.uri && widget.uri === url) {
               return widget;
@@ -998,7 +999,7 @@ function(BaseVersionManager, utils) {
             });
             return isInThatPosition0 || isInThatPosition2;
           }
-          function isLayout1OrLayout3() {
+          /*function isLayout1OrLayout3() {
             var isInThatPosition1 = isContains(onScreenWidgets[8], {
               "position": {
                 "top": 10,
@@ -1012,7 +1013,7 @@ function(BaseVersionManager, utils) {
               }
             });
             return isInThatPosition1 || isInThatPosition3;
-          }
+          }*/
 
           if (isDefaultLayoutOrLayout2()) {
             onScreenWidgets.push({
@@ -1040,23 +1041,25 @@ function(BaseVersionManager, utils) {
         //2 BoxTheme
         function addFullScreenWidgetForBoxTheme(onScreenWidgets) {
           function isDefaultLayout() {
-            var isInThatPosition0 = isContains(findWidget(onScreenWidgets, "themes/BoxTheme/widgets/BoxController/Widget"), {
-              "position": {
-                "right": 0,
-                "bottom": 0
-              }
-            });
+            var isInThatPosition0 = isContains(findWidget(onScreenWidgets,
+              "themes/BoxTheme/widgets/BoxController/Widget"), {
+                "position": {
+                  "right": 0,
+                  "bottom": 0
+                }
+              });
             return isInThatPosition0;
           }
-          function isLayout1() {
-            var isInThatPosition1 = isContains(findWidget(onScreenWidgets, "themes/BoxTheme/widgets/BoxController/Widget"), {
-              "position": {
-                "right": 0,
-                "top": 0
-              }
-            });
+          /*function isLayout1() {
+            var isInThatPosition1 = isContains(findWidget(onScreenWidgets,
+              "themes/BoxTheme/widgets/BoxController/Widget"), {
+                "position": {
+                  "right": 0,
+                  "top": 0
+                }
+              });
             return isInThatPosition1;
-          }
+          }*/
 
           if (isDefaultLayout()) {
             onScreenWidgets.push({
@@ -1095,7 +1098,7 @@ function(BaseVersionManager, utils) {
         }
 
         //4 FoldableTheme
-        function addFullScreenWidgetForFoldableTheme(onScreenWidgets, mobileOnScreenWidgets) {
+        function addFullScreenWidgetForFoldableTheme(onScreenWidgets) {
           onScreenWidgets.push({
             "uri": "widgets/FullScreen/Widget",
             "visible": false,
@@ -1108,7 +1111,7 @@ function(BaseVersionManager, utils) {
         }
 
         //5 DashboardTheme
-        function addFullScreenWidgetForDashboardTheme(onScreenWidgets, mobileOnScreenWidgets) {
+        function addFullScreenWidgetForDashboardTheme(onScreenWidgets) {
           onScreenWidgets.push({
             "uri": "widgets/FullScreen/Widget",
             "visible": false,
@@ -1170,7 +1173,7 @@ function(BaseVersionManager, utils) {
             });
             return isInThatPosition0;
           }
-          function isLayout1() {
+          /*function isLayout1() {
             var isInThatPosition1 = isContains(onScreenWidgets[7], {
               "position": {
                 "right": 110,
@@ -1178,7 +1181,7 @@ function(BaseVersionManager, utils) {
               }
             });
             return isInThatPosition1;
-          }
+          }*/
 
           if (isDefaultLayout()) {
             onScreenWidgets.push({
@@ -1203,6 +1206,89 @@ function(BaseVersionManager, utils) {
           }
         }
 
+        return oldConfig;
+      },
+
+      compatible: true
+    }, {
+      version: '2.6',
+
+      description: 'The version for Online 5.3.',
+
+      upgrader: function(oldConfig){
+        return oldConfig;
+      },
+
+      compatible: true
+    }, {
+      version: '2.7',
+
+      description: 'The version for Online 5.4.',
+
+      upgrader: function(oldConfig){
+        return oldConfig;
+      },
+
+      compatible: true
+    }, {
+      version: '2.8',
+
+      description: 'The version for Online 6.1.',
+
+      upgrader: function(oldConfig){
+
+        upgradeDataSource(oldConfig);
+
+        function upgradeDataSource(oldConfig) {
+          var dataSources = oldConfig.dataSource && oldConfig.dataSource.dataSources;
+          if (dataSources) {
+            var vaildDataSources = getFeatureStatisticsDataSource(dataSources);
+            if (vaildDataSources && vaildDataSources.length) {
+              vaildDataSources.forEach(function(ds) {
+                var statistics = ds.dataSchema && ds.dataSchema.statistics;
+                if (statistics && statistics.length) {
+                  statistics.forEach(function(statistic) {
+                    if (statistic && statistic.statisticType === 'count' &&
+                      statistic.outStatisticFieldName === 'count') {
+                      statistic.outStatisticFieldName = 'STAT_COUNT';
+                      return;
+                    }
+                    statistic.outStatisticFieldName = upperCaseOutStatisticFieldName(statistic.outStatisticFieldName);
+                  });
+                }
+
+              });
+            }
+          }
+        }
+
+        function getFeatureStatisticsDataSource(dataSources) {
+          var dss = [];
+          if (typeof dataSources === 'object') {
+            for (var label in dataSources) {
+              var ds = dataSources[label];
+              if (ds.type === 'FeatureStatistics') {
+                dss.push(ds);
+              }
+            }
+          }
+          return dss;
+        }
+
+        function upperCaseOutStatisticFieldName(osName) {
+          return osName && osName.toUpperCase();
+        }
+
+        return oldConfig;
+      },
+
+      compatible: true
+    }, {
+      version: '2.9',
+
+      description: 'The version for Online 6.2.',
+
+      upgrader: function(oldConfig){
         return oldConfig;
       },
 

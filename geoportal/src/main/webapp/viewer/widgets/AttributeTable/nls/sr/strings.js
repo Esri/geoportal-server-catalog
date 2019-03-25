@@ -40,5 +40,21 @@ define({
   "sortDes": "Sortiraj po opadajućem redosledu",
   "statistics": "Statistika",
   "attachments": "Prilozi",
-  "files": "datoteke"
+  "files": "datoteke",
+  "keepRichTextLabel": "Zadrži obogaćeni tekst",
+  "whatsThis": "Šta je ovo?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} sadrži sledeća polja obogaćenog teksta: ",
+      "line2": " ovo može da uključi stilove formatiranja teksta, kao što su font, boja i veličine teksta.",
+      "line3": "Kada se izveze u CSV format, stilovi oblikovanja će biti sačuvani u formi HTML oznaka. Možete da izaberete da ne čuvate obogaćeni tekst opozivanjem izbora opcije \"Keep rich text format“."
+    },
+    "example": {
+      "label": "Na primer:",
+      "scenarios": {
+        "first": "biće podrazumevano izvezeno kao sledeći tekst:",
+        "second": "a sledeći tekst bez obogaćenog teksta:"
+      }
+    }
+  }
 });

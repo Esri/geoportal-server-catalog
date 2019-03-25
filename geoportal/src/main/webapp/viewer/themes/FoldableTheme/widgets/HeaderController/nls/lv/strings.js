@@ -1,5 +1,5 @@
 define({
-  "_widgetLabel": "Galvenes kontrolieris",
+  "_widgetLabel": "Galvene",
   "signin": "Pierakstīties",
   "signout": "Izrakstīties",
   "about": "Par",

@@ -5,6 +5,12 @@ define({
   "actions": "Laagvelden configureren",
   "field": "Veld",
   "alias": "Alias",
+  "url": "URL",
+  "sortField": "Veld sorteren",
+  "sortOrderTooltips": {
+    "toDescending": "Verander naar aflopende volgorde",
+    "toAscending": "Verander naar oplopende volgorde"
+  },
   "visible": "Zichtbaar",
   "linkField": "Linkveld",
   "noLayers": "Er zijn geen objectlagen beschikbaar",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Exporteren naar CSV",
   "expand": "Klap de widget eerst uit",
   "filterByExtent": "Schakel Filteren op kaartextent standaard in",
+  "allowTextSelection": "Sta tekstselectie toe",
+  "highlightColor": "Markeringskleur",
   "restore": "Standaardwaarde herstellen",
   "ok": "OK",
   "cancel": "Annuleren",

@@ -1,17 +1,20 @@
 define({
   root: ({
     showLegend: "Show legend",
-    controlPopupMenuTitle: "Choose which actions will be shown on the layer context menu.",
+    controlPopupMenuTitle: "Choose which actions will be shown on the layer context menu",
     zoomto: "Zoom to",
     transparency: "Transparency",
     controlPopup: "Enable / Disable pop-up",
     moveUpAndDown: "Move up / Move down",
     attributeTable: "View in Attribute Table",
     url: "Description / Show item details / Download",
-    layerSelectorTitle: "Choose which layers will be shown on the list."
+    expandAllLayers: "Expand all layers",
+    expandAllLayersByDefault: "Expand all layers by default",
+    layerSelectorTitle: "Choose which layers will be shown on the list"
   }),
   "ar": 1,
   "bs": 1,
+  "ca": 1,
   "cs": 1,
   "da": 1,
   "de": 1,
@@ -23,6 +26,7 @@ define({
   "he": 1,
   "hi": 1,
   "hr": 1,
+  "hu": 1,
   "it": 1,
   "id": 1,
   "ja": 1,
@@ -36,6 +40,7 @@ define({
   "pt-pt": 1,
   "ro": 1,
   "ru": 1,
+  "sl": 1,
   "sr": 1,
   "sv": 1,
   "th": 1,

@@ -14,6 +14,7 @@ define({
   "generalSetting": "Allmänna inställningar",
   "allPlaceholder": "Platshållartext för sökning i alla: ",
   "showInfoWindowOnSelect": "Visa popup för det hittade geoobjekt eller den hittade platsen",
+  "showInfoWindowOnSelect2": "Visa popup när geoobjektet eller platsen hittas.",
   "searchInCurrentMapExtent": "Sök bara i den aktuella kartutbredningen",
   "zoomScale": "Zoomningsskala",
   "locatorUrl": "Geokodarens URL",

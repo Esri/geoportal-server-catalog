@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Di chuyển lên / Di chuyển xuống",
   "attributeTable": "Xem trong Bảng Thuộc tính",
   "url": "Thông tin mô tả / Hiện thông tin chi tiết mục / Tải về",
+  "expandAllLayers": "Mở rộng tất cả các lớp",
+  "expandAllLayersByDefault": "Mở rộng tất cả các lớp theo mặc định",
   "layerSelectorTitle": "Chọn lớp sẽ được hiển thị trên danh sách."
 });

@@ -1,4 +1,4 @@
-﻿<div style="width:320px;">
+﻿<div class="symbol-chooser" style="width:320px;">
 	<div class="symbol-section point-symbol-section" data-dojo-attach-point="pointSection">
 		<table class="symbol-set-table" cellspacing="0">
 			<colgroup>
@@ -17,18 +17,7 @@
 				<tr class="point-sym-class-select-tr">
 					<td colspan="2">
 						<select class="restrict-select-width" data-dojo-attach-point="pointSymClassSelect" data-dojo-type="dijit/form/Select" style="width:100%;height:30px;">
-							 <option value='0' selected="selected">${nls.basic}</option>
-							 <option value='1'>A-Z</option>
-							 <option value='2'>${nls.arrows}</option>
-							 <option value='3'>${nls.business}</option>
-							 <option value='4'>${nls.cartographic}</option>
-							 <option value='5'>${nls.nationalParkService}</option>
-							 <option value='6'>${nls.outdoorRecreation}</option>
-							 <option value='7'>${nls.peoplePlaces}</option>
-							 <option value='8'>${nls.safetyHealth}</option>
-							 <option value='9'>${nls.shapes}</option>
-							 <option value='10'>${nls.transportation}</option>
-							 <option value="custom">${nls.customImage}</option>
+
 						</select>
 					</td>
 				</tr>
@@ -38,7 +27,8 @@
 					</td>
 				</tr>
 				<tr class="point-icon-tables-tr" data-dojo-attach-point="pointIconTablesTr">
-					<td colspan="2">
+					<td colspan="2" style="position:relative">
+						<div data-dojo-type="jimu/dijit/LoadingIndicator" data-dojo-attach-point="loadingShelter" data-dojo-props='hidden:true'></div>
 						<div class="icon-tables" data-dojo-attach-point="pointIconTables">
 						</div>
 					</td>
