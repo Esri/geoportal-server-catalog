@@ -1,0 +1,102 @@
+version: '3.5'
+
+services:
+  geoportal:
+    build: gpt_stack/geoportal
+    ports: 
+# keep it off 8080 on local dev
+      - "8082:8080"
+    hostname: geoportal
+    environment:
+      - es_cluster=es-geoportal
+      - es_node=elasticsearch
+      - gpt_authentication=authentication-simple.xml
+    volumes:
+      - gptharvester:/root
+      - gptmetadata:/opt/tomcat/webapps/metadata
+    networks:
+      - datastudio
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '0.50'
+#          memory: 768M
+#        reservations:
+#          cpus: '0.25'
+#          memory: 256M
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:6.5.3
+    container_name: elasticsearch1
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    volumes:
+      - esdata1:/usr/share/elasticsearch/data
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms2g -Xmx2g"
+      - discovery.type=single-node
+      - cluster.name=es-geoportal
+      - xpack.security.enabled=false
+      - xpack.ml.enabled=false
+    networks:
+      - datastudio
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '0.50'
+#          memory: 512M
+#        reservations:
+#          cpus: '0.25'
+#          memory: 512M
+
+#  elasticsearch2:
+#    image: docker.elastic.co/elasticsearch/elasticsearch:6.6.1
+#    container_name: elasticsearch2
+#    environment:
+#      - cluster.name=docker-cluster
+#      - bootstrap.memory_lock=true
+#      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+#      - "discovery.zen.ping.unicast.hosts=elasticsearch"
+#      - xpack.security.enabled=false
+#      - xpack.ml.enabled=false
+#    ulimits:
+#      memlock:
+#        soft: -1
+#        hard: -1
+#    volumes:
+#      - esdata2:/usr/share/elasticsearch/data
+#    networks:
+#      - default
+#    deploy:
+#      resources:
+#        limits:
+#          cpus: '0.50'
+#          memory: 512M
+#        reservations:
+#          cpus: '0.25'
+#          memory: 256M
+
+# ########pain point removed
+# requires creation of an  geoportal network.
+# docker network geoportal create
+###########
+networks:
+  datastudio:
+    external:
+      name: datastudio
+
+volumes:
+  esdata1:
+    driver: local
+  gptharvester:
+    driver: local
+  gptmetadata:
+    driver: local
