@@ -131,8 +131,18 @@
       this.stack.unshift(el);
       this.activeElement = el;
       //console.log("start",prefix+"+"+localName,namespaceURI);
+    }},
+  
+    writeRawDocument: {writable:true,value:function(rawDoc) {
+      console.log("Inside writeRawDocument()");
+      var el = gs.Object.create(gs.base.XmlRaw).init(rawDoc);
+      if (this.activeElement) {
+        this.activeElement.elements.push(el);
+      } else {
+        this.root = el;
+      }
     }}
-
+  
   });
 
   /* ============================================================================================ */
@@ -207,6 +217,22 @@
       }
     }}
 
+  });
+
+
+  /* ============================================================================================ */
+
+  gs.base.XmlRaw = gs.Object.create(gs.base.XmlNode,{
+    rawDoc: {writable: true, value: ""},
+    
+    init: {writable:true,value:function(rawDoc) {
+      this.rawDoc = rawDoc;
+      return this;
+    }},
+  
+    write: {writable:true,value:function(doc) {
+      doc.sbXml.append(this.rawDoc.replace(/^<\?xml.*\?>/gi,''));  
+    }}
   });
 
   /* ============================================================================================ */

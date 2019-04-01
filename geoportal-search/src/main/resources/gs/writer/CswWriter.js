@@ -146,6 +146,13 @@
     }},
 
     writeEntry: {writable:true,value:function(task,xmlBuilder,item,options) {
+      if (task.request.parameterMap["outputSchema"]===task.uris.URI_GMD) {
+        if (item && item._source && item._source.sys_xml_clob) {
+          xmlBuilder.writeRawDocument(item._source.sys_xml_clob);
+        }
+        return
+      }
+      
       var uris = this.ensureUris(task);
       var recordTypeName = options.recordTypeName;
       if (options.entryOnly) {
