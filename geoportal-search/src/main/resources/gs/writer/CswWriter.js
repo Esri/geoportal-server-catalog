@@ -147,9 +147,19 @@
 
     writeEntry: {writable:true,value:function(task,xmlBuilder,item,options) {
       if (task.request.parameterMap["outputSchema"]===task.uris.URI_GMD) {
-        if (item && item._source && item._source.sys_xml_clob) {
-          xmlBuilder.writeRawDocument(item._source.sys_xml_clob);
+        var clob = item && item._source && item._source.sys_xml_clob? item._source.sys_xml_clob: null;
+        if (clob!=null) {
+          var match = clob.replace(/^<\?xml.*\?>/gi,'').match(/^<[^>]*>/gi);
+          if (!match || match.length==0 || match[0].search('MD_Metadata')<0) {
+            clob = null;
+          }
         }
+        if (!clob) {
+          clob = '<gmd:MD_Metadata xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd">'+
+                 'Cannot disseminate schema to "http://www.isotc211.org/2005/gmd" for item \'' +(item && item._id? item._id: '???')+ '\'. This catalog contains mixed data.'+
+                 '</gmd:MD_Metadata>';
+        }
+        xmlBuilder.writeRawDocument(clob);
         return
       }
       
