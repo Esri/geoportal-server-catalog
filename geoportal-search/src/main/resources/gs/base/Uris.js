@@ -36,7 +36,8 @@
     URI_OWS: "http://www.opengis.net/ows",
     URI_OWS2: "http://www.opengis.net/ows/2.0",
     URI_SDI: "http://www.geodata.gov/sdi_atom",
-    URI_TIME: "http://a9.com/-/opensearch/extensions/time/1.0/"
+    URI_TIME: "http://a9.com/-/opensearch/extensions/time/1.0/",
+    URI_GMD: "http://www.isotc211.org/2005/gmd"
 
   };
 
