@@ -140,12 +140,12 @@ body {
 	padding: 0px;
 }
 .g-search-pane-left {
-	width: 25%; 
-	min-width: 100px; 
+	/*width: 25%; */
+	/*min-width: 100px; */
 	float: left; 
 }
 .g-search-pane-right {
-	width: 73%; 
+	/*width: 73%; */
 	float: right; 
 }
 
@@ -251,9 +251,9 @@ and will apply to all search facets */
 .g-search-results {
   /*max-height: 400px;
   overflow-y: auto;*/
-  max-height: -webkit-calc(100vh - 200px);
-  max-height:    -moz-calc(100vh - 200px);
-  max-height:         calc(100vh - 200px);
+  max-height: -webkit-calc(100vh  - 16em);
+  max-height:    -moz-calc(100vh  - 16em);
+  max-height:         calc(100vh  - 16em);
   overflow: auto;
 }
 
