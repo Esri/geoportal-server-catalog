@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?><resource xmlns="http://datacite.org/schema/kernel-4" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://datacite.org/schema/kernel-4 http://schema.datacite.org/meta/kernel-4.1/metadata.xsd">
+  <identifier identifierType="DOI">10.1594/PANGAEA.811023</identifier>
+  <creators>
+      <creator>
+         <creatorName>Carman, M F</creatorName>
+         <givenName>M F</givenName>
+         <familyName>Carman</familyName>
+      </creator>
+      <creator>
+         <creatorName>Dietrich, Volker</creatorName>
+         <givenName>Volker</givenName>
+         <familyName>Dietrich</familyName>
+      </creator>
+      <creator>
+         <creatorName>Sommerauer, J</creatorName>
+         <givenName>J</givenName>
+         <familyName>Sommerauer</familyName>
+      </creator>
+  </creators>
+  <titles>
+      <title>(Table 2) Minerals of modal analyses at DSDP Leg 73 Holes</title>
+  </titles>
+  <publisher>PANGAEA - Data Publisher for Earth &amp; Environmental Science</publisher>
+  <publicationYear>1984</publicationYear>
+  <subjects>
+      <subject subjectScheme="Parameter">Event label</subject>
+      <subject subjectScheme="Parameter">Latitude of event</subject>
+      <subject subjectScheme="Parameter">Longitude of event</subject>
+      <subject subjectScheme="Parameter">Elevation of event</subject>
+      <subject subjectScheme="Parameter">Sample code/label</subject>
+      <subject subjectScheme="Parameter">Piece</subject>
+      <subject subjectScheme="Parameter">Unit</subject>
+      <subject subjectScheme="Parameter">Plagioclase</subject>
+      <subject subjectScheme="Parameter">Clinopyroxene</subject>
+      <subject subjectScheme="Parameter">Olivine</subject>
+      <subject subjectScheme="Parameter">Opaque minerals</subject>
+      <subject subjectScheme="Parameter">Apatite</subject>
+      <subject subjectScheme="Parameter">Biotite</subject>
+      <subject subjectScheme="Parameter">Amphibole</subject>
+      <subject subjectScheme="Parameter">Minerals</subject>
+      <subject subjectScheme="Parameter">Vesicle</subject>
+      <subject subjectScheme="Method">ODP sample designation</subject>
+      <subject subjectScheme="Method">Coarse fraction/modal analysis</subject>
+      <subject subjectScheme="Campaign">Leg73</subject>
+      <subject subjectScheme="Basis">Glomar Challenger</subject>
+      <subject subjectScheme="Project">Deep Sea Drilling Project (DSDP)</subject>
+  </subjects>
+  <dates>
+      <date dateType="Collected">1980-04-22T00:00:00/1980-05-21T00:00:00</date>
+  </dates>
+  <language>en</language>
+  <resourceType resourceTypeGeneral="Dataset">Dataset</resourceType>
+  <relatedIdentifiers>
+      <relatedIdentifier relatedIdentifierType="DOI" relationType="IsPartOf">10.1594/PANGAEA.811032</relatedIdentifier>
+      <relatedIdentifier relatedIdentifierType="DOI" relationType="References">10.2973/dsdp.proc.73.120.1984</relatedIdentifier>
+  </relatedIdentifiers>
+  <sizes>
+      <size>464 data points</size>
+  </sizes>
+  <formats>
+      <format>text/tab-separated-values</format>
+  </formats>
+  <rightsList>
+      <rights rightsURI="https://creativecommons.org/licenses/by/3.0/">Creative Commons Attribution 3.0 Unported (CC-BY-3.0)</rights>
+  </rightsList>
+  <geoLocations>
+      <geoLocation>
+         <geoLocationBox>
+            <westBoundLongitude>-11.6662</westBoundLongitude>
+            <eastBoundLongitude>3.5123</eastBoundLongitude>
+            <southBoundLatitude>-29.4842</southBoundLatitude>
+            <northBoundLatitude>-25.5233</northBoundLatitude>
+         </geoLocationBox>
+      </geoLocation>
+      <geoLocation>
+         <geoLocationPlace>South Atlantic/RIDGE</geoLocationPlace>
+      </geoLocation>
+      <geoLocation>
+         <geoLocationPlace>South Atlantic/VALLEY</geoLocationPlace>
+      </geoLocation>
+      <geoLocation>
+         <geoLocationPlace>South Atlantic/PLATEAU</geoLocationPlace>
+      </geoLocation>
+      <geoLocation>
+         <geoLocationPlace>South Atlantic/CANYON</geoLocationPlace>
+      </geoLocation>
+  </geoLocations>
+</resource>

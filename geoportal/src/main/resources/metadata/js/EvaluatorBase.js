@@ -191,6 +191,10 @@ var G = {
         var isEnd = (options.isEnd || false);
         value = this.DateUtil.checkIsoDateTime(value,isEnd);
       }
+      if (typeof value === "string") {
+          value = value.trim();
+          value = this.Val.unescape(value); // unescape HTML and Octal.
+      }
     }
     return value;
   },
