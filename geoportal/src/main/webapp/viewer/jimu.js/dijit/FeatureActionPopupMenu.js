@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -90,6 +90,16 @@ define(['dojo/_base/declare',
       this.menuItems.push(menuItem);
 
       this.own(on(menuItem, 'click', lang.hitch(this, this.hide)));
+    },
+
+    markAsSelected: function(action) {
+      array.forEach(this.menuItems, function(menuItem) {
+        if (menuItem.action.label === action.label) {
+          menuItem.setSelected(true);
+        } else {
+          menuItem.setSelected(false);
+        }
+      });
     },
 
     prepareActions: function(featureset, allowExport) {

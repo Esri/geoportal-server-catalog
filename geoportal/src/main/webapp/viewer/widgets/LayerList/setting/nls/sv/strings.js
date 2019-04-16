@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Flytta uppåt/Flytta nedåt",
   "attributeTable": "Visa i attributtabell",
   "url": "Beskrivning/Visa objektinformation/Hämta",
+  "expandAllLayers": "Expandera alla lager",
+  "expandAllLayersByDefault": "Expandera alla lager som standard",
   "layerSelectorTitle": "Välj vilka lager som ska visas i listan."
 });

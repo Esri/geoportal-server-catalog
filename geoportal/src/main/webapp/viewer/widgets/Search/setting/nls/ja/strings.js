@@ -14,6 +14,7 @@ define({
   "generalSetting": "一般設定",
   "allPlaceholder": "標準のプレースホルダー テキスト: ",
   "showInfoWindowOnSelect": "検出されたフィーチャまたは位置のポップアップを表示",
+  "showInfoWindowOnSelect2": "フィーチャまたは位置が見つかった場合にポップアップを表示",
   "searchInCurrentMapExtent": "現在のマップ範囲内のみを検索",
   "zoomScale": "ズーム縮尺",
   "locatorUrl": "ジオコーダーの URL",

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -68,7 +68,7 @@ define([
 
       getConfig: function() {
         //check inputs
-        if (!this.timeout.value || !this.scale.value) {
+        if (!this.isValid()) {
           new Message({
             message: this.nls.warning
           });
@@ -82,7 +82,14 @@ define([
 
         this.config.locateButton.scale = parseFloat(this.scale.value);
         return this.config;
-      }
+      },
 
+      isValid: function () {
+        if (!this.scale.isValid() || !this.timeout.isValid()) {
+          return false;
+        }
+
+        return true;
+      }
     });
   });

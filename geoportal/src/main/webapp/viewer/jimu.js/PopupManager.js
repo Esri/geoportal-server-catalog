@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2015 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,8 +24,8 @@ define([
   './utils',
   './dijit/FeatureActionPopupMenu',
   './RelatedRecordsPopupProjector'
-  ], function(declare, lang, html, topic, on, query, FeatureActionManager, jimuUtils, PopupMenu,
-  RelatedRecordsPopupProjector) {
+  ], function(declare, lang, html, topic, on, query, FeatureActionManager,
+  jimuUtils, PopupMenu, RelatedRecordsPopupProjector) {
     var instance = null;
     var clazz = declare(null, {
       mapManager: null,
@@ -105,7 +105,7 @@ define([
         this.initPopupMenu([this.selectedFeature]);
 
         var selectedFeatureLayer = this.selectedFeature.getLayer();
-        var hasInfoTemplate = this.selectedFeature.infoTempalte ||
+        var hasInfoTemplate = this.selectedFeature.infoTemplate ||
                               (selectedFeatureLayer && selectedFeatureLayer.infoTemplate);
         if(hasInfoTemplate) {
           this._createRelatedRecordsPopupProjector(this.selectedFeature);
@@ -132,7 +132,8 @@ define([
         var featureSet = jimuUtils.toFeatureSet(features);
         this.featureActionManager.getSupportedActions(featureSet).then(lang.hitch(this, function(actions){
           var excludeActions = ['ZoomTo', 'ShowPopup', 'Flash', 'ExportToCSV',
-            'ExportToFeatureCollection', 'ExportToGeoJSON', 'ShowRelatedRecords', 'SaveToMyContent'];
+            'ExportToFeatureCollection', 'ExportToGeoJSON', 'ShowRelatedRecords',
+            'SaveToMyContent', 'CreateLayer'];
           var popupActions = actions.filter(lang.hitch(this, function(action){
             return excludeActions.indexOf(action.name) < 0 ;
           }));

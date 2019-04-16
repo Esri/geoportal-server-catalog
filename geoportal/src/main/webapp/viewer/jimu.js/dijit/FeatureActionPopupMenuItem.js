@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -27,7 +27,7 @@ define(['dojo/_base/declare',
   return declare([_WidgetBase, _TemplatedMixin, Evented], {
     baseClass: 'popup-menu-item',
     templateString: '<div>' +
-      '<div class="icon jimu-float-leading">' +
+      '<div class="icon jimu-float-leading" data-dojo-attach-point="iconContainer">' +
       '<div class="feature-action" data-dojo-attach-point="iconNode"></div>' +
       '</div>' +
       '<div class="label" data-dojo-attach-point="labelNode"></div>' +
@@ -51,6 +51,9 @@ define(['dojo/_base/declare',
         this.labelNode.innerHTML = this.action.label;
 
         if(this.action.iconClass) {
+          if (this.action.iconClass === 'no-icon') {
+            html.addClass(this.iconContainer, 'no-icon');
+          }
           html.addClass(this.iconNode, this.action.iconClass);
         } else {
           html.setStyle(this.iconNode, 'background-image', 'url(' + this.action.getIcon('default') + ')');
@@ -61,6 +64,14 @@ define(['dojo/_base/declare',
       }
 
       this.own(on(this.domNode, 'click', lang.hitch(this, this._clickHandler)));
+    },
+
+    setSelected: function(selected) {
+      if (selected) {
+        html.addClass(this.domNode, 'selected');
+      } else {
+        html.removeClass(this.domNode, 'selected');
+      }
     },
 
     _useNormalIcon: function() {

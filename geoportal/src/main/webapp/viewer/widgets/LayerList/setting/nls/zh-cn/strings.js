@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "上移/下移",
   "attributeTable": "在属性表中查看",
   "url": "描述/显示项目详细信息/下载",
+  "expandAllLayers": "展开所有图层",
+  "expandAllLayersByDefault": "默认展开所有图层",
   "layerSelectorTitle": "选择将在列表中显示的图层。"
 });

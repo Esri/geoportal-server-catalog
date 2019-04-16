@@ -237,7 +237,7 @@
             "relation": relation,
             "shape": {
               "type": "envelope",
-              "coordinates": [[coords[0],coords[3]], [coords[2],coords[1]]]
+              "coordinates": [[Number(coords[0]),Number(coords[3])], [Number(coords[2]),Number(coords[1])]]
             }
           };
         }
@@ -245,12 +245,12 @@
           query = {"geo_bounding_box": {}};
           query["geo_bounding_box"][field] = {
             "top_left" : {
-              "lon" : coords[0],
-              "lat" : coords[3]
+              "lon" : Number(coords[0]),
+              "lat" : Number(coords[3])
             },
             "bottom_right" : {
-              "lon" : coords[2],
-              "lat" : coords[1]
+              "lon" : Number(coords[2]),
+              "lat" : Number(coords[1])
             }
           };
         }

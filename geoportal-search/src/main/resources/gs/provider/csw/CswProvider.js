@@ -497,6 +497,8 @@
           outputSchema = task.uris.URI_CSW;
         } else if (lc === task.uris.URI_ATOM.toLowerCase()) {
           outputSchema = task.uris.URI_ATOM;
+        } else if (lc === task.uris.URI_GMD.toLowerCase()) {
+          outputSchema = task.uris.URI_GMD;
         } else {
           msg = "CSW: The outputSchema parameter must be "+task.uris.URI_CSW+" or "+task.uris.URI_ATOM;
           ows = gs.Object.create(gs.provider.csw.OwsException);

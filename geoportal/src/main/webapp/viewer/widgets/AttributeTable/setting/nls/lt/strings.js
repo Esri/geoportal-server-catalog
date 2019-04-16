@@ -5,6 +5,12 @@ define({
   "actions": "Konfigūruoti sluoksnio laukus",
   "field": "Laukas",
   "alias": "Pseudonimas",
+  "url": "URL",
+  "sortField": "Rūšiuoti lauką",
+  "sortOrderTooltips": {
+    "toDescending": "Pakeisti į mažėjimo tvarką",
+    "toAscending": "Pakeisti į didėjimo tvarką"
+  },
   "visible": "Matoma",
   "linkField": "Nuorodos laukas",
   "noLayers": "Elementų sluoksnių nėra",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Leisti eksportuoti į CSV",
   "expand": "Atverti valdiklį iš pradžių",
   "filterByExtent": "Įgalinti numatytąjį filtravimą pagal žemėlapio aprėptį",
+  "allowTextSelection": "Leisti teksto žymėjimą",
+  "highlightColor": "Išryškinimo spalva",
   "restore": "Atkurti numatytąją reikšmę",
   "ok": "Gerai",
   "cancel": "Atšaukti",

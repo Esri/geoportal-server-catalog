@@ -5,6 +5,12 @@ define({
   "actions": "레이어 필드 구성",
   "field": "필드",
   "alias": "별칭",
+  "url": "URL",
+  "sortField": "정렬 필드",
+  "sortOrderTooltips": {
+    "toDescending": "내림차순으로 변경",
+    "toAscending": "오름차순으로 변경"
+  },
   "visible": "표시",
   "linkField": "링크 필드",
   "noLayers": "피처 레이어를 사용할 수 없음",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "CSV로 내보내기 허용",
   "expand": "초기에 위젯 확장",
   "filterByExtent": "기본 설정에 따라 맵 범위별 필터링 활성화",
+  "allowTextSelection": "텍스트 선택 허용",
+  "highlightColor": "강조 색상",
   "restore": "기본 값으로 복원",
   "ok": "확인",
   "cancel": "취소",

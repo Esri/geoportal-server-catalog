@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ define([
   'dojo/json',
   'dojo/Deferred',
   'esri/graphicsUtils',
+  'esri/IdentityManager',
   'jimu/portalUtils',
   'jimu/portalUrlUtils',
   'jimu/Role',
@@ -28,7 +29,7 @@ define([
   '../BaseFeatureAction',
   'jimu/dijit/Popup',
   'jimu/dijit/AddItemForm'
-], function(declare, lang, array, JSON, Deferred, graphicsUtils,
+], function(declare, lang, array, JSON, Deferred, graphicsUtils, IdentityManager,
   portalUtils, portalUrlUtils, Role, Message, BaseFeatureAction, Popup, ItemContent){
   var clazz = declare(BaseFeatureAction, {
     name: 'SaveToMyContent',
@@ -38,51 +39,67 @@ define([
       if (featureSet.features.length <= 0 || !featureSet.features[0].geometry) {
         return false;
       }
-      return this.checkPrivilege();
+      return true;
     },
 
     onExecute: function(featureSet, layer){
-      var itemContent = new ItemContent({
-        appConfig: this.appConfig
-      });
+      this.checkPrivilege().then(lang.hitch(this, function(hasPrivilege) {
+        if (hasPrivilege) {
+          var itemContent = new ItemContent({
+            appConfig: this.appConfig
+          });
 
-      var popup = new Popup({
-        content: itemContent,
-        titleLabel: window.jimuNls.featureActions.SaveToMyContent,
-        width: 525,
-        height: 220,
-        buttons: [{
-          label: window.jimuNls.common.ok,
-          onClick: lang.hitch(this, function() {
-            itemContent.showBusy();
-            popup.disableButton(0);
-            itemContent.validate().then(lang.hitch(this, function(res) {
-              if (res.valid) {
-                this._addItem(featureSet, layer, itemContent);
-              } else {
-                itemContent.hideBusy();
-                popup.enableButton(0);
-              }
-            }));
-          })
-        }, {
-          label: window.jimuNls.common.cancel,
-          classNames: ['jimu-btn-vacation'],
-          onClick: lang.hitch(this, function() {
-            popup.close();
-          })
-        }]
-      });
+          var popup = new Popup({
+            content: itemContent,
+            titleLabel: window.jimuNls.featureActions.SaveToMyContent,
+            width: 525,
+            height: 220,
+            buttons: [{
+              label: window.jimuNls.common.ok,
+              onClick: lang.hitch(this, function() {
+                itemContent.showBusy();
+                popup.disableButton(0);
+                itemContent.validate().then(lang.hitch(this, function(res) {
+                  if (res.valid) {
+                    this._addItem(featureSet, layer, itemContent);
+                  } else {
+                    itemContent.hideBusy();
+                    popup.enableButton(0);
+                  }
+                }));
+              })
+            }, {
+              label: window.jimuNls.common.cancel,
+              classNames: ['jimu-btn-vacation'],
+              onClick: lang.hitch(this, function() {
+                popup.close();
+              })
+            }]
+          });
+        } else {
+          new Message({
+            message: window.jimuNls.noEditPrivileges
+          });
+        }
+      }));
     },
 
     checkPrivilege: function () {
       var portalUrl = portalUrlUtils.getStandardPortalUrl(this.appConfig.portalUrl);
       var portal = portalUtils.getPortal(portalUrl);
 
-      if(!portal || !portal.haveSignIn()) {
+      if(!portal) {
         var def = new Deferred();
         def.resolve(false);
         return def;
+      } else if (!portal.haveSignIn()) {
+        IdentityManager.useSignInPage = false;
+        return portal.signIn().then(lang.hitch(this, function(){
+          IdentityManager.useSignInPage = true;
+          return this._hasPrivilege(portal);
+        }), lang.hitch(this, function() {
+          IdentityManager.useSignInPage = true;
+        }));
       } else {
         return this._hasPrivilege(portal);
       }

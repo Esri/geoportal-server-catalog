@@ -14,6 +14,7 @@ define({
   "generalSetting": "הגדרות כלליות",
   "allPlaceholder": "טקסט Placeholder לחיפוש מלא: ",
   "showInfoWindowOnSelect": "הצג חלון קופץ עבור הישות או המיקום שנמצאו",
+  "showInfoWindowOnSelect2": "הצג חלון קופץ כאשר הישות או המיקום יימצאו.",
   "searchInCurrentMapExtent": "חפש רק בתיחום המפה הנוכחי",
   "zoomScale": "קנה מידה להתמקדות",
   "locatorUrl": "URL של מעגן הכתובות",

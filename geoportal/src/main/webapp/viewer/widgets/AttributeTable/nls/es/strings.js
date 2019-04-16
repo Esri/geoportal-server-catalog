@@ -40,5 +40,21 @@ define({
   "sortDes": "Orden descendente",
   "statistics": "Estadísticas",
   "attachments": "Adjuntos",
-  "files": "archivos"
+  "files": "archivos",
+  "keepRichTextLabel": "Conservar formato de texto enriquecido",
+  "whatsThis": "¿Qué es esto?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} contiene los siguientes campos de texto enriquecido: ",
+      "line2": " que podría incluir estilos de formato de texto, tales como fuentes, colores o tamaños de texto.",
+      "line3": "Al exportar a CSV, los estilos de formato se conservan en forma de etiquetas HTML. Usted tiene la opción de no conservar los formatos de texto enriquecido desactivando la casilla \"Conservar formato de texto enriquecido\"."
+    },
+    "example": {
+      "label": "Por ejemplo:",
+      "scenarios": {
+        "first": "se exportará de forma predeterminada como el siguiente texto:",
+        "second": "y el siguiente texto sin formato de texto enriquecido:"
+      }
+    }
+  }
 });

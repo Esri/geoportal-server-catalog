@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,9 @@ define(['dojo/_base/declare',
       color: null, //dojo.Color or hex string
 
       showLabel: false,
+      around: null,
+
+      _ENABLE: true,
       //events:
       //change
       recordUID: "",
@@ -53,17 +56,18 @@ define(['dojo/_base/declare',
         this.inherited(arguments);
       },
 
+      enable: function (){
+        this._ENABLE = true;
+        html.removeClass(this.domNode, "disable");
+      },
+      disable: function() {
+        this._ENABLE = false;
+        html.addClass(this.domNode, "disable");
+      },
+
       isPartOfPopup: function(target) {
         var node = this.tooltipDialog.domNode;
-        var isInternal1 = target === node || html.isDescendant(target, node);
-
-        var nodeInsidePopup = null;
-        if (this.picker && this.picker.getPickerTooltipDialog) {
-          nodeInsidePopup = this.picker.getPickerTooltipDialog().domNode;
-        }
-        var isInternal2 = target === nodeInsidePopup || html.isDescendant(target, nodeInsidePopup);
-
-        var isInternal = isInternal1 || isInternal2;
+        var isInternal = target === node || html.isDescendant(target, node);
         return isInternal;
       },
 
@@ -71,17 +75,27 @@ define(['dojo/_base/declare',
         this._hideTooltipDialog();
       },
 
+      showTooltipDialog: function() {
+        this._showTooltipDialog();
+      },
+
+      initUI: function(){
+        this.picker.initUI();
+      },
+
       _showTooltipDialog: function() {
         dojoPopup.open({
           parent: this.getParent(),
           popup: this.tooltipDialog,
-          around: this.domNode
+          around: this.around ? this.around : this.domNode,//position
+          orient: this.orient
         });
+
         this._isTooltipDialogOpened = true;
       },
 
       _hideTooltipDialog: function() {
-        dojoPopup.close(this.tooltipDialog);
+        dojoPopup.hide(this.tooltipDialog);
         this._isTooltipDialogOpened = false;
       },
 
@@ -97,24 +111,29 @@ define(['dojo/_base/declare',
             showTransparent: false,
             showColorPalette: true,
             showCoustom: true,
-            showCoustomRecord: true
+            showColorPickerOK: true,//ok btn
+            showColorPickerApply: true,//apply btn
+            showCoustomRecord: true,
+            closeDialogWhenChange: true//TODO
           },
           recordUID: this.recordUID,
           onChange: lang.hitch(this, function(color) {
             if (color) {
               var newColor = new Color(color);
               this.setColor(newColor);
-              this.onChange(newColor);
+              this.onChange(newColor);//emit change event
             }
           })
         });
         picker.placeAt(ttdContent);
         picker.startup();
 
-        // this.own(on(picker, 'jimuColorPicker-popupOpen', lang.hitch(this, function () {
-        // })));
-        this.own(on(picker, 'jimuColorPicker-popupClose', lang.hitch(this, function () {
+        this.own(on(picker, 'close', lang.hitch(this, function () {
           this._hideTooltipDialog();
+        })));
+        this.own(on(picker, 'change-style', lang.hitch(this, function () {
+          this._hideTooltipDialog();
+          this._showTooltipDialog();//re-open to re-posction
         })));
 
         this.own(on(this.domNode, 'click', lang.hitch(this, function(event) {
@@ -124,7 +143,9 @@ define(['dojo/_base/declare',
           if (this._isTooltipDialogOpened) {
             this._hideTooltipDialog();
           } else {
-            this._showTooltipDialog();
+            if (false !== this._ENABLE) {
+              this._showTooltipDialog();
+            }
           }
         })));
         this.own(on(document, 'click', lang.hitch(this, function(event) {
@@ -194,9 +215,6 @@ define(['dojo/_base/declare',
       },
       getTooltipDialog: function() {
         return this.tooltipDialog || null;
-      },
-      isJimuColorPickerTooltipDialogOpened: function(){
-        return this.picker.isJimuColorPickerTooltipDialogOpened();
       }
     });
   });

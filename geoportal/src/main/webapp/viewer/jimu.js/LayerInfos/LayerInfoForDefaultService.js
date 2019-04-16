@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -174,16 +174,24 @@ define([
      ***************************************************/
     // async method, return a deferred.
     _getServiceDefinition: function() {
-      return this.originOperLayer.mapService.layerInfo._getSubserviceDefinition(this.subId);
+      var mapServiceSubId = this.originOperLayer.mapService.mapServiceSubId;
+      return this.originOperLayer.mapService.layerInfo._getSubserviceDefinition(mapServiceSubId);
     },
 
     /***************************************************
      * methods for control service definition
      ***************************************************/
 
-    _getLayerObject: function() {
+    _getLayerObject: function(url) {
       var def = new Deferred();
-      this._layerObjectFacory.getLayerObject().then(lang.hitch(this, function(layerObject) {
+      var layerObjectDef;
+      if(url) {
+        layerObjectDef = this._layerObjectFacory.getLayerObjectWithUrl(url);
+      } else {
+        layerObjectDef = this._layerObjectFacory.getLayerObject();
+      }
+
+      layerObjectDef.then(lang.hitch(this, function(layerObject) {
         if(this.layerObject.empty && layerObject) {
           this.layerObject = layerObject;
         }
@@ -197,6 +205,31 @@ define([
 
     getLayerObject: function() {
       return this._getLayerObject();
+    },
+
+    getLayerObjectTryUsingFeatureService: function() {
+      var featureServiceUrl;
+      if(this.isItemLayer()) {
+        return this.getItemInfo().then(lang.hitch(this, function(itemInfo) {
+          if(itemInfo && /*itemInfo.isHostedLayer() &&*/ itemInfo.getItemData() &&
+             itemInfo.getItemData().layers) {
+            array.some(itemInfo.getItemData().layers, function(layer) {
+              if(layer.id === this.subId) {
+                featureServiceUrl = layer.layerUrl;
+                return true;
+              }
+            }, this);
+          }
+
+          if(featureServiceUrl) {
+            return this._getLayerObject(featureServiceUrl);
+          } else {
+            return this._getLayerObject();
+          }
+        }));
+      } else {
+        return this.getLayerObject();
+      }
     },
 
     /*

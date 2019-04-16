@@ -1,5 +1,5 @@
 /*
-Copyright ©2014 Esri. All rights reserved.
+// Copyright © 2014 - 2018 Esri. All rights reserved.
 
 TRADE SECRETS: ESRI PROPRIETARY AND CONFIDENTIAL
 Unpublished material - all rights reserved under the
@@ -23,56 +23,57 @@ define([
 
   var mo = {};
 
-  mo.getLayerInfosParam = function() {
+  mo.getLayerInfosParam = function(config) {
     // summary:
     //   get layerInfos parameter for create/refresh/settingPage in legend dijit.
     // description:
-    var layerInfosParamFromCurrentMap = getLayerInfosParamFromCurrentMap();
+    var layerInfosParamFromCurrentMap = getLayerInfosParamFromCurrentMap(config);
     return layerInfosParamFromCurrentMap;
   };
 
-  mo.getLayerInfosParamByConfig = function(legendConfig) {
-    var layerInfosParam     = [];
-    var layerInfosParamFromCurrentMap;
-    if(legendConfig.layerInfos && legendConfig.layerInfos.length) {
-      layerInfosParamFromCurrentMap = getLayerInfosParamFromCurrentMap();
-      // respect config
-      array.forEach(layerInfosParamFromCurrentMap, function(layerInfoParam) {
-        var layerInfoConfig = getLayerInfoConfigById(legendConfig, layerInfoParam.jimuLayerInfo.id);
-        if(layerInfoConfig) {
-          layerInfoParam.hideLayers = layerInfoConfig.hideLayers;
-          layerInfosParam.push(layerInfoParam);
-        }
-      });
-    }
-    return layerInfosParam;
-  };
-
-  var getLayerInfosParamFromCurrentMap = function() {
+  var getLayerInfosParamFromCurrentMap = function(config) {
     var layerInfosParam     = [];
     var jimuLayerInfos      = LayerInfos.getInstanceSync();
     var jimuLayerInfoArray  = jimuLayerInfos.getLayerInfoArray();
     array.forEach(jimuLayerInfoArray, function(topLayerInfo) {
       var hideLayers = [];
-      if(topLayerInfo.getShowLegendOfWebmap()) {
+      if(isShowLegend(topLayerInfo, config)) {
         // temporary code.
         if(topLayerInfo.layerObject &&
            (topLayerInfo.layerObject.declaredClass === 'esri.layers.ArcGISDynamicMapServiceLayer' ||
             topLayerInfo.layerObject.declaredClass === 'esri.layers.ArcGISTiledMapServiceLayer')) {
-          topLayerInfo.traversal(function(layerInfo) {
-            if(layerInfo.isLeaf() && !layerInfo.getShowLegendOfWebmap()) {
-              hideLayers.push(layerInfo.originOperLayer.mapService.subId);
+          // topLayerInfo.traversal(function(layerInfo) {
+          //   if(layerInfo.isLeaf() && !layerInfo.getShowLegendOfWebmap()) {
+          //     hideLayers.push(layerInfo.originOperLayer.mapService.subId);
+          //   }
+          // });
+          var baseLayerInfos = topLayerInfo.layerObject.dynamicLayerInfos || topLayerInfo.layerObject.layerInfos;
+          array.forEach(baseLayerInfos, function(jsapiLayerInfo) {
+            var subLayerInfo = null;
+            topLayerInfo.traversal(function(layerInfo) {
+              if(layerInfo.subId === jsapiLayerInfo.id) {
+                if(layerInfo.isLeaf() && !isShowLegend(layerInfo, config)) {
+                  hideLayers.push(layerInfo.originOperLayer.mapService.subId);
+                }
+                subLayerInfo = layerInfo;
+                return true;
+              }
+            });
+            if(!subLayerInfo) {
+              hideLayers.push(jsapiLayerInfo.id);
             }
           });
         }
         // add to layerInfosparam
         if(topLayerInfo.isMapNotesLayerInfo()) {
           array.forEach(topLayerInfo.getSubLayers(), function(mapNotesSubLayerInfo) {
-            var layerInfoParam = {
-              layer: mapNotesSubLayerInfo.layerObject,
-              title: "Map Notes - " + mapNotesSubLayerInfo.title
-            };
-            layerInfosParam.push(layerInfoParam);
+            if(isShowLegend(mapNotesSubLayerInfo, config)) {
+              var layerInfoParam = {
+                layer: mapNotesSubLayerInfo.layerObject,
+                title: "Map Notes - " + mapNotesSubLayerInfo.title
+              };
+              layerInfosParam.push(layerInfoParam);
+            }
           });
         } else {
           var layerInfoParam = {
@@ -87,15 +88,53 @@ define([
     return layerInfosParam.reverse();
   };
 
-  var getLayerInfoConfigById = function(legendConfig, id) {
-    var layerInfoConfig = array.filter(legendConfig.layerInfos, function(layerInfoConfig) {
-      var result = false;
-      if(layerInfoConfig.id === id) {
-        result = true;
-      }
-      return result;
-    });
-    return layerInfoConfig[0];
+  mo.isSupportedLayerType = function(layer) {
+    if (layer &&
+        (layer.declaredClass === "esri.layers.ArcGISDynamicMapServiceLayer" ||
+        (layer.declaredClass === "esri.layers.ArcGISImageServiceLayer" && layer.version >= 10.2) ||
+        layer.declaredClass === "esri.layers.ArcGISImageServiceVectorLayer" ||
+        layer.declaredClass === "esri.layers.ArcGISTiledMapServiceLayer" ||
+        layer.declaredClass === "esri.layers.FeatureLayer" ||
+        layer.declaredClass === "esri.layers.StreamLayer" ||
+        layer.declaredClass === "esri.layers.KMLLayer" ||
+        layer.declaredClass === "esri.layers.GeoRSSLayer" ||
+        layer.declaredClass === "esri.layers.WMSLayer" ||
+        layer.declaredClass === "esri.layers.WFSLayer" ||
+        layer.declaredClass === "esri.layers.CSVLayer")) {
+      return true;
+    }
+    return false;
   };
+  /*
+  function isShowLegend(layerInfo, config) {
+    var isToggledOnLegend;
+    var isShowLegendResult = true;
+    var currentLayerInfo = layerInfo;
+    while(currentLayerInfo) {
+      isToggledOnLegend = config.layerState[currentLayerInfo.id] ?
+                                config.layerState[currentLayerInfo.id].selected :
+                                layerInfo._getShowLegendOfWebmap();
+      isShowLegendResult = isShowLegendResult && isToggledOnLegend;
+      currentLayerInfo = currentLayerInfo.parentLayerInfo;
+    }
+
+    return isShowLegendResult;
+  }
+  */
+
+  function isShowLegend(layerInfo, config) {
+    /*jshint unused: false*/
+    var isShowLegendResult;
+    if(layerInfo.isLeaf()) {
+      isShowLegendResult = config.layerState[layerInfo.id] ?
+                         config.layerState[layerInfo.id].selected :
+                         layerInfo.getShowLegendOfWebmap();
+    } else {
+      isShowLegendResult = true;
+    }
+    return isShowLegendResult;
+  }
+
+
   return mo;
 });

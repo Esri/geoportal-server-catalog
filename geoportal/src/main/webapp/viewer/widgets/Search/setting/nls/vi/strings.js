@@ -14,6 +14,7 @@ define({
   "generalSetting": "Thiết lập tổng quan",
   "allPlaceholder": "Văn bản giữ chỗ để tìm kiếm tất cả: ",
   "showInfoWindowOnSelect": "Hiển thị cửa sổ pop-up cho vị trí hoặc đối tượng được tìm thấy",
+  "showInfoWindowOnSelect2": "Hiển thị pop-up khi tìm thấy đối tượng hoặc vị trí",
   "searchInCurrentMapExtent": "Chỉ tìm kiếm trong kích thước bản đồ hiện tại",
   "zoomScale": "Tỷ lệ thu phóng",
   "locatorUrl": "URL Bộ mã địa lý",

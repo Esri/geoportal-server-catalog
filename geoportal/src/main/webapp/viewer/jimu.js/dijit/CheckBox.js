@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,9 +21,10 @@ define([
   'dojo/_base/html',
   'dojo/dom-class',
   'dojo/on',
-  'dojo/Evented'
+  'dojo/Evented',
+  "dojo/keys"
 ],
-function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
+function(declare, _WidgetBase, lang, html, domClass, on, Evented, keys) {
 
   return declare([_WidgetBase, Evented], {
     'baseClass': 'jimu-checkbox',
@@ -35,7 +36,7 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
 
     postCreate: function(){
       this.checkNode = html.create('div', {
-        'class': 'checkbox jimu-float-leading'
+        'class': 'checkbox jimu-float-leading jimu-icon jimu-icon-checkbox'
       }, this.domNode);
       this.labelNode = html.create('div', {
         'class': 'label jimu-float-leading',
@@ -43,9 +44,11 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
       }, this.domNode);
       if(this.checked){
         html.addClass(this.checkNode, 'checked');
+        html.addClass(this.checkNode, 'jimu-icon-checked');
       }
       if(!this.status){
         html.addClass(this.domNode, 'jimu-state-disabled');
+        html.addClass(this.checkNode, 'jimu-state-disabled');
       }
 
       this.own(
@@ -70,6 +73,8 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
         }))
       );
       this._udpateLabelClass();
+
+      this._initSection508();
     },
 
     setLabel: function(label){
@@ -85,6 +90,32 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
         }else{
           html.addClass(this.labelNode, 'not-visible');
         }
+      }
+    },
+    _initSection508: function () {
+      //with "tabindex" param
+      if ("undefined" !== typeof this.tabindex) {
+        html.setAttr(this.checkNode, "tabindex", this.tabindex);
+        //css class
+        this.own(on(this.checkNode, 'focus', lang.hitch(this, function () {
+          html.addClass(this.checkNode, "dijitCheckBoxFocused");
+        })));
+        this.own(on(this.checkNode, 'blur', lang.hitch(this, function () {
+          html.removeClass(this.checkNode, "dijitCheckBoxFocused");
+        })));
+        //keypress event
+        this.own(on(this.checkNode, 'keypress', lang.hitch(this, function (evt) {
+          var charOrCode = evt.charCode || evt.keyCode;
+          if (html.hasClass(this.checkNode, "dijitCheckBoxFocused") && keys.SPACE === charOrCode) {
+            if (this.status) {
+              if (this.checked) {
+                this.uncheck();
+              } else {
+                this.check();
+              }
+            }
+          }
+        })));
       }
     },
 
@@ -112,8 +143,10 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
 
       if(this.status){
         domClass.remove(this.domNode, 'jimu-state-disabled');
+        html.removeClass(this.checkNode, 'jimu-state-disabled');
       }else{
         domClass.add(this.domNode, 'jimu-state-disabled');
+        html.addClass(this.checkNode, 'jimu-state-disabled');
       }
 
       if(isStatusChanged){
@@ -125,13 +158,16 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
       return this.status;
     },
 
-    check: function(){
+    check: function(notEvent){
       if(!this.status){
         return;
       }
       this.checked = true;
-      html.addClass(this.checkNode, 'checked');
-      this.onStateChange();
+      html.addClass(this.checkNode, 'checked jimu-icon-checked');
+      html.removeClass(this.checkNode, 'checked jimu-icon-checkbox');
+      if(!notEvent){
+        this.onStateChange();
+      }
     },
 
     uncheck: function(notEvent){
@@ -140,6 +176,9 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
       }
       this.checked = false;
       html.removeClass(this.checkNode, 'checked');
+      html.removeClass(this.checkNode, 'jimu-icon-checked');
+      html.addClass(this.checkNode, 'jimu-icon-checkbox');
+
       if(!notEvent){
         this.onStateChange();
       }
@@ -150,6 +189,12 @@ function(declare, _WidgetBase, lang, html, domClass, on, Evented) {
         this.onChange(this.checked);
       }
       this.emit('change', this.checked);
+    },
+
+    focus: function () {
+      if (this.checkNode && this.checkNode.focus) {
+        this.checkNode.focus();
+      }
     }
   });
 });

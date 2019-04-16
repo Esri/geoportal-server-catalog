@@ -99,6 +99,8 @@ define({
         searchLabel: "Search query:",
         fromLabel: "From:",
         toLabel: "To",
+        calendarLabel: "Dates:",
+        calendarTitle: "Enter Time Interval",
         interval: {
           year: "Year",
           quarter: "Quarter",
