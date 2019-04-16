@@ -58,6 +58,7 @@
 .esriPopup .related-records-popup-projector.second-page-mode , .esriMobileInfoView.esriMobilePopupInfoView .related-records-popup-projector.second-page-mode{
   min-height: 60px;
   padding-top: 30px;
+  background-color: inherit;
 }
 
 .esriPopup .related-records-popup-projector .operation-box , .esriMobileInfoView.esriMobilePopupInfoView .operation-box {
@@ -73,6 +74,7 @@
   /*font-weight: bold;*/
   font-family: "Avenir Heavy";
   font-size: 13px;
+  background-color: inherit;
 }
 
 .esriPopup .related-records-popup-projector .operation-box .previos-btn ,.esriMobileInfoView.esriMobilePopupInfoView .previos-btn{

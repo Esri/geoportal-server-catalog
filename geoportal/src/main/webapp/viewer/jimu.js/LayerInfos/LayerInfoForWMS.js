@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -35,10 +35,10 @@ LayerInfo, LayerInfoForDefaultWMS, FeatureLayer, esriLang) {
       /*jshint unused: false*/
     },
 
-
-    getExtent: function() {
-      var extent = this.originOperLayer.layerObject.extent;
-      return this._convertGeometryToMapSpatialRef(extent);
+    _getExtent: function() {
+      var def = new Deferred();
+      def.resolve(this.layerObject.extent || this.layerObject.fullExtent);
+      return def;
     },
 
 
@@ -196,7 +196,8 @@ LayerInfo, LayerInfoForDefaultWMS, FeatureLayer, esriLang) {
         layerObject: this.layerObject, //the subLayerObject is WMS layer also.
         title: wmsLayerInfo.label || wmsLayerInfo.title || wmsLayerInfo.name || " ",
         // WMS sub layer does not has id, set id to 'parentId' + name.
-        id: this.id + '_' + (wmsLayerInfo.name || "-"),
+        // group layer might does not have wmsLayerInfo.name.
+        id: this.id + '_' + (wmsLayerInfo.name || (wmsLayerInfo.title + "-" + Math.random())),
         subId: wmsLayerInfo.name || "-",
         wms: {"layerInfo": this, "subId": wmsLayerInfo.name || "-", "wmsLayerInfo": wmsLayerInfo},
         selfType: 'wms',

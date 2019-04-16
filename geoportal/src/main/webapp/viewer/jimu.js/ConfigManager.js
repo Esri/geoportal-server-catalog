@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -86,7 +86,9 @@ function (declare, lang, array, html, topic, Deferred, on, jimuUtils, WidgetMana
 
       topic.subscribe('builder/widgetPoolChanged', lang.hitch(this, this._onWidgetPoolChanged));
       topic.subscribe('builder/openAtStartChange', lang.hitch(this, this._onOpenAtStartChanged));
+      topic.subscribe('builder/onScreenOrderChanged', lang.hitch(this, this._onScreenOrderChanged));
 
+      topic.subscribe('builder/mapContentModified', lang.hitch(this, this._onMapContentModified));
       topic.subscribe('builder/mapChanged', lang.hitch(this, this._onMapChanged));
       topic.subscribe('builder/mapOptionsChanged', lang.hitch(this, this._onMapOptionsChanged));
       topic.subscribe('builder/mapRefreshIntervalChanged', lang.hitch(this, this._onMapRefreshIntervalChanged));
@@ -467,6 +469,26 @@ function (declare, lang, array, html, topic, Deferred, on, jimuUtils, WidgetMana
       topic.publish('appConfigChanged', this.getAppConfig(), 'openAtStartChange', newJson);
     },
 
+    _onScreenOrderChanged: function(_newJson) {
+      var onscreenWidgets = jimuUtils.reCreateObject(_newJson);
+      var appConfig = this.appConfig;
+
+      // non-controller and removeable OnScreen Widgets
+      array.forEach(appConfig.widgetOnScreen.widgets, function(widget){
+        if (!widget.isController && (widget.inPanel === false && widget.closeable === true ||
+            widget.inPanel === true || !widget.uri)) {
+          array.some(onscreenWidgets, function(item) {
+            if (widget.id === item.id) {
+              widget.position = item.position;
+              return true;
+            }
+          });
+        }
+      }, this);
+
+      topic.publish('appConfigChanged', this.getAppConfig(), 'onScreenOrderChange', onscreenWidgets);
+    },
+
     _onAppAttributeChanged: function(_newJson){
       // transfer obj to another iframe may cause problems on IE8
       var newJson = jimuUtils.reCreateObject(_newJson);
@@ -536,14 +558,28 @@ function (declare, lang, array, html, topic, Deferred, on, jimuUtils, WidgetMana
       } else {
         // Update proxy items
         array.forEach(newJson.proxyItems, lang.hitch(this, function(item) {
-          array.some(this.appConfig.map.appProxy.proxyItems, function(configItem) {
+          var exists = array.some(this.appConfig.map.appProxy.proxyItems, function(configItem) {
             if (configItem.sourceUrl === item.sourceUrl) {
               configItem.useProxy = item.useProxy;
               configItem.proxyUrl = item.proxyUrl || '';
               configItem.proxyId = item.proxyId || '';
+              if (!isNaN(item.hitsPerInterval)) {
+                configItem.hitsPerInterval = item.hitsPerInterval;
+              }
+              if (!isNaN(item.intervalSeconds)) {
+                configItem.intervalSeconds = item.intervalSeconds;
+              }
               return true;
             }
           });
+          // web map may have added new premium layers in map viewer,
+          // To avoid changing appConfig, they will not be added until they are
+          // configured to use app proxy
+          if (!exists && item.useProxy && item.proxyUrl) {
+            var proxyItems = this.appConfig.map.appProxy.proxyItems || [];
+            proxyItems.push(item);
+            this.appConfig.map.appProxy.proxyItems = proxyItems;
+          }
         }));
       }
 
@@ -577,6 +613,11 @@ function (declare, lang, array, html, topic, Deferred, on, jimuUtils, WidgetMana
       this.configLoader.addNeedValues(this.appConfig);
       this._addDefaultValues(this.appConfig);
       topic.publish('appConfigChanged', this.getAppConfig(), 'templateConfigChange', newJson);
+    },
+
+    _onMapContentModified: function() {
+      // Doesn't change appConfig
+      topic.publish('mapContentModified');
     },
 
     _onMapChanged: function(_newJson){

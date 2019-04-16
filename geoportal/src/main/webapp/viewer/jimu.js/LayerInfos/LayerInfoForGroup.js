@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,9 +28,6 @@ LayerInfo) {
     constructor: function(operLayer, map, layerInfoFactory, noLegend) { //done
       /*jshint unused: false*/
       this.noLegend = noLegend;
-    },
-
-    getExtent: function() {//
     },
 
     _initVisible: function() { // done

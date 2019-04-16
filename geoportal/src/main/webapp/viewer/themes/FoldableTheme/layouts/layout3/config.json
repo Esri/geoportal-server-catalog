@@ -31,6 +31,12 @@
       "widgets/ExtentNavigate/Widget": {
         "position": {
           "left": 12,
+          "bottom": 243
+        }
+      },
+      "widgets/FullScreen/Widget": {
+        "position": {
+          "left": 12,
           "bottom": 203
         }
       },

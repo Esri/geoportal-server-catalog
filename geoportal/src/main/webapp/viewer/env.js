@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright ? 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -80,7 +80,7 @@ var
 
   //This version number will be appended to URL to avoid cache.
   //The reason we do not use wabVersion is to avoid force user to change wabVersion when they are customizing app.
-  deployVersion = '2.5';
+  deployVersion = '2.9';
 
 // console.time('before map');
 
@@ -100,11 +100,11 @@ var
 (function(global){
   //init API URL
   var queryObject = getQueryObject();
-  var apiVersion = '3.21';
+  var apiVersion = '3.25';
 
   ////////uncomment the following line when downloading the app
 
-  apiUrl = 'https://js.arcgis.com/3.21';
+  apiUrl = 'https://js.arcgis.com/3.25';
 
   //////////////////////////////////////////////////////////////
   allCookies = getAllCookies();
@@ -121,15 +121,15 @@ var
     } else {
       var portalUrl = getPortalUrlFromLocation();
       if (portalUrl.indexOf('arcgis.com') > -1) {
-        // if(portalUrl.indexOf('devext.arcgis.com') > -1){
-        //   apiUrl = '//js.arcgis.com/' + apiVersion;
-        // }else if(portalUrl.indexOf('qa.arcgis.com') > -1){
-        //   apiUrl = '//jsqa.arcgis.com/' + apiVersion;
-        // }else{
-        //   apiUrl = '//js.arcgis.com/' + apiVersion;
-        // }
+        if(portalUrl.indexOf('devext.arcgis.com') > -1){
+          apiUrl = '//jsdev.arcgis.com/' + apiVersion;
+        }else if(portalUrl.indexOf('qa.arcgis.com') > -1){
+          apiUrl = '//jsqa.arcgis.com/' + apiVersion;
+        }else{
+          apiUrl = '//js.arcgis.com/' + apiVersion;
+        }
 
-        apiUrl = 'https://js.arcgis.com/' + apiVersion;
+        // apiUrl = 'https://js.arcgis.com/' + apiVersion;
       } else {
         apiUrl = portalUrl + 'jsapi/jsapi/';
       }
@@ -291,6 +291,7 @@ var
       }
     }
 
+    dirNode.setAttribute("lang", locale);
     if (isRTLLocale) {
       dirNode.setAttribute("dir", "rtl");
       dirNode.className += " esriRtl jimu-rtl";

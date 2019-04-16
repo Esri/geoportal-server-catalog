@@ -96,13 +96,14 @@
           <select data-dojo-attach-point="setlanguage_languages" class="shareSelects" style="display:inline-block;" data-dojo-type="dijit/form/Select"></select>
         </div>
       </div>
-      <div class="optionsRow shareClearFix">
+      <div class="optionsRow shareClearFix" style="display: none;">
         <input data-id="share-options-auth" data-dojo-attach-point="auth" class="shareCheckBoxes jimu-float-leading" data-dojo-type="dijit.form.CheckBox" type="checkbox">
         <div class="labels">${nls.auth}</div>
         <div  class="optionsMore share-options-auth_optionsMore">
           <input data-dojo-attach-point="authtoken" data-dojo-type="dijit/form/ValidationTextBox" data-dojo-props='required:true'/>
         </div>
       </div>
+
       <div class="optionsRow shareClearFix">
         <div class="subTitle">${nls.linkPreview}</div>
         <div data-dojo-attach-point="preview" class="preview inputsText" data-dojo-type="dijit/form/SimpleTextarea" data-dojo-props='required:true,readOnly:true'></div>
@@ -118,10 +119,10 @@
       <div class="shareClearFix">
         <span class="optionsText jimu-float-leading" data-dojo-attach-point="linkOptions">${nls.linkOptions}</span>
         <div class="shareLinkIcons jimu-float-trailing" data-dojo-attach-point="socialNetworkLinks">
-          <div class="socialNetworkIcons email" data-dojo-attach-event="click:_toEmail" data-dojo-attach-point="emailShare" title="${nls.email}"></div>
-          <div class="socialNetworkIcons facebook" data-dojo-attach-event="click:_toFacebook" data-dojo-attach-point="FacebookShare" title="${nls.facebook}"></div>
-          <div class="socialNetworkIcons twitter" data-dojo-attach-event="click:_toTwitter" data-dojo-attach-point="TwitterShare" title="${nls.twitter}"></div>
-          <div class="socialNetworkIcons googlePlus" data-dojo-attach-point="googlePlusShare" title="${nls.googlePlus}"></div>
+          <a class="socialNetworkIcons email" data-dojo-attach-point="emailShare" title="${nls.shareEmail}"></a>
+          <div class="socialNetworkIcons facebook" data-dojo-attach-event="click:_toFacebook" data-dojo-attach-point="FacebookShare" title="${nls.shareFacebook}"></div>
+          <div class="socialNetworkIcons twitter" data-dojo-attach-event="click:_toTwitter" data-dojo-attach-point="TwitterShare" title="${nls.shareTwitter}"></div>
+          <div class="socialNetworkIcons googlePlus" data-dojo-attach-point="googlePlusShare" title="${nls.shareGooglePlus}"></div>
         </div>
       </div>
     </div>

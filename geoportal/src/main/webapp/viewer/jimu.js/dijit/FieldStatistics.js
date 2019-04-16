@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -106,15 +106,23 @@ define(['dojo/_base/declare',
       }));
     },
 
-    _getFieldAliaseFromStatInfo: function(fieldName){
-      if(this.statInfo.layer){
-        var flabels = array.filter(this.statInfo.layer.fields, function(f) {
-          return f.name === fieldName;
-        });
-        return flabels[0]? flabels[0].alias: '';
-      }else{
-        return this.statInfo.featureSet.fieldAliases? this.statInfo.featureSet.fieldAliases[fieldName]: fieldName;
+    _getFieldAliaseFromStatInfo: function(fieldName) {
+      var featureSet = this.statInfo.featureSet;
+      var fieldAliases = featureSet && featureSet.fieldAliases;
+      var alias;
+      if (fieldAliases && typeof fieldAliases[fieldName] !== 'undefined') {
+        alias = fieldAliases[fieldName];
+      } else {
+        if (this.statInfo.layer) {
+          var flabels = array.filter(this.statInfo.layer.fields, function(f) {
+            return f.name === fieldName;
+          });
+          alias = flabels[0] ? flabels[0].alias : '';
+        } else {
+          alias = fieldName;
+        }
       }
+      return alias;
     },
 
     _createFieldDom: function(container){

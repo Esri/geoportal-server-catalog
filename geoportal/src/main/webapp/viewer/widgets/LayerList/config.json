@@ -1,5 +1,6 @@
 {
   "showLegend": true,
+  "expandAllLayersByDefault": false,
   "contextMenu": {
 	"ZoomTo": true,
 	"Transparency": true,

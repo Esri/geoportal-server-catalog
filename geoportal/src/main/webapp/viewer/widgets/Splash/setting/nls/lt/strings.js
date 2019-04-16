@@ -26,7 +26,7 @@ define({
   "sizeFill": "Užpildyti",
   "sizeFit": "Talpinti",
   "sizeStretch": "Ištempti iki užpildymo dydžio",
-  "sizeCenter": "Centruoti",
+  "sizeCenter": "Centre",
   "sizeTile": "Išklotinė",
   "buttonColor": "Mygtukų spalva",
   "buttonText": "Mygtukų tekstas",

@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "上に移動/下に移動",
   "attributeTable": "属性テーブルの表示",
   "url": "説明/アイテムの詳細を表示/ダウンロード",
+  "expandAllLayers": "すべてのレイヤーを展開",
+  "expandAllLayersByDefault": "デフォルトですべてのレイヤーを展開",
   "layerSelectorTitle": "リストに表示されるレイヤーを選択します。"
 });

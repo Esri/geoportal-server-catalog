@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -29,6 +29,7 @@ define([
   './shared/utils',
   './tokenUtils',
   './portalUtils',
+  './appConfigResourceUtils',
   './portalUrlUtils',
   './AppStateManager',
   'esri/IdentityManager',
@@ -38,7 +39,7 @@ define([
 ],
 function (declare, lang, array, html, dojoConfig, cookie,
   Deferred, all, xhr, jimuUtils, WidgetManager, sharedUtils, tokenUtils,
-  portalUtils, portalUrlUtils, AppStateManager, IdentityManager, esriConfig, esriUrlUtils,
+  portalUtils, appConfigResourceUtils, portalUrlUtils, AppStateManager, IdentityManager, esriConfig, esriUrlUtils,
   arcgisUtils) {
   var instance = null, clazz;
 
@@ -98,7 +99,7 @@ function (declare, lang, array, html, dojoConfig, cookie,
           return this.loadWidgetsManifest(appConfig).then(lang.hitch(this, function() {
             return this.loadAndUpgradeAllWidgetsConfig(appConfig);
           })).then(lang.hitch(this, function(appConfig) {
-            return this.processResourceInAppConfigForConfigLoader(appConfig, this.urlParams.id);
+            return this.updateNecessaryAttrOfResourceUrlInAppConfig(appConfig, this.urlParams.id);
           })).then(lang.hitch(this, function() {
             this._configLoaded = true;
             this._setDocumentTitle(appConfig);
@@ -179,14 +180,15 @@ function (declare, lang, array, html, dojoConfig, cookie,
             return this.loadAndUpgradeAllWidgetsConfig(appConfig);
           })).then(lang.hitch(this, function(appConfig) {
             if(appConfig._wabAppId){//for AGOL template
-              return this.processResourceInAppConfigForConfigLoader(appConfig, appConfig._wabAppId);
+              return this.processResourceInAppConfigForConfigLoader(appConfig, this.urlParams);
             }else if(appConfig.appItemId && window.JSON.stringify(appConfig).indexOf('${itemId}') > -1){
               //for app download from portal/agol and deployed standalone
-              return this.processResourceInAppConfigForConfigLoader(appConfig, appConfig.appItemId);
+              return this.updateNecessaryAttrOfResourceUrlInAppConfig(appConfig, appConfig.appItemId);
             }else{
               return appConfig;
             }
           })).then(lang.hitch(this, function(appConfig) {
+            this.appConfig = appConfig;
             this._configLoaded = true;
             this._setDocumentTitle(appConfig);
             this._readAndSetSharedTheme(appConfig);
@@ -201,26 +203,79 @@ function (declare, lang, array, html, dojoConfig, cookie,
         return def;
       }));
     },
-    processResourceInAppConfigForConfigLoader: function(appConfig, appId) {
-      //Traverse appConfig, get all the resources URL, replace its ${itemId} and token
+    processResourceInAppConfigForConfigLoader:function(appConfig, urlParams){
+      var portalUrl = appConfig.portalUrl;
+      //statement:The original app is app1, the template based app is app2
+      var app1Id = appConfig.appItemId;
+      var app2Id = urlParams.appid;
+      var deferred = new Deferred();
+      var cloneAppConfig = lang.clone(appConfig);
+      //1.Traverse appConfig of app1, get all the resources URL, replace its ${itemId} with app2Id
+      this.updateNecessaryAttrOfResourceUrlInAppConfig(cloneAppConfig, app2Id).then(function(){
+
+        //2.if in builder env, continue to handle resource of app1 and app2
+        if(urlParams.mode === 'config'){
+          //3.get all resource url from app1, if app1's resource is not empty, continue
+          var app1Resources = this.getResourceUrlsOfAppConfig(appConfig).result;
+          if(app1Resources.length !== 0){
+            portalUtils.getItemResources(portalUrl, app2Id).then(function(app2Resources){
+              //4.If the app2's resource is empty, this is the first time to open app2,so
+              //copy all app1's resources to the app2
+              if(app2Resources.length === 0){
+                app1Resources = app1Resources.map(function(item){
+                  return {
+                      resUrl:item
+                    };
+                });
+                return appConfigResourceUtils.AddResourcesToItemForAppSave(portalUrl,
+                  app1Resources, app1Id, app2Id).then(function(){
+                  deferred.resolve(cloneAppConfig);
+                },function(error){
+                  console.warn('Add resource to template based app error:' + error.message || error);
+                  deferred.resolve(cloneAppConfig);
+                });
+              }else{
+                deferred.resolve(cloneAppConfig);
+              }
+            },function(error){
+              console.warn('Get resource of template based item error:' + error.message || error);
+              deferred.resolve(cloneAppConfig);
+            });
+          }else{
+            deferred.resolve(cloneAppConfig);
+          }
+        }else{
+          deferred.resolve(cloneAppConfig);
+        }
+      }.bind(this),function(error){
+        console.warn('Insert appId to resource url of appConfig error:' + error.message || error);
+        deferred.resolve(cloneAppConfig);
+      });
+      return deferred;
+    },
+    getResourceUrlsOfAppConfig: function(appConfig) {
+      function isResources(value) {
+        var regExpStr = /^https?:\/\/(.)+\/sharing\/rest\/content\/items\/(.)+\/resources\/inConfig\//;
+        return regExpStr.test(value);
+      }
+
+      function getResourceUrl(pendingObj) {
+        return pendingObj.value;
+      }
+
+      var cb = {
+        test: isResources,
+        func: lang.hitch(this, getResourceUrl)
+      };
+
+      return jimuUtils.processItemResourceOfAppConfig(appConfig, cb);
+    },
+    updateNecessaryAttrOfResourceUrlInAppConfig: function(appConfig, appId) {
+      //Traverse appConfig, get all the resources URL, replace its ${itemId} and token and protocol
+      //For protocol, if portal's protocal is https, forces the protocol of all resources to https
       var portalUrl = appConfig.portalUrl;
       var self = this;
 
-      function _formatPendingObj(pendingObj){
-        var obj = pendingObj.obj;
-        var key = pendingObj.key;
-        var formatObj = {
-          obj:obj,
-          key:key
-        };
-        if(typeof pendingObj.i === 'number'){
-          formatObj.i = pendingObj.i;
-          formatObj.value = obj[key][pendingObj.i];
-        }else{
-          formatObj.value = obj[key];
-        }
-        return formatObj;
-      }
       function _updateAppConfigWithNewValue(updatingObj, newValue){
         var obj = updatingObj.obj;
         var key = updatingObj.key;
@@ -231,13 +286,14 @@ function (declare, lang, array, html, dojoConfig, cookie,
         }
       }
       //callback:test, is a resource url or not
-      function isResources(value){
-        return /^https?:\/\/(.)+\/sharing\/rest\/content\/items/.test(value);
+      function isResources(value) {
+        var regExpStr = /^https?:\/\/(.)+\/sharing\/rest\/content\/items\/(.)+\/resources\/inConfig\//;
+        return regExpStr.test(value);
       }
       //callback:func, process the resource
       function updateItemIdAndTokenOfResources(args, pendingObj) {
-        pendingObj = _formatPendingObj(pendingObj);
-        var retUrl = self.processItemIdAndTokenOfResources(pendingObj.value, args);
+        var retUrl = self.processItemIDAndTokenOfResources(pendingObj.value, args);
+        retUrl = self.setResouceProtocolForHttps(retUrl);
         _updateAppConfigWithNewValue(pendingObj, retUrl);
         return true;
       }
@@ -255,7 +311,17 @@ function (declare, lang, array, html, dojoConfig, cookie,
         return result.appConfig;
       }));
     },
-    processItemIdAndTokenOfResources:function(resUrl, appInfo){
+
+    setResouceProtocolForHttps:function(retUrl){
+      var url = retUrl;
+      var protocol = window.location.protocol;
+      if(protocol === 'https:'){
+        url = retUrl.replace(/^http(s?):\/\//i, 'https://');
+      }
+      return url;
+    },
+
+    processItemIDAndTokenOfResources:function(resUrl, appInfo){
       //replace resUrl's ${itemId} and token
       if (resUrl.indexOf('${itemId}') > 0) {
         resUrl = resUrl.replace('${itemId}', appInfo.appId);
@@ -940,6 +1006,9 @@ function (declare, lang, array, html, dojoConfig, cookie,
 
     loadWidgetsManifest: function(config){
       var defs = [], def = new Deferred();
+      if(this.urlParams.manifest && config._buildInfo && config._buildInfo.widgetManifestsMerged){
+        delete config._buildInfo.widgetManifestsMerged;
+      }
       if(config._buildInfo && config._buildInfo.widgetManifestsMerged){
         this._loadMergedWidgetManifests().then(lang.hitch(this, function(manifests){
           sharedUtils.visitElement(config, lang.hitch(this, function(e){
@@ -1002,57 +1071,62 @@ function (declare, lang, array, html, dojoConfig, cookie,
         }
       }
 
-      function isWidgetUsable(widgetUrl){
-        if(jimuUtils.isEsriDomain(widgetUrl)){
-          return true;
-        }
+      function isWidgetUsable(/*widgetUrl*/){
+        // if(jimuUtils.isEsriDomain(widgetUrl)){
+        //   return true;
+        // }
 
-        var credential = tokenUtils.getPortalCredential(config.portalUrl);
-        if(!credential){
-          return false;
-        }
+        // var credential = tokenUtils.getPortalCredential(config.portalUrl);
+        // if(!credential){
+        //   return false;
+        // }
 
-        //if user has signed in, because we use the config.portalUrl to get credential, so the user MUST be in this org.
+        // //if user has signed in, because we use the config.portalUrl to get credential, so the user MUST be in this org.
+        // return true;
+
+        //this is for portal only. in portal, as long as user can access the item, use can use the widget.
+        //so return true here.
+        //When online support custom widget, we'll review this code. 20170907
         return true;
       }
 
       function deleteUnloadedWidgets(config, e){
-          //if has e, delete a specific widget
-          //if has no e, delete all unloaded widget
-          deleteInSection('widgetOnScreen');
-          deleteInSection('widgetPool');
+        //if has e, delete a specific widget
+        //if has no e, delete all unloaded widget
+        deleteInSection('widgetOnScreen');
+        deleteInSection('widgetPool');
 
-          function deleteInSection(section){
-            if(config[section] && config[section].widgets){
-              config[section].widgets = config[section].widgets.filter(function(w){
-                if(e){
-                  return w.id !== e.id;
-                }else{
-                  if(w.uri && !w.manifest){
-                    console.error('Widget is removed because it is not loaded successfully.', w.uri);
-                  }
-                  return w.manifest;
+        function deleteInSection(section){
+          if(config[section] && config[section].widgets){
+            config[section].widgets = config[section].widgets.filter(function(w){
+              if(e){
+                return w.id !== e.id;
+              }else{
+                if(w.uri && !w.manifest){
+                  console.error('Widget is removed because it is not loaded successfully.', w.uri);
                 }
-              });
-            }
-            if(config[section] && config[section].groups){
-              config[section].groups.forEach(function(g){
-                if(g.widgets){
-                  g.widgets = g.widgets.filter(function(w){
-                    if(e){
-                      return w.id !== e.id;
-                    }else{
-                      if(w.uri && !w.manifest){
-                        console.error('Widget is removed because it is not loaded successfully.', w.uri);
-                      }
-                      return w.manifest;
+                return w.manifest;
+              }
+            });
+          }
+          if(config[section] && config[section].groups){
+            config[section].groups.forEach(function(g){
+              if(g.widgets){
+                g.widgets = g.widgets.filter(function(w){
+                  if(e){
+                    return w.id !== e.id;
+                  }else{
+                    if(w.uri && !w.manifest){
+                      console.error('Widget is removed because it is not loaded successfully.', w.uri);
                     }
-                  });
-                }
-              });
-            }
+                    return w.manifest;
+                  }
+                });
+              }
+            });
           }
         }
+      }
 
       setTimeout(function(){
         //delete problem widgets to avoid one widget crash app

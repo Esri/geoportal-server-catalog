@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -60,6 +60,7 @@ define([
     _printService: null, // to store the object of print service
     _printWindow: null, // to store the object of print window
     _sizeInPixels: {}, // to store size of report layout in pixels
+    _windowOpenedTimer: null, // to store the interval object which checks whether print window is closed
     // When multiple maps are failed to print we need to show msg only once,
     // this flag will help in showing msg only once
     _shownUnableToPrintMapMsg: false,
@@ -69,7 +70,6 @@ define([
     reportLogo: "", // to store path to report logo
     reportLayout: {}, // to store the report layout
     maxNoOfCols: 3, // to store table columns
-    alignNumbersToRight: false, // to store the default number alignment
     styleSheets: [], // to store the external stylesheets
     styleText: "", // to store style text
 
@@ -154,7 +154,18 @@ define([
           printTemplate.exportOptions.height = this._sizeInPixels.Height;
         }
       } else {
-        mapLayout += " " + this.reportLayout.orientation.Type;
+        // orientation should only be added for default layout
+        if (mapLayout && PageUtils.PageSizes[mapLayout]) {
+          mapLayout += " " + this.reportLayout.orientation.Type;
+        } else {
+          var defaultPageSizeMapLayoutArr = [];
+          Object.keys(PageUtils.PageSizes).forEach(function (key) {
+            defaultPageSizeMapLayoutArr.push(PageUtils.PageSizes[key].MapLayout);
+          });
+          if (defaultPageSizeMapLayoutArr.indexOf(mapLayout) > -1) {
+            mapLayout += " " + this.reportLayout.orientation.Type;
+          }
+        }
       }
       printTemplate.layout = mapLayout;
       return printTemplate;
@@ -200,7 +211,11 @@ define([
         }
       } else {
         printTemplate = this.setMapLayout(printTemplate);
-        printTemplate.layoutOptions = {};
+        printTemplate.layoutOptions = {
+          customTextElements: [{
+            Date: ""
+          }]
+        };
         printTemplate.preserveScale = false;
         printTemplate.showAttribution = true;
         printTemplate.format = "jpg";
@@ -216,19 +231,43 @@ define([
      * This function is used to print the report details
      */
     print: function (reportTitle, printData) {
-      var a, b;
+      var a, b, userAgent;
       if (this._printService) {
         this._shownUnableToPrintMapMsg = false;
-        //close if prev window is available
-        if (this._printWindow) {
-          this._printWindow.close();
-        }
         a = screen.width / 2;
         b = screen.height / 1.5;
-        a = "toolbar\x3dno, location\x3dno, directories\x3dno, status\x3dyes, menubar\x3dno," +
-          "scrollbars\x3dyes, resizable\x3dyes, width\x3d" + a + ", height\x3d" + b + ", top\x3d" +
-          (screen.height / 2 - b / 2) + ", left\x3d" + (screen.width / 2 - a / 2);
+        // in ie11 when window is set to open in new window we need to provide spec,
+        // else scroll-bar wont be visible and max button will be disabled
+        if ((jimuUtils.has('ie') === 11)) {
+          a = "toolbar\x3dno, location\x3dno, directories\x3dno, status\x3dyes, menubar\x3dno," +
+            "scrollbars\x3dyes, resizable\x3dyes, width\x3d" + a + ", height\x3d" + b + ", top\x3d" +
+            (screen.height / 2 - b / 2) + ", left\x3d" + (screen.width / 2 - a / 2);
+        } else {
+          // to open report in new tab, specs should be null for other browser
+          a = null;
+        }
+        // detects browser in which application is running
+        userAgent = jimuUtils.detectUserAgent();
+        // in firefox only first time browser switches control to report tab.
+        // hence to switch it every time we need to close it first
+        if ((userAgent.browser.hasOwnProperty("firefox") && userAgent.browser.firefox) ||
+          (userAgent.os.hasOwnProperty("ipad") && userAgent.os.ipad) ||
+          (userAgent.os.hasOwnProperty("iphone") && userAgent.os.iphone)) {
+          if (this._printWindow) {
+            this._printWindow.close();
+          }
+        }
         this._printWindow = window.open("", "report", a, true);
+        if (this._windowOpenedTimer) {
+          clearInterval(this._windowOpenedTimer);
+        }
+        this._windowOpenedTimer = setInterval(lang.hitch(this, function () {
+          if (this._printWindow.closed) {
+            clearInterval(this._windowOpenedTimer);
+            this.emit("report-window-closed");
+          }
+        }), 500);
+        this._printWindow.focus();
         setTimeout(lang.hitch(this, function () {
           Window.withDoc(this._printWindow.document,
             lang.hitch(this, function () {
@@ -391,7 +430,7 @@ define([
               domStyle.set(printTitle, {
                 "width": (reportMain.clientWidth - reportLogoNode.clientWidth - 51) + "px"
               });
-            }), 100);
+            }), 300);
           })));
         }
       }
@@ -455,7 +494,7 @@ define([
         format = this.reportLayout.pageSize;
       } else {
         sizeInInches = this.reportLayout.pageSize;
-        format = this.reportLayout.pageSize.SizeName;
+        format = this.reportLayout.pageSize.SizeName ? this.reportLayout.pageSize.SizeName : this.reportLayout.SizeName;
       }
       //according to orientation set the height & width of the page
       if (this.reportLayout.orientation.Type === PageUtils.Orientation.Landscape.Type &&
@@ -509,6 +548,7 @@ define([
               domClass.add(mapImg, "esriCTReportLandscapeMapImg");
             }
           }
+          this.emit("report-export-task-completed");
         }), lang.hitch(this, function () {
           domClass.replace(parentNode,
             "esriCTReportMapFail", "esriCTPageBreak esriCTReportMapWait");
@@ -517,6 +557,7 @@ define([
             this._shownUnableToPrintMapMsg = true;
             errorNode.click();
           }
+          this.emit("report-export-task-failed");
         }));
     },
 
@@ -555,23 +596,39 @@ define([
       if (tableInfo.maxNoOfCols) {
         chunk = tableInfo.maxNoOfCols;
       }
+      if (tableInfo.cols.length > chunk) {
+        var remainingCols = tableInfo.cols.length - chunk;
+        if (remainingCols <= 2) {
+          chunk = tableInfo.cols.length;
+        }
+      }
       for (i = 0, j = tableInfo.cols.length; i < j; i += chunk) {
         var newTableInfo = { cols: [], rows: [] };
+        var sliceLength = i + chunk;
+        var breakLoop = false;
         if (i === 0) {
           newTableInfo.title = reportData.title;
         } else {
           newTableInfo.title = "";
         }
-        colsTempArray = tableInfo.cols.slice(i, i + chunk);
+        var remainingCols1 = tableInfo.cols.length - (sliceLength);
+        if (remainingCols1 <= 2 && remainingCols1 > 0) {
+          sliceLength += remainingCols1;
+          breakLoop = true;
+        }
+        colsTempArray = tableInfo.cols.slice(i, sliceLength);
         rowsTempArray = [];
         for (var k = 0; k < tableInfo.rows.length; k++) {
-          rowsTempArray.push(tableInfo.rows[k].slice(i, i + chunk));
+          rowsTempArray.push(tableInfo.rows[k].slice(i, sliceLength));
         }
         newTableInfo.cols = colsTempArray;
         newTableInfo.rows = rowsTempArray;
         this._renderTable(
           domConstruct.create("div", {}, tableParentNode),
           newTableInfo, reportData.data.showRowIndex);
+        if (breakLoop) {
+          break;
+        }
       }
     },
 
@@ -606,13 +663,9 @@ define([
           }, tableRow);
         }
         array.forEach(eachRow, lang.hitch(this, function (rowValue) {
-		  //Format value so that url in value will appear as link.
+          //Format value so that url in value will appear as link.
           var formattedRowValue = jimuUtils.fieldFormatter.getFormattedUrl(rowValue);
-          
-          var colData = domConstruct.create("td", { "innerHTML": formattedRowValue }, tableRow);
-          if (this.alignNumbersToRight && !isNaN(parseFloat(rowValue))) {
-            domClass.add(colData, "esriCTNumber");
-          }
+          domConstruct.create("td", { "innerHTML": formattedRowValue }, tableRow);
         }));
       }));
     }

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,9 +23,11 @@ define([
     'jimu/utils',
     'jimu/ServiceDefinitionManager',
     'esri/tasks/query',
-    'esri/tasks/QueryTask'
+    'esri/tasks/QueryTask',
+    'esri/tasks/FeatureSet'
   ],
-  function(declare, lang, array, all, Deferred, jimuUtils, ServiceDefinitionManager, EsriQuery, QueryTask) {
+  function(declare, lang, array, all, Deferred, jimuUtils, ServiceDefinitionManager, EsriQuery, QueryTask,
+    FeatureSet) {
 
     var clazz = declare(null, {
       //1 means service support orderby and pagination
@@ -100,16 +102,12 @@ define([
           if(feautreCount === 0){
             return 0;
           }
-          if(this.queryType === 3){
-            return 1;
-          }else{
-            return Math.ceil(feautreCount / this.pageSize);
-          }
+          return Math.ceil(feautreCount / this.pageSize);
         }));
       },
 
       //return a deferred which resolves FeatureSet object
-      //if resolves null, it means no features
+      //always resovles a FeatureSet object, featureSet.features maybe an empty array
       getAllFeatures: function(){
         return this.getPageCount().then(lang.hitch(this, function(pageCount){
           if(pageCount > 0){
@@ -129,9 +127,41 @@ define([
               return featureSet;
             }));
           }else{
-            return null;
+            // return this._getEmptyFeatureSet();
+            this._getEmptyFeatureSet().then(lang.hitch(this, function(emptyFeatureSet) {
+              return emptyFeatureSet;
+            }));
           }
         }));
+      },
+
+      _getEmptyFeatureSet: function(){
+        var def = new Deferred();
+        if(!(this.layerDefinition && this.layerDefinition.geometryType)){
+          this._getLayerDefinition().then(lang.hitch(this, function(){
+            def.resolve(this._getEmptyFeatureSetHandler());
+          }));
+        }else{
+          def.resolve(this._getEmptyFeatureSetHandler());
+        }
+        return def;
+      },
+
+      _getEmptyFeatureSetHandler: function(){
+        var featureSet = new FeatureSet();
+        featureSet.features = [];
+        featureSet.geometryType = this.layerDefinition.geometryType;
+        featureSet.fields = [];
+        var allFields = lang.clone(this.layerDefinition.fields);
+
+        if (this.query.outFields.indexOf('*') >= 0) {
+          featureSet.fields = allFields;
+        } else {
+          featureSet.fields = array.filter(allFields, lang.hitch(this, function(fieldInfo) {
+            return this.query.outFields.indexOf(fieldInfo.name) >= 0;
+          }));
+        }
+        return featureSet;
       },
 
       //return current page index, page index starts from 1, not zero
@@ -147,19 +177,26 @@ define([
         return this.queryByPage(pageIndex);
       },
 
-      //return a deferred which resolves FeatureSet by pageIndex, if resolves null, means no features
+      //return a deferred which resolves FeatureSet by pageIndex
       //pageIndex is 1-based, not 0-based
       //use queryByPage(this.getCurrentPageIndex()) to query current page
       //queryByPage doesn't change current page index, queryNextPage does
       queryByPage: function(pageIndex){
         var def = null;
+        //need layerDefinition from _getLayerDefinition() from _getQueryType() from getFeatureCount() from constructor
+        // var emptyFeatureSet = this._getEmptyFeatureSet();
         if(pageIndex <= 0){
           def = new Deferred();
-          def.resolve(null);
+          this._getEmptyFeatureSet().then(lang.hitch(this, function(emptyFeatureSet) {
+            def.resolve(emptyFeatureSet);
+          }));
         }else{
           def = this.getPageCount().then(lang.hitch(this, function(pageCount) {
             if (pageIndex > pageCount) {
-              return null;
+              // return emptyFeatureSet;
+              this._getEmptyFeatureSet().then(lang.hitch(this, function(emptyFeatureSet) {
+                return emptyFeatureSet;
+              }));
             }
             if (this.queryType === 1) {
               return this._queryPageForType1(pageIndex);
@@ -333,10 +370,11 @@ define([
         var queryParams = new EsriQuery();
         queryParams.where = where || this.query.where;
         queryParams.geometry = this.query.geometry;
-        queryParams.outSpatialReference = this.map.spatialReference;
+        queryParams.outSpatialReference = this.query.outSpatialReference;
         queryParams.returnGeometry = this.query.returnGeometry;
         queryParams.spatialRelationship = this.query.spatialRelationship;
         queryParams.outFields = this.query.outFields;
+        queryParams.returnDistinctValues = this.query.returnDistinctValues; //for distinct values
         var queryTask = new QueryTask(this.url);
         return queryTask.execute(queryParams);
       },
@@ -418,6 +456,7 @@ define([
         queryParams.returnGeometry = this.query.returnGeometry;
         queryParams.spatialRelationship = this.query.spatialRelationship;
         queryParams.outFields = this.query.outFields;
+        queryParams.returnDistinctValues = this.query.returnDistinctValues; //for distinct values
         //set pagination info
         queryParams.start = resultOffset;
         queryParams.num = this.pageSize;

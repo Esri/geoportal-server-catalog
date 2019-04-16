@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -127,32 +127,32 @@ define([
       stypes.forEach(function(statisticType){
         //"count", "sum", "min", "max", "avg", "stddev"
         switch(statisticType){
-        case 'count':
-          attributes.countField ++;
-          break;
-        case 'sum':
-          attributes.sumField += val;
-          break;
-        case 'min':
-          if(typeof attributes.minField === 'undefined'){
-            attributes.minField = val;
-          }else{
-            attributes.minField = Math.min(attributes.minField, val);
-          }
-          break;
-        case 'max':
-          if(typeof attributes.maxField === 'undefined'){
-            attributes.maxField = val;
-          }else{
-            attributes.maxField = Math.max(attributes.maxField, val);
-          }
-          break;
-        case 'avg':
-          c++;
-          s += val;
-          break;
-        case 'stddev':
-          break;
+          case 'count':
+            attributes.countField ++;
+            break;
+          case 'sum':
+            attributes.sumField += val;
+            break;
+          case 'min':
+            if(typeof attributes.minField === 'undefined'){
+              attributes.minField = val;
+            }else{
+              attributes.minField = Math.min(attributes.minField, val);
+            }
+            break;
+          case 'max':
+            if(typeof attributes.maxField === 'undefined'){
+              attributes.maxField = val;
+            }else{
+              attributes.maxField = Math.max(attributes.maxField, val);
+            }
+            break;
+          case 'avg':
+            c++;
+            s += val;
+            break;
+          case 'stddev':
+            break;
         }
       });
     });

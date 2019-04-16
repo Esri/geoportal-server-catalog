@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -14,13 +14,14 @@
 // limitations under the License.
 ///////////////////////////////////////////////////////////////////////////
 
-define(['./basePortalUrlUtils'], function(basePortalUrlUtils) {
+// define(['./basePortalUrlUtils'], function(basePortalUrlUtils) {
+define([], function() {
   var mo = {};
 
   var widgetProperties = ['inPanel', 'hasLocale', 'hasStyle', 'hasConfig', 'hasUIFile',
   'hasSettingPage', 'hasSettingUIFile', 'hasSettingLocale', 'hasSettingStyle',
   'keepConfigAfterMapSwitched', 'isController', 'hasVersionManager', 'isThemeWidget',
-  'supportMultiInstance'];
+  'supportMultiInstance', 'mirrorIconForRTL'];
 
   mo.visitElement = visitElement;
 
@@ -42,13 +43,40 @@ define(['./basePortalUrlUtils'], function(basePortalUrlUtils) {
 
   mo.addI18NLabelToManifest = addI18NLabelToManifest;
 
+  //only check if layer service is AGOL hosted
   mo.isHostedService = function (url) {
+    /*
     //http://services.arcgis.com/XXX/arcgis/rest/services/s/FeatureServer
     var server = basePortalUrlUtils.getServerByUrl(url);
     var r = server + "/[^/]+/[^/]+/rest/services";
     var regExp = new RegExp(r, "gi");
     var isHosted = regExp.test(url);
     return isHosted;
+    */
+    if (!url) {
+      return false;
+    }
+    // hosted feature service: http://services.arcgis.com/f7ee40282cbc40998572834591021976/arcgis/rest/services/StateCapitals/FeatureServer
+    // new amazon hosted feature service: http://features.arcgis.com/e2ea3c31dd80478689ce70c4fb3380c5/arcgis/rest/services/santaclara_fs/FeatureServer
+    // hosted tiled service: https://tilesdevext.arcgis.com/tiles/fa019fbbfbb845d08cc9f0acde6dd8af/arcgis/rest/services/States/MapServer
+    // uploaded KML service: http://www.arcgis.com/sharing/content/items/ecddddaf6b174d7ca94816ac397d9b48/data
+    // secure service: http://www.arcgis.com/sharing/rest/services/aee2a3d9d15f406cb21576d92ea1316e/MapServer
+    var arcgis = ".arcgis.com/",
+        services = "//services",
+        tiles = "//tiles",
+        features = "//features";
+    // sharing = (new dojo._Url(esriGeowConfig.restBaseUrl)).authority,
+    // isSingleTenant = (false === esriGeowConfig.isMultiTenant);
+
+    // only consider locally hosted if the restBaseUrl is on same domain as url
+    // and esriGeowConfig.self.supportsHostedServices flag is enabled
+    var isAGOL = url.indexOf(arcgis) !== -1,
+      isHostedServer = (url.indexOf(services) !== -1 || url.indexOf(tiles) !== -1 || url.indexOf(features) !== -1);
+    // isLocallyHosted = ((esri.isDefined(esriGeowConfig.self) && esriGeowConfig.self.supportsHostedServices) && (url.indexOf(sharing) !== -1 && !isSingleTenant));
+    // isProxyService = !isHostedServer && arcgis; // if the service requires non-AGOL credentials
+
+    // return ((isAGOL && isHostedServer) || (!isAGOL && isLocallyHosted));
+    return (isAGOL && isHostedServer);
   };
 
   //add default value for widget properties.

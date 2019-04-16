@@ -40,5 +40,21 @@ define({
   "sortDes": "Sorteeri kahanevalt",
   "statistics": "Statistika",
   "attachments": "Manused",
-  "files": "failid"
+  "files": "failid",
+  "keepRichTextLabel": "Säilita rikasteksti formaat",
+  "whatsThis": "Mis see on?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} sisaldab järgmisi rikastekstivälju: ",
+      "line2": " ja need võivad sisaldada teksti vormindamise laade (nt font, värv, tekstisuurus).",
+      "line3": "CSV-faili eksportimisel säilitatakse vorminduslaadid HTML-märgendite abil. Kui te ei soovi rikasteksti formaate säilitada, tühjendage ruut „Säilita rikasteksti formaat“."
+    },
+    "example": {
+      "label": "Näited.",
+      "scenarios": {
+        "first": "eksporditakse vaikimisi järgmise tekstina:",
+        "second": "ja järgmine tekst rikasteksti formaadita:"
+      }
+    }
+  }
 });

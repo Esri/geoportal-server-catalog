@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -51,7 +51,7 @@ define([
       layerInfo: null,
       OPERATORS: null,
       url: null,
-      featureLayerId: null,//optional
+      featureLayerId: null,
 
       //events:
       //change
@@ -70,9 +70,20 @@ define([
       },
 
       //the default value of showErrorTip is true
-      getFilterExpr: function(){
+      /*
+      return execution expr by default
+      options.ifDisplaySQL: true/false, if true,return the friendly sql to end user
+      options.custom: you can customize your params
+      */
+      getFilterExpr: function(options){
         var newPartsObj = this._getNewValidPartsObj(this.partsObj, true);
         var expr = newPartsObj ? this._getFilterExprByPartsObj(newPartsObj) : null;
+        if(options && options.ifDisplaySQL){
+          if(newPartsObj.displaySQL === undefined){ //origin widget config don't has ifDisplaySQL
+            return expr;
+          }
+          return newPartsObj.displaySQL;
+        }
         return expr;
       },
 
@@ -102,8 +113,34 @@ define([
         var validateSinglePart = lang.hitch(this, function(singlePart){
           if(singlePart.spId){
             var sp = this._getSingleFilterParameterBySpId(singlePart.spId);
-            singlePart.valueObj = sp.getValueObject();
-            return sp.getStatus();
+            // singlePart.valueObj = sp.getValueObject();
+            // return sp.getStatus();
+
+            var valObj = sp.getValueObject();
+            singlePart.valueObj = valObj;
+            if(valObj && (valObj.type === 'uniquePredefined' || valObj.type === 'multiplePredefined')){ //for valueList [{},{}]
+              var newValObj = [];
+              for(var key in valObj.value){
+                if(valObj.value[key].isChecked){
+                  newValObj.push(valObj.value[key]);
+                }
+              }
+              if(newValObj.length > 0){
+                singlePart.valueObj.value = newValObj;
+                return 1;
+              }else{
+                singlePart.valueObj.value = '';
+                return -1;
+              }
+            }else if(valObj && valObj.type === 'multipleDynamic'){//for valueList [1,2]
+              return valObj.value.length > 0 ? 1: -1;
+            }else if(valObj && valObj.type === 'unique'){//for value
+              // return !valObj.value ? -1: 1; //it could be number 0.
+              return (valObj.value === null || valObj.value === undefined || valObj.value === '') ? -1 : 1;
+            }
+            else{//for common value type
+              return sp.getStatus();
+            }
           }else{
             return singlePart.valueObj ? 1 : -1;
           }
@@ -141,16 +178,23 @@ define([
         for(var i = 0; i < _partsObj.parts.length; i++){
           var p = _partsObj.parts[i];
           if (p.parts) {
-            if(tryPushParts(p) < 0 && returnNullIfInvalidPart){
+            if(tryPushParts(p) < 0 && returnNullIfInvalidPart){ //?????
               return null;
             }
           } else {
             if(tryPushSinglePart(p) < 0 && returnNullIfInvalidPart){
-              return null;
+              if(p.valueObj && p.valueObj.type !== 'uniquePredefined' && p.valueObj.type !== 'multiplePredefined' &&
+                p.valueObj.type !== 'unique'){
+                return null;
+              }
             }
           }
         }
 
+        //for predefined (needs a object structure to enable toggleFilter)
+        // if(newPartsObj.parts.length === 0){
+        // return null;
+        // }
         return newPartsObj;
       },
 
@@ -164,10 +208,7 @@ define([
         return this._spObj[id];
       },
 
-      _getCascadeFilterExpr: function(desPart){
-        /*jshint loopfunc: true */
-        var expr = "1=1";
-        //get cascadePartsObj
+      _getCascadeFilterPartsObj: function(desPart){
         var cascadePartsObj = {
           logicalOperator: this.partsObj.logicalOperator,
           parts: []
@@ -213,17 +254,21 @@ define([
             }
           }
         }
-
         cascadePartsObj = this._getNewValidPartsObj(cascadePartsObj, false);
+        return cascadePartsObj;
+      },
 
+      _getCascadeFilterExpr: function(desPart){
+        /*jshint loopfunc: true */
+        var expr = "1=1";
+        //get cascadePartsObj
+        var cascadePartsObj = this._getCascadeFilterPartsObj(desPart);
         if(cascadePartsObj){
           expr = this._getFilterExprByPartsObj(cascadePartsObj);
         }
-
         if(!expr){
           expr = "1=1";
         }
-
         return expr;
       },
 
@@ -243,7 +288,7 @@ define([
       //return a deferred object
       //if resolved, means it build successfully
       //if rejected, means it fail to build
-      build: function(url, layerDefinition, partsObj, /*optional*/ featureLayerId){
+      build: function(url, layerDefinition, partsObj, featureLayerId){
         var resultDef = new Deferred();
         this.clear();
         this.url = url;
@@ -284,6 +329,7 @@ define([
           //override method sp.valueProvider.getCascadeFilterExpr after create all sps and also before build
           array.forEach(sps, lang.hitch(this, function(sp){
             sp.valueProvider.getCascadeFilterExpr = lang.hitch(this, this._getCascadeFilterExpr, sp.part);
+            sp.valueProvider.getCascadeFilterPartsObj = lang.hitch(this, this._getCascadeFilterPartsObj, sp.part);
           }));
           var defs = array.map(sps, lang.hitch(this, function(sp){
             return sp.init();

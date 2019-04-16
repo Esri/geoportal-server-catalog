@@ -5,6 +5,12 @@ define({
   "actions": "Konfigurēt slāņa laukus",
   "field": "Lauks",
   "alias": "Aizstājvārds",
+  "url": "URL",
+  "sortField": "Kārtot lauku",
+  "sortOrderTooltips": {
+    "toDescending": "Nomainīt uz dilstošu secību",
+    "toAscending": "Nomainīt uz pieaugošu secību"
+  },
   "visible": "Redzams",
   "linkField": "Saistīt lauku",
   "noLayers": "Nav pieejams neviens elementu slānis",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Atļaut eksportēt uz CSV",
   "expand": "Sākotnēji izvērst logrīku",
   "filterByExtent": "Aktivizēt filtrēšanu atbilstoši kartes pārklājumam pēc noklusējuma",
+  "allowTextSelection": "Atļaut izvēlēties tekstu",
+  "highlightColor": "Izcēluma krāsa",
   "restore": "Atjaunot uz noklusējuma vērtību",
   "ok": "Labi",
   "cancel": "Atcelt",

@@ -37,6 +37,7 @@ function(declare, lang, domConstruct, fx, AppClient, App) {
       client.pingGeoportal().then(function(geoportal){
         //console.warn("geoportal",geoportal);
         if (!geoportal) geoportal = {};
+        if (window) window.geoportalServiceInfo = geoportal; // to use for child iframes
         AppContext.geoportal = geoportal;      
         AppContext.appUser.whenAppStarted().then(function(){
           showApp();
