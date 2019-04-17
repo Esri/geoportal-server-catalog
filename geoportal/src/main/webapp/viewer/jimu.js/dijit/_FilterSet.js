@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -15,6 +15,7 @@
 ///////////////////////////////////////////////////////////////////////////
 
 define([
+  'dojo/Evented',
   'dojo/_base/declare',
   'dijit/_WidgetBase',
   'dijit/_TemplatedMixin',
@@ -29,14 +30,16 @@ define([
   'dojo/query',
   './_SingleFilter'
 ],
-function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, registry,
+function(Evented, declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, registry,
   lang, html, array, on, aspect, query, SingleFilter) {
-  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
+
+  return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
     templateString:template,
     baseClass: 'jimu-filter-set',
     nls: null,
     url: null,
     layerInfo: null,
+    popupFieldsInfo:[],
     stringFieldType: '',
     dateFieldType: '',
     numberFieldTypes: [],
@@ -45,13 +48,16 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     enableAskForValues: false,
     isHosted: false,
     valueProviderFactory: null,
+    runtime: false, //optional
+
+    //public methods:
+    //toJson
+
+    //events:
+    //change
 
     postMixInProperties:function(){
       this.nls = window.jimuNls.filterBuilder;
-      var a = "${any_or_all}";
-      var splits = this.nls.matchMsgSet.split(a);
-      this.nls.strMatchMsgPart1 = splits[0] || '';
-      this.nls.strMatchMsgPart2 = splits[1] || '';
       this.inherited(arguments);
     },
 
@@ -90,7 +96,12 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     },
 
     _initSelf:function(){
-      this.own(on(this.btnAdd, 'click', lang.hitch(this, this._addSingleFilter)));
+      this.own(on(this.btnAdd, 'click', lang.hitch(this, function(){
+        // var singleFilter = this._addSingleFilter();
+        // singleFilter.domNode.scrollIntoView();
+        this._addSingleFilter();
+        this.emit('change');
+      })));
       if(this.partsObj){
         this.allAnySelect.value = this.partsObj.logicalOperator;
         var parts = this.partsObj.parts || [];
@@ -118,6 +129,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       var args = {
         url: this.url,
         layerInfo: this.layerInfo,
+        popupFieldsInfo: this.popupFieldsInfo,
         stringFieldType: this.stringFieldType,
         dateFieldType: this.dateFieldType,
         numberFieldTypes: this.numberFieldTypes,
@@ -126,19 +138,18 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
         enableAskForValues: this.enableAskForValues,
         isHosted: this.isHosted,
         valueProviderFactory: this.valueProviderFactory,
-        style:{
-          margin:'15px auto 0 auto',
-          border:0,
-          background:'inherit'
-        }
+        isInFilterSet: true,
+        runtime: this.runtime
       };
       var singleFilter = new SingleFilter(args);
       singleFilter.placeAt(this.allExpsBox);
       singleFilter.startup();
-      this.own(aspect.after(singleFilter,
-                            '_destroySelf',
-                            lang.hitch(this, this._checkFilterNumbers)));
+      this.own(aspect.after(singleFilter, '_destroySelf', lang.hitch(this, this._checkFilterNumbers)));
+      this.own(on(singleFilter, 'change', lang.hitch(this, function(){
+        this.emit('change');
+      })));
       this._checkFilterNumbers();
+      return singleFilter;
     },
 
     _checkFilterNumbers:function(){

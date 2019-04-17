@@ -20,7 +20,8 @@ var profile = {
 		copyOnly: function (filename, mid) {
 			/* jshint unused:false */
 			return (/polyfills/).test(filename) || /caja-html-sanitizer-minified/.test(filename)
-			 || /goldenlayout\/goldenlayout\.js/.test(filename) || /jquery/.test(filename);
+			 || /goldenlayout\/goldenlayout\.js/.test(filename) || /jquery/.test(filename) ||
+			 /moment/.test(filename) || /Sortable\.js/.test(filename) || /cropperjs\.js/.test(filename);
 		},
 
 		// Files that are AMD modules.

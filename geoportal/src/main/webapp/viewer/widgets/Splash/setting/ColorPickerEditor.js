@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ define([
       _defaultColor: '#485566',
       templateString: template,
       nls: null,
+      _MINIMUN: 0,
+      _MAXIMIUM: 100,
 
       postCreate: function() {
         this.colorPicker = new ColorPicker({
@@ -46,8 +48,8 @@ define([
         this.slider = new HorizontalSlider({
           name: "slider",
           value: 0,
-          minimum: 0,
-          maximum: 100,
+          minimum: this._MINIMUN,
+          maximum: this._MAXIMIUM,
           discreteValues: 101,
           intermediateChanges: true,
           showButtons: false,
@@ -64,9 +66,14 @@ define([
           }
         })));
 
-        this.own(on(this.spinner, 'change', lang.hitch(this, function(val) {
+        this.own(on(this.spinner, 'change', lang.hitch(this, function (val) {
+          if (isNaN(val)) {
+            this.spinner.setValue(0);
+          }
           if (false === this._isSameVal()) {
-            this.slider.setValue(val);
+            if (this.spinner.isInRange()) {
+              this.slider.setValue(val);
+            }
           }
         })));
 
@@ -75,6 +82,17 @@ define([
       },
       _isSameVal: function() {
         return this.slider.getValue() === this.spinner.getValue();
+      },
+      isValid: function () {
+        var sliderValue = this.slider.getValue();
+        if (sliderValue < this._MINIMUN || sliderValue > this._MAXIMIUM) {
+          return false;
+        }
+        if (!this.spinner.isValid()) {
+          return false;
+        }
+
+        return true;
       },
       getValues: function() {
         var rgb = null,

@@ -22,41 +22,47 @@
       "widgets/ZoomSlider/Widget": {
         "visible": true,
         "position": {
-          "left": 54,
-          "bottom": 14,
+          "left": 10,
+          "bottom": 64,
           "height": 30
         }
       },
       "widgets/HomeButton/Widget": {
         "inPanel": false,
         "position": {
-          "left": 124,
-          "bottom": 14
+          "left": 84,
+          "bottom": 64
         }
       },
       "widgets/MyLocation/Widget": {
         "inPanel": false,
         "position": {
-          "left": 164,
-          "bottom": 14
+          "left": 120,
+          "bottom": 64
         }
       },
       "widgets/ExtentNavigate/Widget": {
         "position": {
-          "left": 203,
-          "bottom": 14,
+          "left": 200,
+          "bottom": 64,
           "height": 30
+        }
+      },
+      "widgets/FullScreen/Widget": {
+        "position": {
+          "left": 160,
+          "bottom": 64
         }
       },
       "widgets/Scalebar/Widget":{
         "position": {
-          "left": 288,
-          "bottom": 5
+          "left": 10,
+          "bottom": 30
         }
       },
       "widgets/Coordinate/Widget": {
         "position": {
-          "left": 463,
+          "left": 10,
           "bottom": 5
         }
       },

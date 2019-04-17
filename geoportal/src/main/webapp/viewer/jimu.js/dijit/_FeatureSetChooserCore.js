@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -30,10 +30,11 @@ define([
   'esri/tasks/query',
   'esri/tasks/QueryTask',
   'esri/layers/FeatureLayer',
-  'esri/symbols/jsonUtils'
+  'esri/symbols/jsonUtils',
+  'esri/geometry/geometryEngine'
 ],
 function(on, sniff, Evented, Deferred, lang, array, declare, jimuUtils, symbolUtils, SelectionManager,
-  LayerInfos, Graphic, EsriQuery, QueryTask, FeatureLayer, symbolJsonUtils) {
+  LayerInfos, Graphic, EsriQuery, QueryTask, FeatureLayer, symbolJsonUtils, geometryEngine) {
 
   return declare([Evented], {
     baseClass: 'jimu-featureset-chooser-core',
@@ -237,7 +238,7 @@ function(on, sniff, Evented, Deferred, lang, array, declare, jimuUtils, symbolUt
         }
       }
 
-      this._onLoading();
+      this.emit('loading');
 
       this._getFeaturesByGeometry(g.geometry).then(lang.hitch(this, function(features){
         var layer = this.updateSelection ? this.featureLayer : this._middleFeatureLayer;
@@ -251,7 +252,16 @@ function(on, sniff, Evented, Deferred, lang, array, declare, jimuUtils, symbolUt
       }));
     },
 
+    _addTolerance: function(geometry) {
+      // Add tolorence of 10px based on current map scale, use fixed dpi 96
+      var resolution = this.map.getScale() * 2.54 / 9600; // meters of each pixel
+      return geometryEngine.buffer(geometry, 10 * resolution, 'meters');
+    },
+
     _getFeaturesByGeometry: function(geometry){
+      if (geometry.type === 'point') {
+        geometry = this._addTolerance(geometry);
+      }
       var def = new Deferred();
       var features = [];
       if(this.featureLayer.getMap()){

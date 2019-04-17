@@ -40,5 +40,21 @@ define({
   "sortDes": "Sortare descendentă",
   "statistics": "Statistică",
   "attachments": "Ataşări",
-  "files": "fişiere"
+  "files": "fişiere",
+  "keepRichTextLabel": "Păstrare format de text îmbogățit",
+  "whatsThis": "Ce înseamnă acest lucru?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} conține următorul/următoarele câmp(uri) de text îmbogățit: ",
+      "line2": " care poate/pot include stiluri de formatare a textului, precum fonturi, culori sau dimensiuni de text.",
+      "line3": "Când sunt exportate în CSV, stilurile de formatare se vor păstra sub forma unor etichete HTML. Puteți alege să nu păstrați formatele de text îmbogățit prin debifarea casetei „Păstrați formatul de text îmbogățit”."
+    },
+    "example": {
+      "label": "De exemplu:",
+      "scenarios": {
+        "first": "se va exporta în mod implicit ca următorul text:",
+        "second": "iar următorul text fără format de text îmbogățit:"
+      }
+    }
+  }
 });

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -55,6 +55,7 @@ define([
       onlyShowVisible: false,
       updateWhenLayerInfosIsShowInMapChanged: false,
       onlyShowWebMapLayers: false,
+      displayTooltipForTreeNode: false,
 
       //public methods:
       //getSelectedItems
@@ -341,6 +342,10 @@ define([
             }
 
             return icon;
+          }),
+
+          getTooltip: lang.hitch(this, function(item){
+            return this.displayTooltipForTreeNode ? item.layerInfo.title : "";
           })
         });
         html.addClass(this.tree.domNode, this._treeClass);
@@ -431,12 +436,11 @@ define([
       destroy: function(){
         if(this.shelter){
           this.shelter.destroy();
+          this.shelter = null;
         }
         if(this.tree){
           this.tree.destroy();
         }
-        this.shelter = null;
-        this.tree.destroy();
         this.inherited(arguments);
       }
     });

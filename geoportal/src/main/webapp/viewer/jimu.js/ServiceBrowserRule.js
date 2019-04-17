@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -53,6 +53,7 @@ function(declare, lang, array, Deferred, jimuUtils, esriRequest, IdentityManager
     //this method return a Deferred object,
     //the Deferred object resolve an item object{name,type,url} of the input url
     //here is the default implementation of getItem
+    //if resolve null, means can't pass the filter
     getItem: function(url){
       return this.defaultGetItem(url);
     },

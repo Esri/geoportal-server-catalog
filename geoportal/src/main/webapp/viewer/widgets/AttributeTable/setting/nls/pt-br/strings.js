@@ -5,6 +5,12 @@ define({
   "actions": "Configurar campos de camada",
   "field": "Campo",
   "alias": "Nome Alternativo",
+  "url": "URL",
+  "sortField": "Campo de classificação",
+  "sortOrderTooltips": {
+    "toDescending": "Alterar para ordem decrescente",
+    "toAscending": "Alterar para ordem crescente"
+  },
   "visible": "Visível",
   "linkField": "Campo de vínculo",
   "noLayers": "Nenhuma camada de feição está disponível",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Permitir exportação para CSV",
   "expand": "Expandir inicialmente o widget",
   "filterByExtent": "Habilitar Filtrar por Extensão de Mapa por padrão",
+  "allowTextSelection": "Permitir seleção de texto",
+  "highlightColor": "Cor de destaque",
   "restore": "Restaurar para valor padrão",
   "ok": "OK",
   "cancel": "Cancelar",

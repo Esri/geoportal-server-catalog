@@ -14,6 +14,7 @@ define({
   "generalSetting": "일반 설정",
   "allPlaceholder": "모두 검색하기 위한 플레이스 홀더 텍스트: ",
   "showInfoWindowOnSelect": "발견한 피처 또는 위치에 대해 팝업 보기",
+  "showInfoWindowOnSelect2": "피처나 위치를 찾은 경우 팝업을 표시합니다.",
   "searchInCurrentMapExtent": "현재 맵 범위에서만 검색",
   "zoomScale": "확대 축척",
   "locatorUrl": "지오코더 URL",

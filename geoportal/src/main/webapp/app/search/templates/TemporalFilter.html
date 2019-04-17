@@ -21,8 +21,10 @@
         <option value="minute">${i18n.search.temporalFilter.interval.minute}</option>
         <option value="second">${i18n.search.temporalFilter.interval.second}</option>
       </select>
-      <img src="images/calendar.png" aria-label="Enter Time Interval" class="calendar" 
+      <label for="${id}_calendar">${i18n.search.temporalFilter.calendarLabel}</label>
+      <img src="images/calendar.png" title="${i18n.search.temporalFilter.calendarTitle}" aria-label="${i18n.search.temporalFilter.calendarTitle}" class="calendar" 
            data-dojo-attach-event="onclick: onCalendarClick"
+           id="${id}_calendar"
       />
     </div>
   </div>

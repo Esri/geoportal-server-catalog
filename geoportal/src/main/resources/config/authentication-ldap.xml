@@ -7,10 +7,10 @@
     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
 	
   <security:ldap-server 
-    id="ldapServer"  
-    url="ldap://gptsrv12r2:10389"
-    manager-dn="uid=admin, ou=system" 
-    manager-password="secret" />
+    id="ldapServer"
+    url="${ldap_url:ldap://gptsrv12r2:10389}"
+    manager-dn="${ldap_manager_dn:uid=admin, ou=system}"
+    manager-password="${ldap_manager_password:secret}" />
 	
   <security:authentication-manager id="authenticationManager" alias="authenticationManager">
     <security:ldap-authentication-provider 

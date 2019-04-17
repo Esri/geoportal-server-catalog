@@ -28,6 +28,60 @@
 .jimu-widget-attributetable-setting .jimu-checkbox{
   margin-right: 20px;
 }
+.jimu-rtl .jimu-widget-attributetable-setting .jimu-checkbox{
+  margin-left: 20px;
+  margin-right: 0;
+}
 .jimu-widget-attributetable-setting .disable-checkbox{
   color: #e5e5e5;
+}
+.jimu-widget-attributetable-setting th.isDescending .jimu-checkbox {
+  display: none;
+}
+.jimu-widget-attributetable-setting td.isDescending {
+  text-align: center;
+}
+.jimu-widget-attributetable-setting td.isDescending .jimu-checkbox {
+  top: 5px;
+  margin: 0;
+}
+.jimu-widget-attributetable-setting td.isDescending .jimu-checkbox .checkbox {
+  background: transparent;
+  background-image: url('images/order_up.svg');
+  width: 16px;
+  height: 16px;
+  background-repeat: no-repeat;
+  background-position-x: 0;
+}
+.jimu-widget-attributetable-setting td.isDescending .jimu-checkbox .checkbox.jimu-icon-checked {
+  background-image: url('images/order_down.svg');
+}
+.jimu-widget-attributetable-setting .sortField .dijitSelect{
+  height: 20px;
+  background: #fff;
+  margin: 5px 0;
+}
+.jimu-widget-attributetable-setting .sortField .dijitSelect .dijitButtonContents{
+  border-right-width: 0;
+}
+.jimu-rtl .jimu-widget-attributetable-setting .sortField .dijitSelect .dijitButtonContents{
+  border-left-width: 0;
+}
+.jimu-widget-attributetable-setting .sortField .dijitSelect .dijitButtonText{
+  overflow: hidden;
+  text-overflow: ellipsis;
+  width: 90px;
+}
+.jimu-widget-attributetable-setting .sortField .dijitSelect .dijitInputField{
+  padding-top: 0;
+  padding-bottom: 0;
+}
+.jimu-widget-attributetable-setting .sortField .dijitSelect .dijitArrowButton{
+  background: #fff;
+}
+.has-webkit .jimu-simple-table.vertical-scroll .head-section > .table-div{
+  padding-right: 6px;
+}
+.jimu-rtl.has-webkit .jimu-simple-table.vertical-scroll .head-section > .table-div{
+  padding-left: 6px;
 }

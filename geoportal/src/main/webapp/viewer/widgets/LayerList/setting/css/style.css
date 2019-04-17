@@ -33,6 +33,10 @@
   margin-bottom: 5px;
 }
 
+.jimu-widget-layerList-setting .control-popupmenu-part {
+  margin: 20px 0 20px 0;
+}
+
 .jimu-widget-layerList-setting .control-popupmenu-part .label {
   /*padding-bottom: 26px;*/
   padding-left: 12px;

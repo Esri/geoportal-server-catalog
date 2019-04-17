@@ -123,8 +123,8 @@ var G = {
     if (ok) {
       //this.writeMultiProp(task.item,"timeperiod_tp",data);
       this.writeMultiProp(task.item,"timeperiod_nst",data);
-      if (data.begin_year_l != null) {
-        this.writeMultiProp(task.item,"metadata_year_i", parseInt(data.begin_year_l));
+      if (data.begin_year_l !== null) {
+        this.writeMultiProp(task.item,"metadata_year_l", parseInt(data.begin_year_l));
       }
     } 
   },
@@ -190,6 +190,10 @@ var G = {
         if (value.startsWith('9999')) return; // Data.Gov uses 9999-01-01 as default
         var isEnd = (options.isEnd || false);
         value = this.DateUtil.checkIsoDateTime(value,isEnd);
+      }
+      if (typeof value === "string") {
+          value = value.trim();
+          value = this.Val.unescape(value); // unescape HTML and Octal.
       }
     }
     return value;

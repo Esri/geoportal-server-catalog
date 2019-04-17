@@ -169,6 +169,24 @@
       <version>1.3.1</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-text</artifactId>
+      <version>1.6</version>
+    </dependency>
+    
+    <!-- https://mvnrepository.com/artifact/net.sourceforge.saxon/saxon License MPL
+      If you have a bug in a transform, try enabling this library
+       mvn clean package
+       -->
+  <!--    <dependency>
+         <groupId>net.sourceforge.saxon</groupId>
+         <artifactId>saxon</artifactId>
+         <version>9.1.0.8</version>
+       </dependency>
+-->
+
   </dependencies> 
   
   <build>
@@ -225,6 +243,9 @@
                 <!--<echo>Ant copy ${project.build.directory}/geoportal.jar to ${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar</echo>-->
                 <copy overwrite="true" file="${project.build.directory}/geoportal.jar" 
                   tofile="${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar" />
+                <copy toDir="${project.build.directory}/geoportal/viewer/widgets/GeoportalSearch/gs">
+                  <fileset dir="../geoportal-search/src/main/resources/gs"/>
+                </copy>
               </tasks>
             </configuration>
             <goals>
