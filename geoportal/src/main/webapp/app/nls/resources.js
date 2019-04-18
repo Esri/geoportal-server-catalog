@@ -70,7 +70,8 @@ define({
         origin: "Source of Origin",
         approvalStatus: "Approval Status",
         access: "Access",
-        accessGroups: "Access Groups"
+        accessGroups: "Access Groups",
+        missingSource: "Editor/Upload"
       },
       componentSettings: {
         componentLabel: "Label",
