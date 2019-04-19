@@ -91,6 +91,9 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
       }
     },
 
+    lastButtonClicked: function() {
+    },
+
     /* SearchComponent API ============================================= */
 
     appendQueryParams: function(params) {
