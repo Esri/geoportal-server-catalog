@@ -92,6 +92,10 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
     },
 
     lastButtonClicked: function() {
+      if (this.numHits < AppContext.appConfig.system.searchLimit && this.hasMore) {
+        this.start = Math.max(Math.ceil(this.numHits / this.numPerPage)-1, 0)*this.numPerPage + 1
+        this.search();
+      }
     },
 
     /* SearchComponent API ============================================= */
@@ -171,6 +175,13 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
       } else {
         domClass.add(this.nextButton.parentNode, "disabled");
       }
+      
+      if (this.numHits < AppContext.appConfig.system.searchLimit && this.hasMore) {
+        domClass.remove(this.lastButton.parentNode, "disabled");
+      } else {
+        domClass.add(this.lastButton.parentNode, "disabled");
+      }
+      
       if (nHits > 0) {
         this.pagingNode.style.display = "";
       } else {
