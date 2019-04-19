@@ -308,6 +308,23 @@ var G = {
       }
       if (xcen < -180.0) xcen = -180.0;
       if (xcen > 180.0) xcen = 180.0;
+      
+      // turn the point into a tiny envelope to let ES 6.6 accept such data
+      if (xmin === xmax) {
+        if (xmax + 0.00000001 > 180) {
+          xmin -= 0.00000001;
+        } else {
+          xmax += 0.00000001;
+        }
+      }
+      if (ymin === ymax) {
+        if (ymax + 0.00000001 > 90) {
+          ymin -= 0.00000001;
+        } else {
+          ymax += 0.00000001;
+        }
+      }
+      
       result = {
         "envelope": {
           "type": "envelope",
