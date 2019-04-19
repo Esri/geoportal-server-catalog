@@ -1,6 +1,10 @@
 define([],function(){var obj={
 // .......................................................................................
   
+  system: {
+    searchLimit: 10000
+  },
+  
   edit: {
     setField: {
       allow: false,
