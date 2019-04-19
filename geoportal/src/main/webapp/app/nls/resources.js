@@ -190,6 +190,8 @@ define({
         previousTip: "Previous",
         next: ">",
         nextTip: "Next",
+        last: ">>",
+        lastTip: "Last",
         pagePattern: "Page {page}",
         countPattern: "{count} items"
       },
