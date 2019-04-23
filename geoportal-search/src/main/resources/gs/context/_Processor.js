@@ -15,6 +15,7 @@
 
 (function(){
 
+  // source file renamed to _Processor.js due to name conflicts with web blockers.
   gs.context.Processor = gs.Object.create(gs.Proto,{
 
     execute: {writable:true,value:function(requestInfo, responseHandler) {
