@@ -100,7 +100,7 @@ define({
         searchLabel: "Search query:",
         fromLabel: "From:",
         toLabel: "To",
-        calendarLabel: "Dates:",
+        calendarLabel: "Specify date range:",
         calendarTitle: "Enter Time Interval",
         interval: {
           year: "Year",
