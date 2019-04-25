@@ -192,6 +192,7 @@ define({
         nextTip: "Next",
         last: ">>",
         lastTip: "Last",
+        lastTipDisabled: "Result exceeds limit of ${searchLimit} records.",
         pagePattern: "Page {page}",
         countPattern: "{count} items"
       },

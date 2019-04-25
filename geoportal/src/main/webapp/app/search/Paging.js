@@ -16,14 +16,16 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/on",
         "dojo/dom-class",
+        "dojo/dom-attr",
         "dojo/number",
         "dojo/topic",
+        "dojo/string",
         "app/context/app-topics",
         "dojo/text!./templates/Paging.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/etc/util"], 
-function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n, SearchComponent, util) {
+function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopics, template, i18n, SearchComponent, util) {
   
   var oThisClass = declare([SearchComponent], {
  
@@ -178,8 +180,10 @@ function(declare, lang, on, domClass, djNumber, topic, appTopics, template, i18n
       
       if (this.numHits < AppContext.appConfig.system.searchLimit && this.hasMore) {
         domClass.remove(this.lastButton.parentNode, "disabled");
+        domAttr.set(this.lastButton, "title", this.i18n.search.paging.lastTip);
       } else {
         domClass.add(this.lastButton.parentNode, "disabled");
+        domAttr.set(this.lastButton, "title", string.substitute(this.i18n.search.paging.lastTipDisabled, {searchLimit: AppContext.appConfig.system.searchLimit}));
       }
       
       if (nHits > 0) {
