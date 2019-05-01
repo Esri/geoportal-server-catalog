@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Pindahkan ke atas/ke bawah",
   "attributeTable": "Tampilkan dalam Tabel Atribut",
   "url": "Deskripsi / Tampilkan Detail item / Unduhan",
+  "expandAllLayers": "Perluas semua layer",
+  "expandAllLayersByDefault": "Perluas semua layer secara default",
   "layerSelectorTitle": "Pilih layer mana yang akan ditampilkan pada daftar."
 });

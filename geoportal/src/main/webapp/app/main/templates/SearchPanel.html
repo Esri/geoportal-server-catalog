@@ -1,6 +1,6 @@
-<div data-dojo-attach-point="contentNode">
-  <div class="g-search-pane" data-dojo-type="app/search/SearchPane">
-    <div class="g-search-pane-left">
+<div  data-dojo-attach-point="contentNode">
+  <div class="g-search-pane row" data-dojo-type="app/search/SearchPane">
+    <div class="g-search-pane-left col-sm-6 col-md-3">
       <div data-dojo-type="app/search/PageUrlFilter"></div>
       <div data-dojo-type="app/search/SearchBox"></div>
       <div data-dojo-type="app/search/SpatialFilter"
@@ -60,7 +60,7 @@
         data-dojo-props="field:'keywords_s',label:'${i18n.search.criteria.keywords}',props:{size:20}">
       </div>    
       <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20}">
+        data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20, missing:'${i18n.search.criteria.missingSource}'}">
       </div> 
       <div data-dojo-type="app/search/TermsAggregation"
         data-dojo-props="
@@ -81,7 +81,7 @@
           label:'${i18n.search.criteria.accessGroups}'">
       </div>  
     </div>
-    <div class="g-search-pane-right">
+    <div class="g-search-pane-right  col-sm-6 col-md-9">
       <div data-dojo-type="app/search/AppliedFilters" data-dojo-props="autoExpand:true"></div>
       <div data-dojo-type="app/search/ResultsPane"></div>
       <div data-dojo-type="app/search/OpenSearchLinksPane"></div>

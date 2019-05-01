@@ -3,5 +3,7 @@
     "arrangement": 0,
     "autoUpdate": true,
     "respectCurrentMapScale": true
-  }
+  },
+  "layerState": {},
+  "syncWithWebmap": false
 }

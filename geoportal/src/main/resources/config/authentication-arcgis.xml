@@ -7,15 +7,15 @@
     http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
     
   <beans:bean id="arcgisAuthenticationProvider" class="com.esri.geoportal.base.security.ArcGISAuthenticationProvider">
-    <beans:property name="appId" value="6iJ2pLIj9UwcSdfA"/>
-    <beans:property name="authorizeUrl" value="https://www.arcgis.com/sharing/rest/oauth2/authorize"/>
-    <beans:property name="createAccountUrl" value="https://www.arcgis.com/home/createaccount.html"/>
+    <beans:property name="appId" value="${arcgis_appid:6iJ2pLIj9UwcSdfA}"/>
+    <beans:property name="authorizeUrl" value="${arcgis_authorizeUrl:https://www.arcgis.com/sharing/rest/oauth2/authorize}"/>
+    <beans:property name="createAccountUrl" value="${arcgis_createAccountUrl:https://www.arcgis.com/home/createaccount.html}"/>
     <beans:property name="expirationMinutes" value="120" />
     <beans:property name="geoportalAdministratorsGroupId" value="" />
     <beans:property name="geoportalPublishersGroupId" value="" />
     <beans:property name="allUsersCanPublish" value="true" />
     <beans:property name="rolePrefix" value="ROLE_" />
-    <beans:property name="showMyProfileLink" value="true" />
+    <beans:property name="showMyProfileLink" value="${arcgis_showMyProfileLink:true}" />
   </beans:bean>
 
 	<security:authentication-manager id="authenticationManager" alias="authenticationManager">

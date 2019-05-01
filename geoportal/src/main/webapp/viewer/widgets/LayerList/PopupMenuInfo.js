@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,10 +23,9 @@ define([
   'jimu/WidgetManager',
   'jimu/portalUrlUtils',
   'esri/lang',
-  'esri/graphicsUtils',
   './NlsStrings'
 ], function(declare, array, lang, Deferred, all, WidgetManager, portalUrlUtils, esriLang,
-  graphicsUtils, NlsStrings) {
+  NlsStrings) {
   var clazz = declare([], {
 
     _candidateMenuItems: null,
@@ -48,11 +47,10 @@ define([
     _getATagLabel: function() {
       var url;
       var label;
-      var itemLayerId = this._layerInfo.isItemLayer && this._layerInfo.isItemLayer();
       var layerUrl = this._layerInfo.getUrl();
-
-      if (itemLayerId) {
-        url = this._getItemDetailsPageUrl() || layerUrl;
+      var basicItemInfo = this._layerInfo.isItemLayer();
+      if (basicItemInfo) {
+        url = this._getItemDetailsPageUrl(basicItemInfo) || layerUrl;
         label = this.nls.itemShowItemDetails;
       } else if (layerUrl &&
         (this._layerType === "CSVLayer" || this._layerType === "KMLLayer")) {
@@ -71,23 +69,14 @@ define([
         url = '';
         label = this.nls.itemDesc;
       }
-
+      this._ATagLabelUrl = url;
       return '<a class="menu-item-description" target="_blank" href="' +
         url + '">' + label + '</a>';
     },
 
-    _getItemDetailsPageUrl: function() {
+    _getItemDetailsPageUrl: function(basicItemInfo) {
       var itemUrl = "";
-      var portalUrl;
-      var appConfig = this.layerListWidget.appConfig;
-      var itemLayerInfo = lang.getObject("_wabProperties.itemLayerInfo", false, this._layerInfo.layerObject);
-      if(this._layerInfo.originOperLayer.itemId) {
-        portalUrl = portalUrlUtils.getStandardPortalUrl(appConfig.map.portalUrl || appConfig.portalUrl);
-        itemUrl = portalUrlUtils.getItemDetailsPageUrl(portalUrl, this._layerInfo.originOperLayer.itemId);
-      } else if(itemLayerInfo && itemLayerInfo.portalUrl && itemLayerInfo.itemId){
-        portalUrl = portalUrlUtils.getStandardPortalUrl(itemLayerInfo.portalUrl);
-        itemUrl = portalUrlUtils.getItemDetailsPageUrl(portalUrl, itemLayerInfo.itemId);
-      }
+      itemUrl = portalUrlUtils.getItemDetailsPageUrl(basicItemInfo.portalUrl, basicItemInfo.itemId);
       return itemUrl;
     },
 
@@ -197,7 +186,7 @@ define([
         });
       }
 
-      if (!this._layerInfo.getUrl()) {
+      if (!this._ATagLabelUrl) {
         dynamicDeniedItems.push({
           'key': 'url',
           'denyType': 'disable'
@@ -311,32 +300,7 @@ define([
      **********************************/
     _onItemZoomToClick: function(evt) {
       /*jshint unused: false*/
-      //this.map.setExtent(this.getExtent());
-      this._layerInfo.getExtent().then(lang.hitch(this, function(geometries) {
-        var ext = null;
-        var a = geometries && geometries.length > 0 && geometries[0];
-        if(this._isValidExtent(a)){
-          ext = a;
-        }
-        if(ext){
-          this._layerInfo.map.setExtent(ext);
-        }else if(this._layerInfo.map.graphicsLayerIds.indexOf(this._layerInfo.id) >= 0){
-          //if fullExtent doesn't exist and the layer is (or sub class of) GraphicsLayer,
-          //we can calculate the full extent
-          this._layerInfo.getLayerObject().then(lang.hitch(this, function(layerObject){
-            if(layerObject.graphics && layerObject.graphics.length > 0){
-              try{
-                ext = graphicsUtils.graphicsExtent(layerObject.graphics);
-              }catch(e){
-                console.error(e);
-              }
-              if(ext){
-                this._layerInfo.map.setExtent(ext);
-              }
-            }
-          }));
-        }
-      }));
+      this._layerInfo.zoomTo();
     },
 
     _isValidExtent: function(extent){

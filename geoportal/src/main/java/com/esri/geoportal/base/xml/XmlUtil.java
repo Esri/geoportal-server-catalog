@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 package com.esri.geoportal.base.xml;
-import java.io.StringReader;
-import java.io.StringWriter;
-import java.io.UnsupportedEncodingException;
-
 import javax.xml.XMLConstants;
 import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
@@ -24,6 +20,9 @@ import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
+import java.io.StringReader;
+import java.io.StringWriter;
+import java.io.UnsupportedEncodingException;
 
 /**
  * XML utilities.
@@ -172,7 +171,16 @@ public class XmlUtil {
   public static void transform(javax.xml.transform.Source source,
       javax.xml.transform.Result result, boolean indent) throws TransformerException {
     TransformerFactory factory = TransformerFactory.newInstance();
-    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD,"");
+ /* have and issue with the default transformer.
+    https://stackoverflow.com/questions/45152707/transformerfactory-and-xalan-dependency-conflict
+    and
+    https://docs.oracle.com/javase/tutorial/jaxp/properties/usingProps.html
+     */
+    try {
+      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    } catch (IllegalArgumentException e) {
+      //jaxp 1.5 feature not supported
+    }
     factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
     //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
     Transformer transformer = factory.newTransformer();

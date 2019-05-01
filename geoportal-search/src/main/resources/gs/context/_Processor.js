@@ -15,6 +15,7 @@
 
 (function(){
 
+  // source file renamed to _Processor.js due to name conflicts with web blockers.
   gs.context.Processor = gs.Object.create(gs.Proto,{
 
     execute: {writable:true,value:function(requestInfo, responseHandler) {
@@ -166,7 +167,7 @@
       };
 
       var atom = ["atom","application/atom+xml","http://www.w3.org/2005/Atom"];
-      var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0"];
+      var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0","http://www.isotc211.org/2005/gmd"];
       var json = ["json","pjson","json-source","application/json"];
       var csv = ["csv","text/csv"];
       var eros = ["eros"];

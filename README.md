@@ -7,7 +7,7 @@ This repository thus contains the catalog capability of Geoportal Server, while 
 - 2.6.1 - Released October 9, 2018, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
 
 ## Can't Wait to Get Started?
-- Try the [sanbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
+- Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
 
 ## Features
 * Metadata editor - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE (Data), INSPIRE (Service), GEMINI (Data), GEMINI (Service)

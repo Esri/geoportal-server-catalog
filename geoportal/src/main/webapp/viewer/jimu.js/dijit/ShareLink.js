@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -21,6 +21,7 @@ define(['dojo/_base/declare',
     'dojo/_base/lang',
     'dojo/_base/array',
     "dojo/dom-class",
+    'dojo/_base/html',
     'dojo/on',
     'dojo/topic',
     "dojo/query",
@@ -37,6 +38,8 @@ define(['dojo/_base/declare',
     'esri/request',
     'esri/tasks/query',
     'esri/tasks/QueryTask',
+    'esri/symbols/jsonUtils',
+    'esri/InfoTemplate',
     "esri/symbols/PictureMarkerSymbol",
     "esri/graphic",
     "esri/layers/GraphicsLayer",
@@ -51,9 +54,10 @@ define(['dojo/_base/declare',
     "dijit/form/SimpleTextarea",
     "dijit/form/ValidationTextBox"
   ],
-  function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, lang, array, dojoClass,
+  function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, lang, array, dojoClass, html,
            on, topic, dojoQuery, jimuUtils, shareUtils, dojoConfig, dojoCookie,
-           template, dojoString, Select, NumberTextBox, domAttr, Deferred, esriRequest, EsriQuery, QueryTask,
+           template, dojoString, Select, NumberTextBox, domAttr, Deferred,
+           esriRequest, EsriQuery, QueryTask, symbolJsonUtils, InfoTemplate,
            PictureMarkerSymbol, Graphic, GraphicsLayer, FeaturelayerChooserFromMap, LayerChooserFromMapWithDropbox) {
     var so = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
       templateString: template,
@@ -340,7 +344,10 @@ define(['dojo/_base/declare',
         this.mobileLayout.set("value", this.share.DEFAULT_MOBILE_LAYOUT);
 
         //hide findLocation
-        this.updateShareLinkOptionsUI({isShowFindLocation: this._isShowFindLocation});
+        //var isShowUseOrg = !!(this._isOnline && this._isSharedToPublic);
+        this.updateShareLinkOptionsUI({
+          isShowFindLocation: this._isShowFindLocation
+        });
 
         this._setInputsClicktoSelect(this.preview);
       },
@@ -531,6 +538,8 @@ define(['dojo/_base/declare',
         })));
       },
       _onMarkersClick: function(results) {
+        shareUtils.disableWebMapPopup(this.map);
+
         this._unselectMarkerBtn();
         this._selectMarkerBtn(results);
 
@@ -554,6 +563,8 @@ define(['dojo/_base/declare',
         this._unselectMarkerBtn();
         this.updateUrl(param);
         this._showPopup();
+
+        shareUtils.enableWebMapPopup(this.map);
       },
 
       _hidePopup: function() {
@@ -768,11 +779,20 @@ define(['dojo/_base/declare',
         this._updateResUrls(param);
         this._updateLinkOptionsUI();
 
-        this.preview.set("value", this._fixUrlIfIsOnline(this.resultUrl));
+        if (true === this.config.useOrgUrl) {
+          //keep raw url(org url)
+        } else {
+          //false OR undefined
+          this.resultUrl = this._fixUrlIfIsOnline(this.resultUrl);
+        }
+
+        this.preview.set("value", this.resultUrl);
 
         if (param === null) {
           this._generateShortenUrl();//init
         }
+
+        this._updateEmailHref();
       },
 
       _generateShortenUrl: function() {
@@ -810,10 +830,10 @@ define(['dojo/_base/declare',
       },
 
       _toFacebook: function() {
-        var a = "http://www.facebook.com/sharer/sharer.php?s\x3d100\x26" +//p[url]\x3d
+        var a = "http://www.facebook.com/sharer/sharer.php?" +
           "u=" + encodeURIComponent(this._linkUrlTextBox.get('value')) +
           "&t=" + encodeURIComponent(jimuUtils.stripHTML(this.socialNetworkTitle(this._appTitle)));
-        window.open(a, "_blank");
+        window.open(a, "", "toolbar=0,status=0,width=626,height=436");
       },
       _toTwitter: function() {
         var shareStr = dojoString.substitute(this.share.shareTwitterTxt, {
@@ -822,26 +842,41 @@ define(['dojo/_base/declare',
         var url = this._linkUrlTextBox.get('value');
         //var title = "&text=" + this.socialNetworkTitle(this._appTitle);
         window.open("http://twitter.com/home?status\x3d" +
-          encodeURIComponent(shareStr + url + "\n@ArcGISOnline"), "_blank");
+          encodeURIComponent(shareStr + url + "\n@ArcGISOnline"), "", "toolbar=0,status=0,width=626,height=436");
       },
-      _toEmail: function() {
+      //_toEmail: function() {
+      // var a = "mailto:?subject\x3d" + dojoString.substitute(this.share.shareEmailSubject, {
+      //       appTitle: jimuUtils.stripHTML(this._appTitle)
+      //     }),
+      //   previewUrl = this.preview.get('value');
+      // a = a + ("\x26body\x3d" + encodeURIComponent(this.nls.shareEmailTxt1) +
+      //   "%0D%0A%0D%0A" + jimuUtils.stripHTML(this._appTitle));
+      // a = a + ("%0D%0A" + encodeURIComponent(previewUrl));
+      // a = a + ("%0D%0A%0D%0A" + encodeURIComponent(this.nls.shareEmailTxt2));
+      // a = a + ("%0D%0A%0D%0A" + encodeURIComponent(this.nls.shareEmailTxt3));
+      // window.top.location.href = a;
+      //},
+      _updateEmailHref: function () {
         var a = "mailto:?subject\x3d" + dojoString.substitute(this.share.shareEmailSubject, {
-              appTitle: jimuUtils.stripHTML(this._appTitle)
-            }),
+          appTitle: jimuUtils.stripHTML(this._appTitle)
+        }),
           previewUrl = this.preview.get('value');
         a = a + ("\x26body\x3d" + encodeURIComponent(this.nls.shareEmailTxt1) +
           "%0D%0A%0D%0A" + jimuUtils.stripHTML(this._appTitle));
         a = a + ("%0D%0A" + encodeURIComponent(previewUrl));
         a = a + ("%0D%0A%0D%0A" + encodeURIComponent(this.nls.shareEmailTxt2));
         a = a + ("%0D%0A%0D%0A" + encodeURIComponent(this.nls.shareEmailTxt3));
-        window.top.location.href = a;
+
+        html.setAttr(this.emailShare, 'href', a);
       },
       _toGooglePlus: function() {
         var link = this._linkUrlTextBox.get('value');
         var url = 'http://plus.google.com/share?url=' + encodeURIComponent(link);
-        window.open(url, "_blank");
+        window.open(url,  "", "toolbar=0,status=0,width=626,height=436");
       },
       _toggleLinkOptions: function() {
+        shareUtils.enableWebMapPopup(this.map);
+
         var parentNode = this.domNode.parentNode || this.domNode.parentElement;
         var shareOptionsWrapper = dojoQuery(".shareOptionsWrapper", parentNode);
         var shareUrlsWrapper = dojoQuery(".shareUrlsWrapper", this.domNode);
@@ -922,9 +957,16 @@ define(['dojo/_base/declare',
       getMapExtent: function(map) {
         var accuracy = 1E4;
         var extent = map.extent;
+        var sr = "";
+        if (extent.spatialReference.wkid) {
+          sr = extent.spatialReference.wkid;
+        } else if (!extent.spatialReference.wkid && extent.spatialReference.wkt) {
+          sr = "wkt=" + extent.spatialReference.wkt;
+        }
+
         return null !== extent ? this._roundValue(extent.xmin, accuracy) + "," +
         this._roundValue(extent.ymin, accuracy) + "," + this._roundValue(extent.xmax, accuracy) + "," +
-        this._roundValue(extent.ymax, accuracy) + "," + extent.spatialReference.wkid : "";
+        this._roundValue(extent.ymax, accuracy) + "," + sr : "";
       },
 
       _roundValue: function(a, b) {
@@ -977,22 +1019,81 @@ define(['dojo/_base/declare',
       },
 
       //add and remove marker ,when click marker icon in linkOptions
-      _addGraphicsLayer: function() {
+      _addGraphicsLayer: function () {
         if (!window.isBuilder && typeof this._graphicsLayer === "undefined") {
-          this._graphicsLayer = new GraphicsLayer();
-          this.map.addLayer(this._graphicsLayer);
+          if (this.map.getLayer("marker-feature-action-layer")) {
+            this._graphicsLayer = this.map.getLayer("marker-feature-action-layer");
+          } else {
+            this._graphicsLayer = new GraphicsLayer({ id: "marker-feature-action-layer" });
+            this.map.addLayer(this._graphicsLayer);
+          }
         }
       },
       _removeGraphicsLayer: function() {
         if (!window.isBuilder && typeof this._graphicsLayer !== "undefined") {
+          //close popup
+          if (this.map.infoWindow && this.map.infoWindow.features &&
+            this.map.infoWindow.features[0] === this._markerGraphic) {
+            this.map.infoWindow.hide();
+          }
+          //clean text
+          if (this._markerGraphic && this._markerGraphic._textSymbol) {
+            this._graphicsLayer.remove(this._markerGraphic._textSymbol);
+          }
+
           this._graphicsLayer.remove(this._markerGraphic);
           this._markerGraphic = null;
         }
       },
-      _addGraphicsLayerMarker: function(evt) {
+      _addGraphicsLayerMarker: function (evt) {
         if (!window.isBuilder && typeof this._graphicsLayer !== "undefined") {
-          this._markerGraphic = this._getMarkerGraphic(evt.mapPoint);
-          this._graphicsLayer.add(this._markerGraphic);
+          if (this.optionSrc !== "addMarker") {
+            this._markerGraphic = this._getMarkerGraphic(evt.mapPoint);
+            this._graphicsLayer.add(this._markerGraphic);
+          } else {
+            //1
+            var infoTemplate = new InfoTemplate('', (this.addMarker_title.get("value") || ""));
+            //template.isIncludeShareUrl
+            //2
+            var markerSymbol = symbolJsonUtils.fromJson({
+              "type": "esriPMS",
+              "url": require.toUrl('jimu') + "/images/EsriBluePinCircle26.png",
+              "contentType": "image/png"
+            });
+            markerSymbol.width = 26;
+            markerSymbol.height = 26;
+            markerSymbol.setOffset(0, 12);
+            this._markerGraphic = new Graphic(evt.mapPoint, markerSymbol, null, infoTemplate);
+            this._graphicsLayer.add(this._markerGraphic);
+
+            //3
+            var textSymbol = symbolJsonUtils.fromJson({
+              "color": [0, 0, 0, 255],
+              "type": "esriTS",
+              "verticalAlignment": "baseline",
+              "horizontalAlignment": "left",
+              "angle": 0,
+              "xoffset": 0,
+              "yoffset": 0,
+              "rotated": false,
+              "kerning": true,
+              "font": {
+                "size": 12,
+                "style": "normal",
+                "weight": "bold",
+                "family": "Arial"
+              },
+              "text": this.addMarker_label.get("value") || ""
+            });
+            if (textSymbol) {
+              textSymbol.xoffset = markerSymbol.width / 2;
+              textSymbol.yoffset = markerSymbol.height / 2 + markerSymbol.yoffset;
+              var textG = new Graphic(evt.mapPoint, textSymbol);
+              this._graphicsLayer.add(textG);
+
+              this._markerGraphic._textSymbol = textG;
+            }
+          }
         }
       },
       _getMarkerGraphic: function(mapPoint) {

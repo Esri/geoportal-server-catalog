@@ -14,6 +14,7 @@ define({
   "generalSetting": "Obecná nastavení",
   "allPlaceholder": "Zástupný text pro vyhledávání všech výsledků: ",
   "showInfoWindowOnSelect": "Zobrazit vyskakovací okno pro nalezený prvek nebo umístění",
+  "showInfoWindowOnSelect2": "Při nálezu funkce či polohy zobrazit automaticky otevírané okno.",
   "searchInCurrentMapExtent": "Vyhledávat pouze v aktuálním rozsahu mapy",
   "zoomScale": "Měřítko přiblížení",
   "locatorUrl": "URL geokodéru",

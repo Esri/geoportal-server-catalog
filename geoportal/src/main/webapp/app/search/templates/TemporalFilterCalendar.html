@@ -1,0 +1,18 @@
+<div>
+  <span class="g-start-date">
+    <label for="{id}_fromDate" class="g-start-date-calendar-label">${i18n.search.temporalFilter.fromLabel}</label>
+    <input type="text" id="{id}_fromDate" class="g-start-date-calendar"
+           data-dojo-type="dijit/form/DateTextBox" 
+           data-dojo-attach-point="startDateCalendar"
+           data-dojo-props="constraints: {datePattern:'yyyy-MM-dd'}"
+           />
+  </span>
+  <span class="g-end-date">
+    <label for="{id}_toDate" class="g-end-date-calendar-label">${i18n.search.temporalFilter.toLabel}</label>
+    <input type="text" id="{id}_toDate" class="g-end-date-calendar"
+           data-dojo-type="dijit/form/DateTextBox" 
+           data-dojo-attach-point="endDateCalendar" 
+           data-dojo-props="constraints: {datePattern:'yyyy-MM-dd'}"
+           />
+  </span>
+</div>

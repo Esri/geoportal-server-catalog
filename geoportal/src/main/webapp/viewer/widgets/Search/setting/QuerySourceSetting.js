@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2015 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -59,6 +59,7 @@ function(declare, html, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     _suggestible: false,
 
     _clickSet: false,
+    _defaultZoomScale: null,
 
     //event
     //reset-query-source
@@ -66,6 +67,7 @@ function(declare, html, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
     postCreate: function() {
       this.inherited(arguments);
 
+      this.zoomScale.set('placeHolder', window.jimuNls.common.defaults);
       this.exactMatch = new CheckBox({
         checked: false,
         label: this.nls.exactMatch
@@ -156,7 +158,7 @@ function(declare, html, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
         displayField: this.displayField.get('value'),// defaults to FeatureLayer.displayField
         exactMatch: this.exactMatch.getValue(),
         searchInCurrentMapExtent: this.searchInCurrentMapExtent.checked,
-        zoomScale: this.zoomScale.get('value') || 50000,
+        zoomScale: this.zoomScale.get('value') || this._defaultZoomScale,
         maxSuggestions: this.maxSuggestions.get('value') || 6,
         maxResults: this.maxResults.get('value') || 6,
         type: 'query'
@@ -217,7 +219,7 @@ function(declare, html, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       this.displayField.set('value', this.config.displayField || "");
       this.exactMatch.setValue(!!this.config.exactMatch);
       this.searchInCurrentMapExtent.setValue(!!this.config.searchInCurrentMapExtent);
-      this.zoomScale.set('value', this.config.zoomScale || 50000);
+      this.zoomScale.set('value', this.config.zoomScale || this._defaultZoomScale);
       this.maxSuggestions.set('value', this.config.maxSuggestions || 6);
       this.maxResults.set('value', this.config.maxResults || 6);
       this._layerId = this.config.layerId;
@@ -230,6 +232,7 @@ function(declare, html, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       } else {
         this._hideSuggestibleTips();
       }
+      /*
       var isPointLayer = this._layerDefinition &&
         this._layerDefinition.geometryType === 'esriGeometryPoint';
       if (!isPointLayer) {
@@ -237,6 +240,7 @@ function(declare, html, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
       } else {
         html.setStyle(this.zoomScaleTr, 'display', '');
       }
+      */
       this._enableSourceItems();
     },
 
@@ -404,7 +408,7 @@ function(declare, html, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin,
           searchFields: [],
           displayField: this._layerDefinition.displayField || "",
           exactMatch: false,
-          zoomScale: 50000, //default
+          zoomScale: this._defaultZoomScale, //default
           maxSuggestions: 6, //default
           maxResults: 6,//default
           type: "query"

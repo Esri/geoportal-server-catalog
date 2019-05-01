@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -23,12 +23,15 @@ define([
     'dojo/when',
     './utils',
     'jimu/LayerInfos/LayerInfos',
+    'jimu/portalUtils',
+    'jimu/portalUrlUtils',
+    'jimu/filterUtils',
     'esri/tasks/query',
     'esri/tasks/QueryTask',
     'esri/tasks/StatisticDefinition',
     './Query'
   ],
-  function(declare, lang, array, topic, Evented, when, jimuUtils, LayerInfos,
+  function(declare, lang, array, topic, Evented, when, jimuUtils, LayerInfos, portalUtils, portalUrlUtils, FilterUtils,
   Query, QueryTask, StatisticDefinition, JimuQuery) {
     var dataSourceTypes = {
       Features: 'Features',
@@ -66,6 +69,12 @@ define([
           //key=data source id
           //value=widget id array
           this._dataSourceUsage = {};
+
+          //key=item url
+          //value=filter
+          this._itemsFilter = {};
+
+          this.filterUtils = new FilterUtils();
 
           if(window.isBuilder){
             topic.subscribe("app/mapLoaded", lang.hitch(this, this._onMapLoaded));
@@ -109,9 +118,11 @@ define([
 
           switch(segs[0]){
             case 'map': //map~<layerId>~<filterId>
+              //layer id may contain "~"
+              var lastPos = id.lastIndexOf('~');
               ret = {
                 from: 'map',
-                layerId: segs[1]
+                layerId: id.substring(4, lastPos)
               };
               return ret;
             case 'widget': //widget~<widgetId>~<dataSourceId>
@@ -339,12 +350,27 @@ define([
             listener.dsId = ds.id;
             this._listeners.push(listener);
 
+            listener = {};
+            listener.handle = this._getLayerInfo(ds.idObj.layerId)
+              .on('filterChanged', lang.hitch(this, this._onLayerDataChange, ds));
+            listener.dsId = ds.id;
+            this._listeners.push(listener);
+
             if(ds.filterByExtent){
               listener = {};
               listener.handle = this.map.on('extent-change', lang.hitch(this, this._onLayerDataChange, ds));
               listener.dsId = ds.id;
               this._listeners.push(listener);
             }
+
+            // //
+            // if(layer.refreshInterval){
+            //   ds.isDynamic = true;
+            //   ds.refreshInterval = layer.refreshInterval;
+            // }else{
+            //   ds.isDynamic = false;
+            //   ds.refreshInterval = 0;
+            // }
           }));
         },
 
@@ -375,6 +401,10 @@ define([
           }else{
             return when(null);
           }
+        },
+
+        _getLayerInfo: function(layerId){
+          return LayerInfos.getInstanceSync().getLayerOrTableInfoById(layerId);
         },
 
         _startRefreshTimer: function(dataSource, reason){
@@ -433,94 +463,182 @@ define([
             var layerInfo = LayerInfos.getInstanceSync().getLayerOrTableInfoById(ds.idObj.layerId);
             var webMapFilter;
             if(layerInfo){
-              webMapFilter = layerInfo.getFilterOfWebmap();
+              webMapFilter = layerInfo.getFilter();
             }
 
-            var dsFilter = ds.filter? ds.filter.expr: '1=1';
+            var dsFilter = ds.filter? this._getFilterExpr(ds.filter, ds.url): '1=1';
             var filter;
             if(webMapFilter){
               filter = '(' + webMapFilter + ') and (' + dsFilter + ')';
             }else{
               filter = dsFilter;
             }
-            return filter;
+            return when(filter);
+          }else if(ds.idObj.from === 'external'){
+            if(ds.portalUrl && ds.itemId){
+              return this._getFilterFromItem(ds.portalUrl, ds.itemId, ds.url)
+              .then(lang.hitch(this, function(itemFilter){
+                var dsFilter = ds.filter? this._getFilterExpr(ds.filter, ds.url): '1=1';
+                if(itemFilter){
+                  filter = '(' + itemFilter + ') and (' + dsFilter + ')';
+                }else{
+                  filter = dsFilter;
+                }
+                return filter;
+              }));
+            }else{
+              return when(ds.filter? this._getFilterExpr(ds.filter, ds.url): '1=1');
+            }
           }else{
-            return ds.filter? ds.filter.expr: '1=1';
+            return when(ds.filter? this._getFilterExpr(ds.filter, ds.url): '1=1');
           }
+        },
+
+        _getFilterExpr: function(filterObj, url){
+          if(this.filterUtils.hasVirtualDate(filterObj)){
+            this.filterUtils.isHosted = jimuUtils.isHostedService(url);
+            return this.filterUtils.getExprByFilterObj(filterObj);
+          }else{
+            return filterObj.expr;
+          }
+
+        },
+
+        _getFilterFromItem: function(portalUrl, itemId, url){
+          var key = portalUrlUtils.getItemUrl(portalUrl, itemId);
+          if(this._itemsFilter[key]){
+            return when(this._itemsFilter[key]);
+          }
+          var portal = portalUtils.getPortal(portalUrl);
+          return portal.getItemById(itemId).then(lang.hitch(this, function(itemInfo){
+            //for now, we see that only feature service item supports set filter
+            if(itemInfo.type !== 'Feature Service'){
+              this._itemsFilter[key] = null;
+              return null;
+            }
+
+            return portal.getItemData(itemId).then(lang.hitch(this, function(itemData){
+              var segs = url.split('/');
+              var layerId = segs.pop();
+              if(!layerId){//the url ends with '/'
+                layerId = segs.pop();
+              }
+              if(!itemData.layers){
+                this._itemsFilter[key] = null;
+                return null;
+              }
+              var layer = itemData.layers.filter(function(layer){
+                return layer.id + '' === layerId;
+              })[0];
+
+              if(!layer || !layer.layerDefinition){
+                this._itemsFilter[key] = null;
+                return null;
+              }
+
+              this._itemsFilter[key] = layer.layerDefinition.definitionExpression;
+              return layer.layerDefinition.definitionExpression;
+            }));
+          }));
         },
 
         doQuery: function(ds){
           if(!ds.idObj){
             ds.idObj = this.parseDataSourceId(ds.id);
           }
+          this.emit('begin-update', ds.id);
+          return this._getQueryObjectFromDataSource(ds).then(lang.hitch(this, function(queryObj){
+            var query, queryTask;
 
-          var query, queryTask;
-          if(ds.type === dataSourceTypes.Features){
-            if(ds.resultRecordType === resultRecordType.serviceLimitation){
-              query = this._getQueryObjectFromDataSource(ds);
-              queryTask = new QueryTask(ds.url);
-              return queryTask.execute(query);
-            }else{
-              //when data source is changed, the cache will be removed.
-              var jimuQuery = this._jimuQueryObject[ds.id];
-              if(!jimuQuery){
-                var queryOptions = {};
-                queryOptions.url = ds.url;
-                queryOptions.query = this._getQueryObjectFromDataSource(ds);
-
-                if(ds.resultRecordType === resultRecordType.all){
-                  jimuQuery = new JimuQuery(queryOptions);
-                }else{
-                  queryOptions.pageSize = ds.resultRecordCount;
-                  jimuQuery = new JimuQuery(queryOptions);
-                }
-                this._jimuQueryObject[ds.id] = jimuQuery;
-              }
-              if(ds.resultRecordType === resultRecordType.all){
-                return jimuQuery.getAllFeatures();
+            if(ds.type === dataSourceTypes.Features){
+              if(ds.resultRecordType === resultRecordType.serviceLimitation){
+                query = queryObj;
+                queryTask = new QueryTask(ds.url);
+                return queryTask.execute(query);
               }else{
-                return jimuQuery.queryByPage(1);
+                //when data source is changed, the cache will be removed.
+                var jimuQuery = this._jimuQueryObject[ds.id];
+                if(jimuQuery){
+                  //the query object may be changed in runtime
+                  if(jimuQuery.url !== ds.url ||
+                    !jimuUtils.isEqual(jimuQuery.query.toJson(), queryObj.toJson())){
+                    delete this._jimuQueryObject[ds.id];
+                    jimuQuery = null;
+                  }
+                }
+                if(!jimuQuery){
+                  var queryOptions = {};
+                  queryOptions.url = ds.url;
+                  queryOptions.query = queryObj;
+
+                  if(ds.resultRecordType === resultRecordType.all){
+                    jimuQuery = new JimuQuery(queryOptions);
+                  }else{
+                    queryOptions.pageSize = ds.resultRecordCount;
+                    jimuQuery = new JimuQuery(queryOptions);
+                  }
+                  this._jimuQueryObject[ds.id] = jimuQuery;
+                }
+                if(ds.resultRecordType === resultRecordType.all){
+                  return jimuQuery.getAllFeatures();
+                }else{
+                  return jimuQuery.queryByPage(1);
+                }
               }
-            }
-          }else{
-            queryTask = new QueryTask(ds.url);
-            query = new Query();
+            }else{
+              queryTask = new QueryTask(ds.url);
+              query = new Query();
 
-            query.where = this._getDataSourceFilter(ds);
-            if(ds.dataSchema.groupByFields && ds.dataSchema.groupByFields.length > 0){
-              query.groupByFieldsForStatistics = ds.dataSchema.groupByFields;
-            }
+              return this._getDataSourceFilter(ds).then(lang.hitch(this, function(dsFilter){
+                query.where = dsFilter;
+                if (ds.filterByExtent) {
+                  query.geometry = this.map.extent;
+                }
+                if(ds.dataSchema.groupByFields && ds.dataSchema.groupByFields.length > 0){
+                  query.groupByFieldsForStatistics = ds.dataSchema.groupByFields;
+                }
 
-            if(ds.dataSchema.orderByFields && ds.dataSchema.orderByFields.length > 0){
-              query.orderByFields = ds.dataSchema.orderByFields;
-            }
+                if(ds.dataSchema.orderByFields && ds.dataSchema.orderByFields.length > 0){
+                  query.orderByFields = ds.dataSchema.orderByFields;
+                }
 
-            query.outStatistics = ds.dataSchema.statistics.map(function(s){
-              var statisticDefinition = new StatisticDefinition();
-              statisticDefinition.statisticType = s.statisticType;
-              statisticDefinition.onStatisticField = s.onStatisticField;
-              statisticDefinition.outStatisticFieldName = s.outStatisticFieldName;
-              return statisticDefinition;
-            });
-            return queryTask.execute(query);
-          }
+                query.outStatistics = ds.dataSchema.statistics.map(function(s){
+
+                  var statName = s.onStatisticField + '_' + s.statisticType;
+                  if(s.statisticType === 'count'){
+                    statName = 'STAT_COUNT';
+                  }
+                  statName = jimuUtils.upperCaseString(statName);
+
+                  var statisticDefinition = new StatisticDefinition();
+                  statisticDefinition.statisticType = s.statisticType;
+                  statisticDefinition.onStatisticField = s.onStatisticField;
+                  statisticDefinition.outStatisticFieldName = statName;
+                  return statisticDefinition;
+                });
+                return queryTask.execute(query);
+              }));
+            }
+          }));
         },
 
         _getQueryObjectFromDataSource: function(ds){
-          var query = new Query();
-          query.where = this._getDataSourceFilter(ds);
-          if(ds.filterByExtent){
-            query.geometry = this.map.extent;
-          }
-          query.outFields = ds.dataSchema.fields.map(function(f){
-            return f.name;
-          });
-          if(ds.dataSchema.orderByFields && ds.dataSchema.orderByFields.length > 0){
-            query.orderByFields = ds.dataSchema.orderByFields;
-          }
-          query.returnGeometry = true;
-          query.outSpatialReference = this.map.spatialReference;
-          return query;
+          return this._getDataSourceFilter(ds).then(lang.hitch(this, function(dsFilter){
+            var query = new Query();
+            query.where = dsFilter;
+            if(ds.filterByExtent){
+              query.geometry = this.map.extent;
+            }
+            query.outFields = ds.dataSchema.fields.map(function(f){
+              return f.name;
+            });
+            if(ds.dataSchema.orderByFields && ds.dataSchema.orderByFields.length > 0){
+              query.orderByFields = ds.dataSchema.orderByFields;
+            }
+            query.returnGeometry = true;
+            query.outSpatialReference = this.map.spatialReference;
+            return when(query);
+          }));
         },
 
         _removeListeners: function(){

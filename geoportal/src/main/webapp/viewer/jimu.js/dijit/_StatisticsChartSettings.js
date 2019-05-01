@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -151,7 +151,23 @@ define([
         }
       },
 
+      _updateLegendDisplayByMode: function(mode) {
+        if (this.type === 'pie') {
+          this._showLegendCbx = true;
+          html.setStyle(this.divLegend, 'display', '');
+        } else if (this.type === 'column' || this.type === 'bar' || this.type === 'line') {
+          if (mode === 'count' || mode === 'field') {
+            html.setStyle(this.divLegend, 'display', 'none');
+            this._showLegendCbx = false;
+          } else if (mode === 'feature' || mode === 'category') {
+            this._showLegendCbx = true;
+            html.setStyle(this.divLegend, 'display', '');
+          }
+        }
+      },
+
       _bindEvents: function(){
+        this.own(on(this.cbxLegend, 'change', lang.hitch(this, this._configChange)));
         if(this.type === 'pie'){
           this.own(on(this.cbxPieLabel, 'change', lang.hitch(this, this._configChange)));
         }
@@ -167,6 +183,7 @@ define([
         this.cbxAxisX.checked = config.showHorizontalAxis === false ? false : true;
         this.cbxAxisY.checked = config.showVerticalAxis === false ? false : true;
         this.cbxPieLabel.checked = config.showDataLabel === false ? false : true;
+        this.cbxLegend.checked = config.showLegend === false ? false : true;
         var colors = lang.clone(config.colors || []);
         this.singleColor = colors.length === 1 && this.type !== 'pie';
 
@@ -196,6 +213,10 @@ define([
           }else{
             config.colors = this.colors[this._getMultiColorValue()];
           }
+        }
+
+        if (this._showLegendCbx) {
+          config.showLegend = this.cbxLegend.checked;
         }
 
         return config;

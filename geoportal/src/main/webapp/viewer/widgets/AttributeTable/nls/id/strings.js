@@ -40,5 +40,21 @@ define({
   "sortDes": "Urutkan turun",
   "statistics": "Statistik",
   "attachments": "Lampiran",
-  "files": "file"
+  "files": "file",
+  "keepRichTextLabel": "Pertahankan format teks kaya",
+  "whatsThis": "Apa ini?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} berisi kolom teks kaya berikut: ",
+      "line2": " yang mungkin mencakup gaya format teks, seperti font, warna, atau ukuran teks.",
+      "line3": "Saat diekspor ke CSV, gaya format akan dipertahankan dalam bentuk tag HTML. Anda dapat memilih untuk tidak mempertahankan format teks kaya dengan menghapus centang pada kotak \"Pertahankan format teks kaya\"."
+    },
+    "example": {
+      "label": "Contoh:",
+      "scenarios": {
+        "first": "akan diekspor sebagai teks berikut secara default:",
+        "second": "dan teks berikut tanpa format teks kaya:"
+      }
+    }
+  }
 });

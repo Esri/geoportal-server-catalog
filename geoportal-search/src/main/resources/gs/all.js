@@ -50,7 +50,7 @@
       "base/XmlInfo",
       "config/Config",
       "context/Context",
-      "context/Processor",
+      "context/_Processor",
       "provider/Provider",
       "provider/csw/CswProvider",
       "provider/csw/GetRecordsParser",

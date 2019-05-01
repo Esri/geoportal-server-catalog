@@ -14,6 +14,7 @@ define({
   "generalSetting": "सामान्य सेटिंग्स",
   "allPlaceholder": "सभी खोज के लिए प्लेसहोल्डर पाठ: ",
   "showInfoWindowOnSelect": "पाई गई फीचर या स्थान के लिए पॉप-अप दिखाएं",
+  "showInfoWindowOnSelect2": "फ़ीचर या स्थान मिलने पर पॉप-अप दिखाएँ।",
   "searchInCurrentMapExtent": "केवल वर्तमान मानचित्र सीमा में खोज करता है",
   "zoomScale": "स्केल को ज़ूम करें",
   "locatorUrl": "जियोकोडर URL",

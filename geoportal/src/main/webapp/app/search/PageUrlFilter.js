@@ -52,6 +52,7 @@ function(declare, lang, array, ioQuery, SearchComponent, QClause, Util) {
       _addQuery: function(v) {
           if (typeof v === "string") {
 
+
               v = Util.escapeForLucene(lang.trim(v));
               //v = v.replace(/:/g,"\\:");
               // v = v.replace(/\//g,"\\\/");

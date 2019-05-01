@@ -1,4 +1,14 @@
-<?xml version="1.0" encoding="UTF-8"?><gmi:MI_Metadata xmlns:gmi="http://www.isotc211.org/2005/gmi" xmlns="http://www.isotc211.org/2005/gmd" xmlns:gco="http://www.isotc211.org/2005/gco" xmlns:gmd="http://www.isotc211.org/2005/gmd" xmlns:gml="http://www.opengis.net/gml" xmlns:gmx="http://www.isotc211.org/2005/gmx" xmlns:gts="http://www.isotc211.org/2005/gts" xmlns:srv="http://www.isotc211.org/2005/srv" xmlns:xlink="http://www.w3.org/1999/xlink" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd">
+<?xml version="1.0" encoding="UTF-8"?><gmi:MI_Metadata xmlns:gmi="http://www.isotc211.org/2005/gmi"
+                                                       xmlns="http://www.isotc211.org/2005/gmd"
+                                                       xmlns:gco="http://www.isotc211.org/2005/gco"
+                                                       xmlns:gmd="http://www.isotc211.org/2005/gmd"
+                                                       xmlns:gml="http://www.opengis.net/gml"
+                                                       xmlns:gmx="http://www.isotc211.org/2005/gmx"
+                                                       xmlns:gts="http://www.isotc211.org/2005/gts"
+                                                       xmlns:srv="http://www.isotc211.org/2005/srv"
+                                                       xmlns:xlink="http://www.w3.org/1999/xlink"
+                                                       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                                                       xsi:schemaLocation="http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd">
   <gmd:fileIdentifier>
     <gco:CharacterString>11187E30129A4CE7A14C688C13EFC6C0</gco:CharacterString>
   </gmd:fileIdentifier>
@@ -449,15 +459,271 @@
           <gmd:temporalElement>
             <gmd:EX_TemporalExtent>
               <gmd:extent>
-                <gml:TimePeriod id="ididm7406968">
-                  <gml:name/>
-                  <gml:beginPosition frame="#ISO-8601">1830-01-01T00:00:00</gml:beginPosition>
-                  <gml:endPosition frame="#ISO-8601">1830-01-01T00:00:00</gml:endPosition>
+                <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="badterms">
+                  <gml:name></gml:name>
+                  <gml:description>unknown, daily, empty name string. no name should be here</gml:description>
+                  <gml:beginPosition indeterminatePosition="unknown"/>
+                  <gml:endPosition indeterminatePosition="updated daily"/>
                 </gml:TimePeriod>
               </gmd:extent>
             </gmd:EX_TemporalExtent>
           </gmd:temporalElement>
         </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="badterms_now">
+                  <gml:name>
+                    <gco:CharacterString>bad present now</gco:CharacterString>
+                  </gml:name>
+                  <gml:description>Unknown</gml:description>
+                  <gml:beginPosition indeterminatePosition="Present"/>
+                  <gml:endPosition indeterminatePosition="now"/>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="CensusaMAFaTIGERadatabase5">
+                  <gml:description>Ground Condition 2003-06-01</gml:description>
+                  <gml:beginPosition>2003-06-01</gml:beginPosition>
+                  <gml:endPosition>2003-06-01</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date1">
+                  <gml:name>
+                    <gco:CharacterString>time as zeros. 1830,2001</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">1830-01-01T00:00:00</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">2001-01T00:00:00</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date_yearmonth_year">
+                  <gml:name>
+                    <gco:CharacterString>time with Z 1990</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">1990-00-00Z</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">1990-10-00Z</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date_yearday_yearweek">
+                  <gml:name>
+                    <gco:CharacterString>YearDay 1990-001, YearWeek 2004-W53-0</gco:CharacterString>
+                  </gml:name>>
+                  <gml:beginPosition frame="#ISO-8601">1990-001</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">2004-W53-6</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date2_bad">
+                  <gml:name>
+                    <gco:CharacterString>bad 9999 0000-00-00Z</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">9999</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">0000-00-00Z</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date3_bad">
+                  <gml:name>
+                    <gco:CharacterString>bad 1990-NaN 2011-9-30</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">1990-NaN-01</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">2012-9-30</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date4_badtime">
+                  <gml:name>
+                    <gco:CharacterString>bad times</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">1995-01-01TUnknown</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">2014-04-27T082845</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date5_badtime">
+                  <gml:name>
+                    <gco:CharacterString>bad times Z and T 2015-10-30T00:16:46ZT00:00:00</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">2002-02-27TVaries by scene</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">2015-10-30T00:16:46ZT00:00:00</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date6_noniso">
+                  <gml:name>
+                    <gco:CharacterString>bad non iso</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">7/7/2010Z</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">May 27, 2016</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date7_wonky">
+                  <gml:name>
+                    <gco:CharacterString>bad non iso</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">1975-98Z</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">03/0-1/-05T12:00:00</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date8_wonky">
+                  <gml:name>
+                    <gco:CharacterString>bad early dates 1004 0819</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">1004-23-01Z</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">0819-20-02T12:00:00</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="date9_moving">
+                    <gml:name>
+                  <gco:CharacterString>range need to fix</gco:CharacterString>
+                </gml:name>
+                  <!-- need to be made into valid range examples to test -->
+                  <gml:beginPosition frame="#ISO-8601">R/P1D</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">P0Y0M1DT0H0M0S</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent>
+        <gmd:EX_Extent>
+          <gmd:temporalElement>
+            <gmd:EX_TemporalExtent>
+              <gmd:extent>
+                <gml:TimePeriod id="over2000">
+                  <gml:name>
+                    <gco:CharacterString>YYYY to large</gco:CharacterString>
+                  </gml:name>
+                  <gml:beginPosition frame="#ISO-8601">7306</gml:beginPosition>
+                  <gml:endPosition frame="#ISO-8601">7306</gml:endPosition>
+                </gml:TimePeriod>
+              </gmd:extent>
+            </gmd:EX_TemporalExtent>
+          </gmd:temporalElement>
+        </gmd:EX_Extent>
+      </gmd:extent>
+      <gmd:extent> <gmd:EX_Extent>
+        <gmd:temporalElement>
+          <gmd:EX_TemporalExtent>
+            <gmd:extent>
+              <gml:TimePeriod xmlns:gml="http://www.opengis.net/gml/3.2" id="under1400">
+                <gml:name>
+                  <gco:CharacterString>YYYY small 0200</gco:CharacterString>
+                </gml:name>
+                <gml:description>Publication Date</gml:description>
+                <gml:beginPosition>0200-03-27</gml:beginPosition>
+                <gml:endPosition>0200-03-27</gml:endPosition>
+              </gml:TimePeriod>
+            </gmd:extent>
+          </gmd:EX_TemporalExtent>
+        </gmd:temporalElement>
+      </gmd:EX_Extent>
       </gmd:extent>
     </gmd:MD_DataIdentification>
   </gmd:identificationInfo>

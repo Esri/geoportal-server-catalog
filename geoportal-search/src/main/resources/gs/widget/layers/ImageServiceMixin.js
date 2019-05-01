@@ -27,7 +27,7 @@ function(declare, Deferred, layerUtil, util, esriLang, ArcGISImageServiceLayer,
   var _def = declare(null, {
 
     addImageService: function(serviceUrl,item,itemData) {
-      var dfd = new Deferred();
+      var self = this, dfd = new Deferred();
       var mapLayerId = util.generateId();
       var layerUrl = serviceUrl;
       var layerObject = {

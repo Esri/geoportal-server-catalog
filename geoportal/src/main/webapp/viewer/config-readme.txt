@@ -113,6 +113,12 @@
 
         filterByExtent: true,
 
+        //the item id that the data source comes from.
+        itemId: "",
+
+        //the portal that the item is hosted.
+        portalUrl: "",
+
         label: "",
 
         isDynamic: ture,
