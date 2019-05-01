@@ -154,7 +154,7 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
       this.search();
     },
     
-    plot: function() {
+    plot: function(customRange) {
       var self = this, svgNode = this.svgNode, hasTo = this.hasToField();
       domConstruct.empty(svgNode);
       this._brushExtent = null;
@@ -281,7 +281,7 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
         .endAngle(function(d, i) { return i ? -Math.PI : Math.PI; });
         var brush = d3.svg.brush()
           .x(x2)
-          .extent(x2.domain())
+          .extent(customRange? customRange: x2.domain())
           .on("brush",function(){brushmove();});
         var brushg = context.append("g")
           .attr("class", "brush")
@@ -496,7 +496,8 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
       this._fromDate = startDate;
       this._toDate = endDate;
       this.intervalSelect.value = "day";
-      this.intervalChanged();
+      this.interval = $(this.intervalSelect).val();
+      this.plot([startDate, endDate]);
     }
     
   });

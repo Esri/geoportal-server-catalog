@@ -80,7 +80,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
       var query = {"term": {}};
       query.term[this.field] = term;
       if (typeof missingVal === "string" && missingVal.length > 0 && missingVal === term) {
-        query = {"missing": {"field": this.field}};
+        query = {"bool": {"must_not": {"exists": {"field": this.field}}}};
       }
       var qClause = new QClause({
         label: name,

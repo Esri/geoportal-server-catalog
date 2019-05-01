@@ -70,7 +70,8 @@ define({
         origin: "Source of Origin",
         approvalStatus: "Approval Status",
         access: "Access",
-        accessGroups: "Access Groups"
+        accessGroups: "Access Groups",
+        missingSource: "Editor/Upload"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -99,7 +100,7 @@ define({
         searchLabel: "Search query:",
         fromLabel: "From:",
         toLabel: "To",
-        calendarLabel: "Dates:",
+        calendarLabel: "Specify date range:",
         calendarTitle: "Enter Time Interval",
         interval: {
           year: "Year",
@@ -189,6 +190,9 @@ define({
         previousTip: "Previous",
         next: ">",
         nextTip: "Next",
+        last: ">>",
+        lastTip: "Last",
+        lastTipDisabled: "Result exceeds limit of ${searchLimit} records.",
         pagePattern: "Page {page}",
         countPattern: "{count} items"
       },
