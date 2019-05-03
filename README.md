@@ -4,7 +4,7 @@ As part of the evolution of Geoportal Server, the catalog capability has been se
 This repository thus contains the catalog capability of Geoportal Server, while it's sibling [geoportal-server-harvester](https://github.com/ArcGIS/geoportal-server-harvester) is the new harvester of Geoportal Server.
 
 ## Releases and Downloads
-- 2.6.1 - Released October 9, 2018, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
+- 2.6.2 - Released May 3, 2019, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
 
 ## Can't Wait to Get Started?
 - Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
