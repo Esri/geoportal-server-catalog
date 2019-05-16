@@ -318,7 +318,7 @@
   "httpProxy": {
     "useProxy": true,
     "alwaysUseProxy": false,
-    "url": "",
+    "url": "./proxy.jsp",
     "rules": []
   },
   "dataSource": {
