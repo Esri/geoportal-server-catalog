@@ -25,7 +25,7 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/etc/util"], 
-function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopics, template, i18n, SearchComponent, util) {
+function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopics, template, i18n, SearchComponent, Util) {
   
   var oThisClass = declare([SearchComponent], {
  
@@ -103,6 +103,12 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
     /* SearchComponent API ============================================= */
 
     appendQueryParams: function(params) {
+      if (Util.getRequestParam("from")) {
+        this.start = Number(Util.getRequestParam("from")) + 1;
+      }
+      if (Util.getRequestParam("size")) {
+        this.size = Number(Util.getRequestParam("size"));
+      }
       params.urlParams.from = this.start - 1;
       params.urlParams.size = this.numPerPage;
     },

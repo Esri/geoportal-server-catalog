@@ -94,6 +94,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       array.forEach(components,function(component){
         component.appendQueryParams(params);
       });
+      history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
       var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
       var v, postData = null;
 

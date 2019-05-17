@@ -47,6 +47,16 @@ define(["dojo/_base/declare",
               }, this.linksNode );
             },
             
+            _createViewLink: function(name, alt, type, urlParams, postData) {
+              var q = lang.mixin(
+                        urlParams, 
+                        { esdsl: JSON.stringify({ query: postData.query }) }
+                      );
+              var sq = ioQuery.objectToQuery(q);
+              var url = "?" + sq + "#searchPanel";
+              this._appendLink(name, alt, url);
+            },
+            
             _createLink: function(name, alt, type, urlParams, postData) {
               var q = lang.mixin(
                         { f: type},
@@ -76,6 +86,7 @@ define(["dojo/_base/declare",
                 searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
               }
               
+              this._createViewLink("VIEW", i18n.search.links.view, "view", searchResponse.urlParams, postData);
               this._createLink("ATOM", i18n.search.links.atom, "atom", searchResponse.urlParams, postData);
               this._createLink("CSW", i18n.search.links.csw, "csw", searchResponse.urlParams, postData);
               this._createLink("JSON", i18n.search.links.json, "json", searchResponse.urlParams, postData);
