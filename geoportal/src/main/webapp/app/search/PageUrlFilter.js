@@ -30,8 +30,8 @@ function(declare, lang, array, ioQuery, SearchComponent, Util) {
       var self = this, uri = window.location.href;
       if (uri.indexOf("?") !== -1) {
           var s = uri.substring(uri.indexOf("?")+1,uri.length);
-          var hash = s.substring(s.indexOf("#")+1,s.length);
-          s=s.substring(0,s.indexOf("#"));
+          var hash = s.indexOf("#")>=0? s.substring(s.indexOf("#")+1,s.length): "";
+          s= s.indexOf("#")>=0? s.substring(0,s.indexOf("#")): s;
         var o = ioQuery.queryToObject(s);
         if (o && typeof o.filter === "string") {
           this._addQuery(o.filter);
