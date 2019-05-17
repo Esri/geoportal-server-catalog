@@ -75,6 +75,13 @@ function(declare, lang, array, ioQuery, SearchComponent, Util) {
     /* SearchComponent API ============================================= */
     
     appendQueryParams: function(params) {
+      var esdslParam = Util.getRequestParam("esdsl");
+      if (esdslParam) {
+        var esdsl = JSON.parse(esdslParam);
+        if (esdsl && esdsl.query) {
+          this.queries = [esdsl.query];
+        }
+      }
       if (this.queries && this.queries.length > 0) {
         if (!params.queries) params.queries = [];
         array.forEach(this.queries,function(query){
