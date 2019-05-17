@@ -35,6 +35,15 @@ function (lang) {
     setNodeText: function(nd,text) {
       nd.innerHTML = "";
       if (text) nd.appendChild(document.createTextNode(text));
+    },
+    
+    getRequestParam: function(name) {
+      param = location.search.split(/[?&]/).filter(function(p){ return p.startsWith(name); });
+      if (param && param.length>0) {
+        var value = param[0].substring(name.length+1);
+        return decodeURIComponent(value);
+      }
+      return;
     }
     
   };
