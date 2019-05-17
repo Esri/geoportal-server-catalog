@@ -47,7 +47,7 @@ define(["dojo/_base/declare",
               }, this.linksNode );
             },
             
-            _createViewLink: function(name, alt, type, urlParams, postData) {
+            _createWebLink: function(name, alt, type, urlParams, postData) {
               var q = lang.mixin(
                         urlParams, 
                         { esdsl: JSON.stringify({ query: postData.query }) }
@@ -86,13 +86,13 @@ define(["dojo/_base/declare",
                 searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
               }
               
-              this._createViewLink("VIEW", i18n.search.links.view, "view", searchResponse.urlParams, postData);
               this._createLink("ATOM", i18n.search.links.atom, "atom", searchResponse.urlParams, postData);
               this._createLink("CSW", i18n.search.links.csw, "csw", searchResponse.urlParams, postData);
               this._createLink("JSON", i18n.search.links.json, "json", searchResponse.urlParams, postData);
               this._createLink("CSV", i18n.search.links.csv, "csv", searchResponse.urlParams, postData);
               this._createLink("KML", i18n.search.links.kml, "kml", searchResponse.urlParams, postData);
               this._createLink("RSS", i18n.search.links.rss, "rss", searchResponse.urlParams, postData);
+              this._createWebLink("WEB", i18n.search.links.web, "web", searchResponse.urlParams, postData);
             }
 
         });

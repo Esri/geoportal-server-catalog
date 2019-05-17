@@ -225,7 +225,7 @@ define({
         error: "Error loading preview"
       },
       links: {
-        view: "View result",
+        web: "Web result",
         atom: "ATOM result",
         rss:  "RSS result",
         json: "JSON result",
