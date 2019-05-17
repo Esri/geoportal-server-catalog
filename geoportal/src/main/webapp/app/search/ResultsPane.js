@@ -23,8 +23,9 @@ define(["dojo/_base/declare",
         "app/search/ItemCard",
         "app/search/DropPane",
         "app/search/Paging",
-        "dojox/widget/Standby"],
-    function (declare, lang, array, aspect, domConstruct, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby) {
+        "dojox/widget/Standby",
+        "app/etc/util"],
+    function (declare, lang, array, aspect, domConstruct, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby, Util) {
 
         var oThisClass = declare([SearchComponent], {
 
@@ -130,6 +131,10 @@ define(["dojo/_base/declare",
 
             appendQueryParams: function (params) {
                 this.paging.appendQueryParams(params);
+                if (Util.getRequestParam("sort") && Util.getRequestParam("sort").split(":").length==2) {
+                  this.sortField = Util.getRequestParam("sort").split(":")[0];
+                  this.sortDir = Util.getRequestParam("sort").split(":")[1];
+                }
                 if (this.sortField !== null && this.sortDir !== null) {
                     params.urlParams.sort = this.sortField + ":" + this.sortDir;
                 }

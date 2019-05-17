@@ -25,7 +25,7 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/etc/util"], 
-function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopics, template, i18n, SearchComponent, util) {
+function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopics, template, i18n, SearchComponent, Util) {
   
   var oThisClass = declare([SearchComponent], {
  
@@ -74,6 +74,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     firstButtonClicked: function() {
       if (this.hasLess) {
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
         this.start = 1;
         this.search();
       }
@@ -81,6 +82,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     previousButtonClicked: function() {
       if (this.hasLess) {
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
         this.start = this.previousStart;
         this.search();
       }
@@ -88,6 +90,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     nextButtonClicked: function() {
       if (this.hasMore) {
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
         this.start = this.nextStart;
         this.search();
       }
@@ -95,6 +98,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     lastButtonClicked: function() {
       if (this.numHits < AppContext.appConfig.system.searchLimit && this.hasMore) {
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
         this.start = Math.max(Math.ceil(this.numHits / this.numPerPage)-1, 0)*this.numPerPage + 1
         this.search();
       }
@@ -103,6 +107,12 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
     /* SearchComponent API ============================================= */
 
     appendQueryParams: function(params) {
+      if (Util.getRequestParam("from")) {
+        this.start = Number(Util.getRequestParam("from")) + 1;
+      }
+      if (Util.getRequestParam("size")) {
+        this.size = Number(Util.getRequestParam("size"));
+      }
       params.urlParams.from = this.start - 1;
       params.urlParams.size = this.numPerPage;
     },
