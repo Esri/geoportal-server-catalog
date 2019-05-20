@@ -19,6 +19,8 @@ define(["dojo/_base/declare",
   "dijit/_WidgetBase",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
+  "esri/geometry/Extent",
+  "esri/SpatialReference",
   "dojo/text!./templates/ItemCard.html",
   "./layers/layerUtil",
   "./util",
@@ -26,7 +28,7 @@ define(["dojo/_base/declare",
   "dijit/TooltipDialog",
   "dijit/form/DropDownButton"],
 function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
-  _WidgetsInTemplateMixin, template, layerUtil, util, popup) {
+  _WidgetsInTemplateMixin, Extent, SpatialReference, template, layerUtil, util, popup) {
 
   var _def = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -43,9 +45,11 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
 
     postCreate: function() {
       this.inherited(arguments);
+      this.zoomButton.innerHTML = this.i18n.search.item.actions.zoom;
       this.addButton.innerHTML = this.i18n.search.item.actions.add;
       this.detailsButton.innerHTML = this.i18n.search.item.actions.details;
       this.linksCaptionNode.innerHTML = this.i18n.search.item.actions.links;
+      this.zoomButton.setAttribute("disabled","disabled");
       this.addButton.setAttribute("disabled","disabled");
       this.detailsButton.setAttribute("disabled","disabled");
       this.linksDropdown.set("disabled",true);
@@ -321,6 +325,9 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       if (this.canRemove) {
         util.setNodeText(this.addButton,this.i18n.search.item.actions.remove);
       }
+      if (item.bbox) {
+        this.zoomButton.removeAttribute("disabled");
+      }
     },
 
     renderLinks: function(response,item) {
@@ -371,6 +378,14 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       } else {
         util.setNodeText(this.addButton,this.i18n.search.item.actions.add);
       }
+    },
+    
+    zoomClicked: function() {
+      var extent = new Extent(
+                this.item.bbox.xmin, this.item.bbox.ymin, this.item.bbox.xmax, this.item.bbox.ymax,
+                new SpatialReference({wkid:4326})
+              );
+      this.resultsPane.getMap().setExtent(extent);
     }
 
   });
