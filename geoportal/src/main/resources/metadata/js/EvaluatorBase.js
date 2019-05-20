@@ -345,7 +345,9 @@ var G = {
     if (typeof value === "string" && value.length === 0) return;
     var v = obj[name];
     if (typeof v === "undefined" || v === null) {
-      obj[name] = value;
+      //obj[name] = value;
+      obj[name] = new Array();
+      obj[name].push(value);
     } else if (typeof v.push === "function") {
       v.push(value);
     } else {
