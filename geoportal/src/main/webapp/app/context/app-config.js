@@ -21,7 +21,8 @@ define([],function(){var obj={
   
   search: {
     allowSettings: true,
-    useSimpleQueryString: false
+    useSimpleQueryString: false,
+    escapeFilter: false
   },
   
   searchMap: {
