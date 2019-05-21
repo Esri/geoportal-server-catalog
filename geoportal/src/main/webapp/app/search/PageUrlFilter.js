@@ -49,7 +49,8 @@ function(declare, lang, array, ioQuery, SearchComponent, Util) {
 
       _addQuery: function(v) {
           if (typeof v === "string") {
-              v = Util.escapeForLucene(lang.trim(v));
+              v = lang.trim(v);
+              v = AppContext.appConfig.search && !!AppContext.appConfig.search.escapeFilter? Util.escapeForLucene(v): v;
 
               if (v.length > 0) {
                   this.queries.push({"query_string": {
