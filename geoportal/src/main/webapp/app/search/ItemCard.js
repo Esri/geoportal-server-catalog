@@ -96,7 +96,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       var item = this.item = hit._source;
       item._id = hit._id; 
       var links = this._uniqueLinks(item);
-      util.setNodeText(this.titleNode,item.title);
+      this._renderTitleLink(item._id, item);
       this._renderOwnerAndDate(item);
       util.setNodeText(this.descriptionNode,item.description);
       this._renderThumbnail(item);
@@ -682,22 +682,39 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }, actionsNode);
       }
     },
-      _renderId: function (item) {
-      /* This node will allow jquery to
-      grab identifiers, without having to resort to parsing URLS
-       */
-          var idNode = this.idNode;
-          var esId = item._id;
-          var fid = item.fileid;
-
-          dojo.attr(idNode,{ 'esId': esId } );
-
-          if (fid) {
-              dojo.attr(idNode,{ 'fileid': fid } );
-          }
-
-      }
     
+    _renderId: function (item) {
+    /* This node will allow jquery to
+    grab identifiers, without having to resort to parsing URLS
+     */
+        var idNode = this.idNode;
+        var esId = item._id;
+        var fid = item.fileid;
+
+        dojo.attr(idNode,{ 'esId': esId } );
+
+        if (fid) {
+            dojo.attr(idNode,{ 'fileid': fid } );
+        }
+
+    },
+    
+    _renderTitleLink: function(itemId,item) {
+      var v = item.sys_metadatatype_s;
+      if (typeof v === "string" && v === "json") {
+        util.setNodeText(this.titleNode,item.title);
+      } else {
+        var titleNode = this.titleNode;
+        var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
+        var htmlNode = domConstruct.create("a",{
+          href: uri+"/html",
+          target: "_blank",
+          title: item.title,
+          "aria-label": item.title,
+          innerHTML: item.title
+        },titleNode);
+      }
+    }    
   });
   
   return oThisClass;
