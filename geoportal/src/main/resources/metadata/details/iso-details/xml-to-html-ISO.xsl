@@ -124,10 +124,16 @@
 					<!-- <br></br><br></br> -->
 						<xsl:for-each select="./*/*">
 							<xsl:variable name="transname" select="name()"/>
-							<xsl:if test="contains($transname,'gmd:spatialRepresentationInfo') or contains($transname,'gmd:referenceSystemInfo') or contains($transname,'gmd:metadataExtensionInfo') or contains($transname,'gmd:identificationInfo') or contains($transname,'gmd:contentInfo') or contains($transname,'gmd:distributionInfo') or contains($transname,'gmd:dataQualityInfo') or contains($transname,'gmd:portrayalCatalogueInfo') or contains($transname,'gmd:metadataConstraints') or contains($transname,'gmd:applicationSchemaInfo') or contains($transname,'gmd:metadataMaintenance') or contains($transname,'gmd:metadataMaintenanceInfo') or contains($transname,'gmi:acquisitionInformation') or contains($transname,'gfc:FC_FeatureCatalogue')">
+							<xsl:if test="contains($transname,'spatialRepresentationInfo') or contains($transname,'referenceSystemInfo') or contains($transname,'metadataExtensionInfo') or contains($transname,'identificationInfo') or contains($transname,'contentInfo') or contains($transname,'distributionInfo') or contains($transname,'dataQualityInfo') or contains($transname,'portrayalCatalogueInfo') or contains($transname,'metadataConstraints') or contains($transname,'applicationSchemaInfo') or contains($transname,'metadataMaintenance') or contains($transname,'metadataMaintenanceInfo') or contains($transname,'acquisitionInformation') or contains($transname,'FC_FeatureCatalogue')">
 								<xsl:element name="a">
 								<xsl:attribute name="href">
-								<xsl:value-of select="'#'" /><xsl:value-of select="substring-after($transname,':')"/>
+								<xsl:value-of select="'#'" />
+                <xsl:if test="contains($transname,':')">
+                  <xsl:value-of select="substring-after($transname,':')"/>
+                </xsl:if>
+                <xsl:if test="not(contains($transname,':'))">
+                  <xsl:value-of select="$transname"/>
+                </xsl:if>
 								</xsl:attribute>
 									<span style="text-transform: capitalize;">
 										<xsl:apply-templates select="child::title" mode="outIt"/>
@@ -180,7 +186,7 @@
 				<xsl:choose>
 					<xsl:when test="count(ancestor::*) = 1 ">
 						<xsl:choose>
-							<xsl:when test="contains($tagname,'gmd:spatialRepresentationInfo') or contains($tagname,'gmd:referenceSystemInfo') or contains($tagname,'gmd:metadataExtensionInfo') or contains($tagname,'gmd:identificationInfo') or contains($tagname,'gmd:contentInfo') or contains($tagname,'gmd:distributionInfo') or contains($tagname,'gmd:dataQualityInfo') or contains($tagname,'gmd:portrayalCatalogueInfo') or contains($tagname,'gmd:metadataConstraints') or contains($tagname,'gmd:applicationSchemaInfo') or contains($tagname,'gmd:metadataMaintenance') or contains($tagname,'gmd:metadataMaintenanceInfo') or contains($tagname,'gmi:acquisitionInformation') or contains($tagname,'gfc:FC_FeatureCatalogue')">
+							<xsl:when test="contains($tagname,'spatialRepresentationInfo') or contains($tagname,'referenceSystemInfo') or contains($tagname,'metadataExtensionInfo') or contains($tagname,'identificationInfo') or contains($tagname,'contentInfo') or contains($tagname,'distributionInfo') or contains($tagname,'dataQualityInfo') or contains($tagname,'portrayalCatalogueInfo') or contains($tagname,'metadataConstraints') or contains($tagname,'applicationSchemaInfo') or contains($tagname,'metadataMaintenance') or contains($tagname,'metadataMaintenanceInfo') or contains($tagname,'acquisitionInformation') or contains($tagname,'FC_FeatureCatalogue')">
 								<xsl:if test="(position()>1)">
 									<xsl:element name="a">
 									<xsl:attribute name="href">
@@ -193,7 +199,12 @@
 								<b>
 									<xsl:element name="a">
 									<xsl:attribute name="name">
-									<xsl:value-of select="substring-after($tagname,':')"/>
+									  <xsl:if test="contains($tagname,':')">
+                      <xsl:value-of select="substring-after($tagname,':')"/>
+									  </xsl:if>
+									  <xsl:if test="not(contains($tagname,':'))">
+                      <xsl:value-of select="$tagname"/>
+									  </xsl:if>
 									</xsl:attribute>
 									<xsl:value-of select="$output"/>
 									</xsl:element>
