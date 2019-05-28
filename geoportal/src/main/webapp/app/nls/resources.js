@@ -149,6 +149,10 @@ define({
         searchTip: "Search",
         searchLabel: "Search query:",
         interval: "Interval",
+        rangeTip: "Specify desired numerical range",
+        rangeLabel: "Specify range:",
+        fromLabel: "From:",
+        toLabel: "To:",
         settings: {
           caption: "Numeric Filter",
           field: "Numeric Field",

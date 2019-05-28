@@ -540,3 +540,27 @@ a.dropdown-toggle:focus {
 .g-open-search-result-link {
   margin-left: 1em;
 }
+
+.g-from-value {
+  
+}
+
+.g-to-value {
+  float: right;
+}
+
+.g-from-value-input {
+  
+}
+
+.g-to-value-input {
+  
+}
+
+.g-from-value-input-label {
+  
+}
+
+.g-to-value-input-label {
+  
+}
