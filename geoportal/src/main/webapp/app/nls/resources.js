@@ -147,6 +147,7 @@ define({
         rangePattern: "{from}..{to}",
         countPattern: "{count} aggregated here",
         searchTip: "Search",
+        searchLabel: "Search query:",
         interval: "Interval",
         settings: {
           caption: "Numeric Filter",
