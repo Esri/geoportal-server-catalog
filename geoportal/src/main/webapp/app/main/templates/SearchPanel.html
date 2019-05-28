@@ -27,6 +27,14 @@
           open:false,
           label:'${i18n.search.criteria.date}'">
       </div>
+      <div data-dojo-type="app/search/NumericFilter"
+        data-dojo-props="
+          field:'metadata_year_l',
+          interval:10000,
+          ticks:6,
+          places:0,
+          label:'${i18n.search.criteria.paleoDate}'">
+      </div>
       <!--
       <div data-dojo-type="app/search/NumericFilter"
         data-dojo-props="
