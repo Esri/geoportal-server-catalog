@@ -62,6 +62,7 @@ define({
         map: "Map",
         timePeriod: "Time Period",
         date: "Date",
+        paleoDate: "Date (Paleo)",
         owner: "Owner",
         topicCategory: "Topic Category",
         metadataType: "Metadata Type",
