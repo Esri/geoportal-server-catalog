@@ -373,10 +373,10 @@ and will apply to all search facets */
 }
 .g-temporal-bar select {
   margin-left: 3px;
-  margin-right: 10px;
 }
 .g-temporal-bar label {
   font-size: 11px;
+  margin-left: 10px;
 }
 .g-temporal-bar .calendar {
   width: 16px;
@@ -539,6 +539,10 @@ a.dropdown-toggle:focus {
 
 .g-open-search-result-link {
   margin-left: 1em;
+}
+
+.g-range-label-link {
+  margin-left: 10px;
 }
 
 .g-from-value {
