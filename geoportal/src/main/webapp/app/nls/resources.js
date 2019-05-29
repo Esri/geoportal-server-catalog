@@ -68,6 +68,7 @@ define({
         metadataType: "Metadata Type",
         organizations: "Organizations",
         keywords: "Keywords",
+        originType: "Origin Type",
         origin: "Source of Origin",
         approvalStatus: "Approval Status",
         access: "Access",
