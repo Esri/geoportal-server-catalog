@@ -236,6 +236,9 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
     },
 
     getAuthor: function(response,item) {
+      if (!this.searchPane.widgetContext.widgetConfig.showOwner) {
+        return "";
+      }
       var author = item.author;
       if (author) {
         if (Array.isArray(author)) {
