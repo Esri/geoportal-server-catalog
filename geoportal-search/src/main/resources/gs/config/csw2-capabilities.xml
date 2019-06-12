@@ -43,7 +43,6 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="AcceptVersions">
@@ -69,7 +68,7 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}" />
+          <ows:Post xlink:href="{csw.url}?request=GetRecords&service=CSW&version=2.0.2" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
@@ -113,7 +112,6 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="outputFormat">
