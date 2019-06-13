@@ -1,6 +1,6 @@
 body {
   font-size: 12px;
-  background-color: #ffffff;
+  backGround-color: #ffffff;
 }
 
 /* chrome */
@@ -195,7 +195,7 @@ and will apply to all search facets */
 }
 .g-spatial-filter-locator {
   display: block;
-  position: absolute;
+  position: fixed;
   z-index: 31;
   left: 44px;
   top: 215px;
