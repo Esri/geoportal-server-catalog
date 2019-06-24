@@ -568,3 +568,8 @@ a.dropdown-toggle:focus {
 .g-to-value-input-label {
   
 }
+
+.g-input-field-note {
+	font-size: 10px;
+	font-style: italic;
+}

@@ -91,7 +91,13 @@ define({
         countPattern: "{count} centered here",
         settings: {
           caption: "Spatial Filter",
-          aggregations: "Aggregations"
+          aggregations: "Aggregations",
+          field: "Shape Field",
+          fieldPlaceholder: "",
+          fieldNote: "(for search, e.g. envelope_geo, shape_geo, envelope_cen_pt)",
+          pointField: "Point Field",
+          pointFieldPlaceholder: "",
+          pointFieldNote: "(for aggregation, e.g. envelope_cen_pt)"
         }
       },
       temporalFilter: {
