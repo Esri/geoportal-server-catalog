@@ -40,6 +40,8 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
       if (!settings) settings = this.targetWidget;
       this.componentLabelInput.value = settings.label;
       this.aggCheckbox.checked = settings.allowAggregation;
+      this.fieldInput.value = settings.field;
+      this.pointFieldInput.value = settings.pointField;
     },
     
     reset: function() {
@@ -57,6 +59,8 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
       
       this.targetWidget.label = chkInput(this.componentLabelInput,this.targetWidget.label);
       this.targetWidget.allowAggregation = !!this.aggCheckbox.checked;
+      this.targetWidget.field = chkInput(this.fieldInput,this.targetWidget.field);
+      this.targetWidget.pointField = chkInput(this.pointFieldInput,this.targetWidget.pointField);
 
       this.targetWidget.dropPane.set("title",this.targetWidget.label);
       this.targetWidget.search();
