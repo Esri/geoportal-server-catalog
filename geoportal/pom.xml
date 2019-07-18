@@ -192,6 +192,11 @@
       <version>1.16.1</version>
     </dependency>
 
+    <dependency>
+      <groupId>org.apache.sis.core</groupId>
+      <artifactId>sis-referencing</artifactId>
+      <version>0.8</version>
+    </dependency>
   </dependencies> 
   
   <build>
