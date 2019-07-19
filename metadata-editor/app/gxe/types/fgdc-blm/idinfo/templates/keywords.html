@@ -1,0 +1,233 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'keywords',label:'${i18nFgdc.idinfo.keywords.caption}'">
+
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+
+    
+      <!-- theme -->
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'theme',minOccurs:1,maxOccurs:'unbounded',
+          label:'ISO Topics',
+          matchTopNode: [
+        {
+           qPath:'themekt',
+          qValue:'ISO 19115 Topic Category',
+          qMode:'must'
+        }]
+          ">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'themekt',value:'ISO 19115 Topic Category',fixed:true,
+            label:'${i18nFgdc.idinfo.keywords.thesaursus}'">
+	    </div>
+        <div data-dojo-type="esri/dijit/metadata/form/Element"   data-dojo-props="target:'themekey',minOccurs:1,maxOccurs:'unbounded', label:'ISO Topics'">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectMany" data-dojo-props="">
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Administrative and Political Boundaries',value:'boundaries'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Agriculture and Farming',value:'farming'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Atmosphere and Climatic',value:'climatologyMeteorologyAtmosphere'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Biology and Ecology',value:'biota'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Business and Economic',value:'economy'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Cadastral',value:'planningCadastre'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Cultural, Society and Demography',value:'society'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Elevation and Derived Products',value:'elevation'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Environment and Conservation',value:'environment'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Facilities and Structures',value:'structure'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Geological and Geophysical',value:'geoscientificInformation'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Human Health and Disease',value:'health'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Imagery and Base Maps',value:'imageryBaseMapsEarthCover'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Inland Water Resources',value:'inlandWaters'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Locations and Geodetic Networks',value:'location'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Military',value:'intelligenceMilitary'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Oceans and Estuaries',value:'oceans'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Transportation Networks',value:'transportation'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Utilities and Communication',value:'utilitiesCommunication'"></div>
+            </div>
+        </div>				  
+      </div>
+
+      <!-- BLM Keywords -->
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'theme',minOccurs:1,maxOccurs:1,
+          label:'BLM Keywords',
+          matchTopNode: [
+            {
+               qPath:'themekt',
+              qValue:'ISO 19115 Topic Category',
+              qMode:'mustNot'
+            },
+            {
+               qPath:'themekt',
+              qValue:'BLM-THEME',
+              qMode:'must'
+            }
+          ]
+        ">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'themekt',value:'BLM-THEME',fixed:true,
+            label:'${i18nFgdc.idinfo.keywords.thesaursus}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputText">
+          </div>
+        </div>
+          <div data-dojo-type="esri/dijit/metadata/form/Element"   data-dojo-props="target:'themekey',minOccurs:1,maxOccurs:'unbounded', label:'BLM Keywords'">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectMany" data-dojo-props="">
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Anthropology',value:'Anthropology'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Authorization',value:'Authorization'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Disturbance',value:'Disturbance'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Endangered',value:'Endangered'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Energy',value:'Energy'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Facility',value:'Facility'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Fire',value:'Fire'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Forest',value:'Forest'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Geology',value:'Geology'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Hydrology',value:'Hydrology'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Management',value:'Management'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Paleontology',value:'Paleontology'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Range',value:'Range'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Recreation',value:'Recreation'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Vegetation',value:'Vegetation'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Wilderness',value:'Wilderness'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Wildlife',value:'Wildlife'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Withdrawal',value:'Withdrawal'"></div>
+            </div>
+          </div>
+      </div>
+
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'theme',minOccurs:1,maxOccurs:'unbounded',
+          label:'Other Keywords',
+          matchTopNode: [
+            {
+               qPath:'themekt',
+              qValue:'ISO 19115 Topic Category',
+              qMode:'mustNot'
+            },
+            {
+               qPath:'themekt',
+              qValue:'BLM-THEME',
+              qMode:'mustNot'
+            }
+          ]
+        ">
+		  
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'themekt',value:'',label:'${i18nFgdc.idinfo.keywords.thesaursus}'">
+	    </div>
+			
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'themekey',maxOccurs:'unbounded',
+            label:'${i18nFgdc.idinfo.keywords.delimited}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputDelimitedTextArea"></div>
+        </div>		  
+      </div>
+	  
+	  
+      <!-- BLM States -->
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'place',minOccurs:1,maxOccurs:1,
+          label:'States'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'placekt',value:'BLM-STATE',fixed:true,
+            label:'${i18nFgdc.idinfo.keywords.thesaursus}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputText">
+          </div>
+        </div>
+          <div data-dojo-type="esri/dijit/metadata/form/Element"   data-dojo-props="target:'placekey',minOccurs:1,maxOccurs:'unbounded', label:'States'">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectMany" data-dojo-props="">
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Alabama',value:'Alabama'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Alaska',value:'Alaska'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Arkansas',value:'Arkansas'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'California',value:'California'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Colorado',value:'Colorado'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Connecticut',value:'Connecticut'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Delaware',value:'Delaware'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'District of Columbia',value:'District of Columbia'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Florida',value:'Florida'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Georgia',value:'Georgia'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Hawaii',value:'Hawaii'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Idaho',value:'Idaho'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Illinois',value:'Illinois'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Indiana',value:'Indiana'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Iowa',value:'Iowa'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Kansas',value:'Kansas'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Kentucky',value:'Kentucky'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Lousiana',value:'Lousiana'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Maine',value:'Maine'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Maryland',value:'Maryland'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Massachusetts',value:'Massachusetts'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Michigan',value:'Michigan'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Minnesota',value:'Minnesota'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Mississippi',value:'Mississippi'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Missouri',value:'Missouri'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Montana',value:'Montana'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Nebraska',value:'Nebraska'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Nevada',value:'Nevada'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'New Jersey',value:'New Jersey'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'New Hampshire',value:'New Hampshire'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'New York',value:'New York'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'New Mexico',value:'New Mexico'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'North Carolina',value:'North Carolina'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'North Dakota',value:'North Dakota'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Ohio',value:'Ohio'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Oklahoma',value:'Oklahoma'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Oregon',value:'Oregon'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Pennsylvania',value:'Pennsylvania'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Rhode Island',value:'Rhode Island'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'South Carolina',value:'South Carolina'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'South Dakota',value:'South Dakota'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Tennessee',value:'Tennessee'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Texas',value:'Texas'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Utah',value:'Utah'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Vermont',value:'Vermont'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Virginia',value:'Virginia'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Washington',value:'Washington'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'West Virginia',value:'West Virginia'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Wisconsin',value:'Wisconsin'"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'Wyoming',value:'Wyoming'"></div>
+            </div>
+          </div>
+      </div>	  
+
+      <!-- stratum -->
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'stratum',minOccurs:0,maxOccurs:'unbounded',
+          label:'${i18nFgdc.idinfo.keywords.stratum}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'stratkt',value:'None',
+            label:'${i18nFgdc.idinfo.keywords.thesaursus}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputText">
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool"
+              data-dojo-props="value:'None',label:'${i18nFgdc.alternates.none}'"></div>
+          </div>
+        </div>
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'stratkey',maxOccurs:'unbounded',
+            label:'${i18nFgdc.idinfo.keywords.delimited}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputDelimitedTextArea"></div>
+        </div>
+      </div>
+
+      <!-- temporal -->
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'temporal',minOccurs:0,maxOccurs:'unbounded',
+          label:'${i18nFgdc.idinfo.keywords.temporal}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'tempkt',value:'None',
+            label:'${i18nFgdc.idinfo.keywords.thesaursus}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputText">
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool"
+              data-dojo-props="value:'None',label:'${i18nFgdc.alternates.none}'"></div>
+          </div>
+        </div>
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'tempkey',maxOccurs:'unbounded',
+            label:'${i18nFgdc.idinfo.keywords.delimited}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputDelimitedTextArea"></div>
+        </div>
+      </div>
+
+    </div>
+
+  </div>
+
+</div>
