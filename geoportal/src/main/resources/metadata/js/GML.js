@@ -17,11 +17,19 @@ var GML = {
         }
       }
     } else {
-      points = GML._readPolygon(task, root);
+      points = GML._readPolygon(task, G.getNode(task, root, "gmd:polygon/gml32:Polygon"));
       if (points && points.length>0) {
         geojson = {
           "type": "polygon",
           "coordinates": [GML._balancePoints(points)]
+        }
+      } else {
+        points = GML._readMultiPoint(task, G.getNode(task, root, "gmd:polygon/gml32:MultiPoint"));
+        if (points && points.length>0) {
+          geojson = {
+            "type": "polygon",
+            "coordinates": [GML._balancePoints(points)]
+          }
         }
       }
     }
@@ -54,8 +62,22 @@ var GML = {
     return false;
   },
   
-  _readPolygon: function(task, root) {
-    return GML._readLinearRing(task, G.getNode(task, G.getNode(task, root, "gmd:polygon/gml32:Polygon"), "gml32:exterior/gml32:LinearRing"));
+  _readMultiPoint: function(task, multiPointNode) {
+    if (!multiPointNode) return null;
+    
+    var points = [];
+    G.forEachNode(task, multiPointNode, "gml32:pointMembers/gml32:Point", function(pointNode) {
+      var point = GML._readPoint(task, pointNode);
+      if (point)
+        points.push(point);
+    });
+    
+    return points;
+  },
+  
+  _readPolygon: function(task, polygonNode) {
+    if (!polygonNode) return null;
+    return GML._readLinearRing(task, G.getNode(task, polygonNode, "gml32:exterior/gml32:LinearRing"));
   },
   
   _readLinearRing: function(task, linearRingNode) {
@@ -95,7 +117,7 @@ var GML = {
     var point = null;
     var pos = G.getString(task, posNode, ".");
     if (pos && pos.length>0) {
-      var xy = pos.split(" ");
+      var xy = pos.split(/\s+/);
       if (xy && xy.length>=2) {
         point = [Number(xy[0]), Number(xy[1])];
       }
@@ -109,7 +131,7 @@ var GML = {
     var points = [];
     var coordinates = G.getString(task, coordinatesNode, ".");
     if (coordinates && coordinates.length>0) {
-      coordinates.split(" ").forEach(function(coordinate){
+      coordinates.split(/\s+/).forEach(function(coordinate){
         var xy = coordinate.split(",");
         if (xy && xy.length>=2) {
           point = [Number(xy[0]), Number(xy[1])];
