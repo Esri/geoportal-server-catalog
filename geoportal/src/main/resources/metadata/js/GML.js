@@ -3,23 +3,71 @@ var GML = {
   toGeoJson: function(task, root) {
     var geojson = null;
     var points = GML._readPoints(task, root);
-
-    if (points.length==1) {
-      geojson = {
-        "type": "point",
-        "coordinates": points[0]
+    
+    if (points && points.length>0) {
+      if (points.length==1) {
+        geojson = {
+          "type": "point",
+          "coordinates": points[0]
+        }
+      } else if (points.length>=4) {
+        geojson = {
+          "type": "polygon",
+          "coordinates": [GML._balancePoints(points)]
+        }
       }
-    } else if (points.length>=4) {
-      if (points[0][0]!=points[points.length-1][0] || points[0][1]!=points[points.length-1][1]) {
-        points.push(points[0]);
-      }
-      geojson = {
-        "type": "polygon",
-        "coordinates": [points]
+    } else {
+      points = GML._readPolygon(task, root);
+      if (points && points.length>0) {
+        geojson = {
+          "type": "polygon",
+          "coordinates": [GML._balancePoints(points)]
+        }
       }
     }
+
     
     return geojson;
+  },
+  
+  _balancePoints: function(points) {
+    if (!points) return null;
+    
+    var outPoints = [];
+    points.forEach(function(pt) {
+      if (outPoints.length==0 || !GML._eqPoints(pt, outPoints[outPoints.length-1])) {
+        outPoints.push(pt);
+      }
+    });
+    if (!GML._eqPoints(outPoints[0], outPoints[outPoints.length-1])) {
+      outPoints.push(outPoints[0]);
+    }
+    
+    return outPoints;
+  },
+  
+  _eqPoints: function(p1, p2) {
+    if (!p1 && !p2) return true;
+    if (p1 && p1.length>=2 && p2 && p2.length>=2) {
+      return p1[0]===p2[0] && p1[1]===p2[1];
+    }
+    return false;
+  },
+  
+  _readPolygon: function(task, root) {
+    return GML._readLinearRing(task, G.getNode(task, G.getNode(task, root, "gmd:polygon/gml32:Polygon"), "gml32:exterior/gml32:LinearRing"));
+  },
+  
+  _readLinearRing: function(task, linearRingNode) {
+    if (!linearRingNode) return null;
+    
+    var points = [];
+    G.forEachNode(task, linearRingNode, "gml32:pos", function(posNode) {
+      var point = GML._readPos(task, posNode);
+      if (point)
+        points.push(point);
+    });
+    return points;
   },
   
   _readPoints: function(task, root) {
