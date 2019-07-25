@@ -33,14 +33,19 @@ var GML = {
   },
   
   _readPoint: function(task, pointNode) {
-      var point = GML._readPos(task,pointNode);
-      if (!point) point = GML._readCoordinates(task,pointNode);
+      var point = GML._readPos(task, G.getNode(task, pointNode, "gml32:pos"));
+      if (!point) {
+        var coordinates = GML._readCoordinates(task, G.getNode(task, pointNode, "gml32:coordinates"));
+        point = coordinates && coordinates.length>0? coordinates[0]: null;
+      }
       return point;
   },
   
-  _readPos: function(task, pointNode) {
+  _readPos: function(task, posNode) {
+    if (!posNode) return null;
+    
     var point = null;
-    var pos = G.getString(task,pointNode,"gml32:pos");
+    var pos = G.getString(task, posNode, ".");
     if (pos && pos.length>0) {
       var xy = pos.split(" ");
       if (xy && xy.length>=2) {
@@ -50,15 +55,20 @@ var GML = {
     return point;
   },
   
-  _readCoordinates: function(task, pointNode) {
-    var point = null;
-    var pos = G.getString(task,pointNode,"gml32:coordinates");
-    if (pos && pos.length>0) {
-      var xy = pos.split(",");
-      if (xy && xy.length>=2) {
-        point = [Number(xy[0]), Number(xy[1])];
-      }
+  _readCoordinates: function(task, coordinatesNode) {
+    if (!coordinatesNode) return null;
+    
+    var points = [];
+    var coordinates = G.getString(task, coordinatesNode, ".");
+    if (coordinates && coordinates.length>0) {
+      coordinates.split(" ").forEach(function(coordinate){
+        var xy = coordinate.split(",");
+        if (xy && xy.length>=2) {
+          point = [Number(xy[0]), Number(xy[1])];
+          point.push(point);
+        }
+      });
     }
-    return point;
+    return points;
   }
 }
