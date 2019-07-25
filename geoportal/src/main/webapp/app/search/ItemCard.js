@@ -95,6 +95,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id; 
+      item.title = item.title? item.title: "???";
       var links = this._uniqueLinks(item);
       this._renderTitleLink(item._id, item);
       this._renderOwnerAndDate(item);
