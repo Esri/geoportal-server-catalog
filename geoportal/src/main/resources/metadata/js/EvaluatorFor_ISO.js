@@ -151,6 +151,28 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"apiso_Denominator_i","gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer");
     G.evalProp(task,item,root,"apiso_DistanceValue_d","gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:distance/gco:Distance");
     G.evalProp(task,item,root,"apiso_DistanceUOM_s","gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:distance/gco:Distance/@uom");
+    
+    var geojsons = {};
+    G.forEachNode(task,root,"//gmd:EX_Extent/gmd:geographicElement/gmd:EX_BoundingPolygon",function(gmdPolygonNode) {
+      var geojson = GML.toGeoJson(task, gmdPolygonNode);
+      if (geojson) {
+        if (!geojsons[geojson.type]) {
+          geojsons[geojson.type] = [];
+        }
+        geojsons[geojson.type].push(geojson);
+      }
+    });
+    
+    Object.keys(geojsons).forEach(function(key){
+      geojsons[key].forEach(function(g, idx) {
+        var prefix = g.type + (geojsons[key].length>1? ""+idx: "");
+        if (g.type==="point") {
+          G.writeProp(task.item, prefix + "_pt", {"lat": g.coordinates[0],"lon": g.coordinates[1]} );
+        } else {
+          G.writeProp(task.item, prefix + "_geo", g );
+        }
+      });
+    });
   },
 
   evalTemporal: function(task) {
