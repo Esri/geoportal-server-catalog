@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Geoportal Standalone Metadata Editor</title>
+<meta http-equiv="content-type" content="text/html; charset=utf-8" />
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+
+<!--
+<link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
+<link rel="stylesheet" href="//local_server/arcgis_js_api/library/3.28/3.28/esri/themes/calcite/esri/esri.css">
+<link rel="stylesheet" href="//local_server/arcgis_js_api/library/3.28/3.28/esri/dijit/metadata/css/gxe.css"/>
+<link rel="stylesheet" href="//local_server/arcgis_js_api/library/3.28/3.28/esri/dijit/metadata/css/gxe-calcite.css"/>
+-->
+
+<link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.28/esri/themes/calcite/dijit/calcite.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.28/esri/themes/calcite/esri/esri.css">
+<link rel="stylesheet" href="//js.arcgis.com/3.28/esri/dijit/metadata/css/gxe.css"/>
+<link rel="stylesheet" href="//js.arcgis.com/3.28/esri/dijit/metadata/css/gxe-calcite.css"/>
+
+<link rel="stylesheet" href="./css/main.css">
+
+<script type="text/javascript">
+  var dojoConfig = {
+    locale: "en",
+    parseOnLoad: true,
+    packages: [
+      {
+        name: 'app',
+        location: location.pathname.replace(/\/[^/]*$/, '') + '/app'
+      }
+    ]
+  };
+</script>
+
+<script src="//js.arcgis.com/3.28"></script>
+<!-- <script src="//local_server/arcgis_js_api/library/3.28/3.28"></script>-->
+
+<script>
+
+  var gxeWasInitialized = false;
+
+  var gxeUnusedTypeKeys = [
+    "gemini-iso-19115", "gemini-iso-19119",
+    "inspire-iso-19115", "inspire-iso-19119",
+	"sdsfie-data", "arcgis-rtx", "geoplatform",
+    "iso-19115", "iso-19119", "iso-19115-2", "fgdc-blm"
+  ];
+
+  var gxeAllowedTypeKeys = [
+    "iso-19115", "iso-19119", "iso-19115-2", "fgdc", "dublin-core", "arcgis"
+  ];
+
+  var gxeTypeDefinitions = [
+    {
+      key: "arcgis-rtx",
+      requiredPath: "app/gxe/types/arcgis-rtx/base/DocumentType",
+      interrogationRules: [{
+         path: "/metadata/Esri/ArcGISstyle['RTX-custom-style']",
+         must: true
+      }]
+    },
+	{
+      key: "dublin-core",
+      requiredPath: "app/gxe/types/dublin-core/base/DataDocumentType",
+      interrogationRules: [
+        {
+          path: "/rdf:RDF",
+          must: true
+        }
+      ]
+    },
+    {
+      key: "fgdc",
+      requiredPath: "esri/dijit/metadata/types/fgdc/base/DocumentType",
+      interrogationRules: [{
+         path: "/metadata/idinfo/citation",
+         must: true
+      }]
+    },
+    {
+      key: "fgdc-blm",
+      requiredPath: "app/gxe/types/fgdc-blm/base/DocumentType",
+      interrogationRules: [{
+         path: "/metadata/idinfo/citation",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19115",
+      requiredPath: "esri/dijit/metadata/types/iso/base/DataDocumentType",
+      interrogationRules: [{
+         path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19119",
+      requiredPath: "esri/dijit/metadata/types/iso/base/ServiceDocumentType",
+      interrogationRules: [{
+         path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19115-2",
+      requiredPath: "esri/dijit/metadata/types/iso/base/GmiDocumentType",
+      interrogationRules: [{
+         path: "/gmi:MI_Metadata",
+         must: true
+      }]
+    }
+
+  ];
+
+  function openMetadataEditor() {
+
+    require(["dojo/_base/lang",
+             "dojo/_base/array",
+             "dojo/Deferred",
+             "dijit/Dialog",
+             "dojo/dom-style",
+             "esri/dijit/metadata/context/DescriptorMixin",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nArcGIS",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nFgdc",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nIso",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nInspire",
+             "dojo/i18n!esri/dijit/metadata/nls/i18nGemini",
+             "esri/dijit/metadata/form/fgdc/IsoTopicTool",
+             "esri/dijit/metadata/editor/util/LoadDocumentPane",
+             "dojo/domReady!"],
+      function(lang, array, Deferred, Dialog, domStyle, DescriptorMixin,
+        i18nArcGIS, i18nFgdc, i18nIso, i18nInspire, i18nGemini, IsoTopicTool, LoadDocumentPane) {
+
+        if (!DescriptorMixin.prototype.xtnWasExtended) {
+          lang.extend(DescriptorMixin, {
+            xtnWasExtended: true,
+            i18nArcGIS: i18nArcGIS,
+            i18nFgdc: i18nFgdc,
+            i18nIso: i18nIso,
+            i18nInspire: i18nInspire,
+            i18nGemini: i18nGemini
+          });
+        }
+
+        if (!IsoTopicTool.prototype.xtnWasExtended) {
+          lang.extend(IsoTopicTool, {
+            xtnWasExtended: true,
+            thesaurus: "ISO 19115 Topic Category"
+          });
+        }
+		
+        if (!LoadDocumentPane.prototype.xtnWasExtended) {
+          lang.extend(LoadDocumentPane, {
+            xtnWasExtended: true,
+            _initialize: function(){
+			  if(this.prompt !== null) {
+				this.setI18nNodeText(this.promptNode, this.prompt);
+				this.promptNode.style.display = "";
+			  }
+			  var doc = this.editor.getEditDocument();
+			  var hasFileReader = (window && window.FileReader);
+			  var allowPullItem = (doc && this.editor.gxeAdaptor.getAllowPullItem());
+			  var docTypes = this.editor.gxeContext.filterDocumentTypes();
+			  // this._setMode("file");
+			  // modified default tab 
+			  this._setMode("type");
+			  
+			  array.forEach(docTypes, function(docType) {
+				this._addDocType(docType);
+			  }, this);
+			  if(hasFileReader) {
+				this._addBrowseButton();
+			  } else {
+				domStyle.set(this.fileTab.domNode, "display", "none");
+				//domStyle.set(this.templateTab.domNode, "display", "none");
+			  }
+			  if(!allowPullItem) {
+				domStyle.set(this.itemTab.domNode, "display", "none");
+			  }
+			  if (this.arcgisMode) {
+				domStyle.set(this.typeTab.domNode, "display", "none");
+			  }
+			  domStyle.set(this.itemTab.domNode, "display", "none"); // hide this for now
+			  this.astCheckBoxNode.checked = false;
+
+			}
+          });
+        }
+
+        var loadType = function(gxeContext,typeDefs,callback) {
+          var typeDef = typeDefs.shift();
+          window["require"]([typeDef.requiredPath],function(Type){
+            var type = new Type({interrogationRules:typeDef.interrogationRules});
+            gxeContext.documentTypes.index[type.key] = type;
+            gxeContext.documentTypes.list.push(type);
+            if (typeDefs.length === 0) {
+              callback();
+            } else {
+              loadType(gxeContext,typeDefs,callback);
+            }
+          });
+        };
+
+        var loadTypes = function(gxeContext,typeDefinitions,callback) {
+          gxeContext.documentTypes.index = {};
+          gxeContext.documentTypes.list = [];
+          var typeDefs = [], allowedTypeKeys = gxeContext.allowedTypeKeys;
+          array.forEach(allowedTypeKeys,function(key) {
+            array.some(typeDefinitions,function(typeDef) {
+              if (typeDef.key === key) {
+                typeDefs.push(typeDef);
+                return true;
+              }
+            });
+          });
+          loadType(gxeContext,typeDefs,function(){
+            gxeContext.setAllowedTypeKeys(allowedTypeKeys);
+            callback();
+          });
+        };
+
+        var loadingDialog = null;
+        document.getElementById("loadingButton").innerHTML = "Loading editor...";
+        document.getElementById("loadingButton").disabled = true;
+        /*
+        if (!gxeWasInitialized) {
+          loadingDialog = new Dialog({
+            title: "Loading Editor...",
+            content: " ",
+            style: "width: 300px"
+          });
+          loadingDialog.show();
+        }
+        */
+
+        require(["esri/dijit/metadata/context/GxeContext",
+                 "esri/dijit/metadata/context/GxeAdaptor",
+                 "esri/dijit/metadata/editor/EditorDialog",],
+          function(GxeContext, GxeAdaptor, EditorDialog) {
+
+	          var gxeContext = new GxeContext({
+	            allowedTypeKeys: gxeAllowedTypeKeys,
+	            allowSave: false,
+	            allowSaveAndClose: false,
+	            allowViewXml: true,
+	            arcgisMode: false,
+	            basemap: "hybrid",
+	            showValidateButton: true,
+	            startupTypeKey: null,
+	            validateOnSave: true,
+	            filePromptText: "Select an XML file.",
+	            asTemplateText: "Reset identifiers",
+	            xmlViewOnlyText: "The type of metadata associated with this item is not supported by the editor."
+	          });
+
+	          var gxeAdaptor = new GxeAdaptor({
+	            getAllowEditMetadata: function() {
+	              return true;
+	            },
+	            getAllowDeleteMetadata: function() {
+	              return false;
+	            },
+	            getOriginalXml: function() {
+	              return null;
+	            },
+	            saveXml: function(gxeDocument, xmlString, bPushToItem) {
+	              var dfd = new Deferred();
+	              dfd.resolve();
+	              return dfd;
+	            }
+	          });
+
+	          loadTypes(gxeContext,gxeTypeDefinitions,function(){
+	            gxeWasInitialized = true;
+	            if (loadingDialog) loadingDialog.hide();
+	            document.getElementById("loadingButton").innerHTML = "Open Metadata Editor";
+              document.getElementById("loadingButton").disabled = false;
+	            var dialog = new EditorDialog({
+	              gxeAdaptor: gxeAdaptor,
+	              gxeContext: gxeContext
+	            });
+	            dialog.show();
+	            dialog.editor.primaryToolbar.saveButton.style.visibility = "hidden";
+	          });
+          }
+        );
+
+      }
+    );
+
+  }
+
+</script>
+
+<body class="calcite">
+  <header>
+    <div class="logo"><img src="images/logo.png" alt="Metadata Editor" /></div>
+    <div>
+      <h2>Metadata Editor</h2>
+      <h3>Create standardized metadata files in XML format</h3>
+    </div>
+    <div class="help"><a href="">Help</a></div>
+  </header>
+
+  <div class="main">
+    <div class="gettingstarted">
+      <h2>What is this?</h2>
+      <p>
+        This tool offers the industry-standard metadata schemas for creating and validating metadata adhering to international standards from ISO, Federal Geographic Data Committee (FGDC) endorsed standards for the Content Standard for Digital Geospatial Metadata (CSDGM) and Dublin Core. 
+      </p>
+    </div>
+
+    <div class="gettingstarted">
+      <h2>Getting Started</h2>
+
+      <div class="gettingstarted-wrapper">
+        <div class="gettingstarted-content">
+          <div class="gettingstarted-button">
+            <button onclick="openMetadataEditor()" id="loadingButton">Open Metadata Editor</button>
+          </div>
+
+          <ul>
+            <li>Click the button to open the metadata Editor.</li>
+            <li>Open an XML file, or start a New Document.</li>
+            <li>Select a metadata standard the metadata document will adhere to.</li>
+            <li>Enter information into the required items.</li>
+            <li>Validate metadata based on selected standard.</li>
+            <li>Save the XML file to your system folder.</li>
+            <li>Publish stand-alone metadata XML file.</li>
+            <li>Reattach metadata to dataset.</li>
+          </ul>
+        </div>
+
+        <div class="references">
+          <h3>Additional References</h3>
+          <ul>
+            <li><a href="https://pro.arcgis.com/en/pro-app/help/metadata/create-iso-19115-and-iso-19139-metadata.htm" target="_blank">Create ISO 19115 and ISO 19139 metadata</a></li>
+            <li><a href="https://github.com/Esri/geoportal-server-catalog" target="_blank">Geoportal Server 2.x GitHub Repository</a></li>
+            <li><a href="https://github.com/ISO-TC211/XML" target="_blank">ISO-TC211 XML Schema Repository</a></li>
+            <li><a href="http://www.fgdc.gov/metadata/documents/MetadataQuickGuide.pdf" target="_blank">ISO keywords</a></li>
+            <li><a href="https://www.fgdc.gov/standards/projects/metadata/base-metadata/v2_0698.pdf" target="_blank">FGDC CSDGM documentation</a></li>
+            <li><a href="https://www.fgdc.gov/csdgmgraphical/index.html" target="_blank">FGDC CSDGM Interactive Map</a></li>
+          </ul>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="bottom">
+    <div>
+      <h3>Why do we need Metadata?</h3>
+      <p>Geospatial resources are high-value business assets that must be documented and maintained like other critical business assets. Metadata allows internal and external customers to improve business and technical understanding of data and data-related processes by helping them to:</p>
+      <img src="images/metadata-flow.png" style="float: right; height: 180px;margin-top:50px;/*box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 2px 3px rgba(0,0,0,.2);background: #ACD1E9;*/" />
+      <ul>
+        <li>Find and access the data</li>
+        <li>Understand data that are discovered</li>
+        <li>Understand the reliability of data</li>
+        <li>Understand the intended use of the data</li>
+        <li>Know how and when the data were collected and by whom</li>
+        <li>Know how and when data are maintained</li>
+        <li>Understand any ways in which the data are manipulated</li>
+        <li>See any warnings or disclaimers that may apply to the data</li>
+        <li>Know who to contact for further information about the data</li>
+        <li>Ensure metadata does not fall out of sync with the data it describes</li>
+      </ul>
+    </div>
+  </div>
+
+</body>
+</html>
