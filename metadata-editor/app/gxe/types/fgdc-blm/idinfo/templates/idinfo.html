@@ -1,0 +1,122 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'idinfo',label:'${i18nFgdc.idinfo.caption}'">
+      
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+    
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'citation',showHeader:false,label:'${i18nFgdc.idinfo.citeinfo}'">
+        <div data-dojo-type="app/gxe/types/fgdc-blm/citeinfo/citeinfo"></div>
+      </div>
+      
+      <p>HELLO WORLD</p>
+
+      <div data-dojo-type="esri/dijit/metadata/types/fgdc/idinfo/descript"
+        data-dojo-props="label:'${i18nFgdc.idinfo.descript.caption}'"></div>
+        
+      <div data-dojo-type="esri/dijit/metadata/form/Section"
+        data-dojo-props="showHeader:false,label:'${i18nFgdc.idinfo.section.timeAndStatus}'">
+        <div data-dojo-type="esri/dijit/metadata/types/fgdc/idinfo/timeperd"></div>
+        <div data-dojo-type="esri/dijit/metadata/types/fgdc/idinfo/status"></div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'spdom',showHeader:false,label:'${i18nFgdc.idinfo.spdom.caption}'">
+        <div data-dojo-type="esri/dijit/metadata/types/fgdc/idinfo/bounding"></div>
+      </div>
+      
+      <div data-dojo-type="app/gxe/types/fgdc-blm/idinfo/keywords"
+        data-dojo-props="label:'${i18nFgdc.idinfo.keywords.caption}'"></div>
+
+      <!-- constraints -->
+      <div data-dojo-type="esri/dijit/metadata/form/Section" data-dojo-props="showHeader:false,label:'${i18nFgdc.idinfo.section.constraints}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'accconst',value:'None',label:'${i18nFgdc.idinfo.accconst}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea">
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" data-dojo-props="value:'None',label:'${i18nFgdc.alternates.none}'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1A: External Source',
+                    value:'NON-BLM DATA – INTENDED FOR INTERNAL USE ONLY. These data are available to internal Bureau of Land Management (BLM) staff, contractors and partners.  All other requests for this data will be referred to the source agency.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1A: Public Data', 
+                    value:'None, these data are considered public domain.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1B: Public Data', 
+                    value:'Generally releasable. However, the data must be reviewed prior to release to assure that no protected data is contained within the dataset.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Non-BLM', 
+                    value:'NON-BLM DATA - FOR INTERNAL USE ONLY - NOT FOR DISTRIBUTION. These data are available to appropriate Bureau of Land Management (BLM) staff, contractors, and partners.  All other requests for this data will be referred to the source agency.  This data might contain sensitive information and can be released by the source agency, subject to FOIA limitations.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Internal Use', 
+                    value:'NON-PUBLIC. NOT FOR DISTRIBUTION. Although these data might be available to internal Bureau of Land Management (BLM) staff, contractors and partners, they should not be released.  These data might contain sensitive information, and can only be accessed by the public through a FOIA request.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Privacy Data', 
+                    value:'NON-PUBLIC. BLM INTERNAL USE ONLY. These data might contain sensitive information, and may not be releasable under the Privacy Act.  Access to these records is limited to AUTHORIZED PERSONS ONLY.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Unverified',
+                    value:'NON-PUBLIC. BLM INTERNAL USE ONLY. Unverified Dataset. These data will be restricted to internal BLM staff, contractors and partners directly involved with developing the associated planning documents.  These data might contain sensitive information, and may only be accessed by the public by filing a FOIA request, which may or may not be granted depending on the applicable FOIA exemption(s).'"></div>
+          </div>
+        </div>
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'useconst',value:'None',label:'${i18nFgdc.idinfo.useconst}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea">
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" data-dojo-props="value:'None',label:'${i18nFgdc.alternates.none}'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1A: External Source',
+                    value:'NON-BLM DATA - FOR INTERNAL USE ONLY.  Users assume the entire risk associated with use of these data. The BLM has no liability for unintentional disclosure, or for any use or misuse of the data.  Users bear all responsibility in determining the fitness of this data for the intended use. Users must consider the following: time sensitivity of the data; spatial differences in measure, projection, or accuracy; differences in terminology, description, or place names. External source Metadata might not be complete, or reliable, or observe BLM, Federal Geographic Data Committee or International Standards Organization standards. Users will assume that no attempts have been made to verify, correct, or complete the source metadata, except where noted in a process step – the data and metadata are “as is” from the source. The BLM attempts to ensure that the external data in corporate holdings is current. Users are responsible for verifying the timeliness of data. The BLM is not responsible for maintenance or update, and offers no warranty of data. Users agree not to misrepresent the data, nor to imply that changes made were approved or endorsed by the BLM. Users will cite the source of this data in any products derived from this data.  Users that modify data are obligated to describe in a process step the modifications made. The source organization might update this data without notification to users. Users will accept the data as is, with all faults.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1A: Public Data', 
+                    value:'These data are provided by Bureau of Land Management (BLM) “as is” and might contain errors or omissions. The User assumes the entire risk associated with its use of these data and bears all responsibility in determining whether these data are fit for the User’s intended use. The information contained in these data is dynamic and may change over time. The data are not better than the sources from which they were derived, and both scale and accuracy may vary across the data set. These data might not have the accuracy, resolution, completeness, timeliness, or other characteristics appropriate for applications that potential users of the data may contemplate. The User is encouraged to carefully consider the content of the metadata file associated with these data. These data are neither legal documents nor land surveys, and must not be used as such. Official records may be referenced at most BLM offices. Please report any errors in the data to the BLM office from which it was obtained. The BLM should be cited as the data source in any products derived from these data. Any Users wishing to modify the data should describe the types of modifications they have performed. The User should not misrepresent the data, nor imply that changes made were approved or endorsed by BLM. This data may be updated by the BLM without notification. (Optional paragraph for additional use constraints, as needed, depending on the data being released. For example: These data were digitized and edited from best available sources at scales ranging from 1:24,000 up to 1:500,000. These data are for general purposes related to Geographic Information System and mapping applications at small to intermediate geographic scales. Users are cautioned that digital enlargement of these data to scales larger than that at which they were originally mapped can cause misinterpretation. Users are further cautioned that these data and interpretations derived from them do not eliminate the need for onsite survey and evaluation of specific sites. OR These data were collected only on those lands managed by the BLM. OR This raptor nest data was collected piece-meal from various small surveys over a 5-year period and do not constitute an intensive survey for nests. Nests might be missing.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1B: Public Data', 
+                    value:'These data are provided by Bureau of Land Management (BLM) “as is” and might contain errors or omissions. The User assumes the entire risk associated with its use of these data and bears all responsibility in determining whether these data are fit for the User’s intended use. The information contained in these data is dynamic and may change over time. The data are not better than the sources from which they were derived, and both scale and accuracy may vary across the data set. These data might not have the accuracy, resolution, completeness, timeliness, or other characteristics appropriate for applications that potential users of the data may contemplate. The User is encouraged to carefully consider the content of the metadata file associated with these data. These data are neither legal documents nor land surveys, and must not be used as such. Official records may be referenced at most BLM offices. Please report any errors in the data to the BLM office from which it was obtained. The BLM should be cited as the data source in any products derived from these data. Any Users wishing to modify the data should describe the types of modifications they have performed. The User should not misrepresent the data, nor imply that changes made were approved or endorsed by BLM. This data may be updated by the BLM without notification. (Optional paragraph for additional use constraints, as needed, depending on the data being released. For example: These data were digitized and edited from best available sources at scales ranging from 1:24,000 up to 1:500,000. These data are for general purposes related to Geographic Information System and mapping applications at small to intermediate geographic scales. Users are cautioned that digital enlargement of these data to scales larger than that at which they were originally mapped can cause misinterpretation. Users are further cautioned that these data and interpretations derived from them do not eliminate the need for onsite survey and evaluation of specific sites. OR These data were collected only on those lands managed by the BLM. OR This raptor nest data was collected piece-meal from various small surveys over a 5-year period and do not constitute an intensive survey for nests. Nests might be missing.)'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Non-BLM', 
+                    value:'NON-BLM DATA – USE IS SUBJECT TO DATA SHARING AGREEMENT. All use must conform to the restrictions placed on the User by the Data Sharing Agreement on file in Records Management and as follows: [add specific restrictions from the data sharing agreement as appropriate]. Users will take all measures to ensure this data is protected from disclosure. Users assume the entire risk associated with use of this data. The BLM has no liability for unintentional disclosure, or for any use or misuse of this data. Users bear all responsibility in determining the fitness of this data for the intended use.  Users must consider the following: time sensitivity of the data; spatial differences in measure, projection, or accuracy; differences in terminology, description, or place names. External source metadata might not be complete, reliable, or observe BLM, Federal Geographic Data Committee or International Standards Organization standards. In the event of highly sensitive data the source organization might have modified the data for release. Users will assume that no attempts have been made to verify, correct, or complete the source metadata except where noted in a process step – the data and metadata are “as is” from the source. The BLM attempts to ensure that the external data in corporate holdings is current. Users are responsible for verifying the timeliness of data. The BLM is not responsible for maintenance or update, and offers no warranty of data. Users agree not to misrepresent the data, nor to imply that changes made were approved or endorsed by the BLM. Users will cite this data as source data in any products derived from this data. Users that modify data are obligated to describe in a process step the modifications made. The source organization might update this data without notification to users. Users will accept the data as is, with all faults'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Internal Use', 
+                    value:'NON-PUBLIC.  BLM INTERNAL USE ONLY.  NOT FOR DISTRIBUTION. The User should take reasonable measures to ensure that these data are protected from disclosure. The User assumes the entire risk associated with its use of these data. The BLM shall not be held liable for unintentional disclosure, nor for any use or misuse of the data described or contained herein. The User bears all responsibility in determining whether these data are fit for the User’s intended use. The BLM should be cited as the data source in any products derived from these data. Any Users wishing to modify the data are obligated to describe within the process history section of the metadata the types of modifications they have performed. The User specifically agrees not to misrepresent the data, nor to imply that changes made were approved or endorsed by BLM. This data may be updated by BLM without notification to Users. The information contained in these data is dynamic and might change over time. The data are not better than the sources from which they were derived, and both scale and accuracy may vary across the data set. These data might not have the accuracy, resolution, completeness, timeliness, or other characteristics appropriate for applications that potential users of the data may contemplate. The User is encouraged to carefully consider the content of the metadata file associated with these data. These data are neither legal documents nor land surveys, and must not be used as such. Official records may be referenced at most BLM offices. Please report any errors in the data to the BLM office from which it was obtained.  (Optional paragraph for information specific to the dataset, for example: These data were digitized and edited from best available sources at scales ranging from 1:24,000 to 1:500,000. These data were developed in support of the Western Sahara Resource Management Plan (RMP). Users are cautioned that these data should only be considered a supplement to the RMP, and not a substitute for the RMP.  These data do not eliminate the need for onsite survey and evaluation of specific sites. The User should ensure that they have the latest version of these data.)'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Privacy Data', 
+                    value:'NON-PUBLIC.  BLM INTERNAL USE ONLY.  NOT FOR DISTRIBUTION. The information contained in these data is dynamic and may change over time. The data are not better than the sources from which they were derived, and both scale and accuracy might vary across the dataset. These data might not have the accuracy, resolution, completeness, timeliness, or other characteristics appropriate for applications that potential users of the data may contemplate. The User is encouraged to carefully consider the content of the metadata file associated with these data. These data are neither legal documents nor land surveys, and must not be used as such. Official records may be referenced at most BLM offices. Please report any errors in the data to the BLM office from which it was obtained. The BLM should be cited as the data source in any products derived from these data. Any Users wishing to modify the data are obligated to describe within the process history section of the metadata the types of modifications they have performed. The User specifically agrees not to misrepresent the data, nor to imply that changes made were approved or endorsed by BLM. This data may be updated by the BLM without notification. By using these data you hereby agree to these conditions. (Optional paragraph for information specific to the dataset, for example: These data were digitized and edited from best available sources at scales ranging from 1:24,000 to 1:500,000. These data were developed in support of the Western Sahara Resource Management Plan (RMP). Users are cautioned that these data should only be considered a supplement to the RMP, and not a substitute for the RMP. These data do not eliminate the need for onsite survey and evaluation of specific sites. The User should ensure that they have the latest version of these data.)'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Unverified',
+                    value:'NON-PUBLIC, BLM INTERNAL USE ONLY.  NOT FOR DISTRIBUTION.  NO WARRANTY IS MADE BY BLM AS TO THE ACCURACY, RELIABILITY, OR COMPLETENESS OF THESE DATA FOR INDIVIDUAL USE OR AGGREGATE USE WITH OTHER DATA. The User is cautioned that these data have not been verified, and have not been approved for release. The User should take reasonable measures to ensure that these data are protected from disclosure. Although these data might be available to internal BLM staff, contractors or partners; the quality and fit for use of these data should be considered unknown. The User is advised that the content of the metadata file associated with these data might be incomplete. The User assumes the entire risk associated with its use of these data. The BLM shall not be held liable for unintentional disclosure; nor for any use or misuse of the data described or contained herein. Further, the BLM assumes no liability for the current accuracy, reliability, completeness or utility of these data on any system or for any general or scientific purposes. The User bears all responsibility in determining whether these data are fit for the User’s intended use. These data are neither legal documents nor land surveys, and must not be used as such. Official records can be referenced at most BLM offices. Please report any errors in the data to the BLM office from which it was obtained. Any products derived from these data should clearly identify the source as unverified data. They must also include the statement REVIEW AND/OR DISPLAY COPY - NOT FOR DISTRIBUTION. The BLM should be cited as the data source in any products derived from these data. Any Users wishing to modify the data are obligated to describe within the process history section of the metadata the types of modifications they have performed. The User specifically agrees not to misrepresent the data, nor to imply that changes made were approved or endorsed by BLM. This data may be updated by the BLM without notification.'"></div>
+          </div>
+        </div>
+      </div>
+        
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'ptcontac',showHeader:false,label:'${i18nFgdc.idinfo.section.contact}'">
+        <div data-dojo-type="esri/dijit/metadata/types/fgdc/cntinfo/cntinfo"></div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Section"
+        data-dojo-props="showHeader:false,label:'${i18nFgdc.idinfo.section.additional}'">
+        
+        <!-- Browse Graphic -->
+        <div data-dojo-type="esri/dijit/metadata/types/fgdc/idinfo/browse"></div>
+        
+        <!-- dataset Credit -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'datacred',minOccurs:0,label:'${i18nFgdc.idinfo.datacred}'">
+        </div>
+
+        <!-- Security Information -->
+        <div data-dojo-type="esri/dijit/metadata/types/fgdc/idinfo/secinfo"></div>
+        
+        <!-- Native Dataset Environment -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'native',minOccurs:0,label:'${i18nFgdc.idinfo.sNative}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+        </div>
+        
+        <!-- Cross Reference -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'crossref',minOccurs:0,maxOccurs:'unbounded',label:'${i18nFgdc.idinfo.crossref}'">
+          <div data-dojo-type="esri/dijit/metadata/types/fgdc/citeinfo/citeinfo"></div>
+        </div>
+        
+      </div>
+      
+    </div>
+      
+  </div>
+    
+</div>
