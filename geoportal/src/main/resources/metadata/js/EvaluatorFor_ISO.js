@@ -167,7 +167,7 @@ G.evaluators.iso = {
       geojsons[key].forEach(function(g, idx) {
         var prefix = g.type + (geojsons[key].length>1? ""+idx: "");
         if (g.type==="point") {
-          G.writeProp(task.item, prefix + "_pt", {"lat": g.coordinates[0],"lon": g.coordinates[1]} );
+          G.writeProp(task.item, prefix + "_pt", {"lon": g.coordinates[0],"lat": g.coordinates[1]} );
         } else {
           G.writeProp(task.item, prefix + "_geo", g );
         }

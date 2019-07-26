@@ -27,8 +27,8 @@ var GML = {
         points = GML._readMultiPoint(task, G.getNode(task, root, "gmd:polygon/gml32:MultiPoint"));
         if (points && points.length>0) {
           geojson = {
-            "type": "polygon",
-            "coordinates": [GML._balancePoints(points)]
+            "type": "multipoint",
+            "coordinates": points
           }
         }
       }
@@ -119,7 +119,7 @@ var GML = {
     if (pos && pos.length>0) {
       var xy = pos.split(/\s+/);
       if (xy && xy.length>=2) {
-        point = [Number(xy[0]), Number(xy[1])];
+        point = [Number(xy[1]), Number(xy[0])];
       }
     }
     return point;
@@ -134,7 +134,7 @@ var GML = {
       coordinates.split(/\s+/).forEach(function(coordinate){
         var xy = coordinate.split(",");
         if (xy && xy.length>=2) {
-          point = [Number(xy[0]), Number(xy[1])];
+          point = [Number(xy[1]), Number(xy[0])];
           point.push(point);
         }
       });
