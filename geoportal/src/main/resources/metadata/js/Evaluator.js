@@ -130,7 +130,8 @@ G._initializeTask = function(mdoc) {
   var task = {
       mdoc: mdoc,
       item: {},
-      xpath: xpath
+      xpath: xpath,
+      parseGml: false
   };
   if (mdoc && mdoc.hasXml()) {
     task.dom = task.mdoc.ensureDom();
