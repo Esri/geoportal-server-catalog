@@ -19,6 +19,7 @@ import com.esri.geoportal.base.util.Val;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -59,6 +60,7 @@ public class ElasticContext {
   private String indexName = "metadata";
   private boolean indexNameIsAlias = true;
   private boolean is6Plus = false;
+  private boolean is7Plus = false;
   private String itemIndexType = "item";
   private String mappingsFile = "config/elastic-mappings.json";
   private List<String> nodes;
@@ -143,6 +145,15 @@ public class ElasticContext {
   /** Version 6+ */
   public void setIs6Plus(boolean is6Plus) {
     this.is6Plus = is6Plus;
+  }
+  
+  /** Version 7+ */
+  public boolean getIs7Plus() {
+    return is7Plus;
+  }
+  /** Version 7+ */
+  public void setIs7Plus(boolean is7Plus) {
+    this.is7Plus = is7Plus;
   }
   
   /** The index name holding metadata items. */
@@ -456,9 +467,10 @@ public class ElasticContext {
     }
   }
   
-  /** Startup. */
+  /** Startup.
+   */
   @PostConstruct
-  public void startup() throws Exception {
+  public void startup() {
     LOGGER.info("Starting up ElasticContext...");
     String[] nodeNames = this.nodesToArray();
     if ((nodeNames == null) || (nodeNames.length == 0)) {
@@ -518,8 +530,12 @@ public class ElasticContext {
       }
       
       for (String node: nodeNames) {
-        InetAddress a = InetAddress.getByName(node);
-        transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
+        try {
+          InetAddress a = InetAddress.getByName(node);
+          transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
+        } catch (UnknownHostException ex) {
+          LOGGER.warn(String.format("Invalid node name: %s", node), ex);
+        }
       }
       
       if (this.getAutoCreateIndex()) {
