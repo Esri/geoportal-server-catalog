@@ -85,7 +85,7 @@
     <dependency>
       <groupId>org.eclipse.jetty</groupId>
       <artifactId>jetty-proxy</artifactId>
-      <version>9.4.7.v20170914</version>
+      <version>9.4.19.v20190610</version>
     </dependency>
     
     <!-- Elasticsearch -->
