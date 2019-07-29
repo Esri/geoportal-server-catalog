@@ -19,6 +19,7 @@ import com.esri.geoportal.base.util.Val;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 
 import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Map.Entry;
@@ -98,7 +99,14 @@ public class ElasticContextHttp extends ElasticContext {
           for (Entry<String, JsonValue> entry2: jso2.entrySet()) {
             String k2 = entry2.getKey();
             if (!k2.equals("blob") && !k2.equals("clob")) {
-              jb2.add(entry2.getKey(),entry2.getValue());
+              if (this.getIs7Plus()) {
+                JsonObject subEntries = entry2.getValue().asJsonObject();
+                for (Entry<String, JsonValue> subEnt: subEntries.entrySet()) {
+                  jb2.add(subEnt.getKey(), subEnt.getValue());
+                }
+              } else {
+                jb2.add(entry2.getKey(),entry2.getValue());
+              }
             }
           }
           jb.add("mappings",jb2.build());
@@ -136,6 +144,7 @@ public class ElasticContextHttp extends ElasticContext {
           int primaryVersion = i;
           //System.out.println("primaryVersion="+primaryVersion);
           if (primaryVersion >= 6) this.setIs6Plus(true);
+          if (primaryVersion >= 7) this.setIs7Plus(true);
           break;
         }
       }
@@ -225,9 +234,11 @@ public class ElasticContextHttp extends ElasticContext {
     }
   }
   
-  /** Startup. */
+  /** Startup.
+   */
   @PostConstruct
-  public void startup() throws Exception {
+  @Override
+  public void startup() {
     LOGGER.info("Starting up ElasticContextHttp...");
     String[] nodeNames = this.nodesToArray();
     if ((nodeNames == null) || (nodeNames.length == 0)) {
