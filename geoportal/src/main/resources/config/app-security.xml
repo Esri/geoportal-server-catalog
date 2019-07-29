@@ -3,8 +3,11 @@
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:security="http://www.springframework.org/schema/security"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd">
+  
+  <beans:bean id ="passwordEncoder" class = "org.springframework.security.crypto.password.NoOpPasswordEncoder" factory-method = "getInstance" />
+
 
   <!-- One and only one of the authentication methods must be implemented.
    Using an enviroment variable: gpt_authentication is the suggested method for changing this
@@ -15,11 +18,11 @@
   <!-- <beans:import resource="authentication-arcgis.xml"/> -->
   <!-- <beans:import resource="authentication-ldap.xml"/> -->
   <!-- <beans:import resource="authentication-simple.xml"/> -->
-    <!-- <beans:import resource="${gpt_authentication:authentication-arcgis.xml}"/> -->
-    <!-- <beans:import resource="${gpt_authentication:authentication-ldap.xml}"/> -->
-    <!-- <beans:import resource="${gpt_authentication:authentication-simple.xml}"/> -->
-    <beans:import resource="${gpt_authentication:authentication-simple.xml}"/>
-
+  <!-- <beans:import resource="${gpt_authentication:authentication-arcgis.xml}"/> -->
+  <!-- <beans:import resource="${gpt_authentication:authentication-ldap.xml}"/> -->
+  <!-- <beans:import resource="${gpt_authentication:authentication-simple.xml}"/> -->
+  <beans:import resource="${gpt_authentication:authentication-simple.xml}"/>
+  
   <beans:import resource="app-oauth.xml"/>
   <security:http realm="Geoportal" pattern="/**" authentication-manager-ref="authenticationManager">
     <security:headers>
