@@ -84,7 +84,7 @@ public class ElasticContextHttp extends ElasticContext {
     //LOGGER.info("Creating index: "+name);
     ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials());
     String url = client.getIndexUrl(name);
-    String path = this.getMappingsFile();
+    String path = this.getActualMappingsFile();
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
     String postData = JsonUtil.toJson(jso,false);
     String contentType = "application/json;charset=utf-8";
@@ -99,14 +99,7 @@ public class ElasticContextHttp extends ElasticContext {
           for (Entry<String, JsonValue> entry2: jso2.entrySet()) {
             String k2 = entry2.getKey();
             if (!k2.equals("blob") && !k2.equals("clob")) {
-              if (this.getIs7Plus()) {
-                JsonObject subEntries = entry2.getValue().asJsonObject();
-                for (Entry<String, JsonValue> subEnt: subEntries.entrySet()) {
-                  jb2.add(subEnt.getKey(), subEnt.getValue());
-                }
-              } else {
-                jb2.add(entry2.getKey(),entry2.getValue());
-              }
+              jb2.add(entry2.getKey(),entry2.getValue());
             }
           }
           jb.add("mappings",jb2.build());
