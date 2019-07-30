@@ -35,6 +35,7 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="autoCreateIndex" value="true" />
 		<beans:property name="allowFileId" value="false" />
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
+		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
 		<beans:property name="httpPort" value="9200" />
 		<beans:property name="transportPort" value="9300" />
 		
