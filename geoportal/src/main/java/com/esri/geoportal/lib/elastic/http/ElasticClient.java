@@ -25,6 +25,7 @@ import java.net.URLEncoder;
 
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import org.apache.commons.lang3.StringUtils;
 
 /**
  * An HTTP client for Elasticsearch.
@@ -121,7 +122,8 @@ public class ElasticClient {
    * @throws UnsupportedEncodingException
    */
   public String getTypeUrl(String indexName, String typeName) throws UnsupportedEncodingException {
-    return baseUrl + "/" + encode(indexName)+ "/" + encode(typeName);
+    typeName = StringUtils.trimToNull(typeName);
+    return baseUrl + "/" + encode(indexName) + (typeName!=null? "/" + encode(typeName): "");
   }
   
   /**
