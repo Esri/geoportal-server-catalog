@@ -26,6 +26,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 /**
  * Item utilities.
@@ -129,7 +130,7 @@ public class ItemUtil {
     // if not, then try the XML blob.
     String field = FieldNames.FIELD_SYS_XML;
     if (itemSource == null) {
-      JsonObject item = readItemJson(indexName, ec.getItemIndexType(), id);
+      JsonObject item = readItemJson(indexName, ec.getActualItemIndexType(), id);
       itemSource = this.getItemSource(item);
     }
     if (itemSource != null && itemSource.containsKey(field)) {
@@ -207,7 +208,7 @@ public class ItemUtil {
       }
     } else {
       if (itemSource == null) {
-        JsonObject item = this.readItemJson(ec.getIndexName(),ec.getItemIndexType(),id);
+        JsonObject item = this.readItemJson(ec.getIndexName(),ec.getActualItemIndexType(),id);
         itemSource = this.getItemSource(item);
       }
       String field = FieldNames.FIELD_SYS_XMLMETA;
@@ -244,7 +245,11 @@ public class ItemUtil {
     String result = client.sendPost(url,postData,contentType);
     JsonObject response = (JsonObject)JsonUtil.toJsonStructure(result);
     JsonObject hits = response.getJsonObject("hits");
-    int total = hits.getInt("total");
+    int total = !hits.containsKey("total")? 0:
+            hits.get("total").getValueType()==JsonValue.ValueType.NUMBER? hits.getInt("total"):
+            hits.get("total").getValueType()!=JsonValue.ValueType.OBJECT? 0:
+            !hits.getJsonObject("total").containsKey("value") || hits.getJsonObject("total").get("value").getValueType()!=JsonValue.ValueType.NUMBER? 0:
+            hits.getJsonObject("total").getInt("value");
     // TODO what if there is more than one hit
     if (total == 1) {
       JsonArray hitsArray = hits.getJsonArray("hits");
@@ -303,7 +308,7 @@ public class ItemUtil {
         itemJson = item.build().toString();
       }
     }
-    String itemUrl = client.getItemUrl(indexName,ec.getItemIndexType(),itemId);
+    String itemUrl = client.getItemUrl(indexName,ec.getActualItemIndexType(),itemId);
     client.sendPut(itemUrl,itemJson,contentType);
   }
   

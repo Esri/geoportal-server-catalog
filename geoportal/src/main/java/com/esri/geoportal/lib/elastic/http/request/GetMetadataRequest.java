@@ -71,7 +71,7 @@ public class GetMetadataRequest extends com.esri.geoportal.lib.elastic.request.G
       url = client.getXmlUrl(ec.getIndexName(),ec.getXmlIndexType(),id);
     } else {
       xmlField = FieldNames.FIELD_SYS_XML;
-      url = client.getItemUrl(ec.getIndexName(),ec.getItemIndexType(),id);
+      url = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(),id);
     }
     
     try {
