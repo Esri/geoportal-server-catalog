@@ -76,7 +76,7 @@ class SimplePromiseExample {
         String ownerField = FieldNames.FIELD_SYS_OWNER;
         
         GetRequestBuilder getItem = ec.getTransportClient().prepareGet(
-            ec.getItemIndexName(),ec.getItemIndexType(),id);
+            ec.getItemIndexName(),ec.getActualItemIndexType(),id);
         getItem.setFetchSource(false);
         /* ES 2to5 */
         //getItem.setFields(ownerField);

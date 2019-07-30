@@ -232,7 +232,7 @@ public class PublishMetadataRequest extends AppRequest {
     
     TransportClient client = ec.getTransportClient();
     String indexName = ec.getItemIndexName();
-    String itemType = ec.getItemIndexType();
+    String itemType = ec.getActualItemIndexType();
     GetResponse getResponse = null;
     SearchHit searchHit = null;
     Map<String,Object> source = null;

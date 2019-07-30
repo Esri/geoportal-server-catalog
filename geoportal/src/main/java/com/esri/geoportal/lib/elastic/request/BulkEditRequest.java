@@ -120,13 +120,13 @@ public class BulkEditRequest extends BulkRequest {
   protected void appendHit(ElasticContext ec, BulkRequestBuilder request, SearchHit hit) {
     if (this.getUpdateScript() != null) {
       request.add(ec.getTransportClient().prepareUpdate(
-        ec.getItemIndexName(),ec.getItemIndexType(),hit.getId())
+        ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
         .setScript(this.getUpdateScript())
         .setRetryOnConflict(getRetryOnConflict())
       );
     } else {
       request.add(ec.getTransportClient().prepareUpdate(
-        ec.getItemIndexName(),ec.getItemIndexType(),hit.getId())
+        ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
         .setDoc(this.getUpdateSource())
         .setRetryOnConflict(getRetryOnConflict())
       );
@@ -145,11 +145,13 @@ public class BulkEditRequest extends BulkRequest {
     // should "_retry_on_conflict" be "retry_on_conflict" at ES6?
     String retryName = "_retry_on_conflict";
     if (ec.getIs6Plus()) retryName = "retry_on_conflict";
-    line1.add("update", Json.createObjectBuilder()
-      .add("_id",hit.getId())
-      .add("_type",ec.getItemIndexType())
-      .add(retryName,this.getRetryOnConflict())
-    );
+    JsonObjectBuilder joBuilder = Json.createObjectBuilder()
+            .add("_id",hit.getId())
+            .add(retryName,this.getRetryOnConflict());
+    if (!ec.getIs7Plus()) {
+      joBuilder = joBuilder.add("_type",ec.getActualItemIndexType());
+    }
+    line1.add("update", joBuilder);
     data.append(line1.build().toString()).append("\n");
     if (getUpdateScript() != null) {
       // TODO updateScript
@@ -184,14 +186,15 @@ public class BulkEditRequest extends BulkRequest {
       QueryBuilder q = QueryBuilders.idsQuery().addIds(values);
       filters.add(q);
       
-      String type = GeoportalContext.getInstance().getElasticContext().getItemIndexType();
       JsonArrayBuilder ja = Json.createArrayBuilder();
       for (String v: values) ja.add(v);
       JsonObjectBuilder jb = Json.createObjectBuilder();
-      jb.add("ids",Json.createObjectBuilder()
-        .add("type",type)
-        .add("values",ja)
-      );
+      JsonObjectBuilder joBuilder = Json.createObjectBuilder()
+              .add("values",ja);
+      if (!GeoportalContext.getInstance().getElasticContext().getIs7Plus()) {
+        joBuilder = joBuilder.add("type",GeoportalContext.getInstance().getElasticContext().getActualItemIndexType());
+      }
+      jb.add("ids", joBuilder);
       httpFilters.add(jb.build());
     }
   }
@@ -311,7 +314,7 @@ public class BulkEditRequest extends BulkRequest {
     LOGGER.debug("BulkEditRequest.query="+q); // TODO temporary
     com.esri.geoportal.lib.elastic.http.util.Scroller scroller = new com.esri.geoportal.lib.elastic.http.util.Scroller();
     scroller.setIndexName(ec.getItemIndexName());
-    scroller.setIndexType(ec.getItemIndexType());
+    scroller.setIndexType(ec.getActualItemIndexType());
     scroller.setQuery(q);
     scroller.setFetchSource(false);
     scroller.setPageSize(getScrollerPageSize());
@@ -360,7 +363,7 @@ public class BulkEditRequest extends BulkRequest {
     QueryBuilder q = this.newScrollerQuery(ec);
     Scroller scroller = new Scroller();
     scroller.setIndexName(ec.getItemIndexName());
-    scroller.setIndexType(ec.getItemIndexType());
+    scroller.setIndexType(ec.getActualItemIndexType());
     scroller.setQuery(q);
     scroller.setFetchSource(false);
     scroller.setPageSize(getScrollerPageSize());

@@ -228,7 +228,7 @@ public class PublishMetadataRequest extends com.esri.geoportal.lib.elastic.reque
     }
     
     String indexName = ec.getItemIndexName();
-    String itemType = ec.getItemIndexType();
+    String itemType = ec.getActualItemIndexType();
     JsonObject item = null;
     JsonObject itemSource = null;
     String sourceAsString = null;
