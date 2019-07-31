@@ -293,15 +293,23 @@ public class PublishMetadataRequest extends com.esri.geoportal.lib.elastic.reque
       }
     } else {
       jb.add(FieldNames.FIELD_SYS_MODIFIED,now);
-      String v = null;
+      String owner_s = null;
+      String owner_txt = null;
       if (itemSource != null) {
-        v = Val.trim(itemSource.getString(FieldNames.FIELD_SYS_OWNER,null));
+        owner_s = Val.trim(itemSource.getString(FieldNames.FIELD_SYS_OWNER,null));
+        owner_txt = Val.trim(itemSource.getString(FieldNames.FIELD_SYS_OWNER_TXT,null));
       }
-      if (v == null || v.length() == 0) setOwner = true;
+      if (owner_s == null || owner_s.length() == 0 || owner_txt == null || owner_txt.length() == 0) setOwner = true;
     }
     if (setOwner) {
-      if (username == null) jb.addNull(FieldNames.FIELD_SYS_OWNER);
-      else jb.add(FieldNames.FIELD_SYS_OWNER,username);
+      if (username == null) {
+        jb.addNull(FieldNames.FIELD_SYS_OWNER);
+        jb.addNull(FieldNames.FIELD_SYS_OWNER_TXT);
+      }
+      else {
+        jb.add(FieldNames.FIELD_SYS_OWNER,username);
+        jb.add(FieldNames.FIELD_SYS_OWNER_TXT,username);
+      }
     }
     if (metadataTypeKey != null) {
       jb.add(FieldNames.FIELD_SYS_METADATATYPE,metadataTypeKey);

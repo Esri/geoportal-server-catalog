@@ -57,6 +57,9 @@ public class FieldNames {
   /** FIELD_SYS_OWNER = "sys_owner_s" */
   public static String FIELD_SYS_OWNER = "sys_owner_s";
   
+  /** FIELD_SYS_OWNER_TXT = "sys_owner_txt" (for aoutocomplete)*/
+  public static String FIELD_SYS_OWNER_TXT = "sys_owner_txt";
+  
   /** FIELD_SYS_SOURCEURI = "sys_sourceuri_s" */
   public static String FIELD_SYS_SOURCEURI = "sys_sourceuri_s";
   
