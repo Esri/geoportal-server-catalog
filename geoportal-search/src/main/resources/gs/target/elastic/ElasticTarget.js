@@ -464,7 +464,9 @@
         var response = JSON.parse(result);
         searchResult.jsonResponse = response;
         if (response && response.hits) {
-          searchResult.totalHits = response.hits.total;
+          searchResult.totalHits = response.hits.total? 
+                        response.hits.total.value && !isNaN(response.hits.total.value)? response.hits.total.value: response.hits.total: 
+                        0;
           if (task.verbose) console.log("totalHits=",searchResult.totalHits);
           var hits = response.hits.hits;
           if (Array.isArray(response.hits.hits)) {
