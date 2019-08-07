@@ -444,7 +444,11 @@
         var url = self.searchUrl, options;
         var data = null, dataContentType = "application/json";
         if (targetRequest && task.val.hasAnyProperty(targetRequest.searchCriteria)) {
-          data = JSON.stringify(targetRequest.searchCriteria);
+          var criteria = {
+            "track_total_hits": true
+          };
+          Object.assign(criteria, targetRequest.searchCriteria);
+          data = JSON.stringify(criteria);
         }
         if (typeof self.username === "string" && self.username.length > 0 &&
             typeof self.password === "string" && self.password.length > 0) {

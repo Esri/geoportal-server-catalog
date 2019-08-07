@@ -141,6 +141,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       if (postData === null) {
         dfd = this._dfd = dojoRequest.get(url,{handleAs:"json"});
       } else {
+        postData.track_total_hits = true;
         dfd = this._dfd = dojoRequest.post(url,{
           handleAs: "json",
           headers: {"Content-Type": "application/json"},
