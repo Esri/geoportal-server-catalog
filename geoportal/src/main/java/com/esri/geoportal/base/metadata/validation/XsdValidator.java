@@ -15,6 +15,7 @@
 package com.esri.geoportal.base.metadata.validation;
 import com.esri.geoportal.base.metadata.MetadataType;
 import com.esri.geoportal.base.util.Val;
+import com.esri.gpt.catalog.schema.RedirectingResourceResolver;
 
 import java.io.IOException;
 import java.io.StringReader;
@@ -26,6 +27,7 @@ import javax.xml.XMLConstants;
 import javax.xml.transform.Source;
 import javax.xml.transform.sax.SAXSource;
 import javax.xml.transform.stream.StreamSource;
+import javax.xml.validation.Validator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -157,6 +159,7 @@ public class XsdValidator implements ErrorHandler {
       if (xsd == null) {
         javax.xml.validation.SchemaFactory factory = 
           javax.xml.validation.SchemaFactory.newInstance(XMLConstants.W3C_XML_SCHEMA_NS_URI); 
+        factory.setResourceResolver(new RedirectingResourceResolver());
         try {
           String [] xsdLocations = xsdLocation.split(",");
           if (xsdLocations!=null && xsdLocations.length>1) {
@@ -189,7 +192,9 @@ public class XsdValidator implements ErrorHandler {
           throw new ValidationException(type.getKey(),sMsg,getValidationErrors());
         }
       }
-      return xsd.newValidator();
+      Validator validator = xsd.newValidator();
+      validator.setResourceResolver(new RedirectingResourceResolver());
+      return validator;
     }
     return null;
   }
