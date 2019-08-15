@@ -34,8 +34,26 @@ var GML = {
       }
     }
 
+    task.bbox = GML._calcBbox(points);
     
     return geojson;
+  },
+  
+  _calcBbox: function(points) {
+    var bbox = null;
+    
+    if (points) {
+      points.forEach(function(pt) {
+        if (!bbox) {
+          bbox = [pt, pt];
+        } else {
+          bbox[0] = [Math.min(bbox[0][0], pt[0]), Math.min(bbox[0][1], pt[1])];
+          bbox[1] = [Math.max(bbox[1][0], pt[0]), Math.max(bbox[1][1], pt[1])];
+        }
+      });
+    }
+    
+    return bbox;
   },
   
   _balancePoints: function(points) {
