@@ -122,6 +122,7 @@ G.evaluators.iso = {
 
   evalSpatial: function(task) {
     var item = task.item, root = task.root;
+    var hasEnvelope = false;
     G.forEachNode(task,root,"//gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox",function(node){
       var xmin = G.Val.chkDbl(G.getString(task,node,"gmd:westBoundLongitude/gco:Decimal"),null);
       var ymin = G.Val.chkDbl(G.getString(task,node,"gmd:southBoundLatitude/gco:Decimal"),null);
@@ -134,6 +135,7 @@ G.evaluators.iso = {
         if (result.center) {
           G.writeMultiProp(task.item,"envelope_cen_pt",result.center);
         }
+        hasEnvelope = true;
       }
     });
     G.forEachNode(task,root,"gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier",function(node){
@@ -174,6 +176,17 @@ G.evaluators.iso = {
           }
         });
       });
+      
+      if (!hasEnvelope && task.bbox) {
+        var result = G.makeEnvelope(task.bbox[0][0],task.bbox[0][1],task.bbox[1][0],task.bbox[1][1]);
+        if (result && result.envelope) {
+          G.writeMultiProp(task.item,"envelope_geo",result.envelope);
+          if (result.center) {
+            G.writeMultiProp(task.item,"envelope_cen_pt",result.center);
+          }
+          hasEnvelope = true;
+        }
+      }
     }
   },
 
