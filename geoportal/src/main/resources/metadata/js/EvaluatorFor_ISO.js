@@ -179,6 +179,7 @@ G.evaluators.iso = {
       
       if (!hasEnvelope && task.bbox) {
         var result = G.makeEnvelope(task.bbox[0][0],task.bbox[0][1],task.bbox[1][0],task.bbox[1][1]);
+        java.lang.System.out.println(JSON.stringify(result));
         if (result && result.envelope) {
           G.writeMultiProp(task.item,"envelope_geo",result.envelope);
           if (result.center) {
