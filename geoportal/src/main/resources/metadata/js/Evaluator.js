@@ -127,11 +127,13 @@ G._initializeTask = function(mdoc) {
   var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
   xpath.setNamespaceContext(new com.esri.geoportal.base.xml.XmlNamespaceContext(nsmap));
 
+  var gptContext = com.esri.geoportal.context.GeoportalContext.getInstance();
+  
   var task = {
       mdoc: mdoc,
       item: {},
       xpath: xpath,
-      parseGml: false
+      parseGml: gptContext.getParseGml()
   };
   if (mdoc && mdoc.hasXml()) {
     task.dom = task.mdoc.ensureDom();
