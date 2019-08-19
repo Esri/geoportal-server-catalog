@@ -53,6 +53,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private boolean supportsApprovalStatus = false;
   private boolean supportsGroupBasedAccess = false;
   private String version = "2.6.0";
+  private boolean parseGml;
   
   /** Constructor */
   public GeoportalContext() {}
@@ -195,6 +196,22 @@ public class GeoportalContext implements ApplicationContextAware {
   @PreDestroy
   public void shutdown() throws Exception {
     LOGGER.info("Shutting down GeoportalContext...");
+  }
+
+  /**
+   * Checks if parse GML.
+   * @return <cocde>true</code> to parse GML
+   */
+  public boolean getParseGml() {
+    return parseGml;
+  }
+
+  /**
+   * Checks if parse GML.
+   * @param parseGml <cocde>true</code> to parse GML
+   */
+  public void setParseGml(boolean parseGml) {
+    this.parseGml = parseGml;
   }
 
 }
