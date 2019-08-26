@@ -1,4 +1,7 @@
 var GML = {
+  FLIP_SRS: [
+    "urn:ogc:def:crs:EPSG::4326"
+  ],
   
   toGeoJson: function(task, root) {
     var geojson = null;
@@ -156,6 +159,6 @@ var GML = {
   
   _checkFlip: function(task, gmlNode) {
     var srsName = G.getString(task, gmlNode, "@srsName");
-    return srsName && srsName.endsWith("4326");
+    return srsName && GML.FLIP_SRS.indexOf(srsName) >= 0;
   }
 }
