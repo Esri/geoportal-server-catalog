@@ -15,7 +15,6 @@
 package com.esri.geoportal.base.metadata.validation;
 import com.esri.geoportal.base.metadata.MetadataType;
 import com.esri.geoportal.base.util.Val;
-import com.esri.gpt.catalog.schema.RedirectingResourceResolver;
 
 import java.io.IOException;
 import java.io.StringReader;
