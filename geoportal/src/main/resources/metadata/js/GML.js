@@ -1,6 +1,6 @@
 var GML = {
   FLIP_SRS: [
-    "urn:ogc:def:crs:EPSG::4326"
+    "urn:ogc:def:crs:EPSG::4326", "EPSG:4326"
   ],
   
   toGeoJson: function(task, root) {
