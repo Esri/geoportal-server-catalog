@@ -1,4 +1,7 @@
 var GML = {
+  FLIP_SRS: [
+    "urn:ogc:def:crs:EPSG::4326"
+  ],
   
   toGeoJson: function(task, root) {
     var geojson = null;
@@ -23,6 +26,14 @@ var GML = {
             "type": "multipoint",
             "coordinates": points
           }
+        } else {
+          points = GML._readMultiCurve(task, G.getNode(task, root, "gmd:polygon/gml32:MultiCurve"));
+          if (points && points.length>0) {
+            geojson = {
+              "type": "multipoint",
+              "coordinates": points
+            }
+          }
         }
       }
     }
@@ -30,6 +41,45 @@ var GML = {
     task.bbox = GML._calcBbox(points);
     
     return geojson;
+  },
+  
+  _readPoints: function(task, root, flip) {
+    var points = [];
+    G.forEachNode(task, root, "gmd:polygon/gml32:Point", function(pointNode) {
+      var point = GML._readPoint(task, pointNode, flip);
+      if (point)
+        points.push(point);
+    });
+    return points;
+  },
+  
+  _readPolygon: function(task, polygonNode) {
+    if (!polygonNode) return null;
+    return GML._readLinearRing(task, G.getNode(task, polygonNode, "gml32:exterior/gml32:LinearRing"), GML._checkFlip(task, polygonNode));
+  },
+  
+  _readMultiPoint: function(task, multiPointNode) {
+    if (!multiPointNode) return null;
+    
+    var points = [];
+    G.forEachNode(task, multiPointNode, "gml32:pointMembers/gml32:Point", function(pointNode) {
+      var point = GML._readPoint(task, pointNode, GML._checkFlip(task, multiPointNode));
+      if (point)
+        points.push(point);
+    });
+    
+    return points;
+  },
+  
+  _readMultiCurve: function(task, multiCurveNode) {
+    if (!multiCurveNode) return null;
+    
+    var points = [];
+    G.forEachNode(task, multiCurveNode, "//gml32:posList", function(posListNode) {
+      points = points.concat(GML._readPosList(task, posListNode, GML._checkFlip(task, multiCurveNode)));
+    });
+    
+    return points;
   },
   
   _calcBbox: function(points) {
@@ -73,40 +123,12 @@ var GML = {
     return false;
   },
   
-  _readMultiPoint: function(task, multiPointNode) {
-    if (!multiPointNode) return null;
-    
-    var points = [];
-    G.forEachNode(task, multiPointNode, "gml32:pointMembers/gml32:Point", function(pointNode) {
-      var point = GML._readPoint(task, pointNode, GML._checkFlip(task, multiPointNode));
-      if (point)
-        points.push(point);
-    });
-    
-    return points;
-  },
-  
-  _readPolygon: function(task, polygonNode) {
-    if (!polygonNode) return null;
-    return GML._readLinearRing(task, G.getNode(task, polygonNode, "gml32:exterior/gml32:LinearRing"), GML._checkFlip(task, polygonNode));
-  },
-  
   _readLinearRing: function(task, linearRingNode, flip) {
     if (!linearRingNode) return null;
     
     var points = [];
     G.forEachNode(task, linearRingNode, "gml32:pos", function(posNode) {
       var point = GML._readPos(task, posNode, flip);
-      if (point)
-        points.push(point);
-    });
-    return points;
-  },
-  
-  _readPoints: function(task, root, flip) {
-    var points = [];
-    G.forEachNode(task, root, "gmd:polygon/gml32:Point", function(pointNode) {
-      var point = GML._readPoint(task, pointNode, flip);
       if (point)
         points.push(point);
     });
@@ -137,6 +159,32 @@ var GML = {
     return point;
   },
   
+  _readPosList: function(task, posListNode, flip) {
+    if (!posListNode) return null;
+    
+    var srsDimension = G.getString(task, posListNode, "@srsDimension");
+    var dim = srsDimension? Number(srsDimension): 2;
+    
+    var points = [];
+    
+    if (dim>=2) {
+      var value = G.getString(task, posListNode, ".");
+      if (value && value.length>0) {
+        var numbers = value.split(/\s+/);
+        
+        for (i=0; i<numbers.length; i+=dim) {
+          var xy = numbers.slice(i, i+dim);
+          if (xy && xy.length>=2) {
+            var point = flip? [Number(xy[1]), Number(xy[0])]: [Number(xy[0]), Number(xy[1])];
+            points.push(point);
+          }
+        }
+      }
+    }
+    
+    return points;
+  },
+  
   _readCoordinates: function(task, coordinatesNode, flip) {
     if (!coordinatesNode) return null;
     
@@ -156,6 +204,6 @@ var GML = {
   
   _checkFlip: function(task, gmlNode) {
     var srsName = G.getString(task, gmlNode, "@srsName");
-    return srsName && srsName.endsWith("4326");
+    return srsName && GML.FLIP_SRS.indexOf(srsName) >= 0;
   }
 }
