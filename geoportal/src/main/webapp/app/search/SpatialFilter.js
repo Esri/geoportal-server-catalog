@@ -176,7 +176,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
           var map = self.map, geometry, outSR;
           if (map && params && params.item && params.item.envelope_geo) {
             outSR = map.spatialReference;
-            var env = params.item.envelope_geo.coordinates;
+            var env = lang.isArray(params.item.envelope_geo) && params.item.envelope_geo.length>0? params.item.envelope_geo[0].coordinates: params.item.envelope_geo.coordinates;
             if (env) {
               geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
             }
