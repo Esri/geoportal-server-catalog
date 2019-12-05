@@ -173,6 +173,7 @@
       var eros = ["eros"];
       var kml = ["kml","application/vnd.google-earth.kml+xml","http://www.opengis.net/kml/2.2"];
       var rss = ["rss","georss","application/rss+xml"];
+      var dcat = ["dcat","application/json"];
 
       var writers = {};
       index(writers,atom,gs.Object.create(gs.writer.AtomWriter));
@@ -182,6 +183,7 @@
       index(writers,eros,gs.Object.create(gs.writer.ErosWriter));
       index(writers,kml,gs.Object.create(gs.writer.KmlWriter));
       index(writers,rss,gs.Object.create(gs.writer.RssWriter));
+      index(writers,dcat,gs.Object.create(gs.writer.DcatWriter));
 
       return writers;
     }},
