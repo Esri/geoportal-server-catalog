@@ -19,11 +19,12 @@
     accessLevel: "public",
     license: "http://www.usa.gov/publicdomain/label/1.0/",
     bureauCode: [ "010:04" ],
-    programCode: [ "010:00" ],
+    programCode: [ "010:000" ],
     publisher: {
       "@type": "org:Organization",
       name: "Your Publisher"
-    }
+    },
+    keyword: ["metadata"]
   };
 
   function selectFalidDate() {
@@ -41,11 +42,14 @@
 
     writeEntry: {writable:true,value:function(task,results,item,options) {
       var json = task.target.itemToJson(task,item) || {};
+      var src = json._source || {};
+      
       var dcat = {
         identifier: json.id,
         title: json.title || '<unknown>',
         description: json.description || '<unknown>',
         modified: selectFalidDate(json.updated, json.published) || new Date().toISOString(),
+        keyword: src.keywords_s || DCAT_DEFAULTS.keyword,
         
         "@type": "dcat:Dataset",
         "license": DCAT_DEFAULTS.license,
@@ -54,6 +58,7 @@
         "programCode": DCAT_DEFAULTS.programCode,
         "publisher": DCAT_DEFAULTS.publisher
       }
+      
       results.push(dcat);
     }},
 
@@ -68,18 +73,12 @@
         conformsTo: "https://project-open-data.cio.gov/v1.1/schema",
         describedBy: "https://project-open-data.cio.gov/v1.1/schema/catalog.json",
         "@context": "https://project-open-data.cio.gov/v1.1/schema/catalog.jsonld",
-        "@type": "dcat:Catalog"
-//        start: searchResult.startIndex,
-//        num: numReturned, // searchResult.itemsPerPage?
-//        total: searchResult.totalHits,
-//        nextStart: searchResult.calcNextRecord(task)
+        "@type": "dcat:Catalog",
+        start: searchResult.startIndex,
+        num: numReturned,
+        total: searchResult.totalHits,
+        nextStart: searchResult.calcNextRecord(task)
       };
-//      if (task.target.schema &&
-//          typeof task.target.schema .schemaType === "string" &&
-//          task.target.schema.schemaType.length > 0) {
-//        response.sourceType = task.target.schema.schemaType;
-//        response.sourceKey = task.target.key;
-//      }
 
       response.dataset = [];
       if (searchResult.itemsPerPage > 0) {
