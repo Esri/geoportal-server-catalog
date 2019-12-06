@@ -26,7 +26,7 @@
     }
   };
 
-  function formatDate() {
+  function selectFalidDate() {
     var validDates = Array.prototype.slice.call(arguments)
                       .map(function(d) { return Date.parse(d); })
                       .filter(function(d) { return !!d; })
@@ -45,7 +45,7 @@
         identifier: json.id,
         title: json.title || '<unknown>',
         description: json.description || '<unknown>',
-        modified: formatDate(json.updated, json.published) || new Date().toISOString(),
+        modified: selectFalidDate(json.updated, json.published) || new Date().toISOString(),
         
         "@type": "dcat:Dataset",
         "license": DCAT_DEFAULTS.license,
