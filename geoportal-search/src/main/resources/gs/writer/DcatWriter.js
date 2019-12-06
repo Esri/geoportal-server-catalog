@@ -19,9 +19,24 @@
     accessLevel: "public",
     license: "http://www.usa.gov/publicdomain/label/1.0/",
     bureauCode: [ "010:04" ],
-    programCode: [ "010:00" ]
+    programCode: [ "010:00" ],
+    publisher: {
+      "@type": "org:Organization",
+      name: "Your Publisher"
+    }
   };
 
+  function formatDate() {
+    var validDates = Array.prototype.slice.call(arguments)
+                      .map(function(d) { return Date.parse(d); })
+                      .filter(function(d) { return !!d; })
+                      .map(function(d) { return new Date(d); });
+              
+    return validDates!=null && validDates.length>0? 
+           validDates[0].toISOString(): null;
+  }
+  
+  
   gs.writer.DcatWriter = gs.Object.create(gs.writer.JsonWriter,{
 
     writeEntry: {writable:true,value:function(task,results,item,options) {
@@ -30,13 +45,14 @@
         identifier: json.id,
         title: json.title || '<unknown>',
         description: json.description || '<unknown>',
-        modified: json.updated || json.published || new Date().toISOString(),
+        modified: formatDate(json.updated, json.published) || new Date().toISOString(),
         
         "@type": "dcat:Dataset",
         "license": DCAT_DEFAULTS.license,
         "accessLevel": DCAT_DEFAULTS.accessLevel,
         "bureauCode": DCAT_DEFAULTS.bureauCode,
-        "programCode": DCAT_DEFAULTS.programCode
+        "programCode": DCAT_DEFAULTS.programCode,
+        "publisher": DCAT_DEFAULTS.publisher
       }
       results.push(dcat);
     }},
