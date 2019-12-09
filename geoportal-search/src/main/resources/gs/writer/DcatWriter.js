@@ -98,6 +98,17 @@
         }
       }
       
+      if (src.envelope_geo && src.envelope_geo.length>0) {
+        var env = src.envelope_geo[0]
+        if (env.coordinates && env.coordinates.length==2) {
+          var lowerLeft = env.coordinates[0]
+          var upperRight = env.coordinates[1]
+          if (lowerLeft && lowerLeft.length==2 && upperRight && upperRight.length==2) {
+            dcat.spatial = [lowerLeft.map(function(coord){ return ""+coord }).join(","), upperRight.map(function(coord){ return ""+coord }).join(",")].join(",")
+          }
+        }
+      }
+      
       results.push(dcat);
     }},
 
