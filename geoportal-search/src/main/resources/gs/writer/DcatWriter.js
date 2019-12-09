@@ -50,6 +50,7 @@
         description: json.description || '<unknown>',
         modified: selectFalidDate(json.updated, json.published) || new Date().toISOString(),
         keyword: src.keywords_s || DCAT_DEFAULTS.keyword,
+        distribution: [],
         
         "@type": "dcat:Dataset",
         "license": DCAT_DEFAULTS.license,
@@ -57,6 +58,24 @@
         "bureauCode": DCAT_DEFAULTS.bureauCode,
         "programCode": DCAT_DEFAULTS.programCode,
         "publisher": DCAT_DEFAULTS.publisher
+      }
+      
+      if (src.fileid) {
+        dcat.distribution.push({
+          "@type": "dcat:Distribution",
+          "downloadURL": src.fileid
+        })
+      }
+      
+      if (json.links) {
+        for (var li =0; li<json.links.length; li++) {
+          var link = json.links[li]
+          dcat.distribution.push({
+            "@type": "dcat:Distribution",
+            "mediaType": link.type,
+            "accessURL": link.href
+          })
+        }
       }
       
       results.push(dcat);
