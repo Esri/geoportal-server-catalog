@@ -244,7 +244,8 @@ define({
         json: "JSON result",
         csv:  "CSV result",
         csw:  "CSW result",
-        kml:  "KML result"
+        kml:  "KML result",
+        dcat: "DCAT result"
       }
     },
     
