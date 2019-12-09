@@ -77,7 +77,8 @@
       "writer/CsvWriter",
       "writer/ErosWriter",
       "writer/KmlWriter",
-      "writer/RssWriter"
+      "writer/RssWriter",
+      "writer/DcatWriter"
     ],
     nashorn: [
       "context/nashorn/NashornContext",
