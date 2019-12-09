@@ -24,6 +24,11 @@
       "@type": "org:Organization",
       name: "Your Publisher"
     },
+    contactPoint: {
+      "@type": "vcard:Contact",
+      fn: "Your contact point",
+      hasEmail: "mailto:email@your.org"
+    },
     keyword: ["metadata"]
   };
 
@@ -37,6 +42,17 @@
            validDates[0].toISOString(): null;
   }
   
+  function isHrefValid(href) {
+    var proto = ["http://", "https://", "ftp://", "ftps://"]
+    if (href) {
+      for (var i=0; i<proto.length; i++) {
+        if (href.startsWith(proto[i])) {
+          return true;
+        }
+      }
+    }
+    return false
+  }
   
   gs.writer.DcatWriter = gs.Object.create(gs.writer.JsonWriter,{
 
@@ -57,12 +73,14 @@
         "accessLevel": DCAT_DEFAULTS.accessLevel,
         "bureauCode": DCAT_DEFAULTS.bureauCode,
         "programCode": DCAT_DEFAULTS.programCode,
-        "publisher": DCAT_DEFAULTS.publisher
+        "publisher": DCAT_DEFAULTS.publisher,
+        "contactPoint": DCAT_DEFAULTS.contactPoint
       }
       
-      if (src.fileid) {
+      if (isHrefValid(src.fileid)) {
         dcat.distribution.push({
           "@type": "dcat:Distribution",
+          "mediaType": "application/octet-stream",
           "downloadURL": src.fileid
         })
       }
@@ -70,11 +88,13 @@
       if (json.links) {
         for (var li =0; li<json.links.length; li++) {
           var link = json.links[li]
-          dcat.distribution.push({
-            "@type": "dcat:Distribution",
-            "mediaType": link.type,
-            "accessURL": link.href
-          })
+          if (isHrefValid(link.href)) {
+            dcat.distribution.push({
+              "@type": "dcat:Distribution",
+              "mediaType": link.type || "application/octet-stream",
+              "accessURL": link.href
+            })
+          }
         }
       }
       
