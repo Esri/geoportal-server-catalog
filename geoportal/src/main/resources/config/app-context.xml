@@ -13,6 +13,10 @@
 	<beans:import resource="app-security.xml" />
 	<beans:import resource="app-factory.xml" />
 
+  <beans:bean id="dcatInit" class="com.esri.geoportal.dcat.Controller" init-method="init" destroy-method="destroy" >
+    
+  </beans:bean>
+  
 	<beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
 		<beans:property name="elasticContext" ref="elasticContext" />
 		<beans:property name="harvesterContext" ref="harvesterContext" />
