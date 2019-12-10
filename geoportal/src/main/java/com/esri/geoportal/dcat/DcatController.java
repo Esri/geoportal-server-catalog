@@ -17,17 +17,22 @@ package com.esri.geoportal.dcat;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class Controller {
+public class DcatController {
   
   /** Logger. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(Controller.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(DcatController.class);
   
+  private String runAt;
+
+  public void setRunAt(String runAt) {
+    this.runAt = runAt;
+  }
 
   public void init() {
-    LOGGER.info("Initializeing DCAT...");
+    LOGGER.info(String.format("Initializing DCAT controller to run at %s", runAt));
   }
   
   public void destroy() {
-    LOGGER.info("Destroying DCAT...");
+    LOGGER.info("Destroying DCAT conroller");
   }
 }
