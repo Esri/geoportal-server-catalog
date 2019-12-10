@@ -14,7 +14,7 @@
 	<beans:import resource="app-factory.xml" />
 
   <beans:bean id="dcatInit" class="com.esri.geoportal.dcat.DcatController" init-method="init" destroy-method="destroy" >
-    <beans:property name="runAt" value="04:00"/>
+    <beans:constructor-arg value="09:22"/>
   </beans:bean>
   
 	<beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
