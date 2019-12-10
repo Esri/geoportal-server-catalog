@@ -14,65 +14,108 @@
  */
 package com.esri.geoportal.dcat;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZonedDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.concurrent.TimeUnit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DcatController {
-  
-  /** Logger */
+
+  /**
+   * Logger
+   */
   private static final Logger LOGGER = LoggerFactory.getLogger(DcatController.class);
-  /** Scheduled execution service */
+  /**
+   * Scheduled execution service
+   */
   private static final ScheduledExecutorService executorService = Executors.newScheduledThreadPool(1);
-  /** run at property */
+  /**
+   * run at property
+   */
   private String runAt;
 
-  public void setRunAt(String runAt) {
+  public DcatController(String runAt) {
     this.runAt = runAt;
   }
-
+  
   public void init() {
-    LOGGER.info(String.format("Initializing DCAT controller to run at %s", runAt));
+    LOGGER.info(String.format("DCAT cache build task to run at %s.", runAt));
     try {
-      HoursMinutes hm = HoursMinutes.parse(runAt);
+      final HoursMinutes hm = HoursMinutes.parse(runAt);
+      startExecutionAt(hm);
     } catch (IllegalArgumentException ex) {
-      LOGGER.error(String.format("Initialization of DCAT controller to run at %s failed", runAt), ex);
+      LOGGER.error(String.format("DCAT cache build task to run at %s failed.", runAt), ex);
     }
   }
-  
+
   public void destroy() {
-    LOGGER.info("Destroying DCAT conroller");
-    executorService.shutdown();
+    LOGGER.info("DCAT cache build process stopped.");
+    executorService.shutdownNow();
   }
-  
+
+  public void startExecutionAt(HoursMinutes hm) {
+    Runnable taskWrapper = new Runnable() {
+      @Override
+      public void run() {
+        LOGGER.info("DCAT cache build started...");
+        startExecutionAt(hm);
+      }
+    };
+    
+    long delay = hm.tillNextRun().getSeconds();
+    executorService.schedule(taskWrapper, delay, TimeUnit.SECONDS);
+    LOGGER.info(String.format("DCAT cache build task scheduled to run in %d seconds", delay));
+  }
+
   private static final class HoursMinutes {
-    public final int hours;
-    public final int minutes;
-    
+
+    public final int targetHour;
+    public final int targetMin;
+
     public HoursMinutes(int hours, int minutes) {
-      this.hours = hours;
-      this.minutes = minutes;
+      this.targetHour = hours;
+      this.targetMin = minutes;
     }
-    
+
+    public Duration tillNextRun() {
+      LocalDateTime localNow = LocalDateTime.now();
+      ZoneId currentZone = ZoneId.systemDefault();
+      ZonedDateTime zonedNow = ZonedDateTime.of(localNow, currentZone);
+
+      ZonedDateTime zonedNextTarget = zonedNow.withHour(targetHour).withMinute(targetMin).withSecond(0);
+      if (zonedNow.compareTo(zonedNextTarget) >= 0) {
+        zonedNextTarget = zonedNextTarget.plusDays(1);
+      }
+
+      Duration duration = Duration.between(zonedNow, zonedNextTarget);
+      return duration;
+    }
+
     public static HoursMinutes parse(String strHM) {
-      if (strHM == null) 
+      if (strHM == null) {
         throw new IllegalArgumentException(String.format("Null hours:minutes"));
-      
-      String [] hm = strHM.split(":");
-      if (hm==null || hm.length!=2)
+      }
+
+      String[] hm = strHM.split(":");
+      if (hm == null || hm.length != 2) {
         throw new IllegalArgumentException(String.format("Invalid hours:minutes (%s)", strHM));
-      
+      }
+
       try {
         return new HoursMinutes(Integer.parseInt(hm[0]), Integer.parseInt(hm[1]));
       } catch (NumberFormatException ex) {
         throw new IllegalArgumentException(String.format("Invalid hours:minutes (%s)", strHM), ex);
       }
     }
-    
+
     @Override
     public String toString() {
-      return String.format("%d:%d", hours, minutes);
+      return String.format("%d:%d", targetHour, targetMin);
     }
   }
 }
