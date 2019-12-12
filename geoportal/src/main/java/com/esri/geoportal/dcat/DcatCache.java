@@ -44,8 +44,16 @@ public class DcatCache {
     this.root = new File(StringUtils.defaultIfBlank(rootDir, getDefaultDCATPath()));
   }
   
+  /**
+   * Initialize cache.
+   */
   public void init() {
     root.mkdirs();
+  }
+  
+  public boolean hasCache() {
+    File latestCache = getLastCacheFile();
+    return latestCache!=null;
   }
   
   /**
@@ -54,8 +62,7 @@ public class DcatCache {
    * @throws FileNotFoundException if cache data file not found
    */
   public InputStream createInputCacheStream() throws FileNotFoundException {
-    File [] cacheFiles = listCacheFiles();
-    File latestCache = findLatest(cacheFiles);
+    File latestCache = getLastCacheFile();
     if (latestCache==null) {
       throw new FileNotFoundException("No recent cache found.");
     }
@@ -70,6 +77,16 @@ public class DcatCache {
   public OutputStream createOutputCacheStream() throws FileNotFoundException {
     File file = new File(root,"cache-"+SDF.format(new Date())+".temp");
     return new CacheOutputStream(file);
+  }
+  
+  /**
+   * Gets last cache file.
+   * @return last cache file or <code>null</code> if not found
+   */
+  private File getLastCacheFile() {
+    File [] cacheFiles = listCacheFiles();
+    File latestCache = findLatest(cacheFiles);
+    return latestCache;
   }
   
   /**

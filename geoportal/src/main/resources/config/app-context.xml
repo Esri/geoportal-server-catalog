@@ -18,7 +18,7 @@
   </beans:bean>
   
   <beans:bean id="dcatInit" class="com.esri.geoportal.dcat.DcatController" init-method="init" destroy-method="destroy" >
-    <beans:constructor-arg value="09:22"/>
+    <beans:constructor-arg value="03:00"/>
     <beans:constructor-arg ref="dcatCache"/>
   </beans:bean>
   
