@@ -44,6 +44,8 @@ public class DcatController {
    * DCAT cache
    */
   private DcatCache dcatCache;
+  
+  private volatile boolean running;
 
   public DcatController(String runAt, DcatCache dcatCache) {
     this.runAt = runAt;
@@ -69,12 +71,7 @@ public class DcatController {
     Runnable taskWrapper = new Runnable() {
       @Override
       public void run() {
-        LOGGER.info("DCAT cache build started...");
-        try (OutputStream dcatCacheOut = dcatCache.createOutputCacheStream()) {
-          // TODO generate cache
-        } catch (IOException ex) {
-          LOGGER.error(String.format("DCAT error creating cache."), ex);
-        }
+        generateDcat();
         startExecutionAt(hm);
       }
     };
@@ -82,6 +79,19 @@ public class DcatController {
     long delay = hm.tillNextRun().getSeconds();
     executorService.schedule(taskWrapper, delay, TimeUnit.SECONDS);
     LOGGER.info(String.format("DCAT cache build task scheduled to run in %d seconds", delay));
+  }
+  
+  public void generateDcat() {
+    if (!running) {
+      running = true;
+      LOGGER.info("DCAT cache build started...");
+      try (OutputStream dcatCacheOut = dcatCache.createOutputCacheStream()) {
+        // TODO generate cache
+      } catch (IOException ex) {
+        LOGGER.error(String.format("DCAT error creating cache."), ex);
+      }
+      running = false;
+    }
   }
 
   private static final class HoursMinutes {
