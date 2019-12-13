@@ -42,6 +42,9 @@ public class DcatStreamingService {
   @Autowired
   private DcatCache dcatCache;
   
+  @Autowired
+  private DcatController dcatController;
+  
   @RequestMapping(path = "/dcat.json", produces = "application/json", method = RequestMethod.GET)
   public ResponseEntity<Void> dcat(HttpServletResponse response) {
     try (OutputStream outStream = response.getOutputStream(); OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8")) {
@@ -52,6 +55,7 @@ public class DcatStreamingService {
         }
       } else {
         writer.write(EMPTY_DCAT_RESPONSE);
+        dcatController.generateDcat();
       }
       writer.flush();
       return lastModified!=null? 

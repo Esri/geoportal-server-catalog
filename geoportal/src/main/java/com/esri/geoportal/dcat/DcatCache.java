@@ -18,10 +18,7 @@ package com.esri.geoportal.dcat;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.regex.Pattern;
@@ -32,6 +29,7 @@ import org.apache.commons.lang3.StringUtils;
  */
 public class DcatCache {
   private static final Pattern CACHE_NAME_PATTERN = Pattern.compile("cache[^.]*\\.dcat",Pattern.CASE_INSENSITIVE);
+  private static final Pattern TEMP_NAME_PATTERN = Pattern.compile("cache[^.]*\\.temp",Pattern.CASE_INSENSITIVE);
   private static final SimpleDateFormat SDF = new SimpleDateFormat("yyyy-MM-dd hh-mm");
   
   private final File root;
@@ -74,9 +72,16 @@ public class DcatCache {
    * @return output stream
    * @throws FileNotFoundException if can not create stream
    */
-  public OutputStream createOutputCacheStream() throws FileNotFoundException {
+  public DcatCacheOutputStream createOutputCacheStream() throws FileNotFoundException {
     File file = new File(root,"cache-"+SDF.format(new Date())+".temp");
-    return new CacheOutputStream(file);
+    return new DcatCacheOutputStream(file);
+  }
+  
+  public void purgeOutdatedFiles() {
+    File[] cacheFiles = listCacheFiles();
+    purgeOutdatedFiles(cacheFiles, findLatest(cacheFiles));
+    File[] tempFiles = listTempFiles();
+    purgeOutdatedFiles(tempFiles, null);
   }
   
   /**
@@ -95,6 +100,14 @@ public class DcatCache {
    */
   private File[] listCacheFiles() {
     return root.listFiles((File dir, String name) -> CACHE_NAME_PATTERN.matcher(name).matches());
+  }
+  
+  /**
+   * Lists all cache files.
+   * @return array of cache files
+   */
+  private File[] listTempFiles() {
+    return root.listFiles((File dir, String name) -> TEMP_NAME_PATTERN.matcher(name).matches());
   }
   
   /**
@@ -136,39 +149,4 @@ public class DcatCache {
     return new File(home, "dcat/cache").getAbsolutePath();
   }
   
-  /**
-   * Cache output stream
-   */
-  private class CacheOutputStream extends OutputStream {
-    
-    private final File file;
-    private final FileOutputStream fileOutputStream;
-    
-    /**
-     * Creates instance of the stream.
-     * @param file file representing the stream
-     * @throws FileNotFoundException if creating stream fails
-     */
-    public CacheOutputStream(File file) throws FileNotFoundException {
-      this.file = file;
-      this.file.getParentFile().mkdirs();
-      this.fileOutputStream = new FileOutputStream(file);
-    }
-
-    @Override
-    public void write(int b) throws IOException {
-      fileOutputStream.write(b);
-    }
-
-    @Override
-    public void close() throws IOException {
-      fileOutputStream.close();
-      String name = file.getName();
-      name = name.replaceAll("\\.[^.]+$", ".dcat");
-      file.renameTo(new File(file.getParentFile(), name));
-      File[] files = listCacheFiles();
-      purgeOutdatedFiles(files, findLatest(files));
-    }
-    
-  }
 }

@@ -43,13 +43,15 @@ public class DcatController {
   /**
    * DCAT cache
    */
-  private DcatCache dcatCache;
+  private final DcatCache dcatCache;
+  private final DcatBuilder dcatBuilder;
   
   private volatile boolean running;
 
-  public DcatController(String runAt, DcatCache dcatCache) {
+  public DcatController(String runAt, DcatCache dcatCache, DcatBuilder dcatBuilder) {
     this.runAt = runAt;
     this.dcatCache = dcatCache;
+    this.dcatBuilder = dcatBuilder;
   }
   
   public void init() {
@@ -67,7 +69,7 @@ public class DcatController {
     executorService.shutdownNow();
   }
 
-  public void startExecutionAt(HoursMinutes hm) {
+  private void startExecutionAt(HoursMinutes hm) {
     Runnable taskWrapper = new Runnable() {
       @Override
       public void run() {
@@ -85,10 +87,27 @@ public class DcatController {
     if (!running) {
       running = true;
       LOGGER.info("DCAT cache build started...");
-      try (OutputStream dcatCacheOut = dcatCache.createOutputCacheStream()) {
+      
+      DcatCacheOutputStream dcatCacheOut = null;
+      try {
+        dcatCacheOut = dcatCache.createOutputCacheStream();
         // TODO generate cache
-      } catch (IOException ex) {
+        dcatBuilder.execute();
+        dcatCacheOut.abort();
+      } catch (Exception ex) {
         LOGGER.error(String.format("DCAT error creating cache."), ex);
+        if (dcatCacheOut!=null) {
+          dcatCacheOut.abort();
+        }
+      } finally {
+        try {
+          if (dcatCacheOut!=null) {
+            dcatCacheOut.close();
+          }
+          dcatCache.purgeOutdatedFiles();
+        } catch(IOException ex) {
+          LOGGER.error(String.format("DCAT error creating cache."), ex);
+        }
       }
       running = false;
     }
