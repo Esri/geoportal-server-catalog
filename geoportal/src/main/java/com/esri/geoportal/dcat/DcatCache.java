@@ -51,9 +51,9 @@ public class DcatCache {
     root.mkdirs();
   }
   
-  public boolean hasCache() {
+  public Date getLastModified() {
     File latestCache = getLastCacheFile();
-    return latestCache!=null;
+    return latestCache!=null? new Date(latestCache.lastModified()): null;
   }
   
   /**

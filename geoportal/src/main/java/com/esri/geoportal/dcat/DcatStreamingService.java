@@ -18,6 +18,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.io.OutputStreamWriter;
+import java.util.Date;
 import javax.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +45,8 @@ public class DcatStreamingService {
   @RequestMapping(path = "/dcat.json", produces = "application/json", method = RequestMethod.GET)
   public ResponseEntity<Void> dcat(HttpServletResponse response) {
     try (OutputStream outStream = response.getOutputStream(); OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8")) {
-      if (dcatCache.hasCache()) {
+      Date lastModified = dcatCache.getLastModified();
+      if (lastModified!=null) {
         try (InputStream intput = dcatCache.createInputCacheStream()) {
           IOUtils.copy(intput, writer, "UTF-8");
         }
@@ -52,7 +54,9 @@ public class DcatStreamingService {
         writer.write(EMPTY_DCAT_RESPONSE);
       }
       writer.flush();
-      return ResponseEntity.ok().build();
+      return lastModified!=null? 
+              ResponseEntity.ok().lastModified(lastModified.getTime()).build(): 
+              ResponseEntity.ok().build();
     } catch (IOException ex) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
