@@ -52,7 +52,7 @@ public class DcatBuilder {
   
   public void execute() {
     try {
-      String sRequestInfo = "{ \"parameterMap\": { \"f\": \"json\" } }";
+      String sRequestInfo = "{ \"parameterMap\": { \"f\": \"json\", \"sortField\": \"id\", \"sortOrder\": \"asc\" } }";
       ScriptEngine engine = getCachedEngine(javascriptFile);
       Invocable invocable = (Invocable)engine;
       invocable.invokeFunction("execute",this,sRequestInfo,"");
