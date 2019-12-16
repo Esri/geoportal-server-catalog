@@ -190,6 +190,11 @@
         targetRequest.searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
         //console.log("targetRequest.searchCriteria="+(JSON.stringify(targetRequest.searchCriteria)));
       }
+      
+      if (task.request.parameterMap.search_after) {
+        targetRequest.searchCriteria["search_after"] = [task.request.parameterMap.search_after]
+      }
+      
       promise.resolve(targetRequest);
       return promise;
     }},
