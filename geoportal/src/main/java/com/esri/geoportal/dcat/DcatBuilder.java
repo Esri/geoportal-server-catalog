@@ -15,12 +15,8 @@
 package com.esri.geoportal.dcat;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ArrayNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -34,7 +30,6 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObjectBuilder;
-import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -118,7 +113,7 @@ public class DcatBuilder {
         elastic.add("password",password);
       }
     } catch (Throwable t) {
-      t.printStackTrace();
+      LOGGER.warn(String.format("Warning getting self info."), t);
     }
     try {
       JsonObjectBuilder access = Json.createObjectBuilder();
@@ -141,7 +136,7 @@ public class DcatBuilder {
       }
       elastic.add("access",access);
     } catch (Throwable t) {
-      t.printStackTrace();
+      LOGGER.warn(String.format("Warning getting self info."), t);
     }
     if ((node != null) && (node.length() > 0)) {
       String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
