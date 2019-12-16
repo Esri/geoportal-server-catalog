@@ -73,6 +73,7 @@ public abstract class DcatRequest {
   }
   
   public abstract void onRec(String rec);
+  public abstract void onEnd();
   
   private void search(String searchAfter) throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
     ObjectNode requestInfo = MAPPER.createObjectNode();
@@ -124,6 +125,8 @@ public abstract class DcatRequest {
     if (lastIdentifier!=null) {
       LOGGER.info(lastIdentifier);
       // TODO continue with next page
+    } else {
+      onEnd();
     }
   }
   
