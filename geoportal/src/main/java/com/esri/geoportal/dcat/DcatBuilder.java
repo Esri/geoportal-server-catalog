@@ -68,73 +68,16 @@ public class DcatBuilder {
   }
   
   public void execute() {
-    search("000033225bed4edeb6b1ea4b6e1a5ee2");
-  }
-  
-  public void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
-    LOGGER.trace(String.format("Entity: %s", entity));
     try {
-      JsonNode data = MAPPER.readTree(entity);
-      processData(data);
-    } catch(IOException ex) {
-      LOGGER.error(String.format("Error parsing entity: %s", entity), ex);
-    }
-  }
-  
-  private void search(String searchAfter) {
-    try {
-      ObjectNode requestInfo = MAPPER.createObjectNode();
-      ObjectNode parameterMap = MAPPER.createObjectNode();
-      requestInfo.set("parameterMap", parameterMap);
-      parameterMap.put("f", "dcat");
-      
-      ArrayNode sortNode = MAPPER.createArrayNode();
-      sortNode.add("_id:asc");
-      parameterMap.set("sortBy", sortNode);
-      
-      if (searchAfter!=null) {
-        parameterMap.put("search_after", searchAfter);
-      }
-      
-      String sRequestInfo = MAPPER.writeValueAsString(requestInfo);
-      String sSelfInfo = null;
-      JsonObjectBuilder selfInfo = this.getSelfInfo();
-      if (selfInfo != null) {
-        sSelfInfo = selfInfo.build().toString();
-      }
-      
-      ScriptEngine engine = getCachedEngine(javascriptFile);
-      Invocable invocable = (Invocable)engine;
-      invocable.invokeFunction("execute",this,sRequestInfo,sSelfInfo);
-    } catch(Exception ex) {
-      LOGGER.error("Error building DCAT", ex);
-    }
-  }
-  
-  private void processData(JsonNode data) {
-    String lastIdentifier = null;
-    
-    if (data.isObject()) {
-      JsonNode dataset = data.get("dataset");
-      if (dataset!=null && dataset.isArray()) {
-        for (JsonNode rec: dataset) {
-          JsonNode identifier = rec.get("identifier");
-          if (identifier!=null && identifier.isTextual()) {
-            lastIdentifier = identifier.asText();
-          }
-          
-          try {
-            String sRec = MAPPER.writeValueAsString(rec);
-            // handle single rec
-          } catch(JsonProcessingException ex) {
-            LOGGER.debug(String.format("Error writing node: %s", rec), ex);
-          }
+      DcatRequest request = new DcatRequest(getSelfInfo(), getCachedEngine(javascriptFile)) {
+        @Override
+        public void onRec(String rec) {
+          // TODO process request
         }
-      }
-    }
-    
-    if (lastIdentifier!=null) {
-      LOGGER.info(lastIdentifier);
+      };
+      request.execute();
+    } catch(Exception ex) {
+      LOGGER.error(String.format("Error generating DCAT."), ex);
     }
   }
   
