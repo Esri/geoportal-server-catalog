@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -63,16 +64,42 @@ public class DcatBuilder {
   }
   
   public void execute() {
+    DcatCacheOutputStream outputStream = null;
+    
     try {
       DcatRequest request = new DcatRequest(getSelfInfo(), getCachedEngine(javascriptFile)) {
+        private boolean open;
+        
         @Override
         public void onRec(String rec) {
-          // TODO process request
+          if (!open) {
+            // TODO open stream and write header
+            
+            open = true;
+          }
+          
+        }
+
+        @Override
+        public void onEnd() {
+          // TODO write final characters
+          
+          if (outputStream!=null) {
+            try {
+              outputStream.close();
+            } catch (IOException ex) {
+              LOGGER.warn(String.format("Error closing DCAT stream."), ex);
+            }
+          }
         }
       };
+      
       request.execute();
     } catch(Exception ex) {
       LOGGER.error(String.format("Error generating DCAT."), ex);
+      if (outputStream!=null) {
+        outputStream.abort();
+      }
     }
   }
   
