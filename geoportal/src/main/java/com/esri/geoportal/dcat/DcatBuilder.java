@@ -78,7 +78,7 @@ public class DcatBuilder {
         private boolean open;
         
         @Override
-        public void onRec(String rec) {
+        public void onRec(DcatHeader header, String rec) {
           if (!open) {
             // TODO open stream and write header
             
