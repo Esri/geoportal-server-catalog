@@ -90,9 +90,10 @@ public abstract class DcatRequest {
   
   /**
    * Callback for a single records.
+   * @param header response header
    * @param rec record
    */
-  public abstract void onRec(String rec);
+  public abstract void onRec(DcatHeader header, String rec);
   
   /**
    * Callback for an end of processing.
@@ -129,6 +130,7 @@ public abstract class DcatRequest {
     String lastIdentifier = null;
     
     if (data.isObject()) {
+      DcatHeaderExt header = MAPPER.convertValue(data, DcatHeaderExt.class);
       JsonNode dataset = data.get("dataset");
       if (dataset!=null && dataset.isArray()) {
         for (JsonNode rec: dataset) {
@@ -139,7 +141,7 @@ public abstract class DcatRequest {
           
           try {
             String sRec = MAPPER.writeValueAsString(rec);
-            onRec(sRec);
+            onRec(header, sRec);
           } catch(JsonProcessingException ex) {
             LOGGER.debug(String.format("Error writing node: %s", rec), ex);
           }
@@ -153,6 +155,15 @@ public abstract class DcatRequest {
     } else {
       onEnd();
     }
+  }
+  
+  private static class DcatHeaderExt extends DcatHeader {
+
+    public Integer start;
+    public Integer num;
+    public Integer total;
+    public Integer nextStart;
+
   }
   
 }
