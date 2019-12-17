@@ -61,4 +61,9 @@ public class DcatCacheOutputStream extends OutputStream {
     }
   }
   
+  public void close(boolean abort) throws IOException  {
+    if (abort) abort();
+    close();
+  }
+  
 }

@@ -18,6 +18,7 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -91,13 +92,7 @@ public class DcatBuilder {
         public void onEnd() {
           // TODO write final characters
           
-          if (outputStream!=null) {
-            try {
-              outputStream.close();
-            } catch (IOException ex) {
-              LOGGER.warn(String.format("Error closing DCAT stream."), ex);
-            }
-          }
+          safeClose(outputStream, false);
           
           LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
         }
@@ -108,8 +103,16 @@ public class DcatBuilder {
       
     } catch(Exception ex) {
       LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      if (outputStream!=null) {
-        outputStream.abort();
+      safeClose(outputStream, true);
+    }
+  }
+  
+  private void safeClose(DcatCacheOutputStream outputStream, boolean abort) {
+    if (outputStream!=null) {
+      try {
+        outputStream.close(abort);
+      } catch (IOException ex) {
+        LOGGER.warn(String.format("Error closing DCAT stream."), ex);
       }
     }
   }
