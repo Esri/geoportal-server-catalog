@@ -23,7 +23,6 @@ import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
 import java.util.Map;
-import javax.json.JsonObjectBuilder;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptException;
@@ -47,7 +46,7 @@ public abstract class DcatRequest {
     MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
   }
   
-  private final JsonObjectBuilder selfInfo;
+  private final String selfInfo;
   private final ScriptEngine engine;
 
   /**
@@ -55,7 +54,7 @@ public abstract class DcatRequest {
    * @param selfInfo self info
    * @param engine engine
    */
-  public DcatRequest(JsonObjectBuilder selfInfo, ScriptEngine engine) {
+  public DcatRequest(String selfInfo, ScriptEngine engine) {
     this.selfInfo = selfInfo;
     this.engine = engine;
   }
@@ -118,14 +117,9 @@ public abstract class DcatRequest {
     }
 
     String sRequestInfo = MAPPER.writeValueAsString(requestInfo);
-    String sSelfInfo = null;
-
-    if (selfInfo != null) {
-      sSelfInfo = selfInfo.build().toString();
-    }
 
     Invocable invocable = (Invocable)engine;
-    invocable.invokeFunction("execute",this,sRequestInfo,sSelfInfo);
+    invocable.invokeFunction("execute",this,sRequestInfo,selfInfo);
   }
   
   private void processData(JsonNode data) throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
@@ -154,8 +148,8 @@ public abstract class DcatRequest {
     }
     
     if (lastIdentifier!=null) {
-      LOGGER.info(lastIdentifier);
-//      search(lastIdentifier);
+      System.out.println(String.format("Last identifier: %s", lastIdentifier));
+      search(lastIdentifier);
     } else {
       onEnd();
     }
