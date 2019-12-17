@@ -126,13 +126,13 @@ public class DcatBuilder {
         ScriptEngineManager engineManager = new ScriptEngineManager();
         engine = engineManager.getEngineByName("nashorn");
         engine.eval(script);
-        ENGINES.put(javascriptFile,engine);
+//        ENGINES.put(javascriptFile,engine);
       }
     }
     return engine;
   }
   
-  private JsonObjectBuilder getSelfInfo() {
+  private String getSelfInfo() {
     JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
     String node = null;
@@ -182,7 +182,7 @@ public class DcatBuilder {
       String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
       elastic.add("searchUrl",url);
       info.add("elastic",elastic);
-      return info;
+      return info.build().toString();
     }
     return null;
   }
