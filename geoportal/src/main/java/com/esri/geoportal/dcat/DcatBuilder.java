@@ -126,7 +126,7 @@ public class DcatBuilder {
         ScriptEngineManager engineManager = new ScriptEngineManager();
         engine = engineManager.getEngineByName("nashorn");
         engine.eval(script);
-//        ENGINES.put(javascriptFile,engine);
+        ENGINES.put(javascriptFile,engine);
       }
     }
     return engine;
