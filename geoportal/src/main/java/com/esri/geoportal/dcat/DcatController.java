@@ -92,7 +92,7 @@ public class DcatController {
       try {
         dcatCacheOut = dcatCache.createOutputCacheStream();
         // TODO generate cache
-        dcatBuilder.execute();
+        dcatBuilder.build();
         dcatCacheOut.abort();
       } catch (Exception ex) {
         LOGGER.error(String.format("DCAT error creating cache."), ex);

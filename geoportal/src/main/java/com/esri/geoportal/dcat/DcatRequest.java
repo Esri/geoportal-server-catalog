@@ -22,8 +22,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.node.ArrayNode;
 import com.fasterxml.jackson.databind.node.ObjectNode;
 import java.io.IOException;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Map;
 import javax.json.JsonObjectBuilder;
 import javax.script.Invocable;
@@ -40,11 +38,10 @@ public abstract class DcatRequest {
    * Logger
    */
   private static final Logger LOGGER = LoggerFactory.getLogger(DcatRequest.class);
+  private static final int PAGE_SIZE = 100;
   
-  /** The script engines. */
-  private static final Map<String,ScriptEngine> ENGINES = Collections.synchronizedMap(new HashMap<String,ScriptEngine>());
+  /** JSON processing. */
   private static final ObjectMapper MAPPER = new ObjectMapper();
-  
   static {
     MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -53,11 +50,23 @@ public abstract class DcatRequest {
   private final JsonObjectBuilder selfInfo;
   private final ScriptEngine engine;
 
+  /**
+   * Creates instance of the request.
+   * @param selfInfo self info
+   * @param engine engine
+   */
   public DcatRequest(JsonObjectBuilder selfInfo, ScriptEngine engine) {
     this.selfInfo = selfInfo;
     this.engine = engine;
   }
   
+  /**
+   * Puts response.
+   * @param status status
+   * @param mediaType media type
+   * @param entity entity
+   * @param headers headers
+   */
   public void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
     LOGGER.trace(String.format("Entity: %s", entity));
     try {
@@ -68,11 +77,26 @@ public abstract class DcatRequest {
     }
   }
   
+  /**
+   * Executes request.
+   * @throws JsonProcessingException
+   * @throws NoSuchMethodException
+   * @throws NullPointerException
+   * @throws ScriptException 
+   */
   public void execute() throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
     search(null);
   }
   
+  /**
+   * Callback for a single records.
+   * @param rec record
+   */
   public abstract void onRec(String rec);
+  
+  /**
+   * Callback for an end of processing.
+   */
   public abstract void onEnd();
   
   private void search(String searchAfter) throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
@@ -80,6 +104,7 @@ public abstract class DcatRequest {
     ObjectNode parameterMap = MAPPER.createObjectNode();
     requestInfo.set("parameterMap", parameterMap);
     parameterMap.put("f", "dcat");
+    parameterMap.put("size", Integer.toString(PAGE_SIZE));
 
     ArrayNode sortNode = MAPPER.createArrayNode();
     sortNode.add("_id:asc");
