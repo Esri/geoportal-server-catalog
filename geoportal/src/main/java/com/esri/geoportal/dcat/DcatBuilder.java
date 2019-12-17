@@ -18,7 +18,6 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -48,8 +47,9 @@ public class DcatBuilder {
   
   /** The script engines. */
   private static final Map<String,ScriptEngine> ENGINES = Collections.synchronizedMap(new HashMap<String,ScriptEngine>());
-  private static final ObjectMapper MAPPER = new ObjectMapper();
   
+  /** JSON processing. */
+  private static final ObjectMapper MAPPER = new ObjectMapper();
   static {
     MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
     MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
@@ -59,11 +59,18 @@ public class DcatBuilder {
   private String javascriptFile = "gs/context/nashorn/execute.js";
   private final DcatCache dcatCache;
   
+  /**
+   * Creates instance of the builder.
+   * @param dcatCache DCAT cache
+   */
   public DcatBuilder(DcatCache dcatCache) {
     this.dcatCache = dcatCache;
   }
   
-  public void execute() {
+  /**
+   * Builds DCAT aggregated file.
+   */
+  public void build() {
     DcatCacheOutputStream outputStream = null;
     
     try {
@@ -91,12 +98,16 @@ public class DcatBuilder {
               LOGGER.warn(String.format("Error closing DCAT stream."), ex);
             }
           }
+          
+          LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
         }
       };
       
+      LOGGER.info(String.format("Starting building aggregated DCAT file..."));
       request.execute();
+      
     } catch(Exception ex) {
-      LOGGER.error(String.format("Error generating DCAT."), ex);
+      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
       if (outputStream!=null) {
         outputStream.abort();
       }
