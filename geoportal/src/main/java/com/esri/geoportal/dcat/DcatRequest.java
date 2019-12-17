@@ -71,8 +71,10 @@ public abstract class DcatRequest {
     LOGGER.trace(String.format("Entity: %s", entity));
     try {
       JsonNode data = MAPPER.readTree(entity);
+      if (data==null || !data.isObject())
+        throw new IOException(String.format("Response is not valid DCAT response."));
       processData(data);
-    } catch(IOException ex) {
+    } catch(Exception ex) {
       LOGGER.error(String.format("Error parsing entity: %s", entity), ex);
     }
   }
@@ -126,32 +128,34 @@ public abstract class DcatRequest {
     invocable.invokeFunction("execute",this,sRequestInfo,sSelfInfo);
   }
   
-  private void processData(JsonNode data) {
+  private void processData(JsonNode data) throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
     String lastIdentifier = null;
     
-    if (data.isObject()) {
-      DcatHeaderExt header = MAPPER.convertValue(data, DcatHeaderExt.class);
-      JsonNode dataset = data.get("dataset");
-      if (dataset!=null && dataset.isArray()) {
-        for (JsonNode rec: dataset) {
-          JsonNode identifier = rec.get("identifier");
-          if (identifier!=null && identifier.isTextual()) {
-            lastIdentifier = identifier.asText();
-          }
-          
-          try {
-            String sRec = MAPPER.writeValueAsString(rec);
-            onRec(header, sRec);
-          } catch(JsonProcessingException ex) {
-            LOGGER.debug(String.format("Error writing node: %s", rec), ex);
-          }
-        }
+    DcatHeaderExt header = MAPPER.convertValue(data, DcatHeaderExt.class);
+    JsonNode dataset = data.get("dataset");
+    
+    if (dataset==null || !dataset.isArray() || dataset.size()==0) {
+      onEnd();
+      return;
+    }
+    
+    for (JsonNode rec: dataset) {
+      JsonNode identifier = rec.get("identifier");
+      if (identifier!=null && identifier.isTextual()) {
+        lastIdentifier = identifier.asText();
+      }
+
+      try {
+        String sRec = MAPPER.writeValueAsString(rec);
+        onRec(header, sRec);
+      } catch(JsonProcessingException ex) {
+        LOGGER.debug(String.format("Error writing node: %s", rec), ex);
       }
     }
     
     if (lastIdentifier!=null) {
       LOGGER.info(lastIdentifier);
-      // TODO continue with next page
+//      search(lastIdentifier);
     } else {
       onEnd();
     }
