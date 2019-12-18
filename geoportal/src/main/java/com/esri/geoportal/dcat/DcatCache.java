@@ -26,6 +26,8 @@ import org.apache.commons.lang3.StringUtils;
 
 /**
  * DCAT cache.
+ * 
+ * Provides general mechanism to maintain DCAT cache.
  */
 public class DcatCache {
   private static final Pattern CACHE_NAME_PATTERN = Pattern.compile("cache[^.]*\\.dcat",Pattern.CASE_INSENSITIVE);
@@ -49,6 +51,10 @@ public class DcatCache {
     root.mkdirs();
   }
   
+  /**
+   * Gets last modified date of the cache.
+   * @return date or <code>null</code> if cache doesn't exist
+   */
   public Date getLastModified() {
     File latestCache = getLastCacheFile();
     return latestCache!=null? new Date(latestCache.lastModified()): null;
@@ -77,6 +83,9 @@ public class DcatCache {
     return new DcatCacheOutputStream(file);
   }
   
+  /**
+   * Purges outdated files.
+   */
   public void purgeOutdatedFiles() {
     File[] cacheFiles = listCacheFiles();
     purgeOutdatedFiles(cacheFiles, findLatest(cacheFiles));

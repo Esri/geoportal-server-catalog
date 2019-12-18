@@ -22,6 +22,7 @@ import java.time.ZonedDateTime;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -48,18 +49,20 @@ public class DcatController {
   private volatile boolean running;
 
   public DcatController(String runAt, DcatCache dcatCache, DcatBuilder dcatBuilder) {
-    this.runAt = runAt;
+    this.runAt = StringUtils.trimToNull(runAt);
     this.dcatCache = dcatCache;
     this.dcatBuilder = dcatBuilder;
   }
   
   public void init() {
-    LOGGER.info(String.format("DCAT cache build task to run at %s.", runAt));
-    try {
-      final HoursMinutes hm = HoursMinutes.parse(runAt);
-      startExecutionAt(hm);
-    } catch (IllegalArgumentException ex) {
-      LOGGER.error(String.format("DCAT cache build task to run at %s failed.", runAt), ex);
+    if (runAt!=null) {
+      LOGGER.info(String.format("DCAT cache build task to run at %s.", runAt));
+      try {
+        final HoursMinutes hm = HoursMinutes.parse(runAt);
+        startExecutionAt(hm);
+      } catch (IllegalArgumentException ex) {
+        LOGGER.error(String.format("DCAT cache build task to run at %s failed.", runAt), ex);
+      }
     }
   }
 

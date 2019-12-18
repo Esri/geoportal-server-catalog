@@ -29,6 +29,8 @@ import org.slf4j.LoggerFactory;
 
 /**
  * DCAT build request.
+ * 
+ * Represents an abstract request used to build a DCAT cache.
  */
 public abstract class DcatRequest {
   /**
