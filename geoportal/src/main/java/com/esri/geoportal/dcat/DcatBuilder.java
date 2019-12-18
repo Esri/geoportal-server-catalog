@@ -39,7 +39,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * DCAT builder
+ * DCAT builder.
+ * 
+ * Provides uniform way for building aggregated DCAT file. It iterates through
+ * all records in the Elastic page by page, then combines it into a single file.
  */
 public class DcatBuilder {
   /**

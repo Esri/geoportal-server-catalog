@@ -21,7 +21,9 @@ import java.io.IOException;
 import java.io.OutputStream;
 
 /**
- * Cache output stream
+ * Cache output stream.
+ * 
+ * DCAT cache output stream. It maintains state between 'temporary' and 'permanent'.
  */
 public class DcatCacheOutputStream extends OutputStream {
 
