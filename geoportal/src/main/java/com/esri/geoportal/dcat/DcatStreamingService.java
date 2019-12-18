@@ -55,7 +55,7 @@ public class DcatStreamingService {
         }
       } else {
         writer.write(EMPTY_DCAT_RESPONSE);
-        dcatController.generateDcat();
+        generateDcat();
       }
       writer.flush();
       return lastModified!=null? 
@@ -64,5 +64,13 @@ public class DcatStreamingService {
     } catch (IOException ex) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
+  }
+  
+  private void generateDcat() {
+    Thread t = new Thread(() -> {
+      dcatController.generateDcat();
+    });
+    t.setDaemon(true);
+    t.start();
   }
 }
