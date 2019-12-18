@@ -47,17 +47,17 @@ public class DcatStreamingService {
   
   @RequestMapping(path = "/dcat.json", produces = "application/json", method = RequestMethod.GET)
   public ResponseEntity<Void> dcat(HttpServletResponse response) {
-    try (OutputStream outStream = response.getOutputStream(); OutputStreamWriter writer = new OutputStreamWriter(outStream, "UTF-8")) {
+    try (OutputStream outStream = response.getOutputStream()) {
       Date lastModified = dcatCache.getLastModified();
       if (lastModified!=null) {
         try (InputStream intput = dcatCache.createInputCacheStream()) {
-          IOUtils.copy(intput, writer, "UTF-8");
+          IOUtils.copy(intput, outStream);
         }
       } else {
-        writer.write(EMPTY_DCAT_RESPONSE);
+        outStream.write(EMPTY_DCAT_RESPONSE.getBytes("UTF-8"));
         generateDcat();
       }
-      writer.flush();
+      outStream.flush();
       return lastModified!=null? 
               ResponseEntity.ok().lastModified(lastModified.getTime()).build(): 
               ResponseEntity.ok().build();
