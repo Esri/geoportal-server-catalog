@@ -25,7 +25,7 @@ import java.io.OutputStream;
  * 
  * DCAT cache output stream. It maintains state between 'temporary' and 'permanent'.
  */
-public class DcatCacheOutputStream extends OutputStream {
+class DcatCacheOutputStream extends OutputStream {
 
   private final File file;
   private final FileOutputStream fileOutputStream;
