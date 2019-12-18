@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DcatStreamingService {
   private static final String EMPTY_DCAT_RESPONSE = "{\n" +
     "  \"conformsTo\": \"https://project-open-data.cio.gov/v1.1/schema\",\n" +
+    "  \"@note\": \"Started creating DCAT cache. Try again later.\",\n" +
     "  \"dataset\": [\n" +
     "  ]\n" +
     "}";
