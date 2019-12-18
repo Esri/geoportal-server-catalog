@@ -208,6 +208,7 @@ public class DcatBuilder {
     }
     
     public void close() {
+      writer.flush();
       if (outputStream!=null) {
         try {
           outputStream.close();
