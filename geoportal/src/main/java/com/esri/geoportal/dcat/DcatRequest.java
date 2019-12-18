@@ -149,7 +149,7 @@ public abstract class DcatRequest {
           lastIdentifier = identifier.asText();
         }
 
-        String sRec = MAPPER.writeValueAsString(rec);
+        String sRec = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(rec);
         onRec(header, sRec);
       }
 
