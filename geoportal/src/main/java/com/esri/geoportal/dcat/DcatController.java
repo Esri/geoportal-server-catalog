@@ -15,7 +15,6 @@
 package com.esri.geoportal.dcat;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -88,26 +87,11 @@ public class DcatController {
       running = true;
       LOGGER.info("DCAT cache build started...");
       
-      DcatCacheOutputStream dcatCacheOut = null;
       try {
-        dcatCacheOut = dcatCache.createOutputCacheStream();
-        // TODO generate cache
         dcatBuilder.build();
-        dcatCacheOut.abort();
+        dcatCache.purgeOutdatedFiles();
       } catch (Exception ex) {
         LOGGER.error(String.format("DCAT error creating cache."), ex);
-        if (dcatCacheOut!=null) {
-          dcatCacheOut.abort();
-        }
-      } finally {
-        try {
-          if (dcatCacheOut!=null) {
-            dcatCacheOut.close();
-          }
-          dcatCache.purgeOutdatedFiles();
-        } catch(IOException ex) {
-          LOGGER.error(String.format("DCAT error creating cache."), ex);
-        }
       }
       running = false;
     }

@@ -15,7 +15,6 @@
 package com.esri.geoportal.dcat;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -25,7 +24,6 @@ import java.io.IOException;
 import java.util.Map;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
-import javax.script.ScriptException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -66,7 +64,7 @@ public abstract class DcatRequest {
    * @param entity entity
    * @param headers headers
    */
-  public void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
+  public synchronized void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
     LOGGER.trace(String.format("Entity: %s", entity));
     try {
       JsonNode data = MAPPER.readTree(entity);
@@ -75,83 +73,95 @@ public abstract class DcatRequest {
       processData(data);
     } catch(Exception ex) {
       LOGGER.error(String.format("Error parsing entity: %s", entity), ex);
+      notifyAll();
     }
   }
   
   /**
    * Executes request.
-   * @throws JsonProcessingException
-   * @throws NoSuchMethodException
    * @throws NullPointerException
-   * @throws ScriptException 
    */
-  public void execute() throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
-    search(null);
+  public synchronized void execute() {
+    try {
+      search(null);
+    } catch (Exception ex) {
+      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
+      notifyAll();
+    }
   }
   
   /**
    * Callback for a single records.
    * @param header response header
    * @param rec record
+   * @throws java.io.IOException if writing record fails
    */
-  public abstract void onRec(DcatHeader header, String rec);
+  public abstract void onRec(DcatHeader header, String rec) throws IOException;
   
   /**
    * Callback for an end of processing.
+   * @throws java.io.IOException if ending file fails
    */
-  public abstract void onEnd();
+  public abstract void onEnd() throws IOException;
   
-  private void search(String searchAfter) throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
-    ObjectNode requestInfo = MAPPER.createObjectNode();
-    ObjectNode parameterMap = MAPPER.createObjectNode();
-    requestInfo.set("parameterMap", parameterMap);
-    parameterMap.put("f", "dcat");
-    parameterMap.put("size", Integer.toString(PAGE_SIZE));
-
-    ArrayNode sortNode = MAPPER.createArrayNode();
-    sortNode.add("_id:asc");
-    parameterMap.set("sortBy", sortNode);
-
-    if (searchAfter!=null) {
-      parameterMap.put("search_after", searchAfter);
+  private synchronized void search(String searchAfter) {
+    try {
+      ObjectNode requestInfo = MAPPER.createObjectNode();
+      ObjectNode parameterMap = MAPPER.createObjectNode();
+      requestInfo.set("parameterMap", parameterMap);
+      parameterMap.put("f", "dcat");
+      parameterMap.put("size", Integer.toString(PAGE_SIZE));
+      
+      ArrayNode sortNode = MAPPER.createArrayNode();
+      sortNode.add("_id:asc");
+      parameterMap.set("sortBy", sortNode);
+      
+      if (searchAfter!=null) {
+        parameterMap.put("search_after", searchAfter);
+      }
+      
+      String sRequestInfo = MAPPER.writeValueAsString(requestInfo);
+      
+      Invocable invocable = (Invocable)engine;
+      invocable.invokeFunction("execute",this,sRequestInfo,selfInfo);
+    } catch (Exception ex) {
+      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
+      notifyAll();
     }
-
-    String sRequestInfo = MAPPER.writeValueAsString(requestInfo);
-
-    Invocable invocable = (Invocable)engine;
-    invocable.invokeFunction("execute",this,sRequestInfo,selfInfo);
   }
   
-  private void processData(JsonNode data) throws JsonProcessingException, NoSuchMethodException, NullPointerException, ScriptException {
-    String lastIdentifier = null;
-    
-    DcatHeaderExt header = MAPPER.convertValue(data, DcatHeaderExt.class);
-    JsonNode dataset = data.get("dataset");
-    
-    if (dataset==null || !dataset.isArray() || dataset.size()==0) {
-      onEnd();
-      return;
-    }
-    
-    for (JsonNode rec: dataset) {
-      JsonNode identifier = rec.get("identifier");
-      if (identifier!=null && identifier.isTextual()) {
-        lastIdentifier = identifier.asText();
+  private synchronized void processData(JsonNode data) {
+    try {
+      String lastIdentifier = null;
+
+      DcatHeaderExt header = MAPPER.convertValue(data, DcatHeaderExt.class);
+      JsonNode dataset = data.get("dataset");
+
+      if (dataset==null || !dataset.isArray() || dataset.size()==0) {
+        onEnd();
+        notifyAll();
+        return;
       }
 
-      try {
+      for (JsonNode rec: dataset) {
+        JsonNode identifier = rec.get("identifier");
+        if (identifier!=null && identifier.isTextual()) {
+          lastIdentifier = identifier.asText();
+        }
+
         String sRec = MAPPER.writeValueAsString(rec);
         onRec(header, sRec);
-      } catch(JsonProcessingException ex) {
-        LOGGER.debug(String.format("Error writing node: %s", rec), ex);
       }
-    }
-    
-    if (lastIdentifier!=null) {
-      System.out.println(String.format("Last identifier: %s", lastIdentifier));
-      search(lastIdentifier);
-    } else {
-      onEnd();
+
+      if (lastIdentifier!=null) {
+        search(lastIdentifier);
+      } else {
+        onEnd();
+        notifyAll();
+      }
+    } catch (Exception ex) {
+      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
+      notifyAll();
     }
   }
   

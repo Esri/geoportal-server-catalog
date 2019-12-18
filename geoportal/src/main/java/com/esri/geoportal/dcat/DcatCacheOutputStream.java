@@ -27,7 +27,6 @@ public class DcatCacheOutputStream extends OutputStream {
 
   private final File file;
   private final FileOutputStream fileOutputStream;
-  private boolean aborted;
 
   /**
    * Creates instance of the stream.
@@ -45,25 +44,21 @@ public class DcatCacheOutputStream extends OutputStream {
     fileOutputStream.write(b);
   }
   
-  public void abort() {
-    aborted = true;
+  public void abort() throws IOException {
+    fileOutputStream.close();
+    
+    // delete temporary file
+    file.delete();
   }
 
   @Override
   public void close() throws IOException {
     fileOutputStream.close();
-    if (!aborted) {
-      String name = file.getName();
-      name = name.replaceAll("\\.[^.]+$", ".dcat");
-      file.renameTo(new File(file.getParentFile(), name));
-    } else {
-      file.delete();
-    }
-  }
-  
-  public void close(boolean abort) throws IOException  {
-    if (abort) abort();
-    close();
+    
+    // make temporary file permanent
+    String name = file.getName();
+    name = name.replaceAll("\\.[^.]+$", ".dcat");
+    file.renameTo(new File(file.getParentFile(), name));
   }
   
 }
