@@ -18,7 +18,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
-import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -71,49 +72,22 @@ public class DcatBuilder {
   /**
    * Builds DCAT aggregated file.
    */
-  public void build() {
-    DcatCacheOutputStream outputStream = null;
-    
+  public synchronized void build() {
     try {
-      DcatRequest request = new DcatRequest(getSelfInfo(), getCachedEngine(javascriptFile)) {
-        private boolean open;
-        
-        @Override
-        public void onRec(DcatHeader header, String rec) {
-          if (!open) {
-            // TODO open stream and write header
-            
-            open = true;
-          }
-          
-        }
-
-        @Override
-        public void onEnd() {
-          // TODO write final characters
-          
-          safeClose(outputStream, false);
-          
-          LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
-        }
-      };
-      
       LOGGER.info(String.format("Starting building aggregated DCAT file..."));
-      request.execute();
-      
+      execute(getSelfInfo(), getCachedEngine(javascriptFile));
     } catch(Exception ex) {
       LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      safeClose(outputStream, true);
     }
   }
   
-  private void safeClose(DcatCacheOutputStream outputStream, boolean abort) {
-    if (outputStream!=null) {
-      try {
-        outputStream.close(abort);
-      } catch (IOException ex) {
-        LOGGER.warn(String.format("Error closing DCAT stream."), ex);
-      }
+  private synchronized void execute(String selfInfo, ScriptEngine engine) {
+    try {
+      DcatRequestImpl request = new DcatRequestImpl(selfInfo, engine);
+      request.execute();
+      wait();
+    } catch(InterruptedException ex) {
+      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
     }
   }
   
@@ -190,4 +164,69 @@ public class DcatBuilder {
     return null;
   }
   
+  private class DcatRequestImpl extends DcatRequest {
+    private DcatCacheOutputStream outputStream = null;
+    private PrintWriter writer = null;
+    private boolean open;
+
+    public DcatRequestImpl(String selfInfo, ScriptEngine engine) {
+      super(selfInfo, engine);
+    }
+
+    @Override
+    public void onRec(DcatHeader header, String rec) throws IOException {
+      if (!open) {
+        prepareForWriting();
+        
+        writer.println("{");
+        writer.println(String.format("\"conformsTo\": \"%s\",", header.conformsTo));
+        writer.println(String.format("\"describedBy\": \"%s\",", header.describedBy));
+        writer.println(String.format("\"context\": \"%s\",", header.context));
+        writer.println(String.format("\"type\": \"%s\",", header.type));
+        writer.println("\"dataset:\": [");
+      }
+      
+      if (open) {
+        writer.print(",");
+      }
+      
+      writer.print(rec);
+      
+      if (!open) {
+        open = true;
+      }
+    }
+
+    @Override
+    public void onEnd() throws IOException {
+      writer.println("]");
+      writer.println("}");
+
+      close();
+
+      LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
+    }
+    
+    public void close() {
+      if (outputStream!=null) {
+        try {
+          outputStream.close();
+        } catch (IOException ignore) {}
+      }
+    }
+    
+    public void abort() {
+      if (outputStream!=null) {
+        try {
+          outputStream.abort();
+        } catch (IOException ignore) {}
+      }
+    }
+    
+    private void prepareForWriting() throws IOException {
+      outputStream = dcatCache.createOutputCacheStream();
+      writer = new PrintWriter(new OutputStreamWriter(outputStream, "UTF-8"));
+    }
+    
+  }
 }
