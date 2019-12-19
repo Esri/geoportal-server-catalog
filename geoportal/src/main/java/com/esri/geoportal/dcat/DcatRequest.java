@@ -75,10 +75,7 @@ public abstract class DcatRequest {
         throw new IOException(String.format("Response is not valid DCAT response."));
       processData(data);
     } catch(Exception ex) {
-      LOGGER.error(String.format("Error parsing entity: %s", entity), ex);
-      try {
-        onEnd(false);
-      } catch (IOException ignore) {}
+      onEnd(ex);
     }
   }
   
@@ -90,10 +87,7 @@ public abstract class DcatRequest {
     try {
       search(null);
     } catch (Exception ex) {
-      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      try {
-        onEnd(false);
-      } catch (IOException ignore) {}
+      onEnd(ex);
     }
   }
   
@@ -107,10 +101,9 @@ public abstract class DcatRequest {
   
   /**
    * Callback for an end of processing.
-   * @param success <code>true</code> if success
-   * @throws java.io.IOException if ending file fails
+   * @param exception if exception occured
    */
-  public abstract void onEnd(boolean success) throws IOException;
+  public abstract void onEnd(Exception exception);
   
   private synchronized void search(String searchAfter) {
     try {
@@ -133,10 +126,7 @@ public abstract class DcatRequest {
       Invocable invocable = (Invocable)engine;
       invocable.invokeFunction("execute",this,sRequestInfo,selfInfo);
     } catch (Exception ex) {
-      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      try {
-        onEnd(false);
-      } catch (IOException ignore) {}
+      onEnd(ex);
     }
   }
   
@@ -148,7 +138,7 @@ public abstract class DcatRequest {
       JsonNode dataset = data.get("dataset");
 
       if (dataset==null || !dataset.isArray() || dataset.size()==0) {
-        onEnd(true);
+        onEnd(null);
         return;
       }
 
@@ -169,13 +159,10 @@ public abstract class DcatRequest {
       if (lastIdentifier!=null) {
         search(lastIdentifier);
       } else {
-        onEnd(true);
+        onEnd(null);
       }
     } catch (Exception ex) {
-      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      try {
-        onEnd(false);
-      } catch (IOException ignore) {}
+      onEnd(ex);
     }
   }
   

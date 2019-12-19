@@ -203,13 +203,17 @@ public class DcatBuilder {
     }
 
     @Override
-    public void onEnd(boolean success) throws IOException {
-      writer.println("]");
-      writer.println("}");
+    public void onEnd(Exception exception) {
+      if (exception==null) {
+        writer.println("]");
+        writer.println("}");
 
-      close();
-
-      LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
+        close();
+        LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
+      } else {
+        abort();
+        LOGGER.error(String.format("Error building aggregated DCAT file!"), exception);
+      }
       
       synchronized(this) {
         this.notifyAll();
