@@ -75,7 +75,7 @@ public class DcatBuilder {
   /**
    * Builds DCAT aggregated file.
    */
-  public synchronized void build() {
+  public void build() {
     try {
       LOGGER.info(String.format("Starting building aggregated DCAT file..."));
       execute(getSelfInfo(), getCachedEngine(javascriptFile));
@@ -84,14 +84,17 @@ public class DcatBuilder {
     }
   }
   
-  private synchronized void execute(String selfInfo, ScriptEngine engine) {
-    try {
+  private void execute(String selfInfo, ScriptEngine engine) {
       DcatRequestImpl request = new DcatRequestImpl(selfInfo, engine);
-      request.execute();
-      wait();
-    } catch(InterruptedException ex) {
-      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-    }
+      synchronized (request) {
+        request.execute();
+        try {
+          request.wait();
+          LOGGER.info(String.format("Wait ended"));
+        } catch(InterruptedException ex) {
+          LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
+        }
+      }
   }
   
   private ScriptEngine getCachedEngine(String javascriptFile) 
@@ -201,13 +204,17 @@ public class DcatBuilder {
     }
 
     @Override
-    public void onEnd() throws IOException {
+    public void onEnd(boolean success) throws IOException {
       writer.println("]");
       writer.println("}");
 
       close();
 
       LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
+      
+      synchronized(this) {
+        this.notifyAll();
+      }
     }
     
     public void close() {

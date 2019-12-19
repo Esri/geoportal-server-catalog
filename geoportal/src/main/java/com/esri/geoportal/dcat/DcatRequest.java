@@ -76,7 +76,9 @@ public abstract class DcatRequest {
       processData(data);
     } catch(Exception ex) {
       LOGGER.error(String.format("Error parsing entity: %s", entity), ex);
-      notifyAll();
+      try {
+        onEnd(false);
+      } catch (IOException ignore) {}
     }
   }
   
@@ -89,7 +91,9 @@ public abstract class DcatRequest {
       search(null);
     } catch (Exception ex) {
       LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      notifyAll();
+      try {
+        onEnd(false);
+      } catch (IOException ignore) {}
     }
   }
   
@@ -103,9 +107,10 @@ public abstract class DcatRequest {
   
   /**
    * Callback for an end of processing.
+   * @param success <code>true</code> if success
    * @throws java.io.IOException if ending file fails
    */
-  public abstract void onEnd() throws IOException;
+  public abstract void onEnd(boolean success) throws IOException;
   
   private synchronized void search(String searchAfter) {
     try {
@@ -129,7 +134,9 @@ public abstract class DcatRequest {
       invocable.invokeFunction("execute",this,sRequestInfo,selfInfo);
     } catch (Exception ex) {
       LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      notifyAll();
+      try {
+        onEnd(false);
+      } catch (IOException ignore) {}
     }
   }
   
@@ -141,8 +148,7 @@ public abstract class DcatRequest {
       JsonNode dataset = data.get("dataset");
 
       if (dataset==null || !dataset.isArray() || dataset.size()==0) {
-        onEnd();
-        notifyAll();
+        onEnd(true);
         return;
       }
 
@@ -163,12 +169,13 @@ public abstract class DcatRequest {
       if (lastIdentifier!=null) {
         search(lastIdentifier);
       } else {
-        onEnd();
-        notifyAll();
+        onEnd(true);
       }
     } catch (Exception ex) {
       LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
-      notifyAll();
+      try {
+        onEnd(false);
+      } catch (IOException ignore) {}
     }
   }
   
