@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 /**
  * DCAT response header.
  */
-class DcatHeader {
+public class DcatHeader {
   
   public String conformsTo;
   public String describedBy;

@@ -32,7 +32,7 @@ import org.slf4j.LoggerFactory;
  * 
  * Represents an abstract request used to build a DCAT cache.
  */
-abstract class DcatRequest {
+public abstract class DcatRequest {
   /**
    * Logger
    */
