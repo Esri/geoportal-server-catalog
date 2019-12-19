@@ -48,6 +48,7 @@ public abstract class DcatRequest {
   
   private final String selfInfo;
   private final ScriptEngine engine;
+  private long dataCounter;
 
   /**
    * Creates instance of the request.
@@ -154,6 +155,10 @@ public abstract class DcatRequest {
         String sRec = MAPPER.writerWithDefaultPrettyPrinter().writeValueAsString(rec);
         onRec(header, sRec);
       }
+      
+      dataCounter += dataset.size();
+      if (dataCounter % Math.round(Math.pow(10,Math.floor(Math.log10(dataCounter)))) == 0)
+        LOGGER.info(String.format("Processed total of %d DCAT records", dataCounter));
 
       if (lastIdentifier!=null) {
         search(lastIdentifier);
