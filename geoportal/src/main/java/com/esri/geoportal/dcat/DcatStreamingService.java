@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class DcatStreamingService {
   private static final String EMPTY_DCAT_RESPONSE = "{\n" +
     "  \"conformsTo\": \"https://project-open-data.cio.gov/v1.1/schema\",\n" +
+    "  \"@note\": \"DCAT file is not ready yet! Started process generating DCAT. Please, try again later.\",\n" +
     "  \"dataset\": [\n" +
     "  ]\n" +
     "}";
@@ -54,7 +55,7 @@ public class DcatStreamingService {
         }
       } else {
         outStream.write(EMPTY_DCAT_RESPONSE.getBytes("UTF-8"));
-        generateDcat();
+        dcatController.generateDcat();
       }
       outStream.flush();
       return lastModified!=null? 
@@ -63,13 +64,5 @@ public class DcatStreamingService {
     } catch (IOException ex) {
       return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
     }
-  }
-  
-  private void generateDcat() {
-    Thread t = new Thread(() -> {
-      dcatController.generateDcat();
-    });
-    t.setDaemon(true);
-    t.start();
   }
 }
