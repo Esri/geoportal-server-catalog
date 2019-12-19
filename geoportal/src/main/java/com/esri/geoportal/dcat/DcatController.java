@@ -14,7 +14,6 @@
  */
 package com.esri.geoportal.dcat;
 
-import java.io.IOException;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
@@ -26,6 +25,9 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+/**
+ * DCAT controller.
+ */
 public class DcatController {
 
   /**
@@ -48,12 +50,21 @@ public class DcatController {
   
   private volatile boolean running;
 
+  /**
+   * Creates instance of the controller.
+   * @param runAt time of the day to run at
+   * @param dcatCache DCAT cache
+   * @param dcatBuilder DCAT builder
+   */
   public DcatController(String runAt, DcatCache dcatCache, DcatBuilder dcatBuilder) {
     this.runAt = StringUtils.trimToNull(runAt);
     this.dcatCache = dcatCache;
     this.dcatBuilder = dcatBuilder;
   }
   
+  /**
+   * Initializes controller.
+   */
   public void init() {
     if (runAt!=null) {
       LOGGER.info(String.format("DCAT cache build task to run at %s.", runAt));
@@ -66,9 +77,30 @@ public class DcatController {
     }
   }
 
+  /**
+   * Destroys controller.
+   */
   public void destroy() {
     LOGGER.info("DCAT cache build process stopped.");
     executorService.shutdownNow();
+  }
+  
+  /**
+   * Generates DCAT.
+   */
+  public void generateDcat() {
+    if (!running) {
+      running = true;
+      LOGGER.info("DCAT cache build started...");
+      
+      try {
+        dcatBuilder.build();
+        dcatCache.purgeOutdatedFiles();
+      } catch (Exception ex) {
+        LOGGER.error(String.format("DCAT error creating cache!"), ex);
+      }
+      running = false;
+    }
   }
 
   private void startExecutionAt(HoursMinutes hm) {
@@ -82,22 +114,7 @@ public class DcatController {
     
     long delay = hm.tillNextRun().getSeconds();
     executorService.schedule(taskWrapper, delay, TimeUnit.SECONDS);
-    LOGGER.info(String.format("DCAT cache build task scheduled to run in %d seconds", delay));
-  }
-  
-  public void generateDcat() {
-    if (!running) {
-      running = true;
-      LOGGER.info("DCAT cache build started...");
-      
-      try {
-        dcatBuilder.build();
-        dcatCache.purgeOutdatedFiles();
-      } catch (Exception ex) {
-        LOGGER.error(String.format("DCAT error creating cache."), ex);
-      }
-      running = false;
-    }
+    LOGGER.info(String.format("DCAT cache build task scheduled to run in %d seconds.", delay));
   }
 
   private static final class HoursMinutes {
