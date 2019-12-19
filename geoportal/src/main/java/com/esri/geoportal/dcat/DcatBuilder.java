@@ -90,7 +90,6 @@ public class DcatBuilder {
         request.execute();
         try {
           request.wait();
-          LOGGER.info(String.format("Wait ended"));
         } catch(InterruptedException ex) {
           LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
         }
