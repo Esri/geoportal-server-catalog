@@ -16,7 +16,7 @@
   </beans:bean>
   
   <beans:bean class="com.esri.geoportal.dcat.DcatController" init-method="init" destroy-method="destroy" >
-    <!-- DCAT building start time (24 hour clock) or empty to siable auto-generation -->
+    <!-- DCAT building start time (24 hour clock) or empty to disable auto-generation -->
     <beans:constructor-arg value="03:00"/>
     <beans:constructor-arg ref="dcatCache"/>
     <beans:constructor-arg ref="dcatBuilder"/>
