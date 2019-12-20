@@ -74,24 +74,24 @@ public class DcatBuilder {
   
   /**
    * Builds DCAT aggregated file.
+   * @param dcatContext context
    */
-  public void build() {
+  public void build(DcatContext dcatContext) {
     try {
       LOGGER.info(String.format("Starting building aggregated DCAT file..."));
-      execute(getSelfInfo(), getCachedEngine(javascriptFile));
+      execute(dcatContext, getSelfInfo(), getCachedEngine(javascriptFile));
     } catch(Exception ex) {
       LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
     }
   }
   
-  private void execute(String selfInfo, ScriptEngine engine) {
-      DcatRequestImpl request = new DcatRequestImpl(selfInfo, engine);
+  private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engine) {
+      DcatRequestImpl request = new DcatRequestImpl(dcatContext, selfInfo, engine);
       synchronized (request) {
         request.execute();
         try {
           request.wait();
-        } catch(InterruptedException ex) {
-          LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
+        } catch(InterruptedException ignore) {
         }
       }
   }
@@ -174,8 +174,8 @@ public class DcatBuilder {
     private PrintWriter writer = null;
     private boolean open;
 
-    public DcatRequestImpl(String selfInfo, ScriptEngine engine) {
-      super(selfInfo, engine);
+    public DcatRequestImpl(DcatContext dcatContext, String selfInfo, ScriptEngine engine) {
+      super(dcatContext, selfInfo, engine);
     }
 
     @Override
@@ -203,16 +203,18 @@ public class DcatBuilder {
     }
 
     @Override
-    public void onEnd(Exception exception) {
-      if (exception==null) {
+    public void onEnd(boolean complete, Exception exception) {
+      if (complete) {
         writer.println("]");
         writer.println("}");
 
-        close();
         LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
+        close();
       } else {
+        if (exception!=null) {
+          LOGGER.error(String.format("Error building aggregated DCAT file!"), exception);
+        }
         abort();
-        LOGGER.error(String.format("Error building aggregated DCAT file!"), exception);
       }
       
       synchronized(this) {
@@ -220,7 +222,7 @@ public class DcatBuilder {
       }
     }
     
-    public void close() {
+    private void close() {
       writer.flush();
       if (outputStream!=null) {
         try {
@@ -229,7 +231,7 @@ public class DcatBuilder {
       }
     }
     
-    public void abort() {
+    private void abort() {
       if (outputStream!=null) {
         try {
           outputStream.abort();
