@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory;
 /**
  * DCAT controller.
  */
-public class DcatController {
+public class DcatController extends DcatContext {
 
   /**
    * Logger
@@ -47,8 +47,6 @@ public class DcatController {
    */
   private final DcatCache dcatCache;
   private final DcatBuilder dcatBuilder;
-  
-  private volatile boolean running;
 
   /**
    * Creates instance of the controller.
@@ -82,6 +80,7 @@ public class DcatController {
    */
   public void destroy() {
     LOGGER.info("DCAT cache build process stopped.");
+    abortRunning();
     executorService.shutdownNow();
   }
   
@@ -89,17 +88,17 @@ public class DcatController {
    * Generates DCAT.
    */
   public void generateDcat() {
-    if (!running) {
-      running = true;
+    if (enterRunning()) {
       LOGGER.info("DCAT cache build started...");
       
       try {
-        dcatBuilder.build();
+        dcatBuilder.build(this);
         dcatCache.purgeOutdatedFiles();
       } catch (Exception ex) {
         LOGGER.error(String.format("DCAT error creating cache!"), ex);
       }
-      running = false;
+      
+      exitRunning();
     }
   }
 

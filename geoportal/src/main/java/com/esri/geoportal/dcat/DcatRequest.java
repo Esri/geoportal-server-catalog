@@ -46,16 +46,19 @@ public abstract class DcatRequest {
     MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
   }
   
+  private final DcatContext dcatContext;
   private final String selfInfo;
   private final ScriptEngine engine;
   private long dataCounter;
 
   /**
    * Creates instance of the request.
+   * @param dcatContext context
    * @param selfInfo self info
    * @param engine engine
    */
-  public DcatRequest(String selfInfo, ScriptEngine engine) {
+  public DcatRequest(DcatContext dcatContext, String selfInfo, ScriptEngine engine) {
+    this.dcatContext = dcatContext;
     this.selfInfo = selfInfo;
     this.engine = engine;
   }
@@ -67,7 +70,7 @@ public abstract class DcatRequest {
    * @param entity entity
    * @param headers headers
    */
-  public synchronized void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
+  public void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
     LOGGER.trace(String.format("Entity: %s", entity));
     try {
       JsonNode data = MAPPER.readTree(entity);
@@ -75,7 +78,7 @@ public abstract class DcatRequest {
         throw new IOException(String.format("Response is not valid DCAT response."));
       processData(data);
     } catch(Exception ex) {
-      onEnd(ex);
+      onEnd(false, ex);
     }
   }
   
@@ -83,11 +86,11 @@ public abstract class DcatRequest {
    * Executes request.
    * @throws NullPointerException
    */
-  public synchronized void execute() {
+  public void execute() {
     try {
       search(null);
     } catch (Exception ex) {
-      onEnd(ex);
+      onEnd(false, ex);
     }
   }
   
@@ -101,11 +104,12 @@ public abstract class DcatRequest {
   
   /**
    * Callback for an end of processing.
-   * @param exception if exception occured
+   * @param complete to complete DCAT file
+   * @param exception if exception occurred
    */
-  public abstract void onEnd(Exception exception);
+  public abstract void onEnd(boolean complete, Exception exception);
   
-  private synchronized void search(String searchAfter) {
+  private void search(String searchAfter) {
     try {
       ObjectNode requestInfo = MAPPER.createObjectNode();
       ObjectNode parameterMap = MAPPER.createObjectNode();
@@ -126,11 +130,11 @@ public abstract class DcatRequest {
       Invocable invocable = (Invocable)engine;
       invocable.invokeFunction("execute",this,sRequestInfo,selfInfo);
     } catch (Exception ex) {
-      onEnd(ex);
+      completeExecution(false, ex);
     }
   }
   
-  private synchronized void processData(JsonNode data) {
+  private void processData(JsonNode data) {
     try {
       String lastIdentifier = null;
 
@@ -138,11 +142,14 @@ public abstract class DcatRequest {
       JsonNode dataset = data.get("dataset");
 
       if (dataset==null || !dataset.isArray() || dataset.size()==0) {
-        onEnd(null);
+        onEnd(true, null);
         return;
       }
 
       for (JsonNode rec: dataset) {
+        if (!dcatContext.isRunning()) {
+          break;
+        }
         JsonNode identifier = rec.get("identifier");
         if (identifier!=null && identifier.isTextual()) {
           lastIdentifier = identifier.asText();
@@ -155,15 +162,22 @@ public abstract class DcatRequest {
       dataCounter += dataset.size();
       if (dataCounter % Math.round(Math.pow(10,Math.floor(Math.log10(dataCounter)))) == 0)
         LOGGER.info(String.format("Processed total of %d DCAT records", dataCounter));
-
-      if (lastIdentifier!=null) {
+      
+      if (lastIdentifier!=null && dcatContext.isRunning()) {
         search(lastIdentifier);
       } else {
-        onEnd(null);
+        completeExecution(dcatContext.isRunning(), null);
       }
     } catch (Exception ex) {
-      onEnd(ex);
+      completeExecution(false, ex);
     }
+  }
+  
+  private void completeExecution(boolean complete, Exception exception) {
+    synchronized(dcatContext) {
+      dcatContext.notifyAll();
+    }
+    onEnd(complete, exception);
   }
   
   private static class DcatHeaderExt extends DcatHeader {
