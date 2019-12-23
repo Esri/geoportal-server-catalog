@@ -8,11 +8,11 @@
 
 	<context:property-placeholder/>
 	<context:annotation-config />
-	<context:component-scan base-package="com.esri.geoportal" />
 
 	<beans:import resource="app-security.xml" />
 	<beans:import resource="app-factory.xml" />
-
+	<beans:import resource="app-dcat.xml" />
+  
 	<beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
 		<beans:property name="elasticContext" ref="elasticContext" />
 		<beans:property name="harvesterContext" ref="harvesterContext" />
@@ -20,6 +20,7 @@
 		<beans:property name="defaultApprovalStatus" value="" /> <!-- optional - approved|reviewed|disapproved|incomplete|posted|draft -->
 		<beans:property name="supportsGroupBasedAccess" value="false" />
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
+		<beans:property name="parseGml" value="false" />
 	</beans:bean>
 <!-- the tokens like ${es_cluster:elasticsearch} ${gpt_indexName:metadata}
 represent environment variables that can be used to pass values into a spring configuration context, aka these files

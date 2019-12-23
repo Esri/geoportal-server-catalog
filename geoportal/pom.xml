@@ -13,7 +13,7 @@
     <log4j.version>2.12.0</log4j.version>
     <springframework.version>5.1.8.RELEASE</springframework.version>
     <springsecurity.version>5.1.5.RELEASE</springsecurity.version>
-    <jackson.version>2.9.9</jackson.version>
+    <jackson.version>2.10.1</jackson.version>
   </properties>
 
 	<repositories>
@@ -186,6 +186,31 @@
          <version>9.1.0.8</version>
        </dependency>
 -->
+    <!-- Dependencies required for JAVA 11/13 runtime environment -->
+    <!--  -->
+    <dependency>
+        <groupId>jakarta.annotation</groupId>
+        <artifactId>jakarta.annotation-api</artifactId>
+        <version>1.3.4</version>
+    </dependency>
+    <dependency>
+        <groupId>javax.xml.bind</groupId>
+        <artifactId>jaxb-api</artifactId>
+        <version>2.3.1</version>
+    </dependency>
+    <dependency>
+        <groupId>org.glassfish.jaxb</groupId>
+        <artifactId>jaxb-runtime</artifactId>
+        <version>2.3.2</version>
+    </dependency>
+   
+    <dependency>
+      <groupId>commons-io</groupId>
+      <artifactId>commons-io</artifactId>
+      <version>2.6</version>
+      <type>jar</type>
+    </dependency>
+   
   </dependencies> 
   
   <build>

@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+  
+  <beans:bean id="dcatCache" class="com.esri.geoportal.dcat.DcatCache" init-method="init">
+    <!-- DCAT cache folder or empty for default: <USER_HOME>/dcat/cache -->
+    <beans:constructor-arg value=""/>
+  </beans:bean>
+
+  <beans:bean id="dcatBuilder" class="com.esri.geoportal.dcat.DcatBuilder">
+    <beans:constructor-arg ref="dcatCache"/>
+  </beans:bean>
+  
+  <beans:bean class="com.esri.geoportal.dcat.DcatController" init-method="init" destroy-method="destroy" >
+    <!-- DCAT building start time (24 hour clock) or empty to disable auto-generation -->
+    <beans:constructor-arg value="03:00"/>
+    <beans:constructor-arg ref="dcatCache"/>
+    <beans:constructor-arg ref="dcatBuilder"/>
+  </beans:bean>
+  
+</beans:beans>
