@@ -100,7 +100,7 @@ public class GetItemRequest extends com.esri.geoportal.lib.elastic.request.GetIt
     
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ElasticClient client = ElasticClient.newClient();
-    String url = client.getItemUrl(ec.getIndexName(),ec.getItemIndexType(),id);
+    String url = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(),id);
     if (this.getPretty()) url += "?pretty=true";
     
     try {

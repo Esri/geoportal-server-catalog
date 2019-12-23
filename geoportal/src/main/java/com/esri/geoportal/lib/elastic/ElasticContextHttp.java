@@ -19,6 +19,7 @@ import com.esri.geoportal.base.util.Val;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 
 import java.io.FileNotFoundException;
+import java.math.BigDecimal;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Map.Entry;
@@ -83,7 +84,7 @@ public class ElasticContextHttp extends ElasticContext {
     //LOGGER.info("Creating index: "+name);
     ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials());
     String url = client.getIndexUrl(name);
-    String path = this.getMappingsFile();
+    String path = this.getActualMappingsFile();
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
     String postData = JsonUtil.toJson(jso,false);
     String contentType = "application/json;charset=utf-8";
@@ -136,6 +137,7 @@ public class ElasticContextHttp extends ElasticContext {
           int primaryVersion = i;
           //System.out.println("primaryVersion="+primaryVersion);
           if (primaryVersion >= 6) this.setIs6Plus(true);
+          if (primaryVersion >= 7) this.setIs7Plus(true);
           break;
         }
       }
@@ -225,9 +227,11 @@ public class ElasticContextHttp extends ElasticContext {
     }
   }
   
-  /** Startup. */
+  /** Startup.
+   */
   @PostConstruct
-  public void startup() throws Exception {
+  @Override
+  public void startup() {
     LOGGER.info("Starting up ElasticContextHttp...");
     String[] nodeNames = this.nodesToArray();
     if ((nodeNames == null) || (nodeNames.length == 0)) {

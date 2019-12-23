@@ -62,7 +62,7 @@ public class AccessUtil {
     }
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ItemUtil itemUtil = new ItemUtil();
-    item = itemUtil.searchForFileId(ec.getIndexName(),ec.getItemIndexType(),id);
+    item = itemUtil.searchForFileId(ec.getIndexName(),ec.getActualItemIndexType(),id);
     if (item != null) {
       this.lastItem = item;
       return item.getString("_id");
@@ -233,7 +233,7 @@ public class AccessUtil {
     if (this.lastItem != null) return this.lastItem;
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ItemUtil itemUtil = new ItemUtil();
-    this.lastItem = itemUtil.readItemJson(ec.getIndexName(),ec.getItemIndexType(),id);
+    this.lastItem = itemUtil.readItemJson(ec.getIndexName(),ec.getActualItemIndexType(),id);
     return this.lastItem;
   }
   

@@ -119,7 +119,9 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     processResults: function(searchResponse) {
       this.start = 1;
-      var nHits = searchResponse.hits.total;
+      var nHits = searchResponse.hits.total? 
+                        searchResponse.hits.total.value && !isNaN(searchResponse.hits.total.value)? searchResponse.hits.total.value: searchResponse.hits.total: 
+                        0;
       var nStart = searchResponse.urlParams.from + 1;
       if (nStart < 1) nStart = 1;
       this.numHits = nHits;

@@ -54,6 +54,7 @@ public class SetOwnerRequest extends com.esri.geoportal.lib.elastic.request.SetO
     
     JsonObjectBuilder jso = Json.createObjectBuilder();
     jso.add(FieldNames.FIELD_SYS_OWNER,newOwner);
+    jso.add(FieldNames.FIELD_SYS_OWNER_TXT,newOwner);
     //jso.add(FieldNames.FIELD_SYS_MODIFIED,DateUtil.nowAsString()); // TODO should this be set?
     setUpdateSource(jso.build().toString());
     

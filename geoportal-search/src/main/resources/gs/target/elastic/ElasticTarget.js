@@ -449,7 +449,11 @@
         var url = self.searchUrl, options;
         var data = null, dataContentType = "application/json";
         if (targetRequest && task.val.hasAnyProperty(targetRequest.searchCriteria)) {
-          data = JSON.stringify(targetRequest.searchCriteria);
+          var criteria = {
+            "track_total_hits": true
+          };
+          Object.assign(criteria, targetRequest.searchCriteria);
+          data = JSON.stringify(criteria);
         }
         if (typeof self.username === "string" && self.username.length > 0 &&
             typeof self.password === "string" && self.password.length > 0) {
@@ -469,7 +473,9 @@
         var response = JSON.parse(result);
         searchResult.jsonResponse = response;
         if (response && response.hits) {
-          searchResult.totalHits = response.hits.total;
+          searchResult.totalHits = response.hits.total? 
+                        response.hits.total.value && !isNaN(response.hits.total.value)? response.hits.total.value: response.hits.total: 
+                        0;
           if (task.verbose) console.log("totalHits=",searchResult.totalHits);
           var hits = response.hits.hits;
           if (Array.isArray(response.hits.hits)) {

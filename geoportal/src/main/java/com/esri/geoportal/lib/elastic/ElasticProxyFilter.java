@@ -74,7 +74,7 @@ public class ElasticProxyFilter implements Filter {
       if (!user.isAdmin()) {
         String path = hsr.getPathInfo();
         String idxName = gc.getElasticContext().getIndexName();
-        String itmType = gc.getElasticContext().getItemIndexType();
+        String itmType = gc.getElasticContext().getActualItemIndexType();
         // This will limit the ability to use other Elasticsearch indexes for non admin users
         // _search, _count URI queries (q=) are problematic
         if (path != null && (path.indexOf("_search") != -1 || path.indexOf("_count") != -1)) {
