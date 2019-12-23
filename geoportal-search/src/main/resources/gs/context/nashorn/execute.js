@@ -85,7 +85,7 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
           hm.put(header.name,header.value);
         });
       }
-      if (requestInfo.taskOptions.verbose) print(entity);
+      if (requestInfo.taskOptions && requestInfo.taskOptions.verbose) print(entity);
       nhRequest.putResponse(status,mediaType,entity,hm);
     });
 

@@ -92,6 +92,7 @@ define(["dojo/_base/declare",
               this._createLink("CSV", i18n.search.links.csv, "csv", searchResponse.urlParams, postData);
               this._createLink("KML", i18n.search.links.kml, "kml", searchResponse.urlParams, postData);
               this._createLink("RSS", i18n.search.links.rss, "rss", searchResponse.urlParams, postData);
+              this._createLink("DCAT", i18n.search.links.dcat, "dcat", searchResponse.urlParams, postData);
               this._createWebLink("WEB", i18n.search.links.web, "web", searchResponse.urlParams, postData);
             }
 
