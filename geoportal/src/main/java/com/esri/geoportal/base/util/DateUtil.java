@@ -15,6 +15,7 @@
 package com.esri.geoportal.base.util;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
@@ -153,6 +154,47 @@ public class DateUtil {
           // e.g 2012-06-13  vs 2012-06-13Z     
           boolean bDateOnly = false;
           String uc = text.toUpperCase();
+          
+          // Check if there is a nominal time part and make sure to separate hh:mm:ss with (:)
+          if ((uc.indexOf("T") != -1)) {
+            String [] p = text.replaceAll("Z$", "").split("T");
+            if (p.length==2) {
+              String time = p[1];
+              
+              // hh:mm:ss.sss
+              String [] timeParts = time.indexOf(".")!=-1? time.split("."): new String[]{time};
+              
+              // test and augment time parts
+              if (timeParts.length>0 && timeParts.length<=2) {
+                // split hh:mm:ss into series of double digits
+                ArrayList<String> subParts = new ArrayList<>();
+                String primePart = timeParts[0].replaceAll("[^0-9]", "");
+                while (primePart.length()>0 && subParts.size()<3) {
+                  int stopIndex = Math.min(2, primePart.length());
+                  String subPart = primePart.substring(0, stopIndex);
+                  while (subPart.length()<2) {
+                    subPart = subPart + "0";
+                  }
+                  subParts.add(subPart);
+                  primePart = primePart.substring(stopIndex);
+                }
+                
+                // make sure there are three sub parts then join them using (:)
+                while (subParts.size()<3) {
+                  subParts.add("00");
+                }
+                timeParts[0] = subParts.stream().collect(Collectors.joining(":"));
+                
+                // generate time by joining hh:mm:ss with sss using (.)
+                time = Arrays.stream(timeParts).collect(Collectors.joining("."));
+                
+                // replace text with date T time
+                p[1] = time;
+                text = Arrays.stream(p).collect(Collectors.joining("T"));
+              }
+            }
+          }
+          
           if ((uc.indexOf(" ") == -1) && (uc.indexOf(":") == -1) &&
               (uc.indexOf("T") == -1) && (uc.indexOf("Z") == -1)) {
             String[] p = text.split("-");
