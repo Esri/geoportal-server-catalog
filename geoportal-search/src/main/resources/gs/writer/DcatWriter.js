@@ -32,7 +32,7 @@
     keyword: ["metadata"]
   };
 
-  function selectFalidDate() {
+  function selectValidDate() {
     var validDates = Array.prototype.slice.call(arguments)
                       .map(function(d) { return Date.parse(d); })
                       .filter(function(d) { return !!d; })
@@ -64,7 +64,7 @@
         identifier: json.id,
         title: json.title || '<unknown>',
         description: json.description || '<unknown>',
-        modified: selectFalidDate(json.updated, json.published) || new Date().toISOString(),
+        modified: selectValidDate(json.updated, json.published) || new Date().toISOString(),
         keyword: src.keywords_s || DCAT_DEFAULTS.keyword,
         distribution: [],
         
