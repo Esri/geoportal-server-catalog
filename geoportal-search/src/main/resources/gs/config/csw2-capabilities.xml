@@ -4,9 +4,12 @@
   xmlns:ogc="http://www.opengis.net/ogc"
   xmlns:gml="http://www.opengis.net/gml"
   xmlns:ows="http://www.opengis.net/ows"
-  xmlns:xlink="http://www.w3.org/1999/xlink">
+  xmlns:xlink="http://www.w3.org/1999/xlink"
+  xmlns:inspire_ds="http://inspire.ec.europa.eu/schemas/inspire_ds/1.0" 
+  xmlns:inspire_com="http://inspire.ec.europa.eu/schemas/common/1.0" 
+>
   <ows:ServiceIdentification>
-    <ows:Title>CSW</ows:Title>
+    <ows:Title>CSW202</ows:Title>
     <ows:Abstract>A catalogue service that conforms to the HTTP protocol binding of the OpenGIS Catalogue Service specification (version 3.0)</ows:Abstract>
     <ows:Keywords>
       <ows:Keyword>CSW</ows:Keyword>
@@ -67,8 +70,8 @@
     <ows:Operation name="GetRecords">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
+          <ows:Post xlink:href="{csw.url}" />
+          <ows:Get xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
@@ -105,6 +108,30 @@
         <ows:AllowedValues>
           <ows:Value>{opensearch.description.url}</ows:Value>
         </ows:AllowedValues>
+      </ows:Constraint>
+			<ows:Parameter name="CONSTRAINTLANGUAGE">
+				<ows:Value>FILTER</ows:Value>
+				<ows:Value>FILTER</ows:Value>
+			</ows:Parameter>
+      <ows:Constraint name="SupportedISOQueryables">
+         <ows:Value>Language</ows:Value>
+      </ows:Constraint>
+      <ows:Constraint name="AdditionalQueryables">
+        <ows:Value>SpecificationDate</ows:Value>
+        <ows:Value>AccessConstraints</ows:Value>
+        <ows:Value>ResponsiblePartyRole</ows:Value>
+        <ows:Value>Degree</ows:Value>
+        <ows:Value>Lineage</ows:Value>
+        <ows:Value>OnlineResourceMimeType</ows:Value>
+        <ows:Value>ConditionApplyingToAccessAndUse</ows:Value>
+        <ows:Value>Date</ows:Value>
+        <ows:Value>MetadataPointOfContact</ows:Value>
+        <ows:Value>OnlineResourceType</ows:Value>
+        <ows:Value>Relation</ows:Value>
+        <ows:Value>SpecificationDateType</ows:Value>
+        <ows:Value>Classification</ows:Value>
+        <ows:Value>OtherConstraints</ows:Value>
+        <ows:Value>SpecificationTitle</ows:Value>
       </ows:Constraint>
     </ows:Operation>
 
@@ -298,6 +325,44 @@
         <ows:Value />
       </ows:AllowedValues>
     </ows:Constraint>
+		<inspire_ds:ExtendedCapabilities>
+			<inspire_com:MetadataUrl>
+				<inspire_com:URL>{csw.url}?SERVICE=CSW&amp;VERSION=2.0.2&amp;REQUEST=GetRecordById&amp;outputSchema=http://www.isotc211.org/2005/gmd&amp;outputFormat=application/xml&amp;resultType=results&amp;ElementSetName=full</inspire_com:URL>
+				<inspire_com:MediaType>application/xml</inspire_com:MediaType>
+			</inspire_com:MetadataUrl>
+			<inspire_com:SupportedLanguages>
+				<!--
+        List of supported languages
+        -->
+				<inspire_common:DefaultLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>eng</inspire_common:Language>
+				</inspire_common:DefaultLanguage>
+				<inspire_common:SupportedLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>fre</inspire_common:Language>
+				</inspire_common:SupportedLanguage>
+				<inspire_common:SupportedLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>ger</inspire_common:Language>
+				</inspire_common:SupportedLanguage>
+				<inspire_common:SupportedLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>spa</inspire_common:Language>
+				</inspire_common:SupportedLanguage>
+				<inspire_common:SupportedLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>por</inspire_common:Language>
+				</inspire_common:SupportedLanguage>
+				<inspire_common:SupportedLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>dut</inspire_common:Language>
+				</inspire_common:SupportedLanguage>
+				<inspire_common:SupportedLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>fin</inspire_common:Language>
+				</inspire_common:SupportedLanguage>
+				<inspire_common:SupportedLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+					<inspire_common:Language>ita</inspire_common:Language>
+				</inspire_common:SupportedLanguage>
+			</inspire_com:SupportedLanguages>
+			<inspire_com:ResponseLanguage>
+				<inspire_com:Language>eng</inspire_com:Language>
+			</inspire_com:ResponseLanguage>
+		</inspire_ds:ExtendedCapabilities>
 
   </ows:OperationsMetadata>
 
