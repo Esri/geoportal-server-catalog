@@ -59,15 +59,37 @@
     }},
 
     execute: {writable:true,value:function(task) {
-      if (!task.request.hasQueryParameters()) {
-        return this.getCapabilities(task);
-      }
-
       var msg, ows, promise;
       var service = this.chkParam(task,"service");
       var request = this.chkParam(task,"request");
       var version = this.chkParam(task,"version");
 
+      if (task.request.body && typeof task.request.body === "string") {
+        body = task.request.body.trim();
+        if (body.length > 0) {
+          try {
+            var xmlInfo = task.context.newXmlInfo(task,body);
+            if (xmlInfo) {
+              var rootInfo = xmlInfo.getNodeInfo(xmlInfo.root);
+              request = request || rootInfo.localName;
+              xmlInfo.forEachAttribute(xmlInfo.root,function(attr){
+                if (attr.localName.toLowerCase() === "service") {
+                  service = service || attr.nodeText;
+                }
+                if (attr.localName.toLowerCase() === "version") {
+                  version = version || attr.nodeText;
+                }
+              });
+            }
+          } catch(ex) {
+          }
+        }
+      }
+      
+      if (!service || !version || !request) {
+        return this.getCapabilities(task);
+      }
+      
       if (!task.hasError && version !== null && version.length > 0 && version !== "3.0.0") {
         if (version === "2.0.2" && this.supportsCsw2) {
           this.isCsw2 = true;
