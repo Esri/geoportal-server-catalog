@@ -70,8 +70,8 @@
     <ows:Operation name="GetRecords">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Post xlink:href="{csw.url}" />
-          <ows:Get xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
+          <ows:Get xlink:href="{csw.url}" />
+          <ows:Post xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
