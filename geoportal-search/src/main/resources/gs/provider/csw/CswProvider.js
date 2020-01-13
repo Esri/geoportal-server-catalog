@@ -82,6 +82,7 @@
               });
             }
           } catch(ex) {
+            print(ex);
           }
         }
       }
