@@ -12,7 +12,7 @@
 >
   <ows:ServiceIdentification>
     <ows:Title>CSW202</ows:Title>
-    <ows:Abstract>A catalogue service that conforms to the HTTP protocol binding of the OpenGIS Catalogue Service specification (version 3.0)</ows:Abstract>
+    <ows:Abstract>A catalogue service that conforms to the HTTP protocol binding of the OpenGIS Catalogue Service specification (version 2.0.2)</ows:Abstract>
     <ows:Keywords>
       <ows:Keyword>CSW</ows:Keyword>
     </ows:Keywords>
