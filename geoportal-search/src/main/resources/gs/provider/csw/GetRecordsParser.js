@@ -150,7 +150,10 @@
 
     _getPropertyName: {writable:true,value:function(nodeInfo,ignoreValidation) {
       // dc:type - liveData, Format - content type, Subject - theme
-      var queryables = ["anytext","id","title"];
+      var queryables = ["anytext","id","title","apiso:language"];
+      var realQueryables = {
+        "apiso:Language": "apiso_Language_s"
+      }
       var anytextAliases = ["","anytext","format","subject"];
       if (!ignoreValidation) anytextAliases.push("dc:type");
 
@@ -183,7 +186,7 @@
           throw new Error("OWSException");
         }
       }
-      return name;
+      return name && (realQueryables[name] || name);
     }},
 
     _getSpatialFilter: {writable:true,value:function(nodeInfo) {
