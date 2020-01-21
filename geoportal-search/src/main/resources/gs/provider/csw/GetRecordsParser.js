@@ -75,6 +75,8 @@
               cswProvider.addOverrideParameter(task,"num",""+num);
             }
           }
+        } else if (attr.localName === "outputSchema") {
+          cswProvider.addOverrideParameter(task,"outputSchema",attr.nodeText);
         }
       });
 

@@ -516,14 +516,16 @@
       var f =  this.chkParam(task,"f");
       if (outputSchema !== null && outputSchema.length > 0) {
         lc = outputSchema.toLowerCase();
-        if (lc === task.uris.URI_CSW.toLowerCase()) {
+        if (!task.isCsw2 && lc === task.uris.URI_CSW.toLowerCase()) {
           outputSchema = task.uris.URI_CSW;
+        } else if (task.isCsw2 && lc === task.uris.URI_CSW2.toLowerCase()) {
+          outputSchema = task.uris.URI_CSW2;
         } else if (lc === task.uris.URI_ATOM.toLowerCase()) {
           outputSchema = task.uris.URI_ATOM;
         } else if (lc === task.uris.URI_GMD.toLowerCase()) {
           outputSchema = task.uris.URI_GMD;
         } else {
-          msg = "CSW: The outputSchema parameter must be "+task.uris.URI_CSW+" or "+task.uris.URI_ATOM;
+          msg = "CSW: The outputSchema parameter must be "+(task.isCsw2? task.uris.URI_CSW2: task.uris.URI_CSW)+", "+task.uris.URI_ATOM+" or "+task.uris.URI_GMD;
           ows = gs.Object.create(gs.provider.csw.OwsException);
           ows.put(task,ows.OWSCODE_InvalidParameterValue,"outputSchema",msg);
           return;
