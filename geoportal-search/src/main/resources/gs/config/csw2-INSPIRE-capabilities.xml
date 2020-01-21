@@ -11,7 +11,7 @@
                   xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd http://inspire.ec.europa.eu/schemas/inspire_ds/1.0 http://inspire.ec.europa.eu/schemas/inspire_ds/1.0/inspire_ds.xsd"
 >
   <ows:ServiceIdentification>
-    <ows:Title>CSW202</ows:Title>
+    <ows:Title>CSW 2.0.2</ows:Title>
     <ows:Abstract>A catalogue service that conforms to the HTTP protocol binding of the OpenGIS Catalogue Service specification (version 2.0.2)</ows:Abstract>
     <ows:Keywords>
       <ows:Keyword>CSW</ows:Keyword>
@@ -79,6 +79,7 @@
       </ows:Parameter>
       <ows:Parameter name="outputSchema">
         <ows:Value>http://www.opengis.net/cat/csw/2.0.2</ows:Value>
+        <ows:Value>http://www.isotc211.org/2005/gmd</ows:Value>
         <ows:Value>http://www.w3.org/2005/Atom</ows:Value>
       </ows:Parameter>
       <ows:Parameter name="ElementSetName">
@@ -131,6 +132,7 @@
       </ows:Parameter>
       <ows:Parameter name="outputSchema">
         <ows:Value>http://www.opengis.net/cat/csw/2.0.2</ows:Value>
+        <ows:Value>http://www.isotc211.org/2005/gmd</ows:Value>
         <ows:Value>http://www.w3.org/2005/Atom</ows:Value>
       </ows:Parameter>
       <ows:Parameter name="ElementSetName">
