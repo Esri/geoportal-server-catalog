@@ -160,6 +160,7 @@ define({
         rangeLabel: "Specify range:",
         fromLabel: "From:",
         toLabel: "To:",
+        applyLabel: "Apply",
         settings: {
           caption: "Numeric Filter",
           field: "Numeric Field",

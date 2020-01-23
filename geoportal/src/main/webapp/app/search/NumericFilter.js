@@ -369,8 +369,8 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
     onRangeClick: function(event) {
       var d = new NumericFilterRange({
         targetWidget: this,
-        fromValue: this._brushExtent[0],
-        toValue: this._brushExtent[1]
+        fromValue: this._brushExtent && this._brushExtent.length>0? this._brushExtent[0]: 0,
+        toValue:   this._brushExtent && this._brushExtent.length>1? this._brushExtent[1]: 0
       });
       d.showDialog();
     },
