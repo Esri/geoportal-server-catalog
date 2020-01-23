@@ -545,6 +545,32 @@ a.dropdown-toggle:focus {
   margin-left: 10px;
 }
 
+
+.g-basic-from-value {
+  margin-right: 10px;
+}
+
+.g-basic-to-value {
+}
+
+.g-basic-from-value-input {
+  width: 140px;
+}
+
+.g-basic-to-value-input {
+  width: 140px;
+}
+
+.g-basic-from-value-input-label {
+  
+}
+
+.g-basic-to-value-input-label {
+  
+}
+
+
+
 .g-from-value {
   
 }
