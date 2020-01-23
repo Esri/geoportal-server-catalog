@@ -36,18 +36,10 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
     field: null,
     fieldsOperator: "must",
     nestedPath: null,
-    interval: 1,
-    ticks: 4,
-    places: 2,
     
     label: i18n.search.numericFilter.label,
     open: false,
         
-    _aggValues: null,
-    _aggInterval: null,
-    _brushExtent: null,
-    _searchDisabled: false,
-    
     _fromValue: null,
     _toValue: null,
     
@@ -59,10 +51,7 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
       this._initialSettings = {
         label: this.label,
         field: this.field,
-        nestedPath: this.nestedPath,
-        interval: this.interval,
-        ticks: this.ticks,
-        places: this.places
+        nestedPath: this.nestedPath
       };
       
       if (this.allowSettings === null) {
@@ -76,24 +65,6 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
           var d = new Settings({targetWidget:this});
           d.showDialog();
         });
-      }
-    },
-    
-    applyBrushExtent: function() {
-      var ext = this._brushExtent;
-      if (ext && ext.length === 2) {
-        this._fromValue = ext[0];
-        this._toValue = ext[1];
-        // TODO ES2to5 can't pass decimals to an integer field
-        if (this.places === 0) {
-          if (typeof this._fromValue === "number") {
-            this._fromValue = Math.round(this._fromValue);
-          }
-          if (typeof this._toValue === "number") {
-            this._toValue = Math.round(this._toValue);
-          }
-        }
-        this.search();
       }
     },
     
@@ -121,7 +92,6 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
     appendQueryParams: function(params) {
       var query = null, qNested = null, condition = null;
       var lbl = this.label;
-      this._aggInterval = this.interval; // TODO use params and searchResponse.params
       var from = this._fromValue, to = this._toValue;
       var tip = this.formatRange(from,to,false);
       if (from || to) {
@@ -136,12 +106,6 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
           query = {"range": {}};
           query.range[this.field] = condition;
           if (this.hasNestedPath()) {
-            /*
-            qNested = {"query":{"nested":{
-              "path": this.nestedPath,
-              "query": {"bool": {"must":[query]}}
-            }}};
-            */
             qNested = {"nested":{
               "path": this.nestedPath,
               "query": {"bool": {"must":[query]}}
@@ -168,7 +132,7 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
       var key = this.getAggregationKey();
       if (!params.aggregations) params.aggregations = {};
       var aggregationField = this.field;
-      var interval = this.interval;
+      var interval = 1;
       var minDocCount = 1;
       var histogram = {
         "histogram":{
@@ -189,34 +153,22 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
       }
       
     },
- 
-    processResults: function(searchResponse) {
-      this._aggValues = null;
-      var key = this.getAggregationKey();
-      if (searchResponse.aggregations) {
-        var agg = searchResponse.aggregations[key];
-        if (this.hasNestedPath()) {
-          if (agg.values) {
-            this._aggValues = agg.values;
-          }
-        } else {
-          this._aggValues = agg;
-        }
-      }
-    },
     
     whenQClauseRemoved: function(qClause) {
       var self = this;
       if (this === qClause.parentQComponent) {
         this._searchDisabled = true;
-        this._fromValue = this._toValue = this._brushExtent = null;
-        this.setNodeText(this.brushExtentNode,"");
+        this._fromValue = this._toValue = null;
+        this.fromValueInput.set("value", null);
+        this.toValueInput.set("value", null);
         setTimeout(function(){self._searchDisabled = false;},100);
       }
     },
     
     onApplyClicked: function(evt) {
-      console.log("Apply clicked", evt);
+      this._fromValue = this.fromValueInput.get("value");
+      this._toValue = this.toValueInput.get("value");
+      this.search();
     }
     
   });
