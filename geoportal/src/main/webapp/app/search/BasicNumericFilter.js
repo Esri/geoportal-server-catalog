@@ -71,11 +71,6 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
     formatRange: function(fromValue,toValue,forSearchLink) {
       var v = "", rangePattern;
       if (fromValue || toValue) {
-        if (fromValue!==null && toValue!==null) {
-          var sortedValues = [fromValue, toValue].sort();
-          fromValue = sortedValues[0];
-          toValue = sortedValues[1];
-        }
         rangePattern = i18n.search.numericFilter.rangePattern;
         v = rangePattern.replace("{from}",this.formatValue(fromValue));
         v = v.replace("{to}",this.formatValue(toValue));
@@ -173,11 +168,6 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
     onApplyClicked: function(evt) {
       this._fromValue = this.fromValueInput.get("value");
       this._toValue = this.toValueInput.get("value");
-      if (this._fromValue!==null && this._toValue!==null) {
-        var sortedValues = [this._fromValue, this._toValue].sort();
-        this._fromValue = sortedValues[0];
-        this._toValue = sortedValues[1];
-      }
       this.search();
     }
     
