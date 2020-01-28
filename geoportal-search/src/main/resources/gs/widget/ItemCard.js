@@ -60,7 +60,29 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
         return;
       }
       this.inherited(arguments);
+      this.evaluateBBox(this.item);
       this.render(this.searchResponse,this.item);
+    },
+    
+    evaluateBBox: function(item) {
+      if (!item.bbox && (item._source && item._source.envelope_geo)) {
+        for (var i=0; i<item._source.envelope_geo.length; i++) {
+          var geo = item._source.envelope_geo[i]
+          if (geo.coordinates && geo.coordinates.length==2) {
+            var ul = geo.coordinates[0] // upper-left
+            var lr = geo.coordinates[1] // lower-right
+            if (ul.length==2 && lr.length==2) {
+              item.bbox = {
+                xmin: ul[0],
+                ymin: lr[1],
+                xmax: lr[0],
+                ymax: ul[1]
+              }
+              break
+            }
+          }
+        }
+      }
     },
 
     addClicked: function() {
