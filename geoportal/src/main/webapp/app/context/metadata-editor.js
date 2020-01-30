@@ -12,6 +12,7 @@ define([],function(){var obj={
       "arcgis", "fgdc", 
       "iso-19115", "iso-19119", "iso-19115-2",
       "inspire-iso-19115", "inspire-iso-19119", 
+      "inspire2-iso-19115", "inspire2-iso-19119", 
       "gemini-iso-19115", "gemini-iso-19119"
     ],
     basemap: "hybrid",
@@ -95,6 +96,42 @@ define([],function(){var obj={
         {
           path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
           value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 1.2)"
+        }
+      ]
+    },
+    {
+      key: "inspire2-iso-19115",
+      requiredPath: "app/gxe/types/inspire2/base/DataDocumentType",
+      interrogationRules: [
+        {
+          path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
+          must: true
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
+          value: "INSPIRE Metadata Implementing Rules"
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
+          value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 2.0)"
+        }
+      ]
+    },
+    {
+      key: "inspire2-iso-19119",
+      requiredPath: "app/gxe/types/inspire2/base/ServiceDocumentType",
+      interrogationRules: [
+        {
+          path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
+          must: true
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
+          value: "INSPIRE Metadata Implementing Rules"
+        },
+        {
+          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
+          value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 2.0)"
         }
       ]
     },
