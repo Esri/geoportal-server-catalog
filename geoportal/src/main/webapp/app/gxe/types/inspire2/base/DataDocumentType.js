@@ -1,18 +1,17 @@
 define(["dojo/_base/declare",
-        "dojo/_base/lang",
-        "./MyProfileDocumentType",
+        "./InspireDocumentType",
         "./DataRoot",
-        "dojo/i18n!../nls/i18nMyProfile"],
-function(declare, lang, DocumentType, RootDescriptor, i18nMyProfile) {
+        "dojo/i18n!../../../../nls/i18nInspire"],
+function(declare, DocumentType, RootDescriptor, i18nInspire) {
 
   var oThisClass = declare(DocumentType, {
 
-    caption: i18nMyProfile.documentTypes.data.caption,
-    description: i18nMyProfile.documentTypes.data.description,
+    caption: i18nInspire.documentTypes.data.caption,
+    description: i18nInspire.documentTypes.data.description,
     key: "inspire2-iso-19115",
     isService: false,
-    metadataStandardName: "MyProfile",
-    metadataStandardVersion: "1.0",
+    metadataStandardName: "INSPIRE Metadata Implementing Rules",
+    metadataStandardVersion: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 2.0)",
 
     newRootDescriptor: function() {
       return new RootDescriptor();
