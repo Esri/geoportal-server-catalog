@@ -18,24 +18,9 @@
           label:'${i18nInspire.keywordSections.serviceCategory}'">
         <div data-dojo-type="esri/dijit/metadata/form/InputSelectMany"
           data-dojo-props="subTarget:'gco:CharacterString'">
-          <div data-dojo-type="esri/dijit/metadata/types/inspire/srv/ServiceCategoryOptions"></div>
+          <div data-dojo-type="app/gxe/types/inspire2/srv/ServiceCategoryOptions"></div>
         </div>
       </div>
-      
-      <!--
-      <div data-dojo-type="gxe/form/iso/CodeListReference" data-dojo-props="target:'gmd:type',
-          fixed:true,label:'Do we need the MD_KeywordTypeCode?'">
-        <div data-dojo-type="gxe/form/iso/CodeListElement" data-dojo-props="target:'gmd:MD_KeywordTypeCode'">
-          <div data-dojo-type="gxe/form/iso/CodeSpaceAttribute"></div>  
-          <div data-dojo-type="gxe/form/iso/CodeListAttribute"
-            data-dojo-props="value:'${codeListPrefix}MD_KeywordTypeCode'">
-          </div>
-          <div data-dojo-type="gxe/form/iso/CodeListValueAttribute" 
-            data-dojo-props="value:'theme'">
-          </div>
-        </div>    
-      </div>
-      -->
       
       <!-- ISO 19119 service taxonomy -->
       <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gmd:thesaurusName',
