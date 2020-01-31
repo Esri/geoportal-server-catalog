@@ -9,6 +9,14 @@ define({
       service: {
         caption: "INSPIRE (Service)",
         description: ""
+      },
+      data_v2: {
+        caption: "INSPIRE 2.0 (Data)",
+        description: ""
+      },
+      service_v2: {
+        caption: "INSPIRE 2.0 (Service)",
+        description: ""
       }
     },
 
