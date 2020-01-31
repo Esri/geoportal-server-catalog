@@ -4,19 +4,17 @@
     data-dojo-props="target:'gmd:MD_Metadata',label:'${i18nInspire.documentTypes.data.caption}'">
     
     <div data-dojo-type="esri/dijit/metadata/form/Tabs">
-      
-      <div data-dojo-type="esri/dijit/metadata/types/inspire/gmd/metadataEntity/MetadataSection"
+      <div data-dojo-type="app/gxe/types/inspire2/gmd/metadataEntity/MetadataSection"
         data-dojo-props="label:'${i18nIso.sections.metadata}'"></div>
         
-      <div data-dojo-type="esri/dijit/metadata/types/inspire/gmd/identification/DataIdentification"
+      <div data-dojo-type="app/gxe/types/inspire2/gmd/identification/DataIdentification"
         data-dojo-props="label:'${i18nIso.sections.identification}'"></div>
-        
+      
       <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/distribution/Distribution"
         data-dojo-props="label:'${i18nIso.sections.distribution}'"></div>
         
       <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/dataQuality/Quality"
         data-dojo-props="label:'${i18nIso.sections.quality}'"></div>
-      
     </div>
 
   </div>
