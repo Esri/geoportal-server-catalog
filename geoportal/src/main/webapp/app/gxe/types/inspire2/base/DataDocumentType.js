@@ -6,8 +6,8 @@ function(declare, DocumentType, RootDescriptor, i18nInspire) {
 
   var oThisClass = declare(DocumentType, {
 
-    caption: i18nInspire.documentTypes.data.caption,
-    description: i18nInspire.documentTypes.data.description,
+    caption: i18nInspire.documentTypes.data_v2.caption,
+    description: i18nInspire.documentTypes.data_v2.description,
     key: "inspire2-iso-19115",
     isService: false,
     metadataStandardName: "INSPIRE Metadata Implementing Rules",
