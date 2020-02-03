@@ -1,10 +1,11 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/has",
+        "dojo/dom-style",
         "esri/dijit/metadata/types/iso/base/IsoDocumentType",
         "./PortalItemTransformer",
         "dojo/i18n!../../../../nls/i18nInspire"],
-function(declare, lang, has, DocumentType, PortalItemTransformer, i18nInspire) {
+function(declare, lang, has, domStyle, DocumentType, PortalItemTransformer, i18nInspire) {
 
   var oThisClass = declare(DocumentType, {
 
@@ -17,7 +18,9 @@ function(declare, lang, has, DocumentType, PortalItemTransformer, i18nInspire) {
     beforeInitializeAttribute: function(gxeDocument, attribute) {
       var p = attribute.gxePath;
 
-      if(!this.isService && (p === "/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue")) {
+      if (p==="/gmd:MD_Metadata/@xsi:schemaLocation") {
+        domStyle.set(attribute.domNode, "display", "none");
+      } else if(!this.isService && (p === "/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue")) {
         attribute.optionsFilter = "dataset,series";
       } else if(!this.isService && (p === "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:scope/gmd:DQ_Scope/gmd:level/gmd:MD_ScopeCode/@codeListValue")) {
         attribute.optionsFilter = "dataset,series";
@@ -46,7 +49,18 @@ function(declare, lang, has, DocumentType, PortalItemTransformer, i18nInspire) {
 
     newPortalItemTransformer: function(gxeDocument) {
       return new PortalItemTransformer();
-    }
+    },
+
+    initializeNamespaces: function() {
+      this.addNamespace("gmd", "http://www.isotc211.org/2005/gmd");
+      this.addNamespace("gco", "http://www.isotc211.org/2005/gco");
+      this.addNamespace("srv", "http://www.isotc211.org/2005/srv");
+      this.addNamespace("gml","http://www.opengis.net/gml/3.2");
+      this.addNamespace("gmx","http://www.isotc211.org/2005/gmx");
+      
+      this.addNamespace("xlink", "http://www.w3.org/1999/xlink");
+      this.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
+    },
 
   });
 
