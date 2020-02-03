@@ -3,7 +3,7 @@ define(["dojo/_base/declare",
         "dojo/has",
         "dojo/query",
         "dijit/registry",
-        "esri/dijit/metadata/types/inspire/base/PortalItemTransformer"],
+        "esri/dijit/metadata/types/iso/base/PortalItemTransformer"],
 function(declare, lang, has, query, registry, PortalItemTransformer) {
 
   var oThisClass = declare([PortalItemTransformer], {
