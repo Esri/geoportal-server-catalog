@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", 
         "dojo/_base/lang",
         "dojo/has",
-        "esri/dijit/metadata/base/Descriptor",
+        "../../base/Descriptor",
         "esri/dijit/metadata/form/Tabs",
         "esri/dijit/metadata/types/iso/gmd/identification/DataRepresentation",
         "esri/dijit/metadata/types/iso/gmd/identification/ResourceClassification",

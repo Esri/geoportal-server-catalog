@@ -1,7 +1,7 @@
 define(["dojo/_base/declare", 
         "dojo/_base/lang",
         "dojo/has",
-        "esri/dijit/metadata/base/Descriptor",
+        "../base/Descriptor",
         "esri/dijit/metadata/form/Element",
         "esri/dijit/metadata/form/InputSelectMany",
         "esri/dijit/metadata/form/iso/AbstractObject",
