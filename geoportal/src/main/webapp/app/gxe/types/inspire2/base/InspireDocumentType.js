@@ -18,9 +18,7 @@ function(declare, lang, has, domStyle, DocumentType, PortalItemTransformer, i18n
     beforeInitializeAttribute: function(gxeDocument, attribute) {
       var p = attribute.gxePath;
 
-      if (p==="/gmd:MD_Metadata/@xsi:schemaLocation") {
-        domStyle.set(attribute.domNode, "display", "none");
-      } else if(!this.isService && (p === "/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue")) {
+      if(!this.isService && (p === "/gmd:MD_Metadata/gmd:hierarchyLevel/gmd:MD_ScopeCode/@codeListValue")) {
         attribute.optionsFilter = "dataset,series";
       } else if(!this.isService && (p === "/gmd:MD_Metadata/gmd:dataQualityInfo/gmd:DQ_DataQuality/gmd:scope/gmd:DQ_Scope/gmd:level/gmd:MD_ScopeCode/@codeListValue")) {
         attribute.optionsFilter = "dataset,series";
