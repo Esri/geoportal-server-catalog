@@ -14,14 +14,16 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "./OtherConstraints",
         "./UseLimitation",
-        "dojo/text!./templates/ResourceConstraints.html"],
+        "dojo/text!./templates/ResourceConstraints.html",
+        "dojo/i18n!../../../../../nls/i18nInspire"],
 function(declare, lang, has, Descriptor, InputSelectOne, Options, Option, AbstractObject, CodeListAttribute,
   CodeListValueAttribute, CodeListElement, CodeListReference, CodeSpaceAttribute, ObjectReference, OtherConstraints,
-  UseLimitation, template) {
+  UseLimitation, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString: template
+    templateString: template,
+    i18nInspire: i18nInspire
 
   });
 

@@ -84,6 +84,27 @@ define({
       protectionOfEnvironment: "The protection of the environment to which such information relates...",
       freeText: "Free text"
     },
+    
+    useConstraints: {
+      otherConstraints: {
+        conditionsUnknown: "Conditions to access and use unknown",
+        noConditions: "No conditions to access and use"
+      }
+    },
+    
+    accessConstraints: {
+      otherConstraints: {
+        noLimitations: "No limitations to public access",
+        limited1a: "Public access limited according to Article 13(1)(a) of the INSPIRE Directive",
+        limited1b: "Public access limited according to Article 13(1)(b) of the INSPIRE Directive",
+        limited1c: "Public access limited according to Article 13(1)(c) of the INSPIRE Directive",
+        limited1d: "Public access limited according to Article 13(1)(d) of the INSPIRE Directive",
+        limited1e: "Public access limited according to Article 13(1)(e) of the INSPIRE Directive",
+        limited1f: "Public access limited according to Article 13(1)(f) of the INSPIRE Directive",
+        limited1g: "Public access limited according to Article 13(1)(g) of the INSPIRE Directive",
+        limited1h: "Public access limited according to Article 13(1)(h) of the INSPIRE Directive"
+      }
+    },
 
     serviceType: {
       humanInteractionService: "100 Geographic human interaction services",
