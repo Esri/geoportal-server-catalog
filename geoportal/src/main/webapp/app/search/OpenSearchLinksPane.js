@@ -82,14 +82,21 @@ define(["dojo/_base/declare",
               var postData = JSON.parse(this.searchPane.lastQuery);
               postData = postData? postData: {};
               
-              this._createLink("ATOM", i18n.search.links.atom, "atom", searchResponse.urlParams, postData);
-              this._createLink("CSW", i18n.search.links.csw, "csw", searchResponse.urlParams, postData);
-              this._createLink("JSON", i18n.search.links.json, "json", searchResponse.urlParams, postData);
-              this._createLink("CSV", i18n.search.links.csv, "csv", searchResponse.urlParams, postData);
-              this._createLink("KML", i18n.search.links.kml, "kml", searchResponse.urlParams, postData);
-              this._createLink("RSS", i18n.search.links.rss, "rss", searchResponse.urlParams, postData);
-              this._createLink("DCAT", i18n.search.links.dcat, "dcat", searchResponse.urlParams, postData);
-              this._createWebLink("WEB", i18n.search.links.web, "web", searchResponse.urlParams, postData);
+              if (!searchResponse.urlParams.hasScorable && typeof searchResponse.urlParams.sort === "undefined") {
+                searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
+              }
+              
+              var urlParams = lang.mixin({}, searchResponse.urlParams)
+              urlParams.from = urlParams.from? urlParams.from+1: 1
+              
+              this._createLink("ATOM", i18n.search.links.atom, "atom", urlParams, postData);
+              this._createLink("CSW", i18n.search.links.csw, "csw", urlParams, postData);
+              this._createLink("JSON", i18n.search.links.json, "json", urlParams, postData);
+              this._createLink("CSV", i18n.search.links.csv, "csv", urlParams, postData);
+              this._createLink("KML", i18n.search.links.kml, "kml", urlParams, postData);
+              this._createLink("RSS", i18n.search.links.rss, "rss", urlParams, postData);
+              this._createLink("DCAT", i18n.search.links.dcat, "dcat", urlParams, postData);
+              this._createWebLink("WEB", i18n.search.links.web, "web", urlParams, postData);
             }
 
         });
