@@ -1,17 +1,10 @@
+/* RESET */
 body {
   font-size: 12px;
   backGround-color: #ffffff;
 }
 
-/* chrome */
-
-
-/* outline: none commented out for accessibility*/
-/*
-:focus {
-  outline: none;
-}*/
-
+/* DOJO/DIJIT OVERRIDES */
 .calcite .dijitTitlePaneTitle, .calcite .dijitTitlePaneTextNode {
   font-size: 12px;
 }
@@ -25,22 +18,18 @@ body {
   border: 1px solid #ebebeb;
 }
 .calcite .dijitTitlePaneContentOuter {
-	/*border-top: 1px solid #ebebeb;*/
-	border: none;
+  /*border-top: 1px solid #ebebeb;*/
+  border: none;
 }
 
-/*
-.calcite .modal-dialog .modal-content .modal-header .close {
-  font-size: 21px;
-}
-*/
-
+/* STYLES */
+/* Note: you need to match or trump Calcite-Bootstrap specificity */
 .g-indent {
-	margin-left: 20px;
+  margin-left: 20px;
 }
 
 .g-loading {
-	margin-right: 4px;
+  margin-right: 4px;
   width: 16px;
   height: 16px;
   background-image: url("images/LoadingAnimation16_Trans.gif");
@@ -84,69 +73,125 @@ body {
   border-radius: 4px;
 }
 
-.navbar-inverse {
-  background-color: #005e95;
+/* HEADER */
+/* HEADER - BRANDING */
+.g-branding {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
 }
-.navbar-inverse .navbar-nav > .active > a, 
-.navbar-inverse .navbar-nav > .active > a:hover, 
-.navbar-inverse .navbar-nav > .active > a:focus {
-  background-color: #478CB8;
-  color: #ffffff;
+
+.g-brand-logo {
+  width: 32px;
+  height: 32px;
 }
-.navbar-inverse .navbar-nav > li > a {
-  color: #ffffff;
+
+.g-header .g-branding .navbar-brand {
+  color: #404040;
+  transition: color linear 250ms;
 }
-.navbar-inverse .glyphicon, .navbar-inverse .navbar-brand {
-  color: #ffffff;
+
+.g-header .g-branding .navbar-brand:hover {
+  color: #000;
 }
-.g-app > .navbar {
-	min-height: 5px;
+
+/* HEADER - NAV */
+.g-header.navbar-inverse {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 70px;
+  background-color: #fff;
 }
-.g-app > .navbar-inverse .navbar-nav > li > a {
-	padding-left: 8px;
+
+.g-header .navbar-nav {
+  display: flex;
+  align-items: baseline;
+  font-weight: 200;
+  color: #404040;
+}
+
+.g-header .navbar-nav .nav-item {
+  float: none;
+}
+
+.g-header .navbar-nav .nav-item.active {
+  background: transparent;
+}
+
+.g-header .navbar-nav .nav-item .nav-link {
+  float: none;
+  padding-left: 8px;
   padding-right: 8px;
-	padding-bottom: 12px;
-	padding-top: 12px;
+  padding-bottom: 12px;
+  padding-top: 12px;
+  border-bottom: 4px solid transparent;
+  background: transparent;
+  color: #404040;
+  transition: all linear 250ms;
 }
-.g-app > .navbar-inverse .navbar-nav > li > a:hover, 
-.g-app > .navbar-inverse .navbar-nav > li > a:focus {
-  background-image: none;
-  transition: none;
-  background-color: transparent;
+
+.g-header .navbar-nav .nav-item .nav-link:hover,
+.g-header .navbar-nav .nav-item .nav-link:focus {
+  border-bottom: 4px solid #2890CE;
+  color: #007ac2;
 }
-.g-app > .navbar-inverse .navbar-nav > li.active > a {
-  background-image: linear-gradient(to bottom, transparent 90%, #cfe1ec 91%, #cfe1ec 100%);
-  transition: color 150ms linear 0s, text-decoration 150ms linear 0s;
-  background-color: transparent;
+
+.g-header .navbar-nav .nav-item.active .nav-link {
+  border-bottom: 4px solid #2890CE;
+  background: transparent;
+  color: #000;
 }
-.g-app > .navbar-inverse .navbar-nav > li > a:hover {
-  outline: thin dotted;
-  outline-offset: -2px;
+
+/* USER ACCOUNT */
+.g-tools .g-signin,
+.g-tools .g-signin {
+  font-size: 16px;
+  color: #404040;
+  transition: color linear 250ms;
 }
-.g-app > .navbar-inverse .g-tools {
-  padding-top: 13px;
-  padding-right: 20px;
-  color: #ffffff;
+
+.g-tools .g-signin:hover,
+.g-tools .g-signin:focus {
+  color: #007ac2;
 }
-.g-app > .navbar-inverse .g-tools > a {
-  color: #ffffff;
+
+.g-user:hover {
+  text-decoration: none;
 }
-.g-app > .navbar-inverse .g-tools > .g-options {
-  margin-left: 16px;
+
+.g-user-thumb {
+  width: 32px;
+  height: 32px;
+  margin-right: 10px;
+  border-radius: 100%;
+  background: #bbb;
+}
+
+.g-username {
+  font-size: 16px;
+  color: #404040;
+  transition: color linear 250ms;
+}
+
+.g-user:hover .g-username,
+.g-user:focus .g-username {
+  color: #007ac2;
+  text-decoration: underline;
 }
 
 .g-search-pane {
-	margin: 0px 20px 20px 20px; 
-	padding: 0px;
+  margin: 0px 20px 20px 20px;
+  padding: 0px;
 }
 .g-search-pane-left {
-	/*width: 25%; */
-	/*min-width: 100px; */
-	float: left; 
+  /*width: 25%; */
+  /*min-width: 100px; */
+  float: left;
 }
 .g-search-pane-right {
-	/*width: 73%; */
-	float: right; 
+  /*width: 73%; */
+  float: right;
 }
 
 .g-drop-pane-tools {
@@ -202,13 +247,13 @@ and will apply to all search facets */
 }
 
 .g-applied-filters .g-drop-pane-tools label {
-	margin-right: 20px;
-	margin-top: 4px;
+  margin-right: 20px;
+  margin-top: 4px;
 }
 /*
 .g-applied-filters .g-drop-pane-tools .glyphicon {
-	vertical-align: none;
-	top: 0;
+  vertical-align: none;
+  top: 0;
 }
 */
 
@@ -218,7 +263,7 @@ and will apply to all search facets */
   margin-right: 4px;
   border: 1px solid #cccccc;
   border-radius: 5px;
-  
+
 }
 .g-applied-filter a {
   vertical-align: middle;
@@ -234,8 +279,8 @@ and will apply to all search facets */
 }
 
 .g-paging {
-	display: inline-block;
-	margin-left: 10px;
+  display: inline-block;
+  margin-left: 10px;
 }
 .g-paging-count {
   display: inline-block;
@@ -271,21 +316,21 @@ and will apply to all search facets */
   margin-right: 0.5em;
 }
 
-.g-item-card .g-item-description, 
-.g-item-card .g-item-actions, 
+.g-item-card .g-item-description,
+.g-item-card .g-item-actions,
 .g-item-card .g-item-owner-and-date {
-	margin-left: 20px;
+  margin-left: 20px;
 }
 
-.g-item-card .g-item-description, 
+.g-item-card .g-item-description,
 .g-item-card .g-item-owner-and-date {
   padding: 2px;
   font-size: 10px;
   width: 85%;
 }
 .g-item-card .g-item-thumbnail {
-	width: 80px;
-	height: 60px;
+  width: 80px;
+  height: 60px;
 }
 
 /* Style for descriptions creates a cap of a few lines of text  */
@@ -299,15 +344,15 @@ and will apply to all search facets */
   padding: 2px;
   clear: both;
 }
-.g-item-card .g-item-actions > a, 
+.g-item-card .g-item-actions > a,
 .g-item-card .g-item-actions > .dropdown {
   margin-right: 20px;
 }
 
 .g-item-card .g-item-actions > .dropdown > .dropdown-menu {
-	max-height: 300px;
-	overflow-y: auto;
-	padding-right: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 20px;
 }
 
 .g-scrollable-typeahead .tt-menu {
@@ -316,16 +361,16 @@ and will apply to all search facets */
 }
 
 .g-validation-errors {
-	margin-top: 12px;
-	max-height: 200px;
-	overflow-y: auto;
+  margin-top: 12px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .g-mapframe-container {
   position: absolute;
   top: 50px; /* TODO ?? */
-  left: 0; 
-  bottom: 4px; 
+  left: 0;
+  bottom: 4px;
   right: 0;
 }
 .g-mapframe-container > iframe {
@@ -335,21 +380,21 @@ and will apply to all search facets */
 }
 
 .g-input-number {
-	/*width: 200px;*/
+  /*width: 200px;*/
 }
 
 .modal-body > .g-settings-pane {
-	max-height: 420px;
-	overflow-y: auto;
-	padding-right: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 10px;
 }
 
 .g-labels-right .form-group input {
-	margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 .g-labels-right .control-label {
-	text-align: right;
-	color: #6e6e6e;
+  text-align: right;
+  color: #6e6e6e;
 }
 
 .calcite .gxePrimaryToolbar > .gxeTabs > .gxeTabButton {
@@ -361,7 +406,7 @@ and will apply to all search facets */
   float: right;
 }
 .gxePrimaryToolbar > .gxeTabs > .gxeMessageArea {
-	clear: right;
+  clear: right;
   position: relative;
   left: 200px;
   margin-top: -20px;
@@ -369,7 +414,7 @@ and will apply to all search facets */
 */
 
 .g-temporal-bar {
-	margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 .g-temporal-bar select {
   margin-left: 3px;
@@ -386,18 +431,18 @@ and will apply to all search facets */
   cursor: pointer;
 }
 .g-start-date {
-  
+
 }
 .g-end-date {
   float: right;
 }
 .g-start-date .g-start-date-calendar {
-  
+
 }
 .g-end-date .g-end-date-calendar {
 }
 .g-start-date .g-start-date-calendar-label {
-  
+
 }
 .g-end-date .g-end-date-calendar-label {
 }
@@ -421,7 +466,7 @@ and will apply to all search facets */
 }
 
 .g-temporal-d3 .area {
-	/* #818181 #a7a7a7 */
+  /* #818181 #a7a7a7 */
   fill: #a7a7a7;
 }
 
@@ -433,7 +478,7 @@ and will apply to all search facets */
 }
 
 .g-temporal-d3 .resize path {
-	/* #bfbfbf #b3b3b3 #818181 */
+  /* #bfbfbf #b3b3b3 #818181 */
   fill: #0079c1;
   fill-opacity: 0.6;
   stroke: #0079c1;
@@ -452,21 +497,21 @@ and will apply to all search facets */
   z-index: 99;
 }
 
-.dijitTooltipContainer, .dijitTooltipContainer > div, 
-.dijitTooltipContainer > div > div, 
+.dijitTooltipContainer, .dijitTooltipContainer > div,
+.dijitTooltipContainer > div > div,
 .dijitTooltipContainer > div > div > div {
   width: 100%;
   height: 100%;
 }
 
 .g-preview-error {
-  position: absolute; 
-  color: black; 
-  background-color: white; 
-  left: 32%; 
+  position: absolute;
+  color: black;
+  background-color: white;
+  left: 32%;
   right: 32%;
-  top: 50%; 
-  z-index: 1; 
+  top: 50%;
+  z-index: 1;
   padding: 3px;
   border: #000000 solid thin;
   border-radius: 4px;
@@ -474,8 +519,8 @@ and will apply to all search facets */
 }
 
 .g-access-groups {
-	margin: 0px;
-	padding: 5px;
+  margin: 0px;
+  padding: 5px;
   max-height: 100px;
   overflow-y: auto;
   border: 1px solid #cccccc;
@@ -483,8 +528,8 @@ and will apply to all search facets */
 }
 
 .modal-dialog .navbar {
-	min-height: 0px;
-	margin-bottom: 8px;
+  min-height: 0px;
+  margin-bottom: 8px;
 }
 
 /* Accessibility Changes */
@@ -511,25 +556,25 @@ a.dropdown-toggle:focus {
 }
 
 .offscreen {
-	position: absolute;
-	height: 1px;
-	width: 1px;
-	overflow: hidden;
-	clip-path: inset(1px 1px 1px 1px);
-	clip-path: inset(1px, 1px, 1px, 1px);
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip-path: inset(1px 1px 1px 1px);
+  clip-path: inset(1px, 1px, 1px, 1px);
 }
 
 .skip-to-content.offscreen:focus {
-	position: relative;
-	display: inline-block;
-	height: auto;
-	width: auto;
-	padding: 0.625em 1.25em;
-	background-color: #005e95;
-	color: #fff;
-	overflow: visible;
-	clip-path: none;
-	text-decoration: none;
+  position: relative;
+  display: inline-block;
+  height: auto;
+  width: auto;
+  padding: 0.625em 1.25em;
+  background-color: #005e95;
+  color: #fff;
+  overflow: visible;
+  clip-path: none;
+  text-decoration: none;
 }
 
 .g-open-search-result-links {
@@ -562,17 +607,17 @@ a.dropdown-toggle:focus {
 }
 
 .g-basic-from-value-input-label {
-  
+
 }
 
 .g-basic-to-value-input-label {
-  
+
 }
 
 
 
 .g-from-value {
-  
+
 }
 
 .g-to-value {
@@ -580,22 +625,22 @@ a.dropdown-toggle:focus {
 }
 
 .g-from-value-input {
-  
+
 }
 
 .g-to-value-input {
-  
+
 }
 
 .g-from-value-input-label {
-  
+
 }
 
 .g-to-value-input-label {
-  
+
 }
 
 .g-input-field-note {
-	font-size: 10px;
-	font-style: italic;
+  font-size: 10px;
+  font-style: italic;
 }
