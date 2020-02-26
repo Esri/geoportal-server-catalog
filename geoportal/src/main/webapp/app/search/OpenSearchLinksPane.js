@@ -82,7 +82,7 @@ define(["dojo/_base/declare",
               var postData = JSON.parse(this.searchPane.lastQuery);
               postData = postData? postData: {};
               
-              if (!searchResponse.urlParams.hasScorable && typeof searchResponse.urlParams.sort === "undefined") {
+              if (!searchResponse.hasScorable && typeof searchResponse.urlParams.sort === "undefined") {
                 searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
               }
               
