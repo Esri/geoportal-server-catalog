@@ -14,7 +14,7 @@
  */
 define({
   root: {
-    
+
     general: {
       cancel: "Cancel",
       clear: "Clear",
@@ -29,13 +29,15 @@ define({
       uploading: "Uploading...",
       working: "...",
     },
-    
+
     nav: {
       brand: "Geoportal",
       home: "Home",
       search: "Search",
+      catalog: "Catalog",
       map: "Map",
       about: "About",
+      admin: "Admin",
       content: "Content",
       welcomePattern: "{name}",
       signIn: "Sign In",
@@ -44,10 +46,11 @@ define({
         createAccount: "Create Account",
         createMetadata: "Create Metadata",
         myProfile: "My Profile",
-        uploadMetadata: "Upload Metadata"
+        uploadMetadata: "Upload Metadata",
+        editFacet: "Edit Facet"
       }
     },
-    
+
     login: {
       caption: "Sign In",
       label: "Sign In",
@@ -56,7 +59,7 @@ define({
       incomplete: "A Username and Password are required.",
       invalidCredentials: "Invalid credentials."
     },
-    
+
     search: {
       criteria: {
         map: "Map",
@@ -249,7 +252,7 @@ define({
         dcat: "DCAT result"
       }
     },
-    
+
     item: {
       actions: {
         html: "HTML",
@@ -278,7 +281,7 @@ define({
         status: "Service availability = ${score}%"
       }
     },
-    
+
     content: {
       updateButton: "Update",
       applyTo: {
@@ -324,8 +327,8 @@ define({
         caption: "Set Field",
         tags: {
           caption: "Tags",
-          value: "User Tags (comma delimited)", 
-        }, 
+          value: "User Tags (comma delimited)",
+        },
         advanced: {
           caption: "Advanced",
           prompt: "",
@@ -338,7 +341,7 @@ define({
         button: "Upload"
       }
     },
-    
+
     metadataEditor: {
       caption: "Metadata",
       loading: "Starting editor...",
@@ -346,7 +349,7 @@ define({
       asTemplatePrompt: "Reset identifiers",
       xmlViewOnly: "The type of metadata associated with this item is not supported by the editor."
     },
-    
+
     errorTranslations: {
       "Unrecognized metadata type.": null,
       "Access denied - not owner.": null,

@@ -125,6 +125,7 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
         this.userOptionsNode.style.display = "";
         this.signInNode.style.display = "none";
         this.signOutNode.style.display = "";
+        this.adminOptionsBtnNode.style.display = "";
         updateHref(this.createAccountNode,this.createAccountLink,null);
         updateHref(this.myProfileNode,this.myProfileLink,AppContext.appUser.getMyProfileUrl());
       } else {
@@ -133,6 +134,7 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
         this.createAccountNode.style.display = "none";
         this.signInNode.style.display = "";
         this.signOutNode.style.display = "none";
+        this.adminOptionsBtnNode.style.display = "none";
         updateHref(this.createAccountNode,this.createAccountLink,this.getCreateAccountUrl());
         updateHref(this.myProfileNode,this.myProfileLink,null);
       }

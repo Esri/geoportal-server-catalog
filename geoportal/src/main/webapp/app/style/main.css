@@ -143,6 +143,28 @@ body {
   color: #000;
 }
 
+.g-header .navbar-nav .nav-item .g-nav-dropdown-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  color: #404040;
+  transition: color linear 250ms;
+}
+
+.g-header .navbar-nav .nav-item .g-nav-dropdown-link:hover,
+.g-header .navbar-nav .nav-item .g-nav-dropdown-link:focus {
+  border: 0;
+  background: transparent;
+  color: #007ac2;
+}
+
+.g-nav-dropdown-icon {
+  width: 24px;
+  height: 24px;
+  fill: #2890ce;
+}
+
 /* USER ACCOUNT */
 .g-tools .g-signin,
 .g-tools .g-signin {
@@ -179,6 +201,8 @@ body {
   color: #007ac2;
   text-decoration: underline;
 }
+
+
 
 .g-search-pane {
   margin: 0px 20px 20px 20px;
