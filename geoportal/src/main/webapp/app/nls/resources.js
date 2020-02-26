@@ -84,7 +84,8 @@ define({
         reset: "Reset"
       },
       searchBox: {
-        search: "Search"
+        search: "Search",
+        searchCatalog: "Search the Catalog"
       },
       spatialFilter: {
         label: "Map",
