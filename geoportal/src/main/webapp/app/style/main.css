@@ -14,18 +14,22 @@ body {
 .calcite .dijitTitlePaneTitle, .calcite .dijitTitlePaneTextNode {
   font-size: 12px;
 }
+
 .calcite .dijitTitlePaneTitle {
   padding: 4px 6px;
 }
-.calcite .dijitTitlePaneContentInner {
-  padding: 8px;
-}
+
 .calcite .dijitTitlePane {
   border: 1px solid #ebebeb;
 }
+
 .calcite .dijitTitlePaneContentOuter {
   /*border-top: 1px solid #ebebeb;*/
   border: none;
+}
+
+.calcite .esriSimpleSliderTL {
+  top: 55px;
 }
 
 /* STYLES */
@@ -231,11 +235,12 @@ body {
 
 /* SEARCH PANEL - SEARCHBAR ROW */
 .g-search-bar-row {
+  position: relative;
+  z-index: 10;
   display: flex;
   justify-content: center;
   align-items: center;
   width: 100%;
-  margin-bottom: 15px;
   background: #0670ae;
   box-shadow: 0px 1px 2px rgba(0,0,0, 0.25);
 }
@@ -295,20 +300,141 @@ body {
   font-size: 14px;
 }
 
-/* SEARCH PANEL - CONTENT*/
+/* SEARCH PANEL - CONTENT */
 .g-search-content-row {
   display: flex;
   width: 1024px;
-  height: calc(100% - 90px);
+  height: calc(100% - 60px);
   overflow: hidden;
 }
 
-/* ABOUT PANEL - CONTENT*/
-.g-about-content-row {
-  width: 1024px;
-  height: 100%;
-  margin: auto;
-  overflow: hidden;
+.g-search-pane-left {
+  width: 30%;
+  padding: 15px 0;
+  margin-right: 48px;
+  overflow: auto;
+}
+
+.g-search-pane-right {
+  width: calc(70% - 46px);
+  padding: 15px 0;
+}
+
+.g-filter-collapse {
+  margin-bottom: 10px;
+}
+
+.g-filter-collapse.last {
+  margin-bottom: 25px;
+}
+
+.g-filter-create-btn {
+  display: flex;
+  width: 100%;
+  margin-top: 25px;
+  padding: 10px 20px;
+  border: 0;
+  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  background: #fff;
+  transition: background linear 250ms;
+}
+
+.g-filter-create-btn:hover {
+  background: #2890ce;
+}
+
+.g-filter-create-btn label {
+  margin: 0 0 0 15px;
+  font-weight: 200;
+  color: #404040;
+  transition: color linear 250ms;
+}
+
+.g-filter-create-btn:hover label {
+  cursor: pointer;
+  color: #fff;
+}
+
+.g-filter-create-icon {
+  width: 24px;
+  height: 24px;
+  fill: #959595;
+  transition: fill linear 250ms;
+}
+
+.g-filter-create-btn:hover .g-filter-create-icon {
+  fill: #fff;
+}
+
+.g-filter-spatial {
+  margin-bottom: 25px;
+}
+
+.g-search-content-row .g-drop-pane {
+  border: 0;
+}
+
+.g-search-pane-left .dijitTitlePaneTitle {
+  /* resolves map disappearing issue #63
+  and will apply to all search facets */
+  overflow-y:hidden !important;
+  padding: 10px 20px;
+  background: #fff;
+  transition: background linear 250ms;
+}
+
+.g-search-pane-left .dijitTitlePaneTitle:hover {
+  background: #f8f8f8;
+}
+
+.g-search-pane-left .dijitTitlePaneTextNode {
+  font-size: 16px;
+}
+
+.g-search-pane-left .dijitTitlePaneContentInner {
+  position: relative;
+  padding: 10px;
+}
+
+/* SEARCH PANEL - COLLAPSIBLE CARDS */
+.g-drop-pane .dijitTitlePaneTextNode {
+  margin-left: 15px;
+}
+
+.g-drop-pane.fixed .dijitTitlePaneTextNode {
+  margin-left: 0;
+}
+
+.g-drop-pane .dijitTitlePaneTitle.dijitTitlePaneTitleOpen.dijitOpen {
+  background: #606060;
+  color: #fff;
+}
+
+.g-drop-pane.fixed .dijitTitlePaneTitle {
+  cursor: auto;
+  pointer-events: none;
+}
+
+.g-drop-pane.fixed .dijitTitlePaneTitleFocus {
+  cursor: auto;
+  position: relative;
+}
+
+.g-drop-pane .g-drop-pane-arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: #959595;
+  transform: rotate(-90deg);
+  transition: transform ease-in-out 250ms;
+}
+
+.g-drop-pane .dijitOpen .g-drop-pane-arrow svg {
+  fill: #fff;
+  transform: rotate(0deg);
+}
+
+.g-drop-pane.fixed .g-drop-pane-arrow svg {
+  display: none;
 }
 
 .g-drop-pane-tools {
@@ -316,30 +442,38 @@ body {
   vertical-align: middle;
 }
 
+.g-drop-pane.fixed .g-drop-pane-tools {
+  pointer-events: all;
+}
+
 .g-drop-pane-tools input {
   vertical-align: top;
   cursor: pointer;
 }
+
 .g-drop-pane-tools label {
   margin-left: 3px;
   font-size: 10px;
   font-weight: normal;
   cursor: pointer;
 }
-.g-drop-pane-tools .glyphicon {
-  vertical-align: middle;
-  margin-bottom: 4px;
+
+.g-drop-pane .g-drop-pane-tools svg {
+  display: none;
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+}
+
+.g-drop-pane .dijitOpen .g-drop-pane-tools svg {
+  display: block;
 }
 
 .g-drop-pane .g-entries {
   max-height: 200px;
   overflow-y: auto;
 }
-/* resolves map disappearing issue #63
-and will apply to all search facets */
-.g-search-pane-left .dijitTitlePaneTitle {
-    overflow-y:hidden !important;
-}
+
 .g-entry-links > div {
   padding: 2px 0px;
 }
@@ -349,18 +483,27 @@ and will apply to all search facets */
   width: auto !important;
 
 }
+
 .g-spatial-filter-relations {
-  margin-right: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 10px 0;
+  font-size: 12px;
 }
-.g-spatial-filter-relation {
-  margin-left: 12px;
+
+.g-spatial-filter-relation label {
+  margin-left: 10px;
+  font-weight: 200;
 }
+
 .g-spatial-filter-locator {
-  display: block;
-  position: fixed;
+  position: absolute;
   z-index: 31;
-  left: 44px;
-  top: 215px;
+  /* these dims should be fixed but they change in code */
+  left: 25px !important;
+  top: 25px !important;
 }
 
 .g-applied-filters .g-drop-pane-tools label {
@@ -644,8 +787,18 @@ and will apply to all search facets */
   margin-bottom: 8px;
 }
 
+/* ABOUT PANEL - CONTENT*/
+.g-about-content-row {
+  width: 1024px;
+  height: 100%;
+  margin: auto;
+  overflow: hidden;
+}
+
 /* FOOTER */
 .g-footer {
+  position: relative;
+  z-index: 10;
   width: 100%;
   height: 48px;
   background: #fff;

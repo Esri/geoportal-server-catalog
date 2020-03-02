@@ -76,7 +76,8 @@ define({
         approvalStatus: "Approval Status",
         access: "Access",
         accessGroups: "Access Groups",
-        missingSource: "Editor/Upload"
+        missingSource: "Editor/Upload",
+        createFilter: "Create Filter"
       },
       componentSettings: {
         componentLabel: "Label",
