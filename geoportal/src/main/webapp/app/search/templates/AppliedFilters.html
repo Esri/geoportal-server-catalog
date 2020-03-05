@@ -1,7 +1,11 @@
-<div class="g-applied-filters">
-	<div class="g-drop-pane" data-dojo-type="app/search/DropPane" 
-	  data-dojo-attach-point="dropPane"
-	  data-dojo-props="title:'${label}',open:${open}">
-	  <div class="g-entries" data-dojo-attach-point="entriesNode"></div>
-	</div>
+<div class="g-applied-filters" data-dojo-attach-point="filtersNode">
+  <div id="g-entries-js" class="g-entries" data-dojo-attach-point="entriesNode">
+    <a href="#"
+      class="g-applied-filters-clear"
+      title="${i18n.search.appliedFilters.clearAll}"
+      data-dojo-attach-point="clearAllLinkNode"
+    >
+      ${i18n.search.appliedFilters.clearAll}
+    </a>
+  </div>
 </div>
