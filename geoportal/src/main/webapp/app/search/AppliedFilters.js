@@ -18,11 +18,12 @@ define(["dojo/_base/declare",
         "dojo/dom-construct",
         "dojo/on",
         "dojo/query",
+        "dojo/dom-class",
         "dojo/text!./templates/AppliedFilters.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/search/AppliedFilter"],
-function(declare, lang, array, domConstruct, on, query, template, i18n, SearchComponent, AppliedFilter) {
+function(declare, lang, array, domConstruct, on, query, domClass, template, i18n, SearchComponent, AppliedFilter) {
 
   var oThisClass = declare([SearchComponent], {
 
@@ -50,16 +51,6 @@ function(declare, lang, array, domConstruct, on, query, template, i18n, SearchCo
           this.clearAll();
         }))
       );
-      // var link = this.clearAllNode = domConstruct.create("a",{
-      //   href: "#",
-      //   onclick: lang.hitch(this,function(e) {
-      //     //e.stopPropagation();
-      //     //e.preventDefault();
-      //     this.clearAll();
-      //   })
-      // },this.filtersNode);
-      // link.innerHTML = "<span class=\"glyphicon glyphicon-remove\"></span>";
-      // link.title = i18n.search.appliedFilters.clearAll;
     },
 
     addMyContent: function() {
@@ -159,8 +150,18 @@ function(declare, lang, array, domConstruct, on, query, template, i18n, SearchCo
       // else this.dropPane.setDisplayTools(false);
       if (showMyContent) this.myContentNode.style.display = "";
       else this.myContentNode.style.display = "none";
-      if (hasViewable) this.clearAllLinkNode.style.display = "";
-      else this.clearAllLinkNode.style.display = "none";
+
+      if (hasViewable) {
+        this.clearAllLinkNode.style.display = "";
+        // query the filtersNode height and adjust the search results pane to fit in the space
+        var filtersHeight = query(".g-applied-filters")[0].clientHeight;
+        query(".g-search-results-pane").style("height", "calc(100% - " + filtersHeight +"px)");
+      }
+      else {
+        this.clearAllLinkNode.style.display = "none";
+        // reset the search results pane
+        query(".g-search-results-pane").style("height", "100%");
+      }
 
       if (this.autoExpand) {
         var count = this.count();

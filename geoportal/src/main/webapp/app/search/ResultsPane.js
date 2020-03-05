@@ -17,6 +17,7 @@ define(["dojo/_base/declare",
         "dojo/_base/array",
         "dojo/aspect",
         "dojo/dom-construct",
+        "dojo/query",
         "dojo/text!./templates/ResultsPane.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
@@ -25,7 +26,7 @@ define(["dojo/_base/declare",
         "app/search/Paging",
         "dojox/widget/Standby",
         "app/etc/util"],
-    function (declare, lang, array, aspect, domConstruct, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby, Util) {
+    function (declare, lang, array, aspect, domConstruct, query, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby, Util) {
 
         var oThisClass = declare([SearchComponent], {
 
@@ -42,7 +43,7 @@ define(["dojo/_base/declare",
                 this.inherited(arguments);
                 this.addSort();
                 this.paging = new Paging({});
-                this.paging.placeAt(this.dropPane.toolsNode);
+                this.paging.placeAt(this.resultsFooterNode);
                 /*
                 // no longer needed
                 this.own(aspect.after(this.paging,"search",lang.hitch(this,function(){
@@ -50,7 +51,7 @@ define(["dojo/_base/declare",
                 })));
                 */
                 document.body.appendChild(this.statusNode.domNode);
-                this.statusNode.target = this.dropPane.domNode;
+                this.statusNode.target = this.containerNode;
             },
 
             addSort: function () {
@@ -85,7 +86,7 @@ define(["dojo/_base/declare",
 
                 dd = domConstruct.create("div", {
                     "class": "dropdown g-sort-dropdown"
-                }, this.dropPane.toolsNode);
+                }, this.resultsHeaderNode);
                 var ddbtn = domConstruct.create("a", {
                     "class": "dropdown-toggle",
                     "href": "#",
@@ -114,11 +115,12 @@ define(["dojo/_base/declare",
                 this.noMatchNode.style.display = "none";
                 this.noMatchNode.innerHTML = "";
                 var rm = [];
-                array.forEach(this.dropPane.getChildren(), function (child) {
-                    if (child.isItemCard) rm.push(child);
+                array.forEach(query(".g-item-card", this.itemsNode), function (child) {
+                    //if (child.isItemCard)
+                    rm.push(child);
                 });
                 array.forEach(rm, function (child) {
-                    this.dropPane.removeChild(child);
+                    this.itemsNode.removeChild(child);
                 }, this);
             },
 

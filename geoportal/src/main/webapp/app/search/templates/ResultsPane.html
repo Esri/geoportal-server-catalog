@@ -1,10 +1,11 @@
 <div class="g-search-results-pane" data-dojo-attach-point="containerNode">
-  <div class="g-drop-pane" data-dojo-type="app/search/DropPane" 
+  <!-- <div class="g-drop-pane" data-dojo-type="app/search/DropPane"
     data-dojo-attach-point="dropPane"
     data-dojo-props="title:'${label}',open:${open}">
-    <div data-dojo-attach-point="noMatchNode" class="text-danger" style="display:none;"></div>
-    <div class="g-search-results container" data-dojo-attach-point="itemsNode"></div>
-  </div>
-  <div data-dojo-type="dojox.widget.Standby"
-       data-dojo-attach-point="statusNode"></div>
+  </div> -->
+  <div data-dojo-attach-point="resultsHeaderNode"></div>
+  <div data-dojo-attach-point="noMatchNode" class="text-danger" style="display:none;"></div>
+  <div class="g-search-results container" data-dojo-attach-point="itemsNode"></div>
+  <div data-dojo-attach-point="resultsFooterNode"></div>
+  <div data-dojo-type="dojox.widget.Standby" data-dojo-attach-point="statusNode"></div>
 </div>

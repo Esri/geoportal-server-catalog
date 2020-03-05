@@ -544,6 +544,17 @@ body {
   fill: #959595;
 }
 
+/* SEARCH RESULTS PANE */
+
+.g-search-results-pane {
+  height: 100%;
+}
+
+/* reset height to allow for filters to show */
+/* .g-applied-filters.active + .g-search-results-pane {
+  height: 90%;
+} */
+
 .g-search-results-pane .g-sort-dropdown {
   display: inline-block;
   width: 120px;
@@ -569,11 +580,8 @@ body {
 }
 
 .g-search-results {
-  /*max-height: 400px;
-  overflow-y: auto;*/
-  max-height: -webkit-calc(100vh  - 16em);
-  max-height:    -moz-calc(100vh  - 16em);
-  max-height:         calc(100vh  - 16em);
+  width: 100%;
+  height: calc(100% - 60px);
   overflow: auto;
 }
 
