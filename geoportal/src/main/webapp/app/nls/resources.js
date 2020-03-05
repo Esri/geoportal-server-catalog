@@ -359,7 +359,12 @@ define({
       "Id not found.": null,
       "org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.": "Not an XML file.",
       "javax.json.stream.JsonParsingException: Invalid JSON": "Invalid JSON"
-    }
+    },
 
+    footer: {
+      "copyright": "© Geoportal 2020",
+      "quickLink1": "Quick Link 1",
+      "quickLink2": "Quick Link 2"
+    }
   }
 });
