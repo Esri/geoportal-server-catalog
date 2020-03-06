@@ -555,8 +555,57 @@ body {
 }
 
 .g-search-results-header {
+  display: flex;
+  justify-content: flex-end;
   border-bottom: 1px solid #e4e4e4;
-  text-align: right;
+}
+
+.g-search-results-sort {
+  position: relative;
+}
+
+.g-search-results-sort-container {
+  display: flex;
+  align-items: center;
+}
+
+.g-search-results-sort-link {
+  display: flex;
+  align-items: center;
+  color: #4c4c4c;
+}
+
+.g-search-results-sort-link-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  transform: rotateY(180deg);
+}
+
+.g-search-results-sort-btn {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-left: 15px;
+}
+
+.g-search-results-sort-btn.hidden {
+  display: none;
+}
+
+.g-search-results-sort-btn svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+
+.g-search-results-sort-btn.desc svg {
+  transform: rotateX(180deg);
+}
+
+.g-search-results-sort-btn span {
+  font-size: 14px;
+  font-weight: 400;
 }
 
 .g-search-results-footer {
