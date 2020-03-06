@@ -18,6 +18,8 @@ define(["dojo/_base/declare",
         "dojo/aspect",
         "dojo/dom-construct",
         "dojo/query",
+        "dojo/on",
+        "dojo/dom-class",
         "dojo/text!./templates/ResultsPane.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
@@ -26,7 +28,7 @@ define(["dojo/_base/declare",
         "app/search/Paging",
         "dojox/widget/Standby",
         "app/etc/util"],
-    function (declare, lang, array, aspect, domConstruct, query, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby, Util) {
+    function (declare, lang, array, aspect, domConstruct, query, on, domClass, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby, Util) {
 
         var oThisClass = declare([SearchComponent], {
 
@@ -55,6 +57,48 @@ define(["dojo/_base/declare",
             },
 
             addSort: function () {
+              this.own(
+                on(this.sortRelevanceBtn, "click", lang.hitch(this, function() {
+                  this.sortLabel.innerHTML = i18n.search.sort.byRelevance;
+                  this.sortField = null;
+                  this.sortDir = null;
+                  domClass.add(this.sortOrderBtn, "hidden");
+                  this.search();
+                })),
+
+                on(this.sortTitleBtn, "click", lang.hitch(this, function() {
+                  this.sortLabel.innerHTML = i18n.search.sort.byTitle;
+                  this.sortField = "title.sort";
+                  if (this.sortDir === null) {
+                    this.sortDir = "asc";
+                  }
+                  domClass.remove(this.sortOrderBtn, "hidden");
+                  this.search();
+                })),
+
+                on(this.sortDateBtn, "click", lang.hitch(this, function() {
+                  this.sortLabel.innerHTML = i18n.search.sort.byDate;
+                  this.sortField = "sys_modified_dt";
+                  if (this.sortDir === null) {
+                    this.sortDir = "asc";
+                  }
+                  domClass.remove(this.sortOrderBtn, "hidden");
+                  this.search();
+                })),
+
+                on(this.sortOrderBtn, "click", lang.hitch(this, function() {
+                  if (this.sortDir === "asc") {
+                    domClass.add(this.sortOrderBtn, "desc");
+                    this.sortOrderBtnLabel.innerHTML = i18n.search.sort.desc;
+                    this.sortDir = "desc";
+                  } else {
+                    domClass.remove(this.sortOrderBtn, "desc");
+                    this.sortOrderBtnLabel.innerHTML = i18n.search.sort.asc;
+                    this.sortDir = "asc";
+                  }
+                  this.search();
+                })),
+              );
                 var self = this, dd = null;
                 var addOption = function (parent, ddbtn, label, field, sortDir) {
                     var ddli = domConstruct.create("li", {}, parent);
@@ -84,31 +128,31 @@ define(["dojo/_base/declare",
                     }, ddli);
                 };
 
-                dd = domConstruct.create("div", {
-                    "class": "dropdown g-sort-dropdown"
-                }, this.resultsHeaderNode);
-                var ddbtn = domConstruct.create("a", {
-                    "class": "dropdown-toggle",
-                    "href": "#",
-                    "data-toggle": "dropdown",
-                    "aria-haspopup": true,
-                    "aria-expanded": true,
-                    innerHTML: i18n.search.sort.byRelevance,
-                    onclick: function (e) {
-                        if ($(dd).hasClass('open')) {
-                            $(dd).removeClass('open');
-                        } else {
-                            $(dd).addClass('open');
-                        }
-                        e.stopPropagation();
-                    }
-                }, dd);
-                domConstruct.create("span", {"class": "glyphicon glyphicon-triangle-right"}, ddbtn);
-                var ddul = domConstruct.create("ul", {"class": "dropdown-menu"}, dd);
-
-                addOption(ddul, ddbtn, i18n.search.sort.byRelevance, null, null);
-                addOption(ddul, ddbtn, i18n.search.sort.byTitle, "title.sort", "asc");
-                addOption(ddul, ddbtn, i18n.search.sort.byDate, "sys_modified_dt", "desc");
+                // dd = domConstruct.create("div", {
+                //     "class": "dropdown g-sort-dropdown"
+                // }, this.resultsHeaderNode);
+                // var ddbtn = domConstruct.create("a", {
+                //     "class": "dropdown-toggle",
+                //     "href": "#",
+                //     "data-toggle": "dropdown",
+                //     "aria-haspopup": true,
+                //     "aria-expanded": true,
+                //     innerHTML: i18n.search.sort.byRelevance,
+                //     onclick: function (e) {
+                //         if ($(dd).hasClass('open')) {
+                //             $(dd).removeClass('open');
+                //         } else {
+                //             $(dd).addClass('open');
+                //         }
+                //         e.stopPropagation();
+                //     }
+                // }, dd);
+                // domConstruct.create("span", {"class": "glyphicon glyphicon-triangle-right"}, ddbtn);
+                // var ddul = domConstruct.create("ul", {"class": "dropdown-menu"}, dd);
+                //
+                // addOption(ddul, ddbtn, i18n.search.sort.byRelevance, null, null);
+                // addOption(ddul, ddbtn, i18n.search.sort.byTitle, "title.sort", "asc");
+                // addOption(ddul, ddbtn, i18n.search.sort.byDate, "sys_modified_dt", "desc");
             },
 
             destroyItems: function (searchContext, searchResponse) {

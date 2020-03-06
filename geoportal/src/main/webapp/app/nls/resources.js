@@ -201,6 +201,8 @@ define({
         byRelevance: "By Relevance",
         byTitle: "By Title",
         byDate: "By Date",
+        asc: "ASC",
+        desc: "DESC",
       },
       paging: {
         first: "First",
