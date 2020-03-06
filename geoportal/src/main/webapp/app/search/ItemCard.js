@@ -43,23 +43,23 @@ define(["dojo/_base/declare",
   "app/content/SetField",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
-  "app/preview/PreviewPane"], 
+  "app/preview/PreviewPane"],
 function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
-  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup, 
+  _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
-  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata, 
+  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata,
   PreviewUtil, PreviewPane) {
-  
+
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
- 
+
     i18n: i18n,
     templateString: template,
-    
+
     isItemCard: true,
     item: null,
     itemsNode: null,
     searchPane: null,
-    
+
     allowedServices: {
       "featureserver":"agsfeatureserver",
       "imageserver":"agsimageserver",
@@ -71,7 +71,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       "wfs": "wfs",
       "wms": "wms"
     },
-    
+
     postCreate: function() {
       this.inherited(arguments);
       var self = this;
@@ -91,10 +91,10 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }
       }));
     },
-    
+
     render: function(hit) {
       var item = this.item = hit._source;
-      item._id = hit._id; 
+      item._id = hit._id;
       item.title = item.title? item.title: "???";
       var links = this._uniqueLinks(item);
       this._renderTitleLink(item._id, item);
@@ -109,7 +109,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       this._renderUrlLinks(item);
       this._renderId(item);
     },
-    
+
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
       var v;
       if ((isOwner && isPublisher) || isAdmin) {
@@ -128,7 +128,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       }
       return false;
     },
-    
+
     _isOwner: function(item) {
       var username = AppContext.appUser.getUsername();
       if (typeof username === "string" && username.length > 0) {
@@ -136,7 +136,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       }
       return false;
     },
-    
+
     _mitigateDropdownClip: function(dd,ddul) {
       // Bootstrap dropdown menus clipped by scrollable container
       var self = this;
@@ -146,7 +146,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         var l = $(dd).offset().left;
         $(ddul).css('top',t);
         $(ddul).css('left',l);
-        
+
         var position = dd.getBoundingClientRect().top;
         var buttonHeight = dd.getBoundingClientRect().height;
         var menuHeight = $(ddul).outerHeight();
@@ -155,7 +155,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           //console.warn("dropup","position:",position,"t",t,"buttonHeight",buttonHeight,"menuHeight",menuHeight);
           t = t - menuHeight - buttonHeight - 4;
           $(ddul).css('top',t);
-        } 
+        }
       };
       $(ddul).css("position","fixed");
       $(dd).on('click', function() {reposition();});
@@ -163,7 +163,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       //$(this.itemsNode).scroll(function() {reposition();});
       //$(window).resize(function() {reposition();});
     },
-    
+
     _mouseenter: function(e) {
       topic.publish(appTopics.OnMouseEnterResultItem,{item:this.item});
     },
@@ -171,39 +171,39 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     _mouseleave: function(e) {
       topic.publish(appTopics.OnMouseLeaveResultItem,{item:this.item});
     },
-    
+
     _renderPreview: function(item, actionsNode, serviceType) {
-      
+
       // declare preview pane
       var previewPane;
-      
-      // create preview area 
+
+      // create preview area
       var previewArea = domConstruct.create("div");
       var tooltipDialog = new TooltipDialog({
           style: "width: 470px; height: 320px;",
           content: previewArea,
-          
+
           onBlur: function() {
             // cause to hide dialog whenever user clicks outside the map
             popup.close(tooltipDialog);
           },
-          
+
           onKeyPress: function(event) {
             // cause to hide dialog whenever ESC key is being pressed
             if (event.keyCode === 27) {
               popup.close(tooltipDialog);
             }
           },
-          
+
           onShow: function() {
             // focus automatically
             tooltipDialog.focus();
-            
+
             // create new preview pane
             previewPane = new PreviewPane({serviceType: serviceType}, previewArea);
             previewPane.startup();
           },
-          
+
           onHide: function() {
             // destroy preview pane
             previewPane.destroy();
@@ -211,7 +211,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
       });
       this.own(tooltipDialog);
-      
+
       // create clickable link to launch preview dialog
       var previewNode = domConstruct.create("a",{
         href: "javascript:void(0)",
@@ -219,7 +219,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.preview, title: item.title}),
         innerHTML: i18n.item.actions.preview
       },actionsNode);
-      
+
       // install 'onclick' event handler to show tooltip dialog
       this.own(on(previewNode, "click", function() {
         popup.open({
@@ -228,7 +228,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         });
       }));
     },
-    
+
     _renderAddToMap: function(item,links) {
       if (links.length === 0) return;
       var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
@@ -247,17 +247,17 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
               topic.publish(appTopics.AddToMapClicked,serviceType);
             }
           },actionsNode);
-          
+
           // create clickable 'Preview' link if allowes
           if (PreviewUtil.canPreview(serviceType)) {
             this._renderPreview(item, actionsNode, serviceType);
           }
-          
+
           return true;
         }
       }));
     },
-    
+
     _renderItemLinks: function(itemId,item) {
       if (AppContext.appConfig.searchResults.showLinks) {
         var actionsNode = this.actionsNode;
@@ -283,10 +283,10 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
           innerHTML: i18n.item.actions.json
         },actionsNode);
-        if (AppContext.geoportal.supportsApprovalStatus || 
+        if (AppContext.geoportal.supportsApprovalStatus ||
             AppContext.geoportal.supportsGroupBasedAccess) {
           var client = new AppClient();
-          htmlNode.href = client.appendAccessToken(htmlNode.href); 
+          htmlNode.href = client.appendAccessToken(htmlNode.href);
           xmlNode.href = client.appendAccessToken(xmlNode.href);
           jsonNode.href = client.appendAccessToken(jsonNode.href);
         }
@@ -297,7 +297,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }
       }
     },
-    
+
     _renderLinksDropdown: function(item,links) {
       if (links.length === 0) return;
       var dd = domConstruct.create("div",{
@@ -333,7 +333,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       });
       this._mitigateDropdownClip(dd,ddul);
     },
-    
+
     _renderOptionsDropdown: function(itemId,item) {
       var self = this;
       var isOwner = this._isOwner(item);
@@ -342,7 +342,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       var supportsApprovalStatus = AppContext.geoportal.supportsApprovalStatus;
       var supportsGroupBasedAccess = AppContext.geoportal.supportsGroupBasedAccess;
       var links = [];
-      
+
       if (this._canEditMetadata(item,isOwner,isAdmin,isPublisher)) {
         links.push(domConstruct.create("a",{
           "class": "small",
@@ -354,9 +354,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
         }));
       }
-      
+
       var canManage = ((isOwner && isPublisher) || isAdmin);
-      
+
       if (canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
@@ -367,7 +367,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
         }));
       }
-      
+
       if (isAdmin) {
         links.push(domConstruct.create("a",{
           "class": "small",
@@ -379,7 +379,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
         }));
       }
-      
+
       if (supportsApprovalStatus && canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
@@ -391,7 +391,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
         }));
       }
-      
+
       if (supportsGroupBasedAccess && canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
@@ -403,9 +403,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
         }));
       }
-      
-      if (canManage && AppContext.appConfig.edit && AppContext.appConfig.edit.setField && 
-          AppContext.appConfig.edit.setField.allow && 
+
+      if (canManage && AppContext.appConfig.edit && AppContext.appConfig.edit.setField &&
+          AppContext.appConfig.edit.setField.allow &&
           (isAdmin || !AppContext.appConfig.edit.setField.adminOnly)) {
         links.push(domConstruct.create("a",{
           "class": "small",
@@ -415,9 +415,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             var dialog = new SetField({item:item,itemCard:self});
             dialog.show();
           }
-        }));        
+        }));
       }
-      
+
       if (canManage) {
         links.push(domConstruct.create("a",{
           "class": "small",
@@ -429,7 +429,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
         }));
       }
-      
+
 //      if (canManage) {
 //        links.push(domConstruct.create("a",{
 //          "class": "small",
@@ -461,11 +461,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
 //              }
 //            });
 //          }
-//        }));        
+//        }));
 //      }
 
       if (links.length === 0) return;
-      
+
       var dd = domConstruct.create("div",{
         "class": "dropdown",
         "style": "display:inline-block;"
@@ -490,10 +490,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       });
       this._mitigateDropdownClip(dd,ddul);
     },
-    
+
     _renderOwnerAndDate: function(item) {
       var owner = item.sys_owner_s;
       var date = item.sys_modified_dt;
+      var permissions = ""
       var idx, text = "", v;
       if (AppContext.appConfig.searchResults.showDate && typeof date === "string" && date.length > 0) {
         idx = date.indexOf("T");
@@ -504,19 +505,19 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         if (text.length > 0) text += " ";
         text += owner;
       }
-      
+
       if (AppContext.appUser.isAdmin() || this._isOwner(item)) {
-        if (AppContext.appConfig.searchResults.showAccess && 
+        if (AppContext.appConfig.searchResults.showAccess &&
             AppContext.geoportal.supportsGroupBasedAccess) {
           v = item.sys_access_s;
           if (text.length > 0) text += " - ";
           if (v === "private") {
-            text += i18n.content.setAccess._private;
+            permissions = i18n.content.setAccess._private;
           } else {
-            text += i18n.content.setAccess._public;
+            permissions = i18n.content.setAccess._public;
           }
         }
-        if (AppContext.appConfig.searchResults.showApprovalStatus && 
+        if (AppContext.appConfig.searchResults.showApprovalStatus &&
             AppContext.geoportal.supportsApprovalStatus) {
           v = item.sys_approval_status_s;
           if (typeof v === "string" && v.length > 0) {
@@ -528,12 +529,27 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           }
         }
       }
-      
-      if (text.length > 0) {
-        util.setNodeText(this.ownerAndDateNode,text);
+
+      // set individual fields
+      if (owner.length > 0) {
+        util.setNodeText(this.ownerNode, owner);
+      } else {
+        util.setNodeText(this.ownerNode, i18n.item.notAvailable);
+      }
+
+      if (date.length > 0) {
+        util.setNodeText(this.dateNode, date);
+      } else {
+        util.setNodeText(this.dateNode, i18n.item.notAvailable);
+      }
+
+      if (permissions.length > 0) {
+        util.setNodeText(this.permissionsNode, permissions);
+      } else {
+        util.setNodeText(this.permissionsNode, i18n.item.notAvailable);
       }
     },
-    
+
     _renderThumbnail: function(item) {
       var show = AppContext.appConfig.searchResults.showThumbnails;
       var thumbnailNode = this.thumbnailNode;
@@ -546,7 +562,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       }
       //thumbnailNode.src = "http://placehold.it/80x60";
     },
-    
+
     _uniqueLinks: function(item) {
       var links = [];
       if (typeof item.links_s === "string") {
@@ -558,7 +574,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       }
       return links;
     },
-    
+
     _renderServiceStatus: function(item) {
       var type;
       var authKey = AppContext.appConfig.statusChecker.authKey;
@@ -581,7 +597,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }
       }
     },
-    
+
     _checkService: function(id,type) {
       console.log("Service check for: ", id, type);
       xhr.get("viewer/proxy.jsp?"+AppContext.appConfig.statusChecker.apiUrl,{
@@ -593,16 +609,16 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         handleAs: "json"
       }).then(lang.hitch({self: this, id: id, type: type},this._drawStatusIcon));
     },
-    
+
     _drawStatusIcon: function(response) {
       if (response.error) {
         console.error(response.error);
       } else if (response.data!=null && response.data.constructor==Array && response.data.length>0) {
         var score = response.data[0].summary.scoredTest.currentScore;
         this.self._setServiceCheckerIcon(score,this.id,this.type);
-      }    
+      }
     },
-    
+
     _setServiceCheckerIcon: function(score,id,type) {
       console.log("SCORE", score);
       var imgSrc;
@@ -625,23 +641,23 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       if (!info) {
         info = string.substitute(i18n.item.statusChecker.status,{score: score});
       }
-      
+
       var link = domConstruct.create("a",{
-        href: AppContext.appConfig.statusChecker.infoUrl+"?auth="+AppContext.appConfig.statusChecker.authKey+"&uId="+id+"&serviceType="+type, 
+        href: AppContext.appConfig.statusChecker.infoUrl+"?auth="+AppContext.appConfig.statusChecker.authKey+"&uId="+id+"&serviceType="+type,
         target: "_blank",
         alt: info,
         "class": "g-item-status"
       });
       domConstruct.place(link,this.titleNode,"first");
-      
+
       var iconPlace = domConstruct.create("img",{
-        src: "images/serviceChecker"+imgSrc, 
-        alt: info, 
-        height: 16, 
+        src: "images/serviceChecker"+imgSrc,
+        alt: info,
+        height: 16,
         width: 16
       });
       domConstruct.place(iconPlace,link);
-      
+
       var tooltip = new Tooltip({
         connectId: link,
         label: info,
@@ -649,7 +665,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       });
       tooltip.startup();
     },
-    
+
     _translateService: function(service) {
       if (service) {
         service = service.toLowerCase();
@@ -659,7 +675,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       }
       return null;
     },
-    
+
     _renderUrlLinks: function(item) {
       if (AppContext.appConfig.searchResults.showCustomLinks) {
         this._renderUrlLink(item.url_thumbnail_s, i18n.item.actions.urlLinks.thumbnail);
@@ -670,20 +686,20 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         this._renderUrlLink(item.url_ftp_download_s, i18n.item.actions.urlLinks.downloadFTP);
       }
     },
-    
+
     _renderUrlLink: function(href, caption) {
       var actionsNode = this.actionsNode;
-      
+
       if (href && href.length > 0) {
         var link = domConstruct.create("a",{
-          href: href, 
+          href: href,
           target: "_blank",
           "class": "g-item-status",
           innerHTML: caption
         }, actionsNode);
       }
     },
-    
+
     _renderId: function (item) {
     /* This node will allow jquery to
     grab identifiers, without having to resort to parsing URLS
@@ -699,7 +715,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         }
 
     },
-    
+
     _renderTitleLink: function(itemId,item) {
       var v = item.sys_metadatatype_s;
       if (typeof v === "string" && v === "json") {
@@ -715,8 +731,8 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           innerHTML: item.title
         },titleNode);
       }
-    }    
+    }
   });
-  
+
   return oThisClass;
 });

@@ -94,8 +94,6 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         pointField: this.pointField
       };
 
-      this.dropPane.fixedOpen = true;
-
       if (this.allowSettings === null) {
         if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
           this.allowSettings = true;

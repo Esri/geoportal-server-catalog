@@ -203,16 +203,16 @@ define({
         byDate: "By Date",
       },
       paging: {
-        first: "<<",
+        first: "First",
         firstTip: "First",
-        previous: "<",
+        previous: "Previous",
         previousTip: "Previous",
-        next: ">",
+        next: "Next",
         nextTip: "Next",
-        last: ">>",
+        last: "Last",
         lastTip: "Last",
         lastTipDisabled: "Result exceeds limit of ${searchLimit} records.",
-        pagePattern: "Page {page}",
+        pagePattern: "{page}",
         countPattern: "{count} items"
       },
       termsAggregation: {
@@ -256,6 +256,7 @@ define({
     },
 
     item: {
+      notAvailable: "N/A",
       actions: {
         html: "HTML",
         xml: "XML",

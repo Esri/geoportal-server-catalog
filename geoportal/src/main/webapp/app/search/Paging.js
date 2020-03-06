@@ -24,22 +24,22 @@ define(["dojo/_base/declare",
         "dojo/text!./templates/Paging.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
-        "app/etc/util"], 
+        "app/etc/util"],
 function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopics, template, i18n, SearchComponent, Util) {
-  
+
   var oThisClass = declare([SearchComponent], {
- 
+
     i18n: i18n,
     templateString: template,
-    
+
     hasLess: false,
     hasMore: false,
     nextStart: -1,
     numHits: 0,
-    numPerPage: null, 
+    numPerPage: null,
     previousStart: -1,
     start: 1,
-    
+
     typePlural: null,
     typeSingular: null,
 
@@ -53,7 +53,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
       if (typeof this.numPerPage === "undefined" || this.numPerPage === null) {
         this.numPerPage = 10;
       }
-      
+
       var self = this;
       topic.subscribe(appTopics.ItemDeleted,function(params){
         if (params.searchPane && self.searchPane === params.searchPane) {
@@ -119,18 +119,18 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     processResults: function(searchResponse) {
       this.start = 1;
-      var nHits = searchResponse.hits.total? 
-                        searchResponse.hits.total.value && !isNaN(searchResponse.hits.total.value)? searchResponse.hits.total.value: searchResponse.hits.total: 
+      var nHits = searchResponse.hits.total?
+                        searchResponse.hits.total.value && !isNaN(searchResponse.hits.total.value)? searchResponse.hits.total.value: searchResponse.hits.total:
                         0;
       var nStart = searchResponse.urlParams.from + 1;
       if (nStart < 1) nStart = 1;
       this.numHits = nHits;
       this._start = nStart;
-      
+
       this._renderCount();
       this._renderPaging(searchResponse);
     },
-    
+
     _renderCount: function() {
       var nHits = this.numHits;
       var sType = this.typePlural;
@@ -141,10 +141,10 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
       this.setNodeText(this.countNode,s);
       if (this.searchPane) this.searchPane.lastQueryCount = nHits;
     },
-    
+
     _renderPaging: function(searchResponse) {
       var nStart = this._start, nHits = this.numHits, nPer = this.numPerPage;
-      
+
       this.hasMore = false;
       this.nextStart = -1;
       var nNext = nStart + nPer;
@@ -152,7 +152,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
         this.hasMore = true;
         this.nextStart = nNext;
       }
-      
+
       if (searchResponse) {
         this.hasLess = false;
         this.previousStart = -1;
@@ -175,8 +175,9 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
         sPage = this.i18n.search.paging.pagePattern;
         sPage = sPage.replace("{page}",""+1);
       }
+
       this.setNodeText(this.pagePatternNode,sPage);
-      
+
       if (this.hasLess) {
         domClass.remove(this.firstButton.parentNode, "disabled");
         domClass.remove(this.previousButton.parentNode, "disabled");
@@ -189,7 +190,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
       } else {
         domClass.add(this.nextButton.parentNode, "disabled");
       }
-      
+
       if (this.numHits < AppContext.appConfig.system.searchLimit && this.hasMore) {
         domClass.remove(this.lastButton.parentNode, "disabled");
         domAttr.set(this.lastButton, "title", this.i18n.search.paging.lastTip);
@@ -197,7 +198,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
         domClass.add(this.lastButton.parentNode, "disabled");
         domAttr.set(this.lastButton, "title", string.substitute(this.i18n.search.paging.lastTipDisabled, {searchLimit: AppContext.appConfig.system.searchLimit}));
       }
-      
+
       if (nHits > 0) {
         this.pagingNode.style.display = "";
       } else {
