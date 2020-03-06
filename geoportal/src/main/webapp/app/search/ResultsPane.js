@@ -71,6 +71,8 @@ define(["dojo/_base/declare",
                   this.sortField = "title.sort";
                   if (this.sortDir === null) {
                     this.sortDir = "asc";
+                    domClass.remove(this.sortOrderBtn, "desc");
+                    this.sortOrderBtnLabel.innerHTML = i18n.search.sort.asc;
                   }
                   domClass.remove(this.sortOrderBtn, "hidden");
                   this.search();
@@ -81,6 +83,8 @@ define(["dojo/_base/declare",
                   this.sortField = "sys_modified_dt";
                   if (this.sortDir === null) {
                     this.sortDir = "asc";
+                    domClass.remove(this.sortOrderBtn, "desc");
+                    this.sortOrderBtnLabel.innerHTML = i18n.search.sort.asc;
                   }
                   domClass.remove(this.sortOrderBtn, "hidden");
                   this.search();
@@ -99,60 +103,6 @@ define(["dojo/_base/declare",
                   this.search();
                 })),
               );
-                var self = this, dd = null;
-                var addOption = function (parent, ddbtn, label, field, sortDir) {
-                    var ddli = domConstruct.create("li", {}, parent);
-                    domConstruct.create("a", {
-                        "class": "small",
-                        "href": "javascript:void(0)",
-                        innerHTML: label,
-                        onclick: function (e) {
-                            var dir = sortDir;
-                            if (field !== null && field === self.sortField) {
-                                if (self.sortDir === "asc") dir = "desc";
-                                else dir = "asc";
-                            }
-                            self.sortField = field;
-                            self.sortDir = dir;
-                            if (dir === null) {
-                                ddbtn.innerHTML = label + "<span class='glyphicon glyphicon-triangle-right'></span>";
-                            } else if (dir === "asc") {
-                                ddbtn.innerHTML = label + "<span class='glyphicon glyphicon-triangle-top'></span>";
-                            } else {
-                                ddbtn.innerHTML = label + "<span class='glyphicon glyphicon-triangle-bottom'></span>";
-                            }
-                            //ddbtn.innerHTML = label+"<span class='caret'></span>";
-                            $(dd).removeClass('open');
-                            self.search();
-                        }
-                    }, ddli);
-                };
-
-                // dd = domConstruct.create("div", {
-                //     "class": "dropdown g-sort-dropdown"
-                // }, this.resultsHeaderNode);
-                // var ddbtn = domConstruct.create("a", {
-                //     "class": "dropdown-toggle",
-                //     "href": "#",
-                //     "data-toggle": "dropdown",
-                //     "aria-haspopup": true,
-                //     "aria-expanded": true,
-                //     innerHTML: i18n.search.sort.byRelevance,
-                //     onclick: function (e) {
-                //         if ($(dd).hasClass('open')) {
-                //             $(dd).removeClass('open');
-                //         } else {
-                //             $(dd).addClass('open');
-                //         }
-                //         e.stopPropagation();
-                //     }
-                // }, dd);
-                // domConstruct.create("span", {"class": "glyphicon glyphicon-triangle-right"}, ddbtn);
-                // var ddul = domConstruct.create("ul", {"class": "dropdown-menu"}, dd);
-                //
-                // addOption(ddul, ddbtn, i18n.search.sort.byRelevance, null, null);
-                // addOption(ddul, ddbtn, i18n.search.sort.byTitle, "title.sort", "asc");
-                // addOption(ddul, ddbtn, i18n.search.sort.byDate, "sys_modified_dt", "desc");
             },
 
             destroyItems: function (searchContext, searchResponse) {
