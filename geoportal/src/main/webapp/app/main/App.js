@@ -98,6 +98,10 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
     uploadClicked: function() {
       if (AppContext.appUser.isPublisher()) (new UploadMetadata()).show();
     },
+    
+    editFacetClicked: function() {
+      console.warn("TODO provide edit facet functionality in App.js")
+    },
 
     /* =================================================================================== */
 
