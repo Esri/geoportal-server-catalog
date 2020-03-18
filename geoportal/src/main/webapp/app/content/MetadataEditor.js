@@ -67,7 +67,7 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
         window["require"]([
           "esri/dijit/metadata/context/GxeContext",
           "esri/dijit/metadata/context/GxeAdaptor",
-          "esri/dijit/metadata/editor/EditorDialog"],
+          "app/gxe/editor/EditorDialog"],
         function(GxeContext,GxeAdaptor,EditorDialog) {
           var gxeContext = self._newContext(GxeContext);
           gxeContext.documentTypes.index = {};
