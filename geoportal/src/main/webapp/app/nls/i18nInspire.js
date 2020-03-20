@@ -195,6 +195,14 @@ define({
     
     validation: {
       fullDate: "The value must be a full date."
+    },
+    
+    dataQuality: {
+      scope: {
+        levelDescription: "Level descripton",
+        scopeDescription: "Scope description",
+        other: "Other"
+      }
     }
 
   })
