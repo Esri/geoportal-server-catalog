@@ -36,7 +36,13 @@ See Common Open Source Licenses section for a copy of the License.
 Apache Commons:
 Apache Commons Codec (dependency of 3rd party libraries)
 Commons Cli
+Apache Commons IO 
+	http://commons.apache.org/proper/commons-io/
+Apache Commons Lang
+	http://commons.apache.org/proper/commons-lang/
 Logging (dependency of 3rd party libraries)
+Apache Commons Text
+	https://commons.apache.org/proper/commons-text
 -------------------------------------------------------------------------------
 Â© 2002-2016 The Apache Software Foundation
 This product includes software developed by The Apache Software Foundation
@@ -177,6 +183,18 @@ Dojo is available under either the terms of the modified BSD license or the Acad
 
 See Common Open Source Licenses section for a copy of the License.
 
+
+
+===============================================================================
+FastInfoset
+FastInfoset-1.2.16.jar
+
+Apache 2.0
+===============================================================================
+Guava: Google Core Libraries For Java 
+guava-16.0.1.jar
+License: Apache 2.0
+
 ===============================================================================
 HdrHistogram (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
@@ -192,6 +210,11 @@ License: Apache License 2.0
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
+Istack Common Utility Code Runtime
+istack-commons-runtime-3.0.8.jar
+
+License: EDL 1.0
+===============================================================================
 Jackson (dependency of 3rd party libraries)
 Jackson Annotations (dependency of 3rd party libraries)
 Jackson Core (dependency of 3rd party libraries)
@@ -205,6 +228,22 @@ License: Apache 2.0
 
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
+===============================================================================
+Jakarta Activation (jakarta.activation-1.2.1.jar)
+Jakarta Activation API JAR (jakarta.activation-api-1.2.1.jar)
+Jakarta Annotations API (jakarta.annotation-api-1.3.5.jar)
+	https://projects.eclipse.org/projects/ee4j.ca
+Jakarta Inject (jakarta.inject-2.6.1.jar)
+Jakarta WS RS API (jakarta.ws.rs-api-2.1.6.jar)
+	https://github.com/eclipse-ee4j/jaxrs-api
+Jakarta XML Binding API (jakarta.xml.bind-api-2.3.2.jar)
+
+License: EDL 1.0
+===============================================================================
+Jakarta Bean Validation API (jakarta.validation-api-2.0.2.jar)
+https://beanvalidation.org
+
+License: Apache 2.0
 ===============================================================================
 Java Native Access (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
@@ -222,6 +261,16 @@ Javassist (JAVA programming ASSISTant) makes Java bytecode manipulation simple. 
 This software is distributed under the Mozilla Public License Version 1.1, the GNU Lesser General Public License Version 2.1 or later, or the Apache License Version 2.0.
 
 ===============================================================================
+JAXB API
+jaxb-api-2.3.1.jar
+License: CDDL 1.1
+===============================================================================
+JAXB Runtime
+jaxb-runtime-2.3.2.jar
+license: CDDL, GPL 1.1
+
+
+===============================================================================
 Javax.annotation API (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright (c) 2012-2016 Oracle and/or its affiliates. All rights reserved.
@@ -229,6 +278,11 @@ Copyright (c) 2012-2016 Oracle and/or its affiliates. All rights reserved.
 License: CDDL + GPLv2 with classpath exception
 
 See Common Open Source Licenses section for a copy of the License.
+
+===============================================================================
+JavaMail API
+javax.mail-1.5.3.jar
+License: CDDL, GPL 2.0
 
 ===============================================================================
 Javax.ws.rs Api
@@ -246,7 +300,6 @@ Jersey Core Client (dependency of 3rd party libraries)
 Jersey Core Common (dependency of 3rd party libraries)
 Jersey Core Server (dependency of 3rd party libraries)
 Jersey Media Jaxb (dependency of 3rd party libraries)
-Jersey Repackaged Guava (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright Â©2010-2017 Oracle Corporation. All Rights Reserved.
 
@@ -259,7 +312,10 @@ GNU General Public License (GPL - Version 2, June 1991) with the â€œClasspat
 https://jersey.java.net/license.html
 
 See Common Open Source Licenses section for a copy of the License.
-
+===============================================================================
+Jersey Inject HK2 
+(jersey-hk2-2.29.1.jar)
+License: Apache 2.0
 ===============================================================================
 Jetty
 Jetty :: Asynchronous HTTP Client (dependency of 3rd party libraries)
@@ -352,7 +408,11 @@ SnakeYAML (dependency of 3rd party libraries)
 License: Apache 2.0
 
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
-
+===============================================================================
+Sniffer
+sniffer-5.1.1.jar
+https://github.com/elastic/elasticsearch
+Licence: Apache 2.0
 ===============================================================================
 Spring Framework:
 Spring AOP (dependency of 3rd party libraries)
@@ -377,7 +437,11 @@ Spring Security Web
 -------------------------------------------------------------------------------
 License: Apache 2.0
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
-
+===============================================================================
+Spring Commons Logging Bridge
+spring-jcl-5.2.3.RELEASE.jar
+	https://github.com/spring-projects/spring-framework
+License: Apache 2.0	
 ===============================================================================
 Spring Ldap Core (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
@@ -408,7 +472,10 @@ For written permission, please contact ryan@webcohesion.com.
 
 See Common Open Source Licenses section below for a copy of Apache 2.0 License.
 
-
+===============================================================================
+Extended StAX API
+stax-ex-1.8.1.jar
+License: EDL 1.0
 ===============================================================================
 T Digest (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
@@ -420,6 +487,27 @@ License: Apache 2.0
 
 See Common Open Source Licenses section below for a copy of Apache 2.0 License.
 
+===============================================================================
+TXW2 Runtime
+txw2-2.3.2.jar
+License: CDDL, GPL 1.1
+
+===============================================================================
+UnboundID LDAP SDK For Java
+unboundid-ldapsdk-3.2.0.jar
+https://www.ldap.com/unboundid-ldap-sdk-for-java
+license: GPL 2.0, LGPL 2.1
+
+===============================================================================
+X Pack
+x-pack-api-5.1.1.jar
+Elasticsearch Expanded Pack Plugin
+License: Apache 2.0
+===============================================================================
+Transport Client
+x-pack-transport-5.1.1.jar
+https://github.com/elastic/x-pack-elasticsearch
+License: Apache 2.0
 
 ===============================================================================
 Common Open Source Licenses
