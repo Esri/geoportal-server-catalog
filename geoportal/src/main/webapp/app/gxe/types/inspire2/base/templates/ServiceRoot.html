@@ -2,6 +2,10 @@
 
   <div data-dojo-type="esri/dijit/metadata/form/Element"
     data-dojo-props="target:'gmd:MD_Metadata',label:'${i18nInspire.documentTypes.service.caption}'">
+
+    <div data-dojo-type="esri/dijit/metadata/form/Attribute"
+      data-dojo-props="target: 'xsi:schemaLocation', value:'http://www.isotc211.org/2005/gmd http://schemas.opengis.net/csw/2.0.2/profiles/apiso/1.0.0/apiso.xsd',fixed:true,hide:true">
+    </div>    
     
     <div data-dojo-type="esri/dijit/metadata/form/Tabs">
       <div data-dojo-type="app/gxe/types/inspire2/gmd/metadataEntity/MetadataSection"
