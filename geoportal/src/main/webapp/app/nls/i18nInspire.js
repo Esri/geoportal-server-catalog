@@ -191,6 +191,10 @@ define({
       noCondition: "No conditions apply",
       unknownCondition: "Conditions unknown",
       freeText: "Free text"
+    },
+    
+    validation: {
+      fullDate: "The value must be a full date."
     }
 
   })
