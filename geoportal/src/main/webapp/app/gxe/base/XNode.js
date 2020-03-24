@@ -37,7 +37,6 @@ function(declare, lang, array, topic, domAttr, has, docUtil, validationUtil, Tem
 
     postCreate: function() {
       this.inherited(arguments);
-      console.log('Custom XNode')
     },
     
     destroy: function() {

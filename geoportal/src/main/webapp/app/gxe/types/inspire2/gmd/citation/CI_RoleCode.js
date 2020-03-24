@@ -15,12 +15,7 @@ function(declare, lang, has, Descriptor, InputSelectOne, Options, Option, CodeLi
 
   var oThisClass = declare(Descriptor, {
 
-    templateString: template,
-    
-    postCreate: function() {
-      this.inherited(arguments)
-      console.log('Custom role code')
-    }
+    templateString: template
 
   });
 

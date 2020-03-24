@@ -10,7 +10,6 @@ function(declare, lang, has, Element) {
 
     postCreate: function() {
       this.inherited(arguments);
-      console.log('Custom GcoElement')
     },
 
     resolveMinOccurs: function() {
