@@ -36,7 +36,6 @@ function(declare, lang, array, topic, domClass, domConstruct, domStyle, has, XNo
 
     postCreate: function() {
       this.inherited(arguments);
-      console.log('Custom Element')
     },
 
     // TODO do multiplicityHeader &&  elementHeader get destroyed

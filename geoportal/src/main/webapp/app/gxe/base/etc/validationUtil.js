@@ -28,7 +28,6 @@ function(lang, array, has, i18nBase, i18nInspire) {
     },
 
     validateValue: function(status, value) {
-      console.log('Custom validation')
       status.isValid = true;
       status.message = this.formatMessage(status, i18nBase.validation.ok);
       status._continue = true;
