@@ -18,7 +18,11 @@ function(declare, lang, has, topic, Descriptor, Element, InputSelectOne, Options
     postCreate: function() {
       this.inherited(arguments)
       
-      console.log('ServiceType', arguments, this._selectOne)
+      var setInputValue = lang.hitch(this._selectOne, this._selectOne.setInputValue)
+      this._selectOne.setInputValue = lang.hitch(this._selectOne, function(serviceType){
+        setInputValue(serviceType)
+        topic.publish("inspire/service-type-changed", serviceType)
+      })
       
       this.own(this._selectOne.on("interaction-occurred", lang.hitch(this, function(event) {
         var serviceType = event.inputWidget.getInputValue()
