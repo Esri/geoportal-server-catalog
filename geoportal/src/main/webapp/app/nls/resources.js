@@ -365,7 +365,7 @@ define({
     },
 
     footer: {
-      "copyright": "© Geoportal 2020",
+      "copyright": "© Geoportal",
       "quickLink1": "Quick Link 1",
       "quickLink2": "Quick Link 2"
     }

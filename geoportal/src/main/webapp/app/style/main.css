@@ -1,6 +1,11 @@
 /* RESET */
-html, body, .g-app {
+html,
+body,
+.g-app {
   height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
 }
 
 body {
@@ -11,7 +16,8 @@ body {
 }
 
 /* DOJO/DIJIT OVERRIDES */
-.calcite .dijitTitlePaneTitle, .calcite .dijitTitlePaneTextNode {
+.calcite .dijitTitlePaneTitle,
+.calcite .dijitTitlePaneTextNode {
   font-size: 12px;
 }
 
@@ -34,8 +40,15 @@ body {
 
 /* STYLES */
 /* Note: you need to match or trump Calcite-Bootstrap specificity */
+
+/* 
 .g-app .tab-content {
   height: calc(100% - 113px);
+}
+*/
+
+.tab-content {
+  flex: 1 1 auto;
 }
 
 .g-app .tab-pane,
@@ -71,7 +84,10 @@ body {
 
 .g-app-loading {
   position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   z-index: 99;
   background-color: #f8f8f8;
 }
@@ -79,7 +95,10 @@ body {
   width: 200px;
   margin: auto;
   position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   background-color: #f8f8f8;
 }
 .g-app-loading .g-error {
@@ -105,8 +124,8 @@ body {
 }
 
 .g-brand-logo {
-  width: 32px;
-  height: 32px;
+  width: 28px;
+  height: 28px;
 }
 
 .g-header .g-branding .navbar-brand {
@@ -146,8 +165,9 @@ body {
   float: none;
   padding-left: 8px;
   padding-right: 8px;
-  padding-bottom: 12px;
   padding-top: 12px;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
   border-bottom: 4px solid transparent;
   background: transparent;
   color: #404040;
@@ -206,9 +226,9 @@ body {
 }
 
 .g-user-thumb {
-  width: 32px;
-  height: 32px;
-  margin-right: 10px;
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
   border-radius: 100%;
   background: #bbb;
 }
@@ -242,26 +262,27 @@ body {
   align-items: center;
   width: 100%;
   background: #0670ae;
-  box-shadow: 0px 1px 2px rgba(0,0,0, 0.25);
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25);
 }
 
 .g-search-bar {
   display: flex;
   align-items: center;
   width: 1024px;
-  padding: 10px 0;
+  padding: 8px 0;
 }
 
 .g-search-bar-title {
   width: 30%;
-  margin-right: 48px;
-  font-size: 24px;
+  margin-right: 16px;
+  font-size: 20px;
   color: #fff;
 }
 
 /* SEARCH PANEL - SEARCH INPUT OVERRIDES */
 .g-search-bar .search-box {
   width: calc(70% - 48px);
+  padding: 0px 16px;
 }
 
 .g-search-bar .search-box .input-group {
@@ -272,7 +293,7 @@ body {
 
 .g-search-bar .search-box .input-group input {
   width: calc(100% - 151px);
-  padding: 20px 10px;
+  padding: 8px 4px;
   font-size: 16px;
 }
 
@@ -293,7 +314,7 @@ body {
 .g-search-bar .search-box .btn {
   display: flex;
   align-items: center;
-  height: 40px;
+  height: 36px;
   padding: 0 25px;
   border: 1px solid #fff;
   background: #004874;
@@ -304,20 +325,17 @@ body {
 .g-search-content-row {
   display: flex;
   width: 1024px;
-  height: calc(100% - 60px);
-  overflow: hidden;
+  padding: 12px 0px;
 }
 
 .g-search-pane-left {
   width: 30%;
-  padding: 15px 0;
-  margin-right: 48px;
-  overflow: auto;
+  margin-right: 16px;
 }
 
 .g-search-pane-right {
   width: calc(70% - 46px);
-  padding: 15px 0;
+  /* padding: 15px 0; */
 }
 
 .g-filter-collapse {
@@ -334,7 +352,7 @@ body {
   margin-top: 25px;
   padding: 10px 20px;
   border: 0;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
   background: #2890ce;
   transition: background linear 250ms;
 }
@@ -368,8 +386,8 @@ body {
 .g-search-pane-left .dijitTitlePaneTitle {
   /* resolves map disappearing issue #63
   and will apply to all search facets */
-  overflow-y:hidden !important;
-  padding: 10px 20px;
+  overflow-y: hidden !important;
+  padding: 6px 10px;
   background: #fff;
   transition: background linear 250ms;
 }
@@ -379,17 +397,19 @@ body {
 }
 
 .g-search-pane-left .dijitTitlePaneTextNode {
-  font-size: 16px;
+  font-size: 14px;
 }
 
 .g-search-pane-left .dijitTitlePaneContentInner {
   position: relative;
-  padding: 10px;
+  padding: 8px;
 }
+
+.
 
 /* SEARCH PANEL - COLLAPSIBLE CARDS */
 .g-drop-pane .dijitTitlePaneTextNode {
-  margin-left: 15px;
+  margin-left: 8px;
 }
 
 .g-drop-pane.fixed .dijitTitlePaneTextNode {
@@ -464,16 +484,20 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  font-size: 14px;
 }
 
 .g-entry-links > div {
-  padding: 2px 0px;
+  padding: 2px 2px;
+  max-width: 280px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .g-spatial-filter-map {
   height: 300px !important;
   width: auto !important;
-
 }
 
 .g-spatial-filter-relations {
@@ -502,6 +526,7 @@ body {
 .g-applied-filters {
   display: flex;
   align-items: center;
+  padding: 0px 16px;
 }
 
 .g-applied-filters-clear {
@@ -525,8 +550,8 @@ body {
   align-items: center;
   justify-content: space-between;
   margin: 0 10px 10px 0;
-  padding: 10px;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  padding: 4px 6px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
   background: #fff;
 }
 
@@ -552,13 +577,14 @@ body {
 
 .g-search-results-pane {
   position: relative;
-  height: calc(100% - 32px);
+  /* height: calc(100% - 32px); */
+  padding: 0px 16px;
 }
 
 .g-search-results-header {
   display: flex;
   justify-content: flex-end;
-  border-bottom: 1px solid #e4e4e4;
+  /* border-bottom: 1px solid #e4e4e4; */
 }
 
 .g-search-results-sort {
@@ -613,9 +639,9 @@ body {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding-top: 10px;
-  border-top: 1px solid #e4e4e4;
+  /* border-top: 1px solid #e4e4e4; */
   border-bottom: 1px solid #e4e4e4;
+  margin-bottom: 8px;
 }
 
 .g-search-results-pane .g-sort-dropdown {
@@ -635,6 +661,7 @@ body {
   position: absolute;
   top: 0;
   left: 0;
+  margin-left: 16px;
 }
 .g-paging .pagination {
   margin: 0;
@@ -665,8 +692,8 @@ body {
 
 .g-search-results {
   width: 100%;
-  height: calc(100% - 80px);
-  overflow: auto;
+  /* height: calc(100% - 80px); */
+  /* overflow: auto; */
 }
 
 /* ITEM CARD */
@@ -674,14 +701,16 @@ body {
   display: flex;
   align-items: flex-start;
   justify-content: space-between;
-  margin: 15px 0;
-  padding: 15px;
-  box-shadow: 0 1px 1px rgba(0,0,0,0.05);
+  margin: 12px 0;
+  padding: 8px 12px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
   background: #fff;
 }
 
+/*
 .g-item-card-content {
 }
+*/
 
 .g-item-card-content-header {
   display: flex;
@@ -689,12 +718,21 @@ body {
   justify-content: space-between;
 }
 
+/*
 .g-item-card-content-header-info {
-  
+}
+*/
+
+g-item-card-content-header-info .g-item-card .g-item-title {
+  font-weight: 400;
 }
 
-g-item-card-content-header-info
-.g-item-card .g-item-title {
+.g-item-title {
+  max-width: 440px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
   font-weight: 400;
 }
 
@@ -711,9 +749,9 @@ g-item-card-content-header-info
 }
 
 .g-item-card-info svg {
-  width: 18px;
-  height: 18px;
-  margin-right: 5px;
+  width: 16px;
+  height: 16px;
+  margin: 3px 4px 6px 0px;
 }
 
 .g-item-card .g-item-status {
@@ -722,13 +760,13 @@ g-item-card-content-header-info
 
 .g-item-card .g-item-description,
 .g-item-card .g-item-owner-and-date {
-  margin: 10px 0;
+  margin: 0px 0px 6px 0px;
   font-size: 12px;
 }
 
 .g-item-card .g-item-thumbnail {
-  width: 80px;
-  height: 60px;
+  max-width: 80px;
+  max-height: 60px;
 }
 
 /* Style for descriptions creates a cap of a few lines of text  */
@@ -767,11 +805,11 @@ g-item-card-content-header-info
 
 .g-mapframe-container {
   position: absolute;
-  top: 65px;
+  top: 48px;
   left: 0;
   bottom: 4px;
   right: 0;
-  height: calc(100% - 113px);
+  height: calc(100% - 96px);
 }
 .g-mapframe-container > iframe {
   width: 100%;
@@ -779,10 +817,11 @@ g-item-card-content-header-info
   border: none;
 }
 
+/*
 .g-input-number {
-  /*width: 200px;*/
+  width: 200px;
 }
-
+*/
 .modal-body > .g-settings-pane {
   max-height: 420px;
   overflow-y: auto;
@@ -795,6 +834,7 @@ g-item-card-content-header-info
 .g-labels-right .control-label {
   text-align: right;
   color: #6e6e6e;
+  font-size: 14px;
 }
 
 .calcite .gxePrimaryToolbar > .gxeTabs > .gxeTabButton {
@@ -826,27 +866,27 @@ g-item-card-content-header-info
 .g-temporal-bar .calendar {
   width: 16px;
   height: 16px;
-  margin: 0;
+  margin: 4px 0px 8px 0px;
   vertical-align: top;
   cursor: pointer;
 }
+/*
 .g-start-date {
-
 }
+*/
 .g-end-date {
   float: right;
 }
+/*
 .g-start-date .g-start-date-calendar {
-
 }
 .g-end-date .g-end-date-calendar {
 }
 .g-start-date .g-start-date-calendar-label {
-
 }
 .g-end-date .g-end-date-calendar-label {
 }
-
+*/
 .g-temporal-d3 svg {
   /*font: 10px sans-serif;*/
   font-size: 9px;
@@ -897,7 +937,8 @@ g-item-card-content-header-info
   z-index: 99;
 }
 
-.dijitTooltipContainer, .dijitTooltipContainer > div,
+.dijitTooltipContainer,
+.dijitTooltipContainer > div,
 .dijitTooltipContainer > div > div,
 .dijitTooltipContainer > div > div > div {
   width: 100%;
@@ -943,13 +984,12 @@ g-item-card-content-header-info
 /* FOOTER */
 .g-footer {
   position: relative;
-  z-index: 10;
   display: flex;
   align-items: center;
   width: 100%;
-  height: 48px;
+  padding: 12px;
   background: #fff;
-  box-shadow: 0px -1px 2px 0px rgba(0,0,0, 0.05);
+  box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.05);
 }
 
 .g-footer-row {
@@ -966,25 +1006,30 @@ g-item-card-content-header-info
 
 /* Accessibility Changes */
 .btn-success {
-    color: #ffffff;
-    background-color: #338033;
-    border-color: #50834f;
+  color: #ffffff;
+  background-color: #338033;
+  border-color: #50834f;
 }
 
 a {
-    color: #005e95;
-    text-decoration: none;
+  color: #005e95;
+  text-decoration: none;
 }
 
 a.dropdown-toggle:focus {
-    outline: 5px auto -webkit-focus-ring-color;
+  outline: 5px auto -webkit-focus-ring-color;
 }
 
-.pagination > .disabled > span, .pagination > .disabled > span:hover, .pagination > .disabled > span:focus, .pagination > .disabled > a, .pagination > .disabled > a:hover, .pagination > .disabled > a:focus {
-    color: #595959;
-    background-color: #ffffff;
-    border-color: #cccccc;
-    cursor: not-allowed;
+.pagination > .disabled > span,
+.pagination > .disabled > span:hover,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > a,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > a:focus {
+  color: #595959;
+  background-color: #ffffff;
+  border-color: #cccccc;
+  cursor: not-allowed;
 }
 
 .offscreen {
@@ -1013,6 +1058,8 @@ a.dropdown-toggle:focus {
   border: 0;
   box-shadow: none;
   background: transparent;
+  margin-top: 24px;
+  margin-bottom: 12px;
 }
 
 .g-open-search-result-links {
@@ -1028,13 +1075,13 @@ a.dropdown-toggle:focus {
   margin-left: 10px;
 }
 
-
+/*
 .g-basic-from-value {
-  /*margin-right: 10px;*/
+  margin-right: 10px;
 }
-
 .g-basic-to-value {
 }
+*/
 
 .g-basic-from-value-input {
   width: 140px;
@@ -1044,41 +1091,39 @@ a.dropdown-toggle:focus {
   width: 140px;
 }
 
+/*
 .g-basic-from-value-input-label {
-
 }
 
 .g-basic-to-value-input-label {
-
 }
-
-
 
 .g-from-value {
-
 }
+*/
 
 .g-to-value {
   float: right;
 }
 
+/*
 .g-from-value-input {
-
 }
 
 .g-to-value-input {
-
 }
 
 .g-from-value-input-label {
-
 }
 
 .g-to-value-input-label {
-
 }
-
+*/
 .g-input-field-note {
   font-size: 10px;
   font-style: italic;
+}
+
+.nav-padding-fix {
+  padding: 0px !important;
 }
