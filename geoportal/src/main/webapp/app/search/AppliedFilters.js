@@ -160,7 +160,7 @@ function(declare, lang, array, domConstruct, on, query, domClass, template, i18n
       else {
         this.clearAllLinkNode.style.display = "none";
         // reset the search results pane
-        query(".g-search-results-pane").style("height", "calc(100% - 32px)");
+        //query(".g-search-results-pane").style("height", "calc(100% - 32px)");
       }
 
       if (this.autoExpand) {
