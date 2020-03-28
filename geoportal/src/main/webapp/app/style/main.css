@@ -484,12 +484,13 @@ body {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  font-size: 14px;
+  font-size: 13px;
 }
 
 .g-entry-links > div {
-  padding: 2px 2px;
   max-width: 280px;
+  padding: 2px 2px;
+  margin-bottom: 3px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -728,7 +729,7 @@ g-item-card-content-header-info .g-item-card .g-item-title {
 }
 
 .g-item-title {
-  max-width: 440px;
+  max-width: 540px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -765,8 +766,8 @@ g-item-card-content-header-info .g-item-card .g-item-title {
 }
 
 .g-item-card .g-item-thumbnail {
+  height: auto;
   max-width: 80px;
-  max-height: 60px;
 }
 
 /* Style for descriptions creates a cap of a few lines of text  */
@@ -783,7 +784,7 @@ g-item-card-content-header-info .g-item-card .g-item-title {
 
 .g-item-card .g-item-actions > a,
 .g-item-card .g-item-actions > .dropdown {
-  margin-right: 20px;
+  margin-right: 16px;
 }
 
 .g-item-card .g-item-actions > .dropdown > .dropdown-menu {
@@ -1058,12 +1059,10 @@ a.dropdown-toggle:focus {
   border: 0;
   box-shadow: none;
   background: transparent;
-  margin-top: 24px;
   margin-bottom: 12px;
 }
 
 .g-open-search-result-links {
-  margin-top: 10px;
   text-align: center;
 }
 

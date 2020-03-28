@@ -14,7 +14,6 @@
  */
 define({
   root: {
-
     general: {
       cancel: "Cancel",
       clear: "Clear",
@@ -27,7 +26,7 @@ define({
       deleting: "Deleting...",
       updating: "Updating...",
       uploading: "Uploading...",
-      working: "...",
+      working: "..."
     },
 
     nav: {
@@ -46,8 +45,8 @@ define({
         createAccount: "Create Account",
         createMetadata: "Create Metadata",
         myProfile: "My Profile",
-        uploadMetadata: "Upload Metadata",
-        editFacet: "Edit Facet"
+        uploadMetadata: "Upload Metadata"
+        // editFacet: "Edit Facet"
       }
     },
 
@@ -99,7 +98,8 @@ define({
           aggregations: "Aggregations",
           field: "Shape Field",
           fieldPlaceholder: "",
-          fieldNote: "(for search, e.g. envelope_geo, shape_geo, envelope_cen_pt)",
+          fieldNote:
+            "(for search, e.g. envelope_geo, shape_geo, envelope_cen_pt)",
           pointField: "Point Field",
           pointFieldPlaceholder: "",
           pointFieldNote: "(for aggregation, e.g. envelope_cen_pt)"
@@ -202,7 +202,7 @@ define({
         byTitle: "By Title",
         byDate: "By Date",
         asc: "ASC",
-        desc: "DESC",
+        desc: "DESC"
       },
       paging: {
         first: "First",
@@ -238,7 +238,7 @@ define({
             countAsc: "Count - ascending",
             countDesc: "Count - descending",
             termAsc: "Term - ascending",
-            termDesc: "Term - descending",
+            termDesc: "Term - descending"
           }
         }
       },
@@ -248,11 +248,11 @@ define({
       links: {
         web: "Web result",
         atom: "ATOM result",
-        rss:  "RSS result",
+        rss: "RSS result",
         json: "JSON result",
-        csv:  "CSV result",
-        csw:  "CSW result",
-        kml:  "KML result",
+        csv: "CSV result",
+        csw: "CSW result",
+        kml: "KML result",
         dcat: "DCAT result"
       }
     },
@@ -293,12 +293,14 @@ define({
         itemLabel: "Apply change to this item only",
         ownerPattern: "Apply change to all items owned by: {name}",
         sourceUriPattern: "Apply change to all items harvested from: {name}",
-        taskRefPattern: "Apply change to all items associated with harvesting task: {name}",
+        taskRefPattern:
+          "Apply change to all items associated with harvesting task: {name}",
         queryPattern: "Apply change to all selected items: {count}",
         itemLabelDelete: "Delete this item only",
         ownerPatternDelete: "Delete all items owned by: {name}",
         sourceUriPatternDelete: "Delete all items harvested from: {name}",
-        taskRefPatternDelete: "Delete all items associated with harvesting task: {name}",
+        taskRefPatternDelete:
+          "Delete all items associated with harvesting task: {name}",
         queryPatternDelete: "Delete all selected items: {count}"
       },
       changeOwner: {
@@ -307,7 +309,7 @@ define({
         newOwner: "New Owner:"
       },
       deleteItems: {
-        caption: "Delete",
+        caption: "Delete"
       },
       setAccess: {
         caption: "Set Access",
@@ -332,13 +334,13 @@ define({
         caption: "Set Field",
         tags: {
           caption: "Tags",
-          value: "User Tags (comma delimited)",
+          value: "User Tags (comma delimited)"
         },
         advanced: {
           caption: "Advanced",
           prompt: "",
           field: "Field Name",
-          value: "Value",
+          value: "Value"
         }
       },
       uploadMetadata: {
@@ -352,7 +354,8 @@ define({
       loading: "Starting editor...",
       filePrompt: "Select an XML file.",
       asTemplatePrompt: "Reset identifiers",
-      xmlViewOnly: "The type of metadata associated with this item is not supported by the editor."
+      xmlViewOnly:
+        "The type of metadata associated with this item is not supported by the editor."
     },
 
     errorTranslations: {
@@ -360,14 +363,15 @@ define({
       "Access denied - not owner.": null,
       "Schematron violation.": null,
       "Id not found.": null,
-      "org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.": "Not an XML file.",
+      "org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.":
+        "Not an XML file.",
       "javax.json.stream.JsonParsingException: Invalid JSON": "Invalid JSON"
     },
 
     footer: {
-      "copyright": "© Geoportal",
-      "quickLink1": "Quick Link 1",
-      "quickLink2": "Quick Link 2"
+      copyright: "© Geoportal",
+      quickLink1: "Quick Link 1",
+      quickLink2: "Quick Link 2"
     }
   }
 });

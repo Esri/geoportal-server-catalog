@@ -154,8 +154,8 @@ function(declare, lang, array, domConstruct, on, query, domClass, template, i18n
       if (hasViewable) {
         this.clearAllLinkNode.style.display = "";
         // query the filtersNode height and adjust the search results pane to fit in the space
-        var filtersHeight = query(".g-applied-filters")[0].clientHeight;
-        query(".g-search-results-pane").style("height", "calc(100% - " + (filtersHeight + 32) +"px)");
+        // var filtersHeight = query(".g-applied-filters")[0].clientHeight;
+        // query(".g-search-results-pane").style("height", "calc(100% - " + (filtersHeight + 32) +"px)");
       }
       else {
         this.clearAllLinkNode.style.display = "none";
