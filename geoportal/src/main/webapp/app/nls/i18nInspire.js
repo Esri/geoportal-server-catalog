@@ -197,6 +197,12 @@ define({
       fullDate: "The value must be a full date."
     },
     
+    distributionInfo: {
+      online: {
+        description: "Description"
+      }
+    },
+    
     dataQuality: {
       scope: {
         levelDescription: "Level descripton",
