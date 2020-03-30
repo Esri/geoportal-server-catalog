@@ -4,14 +4,14 @@
   </a>
 
   <nav class="g-header navbar-inverse">
-    <figure class="g-branding"  data-dojo-attach-event="onclick: _onHome">
-      <img class="g-brand-logo" src="images/esri-logo-sym.png"/>
-      <span class="navbar-brand">${i18n.nav.brand}</span>
+    <figure class="g-branding">
+      <img class="g-brand-logo" src="images/esri-logo-sym.png" />
+      <a class="navbar-brand" href="#searchPanel">${i18n.nav.brand}</a>
     </figure>
 
     <ul class="nav navbar-nav">
       <li class="nav-item active">
-        <a class="nav-link" href="#searchPanel" data-toggle="tab" data-dojo-attach-point="searchPanelLink">
+        <a class="nav-link" href="#searchPanel" data-toggle="tab">
           ${i18n.nav.catalog}
           <span class="sr-only">(current)</span>
         </a>

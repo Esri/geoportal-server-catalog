@@ -165,11 +165,6 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
         url = url.substr(0, url.toLowerCase().indexOf(srv) + srv.length);
       }
       return url;
-    },
-    
-    _onHome: function() {
-      this.searchPanelLink.click()
-      location.hash = "searchPanel"
     }
 
   });
