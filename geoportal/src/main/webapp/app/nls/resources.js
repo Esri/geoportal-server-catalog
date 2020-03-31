@@ -46,8 +46,8 @@ define({
         createAccount: "Create Account",
         createMetadata: "Create Metadata",
         myProfile: "My Profile",
-        uploadMetadata: "Upload Metadata"
-        //editFacet: "Edit Facet"
+        uploadMetadata: "Upload Metadata",
+        editFacet: "Edit Facet"
       }
     },
 
