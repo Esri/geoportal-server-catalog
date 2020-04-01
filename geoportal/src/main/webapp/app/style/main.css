@@ -723,7 +723,17 @@ body {
 }
 */
 
-g-item-card-content-header-info .g-item-card .g-item-title {
+.g-item-card-content-main {
+  display: flex;
+}
+
+.g-item-card-content-info {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+
+g-item-card-content-info .g-item-card .g-item-title {
   font-weight: 400;
 }
 
@@ -765,12 +775,15 @@ g-item-card-content-header-info .g-item-card .g-item-title {
 }
 
 .g-item-card .g-item-thumbnail {
-  height: auto;
   max-width: 80px;
+  height: auto;
+  padding: 4px;
+  margin-top: 4px;
 }
 
 /* Style for descriptions creates a cap of a few lines of text  */
 .g-item-card .g-item-description {
+  max-width: 540px;
   max-height: 40px;
   overflow: hidden;
 }
