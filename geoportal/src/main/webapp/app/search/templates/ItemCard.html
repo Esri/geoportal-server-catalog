@@ -3,8 +3,8 @@
   data-dojo-attach-event="onmouseenter: _mouseenter, onmouseleave: _mouseleave"
 >
   <div class="g-item-card-content">
-    <div class="g-item-card-content-header">
-      <div class="g-item-card-content-header-info">
+    <div class="g-item-card-content-main">
+      <div class="g-item-card-content-info">
         <div class="g-item-title" data-dojo-attach-point="titleNode"></div>
 
         <div class="g-item-card-info-container">
@@ -32,13 +32,12 @@
             <span class="g-item-owner-and-date" data-dojo-attach-point="permissionsNode"></span>
           </div>
         </div>
+        <div class="g-item-description" data-dojo-attach-point="descriptionNode"></div>
       </div>
       
       <img class="g-item-thumbnail" alt="Thumbnail" data-dojo-attach-point="thumbnailNode"/>
       
     </div>
-
-    <div class="g-item-description" data-dojo-attach-point="descriptionNode"></div>
 
     <div class="g-item-actions" data-dojo-attach-point="actionsNode"></div>
 
