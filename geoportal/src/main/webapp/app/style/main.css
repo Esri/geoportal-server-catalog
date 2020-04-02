@@ -776,7 +776,7 @@ g-item-card-content-info .g-item-card .g-item-title {
 
 .g-item-card .g-item-thumbnail {
   max-width: 80px;
-  height: auto;
+  max-height: 80px;
   padding: 4px;
   margin-top: 4px;
 }
