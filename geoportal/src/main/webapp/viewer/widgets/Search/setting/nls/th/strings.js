@@ -14,6 +14,7 @@ define({
   "generalSetting": "การคั้งค่าทั่วไป",
   "allPlaceholder": "ใส่ข้อความสำหรับการค้นหาทั้งหมด ",
   "showInfoWindowOnSelect": "แสดงป๊อปอัพสำหรับคุณลักษณะ หรือสถานที่",
+  "showInfoWindowOnSelect2": "แสดงป๊อปอัปเมื่อพบฟีเจอร์หรือตำแหน่งที่ตั้ง",
   "searchInCurrentMapExtent": "ค้นหาเฉพาะในขอบเขตแผนที่ปัจจุบัน",
   "zoomScale": "การย่อ / ขยาย มาตราส่วน",
   "locatorUrl": "URL เครื่องระบุตำแหน่ง",

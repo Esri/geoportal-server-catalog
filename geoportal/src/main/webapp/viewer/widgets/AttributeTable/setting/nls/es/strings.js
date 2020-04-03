@@ -5,6 +5,12 @@ define({
   "actions": "Configurar campos de capa",
   "field": "Campo",
   "alias": "Alias",
+  "url": "Dirección URL",
+  "sortField": "El campo de ordenación",
+  "sortOrderTooltips": {
+    "toDescending": "Cambiar a orden descendente",
+    "toAscending": "Cambiar a orden ascendente"
+  },
   "visible": "Visible",
   "linkField": "Campo de vínculo",
   "noLayers": "No hay capas de entidades disponibles",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "Permitir exportación a CSV",
   "expand": "Expandir inicialmente el widget",
   "filterByExtent": "Habilitar Filtrar por extensión de mapa de forma predeterminada",
+  "allowTextSelection": "Permitir selección de texto",
+  "highlightColor": "Resaltar color",
   "restore": "Restaurar al valor predeterminado",
   "ok": "Aceptar",
   "cancel": "Cancelar",

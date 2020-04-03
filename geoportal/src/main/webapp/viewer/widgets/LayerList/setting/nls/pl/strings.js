@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Przenieś do góry / Przenieś w dół",
   "attributeTable": "Wyświetl w tabeli atrybutów",
   "url": "Opis / Pokaż szczegóły elementu / Pobierz",
+  "expandAllLayers": "Rozwiń wszystkie warstwy",
+  "expandAllLayersByDefault": "Domyślnie rozwiń wszystkie warstwy",
   "layerSelectorTitle": "Wybierz warstwy, które zostaną wymienione na liście."
 });

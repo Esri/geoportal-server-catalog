@@ -167,6 +167,22 @@
     right: 0;
     left: 17px;
 }
+.has-webkit.jimu-rtl .jimu-widget-attributetable .dgrid-rtl-swap .dgrid-header-row {
+  left: 6px;
+}
+.dj_edge.jimu-rtl .jimu-widget-attributetable .dgrid-header-row {
+  left: 12px;
+  right: 0;
+}
+.dj_edge.jimu-rtl .dgrid-header-scroll,
+.dj_edge.jimu-rtl .dgrid-hider-toggle {
+  right: auto;
+  left: 0;
+}
+.dj_edge.jimu-rtl .dgrid-hider-menu {
+  left: 17px;
+  right: auto;
+}
 .jimu-rtl .jimu-widget-attributetable .dgrid-cell {
   text-align: right;
   border-left: solid 1px #ccc;
@@ -174,6 +190,18 @@
 .jimu-widget-attributetable .dgrid-header {
   overflow: hidden;
   background-color: #eee;
+}
+.jimu-widget-attributetable .dgrid-header.dgrid-scrollbar-width {
+  min-width: 16px;
+}
+.jimu-widget-attributetable .dgrid-header .dgrid-cell:last-child {
+  border-right-color: transparent;
+}
+.jimu-widget-attributetable .dgrid-header .dgrid-cell:last-child .dgrid-resize-handle {
+  display: none;
+}
+.jimu-rtl .jimu-widget-attributetable .dgrid-header .dgrid-cell:last-child {
+  border-left-color: transparent;
 }
 .jimu-widget-attributetable .dgrid-cell a{
   color: #21759B;
@@ -422,4 +450,64 @@ background-color:#E1F0FB;
   bottom: 4px;
   background: white;
   width: 100%;
+}
+.widget-at-filter-popup .content-absolute{
+  left: 0;
+  right: 0;
+}
+
+/* for message dialog */
+.jimu-widget-attributetable-feature-table-popup p {
+  margin-bottom: 10px;
+}
+.jimu-widget-attributetable-feature-table-popup strong {
+  font-family: "Avenir Medium";
+}
+.jimu-widget-attributetable-feature-table-popup mark {
+  display: inline-block;
+  color: #596679;
+  background: #f1f1f1;
+  border-bottom: 1px solid #ddd;
+  margin: 5px;
+  padding: 5px;
+  font-size: 12px;
+}
+.jimu-widget-attributetable-feature-table-popup pre {
+  padding: 5px;
+  white-space: normal;
+  font-size: 13px;
+  color: #595959;
+  background-color: #f8f8f8;
+  border: 1px solid #efefef;
+  margin: 10px 0 15px;
+}
+.jimu-widget-attributetable-feature-table-popup .tags {
+  margin-bottom: 10px;
+}
+.jimu-widget-attributetable-feature-table-popup .example-block {
+  margin-top: 10px;
+}
+.jimu-widget-attributetable-feature-table-popup .input-row {
+  margin: 20px auto;
+  color: #596679;
+}
+.jimu-widget-attributetable-feature-table-popup .input-row > * {
+  vertical-align: top;
+}
+.jimu-widget-attributetable-feature-table-popup .input-row a {
+  color: #485566;
+  cursor: pointer;
+  line-height: 16px;
+  margin-left: 10px;
+}
+.jimu-rtl .jimu-widget-attributetable-feature-table-popup .input-row a {
+  margin-left: auto;
+  margin-right: 10px;
+}
+.jimu-widget-attributetable-feature-table-popup .input-row a.hint-button {
+  font-size: 12px;
+  color: #999;
+}
+.jimu-widget-attributetable-feature-table-popup .input-row a.hint-button:hover {
+  color: #595959;
 }

@@ -155,7 +155,7 @@
       
       // allow Elasticsearch DSL searches
       if (task.config.allowDslSearches) {
-        var body, sBody = task.request.body;
+        var body, sBody = task.request.getEsDsl()? task.request.getEsDsl(): task.request.body;
         if (typeof sBody === "string" && sBody.indexOf("{") === 0) {
           sBody = sBody.trim();
           if (sBody.indexOf("{") === 0) {
@@ -190,6 +190,11 @@
         targetRequest.searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
         //console.log("targetRequest.searchCriteria="+(JSON.stringify(targetRequest.searchCriteria)));
       }
+      
+      if (task.request.parameterMap.search_after) {
+        targetRequest.searchCriteria["search_after"] = [task.request.parameterMap.search_after]
+      }
+      
       promise.resolve(targetRequest);
       return promise;
     }},
@@ -237,7 +242,7 @@
             "relation": relation,
             "shape": {
               "type": "envelope",
-              "coordinates": [[coords[0],coords[3]], [coords[2],coords[1]]]
+              "coordinates": [[Number(coords[0]),Number(coords[3])], [Number(coords[2]),Number(coords[1])]]
             }
           };
         }
@@ -245,12 +250,12 @@
           query = {"geo_bounding_box": {}};
           query["geo_bounding_box"][field] = {
             "top_left" : {
-              "lon" : coords[0],
-              "lat" : coords[3]
+              "lon" : Number(coords[0]),
+              "lat" : Number(coords[3])
             },
             "bottom_right" : {
-              "lon" : coords[2],
-              "lat" : coords[1]
+              "lon" : Number(coords[2]),
+              "lat" : Number(coords[1])
             }
           };
         }
@@ -444,7 +449,9 @@
         var url = self.searchUrl, options;
         var data = null, dataContentType = "application/json";
         if (targetRequest && task.val.hasAnyProperty(targetRequest.searchCriteria)) {
-          data = JSON.stringify(targetRequest.searchCriteria);
+          var criteria = JSON.parse(JSON.stringify(targetRequest.searchCriteria));
+          criteria.track_total_hits = true;
+          data = JSON.stringify(criteria);
         }
         if (typeof self.username === "string" && self.username.length > 0 &&
             typeof self.password === "string" && self.password.length > 0) {
@@ -464,7 +471,9 @@
         var response = JSON.parse(result);
         searchResult.jsonResponse = response;
         if (response && response.hits) {
-          searchResult.totalHits = response.hits.total;
+          searchResult.totalHits = response.hits.total? 
+                        response.hits.total.value && !isNaN(response.hits.total.value)? response.hits.total.value: response.hits.total: 
+                        0;
           if (task.verbose) console.log("totalHits=",searchResult.totalHits);
           var hits = response.hits.hits;
           if (Array.isArray(response.hits.hits)) {

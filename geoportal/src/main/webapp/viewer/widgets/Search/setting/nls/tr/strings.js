@@ -14,6 +14,7 @@ define({
   "generalSetting": "Genel ayarlar",
   "allPlaceholder": "Tümünü aramak için yer tutucu metin: ",
   "showInfoWindowOnSelect": "Bulunan detay veya konum için açılır pencere göster",
+  "showInfoWindowOnSelect2": "Detay veya konum bulunduğunda açılır pencereyi göster.",
   "searchInCurrentMapExtent": "Yalnızca geçerli harita yayılımını ara",
   "zoomScale": "Yakınlaştırma ölçeği",
   "locatorUrl": "Coğrafi Kodlayıcı URL'si",

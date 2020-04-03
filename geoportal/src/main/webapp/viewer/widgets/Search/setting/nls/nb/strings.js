@@ -14,6 +14,7 @@ define({
   "generalSetting": "Generelle innstillinger",
   "allPlaceholder": "Plassholdertekst for søk i alt: ",
   "showInfoWindowOnSelect": "Vis popuptekst for funnet geoobjekt eller lokasjon",
+  "showInfoWindowOnSelect2": "Vis popup når geoobjektet eller lokasjonen blir funnet.",
   "searchInCurrentMapExtent": "Søk kun i gjeldende kartutstrekning",
   "zoomScale": "Zoomeskala",
   "locatorUrl": "Geokoder-URL",

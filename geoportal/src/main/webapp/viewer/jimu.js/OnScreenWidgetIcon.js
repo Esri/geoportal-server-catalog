@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -28,28 +28,15 @@ function(declare, lang, array, html, on, keys, _WidgetBase, utils) {
   return declare(_WidgetBase, {
     'class': 'jimu-widget-onscreen-icon',
 
-/*
     postCreate: function(){
       this.inherited(arguments);
       this.iconNode = html.create('img', {
         src: this.widgetConfig.icon,
         alt: this.widgetConfig.label
       }, this.domNode);
-      html.setAttr(this.domNode, 'title', this.widgetConfig.label);
-      html.setAttr(this.domNode, 'tabindex', '0');
-      html.setAttr(this.domNode, 'role', 'button');
-      html.setAttr(this.domNode, 'data-widget-name', this.widgetConfig.name);
-      this.own(on(this.domNode, 'click', lang.hitch(this, function(){
-        this.onClick();
-      }))); */
-        
-        
-    postCreate: function(){
-      this.inherited(arguments);
-      this.iconNode = html.create('img', {
-        src: this.widgetConfig.icon,
-        alt: this.widgetConfig.label
-      }, this.domNode);
+      if(window.isRTL && this.widgetConfig.mirrorIconForRTL){
+        html.addClass(this.iconNode, 'jimu-flipx');
+      }
       html.setAttr(this.domNode, 'title', this.widgetConfig.label);
       html.setAttr(this.domNode, 'tabindex', '0');
       html.setAttr(this.domNode, 'role', 'button');
@@ -60,7 +47,7 @@ function(declare, lang, array, html, on, keys, _WidgetBase, utils) {
       this.own(on(this.domNode,"keyup",lang.hitch(this,function(evt) {
         if (evt.keyCode === keys.ENTER) this.onClick();
       })));
-      
+
       this.position = lang.clone(this.widgetConfig.position);
       if (this.widgetConfig.position.relativeTo === 'map') {
         this.own(on(this.map, 'resize', lang.hitch(this, function() {

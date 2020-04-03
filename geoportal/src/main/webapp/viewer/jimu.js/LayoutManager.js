@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -100,13 +100,15 @@ function(declare, lang, html, _WidgetBase, topic, on, query,
         this._loadLayoutManager(this.appConfig).then(lang.hitch(this, function(layoutManager){
           this.layoutManager = layoutManager;
 
-          this.layoutManager.onEnter(this.appConfig, this.mapId);
-          this.mapDiv = this.layoutManager.getMapDiv();
-          this._loadMap(this.mapId);
+          this.layoutManager.onEnter(this.appConfig, this.mapId)
+          .then(lang.hitch(this, function(){
+            this.mapDiv = this.layoutManager.getMapDiv();
+            this._loadMap(this.mapId);
 
-          if(this.appConfig.theme){
-            this._loadTheme(this.appConfig.theme);
-          }
+            if(this.appConfig.theme){
+              this._loadTheme(this.appConfig.theme);
+            }
+          }));
         }));
       }));
     },
@@ -209,6 +211,11 @@ function(declare, lang, html, _WidgetBase, topic, on, query,
     _getFixedThemeStyles: function(theme){
       //fix popup
       var cssText = '.esriPopup .titlePane {background-color: ${mainBackgroundColor} !important;}';
+      if(theme.customStyles.mainBackgroundColor && utils.isLightColor(theme.customStyles.mainBackgroundColor)){
+        var imageUrl = require.toUrl('jimu') + '/css/images/api_popup_light.png';
+        cssText += '.esriPopup .titleButton {background: url(' + imageUrl + ') no-repeat}';
+        cssText += '.esriPopup .titlePane {color: black}';
+      }
       if(theme.name === 'PlateauTheme'){
         cssText += '.jimu-widget-header-controller .jimu-title, .jimu-widget-header-controller .jimu-subtitle' +
           '{color: ${mainBackgroundColor} !important;}';
@@ -229,20 +236,23 @@ function(declare, lang, html, _WidgetBase, topic, on, query,
       }else if(theme.name === 'BillboardTheme'){
         cssText += '.jimu-widget-homebutton .HomeButton .home, .jimu-widget-mylocation,' +
           ' .jimu-widget-mylocation .place-holder, .jimu-widget-zoomslider.vertical .zoom-in,' +
-          ' .jimu-widget-zoomslider.vertical .zoom-out, .jimu-widget-extent-navigate .operation' +
+          ' .jimu-widget-zoomslider.vertical .zoom-out, .jimu-widget-extent-navigate .operation,' +
+          ' .jimu-widget-fullScreen .fullScreen' +
           '{background-color: ${mainBackgroundColor} !important;}';
         cssText += '.jimu-widget-onscreen-icon' +
           '{background-color: ${mainBackgroundColor} !important;}';
       }else if(theme.name === 'BoxTheme'){
         cssText += '.jimu-widget-homebutton .HomeButton .home, .jimu-widget-mylocation,' +
           ' .jimu-widget-mylocation .place-holder, .jimu-widget-zoomslider.vertical .zoom-in,' +
-          ' .jimu-widget-zoomslider.vertical .zoom-out, .jimu-widget-extent-navigate' +
+          ' .jimu-widget-zoomslider.vertical .zoom-out, .jimu-widget-extent-navigate,' +
+          ' .jimu-widget-fullScreen .fullScreen' +
           '{background-color: ${mainBackgroundColor} !important;}';
       }else if(theme.name === 'TabTheme'){
         cssText += '.tab-widget-frame .title-label{color: ${mainBackgroundColor} !important;}';
-      }
-      else if(theme.name === 'DashboardTheme'){
+      }else if(theme.name === 'DashboardTheme'){
         cssText += '.jimu-widget-dnd-header{background-color: ${mainBackgroundColor} !important;}';
+      }else if(theme.name === 'DartTheme'){
+        cssText += '.jimu-widget-fullScreen .fullScreen{background-color: ${mainBackgroundColor} !important;}';
       }
       return cssText;
     },
@@ -252,36 +262,39 @@ function(declare, lang, html, _WidgetBase, topic, on, query,
       appConfig = lang.clone(appConfig);
       //deal with these reasons only
       switch(reason){
-      case 'themeChange':
-        this._onThemeChange(appConfig);
-        break;
-      case 'styleChange':
-        this._onStyleChange(appConfig);
-        break;
-      case 'layoutChange':
-        this._onLayoutChange(appConfig);
-        break;
-      case 'widgetChange':
-        this._onWidgetChange(appConfig, changeData);
-        break;
-      case 'groupChange':
-        this._onGroupChange(appConfig, changeData);
-        break;
-      case 'widgetPoolChange':
-        this._onWidgetPoolChange(appConfig, changeData);
-        break;
-      case 'resetConfig':
-        this._onResetConfig(appConfig);
-        break;
-      case 'loadingPageChange':
-        this._onLoadingPageChange(appConfig, changeData);
-        break;
-      case 'layoutDefinitionChange':
-        this._onLayoutDefinitionChange(appConfig, changeData);
-        break;
-      case 'onScreenGroupsChange':
-        this._onOnScreenGroupsChange(appConfig, changeData);
-        break;
+        case 'themeChange':
+          this._onThemeChange(appConfig);
+          break;
+        case 'styleChange':
+          this._onStyleChange(appConfig);
+          break;
+        case 'layoutChange':
+          this._onLayoutChange(appConfig);
+          break;
+        case 'widgetChange':
+          this._onWidgetChange(appConfig, changeData);
+          break;
+        case 'groupChange':
+          this._onGroupChange(appConfig, changeData);
+          break;
+        case 'widgetPoolChange':
+          this._onWidgetPoolChange(appConfig, changeData);
+          break;
+        case 'resetConfig':
+          this._onResetConfig(appConfig);
+          break;
+        case 'loadingPageChange':
+          this._onLoadingPageChange(appConfig, changeData);
+          break;
+        case 'layoutDefinitionChange':
+          this._onLayoutDefinitionChange(appConfig, changeData);
+          break;
+        case 'onScreenGroupsChange':
+          this._onOnScreenGroupsChange(appConfig, changeData);
+          break;
+        case 'onScreenOrderChange':
+          this._onOnScreenOrderChange(appConfig, changeData);
+          break;
       }
       this.appConfig = appConfig;
     },
@@ -311,11 +324,14 @@ function(declare, lang, html, _WidgetBase, topic, on, query,
         var layoutManager = results[0];
         if(this.layoutManager.name !== layoutManager.name){
           this.layoutManager.onLeave();
-          layoutManager.onEnter(appConfig, this.mapId);
-
-          this.layoutManager = layoutManager;
+          layoutManager.onEnter(appConfig, this.mapId)
+          .then(lang.hitch(this, function(){
+            this.layoutManager = layoutManager;
+            this.layoutManager.loadAndLayout(appConfig);
+          }));
+        } else {
+          this.layoutManager.loadAndLayout(appConfig);
         }
-        this.layoutManager.loadAndLayout(appConfig);
       }));
     },
 
@@ -402,6 +418,10 @@ function(declare, lang, html, _WidgetBase, topic, on, query,
 
     _onOnScreenGroupsChange: function(appConfig, groups){
       this.layoutManager.onOnScreenGroupsChange(appConfig, groups);
+    },
+
+    _onOnScreenOrderChange: function(appConfig, onscreenWidgets) {
+      this.layoutManager.onOnScreenOrderChange(appConfig, onscreenWidgets);
     },
 
     _removeThemeCommonStyle: function(theme){

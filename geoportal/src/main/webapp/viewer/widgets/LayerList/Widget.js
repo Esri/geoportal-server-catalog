@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -136,6 +136,10 @@ define([
           layerListWidget: this,
           config: this.config
         }).placeAt(this.layerListBody);
+
+        if(this.config.expandAllLayersByDefault) {
+          this.layerListView.foldOrUnfoldAllLayers(false);
+        }
       },
 
       _clearLayers: function() {
@@ -170,10 +174,6 @@ define([
           lang.hitch(this, this._onLayerInfosIsVisibleChanged)));
 
         this.own(on(this.operLayerInfos,
-          'updated',
-          lang.hitch(this, this._onLayerInfosObjUpdated)));
-
-        this.own(on(this.operLayerInfos,
           'layerInfosReorder',
           lang.hitch(this, this._onLayerInfosReorder)));
 
@@ -190,42 +190,12 @@ define([
           lang.hitch(this, this._onLayerInfosOpacityChanged)));
       },
 
-      _onLayerInfosChanged: function(layerInfo, changedType) {
-        //this._refresh();
-
-        if(changedType === "added") {
-          var allLayers = this.map.layerIds.concat(this.map.graphicsLayerIds);
-
-          var layerIndex = array.indexOf(allLayers, layerInfo.id);
-          var refLayerId = null;
-          var refLayerNode = null;
-          for(var i = layerIndex - 1; i >= 0; i--) {
-            refLayerId = allLayers[i];
-            refLayerNode = query("[class~='layer-tr-node-" + refLayerId + "']", this.domNode)[0];
-            if(refLayerNode) {
-              break;
-            }
-          }
-          if(refLayerNode) {
-            this.layerListView.drawListNode(layerInfo, 0, refLayerNode, 'before');
-          } else {
-            this.layerListView.drawListNode(layerInfo, 0, this.layerListView.layerListTable);
-          }
-        } else {
-          this.layerListView.destroyLayerTrNode(layerInfo);
-        }
+      _onLayerInfosChanged: function(/*layerInfo, changedType*/) {
+        this.layerListView.refresh();
       },
 
-      _onTableInfosChanged: function(tableInfoArray, changedType) {
-        if(changedType === "added") {
-          array.forEach(tableInfoArray, function(tableInfo) {
-            this.layerListView.drawListNode(tableInfo, 0, this.layerListView.tableListTable);
-          }, this);
-        } else {
-          array.forEach(tableInfoArray, function(tableInfo) {
-            this.layerListView.destroyLayerTrNode(tableInfo);
-          }, this);
-        }
+      _onTableInfosChanged: function(/*tableInfoArray, changedType*/) {
+        this.layerListView.refresh();
       },
 
       _onLayerInfosIsVisibleChanged: function(changedLayerInfos) {
@@ -247,12 +217,15 @@ define([
         }
       },
 
-      _onLayerInfosObjUpdated: function() {
-        this._refresh();
-      },
-
       _onZoomEnd: function() {
+        var layerInfoArray = [];
         this.operLayerInfos.traversal(lang.hitch(this, function(layerInfo) {
+          layerInfoArray.push(layerInfo);
+        }));
+
+        var that = this;
+        setTimeout(function() {
+          var layerInfo = layerInfoArray.shift();
           query("[class~='layer-title-div-" + layerInfo.id + "']", this.domNode)
           .forEach(function(layerTitleDivIdDomNode) {
             try {
@@ -264,8 +237,14 @@ define([
             } catch (err) {
               console.warn(err.message);
             }
-          }, this);
-        }));
+          }, that);
+
+          if(layerInfoArray.length > 0) {
+            setTimeout(arguments.callee, 30); // jshint ignore:line
+          }
+        }, 30);
+
+
       },
 
       _onLayerInfosReorder: function() {

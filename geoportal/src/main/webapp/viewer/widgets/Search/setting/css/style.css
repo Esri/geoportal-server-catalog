@@ -1,7 +1,7 @@
 .jimu-widget-search-setting{
   overflow: hidden;
   width: 100%;
-  margin-top: 20px;
+  margin-top: 19px;
   color: #596679;
   font-size: 14px;
 }
@@ -80,6 +80,7 @@
   position: relative;
   height: 100%;
   overflow: auto;
+  padding-right: 5px;
 }
 
 .jimu-widget-search-setting .source-setting .source-tips{
@@ -118,6 +119,20 @@
 
 .jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .local-search-row .first{
   padding-left: 20px;
+}
+
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row a{
+  text-decoration: none;
+}
+
+.jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row .esri-icon-question{
+  color: #485566;
+  font-style: normal;
+}
+
+.jimu-rtl .jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row .esri-icon-question{
+  transform: rotateY(180deg);
+  display: inline-block;
 }
 
 .jimu-widget-search-setting .jimu-widget-search-locator-source-setting .source-details-section .country-code-row .example,

@@ -1,0 +1,133 @@
+body {
+  font-family: "Roboto",sans-serif !important;
+  background-color: #F0EFEE;
+  color: #666666;
+  font-size: 16px;
+  /*line-height: 24px;*/
+}
+
+header {
+  display: flex;
+  /*background: #000 url(images/banner.png) 0px 0px;*/
+  /*background: #000 url(images/main-bg.jpg) -20px;*/
+  background: #555;
+  justify-content: flex-start;
+  height: 108px
+}
+
+header h2 {
+  margin: 1rem 0;
+  font-size: 4rem;
+  color: #F0EFEE;
+}
+header h3 {
+  margin: 1rem 0;
+  font-size: 2rem;
+  color: #F0EFEE;
+}
+.logo {
+  padding: 1rem;
+}
+
+.help {
+  margin: 3rem;
+  margin-left: auto;
+}
+.help a {
+  text-decoration: underline;
+}
+
+.main {
+  margin: 2rem;
+}
+
+.bottom {
+  background: #000 url(images/main-bg.jpg) -20px;
+  /*background: #1D4E70;*/
+  padding: 2rem;
+  color: #F0EFEE;
+}
+
+.gettingstarted {
+  margin-top: 3rem;
+}
+
+.gettingstarted-content {
+  min-width: 60%;
+  background: #FFF;
+  padding: 2rem;
+  box-shadow: 0 0 0 1px rgba(0,0,0,.1), 0 2px 3px rgba(0,0,0,.2);
+}
+.gettingstarted-button {
+  margin-bottom: 2rem;
+}
+
+.gettingstarted-wrapper {
+  display: flex;
+}
+
+.gettingstarted-content ul {
+  -webkit-padding-start: 2rem;
+}
+
+.references {
+  margin-left: 4rem;
+}
+.references h3 {
+  margin: 2rem;
+}
+
+@media (max-width: 720px) {
+
+  header h3 {
+    display: none;
+  }
+
+  .gettingstarted-wrapper {
+    flex-direction: column;
+  }
+
+  .references {
+    margin-left: 0;
+  }
+
+}
+
+/*
+  .esri-item-gallery .esri-item-container {
+    float: left;
+    text-align: center;
+    padding: 10px;
+    width: 204px;
+    display: inline-block;
+  }
+
+  .esri-item-gallery .esri-image {
+    width: 200px;
+    height: 133px;
+    border: 2px solid gray;
+    border-radius: 5px;
+  }
+
+  .esri-item-gallery .esri-null-image {
+    line-height: 133px;
+    text-align: center;
+    color: #999999;
+  }
+
+  .esri-item-gallery .esri-title {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .esri-item-gallery .esri-null-title {
+    color: #999999;
+  }
+
+  .action {
+    color: blue;
+    cursor: pointer;
+    text-decoration: underline;
+  }
+*/

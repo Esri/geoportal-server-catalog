@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -36,6 +36,8 @@ define([
       _cornerBottom: 'jimu-corner-bottom',
       _cornerLeading: 'jimu-corner-leading',
       _cornerTrailing: 'jimu-corner-trailing',
+
+      moveTopOnActive: false,
 
       postCreate: function(){
         this.inherited(arguments);

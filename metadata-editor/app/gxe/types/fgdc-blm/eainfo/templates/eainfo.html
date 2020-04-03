@@ -1,0 +1,129 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'eainfo',minOccurs:0,maxOccurs:1,label:'${i18nFgdc.eainfo.caption}'">
+
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+  
+    <!-- Detailed Description -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'detailed',minOccurs:0,maxOccurs:'unbounded',label:'Detailed Description'">
+
+        <!-- Entity Type -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'enttyp',label:'Entity Type'">
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'enttypl',label:'Entity Type Label'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+            </div>
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'enttypd',label:'Entity Type Definition'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+            </div>
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'enttypds',minOccurs:0,label:'Entity Type Definition Source'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+            </div>
+        </div>
+        
+        <!-- Attribute -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attr',maxOccurs:'unbounded',label:'Attribute'">
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrlabl',label:'Attribute Label'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+            </div>
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrdef',label:'Attribute Definition'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+            </div>
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrdefs',minOccurs:0,label:'Attribute Definition Source'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+            </div>
+            
+            <!-- Attribute Domain Values -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrdomv',label:'Attribute Domain Values'">
+                <div data-dojo-type="esri/dijit/metadata/form/ElementChoice">
+                
+                    <!-- Enumerated -->
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'edom',minOccurs:1,maxOccurs:'unbounded',label:'Enumerated'">
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'edomv',label:'Enumerated Domain Value'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'edomvd',label:'Enumerated Domain Value Definition'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'edomvds',label:'Enumerated Domain Value Definition Source'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Range -->
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'rdom',label:'Range'">
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'rdommin',label:'Range Domain Minimum'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'rdommax',label:'Range Domain Maximum'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrunit',minOccurs:0,label:'Attribute Units of Measure'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrmres',minOccurs:0,label:'Attribute Measurement Resolution'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputNumber"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Codeset -->
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'codesetd',label:'Codeset'">
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'codesetn',label:'Codeset Name'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'codesets',label:'Codeset Source'">
+                            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                    </div>
+                    
+                    <!-- Unrepresentable -->
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'udom',label:'Unrepresentable'">
+                        <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Beginning/Ending Date of Attribute Values -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'begdatea',minOccurs:0,label:'Beginning Date of Attribute Values'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+
+                <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'enddatea',minOccurs:0,label:'Ending Date of Attribute Values'">
+                        <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                </div>
+            </div>
+            
+            <!-- Attribute Value Accuracy Information -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrvai',minOccurs:0,label:'Attribute Value Accuracy Information'">
+                <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrva',label:'Attribute Value Accuracy'">
+                    <div data-dojo-type="esri/dijit/metadata/form/InputNumber"></div>
+                </div>
+                <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrvae',label:'Attribute Value Accuracy Explanation'">
+                    <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                </div>
+            </div>
+            
+            <!-- Attribute Measurement Frequency -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'attrmfrq',minOccurs:0,alternateValues:['Unknown','As needed','Irregular'],label:'Attribute Measurement Frequency'">
+                <div data-dojo-type="esri/dijit/metadata/form/InputNumber">
+                    <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" data-dojo-props="value:'Unknown',label:'Unknown'"></div>  
+                    <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" data-dojo-props="value:'As needed',label:'As needed'"></div>  
+                    <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" data-dojo-props="value:'Irregular',label:'Irregular'"></div>  
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Overview Description -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'overview',maxOccurs:'unbounded',label:'${i18nFgdc.eainfo.overview}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'eaover',label:'${i18nFgdc.eainfo.eaover}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+        </div>
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'eadetcit',minOccurs:0,maxOccurs:'unbounded',label:'${i18nFgdc.eainfo.eadetcit}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+        </div>
+    </div>
+    
+    </div>
+    
+  </div>
+  
+</div>

@@ -6,4 +6,9 @@
   -webkit-border-radius: 4px;
   border-radius: 4px;
 }
-
+.jimu-subtitle{
+  opacity: 0.5;
+}
+.jimu-link{
+  opacity: 0.8;
+}

@@ -5,6 +5,12 @@ define({
   "actions": "配置图层字段",
   "field": "字段",
   "alias": "别名",
+  "url": "URL",
+  "sortField": "排序字段",
+  "sortOrderTooltips": {
+    "toDescending": "更改为降序",
+    "toAscending": "更改为升序"
+  },
   "visible": "可见",
   "linkField": "链接字段",
   "noLayers": "没有可用的要素图层",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "允许导出为 CSV",
   "expand": "初始展开微件",
   "filterByExtent": "默认启用按地图范围过滤",
+  "allowTextSelection": "允许选择文本",
+  "highlightColor": "高亮显示颜色",
   "restore": "恢复至默认值",
   "ok": "确定",
   "cancel": "取消",

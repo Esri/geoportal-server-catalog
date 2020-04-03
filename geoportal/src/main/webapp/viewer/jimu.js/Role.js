@@ -225,9 +225,9 @@ define([
         case "premium:user:geoenrichment":
           this.privilegeObj.premium.user.geoenrichment = allow;
           break;
-//        case "premium:user:geotrigger":
-//          this.privilegeObj.premium.user.geotrigger = allow;
-//          break;
+        //  case "premium:user:geotrigger":
+        //    this.privilegeObj.premium.user.geotrigger = allow;
+        //    break;
         case "premium:user:demographics":
           this.privilegeObj.premium.user.demographics = allow;
           break;

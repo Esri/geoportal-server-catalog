@@ -63,15 +63,18 @@ define({
         map: "Map",
         timePeriod: "Time Period",
         date: "Date",
+        paleoDate: "Date (Paleo)",
         owner: "Owner",
         topicCategory: "Topic Category",
         metadataType: "Metadata Type",
         organizations: "Organizations",
         keywords: "Keywords",
+        originType: "Origin Type",
         origin: "Source of Origin",
         approvalStatus: "Approval Status",
         access: "Access",
-        accessGroups: "Access Groups"
+        accessGroups: "Access Groups",
+        missingSource: "Editor/Upload"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -89,7 +92,13 @@ define({
         countPattern: "{count} centered here",
         settings: {
           caption: "Spatial Filter",
-          aggregations: "Aggregations"
+          aggregations: "Aggregations",
+          field: "Shape Field",
+          fieldPlaceholder: "",
+          fieldNote: "(for search, e.g. envelope_geo, shape_geo, envelope_cen_pt)",
+          pointField: "Point Field",
+          pointFieldPlaceholder: "",
+          pointFieldNote: "(for aggregation, e.g. envelope_cen_pt)"
         }
       },
       temporalFilter: {
@@ -97,6 +106,11 @@ define({
         rangePattern: "{from}..{to}",
         countPattern: "{count} aggregated here",
         searchTip: "Search",
+        searchLabel: "Search query:",
+        fromLabel: "From:",
+        toLabel: "To",
+        calendarLabel: "Specify date range:",
+        calendarTitle: "Enter Time Interval",
         interval: {
           year: "Year",
           quarter: "Quarter",
@@ -141,7 +155,13 @@ define({
         rangePattern: "{from}..{to}",
         countPattern: "{count} aggregated here",
         searchTip: "Search",
+        searchLabel: "Search query:",
         interval: "Interval",
+        rangeTip: "Specify desired numerical range",
+        rangeLabel: "Specify range:",
+        fromLabel: "From:",
+        toLabel: "To:",
+        applyLabel: "Apply",
         settings: {
           caption: "Numeric Filter",
           field: "Numeric Field",
@@ -185,6 +205,9 @@ define({
         previousTip: "Previous",
         next: ">",
         nextTip: "Next",
+        last: ">>",
+        lastTip: "Last",
+        lastTipDisabled: "Result exceeds limit of ${searchLimit} records.",
         pagePattern: "Page {page}",
         countPattern: "{count} items"
       },
@@ -215,6 +238,16 @@ define({
       },
       preview: {
         error: "Error loading preview"
+      },
+      links: {
+        web: "Web result",
+        atom: "ATOM result",
+        rss:  "RSS result",
+        json: "JSON result",
+        csv:  "CSV result",
+        csw:  "CSW result",
+        kml:  "KML result",
+        dcat: "DCAT result"
       }
     },
     
@@ -227,7 +260,7 @@ define({
         links: "Links",
         addToMap: "Add to Map",
         preview: "Preview",
-        titleFormat: "${action} link for ${title}",
+        titleFormat: "${action} - ${title}",
         options: {
           caption: "Options",
           editMetadata: "Edit Metadata",

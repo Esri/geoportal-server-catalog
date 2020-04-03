@@ -1,0 +1,30 @@
+<div>
+  <div class="g-drop-pane" data-dojo-type="app/search/DropPane" 
+    data-dojo-attach-point="dropPane" data-dojo-props="title:'${label}',open:${open}">
+    <span class="g-basic-from-value">
+      <label for="{id}_fromValue" class="g-basic-from-value-input-label">${i18n.search.numericFilter.fromLabel}</label>
+      <input type="text" id="{id}_fromValue" class="g-basic-from-value-input"
+             data-dojo-type="dijit/form/NumberTextBox" 
+             data-dojo-attach-point="fromValueInput"
+             placeholder="e.g. -100000"
+             size="11"
+             style="width: 130px;"
+             />
+    </span>
+    <span class="g-basic-to-value">
+      <label for="{id}_toValue" class="g-basic-from-value-input-label">${i18n.search.numericFilter.toLabel}</label>
+      <input type="text" id="{id}_toValue" class="g-basic-to-value-input" 
+             data-dojo-type="dijit/form/NumberTextBox" 
+             data-dojo-attach-point="toValueInput"
+             placeholder="e.g. -50000"
+             size="11"
+             style="width: 130px;"
+             />
+    </span>
+    <button type="button" 
+      data-dojo-attach-point="applyButton"
+      data-dojo-attach-event="onClick: onApplyClicked"
+      class="btn btn-link btn-sm"
+      >${i18n.search.numericFilter.applyLabel}</button>
+  </div>
+</div>

@@ -40,5 +40,21 @@ define({
   "sortDes": "Ordem decrescente",
   "statistics": "Estatística",
   "attachments": "Anexos",
-  "files": "arquivos"
+  "files": "arquivos",
+  "keepRichTextLabel": "Manter formato rich text",
+  "whatsThis": "O que é Isto?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} contém os seguintes campos de rich text: ",
+      "line2": " Isto pode incluir estilos da formatação de texto, como fontes, cores ou tamanhos de texto.",
+      "line3": "Quando exportados para CSV, os estilos de formatação serão preservados na forma de tags da HTML. Você pode optar por não manter os formatos rich text, desmarcando a caixa \"Manter formato rich text\"."
+    },
+    "example": {
+      "label": "Por exemplo:",
+      "scenarios": {
+        "first": "será exportado como o seguinte texto por padrão:",
+        "second": "e o seguinte texto sem formato rich text:"
+      }
+    }
+  }
 });

@@ -1,0 +1,60 @@
+define({
+  "_widgetLabel": "Attribútumtábla",
+  "_featureAction_ShowRelatedRecords": "Kapcsolt rekordok megjelenítése",
+  "_featureAction_ViewInTable": "Megtekintés az Attribútumtáblában",
+  "ok": "OK",
+  "cancel": "Mégse",
+  "unsupportQueryWarning": "A rétegnek támogatnia kell a lekérdezési műveletet, hogy megjelenhessen az Attribute Table widgetben. Győződjön meg arról, hogy a szolgáltatás lekérdezési funkciója be van kapcsolva.",
+  "exportMessage": "Exportálja az adatokat CSV fájlba?",
+  "exportFiles": "Exportálás CSV fájlba",
+  "exportSelected": "Kijelöltek exportálása CSV fájlba",
+  "exportAll": "Az összes exportálása CSV fájlba",
+  "options": "Beállítások",
+  "zoomto": "Nagyítás erre:",
+  "highlight": "Grafika kiemelése",
+  "selectAll": "Rekordok kijelölése az összes oldalon",
+  "selectPage": "Rekordok kijelölése az aktuális oldalon",
+  "clearSelection": "Kijelölés megszüntetése",
+  "filter": "Szűrő",
+  "setFilterTip": "Állítsa be megfelelően a szűrőket.",
+  "noFilterTip": "A szűrési kifejezések meghatározása nélkül ez a lekérdezési feladat a megadott adatforrás összes vektoros elemét felsorolja.",
+  "filterByExtent": "Szűrés térképkiterjedés szerint",
+  "showSelectedRecords": "Kiválasztott rekordok megjelenítése",
+  "showAllRecords": "Összes rekord megjelenítése",
+  "showRelatedRecords": "Kapcsolt rekordok megjelenítése",
+  "noRelatedRecords": "Nincsenek kapcsolt rekordok",
+  "attachmentColumn": "Fényképek és fájlok",
+  "refresh": "Frissítés",
+  "features": "Vektoros elemek",
+  "records": "rekord",
+  "selected": "kiválasztva",
+  "transparent": "Átlátszó mód",
+  "indicate": "Kijelölés megkeresése",
+  "columns": "Oszlopok megjelenítése/elrejtése",
+  "selectionSymbol": "Kiválasztási szimbólum",
+  "closeMessage": "Tábla elrejtése (alulról ismét kibontható)",
+  "dataNotAvailable": "Az adatok nem érhetők el!<br>A [Frissítés] gombra kattintva próbálkozhat újra.",
+  "openTableTip": "Attribútumtábla megnyitása",
+  "closeTableTip": "Attribútumtábla elrejtése",
+  "sortAsc": "Rendezés növekvő sorrendben",
+  "sortDes": "Rendezés csökkenő sorrendben",
+  "statistics": "Statisztika",
+  "attachments": "Csatolmányok",
+  "files": "fájl",
+  "keepRichTextLabel": "Rich Text formátum megőrzése",
+  "whatsThis": "Mi ez?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "A(z) ${layerName} a következő Rich Text formátumú mező(ke)t tartalmazza: ",
+      "line2": " Ezek szövegformázási stílusokat, például betűtípusokat, színeket vagy szövegméreteket tartalmazhatnak.",
+      "line3": "CSV-fájlba történő exportáláskor a formázási stílusok HTML-címkékként őrződnek meg. Ha nem szeretné megőrizni a Rich Text formátumokat, törölje a ”Rich Text formátum megőrzése\" jelölőnégyzet jelölését."
+    },
+    "example": {
+      "label": "Például:",
+      "scenarios": {
+        "first": "alapértelmezés szerint a következő szövegként lesz exportálva:",
+        "second": "és a következő szöveg Rich Text formátum nélkül:"
+      }
+    }
+  }
+});

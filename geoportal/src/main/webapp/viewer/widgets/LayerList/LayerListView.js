@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -24,6 +24,7 @@ define([
   'dojo/query',
   'jimu/dijit/CheckBox',
   'jimu/dijit/DropMenu',
+  'jimu/dijit/LoadingShelter',
   './PopupMenu',
   'dijit/_TemplatedMixin',
   'dojo/text!./LayerListView.html',
@@ -31,7 +32,7 @@ define([
   'dojo/dom-style',
   './NlsStrings'
 ], function(_WidgetBase, declare, lang, array, domConstruct, on, query,
-  CheckBox, DropMenu, PopupMenu, _TemplatedMixin, template,
+  CheckBox, DropMenu, LoadingShelter, PopupMenu, _TemplatedMixin, template,
   domClass, domStyle, NlsStrings) {
 
   return declare([_WidgetBase, _TemplatedMixin], {
@@ -39,14 +40,29 @@ define([
     _currentSelectedLayerRowNode: null,
     operationsDropMenu: null,
     _layerNodeHandles: null,
+    // _layerDomNodeStorage = {
+    //   layerInfoObjectId: {// layerDomNode
+    //     layerTrNode: domNode,
+    //     layerContentTrNode: domeNode,
+    //     layerNodeEventHandles: []
+    //     layerNodeReferredDijits: []
+    //   }
+    // }
+    _layerDomNodeStorage: null,
 
     postMixInProperties: function() {
       this.inherited(arguments);
       this.nls = NlsStrings.value;
-      this._layerNodeHandles = {};
+      this._layerDomNodeStorage = {};
     },
 
     postCreate: function() {
+      this.refresh();
+      this._initOperations();
+    },
+
+    refresh: function() {
+      this._removeLayerNodes();
       array.forEach(this.operLayerInfos.getLayerInfoArray(), function(layerInfo) {
         this.drawListNode(layerInfo, 0, this.layerListTable);
       }, this);
@@ -54,7 +70,6 @@ define([
       array.forEach(this.operLayerInfos.getTableInfoArray(), function(layerInfo) {
         this.drawListNode(layerInfo, 0, this.tableListTable);
       }, this);
-      this._initOperations();
     },
 
     drawListNode: function(layerInfo, level, toTableNode, position) {
@@ -62,35 +77,50 @@ define([
       if(this.isLayerHiddenInWidget(layerInfo)) {
         return;
       }
-      if (layerInfo.newSubLayers.length === 0) {
+
+      nodeAndSubNode = this._layerDomNodeStorage[layerInfo.getObjectId()];
+      if((layerInfo.isRootLayer() || layerInfo.isTable)  && nodeAndSubNode) {
+        domConstruct.place(nodeAndSubNode.layerTrNode, toTableNode, position);
+        domConstruct.place(nodeAndSubNode.layerContentTrNode, toTableNode, position);
+      } else if (layerInfo.newSubLayers.length === 0) {
         //addLayerNode
         nodeAndSubNode = this.addLayerNode(layerInfo, level, toTableNode, position);
         //add legend node
         if (this.config.showLegend) {
           this.addLegendNode(layerInfo, level, nodeAndSubNode.subNode);
         } else {
-          showLegendDiv = query(".showLegend-div", nodeAndSubNode.currentNode)[0];
+          showLegendDiv = query(".showLegend-div", nodeAndSubNode.layerTrNode)[0];
           if(showLegendDiv) {
             domClass.add(showLegendDiv, 'hidden');
           }
         }
-        return;
+      } else {
+        //addLayerNode
+        nodeAndSubNode = this.addLayerNode(layerInfo, level, toTableNode, position);
+        array.forEach(layerInfo.newSubLayers, lang.hitch(this, function(level, subLayerInfo) {
+          this.drawListNode(subLayerInfo, level + 1, nodeAndSubNode.subNode);
+        }, level));
       }
-      //addLayerNode
-      nodeAndSubNode = this.addLayerNode(layerInfo, level, toTableNode, position);
-      array.forEach(layerInfo.newSubLayers, lang.hitch(this, function(level, subLayerInfo) {
-        this.drawListNode(subLayerInfo, level + 1, nodeAndSubNode.subNode);
-      }, level));
     },
 
     addLayerNode: function(layerInfo, level, toTableNode, position) {
-      var layerTrNode,
-        layerTdNode, ckSelectDiv, ckSelect, imageNoLegendDiv, handle,
-        imageNoLegendNode, popupMenuNode, i, imageShowLegendDiv, popupMenu, divLabel;
+
+      var layerTrNode, layerTdNode, ckSelectDiv, ckSelect, imageNoLegendDiv, handle,
+        imageNoLegendNode, popupMenuNode, i, imageShowLegendDiv, divLabel;
 
       var rootLayerInfo = layerInfo.getRootLayerInfo();
-      if(!this._layerNodeHandles[rootLayerInfo.id]) {
-        this._layerNodeHandles[rootLayerInfo.id] = [];
+      // if(!this._layerNodeHandles[rootLayerInfo.id]) {
+      //   this._layerNodeHandles[rootLayerInfo.id] = [];
+      // }
+
+      // init _layerDomNodeStorage for rootLayerInfo.
+      if(layerInfo.isRootLayer() || layerInfo.isTable) {
+        this._layerDomNodeStorage[layerInfo.getObjectId()] = {
+          layerTrNode: null,
+          layerContentTrNode: null,
+          layerNodeEventHandles: [],
+          layerNodeReferredDijits: []
+        };
       }
 
       var layerTrNodeClass = "layer-tr-node-" + layerInfo.id;
@@ -145,7 +175,7 @@ define([
         'alt': 'l'
       }, imageNoLegendDiv);
 
-      if (layerInfo.noLegend || layerInfo.isTable) {
+      if (layerInfo.isTiled || layerInfo.isTable) {
         domStyle.set(imageShowLegendDiv, 'display', 'none');
         domStyle.set(ckSelectDiv, 'display', 'none');
         domStyle.set(imageNoLegendDiv, 'display', 'block');
@@ -219,16 +249,16 @@ define([
       */
 
       //add a tr node to toTableNode.
-      var trNode = domConstruct.create('tr', {
+      var layerContentTrNode = domConstruct.create('tr', {
         'class': '',
         'layerContentTrNodeId': layerInfo.id
       });
-      domConstruct.place(trNode, toTableNode, position);
+      domConstruct.place(layerContentTrNode, toTableNode, position);
 
       var tdNode = domConstruct.create('td', {
         'class': '',
         'colspan': '3'
-      }, trNode);
+      }, layerContentTrNode);
 
       var tableNode = domConstruct.create('table', {
         'class': 'layer-sub-node',
@@ -244,7 +274,8 @@ define([
           imageShowLegendDiv,
           layerTrNode,
           tableNode)));
-      this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      //this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      this._storeLayerNodeEventHandle(rootLayerInfo, handle[0]);
 
       handle = this.own(on(imageShowLegendDiv,
         'click',
@@ -254,33 +285,30 @@ define([
           imageShowLegendDiv,
           layerTrNode,
           tableNode)));
-      this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
-
-      handle = this.own(on(layerTrNode,
-        'mouseover',
-        lang.hitch(this, this._onLayerNodeMouseover, layerTrNode, popupMenu)));
-      this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
-
-      handle = this.own(on(layerTrNode,
-        'mouseout',
-        lang.hitch(this, this._onLayerNodeMouseout, layerTrNode, popupMenu)));
-      this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      //this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      this._storeLayerNodeEventHandle(rootLayerInfo, handle[0]);
 
       handle = this.own(on(ckSelect.domNode, 'click', lang.hitch(this,
         this._onCkSelectNodeClick,
         layerInfo,
         ckSelect)));
-      this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      //this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      this._storeLayerNodeEventHandle(rootLayerInfo, handle[0]);
 
       handle = this.own(on(popupMenuNode, 'click', lang.hitch(this,
         this._onPopupMenuClick,
         layerInfo,
         popupMenuNode,
         layerTrNode)));
-      this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      //this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+      this._storeLayerNodeEventHandle(rootLayerInfo, handle[0]);
 
+      if(layerInfo.isRootLayer() || layerInfo.isTable) {
+        this._layerDomNodeStorage[layerInfo.getObjectId()].layerTrNode = layerTrNode;
+        this._layerDomNodeStorage[layerInfo.getObjectId()].layerContentTrNode = layerContentTrNode;
+      }
       return {
-        currentNode: layerTrNode,
+        layerTrNode: layerTrNode,
         subNode: tableNode
       };
     },
@@ -299,22 +327,6 @@ define([
         hasContentMenu = true;
       }
       return hasContentMenu;
-    },
-
-    destroyLayerTrNode: function(layerInfo) {
-      var removedLayerNode = query("[class~='layer-tr-node-" + layerInfo.id + "']", this.domNode)[0];
-      var removedLayerContentNode = query("[layercontenttrnodeid='" + layerInfo.id + "']", this.domNode)[0];
-      if(removedLayerNode) {
-        var rootLayerInfo = layerInfo.getRootLayerInfo();
-        array.forEach(this._layerNodeHandles[rootLayerInfo.id], function(handle) {
-          handle.remove();
-        }, this);
-        delete this._layerNodeHandles[rootLayerInfo.id];
-        domConstruct.destroy(removedLayerNode);
-        if(removedLayerContentNode) {
-          domConstruct.destroy(removedLayerContentNode);
-        }
-      }
     },
 
     addLegendNode: function(layerInfo, level, toTableNode) {
@@ -339,6 +351,105 @@ define([
       }
     },
 
+    redrawLegends: function(layerInfo) {
+      var legendsNode = query("div[legendsDivId='" + layerInfo.id + "']", this.layerListTable)[0];
+      if(legendsNode) {
+        if(legendsNode._legendDijit && legendsNode._legendDijit.destroy) {
+          legendsNode._legendDijit.destroy();
+        }
+        layerInfo.drawLegends(legendsNode, this.layerListWidget.appConfig.portalUrl);
+      }
+    },
+
+    // destroyLayerTrNode: function(layerInfo) {
+    //   var removedLayerNode = query("[class~='layer-tr-node-" + layerInfo.id + "']", this.domNode)[0];
+    //   var removedLayerContentNode = query("[layercontenttrnodeid='" + layerInfo.id + "']", this.domNode)[0];
+    //   if(removedLayerNode) {
+    //     var rootLayerInfo = layerInfo.getRootLayerInfo();
+    //     array.forEach(this._layerNodeHandles[rootLayerInfo.id], function(handle) {
+    //       handle.remove();
+    //     }, this);
+    //     delete this._layerNodeHandles[rootLayerInfo.id];
+    //     domConstruct.destroy(removedLayerNode);
+    //     if(removedLayerContentNode) {
+    //       domConstruct.destroy(removedLayerContentNode);
+    //     }
+    //   }
+    // },
+
+    /***************************************************
+     * methods for refresh layerListView
+     ***************************************************/
+    _storeLayerNodeEventHandle: function(rootLayerInfo, handle) {
+      var rootLayerStorage = this._layerDomNodeStorage[rootLayerInfo.getObjectId()];
+      if(rootLayerStorage) {
+        rootLayerStorage.layerNodeEventHandles.push(handle);
+      }
+    },
+
+    _storeLayerNodeDijit: function(rootLayerInfo, dijit) {
+      var rootLayerStorage = this._layerDomNodeStorage[rootLayerInfo.getObjectId()];
+      if(rootLayerStorage) {
+        rootLayerStorage.layerNodeReferredDijits.push(dijit);
+      }
+    },
+
+    _clearLayerDomNodeStorage:function() {
+      //jshint unused:false
+      var layerInfoArray = this.operLayerInfos.getLayerInfoArray();
+      var tableInfoArray = this.operLayerInfos.getTableInfoArray();
+      var layerAndTableInfoArray = layerInfoArray.concat(tableInfoArray);
+      var findElem;
+      for(var elem in this._layerDomNodeStorage) {
+        if(this._layerDomNodeStorage.hasOwnProperty(elem) &&
+           (typeof this._layerDomNodeStorage[elem] !== 'function')) {
+          /* jshint loopfunc: true */
+          findElem = array.some(layerAndTableInfoArray, function(layerInfo) {
+            if(layerInfo.getObjectId().toString() === elem) {
+              return true;
+            }
+          }, this);
+          if(!findElem) {
+            //release layer node.
+            array.forEach(this._layerDomNodeStorage[elem].layerNodeEventHandles, function(handle) {
+              handle.remove();
+            }, this);
+            array.forEach(this._layerDomNodeStorage[elem].layerNodeReferredDijits, function(dijit) {
+              dijit.destroy();
+            }, this);
+            domConstruct.destroy(this._layerDomNodeStorage[elem].layerTrNode);
+            domConstruct.destroy(this._layerDomNodeStorage[elem].layerContentTrNode);
+            delete this._layerDomNodeStorage[elem];
+          }
+        }
+      }
+    },
+
+    _removeLayerNodes: function() {
+      var nodeAndSubNode, parentNode;
+      this._clearLayerDomNodeStorage();
+      for(var elem in this._layerDomNodeStorage) {
+        if(this._layerDomNodeStorage.hasOwnProperty(elem) &&
+           (typeof this._layerDomNodeStorage[elem] !== 'function')) {
+          nodeAndSubNode = this._layerDomNodeStorage[elem];
+          if(nodeAndSubNode.parentNode && nodeAndSubNode.layerTrNode) {
+            parentNode = nodeAndSubNode.layerTrNode.parentNode;
+            if(parentNode) {
+              parentNode.removeChild(nodeAndSubNode.layerTrNode);
+            }
+            parentNode = nodeAndSubNode.layerContentTrNode.parentNode;
+            if(parentNode) {
+              parentNode.removeChild(nodeAndSubNode.layerContentTrNode);
+            }
+          }
+        }
+      }
+      // this.inherited(arguments);
+    },
+
+    /***************************************************
+     * methods for control layerListView
+     ***************************************************/
     // return current state:
     //   true:  fold,
     //   false: unfold
@@ -387,16 +498,6 @@ define([
       return state;
     },
 
-    redrawLegends: function(layerInfo) {
-      var legendsNode = query("div[legendsDivId='" + layerInfo.id + "']", this.layerListTable)[0];
-      if(legendsNode) {
-        if(legendsNode._legendDijit && legendsNode._legendDijit.destroy) {
-          legendsNode._legendDijit.destroy();
-        }
-        layerInfo.drawLegends(legendsNode, this.layerListWidget.appConfig.portalUrl);
-      }
-    },
-
     _foldOrUnfoldLayers: function(layerInfos, isFold) {
       array.forEach(layerInfos, function(layerInfo) {
         this._foldOrUnfoldLayer(layerInfo, isFold);
@@ -430,10 +531,12 @@ define([
           _config: this.config
         }).placeAt(popupMenuNode);
         popupMenuNode.popupMenu = popupMenu;
+        this._storeLayerNodeDijit(rootLayerInfo, popupMenu);
         var handle = this.own(on(popupMenu,
               'onMenuClick',
               lang.hitch(this, this._onPopupMenuItemClick, layerInfo, popupMenu)));
-        this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+        //this._layerNodeHandles[rootLayerInfo.id].push(handle[0]);
+        this._storeLayerNodeEventHandle(rootLayerInfo, handle[0]);
       }
 
       /*jshint unused: false*/
@@ -459,26 +562,6 @@ define([
       if (this.currentPopupMenu && this.currentPopupMenu.state === 'opened') {
         this.currentPopupMenu.closeDropMenu();
       }
-    },
-
-    _onLayerNodeMouseover: function(layerTrNode) {
-      domClass.add(layerTrNode, "layer-row-mouseover");
-      /*
-      if (popupMenu) {
-        //domClass.add(popupMenuNode, "layers-list-popupMenu-div-selected");
-        domClass.add(popupMenu.btnNode, "jimu-icon-btn-selected");
-      }
-      */
-    },
-
-    _onLayerNodeMouseout: function(layerTrNode) {
-      domClass.remove(layerTrNode, "layer-row-mouseover");
-      /*
-      if (popupMenu) {
-        //domClass.remove(popupMenuNode, "layers-list-popupMenu-div-selected");
-        domClass.remove(popupMenu.btnNode, "jimu-icon-btn-selected");
-      }
-      */
     },
 
     _onLayerListWidgetPaneClick: function() {
@@ -534,6 +617,9 @@ define([
       }
     },
 
+    /***************************************************
+     * methods for control moveUp/moveDown.
+     ***************************************************/
     // befor exchange:  id1 -> id2
     // after exchanged: id2 -> id1
     _exchangeLayerTrNode: function(layerInfo1, layerInfo2) {
@@ -552,7 +638,6 @@ define([
         this.layerListTable.insertBefore(layer2ContentTrNode, layer1TrNode);
       }
     },
-
 
     _getMovedSteps: function(layerInfo, upOrDown) {
       // summary:
@@ -587,108 +672,6 @@ define([
         }
       }
       return steps;
-    },
-
-    _initOperations: function() {
-      this.operationsDropMenu = new DropMenu({
-        items:[{
-          key: "turnAllLayersOn",
-          label: this.nls.turnAllLayersOn
-        }, {
-          key: "turnAllLayersOff",
-          label: this.nls.turnAllLayersOff
-        }, {
-          key: "separator"
-        }, {
-          key: "expandAllLayers",
-          label: this.nls.expandAllLayers
-        }, {
-          key: "collapseAlllayers",
-          label: this.nls.collapseAlllayers
-        }],
-        box: this.layerListWidget.domNode.parentNode
-      }).placeAt(this.layerListOperations);
-
-      var operationIconBtnNode = query('div.jimu-dropmenu > div:first-child',
-          this.layerListOperations)[0];
-
-      if(operationIconBtnNode) {
-        domClass.remove(operationIconBtnNode, ['jimu-icon-btn', 'popup-menu-button']);
-        domClass.add(operationIconBtnNode, ['feature-action', 'icon-operation']);
-      }
-
-      if(this.operationsDropMenu.btnNode) {
-        this.own(on(this.operationsDropMenu.btnNode,
-          'click',
-          lang.hitch(this, this._onLayerListOperationsClick)));
-      }
-
-      this.own(on(this.operationsDropMenu ,
-        'onMenuClick',
-        lang.hitch(this, this._onOperationsMenuItemClick)));
-    },
-
-    _onLayerListOperationsClick: function() {
-      this._hideCurrentPopupMenu();
-    },
-
-    _onOperationsMenuItemClick: function(item) {
-      switch (item.key) {
-      case 'turnAllLayersOn':
-        this.turnAllRootLayers(true);
-        return;
-      case 'turnAllLayersOff':
-        this.turnAllRootLayers(false);
-        return;
-      case 'expandAllLayers':
-        this.foldOrUnfoldAllRootLayers(false);
-        return;
-      case 'collapseAlllayers':
-        this.foldOrUnfoldAllRootLayers(true);
-        return;
-      default:
-        return;
-      }
-    },
-
-    isFirstDisplayedLayerInfo: function(layerInfo) {
-      var isFirst;
-      var steps;
-      var layerInfoIndex;
-      var layerInfoArray;
-      if(layerInfo.isFirst || !layerInfo.isRootLayer()) {
-        isFirst = true;
-      } else {
-        steps = this._getMovedSteps(layerInfo, "moveup");
-        layerInfoArray = this.operLayerInfos.getLayerInfoArray();
-        layerInfoIndex = this.operLayerInfos._getTopLayerInfoIndexById(layerInfo.id);
-        if(this.isLayerHiddenInWidget(layerInfoArray[layerInfoIndex - steps])) {
-          isFirst = true;
-        } else {
-          isFirst = false;
-        }
-      }
-      return isFirst;
-    },
-
-    isLastDisplayedLayerInfo: function(layerInfo) {
-      var isLast;
-      var steps;
-      var layerInfoIndex;
-      var layerInfoArray;
-      if(layerInfo.isLast || !layerInfo.isRootLayer()) {
-        isLast = true;
-      } else {
-        steps = this._getMovedSteps(layerInfo, "movedown");
-        layerInfoArray = this.operLayerInfos.getLayerInfoArray();
-        layerInfoIndex = this.operLayerInfos._getTopLayerInfoIndexById(layerInfo.id);
-        if(this.isLayerHiddenInWidget(layerInfoArray[layerInfoIndex + steps])) {
-          isLast = true;
-        } else {
-          isLast = false;
-        }
-      }
-      return isLast;
     },
 
     moveUpLayer: function(layerInfo) {
@@ -743,6 +726,116 @@ define([
       return isHidden;
     },
 
+    isFirstDisplayedLayerInfo: function(layerInfo) {
+      var isFirst;
+      var steps;
+      var layerInfoIndex;
+      var layerInfoArray;
+      if(layerInfo.isFirst || !layerInfo.isRootLayer()) {
+        isFirst = true;
+      } else {
+        steps = this._getMovedSteps(layerInfo, "moveup");
+        layerInfoArray = this.operLayerInfos.getLayerInfoArray();
+        layerInfoIndex = this.operLayerInfos._getTopLayerInfoIndexById(layerInfo.id);
+        if(this.isLayerHiddenInWidget(layerInfoArray[layerInfoIndex - steps])) {
+          isFirst = true;
+        } else {
+          isFirst = false;
+        }
+      }
+      return isFirst;
+    },
+
+    isLastDisplayedLayerInfo: function(layerInfo) {
+      var isLast;
+      var steps;
+      var layerInfoIndex;
+      var layerInfoArray;
+      if(layerInfo.isLast || !layerInfo.isRootLayer()) {
+        isLast = true;
+      } else {
+        steps = this._getMovedSteps(layerInfo, "movedown");
+        layerInfoArray = this.operLayerInfos.getLayerInfoArray();
+        layerInfoIndex = this.operLayerInfos._getTopLayerInfoIndexById(layerInfo.id);
+        if(this.isLayerHiddenInWidget(layerInfoArray[layerInfoIndex + steps])) {
+          isLast = true;
+        } else {
+          isLast = false;
+        }
+      }
+      return isLast;
+    },
+
+    /***************************************************
+     * methods for control operation.
+     ***************************************************/
+    _initOperations: function() {
+      this.operationsDropMenu = new DropMenu({
+        items:[{
+          key: "turnAllLayersOn",
+          label: this.nls.turnAllLayersOn
+        }, {
+          key: "turnAllLayersOff",
+          label: this.nls.turnAllLayersOff
+        }, {
+          key: "separator"
+        }, {
+          key: "expandAllLayers",
+          label: this.nls.expandAllLayers
+        }, {
+          key: "collapseAlllayers",
+          label: this.nls.collapseAlllayers
+        }],
+        box: this.layerListWidget.domNode.parentNode
+      }).placeAt(this.layerListOperations);
+
+      var operationIconBtnNode = query('div.jimu-dropmenu > div:first-child',
+          this.layerListOperations)[0];
+
+      if(operationIconBtnNode) {
+        domClass.remove(operationIconBtnNode, ['jimu-icon-btn', 'popup-menu-button']);
+        domClass.add(operationIconBtnNode, ['feature-action', 'icon-operation']);
+      }
+
+      if(this.operationsDropMenu.btnNode) {
+        this.own(on(this.operationsDropMenu.btnNode,
+          'click',
+          lang.hitch(this, this._onLayerListOperationsClick)));
+      }
+
+      this.own(on(this.operationsDropMenu ,
+        'onMenuClick',
+        lang.hitch(this, this._onOperationsMenuItemClick)));
+
+
+      this.operationsDropMenuLoading = new LoadingShelter({
+        hidden: true
+      }).placeAt(this.operationsDropMenu.domNode);
+    },
+
+    _onLayerListOperationsClick: function() {
+      this._hideCurrentPopupMenu();
+    },
+
+    _onOperationsMenuItemClick: function(item) {
+      switch (item.key) {
+        case 'turnAllLayersOn':
+          this.turnAllRootLayers(true);
+          return;
+        case 'turnAllLayersOff':
+          this.turnAllRootLayers(false);
+          return;
+        case 'expandAllLayers':
+          this.foldOrUnfoldAllLayers(false);
+          return;
+        case 'collapseAlllayers':
+          this.foldOrUnfoldAllLayers(true);
+          return;
+        default:
+          return;
+      }
+    },
+
     turnAllRootLayers: function(isOnOrOff) {
       var layerInfoArray = this.operLayerInfos.getLayerInfoArray();
       array.forEach(layerInfoArray, function(layerInfo) {
@@ -784,6 +877,38 @@ define([
         }, this);
         this._foldOrUnfoldLayers(layerInfoArray, isFold);
       }
+    },
+
+    foldOrUnfoldAllLayers: function(isFold) {
+      var layerInfoArray = [];
+      var rootLayerInfoArray = [];
+
+      this.operationsDropMenuLoading.show();
+      this.operLayerInfos.traversal(lang.hitch(this, function(layerInfo) {
+        if(!this.isLayerHiddenInWidget(layerInfo)) {
+          if(layerInfo.isRootLayer()) {
+            rootLayerInfoArray.push(layerInfo);
+          } else {
+            layerInfoArray.push(layerInfo);
+          }
+        }
+      }));
+
+      layerInfoArray = rootLayerInfoArray.concat(layerInfoArray);
+
+      var i = 0;
+      var layerInfoArrayLength = layerInfoArray.length;
+      var steps = 50;
+      setTimeout(lang.hitch(this, function() {
+        if(i < layerInfoArrayLength) {
+          var candidateLayerInfoArray = layerInfoArray.slice(i, i + steps);
+          this._foldOrUnfoldLayers(candidateLayerInfoArray, isFold);
+          i = i + steps;
+          setTimeout(lang.hitch(this, arguments.callee), 60); // jshint ignore:line
+        } else {
+          this.operationsDropMenuLoading.hide();
+        }
+      }), 60);
     }
 
   });

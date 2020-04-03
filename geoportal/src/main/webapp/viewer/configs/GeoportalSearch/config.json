@@ -1,0 +1,23 @@
+{
+  "showOwner": true,
+  "targets": [
+    {
+      "name": "Local Catalog",
+      "url": null,
+      "type": "geoportal",
+      "profile": null,
+      "requiredFilter": null,
+      "enabled": true
+    },
+    {
+      "name": "ArcGIS Online",
+      "url": "https://www.arcgis.com",
+      "type": "portal",
+      "profile": null,
+      "requiredFilter": null,
+      "enabled": true,
+      "useProxy": false,
+      "disableContentType": false
+    }
+  ]
+}

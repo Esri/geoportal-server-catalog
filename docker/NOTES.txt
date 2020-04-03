@@ -1,0 +1,13 @@
+ in a separate shell, you can see what is in the container
+ docker ps
+
+CONTAINER ID        IMAGE                                                 COMMAND                  CREATED             STATUS              PORTS                                            NAMES
+965268c5a8c6        b79351e20dbe                                          "catalina.sh run"        2 minutes ago       Up 2 minutes        8080/tcp                                         nostalgic_robinson
+e461c5cfe20b        src_geoportal                                         "catalina.sh run"        26 minutes ago      Up 2 minutes        0.0.0.0:8082->8080/tcp                           src_geoportal_1
+adaa647bc2bc        docker.elastic.co/elasticsearch/elasticsearch:6.6.1   "/usr/local/bin/dock…"   30 minutes ago      Up 2 minutes        0.0.0.0:9200->9200/tcp, 0.0.0.0:9300->9300/tcp   elasticsearch
+
+docker exec src_geoportal_1 cat  /usr/local/tomcat/webapps/harvester/WEB-INF/classes/config/app-security.xml
+
+docker exec src_geoportal_1 cat  /usr/local/tomcat/webapps/harvester/WEB-INF/classes/config/authentication-simple.xml
+
+docker exec src_geoportal_1 ls  /usr/local/tomcat/webapps/geoportal

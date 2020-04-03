@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,12 +42,20 @@ define([
       panelContainerNode: null,
       openIds: null,
       toolsCount: 0,
+      panels: null,
+      openPanelIds: null,
+      widgetOnCloseHandlerIds: null,
+      panelOnCloseHandlerIds: null,
 
       postCreate: function() {
         this.inherited(arguments);
         this.panelManager = PanelManager.getInstance();
         this.widgetManager = WidgetManager.getInstance();
         this.openIds = [];
+        this.openPanelIds = [];
+        this.widgetOnCloseHandlerIds = [];
+        this.panelOnCloseHandlerIds = [];
+        this.panels = {};
         this.createWidgetIcons();
         if (this.toolsCount === 0) {
           html.setStyle(this.domNode, 'display', 'none');
@@ -109,6 +117,22 @@ define([
         }
       },
 
+      _pushId: function(panelId) {
+        this._popId(panelId);
+        this.openPanelIds.push(panelId);
+      },
+
+      _popId: function(panelId, update) {
+        var idx = this.openPanelIds.indexOf(panelId), activePanelId;
+        if (idx >= 0) {
+          this.openPanelIds.splice(idx, 1);
+          if (update && this.openPanelIds.length > 0) {
+            activePanelId = this.openPanelIds[this.openPanelIds.length - 1];
+            this.panelManager.openPanel(activePanelId);
+          }
+        }
+      },
+
       _addItem: function(widget) {
         var widgetCopy = lang.clone(widget);
         var row = domConstruct.create('div', {
@@ -125,30 +149,42 @@ define([
         }, row);
 
         this.own(on(row, 'click', lang.hitch(this, function(event) {
-          var box;
+          var box, panelPosition;
           event.stopPropagation();
           if (widget.inPanel) {
             box = domGeometry.getMarginBox(this.panelContainerNode);
-            widgetCopy.panel = {
-              uri: 'themes/DashboardTheme/panels/OnScreenPanel/Panel',
-              position: {
+            if (window.isRTL) {
+              panelPosition = {
+                relativeTo: 'browser',
+                right: box.l,
+                top: box.t,
+                width: box.w,
+                height: box.h
+              };
+            } else {
+              panelPosition = {
                 relativeTo: 'browser',
                 left: box.l,
                 top: box.t,
                 width: box.w,
                 height: box.h
-              }
+              };
+            }
+            widgetCopy.panel = {
+              uri: 'themes/DashboardTheme/panels/OnScreenPanel/Panel',
+              position: panelPosition
             };
             this.panelManager.showPanel(widgetCopy)
             .then(lang.hitch(this, function(panel) {
-              this.activePanel = panel;
-              panel.setPosition({
-                relativeTo: 'browser',
-                left: box.l,
-                top: box.t,
-                width: box.w,
-                height: box.h
-              });
+              this.panels[panel.id] = panel;
+              this._pushId(panel.id);
+              panel.setPosition(panelPosition);
+              if (this.panelOnCloseHandlerIds.indexOf(panel.id) < 0) {
+                this.own(aspect.after(panel, 'onClose', lang.hitch(this, function() {
+                  this._popId(panel.id, true);
+                })));
+                this.panelOnCloseHandlerIds.push(panel.id);
+              }
               return panel;
             }))
             .then(lang.hitch(this, function(panel) {
@@ -180,22 +216,28 @@ define([
               relativeTo: 'map'
             });
             this.widgetManager.openWidget(widget);
-
-            this.own(aspect.after(widget, 'onClose', lang.hitch(this, function() {
-              index = this.openIds.indexOf(widgetConfig.id);
-              if (index >= 0) {
-                this.openIds.splice(index, 1);
-              }
-            })));
+            if (this.widgetOnCloseHandlerIds.indexOf(widgetConfig.id) < 0) {
+              this.own(aspect.after(widget, 'onClose', lang.hitch(this, function() {
+                index = this.openIds.indexOf(widgetConfig.id);
+                if (index >= 0) {
+                  this.openIds.splice(index, 1);
+                }
+              })));
+              this.widgetOnCloseHandlerIds.push(widgetConfig.id);
+            }
           }));
         }
       },
 
       setPanelPosition: function(pos) {
-        if (this.activePanel) {
-          pos.relativeTo = 'layout';
-          this.activePanel.setPosition(pos);
-        }
+        array.forEach(this.openPanelIds, lang.hitch(this, function(id, index) {
+          if (index === this.openPanelIds.length - 1) {
+            pos.zIndex = 101;
+          }
+          if (this.panels[id].state === 'opened' || this.panels[id].state === 'active') {
+            this.panels[id].setPosition(pos, true);
+          }
+        }));
       }
     });
     return clazz;

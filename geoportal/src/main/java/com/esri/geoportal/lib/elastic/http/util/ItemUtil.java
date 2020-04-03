@@ -26,6 +26,7 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
+import javax.json.JsonValue;
 
 /**
  * Item utilities.
@@ -125,34 +126,58 @@ public class ItemUtil {
    */
   public String readXml(String indexName, String id, JsonObject itemSource) throws Exception {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    if (ec.getUseSeparateXmlItem()) {
+    // see if XML is in itemSource document (eg comes from a v6 index)
+    // if not, then try the XML blob.
+    String field = FieldNames.FIELD_SYS_XML;
+    if (itemSource == null) {
+      JsonObject item = readItemJson(indexName, ec.getActualItemIndexType(), id);
+      itemSource = this.getItemSource(item);
+    }
+    if (itemSource != null && itemSource.containsKey(field)) {
+      try {
+        String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
+        return xml;
+      } catch (Exception e) {
+        e.printStackTrace();
+      }
+    } else {
       ElasticClient client = ElasticClient.newClient();
-      String url = client.getXmlUrl(indexName,ec.getXmlIndexType(),id);
+      String url = client.getXmlUrl(indexName, ec.getXmlIndexType(), id);
       String result = client.sendGet(url);
       if (result != null && result.length() > 0) {
-        JsonObject item = (JsonObject)JsonUtil.toJsonStructure(result);
+        JsonObject item = (JsonObject) JsonUtil.toJsonStructure(result);
         try {
           String xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_CLOB);
           return xml;
         } catch (Exception e) {
           e.printStackTrace();
-        }       
-      }
-    } else {
-      String field = FieldNames.FIELD_SYS_XML;
-      if (itemSource == null) {
-        JsonObject item = readItemJson(indexName,ec.getItemIndexType(),id);
-        itemSource = this.getItemSource(item);
-      }
-      if (itemSource != null && itemSource.containsKey(field)) {
-        try {
-          String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
-          return xml;
-        } catch (Exception e) {
-          e.printStackTrace();
-        }        
+        }
       }
     }
+//      if (result != null && result.length() > 0) {
+//        JsonObject item = (JsonObject)JsonUtil.toJsonStructure(result);
+//        try {
+//          String xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_CLOB);
+//          return xml;
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//    } else {
+//      String field = FieldNames.FIELD_SYS_XML;
+//      if (itemSource == null) {
+//        JsonObject item = readItemJson(indexName,ec.getItemIndexType(),id);
+//        itemSource = this.getItemSource(item);
+//      }
+//      if (itemSource != null && itemSource.containsKey(field)) {
+//        try {
+//          String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
+//          return xml;
+//        } catch (Exception e) {
+//          e.printStackTrace();
+//        }
+//      }
+//    }
     return null;
   }
   
@@ -183,7 +208,7 @@ public class ItemUtil {
       }
     } else {
       if (itemSource == null) {
-        JsonObject item = this.readItemJson(ec.getIndexName(),ec.getItemIndexType(),id);
+        JsonObject item = this.readItemJson(ec.getIndexName(),ec.getActualItemIndexType(),id);
         itemSource = this.getItemSource(item);
       }
       String field = FieldNames.FIELD_SYS_XMLMETA;
@@ -220,7 +245,11 @@ public class ItemUtil {
     String result = client.sendPost(url,postData,contentType);
     JsonObject response = (JsonObject)JsonUtil.toJsonStructure(result);
     JsonObject hits = response.getJsonObject("hits");
-    int total = hits.getInt("total");
+    int total = !hits.containsKey("total")? 0:
+            hits.get("total").getValueType()==JsonValue.ValueType.NUMBER? hits.getInt("total"):
+            hits.get("total").getValueType()!=JsonValue.ValueType.OBJECT? 0:
+            !hits.getJsonObject("total").containsKey("value") || hits.getJsonObject("total").get("value").getValueType()!=JsonValue.ValueType.NUMBER? 0:
+            hits.getJsonObject("total").getInt("value");
     // TODO what if there is more than one hit
     if (total == 1) {
       JsonArray hitsArray = hits.getJsonArray("hits");
@@ -279,7 +308,7 @@ public class ItemUtil {
         itemJson = item.build().toString();
       }
     }
-    String itemUrl = client.getItemUrl(indexName,ec.getItemIndexType(),itemId);
+    String itemUrl = client.getItemUrl(indexName,ec.getActualItemIndexType(),itemId);
     client.sendPut(itemUrl,itemJson,contentType);
   }
   

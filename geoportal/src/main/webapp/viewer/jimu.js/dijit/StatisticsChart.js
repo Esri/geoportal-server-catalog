@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -32,19 +32,17 @@ define([
     'dojo/text!./templates/StatisticsChart.html',
     'esri/lang',
     'esri/graphic',
-    'esri/graphicsUtils',
     'esri/symbols/jsonUtils',
     'esri/layers/FeatureLayer',
     'jimu/utils',
-    'jimu/portalUrlUtils',
     'jimu/clientStatisticsUtils',
     'jimu/dijit/Chart',
     'jimu/dijit/_StatisticsChartSettings',
     'jimu/dijit/LoadingIndicator'
   ],
   function(on, Evented, Deferred, declare, lang, array, html, query, Color, dojoPopup, _WidgetBase, TooltipDialog,
-    _TemplatedMixin, _WidgetsInTemplateMixin, template, esriLang, Graphic, graphicsUtils, symbolJsonUtils, FeatureLayer,
-    jimuUtils, portalUrlUtils, clientStatisticsUtils, JimuChart, StatisticsChartSettings) {
+    _TemplatedMixin, _WidgetsInTemplateMixin, template, esriLang, Graphic, symbolJsonUtils, FeatureLayer,
+    jimuUtils, clientStatisticsUtils, JimuChart, StatisticsChartSettings) {
 
     return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
       baseClass: 'jimu-dijit-statistics-chart',
@@ -221,8 +219,8 @@ define([
             if(operation === 'average'){
               operation = 'avg';
             }
-            var mockFieldName = valueField + "_" + operation;
-            var mockFieldAlias = valueField + "_" + operation;
+            var mockFieldName = valueField + "_" + jimuUtils.upperCaseString(operation);
+            var mockFieldAlias = valueField + "_" + jimuUtils.upperCaseString(operation);
             mockConfig.valueFields.push(mockFieldName);
             var mockFieldInfo = {
               name: mockFieldName,
@@ -354,8 +352,8 @@ define([
             if(operation === 'average'){
               operation = 'avg';
             }
-            var mockFieldName = valueField + "_" + operation;
-            var mockFieldAlias = valueField + "_" + operation;
+            var mockFieldName = valueField + "_" + jimuUtils.upperCaseString(operation);
+            var mockFieldAlias = valueField + "_" + jimuUtils.upperCaseString(operation);
             mockConfig.valueFields.push(mockFieldName);
             var mockFieldInfo = {
               name: mockFieldName,
@@ -462,12 +460,17 @@ define([
         types
       }
       */
-      createClientCharts: function(featureLayerOrUrlOrLayerDefinition, features, config){
+      createClientCharts: function(featureLayerOrUrlOrLayerDefinition, features, config,
+        popupFieldInfosObj, featureLayerForChartSymbologyChart){
+        if(featureLayerForChartSymbologyChart){
+          this.featureLayerForChartSymbologyChart = featureLayerForChartSymbologyChart;
+        }
         return this._getLoadedLayer(featureLayerOrUrlOrLayerDefinition).then(lang.hitch(this, function(featureLayer){
           var args = {
             featureLayer: featureLayer,
             features: features,
-            config: config
+            config: config,
+            popupFieldInfosObj:popupFieldInfosObj
           };
           this._createChartsAsync(args);
         }));
@@ -515,18 +518,34 @@ define([
           this.loading.hide();
 
           this.clear();
+          var isSelectedFeatures = false;
           if(args.features){
+            isSelectedFeatures = !!args.features.isSelectedFeatures;
             args.features = array.filter(args.features, lang.hitch(this, function(feature){
               return !!feature.attributes;
             }));
           }
           this.config = args.config;
           this.features = args.features;
+
           this.featureLayer = args.featureLayer;
-          if(!this.config.highLightColor){
-            this.config.highLightColor = "#00ffff";
+          //set popupFieldInfosObj
+          if(args.popupFieldInfosObj){
+            this.popupFieldInfosObj = args.popupFieldInfosObj;
+          }else{
+            this.popupFieldInfosObj = {};
           }
-          this._updatePopupFieldInfos();
+
+          if(!this.config.highLightColor){
+            if(isSelectedFeatures){
+              //set red color for selected features
+              this.config.highLightColor = "#ff0000";
+            }else{
+              //set selection like symbol
+              this.config.highLightColor = "#00ffff";
+            }
+          }
+          // this._updatePopupFieldInfos();
           this._calculateDecimalPlaceForFloatField();
 
           this.chartTitle.innerHTML = jimuUtils.stripHTML(this.config.name || "");
@@ -647,60 +666,62 @@ define([
         html.setStyle(this.leftArrow, 'height', arrowHeight + 'px');
         html.setStyle(this.rightArrow, 'height', arrowHeight + 'px');
         html.setStyle(this.chartContainer, 'height', itemHeight + 'px');
+        //set the height of fiald-render-info
+        html.setStyle(this.faildRenderInfo, 'height', itemHeight + 'px');
         var box = html.getContentBox(this.chartContainer);
         return box;
       },
 
-      _updatePopupFieldInfos: function(){
-        this.popupFieldInfosObj = {};
-        var fieldInfosInMapViewer = null;
+      // _updatePopupFieldInfos: function(){
+      //   this.popupFieldInfosObj = {};
+      //   var fieldInfosInMapViewer = null;
 
-        if(this.config.url && this.map && this.map.itemInfo && this.map.itemInfo.itemData){
-          var configUrl = jimuUtils.removeSuffixSlashes(this.config.url);
-          configUrl = portalUrlUtils.removeProtocol(configUrl);
-          var operationalLayers = this.map.itemInfo.itemData.operationalLayers;
-          var splits = configUrl.split("/");
-          var strLayerId = splits[splits.length - 1];
-          var layerId = parseInt(strLayerId, 10);
+      //   if(this.config.url && this.map && this.map.itemInfo && this.map.itemInfo.itemData){
+      //     var configUrl = jimuUtils.removeSuffixSlashes(this.config.url);
+      //     configUrl = portalUrlUtils.removeProtocol(configUrl);
+      //     var operationalLayers = this.map.itemInfo.itemData.operationalLayers;
+      //     var splits = configUrl.split("/");
+      //     var strLayerId = splits[splits.length - 1];
+      //     var layerId = parseInt(strLayerId, 10);
 
-          if(operationalLayers && operationalLayers.length > 0){
-            array.some(operationalLayers, lang.hitch(this, function(operationalLayer){
-              var layerUrl = operationalLayer.url;
-              if(layerUrl){
-                layerUrl = jimuUtils.removeSuffixSlashes(layerUrl);
-                layerUrl = portalUrlUtils.removeProtocol(layerUrl);
-                if(configUrl.indexOf(layerUrl) >= 0){
-                  if(configUrl === layerUrl){
-                    //operationalLayer is a feature layer
-                    if(operationalLayer.popupInfo && operationalLayer.popupInfo.fieldInfos){
-                      fieldInfosInMapViewer = operationalLayer.popupInfo.fieldInfos;
-                      return true;
-                    }
-                  }else if(configUrl.length > layerUrl.length){
-                    //operationalLayer is a map server or group layer
-                    if(operationalLayer.layers && layerId >= 0){
-                      var subOperationLayer = operationalLayer[layerId];
-                      if(subOperationLayer && subOperationLayer.popupInfo &&
-                        subOperationLayer.popupInfo.fieldInfos){
-                        fieldInfosInMapViewer = subOperationLayer.popupInfo.fieldInfos;
-                        return true;
-                      }
-                    }
-                  }
-                }
-              }
-              return false;
-            }));
-          }
-        }
+      //     if(operationalLayers && operationalLayers.length > 0){
+      //       array.some(operationalLayers, lang.hitch(this, function(operationalLayer){
+      //         var layerUrl = operationalLayer.url;
+      //         if(layerUrl){
+      //           layerUrl = jimuUtils.removeSuffixSlashes(layerUrl);
+      //           layerUrl = portalUrlUtils.removeProtocol(layerUrl);
+      //           if(configUrl.indexOf(layerUrl) >= 0){
+      //             if(configUrl === layerUrl){
+      //               //operationalLayer is a feature layer
+      //               if(operationalLayer.popupInfo && operationalLayer.popupInfo.fieldInfos){
+      //                 fieldInfosInMapViewer = operationalLayer.popupInfo.fieldInfos;
+      //                 return true;
+      //               }
+      //             }else if(configUrl.length > layerUrl.length){
+      //               //operationalLayer is a map server or group layer
+      //               if(operationalLayer.layers && layerId >= 0){
+      //                 var subOperationLayer = operationalLayer[layerId];
+      //                 if(subOperationLayer && subOperationLayer.popupInfo &&
+      //                   subOperationLayer.popupInfo.fieldInfos){
+      //                   fieldInfosInMapViewer = subOperationLayer.popupInfo.fieldInfos;
+      //                   return true;
+      //                 }
+      //               }
+      //             }
+      //           }
+      //         }
+      //         return false;
+      //       }));
+      //     }
+      //   }
 
-        if(fieldInfosInMapViewer && fieldInfosInMapViewer.length > 0){
-          array.forEach(fieldInfosInMapViewer, lang.hitch(this, function(fieldInfo){
-            var fieldName = fieldInfo.fieldName;
-            this.popupFieldInfosObj[fieldName] = fieldInfo;
-          }));
-        }
-      },
+      //   if(fieldInfosInMapViewer && fieldInfosInMapViewer.length > 0){
+      //     array.forEach(fieldInfosInMapViewer, lang.hitch(this, function(fieldInfo){
+      //       var fieldName = fieldInfo.fieldName;
+      //       this.popupFieldInfosObj[fieldName] = fieldInfo;
+      //     }));
+      //   }
+      // },
 
       _calculateDecimalPlaceForFloatField: function(){
         this.floatNumberFieldDecimalPlace = {};//{fieldName: decimal place,...}
@@ -854,6 +875,14 @@ define([
         html.addClass(this.domNode, this.noMoreThanOneChartClassName);
       },
 
+      _showFialdRenderInfo:function(){
+        html.addClass(this.chartSection, 'render-faild');
+      },
+
+      _hideFialdRenderInfo:function(){
+        html.removeClass(this.chartSection, 'render-faild');
+      },
+
       _showChart: function(index) {
         this.currentChartIndex = -1;
         var chartDivs = query('.chart-div', this.chartContainer);
@@ -878,6 +907,14 @@ define([
           html.addClass(li, 'selected');
         }
 
+        if (this.charts && this.charts.length > 0) {
+          chart = this.charts[index];
+          if (chart) {
+            //hide pie chart when labels > 150, show render pie chart faild
+            this._handlePieChartDisplay(chart);
+          }
+        }
+
         if(this.isBigPreview){
           return;
         }
@@ -899,6 +936,21 @@ define([
               this.loading.hide();
             }
           }
+        }
+      },
+
+      _handlePieChartDisplay: function(chart) {
+        var hidePieChart = false;
+        if(chart &&  chart.config && chart.config.type === 'pie'){
+          var labels = chart.config.labels;
+          if(labels && labels.length > 150){
+            hidePieChart = true;
+          }
+        }
+        if(hidePieChart){
+          this._showFialdRenderInfo();
+        }else{
+          this._hideFialdRenderInfo();
         }
       },
 
@@ -988,7 +1040,7 @@ define([
         return symbol;
       },
 
-      _getHighLightLineSymbol: function(){
+      _getHighLightLineSymbol: function(/*optional*/ highLightColor){
         var selectedSymJson = {
           "color": [0, 255, 255, 255],
           "width": 1.5,
@@ -996,25 +1048,13 @@ define([
           "style": "esriSLSSolid"
         };
         var symbol = symbolJsonUtils.fromJson(selectedSymJson);
-        symbol.setColor(new Color(this.config.highLightColor));
+        symbol.setColor(new Color(highLightColor || this.config.highLightColor));
         return symbol;
       },
 
-      _getHighLightFillSymbol:function(){
-        // var symbol = symbolJsonUtils.fromJson(this.config.symbol);
-        // var outlineSymJson = {
-        //   "color": [0, 255, 255, 255],
-        //   "width": 1.5,
-        //   "type": "esriSLS",
-        //   "style": "esriSLSSolid"
-        // };
-        // var outlineSym = symbolJsonUtils.fromJson(outlineSymJson);
-        // outlineSym.setColor(new Color(this.config.highLightColor));
-        // symbol.setOutline(outlineSym);
-        // return symbol;
-
+      _getDefaultHighLightFillSymbol:function(){
         var symbolJson = {
-          "color": [255, 255, 255, 128],
+          "color": [0, 255, 255, 128],
           "outline": {
             "color": [0, 255, 255, 255],
             "width": 1.5,
@@ -1029,6 +1069,66 @@ define([
         return symbol;
       },
 
+      _getVisualVariableByType: function(type, visualVariables) {
+        // we could also use esri.renderer.Renderer.getVisualVariablesForType for renderers
+        if (visualVariables) {
+          var visVars = array.filter(visualVariables, function(visVar) {
+            return (visVar.type === type && !visVar.target);
+          });
+          if (visVars.length) {
+            return visVars[0];
+          } else {
+            return null;
+          }
+        }
+        return null;
+      },
+
+      _getSymbolByRenderer: function(renderer, feature) {
+        var symbol = this._getDefaultHighLightFillSymbol();
+        var visualVariables = renderer.visualVariables;
+        var visVar = this._getVisualVariableByType('colorInfo', visualVariables);
+        if (visVar) {
+          var color = renderer.getColor(feature, {
+            colorInfo: visVar
+          });
+          if (color) {
+            color = lang.clone(color);
+            symbol.setColor(color);
+          }
+        } else {
+          symbol = renderer.getSymbol(feature);
+        }
+        return symbol;
+      },
+
+      _getHighLightFillSymbol: function(featureLayer, feature, isSelectedFeature){
+        var highLightSymbol = null;
+        var currentSymbol = feature.symbol;
+        var renderer = featureLayer.renderer;
+        if(!currentSymbol && renderer){
+          currentSymbol = this._getSymbolByRenderer(renderer, feature);
+        }
+        if(currentSymbol && typeof currentSymbol.setOutline === 'function'){
+          highLightSymbol = symbolJsonUtils.fromJson(currentSymbol.toJson());
+          var outlineWidth = 1.5;
+          if(currentSymbol.outline){
+            if(currentSymbol.outline.width > 0){
+              outlineWidth = currentSymbol.outline.width + 1;
+            }
+          }
+          //if feature in feature selection, set red color for selected features
+          //if feature is not in feature selection, set selection like symbol
+          var highLightColor = isSelectedFeature ? "#ff0000" : this.config.highLightColor;
+          var outline = this._getHighLightLineSymbol(highLightColor);
+          outline.setWidth(outlineWidth);
+          highLightSymbol.setOutline(outline);
+        }else{
+          highLightSymbol = this._getDefaultHighLightFillSymbol();
+        }
+        return highLightSymbol;
+      },
+
       _zoomToGraphics: function(features){
         if(!this.map){
           return;
@@ -1038,46 +1138,27 @@ define([
         if(!isVisible){
           return;
         }
-
+        var fs;
+        //some graphics maybe don't have geometry or have a invaild geometry,
+        //so need to filter graphics here by geometry
         if(features && features.length > 0){
-          var extent = null;
-          try{
-            //some graphics maybe don't have geometry, so need to filter graphics here by geometry
-            var fs = array.filter(features, function(f){
-              return !!f.geometry;
-            });
-            if(fs.length > 0){
-              extent = graphicsUtils.graphicsExtent(fs);
+          fs = array.filter(features, function(f) {
+            var geometry = f.geometry;
+            //if geometry.type is not point, return true
+            if (geometry.type !== 'point') {
+              return true;
+            } else {
+              return jimuUtils.isVaildPointGeometry(geometry);
             }
+          }.bind(this));
+        }
+
+        if(fs && fs.length > 0){
+          var featureSet = jimuUtils.toFeatureSet(fs);
+          try{
+            jimuUtils.zoomToFeatureSet(this.map, featureSet);
           }catch(e){
             console.error(e);
-          }
-
-          if(extent){
-            this.map.setExtent(extent.expand(1.4));
-          }else{
-            var firstFeature = features[0];
-            var geometry = firstFeature && firstFeature.geometry;
-
-            if(geometry){
-              var singlePointFlow = lang.hitch(this, function(centerPoint){
-                var maxLevel = this.map.getNumLevels();
-                var currentLevel = this.map.getLevel();
-                var level2 = Math.floor(maxLevel * 2 / 3);
-                var zoomLevel = Math.max(currentLevel, level2);
-                this.map.setLevel(zoomLevel).then(lang.hitch(this, function(){
-                  this.map.centerAt(centerPoint);
-                }));
-              });
-
-              if(geometry.type === 'point'){
-                singlePointFlow(geometry);
-              }else if(geometry.type === 'multipoint'){
-                if(geometry.points.length === 1){
-                  singlePointFlow(geometry.getPoint(0));
-                }
-              }
-            }
           }
         }
       },
@@ -1095,6 +1176,11 @@ define([
       _mouseOverChartItem: function(features){
         this._removeTempGraphics();
 
+        //We need to store the original feature symbol because we will use it in mouse out event.
+        array.forEach(features, lang.hitch(this, function(feature) {
+          feature._originalSymbol = feature.symbol;
+        }));
+
         var isVisible = this.featureLayer && this.featureLayer.getMap() && this.featureLayer.visible;
         if(!isVisible){
           return;
@@ -1110,17 +1196,24 @@ define([
             this.tempGraphics.push(g);
             this.featureLayer.add(g);
           }));
-        }else if(geoType === 'polyline' || geoType === 'polygon'){
-          if(geoType === 'polyline'){
-            symbol = this._getHighLightLineSymbol();
-          }else{
-            symbol = this._getHighLightFillSymbol();
-          }
+        }else if(geoType === 'polyline'){
+          symbol = this._getHighLightLineSymbol();
 
           array.forEach(features, lang.hitch(this, function(feature) {
             feature.setSymbol(symbol);
           }));
+        }else if(geoType === 'polygon'){
 
+          var selectedFeatures = this.featureLayer.getSelectedFeatures() || [];
+
+          array.forEach(features, lang.hitch(this, function(feature) {
+            var isSelectedFeature = selectedFeatures.indexOf(feature) >= 0;
+            var highLightSymbol = this._getHighLightFillSymbol(this.featureLayer, feature, isSelectedFeature);
+            feature.setSymbol(highLightSymbol);
+          }));
+
+          //The outline of these features maybe overlapped by others,
+          //so we need to put these features at the end of the featureLayer
           if(this.features.length !== features.length && geoType === 'polygon'){
             array.forEach(features, lang.hitch(this, function(feature){
               this.featureLayer.remove(feature);
@@ -1132,15 +1225,17 @@ define([
         }
       },
 
-      _mouseOutChartItem: function(){
+      _mouseOutChartItem: function(features){
         this._removeTempGraphics();
 
-        if(!this.featureLayer){
-          return;
-        }
+        // if(!this.featureLayer){
+        //   return;
+        // }
 
-        array.forEach(this.featureLayer.graphics, lang.hitch(this, function(feature){
-          feature.setSymbol(null);
+        //Restore feature's original symbol.
+        array.forEach(features, lang.hitch(this, function(feature){
+          var _originalSymbol = feature._originalSymbol || null;
+          feature.setSymbol(_originalSymbol);
         }));
       },
 
@@ -1378,20 +1473,21 @@ define([
         return colors;
       },
 
-      _createParamsDijit: function(type, chartDisplayConfig){
+      _createParamsDijit: function(type, chartDisplayConfig, mode){
         var options = {
           isInWidget: this.map ? true : false,
           type: type,
           config: chartDisplayConfig
         };
         var paramsDijit = new StatisticsChartSettings(options);
+        paramsDijit._updateLegendDisplayByMode(mode);
         return paramsDijit;
       },
 
       _createJimuChart: function(chartDiv, mode, options, data, chartTypeInfo){
         var type = chartTypeInfo.type;
         var displayConfig = chartTypeInfo.display;
-        var paramsDijit = this._createParamsDijit(type, displayConfig);
+        var paramsDijit = this._createParamsDijit(type, displayConfig, mode);
         var paramsConfig1 = paramsDijit.getConfig();
         if(paramsConfig1){
           lang.mixin(chartTypeInfo.display, paramsConfig1);
@@ -1399,11 +1495,21 @@ define([
         var chartOptions = this._getBasicChartOptionsByStatisticsInfo(mode, options, data, type);
         this._udpateJimuChartDisplayOptions(chartOptions, chartTypeInfo);
 
+        var DEFAULT_CONFIG = {
+          type: type || 'column',
+          labels: [],
+          series: [{
+            data: []
+          }]
+        };
         var chart = new JimuChart({
           chartDom: chartDiv,
-          config: chartOptions
+          config: DEFAULT_CONFIG
         });
         chart.placeAt(chartDiv);
+        chart.resize();
+
+        chart.updateConfig(chartOptions);
         this._bindChartEvent(chart, mode, data);
 
         if(this.showSettingIcon){
@@ -1413,7 +1519,7 @@ define([
               var paramsConfig2 = paramsDijit.getConfig();
               lang.mixin(chartTypeInfo.display, paramsConfig2);
               this._udpateJimuChartDisplayOptions(chartOptions, chartTypeInfo);
-              chart.setConfig(chartOptions);
+              chart.updateConfig(chartOptions);
             }
             paramsDijit.hideShelter();
           })));
@@ -1422,112 +1528,115 @@ define([
         return [chart, paramsDijit];
       },
 
+      //get Chart display options by StatisticsChart display options
       _udpateJimuChartDisplayOptions: function(chartOptions, chartTypeInfo){
         var type = chartTypeInfo.type;
         var displayConfig = chartTypeInfo.display;
 
-        var mixinOptions = {
-          type: type,
-          dataZoom: ["inside", "slider"],
-          confine: true,
-          backgroundColor: displayConfig.backgroundColor,
-          color: displayConfig.colors,
-          legend: displayConfig.showLegend,
-          theme: this.theme || "light",
-          advanceOption: function(options){
-            //legend
-            if (displayConfig.showLegend) {
-              if (options.legend) {
-                if (!options.legend.textStyle) {
-                  options.legend.textStyle = {};
-                }
-                options.legend.textStyle.color = displayConfig.legendTextColor;
-              }
-            }
+        this._settingAxisDisplay(chartOptions, displayConfig, type);
 
-            if(type === 'pie'){
-              if(options.series && options.series.length > 0){
-                array.forEach(options.series, lang.hitch(this, function(item){
-                  if(item.type === 'pie'){
-                    if(!item.label){
-                      item.label = {};
-                    }
-                    if(!item.label.normal){
-                      item.label.normal = {};
-                    }
-                    item.label.normal.show = displayConfig.showDataLabel;
-                    if(!item.label.normal.textStyle){
-                      item.label.normal.textStyle = {};
-                    }
-                    item.label.normal.textStyle.color = displayConfig.dataLabelColor;
-                  }
-                }));
-              }
-            }else{
-              //xAxis
-              if(!options.xAxis){
-                options.xAxis = {};
-              }
-              // options.xAxis.show = displayConfig.showHorizontalAxis;
-              if(!options.xAxis.axisLabel){
-                options.xAxis.axisLabel = {};
-              }
-              if(!options.xAxis.axisLabel.textStyle){
-                options.xAxis.axisLabel.textStyle = {};
-              }
-              options.xAxis.axisLabel.textStyle.color = displayConfig.horizontalAxisTextColor;
+        chartOptions.type = type;
+        chartOptions.dataZoom = ["inside", "slider"];
+        chartOptions.confine = true;
+        chartOptions.backgroundColor = displayConfig.backgroundColor;
+        chartOptions.color = displayConfig.colors;
 
-              //yAxis
-              if(!options.yAxis){
-                options.yAxis = {};
-              }
-              // options.yAxis.show = displayConfig.showVerticalAxis;
-              if(!options.yAxis.axisLabel){
-                options.yAxis.axisLabel = {};
-              }
-              if(!options.yAxis.axisLabel.textStyle){
-                options.yAxis.axisLabel.textStyle = {};
-              }
-              options.yAxis.axisLabel.textStyle.color = displayConfig.verticalAxisTextColor;
-              // if(!displayConfig.showVerticalAxis){
-              //   if(window.isRTL){
-              //     options.grid.right = "5%";
-              //   }else{
-              //     options.grid.left = "5%";
-              //   }
-              // }
-            }
-          }
+        var legendOption = {
+          show: displayConfig.showLegend,
+          textStyle: {}
         };
+        if (displayConfig.legendTextColor) {
+          legendOption.textStyle.color = displayConfig.legendTextColor;
+        }
+        if (displayConfig.legendTextSize) {
+          legendOption.textStyle.fontSize = displayConfig.legendTextSize;
+        }
+        chartOptions.legend = legendOption;
+
+        var dataLabelOption = {
+          show: displayConfig.showDataLabel,
+          textStyle: {}
+        };
+        if (displayConfig.dataLabelColor) {
+          dataLabelOption.textStyle.color = displayConfig.dataLabelColor;
+        }
+        if (displayConfig.dataLabelSize) {
+          dataLabelOption.textStyle.fontSize = displayConfig.dataLabelSize;
+        }
+        chartOptions.dataLabel = dataLabelOption;
 
         if(type === 'pie'){
-          mixinOptions.labelLine = !!displayConfig.showDataLabel;
-        }
-        lang.mixin(chartOptions, mixinOptions);
-
-        if(type !== 'pie'){
-          chartOptions.axisPointer = false;
-          chartOptions.scale = false;
-          chartOptions.hidexAxis = !displayConfig.showHorizontalAxis;
-          chartOptions.hideyAxis = !displayConfig.showVerticalAxis;
+          chartOptions.innerRadius = displayConfig.innerRadius;
         }
 
         return chartOptions;
+      },
+
+      _settingAxisDisplay: function(chartOptions, displayConfig, type) {
+        var axisTypes = ['column', 'bar', 'line'];
+        if (axisTypes.indexOf(type) < 0) {
+          return;
+        }
+        var xAxisOption = {
+          show: displayConfig.showHorizontalAxis,
+          textStyle: {}
+        };
+        if (displayConfig.horizontalAxisTextColor) {
+          xAxisOption.textStyle.color = displayConfig.horizontalAxisTextColor;
+        }
+        if (displayConfig.horizontalAxisTextSize) {
+          xAxisOption.textStyle.fontSize = displayConfig.horizontalAxisTextSize;
+        }
+        chartOptions.xAxis = xAxisOption;
+
+        var yAxisOption = {
+          show: displayConfig.showVerticalAxis,
+          textStyle: {}
+        };
+        if (displayConfig.verticalAxisTextColor) {
+          yAxisOption.textStyle.color = displayConfig.verticalAxisTextColor;
+        }
+        if (displayConfig.verticalAxisTextSize) {
+          yAxisOption.textStyle.fontSize = displayConfig.verticalAxisTextSize;
+        }
+        chartOptions.yAxis = yAxisOption;
+
+        //axis chart, set stack and area
+        if (!displayConfig.stack) {
+          displayConfig.stack = false;
+        }
+        if ((type === 'column' || type === 'bar') || (type === 'line' && displayConfig.area)) {
+          chartOptions.stack = displayConfig.stack;
+        }
+        //area
+        if (type === 'line' && !displayConfig.area) {
+          displayConfig.area = false;
+        }
+
+        if (type === 'line') {
+          chartOptions.area = displayConfig.area;
+        }
+        //axisPointer, scale, hidexAxis, hideyAxis
+        chartOptions.axisPointer = true;
+        chartOptions.scale = false;
       },
 
       _getBasicChartOptionsByStatisticsInfo: function(mode, options, data, type){
         if(mode === 'feature' || mode === 'category'){
           return this._getCategoryModeChartOptionsByStatisticsInfo(options, data, type);
         }else if(mode === 'count'){
-          return this._getCountModeChartOptionsByStatisticsInfo(options, data, type);
+          return this._getCountModeChartOptionsByStatisticsInfo(data, type);
         }else if(mode === 'field'){
-          return this._getFieldModeChartOptionByStatisticsInfo(options, data, type);
+          return this._getFieldModeChartOptionByStatisticsInfo(data, type);
         }
         return null;
       },
 
       _bindChartEvent: function(chart, mode, data){
         if(!this.map){
+          return;
+        }
+        if(data.length === 0){
           return;
         }
         var callback = lang.hitch(this, function(evt) {
@@ -1543,7 +1652,9 @@ define([
             //category: {category,valueFields,dataFeatures:[f1,f2...]}
             //count {fieldValue:value1,count:count1,dataFeatures:[f1,f2...]}
             var a = data[evt.dataIndex];
-            features = a.dataFeatures;
+            if (a) {
+              features = a.dataFeatures;
+            }
           }
 
           if(!features){
@@ -1587,12 +1698,17 @@ define([
 
         var options = {
           layerDefinition: this.featureLayer,
+          popupFieldInfosObj: this.popupFieldInfosObj,
           features: args.features,
           labelField: config.labelField,
           valueFields: config.valueFields,
-          sortOrder: config.sortOrder
+          sortOrder: config.sortOrder,
+          maxLabels: config.maxLabels,
+          useLayerSymbology: config.useLayerSymbology
         };
-
+        if(this.featureLayerForChartSymbologyChart){
+          options.featureLayerForChartSymbologyChart = this.featureLayerForChartSymbologyChart;
+        }
         //data: [{category:'a',valueFields:[10,100,2],dataFeatures:[f1]}]
         var data = clientStatisticsUtils.getFeatureModeStatisticsInfo(options);
 
@@ -1622,13 +1738,21 @@ define([
 
         var options = {
           layerDefinition: this.featureLayer,
+          popupFieldInfosObj: this.popupFieldInfosObj,
           features: args.features,
           categoryField: config.categoryField,
           valueFields: config.valueFields,
           operation: args.config.operation,
-          sortOrder: config.sortOrder
+          sortOrder: config.sortOrder,
+          dateConfig:config.dateConfig,
+          maxLabels: config.maxLabels,
+          nullValue: config.nullValue,
+          useLayerSymbology: config.useLayerSymbology,
+          splitField: config.splitField
         };
-
+        if(this.featureLayerForChartSymbologyChart){
+          options.featureLayerForChartSymbologyChart = this.featureLayerForChartSymbologyChart;
+        }
         //data: [{category:'a',valueFields:[10,100,2],dataFeatures:[f1,f2...]}]
         var data = clientStatisticsUtils.getCategoryModeStatisticsInfo(options);
 
@@ -1649,39 +1773,160 @@ define([
         };
       },
 
-      _getCategoryModeChartOptionsByStatisticsInfo: function(options, data, chartType){
-        //data: [{category:'a',valueFields:[10,100,2],dataFeatures:[f1,f2...]}]
-
+      _getSplitedSeriesForCategoryOrCountMode: function(data, chartType) {
         var chartOptions = {
           type: chartType,
           labels: [],
           series: []
         };
-        var valueFields = options.valueFields;
-        var valueAliases = this._getFieldAliasArray(valueFields);
-        var labelOrCategoryField = options.labelField || options.categoryField;
-        chartOptions.series = array.map(valueAliases, lang.hitch(this, function(valueFieldAlias){
+        var allSplitedFields = [];
+        data.forEach(function(item) {
+          var splitedValueFields = item.splitedValueFields;
+          if (splitedValueFields) {
+            var fields = splitedValueFields.map(function(splitedValueField) {
+              return splitedValueField.field;
+            });
+            allSplitedFields = allSplitedFields.concat(fields);
+          }
+        });
+        var uniqueSeplitedFields = jimuUtils.uniqueArray(allSplitedFields);
+
+        chartOptions.series = array.map(uniqueSeplitedFields, lang.hitch(this, function(uniqueSeplitedField) {
+          var dataItem = [];
+          for (var i = 0; i < data.length; i++) {
+            dataItem[i] = null;
+          }
           var item = {
-            name: valueFieldAlias,
+            name: uniqueSeplitedField,
             type: chartType,
-            data: []
+            data: dataItem
           };
           return item;
         }));
 
-        array.forEach(data, lang.hitch(this, function(item){
-          //item: {category:'a',valueFields:[10,100,2]
-          var text = this._getBestDisplayValue(labelOrCategoryField, item.category);
-          chartOptions.labels.push(text);
-          for(var i = 0; i < item.valueFields.length; i++){
-            var num = item.valueFields[i];
-            // var fieldName = valueFields[i];
-            // var aliasName = valueAliases[i];
-            // var c = this._getBestDisplayValue(fieldName, num);
-            chartOptions.series[i].data.push(num);
+        array.forEach(data, lang.hitch(this, function(item, i) {
+          //item: {category:'a',valueFields:[10,100,2] or {fieldValue:value1,count:count1}
+          var label = '';
+          if (item.category) {
+            label = item.category;
+          } else if (item.fieldValue) {
+            label = item.fieldValue;
           }
+          chartOptions.labels.push(label);
+
+          item.splitedValueFields.forEach(function(svf) {
+            chartOptions.series.forEach(function(serie) {
+              if (serie.name === svf.field) {
+                if (typeof item.color !== 'undefined') {
+                  var dataObj = this._getSerieData(item, svf.value);
+                  serie.data[i] = dataObj;
+                } else {
+                  serie.data[i] = svf.value;
+                }
+              }
+            }.bind(this));
+          }.bind(this));
         }));
         return chartOptions;
+      },
+      _getCategoryModeChartOptionsByStatisticsInfo: function(options, data, chartType) {
+        //data: [{category:'a',valueFields:[10,100,2],dataFeatures:[f1,f2...]}]
+
+        var valueFields = options.valueFields;
+        var valueAliases = this._getFieldAliasArray(valueFields);
+        var chartOptions = null;
+
+        var hasSplitField = false;
+        if (data.length > 0) {
+          hasSplitField = data.every(function(item) {
+            return !!item.splitedValueFields;
+          });
+        }
+
+        if (hasSplitField) {
+          return this._getSplitedSeriesForCategoryOrCountMode(data, chartType);
+        }
+
+        if (chartType === 'radar') {
+          var indicator = valueAliases.map(function(item) {
+            return {
+              name: item
+            };
+          });
+          var series = this._getSeriesOfRadar(data);
+          chartOptions = {
+            type: chartType,
+            indicator: indicator,
+            series: series
+          };
+        } else {
+          chartOptions = {
+            type: chartType,
+            labels: [],
+            series: []
+          };
+
+          chartOptions.series = array.map(valueAliases, lang.hitch(this, function(valueFieldAlias) {
+            var item = {
+              name: valueFieldAlias,
+              type: chartType,
+              data: []
+            };
+            return item;
+          }));
+
+          array.forEach(data, lang.hitch(this, function(item) {
+            //item: {category:'a',valueFields:[10,100,2]
+            chartOptions.labels.push(item.category);
+            for (var i = 0; i < item.valueFields.length; i++) {
+              var num = item.valueFields[i];
+              //color
+              if (typeof item.color !== 'undefined') {
+                var dataObj = this._getSerieData(item, num);
+                chartOptions.series[i].data.push(dataObj);
+              } else {
+                chartOptions.series[i].data.push(num);
+              }
+            }
+          }));
+        }
+        return chartOptions;
+      },
+
+      _getSeriesOfRadar: function(data) {
+        data = data.map(function(item) {
+          return {
+            name: item.category,
+            value: item.valueFields
+          };
+        });
+        return [{
+          type: 'radar',
+          data: data
+        }];
+      },
+
+      _isAllFalseColor:function(data){
+        return data.every(function(item){
+          return !item.color;
+        });
+      },
+
+      _getSerieData:function(item, num){
+        if(!item.color){
+          item.color = 'transparent';
+        }
+        var dataObj = {
+          value:num,
+          itemStyle:{
+            normal:{
+              color:item.color
+            },emphasis:{
+              color:item.color
+            }
+          }
+        };
+        return dataObj;
       },
 
       //------------------------create count mode charts--------------------------
@@ -1692,11 +1937,18 @@ define([
 
         var options = {
           layerDefinition: this.featureLayer,
+          popupFieldInfosObj: this.popupFieldInfosObj,
           features: args.features,
           categoryField: config.categoryField,
-          sortOrder: config.sortOrder
+          sortOrder: config.sortOrder,
+          dateConfig:config.dateConfig,
+          maxLabels: config.maxLabels,
+          useLayerSymbology: config.useLayerSymbology,
+          splitField: config.splitField
         };
-
+        if(this.featureLayerForChartSymbologyChart){
+          options.featureLayerForChartSymbologyChart = this.featureLayerForChartSymbologyChart;
+        }
         //data:[{fieldValue:value1,count:count1,dataFeatures:[f1,f2...]}]
         var data = clientStatisticsUtils.getCountModeStatisticsInfo(options);
 
@@ -1719,27 +1971,40 @@ define([
 
       //options: {features, categoryField, sortOrder}
       //data: [{fieldValue:value1,count:count1,dataFeatures:[f1,f2...]}]
-      _getCountModeChartOptionsByStatisticsInfo: function(options, data, chartType){
+      _getCountModeChartOptionsByStatisticsInfo: function(data, chartType){
         //data: [{fieldValue:value1,count:count1,dataFeatures:[f1,f2...]}]
+        var hasSplitField = false;
+        if (data.length > 0) {
+          hasSplitField = data.every(function(item) {
+            return !!item.splitedValueFields;
+          });
+        }
+
+        if (hasSplitField) {
+          return this._getSplitedSeriesForCategoryOrCountMode(data, chartType);
+        }
+
         var chartOptions = {
           type: chartType,
           labels: [],
           series: [{
-            name: this._legendNls || "Legend",
+            // name: '',
             type: chartType,
             data: []
           }]
         };
 
         //[{fieldValue:value1,count:count1,dataFeatures:[f1,f2...]}]
-        var categoryField = options.categoryField;
-
         array.forEach(data, lang.hitch(this, function(item/*, index*/) {
           var num = item.count;
           var fieldValue = item.fieldValue;
-          var text = this._getBestDisplayValue(categoryField, fieldValue);
-          chartOptions.labels.push(text);
-          chartOptions.series[0].data.push(num);
+          chartOptions.labels.push(fieldValue);
+          if (typeof item.color !== 'undefined') {
+            var dataObj = this._getSerieData(item, num);
+            chartOptions.series[0].data.push(dataObj);
+          } else {
+            chartOptions.series[0].data.push(num);
+          }
         }));
 
         return chartOptions;
@@ -1753,12 +2018,16 @@ define([
 
         var options = {
           layerDefinition: this.featureLayer,
+          popupFieldInfosObj: this.popupFieldInfosObj,
           features: args.features,
           valueFields: config.valueFields,
-          operation: config.operation
+          operation: config.operation,
+          sortOrder: config.sortOrder,
+          maxLabels: config.maxLabels,
+          nullValue: config.nullValue
         };
 
-        //data: {fieldName1:value1,fieldName2:value2}
+        //data: [{label:fieldName,value:,fieldValue}]
         var data = clientStatisticsUtils.getFieldModeStatisticsInfo(options);
 
         array.forEach(config.types, lang.hitch(this, function(typeInfo, i){
@@ -1778,28 +2047,22 @@ define([
         };
       },
 
-      _getFieldModeChartOptionByStatisticsInfo: function(options, data, chartType){
-        //data: {fieldName1:value1,fieldName2:value2}
+      _getFieldModeChartOptionByStatisticsInfo: function(data, chartType){
+        //data: [{label:fieldName,value:,fieldValue}]
         var chartOptions = {
           type: chartType,
           labels: [],
           series: [{
-            name: this._legendNls || "Legend",
+            // name: this._legendNls || "Legend",
             type: chartType,
             data: []
           }]
         };
 
-        //data: {fieldName1:value1,fieldName2:value2}
-        var valueFields = options.valueFields;
-        var valueAliases = this._getFieldAliasArray(valueFields);
-
-        array.forEach(valueFields, lang.hitch(this, function(fieldName, index) {
-          var aliasName = valueAliases[index];
-          var num = data[fieldName];
-
+        array.forEach(data, lang.hitch(this, function(item) {
+          var aliasName = this._getFieldAlias(item.label);
           chartOptions.labels.push(aliasName);
-          chartOptions.series[0].data.push(num);
+          chartOptions.series[0].data.push(item.value);
         }));
 
         return chartOptions;

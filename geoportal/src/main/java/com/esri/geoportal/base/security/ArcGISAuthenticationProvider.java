@@ -26,6 +26,7 @@ import java.util.List;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
+import org.apache.commons.lang3.StringUtils;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -203,6 +204,14 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
       if (role.equals("org_user") || role.equals("account_user")) hasOrgUserRole = true;
     }
 
+    if (jso.containsKey("orgId") && !jso.isNull("orgId")) {
+      String orgId = StringUtils.trimToEmpty(jso.getString("orgId"));
+      if (!orgId.isEmpty()) {
+        String orgKey = orgId+"_..._"+"My Organization";
+        groupKeys.add(orgKey);
+      }
+    }
+    
     if (jso.containsKey("groups") && !jso.isNull("groups")) {
       JsonArray jsoGroups = jso.getJsonArray("groups");
       for (int i=0;i<jsoGroups.size();i++) {

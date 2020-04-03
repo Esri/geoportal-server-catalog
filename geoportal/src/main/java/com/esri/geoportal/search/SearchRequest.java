@@ -229,8 +229,8 @@ public class SearchRequest {
     }
     if ((node != null) && (node.length() > 0)) {
       String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
-      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
-      String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
+      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getActualItemIndexType();       
+      String url = scheme+node+":"+port+"/"+idxName+(itmType!=null? "/"+itmType: "")+"/_search";
       elastic.add("searchUrl",url);
       info.add("elastic",elastic);
       return info;

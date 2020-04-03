@@ -52,7 +52,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
             lyr = new ArcGISDynamicMapServiceLayer(serviceUrl, options);
             self._processDynamicLayer(response,lyr,itemData);
           }
-          self._waitThenAddDynamicLayer(dfd,lyr,item,itemData);
+          return self._waitThenAddDynamicLayer(lyr,item,itemData);
         }
       }).then(function(result) {
         dfd.resolve(result);
@@ -168,8 +168,9 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
       }
     },
 
-    _waitThenAddDynamicLayer: function(dfd,lyr,item,itemData) {
+    _waitThenAddDynamicLayer: function(lyr,item,itemData) {
       var self = this;
+      dfd = new Deferred();
       layerUtil.waitForLayer(this.i18n,lyr).then(function(layer) {
         var templates = null;
         array.forEach(layer.layerInfos, function(layerInfo) {
@@ -207,6 +208,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
       }).otherwise(function(error){
         dfd.reject(error);
       });
+      return dfd;
     }
 
   });

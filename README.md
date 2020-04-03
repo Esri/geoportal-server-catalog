@@ -4,10 +4,10 @@ As part of the evolution of Geoportal Server, the catalog capability has been se
 This repository thus contains the catalog capability of Geoportal Server, while it's sibling [geoportal-server-harvester](https://github.com/ArcGIS/geoportal-server-harvester) is the new harvester of Geoportal Server.
 
 ## Releases and Downloads
-- 2.6.0 - Released May 7, 2018, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
+- 2.6.2 - Released May 3, 2019, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
 
 ## Can't Wait to Get Started?
-- Try the [sanbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
+- Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
 
 ## Features
 * Metadata editor - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE (Data), INSPIRE (Service), GEMINI (Data), GEMINI (Service)
@@ -56,7 +56,4 @@ limitations under the License.
 
 A copy of the license is available in the repository's [license](https://github.com/ArcGIS/geoportal-server-catalog/blob/master/LICENSE.txt) file.
 
-[](Esri Tags: Geoportal Server)
-[](Esri Language: CSW)
-[](Esri Language: Metadata)
 

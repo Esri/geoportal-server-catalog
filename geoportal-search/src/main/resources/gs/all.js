@@ -50,7 +50,7 @@
       "base/XmlInfo",
       "config/Config",
       "context/Context",
-      "context/Processor",
+      "context/_Processor",
       "provider/Provider",
       "provider/csw/CswProvider",
       "provider/csw/GetRecordsParser",
@@ -77,7 +77,8 @@
       "writer/CsvWriter",
       "writer/ErosWriter",
       "writer/KmlWriter",
-      "writer/RssWriter"
+      "writer/RssWriter",
+      "writer/DcatWriter"
     ],
     nashorn: [
       "context/nashorn/NashornContext",

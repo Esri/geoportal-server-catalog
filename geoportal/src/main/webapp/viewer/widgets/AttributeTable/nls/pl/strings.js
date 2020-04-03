@@ -40,5 +40,21 @@ define({
   "sortDes": "Sortuj malejąco",
   "statistics": "Statystyka",
   "attachments": "Załączniki",
-  "files": "plikami"
+  "files": "plikami",
+  "keepRichTextLabel": "Zachowaj format RTF",
+  "whatsThis": "Co to jest?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "Warstwa ${layerName} zawiera następujące pola w formacie RTF: ",
+      "line2": " , które mogą zawierać style formatowania tekstu, jak np. czcionki, kolory i rozmiary tekstu.",
+      "line3": "Po wyeksportowaniu do pliku CSV style formatowania zostaną zachowane w postaci znaczników HTML. Można zdecydować, że format RTF nie zostanie zachowany, usuwając zaznaczenie pola \"Zachowaj format RTF\"."
+    },
+    "example": {
+      "label": "Przykład:",
+      "scenarios": {
+        "first": "zostanie wyeksportowany domyślnie jako poniższy tekst:",
+        "second": "i poniższy tekst bez formatu RTF:"
+      }
+    }
+  }
 });

@@ -86,7 +86,7 @@ function(declare, lang, domConstruct, on, PreviewUtil,
     _showLoading: function(args) {
       esri.show(this.loading);
       if (this.tout == null) {
-        this.tout = setTimeout(lang.hitch(this, function() { this._hideLoading(args); }), 10000);
+        this.tout = setTimeout(lang.hitch(this, function() { this._hideLoading(args); }), 360000);
       }
     },
     
