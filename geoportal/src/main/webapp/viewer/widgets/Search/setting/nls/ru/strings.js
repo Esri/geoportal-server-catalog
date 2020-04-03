@@ -14,6 +14,7 @@ define({
   "generalSetting": "Общие настройки",
   "allPlaceholder": "Замещающий текст для поиска всего: ",
   "showInfoWindowOnSelect": "Показать всплывающее окно для найденного объекта или местоположения",
+  "showInfoWindowOnSelect2": "Показать всплывающее окно, если найден объект или местоположение.",
   "searchInCurrentMapExtent": "Искать только в пределах текущего экстента карты",
   "zoomScale": "Масштаб",
   "locatorUrl": "URL-адрес геокодера",

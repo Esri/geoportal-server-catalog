@@ -40,5 +40,21 @@ define({
   "sortDes": "Azalan sıralama",
   "statistics": "İstatistikler",
   "attachments": "Ekler",
-  "files": "dosyalar"
+  "files": "dosyalar",
+  "keepRichTextLabel": "Zengin metin biçimini koru",
+  "whatsThis": "Bu nedir?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName}, aşağıdaki zengin metin alanlarını içerir: ",
+      "line2": " yazı tipleri, renkler veya metin boyutları gibi metin biçimlendirme çeşitlerini içerebilen.",
+      "line3": "Biçimlendirme çeşitleri, CSV’ye aktarıldığında HTML etiketleri biçiminde korunur. \"Zengin metin biçimini koru\" kutusundaki işareti kaldırarak zengin metin biçimlerini korumamayı seçebilirsiniz."
+    },
+    "example": {
+      "label": "Örneğin:",
+      "scenarios": {
+        "first": "varsayılan olarak aşağıdaki metin şeklinde aktarılır:",
+        "second": "ve zengin metin biçimi olmayan aşağıdaki metin:"
+      }
+    }
+  }
 });

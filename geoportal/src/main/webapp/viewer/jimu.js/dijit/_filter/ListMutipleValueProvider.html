@@ -1,0 +1,61 @@
+<div>
+   <!--
+    <select data-dojo-attach-point="valProviderSelect" class="dijit-form-Select multiple-Select"  data-dojo-attach-event="onclick:_showPopup">
+    </select>
+    -->
+    <!-- <div class="subTitle">${CommonNls.layer}: <span data-dojo-attach-point="layerName"></span></div> -->
+    <div class="jimu-filter-popup-btn jimu-not-selectable">
+      <!-- <div data-dojo-attach-point="listSelectStore" style="height:1px;visibility:hidden;overflow:hidden;"></div> -->
+
+      <!-- for list select popup -->
+      <!-- <div class="add-label-btn" data-dojo-attach-event="click:_showPopup"> -->
+      <!-- for eidtTable -->
+      <div class="add-label-btn" data-dojo-attach-event="click:_createTarget">
+        <div class="icon"></div>
+        <div class="tip">${CommonNls.add}</div>
+      </div>
+      <!--
+      <div class="add-btn" data-dojo-attach-event="click:_showPopup">
+        <div class="tip">openLayer-temp</div>
+      </div>
+
+      <div class="add-btn add-btn-right" data-dojo-attach-event="click:_createTarget">
+        <div class="tip">${CommonNls.add}</div>
+      </div>
+       -->
+    </div>
+    <div data-dojo-attach-point="tableContent"></div>
+    <div class="displayTypes" data-dojo-attach-point="displayTypes" data-dojo-attach-event="click:_changeDisplayType">
+      <div class="title jimu-ellipsis">${Nls.displayAs}</div>
+      <span class="option dropdownOption">
+        <div class="radio"></div>
+        <div class="label jimu-ellipsis">${Nls.aDrowdownList}</div>
+      </span>
+      <span class="option expandedOption">
+      <div class="radio"></div>
+      <div class="label jimu-ellipsis">${Nls.aExpandedList}</div>
+      </span>
+    </div>
+    <!--
+    <div class="jimu-multiple-set-container">
+      <div data-dojo-attach-point="" class="items-list-content items-list-header"  >
+        <div class="item">
+          <div class="label jimu-ellipsis">${CommonNls.name}</div>
+          <div class="label jimu-ellipsis">${CommonNls.label}</div>
+          <div class="label checkboxHeader jimu-ellipsis" title="set default?">${CommonNls.defaults}</div>
+          <div class="label lableR jimu-ellipsis">${CommonNls.actions}</div>
+        </div>
+      </div>
+      <div data-dojo-attach-point="listContent" class="items-list-content" data-dojo-attach-event="click:_onListContentClicked">
+      </div>
+    </div>
+    -->
+
+    <div class="value-type-popup" data-dojo-attach-point="valuesPopupNode" style="display:none;">
+      <!-- <div data-dojo-attach-point="mutiValuesSelect" multiple="true" data-dojo-type="dojox/form/CheckedMultiSelect" data-dojo-props='searchAttr:"label",required:false,intermediateChanges:true' style="width:100%;" ></div> -->
+      <div data-dojo-attach-point="pageControlContainer">Load more data</div>
+
+    </div>
+
+    <!-- <a data-dojo-attach-event="onclick:_setSelectType" class="popupOper" style="display:none;">type</a> -->
+  </div>

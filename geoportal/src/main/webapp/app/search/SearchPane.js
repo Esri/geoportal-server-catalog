@@ -94,6 +94,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       array.forEach(components,function(component){
         component.appendQueryParams(params);
       });
+      // history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
       var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
       var v, postData = null;
 
@@ -140,6 +141,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       if (postData === null) {
         dfd = this._dfd = dojoRequest.get(url,{handleAs:"json"});
       } else {
+        postData.track_total_hits = true;
         dfd = this._dfd = dojoRequest.post(url,{
           handleAs: "json",
           headers: {"Content-Type": "application/json"},
@@ -158,6 +160,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
             self.lastQuery = null;
           }
           response.urlParams = params.urlParams;
+          response.hasScorable = params.hasScorable;
           array.forEach(components,function(component){
             component.processResults(response);
           });

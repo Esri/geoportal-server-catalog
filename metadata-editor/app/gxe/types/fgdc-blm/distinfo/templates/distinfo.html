@@ -1,0 +1,360 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'distinfo',minOccurs:0,maxOccurs:'unbounded',
+      label:'${i18nFgdc.distinfo.caption}'">
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+    
+      <div data-dojo-type="esri/dijit/metadata/form/Section"
+        data-dojo-props="showHeader:false,
+          label:'${i18nFgdc.distinfo.section.distributor}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'distrib',showHeader:false,
+            label:'${i18nFgdc.distinfo.distrib}'">
+          <div data-dojo-type="esri/dijit/metadata/types/fgdc/cntinfo/cntinfo"></div>
+        </div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Section"
+        data-dojo-props="showHeader:false,
+          label:'${i18nFgdc.distinfo.section.description}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'resdesc',minOccurs:0,preferOpen:true,
+            label:'${i18nFgdc.distinfo.resdesc.caption}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+            <div data-dojo-type="esri/dijit/metadata/form/Options">
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'',value:''"></div>
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.liveData}',value:'Live Data and Maps'"></div>  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.downloadableData}',value:'Downloadable Data'"></div>  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.offlineData}',value:'Offline Data'"></div>  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.staticMapImages}',value:'Static Map Images'"></div>                  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.sDocument}',value:'Other Documents'"></div>  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.application}',value:'Applications'"></div>  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.geographicService}',value:'Geographic Services'"></div>  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.clearingHouse}',value:'Clearinghouses'"></div>  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.mapFiles}',value:'Map Files'"></div>                  
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.distinfo.resdesc.geographicActivies}',value:'Geographic Activities'"></div>                                                          
+              <div data-dojo-type="esri/dijit/metadata/form/Option"
+                data-dojo-props="label:'${i18nFgdc.alternates.other}',value:'_other',isOther:true"></div>  
+            </div>            
+          </div>
+        </div>
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'distliab',label:'${i18nFgdc.distinfo.distliab}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea">
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" data-dojo-props="value:'None',label:'${i18nFgdc.alternates.none}'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1A: External Source',
+                    value:'BLM INTERNAL USE.  NOT FOR DISTRIBUTION.  Distribution requests from outside the BLM for this data will be referred to the source.  The BLM has no liability for the unintentional disclosure of data.  The BLM assumes no responsibility for errors or omissions and makes no warranty to the accuracy, reliability, or completeness of this data for individual use or aggregate use with other data; nor shall the act of distribution to contractors, partners, or beyond, constitute any such warranty for individual or aggregate data use with other data.  BLM computers successfully processed this data.  The BLM makes no warranty, expressed or implied, regarding the use of this data on any other system, or for general or scientific purposes, nor does distribution constitute or imply any such warranty.  The BLM has no liability for payment of any consequential, incidental, indirect, special, or tort damages of any kind, including, but not limited to, any loss of profits arising out of the use or reliance on the geographic data or arising out of the delivery, installation, operation, or support by BLM.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1A: Public Data', 
+                    value:'The BLM assumes no responsibility for errors or omissions.  No warranty is made by the BLM as to the accuracy, reliability, or completeness of these data for individual use or aggregate use with other data; nor shall the act of distribution to contractors, partners, or beyond, constitute any such warranty for individual or aggregate data use with other data.  Although these data have been processed successfully on computers of BLM, no warranty, expressed or implied, is made by BLM regarding the use of these data on any other system, or for general or scientific purposes, nor does the fact of distribution constitute or imply any such warranty.  In no event shall the BLM have any liability whatsoever for payment of any consequential, incidental, indirect, special, or tort damages of any kind, including, but not limited to, any loss of profits arising out of the use or reliance on the geographic data or arising out of the delivery, installation, operation, or support by BLM.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 1B: Public Data', 
+                    value:'The BLM assumes no responsibility for errors or omissions.  No warranty is made by the BLM as to the accuracy, reliability, or completeness of these data for individual use or aggregate use with other data; nor shall the act of distribution to contractors, partners, or beyond, constitute any such warranty for individual or aggregate data use with other data.  Although these data have been processed successfully on computers of BLM, no warranty, expressed or implied, is made by BLM regarding the use of these data on any other system, or for general or scientific purposes, nor does the fact of distribution constitute or imply any such warranty.  In no event shall the BLM have any liability whatsoever for payment of any consequential, incidental, indirect, special, or tort damages of any kind, including, but not limited to, any loss of profits arising out of the use or reliance on the geographic data or arising out of the delivery, installation, operation, or support by BLM.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Non-BLM', 
+                    value:'BLM INTERNAL USE.  NOT FOR DISTRIBUTION.  Distribution requests from outside the BLM for this data will be referred to the source organization.  The BLM has no liability for the unintentional disclosure of data.  The BLM assumes no responsibility for errors or omissions and makes no warranty to the accuracy, reliability, or completeness of this data for individual use or aggregate use with other data; nor shall the act of distribution to contractors, partners, or beyond, constitute any such warranty for individual or aggregate data use with other data.  BLM computers successfully processed this data.  The BLM makes no warranty, expressed or implied, regarding the use of this data on any other system, or for general or scientific purposes, nor does distribution constitute or imply any such warranty.  The BLM has no liability for payment of any consequential, incidental, indirect, special, or tort damages of any kind, including, but not limited to, any loss of profits arising out of the use or reliance on the geographic data or arising out of the delivery, installation, operation, or support by BLM.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Internal Use', 
+                    value:'BLM INTERNAL USE.  NOT FOR DISTRIBUTION.  The BLM will not be held liable for the unintentional disclosure of these data.  The BLM assumes no responsibility for errors or omissions.  No warranty is made by the BLM as to the accuracy, reliability, or completeness of these data for individual use or aggregate use with other data; nor shall the act of distribution to contractors, partners, or beyond, constitute any such warranty for individual or aggregate data use with other data.  Although these data have been processed successfully on computers of BLM, no warranty, expressed or implied, is made by BLM regarding the use of these data on any other system, or for general or scientific purposes, nor does the fact of distribution constitute or imply any such warranty.  In no event shall the BLM have any liability whatsoever for payment of any consequential, incidental, indirect, special, or tort damages of any kind, including, but not limited to, any loss of profits arising out of the use or reliance on the geographic data or arising out of the delivery, installation, operation, or support by BLM.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Privacy Data', 
+                    value:'BLM INTERNAL USE AND DISTRIBUTION TO AUTHORIZED PERSONS ONLY.  Information may not be disclosed from this file unless permitted by current Federal regulations (43 CFR 2.56).  These records may not be altered or destroyed except as authorized by current Federal regulations (43 CFR 2.52).  The Privacy Act contains penalties for knowingly and willfully disclosing information from this file unless properly authorized. The BLM will not be held liable for the unintentional disclosure of these data.  The BLM assumes no responsibility for errors or omissions in these data.  No warranty is made by the BLM as to the accuracy, reliability, or completeness of these data for individual use or aggregate use with other data; nor shall the act of distribution to contractors, partners, or beyond, constitute any such warranty for individual or aggregate data use with other data.  Although these data have been processed successfully on computers of BLM, no warranty, expressed or implied, is made by BLM regarding the use of these data on any other system, or for general or scientific purposes, nor does the fact of distribution constitute or imply any such warranty.  In no event shall the BLM have any liability whatsoever for payment of any consequential, incidental, indirect, special, or tort damages of any kind, including, but not limited to, any loss of profits arising out of the use or reliance on the geographic data or arising out of the delivery, installation, operation, or support by BLM.'"></div>  
+            <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" 
+                data-dojo-props="label:'Category 2: Non-Public, Unverified',
+                    value:'BLM INTERNAL USE.  NOT FOR DISTRIBUTION.  The BLM will not be held liable for the unintentional disclosure of these data.  The BLM assumes no responsibility for errors or omissions.  No warranty is made by the BLM as to the accuracy, reliability, or completeness of these data for individual use or aggregate use with other data; nor shall the act of distribution to contractors, partners, or beyond, constitute any such warranty for individual or aggregate data use with other data.  Although these data have been processed successfully on computers of BLM, no warranty, expressed or implied, is made by BLM regarding the use of these data on any other system, or for general or scientific purposes, nor does the fact of distribution constitute or imply any such warranty.  In no event shall the BLM have any liability whatsoever for payment of any consequential, incidental, indirect, special, or tort damages of any kind, including, but not limited to, any loss of profits arising out of the use or reliance on the geographic data or arising out of the delivery, installation, operation, or support by BLM.'"></div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Order Process -->
+      <div data-dojo-type="esri/dijit/metadata/form/Section" data-dojo-props="showHeader:false,label:'${i18nFgdc.distinfo.section.orderProcess}'">
+        <!-- Standard Order Process -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'stdorder',minOccurs:0,maxOccurs:'unbounded',label:'Standard Order Process'">
+        
+          <!-- [Non--digital form | digital form] -->
+          <div data-dojo-type="esri/dijit/metadata/form/ElementChoice">
+            <!-- non-digital form -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'nondig',label:'Non-digital Form'">
+              <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+            </div>
+            <!-- digital form -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'digform',minOccurs:1,maxOccurs:'unbounded',label:'Digital Form'">
+              <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+                <!-- Digital Transfer Information -->
+                <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'digtinfo',minOccurs:1,label:'Digital Transfer Information'">
+
+                  <!-- Format Name -->
+                  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'formname',minOccurs:1,maxOccurs:'unbounded',label:'Format Name'">
+
+                    <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="">
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'ARCE',label:'ARC/INFO Export format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'ARCG',label:'ARC/INFO Generate format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'ASCII',label:'ASCII file'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'BIL',label:'Imagery, band interleaved by line'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'BIP',label:'Imagery, band interleaved by pixel'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'BSQ',label:'Imagery, band interleaved sequential'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'CDF',label:'Common Data Format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'CFF',label:'Cartographic Feature File (U.S. Forest Service)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'COORD',label:'User-created coordinate file, declared format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DEM',label:'Digital Elevation Model (U.S. Geological Survey)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DFAD',label:'Digital Feature Analysis Data (NGA)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DGN',label:'Microstation format (Intergraph Corporation)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DIGEST',label:'Digital Geographic Information Exchange Standard'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DLG',label:'Digital Line Graph (U.S. Geological Survey)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DTED',label:'Digital Terrain Elevation Data (MIL-D-89020)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DWG',label:'AutoCAD Drawing format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DX90',label:'Data Exchange 90'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'DXF',label:'AutoCAD Drawing Exchange Format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'ERDAS',label:'ERDAS image files (ERDAS Corporation)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'GRASS',label:'Geographic Resources Analysis Support System'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'HDF',label:'Hierarchical Data Format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'IGDS',label:'Interactive Graphic Design System format (Intergraph Corporation)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'IGES',label:'Initial Graphics Exchange Standard'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'MOSS',label:'Multiple Overlay Statistical System export file'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'netCDF',label:'network Common Data Format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'NITF',label:'National Imagery Transfer Format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'RPF',label:'Raster Product Format (NGA)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'RVC',label:'Raster Vector Converted format (MicroImages)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'RVF',label:'Raster Vector Format (MicroImages)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'SDTS',label:'Spatial Data Transfer Standard (FIPS 173)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'SIF',label:'Standard Interchange Format (DOD Project 2851)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'SLF',label:'Standard Linear Format (NGA)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'TIFF',label:'Tagged Image File Format'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'TGLRN',label:'TIGER Line format (Bureau of the Census)'"></div>
+                      <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'VPF',label:'Vector Product FIPS (NGA)'"></div>
+                    </div>
+                  </div>
+
+                  <!-- [format version number | format version date] -->
+                  <div data-dojo-type="esri/dijit/metadata/form/ElementChoice">
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'formvern',minOccurs:0,label:'Format Version Number'">
+                      <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                    </div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'formverd',minOccurs:0,label:'Format Version Date'">
+                      <div data-dojo-type="esri/dijit/metadata/form/InputDate"></div>
+                    </div>
+                  </div>
+                  
+                  <!-- Format Specification -->
+                  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'formspec',minOccurs:0,label:'Format Specification'">
+                    <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                  </div>
+                  
+                  <!-- Format Information Content -->
+                  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'formcont',minOccurs:0,label:'Format Information Content'">
+                    <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                  </div>
+                  
+                  <!-- File Decompression Technique -->
+                  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'filedec',minOccurs:0,label:'File Decompression Technique'">
+                    <div data-dojo-type="esri/dijit/metadata/form/InputText">
+                      <div data-dojo-type="esri/dijit/metadata/form/tools/ClickableValueTool" data-dojo-props="value:'No compression applied',label:'No compression applied'"></div>  
+                    </div>
+                  </div>
+
+                  <!-- Transfer Size -->
+                  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'transize',minOccurs:0,label:'Transfer Size'">
+                    <div data-dojo-type="esri/dijit/metadata/form/InputNumber"></div>
+                  </div>
+                </div>
+                
+                <!-- Digital Transfer Option -->
+                <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'digtopt',minOccurs:1,maxOccurs:'unbounded',label:'Digital Transfer Option'">
+                  <div data-dojo-type="esri/dijit/metadata/form/ElementChoice">
+                    <!-- Online Option -->
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'onlinopt',minOccurs:1,label:'Online Option'">
+
+                      <!-- Computer Contact Information -->
+                      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'computer',minOccurs:1,maxOccurs:'unbounded',label:'Computer Contact Information'">
+                        <div data-dojo-type="esri/dijit/metadata/form/ElementChoice">
+                          <!-- Network Address -->
+                          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'networka',minOccurs:1,label:'Network Address'">
+                            <!-- Network Resource Name -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'networkr',minOccurs:1,maxOccurs:'unbounded',label:'Network Resource Name'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                            </div>
+                          </div>
+
+                          <!-- Dialup Instructions -->
+                          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dialinst',minOccurs:1,label:'Dialup Instructions'">
+                            <!-- Lowest BPS -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'lowbps',minOccurs:1,label:'Lowest BPS'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputNumber"></div>
+                            </div>
+                            
+                            <!-- Highest BPS -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'highbps',minOccurs:0,label:'Highest BPS'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputNumber"></div>
+                            </div>
+                            
+                            <!-- Number DataBits -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'numdata',minOccurs:1,label:'Number DataBits'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="">
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'7',label:'7'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'8',label:'8'"></div>
+                              </div>
+                            </div>
+
+                            <!-- Number StopBits -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'numstop',minOccurs:1,label:'Number StopBits'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="">
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'1',label:'1'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'2',label:'2'"></div>
+                              </div>
+                            </div>
+
+                            <!-- Parity -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'parity',minOccurs:1,label:'Parity'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="">
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'None',label:'None'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'Odd',label:'Odd'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'Even',label:'Even'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'Mark',label:'Mark'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'Space',label:'Space'"></div>
+                              </div>
+                            </div>
+
+                            <!-- Compression Support -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'compress',minOccurs:0,label:'Compression Support'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="">
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'V.32',label:'V.32'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'V.32bis',label:'V.32bis'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'V.42',label:'V.42'"></div>
+                                <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'V.42bis',label:'V.42bis'"></div>
+                              </div>
+                            </div>
+                            
+                            <!-- Dialup Telephone -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dialtel',minOccurs:1,maxOccurs:'unbounded',label:'Dialup Telephone'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                            </div>
+                            
+                            <!-- Dialup Filename -->
+                            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dialfile',minOccurs:1,maxOccurs:'unbounded',label:'Dialup Filename'">
+                              <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      <!-- Access Instructions -->
+                      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'accinstr',minOccurs:0,label:'Access Instructions'">
+                        <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                      </div>
+
+                      <!-- Online Computer and Operating System -->
+                      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'oncomp',minOccurs:0,label:'Computer and Operating System'">
+                        <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                      </div>
+                    </div>
+                  
+                    <!-- Offline Option -->
+                    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'offoptn',minOccurs:1,label:'Offline Option'">
+                      <!-- Offline Media -->
+                      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'offmedia',minOccurs:1,label:'Offline Media'">
+                        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="">
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'CD-ROM',label:'None'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'3-1/2 inch floppy disk',label:'Odd'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'5-1/4 inch floppy disk',label:'Even'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'9-track tape',label:'9-track tape'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'4 mm cartridge tape',label:'4 mm cartridge tape'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'8 mm cartridge tape',label:'8 mm cartridge tape'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'1/4-inch cartridge tape',label:'1/4-inch cartridge tape'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nFgdc.alternates.other}',value:'_other',isOther:true"></div>  
+                        </div>
+                      </div>
+
+                      <!-- Recording Capacity -->
+                      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'reccap',minOccurs:0,label:'Recording Capacity'">
+                        <!-- Recording Density -->
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'recden',minOccurs:1,maxOccurs:'unbounded',label:'Recording Density'">
+                          <div data-dojo-type="esri/dijit/metadata/form/InputNumber"></div>
+                        </div>
+                        <!-- Recording Density Units -->
+                        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'recdenu',minOccurs:1,label:'Recording Density Units'">
+                          <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                        </div>
+                      </div>
+
+                      <!-- Recording Format -->
+                      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'recfmt',minOccurs:1,maxOccurs:'unbounded',label:'Recording Format'">
+                        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="">
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'cpio',label:'cpio'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'tar',label:'tar'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'High Sierra',label:'High Sierra'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'ISO 9660',label:'ISO 9660'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'ISO 9660 with Rock Ridge extensions',label:'ISO 9660 with Rock Ridge extensions'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="value:'ISO 9660 with Apple HFS extensions',label:'ISO 9660 with Apple HFS extensions'"></div>
+                          <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nFgdc.alternates.other}',value:'_other',isOther:true"></div>
+                        </div>
+                      </div>
+
+                      <!-- Compatibility Information -->
+                      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'compat',minOccurs:0,label:'Compatibility Information'">
+                        <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fees -->
+          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'fees',minOccurs:1,label:'Fees'">
+            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+          </div>
+          
+          <!-- Ordering Instructions -->
+          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'ordering',minOccurs:0,label:'Ordering Instructions'">
+            <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+          </div>
+          
+          <!-- Turnaround -->
+          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'turnarnd',minOccurs:0,label:'Turnaround'">
+            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+          </div>          
+        </div>
+
+        <!-- Custom Order Process -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'custom',minOccurs:0,label:'${i18nFgdc.distinfo.custom}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+        </div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Section"
+        data-dojo-props="showHeader:false,
+          label:'${i18nFgdc.distinfo.section.prerequisites}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'techpreq',minOccurs:0,
+            label:'${i18nFgdc.distinfo.techpreq}'">
+          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+        </div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Section"
+        data-dojo-props="showHeader:false,
+          label:'${i18nFgdc.distinfo.section.availability}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Element"
+          data-dojo-props="target:'availabl',minOccurs:0,
+            label:'${i18nFgdc.distinfo.availabl}'">
+          <div data-dojo-type="esri/dijit/metadata/types/fgdc/timeinfo/timeinfo"></div>
+        </div>
+      </div>
+    
+    </div>
+  </div>
+  
+</div>

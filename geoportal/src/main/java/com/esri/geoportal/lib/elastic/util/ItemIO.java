@@ -46,7 +46,7 @@ public class ItemIO {
    */
   public DeleteResponse deleteItem(ElasticContext ec, String id) throws Exception {
     DeleteResponse resp = ec.getTransportClient().prepareDelete(
-      ec.getItemIndexName(),ec.getItemIndexType(),id).get();
+      ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
     /* ES 2to5 */
     // if (resp.isFound()) {
     if (resp.getResult().equals(Result.DELETED)) {
@@ -64,7 +64,7 @@ public class ItemIO {
    */
   public GetResponse getItem(ElasticContext ec, String id) throws Exception {
     return ec.getTransportClient().prepareGet(
-        ec.getItemIndexName(),ec.getItemIndexType(),id).get();
+        ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
   }
   
   /**
@@ -228,7 +228,7 @@ public class ItemIO {
       (new XmlContent(ec)).write(ec,mdoc,xmlIndexName);
     }
     IndexRequestBuilder req = ec.getTransportClient().prepareIndex(
-        indexName,ec.getItemIndexType(),mdoc.getItemId());
+        indexName,ec.getActualItemIndexType(),mdoc.getItemId());
     req.setSource(mdoc.getJson());
     return req.get();
   }

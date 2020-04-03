@@ -3,10 +3,17 @@
     data-dojo-attach-point="dropPane" data-dojo-props="title:'${label}',open:${open}">
     <div class="g-temporal-d3" data-dojo-attach-point="svgNode"></div>
     <div class="g-temporal-bar pull-right">
-      <a href="javascript:void(0)" class="small" 
-        title="${i18n.search.temporalFilter.searchTip}"
+      <label for="${id}_intervalLink">${i18n.search.temporalFilter.searchLabel}</label>
+      <a href="javascript:void(0)" class="small" id="${id}_intervalLink"
+        title="${i18n.search.numericFilter.searchTip}"
         data-dojo-attach-point="brushExtentNode"
         data-dojo-attach-event="onclick: applyBrushExtent">
+      </a>
+      <a href="javascript:void(0)" class="small g-range-label-link" id="${id}_rangeLink"
+        xtitle="${i18n.search.numericFilter.rangeTip}"
+        aria-label="${i18n.search.numericFilter.rangeTip}"
+        data-dojo-attach-event="onclick: onRangeClick">
+        ${i18n.search.numericFilter.rangeLabel}
       </a>
     </div>
   </div>

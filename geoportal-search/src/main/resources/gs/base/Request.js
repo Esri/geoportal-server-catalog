@@ -177,6 +177,10 @@
       if (types.length === 0) types = null;
       return types;
     }},
+  
+    getEsDsl: {writable:true,value:function() {
+      return this.chkParam("esdsl");  
+    }},
 
     /* .......................................................................................... */
 

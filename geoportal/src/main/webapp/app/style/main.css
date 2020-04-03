@@ -1,6 +1,6 @@
 body {
   font-size: 12px;
-  background-color: #ffffff;
+  backGround-color: #ffffff;
 }
 
 /* chrome */
@@ -140,12 +140,12 @@ body {
 	padding: 0px;
 }
 .g-search-pane-left {
-	width: 25%; 
-	min-width: 100px; 
+	/*width: 25%; */
+	/*min-width: 100px; */
 	float: left; 
 }
 .g-search-pane-right {
-	width: 73%; 
+	/*width: 73%; */
 	float: right; 
 }
 
@@ -173,7 +173,11 @@ body {
   max-height: 200px;
   overflow-y: auto;
 }
-
+/* resolves map disappearing issue #63
+and will apply to all search facets */
+.g-search-pane-left .dijitTitlePaneTitle {
+    overflow-y:hidden !important;;
+}
 .g-entry-links > div {
   padding: 2px 0px;
 }
@@ -181,6 +185,7 @@ body {
 .g-spatial-filter-map {
   height: 300px !important;
   width: auto !important;
+
 }
 .g-spatial-filter-relations {
   margin-right: 12px;
@@ -190,7 +195,7 @@ body {
 }
 .g-spatial-filter-locator {
   display: block;
-  position: absolute;
+  position: fixed;
   z-index: 31;
   left: 44px;
   top: 215px;
@@ -246,9 +251,9 @@ body {
 .g-search-results {
   /*max-height: 400px;
   overflow-y: auto;*/
-  max-height: -webkit-calc(100vh - 200px);
-  max-height:    -moz-calc(100vh - 200px);
-  max-height:         calc(100vh - 200px);
+  max-height: -webkit-calc(100vh  - 16em);
+  max-height:    -moz-calc(100vh  - 16em);
+  max-height:         calc(100vh  - 16em);
   overflow: auto;
 }
 
@@ -368,7 +373,33 @@ body {
 }
 .g-temporal-bar select {
   margin-left: 3px;
-  margin-right: 10px;
+}
+.g-temporal-bar label {
+  font-size: 11px;
+  margin-left: 10px;
+}
+.g-temporal-bar .calendar {
+  width: 16px;
+  height: 16px;
+  margin: 0;
+  vertical-align: top;
+  cursor: pointer;
+}
+.g-start-date {
+  
+}
+.g-end-date {
+  float: right;
+}
+.g-start-date .g-start-date-calendar {
+  
+}
+.g-end-date .g-end-date-calendar {
+}
+.g-start-date .g-start-date-calendar-label {
+  
+}
+.g-end-date .g-end-date-calendar-label {
 }
 
 .g-temporal-d3 svg {
@@ -521,4 +552,72 @@ a.dropdown-toggle:focus {
 	overflow: visible;
 	clip-path: none;
 	text-decoration: none;
+}
+
+.g-open-search-result-links {
+  float: right;
+  padding: 1em;
+}
+
+.g-open-search-result-link {
+  margin-left: 1em;
+}
+
+.g-range-label-link {
+  margin-left: 10px;
+}
+
+
+.g-basic-from-value {
+  /*margin-right: 10px;*/
+}
+
+.g-basic-to-value {
+}
+
+.g-basic-from-value-input {
+  width: 140px;
+}
+
+.g-basic-to-value-input {
+  width: 140px;
+}
+
+.g-basic-from-value-input-label {
+  
+}
+
+.g-basic-to-value-input-label {
+  
+}
+
+
+
+.g-from-value {
+  
+}
+
+.g-to-value {
+  float: right;
+}
+
+.g-from-value-input {
+  
+}
+
+.g-to-value-input {
+  
+}
+
+.g-from-value-input-label {
+  
+}
+
+.g-to-value-input-label {
+  
+}
+
+.g-input-field-note {
+	font-size: 10px;
+	font-style: italic;
 }

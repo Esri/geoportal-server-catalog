@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -18,10 +18,11 @@ define([
   'dojo/_base/declare',
   'dojo/_base/array',
   'dojo/_base/lang',
-  'esri/graphicsUtils',
-  './LayerInfo',
-  'esri/lang'
-], function(declare, array, lang, graphicsUtils, LayerInfo, esriLang) {
+  'dojo/promise/all',
+  'esri/lang',
+  'jimu/utils',
+  './LayerInfo'
+], function(declare, array, lang, all, esriLang, jimuUtils, LayerInfo) {
   return declare(LayerInfo, {
 
     constructor: function( /*operLayer, map*/ ) {
@@ -33,6 +34,7 @@ define([
       };
     },
 
+    /*
     getExtent: function() {
 
       var graphicsOfAllSubLayer = [],
@@ -51,6 +53,24 @@ define([
         extent = this._convertGeometryToMapSpatialRef(extent);
       }
       return extent;
+    },
+    */
+
+    _getExtent: function() {
+      var extent = null;
+      var _extentDefs = [];
+      array.forEach(this.getSubLayers(), function(subLayerInfo) {
+        _extentDefs.push(subLayerInfo._getExtent());
+      }, this);
+
+      return all(_extentDefs).then(lang.hitch(this, function(extents) {
+        array.forEach(extents, function(ext) {
+          if(jimuUtils.isValidExtent(ext)) {
+            extent = extent ? extent.union(ext) : ext;
+          }
+        }, this);
+        return extent;
+      }));
     },
 
     // _resetLayerObjectVisiblity: function(layerOptions) {
@@ -159,7 +179,7 @@ define([
             subId: layerObj.id || "-",
             collection: {"layerInfo": this},
             selfType: 'collection',
-            showLegend: this.originOperLayer.featureCollection.showLegend,
+            showLegend: true, //this.originOperLayer.featureCollection.showLegend,
             parentLayerInfo: this
           });
 

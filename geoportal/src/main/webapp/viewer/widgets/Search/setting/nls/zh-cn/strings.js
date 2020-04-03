@@ -14,6 +14,7 @@ define({
   "generalSetting": "常规设置",
   "allPlaceholder": "用于搜索全部内容的占位符文本： ",
   "showInfoWindowOnSelect": "显示已找到要素或位置的弹出窗口",
+  "showInfoWindowOnSelect2": "找到要素或位置时显示弹出窗口。",
   "searchInCurrentMapExtent": "仅在当前地图范围内搜索",
   "zoomScale": "缩放比例",
   "locatorUrl": "地理编码器 URL",

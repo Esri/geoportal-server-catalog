@@ -7,7 +7,7 @@
   xmlns:xlink="http://www.w3.org/1999/xlink">
   <ows:ServiceIdentification>
     <ows:Title>CSW</ows:Title>
-    <ows:Abstract>A catalogue service that conforms to the HTTP protocol binding of the OpenGIS Catalogue Service specification (version 3.0)</ows:Abstract>
+    <ows:Abstract>A catalogue service that conforms to the HTTP protocol binding of the OpenGIS Catalogue Service specification (version 2.0.2)</ows:Abstract>
     <ows:Keywords>
       <ows:Keyword>CSW</ows:Keyword>
     </ows:Keywords>
@@ -43,7 +43,6 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="AcceptVersions">
@@ -69,7 +68,7 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}" />
+          <ows:Post xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
@@ -86,6 +85,7 @@
       <ows:Parameter name="outputSchema">
         <ows:AllowedValues>
           <ows:Value>http://www.opengis.net/cat/csw/2.0.2</ows:Value>
+          <ows:Value>http://www.isotc211.org/2005/gmd</ows:Value>
           <ows:Value>http://www.w3.org/2005/Atom</ows:Value>
         </ows:AllowedValues>
       </ows:Parameter>
@@ -113,7 +113,6 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="outputFormat">
@@ -125,6 +124,7 @@
       <ows:Parameter name="outputSchema">
         <ows:AllowedValues>
           <ows:Value>http://www.opengis.net/cat/csw/2.0.2</ows:Value>
+          <ows:Value>http://www.isotc211.org/2005/gmd</ows:Value>
           <ows:Value>http://www.w3.org/2005/Atom</ows:Value>
         </ows:AllowedValues>
       </ows:Parameter>

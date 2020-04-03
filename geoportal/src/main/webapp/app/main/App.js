@@ -14,6 +14,7 @@
  */
 define(["dojo/_base/declare",
         "dojo/_base/lang",
+        "dojo/_base/array",
         "dojo/topic",
         "app/context/app-topics",
         "app/common/Templated",
@@ -26,7 +27,7 @@ define(["dojo/_base/declare",
         "app/main/AboutPanel",
         "app/content/MetadataEditor",
         "app/content/UploadMetadata"], 
-function(declare, lang, topic, appTopics, Templated, template, i18n, util, SearchPanel, MapPanel, HelpPanel, AboutPanel,
+function(declare, lang, array, topic, appTopics, Templated, template, i18n, util, SearchPanel, MapPanel, HelpPanel, AboutPanel,
     MetadataEditor, UploadMetadata) {
 
   var oThisClass = declare([Templated], {
@@ -52,18 +53,18 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
       $("a[href='#aboutPanel']").on("shown.bs.tab",function(e) {
         location.hash = '#aboutPanel';
       });
-      topic.subscribe(appTopics.AddToMapClicked,function(params){
+      topic.subscribe(appTopics.AddToMapClicked,lang.hitch(this, function(params){
         if (self.mapPanel.mapWasInitialized) {
           $("a[href='#mapPanel']").tab("show");
           self.mapPanel.addToMap(params);
         } else {
-          var urlParams = {resource: params.type+":"+params.url};
+          var urlParams = {resource: params.type+":"+this.normalizeUrl(params.url)};
           ignoreMapPanelActivated = true;
           $("a[href='#mapPanel']").tab("show");
           self.mapPanel.ensureMap(urlParams);
           ignoreMapPanelActivated = false;
         }
-      });
+      }));
       
       topic.subscribe(appTopics.SignedIn,function(params){
         self.updateUI();
@@ -150,6 +151,16 @@ function(declare, lang, topic, appTopics, Templated, template, i18n, util, Searc
       
       if (!FileReader) this.uploadNode.style.display = "none";
     },
+    
+    normalizeUrl: function(url) {
+      var services = ["mapserver", "imageserver", "featureserver", "streamserver", "vectortileserver"];
+      var selSrv = array.filter(services, function(srv) { return url.toLowerCase().indexOf(srv)>=0; });
+      if (selSrv && selSrv.length>0) {
+        var srv = selSrv[0];
+        url = url.substr(0, url.toLowerCase().indexOf(srv) + srv.length);
+      }
+      return url;
+    }
 
   });
 

@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -26,11 +26,13 @@ define([
     'jimu/dijit/Message',
     'dojo/touch'
   ],
-  function(declare, BaseWidget, LocateButton, html, on, keys, lang, jimuUtils) {
+   function(declare, BaseWidget, LocateButton, html, on, keys, lang, jimuUtils) {
     var clazz = declare([BaseWidget], {
 
       name: 'MyLocation',
       baseClass: 'jimu-widget-mylocation',
+
+      moveTopOnActive: false,
 
       startup: function() {
         this.inherited(arguments);
@@ -78,6 +80,15 @@ define([
         }
       },
 
+      //there is no "locate-error" event in 2d-api
+      onLocateOrError: function (evt) {
+        if (evt.error) {
+          this.onLocateError(evt);
+        } else {
+          this.onLocate(evt);
+        }
+      },
+
       onLocate: function(parameters) {
         html.removeClass(this.placehoder, "locating");
         if (this.geoLocate.useTracking) {
@@ -85,14 +96,18 @@ define([
         }
 
         if (parameters.error) {
-          console.error(parameters.error);
-          // new Message({
-          //   message: this.nls.failureFinding
-          // });
+          this.onLocateError(parameters);
         } else {
           html.addClass(this.domNode, "onCenter");
           this.neverLocate = false;
         }
+      },
+
+      onLocateError: function(evt) {
+        console.error(evt.error);
+        html.removeClass(this.placehoder, "locating");
+        html.removeClass(this.domNode, "onCenter");
+        html.removeClass(this.placehoder, "tracking");
       },
 
       _createGeoLocate: function() {
@@ -113,10 +128,16 @@ define([
           json.geolocationOptions = lang.mixin(geoOptions, json.geolocationOptions);
         }
 
+        //hack for issue,#11199
+        if (jimuUtils.has('ie') === 11) {
+          json.geolocationOptions.maximumAge = 300;
+          json.geolocationOptions.enableHighAccuracy = false;
+        }
+
         this.geoLocate = new LocateButton(json);
         this.geoLocate.startup();
-
-        this.geoLocate.own(on(this.geoLocate, "locate", lang.hitch(this, this.onLocate)));
+        //only 3d-api have error event
+        this.geoLocate.own(on(this.geoLocate, "locate", lang.hitch(this, this.onLocateOrError)));
       },
 
       _destroyGeoLocate: function() {

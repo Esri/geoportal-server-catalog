@@ -89,7 +89,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       
       this._initialSettings = {
         label: this.label,
-        allowAggregation: this.allowAggregation
+        allowAggregation: this.allowAggregation,
+        field: this.field,
+        pointField: this.pointField
       };
       if (this.allowSettings === null) {
         if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
@@ -174,8 +176,10 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
           var map = self.map, geometry, outSR;
           if (map && params && params.item && params.item.envelope_geo) {
             outSR = map.spatialReference;
-            var env = params.item.envelope_geo.coordinates;
-            geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
+            var env = lang.isArray(params.item.envelope_geo) && params.item.envelope_geo.length>0? params.item.envelope_geo[0].coordinates: params.item.envelope_geo.coordinates;
+            if (env) {
+              geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
+            }
           }
           if (geometry && webMercatorUtils.canProject(geometry,outSR)) {
             var projected = webMercatorUtils.project(geometry,outSR);
@@ -419,7 +423,8 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     
     appendQueryParams: function(params) {
       if (!this.hasField()) return;
-      var field = this.field, relation = this.getRelation();
+      var field = this.field, pointField = this.pointField;
+      var relation = this.getRelation();
       var map = this.map, qClause = null;
       var env1, env2, query, tip;
       
@@ -439,20 +444,21 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         var qry = {"geo_shape":{}};
         qry.geo_shape[field] = {"shape":shp,"relation":relation};
         
-        // TODO
-//        qry = {"geo_bounding_box": {
-//          "envelope_cen_pt" : {
-//            "top_left" : {
-//              "lat" : env.ymax,
-//              "lon" : env.xmin
-//            },
-//            "bottom_right" : {
-//              "lat" : env.ymin,
-//              "lon" : env.xmax
-//            }
-//          }
-//        }};
-        
+        var queryPoints = field.endsWith("_pt");
+        if (queryPoints) {
+          qry = {"geo_bounding_box": {}};
+          qry.geo_bounding_box[pointField] = {
+            "top_left" : {
+              "lat" : env.ymax,
+              "lon" : env.xmin
+            },
+            "bottom_right" : {
+              "lat" : env.ymin,
+              "lon" : env.xmax
+            }            
+          };         
+        }
+                
         return qry;
       };
 
@@ -514,7 +520,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       }
       
       if (this.allowAggregation && this.hasPointField()) {
-        // TOD0 does this need a filter
+        // TODO does this need a filter
         var key = this.getAggregationKey();
         var precision = this.getGeoHashGridPrecision((qClause !== null));
         if (!params.aggregations) params.aggregations = {};

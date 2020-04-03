@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -33,13 +33,16 @@ define([
   'dijit/TooltipDialog',
   'jimu/utils',
   'jimu/dijit/DrawBox',
-  'jimu/dijit/_FeatureSetChooserCore'
+  'jimu/dijit/_FeatureSetChooserCore',
+  'jimu/dijit/FeatureActionPopupMenu'
 ],
 function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _WidgetBase, _TemplatedMixin,
-  _WidgetsInTemplateMixin, template, dojoPopup, TooltipDialog, jimuUtils, DrawBox, _FeatureSetChooserCore) {
+  _WidgetsInTemplateMixin, template, dojoPopup, TooltipDialog, jimuUtils, DrawBox, _FeatureSetChooserCore,
+  PopupMenu) {
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
     baseClass: 'jimu-multiple-layers-featureset-chooser',
+    declaredClass: 'jimu.dijit.FeatureSetChooserForMultipleLayers',
     templateString: template,
     drawBox: null,
     _instances: null,//[{featureLayer,featureSetChooserCore}]
@@ -48,14 +51,15 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
     _tooltipDialogTimeoutId2: -1,
     _tooltipDialogClientX2: -1,
     _tooltipTimeout: 1000,
-    _currentGeoTypeInfo: null,//{geoType,dom1,dom2}
-    _geoTypeInfos: null,//[{geoType,dom1,dom2}]
+    _currentGeoTypeInfo: null,//{geoType,action,dom}
+    _geoTypeInfos: null,//[{geoType,action,dom}]
 
     //constructor options:
     map: null,
     updateSelection: false,
     fullyWithin: false,
-    geoTypes: null,//['EXTENT', 'POLYGON', 'CIRCLE', 'POLYLINE']
+    geoTypes: null,//['POINT', EXTENT', 'POLYGON', 'CIRCLE', 'POLYLINE', 'FREEHAND_POLYGON']
+    actions: null,
 
     //public methods:
     //enable
@@ -75,7 +79,7 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
     postMixInProperties:function(){
       this.inherited(arguments);
       this.nls = window.jimuNls.featureSetChooser;
-      var validGeoTypes = ['EXTENT', 'POLYGON', 'CIRCLE', 'POLYLINE'];
+      var validGeoTypes = ['POINT', 'EXTENT', 'POLYGON', 'CIRCLE', 'POLYLINE', 'FREEHAND_POLYGON'];
 
       if(this.geoTypes && this.geoTypes.length > 0){
         this.geoTypes = array.filter(this.geoTypes, lang.hitch(this, function(geoType){
@@ -92,6 +96,7 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
       this.inherited(arguments);
 
       this._instances = [];
+      this.popupMenu = PopupMenu.getInstance();
 
       var selectTextDom = query('.select-text', this.domNode)[0];
       selectTextDom.innerHTML = this.nls.select;
@@ -99,16 +104,12 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
       var clearTextDom = query('.clear-text', this.domNode)[0];
       clearTextDom.innerHTML = window.jimuNls.common.clear;
 
-      query('.draw-item-rectangle .draw-text', this.domNode)[0].innerHTML = this.nls.selectByRectangle;
-      query('.draw-item-polygon .draw-text', this.domNode)[0].innerHTML = this.nls.selectByPolygon;
-      query('.draw-item-circle .draw-text', this.domNode)[0].innerHTML = this.nls.selectByCircle;
-      query('.draw-item-polyline .draw-text', this.domNode)[0].innerHTML = this.nls.selectByLine;
-
       this._initTooltipDialogs();
 
       this._initDrawBox();
 
       this._geoTypeInfos = [];
+      this.actions = [];
 
       if(this.geoTypes.length === 0){
         this.geoTypes.push("EXTENT");
@@ -120,35 +121,59 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
         html.addClass(this.domNode, 'multiple-geotypes');
       }
 
-      var validGeoTypes = ['EXTENT', 'POLYGON', 'CIRCLE', 'POLYLINE'];
+      var validGeoTypes = ['POINT', 'EXTENT', 'POLYGON', 'CIRCLE', 'POLYLINE', 'FREEHAND_POLYGON'];
       var geoTypeMap = {
-        EXTENT: [this.rectangleItem, this.drawBox.extentIcon],
-        POLYGON: [this.polygonItem, this.drawBox.polygonIcon],
-        CIRCLE: [this.circleItem, this.drawBox.circleIcon],
-        POLYLINE: [this.polylineItem, this.drawBox.polylineIcon]
+        POINT: ['icon-select-by-point', this.nls.selectByPoint, this.drawBox.pointIcon],
+        EXTENT: ['icon-select-by-rect', this.nls.selectByRectangle, this.drawBox.extentIcon],
+        POLYGON: ['icon-select-by-polygon', this.nls.selectByPolygon, this.drawBox.polygonIcon],
+        CIRCLE: ['icon-select-by-circle', this.nls.selectByCircle, this.drawBox.circleIcon],
+        POLYLINE: ['icon-select-by-line', this.nls.selectByLine, this.drawBox.polylineIcon],
+        FREEHAND_POLYGON: ['icon-select-by-freehand-polygon',
+          this.nls.selectByFreehandPolygon,
+          this.drawBox.freehandPolygonIcon]
       };
+      var extentIndex = -1;
       array.forEach(validGeoTypes, lang.hitch(this, function(geoType) {
-        var doms = geoTypeMap[geoType];
-        var attachpoint = doms[0];
+        var dataItem = geoTypeMap[geoType];
+        //var attachpoint = doms[0];
         if (this.geoTypes.indexOf(geoType) >= 0) {
           var geoTypeInfo = {
             geoType: geoType,
-            dom1: doms[0],
-            dom2: doms[1]
+            action: {
+              iconClass: dataItem[0],
+              label: dataItem[1],
+              data: {}
+            },
+            dom: dataItem[2]
+          };
+          var action = {
+            iconClass: dataItem[0],
+            label: dataItem[1],
+            data: {},
+            onExecute: lang.hitch(this, this._onDrawItemClicked, geoTypeInfo)
           };
           this._geoTypeInfos.push(geoTypeInfo);
-          this.own(on(attachpoint, 'click', lang.hitch(this, this._onDrawItemClicked, geoTypeInfo)));
-        } else {
-          html.addClass(attachpoint, 'hidden');
+          this.actions.push(action);
+          if (geoType === 'EXTENT') {
+            extentIndex = this._geoTypeInfos.length - 1;
+          }
         }
       }));
 
       this.own(on(this.btnSelect, 'click', lang.hitch(this, function() {
-        jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom2);
+        jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom);
         this._hideDrawItems();
       })));
 
-      this._setCurrentGeoInfo(this._geoTypeInfos[0]);
+      // default value is selecting by extent
+      if (extentIndex >= 0) {
+        this._setCurrentGeoInfo(this._geoTypeInfos[extentIndex]);
+        html.addClass(this.geoTypeIcon, 'icon-select-by-rect');
+      } else {
+        this._setCurrentGeoInfo(this._geoTypeInfos[0]);
+        html.addClass(this.geoTypeIcon, this._geoTypeInfos[0].action.iconClass);
+      }
+
       this.deactivate();
     },
 
@@ -205,6 +230,10 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
                 titleDom.innerHTML = this.nls.selectByCircle;
               }else if(geoType === 'POLYLINE'){
                 titleDom.innerHTML = this.nls.selectByLine;
+              }else if(geoType === 'FREEHAND_POLYGON') {
+                titleDom.innerHTML = this.nls.selectByFreehandPolygon;
+              }else if(geoType === 'POINT') {
+                titleDom.innerHTML = this.nls.selectByPoint;
               }
             }
             dojoPopup.open({
@@ -264,11 +293,8 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
 
     _onArrowClicked: function(event){
       event.stopPropagation();
-      if(this._isDrawItemsVisible()){
-        this._hideDrawItems();
-      }else{
-        this._showDrawItems();
-      }
+      var position = html.position(event.target);
+      this._showDrawItems(position);
     },
 
     _setCurrentGeoInfo: function(geoTypeInfo){
@@ -281,29 +307,54 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
 
       if(this.isActive()){
         if(oldGeoType !== this._currentGeoTypeInfo.geoType){
-          jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom2);
+          jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom);
         }
       }else{
-        jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom2);
+        jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom);
       }
     },
 
-    _isDrawItemsVisible: function(){
-      return !html.hasClass(this.drawItems, 'hidden');
-    },
-
-    _showDrawItems: function(){
-      html.removeClass(this.drawItems, 'hidden');
+    _showDrawItems: function(position){
+      this.popupMenu.setActions(this.actions);
+      this.popupMenu.markAsSelected(this._currentGeoTypeInfo.action);
+      this.popupMenu.show(position);
     },
 
     _hideDrawItems: function(){
-      html.addClass(this.drawItems, 'hidden');
+      this.popupMenu.hide();
     },
 
-    _onDrawItemClicked: function(geoTypeInfo, event){
-      event.stopPropagation();
+    _onDrawItemClicked: function(geoTypeInfo){
       this._hideDrawItems();
       this._setCurrentGeoInfo(geoTypeInfo);
+      // 'EXTENT', 'POLYGON', 'CIRCLE', 'POLYLINE'
+      html.removeClass(this.geoTypeIcon, [
+        'icon-select-by-point',
+        'icon-select-by-circle',
+        'icon-select-by-rect',
+        'icon-select-by-polygon',
+        'icon-select-by-line',
+        'icon-select-by-freehand-polygon'
+      ]);
+      switch(geoTypeInfo.geoType) {
+        case 'POLYGON':
+          html.addClass(this.geoTypeIcon, 'icon-select-by-polygon');
+          break;
+        case 'CIRCLE':
+          html.addClass(this.geoTypeIcon, 'icon-select-by-circle');
+          break;
+        case 'POLYLINE':
+          html.addClass(this.geoTypeIcon, 'icon-select-by-line');
+          break;
+        case 'FREEHAND_POLYGON':
+          html.addClass(this.geoTypeIcon, 'icon-select-by-freehand-polygon');
+          break;
+        case 'POINT':
+          html.addClass(this.geoTypeIcon, 'icon-select-by-point');
+          break;
+        default:
+          html.addClass(this.geoTypeIcon, 'icon-select-by-rect');
+      }
     },
 
     _initDrawBox: function(){
@@ -322,14 +373,11 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
         this.map.infoWindow.hide();
         html.addClass(this.currentDrawItem, 'pressed');
         html.addClass(this.btnSelect, 'selected');
-        query('.draw-item.selected', this.drawItems).removeClass('selected');
-        html.addClass(this._currentGeoTypeInfo.dom1, 'selected');
       })));
 
       this.own(on(this.drawBox, 'draw-deactivate', lang.hitch(this, function(){
         html.removeClass(this.currentDrawItem, 'pressed');
         html.removeClass(this.btnSelect, 'selected');
-        query('.draw-item.selected', this.drawItems).removeClass('selected');
       })));
 
       this.own(on(this.btnClear, 'click', lang.hitch(this, function(){
@@ -481,7 +529,7 @@ function(on, sniff, mouse, query, Evented, html, lang, array, all, declare, _Wid
             all(defs).always(lang.hitch(this, function() {
               this.enable();
               if(this._currentGeoTypeInfo){
-                jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom2);
+                jimuUtils.simulateClickEvent(this._currentGeoTypeInfo.dom);
               }
               this.emit('unloading');
             }));

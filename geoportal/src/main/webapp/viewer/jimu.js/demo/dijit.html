@@ -38,6 +38,8 @@
     <script type="text/javascript">
       var url = window.location.href.split('?')[0];
       window.dojoConfig = {
+        locale: 'en',
+        extraLocale: ['ar', 'zh-cn'],
         packages: [{
           name: "jimu",
           location: url.replace("demo/dijit.html", "")
@@ -47,14 +49,14 @@
         }]
       };
     </script>
-    <script src="//js.arcgis.com/3.20/"></script>
+    <script src="//js.arcgis.com/3.22/"></script>
     <script type="text/javascript" src="../../simpleLoader.js"></script>
     <script type="text/javascript">
       jimuConfig = {
         layoutId: 'body'
       };
       require(['dojo/i18n!jimu/nls/main', 'dojo/_base/html', 'dojo/_base/lang', 'dojo/dom', 'dojo/on', 'dijit/layout/TabContainer',
-      'dijit/layout/ContentPane', 'jimu/dijit/LoadingShelter', 'jimu/dijit/LoadingIndicator', 'jimu/utils', 'dojo/domReady!'],
+      'dijit/layout/ContentPane', 'jimu/dijit/LoadingShelter', 'jimu/dijit/LoadingIndicator', 'jimu/utils',  'dojo/domReady!'],
 
       function (jimuNls, html, lang, dom, on, TabContainer, ContentPane, LoadingShelter, LoadingIndicator, jimuUtils) {
         window.jimuNls = jimuNls;
@@ -102,6 +104,231 @@
           });
         };
 
+        //////////////////////////////
+        var layerChooserLiteTab = new ContentPane({
+          title: "layerChooserLite"
+        });
+        tab.addChild(layerChooserLiteTab);
+        layerChooserLiteTab.selectHandle = function() {
+          if(layerChooserLiteTab.loaded){
+            return;
+          }
+          //showLoading(layerChooserLiteTab);
+          require(['jimu/dijit/LayerChooserFromMapLite', 'jimu/LayerInfos/LayerInfos', 'jimu/dijit/LayerChooserFromMap'],
+          function(LayerChooserFromMapLite, LayerInfos, LayerChooserFromMap){
+            // create a webmap
+            var webMapOptions = {
+              mapOptions: {},
+              usePopupManager: true
+            };
+
+            var itemId = "2d1005e2b2c84bcb83275c94fffea354";
+            esri.arcgis.utils.arcgisUrl = "http://www.arcgis.com/sharing/rest/content/items";
+
+            var mapDiv = html.create('div', {style: 'width: 500px; height: 200px'}, layerChooserLiteTab.domNode);
+            esri.arcgis.utils.createMap(itemId, mapDiv, webMapOptions).then(lang.hitch(this, function(response) {
+              var map = response.map;
+              map.itemInfo = response.itemInfo;
+
+              layerChooserLiteTab.loaded = true;
+              hideLoading();
+
+              // create LayerInfos instance
+              LayerInfos.getInstanceSyncForInit(map, map.itemInfo);
+
+              // create a layerChooserFromMapLite instance 
+              var layerChooser1 = createLayerChooserLite({
+                                              onlySelectLeafLayer:true,
+                                              displayLayerTypeIcon: false
+                                            }, map);
+
+              on(layerChooser1, 'selection-change', function(layerNode, selectd) {
+                console.log(selectd);
+              });
+              
+              on(layerChooser1, 'tree-click', function(item, node, evt) {
+                console.log(item);
+                console.log(evt);
+              });
+
+              // create a layerChooserFromMapLite with visibility controller
+              //var layerVisibilityStateController =  new LayerChooserFromMapLite.LayerVisibilityStateController();
+              var customFilter = LayerChooserFromMap.createFeaturelayerFilter(null, true, true, false);
+              //var customFilter = LayerChooserFromMap.createImageServiceLayerFilter(null, true, true, false);
+              var layerChooser2 = createLayerChooserLite({
+                                    customFilter: customFilter,
+                                    layerStateController: LayerChooserFromMapLite.layerVisibilityStateController
+                                  }, map);
+              
+              // create a layerChooserFromMapLite with a new map
+              var map1Div = html.create('div', {style: 'width: 500px; height: 200px'}, layerChooserLiteTab.domNode);
+              esri.arcgis.utils.createMap(itemId, map1Div, webMapOptions).then(lang.hitch(this, function(response) {
+                var map1 = response.map;
+                map1.itemInfo = response.itemInfo;
+
+                // create a layerChooserFromMapLite with visibility controller
+                var layerVisibilityStateController =  new LayerChooserFromMapLite.LayerVisibilityStateController();
+                var layerChooser3 = createLayerChooserLite({
+                                      map: map1,
+                                      layerStateController: LayerChooserFromMapLite.layerVisibilityStateController
+                                    }, map1);
+              }));
+
+
+            }));
+
+            function createLayerChooserLite(options, map) {
+
+              var testUnitDiv = html.create('div', {
+                                }, layerChooserLiteTab.domNode);
+
+              var layerChooser = new LayerChooserFromMapLite(options);
+              layerChooser.placeAt(testUnitDiv);
+
+              var getStateDiv = html.create('div', {
+                                  style: 'width: 200px; height: 20px; border: 1px solid;',
+                                  innerHTML: 'getState'
+                                }, testUnitDiv);
+
+              var layerState;
+              on(getStateDiv, 'click', function() {
+                  layerState = layerChooser.getState();
+                  console.log(layerState);
+              });
+
+              var restoreStateDiv = html.create('div', {
+                                      style: 'width: 200px; height: 20px; border: 1px solid;',
+                                      innerHTML: 'restoreState'
+                                    }, testUnitDiv);
+
+              on(restoreStateDiv, 'click', function() {
+                 layerChooser.restoreState(layerState);
+              });
+
+
+              var createLayerChooserDiv = html.create('div', {
+                                      style: 'width: 200px; height: 20px; border: 1px solid;',
+                                      innerHTML: 'create a new layerCooser',
+                                      title: 'create a new layerCooser with the current layerState'
+                                    }, testUnitDiv);
+
+              on(createLayerChooserDiv, 'click', function() {
+                options.layerState = layerChooser.getState();
+                var layerChooserx = new LayerChooserFromMapLite(options);
+                layerChooserx.placeAt(testUnitDiv);
+                layerChooserx.startup();
+              });
+
+              var destroyDiv = html.create('div', {
+                                      style: 'width: 200px; height: 20px; border: 1px solid;',
+                                      innerHTML: 'destroy'
+                                    }, testUnitDiv);
+
+              on(destroyDiv, 'click', function() {
+                 layerChooser.destroy();
+              });
+
+              var getSelectedLayerNodesDiv = html.create('div', {
+                                      style: 'width: 200px; height: 20px; border: 1px solid;',
+                                      innerHTML: 'getSelectedLayerNodes'
+                                    }, testUnitDiv);
+
+              on(getSelectedLayerNodesDiv, 'click', function() {
+                  var selectedNode = layerChooser.getSelectedLayerNodes();
+                  console.log(selectedNode);
+                  var selectedItems = layerChooser.getSelectedItems();
+                  console.log(selectedItems);
+              });
+
+              var getRootLayerAssociateDomNodes = html.create('div', {
+                                      style: 'width: 200px; height: 20px; border: 1px solid;',
+                                      innerHTML: 'getRootLayerAssociateDomNodes'
+                                    }, testUnitDiv);
+
+              on(getRootLayerAssociateDomNodes, 'click', function() {
+                var webmaplayerIds = map.layerIds.concat(map.graphicsLayerIds);
+                for(var i = 0; i< webmaplayerIds.length; i++) {
+                  var domNodes = layerChooser.getLayerAssociateDomNodesById(webmaplayerIds[i]);
+                };
+
+              });
+
+              return layerChooser;
+            }
+
+          });
+        };
+
+        //////////////////////////////
+        var localeDateTab = new ContentPane({
+          title: "localDate"
+        });
+        tab.addChild(localeDateTab);
+        localeDateTab.selectHandle = function() {
+          if(localeDateTab.loaded){
+            return;
+          }
+          showLoading(simplesTab);
+
+          require(['dojo/date/locale'],
+          function(dateLocale){
+            simplesTab.loaded = true;
+            hideLoading();
+            //window.dojoConfig.locale = "ar";
+
+            var formatedDate;
+            var dateObj = new Date();
+            var options = {
+              fullYear: true,
+              selector: 'date',
+              //formatLength: 'medium',
+              //locale: 'ar'
+            };
+            options.locale = 'en';
+            options.formatLength = 'short';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'en';   formatLength: short;    result:  ------ " + formatedDate)
+            document.writeln("<br>");
+            options.formatLength = 'medium';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'en';   formatLength: medium;   result: ------ " + formatedDate)
+            document.writeln("<br>");
+            options.formatLength = 'long';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'en';   formatLength: long;     result:   ------ " + formatedDate)
+            document.writeln("<hr>");
+
+
+            options.locale = 'zh-cn';
+            options.formatLength = 'short';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'zh-cn';   formatLength: short;    result:  ------ " + formatedDate)
+            document.writeln("<br>");
+            options.formatLength = 'medium';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'zh-cn';   formatLength: medium;   result:  ------ " + formatedDate)
+            document.writeln("<br>");
+            options.formatLength = 'long';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'zh-cn';   formatLength: long;     result:  ------ " + formatedDate)
+            document.writeln("<hr>");
+
+
+            options.locale = 'ar';
+            options.formatLength = 'short';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'ar';   formatLength: short;    result:  ------ " + formatedDate)
+            document.writeln("<br>");
+            options.formatLength = 'medium';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'ar';   formatLength: medium;   result: ------ " + formatedDate)
+            document.writeln("<br>");
+            options.formatLength = 'long';
+            formatedDate = dateLocale.format(dateObj, options);
+            document.writeln("locale: 'ar';   formatLength: long;     result:   ------ " + formatedDate)
+            document.writeln("<hr>");
+          });
+        };
         ///////////////////////////////
         var cropImageTab = new ContentPane({
           title: "CropImage"
@@ -920,6 +1147,8 @@
             radarChart.placeAt(radarChartDiv);
           });
         };
+
+
         ////////////////////////////
         ///
         var cssComponents = new ContentPane({
@@ -1064,6 +1293,7 @@
           jimuUtils.loadStyleLink(themeName + '-common', require.toUrl('jimu') + '../themes/' + themeName + '/common.css');
           jimuUtils.loadStyleLink(themeName + '-common', require.toUrl('jimu') + '../themes/' + themeName + '/styles/' + styleName + '/style.css');
         }
+
       });
     </script>
   </head>

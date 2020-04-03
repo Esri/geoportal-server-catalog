@@ -24,9 +24,12 @@ define(["dojo/_base/declare",
         "app/search/DateFilter",
         "app/search/TemporalFilter",
         "app/search/TermsAggregation",
+        "app/search/BasicNumericFilter",
         "app/search/NumericFilter",
         "app/search/AppliedFilters",
-        "app/search/ResultsPane"], 
+        "app/search/ResultsPane",
+        "app/search/OpenSearchLinksPane"
+      ], 
 function(declare, lang, Templated, template, i18n) {
 
   var oThisClass = declare([Templated], {

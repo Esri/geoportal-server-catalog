@@ -30,7 +30,6 @@
             "#d2f5a6",
             "#76f2f2"
         ],
-        // "backgroundColor": "#000000",
         "textStyle": {},
         "title": {
             "textStyle": {
@@ -42,9 +41,7 @@
         },
         "line": {
             "itemStyle": {
-                "normal": {
-                    "borderWidth": "1"
-                }
+                "normal": {}
             },
             "lineStyle": {
                 "normal": {
@@ -57,9 +54,7 @@
         },
         "radar": {
             "itemStyle": {
-                "normal": {
-                    "borderWidth": "1"
-                }
+                "normal": {}
             },
             "lineStyle": {
                 "normal": {
@@ -69,42 +64,6 @@
             "symbolSize": "5",
             "symbol": "circle",
             "smooth": false
-        },
-        "bar": {
-            "itemStyle": {
-                "normal": {
-                    "barBorderWidth": 0,
-                    "barBorderColor": "#ccc"
-                },
-                "emphasis": {
-                    "barBorderWidth": 0,
-                    "barBorderColor": "#ccc"
-                }
-            }
-        },
-        "pie": {
-            "itemStyle": {
-                "normal": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                },
-                "emphasis": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                }
-            }
-        },
-        "funnel": {
-            "itemStyle": {
-                "normal": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                },
-                "emphasis": {
-                    "borderWidth": 0,
-                    "borderColor": "#ccc"
-                }
-            }
         },
         "gauge": {
             "axisLine": {

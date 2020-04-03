@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -34,6 +34,7 @@ define([
 ],
 function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, lang, html,
   array, on, query, Evented, Graphic, GraphicsLayer, Draw, jsonUtils, Polygon) {
+  var instancesObj = {};
 
   return declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Evented], {
     templateString:template,
@@ -141,6 +142,8 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       var display = this.showClear === true ? 'block' : 'none';
       html.setStyle(this.btnClear, 'display', display);
       this.enable();
+
+      instancesObj[this.id] = this;
     },
 
     enable: function(){
@@ -201,6 +204,7 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       this.drawToolBar = null;
       this.map = null;
       this.drawLayer = null;
+      delete instancesObj[this.id];
       this.inherited(arguments);
     },
 
@@ -421,6 +425,8 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
     },
 
     _activate: function(itemIcon){
+      this._deactiveAllDrawBoxes();
+
       var items = query('.draw-item', this.domNode);
       items.removeClass('jimu-state-active');
       html.addClass(itemIcon, 'jimu-state-active');
@@ -481,7 +487,16 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, templat
       }
 
       this.onDrawEnd(g, geotype, commontype, this._shiftKey, this._ctrlKey, this._metaKey);
-    }
+    },
 
+    _deactiveAllDrawBoxes: function() {
+      var widget;
+      array.forEach(Object.keys(instancesObj), lang.hitch(this, function(key) {
+        widget = instancesObj[key];
+        if (widget && widget.drawToolBar && key !== this.id) {
+          widget.deactivate();
+        }
+      }));
+    }
   });
 });

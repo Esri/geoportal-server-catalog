@@ -87,12 +87,23 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
       if (v === "private") this.privateNode.checked = true;
       else this.publicNode.checked = true;
       
+      var orgId = null;
+      if (AppContext.appUser && AppContext.appUser.arcgisPortalUser && AppContext.appUser.arcgisPortalUser.orgId) {
+        orgId = AppContext.appUser.arcgisPortalUser.orgId;
+      }
+      
       var itemGroups = this.item["sys_access_groups_s"];
       var groups = AppContext.appUser.getGroups();
       if (lang.isArray(groups)) {
         groups = groups.slice(0); // shallow clone
         groups.sort(function(groupA,groupB){ 
           try {
+            if (groupA.id===orgId) {
+              return -1;
+            }
+            if (groupB.id===orgId) {
+              return 1;
+            }
             var a = groupA.name.toLowerCase();
             var b = groupB.name.toLowerCase();
             if (a === b) return 0;

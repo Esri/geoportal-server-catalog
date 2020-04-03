@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -259,9 +259,13 @@ define([
           'data-widget-name': item.name
         }, pageNode);
 
-        domConstruct.create('img', {
+        var imgNode = domConstruct.create('img', {
           'src': item.icon
         }, node);
+
+        if(window.isRTL && item.mirrorIconForRTL){
+          html.addClass(imgNode, 'jimu-flipx');
+        }
 
         domConstruct.create('div', {
           'class': 'node-label',

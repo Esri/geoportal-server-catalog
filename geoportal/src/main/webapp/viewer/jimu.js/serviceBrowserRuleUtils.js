@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -96,7 +96,7 @@ function(lang, array, Deferred, jimuUtils, ServiceBrowserRule) {
     return allRule;
   };
 
-  mo.getFeaturelayerServiceBrowserRule = function(_types, isSupportQuery){
+  mo.getFeaturelayerServiceBrowserRule = function(_types, isSupportQuery, isSupportTable){
     //init types
     var types = lang.clone(_types);
     var allTypes = ['point', 'polyline', 'polygon'];
@@ -111,10 +111,10 @@ function(lang, array, Deferred, jimuUtils, ServiceBrowserRule) {
       types = allTypes;
     }
 
-    return mo._getFeaturelayerServiceBrowserRule(types, isSupportQuery);
+    return mo._getFeaturelayerServiceBrowserRule(types, isSupportQuery, isSupportTable);
   };
 
-  mo._getFeaturelayerServiceBrowserRule = function(types, shouldSupportQuery){
+  mo._getFeaturelayerServiceBrowserRule = function(types, shouldSupportQuery, shouldSupportTable){
     var rule = new ServiceBrowserRule({
       types: types,
       leafTypes: ['Feature Layer', 'Table'],
@@ -127,8 +127,10 @@ function(lang, array, Deferred, jimuUtils, ServiceBrowserRule) {
       getItem: function(url){
         var  def = new Deferred();
         if(this.isUrlEndWithServiceType(url, this.serviceTypes)){
+          //http://sampleserver6.arcgisonline.com/arcgis/rest/services/SampleWorldCities/MapServer
           def = this.defaultGetItem(url);
         }else{
+          //http://sampleserver6.arcgisonline.com/arcgis/rest/services/SampleWorldCities/MapServer/0
           this.getRestInfo(url).then(lang.hitch(this, function(layerDefinition){
             var item = this._getItemByLayerDefinition(url, layerDefinition);
             def.resolve(item);
@@ -208,6 +210,15 @@ function(lang, array, Deferred, jimuUtils, ServiceBrowserRule) {
               urls.push(url);
             }
           }));
+          if (shouldSupportTable) {
+            array.forEach(serviceMeta.tables, lang.hitch(this, function(layerInfo) {
+              var hasParent = layerInfo.parentLayerId >= 0;
+              if (!hasParent) {
+                var url = serviceUrl + '/' + layerInfo.id;
+                urls.push(url);
+              }
+            }));
+          }
           def.resolve(urls);
         }), lang.hitch(this, function(err) {
           def.reject(err);
@@ -417,7 +428,7 @@ function(lang, array, Deferred, jimuUtils, ServiceBrowserRule) {
 
   mo.getQueryableServiceBrowserRule = function(){
     var featureServiceRule = mo.getFeaturelayerServiceBrowserRule(['point', 'polyline', 'polygon'],
-                                                                  true);
+                                                                  true, true);
     var imageServiceRule = mo.getImageServiceBrowserRule(true);
     var rule = mo.combineRules([featureServiceRule, imageServiceRule]);
     return rule;

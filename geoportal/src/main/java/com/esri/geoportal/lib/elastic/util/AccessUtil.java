@@ -57,13 +57,13 @@ public class AccessUtil {
       ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
       TransportClient client = ec.getTransportClient();
       GetResponse result = client.prepareGet(
-          ec.getItemIndexName(),ec.getItemIndexType(),id).get();
+          ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
       if (result.isExists()) {
         //System.err.println("result.isExists: "+id+" - resultId = "+result.getId());
         return id;
       } else {
         SearchRequestBuilder builder = client.prepareSearch(ec.getItemIndexName());
-        builder.setTypes(ec.getItemIndexType());
+        builder.setTypes(ec.getActualItemIndexType());
         builder.setSize(1);
         builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_FILEID,id));
         SearchHits hits = builder.get().getHits();
@@ -134,7 +134,7 @@ public class AccessUtil {
       String v;
       ElasticContext ec = gc.getElasticContext();
       GetResponse response = ec.getTransportClient().prepareGet(
-          ec.getItemIndexName(),ec.getItemIndexType(),id).get();
+          ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
       
       String username = user.getUsername();
       if (username != null && username.length() > 0) {
@@ -214,7 +214,7 @@ public class AccessUtil {
     if (!user.isPublisher()) throw new AccessDeniedException(accessDeniedMessage);
     
     GetRequestBuilder request = ec.getTransportClient().prepareGet(
-        ec.getItemIndexName(),ec.getItemIndexType(),id);
+        ec.getItemIndexName(),ec.getActualItemIndexType(),id);
     //request.setFetchSource(false);
     /* ES 2to5 */
     //request.setFields(ownerField);

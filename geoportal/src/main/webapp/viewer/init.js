@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright ? 2014 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -82,6 +82,10 @@ var ie = (function() {
 
     setLocale();
 
+    if(window.isRTL){
+      dojoConfig.has['dojo-bidi'] = true;
+    }
+
     resources = resources.concat([
       window.apiUrl + 'dojo/resources/dojo.css',
       window.apiUrl + 'dijit/themes/claro/claro.css',
@@ -89,6 +93,11 @@ var ie = (function() {
       window.apiUrl + 'dojox/layout/resources/ResizeHandle.css',
       window.path + 'jimu.js/css/jimu-theme.css',
       window.path + 'libs/caja-html-sanitizer-minified.js',
+      window.path + 'libs/moment/twix.js',
+      window.path + 'libs/Sortable.js',
+
+      window.path + 'libs/cropperjs/cropperjs.js',
+      window.path + 'libs/cropperjs/cropper.css',
       //because we have jimu/dijit/GridLayout dijit, so we import this css here
       window.path + 'libs/goldenlayout/goldenlayout-base.css',
       window.path + 'libs/goldenlayout/goldenlayout-light-theme.css'

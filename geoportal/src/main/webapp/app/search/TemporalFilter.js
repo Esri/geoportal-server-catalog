@@ -25,9 +25,10 @@ define(["dojo/_base/declare",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
-        "app/search/TemporalFilterSettings"], 
+        "app/search/TemporalFilterSettings",
+        "app/search/TemporalFilterCalendar"], 
 function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
-    template, i18n, SearchComponent, DropPane, QClause, TemporalFilterSettings) {
+    template, i18n, SearchComponent, DropPane, QClause, TemporalFilterSettings, TemporalFilterCalendar) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -153,7 +154,7 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
       this.search();
     },
     
-    plot: function() {
+    plot: function(customRange) {
       var self = this, svgNode = this.svgNode, hasTo = this.hasToField();
       domConstruct.empty(svgNode);
       this._brushExtent = null;
@@ -280,7 +281,7 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
         .endAngle(function(d, i) { return i ? -Math.PI : Math.PI; });
         var brush = d3.svg.brush()
           .x(x2)
-          .extent(x2.domain())
+          .extent(customRange? customRange: x2.domain())
           .on("brush",function(){brushmove();});
         var brushg = context.append("g")
           .attr("class", "brush")
@@ -480,6 +481,23 @@ function(declare, lang, array, djDate, locale, stamp, domConstruct, domGeometry,
         this.setNodeText(this.brushExtentNode,"");
         setTimeout(function(){self._searchDisabled = false;},100);
       }
+    },
+    
+    onCalendarClick: function(event) {
+      var d = new TemporalFilterCalendar({
+        targetWidget: this,
+        startDate: this._brushExtent[0],
+        endDate: this._brushExtent[1]
+      });
+      d.showDialog();
+    },
+    
+    updateRange: function(startDate, endDate) {
+      this._fromDate = startDate;
+      this._toDate = endDate;
+      this.intervalSelect.value = "day";
+      this.interval = $(this.intervalSelect).val();
+      this.plot([startDate, endDate]);
     }
     
   });

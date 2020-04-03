@@ -5,6 +5,12 @@ define({
   "actions": "Katman alanlarını yapılandır",
   "field": "Alan",
   "alias": "Takma Ad",
+  "url": "URL",
+  "sortField": "Alanları ayır",
+  "sortOrderTooltips": {
+    "toDescending": "Azalan düzene çevir",
+    "toAscending": "Artan düzene çevir"
+  },
   "visible": "Görünür",
   "linkField": "Alan bağlantısı yap",
   "noLayers": "Detay katmanı mevcut değil",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "CSV'ye Aktarmaya İzin Ver",
   "expand": "İlk olarak gereci genişlet",
   "filterByExtent": "Harita yayılımına göre filtrele özelliğini varsayılan olarak etkinleştir",
+  "allowTextSelection": "Metin seçimine izin ver",
+  "highlightColor": "Rengi vurgula",
   "restore": "Varsayılan değere geri yükle",
   "ok": "Tamam",
   "cancel": "İptal",

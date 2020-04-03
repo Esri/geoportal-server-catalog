@@ -1,5 +1,5 @@
 ///////////////////////////////////////////////////////////////////////////
-// Copyright © 2014 - 2016 Esri. All Rights Reserved.
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -104,10 +104,24 @@ define([
   function setExtent(queryObject, map){
     //?extent=-13054125.21,4029134.71,-13032684.63,4041785.04,102100 or ?extent=-13054125.21;4029134.71;-13032684.63;4041785.04;102100
     //?extent=-117.2672,33.9927,-117.0746,34.1064 or ?extent=-117.2672;33.9927;-117.0746;34.1064
-    var extArray = queryObject.extent.split(";");
-    if (extArray.length === 1) {
-      extArray = queryObject.extent.split(",");
+
+    //?extent=1008562.1255,1847133.031,1060087.7901,1877230.7859,wkt=PROJCS["NAD_1983_HARN_StatePlane_Illinois_East_FIPS_1201",GEOGCS["GCS_North_American_1983_HARN",DATUM["D_North_American_1983_HARN",SPHEROID["GRS_1980",6378137.0,298.257222101]]......
+    var extArray = queryObject.extent.split("wkt=");
+    var wkt = null;
+    if (extArray.length === 2) {
+      //with "wkt="
+      wkt = extArray[1];
+      extArray = extArray[0];
+
+      extArray = extArray.split(",");
+    } else {
+      //without "wkt="
+      extArray = queryObject.extent.split(";");
+      if (extArray.length === 1) {
+        extArray = queryObject.extent.split(",");
+      }
     }
+
     if (extArray.length === 4 || extArray.length === 5) {
       var minx = parseFloat(extArray[0]);
       var miny = parseFloat(extArray[1]);
@@ -124,7 +138,13 @@ define([
         if (extArray.length === 5 && !isNaN(extArray[4])) {
           wkid = parseInt(extArray[4], 10);
         }
-        var ext = new Extent(minx, miny, maxx, maxy, new SpatialReference({wkid:wkid}));
+
+        var ext = null;
+        if (wkt) {
+          ext = new Extent(minx, miny, maxx, maxy, new SpatialReference({ wkt: wkt }));
+        } else {
+          ext = new Extent(minx, miny, maxx, maxy, new SpatialReference({ wkid: wkid }));
+        }
 
         if (!sameSpatialReference(map.spatialReference, ext.spatialReference)) {
 

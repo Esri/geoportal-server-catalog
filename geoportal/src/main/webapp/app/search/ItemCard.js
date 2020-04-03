@@ -96,8 +96,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id; 
+      item.title = item.title? item.title: "???";
       var links = this._uniqueLinks(item);
-      util.setNodeText(this.titleNode,item.title);
+      this._renderTitleLink(item._id, item);
       this._renderOwnerAndDate(item);
       util.setNodeText(this.descriptionNode,item.description);
       this._renderThumbnail(item);
@@ -107,6 +108,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       this._renderAddToMap(item,links);
       this._renderServiceStatus(item);
       this._renderUrlLinks(item);
+      this._renderId(item);
     },
     
     _canEditMetadata: function(item,isOwner,isAdmin,isPublisher) {
@@ -215,6 +217,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       var previewNode = domConstruct.create("a",{
         href: "javascript:void(0)",
         title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.preview, title: item.title}),
+        "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.preview, title: item.title}),
         innerHTML: i18n.item.actions.preview
       },actionsNode);
       
@@ -240,6 +243,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             href: "javascript:void(0)",
             innerHTML: i18n.item.actions.addToMap,
             title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.addToMap, title: item.title}),
+            "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.addToMap, title: item.title}),
             onclick: function() {
               topic.publish(appTopics.AddToMapClicked,serviceType);
             }
@@ -264,18 +268,21 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           href: uri+"/html",
           target: "_blank",
           title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.html, title: item.title}),
+          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.html, title: item.title}),
           innerHTML: i18n.item.actions.html
         },actionsNode);
         var xmlNode = domConstruct.create("a",{
           href: uri+"/xml",
           target: "_blank",
           title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
+          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
           innerHTML: i18n.item.actions.xml
         },actionsNode);
         var jsonNode = domConstruct.create("a",{
           href: uri+"?pretty=true",
           target: "_blank",
           title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
+          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
           innerHTML: i18n.item.actions.json
         },actionsNode);
         if (v === "json") {
@@ -332,6 +339,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         "aria-haspopup": true,
         "aria-expanded": true,
         title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.links, title: item.title}),
+        "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.links, title: item.title}),
         innerHTML: i18n.item.actions.links
       },dd);
       domConstruct.create("span",{
@@ -347,6 +355,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           href: u,
           target: "_blank",
           title: string.substitute(i18n.item.actions.titleFormat, {action: u, title: item.title}),
+          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: u, title: item.title}),
           innerHTML: u
         },ddli);
       });
@@ -701,8 +710,40 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
           innerHTML: caption
         }, actionsNode);
       }
-    }
+    },
     
+    _renderId: function (item) {
+    /* This node will allow jquery to
+    grab identifiers, without having to resort to parsing URLS
+     */
+        var idNode = this.idNode;
+        var esId = item._id;
+        var fid = item.fileid;
+
+        dojo.attr(idNode,{ 'esId': esId } );
+
+        if (fid) {
+            dojo.attr(idNode,{ 'fileid': fid } );
+        }
+
+    },
+    
+    _renderTitleLink: function(itemId,item) {
+      var v = item.sys_metadatatype_s;
+      if (typeof v === "string" && v === "json") {
+        util.setNodeText(this.titleNode,item.title);
+      } else {
+        var titleNode = this.titleNode;
+        var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
+        var htmlNode = domConstruct.create("a",{
+          href: uri+"/html",
+          target: "_blank",
+          title: item.title,
+          "aria-label": item.title,
+          innerHTML: item.title
+        },titleNode);
+      }
+    }    
   });
   
   return oThisClass;

@@ -1,0 +1,280 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<csw:Capabilities version="2.0.2"
+                  xmlns:csw="http://www.opengis.net/cat/csw/2.0.2"
+                  xmlns:ogc="http://www.opengis.net/ogc"
+                  xmlns:gml="http://www.opengis.net/gml"
+                  xmlns:ows="http://www.opengis.net/ows"
+                  xmlns:xlink="http://www.w3.org/1999/xlink"
+                  xmlns:inspire_ds="http://inspire.ec.europa.eu/schemas/inspire_ds/1.0" 
+                  xmlns:inspire_com="http://inspire.ec.europa.eu/schemas/common/1.0" 
+                  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                  xsi:schemaLocation="http://www.opengis.net/cat/csw/2.0.2 http://schemas.opengis.net/csw/2.0.2/CSW-discovery.xsd http://inspire.ec.europa.eu/schemas/inspire_ds/1.0 http://inspire.ec.europa.eu/schemas/inspire_ds/1.0/inspire_ds.xsd"
+>
+  <ows:ServiceIdentification>
+    <ows:Title>CSW 2.0.2</ows:Title>
+    <ows:Abstract>A catalogue service that conforms to the HTTP protocol binding of the OpenGIS Catalogue Service specification (version 2.0.2)</ows:Abstract>
+    <ows:Keywords>
+      <ows:Keyword>CSW</ows:Keyword>
+    </ows:Keywords>
+    <ows:ServiceType>CSW</ows:ServiceType>
+    <ows:ServiceTypeVersion>2.0.2</ows:ServiceTypeVersion>
+  </ows:ServiceIdentification>
+  <ows:ServiceProvider>
+    <ows:ProviderName></ows:ProviderName>
+    <ows:ProviderSite xlink:type="simple" xlink:href="" />
+    <ows:ServiceContact>
+      <ows:IndividualName />
+      <ows:PositionName />
+      <ows:ContactInfo>
+        <ows:Phone>
+          <ows:Voice></ows:Voice>
+          <ows:Facsimile></ows:Facsimile>
+        </ows:Phone>
+        <ows:Address>
+          <ows:DeliveryPoint></ows:DeliveryPoint>
+          <ows:City></ows:City>
+          <ows:AdministrativeArea></ows:AdministrativeArea>
+          <ows:PostalCode></ows:PostalCode>
+          <ows:Country></ows:Country>
+          <ows:ElectronicMailAddress></ows:ElectronicMailAddress>
+        </ows:Address>
+        <ows:OnlineResource xlink:href="" />
+      </ows:ContactInfo>
+    </ows:ServiceContact>
+  </ows:ServiceProvider>
+
+  <ows:OperationsMetadata>
+    <ows:Operation name="GetCapabilities">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:href="{csw.url}" />
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="AcceptVersions">
+        <ows:Value>2.0.2</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="AcceptFormats">
+        <ows:Value>application/xml</ows:Value>
+        <ows:Value>text/xml</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="Sections">
+        <ows:Value>All</ows:Value>
+        <ows:Value>Filter_Capabilities</ows:Value>
+      </ows:Parameter>
+    </ows:Operation>
+
+    <ows:Operation name="GetRecords">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:href="{csw.url}" />
+          <ows:Post xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="typeName">
+        <ows:Value>csw:Record</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="outputFormat">
+        <ows:Value>application/xml</ows:Value>
+        <ows:Value>application/atom+xml</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="outputSchema">
+        <ows:Value>http://www.opengis.net/cat/csw/2.0.2</ows:Value>
+        <ows:Value>http://www.isotc211.org/2005/gmd</ows:Value>
+        <ows:Value>http://www.w3.org/2005/Atom</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="ElementSetName">
+        <ows:Value>brief</ows:Value>
+        <ows:Value>summary</ows:Value>
+        <ows:Value>full</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="CONSTRAINTLANGUAGE">
+        <ows:Value>FILTER</ows:Value>
+        <ows:Value>FILTER</ows:Value>
+      </ows:Parameter>
+      <ows:Constraint name="SupportedGMLVersions">
+        <ows:Value> http://www.opengis.net/gml/3.2</ows:Value>
+        <ows:Value> http://www.opengis.net/gml</ows:Value>
+      </ows:Constraint>
+      <ows:Constraint name="OpenSearchDescriptionDocument">
+        <ows:Value>{opensearch.description.url}</ows:Value>
+      </ows:Constraint>
+      <ows:Constraint name="SupportedISOQueryables">
+        <ows:Value>Language</ows:Value>
+      </ows:Constraint>
+      <ows:Constraint name="AdditionalQueryables">
+        <ows:Value>SpecificationDate</ows:Value>
+        <ows:Value>AccessConstraints</ows:Value>
+        <ows:Value>ResponsiblePartyRole</ows:Value>
+        <ows:Value>Degree</ows:Value>
+        <ows:Value>Lineage</ows:Value>
+        <ows:Value>OnlineResourceMimeType</ows:Value>
+        <ows:Value>ConditionApplyingToAccessAndUse</ows:Value>
+        <ows:Value>Date</ows:Value>
+        <ows:Value>MetadataPointOfContact</ows:Value>
+        <ows:Value>OnlineResourceType</ows:Value>
+        <ows:Value>Relation</ows:Value>
+        <ows:Value>SpecificationDateType</ows:Value>
+        <ows:Value>Classification</ows:Value>
+        <ows:Value>OtherConstraints</ows:Value>
+        <ows:Value>SpecificationTitle</ows:Value>
+      </ows:Constraint>
+    </ows:Operation>
+
+    <ows:Operation name="GetRecordById">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:href="{csw.url}" />
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="outputFormat">
+        <ows:Value>application/xml</ows:Value>
+        <ows:Value>application/atom+xml</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="outputSchema">
+        <ows:Value>http://www.opengis.net/cat/csw/2.0.2</ows:Value>
+        <ows:Value>http://www.isotc211.org/2005/gmd</ows:Value>
+        <ows:Value>http://www.w3.org/2005/Atom</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="ElementSetName">
+        <ows:Value>brief</ows:Value>
+        <ows:Value>summary</ows:Value>
+        <ows:Value>full</ows:Value>
+      </ows:Parameter>
+    </ows:Operation>
+
+    <ows:Constraint name="GetCapabilities-KVP">
+      <ows:Value>true</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecords-KVP">
+      <ows:Value>true</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecordById-KVP">
+      <ows:Value>true</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="OpenSearch">
+      <ows:Value>true</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Filter-KVP">
+      <ows:Value>true</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="CSW-Response">
+      <ows:Value>true</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="ATOM-response">
+      <ows:Value>true</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="DefaultSortingAlgorithm">
+      <ows:Value>relevance</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="CoreQueryables">
+      <ows:Value>AnyText</ows:Value>
+      <ows:Value>BoundingBox</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="CoreSortables">
+      <ows:Value>Title</ows:Value>
+      <ows:Value>Modified</ows:Value>
+    </ows:Constraint>
+
+    <ows:Constraint name="GetCapabilities-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecordById-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecords-Basic-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecords-Distributed-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecords-Distributed-KVP">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecords-Async-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetRecords-Async-KVP">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetDomain-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="GetDomain-KVP">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Transaction">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Harvest-Basic-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Harvest-Basic-KVP">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Harvest-Async-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Harvest-Async-KVP">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Harvest-Periodic-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Harvest-Periodic-KVP">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Filter-CQL">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Filter-FES">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Filter-FES-KVP-Advanced">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="Filter-FES-XML">
+      <ows:Value>false</ows:Value>
+    </ows:Constraint>
+    <ows:Constraint name="FedeartedCatalogues">
+      <ows:Value />
+    </ows:Constraint>
+    <ows:Constraint name="WSDL">
+      <ows:Value />
+    </ows:Constraint>
+    <inspire_ds:ExtendedCapabilities>
+      <inspire_com:MetadataUrl>
+        <inspire_com:URL>{csw.url}?SERVICE=CSW&amp;VERSION=2.0.2&amp;REQUEST=GetRecordById&amp;outputSchema=http://www.isotc211.org/2005/gmd&amp;outputFormat=application/xml&amp;resultType=results&amp;ElementSetName=full</inspire_com:URL>
+        <inspire_com:MediaType>application/xml</inspire_com:MediaType>
+      </inspire_com:MetadataUrl>
+      <inspire_com:SupportedLanguages>
+        <inspire_common:DefaultLanguage xmlns:inspire_common="http://inspire.ec.europa.eu/schemas/common/1.0">
+          <inspire_common:Language>eng</inspire_common:Language>
+        </inspire_common:DefaultLanguage>
+      </inspire_com:SupportedLanguages>
+      <inspire_com:ResponseLanguage>
+        <inspire_com:Language>eng</inspire_com:Language>
+      </inspire_com:ResponseLanguage>
+    </inspire_ds:ExtendedCapabilities>
+
+  </ows:OperationsMetadata>
+
+  <ogc:Filter_Capabilities>
+    <ogc:Spatial_Capabilities>
+      <ogc:GeometryOperands>
+        <ogc:GeometryOperand>gml:Envelope</ogc:GeometryOperand>
+      </ogc:GeometryOperands>
+      <ogc:SpatialOperators>
+        <ogc:SpatialOperator name="BBOX"/>
+      </ogc:SpatialOperators>
+    </ogc:Spatial_Capabilities>
+    <ogc:Scalar_Capabilities>
+      <ogc:LogicalOperators/>
+      <ogc:ComparisonOperators>
+        <ogc:ComparisonOperator>EqualTo</ogc:ComparisonOperator>
+      </ogc:ComparisonOperators>
+    </ogc:Scalar_Capabilities>
+    <ogc:Id_Capabilities>
+      <ogc:EID/>
+    </ogc:Id_Capabilities>
+  </ogc:Filter_Capabilities>
+</csw:Capabilities>

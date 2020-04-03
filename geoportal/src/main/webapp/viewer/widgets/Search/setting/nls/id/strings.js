@@ -14,6 +14,7 @@ define({
   "generalSetting": "Pengaturan umum",
   "allPlaceholder": "Teks placehoder untuk mencari semua: ",
   "showInfoWindowOnSelect": "Tampilkan pop-up untuk fitur atau lokasi yang ditemukan",
+  "showInfoWindowOnSelect2": "Perlihatkan pop-up jika fitur atau lokasi ditemukan.",
   "searchInCurrentMapExtent": "Cari hanya dalam jangkauan peta saat ini",
   "zoomScale": "Skala zoom",
   "locatorUrl": "URL Geocoder",

@@ -5,6 +5,12 @@ define({
   "actions": "הגדר שדות שכבה",
   "field": "שדה",
   "alias": "כינוי לתצוגה",
+  "url": "כתובת URL",
+  "sortField": "שדה מיון",
+  "sortOrderTooltips": {
+    "toDescending": "שנה לסדר יורד",
+    "toAscending": "שנה לסדר עולה"
+  },
   "visible": "ניראה",
   "linkField": "שדה קישור",
   "noLayers": "אין שכבות ישויות זמינות",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "אפשר ייצוא ל-CSV",
   "expand": "הרחבה ראשונית של הוידג'ט",
   "filterByExtent": "אפשר סינון לפי תיחום המפה כברירת מחדל",
+  "allowTextSelection": "אפשר בחירת טקסט",
+  "highlightColor": "צבע הדגשה",
   "restore": "שחזר לערך ברירת מחדל",
   "ok": "אישור",
   "cancel": "בטל",

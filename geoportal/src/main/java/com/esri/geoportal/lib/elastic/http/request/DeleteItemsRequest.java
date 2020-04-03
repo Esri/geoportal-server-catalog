@@ -39,10 +39,12 @@ public class DeleteItemsRequest extends com.esri.geoportal.lib.elastic.request.D
   protected void appendHit(ElasticContext ec, StringBuilder data, com.esri.geoportal.lib.elastic.http.util.SearchHit hit) {
     // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
     JsonObjectBuilder line1 = Json.createObjectBuilder();
-    line1.add("delete", Json.createObjectBuilder()
-      .add("_id",hit.getId())
-      .add("_type",ec.getItemIndexType())
-    );
+    JsonObjectBuilder joBuilder = Json.createObjectBuilder()
+            .add("_id",hit.getId());
+    if (!ec.getIs7Plus()) {
+      joBuilder =joBuilder.add("_type",ec.getActualItemIndexType());
+    }
+    line1.add("delete", joBuilder);
     data.append(line1.build().toString()).append("\n");
     if (ec.getUseSeparateXmlItem()) {
       JsonObjectBuilder line2 = Json.createObjectBuilder();

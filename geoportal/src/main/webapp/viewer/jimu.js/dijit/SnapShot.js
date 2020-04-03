@@ -1,5 +1,5 @@
-﻿///////////////////////////////////////////////////////////////////////////
-// Copyright © 2017 Esri. All Rights Reserved.
+///////////////////////////////////////////////////////////////////////////
+// Copyright © 2014 - 2018 Esri. All Rights Reserved.
 //
 // Licensed under the Apache License Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -212,7 +212,6 @@ define([
       _createMap: function (mapItemInfo, layers) {
         var itemData = mapItemInfo.itemData;
         var title = this.name;
-        var sr;
         var baseMapLayers = [];
         for (var i = 0; i < itemData.baseMap.baseMapLayers.length; i++) {
           var bml = itemData.baseMap.baseMapLayers[i];
@@ -222,9 +221,10 @@ define([
             "url": bml.url,
             "visibility": bml.visibility,
             "opacity": bml.opacity,
-            "title": bml.title
+            "title": bml.title,
+            "styleUrl": bml.styleUrl,
+            "itemId": bml.itemId
           });
-          sr = bml.resourceInfo.spatialReference;
         }
         var baseMap = {
           "baseMapLayers": baseMapLayers
@@ -253,8 +253,9 @@ define([
           text: JSON.stringify({
             "operationalLayers": operationalLayers,
             "baseMap": baseMap,
-            "spatialReference": sr,
-            "version": "2.4"
+            "spatialReference": this.map.spatialReference,
+            "version": mapItemInfo && mapItemInfo.itemData && mapItemInfo.itemData.version ?
+              mapItemInfo.itemData.version : "2.4"
           }),
           tags: this.name + "," + this.nls.snapshot_append,
           wabType: "HTML"

@@ -40,5 +40,21 @@ define({
   "sortDes": "降冪排列",
   "statistics": "統計資料",
   "attachments": "附件",
-  "files": "檔案"
+  "files": "檔案",
+  "keepRichTextLabel": "保留 RTF 格式",
+  "whatsThis": "這是什麼?",
+  "richTextMessage": {
+    "explanatoryText": {
+      "line1": "${layerName} 包含下列 RTF 欄位: ",
+      "line2": " 可能包含文字格式樣式，例如字型、顏色或文字大小。",
+      "line3": "匯出至 CSV 時，會以 HTML 標記形式保留格式樣式。 您可以取消勾選「保留 RTF 格式」方塊以選擇不保留 RTF 格式。"
+    },
+    "example": {
+      "label": "例如：",
+      "scenarios": {
+        "first": "預設會匯出成下列文字:",
+        "second": "及不含 RTF 格式的下列文字:"
+      }
+    }
+  }
 });

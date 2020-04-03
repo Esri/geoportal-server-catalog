@@ -5,6 +5,12 @@ define({
   "actions": "تكوين حقول الطبقة",
   "field": "حقل",
   "alias": "اسم مستعار",
+  "url": "عنوان URL",
+  "sortField": "فرز الحقل",
+  "sortOrderTooltips": {
+    "toDescending": "تغيير إلى ترتيب تنازلي",
+    "toAscending": "تغيير إلى ترتيب تصاعدي"
+  },
   "visible": "مرئي",
   "linkField": "حقل الرابط",
   "noLayers": "لا تنوفر طبقات معالم متاحة",
@@ -12,6 +18,8 @@ define({
   "exportCSV": "السماح بالتصدير إلى CSV",
   "expand": "توسيع عنصر واجهة الخدمة بشكل أوّلي",
   "filterByExtent": "تمكين عامل التصفية بواسطة مدى الخريطة افتراضيًا",
+  "allowTextSelection": "السماح بتحديد النص",
+  "highlightColor": "لون التميز",
   "restore": "استعادة القيمة الافتراضية",
   "ok": "موافق",
   "cancel": "إلغاء الأمر",

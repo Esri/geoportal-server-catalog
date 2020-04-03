@@ -1,6 +1,10 @@
 define([],function(){var obj={
 // .......................................................................................
   
+  system: {
+    searchLimit: 10000
+  },
+  
   edit: {
     setField: {
       allow: false,
@@ -16,8 +20,9 @@ define([],function(){var obj={
   },
   
   search: {
-    allowSettings: false,
-    useSimpleQueryString: false
+    allowSettings: true,
+    useSimpleQueryString: false,
+    escapeFilter: false
   },
   
   searchMap: {
@@ -37,7 +42,8 @@ define([],function(){var obj={
     showApprovalStatus: true,
     defaultSort: "title.sort:asc",
     showLinks: true,
-    showCustomLinks: true
+    showCustomLinks: true,
+    showOpenSearchLinks: true
   },
   
   statusChecker: {

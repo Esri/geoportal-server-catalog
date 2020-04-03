@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd">
+  
+  <!-- Extensibility classes that are instantiated on demand -->
+  
+  <beans:bean id="request.TransformMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.TransformMetadataRequest"/>
+  <beans:bean id="request.ValidateMetadataRequest" scope="prototype" class="com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest"/>
+  
+  <beans:bean id="metadata.Evaluator" scope="prototype" class="com.esri.geoportal.base.metadata.Evaluator">
+    <beans:property name="javascriptFile" value="metadata/js/Evaluator.js"/>
+  </beans:bean>
+  <beans:bean id="metadata.Validator" scope="prototype" class="com.esri.geoportal.base.metadata.Validator"/>
+  
+</beans:beans>

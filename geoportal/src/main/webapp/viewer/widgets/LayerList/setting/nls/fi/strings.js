@@ -7,5 +7,7 @@ define({
   "moveUpAndDown": "Siirrä ylös / Siirrä alas",
   "attributeTable": "Näytä ominaisuustaulukossa",
   "url": "Kuvaus / Näytä kohteen tiedot / Lataa",
+  "expandAllLayers": "Laajenna kaikki karttatasot",
+  "expandAllLayersByDefault": "Laajenna kaikki karttatasot oletusarvoisesti",
   "layerSelectorTitle": "Valitse, mitkä karttatasot näytetään luettelossa."
 });
