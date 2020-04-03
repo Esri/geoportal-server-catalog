@@ -70,13 +70,30 @@
           data-dojo-props="target:'gmd:CI_Date',minOccurs:0">
           <div data-dojo-type="esri/dijit/metadata/form/Element"
             data-dojo-props="target:'gmd:date',label:'${i18nIso.CI_Date.date}'">
-            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" 
-              data-dojo-props="target:'gco:Date',value:'2010-12-08',fixed:true">
+            <div data-dojo-type="app/gxe/form/iso/GcoElement" 
+              data-dojo-props="target:'gco:Date'">
+              <div data-dojo-type="esri/dijit/metadata/form/InputDate" data-dojo-props="fullDate: true, hint: '(yyyy-mm-dd)'"></div>
             </div>
           </div>
           <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference"
             data-dojo-props="target:'gmd:dateType',label:'${i18nIso.CI_DateTypeCode.caption}'">
-            <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/citation/CI_DateTypeCode"></div>
+
+            <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement"
+              data-dojo-props="target:'gmd:CI_DateTypeCode'">
+              <div data-dojo-type="esri/dijit/metadata/form/iso/CodeSpaceAttribute"></div>
+              <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListAttribute"
+                data-dojo-props="value:'${codeListPrefix}CI_DateTypeCode'"></div>
+              <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute">
+                <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+                  <div data-dojo-type="esri/dijit/metadata/form/Options">
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'',value:''"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option"
+                      data-dojo-props="label:'${i18nIso.CI_DateTypeCode.publication}',value:'publication',selected:true"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
     </div>          
