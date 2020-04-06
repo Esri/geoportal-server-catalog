@@ -702,15 +702,14 @@ body {
   align-items: flex-start;
   justify-content: space-between;
   margin: 12px 0;
-  padding: 8px 12px;
+  padding: 8px 8px 8px 12px;
   box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
   background: #fff;
 }
 
-/*
 .g-item-card-content {
+  max-width: 100%;
 }
-*/
 
 .g-item-card-content-header {
   display: flex;
