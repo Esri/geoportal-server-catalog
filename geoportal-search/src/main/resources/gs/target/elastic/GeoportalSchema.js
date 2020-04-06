@@ -259,19 +259,22 @@
       }
 
       if (this.bboxField) {
-        var extent = source[this.bboxField];
-        if (extent && extent.type && extent.type === "envelope" &&
-            extent.coordinates && extent.coordinates.length === 2) {
-          var topLeft = extent.coordinates[0];
-          var bottomRight = extent.coordinates[1];
-          if (topLeft != null && topLeft.length === 2 &&
-              bottomRight != null && bottomRight.length === 2) {
-            entry.bbox = gs.Object.create(gs.atom.BBox).init({
-              xmin: topLeft[0],
-              ymin: bottomRight[1],
-              xmax: bottomRight[0],
-              ymax: topLeft[1]
-            });
+        var bboxFieldValue = source[this.bboxField];
+        if (bboxFieldValue && Array.isArray(bboxFieldValue) && bboxFieldValue.length>0) {
+          var extent = bboxFieldValue[0]
+          if (extent && extent.type && extent.type === "envelope" &&
+              extent.coordinates && extent.coordinates.length === 2) {
+            var topLeft = extent.coordinates[0];
+            var bottomRight = extent.coordinates[1];
+            if (topLeft != null && topLeft.length === 2 &&
+                bottomRight != null && bottomRight.length === 2) {
+              entry.bbox = gs.Object.create(gs.atom.BBox).init({
+                xmin: topLeft[0],
+                ymin: bottomRight[1],
+                xmax: bottomRight[0],
+                ymax: topLeft[1]
+              });
+            }
           }
         }
       }
