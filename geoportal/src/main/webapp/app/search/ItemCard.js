@@ -293,7 +293,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         var v = item.sys_metadatatype_s;
         if (typeof v === "string" && v === "json") {
           htmlNode.style.visibility = "hidden";
+          htmlNode.style.display = "none";
           xmlNode.style.visibility = "hidden";
+          xmlNode.style.display = "none";
         }
       }
     },
