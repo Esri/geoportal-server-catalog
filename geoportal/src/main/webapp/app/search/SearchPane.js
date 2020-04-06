@@ -160,6 +160,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
             self.lastQuery = null;
           }
           response.urlParams = params.urlParams;
+          response.hasScorable = params.hasScorable;
           array.forEach(components,function(component){
             component.processResults(response);
           });
