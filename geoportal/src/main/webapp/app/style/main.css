@@ -728,9 +728,8 @@ body {
 }
 
 .g-item-card-content-info {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+  flex: 1;
+  min-width: 0;
 }
 
 g-item-card-content-info .g-item-card .g-item-title {
@@ -738,7 +737,6 @@ g-item-card-content-info .g-item-card .g-item-title {
 }
 
 .g-item-title {
-  max-width: 540px;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -775,15 +773,17 @@ g-item-card-content-info .g-item-card .g-item-title {
 }
 
 .g-item-card .g-item-thumbnail {
-  max-width: 80px;
-  max-height: 80px;
-  padding: 4px;
-  margin-top: 4px;
+  max-width: 64px;
+  padding: 4px 4px;
+}
+
+.g-item-thumbnail img {
+  width: 100%;
+  height: auto;
 }
 
 /* Style for descriptions creates a cap of a few lines of text  */
 .g-item-card .g-item-description {
-  max-width: 540px;
   max-height: 40px;
   overflow: hidden;
 }
