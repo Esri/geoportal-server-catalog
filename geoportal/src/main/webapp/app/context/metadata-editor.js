@@ -10,8 +10,7 @@ define([],function(){var obj={
   gxeContext: {
     allowedTypeKeys: [
       "arcgis", "fgdc", 
-//      "iso-19115", "iso-19119", "iso-19115-2",
-//      "inspire-iso-19115", "inspire-iso-19119", 
+      "iso-19115", "iso-19119", "iso-19115-2",
       "inspire2-iso-19115", "inspire2-iso-19119", 
       "gemini-iso-19115", "gemini-iso-19119"
     ],
@@ -38,66 +37,6 @@ define([],function(){var obj={
          path: "/metadata/idinfo/citation",
          must: true
       }]
-    },
-    {
-      key: "iso-19115",
-      requiredPath: "esri/dijit/metadata/types/iso/base/DataDocumentType",
-      interrogationRules: [{
-         path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
-         must: true
-      }]
-    },
-    {
-      key: "iso-19119",
-      requiredPath: "esri/dijit/metadata/types/iso/base/ServiceDocumentType",
-      interrogationRules: [{
-         path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
-         must: true
-      }]
-    },
-    {
-      key: "iso-19115-2",
-      requiredPath: "esri/dijit/metadata/types/iso/base/GmiDocumentType",
-      interrogationRules: [{
-         path: "/gmi:MI_Metadata",
-         must: true
-      }]
-    },
-    {
-      key: "inspire-iso-19115",
-      requiredPath: "esri/dijit/metadata/types/inspire/base/DataDocumentType",
-      interrogationRules: [
-        {
-          path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
-          must: true
-        },
-        {
-          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
-          value: "INSPIRE Metadata Implementing Rules"
-        },
-        {
-          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
-          value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 1.2)"
-        }
-      ]
-    },
-    {
-      key: "inspire-iso-19119",
-      requiredPath: "esri/dijit/metadata/types/inspire/base/ServiceDocumentType",
-      interrogationRules: [
-        {
-          path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
-          must: true
-        },
-        {
-          path: "/gmd:MD_Metadata/gmd:metadataStandardName/gco:CharacterString",
-          value: "INSPIRE Metadata Implementing Rules"
-        },
-        {
-          path: "/gmd:MD_Metadata/gmd:metadataStandardVersion/gco:CharacterString",
-          value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 1.2)"
-        }
-      ]
     },
     {
       key: "inspire2-iso-19115",
@@ -134,6 +73,30 @@ define([],function(){var obj={
           value: "Technical Guidelines based on EN ISO 19115 and EN ISO 19119 (Version 2.0)"
         }
       ]
+    },
+    {
+      key: "iso-19115",
+      requiredPath: "esri/dijit/metadata/types/iso/base/DataDocumentType",
+      interrogationRules: [{
+         path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19119",
+      requiredPath: "esri/dijit/metadata/types/iso/base/ServiceDocumentType",
+      interrogationRules: [{
+         path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
+         must: true
+      }]
+    },
+    {
+      key: "iso-19115-2",
+      requiredPath: "esri/dijit/metadata/types/iso/base/GmiDocumentType",
+      interrogationRules: [{
+         path: "/gmi:MI_Metadata",
+         must: true
+      }]
     },
     {
       key: "gemini-iso-19115",
