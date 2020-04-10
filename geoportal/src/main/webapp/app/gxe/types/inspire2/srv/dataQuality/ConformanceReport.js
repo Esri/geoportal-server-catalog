@@ -7,11 +7,11 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
-        "./ConformanceCitation",
+        "./OfficialTitleConformanceCitation",
         "../../gmd/dataQuality/ConformanceDegree",
         "dojo/text!./templates/ConformanceReport.html"],
 function(declare, lang, has, Descriptor, Element, InputTextArea, AbstractObject, GcoElement, ObjectReference,
-  ConformanceCitation, ConformanceDegree, template) {
+  OfficialTitleConformanceCitation, ConformanceDegree, template) {
 
   var oThisClass = declare(Descriptor, {
 

@@ -2,19 +2,26 @@
 
   <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
     data-dojo-props="target:'gmd:report',
-      label:'${i18nIso.DQ_DataQuality.report}'">
+      label:'${i18nIso.DQ_DataQuality.report}',
+      matchTopNode:[
+        {
+          qPath: 'gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:title/gmx:Anchor/@xlink:href',
+          qValue: 'http://inspire.ec.europa.eu/id/ats/metadata/2.0/common/conformity-specification/official-title',
+          qMode: 'must'
+        }
+      ]">
     <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
       data-dojo-props="target:'gmd:DQ_DomainConsistency'">
       
       <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
-        data-dojo-props="target:'gmd:result',maxOccurs:2,
+        data-dojo-props="target:'gmd:result',
           label:'${i18nIso.DQ_ConformanceResult.caption}'">
         <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
-          data-dojo-props="target:'gmd:DQ_ConformanceResult',minOccurs:0">
+          data-dojo-props="target:'gmd:DQ_ConformanceResult'">
           
           <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
             data-dojo-props="target:'gmd:specification',showHeader:false">
-            <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/ConformanceCitation"></div>
+            <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/OfficialTitleConformanceCitation"></div>
           </div>
           
           <div data-dojo-type="esri/dijit/metadata/form/Element"

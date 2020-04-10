@@ -1,8 +1,10 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/has",
+        "dojo/dom-style",
         "../../base/Descriptor",
         "esri/dijit/metadata/form/Element",
+        "esri/dijit/metadata/form/Attribute",
         "esri/dijit/metadata/form/InputSelectOne",
         "esri/dijit/metadata/form/Options",
         "esri/dijit/metadata/form/Option",
@@ -10,13 +12,19 @@ define(["dojo/_base/declare",
         "../../../../form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "esri/dijit/metadata/types/iso/gmd/citation/CI_Date",
-        "dojo/text!./templates/ConformanceCitation.html"],
-function(declare, lang, has, Descriptor, Element, InputSelectOne, Options, Option, AbstractObject, GcoElement, ObjectReference, CI_Date,
+        "dojo/text!./templates/OfficialTitleConformanceCitation.html"],
+function(declare, lang, has, domStyle, Descriptor, Element, Attribute, InputSelectOne, Options, Option, AbstractObject, GcoElement, ObjectReference, CI_Date,
   template) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString: template
+    templateString: template,
+    
+    postCreate: function() {
+      this.inherited(arguments)
+      
+      domStyle.set(this._titleAnchorLink.domNode, "display", "none")
+    }
 
   });
 
