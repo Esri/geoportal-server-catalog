@@ -219,6 +219,10 @@ define({
           interoperable: "Interoperable",
           harmonised: "Harmonised"
         }
+      },
+      
+      conceptualConsistency: {
+        caption: "Conceptual Consistency"
       }
     }
 
