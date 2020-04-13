@@ -8,14 +8,19 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "../../gmd/dataQuality/ConformanceReport",
         "./ConformanceReport",
+        "./ConceptualConsistency",
         "esri/dijit/metadata/types/iso/gmd/dataQuality/Lineage",
         "./Scope",
-        "dojo/text!./templates/Quality.html"],
-function(declare, lang, has, topic, Descriptor, Tabs, AbstractObject, ObjectReference, ConformanceReport, SrvConformanceReport, Lineage, Scope, template) {
+        "dojo/text!./templates/Quality.html",
+        "dojo/i18n!../../../../../nls/i18nInspire"],
+function(declare, lang, has, topic, Descriptor, Tabs, AbstractObject, ObjectReference, 
+         ConformanceReport, SrvConformanceReport, ConceptualConsistency, Lineage, Scope, 
+         template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
     templateString : template,
+    i18nInspire: i18nInspire,
 
     
     postCreate: function() {
