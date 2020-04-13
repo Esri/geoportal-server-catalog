@@ -20,7 +20,6 @@ function(declare, lang, has, topic, Descriptor, Tabs, AbstractObject, ObjectRefe
     
     postCreate: function() {
       this.inherited(arguments)
-      console.log('SRV conformance report')
       
       this.own(topic.subscribe("inspire/service-type-changed", lang.hitch(this, function(serviceType) {
         var isOther = serviceType==="other"
