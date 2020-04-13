@@ -213,7 +213,12 @@ define({
       conformanceReport: {
         freeText: "Free Text",
         officialTitle: "Official Title",
-        conformanceClass: "Conformance Class"
+        conformanceClass: "Conformance Class",
+        classess: {
+          invokable: "Invokable",
+          interoperable: "Interoperable",
+          harmonised: "Harmonised"
+        }
       }
     }
 

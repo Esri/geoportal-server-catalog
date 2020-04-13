@@ -9,16 +9,19 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
+        "./InvocableConformanceCitation",
         "./InteroperableConformanceCitation",
         "./HarmonisedConformanceCitation",
         "../../gmd/dataQuality/ConformanceDegree",
-        "dojo/text!./templates/ClassConformanceReport.html"],
+        "dojo/text!./templates/ClassConformanceReport.html",
+        "dojo/i18n!../../../../../nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Tabs, Element, ElementChoice, InputTextArea, AbstractObject, GcoElement, ObjectReference,
-  InteroperableConformanceCitation, HarmonisedConformanceCitation, ConformanceDegree, template) {
+  InvocableConformanceCitation, InteroperableConformanceCitation, HarmonisedConformanceCitation, ConformanceDegree, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString : template
+    templateString : template,
+    i18nInspire: i18nInspire
 
   });
 
