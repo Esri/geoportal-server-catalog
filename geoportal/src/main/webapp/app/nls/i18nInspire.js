@@ -208,6 +208,12 @@ define({
         levelDescription: "Level descripton",
         scopeDescription: "Scope description",
         other: "Other"
+      },
+      
+      conformanceReport: {
+        freeText: "Free Text",
+        officialTitle: "Official Title",
+        conformanceClass: "Conformance Class"
       }
     }
 
