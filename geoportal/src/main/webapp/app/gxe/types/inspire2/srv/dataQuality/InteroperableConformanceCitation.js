@@ -13,7 +13,7 @@ define(["dojo/_base/declare",
         "../../../../form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "esri/dijit/metadata/types/iso/gmd/citation/CI_Date",
-        "dojo/text!./templates/ClassConformanceCitation.html"],
+        "dojo/text!./templates/InteroperableConformanceCitation.html"],
 function(declare, lang, has, domStyle, Descriptor, Element, Attribute, InputText, InputSelectOne, Options, Option, AbstractObject, GcoElement, ObjectReference, CI_Date,
   template) {
 
