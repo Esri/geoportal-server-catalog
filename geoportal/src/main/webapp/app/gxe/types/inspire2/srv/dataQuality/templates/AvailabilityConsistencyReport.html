@@ -1,8 +1,7 @@
 <div data-dojo-attach-point="containerNode">
 
   <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
-    data-dojo-props="target:'gmd:report',
-      label:'${i18nIso.DQ_DataQuality.report}',
+    data-dojo-props="target:'gmd:report',showHeader:false,
       matchTopNode:[
         {
           qPath: 'gmd:DQ_ConceptualConsistency/gmd:nameOfMeasure/gmx:Anchor/@xlink:href',
@@ -10,46 +9,49 @@
           qMode: 'must'
         }
       ]">
-    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" 
       data-dojo-props="target:'gmd:DQ_ConceptualConsistency'">
 
-      <div data-dojo-type="esri/dijit/metadata/form/Element"
-        data-dojo-props="target:'gmd:nameOfMeasure',
-          label:'Name of Measure'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-attach-point="_nameOfMeasure"
+        data-dojo-props="target:'gmd:nameOfMeasure'">
         <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
           data-dojo-props="target:'gmx:Anchor',showHeader:false,value:'availability',fixed:true">
-          <div data-dojo-type="esri/dijit/metadata/form/Attribute" data-dojo-attach-point="_titleAnchorLink"
-               data-dojo-props="target:'xlink:href',showHeader:false,fixed:true,hiden:true,
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute"
+               data-dojo-props="target:'xlink:href',showHeader:false,fixed:true,
                                 value:'http://inspire.ec.europa.eu/metadata-codelist/QualityOfServiceCriteriaCode/availability'"></div>
-            <div data-dojo-type="esri/dijit/metadata/form/InputText">
-            </div>
+            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
         </div>
       </div>  
       
-      <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'gmd:measureDescription',label:'Measure Description'">    
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
         data-dojo-props="target:'gmd:result',
           label:'${i18nIso.DQ_ConformanceResult.caption}'">
         
-<!--        <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
-          data-dojo-props="target:'gmd:DQ_ConformanceResult'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+          data-dojo-props="target:'gmd:DQ_QuantitativeResult'">
           
-          <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
-            data-dojo-props="target:'gmd:specification',showHeader:false">
-            <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/FreeTextConformanceCitation"></div>
-          </div>
-          
-          <div data-dojo-type="esri/dijit/metadata/form/Element"
-            data-dojo-props="target:'gmd:explanation',
-              label:'${i18nIso.DQ_ConformanceResult.explanation}'">
-            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
-              data-dojo-props="target:'gco:CharacterString'">
-                <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-attach-point="_valueUnit"
+            data-dojo-props="target:'gmd:valueUnit'">
+            <div data-dojo-type="esri/dijit/metadata/form/Attribute"
+                 data-dojo-props="target:'xlink:href',fixed:true,value:'urn:ogc:def:uom:OGC::percent'">
             </div>
           </div>
           
-          <div data-dojo-type="app/gxe/types/inspire2/gmd/dataQuality/ConformanceDegree"></div>
-          
-        </div>-->
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+            data-dojo-props="target:'gmd:value'">
+            <div data-dojo-type="esri/dijit/metadata/form/Attribute" data-dojo-attach-point="_xs"
+                 data-dojo-props="target:'xmlns:xs',fixed:true,value:'http://www.w3.org/2001/XMLSchema'">
+            </div>
+            <div data-dojo-type="esri/dijit/metadata/form/Attribute" data-dojo-attach-point="_type"
+                 data-dojo-props="target:'xsi:type',fixed:true,value:'xs:double'">
+            </div>
+            <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,maxValue:100"></div>
+          </div>
+        </div>
       </div>  
       
     </div>

@@ -222,7 +222,10 @@ define({
       },
       
       conceptualConsistency: {
-        caption: "Conceptual Consistency"
+        caption: "Conceptual Consistency",
+        availability: "Availability Report",
+        performance: "Performance Report",
+        capacity: "Capacity Report"
       }
     }
 
