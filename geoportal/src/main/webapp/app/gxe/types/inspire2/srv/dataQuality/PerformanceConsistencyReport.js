@@ -11,13 +11,15 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
-        "dojo/text!./templates/PerformanceConsistencyReport.html"],
+        "dojo/text!./templates/PerformanceConsistencyReport.html",
+        "dojo/i18n!../../../../../nls/i18nInspire"],
 function(declare, lang, has, domStyle, Descriptor, Tabs, Element, InputText, InputTextArea, InputNumber, AbstractObject, GcoElement, ObjectReference,
-  template) {
+  template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
     templateString : template,
+    i18nInspire: i18nInspire,
     
     postCreate: function() {
       this.inherited(arguments)
