@@ -10,10 +10,11 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "./AvailabilityConsistencyReport",
         "./PerformanceConsistencyReport",
+        "./CapacityConsistencyReport",
         "dojo/text!./templates/ConceptualConsistency.html",
         "dojo/i18n!../../../../../nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Tabs, Element, InputTextArea, AbstractObject, GcoElement, ObjectReference,
-  AvailabilityConsistencyReport, PerformanceConsistencyReport, template, i18nInspire) {
+  AvailabilityConsistencyReport, PerformanceConsistencyReport, CapacityConsistencyReport, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
