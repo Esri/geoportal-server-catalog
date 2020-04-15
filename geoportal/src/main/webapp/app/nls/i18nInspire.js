@@ -225,7 +225,12 @@ define({
         caption: "Conceptual Consistency",
         availability: "Availability Report",
         performance: "Performance Report",
-        capacity: "Capacity Report"
+        capacity: "Capacity Report",
+        hints: {
+          availability: "0 - 100",
+          performance: "0 or more",
+          capacity: "0 or more, whole numbers only"
+        }
       }
     }
 
