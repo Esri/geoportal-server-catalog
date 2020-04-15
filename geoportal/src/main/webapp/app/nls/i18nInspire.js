@@ -226,6 +226,7 @@ define({
         availability: "Availability Report",
         performance: "Performance Report",
         capacity: "Capacity Report",
+        measureDescription: "Measure Description",
         hints: {
           availability: "0 - 100",
           performance: "0 or more",
