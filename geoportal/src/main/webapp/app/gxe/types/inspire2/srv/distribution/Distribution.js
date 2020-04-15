@@ -21,6 +21,8 @@ function(declare, lang, has, topic, Descriptor, AbstractObject, ObjectReference,
         var isOther = serviceType==="other"
         this._forNetwork._isOptionallyOff = isOther
         this._forInvokable._isOptionallyOff = !isOther
+        this._forNetwork._isGxeElement = !isOther
+        this._forInvokable._isGxeElement = isOther
         this._forNetwork.domNode.style.display = isOther? "none": "block"
         this._forInvokable.domNode.style.display = !isOther? "none": "block"
       })))
