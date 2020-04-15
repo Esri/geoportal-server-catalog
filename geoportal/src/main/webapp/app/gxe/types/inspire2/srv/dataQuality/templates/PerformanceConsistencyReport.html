@@ -5,7 +5,7 @@
       matchTopNode:[
         {
           qPath: 'gmd:DQ_ConceptualConsistency/gmd:nameOfMeasure/gmx:Anchor/@xlink:href',
-          qValue: 'http://inspire.ec.europa.eu/metadata-codelist/QualityOfServiceCriteriaCode/availability',
+          qValue: 'http://inspire.ec.europa.eu/metadata-codelist/QualityOfServiceCriteriaCode/performance',
           qMode: 'must'
         }
       ]">
@@ -15,10 +15,10 @@
       <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-attach-point="_nameOfMeasure"
         data-dojo-props="target:'gmd:nameOfMeasure'">
         <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
-          data-dojo-props="target:'gmx:Anchor',showHeader:false,value:'Availability',fixed:true">
+          data-dojo-props="target:'gmx:Anchor',showHeader:false,value:'Performance',fixed:true">
           <div data-dojo-type="esri/dijit/metadata/form/Attribute"
                data-dojo-props="target:'xlink:href',showHeader:false,fixed:true,
-                                value:'http://inspire.ec.europa.eu/metadata-codelist/QualityOfServiceCriteriaCode/availability'"></div>
+                                value:'http://inspire.ec.europa.eu/metadata-codelist/QualityOfServiceCriteriaCode/performance'"></div>
             <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
         </div>
       </div>  
@@ -37,7 +37,7 @@
           <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-attach-point="_valueUnit"
             data-dojo-props="target:'gmd:valueUnit'">
             <div data-dojo-type="esri/dijit/metadata/form/Attribute"
-                 data-dojo-props="target:'xlink:href',fixed:true,value:'urn:ogc:def:uom:OGC::percent'">
+                 data-dojo-props="target:'xlink:href',fixed:true,value:'http://www.opengis.net/def/uom/SI/second'">
             </div>
           </div>
           
@@ -49,7 +49,7 @@
             <div data-dojo-type="esri/dijit/metadata/form/Attribute" data-dojo-attach-point="_type"
                  data-dojo-props="target:'xsi:type',fixed:true,value:'xs:double'">
             </div>
-            <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,maxValue:100"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0"></div>
           </div>
         </div>
       </div>  
