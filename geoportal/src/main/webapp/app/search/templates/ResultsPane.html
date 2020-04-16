@@ -1,10 +1,59 @@
 <div class="g-search-results-pane" data-dojo-attach-point="containerNode">
-  <div class="g-drop-pane" data-dojo-type="app/search/DropPane" 
+  <!-- <div class="g-drop-pane" data-dojo-type="app/search/DropPane"
     data-dojo-attach-point="dropPane"
     data-dojo-props="title:'${label}',open:${open}">
-    <div data-dojo-attach-point="noMatchNode" class="text-danger" style="display:none;"></div>
-    <div class="g-search-results container" data-dojo-attach-point="itemsNode"></div>
+  </div> -->
+  <div class="g-search-results-header" data-dojo-attach-point="resultsHeaderNode">
+    <div class="g-search-results-sort" data-dojo-attach-point="sortOptionsBtnNode">
+      <div class="g-search-results-sort-container">
+        <a class="g-search-results-sort-link dropdown-toggle" href="#"
+          aria-label="Dropdown Menu"
+          data-toggle="dropdown"
+        >
+          <svg class="g-search-results-sort-link-icon" viewBox="0 0 24 24">
+            <path fill="currentColor" d="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z" />
+          </svg>
+
+          <span data-dojo-attach-point="sortLabel">${i18n.search.sort.byRelevance}</span>
+
+          <svg class="g-nav-dropdown-icon" viewBox="0 0 24 24">
+            <path d="M7,10L12,15L17,10H7Z" />
+          </svg>
+        </a>
+        <ul class="dropdown-menu">
+           <li data-role="sortOption">
+             <a href="#" class="small" data-dojo-attach-point="sortRelevanceBtn">
+               ${i18n.search.sort.byRelevance}
+             </a>
+           </li>
+           <li data-role="sortOption">
+             <a href="#" class="small" data-dojo-attach-point="sortTitleBtn">
+               ${i18n.search.sort.byTitle}
+             </a>
+           </li>
+           <li data-role="sortOption">
+             <a href="#" class="small" data-dojo-attach-point="sortDateBtn">
+               ${i18n.search.sort.byDate}
+             </a>
+           </li>
+        </ul>
+
+        <a class="g-search-results-sort-btn hidden" href="#" data-dojo-attach-point="sortOrderBtn">
+          <svg viewBox="0 0 24 24">
+            <path fill="currentColor" d="M13,20H11V8L5.5,13.5L4.08,12.08L12,4.16L19.92,12.08L18.5,13.5L13,8V20Z" />
+          </svg>
+
+          <span data-dojo-attach-point="sortOrderBtnLabel">${i18n.search.sort.asc}</span>
+        </a>
+      </div>
+    </div>
   </div>
-  <div data-dojo-type="dojox.widget.Standby"
-       data-dojo-attach-point="statusNode"></div>
+
+  <div data-dojo-attach-point="noMatchNode" class="text-danger" style="display:none;"></div>
+
+  <div class="g-search-results container" data-dojo-attach-point="itemsNode"></div>
+
+  <div class="g-search-results-footer" data-dojo-attach-point="resultsFooterNode"></div>
+
+  <div data-dojo-type="dojox.widget.Standby" data-dojo-attach-point="statusNode"></div>
 </div>

@@ -1,46 +1,71 @@
+/* RESET */
+html,
+body,
+.g-app {
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
+
 body {
-  font-size: 12px;
-  backGround-color: #ffffff;
+  margin: 0;
+  overflow: hidden;
+  background-color: #f3f3f3;
+  font-size: 16px;
 }
 
-/* chrome */
-
-
-/* outline: none commented out for accessibility*/
-/*
-:focus {
-  outline: none;
-}*/
-
-.calcite .dijitTitlePaneTitle, .calcite .dijitTitlePaneTextNode {
+/* DOJO/DIJIT OVERRIDES */
+.calcite .dijitTitlePaneTitle,
+.calcite .dijitTitlePaneTextNode {
   font-size: 12px;
 }
+
 .calcite .dijitTitlePaneTitle {
   padding: 4px 6px;
 }
-.calcite .dijitTitlePaneContentInner {
-  padding: 8px;
-}
+
 .calcite .dijitTitlePane {
   border: 1px solid #ebebeb;
 }
+
 .calcite .dijitTitlePaneContentOuter {
-	/*border-top: 1px solid #ebebeb;*/
-	border: none;
+  /*border-top: 1px solid #ebebeb;*/
+  border: none;
 }
 
-/*
-.calcite .modal-dialog .modal-content .modal-header .close {
-  font-size: 21px;
+.calcite .esriSimpleSliderTL {
+  top: 55px;
+}
+
+/* STYLES */
+/* Note: you need to match or trump Calcite-Bootstrap specificity */
+
+/* 
+.g-app .tab-content {
+  height: calc(100% - 113px);
 }
 */
 
+.tab-content {
+  flex: 1 1 auto;
+}
+
+.g-app .tab-pane,
+.g-app .tab-pane > div {
+  height: 100%;
+}
+
+.g-app .tab-pane {
+  height: 100%;
+}
+
 .g-indent {
-	margin-left: 20px;
+  margin-left: 20px;
 }
 
 .g-loading {
-	margin-right: 4px;
+  margin-right: 4px;
   width: 16px;
   height: 16px;
   background-image: url("images/LoadingAnimation16_Trans.gif");
@@ -59,7 +84,10 @@ body {
 
 .g-app-loading {
   position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   z-index: 99;
   background-color: #f8f8f8;
 }
@@ -67,7 +95,10 @@ body {
   width: 200px;
   margin: auto;
   position: absolute;
-  top: 0; left: 0; bottom: 0; right: 0;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
   background-color: #f8f8f8;
 }
 .g-app-loading .g-error {
@@ -84,69 +115,336 @@ body {
   border-radius: 4px;
 }
 
-.navbar-inverse {
-  background-color: #005e95;
-}
-.navbar-inverse .navbar-nav > .active > a, 
-.navbar-inverse .navbar-nav > .active > a:hover, 
-.navbar-inverse .navbar-nav > .active > a:focus {
-  background-color: #478CB8;
-  color: #ffffff;
-}
-.navbar-inverse .navbar-nav > li > a {
-  color: #ffffff;
-}
-.navbar-inverse .glyphicon, .navbar-inverse .navbar-brand {
-  color: #ffffff;
-}
-.g-app > .navbar {
-	min-height: 5px;
-}
-.g-app > .navbar-inverse .navbar-nav > li > a {
-	padding-left: 8px;
-  padding-right: 8px;
-	padding-bottom: 12px;
-	padding-top: 12px;
-}
-.g-app > .navbar-inverse .navbar-nav > li > a:hover, 
-.g-app > .navbar-inverse .navbar-nav > li > a:focus {
-  background-image: none;
-  transition: none;
-  background-color: transparent;
-}
-.g-app > .navbar-inverse .navbar-nav > li.active > a {
-  background-image: linear-gradient(to bottom, transparent 90%, #cfe1ec 91%, #cfe1ec 100%);
-  transition: color 150ms linear 0s, text-decoration 150ms linear 0s;
-  background-color: transparent;
-}
-.g-app > .navbar-inverse .navbar-nav > li > a:hover {
-  outline: thin dotted;
-  outline-offset: -2px;
-}
-.g-app > .navbar-inverse .g-tools {
-  padding-top: 13px;
-  padding-right: 20px;
-  color: #ffffff;
-}
-.g-app > .navbar-inverse .g-tools > a {
-  color: #ffffff;
-}
-.g-app > .navbar-inverse .g-tools > .g-options {
-  margin-left: 16px;
+/* HEADER */
+/* HEADER - BRANDING */
+.g-branding {
+  display: flex;
+  align-items: center;
+  justify-content: flex-start;
+  cursor: pointer;
 }
 
-.g-search-pane {
-	margin: 0px 20px 20px 20px; 
-	padding: 0px;
+.g-brand-logo {
+  width: 28px;
+  height: 28px;
 }
+
+.g-header .g-branding .navbar-brand {
+  color: #404040;
+  transition: color linear 250ms;
+}
+
+.g-header .g-branding .navbar-brand:hover {
+  color: #000;
+}
+
+/* HEADER - NAV */
+.g-header.navbar-inverse {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 70px;
+  background-color: #fff;
+}
+
+.g-header .navbar-nav {
+  display: flex;
+  align-items: baseline;
+  font-weight: 200;
+  color: #404040;
+}
+
+.g-header .navbar-nav .nav-item {
+  float: none;
+}
+
+.g-header .navbar-nav .nav-item.active {
+  background: transparent;
+}
+
+.g-header .navbar-nav .nav-item .nav-link {
+  float: none;
+  padding-left: 8px;
+  padding-right: 8px;
+  padding-top: 12px;
+  padding-bottom: 6px;
+  margin-bottom: 2px;
+  border-bottom: 4px solid transparent;
+  background: transparent;
+  color: #404040;
+  transition: all linear 250ms;
+}
+
+.g-header .navbar-nav .nav-item .nav-link:hover,
+.g-header .navbar-nav .nav-item .nav-link:focus {
+  border-bottom: 4px solid #2890ce;
+  color: #007ac2;
+}
+
+.g-header .navbar-nav .nav-item.active .nav-link {
+  border-bottom: 4px solid #2890ce;
+  background: transparent;
+  color: #000;
+}
+
+.g-header .navbar-nav .nav-item .g-nav-dropdown-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: transparent;
+  color: #404040;
+  transition: color linear 250ms;
+}
+
+.g-header .navbar-nav .nav-item .g-nav-dropdown-link:hover,
+.g-header .navbar-nav .nav-item .g-nav-dropdown-link:focus {
+  border: 0;
+  background: transparent;
+  color: #007ac2;
+}
+
+.g-nav-dropdown-icon {
+  width: 24px;
+  height: 24px;
+  fill: #2890ce;
+}
+
+/* USER ACCOUNT */
+.g-tools .g-signin,
+.g-tools .g-signin {
+  font-size: 16px;
+  color: #404040;
+  transition: color linear 250ms;
+}
+
+.g-tools .g-signin:hover,
+.g-tools .g-signin:focus {
+  color: #007ac2;
+}
+
+.g-user:hover {
+  text-decoration: none;
+}
+
+.g-user-thumb {
+  width: 24px;
+  height: 24px;
+  margin-right: 4px;
+  border-radius: 100%;
+  background: #bbb;
+}
+
+.g-username {
+  font-size: 16px;
+  color: #404040;
+  transition: color linear 250ms;
+}
+
+.g-user:hover .g-username,
+.g-user:focus .g-username {
+  color: #007ac2;
+  text-decoration: underline;
+}
+
+/* SEARCH PANEL */
+.g-search-panel {
+  display: flex;
+  align-items: center;
+  flex-direction: column;
+  height: 100%;
+}
+
+/* SEARCH PANEL - SEARCHBAR ROW */
+.g-search-bar-row {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  background: #0670ae;
+  box-shadow: 0px 1px 2px rgba(0, 0, 0, 0.25);
+}
+
+.g-search-bar {
+  display: flex;
+  align-items: center;
+  width: 1024px;
+  padding: 8px 0;
+}
+
+.g-search-bar-title {
+  width: 30%;
+  margin-right: 16px;
+  font-size: 20px;
+  color: #fff;
+}
+
+/* SEARCH PANEL - SEARCH INPUT OVERRIDES */
+.g-search-bar .search-box {
+  width: calc(70% - 48px);
+  padding: 0px 16px;
+}
+
+.g-search-bar .search-box .input-group {
+  display: flex;
+  align-items: center;
+  background: #fff;
+}
+
+.g-search-bar .search-box .input-group input {
+  width: calc(100% - 151px);
+  padding: 8px 4px;
+  font-size: 16px;
+}
+
+.g-search-bar .search-box .input-group input:focus {
+  box-shadow: none;
+}
+
+.g-search-bar .search-box .form-control {
+  border: 0;
+}
+
+.g-search-bar .search-box .esri-icon-search {
+  margin: 0 25px 0 15px;
+  font-size: 16px;
+  color: #404040;
+}
+
+.g-search-bar .search-box .btn {
+  display: flex;
+  align-items: center;
+  height: 36px;
+  padding: 0 25px;
+  border: 1px solid #fff;
+  background: #004874;
+  font-size: 14px;
+}
+
+/* SEARCH PANEL - CONTENT */
+.g-search-content-row {
+  display: flex;
+  width: 1024px;
+  padding: 12px 0px;
+}
+
 .g-search-pane-left {
-	/*width: 25%; */
-	/*min-width: 100px; */
-	float: left; 
+  width: 30%;
+  margin-right: 16px;
 }
+
 .g-search-pane-right {
-	/*width: 73%; */
-	float: right; 
+  width: calc(70% - 46px);
+  /* padding: 15px 0; */
+}
+
+.g-filter-collapse {
+  margin-bottom: 10px;
+}
+
+.g-filter-collapse.last {
+  margin-bottom: 25px;
+}
+
+.g-filter-create-btn {
+  display: flex;
+  width: 100%;
+  margin-top: 25px;
+  padding: 10px 20px;
+  border: 0;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  background: #2890ce;
+  transition: background linear 250ms;
+}
+
+.g-filter-create-btn:hover {
+  background: #0970ae;
+}
+
+.g-filter-create-btn label {
+  margin: 0 0 0 15px;
+  font-weight: 200;
+  color: #fff;
+  transition: color linear 250ms;
+}
+
+.g-filter-create-btn:hover label {
+  cursor: pointer;
+}
+
+.g-filter-create-icon {
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+  transition: fill linear 250ms;
+}
+
+.g-search-content-row .g-drop-pane {
+  border: 0;
+}
+
+.g-search-pane-left .dijitTitlePaneTitle {
+  /* resolves map disappearing issue #63
+  and will apply to all search facets */
+  overflow-y: hidden !important;
+  padding: 6px 10px;
+  background: #fff;
+  transition: background linear 250ms;
+}
+
+.g-search-pane-left .dijitTitlePaneTitle:hover {
+  background: #f8f8f8;
+}
+
+.g-search-pane-left .dijitTitlePaneTextNode {
+  font-size: 14px;
+}
+
+.g-search-pane-left .dijitTitlePaneContentInner {
+  position: relative;
+  padding: 8px;
+}
+
+/* SEARCH PANEL - COLLAPSIBLE CARDS */
+.g-drop-pane .dijitTitlePaneTextNode {
+  margin-left: 8px;
+}
+
+.g-drop-pane.fixed .dijitTitlePaneTextNode {
+  margin-left: 0;
+}
+
+.g-drop-pane .dijitTitlePaneTitle.dijitTitlePaneTitleOpen.dijitOpen {
+  background: #606060;
+  color: #fff;
+}
+
+.g-drop-pane.fixed .dijitTitlePaneTitle {
+  cursor: auto;
+  pointer-events: none;
+}
+
+.g-drop-pane.fixed .dijitTitlePaneTitleFocus {
+  cursor: auto;
+  position: relative;
+}
+
+.g-drop-pane .g-drop-pane-arrow svg {
+  width: 24px;
+  height: 24px;
+  fill: #959595;
+  transform: rotate(-90deg);
+  transition: transform ease-in-out 250ms;
+}
+
+.g-drop-pane .dijitOpen .g-drop-pane-arrow svg {
+  fill: #fff;
+  transform: rotate(0deg);
+}
+
+.g-drop-pane.fixed .g-drop-pane-arrow svg {
+  display: none;
 }
 
 .g-drop-pane-tools {
@@ -154,74 +452,196 @@ body {
   vertical-align: middle;
 }
 
+.g-drop-pane.fixed .g-drop-pane-tools {
+  pointer-events: all;
+}
+
 .g-drop-pane-tools input {
   vertical-align: top;
   cursor: pointer;
 }
+
 .g-drop-pane-tools label {
   margin-left: 3px;
   font-size: 10px;
   font-weight: normal;
   cursor: pointer;
 }
-.g-drop-pane-tools .glyphicon {
-  vertical-align: middle;
-  margin-bottom: 4px;
+
+.g-drop-pane .g-drop-pane-tools svg {
+  display: none;
+  width: 24px;
+  height: 24px;
+  fill: #fff;
+}
+
+.g-drop-pane .dijitOpen .g-drop-pane-tools svg {
+  display: block;
 }
 
 .g-drop-pane .g-entries {
-  max-height: 200px;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  font-size: 13px;
 }
-/* resolves map disappearing issue #63
-and will apply to all search facets */
-.g-search-pane-left .dijitTitlePaneTitle {
-    overflow-y:hidden !important;;
-}
+
 .g-entry-links > div {
-  padding: 2px 0px;
+  max-width: 280px;
+  padding: 2px 2px;
+  margin-bottom: 3px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .g-spatial-filter-map {
   height: 300px !important;
   width: auto !important;
-
 }
+
 .g-spatial-filter-relations {
-  margin-right: 12px;
-}
-.g-spatial-filter-relation {
-  margin-left: 12px;
-}
-.g-spatial-filter-locator {
-  display: block;
-  position: fixed;
-  z-index: 31;
-  left: 44px;
-  top: 215px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 10px 0;
+  font-size: 12px;
 }
 
-.g-applied-filters .g-drop-pane-tools label {
-	margin-right: 20px;
-	margin-top: 4px;
+.g-spatial-filter-relation label {
+  margin-left: 10px;
+  font-weight: 200;
 }
-/*
-.g-applied-filters .g-drop-pane-tools .glyphicon {
-	vertical-align: none;
-	top: 0;
+
+.g-spatial-filter-locator {
+  position: absolute;
+  z-index: 31;
+  /* these dims should be fixed but they change in code */
+  left: 25px !important;
+  top: 25px !important;
 }
-*/
+
+/* APPLIED FILTERS */
+.g-applied-filters {
+  display: flex;
+  align-items: center;
+  padding: 0px 16px;
+}
+
+.g-applied-filters-clear {
+  margin-bottom: 10px;
+  color: #de2900;
+}
+
+.g-applied-filters-clear:hover,
+.g-applied-filters-clear:focus {
+  color: #de2900;
+}
+
+.g-entries {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+}
 
 .g-applied-filter {
-  line-height: 2;
-  padding: 2px 4px;
-  margin-right: 4px;
-  border: 1px solid #cccccc;
-  border-radius: 5px;
-  
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin: 0 10px 10px 0;
+  padding: 4px 6px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  background: #fff;
 }
+
+.g-applied-filter span {
+  max-width: 150px;
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
+
 .g-applied-filter a {
-  vertical-align: middle;
+  display: flex;
+  margin-left: 10px;
+}
+
+.g-applied-filter svg {
+  width: 24px;
+  height: 24px;
+  fill: #959595;
+}
+
+/* SEARCH RESULTS PANE */
+
+.g-search-results-pane {
+  position: relative;
+  /* height: calc(100% - 32px); */
+  padding: 0px 16px;
+}
+
+.g-search-results-header {
+  display: flex;
+  justify-content: flex-end;
+  /* border-bottom: 1px solid #e4e4e4; */
+}
+
+.g-search-results-sort {
+  position: relative;
+}
+
+.g-search-results-sort-container {
+  display: flex;
+  align-items: center;
+}
+
+.g-search-results-sort-link {
+  display: flex;
+  align-items: center;
+  color: #4c4c4c;
+}
+
+.g-search-results-sort-link-icon {
+  width: 24px;
+  height: 24px;
+  margin-right: 10px;
+  transform: rotateY(180deg);
+}
+
+.g-search-results-sort-btn {
+  display: flex;
+  align-items: center;
+  padding: 0;
+  margin-left: 15px;
+}
+
+.g-search-results-sort-btn.hidden {
+  display: none;
+}
+
+.g-search-results-sort-btn svg {
+  width: 18px;
+  height: 18px;
+  margin-right: 5px;
+}
+
+.g-search-results-sort-btn.desc svg {
+  transform: rotateX(180deg);
+}
+
+.g-search-results-sort-btn span {
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.g-search-results-footer {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  /* border-top: 1px solid #e4e4e4; */
+  border-bottom: 1px solid #e4e4e4;
+  margin-bottom: 8px;
 }
 
 .g-search-results-pane .g-sort-dropdown {
@@ -234,80 +654,154 @@ and will apply to all search facets */
 }
 
 .g-paging {
-	display: inline-block;
-	margin-left: 10px;
+  display: inline-block;
+  margin-left: 10px;
 }
 .g-paging-count {
-  display: inline-block;
-  margin: 0 10px;
+  position: absolute;
+  top: 0;
+  left: 0;
+  margin-left: 16px;
 }
 .g-paging .pagination {
   margin: 0;
+  font-size: 14px;
 }
-.g-paging .pagination-sm > li > a, .g-paging .pagination-sm > li > span {
-  padding: 1px 10px;
+
+.g-paging .pagination li a,
+.g-paging .pagination li.disabled a {
+  border: 0;
+  background: transparent;
+}
+
+.g-paging .pagination li a:hover {
+  color: #0079c1;
+  text-decoration: underline;
+}
+
+.g-paging .pagination li a:focus {
+  color: #0079c1;
+}
+
+.g-paging .pagination li a.g-paging-page-num {
+  padding: 4px 10px;
+  margin: 0 20px;
+  background: #2890ce;
+  color: #fff;
 }
 
 .g-search-results {
-  /*max-height: 400px;
-  overflow-y: auto;*/
-  max-height: -webkit-calc(100vh  - 16em);
-  max-height:    -moz-calc(100vh  - 16em);
-  max-height:         calc(100vh  - 16em);
-  overflow: auto;
+  width: 100%;
+  /* height: calc(100% - 80px); */
+  /* overflow: auto; */
 }
 
+/* ITEM CARD */
 .g-item-card {
-  margin-top: 5px;
-  padding: 4px;
-  border-bottom: 1px solid #cccccc;
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin: 12px 0;
+  padding: 8px 8px 8px 12px;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
+  background: #fff;
 }
 
-.g-item-card .g-item-title {
-  font-weight: bold;
+.g-item-card-content {
+  max-width: 100%;
+}
+
+.g-item-card-content-header {
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+}
+
+/*
+.g-item-card-content-header-info {
+}
+*/
+
+.g-item-card-content-main {
+  display: flex;
+}
+
+.g-item-card-content-info {
+  flex: 1;
+  min-width: 0;
+}
+
+g-item-card-content-info .g-item-card .g-item-title {
+  font-weight: 400;
+}
+
+.g-item-title {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 14px;
+  font-weight: 400;
+}
+
+.g-item-card-info-container {
+  display: flex;
+  align-items: center;
+}
+
+.g-item-card-info {
+  display: flex;
+  align-items: center;
+  margin-right: 15px;
+  color: #959595;
+}
+
+.g-item-card-info svg {
+  width: 16px;
+  height: 16px;
+  margin: 3px 4px 6px 0px;
 }
 
 .g-item-card .g-item-status {
   margin-right: 0.5em;
 }
 
-.g-item-card .g-item-description, 
-.g-item-card .g-item-actions, 
+.g-item-card .g-item-description,
 .g-item-card .g-item-owner-and-date {
-	margin-left: 20px;
+  margin: 0px 0px 6px 0px;
+  font-size: 12px;
 }
 
-.g-item-card .g-item-description, 
-.g-item-card .g-item-owner-and-date {
-  padding: 2px;
-  font-size: 10px;
-  width: 85%;
-}
 .g-item-card .g-item-thumbnail {
-	width: 80px;
-	height: 60px;
+  max-width: 64px;
+  padding: 4px 4px;
+}
+
+.g-item-thumbnail img {
+  width: 100%;
+  height: auto;
 }
 
 /* Style for descriptions creates a cap of a few lines of text  */
 .g-item-card .g-item-description {
-  max-height: 46px;
+  max-height: 40px;
   overflow: hidden;
-  width: 85%;
 }
 
 .g-item-card .g-item-actions {
-  padding: 2px;
-  clear: both;
+  font-size: 12px;
+  display: flex;
+  flex-wrap: wrap;
 }
-.g-item-card .g-item-actions > a, 
+
+.g-item-card .g-item-actions > a,
 .g-item-card .g-item-actions > .dropdown {
-  margin-right: 20px;
+  margin-right: 16px;
 }
 
 .g-item-card .g-item-actions > .dropdown > .dropdown-menu {
-	max-height: 300px;
-	overflow-y: auto;
-	padding-right: 20px;
+  max-height: 300px;
+  overflow-y: auto;
+  padding-right: 20px;
 }
 
 .g-scrollable-typeahead .tt-menu {
@@ -316,17 +810,18 @@ and will apply to all search facets */
 }
 
 .g-validation-errors {
-	margin-top: 12px;
-	max-height: 200px;
-	overflow-y: auto;
+  margin-top: 12px;
+  max-height: 200px;
+  overflow-y: auto;
 }
 
 .g-mapframe-container {
   position: absolute;
-  top: 50px; /* TODO ?? */
-  left: 0; 
-  bottom: 4px; 
+  top: 48px;
+  left: 0;
+  bottom: 4px;
   right: 0;
+  height: calc(100% - 96px);
 }
 .g-mapframe-container > iframe {
   width: 100%;
@@ -334,22 +829,24 @@ and will apply to all search facets */
   border: none;
 }
 
+/*
 .g-input-number {
-	/*width: 200px;*/
+  width: 200px;
 }
-
+*/
 .modal-body > .g-settings-pane {
-	max-height: 420px;
-	overflow-y: auto;
-	padding-right: 10px;
+  max-height: 420px;
+  overflow-y: auto;
+  padding-right: 10px;
 }
 
 .g-labels-right .form-group input {
-	margin-bottom: 10px;
+  margin-bottom: 10px;
 }
 .g-labels-right .control-label {
-	text-align: right;
-	color: #6e6e6e;
+  text-align: right;
+  color: #6e6e6e;
+  font-size: 14px;
 }
 
 .calcite .gxePrimaryToolbar > .gxeTabs > .gxeTabButton {
@@ -361,7 +858,7 @@ and will apply to all search facets */
   float: right;
 }
 .gxePrimaryToolbar > .gxeTabs > .gxeMessageArea {
-	clear: right;
+  clear: right;
   position: relative;
   left: 200px;
   margin-top: -20px;
@@ -369,7 +866,7 @@ and will apply to all search facets */
 */
 
 .g-temporal-bar {
-	margin-bottom: 5px;
+  margin-bottom: 5px;
 }
 .g-temporal-bar select {
   margin-left: 3px;
@@ -381,27 +878,27 @@ and will apply to all search facets */
 .g-temporal-bar .calendar {
   width: 16px;
   height: 16px;
-  margin: 0;
+  margin: 4px 0px 8px 0px;
   vertical-align: top;
   cursor: pointer;
 }
+/*
 .g-start-date {
-  
 }
+*/
 .g-end-date {
   float: right;
 }
+/*
 .g-start-date .g-start-date-calendar {
-  
 }
 .g-end-date .g-end-date-calendar {
 }
 .g-start-date .g-start-date-calendar-label {
-  
 }
 .g-end-date .g-end-date-calendar-label {
 }
-
+*/
 .g-temporal-d3 svg {
   /*font: 10px sans-serif;*/
   font-size: 9px;
@@ -421,7 +918,7 @@ and will apply to all search facets */
 }
 
 .g-temporal-d3 .area {
-	/* #818181 #a7a7a7 */
+  /* #818181 #a7a7a7 */
   fill: #a7a7a7;
 }
 
@@ -433,7 +930,7 @@ and will apply to all search facets */
 }
 
 .g-temporal-d3 .resize path {
-	/* #bfbfbf #b3b3b3 #818181 */
+  /* #bfbfbf #b3b3b3 #818181 */
   fill: #0079c1;
   fill-opacity: 0.6;
   stroke: #0079c1;
@@ -452,21 +949,22 @@ and will apply to all search facets */
   z-index: 99;
 }
 
-.dijitTooltipContainer, .dijitTooltipContainer > div, 
-.dijitTooltipContainer > div > div, 
+.dijitTooltipContainer,
+.dijitTooltipContainer > div,
+.dijitTooltipContainer > div > div,
 .dijitTooltipContainer > div > div > div {
   width: 100%;
   height: 100%;
 }
 
 .g-preview-error {
-  position: absolute; 
-  color: black; 
-  background-color: white; 
-  left: 32%; 
+  position: absolute;
+  color: black;
+  background-color: white;
+  left: 32%;
   right: 32%;
-  top: 50%; 
-  z-index: 1; 
+  top: 50%;
+  z-index: 1;
   padding: 3px;
   border: #000000 solid thin;
   border-radius: 4px;
@@ -474,8 +972,8 @@ and will apply to all search facets */
 }
 
 .g-access-groups {
-	margin: 0px;
-	padding: 5px;
+  margin: 0px;
+  padding: 5px;
   max-height: 100px;
   overflow-y: auto;
   border: 1px solid #cccccc;
@@ -483,58 +981,100 @@ and will apply to all search facets */
 }
 
 .modal-dialog .navbar {
-	min-height: 0px;
-	margin-bottom: 8px;
+  min-height: 0px;
+  margin-bottom: 8px;
+}
+
+/* ABOUT PANEL - CONTENT*/
+.g-about-content-row {
+  width: 1024px;
+  height: 100%;
+  margin: auto;
+  overflow: hidden;
+}
+
+/* FOOTER */
+.g-footer {
+  position: relative;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  padding: 12px;
+  background: #fff;
+  box-shadow: 0px -1px 2px 0px rgba(0, 0, 0, 0.05);
+}
+
+.g-footer-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 1024px;
+  margin: auto;
+}
+
+.g-footer-link {
+  margin-right: 20px;
 }
 
 /* Accessibility Changes */
 .btn-success {
-    color: #ffffff;
-    background-color: #338033;
-    border-color: #50834f;
+  color: #ffffff;
+  background-color: #338033;
+  border-color: #50834f;
 }
 
 a {
-    color: #005e95;
-    text-decoration: none;
+  color: #005e95;
+  text-decoration: none;
 }
 
 a.dropdown-toggle:focus {
-    outline: 5px auto -webkit-focus-ring-color;
+  outline: 5px auto -webkit-focus-ring-color;
 }
 
-.pagination > .disabled > span, .pagination > .disabled > span:hover, .pagination > .disabled > span:focus, .pagination > .disabled > a, .pagination > .disabled > a:hover, .pagination > .disabled > a:focus {
-    color: #595959;
-    background-color: #ffffff;
-    border-color: #cccccc;
-    cursor: not-allowed;
+.pagination > .disabled > span,
+.pagination > .disabled > span:hover,
+.pagination > .disabled > span:focus,
+.pagination > .disabled > a,
+.pagination > .disabled > a:hover,
+.pagination > .disabled > a:focus {
+  color: #595959;
+  background-color: #ffffff;
+  border-color: #cccccc;
+  cursor: not-allowed;
 }
 
 .offscreen {
-	position: absolute;
-	height: 1px;
-	width: 1px;
-	overflow: hidden;
-	clip-path: inset(1px 1px 1px 1px);
-	clip-path: inset(1px, 1px, 1px, 1px);
+  position: absolute;
+  height: 1px;
+  width: 1px;
+  overflow: hidden;
+  clip-path: inset(1px 1px 1px 1px);
+  clip-path: inset(1px, 1px, 1px, 1px);
 }
 
 .skip-to-content.offscreen:focus {
-	position: relative;
-	display: inline-block;
-	height: auto;
-	width: auto;
-	padding: 0.625em 1.25em;
-	background-color: #005e95;
-	color: #fff;
-	overflow: visible;
-	clip-path: none;
-	text-decoration: none;
+  position: relative;
+  display: inline-block;
+  height: auto;
+  width: auto;
+  padding: 0.625em 1.25em;
+  background-color: #005e95;
+  color: #fff;
+  overflow: visible;
+  clip-path: none;
+  text-decoration: none;
+}
+
+.g-open-search-result-links-container {
+  border: 0;
+  box-shadow: none;
+  background: transparent;
+  margin-bottom: 12px;
 }
 
 .g-open-search-result-links {
-  float: right;
-  padding: 1em;
+  text-align: center;
 }
 
 .g-open-search-result-link {
@@ -545,13 +1085,13 @@ a.dropdown-toggle:focus {
   margin-left: 10px;
 }
 
-
+/*
 .g-basic-from-value {
-  /*margin-right: 10px;*/
+  margin-right: 10px;
 }
-
 .g-basic-to-value {
 }
+*/
 
 .g-basic-from-value-input {
   width: 140px;
@@ -561,41 +1101,39 @@ a.dropdown-toggle:focus {
   width: 140px;
 }
 
+/*
 .g-basic-from-value-input-label {
-  
 }
 
 .g-basic-to-value-input-label {
-  
 }
-
-
 
 .g-from-value {
-  
 }
+*/
 
 .g-to-value {
   float: right;
 }
 
+/*
 .g-from-value-input {
-  
 }
 
 .g-to-value-input {
-  
 }
 
 .g-from-value-input-label {
-  
 }
 
 .g-to-value-input-label {
-  
+}
+*/
+.g-input-field-note {
+  font-size: 10px;
+  font-style: italic;
 }
 
-.g-input-field-note {
-	font-size: 10px;
-	font-style: italic;
+.nav-padding-fix {
+  padding: 0px !important;
 }
