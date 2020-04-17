@@ -1,78 +1,192 @@
 <div class="g-app" data-dojo-attach-point="contentNode">
-        <a class="offscreen skip-to-content" href="#searchBox">Skip to main content</a>
-	<nav class="navbar navbar-inverse">
-    <!-- <div class="navbar-header"><a class="navbar-brand" href="#">${i18n.nav.brand}</a></div>-->
-	  <ul class="nav navbar-nav">
-	    <li class="nav-item active">
-	      <a class="nav-link" href="#searchPanel" data-toggle="tab">${i18n.nav.search} <span class="sr-only">(current)</span></a>
-	    </li>
-	    <li class="nav-item">
-	      <a class="nav-link" href="#mapPanel" data-toggle="tab">${i18n.nav.map}</a>
-	    </li>
-        <!--
-	    <li class="nav-item">
-	      <a class="nav-link" href="#helpPanel" data-toggle="tab">${i18n.nav.help}</a>
-	    </li>
-        -->
-	    <li class="nav-item">
-	      <a class="nav-link" href="#aboutPanel" data-toggle="tab">${i18n.nav.about}</a>
-	    </li>
-	  </ul>
-	  
-	  <div class="g-tools pull-right">
-	    <span class="g-username" data-dojo-attach-point="usernameNode"></span>
-	    <a class="g-signin" href="#"
-	      data-dojo-attach-point="signInNode" 
-	      data-dojo-attach-event="onclick: signInClicked"
-	      >${i18n.nav.signIn}</a>
-		  <div id="idAppDropdown" class="dropdown pull-right g-options">
-		    <a href="#" class="dropdown-toggle" aria-label="Dropdown Menu" data-toggle="dropdown"
-		      ><span class="glyphicon glyphicon-menu-hamburger"></span></a>
-	      <ul class="dropdown-menu">
-	         <li class="divider"></li>
-           <li data-role="publisher" data-dojo-attach-point="createMetadataNode">
-             <a href="#" class="small" data-dojo-attach-event="onclick: createMetadataClicked">
-               ${i18n.nav.options.createMetadata}
-             </a>
-           </li>
-           <li data-role="publisher" data-dojo-attach-point="uploadNode">
-             <a href="#" class="small" data-dojo-attach-event="onclick: uploadClicked">
-               ${i18n.nav.options.uploadMetadata}
-             </a>
-           </li>	         
-	         <li class="divider"></li>
-           <li data-dojo-attach-point="createAccountNode">
-             <a href="#" class="small" target="_blank" data-dojo-attach-point="createAccountLink">
-               ${i18n.nav.options.createAccount}
-             </a>
-           </li>
-           <li data-dojo-attach-point="myProfileNode">
-             <a href="#" class="small" target="_blank" data-dojo-attach-point="myProfileLink">
-               ${i18n.nav.options.myProfile}
-             </a>
-           </li>
-	         <li data-dojo-attach-point="signOutNode" >
-	           <a href="#" class="small" data-dojo-attach-event="onclick: signOutClicked">
-	             ${i18n.nav.signOut}
-	           </a>
-	         </li>
-	      </ul>
-		  </div>
-	  </div> 
-	  
-	</nav>
+  <a class="offscreen skip-to-content" href="#searchBox">
+    Skip to main content
+  </a>
+
+  <nav class="g-header navbar-inverse">
+    <figure class="g-branding" data-dojo-attach-event="onclick: _onHome">
+      <img class="g-brand-logo" src="images/esri-logo-sym.png" />
+      <span class="navbar-brand">${i18n.nav.brand}</span>
+    </figure>
+
+    <ul class="nav navbar-nav">
+      <li class="nav-item active">
+        <a
+          class="nav-link"
+          href="#searchPanel"
+          data-toggle="tab"
+          data-dojo-attach-point="searchPanelLink"
+        >
+          ${i18n.nav.catalog}
+          <span class="sr-only">(current)</span>
+        </a>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="#mapPanel" data-toggle="tab">
+          ${i18n.nav.map}
+        </a>
+      </li>
+
+      <li class="nav-item" data-dojo-attach-point="adminOptionsBtnNode">
+        <a
+          class="g-nav-dropdown-link dropdown-toggle nav-padding-fix"
+          href="#"
+          aria-label="Dropdown Menu"
+          data-toggle="dropdown"
+        >
+          <span>${i18n.nav.admin}</span>
+          <svg class="g-nav-dropdown-icon" viewBox="0 0 24 24">
+            <path d="M7,10L12,15L17,10H7Z" />
+          </svg>
+        </a>
+
+        <ul class="dropdown-menu">
+          <li class="divider"></li>
+          <li data-role="publisher">
+            <a
+              href="#"
+              class="small"
+              data-dojo-attach-event="onclick: createMetadataClicked"
+            >
+              ${i18n.nav.options.createMetadata}
+            </a>
+          </li>
+          <li data-role="publisher">
+            <a
+              href="#"
+              class="small"
+              data-dojo-attach-event="onclick: uploadClicked"
+            >
+              ${i18n.nav.options.uploadMetadata}
+            </a>
+          </li>
+          <!-- TODO provide edit facet functionality in App.js
+          <li data-role="publisher">
+            <a
+              href="#"
+              class="small"
+              data-dojo-attach-event="onclick: editFacetClicked"
+            >
+              ${i18n.nav.options.editFacet}
+            </a>
+          </li>
+        --></ul>
+      </li>
+
+      <li class="nav-item">
+        <a class="nav-link" href="#aboutPanel" data-toggle="tab">
+          ${i18n.nav.about}
+        </a>
+      </li>
+    </ul>
+
+    <div class="g-tools">
+      <div
+        id="idAppDropdown"
+        class="dropdown g-options"
+        data-dojo-attach-point="userOptionsNode"
+      >
+        <a
+          href="#"
+          class="dropdown-toggle g-user"
+          aria-label="Dropdown Menu"
+          data-toggle="dropdown"
+        >
+          <img class="g-user-thumb" src="images/account-placehold.svg" />
+          <span class="g-username" data-dojo-attach-point="usernameNode"></span>
+        </a>
+
+        <ul class="dropdown-menu">
+          <li class="divider"></li>
+          <li class="divider"></li>
+          <li data-dojo-attach-point="createAccountNode">
+            <a
+              href="#"
+              class="small"
+              target="_blank"
+              data-dojo-attach-point="createAccountLink"
+            >
+              ${i18n.nav.options.createAccount}
+            </a>
+          </li>
+          <li data-dojo-attach-point="myProfileNode">
+            <a
+              href="#"
+              class="small"
+              target="_blank"
+              data-dojo-attach-point="myProfileLink"
+            >
+              ${i18n.nav.options.myProfile}
+            </a>
+          </li>
+          <li data-dojo-attach-point="signOutNode">
+            <a
+              href="#"
+              class="small"
+              data-dojo-attach-event="onclick: signOutClicked"
+            >
+              ${i18n.nav.signOut}
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <a
+        class="g-signin"
+        href="#"
+        data-dojo-attach-point="signInNode"
+        data-dojo-attach-event="onclick: signInClicked"
+      >
+        ${i18n.nav.signIn}
+      </a>
+    </div>
+  </nav>
+
   <div class="tab-content">
-    <div id="searchPanel" role="tabpanel" class="tab-pane fade in active" >
-		  <div data-dojo-type="app/main/SearchPanel" data-dojo-attach-point="searchPanel"></div>
+    <div id="searchPanel" role="tabpanel" class="tab-pane fade in active">
+      <div
+        data-dojo-type="app/main/SearchPanel"
+        data-dojo-attach-point="searchPanel"
+      ></div>
     </div>
-    <div id="mapPanel" role="tabpanel" class="tab-pane fade" >
-      <div data-dojo-type="app/main/MapPanel" data-dojo-attach-point="mapPanel"></div>
+    <div id="mapPanel" role="tabpanel" class="tab-pane fade">
+      <div
+        data-dojo-type="app/main/MapPanel"
+        data-dojo-attach-point="mapPanel"
+      ></div>
     </div>
-    <div id="helpPanel" role="tabpanel" class="tab-pane fade" >
-      <div data-dojo-type="app/main/HelpPanel" data-dojo-attach-point="helpPanel"></div>
+    <div id="aboutPanel" role="tabpanel" class="tab-pane fade">
+      <div
+        data-dojo-type="app/main/AboutPanel"
+        data-dojo-attach-point="aboutPanel"
+      ></div>
     </div>
-    <div id="aboutPanel" role="tabpanel" class="tab-pane fade" >
-      <div data-dojo-type="app/main/AboutPanel" data-dojo-attach-point="aboutPanel"></div>
+  </div>
+
+  <div class="g-footer">
+    <div class="g-footer-row">
+      <span>${i18n.footer.copyright}</span>
+
+      <!-- Quick links
+      <section class="g-footer-section">
+        
+        <a href="#" class="g-footer-link">${i18n.footer.quickLink1}</a>
+        <a href="#">${i18n.footer.quickLink2}</a>
+      </section>
+      -->
+
+      <!-- Social media icons and links
+      <section class="g-footer-section">
+        <a href="#">
+          <img src="images/facebook.svg" alt="Facebook Link">
+        </a>
+
+        <a href="#">
+          <img src="images/twitter.svg" alt="Twitter Link">
+        </a>
+      </section>
+      -->
     </div>
   </div>
 </div>

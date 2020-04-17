@@ -1,117 +1,143 @@
 <div  data-dojo-attach-point="contentNode">
-  <div class="g-search-pane row" data-dojo-type="app/search/SearchPane">
-    <div class="g-search-pane-left col-sm-6 col-md-3">
-      <div data-dojo-type="app/search/PageUrlFilter"></div>
-      <div data-dojo-type="app/search/SearchBox"></div>
-      <div data-dojo-type="app/search/SpatialFilter"
-        data-dojo-props="
-          field: 'envelope_geo',
-          pointField: 'envelope_cen_pt',
-          allowAggregation: true,
-          open: true,
-          label:'${i18n.search.criteria.map}'">
+  <div class="g-search-panel" data-dojo-type="app/search/SearchPane">
+    <div class="g-search-bar-row">
+      <div class="g-search-bar">
+        <span class="g-search-bar-title">Search Catalog</span>
+        <div data-dojo-type="app/search/SearchBox"></div>
       </div>
-      <div data-dojo-type="app/search/TemporalFilter"
-        data-dojo-props="
-          nestedPath:'timeperiod_nst',
-          field:'timeperiod_nst.begin_dt',
-          toField:'timeperiod_nst.end_dt',
-          interval:'year',
-          open:false,
-          label:'${i18n.search.criteria.timePeriod}'">
-      </div>
-      <div data-dojo-type="app/search/TemporalFilter"
-        data-dojo-props="
-          field:'sys_modified_dt',
-          interval:'day',
-          open:false,
-          label:'${i18n.search.criteria.date}'">
-      </div>
-      <!-- Uncomment to turn Paleo-Date search
-      <div data-dojo-type="app/search/BasicNumericFilter"
-        data-dojo-props="
-          field:'metadata_year_l',
-          label:'${i18n.search.criteria.paleoDate}'">
-      </div>
-      -->
-      
-      <!--
-      <div data-dojo-type="app/search/NumericFilter"
-        data-dojo-props="
-          field:'metadata_year_l',
-          interval:10000,
-          ticks:6,
-          places:0,
-          label:'Year (Paleo)'">
-      </div>
-      -->
-      <!--
-      <div data-dojo-type="app/search/NumericFilter"
-        data-dojo-props="
-          field:'metadata_year_i',
-          interval:10,
-          ticks:4,
-          places:0,
-          label:'Time Period'">
-      </div>      
+    </div>
 
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'sys_owner_s',open:false,label:'${i18n.search.criteria.owner}'">
+    <div class="g-search-content-row">
+      <div class="g-search-pane-left">
+        <div data-dojo-type="app/search/PageUrlFilter"></div>
+
+        <div class="g-filter-collapse g-filter-spatial" data-dojo-type="app/search/SpatialFilter"
+          data-dojo-props="
+            field: 'envelope_geo',
+            pointField: 'envelope_cen_pt',
+            allowAggregation: true,
+            open: true,
+            label:'${i18n.search.criteria.map}'">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TemporalFilter"
+          data-dojo-props="
+            nestedPath:'timeperiod_nst',
+            field:'timeperiod_nst.begin_dt',
+            toField:'timeperiod_nst.end_dt',
+            interval:'year',
+            open:false,
+            label:'${i18n.search.criteria.timePeriod}'">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TemporalFilter"
+          data-dojo-props="
+            field:'sys_modified_dt',
+            interval:'day',
+            open:false,
+            label:'${i18n.search.criteria.date}'">
+        </div>
+        <!-- Uncomment to turn Paleo-Date search
+        <div class="g-filter-collapse" data-dojo-type="app/search/BasicNumericFilter"
+          data-dojo-props="
+            field:'metadata_year_l',
+            label:'${i18n.search.criteria.paleoDate}'">
+        </div>
+        -->
+
+        <!--
+        <div data-dojo-type="app/search/NumericFilter"
+          data-dojo-props="
+            field:'metadata_year_l',
+            interval:10000,
+            ticks:6,
+            places:0,
+            label:'Year (Paleo)'">
+        </div>
+        -->
+        <!--
+        <div data-dojo-type="app/search/NumericFilter"
+          data-dojo-props="
+            nestedPath:'timeperiod_nst',
+            field:'timeperiod_nst.begin_year_l',
+            interval:1000,
+            ticks:4,
+            places:0,
+            label:'Year (Paleo)'">
+        </div>
+        -->
+        <!--
+        <div data-dojo-type="app/search/DateFilter"
+          data-dojo-props="field:'sys_created_dt',interval:'day',allowHistogram:false,label:'Created'">
+        </div>
+        -->
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'sys_owner_s',open:false,label:'${i18n.search.criteria.owner}'">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'apiso_TopicCategory_s',open:false,label:'${i18n.search.criteria.topicCategory}'">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'sys_metadatatype_s',label:'${i18n.search.criteria.metadataType}'">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'contact_organizations_s',label:'${i18n.search.criteria.organizations}'">
+        </div>
+
+        <!-- e.g. field:'keywords_s',label:'Keywords',props:{size:20,min_doc_count:500} -->
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'keywords_s',label:'${i18n.search.criteria.keywords}',props:{size:20}">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'src_source_type_s',label:'${i18n.search.criteria.originType}',props:{size:20, missing:'${i18n.search.criteria.missingSource}'}">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20, missing:'${i18n.search.criteria.missingSource}'}">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="
+            conditionallyDisabled: !AppContext.geoportal.supportsApprovalStatus,
+            field:'sys_approval_status_s',
+            label:'${i18n.search.criteria.approvalStatus}'">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="
+            conditionallyDisabled: !AppContext.geoportal.supportsGroupBasedAccess,
+            field:'sys_access_s',
+            label:'${i18n.search.criteria.access}'">
+        </div>
+
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="
+            conditionallyDisabled: !AppContext.geoportal.supportsGroupBasedAccess,
+            field:'sys_access_groups_s',
+            label:'${i18n.search.criteria.accessGroups}'">
+        </div>
+
+        <!-- Future release create filter capability -->
+        <button style="display: none;" class="g-filter-create-btn" type="button" name="button">
+          <svg class="g-filter-create-icon"viewBox="0 0 24 24">
+            <path d="M19,13H13V19H11V13H5V11H11V5H13V11H19V13Z" />
+          </svg>
+
+          <label>${i18n.search.criteria.createFilter}</label>
+        </button>
       </div>
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'src_disposition_s',open:false,label:'Disposition'">
+
+      <div class="g-search-pane-right">
+        <div data-dojo-type="app/search/AppliedFilters" data-dojo-props="autoExpand:true"></div>
+
+        <div data-dojo-type="app/search/ResultsPane"></div>
+
+        <div data-dojo-type="app/search/OpenSearchLinksPane"></div>
       </div>
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'src_data_category_s',open:false,label:'Data Category'">
-      </div>
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'src_type_media_s',open:false,label:'Type Media'">
-      </div>
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'contentType_s',open:false,label:'Content Type'">
-      </div>
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'apiso_TopicCategory_s',open:false,label:'${i18n.search.criteria.topicCategory}'">
-      </div>
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'sys_metadatatype_s',label:'${i18n.search.criteria.metadataType}'">
-      </div>  
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'contact_organizations_s',label:'${i18n.search.criteria.organizations}'">
-      </div>
-      <!-- e.g. field:'keywords_s',label:'Keywords',props:{size:20,min_doc_count:500} -->
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'keywords_s',label:'${i18n.search.criteria.keywords}',props:{size:20}">
-      </div>    
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'src_source_type_s',label:'${i18n.search.criteria.originType}',props:{size:20, missing:'${i18n.search.criteria.missingSource}'}">
-      </div> 
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20, missing:'${i18n.search.criteria.missingSource}'}">
-      </div> 
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="
-          conditionallyDisabled: !AppContext.geoportal.supportsApprovalStatus,
-          field:'sys_approval_status_s',
-          label:'${i18n.search.criteria.approvalStatus}'">
-      </div>  
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="
-          conditionallyDisabled: !AppContext.geoportal.supportsGroupBasedAccess,
-          field:'sys_access_s',
-          label:'${i18n.search.criteria.access}'">
-      </div>   
-      <div data-dojo-type="app/search/TermsAggregation"
-        data-dojo-props="
-          conditionallyDisabled: !AppContext.geoportal.supportsGroupBasedAccess,
-          field:'sys_access_groups_s',
-          label:'${i18n.search.criteria.accessGroups}'">
-      </div>  
     </div>
-    <div class="g-search-pane-right  col-sm-6 col-md-9">
-      <div data-dojo-type="app/search/AppliedFilters" data-dojo-props="autoExpand:true"></div>
-      <div data-dojo-type="app/search/ResultsPane"></div>
-      <div data-dojo-type="app/search/OpenSearchLinksPane"></div>
-    </div>
-  </div>    
+  </div>
 </div>
