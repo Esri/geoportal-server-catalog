@@ -31,7 +31,7 @@ define({
     },
 
     nav: {
-      brand: "Geoportal",
+      brand: "Geospatial Inventory Browser",
       home: "Home",
       search: "Search",
       catalog: "Catalog",
