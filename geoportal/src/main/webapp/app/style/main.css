@@ -1159,3 +1159,7 @@ a.dropdown-toggle:focus {
 .nav-padding-fix {
   padding: 0px !important;
 }
+
+.g-about-content-row h4 {
+  margin-top: 24px;
+}
