@@ -16,9 +16,9 @@
 }
 
 .g-banner-title { 
-    font-size: 32px;  
+    font-size: 22px;  
+    font-weight: bold;
 }
 
 .g-mapframe-container {
-    top: 107px;
 }
