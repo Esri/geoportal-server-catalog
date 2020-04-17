@@ -14,7 +14,7 @@
  */
 define({
   root: {
-    
+
     general: {
       cancel: "Cancel",
       clear: "Clear",
@@ -29,14 +29,16 @@ define({
       uploading: "Uploading...",
       working: "...",
     },
-    
+
     nav: {
       brand: "Geoportal",
       home: "Home",
       search: "Search",
+      catalog: "Catalog",
       map: "Map",
       help: "Help",
       about: "About",
+      admin: "Admin",
       content: "Content",
       welcomePattern: "{name}",
       signIn: "Sign In",
@@ -45,10 +47,11 @@ define({
         createAccount: "Create Account",
         createMetadata: "Create Metadata",
         myProfile: "My Profile",
-        uploadMetadata: "Upload Metadata"
+        uploadMetadata: "Upload Metadata",
+        editFacet: "Edit Facet"
       }
     },
-    
+
     login: {
       caption: "Sign In",
       label: "Sign In",
@@ -57,7 +60,7 @@ define({
       incomplete: "A Username and Password are required.",
       invalidCredentials: "Invalid credentials."
     },
-    
+
     search: {
       criteria: {
         map: "Map",
@@ -74,7 +77,8 @@ define({
         approvalStatus: "Approval Status",
         access: "Access",
         accessGroups: "Access Groups",
-        missingSource: "Editor/Upload"
+        missingSource: "Editor/Upload",
+        createFilter: "Create Filter"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -82,7 +86,8 @@ define({
         reset: "Reset"
       },
       searchBox: {
-        search: "Search"
+        search: "Search",
+        searchCatalog: "Search the Catalog"
       },
       spatialFilter: {
         label: "Map",
@@ -197,18 +202,20 @@ define({
         byRelevance: "By Relevance",
         byTitle: "By Title",
         byDate: "By Date",
+        asc: "ASC",
+        desc: "DESC",
       },
       paging: {
-        first: "<<",
+        first: "First",
         firstTip: "First",
-        previous: "<",
+        previous: "Previous",
         previousTip: "Previous",
-        next: ">",
+        next: "Next",
         nextTip: "Next",
-        last: ">>",
+        last: "Last",
         lastTip: "Last",
         lastTipDisabled: "Result exceeds limit of ${searchLimit} records.",
-        pagePattern: "Page {page}",
+        pagePattern: "{page}",
         countPattern: "{count} items"
       },
       termsAggregation: {
@@ -250,8 +257,9 @@ define({
         dcat: "DCAT result"
       }
     },
-    
+
     item: {
+      notAvailable: "N/A",
       actions: {
         html: "HTML",
         xml: "XML",
@@ -285,7 +293,7 @@ define({
         status: "Service availability = ${score}%"
       }
     },
-    
+
     content: {
       updateButton: "Update",
       applyTo: {
@@ -331,8 +339,8 @@ define({
         caption: "Set Field",
         tags: {
           caption: "Tags",
-          value: "User Tags (comma delimited)", 
-        }, 
+          value: "User Tags (comma delimited)",
+        },
         advanced: {
           caption: "Advanced",
           prompt: "",
@@ -345,7 +353,7 @@ define({
         button: "Upload"
       }
     },
-    
+
     metadataEditor: {
       caption: "Metadata",
       loading: "Starting editor...",
@@ -353,7 +361,7 @@ define({
       asTemplatePrompt: "Reset identifiers",
       xmlViewOnly: "The type of metadata associated with this item is not supported by the editor."
     },
-    
+
     errorTranslations: {
       "Unrecognized metadata type.": null,
       "Access denied - not owner.": null,
@@ -361,7 +369,12 @@ define({
       "Id not found.": null,
       "org.xml.sax.SAXParseException; lineNumber: 1; columnNumber: 1; Content is not allowed in prolog.": "Not an XML file.",
       "javax.json.stream.JsonParsingException: Invalid JSON": "Invalid JSON"
-    }
+    },
 
+    footer: {
+      "copyright": "© Geoportal",
+      "quickLink1": "Quick Link 1",
+      "quickLink2": "Quick Link 2"
+    }
   }
 });
