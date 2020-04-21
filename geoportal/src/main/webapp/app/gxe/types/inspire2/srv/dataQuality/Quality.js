@@ -1,6 +1,7 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/has",
+        "dojo/dom-style",
         "dojo/topic",
         "../../base/Descriptor",
         "esri/dijit/metadata/form/Tabs",
@@ -13,7 +14,7 @@ define(["dojo/_base/declare",
         "./Scope",
         "dojo/text!./templates/Quality.html",
         "dojo/i18n!../../../../../nls/i18nInspire"],
-function(declare, lang, has, topic, Descriptor, Tabs, AbstractObject, ObjectReference, 
+function(declare, lang, has, domStyle, topic, Descriptor, Tabs, AbstractObject, ObjectReference, 
          ConformanceReport, SrvConformanceReport, ConceptualConsistency, Lineage, Scope, 
          template, i18nInspire) {
 
@@ -26,13 +27,19 @@ function(declare, lang, has, topic, Descriptor, Tabs, AbstractObject, ObjectRefe
     postCreate: function() {
       this.inherited(arguments)
       
+      this.toggle(false)
+      
       this.own(topic.subscribe("inspire/service-type-changed", lang.hitch(this, function(serviceType) {
         var isOther = serviceType==="other"
-        this._forNetwork._isOptionallyOff = isOther
-        this._forInvokable._isOptionallyOff = !isOther
-        this._forNetwork.domNode.style.display = isOther? "none": "block"
-        this._forInvokable.domNode.style.display = !isOther? "none": "block"
+        this.toggle(isOther)
       })))
+    },
+    
+    toggle: function(isOther) {
+      this._forNetwork._isOptionallyOff = isOther
+      this._forInvokable._isOptionallyOff = !isOther
+      domStyle.set(this._forNetwork.domNode, "display", isOther? "none": "block")
+      domStyle.set(this._forInvokable.domNode, "display", !isOther? "none": "block")
     }
 
   });

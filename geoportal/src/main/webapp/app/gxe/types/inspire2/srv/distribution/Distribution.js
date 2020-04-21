@@ -1,6 +1,7 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/has",
+        "dojo/dom-style",
         "dojo/topic",
         "../../base/Descriptor",
         "esri/dijit/metadata/form/iso/AbstractObject",
@@ -8,7 +9,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/types/iso/gmd/distribution/DistributionFormat",
         "./TransferOptions",
         "dojo/text!./templates/Distribution.html"],
-function(declare, lang, has, topic, Descriptor, AbstractObject, ObjectReference, DistributionFormat, TransferOptions, template) {
+function(declare, lang, has, domStyle, topic, Descriptor, AbstractObject, ObjectReference, DistributionFormat, TransferOptions, template) {
 
   var oThisClass = declare(Descriptor, {
 
@@ -36,13 +37,13 @@ function(declare, lang, has, topic, Descriptor, AbstractObject, ObjectReference,
         
         this._forNetwork._isGxeElement = !isOther
         this._forNetwork._isOptionallyOff = isOther
-        this._forNetwork.domNode.style.display = isOther? "none": "block"
+        domStyle.set(this._forNetwork.domNode, "display", isOther? "none": "block")
         
 
         this._forInvokable.toggleContent(isOther, false)
         this._forInvokable._isGxeElement = isOther
         this._forInvokable._isOptionallyOff = !isOther
-        this._forInvokable.domNode.style.display = !isOther? "none": "block"
+        domStyle.set(this._forInvokable.domNode, "display", !isOther? "none": "block")
     }
 
   });
