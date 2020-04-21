@@ -20,6 +20,7 @@ define(["dojo/_base/declare",
   "dojo/request/xhr",
   "dojo/on",
   "app/context/app-topics",
+  "dojo/dom-style",
   "dojo/dom-class",
   "dojo/dom-construct",
   "dijit/_WidgetBase",
@@ -44,7 +45,7 @@ define(["dojo/_base/declare",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
   "app/preview/PreviewPane"],
-function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domConstruct,
+function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
   MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata,
@@ -497,20 +498,14 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       var owner = item.sys_owner_s;
       var date = item.sys_modified_dt;
       var permissions = ""
-      var idx, text = "", v;
-      if (AppContext.appConfig.searchResults.showDate && typeof date === "string" && date.length > 0) {
-        idx = date.indexOf("T");
+      
+      if (typeof date === "string" && date.length > 0) {
+        var idx = date.indexOf("T");
         if (idx > 0) date =date.substring(0,idx);
-        text = date;
       }
-      if (AppContext.appConfig.searchResults.showOwner && typeof owner === "string" && owner.length > 0) {
-        if (text.length > 0) text += " ";
-        text += owner;
-      }
-
+      
       if (AppContext.appUser.isAdmin() || this._isOwner(item)) {
-        if (AppContext.appConfig.searchResults.showAccess &&
-            AppContext.geoportal.supportsGroupBasedAccess) {
+        if (AppContext.geoportal.supportsGroupBasedAccess) {
           v = item.sys_access_s;
           if (text.length > 0) text += " - ";
           if (v === "private") {
@@ -519,36 +514,37 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
             permissions = i18n.content.setAccess._public;
           }
         }
-        if (AppContext.appConfig.searchResults.showApprovalStatus &&
-            AppContext.geoportal.supportsApprovalStatus) {
-          v = item.sys_approval_status_s;
-          if (typeof v === "string" && v.length > 0) {
-            v = i18n.content.setApprovalStatus[v];
-          }
-          if (typeof v === "string" && v.length > 0) {
-            if (text.length > 0) text += " - ";
-            text += v;
-          }
-        }
       }
 
       // set individual fields
-      if (owner.length > 0) {
-        util.setNodeText(this.ownerNode, owner);
+      if (AppContext.appConfig.searchResults.showOwner) {
+        if (owner.length > 0) {
+          util.setNodeText(this.ownerNode, owner);
+        } else {
+          util.setNodeText(this.ownerNode, i18n.item.notAvailable);
+        }
       } else {
-        util.setNodeText(this.ownerNode, i18n.item.notAvailable);
+        domStyle.set(this.ownerSection, "display", "none")
       }
 
-      if (date.length > 0) {
-        util.setNodeText(this.dateNode, date);
+      if (AppContext.appConfig.searchResults.showDate) {
+        if (date.length > 0) {
+          util.setNodeText(this.dateNode, date);
+        } else {
+          util.setNodeText(this.dateNode, i18n.item.notAvailable);
+        }
       } else {
-        util.setNodeText(this.dateNode, i18n.item.notAvailable);
+        domStyle.set(this.dateSection, "display", "none")
       }
 
-      if (permissions.length > 0) {
-        util.setNodeText(this.permissionsNode, permissions);
+      if (AppContext.appConfig.searchResults.showAccess) {
+        if (permissions.length > 0) {
+          util.setNodeText(this.permissionsNode, permissions);
+        } else {
+          util.setNodeText(this.permissionsNode, i18n.item.notAvailable);
+        }
       } else {
-        util.setNodeText(this.permissionsNode, i18n.item.notAvailable);
+        domStyle.set(this.permissionSection, "display", "none")
       }
     },
 
