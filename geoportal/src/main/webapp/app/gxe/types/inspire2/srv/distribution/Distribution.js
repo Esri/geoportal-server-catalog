@@ -31,12 +31,13 @@ function(declare, lang, has, domStyle, topic, Descriptor, AbstractObject, Object
         if (isOther) {
           this.storedNetworkOptionallyOff = this._forNetwork._isOptionallyOff
           this._forNetwork.toggleContent(false, false)
+          this._forNetwork._isOptionallyOff = true
         } else {
           this._forNetwork.toggleContent(!this.storedNetworkOptionallyOff, false)
+          this._forNetwork._isOptionallyOff = this.storedNetworkOptionallyOff
         }
         
         this._forNetwork._isGxeElement = !isOther
-        this._forNetwork._isOptionallyOff = isOther
         domStyle.set(this._forNetwork.domNode, "display", isOther? "none": "block")
         
 
