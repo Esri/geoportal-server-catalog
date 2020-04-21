@@ -26,6 +26,7 @@ function(declare, lang, has, topic, Descriptor, Element, Attribute, AbstractObje
       this.own(topic.subscribe("inspire/service-type-changed", lang.hitch(this, function(serviceType) {
         var isOther = serviceType==="other"
         this._forInvokable._isOptionallyOff = !isOther
+        this._forInvokable._isGxeElement = isOther
         this._forInvokable.domNode.style.display = !isOther? "none": "block"
       })))
       
