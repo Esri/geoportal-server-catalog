@@ -24,6 +24,7 @@ function(declare, lang, has, domStyle, topic, Descriptor, Element, Attribute, Ab
     postCreate: function() {
       this.inherited(arguments)
       
+      domStyle.set(this._forInvokable.domNode, "display", "none")
       this.toggle(false)
       
       this.own(topic.subscribe("inspire/service-type-changed", lang.hitch(this, function(serviceType) {
@@ -36,7 +37,6 @@ function(declare, lang, has, domStyle, topic, Descriptor, Element, Attribute, Ab
     toggle: function(isOther) {
       this._forInvokable._isOptionallyOff = !isOther
       this._forInvokable._isGxeElement = isOther
-      domStyle.set(this._forInvokable.domNode, "display", !isOther? "none": "block")
     }
 
   });
