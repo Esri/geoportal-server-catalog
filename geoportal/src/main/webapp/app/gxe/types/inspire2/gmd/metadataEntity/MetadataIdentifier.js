@@ -3,7 +3,7 @@ define(["dojo/_base/declare",
         "dojo/has",
         "../../base/Descriptor",
         "esri/dijit/metadata/types/iso/gmd/metadataEntity/MetadataFileIdentifier",
-        "esri/dijit/metadata/types/iso/gmd/metadataEntity/MetadataHierarchy",
+        "./MetadataHierarchy",
         "./MetadataLanguage",
         "dojo/text!./templates/MetadataIdentifier.html"],
 function(declare, lang, has, Descriptor, MetadataFileIdentifier, MetadataHierarchy, MetadataLanguage, template) {
