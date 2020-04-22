@@ -9,13 +9,15 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/CodeListValueAttribute",
         "esri/dijit/metadata/form/iso/CodeListElement",
         "esri/dijit/metadata/form/iso/CodeSpaceAttribute",
-        "dojo/text!./templates/CI_RoleCode.html"],
+        "dojo/text!./templates/CI_RoleCode.html",
+        "dojo/i18n!../../../../../nls/i18nInspire"],
 function(declare, lang, has, Descriptor, InputSelectOne, Options, Option, CodeListAttribute, CodeListValueAttribute,
-  CodeListElement, CodeSpaceAttribute, template) {
+  CodeListElement, CodeSpaceAttribute, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString: template
+    templateString: template,
+    i18nInspire: i18nInspire
 
   });
 
