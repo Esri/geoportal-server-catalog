@@ -32,10 +32,6 @@ define({
       invoke: "Invoke Service",
       other: "Other Service"
     },
-    
-    contactRole: {
-      hint: "At least one \"point of contact\" must be present"
-    },
 
     keywordSections: {
       dataTheme: "Inspire Data Theme",
@@ -236,6 +232,13 @@ define({
           performance: "0 or more",
           capacity: "0 or more, whole numbers only"
         }
+      }
+    },
+    
+    contact: {
+      role: {
+        primary: "Primary",
+        other: "Other"
       }
     }
 
