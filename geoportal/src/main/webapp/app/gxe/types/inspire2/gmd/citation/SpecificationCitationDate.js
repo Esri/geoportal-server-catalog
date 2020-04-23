@@ -1,21 +1,27 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/has",
+        "dojo/dom-style",
         "../../base/Descriptor",
         "esri/dijit/metadata/form/Element",
         "esri/dijit/metadata/form/InputDate",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/CodeListReference",
         "../../../../form/iso/GcoElement",
-        "esri/dijit/metadata/types/iso/gmd/citation/CI_DateTypeCode",
-        "dojo/text!./templates/CI_Date.html"],
-function(declare, lang, has, Descriptor, Element, InputDate, AbstractObject, CodeListReference, GcoElement,
-  CI_DateTypeCode, template) {
+        "dojo/text!./templates/SpecificationCitationDate.html"],
+function(declare, lang, has, domStyle, Descriptor, Element, InputDate, AbstractObject, CodeListReference, GcoElement,
+  template) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString: template
+    templateString: template,
     
+    postCreate: function() {
+      this.inherited(arguments)
+      
+      domStyle.set(this._dateType.domNode, "display", "none")
+    }
+
   });
 
   return oThisClass;
