@@ -14,13 +14,15 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "esri/dijit/metadata/types/iso/gmd/identification/MD_SpatialRepresentationTypeCode",
-        "dojo/text!./templates/DataRepresentation.html"],
+        "dojo/text!./templates/DataRepresentation.html",
+        "dojo/i18n!../../../../../nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Attribute, Element, ElementChoice, InputNumber, InputSelectOne, Options, Option,
-  AbstractObject, CodeListReference, GcoElement, ObjectReference, MD_SpatialRepresentationTypeCode, template) {
+  AbstractObject, CodeListReference, GcoElement, ObjectReference, MD_SpatialRepresentationTypeCode, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString : template
+    templateString : template,
+    i18nInspire: i18nInspire
 
   });
 

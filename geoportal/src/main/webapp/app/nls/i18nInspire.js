@@ -203,6 +203,13 @@ define({
       }
     },
     
+    dataRepresentation: {
+      hints: {
+        denominator: "0 or more, whole numbers only",
+        distance: "0 or more"
+      }
+    },
+    
     dataQuality: {
       scope: {
         levelDescription: "Level descripton",
