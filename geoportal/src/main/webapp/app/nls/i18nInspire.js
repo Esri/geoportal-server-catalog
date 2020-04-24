@@ -243,10 +243,7 @@ define({
     },
     
     contact: {
-      role: {
-        primary: "Primary",
-        other: "Other"
-      }
+      hint: "At least one contact with role 'Point of Contact' must be present"
     }
 
   })
