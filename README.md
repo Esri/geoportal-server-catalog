@@ -1,7 +1,14 @@
-# geoportal-server-catalog
-As part of the evolution of Geoportal Server, the catalog capability has been separated into its own module. This is because there are use cases where the catalog can be used without the need for harvesting or even metadata editing. 
+# Esri Geoportal Server Catalog
 
-This repository thus contains the catalog capability of Geoportal Server, while it's sibling [geoportal-server-harvester](https://github.com/ArcGIS/geoportal-server-harvester) is the new harvester of Geoportal Server.
+[![apache licensed](https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square)](https://raw.githubusercontent.com/Esri/geoportal-server-catalog/master/LICENSE.txt)
+
+Geoportal Server Catalog is the next generation metadata catalog and search application, based on elasticsearch. 
+
+Geoportal Server now provides the catalog and harvesting capabilities as separate modules. Separate modules are useful when users need the catalog capabilities without needing metadata harvesting, or possibly even metadata editing.
+
+This repository contains the capability of Geoportal Server Catalog, while it's sibling [Geoportal Server Harvester](https://github.com/ArcGIS/geoportal-server-harvester) is managed in a separate repository.
+
+(Note: The long-lived Geoportal Server v1.x is now fully retired; its archive is [available here](https://github.com/Esri/geoportal-server).)
 
 ## Releases and Downloads
 - 2.6.2 - Released May 3, 2019, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
