@@ -243,7 +243,7 @@ define({
     },
     
     contact: {
-      hint: "At least one contact with role 'Point of Contact' must be present"
+      hint: "At least one contact with role \"Point of Contact\" must be present"
     }
 
   })
