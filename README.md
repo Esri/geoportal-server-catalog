@@ -11,7 +11,7 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 (Note: The long-lived Esri Geoportal Server v1 is now retired; its archive is [available here](https://github.com/Esri/geoportal-server).)
 
 ## Releases and Downloads
-- 2.6.2 - Released May 3, 2019, click [here](https://github.com/ArcGIS/geoportal-server-catalog/releases) for release notes and downloads.
+- 2.6.3 - released April 7, 2020, click here for release notes and downloads.
 
 ## Can't Wait to Get Started?
 - Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
