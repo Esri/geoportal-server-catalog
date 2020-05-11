@@ -5,7 +5,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "../extent/GeographicElement",
-        "esri/dijit/metadata/types/iso/gmd/extent/TemporalElement",
+        "../extent/TemporalElement",
         "dojo/text!./templates/ResourceExtent.html"],
 function(declare, lang, has, Descriptor, AbstractObject, ObjectReference, GeographicElement, TemporalElement, template) {
 
