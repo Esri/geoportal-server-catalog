@@ -244,6 +244,12 @@ define({
     
     contact: {
       hint: "At least one contact with role \"Point of Contact\" must be present"
+    },
+    
+    serviceIdentification: {
+      contact: {
+        hint: "At least one contact with role \"Custodian\" must be present for interoperable or harmonised services"
+      }
     }
 
   })
