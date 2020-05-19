@@ -11,7 +11,7 @@ define([],function(){var obj={
     allowedTypeKeys: [
       "arcgis", "fgdc", 
       "iso-19115", "iso-19119", "iso-19115-2",
-      "inspire2-iso-19115", "inspire2-iso-19119", 
+      "inspire2-iso-19119", "inspire2-iso-19115",  
       "gemini-iso-19115", "gemini-iso-19119"
     ],
     basemap: "hybrid",
