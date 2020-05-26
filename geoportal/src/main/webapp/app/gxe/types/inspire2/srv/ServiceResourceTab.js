@@ -6,7 +6,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/types/iso/srv/ContainsOperations",
         "esri/dijit/metadata/types/iso/srv/CouplingType",
         "./OperatesOn",
-        "esri/dijit/metadata/types/iso/srv/ServiceExtent",
+        "./ServiceExtent",
         "./ServiceType",
         "dojo/text!./templates/ServiceResourceTab.html"],
 function(declare, lang, has, Descriptor, Tabs, ContainsOperations, CouplingType, OperatesOn, ServiceExtent, ServiceType, template) {
