@@ -6,12 +6,14 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/GcoElement",
         "./SpecificationCitationDate",
-        "dojo/text!./templates/SpecificationCitation.html"],
-function(declare, lang, has, Descriptor, Element, AbstractObject, GcoElement, CI_Date, template) {
+        "dojo/text!./templates/SpecificationCitation.html",
+        "dojo/i18n!../../../../../nls/i18nInspire"],
+function(declare, lang, has, Descriptor, Element, AbstractObject, GcoElement, CI_Date, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString: template
+    templateString: template,
+    i18nInspire: i18nInspire
 
   });
 

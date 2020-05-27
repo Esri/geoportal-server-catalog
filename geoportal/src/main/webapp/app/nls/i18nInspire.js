@@ -197,6 +197,14 @@ define({
       fullDate: "The value must be a full date."
     },
     
+    identification: {
+      keywords: {
+        specificationCitation: {
+          hint: "(Always group keywords from the same thesaurus in one collection)"
+        }
+      }
+    },
+    
     distributionInfo: {
       online: {
         description: "Description"
