@@ -1,0 +1,140 @@
+<div data-dojo-attach-point="containerNode">
+
+  <!-- gmd:resourceConstraints/gmd:MD_Constraints -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+    data-dojo-props="target:'gmd:resourceConstraints',
+      label:'${i18nIso.MD_Constraints.caption}',
+      matchTopNode: [
+        {
+           qPath: 'gmd:MD_LegalConstraints/gmd:useConstraints',
+          qValue: null,
+          qMode: 'must'
+        }  
+      ]">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+      data-dojo-props="target:'gmd:MD_LegalConstraints'">
+      
+      <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference"
+        data-dojo-props="target:'gmd:useConstraints',
+          label:'${i18nIso.MD_Constraints.useLimitation}'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement"
+          data-dojo-props="target:'gmd:MD_RestrictionCode'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeSpaceAttribute"></div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListAttribute"
+            data-dojo-props="value:'${codeListPrefix}MD_RestrictionCode'"></div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute" data-dojo-props="useDisplayValue: true">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="fixed:true">
+              <div data-dojo-type="esri/dijit/metadata/form/Options">
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nIso.MD_RestrictionCode.otherRestrictions}',
+                    value:'otherRestrictions'"></div>                                                        
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>  
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'gmd:otherConstraints',
+          label:'${i18nIso.MD_LegalConstraints.otherConstraints}'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement"
+          data-dojo-props="target:'gmx:Anchor'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute" data-dojo-props="target:'xlink:href', useDisplayValue: true">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+              <div data-dojo-type="esri/dijit/metadata/form/Options">
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'',value:''"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.useConstraints.otherConstraints.conditionsUnknown}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/conditionsUnknown'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.useConstraints.otherConstraints.noConditions}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/ConditionsApplyingToAccessAndUse/noConditionsApply'"></div>                                                        
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+  
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+    data-dojo-props="target:'gmd:resourceConstraints',
+      label:'${i18nIso.MD_LegalConstraints.caption}',
+      matchTopNode: [
+        {
+           qPath: 'gmd:MD_LegalConstraints/gmd:accessConstraints',
+          qValue: null,
+          qMode: 'must'
+        }  
+      ]">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+      data-dojo-props="target:'gmd:MD_LegalConstraints'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference"
+        data-dojo-props="target:'gmd:accessConstraints',
+          label:'${i18nIso.MD_LegalConstraints.accessConstraints}'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement"
+          data-dojo-props="target:'gmd:MD_RestrictionCode'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeSpaceAttribute"></div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListAttribute"
+            data-dojo-props="value:'${codeListPrefix}MD_RestrictionCode'"></div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute" data-dojo-props="useDisplayValue: true">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne" data-dojo-props="fixed:true">
+              <div data-dojo-type="esri/dijit/metadata/form/Options">
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nIso.MD_RestrictionCode.otherRestrictions}',
+                    value:'otherRestrictions'"></div>                                                        
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>  
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'gmd:otherConstraints',
+          label:'${i18nIso.MD_LegalConstraints.otherConstraints}'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement"
+          data-dojo-props="target:'gmx:Anchor'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute" data-dojo-props="target:'xlink:href', useDisplayValue: true">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+              <div data-dojo-type="esri/dijit/metadata/form/Options">
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'',value:''"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.noLimitations}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/noLimitations'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1a}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1a'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1b}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1b'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1c}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1c'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1d}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1d'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1e}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1e'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1f}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1f'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1g}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1g'"></div>                                                        
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nInspire.accessConstraints.otherConstraints.limited1h}',
+                    value:'http://inspire.ec.europa.eu/metadata-codelist/LimitationsOnPublicAccess/INSPIRE_Directive_Article13_1h'"></div>                                                        
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+</div>
