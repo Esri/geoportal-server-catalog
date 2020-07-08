@@ -18,7 +18,7 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 - Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
 
 ## Features
-* **Metadata editor** - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE (Data), INSPIRE (Service), GEMINI (Data), GEMINI (Service)
+* **Metadata editor** - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE 2.0.1 (Data), INSPIRE 2.0.1 (Service), GEMINI (Data), GEMINI (Service)
 * **Faceted Search** - Configure different facets to allow your user to filter from the hay stack to the needle
 * **Scalability** - Thank you elasticsearch for providing multi-node configuration support
 * **OGC CSW 3.0.0** - Standards compliant catalog service interface
