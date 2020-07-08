@@ -11,24 +11,25 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 (Note: The long-lived Esri Geoportal Server v1 is now retired; its archive is [available here](https://github.com/Esri/geoportal-server).)
 
 ## Releases and Downloads
+- 2.6.4 - released July 8, 2020, [click here](https://github.com/Esri/geoportal-server-catalog/wiki) for release notes and downloads.
 - 2.6.3 - released April 7, 2020, [click here](https://github.com/Esri/geoportal-server-catalog/wiki) for release notes and downloads.
 
 ## Can't Wait to Get Started?
 - Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
 
 ## Features
-* Metadata editor - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE (Data), INSPIRE (Service), GEMINI (Data), GEMINI (Service)
-* Faceted Search - Configure different facets to allow your user to filter from the hay stack to the needle
-* Scalability - Thank you elasticsearch for providing multi-node configuration support
-* OGC CSW 3.0.0 - Standards compliant catalog service interface
-* Many metadata formats - Extend the configuration with your favorite XML format
-* Built-in Viewer - Use the app we include or build one using Web AppBuilder and hook it up!
-* No more database - Yes that's a feature!
+* **Metadata editor** - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE (Data), INSPIRE (Service), GEMINI (Data), GEMINI (Service)
+* **Faceted Search** - Configure different facets to allow your user to filter from the hay stack to the needle
+* **Scalability** - Thank you elasticsearch for providing multi-node configuration support
+* **OGC CSW 3.0.0** - Standards compliant catalog service interface
+* **Many metadata formats** - Extend the configuration with your favorite XML format
+* **Built-in Viewer** - Use the app we include or build one using Web AppBuilder and hook it up!
+* **No more database** - Yes that's a feature!
 
 ## Requirements
 
-* Elasticsearch 5.0 or higher
-* Tomcat 8
+* Elasticsearch 6.0 or higher
+* Tomcat 9.x
 
 ## Installation
 - See the [installation instructions](https://github.com/Esri/geoportal-server-catalog/wiki/Installation) on the wiki.
@@ -47,7 +48,7 @@ Esri welcomes contributions from anyone and everyone. Please see our [guidelines
 
 
 ## Licensing
-Copyright 2016 Esri
+Copyright 2020 Esri
 
 Licensed under the Apache License, Version 2.0 (the "License");
 you may not use this file except in compliance with the License.
