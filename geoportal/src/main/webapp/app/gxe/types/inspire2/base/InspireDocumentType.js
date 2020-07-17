@@ -53,7 +53,7 @@ function(declare, lang, has, domStyle, DocumentType, PortalItemTransformer, i18n
       this.addNamespace("gmd", "http://www.isotc211.org/2005/gmd");
       this.addNamespace("gco", "http://www.isotc211.org/2005/gco");
       this.addNamespace("srv", "http://www.isotc211.org/2005/srv");
-      this.addNamespace("gml","http://www.opengis.net/gml/3.2");
+      this.addNamespace("gml","http://www.opengis.net/gml");
       this.addNamespace("gmx","http://www.isotc211.org/2005/gmx");
       
       this.addNamespace("xlink", "http://www.w3.org/1999/xlink");
