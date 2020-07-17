@@ -4,7 +4,7 @@
   <groupId>com.esri.geoportal</groupId>
   <artifactId>geoportal-search</artifactId>
   <packaging>war</packaging>
-  <version>2.6.4-RELEASE</version>
+  <version>3.6.5-SNAPSHOT</version>
   <name>geoportal-search</name>
   <url>http://maven.apache.org</url>
   <dependencies>
