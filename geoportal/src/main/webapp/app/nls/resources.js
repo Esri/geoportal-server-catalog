@@ -78,7 +78,8 @@ define({
         access: "Access",
         accessGroups: "Access Groups",
         missingSource: "Editor/Upload",
-        createFilter: "Create Filter"
+        createFilter: "Create Filter",
+        dataType: "Data Type"
       },
       componentSettings: {
         componentLabel: "Label",
