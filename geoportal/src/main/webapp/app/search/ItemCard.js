@@ -264,27 +264,27 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         var v = item.sys_metadatatype_s;
         var actionsNode = this.actionsNode;
         var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
-        var htmlNode = domConstruct.create("a",{
-          href: uri+"/html",
-          target: "_blank",
-          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.html, title: item.title}),
-          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.html, title: item.title}),
-          innerHTML: i18n.item.actions.html
-        },actionsNode);
-        var xmlNode = domConstruct.create("a",{
-          href: uri+"/xml",
-          target: "_blank",
-          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
-          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
-          innerHTML: i18n.item.actions.xml
-        },actionsNode);
-        var jsonNode = domConstruct.create("a",{
-          href: uri+"?pretty=true",
-          target: "_blank",
-          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
-          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
-          innerHTML: i18n.item.actions.json
-        },actionsNode);
+//        var htmlNode = domConstruct.create("a",{
+//          href: uri+"/html",
+//          target: "_blank",
+//          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.html, title: item.title}),
+//          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.html, title: item.title}),
+//          innerHTML: i18n.item.actions.html
+//        },actionsNode);
+//        var xmlNode = domConstruct.create("a",{
+//          href: uri+"/xml",
+//          target: "_blank",
+//          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
+//          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
+//          innerHTML: i18n.item.actions.xml
+//        },actionsNode);
+//        var jsonNode = domConstruct.create("a",{
+//          href: uri+"?pretty=true",
+//          target: "_blank",
+//          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
+//          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
+//          innerHTML: i18n.item.actions.json
+//        },actionsNode);
         if (v === "json") {
           var dataNode = domConstruct.create("a",{
             href: "#",
@@ -297,19 +297,19 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
         if (AppContext.geoportal.supportsApprovalStatus || 
             AppContext.geoportal.supportsGroupBasedAccess) {
           var client = new AppClient();
-          htmlNode.href = client.appendAccessToken(htmlNode.href);
-          xmlNode.href = client.appendAccessToken(xmlNode.href);
-          jsonNode.href = client.appendAccessToken(jsonNode.href);
+//          htmlNode.href = client.appendAccessToken(htmlNode.href);
+//          xmlNode.href = client.appendAccessToken(xmlNode.href);
+//          jsonNode.href = client.appendAccessToken(jsonNode.href);
         }
         if (typeof v === "string" && v === "json") {
-          htmlNode.style.visibility = "hidden";
-          htmlNode.style.display = "none";
-          xmlNode.style.visibility = "hidden";
-          jsonNode.style.visibility = "hidden";
+//          htmlNode.style.visibility = "hidden";
+//          htmlNode.style.display = "none";
+//          xmlNode.style.visibility = "hidden";
+//          jsonNode.style.visibility = "hidden";
           
-          htmlNode.style.display = "none";
-          xmlNode.style.display = "none";
-          jsonNode.style.display = "none";
+//          htmlNode.style.display = "none";
+//          xmlNode.style.display = "none";
+//          jsonNode.style.display = "none";
         }
       }
     },
