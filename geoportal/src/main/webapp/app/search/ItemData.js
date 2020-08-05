@@ -28,13 +28,79 @@ define([
         templateString: template,
         i18n: i18n,
         
+        // list specific fields in the desired order; fields not mentioned will be placed last in the alphabetic order.
+        fieldOrder: ["Title", "Map Nw Lon Lat", "Map Nw Xy", "Location", "Publication Date"],
+        // list field to skip
+        fieldsToDrop: ["Publication Date Txt"],
+        // fields to rename
+        fieldsToRename: {
+          "Map Nw Lon Lat": "Longitude, Latitude",
+          "Map Nw Xy": "X, Y"
+        },
+        
         postCreate: function() {
           this.inherited(arguments);
-          array.filter(Object.keys(this.item), function(key) { return key.indexOf("src_")==0})
+          
+          // normalize special fileds names
+          this.fieldOrder = this.fieldOrder.map( function(name) {
+            return name.toLowerCase();
+          });
+          this.fieldsToDrop = this.fieldsToDrop.map( function(name) {
+            return name.toLowerCase();
+          });
+          
+          // combine lon lat into a single field
+          this.item.src_map_nw_lon_lat_txt = "" + this.item.src_map_nw_lon_d + ", " + this.item.src_map_nw_lat_d;
+          delete this.item.src_map_nw_lon_d;
+          delete this.item.src_map_nw_lat_d;
+          
+          // combine x y into a single field
+          this.item.src_map_nw_xy_txt = "" + this.item.src_map_nw_x_d + ", " + this.item.src_map_nw_y_d;
+          delete this.item.src_map_nw_x_d;
+          delete this.item.src_map_nw_y_d;
+          
+          array
+               // select only 'src_' fields
+               .filter(Object.keys(this.item), function(key) { return key.indexOf("src_")==0})
+               // skip operational fields: src_source_,  src_uri_, src_task_ref_
                .filter(function(key) { return !key.indexOf("src_source_")==0 && !key.indexOf("src_uri_")==0  && !key.indexOf("src_task_ref_")==0})
+               // create key-value pair for each key
                .map(lang.hitch(this, function(key) {return {key: key, value: this.item[key]}}))
+               // select only non empty values
                .filter(function(kvp) {return kvp.value!=null && (typeof kvp.value == "string"? kvp.value.trim().length>0: true)})
+               // drop time from date/time
+               .map(function(kvp) { 
+                  if (kvp.key.endsWith("_dt")) { 
+                   kvp.value = kvp.value.split("T")[0];
+                  }; 
+                  return kvp; 
+               })
+               // remove prefixes and suffixes from the names
                .map(function(kvp) { return {key: kvp.key.replace(/^src_/g, "").replace(/_[^_]+$/gi,"").replace(/_+/gi," "), value: kvp.value}})
+               .filter(lang.hitch(this, function(kvp) {
+                 return this.fieldsToDrop.indexOf(kvp.key.toLowerCase()) < 0;
+               }))
+               .sort(lang.hitch(this, function(kvp1, kvp2) {
+                 var idx1 = this.fieldOrder.indexOf(kvp1.key.toLowerCase());
+                 var idx2 = this.fieldOrder.indexOf(kvp2.key.toLowerCase());
+                 
+                 if (idx1>=0 && idx2>=0) {
+                   return Math.sign(idx1-idx2);
+                 }
+                 
+                 if (idx1 >= 0) return -1;
+                 if (idx2 >= 0) return 1;
+                 
+                 return kvp1.key.localeCompare(kvp2.key);
+               }))
+               // capitalize names and rename names
+               .map(lang.hitch(this, function(kvp) {
+                 kvp.key = kvp.key.split(" ").map(function(part) { return part.charAt(0).toUpperCase() + part.slice(1); }).join(" ");
+                 var renamed = this.fieldsToRename[kvp.key];
+                 if (renamed) kvp.key = renamed;
+                 return kvp; 
+               }))
+               // create data row
                .forEach(lang.hitch(this, function(kvp){
                   this._appendData(kvp.key, kvp.value);
                }));
