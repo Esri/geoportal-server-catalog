@@ -40,31 +40,31 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
       var self = this;
       this.updateUI();
 
-      var ignoreMapPanelActivated = false;
+//      var ignoreMapPanelActivated = false;
       $("a[href='#searchPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
         this.setHash('searchPanel')
       }));
-      $("a[href='#mapPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
-        this.setHash('mapPanel')
-        if (!ignoreMapPanelActivated && !self.mapPanel.mapWasInitialized) {
-          self.mapPanel.ensureMap();
-        }
-      }));
+//      $("a[href='#mapPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
+//        this.setHash('mapPanel')
+//        if (!ignoreMapPanelActivated && !self.mapPanel.mapWasInitialized) {
+//          self.mapPanel.ensureMap();
+//        }
+//      }));
       $("a[href='#aboutPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
         this.setHash('aboutPanel')
       }));
-      topic.subscribe(appTopics.AddToMapClicked,lang.hitch(this, function(params){
-        if (self.mapPanel.mapWasInitialized) {
-          $("a[href='#mapPanel']").tab("show");
-          self.mapPanel.addToMap(params);
-        } else {
-          var urlParams = {resource: params.type+":"+this.normalizeUrl(params.url)};
-          ignoreMapPanelActivated = true;
-          $("a[href='#mapPanel']").tab("show");
-          self.mapPanel.ensureMap(urlParams);
-          ignoreMapPanelActivated = false;
-        }
-      }));
+//      topic.subscribe(appTopics.AddToMapClicked,lang.hitch(this, function(params){
+//        if (self.mapPanel.mapWasInitialized) {
+//          $("a[href='#mapPanel']").tab("show");
+//          self.mapPanel.addToMap(params);
+//        } else {
+//          var urlParams = {resource: params.type+":"+this.normalizeUrl(params.url)};
+//          ignoreMapPanelActivated = true;
+//          $("a[href='#mapPanel']").tab("show");
+//          self.mapPanel.ensureMap(urlParams);
+//          ignoreMapPanelActivated = false;
+//        }
+//      }));
 
       topic.subscribe(appTopics.SignedIn,function(params){
         self.updateUI();
