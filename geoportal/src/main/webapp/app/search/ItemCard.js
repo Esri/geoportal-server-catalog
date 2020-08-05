@@ -105,7 +105,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       this._renderItemLinks(hit._id,item);
       this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
-      this._renderAddToMap(item,links);
+//      this._renderAddToMap(item,links);
       this._renderServiceStatus(item);
       this._renderUrlLinks(item);
       this._renderId(item);
@@ -230,34 +230,34 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       }));
     },
 
-    _renderAddToMap: function(item,links) {
-      if (links.length === 0) return;
-      var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
-      var actionsNode = this.actionsNode;
-      array.some(links, lang.hitch(this, function(u){
-        var serviceType = new ServiceType();
-        serviceType.checkUrl(u);
-        //console.warn("serviceType",serviceType.isSet(),serviceType);
-        if (serviceType.isSet()) {
-          domConstruct.create("a",{
-            href: "javascript:void(0)",
-            innerHTML: i18n.item.actions.addToMap,
-            title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.addToMap, title: item.title}),
-            "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.addToMap, title: item.title}),
-            onclick: function() {
-              topic.publish(appTopics.AddToMapClicked,serviceType);
-            }
-          },actionsNode);
-
-          // create clickable 'Preview' link if allowes
-          if (PreviewUtil.canPreview(serviceType)) {
-            this._renderPreview(item, actionsNode, serviceType);
-          }
-
-          return true;
-        }
-      }));
-    },
+//    _renderAddToMap: function(item,links) {
+//      if (links.length === 0) return;
+//      var endsWith = function(v,sfx) {return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);};
+//      var actionsNode = this.actionsNode;
+//      array.some(links, lang.hitch(this, function(u){
+//        var serviceType = new ServiceType();
+//        serviceType.checkUrl(u);
+//        //console.warn("serviceType",serviceType.isSet(),serviceType);
+//        if (serviceType.isSet()) {
+//          domConstruct.create("a",{
+//            href: "javascript:void(0)",
+//            innerHTML: i18n.item.actions.addToMap,
+//            title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.addToMap, title: item.title}),
+//            "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.addToMap, title: item.title}),
+//            onclick: function() {
+//              topic.publish(appTopics.AddToMapClicked,serviceType);
+//            }
+//          },actionsNode);
+//
+//          // create clickable 'Preview' link if allowes
+//          if (PreviewUtil.canPreview(serviceType)) {
+//            this._renderPreview(item, actionsNode, serviceType);
+//          }
+//
+//          return true;
+//        }
+//      }));
+//    },
 
     _renderItemLinks: function(itemId,item) {
       if (AppContext.appConfig.searchResults.showLinks) {
