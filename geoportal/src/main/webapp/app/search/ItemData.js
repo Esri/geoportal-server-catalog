@@ -29,7 +29,7 @@ define([
         i18n: i18n,
         
         // list specific fields in the desired order; fields not mentioned will be placed last in the alphabetic order.
-        fieldOrder: ["Title", "Map Nw Lon Lat", "Map Nw Xy", "Location", "Publication Date"],
+        fieldOrder: ["Item Title", "Map Nw Lon Lat", "Map Nw Xy", "Location", "Publication Date", "Type Media"],
         // list field to skip
         fieldsToDrop: ["Publication Date Txt"],
         // fields to rename
@@ -50,14 +50,28 @@ define([
           });
           
           // combine lon lat into a single field
-          this.item.src_map_nw_lon_lat_txt = "" + this.item.src_map_nw_lon_d + ", " + this.item.src_map_nw_lat_d;
-          delete this.item.src_map_nw_lon_d;
-          delete this.item.src_map_nw_lat_d;
+          if (this.item.src_map_nw_lon_d && this.item.src_map_nw_lat_d) {
+            this.item.src_map_nw_lon_lat_txt = "" + this.item.src_map_nw_lon_d + ", " + this.item.src_map_nw_lat_d;
+            delete this.item.src_map_nw_lon_d;
+            delete this.item.src_map_nw_lat_d;
+          }
+          if (this.item.src_map_nw_lon_i && this.item.src_map_nw_lat_i) {
+            this.item.src_map_nw_lon_lat_txt = "" + this.item.src_map_nw_lon_i + ", " + this.item.src_map_nw_lat_i;
+            delete this.item.src_map_nw_lon_i;
+            delete this.item.src_map_nw_lat_i;
+          }
           
           // combine x y into a single field
-          this.item.src_map_nw_xy_txt = "" + this.item.src_map_nw_x_d + ", " + this.item.src_map_nw_y_d;
-          delete this.item.src_map_nw_x_d;
-          delete this.item.src_map_nw_y_d;
+          if (this.item.src_map_nw_x_d && this.item.src_map_nw_y_d) {
+            this.item.src_map_nw_xy_txt = "" + this.item.src_map_nw_x_d + ", " + this.item.src_map_nw_y_d;
+            delete this.item.src_map_nw_x_d;
+            delete this.item.src_map_nw_y_d;
+          }
+          if (this.item.src_map_nw_x_i && this.item.src_map_nw_y_i) {
+            this.item.src_map_nw_xy_txt = "" + this.item.src_map_nw_x_i + ", " + this.item.src_map_nw_y_i;
+            delete this.item.src_map_nw_x_i;
+            delete this.item.src_map_nw_y_i;
+          }
           
           array
                // select only 'src_' fields
