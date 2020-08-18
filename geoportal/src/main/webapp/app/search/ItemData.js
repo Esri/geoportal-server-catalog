@@ -29,13 +29,16 @@ define([
         i18n: i18n,
         
         // list specific fields in the desired order; fields not mentioned will be placed last in the alphabetic order.
-        fieldOrder: ["Item Title", "Map Nw Lon Lat", "Map Nw Xy", "Location", "Publication Date", "Type Media"],
+        fieldOrder: ["Item Title", "Map Nw Lon Lat", "Map Nw Xy", "Map Ne Xy","Map Sw Xy","Map Se Xy","Location", "Publication Date", "Type Media"],
         // list field to skip
         fieldsToDrop: ["Publication Date Txt"],
         // fields to rename
         fieldsToRename: {
           "Map Nw Lon Lat": "Longitude, Latitude",
-          "Map Nw Xy": "X, Y"
+          "Map Nw Xy": "NW corner X, Y"
+          "Map Ne Xy": "NE corner X, Y"	  
+          "Map Ne Xy": "SW corner X, Y"	 
+          "Map Ne Xy": "SE corner X, Y"	 
         },
         
         postCreate: function() {
@@ -50,29 +53,48 @@ define([
           });
           
           // combine lon lat into a single field
-          if (this.item.src_map_nw_lon_d && this.item.src_map_nw_lat_d) {
-            this.item.src_map_nw_lon_lat_txt = "" + this.item.src_map_nw_lon_d + ", " + this.item.src_map_nw_lat_d;
-            delete this.item.src_map_nw_lon_d;
-            delete this.item.src_map_nw_lat_d;
+          if (this.item.src_map_nw_lon_txt && this.item.src_map_nw_lat_txt) {
+            this.item.src_map_nw_lon_lat_txt = "" + this.item.src_map_nw_lon_txt + ", " + this.item.src_map_nw_lat_txt;
+            delete this.item.src_map_nw_lon_txt;
+            delete this.item.src_map_nw_lat_txt;
           }
-          if (this.item.src_map_nw_lon_i && this.item.src_map_nw_lat_i) {
-            this.item.src_map_nw_lon_lat_txt = "" + this.item.src_map_nw_lon_i + ", " + this.item.src_map_nw_lat_i;
-            delete this.item.src_map_nw_lon_i;
-            delete this.item.src_map_nw_lat_i;
-          }
+          if (this.item.src_map_ne_lon_txt && this.item.src_map_ne_lat_txt) {
+              this.item.src_map_ne_lon_lat_txt = "" + this.item.src_map_ne_lon_txt + ", " + this.item.src_map_ne_lat_txt;
+              delete this.item.src_map_ne_lon_txt;
+              delete this.item.src_map_ne_lat_txt;
+            }
+          if (this.item.src_map_sw_lon_txt && this.item.src_map_sw_lat_txt) {
+              this.item.src_map_sw_lon_lat_txt = "" + this.item.src_map_sw_lon_txt + ", " + this.item.src_map_sw_lat_txt;
+              delete this.item.src_map_sw_lon_txt;
+              delete this.item.src_map_sw_lat_txt;
+            }
+          if (this.item.src_map_se_lon_txt && this.item.src_map_se_lat_txt) {
+              this.item.src_map_se_lon_lat_txt = "" + this.item.src_map_se_lon_txt + ", " + this.item.src_map_se_lat_txt;
+              delete this.item.src_map_se_lon_txt;
+              delete this.item.src_map_se_lat_txt;
+            }
           
           // combine x y into a single field
-          if (this.item.src_map_nw_x_d && this.item.src_map_nw_y_d) {
-            this.item.src_map_nw_xy_txt = "" + this.item.src_map_nw_x_d + ", " + this.item.src_map_nw_y_d;
-            delete this.item.src_map_nw_x_d;
-            delete this.item.src_map_nw_y_d;
+          if (this.item.src_map_nw_x_txt && this.item.src_map_nw_y_txt) {
+            this.item.src_map_nw_xy_txt = "" + this.item.src_map_nw_x_txt + ", " + this.item.src_map_nw_y_txt;
+            delete this.item.src_map_nw_x_txt;
+            delete this.item.src_map_nw_y_txt;
           }
-          if (this.item.src_map_nw_x_i && this.item.src_map_nw_y_i) {
-            this.item.src_map_nw_xy_txt = "" + this.item.src_map_nw_x_i + ", " + this.item.src_map_nw_y_i;
-            delete this.item.src_map_nw_x_i;
-            delete this.item.src_map_nw_y_i;
-          }
-          
+          if (this.item.src_map_ne_x_txt && this.item.src_map_ne_y_txt) {
+              this.item.src_map_ne_xy_txt = "" + this.item.src_map_ne_x_txt + ", " + this.item.src_map_ne_y_txt;
+              delete this.item.src_map_ne_x_txt;
+              delete this.item.src_map_ne_y_txt;
+            }   
+          if (this.item.src_map_sw_x_txt && this.item.src_map_sw_y_txt) {
+              this.item.src_map_sw_xy_txt = "" + this.item.src_map_sw_x_txt + ", " + this.item.src_map_sw_y_txt;
+              delete this.item.src_map_sw_x_txt;
+              delete this.item.src_map_sw_y_txt;
+            } 
+          if (this.item.src_map_se_x_txt && this.item.src_map_se_y_txt) {
+              this.item.src_map_se_xy_txt = "" + this.item.src_map_se_x_txt + ", " + this.item.src_map_se_y_txt;
+              delete this.item.src_map_se_x_txt;
+              delete this.item.src_map_se_y_txt;
+            } 
           array
                // select only 'src_' fields
                .filter(Object.keys(this.item), function(key) { return key.indexOf("src_")==0})
