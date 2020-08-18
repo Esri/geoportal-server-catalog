@@ -29,16 +29,19 @@ define([
         i18n: i18n,
         
         // list specific fields in the desired order; fields not mentioned will be placed last in the alphabetic order.
-        fieldOrder: ["Item Title", "Map Nw Lon Lat", "Map Nw Xy", "Map Ne Xy","Map Sw Xy","Map Se Xy","Location", "Publication Date", "Type Media"],
+        fieldOrder: ["Item Title", "Map Nw Lon Lat","Map Ne Lon Lat","Map Sw Lon Lat","Map Se Lon Lat", "Map Nw Xy", "Map Ne Xy","Map Sw Xy","Map Se Xy","Location", "Publication Date", "Type Media"],
         // list field to skip
         fieldsToDrop: ["Publication Date Txt"],
         // fields to rename
         fieldsToRename: {
-          "Map Nw Lon Lat": "Longitude, Latitude",
-          "Map Nw Xy": "NW corner X, Y"
-          "Map Ne Xy": "NE corner X, Y"	  
-          "Map Ne Xy": "SW corner X, Y"	 
-          "Map Ne Xy": "SE corner X, Y"	 
+          "Map Nw Lon Lat": "NW corner Longitude, Latitude",
+		  "Map Ne Lon Lat": "NE corner Longitude, Latitude",
+		  "Map Sw Lon Lat": "SW corner Longitude, Latitude",
+		  "Map Se Lon Lat": "SE corner Longitude, Latitude",
+          "Map Nw Xy": "NW corner X, Y",
+          "Map Ne Xy": "NE corner X, Y",  
+          "Map Sw Xy": "SW corner X, Y",
+          "Map Se Xy": "SE corner X, Y"	 
         },
         
         postCreate: function() {
