@@ -2,7 +2,7 @@
 
 [![apache licensed](https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square)](https://raw.githubusercontent.com/Esri/geoportal-server-catalog/master/LICENSE.txt)
 
-Esri Geoportal Server v2 is the next generation free and open source metadata catalog and search application, based on elasticsearch. 
+Esri Geoportal Server v2 is Esri's free and open source metadata catalog and search application, based on elasticsearch. 
 
 Esri Geoportal Server v2 now provides the catalog and harvesting capabilities as separate modules. Separate modules are useful when users need the catalog capabilities without needing metadata harvesting, or possibly even metadata editing.
 
