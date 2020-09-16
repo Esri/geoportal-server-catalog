@@ -577,6 +577,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domClass, domC
       } else {
         util.setNodeText(this.permissionsNode, i18n.item.notAvailable);
       }
+      
+      if (!item.envelope_geo) {
+        this.locationPlace.style.display = "flex";
+        util.setNodeText(this.locationNode, i18n.item.locationUnknown);
+      }
     },
 
     _renderThumbnail: function(item) {
