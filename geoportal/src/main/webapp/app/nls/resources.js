@@ -79,7 +79,8 @@ define({
         accessGroups: "Access Groups",
         missingSource: "Editor/Upload",
         createFilter: "Create Filter",
-        dataType: "Data Type"
+        dataType: "Data Type",
+        mediaType: "Media Type",
       },
       componentSettings: {
         componentLabel: "Label",
