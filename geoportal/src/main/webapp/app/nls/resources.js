@@ -261,6 +261,7 @@ define({
 
     item: {
       notAvailable: "N/A",
+      locationUnknown: "Unknown",
       actions: {
         html: "HTML",
         xml: "XML",
