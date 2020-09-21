@@ -100,7 +100,7 @@ public class SearchRequest {
         URI uri = url.toURI();
         String script = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");
         ScriptEngineManager engineManager = new ScriptEngineManager();
-        engine = engineManager.getEngineByName("nashorn");
+        engine = engineManager.getEngineByName("graal.js");
         engine.eval(script);
         ENGINES.put(javascriptFile,engine);
       }
