@@ -81,6 +81,7 @@ define({
         createFilter: "Create Filter",
         dataType: "Data Type",
         mediaType: "Media Type",
+        site: "Site"
       },
       componentSettings: {
         componentLabel: "Label",
