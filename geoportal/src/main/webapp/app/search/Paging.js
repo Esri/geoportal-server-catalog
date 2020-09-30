@@ -139,7 +139,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
       s = s.replace("{count}",""+djNumber.format(nHits.value,{}));
       s = s.replace("{type}",sType);
       this.setNodeText(this.countNode,s);
-      if (this.searchPane) this.searchPane.lastQueryCount = nHits;
+      if (this.searchPane) this.searchPane.lastQueryCount = nHits.value;
     },
 
     _renderPaging: function(searchResponse) {
