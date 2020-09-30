@@ -132,14 +132,14 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
     },
 
     _renderCount: function() {
-      var nHits = this.numHits || {value: 0};
+      var nHits = this.numHits? this.numHits.value? this.numHits.value: typeof(this.numHits)==="number"? this.numHits: 0: 0;
       var sType = this.typePlural;
       if (nHits === 1) sType = this.typeSingular;
       var s = i18n.search.resultCount.countPattern;
-      s = s.replace("{count}",""+djNumber.format(nHits.value,{}));
+      s = s.replace("{count}",""+djNumber.format(nHits,{}));
       s = s.replace("{type}",sType);
       this.setNodeText(this.countNode,s);
-      if (this.searchPane) this.searchPane.lastQueryCount = nHits.value;
+      if (this.searchPane) this.searchPane.lastQueryCount = nHits;
     },
 
     _renderPaging: function(searchResponse) {
