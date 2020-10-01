@@ -26,6 +26,7 @@ define(["dojo/_base/declare",
         "app/search/TermsAggregation",
         "app/search/BasicNumericFilter",
         "app/search/NumericFilter",
+        "app/search/HierarchyAggregation",
         "app/search/AppliedFilters",
         "app/search/ResultsPane",
         "app/search/OpenSearchLinksPane"
