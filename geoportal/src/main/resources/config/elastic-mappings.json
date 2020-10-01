@@ -1,6 +1,17 @@
 {
   "settings": {
     "analysis": {
+      "tokenizer": {
+        "hierarchy_tokenizer": {
+          "type": "path_hierarchy",
+          "delimiter": "|"
+        },
+        "reverse_hierarchy_tokenizer": {
+          "type": "path_hierarchy",
+          "delimiter": "|",
+          "reverse": "true"
+        }
+      },
       "analyzer": {
         "default": {
           "tokenizer": "standard",
@@ -8,6 +19,14 @@
         },
         "case_insensitive_sort": {
           "tokenizer": "keyword",
+          "filter": ["lowercase"] 
+        },
+        "hierarchical_category": {
+          "tokenizer": "hierarchy_tokenizer",
+          "filter": ["lowercase"] 
+        },
+        "reverse_hierarchical_category": {
+          "tokenizer": "reverse_hierarchy_tokenizer",
           "filter": ["lowercase"] 
         }
       },
@@ -189,6 +208,27 @@
               "index":false,
               "store": true,
               "doc_values": false
+            }
+          }
+        },
+        {
+          "_cat":{
+            "match":"*_cat",
+            "mapping":{
+              "type":"keyword",
+              "fields": {
+                "text": {
+                  "type": "text"
+                },
+                "tree": {
+                  "type": "text",
+                  "analyzer": "hierarchical_category"
+                },
+                "rtree": {
+                  "type": "text",
+                  "analyzer": "reverse_hierarchical_category"
+                }
+              }
             }
           }
         }
