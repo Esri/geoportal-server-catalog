@@ -102,7 +102,7 @@ public class TransformMetadataRequest extends com.esri.geoportal.lib.elastic.req
     
     try {
       ItemUtil itemUtil = new ItemUtil();
-      JsonObject item = itemUtil.readItemJson(ec.getIndexName(),ec.getItemIndexType(),id);
+      JsonObject item = itemUtil.readItemJson(ec.getIndexName(),ec.getActualItemIndexType(),id);
       if (item == null) {
         response.writeIdNotFound(this,id);
       } else {

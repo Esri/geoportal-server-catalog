@@ -72,7 +72,7 @@ public class DeleteItemRequest extends com.esri.geoportal.lib.elastic.request.De
     
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ElasticClient client = ElasticClient.newClient();
-    String url = client.getItemUrl(ec.getIndexName(),ec.getItemIndexType(),id);
+    String url = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(),id);
     boolean useSeparateXmlItem = ec.getUseSeparateXmlItem();
     boolean deletingXml = false;
     

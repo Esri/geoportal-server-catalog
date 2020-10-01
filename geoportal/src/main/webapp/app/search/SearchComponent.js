@@ -67,6 +67,7 @@ function(declare, lang, array, Templated, util) {
     },
     
     search: function() {
+      history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
       if (this.searchPane) this.searchPane.search();
     },
     

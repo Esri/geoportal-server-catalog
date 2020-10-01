@@ -34,7 +34,7 @@ public class DeleteItemsRequest extends BulkEditRequest {
   @Override
   protected void appendHit(ElasticContext ec, BulkRequestBuilder request, SearchHit hit) {
     request.add(ec.getTransportClient().prepareDelete(
-      ec.getItemIndexName(),ec.getItemIndexType(),hit.getId())
+      ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
     );
     request.add(ec.getTransportClient().prepareDelete(
       ec.getItemIndexName(),ec.getXmlIndexType(),hit.getId()+"_xml")

@@ -26,6 +26,7 @@ load("classpath:metadata/js/EvaluatorFor_DC.js");
 load("classpath:metadata/js/EvaluatorFor_FGDC.js");
 load("classpath:metadata/js/EvaluatorFor_ISO.js");
 load("classpath:metadata/js/EvaluatorFor_ISO_extended.js"); // add  extended class
+load("classpath:metadata/js/GML.js");
 
 G._metadataTypes =  {
   "iso19115base": {
@@ -126,10 +127,13 @@ G._initializeTask = function(mdoc) {
   var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
   xpath.setNamespaceContext(new com.esri.geoportal.base.xml.XmlNamespaceContext(nsmap));
 
+  var gptContext = com.esri.geoportal.context.GeoportalContext.getInstance();
+  
   var task = {
       mdoc: mdoc,
       item: {},
-      xpath: xpath
+      xpath: xpath,
+      parseGml: gptContext.getParseGml()
   };
   if (mdoc && mdoc.hasXml()) {
     task.dom = task.mdoc.ensureDom();

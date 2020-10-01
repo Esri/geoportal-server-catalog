@@ -30,8 +30,8 @@ function(declare, lang, array, ioQuery, SearchComponent, Util) {
       var self = this, uri = window.location.href;
       if (uri.indexOf("?") !== -1) {
           var s = uri.substring(uri.indexOf("?")+1,uri.length);
-          var hash = s.substring(s.indexOf("#")+1,s.length);
-          s=s.substring(0,s.indexOf("#"));
+          var hash = s.indexOf("#")>=0? s.substring(s.indexOf("#")+1,s.length): "";
+          s= s.indexOf("#")>=0? s.substring(0,s.indexOf("#")): s;
         var o = ioQuery.queryToObject(s);
         if (o && typeof o.filter === "string") {
           this._addQuery(o.filter);
@@ -49,7 +49,8 @@ function(declare, lang, array, ioQuery, SearchComponent, Util) {
 
       _addQuery: function(v) {
           if (typeof v === "string") {
-              v = Util.escapeForLucene(lang.trim(v));
+              v = lang.trim(v);
+              v = AppContext.appConfig.search && !!AppContext.appConfig.search.escapeFilter? Util.escapeForLucene(v): v;
 
               if (v.length > 0) {
                   this.queries.push({"query_string": {
@@ -75,6 +76,13 @@ function(declare, lang, array, ioQuery, SearchComponent, Util) {
     /* SearchComponent API ============================================= */
     
     appendQueryParams: function(params) {
+      var esdslParam = Util.getRequestParam("esdsl");
+      if (esdslParam) {
+        var esdsl = JSON.parse(esdslParam);
+        if (esdsl && esdsl.query) {
+          this.queries = [esdsl.query];
+        }
+      }
       if (this.queries && this.queries.length > 0) {
         if (!params.queries) params.queries = [];
         array.forEach(this.queries,function(query){

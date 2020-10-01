@@ -3,16 +3,16 @@
 	xmlns:beans="http://www.springframework.org/schema/beans"
 	xmlns:context="http://www.springframework.org/schema/context"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.3.xsd
-    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.3.xsd">
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
 	<context:property-placeholder/>
 	<context:annotation-config />
-	<context:component-scan base-package="com.esri.geoportal" />
 
 	<beans:import resource="app-security.xml" />
 	<beans:import resource="app-factory.xml" />
-
+	<beans:import resource="app-dcat.xml" />
+  
 	<beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
 		<beans:property name="elasticContext" ref="elasticContext" />
 		<beans:property name="harvesterContext" ref="harvesterContext" />
@@ -20,6 +20,7 @@
 		<beans:property name="defaultApprovalStatus" value="" /> <!-- optional - approved|reviewed|disapproved|incomplete|posted|draft -->
 		<beans:property name="supportsGroupBasedAccess" value="false" />
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
+		<beans:property name="parseGml" value="false" />
 	</beans:bean>
 <!-- the tokens like ${es_cluster:elasticsearch} ${gpt_indexName:metadata}
 represent environment variables that can be used to pass values into a spring configuration context, aka these files
@@ -35,6 +36,7 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="autoCreateIndex" value="true" />
 		<beans:property name="allowFileId" value="false" />
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
+		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
 		<beans:property name="httpPort" value="9200" />
 		<beans:property name="transportPort" value="9300" />
 		

@@ -190,6 +190,11 @@
         targetRequest.searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
         //console.log("targetRequest.searchCriteria="+(JSON.stringify(targetRequest.searchCriteria)));
       }
+      
+      if (task.request.parameterMap.search_after) {
+        targetRequest.searchCriteria["search_after"] = [task.request.parameterMap.search_after]
+      }
+      
       promise.resolve(targetRequest);
       return promise;
     }},
@@ -444,7 +449,9 @@
         var url = self.searchUrl, options;
         var data = null, dataContentType = "application/json";
         if (targetRequest && task.val.hasAnyProperty(targetRequest.searchCriteria)) {
-          data = JSON.stringify(targetRequest.searchCriteria);
+          var criteria = JSON.parse(JSON.stringify(targetRequest.searchCriteria));
+          criteria.track_total_hits = true;
+          data = JSON.stringify(criteria);
         }
         if (typeof self.username === "string" && self.username.length > 0 &&
             typeof self.password === "string" && self.password.length > 0) {
@@ -464,7 +471,9 @@
         var response = JSON.parse(result);
         searchResult.jsonResponse = response;
         if (response && response.hits) {
-          searchResult.totalHits = response.hits.total;
+          searchResult.totalHits = response.hits.total? 
+                        response.hits.total.value && !isNaN(response.hits.total.value)? response.hits.total.value: response.hits.total: 
+                        0;
           if (task.verbose) console.log("totalHits=",searchResult.totalHits);
           var hits = response.hits.hits;
           if (Array.isArray(response.hits.hits)) {

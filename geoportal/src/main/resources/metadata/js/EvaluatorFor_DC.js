@@ -79,9 +79,10 @@ G.evaluators.dc = {
 
   evalSpatial: function(task) {
     var item = task.item, root = task.root;
-    G.forEachNode(task,root,"//ows:WGS84BoundingBox",function(node){
-      var lc = G.getString(task,node,"ows:LowerCorner");
-      var uc = G.getString(task,node,"ows:UppeCorner");
+    
+    G.forEachNode(task,root,"//ows:WGS84BoundingBox | //ows2:WGS84BoundingBox",function(node){
+      var lc = G.getString(task,node,"ows:LowerCorner | ows2:LowerCorner");
+      var uc = G.getString(task,node,"ows:UpperCorner | ows2:UpperCorner");
       if (lc !== null && lc.length > 0 && uc !== null && uc.length > 0) {
         var alc = lc.split(" ");
         var auc = uc.split(" ");

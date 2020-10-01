@@ -19,6 +19,7 @@ import com.esri.geoportal.base.util.Val;
 
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -59,8 +60,10 @@ public class ElasticContext {
   private String indexName = "metadata";
   private boolean indexNameIsAlias = true;
   private boolean is6Plus = false;
+  private boolean is7Plus = false;
   private String itemIndexType = "item";
   private String mappingsFile = "config/elastic-mappings.json";
+  private String mappingsFile7 = "config/elastic-mappings-7.json";
   private List<String> nodes;
   private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
@@ -145,6 +148,15 @@ public class ElasticContext {
     this.is6Plus = is6Plus;
   }
   
+  /** Version 7+ */
+  public boolean getIs7Plus() {
+    return is7Plus;
+  }
+  /** Version 7+ */
+  public void setIs7Plus(boolean is7Plus) {
+    this.is7Plus = is7Plus;
+  }
+  
   /** The index name holding metadata items. */
   public String getItemIndexName() {
     return this.indexName;
@@ -155,9 +167,12 @@ public class ElasticContext {
     return this.itemIndexType;
   }
   /** The item index type (default=item). */
-  @SuppressWarnings("unused")
-  private void setItemIndexType(String itemIndexType) {
+  public void setItemIndexType(String itemIndexType) {
     this.itemIndexType = itemIndexType;
+  }
+  
+  public String getActualItemIndexType() {
+    return !getIs7Plus()? getItemIndexType(): "_doc";
   }
   
   /** The index mappings file (default=config/elastic-mappings.json). */
@@ -167,6 +182,23 @@ public class ElasticContext {
   /** The index mappings file (default=config/elastic-mappings.json). */
   public void setMappingsFile(String mappingsFile) {
     this.mappingsFile = mappingsFile;
+  }
+  
+  /** The index mappings file (default=config/elastic-mappings-7.json). */
+  public String getMappingsFile7() {
+    return mappingsFile7;
+  }
+  /** The index mappings file (default=config/elastic-mappings-7.json). */
+  public void setMappingsFile7(String mappingsFile7) {
+    this.mappingsFile7 = mappingsFile7;
+  }
+  
+  /**
+   * Gets actual mapping file.
+   * @return mappings file
+   */
+  public String getActualMappingsFile() {
+    return getIs7Plus()? getMappingsFile7(): getMappingsFile();
   }
 
   /** The node names. */
@@ -322,7 +354,7 @@ public class ElasticContext {
    */
   protected void _createIndex(String name) throws Exception {
     //LOGGER.info("Creating index: "+name);
-    String path = this.getMappingsFile();
+    String path = this.getActualMappingsFile();
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
     String json = JsonUtil.toJson(jso,false);
     AdminClient client = this.getTransportClient().admin();
@@ -456,9 +488,10 @@ public class ElasticContext {
     }
   }
   
-  /** Startup. */
+  /** Startup.
+   */
   @PostConstruct
-  public void startup() throws Exception {
+  public void startup() {
     LOGGER.info("Starting up ElasticContext...");
     String[] nodeNames = this.nodesToArray();
     if ((nodeNames == null) || (nodeNames.length == 0)) {
@@ -518,8 +551,12 @@ public class ElasticContext {
       }
       
       for (String node: nodeNames) {
-        InetAddress a = InetAddress.getByName(node);
-        transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
+        try {
+          InetAddress a = InetAddress.getByName(node);
+          transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
+        } catch (UnknownHostException ex) {
+          LOGGER.warn(String.format("Invalid node name: %s", node), ex);
+        }
       }
       
       if (this.getAutoCreateIndex()) {

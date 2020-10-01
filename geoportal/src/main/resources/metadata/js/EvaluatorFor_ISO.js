@@ -57,7 +57,7 @@ G.evaluators.iso = {
 
     /* subject */
     G.evalProps(task,item,root,"apiso_Subject_txt","//gmd:MD_TopicCategoryCode | //gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:keyword/*/text() ");
-    G.evalProps(task,item,root,"apiso_Format_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat/gmd:MD_Format/name/*/text()");
+    G.evalProps(task,item,root,"apiso_Format_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributionFormat/gmd:MD_Format/gmd:name/*/text()");
     G.evalProps(task,item,root,"apiso_TopicCategory_s","//gmd:MD_TopicCategoryCode");
     G.evalProps(task,item,root,"apiso_KeywordType_s","//gmd:descriptiveKeywords/gmd:MD_Keywords/gmd:type/gmd:MD_KeywordTypeCode/@codeListValue");
     G.evalCode(task,item,root,"apiso_Type_s","gmd:hierarchyLevel/gmd:MD_ScopeCode");
@@ -147,6 +147,7 @@ G.evaluators.iso = {
 
   evalSpatial: function(task) {
     var item = task.item, root = task.root;
+    var hasEnvelope = false;
     G.forEachNode(task,root,"//gmd:EX_Extent/gmd:geographicElement/gmd:EX_GeographicBoundingBox",function(node){
       var xmin = G.Val.chkDbl(G.getString(task,node,"gmd:westBoundLongitude/gco:Decimal"),null);
       var ymin = G.Val.chkDbl(G.getString(task,node,"gmd:southBoundLatitude/gco:Decimal"),null);
@@ -159,6 +160,7 @@ G.evaluators.iso = {
         if (result.center) {
           G.writeMultiProp(task.item,"envelope_cen_pt",result.center);
         }
+        hasEnvelope = true;
       }
     });
     G.forEachNode(task,root,"gmd:referenceSystemInfo/gmd:MD_ReferenceSystem/gmd:referenceSystemIdentifier/gmd:RS_Identifier",function(node){
@@ -176,6 +178,41 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"apiso_Denominator_i","gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:equivalentScale/gmd:MD_RepresentativeFraction/gmd:denominator/gco:Integer");
     G.evalProp(task,item,root,"apiso_DistanceValue_d","gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:distance/gco:Distance");
     G.evalProp(task,item,root,"apiso_DistanceUOM_s","gmd:identificationInfo/gmd:MD_DataIdentification/gmd:spatialResolution/gmd:MD_Resolution/gmd:distance/gco:Distance/@uom");
+    
+    if (task.parseGml) {
+      var geojsons = {};
+      G.forEachNode(task,root,"//gmd:EX_Extent/gmd:geographicElement/gmd:EX_BoundingPolygon",function(gmdPolygonNode) {
+        var geojson = GML.toGeoJson(task, gmdPolygonNode);
+        if (geojson) {
+          if (!geojsons[geojson.type]) {
+            geojsons[geojson.type] = [];
+          }
+          geojsons[geojson.type].push(geojson);
+        }
+      });
+      
+      Object.keys(geojsons).forEach(function(key, kidx){
+        if (kidx==0) {
+          geojsons[key].forEach(function(g, idx) {
+            if (idx==0) {
+              G.writeProp(task.item, "shape_geo", g );
+            }
+          });
+        }
+      });
+      
+      if (!hasEnvelope && task.bbox) {
+        var result = G.makeEnvelope(task.bbox[0][0],task.bbox[0][1],task.bbox[1][0],task.bbox[1][1]);
+        java.lang.System.out.println(JSON.stringify(result));
+        if (result && result.envelope) {
+          G.writeMultiProp(task.item,"envelope_geo",result.envelope);
+          if (result.center) {
+            G.writeMultiProp(task.item,"envelope_cen_pt",result.center);
+          }
+          hasEnvelope = true;
+        }
+      }
+    }
   },
 
   evalTemporal: function(task) {
@@ -253,8 +290,8 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"url_website_s","gmd:identificationInfo/gmd:MD_DataIdentification/gmd:citation/gmd:CI_Citation/gmd:citedResponsibleParty[1]/gmd:CI_ResponsibleParty/gmd:contactInfo/gmd:CI_Contact/gmd:onlineResource/gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
     G.evalProp(task,item,root,"url_project_metadata_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:name/gco:CharacterString,'Project Metadata')]/gmd:linkage/gmd:URL");
     G.evalProp(task,item,root,"url_granule_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:name/gco:CharacterString,'Granule Search')]/gmd:linkage/gmd:URL");
-    G.evalProp(task,item,root,"url_http_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
-    G.evalProp(task,item,root,"url_ftp_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL");
+    G.evalProp(task,item,root,"url_http_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[not(contains(gmd:protocol/gco:CharacterString,'FTP'))]/gmd:linkage/gmd:URL");
+    G.evalProp(task,item,root,"url_ftp_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL | gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL");
   }
 
 };

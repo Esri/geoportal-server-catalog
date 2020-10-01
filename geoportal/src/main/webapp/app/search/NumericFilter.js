@@ -23,9 +23,10 @@ define(["dojo/_base/declare",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
-        "app/search/NumericFilterSettings"], 
+        "app/search/NumericFilterSettings",
+        "app/search/NumericFilterRange"], 
 function(declare, lang, array, djNumber, domConstruct, domGeometry,
-    template, i18n, SearchComponent, DropPane, QClause, Settings) {
+    template, i18n, SearchComponent, DropPane, QClause, Settings, NumericFilterRange) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -119,7 +120,7 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
       return (typeof this.nestedPath === "string" && this.nestedPath.length > 0);
     },
     
-    plot: function() {
+    plot: function(customRange) {
       var self = this, svgNode = this.svgNode;
       domConstruct.empty(svgNode);
       this._brushExtent = null;
@@ -236,7 +237,7 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
         .endAngle(function(d, i) { return i ? -Math.PI : Math.PI; });
         var brush = d3.svg.brush()
           .x(x2)
-          .extent(x2.domain())
+          .extent(customRange? customRange: x2.domain())
           .on("brush",function(){brushmove();});
         var brushg = context.append("g")
           .attr("class", "brush")
@@ -363,6 +364,19 @@ function(declare, lang, array, djNumber, domConstruct, domGeometry,
         this.setNodeText(this.brushExtentNode,"");
         setTimeout(function(){self._searchDisabled = false;},100);
       }
+    },
+    
+    onRangeClick: function(event) {
+      var d = new NumericFilterRange({
+        targetWidget: this,
+        fromValue: this._brushExtent && this._brushExtent.length>0? this._brushExtent[0]: 0,
+        toValue:   this._brushExtent && this._brushExtent.length>1? this._brushExtent[1]: 0
+      });
+      d.showDialog();
+    },
+    
+    updateRange: function(fromValue, toValue) {
+      this.plot([fromValue, toValue]);
     }
     
   });

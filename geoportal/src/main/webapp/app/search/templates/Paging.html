@@ -1,40 +1,50 @@
 <div class="g-paging">
   <div class="g-paging-count" data-dojo-attach-point="countNode"></div>
-	<ul class="pagination pagination-sm" data-dojo-attach-point="pagingNode">
-		<li>
-			<a href="#" aria-label="First"
-				data-dojo-attach-point="firstButton"
-				data-dojo-attach-event="onClick: firstButtonClicked"
-				title="${i18n.search.paging.firstTip}"
-				><span aria-hidden="true">&laquo;</span>
-		  </a>
-		</li>
-		<li>
-			<a href="#" aria-label="Previous"
-				data-dojo-attach-point="previousButton"
-				data-dojo-attach-event="onClick: previousButtonClicked"
-				title="${i18n.search.paging.previousTip}"
-				><span aria-hidden="true">&lt;</span>
-		  </a>
-		</li>
-		<li>
-		  <a><span data-dojo-attach-point="pagePatternNode"></span></a>
-		</li>
-		<li>
-			<a href="#" aria-label="Next"
-				data-dojo-attach-point="nextButton"
-				data-dojo-attach-event="onClick: nextButtonClicked"
-				title="${i18n.search.paging.nextTip}"
-				><span aria-hidden="true">&gt;</span>
-		  </a>
-		</li>
-		<li>
-			<a href="#" aria-label="Last"
-				data-dojo-attach-point="lastButton"
-				data-dojo-attach-event="onClick: lastButtonClicked"
-				title="${i18n.search.paging.lastTip}"
-				><span aria-hidden="true">&raquo;</span>
-		  </a>
-		</li>
-	</ul>
+  <ul class="pagination" data-dojo-attach-point="pagingNode">
+    <li>
+      <a href="#" aria-label="First"
+        data-dojo-attach-point="firstButton"
+        data-dojo-attach-event="onClick: firstButtonClicked"
+        title="${i18n.search.paging.firstTip}"
+      >
+        <span aria-hidden="true">${i18n.search.paging.first}</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" aria-label="Previous"
+        data-dojo-attach-point="previousButton"
+        data-dojo-attach-event="onClick: previousButtonClicked"
+        title="${i18n.search.paging.previousTip}"
+      >
+        <span aria-hidden="true">${i18n.search.paging.previous}</span>
+      </a>
+    </li>
+
+    <li>
+      <a class="g-paging-page-num">
+        <span data-dojo-attach-point="pagePatternNode"></span>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" aria-label="Next"
+        data-dojo-attach-point="nextButton"
+        data-dojo-attach-event="onClick: nextButtonClicked"
+        title="${i18n.search.paging.nextTip}"
+      >
+        <span aria-hidden="true">${i18n.search.paging.next}</span>
+      </a>
+    </li>
+
+    <li>
+      <a href="#" aria-label="Last"
+        data-dojo-attach-point="lastButton"
+        data-dojo-attach-event="onClick: lastButtonClicked"
+        title="${i18n.search.paging.lastTip}"
+      >
+        <span aria-hidden="true">${i18n.search.paging.last}</span>
+      </a>
+    </li>
+  </ul>
 </div>

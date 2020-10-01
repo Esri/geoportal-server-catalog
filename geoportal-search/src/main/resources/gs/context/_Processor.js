@@ -167,12 +167,13 @@
       };
 
       var atom = ["atom","application/atom+xml","http://www.w3.org/2005/Atom"];
-      var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0","http://www.isotc211.org/2005/gmd"];
+      var csw = ["csw","","application/xml","http://www.opengis.net/cat/csw/3.0","http://www.opengis.net/cat/csw/2.0.2","http://www.isotc211.org/2005/gmd"];
       var json = ["json","pjson","json-source","application/json"];
       var csv = ["csv","text/csv"];
       var eros = ["eros"];
       var kml = ["kml","application/vnd.google-earth.kml+xml","http://www.opengis.net/kml/2.2"];
       var rss = ["rss","georss","application/rss+xml"];
+      var dcat = ["dcat","application/json"];
 
       var writers = {};
       index(writers,atom,gs.Object.create(gs.writer.AtomWriter));
@@ -182,6 +183,7 @@
       index(writers,eros,gs.Object.create(gs.writer.ErosWriter));
       index(writers,kml,gs.Object.create(gs.writer.KmlWriter));
       index(writers,rss,gs.Object.create(gs.writer.RssWriter));
+      index(writers,dcat,gs.Object.create(gs.writer.DcatWriter));
 
       return writers;
     }},

@@ -52,18 +52,18 @@ define(["dojo/_base/declare",
         "esri/InfoTemplate",
         "esri/dijit/Search",
         "dojo/Deferred",
-        "esri/tasks/locator"], 
-function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber, 
-    topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map, 
-    ArcGISTiledMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference, 
-    SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer, 
+        "esri/tasks/locator"],
+function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber,
+    topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map,
+    ArcGISTiledMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference,
+    SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer,
     SimpleRenderer, Graphic, Color, PopupTemplate, InfoTemplate, SearchWidget, Deferred, Locator) {
-  
+
   var oThisClass = declare([SearchComponent], {
-    
+
     i18n: i18n,
     templateString: template,
-    
+
     allowAggregation: true,
     allowSettings: null,
     basemapUrl: null,
@@ -77,20 +77,23 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     highlightItemOnHover: true,
     showLocator: true,
     map: null,
-    
+
     _highlighted: null,
     _locator: null,
     _tmpHandles: null,
-    
+
     postCreate: function() {
       this.inherited(arguments);
       this.initializeChoices();
       this.initializeMap();
-      
+
       this._initialSettings = {
         label: this.label,
-        allowAggregation: this.allowAggregation
+        allowAggregation: this.allowAggregation,
+        field: this.field,
+        pointField: this.pointField
       };
+
       if (this.allowSettings === null) {
         if (AppContext.appConfig.search && !!AppContext.appConfig.search.allowSettings) {
           this.allowSettings = true;
@@ -103,7 +106,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
           d.showDialog();
         });
       }
-      
+
       var _lodToGeoHashGridPrecision = {
         "default": 3,
         "min": 1,
@@ -165,24 +168,26 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       };
        */
       if (!this.lodToGeoHashGridPrecision) this.lodToGeoHashGridPrecision = _lodToGeoHashGridPrecision;
-      
+
       var self = this;
-      
+
       this.own(topic.subscribe(appTopics.OnMouseEnterResultItem,function(params){
         if (!self.highlightItemOnHover) return;
         try {
           var map = self.map, geometry, outSR;
           if (map && params && params.item && params.item.envelope_geo) {
             outSR = map.spatialReference;
-            var env = params.item.envelope_geo.coordinates;
-            geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
+            var env = lang.isArray(params.item.envelope_geo) && params.item.envelope_geo.length>0? params.item.envelope_geo[0].coordinates: params.item.envelope_geo.coordinates;
+            if (env) {
+              geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
+            }
           }
           if (geometry && webMercatorUtils.canProject(geometry,outSR)) {
             var projected = webMercatorUtils.project(geometry,outSR);
             if (!self._highlighted) {
               var symbol = new SimpleFillSymbol(
-                SimpleFillSymbol.STYLE_SOLID, 
-                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,0,0]), 2), 
+                SimpleFillSymbol.STYLE_SOLID,
+                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,0,0]), 2),
                 new Color([255,255,0,0.3]));
               self._highlighted = new Graphic(projected,symbol);
               map.graphics.add(self._highlighted);
@@ -191,17 +196,17 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
               self._highlighted.show();
             }
             self._highlighted.xtnItemId = params.item._id;
-          }          
+          }
         } catch(ex) {
           console.warn("SpatialFilter.OnMouseEnterResultItem");
           console.warn(ex);
         }
       }));
-      
+
       this.own(topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
         if (self._highlighted) self._highlighted.hide();
       }));
-      
+
       var positionLocator = true;
       this.own(aspect.after(this.dropPane,"_setOpenAttr",function() {
         if (positionLocator && self.map && self.map._slider && self._locator) {
@@ -214,7 +219,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         }
       }));
     },
-    
+
     destroy: function() {
       try {
         if (this._locator) {
@@ -224,13 +229,13 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       } catch(ex) {}
       this.inherited(arguments);
     },
-    
+
     _clearTmpHandles: function() {
-      try {array.forEach(this._tmpHandles,function(h) {h.remove();});} 
+      try {array.forEach(this._tmpHandles,function(h) {h.remove();});}
       catch(ex) {console.warn(ex);}
-      this._tmpHandles = [];      
+      this._tmpHandles = [];
     },
-    
+
     _convertConfig: function(config) {
       var sources = [];
       array.forEach(config.sources, lang.hitch(this, function(source) {
@@ -260,7 +265,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       }));
       return sources;
     },
-    
+
     equalInterval: function(min,max) {
       var newsym = function(size) {
         var olclr = Color.fromHex("#7A7A7A");
@@ -284,7 +289,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       renderer.addBreak(v3,v4,newsym(16));
       return renderer;
     },
-    
+
     getGeoHashGridPrecision: function(hasSpatialFilter) {
       // precision ranges from 0..12, 12 is than a square meter
       var getInt = function(v) {
@@ -305,33 +310,33 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       }
       if (precision === null && lodToGeo && lodToGeo.hasOwnProperty("default")) {
         precision = getInt(lodToGeo["default"]);
-      } 
+      }
       if (precision === null) precision = 3;
       //console.warn("map-lod:",level," geohash-grid-precision:",precision);
       return precision;
     },
-    
+
     getRelation: function() {
       var r = djQuery("input[type=radio]:checked",this.relationsNode)[0].getAttribute("data-op");
       if (typeof r === "string" && r !== "any" && r.length > 0) return r;
       return "any";
     },
-    
+
     hasField: function() {
       return (typeof this.field === "string" && this.field.length > 0);
     },
-    
+
     hasPointField: function() {
       return (typeof this.pointField === "string" && this.pointField.length > 0);
     },
-    
+
     initializeChoices: function() {
       var self = this;
       this.dropPane.stopEvents = false;
       var nd = this.relationsNode = domConstruct.create("span",{
         "class": "g-spatial-filter-relations"
-      },this.dropPane.toolsNode);
-      
+      },this.choicesNode);
+
       var addChoice = function(lbl,op) {
         var spn = domConstruct.create("span",{
           "class": "g-spatial-filter-relation"
@@ -357,12 +362,12 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         },spn);
         return radio;
       };
-      
+
       addChoice(i18n.search.spatialFilter.any,"any").checked = true;
       addChoice(i18n.search.spatialFilter.intersects,"intersects");
       addChoice(i18n.search.spatialFilter.within,"within");
     },
-    
+
     initializeLocator: function() {
       if (!this.showLocator) return;
       var params = {
@@ -389,7 +394,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       domClass.add(locator.domNode,"g-spatial-filter-locator");
       this._locator = locator;
     },
-    
+
     initializeMap: function() {
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
@@ -414,15 +419,16 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         })));
       })));
     },
-    
+
     /* SearchComponent API ============================================= */
-    
+
     appendQueryParams: function(params) {
       if (!this.hasField()) return;
-      var field = this.field, relation = this.getRelation();
+      var field = this.field, pointField = this.pointField;
+      var relation = this.getRelation();
       var map = this.map, qClause = null;
       var env1, env2, query, tip;
-      
+
       var chkBnd = function(env) {
         if (!env) return;
         if (env.xmin < -180) env.xmin = -180;
@@ -430,29 +436,30 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         if (env.ymin < -90) env.ymin = -90;
         if (env.ymax > 90) env.ymax = 90;
       };
-      
+
       var makeQuery = function(env) {
         var shp = {
           "type": "envelope",
-          "coordinates": [[env.xmin,env.ymax], [env.xmax,env.ymin]]  
+          "coordinates": [[env.xmin,env.ymax], [env.xmax,env.ymin]]
         };
         var qry = {"geo_shape":{}};
         qry.geo_shape[field] = {"shape":shp,"relation":relation};
-        
-        // TODO
-//        qry = {"geo_bounding_box": {
-//          "envelope_cen_pt" : {
-//            "top_left" : {
-//              "lat" : env.ymax,
-//              "lon" : env.xmin
-//            },
-//            "bottom_right" : {
-//              "lat" : env.ymin,
-//              "lon" : env.xmax
-//            }
-//          }
-//        }};
-        
+
+        var queryPoints = field.endsWith("_pt");
+        if (queryPoints) {
+          qry = {"geo_bounding_box": {}};
+          qry.geo_bounding_box[pointField] = {
+            "top_left" : {
+              "lat" : env.ymax,
+              "lon" : env.xmin
+            },
+            "bottom_right" : {
+              "lat" : env.ymin,
+              "lon" : env.xmax
+            }
+          };
+        }
+
         return qry;
       };
 
@@ -485,7 +492,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             }
             //console.warn("... ... xmin",env1.xmin,"xmax",env1.xmax);
           }
-          
+
           chkBnd(env1);
           chkBnd(env2);
           if (env2) {
@@ -496,7 +503,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             tip = env1.xmin+" "+env1.ymin+" "+env1.xmax+" "+env1.ymax;
             query = makeQuery(env1);
           }
-          
+
           qClause = new QClause({
             label: this.label,
             tip: tip,
@@ -512,9 +519,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         this.activeQClauses = [qClause];
         this.appendQClauses(params);
       }
-      
+
       if (this.allowAggregation && this.hasPointField()) {
-        // TOD0 does this need a filter
+        // TODO does this need a filter
         var key = this.getAggregationKey();
         var precision = this.getGeoHashGridPrecision((qClause !== null));
         if (!params.aggregations) params.aggregations = {};
@@ -524,7 +531,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         }};
       }
     },
-    
+
     processResults: function(searchResponse) {
       this._clearTmpHandles();
       if (this._highlighted) this._highlighted.hide();
@@ -568,7 +575,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         clusterLayer.setRenderer(renderer);
         map.addLayer(clusterLayer);
         //console.warn("clusterLayer",clusterLayer);
-        
+
         var countPattern = i18n.search.spatialFilter.countPattern;
         var tooltip = d3.select(this.tooltipNode);
         tooltip.style("opacity", 0);
@@ -582,7 +589,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             tooltip.transition().duration(200).style("opacity", 1);
             tooltip.html(txt)
               .style("left", (evt.pageX + 12) + "px")
-              .style("top", (evt.pageY - 20) + "px");   
+              .style("top", (evt.pageY - 20) + "px");
           } else {
             hideTooltip();
           }
@@ -592,14 +599,14 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         }));
       }
     },
-    
+
     whenQClauseRemoved: function(qClause) {
       if (this === qClause.parentQComponent) {
         djQuery("input[data-op=any]",this.relationsNode)[0].checked = true;
       }
     }
-    
+
   });
-  
+
   return oThisClass;
 });

@@ -54,6 +54,7 @@ define({
       },
       item: {
         actions: {
+          zoom: "Zoom to",
           add: "Add",
           remove: "Remove",
           details: "Details",
