@@ -112,12 +112,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
         this.label = this.field;
       }
     },
-    
-    clearEntries: function() {
-      this.observableStore.getChildren({id: "root"}).forEach(child => this.observableStore.remove(child.id));
-    },
-    
-    
+       
     addEntry: function(term,count,missingVal) {
       var item = {
         parent: "root",
@@ -197,10 +192,50 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
             v = lang.trim(this.props.missing);
             if (v.length > 0) missingVal = v;
           }
-          this.clearEntries();
+          
+          // build tree structure
+          var root = { id: "root", parent: null };
+          
+          findPath = function(element) {
+            var parentPath = element.parent? findPath(element.parent): null;
+            return parentPath!=null? parentPath + "|" + element.id: element.id;
+          }
+          
           array.forEach(data.buckets,function(entry){
-            this.addEntry(entry.key,entry.doc_count,missingVal);
-          },this);
+            var parts = entry.key.split("|");
+            var head = root;
+            
+            parts.forEach(part => {
+              if (!head[part]) {
+                head[part] = {
+                  parentNode: head,
+                  parent: head.id,
+                  id: (head.parent? head.id + "|": "") + part,
+                  name: part
+                };
+              }
+              head = head[part];
+            }, this);
+            
+            head.count = entry.doc_count;
+          });
+          
+          // clear tree widget
+          this.observableStore.data.filter(node => node.id != root.id).forEach(child => this.observableStore.remove(child.id))
+          
+          addContent = lang.hitch(this, function(root) {
+            Object.keys(root).filter(e => ["id", "name", "parent", "parentNode", "count"].indexOf(e) < 0).forEach(key => {
+              var element = root[key];
+              this.observableStore.add({
+                id: element.id,
+                name: element.name + (element.count? " ("+element.count+")": ""),
+                parent: element.parent
+              });
+              addContent(element);
+            });
+          });
+          
+          addContent(root);
         }
       }
     }
