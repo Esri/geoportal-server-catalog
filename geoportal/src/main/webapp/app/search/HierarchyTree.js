@@ -16,13 +16,16 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
         "dojo/dom-construct",
+        "dojo/store/Memory",
+        "dijit/tree/ObjectStoreModel", 
+        "dijit/Tree",
         "dojo/text!./templates/HierarchyTree.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/HierarchyTreeSettings"], 
-function(declare, lang, array, domConstruct, template, i18n, SearchComponent, 
+function(declare, lang, array, domConstruct, Memory, ObjectStoreModel, Tree, template, i18n, SearchComponent, 
   DropPane, QClause, HierarchyTreeSettings) {
   
   var oThisClass = declare([SearchComponent], {
