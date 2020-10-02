@@ -518,7 +518,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
 
       // set individual fields
       if (AppContext.appConfig.searchResults.showOwner) {
-        if (owner.length > 0) {
+        if (owner && owner.length > 0) {
           util.setNodeText(this.ownerNode, owner);
         } else {
           util.setNodeText(this.ownerNode, i18n.item.notAvailable);
@@ -528,7 +528,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       }
 
       if (AppContext.appConfig.searchResults.showDate) {
-        if (date.length > 0) {
+        if (date && date.length > 0) {
           util.setNodeText(this.dateNode, date);
         } else {
           util.setNodeText(this.dateNode, i18n.item.notAvailable);
@@ -538,7 +538,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       }
 
       if (AppContext.appConfig.searchResults.showAccess) {
-        if (permissions.length > 0) {
+        if (permissions && permissions.length > 0) {
           util.setNodeText(this.permissionsNode, permissions);
         } else {
           util.setNodeText(this.permissionsNode, i18n.item.notAvailable);
