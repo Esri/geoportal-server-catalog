@@ -131,40 +131,6 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
         this.label = this.field;
       }
     },
-       
-    addEntry: function(term,count,missingVal) {
-      var item = {
-        parent: "root",
-        id: term,
-        name: term + " ("+count+")"
-      };
-      this.observableStore.add(item);
-//      var name = this.chkName(term);
-//      var v = name+" ("+count+")";
-//      var tipPattern = i18n.search.appliedFilters.tipPattern;
-//      var tip = tipPattern.replace("{type}",this.label).replace("{value}",name);
-//      var query = {"term": {}};
-//      query.term[this.field] = term;
-//      if (typeof missingVal === "string" && missingVal.length > 0 && missingVal === term) {
-//        query = {"bool": {"must_not": {"exists": {"field": this.field}}}};
-//      }
-//      var qClause = new QClause({
-//        label: name,
-//        tip: tip,
-//        parentQComponent: this,
-//        removable: true,
-//        scorable: true,
-//        query: query
-//      });
-//      var nd = domConstruct.create("div",{},this.entriesNode);
-//      var link = domConstruct.create("a",{
-//        href: "#",
-//        onclick: lang.hitch(this,function() {
-//          this.pushQClause(qClause,true);
-//        })
-//      },nd);
-//      this.setNodeText(link,v);
-    },
     
     chkName: function(term){
       var name = term;
