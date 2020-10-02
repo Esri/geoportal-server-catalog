@@ -19,6 +19,7 @@ define(["dojo/_base/declare",
         "dojo/topic",
         "app/context/app-topics",
         "dojo/store/Memory",
+        "dojo/store/Observable",
         "dijit/tree/ObjectStoreModel", 
         "dijit/Tree",
         "dojo/text!./templates/HierarchyTree.html",
@@ -27,7 +28,7 @@ define(["dojo/_base/declare",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/HierarchyTreeSettings"], 
-function(declare, lang, array, domConstruct, topic, appTopics, Memory, ObjectStoreModel, Tree, template, i18n, SearchComponent, 
+function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observable, ObjectStoreModel, Tree, template, i18n, SearchComponent, 
   DropPane, QClause, HierarchyTreeSettings) {
   
   var oThisClass = declare([SearchComponent], {
@@ -45,6 +46,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, ObjectSto
     
     // tree structures
     store: null,
+    observableStore: null,
     model: null,
     tree: null,
     
@@ -52,43 +54,24 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, ObjectSto
       this.inherited(arguments);
       
       this.store = new Memory({
-          data: [
-              { id: 'world', name:'The earth', type:'planet', population: '6 billion'},
-              { id: 'AF', name:'Africa', type:'continent', population:'900 million', area: '30,221,532 sq km',
-                      timezone: '-1 UTC to +4 UTC', parent: 'world'},
-                  { id: 'EG', name:'Egypt', type:'country', parent: 'AF' },
-                  { id: 'KE', name:'Kenya', type:'country', parent: 'AF' },
-                      { id: 'Nairobi', name:'Nairobi', type:'city', parent: 'KE' },
-                      { id: 'Mombasa', name:'Mombasa', type:'city', parent: 'KE' },
-                  { id: 'SD', name:'Sudan', type:'country', parent: 'AF' },
-                      { id: 'Khartoum', name:'Khartoum', type:'city', parent: 'SD' },
-              { id: 'AS', name:'Asia', type:'continent', parent: 'world' },
-                  { id: 'CN', name:'China', type:'country', parent: 'AS' },
-                  { id: 'IN', name:'India', type:'country', parent: 'AS' },
-                  { id: 'RU', name:'Russia', type:'country', parent: 'AS' },
-                  { id: 'MN', name:'Mongolia', type:'country', parent: 'AS' },
-              { id: 'OC', name:'Oceania', type:'continent', population:'21 million', parent: 'world'},
-              { id: 'EU', name:'Europe', type:'continent', parent: 'world' },
-                  { id: 'DE', name:'Germany', type:'country', parent: 'EU' },
-                  { id: 'FR', name:'France', type:'country', parent: 'EU' },
-                  { id: 'ES', name:'Spain', type:'country', parent: 'EU' },
-                  { id: 'IT', name:'Italy', type:'country', parent: 'EU' },
-              { id: 'NA', name:'North America', type:'continent', parent: 'world' },
-              { id: 'SA', name:'South America', type:'continent', parent: 'world' }
-          ],
+          data: [ {id: "root"} ],
           getChildren: function(object){
               return this.query({parent: object.id});
           }
       });
       
+      this.observableStore = new Observable(this.store);
+      
       this.model = new ObjectStoreModel({
-          store: this.store,
-          query: {id: 'world'}
+          store: this.observableStore,
+          query: {id: 'root'}
       });
       
       this.tree =  new Tree({
-          model: this.model
+          model: this.model,
+          showRoot: false
       });
+      TREE = this.tree;
     },
     
     postCreate: function() {
@@ -130,7 +113,18 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, ObjectSto
       }
     },
     
+    clearEntries: function() {
+      this.observableStore.getChildren({id: "root"}).forEach(child => this.observableStore.remove(child.id));
+    },
+    
+    
     addEntry: function(term,count,missingVal) {
+      var item = {
+        parent: "root",
+        id: term,
+        name: term + " ("+count+")"
+      };
+      this.observableStore.add(item);
 //      var name = this.chkName(term);
 //      var v = name+" ("+count+")";
 //      var tipPattern = i18n.search.appliedFilters.tipPattern;
@@ -193,7 +187,6 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, ObjectSto
     },
     
     processResults: function(searchResponse) {
-      domConstruct.empty(this.entriesNode);
       var key = this.getAggregationKey();
       if (searchResponse.aggregations) {
         var data = searchResponse.aggregations[key];
@@ -204,6 +197,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, ObjectSto
             v = lang.trim(this.props.missing);
             if (v.length > 0) missingVal = v;
           }
+          this.clearEntries();
           array.forEach(data.buckets,function(entry){
             this.addEntry(entry.key,entry.doc_count,missingVal);
           },this);
