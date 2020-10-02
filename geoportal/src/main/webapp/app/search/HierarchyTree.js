@@ -69,9 +69,28 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
       
       this.tree =  new Tree({
           model: this.model,
-          showRoot: false
+          showRoot: false,
+          onClick: lang.hitch(this, function(item){
+            if (item.count) {
+              var name = this.chkName(item.id);
+              var tipPattern = i18n.search.appliedFilters.tipPattern;
+              var tip = tipPattern.replace("{type}",this.label).replace("{value}",name);
+              
+              var query = {"term": {}};
+              query.term[this.field] = item.id;
+              var qClause = new QClause({
+                label: name,
+                tip: tip,
+                parentQComponent: this,
+                removable: true,
+                scorable: true,
+                query: query
+              });
+              
+              this.pushQClause(qClause,true)
+            }
+          })
       });
-      TREE = this.tree;
     },
     
     postCreate: function() {
@@ -223,13 +242,15 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
           // clear tree widget
           this.observableStore.data.filter(node => node.id != root.id).forEach(child => this.observableStore.remove(child.id))
           
+          // create content of the tree widget
           addContent = lang.hitch(this, function(root) {
             Object.keys(root).filter(e => ["id", "name", "parent", "parentNode", "count"].indexOf(e) < 0).forEach(key => {
               var element = root[key];
               this.observableStore.add({
                 id: element.id,
                 name: element.name + (element.count? " ("+element.count+")": ""),
-                parent: element.parent
+                parent: element.parent,
+                count: element.count
               });
               addContent(element);
             });
