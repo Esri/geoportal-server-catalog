@@ -179,7 +179,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
           }
           
           // build tree structure
-          var root = { id: "root", parent: null };
+          var root = { id: "root", parent: null, hasChildren: false };
           
           findPath = function(element) {
             var parentPath = element.parent? findPath(element.parent): null;
@@ -196,8 +196,10 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
                   parentNode: head,
                   parent: head.id,
                   id: (head.parent? head.id + "|": "") + part,
-                  name: part
+                  name: part,
+                  hasChildren: false
                 };
+                head.hasChildren = true;
               }
               head = head[part];
             }, this);
@@ -205,18 +207,22 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
             head.count = entry.doc_count;
           });
           
+          console.log(root)
+          
           // clear tree widget
           this.observableStore.data.filter(node => node.id != root.id).forEach(child => this.observableStore.remove(child.id))
           
+          var SYS_PROPS = ["id", "name", "parent", "parentNode", "count", "hasChildren"];
           // create content of the tree widget
           addContent = lang.hitch(this, function(root) {
-            Object.keys(root).filter(e => ["id", "name", "parent", "parentNode", "count"].indexOf(e) < 0).forEach(key => {
+            Object.keys(root).filter(e => SYS_PROPS.indexOf(e) < 0).forEach(key => {
               var element = root[key];
               this.observableStore.add({
                 id: element.id,
                 name: element.name + (element.count? " ("+element.count+")": ""),
                 parent: element.parent,
-                count: element.count
+                count: element.count,
+                hasChildren: element.hasChildren
               });
               addContent(element);
             });
