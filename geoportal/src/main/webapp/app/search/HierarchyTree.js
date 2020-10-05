@@ -178,51 +178,62 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
             if (v.length > 0) missingVal = v;
           }
           
-          // build tree structure
-          var root = { id: "root", parent: null, hasChildren: false };
+          // root tree structure
+          var root = { 
+            id: "root",
+            name: "root",
+            parent: null,
+            children: {},
+            count: 0, // number of documents directly under the node
+            total: 0  // total number of the documents
+          };
           
-          findPath = function(element) {
-            var parentPath = element.parent? findPath(element.parent): null;
-            return parentPath!=null? parentPath + "|" + element.id: element.id;
-          }
-          
+          // process data into tree structure
           array.forEach(data.buckets,function(entry){
             var parts = entry.key.split("|");
             var head = root;
             
             parts.forEach(part => {
-              if (!head[part]) {
-                head[part] = {
-                  parentNode: head,
-                  parent: head.id,
+              // create tree child for the part if doesn't exist
+              var child = head.children[part];
+              if (!child) {
+                child = {
                   id: (head.parent? head.id + "|": "") + part,
                   name: part,
-                  hasChildren: false
+                  parent: head,
+                  children: {},
+                  count: 0,
+                  total: 0
                 };
-                head.hasChildren = true;
+                head.children[part] = child;
               }
-              head = head[part];
+              head = child;
             }, this);
             
+            // record documents count
             head.count = entry.doc_count;
+            head.total += entry.doc_count;
+            
+            var parentPointer = head.parent;
+            while (parentPointer) {
+              parentPointer.total += entry.doc_count;
+              parentPointer = parentPointer.parent;
+            }
           });
-          
-          console.log(root)
           
           // clear tree widget
           this.observableStore.data.filter(node => node.id != root.id).forEach(child => this.observableStore.remove(child.id))
           
-          var SYS_PROPS = ["id", "name", "parent", "parentNode", "count", "hasChildren"];
           // create content of the tree widget
           addContent = lang.hitch(this, function(root) {
-            Object.keys(root).filter(e => SYS_PROPS.indexOf(e) < 0).forEach(key => {
-              var element = root[key];
+            Object.keys(root.children).forEach(key => {
+              var element = root.children[key];
               this.observableStore.add({
                 id: element.id,
                 name: element.name + (element.count? " ("+element.count+")": ""),
-                parent: element.parent,
-                count: element.count,
-                hasChildren: element.hasChildren
+                parent: element.parent.id,
+                count: element.doc_count,
+                hasChildren: element.children.length > 0
               });
               addContent(element);
             });
