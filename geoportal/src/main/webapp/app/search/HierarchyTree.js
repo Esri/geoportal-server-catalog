@@ -232,7 +232,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
                 id: element.id,
                 name: element.name + (element.count? " ("+element.count+")": ""),
                 parent: element.parent.id,
-                count: element.doc_count,
+                count: element.count,
                 hasChildren: element.children.length > 0
               });
               addContent(element);
