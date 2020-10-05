@@ -71,13 +71,17 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
           model: this.model,
           showRoot: false,
           onClick: lang.hitch(this, function(item){
-            if (item.count) {
+            if (item.count || item.hasChildren) {
               var name = this.chkName(item.id);
               var tipPattern = i18n.search.appliedFilters.tipPattern;
               var tip = tipPattern.replace("{type}",this.label).replace("{value}",name);
               
               var query = {"term": {}};
-              query.term[this.field] = item.id;
+              if (!item.hasChildren) {
+                query.term[this.field] = item.id;
+              } else {
+                query.term[this.field+".tree"] = item.id.toLowerCase();
+              }
               var qClause = new QClause({
                 label: name,
                 tip: tip,
@@ -233,7 +237,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
                 name: element.name + (element.count? " ("+element.count+")": ""),
                 parent: element.parent.id,
                 count: element.count,
-                hasChildren: element.children.length > 0
+                hasChildren: Object.keys(element.children).length > 0
               });
               addContent(element);
             });
