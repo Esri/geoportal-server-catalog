@@ -78,7 +78,16 @@ G.evaluators.iso = {
     G.writeProp(item,"apiso_HasSecurityConstraints_b",G.hasNode(task,root,"//gmd:resourceConstraints"));
     
     /* hierarchical category */
-    G.evalProps(task,item,root,"src_category_cat","//gmd:MD_TopicCategoryCode");
+//    G.evalProps(task,item,root,"src_category_cat","//gmd:MD_TopicCategoryCode");
+    try {
+      var response = JSON.parse(this.fetch("http://localhost:3000/"+item.fileid));
+      if (response && response.category && response.category.length > 0) {
+        item["src_category_cat"] = [ response.category ];
+      }
+    } catch(exception) {
+      print(exception);
+    }
+    
   },
 
   evalInspire: function(task) {
@@ -270,6 +279,27 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"url_granule_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:name/gco:CharacterString,'Granule Search')]/gmd:linkage/gmd:URL");
     G.evalProp(task,item,root,"url_http_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[not(contains(gmd:protocol/gco:CharacterString,'FTP'))]/gmd:linkage/gmd:URL");
     G.evalProp(task,item,root,"url_ftp_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL | gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL");
+  },
+  
+  fetch: function(url) {
+    var con = new java.net.URL(url).openConnection();
+    con.requestMethod = "GET";
+    
+    var response = this.read(con.inputStream);
+    
+    return response;
+  },
+  
+  read: function(inputStream){
+    var inReader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));
+    var inputLine;
+    var response = new java.lang.StringBuffer();
+
+    while ((inputLine = inReader.readLine()) != null) {
+           response.append(inputLine);
+    }
+    inReader.close();
+    return response.toString();
   }
 
 };
