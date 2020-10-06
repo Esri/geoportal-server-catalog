@@ -24,12 +24,13 @@ define(["dojo/_base/declare",
         "dijit/Tree",
         "dojo/text!./templates/HierarchyTree.html",
         "dojo/i18n!app/nls/resources",
+        "app/context/app-config",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/HierarchyTreeSettings"], 
-function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observable, ObjectStoreModel, Tree, template, i18n, SearchComponent, 
-  DropPane, QClause, HierarchyTreeSettings) {
+function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observable, ObjectStoreModel, Tree, template, i18n, config,
+  SearchComponent, DropPane, QClause, HierarchyTreeSettings) {
   
   var oThisClass = declare([SearchComponent], {
     
@@ -71,7 +72,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
           model: this.model,
           showRoot: false,
           onClick: lang.hitch(this, function(item){
-            if (item.count || item.hasChildren) {
+            if (item.count || config.searchResults.showTotalCountInHierarchy) {
               var name = this.chkName(item.id);
               var tipPattern = i18n.search.appliedFilters.tipPattern;
               var tip = tipPattern.replace("{type}",this.label).replace("{value}",name);
@@ -232,9 +233,13 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
           addContent = lang.hitch(this, function(root) {
             Object.keys(root.children).forEach(key => {
               var element = root.children[key];
+              var name = config.searchResults.showTotalCountInHierarchy?
+                element.name + " ("+element.total+")":
+                element.name + (element.count? " ("+element.count+")": "");
+        
               this.observableStore.add({
                 id: element.id,
-                name: element.name + (element.count? " ("+element.count+")": ""),
+                name: name,
                 parent: element.parent.id,
                 count: element.count,
                 hasChildren: Object.keys(element.children).length > 0
