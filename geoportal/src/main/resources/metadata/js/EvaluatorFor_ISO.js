@@ -80,9 +80,9 @@ G.evaluators.iso = {
     /* hierarchical category */
 //    G.evalProps(task,item,root,"src_category_cat","//gmd:MD_TopicCategoryCode");
     try {
-      var response = JSON.parse(this.fetch("http://localhost:3000/"+item.fileid));
+      var response = JSON.parse(this.httpGet("http://localhost:3000/"+item.fileid));
       if (response && response.category && response.category.length > 0) {
-        item["src_category_cat"] = [ response.category ];
+        item["user_category_cat"] = [ response.category ];
       }
     } catch(exception) {
       print(exception);
@@ -281,7 +281,7 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"url_ftp_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL | gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL");
   },
   
-  fetch: function(url) {
+  httpGet: function(url) {
     var con = new java.net.URL(url).openConnection();
     con.requestMethod = "GET";
     
