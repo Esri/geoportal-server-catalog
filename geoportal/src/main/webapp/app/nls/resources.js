@@ -78,7 +78,7 @@ define({
         accessGroups: "Access Groups",
         missingSource: "Editor/Upload",
         createFilter: "Create Filter",
-        categories: "Categories"
+        hierarchicalCategory: "Hierarchical Category"
       },
       componentSettings: {
         componentLabel: "Label",
