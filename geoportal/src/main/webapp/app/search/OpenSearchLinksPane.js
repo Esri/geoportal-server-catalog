@@ -86,17 +86,20 @@ define(["dojo/_base/declare",
                 searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
               }
               
-              var urlParams = lang.mixin({}, searchResponse.urlParams)
-              urlParams.from = urlParams.from? urlParams.from+1: 1
+              var openSearchUrlParams = lang.mixin({}, searchResponse.urlParams)
+              openSearchUrlParams.from = searchResponse.urlParams.from? searchResponse.urlParams.from+1: 1
               
-              this._createLink("ATOM", i18n.search.links.atom, "atom", urlParams, postData);
-              this._createLink("CSW", i18n.search.links.csw, "csw", urlParams, postData);
-              this._createLink("JSON", i18n.search.links.json, "json", urlParams, postData);
-              this._createLink("CSV", i18n.search.links.csv, "csv", urlParams, postData);
-              this._createLink("KML", i18n.search.links.kml, "kml", urlParams, postData);
-              this._createLink("RSS", i18n.search.links.rss, "rss", urlParams, postData);
-              this._createLink("DCAT", i18n.search.links.dcat, "dcat", urlParams, postData);
-              this._createWebLink("WEB", i18n.search.links.web, "web", urlParams, postData);
+              // 1-base index
+              this._createLink("ATOM", i18n.search.links.atom, "atom", openSearchUrlParams, postData);
+              this._createLink("CSW", i18n.search.links.csw, "csw", openSearchUrlParams, postData);
+              this._createLink("JSON", i18n.search.links.json, "json", openSearchUrlParams, postData);
+              this._createLink("CSV", i18n.search.links.csv, "csv", openSearchUrlParams, postData);
+              this._createLink("KML", i18n.search.links.kml, "kml", openSearchUrlParams, postData);
+              this._createLink("RSS", i18n.search.links.rss, "rss", openSearchUrlParams, postData);
+              this._createLink("DCAT", i18n.search.links.dcat, "dcat", openSearchUrlParams, postData);
+              
+              // 0-base index
+              this._createWebLink("WEB", i18n.search.links.web, "web", searchResponse.urlParams, postData);
             }
 
         });
