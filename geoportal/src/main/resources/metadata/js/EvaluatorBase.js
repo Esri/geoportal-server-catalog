@@ -367,6 +367,30 @@ var G = {
           obj[name] = undefined;
       }
 
+  },
+  
+  // Simple HTTP GET
+  httpGet: function(url) {
+    var con = new java.net.URL(url).openConnection();
+    con.requestMethod = "GET";
+    
+    var response = this._read(con.inputStream);
+    
+    return response;
+  },
+  
+  _read: function(inputStream){
+    var inReader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));
+    var inputLine;
+    var response = new java.lang.StringBuffer();
+
+    while ((inputLine = inReader.readLine()) != null) {
+           response.append(inputLine);
+    }
+    
+    inReader.close();
+    return response.toString();
   }
+  
   
 };
