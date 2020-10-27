@@ -2,9 +2,11 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/dom-construct",
         "dojo/_base/fx",
+        "dojo/topic",
+        "app/context/app-topics",
         "app/context/AppClient",
         "app/main/App"],
-function(declare, lang, domConstruct, fx, AppClient, App) {
+function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
 
   var oThisClass = declare(null, {
 
@@ -21,6 +23,7 @@ function(declare, lang, domConstruct, fx, AppClient, App) {
           node: "app-loading-node",
           onEnd: function() {
             domConstruct.destroy("app-loading-node");
+            topic.publish(appTopics.AppStarted, {});
           }
         }).play();
       };
