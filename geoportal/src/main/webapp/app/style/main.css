@@ -1137,3 +1137,7 @@ a.dropdown-toggle:focus {
 .nav-padding-fix {
   padding: 0px !important;
 }
+
+.g-drop-pane .dijitTreeContent {
+  cursor: pointer;
+}
