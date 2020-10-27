@@ -78,15 +78,44 @@ G.evaluators.iso = {
     G.writeProp(item,"apiso_HasSecurityConstraints_b",G.hasNode(task,root,"//gmd:resourceConstraints"));
     
     /* hierarchical category */
+    
+    /*
+     * There are two distinct cases of the source of the hierarchical category 
+     * information: metadata or a legacy system (service). Hierarchical category
+     * is always a string with pipe (|) separated category names like: 
+     * "Category|Oceanic|Temperature". If other separator is desired, update
+     * replace delimiter declaration in hierarchy_tokenizer and 
+     * reverse_hierarchy_tokenizer within elastic-mappings.json and
+     * elastic-mappings-7.json, then recreate Elastic Search index.
+     * 
+     * If the source is metadata or, more acuratelly: a field from within metadata
+     * use G.evalProps to read that information and put into 'src_category_cat
+     * property (Eample 1)
+     * 
+     * If the source is a legacy system, you may consider making an AJAX call to
+     * this system and receive mapping information then use it to update
+     * 'user_category_cat' property (Example 2). In this example a simple service 
+     * is listening on port 3000 and is awaiting for the HTTP GET request in the 
+     * form of the following pattern: http://localhost:3000/<fileId> where file 
+     * id is information extracted from the metadata itself. External service is 
+     * able to map file it into category and provide a JSON response as below:
+     * {
+     *  "category": <category>
+     * }
+     */
+   
+// //Example 1
 //    G.evalProps(task,item,root,"src_category_cat","//gmd:MD_TopicCategoryCode");
-    try {
-      var response = JSON.parse(this.httpGet("http://localhost:3000/"+item.fileid));
-      if (response && response.category && response.category.length > 0) {
-        item["user_category_cat"] = [ response.category ];
-      }
-    } catch(exception) {
-      print(exception);
-    }
+
+// //Example 2
+//    try {
+//      var response = JSON.parse(G.httpGet("http://localhost:3000/"+item.fileid));
+//      if (response && response.category && response.category.length > 0) {
+//        item["user_category_cat"] = [ response.category ];
+//      }
+//    } catch(exception) {
+//      print(exception);
+//    }
     
   },
 
@@ -279,27 +308,6 @@ G.evaluators.iso = {
     G.evalProp(task,item,root,"url_granule_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:name/gco:CharacterString,'Granule Search')]/gmd:linkage/gmd:URL");
     G.evalProp(task,item,root,"url_http_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource/gmd:linkage/gmd:URL | gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[not(contains(gmd:protocol/gco:CharacterString,'FTP'))]/gmd:linkage/gmd:URL");
     G.evalProp(task,item,root,"url_ftp_download_s","gmd:distributionInfo/gmd:MD_Distribution/gmd:distributor/gmd:MD_Distributor/gmd:distributorTransferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL | gmd:distributionInfo/gmd:MD_Distribution/gmd:transferOptions/gmd:MD_DigitalTransferOptions/gmd:onLine/gmd:CI_OnlineResource[contains(gmd:protocol/gco:CharacterString,'FTP')]/gmd:linkage/gmd:URL");
-  },
-  
-  httpGet: function(url) {
-    var con = new java.net.URL(url).openConnection();
-    con.requestMethod = "GET";
-    
-    var response = this.read(con.inputStream);
-    
-    return response;
-  },
-  
-  read: function(inputStream){
-    var inReader = new java.io.BufferedReader(new java.io.InputStreamReader(inputStream));
-    var inputLine;
-    var response = new java.lang.StringBuffer();
-
-    while ((inputLine = inReader.readLine()) != null) {
-           response.append(inputLine);
-    }
-    inReader.close();
-    return response.toString();
   }
 
 };
