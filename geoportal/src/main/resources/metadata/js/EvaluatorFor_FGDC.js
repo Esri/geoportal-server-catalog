@@ -37,7 +37,7 @@ G.evaluators.fgdc = {
     G.evalProps(task,item,root,"contentType_s","distinfo/resdesc");
     
     /* hierarchical category */
-    /* see: evalBse() method in EvaluatorFor_DC.js and copy that code here if desired. */
+    /* see: evalBse() method in EvaluatorFor_ISO.js and copy that code here if desired. */
   },
 
   evalService: function(task) {
