@@ -7,7 +7,7 @@ define([],function(){var obj={
   
   edit: {
     setField: {
-      allow: false,
+      allow: true,
       adminOnly: false
     }
   },
