@@ -122,6 +122,10 @@
         </div>
 
         <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
+          data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20, missing:'${i18n.search.criteria.missingSource}'}">
+        </div>
+        
+        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
           data-dojo-props="
             conditionallyDisabled: !AppContext.geoportal.supportsApprovalStatus,
             field:'sys_approval_status_s',
