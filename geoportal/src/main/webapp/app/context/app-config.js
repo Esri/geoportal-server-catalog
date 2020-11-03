@@ -43,7 +43,8 @@ define([],function(){var obj={
     defaultSort: "title.sort:asc",
     showLinks: true,
     showCustomLinks: true,
-    showOpenSearchLinks: true
+    showOpenSearchLinks: true,
+    showTotalCountInHierarchy: true
   },
   
   statusChecker: {

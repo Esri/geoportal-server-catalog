@@ -52,6 +52,9 @@ G.evaluators.dc = {
       G.evalProps(task,item,dsc,"publisher_s","dc:publisher | dct:publisher");
       G.evalProps(task,item,dsc,"contributor_s","dc:contributor | dct:contributor");
       G.evalProps(task,item,dsc,"creator_s","dc:creator | dct:creator ");
+    
+    /* hierarchical category */
+    /* see: evalBse() method in EvaluatorFor_ISO.js and copy that code here if desired. */
   },
     evalTitleAndDescription: function(task){
         var item = task.item, root = task.root;

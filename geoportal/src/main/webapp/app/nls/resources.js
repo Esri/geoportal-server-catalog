@@ -79,6 +79,7 @@ define({
         accessGroups: "Access Groups",
         missingSource: "Editor/Upload",
         createFilter: "Create Filter",
+        hierarchicalCategory: "Hierarchical Category",
         dataType: "Data Type",
         mediaType: "Media Type",
         site: "Site",

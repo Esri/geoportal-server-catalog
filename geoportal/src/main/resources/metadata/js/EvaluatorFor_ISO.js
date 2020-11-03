@@ -76,6 +76,55 @@ G.evaluators.iso = {
     G.evalProps(task,item,root,"apiso_OtherConstraints_s","//gmd:resourceConstraints/gmd:MD_LegalConstraints/gmd:otherConstraints/*/text()");
     G.evalProps(task,item,root,"apiso_Classification_s","//gmd:resourceConstraints/gmd:MD_SecurityConstraints/gmd:classification/gmd:MD_ClassificationCode/@codeListValue");
     G.writeProp(item,"apiso_HasSecurityConstraints_b",G.hasNode(task,root,"//gmd:resourceConstraints"));
+    
+    /* hierarchical category */
+    
+    /*
+     * There are two distinct cases of the source of the hierarchical category 
+     * information: metadata or a legacy system (service). Hierarchical category
+     * is always a string with pipe (|) separated category names like: 
+     * "Category|Oceanic|Temperature". If other separator is desired, update
+     * replace delimiter declaration in hierarchy_tokenizer and 
+     * reverse_hierarchy_tokenizer within elastic-mappings.json and
+     * elastic-mappings-7.json, then recreate Elastic Search index.
+     * 
+     * If the source is metadata or, more acuratelly: a field from within metadata
+     * use G.evalProps to read that information and put into 'src_category_cat
+     * property (Eample 1)
+     * 
+     * If the source is a legacy system, you may consider making an AJAX call to
+     * this system and receive mapping information then use it to update
+     * 'user_category_cat' property (Example 2). In this example a simple service 
+     * is listening on port 3000 and is awaiting for the HTTP GET request in the 
+     * form of the following pattern: http://localhost:3000/<fileId> where file 
+     * id is information extracted from the metadata itself. External service is 
+     * able to map file it into category and provide a JSON response as below:
+     * {
+     *  "category": <category>
+     * }
+     * 
+     * NOTE! While first example uses 'src_category_cat' the second one uses 
+     * 'user_category_cat'. This is not a mistake; prefixes like 'src_' and 
+     * 'user_' denotes if particular property should be replaced or preserved
+     * during record update (harvesting).
+     * 
+     * In order to 'user_category_cat' be used instead of 'src_category_cat'
+     * update code of the Hierachical Category facet in SearchPanel.html
+     */
+   
+// //Example 1
+//    G.evalProps(task,item,root,"src_category_cat","//gmd:MD_TopicCategoryCode");
+
+// //Example 2
+//    try {
+//      var response = JSON.parse(G.httpGet("http://localhost:3000/"+item.fileid));
+//      if (response && response.category && response.category.length > 0) {
+//        item["user_category_cat"] = [ response.category ];
+//      }
+//    } catch(exception) {
+//      print(exception);
+//    }
+    
   },
 
   evalInspire: function(task) {

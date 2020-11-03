@@ -35,6 +35,9 @@ G.evaluators.fgdc = {
     G.evalProps(task,item,root,"contact_organizations_s","//cntinfo/cntorgp/cntorg");
     G.evalProps(task,item,root,"contact_people_s","//cntinfo/cntorgp/cntper");
     G.evalProps(task,item,root,"contentType_s","distinfo/resdesc");
+    
+    /* hierarchical category */
+    /* see: evalBse() method in EvaluatorFor_ISO.js and copy that code here if desired. */
   },
 
   evalService: function(task) {

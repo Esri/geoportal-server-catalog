@@ -1,0 +1,49 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+    data-dojo-props="target:'gmd:dataQualityInfo',
+      label:'${i18nIso.MD_Metadata.dataQualityInfo}'">
+    
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-attach-point="_forNetwork"
+      data-dojo-props="target:'gmd:DQ_DataQuality'">
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+      
+        <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/Scope"
+          data-dojo-props="label:'${i18nIso.qualitySection.scope}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/inspire2/gmd/dataQuality/ConformanceReport"
+          data-dojo-props="label:'${i18nIso.qualitySection.conformance}'"></div>
+          
+        <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/dataQuality/Lineage"
+          data-dojo-props="label:'${i18nIso.qualitySection.lineage}'"></div>  
+                  
+      </div>  
+      
+    </div>
+
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-attach-point="_forInvokable"
+      data-dojo-props="target:'gmd:DQ_DataQuality'">
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+      
+        <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/Scope"
+          data-dojo-props="label:'${i18nIso.qualitySection.scope}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/ConformanceReport"
+          data-dojo-props="label:'${i18nIso.qualitySection.conformance}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/ConceptualConsistency"
+          data-dojo-props="label:'${i18nInspire.dataQuality.conceptualConsistency.caption}'"></div>
+          
+        <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/dataQuality/Lineage"
+          data-dojo-props="label:'${i18nIso.qualitySection.lineage}'"></div>  
+                  
+      </div>  
+      
+    </div>
+
+  </div>
+
+</div>

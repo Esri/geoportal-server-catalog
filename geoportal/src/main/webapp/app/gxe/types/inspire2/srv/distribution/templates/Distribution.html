@@ -1,0 +1,27 @@
+<div data-dojo-attach-point="containerNode">
+  
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-attach-point="_forNetwork"
+    data-dojo-props="target:'gmd:distributionInfo',minOccurs:0,
+      label:'${i18nIso.MD_Metadata.distributionInfo}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+      data-dojo-props="target:'gmd:MD_Distribution',minOccurs:0">
+      
+      <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/distribution/DistributionFormat"></div>
+      <div data-dojo-type="app/gxe/types/inspire2/srv/distribution/TransferOptions"></div>
+      
+    </div>
+  </div>  
+  
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-attach-point="_forInvokable"
+    data-dojo-props="target:'gmd:distributionInfo',minOccurs:1,
+      label:'${i18nIso.MD_Metadata.distributionInfo}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+      data-dojo-props="target:'gmd:MD_Distribution',minOccurs:1">
+      
+      <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/distribution/DistributionFormat"></div>
+      <div data-dojo-type="app/gxe/types/inspire2/srv/distribution/TransferOptions"></div>
+      
+    </div>
+  </div>  
+  
+</div>

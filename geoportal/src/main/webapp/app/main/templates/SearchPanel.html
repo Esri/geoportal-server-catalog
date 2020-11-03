@@ -117,6 +117,12 @@
           data-dojo-props="field:'src_item_category_s',label:'${i18n.search.criteria.category}',props:{size:20}">
         </div>
         
+        <div class="g-filter-collapse" data-dojo-type="app/search/HierarchyTree"
+          data-dojo-props="
+            field:'src_category_cat',
+            label:'${i18n.search.criteria.hierarchicalCategory}'">
+        </div>
+
         <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
           data-dojo-props="field:'src_data_type_s',label:'${i18n.search.criteria.dataType}',props:{size:20}">
         </div>
