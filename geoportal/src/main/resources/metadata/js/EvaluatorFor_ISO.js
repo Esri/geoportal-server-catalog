@@ -118,10 +118,11 @@ G.evaluators.iso = {
 // //Example 1
 //    G.evalProps(task,item,root,"src_category_cat","//gmd:MD_TopicCategoryCode");
 
-//  //Example 2
+// //Example 2
 //    var json = task.suppliedJson;
-//    if (json && json.src_source_type_s === "UNC" && json.src_uri_s && json.src_source_uri_s && json.src_source_uri_s.startsWith("UNC:")) {
-//      var src_root = json.src_source_uri_s.substr("UNC:".length);
+//    if (json && (json.src_source_type_s === "UNC" || json.src_source_type_s === "WAF") 
+//             && json.src_uri_s && json.src_source_uri_s && json.src_source_uri_s.startsWith(json.src_source_type_s)) {
+//      var src_root = json.src_source_uri_s.substr(json.src_source_type_s.length+1);
 //      var src_root_index = json.src_uri_s.indexOf(src_root);
 //      if (src_root_index >= 0) {
 //        var src_base = json.src_uri_s.substr(src_root_index + src_root.length);
