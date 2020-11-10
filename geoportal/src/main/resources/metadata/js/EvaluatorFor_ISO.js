@@ -92,9 +92,12 @@ G.evaluators.iso = {
      * use G.evalProps to read that information and put into 'src_category_cat
      * property (Eample 1)
      * 
+     * If the source of the metadata is an UNC folder or WAF folder, it is possible
+     * to use folder structure as category (Example 2)
+     * 
      * If the source is a legacy system, you may consider making an AJAX call to
      * this system and receive mapping information then use it to update
-     * 'user_category_cat' property (Example 2). In this example a simple service 
+     * 'user_category_cat' property (Example 3). In this example a simple service 
      * is listening on port 3000 and is awaiting for the HTTP GET request in the 
      * form of the following pattern: http://localhost:3000/<fileId> where file 
      * id is information extracted from the metadata itself. External service is 
@@ -115,7 +118,21 @@ G.evaluators.iso = {
 // //Example 1
 //    G.evalProps(task,item,root,"src_category_cat","//gmd:MD_TopicCategoryCode");
 
-// //Example 2
+//  //Example 2
+//    var json = task.suppliedJson;
+//    if (json && json.src_source_type_s === "UNC" && json.src_uri_s && json.src_source_uri_s && json.src_source_uri_s.startsWith("UNC:")) {
+//      var src_root = json.src_source_uri_s.substr("UNC:".length);
+//      var src_root_index = json.src_uri_s.indexOf(src_root);
+//      if (src_root_index >= 0) {
+//        var src_base = json.src_uri_s.substr(src_root_index + src_root.length);
+//        src_base = src_base.split("/").filter(function(p) { return p.length > 0; }).slice(0, -1);
+//        src_base.unshift(src_root);
+//        var category = src_base.join("|");
+//        item["src_category_cat"] = [ category ];
+//      }
+//    }
+
+// //Example 3
 //    try {
 //      var response = JSON.parse(G.httpGet("http://localhost:3000/"+item.fileid));
 //      if (response && response.category && response.category.length > 0) {
