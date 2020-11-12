@@ -14,9 +14,10 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 - 2.6.4 - released July 8, 2020, [click here](https://github.com/Esri/geoportal-server-catalog/wiki) for release notes and downloads.
 - 2.6.3 - released April 7, 2020, [click here](https://github.com/Esri/geoportal-server-catalog/wiki) for release notes and downloads.
 
-<!---## Can't Wait to Get Started?
+## Can't Wait to Get Started?
 - Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
---->
+- A different configuration that contains several 100,000 images as its [catalog](https://geoss.esri.com/imagecatalog)
+
 ## Features
 * **Metadata editor** - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE 2.0.1 (Data), INSPIRE 2.0.1 (Service), GEMINI (Data), GEMINI (Service)
 * **Faceted Search** - Configure different facets to allow your user to filter from the hay stack to the needle

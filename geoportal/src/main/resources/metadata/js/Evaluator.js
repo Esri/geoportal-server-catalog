@@ -133,7 +133,8 @@ G._initializeTask = function(mdoc) {
       mdoc: mdoc,
       item: {},
       xpath: xpath,
-      parseGml: gptContext.getParseGml()
+      parseGml: gptContext.getParseGml(),
+      suppliedJson: JSON.parse(mdoc.getSuppliedJson())
   };
   if (mdoc && mdoc.hasXml()) {
     task.dom = task.mdoc.ensureDom();
