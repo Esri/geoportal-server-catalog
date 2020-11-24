@@ -94,7 +94,10 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
               
               this.pushQClause(qClause,true)
             }
-          })
+          }),
+          getIconClass: function(/*dojo.store.Item*/ item, /*Boolean*/ opened){
+              return (!item || this.model.mayHaveChildren(item)) ? (opened ? "g-dijitFolderOpened" : "g-dijitFolderClosed") : "dijitLeaf";
+          }
       });
     },
     
