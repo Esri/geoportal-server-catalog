@@ -83,7 +83,7 @@ define({
         dataType: "Data Type",
         mediaType: "Media Type",
         site: "Site",
-        category: "Category"
+        category: "Item Category"
       },
       componentSettings: {
         componentLabel: "Label",
