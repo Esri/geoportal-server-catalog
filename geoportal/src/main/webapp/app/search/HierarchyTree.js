@@ -91,7 +91,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, Memory, Observabl
                 scorable: true,
                 query: query
               });
-              
+              this.activeQClauses = null;
               this.pushQClause(qClause,true)
             }
           }),
