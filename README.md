@@ -15,7 +15,7 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 - 2.6.3 - released April 7, 2020, [click here](https://github.com/Esri/geoportal-server-catalog/wiki) for release notes and downloads.
 
 ## Can't Wait to Get Started?
-- Try the [sandbox site](http://geoss.esri.com/geoportal2) and learn what Geoportal 2 is all about!
+- Try the [sandbox site](http://gptogc.esri.com/geoportal2) and learn what Geoportal 2 is all about!
 - A different configuration that contains several 100,000 images as its [catalog](https://geoss.esri.com/imagecatalog)
 
 ## Features
