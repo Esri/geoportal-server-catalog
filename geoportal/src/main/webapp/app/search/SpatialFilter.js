@@ -222,13 +222,13 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
           clearTimeout(self.newExtendTimerHandler);
           self.newExtendTimerHandler = null;
         }
-        if (self.savedExtent) {
-          self.newExtendTimerHandler = setTimeout(function() {
+        self.newExtendTimerHandler = setTimeout(function() {
+          if (self.savedExtent) {
             self.map.setExtent(self.savedExtent);
             self.savedExtent = null;
-          }, 800);
-        }
-        self.disableMapNotification = false;
+          }
+          self.disableMapNotification = false;
+        }, 800);
         if (self._highlighted) {
           self._highlighted.hide();
         }
