@@ -1,0 +1,46 @@
+version: '3.5'
+
+services:
+
+  elasticsearch:
+    image: docker.elastic.co/elasticsearch/elasticsearch:7.11.0
+    container_name: elasticsearch-7.11.0
+    hostname: elasticsearch
+    ports:
+      - "9200:9200"
+      - "9300:9300"
+    volumes:
+        - c:\gpt-data:/usr/share/elasticsearch/data
+    environment:
+      - "ES_JAVA_OPTS=-Xms512m -Xmx512m"
+      - bootstrap.memory_lock=true
+      - discovery.type=single-node
+      - cluster.name=geoportal
+      - xpack.security.enabled=false
+      - xpack.ml.enabled=false
+    networks:
+      - gpt-net
+    healthcheck:
+        test: ["CMD", "curl", "-f", "http://elasticsearch:9200"]
+        interval: 20s
+        timeout: 10s
+        retries: 5      
+
+  geoportal:
+    build: .
+    ports: 
+      - "8082:8080"
+    container_name: geoportal-catalog-2.6.4
+    hostname: geoportal
+    depends_on: 
+      elasticsearch:
+        condition: service_healthy
+    environment:
+      - es_cluster=geoportal
+      - es_node=elasticsearch
+    networks:
+      - gpt-net
+
+networks:
+  gpt-net:
+    driver: bridge
