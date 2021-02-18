@@ -77,6 +77,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     highlightItemOnHover: true,
     showLocator: true,
     map: null,
+    disableMapNotification: false,
+    savedExtent: null,
+    newExtendTimerHandler: null,
 
     _highlighted: null,
     _locator: null,
@@ -183,6 +186,10 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             }
           }
           if (geometry && webMercatorUtils.canProject(geometry,outSR)) {
+            self.disableMapNotification = true;
+            if (!self.savedExtent) {
+              self.savedExtent = map.extent;
+            }
             var projected = webMercatorUtils.project(geometry,outSR);
             if (!self._highlighted) {
               var symbol = new SimpleFillSymbol(
@@ -196,6 +203,13 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
               self._highlighted.show();
             }
             self._highlighted.xtnItemId = params.item._id;
+            if (self.newExtendTimerHandler) {
+              clearTimeout(self.newExtendTimerHandler);
+              self.newExtendTimerHandler = null;
+            }
+            self.newExtendTimerHandler = setTimeout(function() {
+              map.setExtent(projected);
+            }, 800);
           }
         } catch(ex) {
           console.warn("SpatialFilter.OnMouseEnterResultItem");
@@ -204,7 +218,20 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       }));
 
       this.own(topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
-        if (self._highlighted) self._highlighted.hide();
+        if (self.newExtendTimerHandler) {
+          clearTimeout(self.newExtendTimerHandler);
+          self.newExtendTimerHandler = null;
+        }
+        if (self.savedExtent) {
+          self.newExtendTimerHandler = setTimeout(function() {
+            self.map.setExtent(self.savedExtent);
+            self.savedExtent = null;
+          }, 800);
+        }
+        self.disableMapNotification = false;
+        if (self._highlighted) {
+          self._highlighted.hide();
+        }
       }));
 
       var positionLocator = true;
@@ -415,6 +442,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         this.initializeLocator();
         //window.AppContext.searchMap = this.map;
         this.own(on(map,"ExtentChange",lang.hitch(this,function(){
+          if (this.disableMapNotification) return;
           if (this.getRelation() !== "any") this.search();
         })));
       })));
