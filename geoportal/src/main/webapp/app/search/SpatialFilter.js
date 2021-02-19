@@ -12,6 +12,9 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+var CARD_MOUSE_ENTER_DELAY = 800;
+var CARD_MOUSE_lEAVE_DELAY = 200;
+
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
@@ -209,7 +212,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             }
             self.newExtendTimerHandler = setTimeout(function() {
               map.setExtent(projected);
-            }, 800);
+            }, CARD_MOUSE_ENTER_DELAY);
           }
         } catch(ex) {
           console.warn("SpatialFilter.OnMouseEnterResultItem");
@@ -228,7 +231,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             self.savedExtent = null;
           }
           self.disableMapNotification = false;
-        }, 800);
+        }, CARD_MOUSE_lEAVE_DELAY);
         if (self._highlighted) {
           self._highlighted.hide();
         }
