@@ -332,6 +332,11 @@ body {
 .g-search-pane-left {
   width: 30%;
   margin-right: 16px;
+  
+  position: sticky;
+  top: 0px;
+  align-self: flex-start;
+  
 }
 
 .g-search-pane-right {
