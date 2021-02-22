@@ -206,13 +206,15 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
               self._highlighted.show();
             }
             self._highlighted.xtnItemId = params.item._id;
-            if (self.newExtendTimerHandler) {
-              clearTimeout(self.newExtendTimerHandler);
-              self.newExtendTimerHandler = null;
+            if (projected) {
+              if (self.newExtendTimerHandler) {
+                clearTimeout(self.newExtendTimerHandler);
+                self.newExtendTimerHandler = null;
+              }
+              self.newExtendTimerHandler = setTimeout(function() {
+                map.setExtent(projected.expand(1.4));
+              }, CARD_MOUSE_ENTER_DELAY);
             }
-            self.newExtendTimerHandler = setTimeout(function() {
-              map.setExtent(projected);
-            }, CARD_MOUSE_ENTER_DELAY);
           }
         } catch(ex) {
           console.warn("SpatialFilter.OnMouseEnterResultItem");
