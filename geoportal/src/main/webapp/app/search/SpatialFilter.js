@@ -209,7 +209,6 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             if (projected) {
               if (self.newExtendTimerHandler) {
                 clearTimeout(self.newExtendTimerHandler);
-                self.newExtendTimerHandler = null;
               }
               self.newExtendTimerHandler = setTimeout(function() {
                 map.setExtent(projected.expand(1.4));
@@ -225,14 +224,14 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       this.own(topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
         if (self.newExtendTimerHandler) {
           clearTimeout(self.newExtendTimerHandler);
-          self.newExtendTimerHandler = null;
         }
         self.newExtendTimerHandler = setTimeout(function() {
           if (self.savedExtent) {
             self.map.setExtent(self.savedExtent);
             self.savedExtent = null;
+          } else {
+            self.disableMapNotification = false;
           }
-          self.disableMapNotification = false;
         }, CARD_MOUSE_lEAVE_DELAY);
         if (self._highlighted) {
           self._highlighted.hide();
@@ -447,7 +446,12 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         this.initializeLocator();
         //window.AppContext.searchMap = this.map;
         this.own(on(map,"ExtentChange",lang.hitch(this,function(){
-          if (this.disableMapNotification) return;
+          if (this.disableMapNotification) {
+            if (!this.savedExtent) {
+              this.disableMapNotification = false;
+            }
+            return;
+          }
           if (this.getRelation() !== "any") this.search();
         })));
       })));
