@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 var CARD_MOUSE_ENTER_DELAY = 800;
-var CARD_MOUSE_lEAVE_DELAY = 200;
+var CARD_MOUSE_lEAVE_DELAY = 50;
 
 define(["dojo/_base/declare",
         "dojo/_base/lang",
