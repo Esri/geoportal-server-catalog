@@ -28,6 +28,7 @@ define({
       updating: "Updating...",
       uploading: "Uploading...",
       working: "...",
+      incompatible: "Your Internet browser is no longer supported.<br>Please, use different browser."
     },
 
     nav: {
