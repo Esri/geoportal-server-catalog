@@ -82,6 +82,13 @@ body {
   display: none;
 }
 
+.g-browser-incompatible {
+  margin: auto;
+  display: none;
+  width: 450px;
+  text-align: center;
+}
+
 .g-app-loading {
   position: absolute;
   top: 0;
@@ -90,6 +97,7 @@ body {
   right: 0;
   z-index: 99;
   background-color: #f8f8f8;
+  display: none;
 }
 .g-app-loading .progress {
   width: 200px;
