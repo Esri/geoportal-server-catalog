@@ -25,6 +25,9 @@
 	    role="progressbar" style="width:100%">Geoportal...</div>
 	</div>
 </div>
+<div id="app-browser-incompatible-node" class="g-browser-incompatible">
+	  <span id="app-browser-incompatible-msg" style="width:100%"></span>
+</div>
 <script type="text/javascript">
   var dojoConfig = {
     locale: "en",
@@ -37,6 +40,7 @@
       }
     ]
   };
+  
 </script>
 <script src="./lib/d3-3.5.5.js"></script>
 <script src="//cdnjs.cloudflare.com/ajax/libs/c3/0.4.10/c3.min.js"></script>
@@ -46,15 +50,23 @@
 <script src="//js.arcgis.com/3.35/"></script>
 <script src="./custom/custom.js"></script>
 <script>
-require(["app"],function() {
-  require(["dojo/ready","app/context/AppContext","app/context/AppStarter"],
-  function(ready,AppContext,AppStarter) {
-    window.AppContext = new AppContext();
-    ready(function() {
-      esri.config.defaults.io.proxyUrl = "viewer/proxy.jsp";
-      (new AppStarter()).startupApp();
+require(["app","dojo/i18n!app/nls/resources"],function(app,i18n) {
+  var isIE = navigator.userAgent.indexOf("MSIE ")!=-1 || navigator.userAgent.indexOf("Trident/")!=-1;
+  if (!isIE) {
+    document.getElementById("app-loading-node").style.display = "block";
+    require(["dojo/ready","app/context/AppContext","app/context/AppStarter"],
+    function(ready,AppContext,AppStarter) {
+      window.AppContext = new AppContext();
+      ready(function() {
+        esri.config.defaults.io.proxyUrl = "viewer/proxy.jsp";
+        (new AppStarter()).startupApp();
+      });
     });
-  });
+  } else {
+    console.log("Your browser is no longer supported.");
+    document.getElementById("app-browser-incompatible-node").style.display = "block";
+    document.getElementById("app-browser-incompatible-node").innerHTML = i18n.general.incompatible;
+  }
 });
 </script>
 </body>
