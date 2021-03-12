@@ -1,0 +1,116 @@
+﻿<UserControl x:Class="GeoportalSearch.Dockpane1View"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:extensions="clr-namespace:ArcGIS.Desktop.Extensions;assembly=ArcGIS.Desktop.Extensions" xmlns:geoportalsearch="clr-namespace:GeoportalSearch" 
+             mc:Ignorable="d" d:DesignWidth="300" d:DesignHeight="580"
+             HorizontalAlignment="Stretch"
+             d:DataContext="{Binding Path=ui.Dockpane1ViewModel}" SizeChanged="userControl_SizeChanged">
+    <UserControl.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <extensions:DesignOnlyResourceDictionary Source="pack://application:,,,/ArcGIS.Desktop.Framework;component\Themes\Default.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+        </ResourceDictionary>
+    </UserControl.Resources>
+    <Grid Margin="0,0,0,0" HorizontalAlignment="Stretch">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <DockPanel x:Name="dockPanel" Grid.Row="1" LastChildFill="true" KeyboardNavigation.TabNavigation="Local" Margin="5,0,0,-15" Width="auto" VerticalAlignment="Top" HorizontalAlignment="Left" Height="579" SizeChanged="dockPanel_SizeChanged" Grid.Column="1" Grid.ColumnSpan="2">
+            <TabControl x:Name="tabControl" HorizontalAlignment="Left" VerticalAlignment="Top" Height="578" Width="auto" SizeChanged="tabControl_SizeChanged">
+                <TabItem Header="Find" HorizontalAlignment="Stretch" Width="auto" GotFocus="TabItem_GotFocus">
+                    <Grid x:Name="gridControl" Width="auto" Height="556" Margin="10,0">
+                        <Label x:Name="lblFind" Content="Find:" HorizontalAlignment="Left" Height="27" Margin="10,10,0,0" VerticalAlignment="Top"/>
+                        <TextBox x:Name="searchPhraseTextBox" Height="23" Margin="10,37,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" KeyDown="searchPhraseTextBox_KeyDown" HorizontalAlignment="Stretch"/>
+                        <Label x:Name="lblCatalog" Content="In Catalog:" HorizontalAlignment="Left" Height="27" Margin="10,65,0,0" VerticalAlignment="Top"/>
+                        <ComboBox x:Name="catalogComboBox" VerticalAlignment="Top" Margin="10,95,60,5" IsReadOnly="True">
+                            <ListBoxItem x:Name="lbiGPTOGC" IsSelected="True">Esri Geoportal Server Sandbox</ListBoxItem>
+                        </ComboBox>
+                        <Button x:Name="findButton" Content="Find" HorizontalAlignment="Right" Margin="0,95,10,0" VerticalAlignment="Top" Width="40" Click="FindButton_Click" Height="22"/>
+                        <CheckBox x:Name="liveDataAndMapsOnlyCheckBox" Content="Live Data and Maps Only" Margin="10,125,0,412" ></CheckBox>
+                        <CheckBox x:Name="useCurrentExtentCheckBox" Content="Use Current Extent" Margin="10,144,0,391" ></CheckBox>
+
+                        <Label x:Name="resultsLabel" Content="Results:" HorizontalAlignment="Left" Height="27" Margin="10,165,0,0" VerticalAlignment="Top"/>
+
+                        <Button x:Name="viewMetadataToolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,197,0,0" Width="32" Height="32" Background="White" Click="ViewMetadata_Clicked" ToolTip="View Metadata">
+                            <StackPanel>
+                                <Image x:Name="imgViewMetadata" VerticalAlignment="Top"  Grid.Row="1" Source="Images/metadata_view.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="downloadMetadataToolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="46,197,0,0" Width="32" Height="32" Background="White" ToolTip="Download Metadata" Click="downloadMetadataToolStripButton_Click">
+                            <StackPanel>
+                                <Image x:Name="imgDownloadMetadata" VerticalAlignment="Top"  Grid.Row="1" Source="Images/metadata_download.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="addToMapToolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="82,197,0,0" Width="32" Height="32" Background="White" ToolTip="Add to Map" Click="addToMapToolStripButton_Click">
+                            <StackPanel>
+                                <Image x:Name="imgAddToMap" VerticalAlignment="Top"  Grid.Row="1" Source="Images/metadata_addToMap.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="displayFootprinttoolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="118,197,0,0" Width="32" Height="32" Background="White" ToolTip="Display Footprint" Click="displayFootprinttoolStripButton_Click">
+                            <StackPanel>
+                                <Image x:Name="imgDisplayFootprints" VerticalAlignment="Top"  Grid.Row="1" Source="Images/display_footprint.bmp" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="zoomtoFootprintToolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="154,197,0,0" Width="32" Height="32" Background="White" ToolTip="Zoom to Footprint" Click="zoomtoFootprintToolStripButton_Click">
+                            <StackPanel>
+                                <Image x:Name="imgZoomToFootprint" VerticalAlignment="Top"  Grid.Row="1" Source="Images/zoom_to_footprint.bmp" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="showAllFootprintToolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="190,197,0,0" Width="32" Height="32" Background="White" ToolTip="Show All Footprints" Click="showAllFootprintToolStripButton_Click">
+                            <StackPanel>
+                                <Image x:Name="imgShowAllFootprints" VerticalAlignment="Top"  Grid.Row="1" Source="Images/showAll.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="clearAllFootprinttoolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="226,197,0,0" Width="32" Height="32" Background="White" ToolTip="Clear All Footprints" Click="clearAllFootprinttoolStripButton_Click">
+                            <StackPanel>
+                                <Image x:Name="imgHideAllFootprints" VerticalAlignment="Top"  Grid.Row="1" Source="Images/delete.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <ListBox x:Name="resultsListBox" Height="169" Margin="10,235,0,0" VerticalAlignment="Top" SelectionChanged="ResultsListBox_SelectedIndexChanged" Width="auto"/>
+
+                        <Label x:Name="lblAbstract" Content="Abstract:" HorizontalAlignment="Left" Height="auto" Margin="10,415,0,0" VerticalAlignment="Top"/>
+                        <TextBox x:Name="abstractTextBox" ScrollViewer.VerticalScrollBarVisibility="Auto" Margin="10,440,0,0" VerticalAlignment="Top" MinHeight="100" IsReadOnly="True" IsEnabled="True" VerticalScrollBarVisibility="Visible" TextWrapping="Wrap" Height="106" MaxHeight="100" HorizontalAlignment="Stretch" Width="auto"/>
+                    </Grid>
+                </TabItem>
+                <TabItem Header="Configure" HorizontalAlignment="Stretch" Width="auto" IsEnabled="True">
+                    <Grid HorizontalAlignment="Stretch" Margin="0,0,0.4,0" Width="auto" Height="556">
+                        <Label x:Name="lblCatalogUrl" Content="Catalog Service URL:" HorizontalAlignment="Left" Height="27" Margin="2,10,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3" Grid.Column="1"/>
+                        <TextBox x:Name="catalogUrlTextBox" Height="23" Margin="10,37,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Width="auto" Grid.ColumnSpan="3" TextChanged="catalogUrlTextBox_TextChanged" Grid.Column="1"/>
+
+                        <Label x:Name="lblProfile" Content="Profile:" HorizontalAlignment="Left" Height="27" Margin="2,65,0,0" VerticalAlignment="Top" Grid.Column="1" Grid.ColumnSpan="2"/>
+                        <ComboBox x:Name="catalogProfileComboBox" HorizontalAlignment="Stretch" VerticalAlignment="Top" Margin="10,90,10,0" IsReadOnly="True" Grid.ColumnSpan="3" SelectionChanged="catalogProfileComboBox_SelectionChanged" Grid.Column="1">
+                            <ListBoxItem x:Name="lbiProfileCSW202" IsSelected="True">OGC CSW 2.0.2 (Geoportal Server 2.x)</ListBoxItem>
+                            <ListBoxItem x:Name="lbiProfileCSW300" IsSelected="False">OGC CSW 3.0.0 (Geoportal Server 2.x)</ListBoxItem>
+                        </ComboBox>
+
+                        <Label x:Name="lblDisplayName" Content="Display Name:" HorizontalAlignment="Left" Height="27" Margin="2,125,0,0" VerticalAlignment="Top" Grid.ColumnSpan="3" Grid.Column="1"/>
+                        <TextBox x:Name="catalogDisplayNameTextBox" Height="23" Margin="10,150,10,0" TextWrapping="Wrap" Text="" VerticalAlignment="Top" Grid.ColumnSpan="3" TextChanged="catalogDisplayNameTextBox_TextChanged" Grid.Column="1"/>
+
+                        <Button x:Name="newCatalogButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="2,197,0,0" Width="32" Height="32" Background="White" Click="NewCatalogButton_Click" Grid.Column="1" Grid.ColumnSpan="2">
+                            <StackPanel>
+                                <Image x:Name="imgNewCatalog" VerticalAlignment="Top"  Grid.Row="1" Source="Images/new.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="saveCatalogButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="30.4,197,0,0" Width="32" Height="32" Background="White" Click="SaveCatalogButton_Click" Grid.ColumnSpan="2" Grid.Column="2">
+                            <StackPanel>
+                                <Image x:Name="imgSaveCatalog" VerticalAlignment="Top"  Grid.Row="1" Source="Images/save.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Button x:Name="deleteCatalogButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="193.8,197,-5.4,0" Width="32" Height="32" Background="White" Click="DeleteCatalogButton_Click" Grid.Column="3">
+                            <StackPanel>
+                                <Image x:Name="imgDeleteCatalog" VerticalAlignment="Top"  Grid.Row="1" Source="Images/delete.gif" Height="16"/>
+                            </StackPanel>
+                        </Button>
+                        <Label x:Name="catalogListLabel" Content="Catalogs:" HorizontalAlignment="Left" Height="27" Margin="10,234,-8.4,0" VerticalAlignment="Top" Grid.ColumnSpan="3" Grid.Column="1"/>
+                        <ListBox x:Name="catalogListBox" HorizontalAlignment="Stretch" Height="169" Margin="10,266,10,0" VerticalAlignment="Top" ItemsSource="{Binding Path=SearchResults}" SelectionChanged="CatalogListBox_SelectedIndexChanged" Grid.ColumnSpan="3" Grid.Column="1"></ListBox>
+                    </Grid>
+                </TabItem>
+            </TabControl>
+        </DockPanel>
+    </Grid>
+</UserControl>
