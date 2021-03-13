@@ -1,4 +1,4 @@
-#CSW Client for ArcGIS Pro
+# CSW Client for ArcGIS Pro
 
 These folders contain the new CSW Client for ArcGIS Pro. This is a straight port from the [https://github.com/Esri/geoportal-server/wiki/Geoportal-CSW-Clients](CSW Client for ArcMap). The CSW Client is currently only made available as a Microsoft Visual Studio Solution. Open the solution in your Visual Studio and build it to create the addin files that can be deployed to an ArcGIS Pro client.
 
@@ -14,5 +14,7 @@ Setup:
   - Set ```debug``` to ```on``` or ```off``` to show/hide debug messages from the addin.
 - Open the CswClient.sln file in Visual Studio
 - Check that Pro is properly set as the external program to start when debugging the addin from within Visual Studio:
+
 ![image](https://user-images.githubusercontent.com/394890/111036079-42156000-83d2-11eb-881d-2ca4d1b3c3e1.png)
+
 - Run!
