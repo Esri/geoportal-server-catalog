@@ -255,7 +255,8 @@ define({
         csv:  "CSV result",
         csw:  "CSW result",
         kml:  "KML result",
-        dcat: "DCAT result"
+        dcat: "DCAT result",
+        stac: "STAC result"
       }
     },
 
