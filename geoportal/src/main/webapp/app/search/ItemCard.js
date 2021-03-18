@@ -285,7 +285,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
 //          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
 //          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
 //          innerHTML: i18n.item.actions.json
-        },actionsNode);
+//        },actionsNode);
         if (v === "json") {
           var dataNode = domConstruct.create("a",{
             href: "#",
@@ -543,6 +543,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           }
         }
       }
+//      var permissions = ""
       
       if (typeof date === "string" && date.length > 0) {
         var idx = date.indexOf("T");
