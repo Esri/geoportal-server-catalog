@@ -27,7 +27,7 @@ import org.slf4j.LoggerFactory;
  */
 public class HarvesterProxy extends BalancerServlet {
   private static final Logger LOGGER = LoggerFactory.getLogger(HarvesterProxy.class);
-  private final BalancerSupport balancerSupport = new BalancerSupport();
+  private BalancerSupport balancerSupport = new BalancerSupport();
 
   public HarvesterProxy() {
   }

@@ -40,6 +40,7 @@ public class ElasticProxy extends BalancerServlet {
   private final BalancerSupport balancerSupport = new BalancerSupport();
   private String _authString = null;
   private boolean _useHttps = false;
+  private Integer proxyBufferSize = null;
 
   public ElasticProxy() {
   }
@@ -63,6 +64,13 @@ public class ElasticProxy extends BalancerServlet {
   @Override
   public void init() throws ServletException {
     LOGGER.debug("Starting up ElasticProxy...");
+    GeoportalContext gc = GeoportalContext.getInstance();
+    if (gc!=null) {
+      ElasticContext ec = gc.getElasticContext();
+      if (ec!=null) {
+        proxyBufferSize = ec.getProxyBufferSize();
+      }
+    }
     initBalancerNodes();
     super.init();
   }
@@ -107,8 +115,11 @@ public class ElasticProxy extends BalancerServlet {
       factory = new SslContextFactory();
       factory.setTrustAll(true);
     }
-    //return balancerSupport.newHttpClient();
     HttpClient client = factory!=null? new HttpClient(factory): new HttpClient();
+    if (proxyBufferSize!=null) {
+      LOGGER.debug(String.format("Buffer size for HTTP client for ElasticProxi set to: %s bytes", proxyBufferSize));
+      client.setRequestBufferSize(proxyBufferSize);
+    }
 //    org.eclipse.jetty.client.HttpProxy proxy = new org.eclipse.jetty.client.HttpProxy("localhost",8888);
 //    org.eclipse.jetty.client.ProxyConfiguration proxyConfig = client.getProxyConfiguration();
 //    proxyConfig.getProxies().add(proxy);
