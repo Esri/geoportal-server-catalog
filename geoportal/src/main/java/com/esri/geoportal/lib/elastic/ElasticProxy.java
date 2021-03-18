@@ -41,9 +41,6 @@ public class ElasticProxy extends BalancerServlet {
   private String _authString = null;
   private boolean _useHttps = false;
   private Integer proxyBufferSize = null;
-
-  public ElasticProxy() {
-  }
   
   @Override
   protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
