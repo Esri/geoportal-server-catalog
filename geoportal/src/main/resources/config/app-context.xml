@@ -39,6 +39,7 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
 		<beans:property name="httpPort" value="9200" />
 		<beans:property name="transportPort" value="9300" />
+		<beans:property name="proxyBufferSize" value="8192" />
 		
 		<!-- complete the following if you have x-pack security enabled,
 		     see https://www.elastic.co/guide/en/x-pack/current/java-clients.html -->
