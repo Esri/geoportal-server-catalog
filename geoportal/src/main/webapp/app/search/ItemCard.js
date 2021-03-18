@@ -279,12 +279,12 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
 //          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.xml, title: item.title}),
 //          innerHTML: i18n.item.actions.xml
 //        },actionsNode);
-        var jsonNode = domConstruct.create("a",{
-          href: uri+"?pretty=true",
-          target: "_blank",
-          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
-          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
-          innerHTML: i18n.item.actions.json
+//        var jsonNode = domConstruct.create("a",{
+//          href: uri+"?pretty=true",
+//          target: "_blank",
+//          title: string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
+//          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
+//          innerHTML: i18n.item.actions.json
         },actionsNode);
         if (v === "json") {
           var dataNode = domConstruct.create("a",{
@@ -543,7 +543,6 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           }
         }
       }
-//      var permissions = ""
       
       if (typeof date === "string" && date.length > 0) {
         var idx = date.indexOf("T");
@@ -561,17 +560,6 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           }
         }
       }
-
-      // set individual fields
-//      if (AppContext.appConfig.searchResults.showOwner) {
-//        if (owner && owner.length > 0) {
-//          util.setNodeText(this.ownerNode, owner);
-//        } else {
-//          util.setNodeText(this.ownerNode, i18n.item.notAvailable);
-//        }
-//      } else {
-//        domStyle.set(this.ownerSection, "display", "none")
-//      }
 
       if (AppContext.appConfig.searchResults.showDate) {
         if (date && date.length > 0) {
@@ -600,16 +588,6 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       } else {
         util.setNodeText(this.keywordsNode, i18n.item.notAvailable);
       }
-      
-//      if (AppContext.appConfig.searchResults.showAccess) {
-//        if (permissions && permissions.length > 0) {
-//          util.setNodeText(this.permissionsNode, permissions);
-//        } else {
-//          util.setNodeText(this.permissionsNode, i18n.item.notAvailable);
-//        }
-//      } else {
-//        domStyle.set(this.permissionSection, "display", "none")
-//      }
       
       if (!item.envelope_geo) {
         this.locationPlace.style.display = "flex";
