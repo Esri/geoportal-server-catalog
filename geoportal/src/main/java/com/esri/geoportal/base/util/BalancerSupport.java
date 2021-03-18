@@ -31,10 +31,6 @@ public class BalancerSupport {
   protected final AtomicLong balancerCount = new AtomicLong();
   private List<BalancerNode> balancerNodes = new ArrayList<>();
   private boolean is7Plus;
-  
-  /** Constructor. */
-  public BalancerSupport() {
-  }
 
   public boolean getIs7Plus() {
     return is7Plus;

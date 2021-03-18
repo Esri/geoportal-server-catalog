@@ -29,9 +29,6 @@ public class HarvesterProxy extends BalancerServlet {
   private static final Logger LOGGER = LoggerFactory.getLogger(HarvesterProxy.class);
   private BalancerSupport balancerSupport = new BalancerSupport();
 
-  public HarvesterProxy() {
-  }
-
   @Override
   public void init() throws ServletException {
     super.init();
