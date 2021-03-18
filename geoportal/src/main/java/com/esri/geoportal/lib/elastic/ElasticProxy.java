@@ -40,6 +40,9 @@ public class ElasticProxy extends BalancerServlet {
   private final BalancerSupport balancerSupport = new BalancerSupport();
   private String _authString = null;
   private boolean _useHttps = false;
+
+  public ElasticProxy() {
+  }
   
   @Override
   protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
@@ -99,13 +102,13 @@ public class ElasticProxy extends BalancerServlet {
   
   @Override
   protected HttpClient newHttpClient() {
+    SslContextFactory factory = null;
     if (this._useHttps) {
-      SslContextFactory factory = new SslContextFactory();
+      factory = new SslContextFactory();
       factory.setTrustAll(true);
-      return new HttpClient(factory);
     }
     //return balancerSupport.newHttpClient();
-    HttpClient client = new HttpClient();
+    HttpClient client = factory!=null? new HttpClient(factory): new HttpClient();
 //    org.eclipse.jetty.client.HttpProxy proxy = new org.eclipse.jetty.client.HttpProxy("localhost",8888);
 //    org.eclipse.jetty.client.ProxyConfiguration proxyConfig = client.getProxyConfiguration();
 //    proxyConfig.getProxies().add(proxy);
