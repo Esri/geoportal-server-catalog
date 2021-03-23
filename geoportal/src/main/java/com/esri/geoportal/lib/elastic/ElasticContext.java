@@ -47,6 +47,7 @@ import org.slf4j.LoggerFactory;
  * Elasticsearch context.
  */
 public class ElasticContext {
+  private static final int DEFAULT_PROXY_BUFFER_SIZE = 4096;
 
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContext.class);
@@ -82,8 +83,26 @@ public class ElasticContext {
   private String xpackSslCertificate = null;
   private String xpackSslCertificateAuthorities = null;
   
+  private Integer proxyBufferSize = DEFAULT_PROXY_BUFFER_SIZE;
+  
   /** Constructor */
   public ElasticContext() {}
+  
+  /**
+   * Gest proxy buffer size.
+   * @return buffer size
+   */
+  public Integer getProxyBufferSize() {
+    return proxyBufferSize;
+  }
+
+  /**
+   * Sets proxy buffer size.
+   * @param proxyBufferSize buffer size or <code>null</code> for default
+   */
+  public void setProxyBufferSize(Integer proxyBufferSize) {
+    this.proxyBufferSize = proxyBufferSize!=null? proxyBufferSize: DEFAULT_PROXY_BUFFER_SIZE;
+  }
   
   /** Allow internal metadata file idenitfiers to be used as the Elasticsearch _id .*/
   public boolean getAllowFileId() {
