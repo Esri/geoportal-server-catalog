@@ -16,13 +16,11 @@ package com.esri.geoportal.base.util;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
 import javax.servlet.http.HttpServletRequest;
 
-import org.eclipse.jetty.client.HttpClient;
 
 /**
  * Supports forward proxy load balancing to a cluster of nodes.
@@ -33,9 +31,6 @@ public class BalancerSupport {
   protected final AtomicLong balancerCount = new AtomicLong();
   private List<BalancerNode> balancerNodes = new ArrayList<>();
   private boolean is7Plus;
-  
-  /** Constructor. */
-  public BalancerSupport() {}
 
   public boolean getIs7Plus() {
     return is7Plus;
@@ -53,19 +48,19 @@ public class BalancerSupport {
   public void getBalancerNodes(List<BalancerNode> balancerNodes) {
     this.balancerNodes = balancerNodes;
   }
-  
-  /**
-   * Make a new HTTP client
-   * @return the client
-   */
-  public HttpClient newHttpClient() {
-    HttpClient client = new HttpClient();
-    // TODO HttpProxy??
-    //HttpProxy proxy = new HttpProxy("localhost",8888);
-    //ProxyConfiguration proxyConfig = client.getProxyConfiguration();
-    //proxyConfig.getProxies().add(proxy);
-    return client;
-  }
+//  
+//  /**
+//   * Make a new HTTP client
+//   * @return the client
+//   */
+//  public HttpClient newHttpClient() {
+//    HttpClient client = new HttpClient();
+//    // TODO HttpProxy??
+//    //HttpProxy proxy = new HttpProxy("localhost",8888);
+//    //ProxyConfiguration proxyConfig = client.getProxyConfiguration();
+//    //proxyConfig.getProxies().add(proxy);
+//    return client;
+//  }
   
   /**
    * Rewrite the target url for a request.
