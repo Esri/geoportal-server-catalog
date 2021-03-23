@@ -90,6 +90,10 @@
       },
       "description": {
         "type": "text"
+      },
+      "_json": {
+        "type": "object",
+        "enabled": false
       }
     },
     "dynamic_templates":[
