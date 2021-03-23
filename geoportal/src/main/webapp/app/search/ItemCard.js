@@ -44,12 +44,20 @@ define(["dojo/_base/declare",
   "app/content/SetField",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
-  "app/preview/PreviewPane"],
+  "app/preview/PreviewPane",
+  "esri/map",
+  "esri/geometry/Extent",
+  "esri/symbols/SimpleFillSymbol",
+  "esri/geometry/Point",
+  "esri/graphic",
+  "esri/layers/GraphicsLayer",
+  "dojo/domReady!"
+],
 function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
   MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata,
-  PreviewUtil, PreviewPane) {
+  PreviewUtil, PreviewPane, Map, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer) {
 
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -102,6 +110,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       this._renderOwnerAndDate(item);
       util.setNodeText(this.descriptionNode,item.description);
       this._renderThumbnail(item);
+
+      this._renderFootprint(item);
+      
       this._renderItemLinks(hit._id,item);
       this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
@@ -559,6 +570,84 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         thumbnailNode.style.display = "none";
       }
       //thumbnailNode.src = "http://placehold.it/80x60";
+    },
+
+    _renderFootprint: function(item) {
+      var show = AppContext.appConfig.searchResults.showFootprint;
+      var footprintNode = this.footprintNode;
+      if (show && item.shape_geo) {
+        var extent;
+
+        var west = 180;
+        var east = -180;
+        var south = 90;
+        var north = -90;
+
+        if (item.envelope_geo) {
+          var west = item.envelope_geo[0].coordinates[0][0];
+          var south = item.envelope_geo[0].coordinates[0][1];
+          var east = item.envelope_geo[0].coordinates[1][0];
+          var north = item.envelope_geo[0].coordinates[1][1];
+          extent = new Extent({xmin:west, ymin:south, xmax:east, ymax:north, spatialReference:{wkid:4326}}); 
+        };
+  
+        if (item.shape_geo) {
+
+          for (var i=0; i<item.shape_geo.coordinates[0].length; i++) {
+            var coordinate = item.shape_geo.coordinates[0][i];
+            west = Math.min(west, coordinate[0]);
+            east = Math.max(east, coordinate[0]);
+            south = Math.min(south, coordinate[1]);
+            north = Math.max(north, coordinate[1]);
+          }
+          extent = new Extent({xmin:west-0.25, ymin:south-0.5, xmax:east+0.5, ymax:north+0.25, spatialReference:{wkid:4326}});
+        }
+        
+        var mapOptions = {
+          basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
+          //center: [item.envelope_cen_pt.lon, item.envelope_cen_pt.lat],
+          isClickRecenter: false,
+          isDoubleClickZoom: false,
+          isKeyboardNavigation: false,
+          isMapNavigation: true,
+          isPan: true,
+          isPinchZoom: false,
+          isRubberbandZoom: false,
+          isScrollWheel: false,
+          slider: true,
+          logo: false,
+          showAttribution: false,
+          nav: false,
+          wrapAround180: true,
+          extent: extent
+        };
+
+        var map = new Map(this.footprintMap, mapOptions);
+
+        var gl = new GraphicsLayer({ id: "footprint" });
+        map.addLayer(gl);
+        var footprint = {
+          "geometry":{"rings": item.shape_geo.coordinates}, 
+          "spatialReference":{"wkid":4326}, 
+          "symbol":{
+            "color":[0,0,0,64],
+            "outline":{
+              "color":[0,0,0,255], 
+              "width":1,
+              "type":"esriSLS",
+              "style":"esriSLSSolid"
+            }, 
+            "type":"esriSFS","style":"esriSFSSolid"
+          }
+        };
+        var graphic = new Graphic(footprint);
+        gl.add(graphic);
+        
+        map.setExtent(extent, true);
+
+      } else {
+        footprintNode.style.display = "none";
+      }
     },
 
     _uniqueLinks: function(item) {

@@ -38,6 +38,7 @@ define([],function(){var obj={
     showDate: true,
     showOwner: true,
     showThumbnails: true,
+    showFootprint: true,
     showAccess: true,
     showApprovalStatus: true,
     defaultSort: "title.sort:asc",

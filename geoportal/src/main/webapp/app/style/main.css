@@ -794,6 +794,19 @@ g-item-card-content-info .g-item-card .g-item-title {
   height: auto;
 }
 
+.g-item-card .g-item-footprintNode {
+  width: 300px;
+  height: 300px;
+  margin: 0px;
+  padding: 0px;
+}
+
+.g-item-card .g-item-footprintMap {
+  width: 300px !important;
+  height:300px !important;
+  margin: 0px;
+  padding: 0px;
+}
 /* Style for descriptions creates a cap of a few lines of text  */
 .g-item-card .g-item-description {
   max-height: 40px;
