@@ -297,6 +297,12 @@ define({
       statusChecker: {
         unknown: "Unknown",
         status: "Service availability = ${score}%"
+      },
+      tooltips: {
+        date: "Metadata date",
+        type: "Data type",
+        category: "Item category",
+        keywords: "Keywords"
       }
     },
 

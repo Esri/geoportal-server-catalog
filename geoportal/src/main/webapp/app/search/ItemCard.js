@@ -523,8 +523,27 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
 
     _renderOwnerAndDate: function(item) {
       var owner = item.sys_owner_s;
-      var date = item.sys_modified_dt;
-      var permissions = ""
+      var date = item.src_publication_date_dt;
+      var dataType = item.src_data_type_s;
+      var itemCategory = item.src_item_category_s;
+      var keywordsArray = item.keywords_s;
+      var keywords = null;
+      
+      var MAX_KEYWORDS_LENGTH = 50;
+      if (keywordsArray && Array.isArray(keywordsArray)) {
+        for (var i=0; i<keywordsArray.length; i++) {
+          var currKeyword = keywordsArray[i];
+          if ( (keywords? keywords.length + ", ".length: 0) + currKeyword.length < MAX_KEYWORDS_LENGTH) {
+            if (keywords) {
+              keywords += ", ";
+            } else {
+              keywords = "";
+            }
+            keywords += currKeyword;
+          }
+        }
+      }
+//      var permissions = ""
       
       if (typeof date === "string" && date.length > 0) {
         var idx = date.indexOf("T");
@@ -543,17 +562,6 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         }
       }
 
-      // set individual fields
-      if (AppContext.appConfig.searchResults.showOwner) {
-        if (owner && owner.length > 0) {
-          util.setNodeText(this.ownerNode, owner);
-        } else {
-          util.setNodeText(this.ownerNode, i18n.item.notAvailable);
-        }
-      } else {
-        domStyle.set(this.ownerSection, "display", "none")
-      }
-
       if (AppContext.appConfig.searchResults.showDate) {
         if (date && date.length > 0) {
           util.setNodeText(this.dateNode, date);
@@ -564,19 +572,22 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         domStyle.set(this.dateSection, "display", "none")
       }
 
-      if (AppContext.appConfig.searchResults.showAccess) {
-        if (permissions && permissions.length > 0) {
-          util.setNodeText(this.permissionsNode, permissions);
-        } else {
-          util.setNodeText(this.permissionsNode, i18n.item.notAvailable);
-        }
+      if (dataType && dataType.length > 0) {
+        util.setNodeText(this.dataTypeNode, dataType);
       } else {
-        domStyle.set(this.permissionSection, "display", "none")
+        util.setNodeText(this.dataTypeNode, i18n.item.notAvailable);
       }
-      
-      if (!item.envelope_geo) {
-        this.locationPlace.style.display = "flex";
-        util.setNodeText(this.locationNode, i18n.item.locationUnknown);
+
+      if (itemCategory && itemCategory.length > 0) {
+        util.setNodeText(this.itemCategoryNode, itemCategory);
+      } else {
+        util.setNodeText(this.itemCategoryNode, i18n.item.notAvailable);
+      }
+
+      if (keywords && keywords.length > 0) {
+        util.setNodeText(this.keywordsNode, keywords);
+      } else {
+        util.setNodeText(this.keywordsNode, i18n.item.notAvailable);
       }
     },
 
