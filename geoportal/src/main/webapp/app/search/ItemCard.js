@@ -518,7 +518,6 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       if (AppContext.appUser.isAdmin() || this._isOwner(item)) {
         if (AppContext.geoportal.supportsGroupBasedAccess) {
           v = item.sys_access_s;
-          if (text.length > 0) text += " - ";
           if (v === "private") {
             permissions = i18n.content.setAccess._private;
           } else {
