@@ -45,12 +45,14 @@ define(["dojo/_base/declare",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
   "app/preview/PreviewPane",
-  "app/search/ItemData"], 
+  "app/search/ItemData",
+  "app/search/ItemHtml"
+], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
   MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata, 
-  PreviewUtil, PreviewPane, ItemData) {
+  PreviewUtil, PreviewPane, ItemData, ItemHtml) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -326,6 +328,19 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         }
       });
       itemData.show();
+    },
+    
+    _renderDataHtml: function(item, uri) {
+      console.log(item);
+      var itemHtml = new ItemHtml({
+        title: item.title,
+        uri: uri,
+        style: "width: 80%; max-width: 80%; height: 80%; max-height: 80%;",
+        onHide: function() {
+          itemHtml.destroy();
+        }
+      });
+      itemHtml.show();
     },
     
     _renderLinksDropdown: function(item,links) {
@@ -764,12 +779,14 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         var titleNode = this.titleNode;
         var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
         var htmlNode = domConstruct.create("a",{
-          href: uri+"/html",
-          target: "_blank",
+          href: "#",
           title: item.title,
           "aria-label": item.title,
           innerHTML: item.title
         },titleNode);
+        this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
+          this.self._renderDataHtml(item, uri+"/html");
+        })));
       }
     }
   });

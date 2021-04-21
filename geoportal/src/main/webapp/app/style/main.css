@@ -1184,3 +1184,23 @@ a.dropdown-toggle:focus {
   height: 16px;
   width: 16px;
 }
+
+.g-item-html {
+  min-height: 200px; 
+  max-height: 600px; 
+  width: 100%; 
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.g-item-html-body {
+  height: 100%;
+}
+
+.g-item-html-body iframe {
+  border-color: lightgrey;
+  border-style: solid;
+  border-width: thin;
+}
