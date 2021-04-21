@@ -1181,6 +1181,19 @@ a.dropdown-toggle:focus {
   width: 16px;
 }
 
+.g-item-html {
+  min-height: 200px; 
+  max-height: 600px; 
+  width: 100%; 
+  overflow-y: auto;
+  overflow-x: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.g-item-html-body {
+  height: 100%;
+}
 .g-keepSignedInCheck {
   position: relative;
   top: 2px;

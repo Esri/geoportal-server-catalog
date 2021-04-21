@@ -46,20 +46,14 @@ define(["dojo/_base/declare",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
   "app/preview/PreviewPane",
-  "esri/map",
-  "esri/geometry/Extent",
-  "esri/symbols/SimpleFillSymbol",
-  "esri/geometry/Point",
-  "esri/graphic",
-  "esri/layers/GraphicsLayer",
-  "dojo/domReady!"
-],
+  "app/search/ItemHtml"
+], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
-  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetCollections, SetField, UploadMetadata,
-  PreviewUtil, PreviewPane, Map, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer) {
-
+  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata, 
+  PreviewUtil, PreviewPane, ItemHtml) {
+  
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
     i18n: i18n,
@@ -312,7 +306,20 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         }
       }
     },
-
+    
+    _renderDataHtml: function(item, uri) {
+      console.log(item);
+      var itemHtml = new ItemHtml({
+        title: item.title,
+        uri: uri,
+        style: "width: 80%; max-width: 80%; height: 80%; max-height: 80%;",
+        onHide: function() {
+          itemHtml.destroy();
+        }
+      });
+      itemHtml.show();
+    },
+    
     _renderLinksDropdown: function(item,links) {
       if (links.length === 0) return;
       var dd = domConstruct.create("div",{
@@ -824,17 +831,14 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         var titleNode = this.titleNode;
         var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
         var htmlNode = domConstruct.create("a",{
-          href: uri+"/html",
-          target: "_blank",
+          href: "#",
           title: item.title,
           "aria-label": item.title,
           innerHTML: item.title
         },titleNode);
-        if (AppContext.geoportal.supportsApprovalStatus ||
-            AppContext.geoportal.supportsGroupBasedAccess) {
-          var client = new AppClient();
-          htmlNode.href = client.appendAccessToken(htmlNode.href);
-        }
+        this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
+          this.self._renderDataHtml(item, uri+"/html");
+        })));
       }
     }
   });
