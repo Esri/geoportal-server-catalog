@@ -1194,6 +1194,12 @@ a.dropdown-toggle:focus {
 .g-item-html-body {
   height: 100%;
 }
+
+.g-item-html-body iframe {
+  border-color: lightgrey;
+  border-style: solid;
+  border-width: thin;
+}
 .g-keepSignedInCheck {
   position: relative;
   top: 2px;
