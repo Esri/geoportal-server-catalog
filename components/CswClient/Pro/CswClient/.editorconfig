@@ -1,0 +1,11 @@
+﻿[*.cs]
+
+# CS0168: Variable is declared but never used
+dotnet_diagnostic.CS0168.severity = silent
+# CS0169: Variable is assigned but never used
+dotnet_diagnostic.CS0169.severity = silent
+dotnet_diagnostic.CS0414.severity = silent
+dotnet_diagnostic.CS0162.severity = silent
+dotnet_diagnostic.CS1717.severity = silent
+dotnet_diagnostic.CS0649.severity = silent
+dotnet_diagnostic.CS0219.severity = silent
