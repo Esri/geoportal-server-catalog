@@ -816,6 +816,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           "aria-label": item.title,
           innerHTML: item.title
         },titleNode);
+        if (AppContext.geoportal.supportsApprovalStatus ||
+            AppContext.geoportal.supportsGroupBasedAccess) {
+          var client = new AppClient();
+          htmlNode.href = client.appendAccessToken(htmlNode.href);
+        }
       }
     }
   });
