@@ -829,7 +829,6 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         util.setNodeText(this.titleNode,item.title);
       } else {
         var titleNode = this.titleNode;
-        var uri = "./rest/metadata/item/"+encodeURIComponent(itemId);
         var htmlNode = domConstruct.create("a",{
           href: "#",
           title: item.title,
@@ -837,7 +836,13 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           innerHTML: item.title
         },titleNode);
         this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
-          this.self._renderDataHtml(item, uri+"/html");
+          var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
+          if (AppContext.geoportal.supportsApprovalStatus || 
+              AppContext.geoportal.supportsGroupBasedAccess) {
+            var client = new AppClient();
+            uri = client.appendAccessToken(uri);
+          }
+          this.self._renderDataHtml(item, uri);
         })));
       }
     }
