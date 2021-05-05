@@ -57,6 +57,7 @@ define({
       label: "Sign In",
       username: "Username",
       password: "Password",
+      keep: "Keep me signed in:",
       incomplete: "A Username and Password are required.",
       invalidCredentials: "Invalid credentials."
     },
