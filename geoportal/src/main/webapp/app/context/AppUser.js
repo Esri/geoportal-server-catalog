@@ -220,7 +220,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       var expires = "expires=" + cexpires.toUTCString();
       var domain = "domain=" + location.hostname;
       var path = "path=/" + location.pathname.replaceAll(/^\/+|\/+$/gi,"");
-      var value = typeof cValue === "object"? JSON.stringify(cValue): cValue;
+      var value = btoa(typeof cValue === "object"? JSON.stringify(cValue): cValue);
       document.cookie = KEEP_SIGNED_IN_COOKIE_NAME + "=" + value + "; " + expires + "; " + domain + "; " + path;
     },
     
@@ -240,7 +240,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
           c = c.substring(1);
         }
         if (c.indexOf(name) == 0) {
-          return JSON.parse(c.substring(name.length, c.length));
+          return JSON.parse(atob(c.substring(name.length, c.length)));
         }
       }
     }    
