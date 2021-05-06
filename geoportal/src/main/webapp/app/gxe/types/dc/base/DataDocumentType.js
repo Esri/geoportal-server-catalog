@@ -9,7 +9,7 @@ function(declare, lang, DocumentType, RootDescriptor, i18nDublinCore) {
 
     caption: i18nDublinCore.documentTypes.data.caption,
     description: i18nDublinCore.documentTypes.data.description,
-    key: "dublin-core",
+    key: "dc",
     isService: false,
     metadataStandardName: "Dublin Core",
     metadataStandardVersion: "1.1",
