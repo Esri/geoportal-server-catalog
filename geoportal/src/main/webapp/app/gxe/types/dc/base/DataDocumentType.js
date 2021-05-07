@@ -2,7 +2,7 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "./DublinCoreDocumentType",
         "./DataRoot",
-        "dojo/i18n!../nls/i18nDublinCore"],
+        "dojo/i18n!../../../../nls/i18nDublinCore"],
 function(declare, lang, DocumentType, RootDescriptor, i18nDublinCore) {
 
   var oThisClass = declare(DocumentType, {

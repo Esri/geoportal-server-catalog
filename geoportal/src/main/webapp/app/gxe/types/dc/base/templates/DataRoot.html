@@ -23,15 +23,15 @@
       data-dojo-props="target:'ows:WGS84BoundingBox',minOccurs:0">
       <div class="gxeGeoExtentSection">  
         <div class="gxeGeoExtentCoordinates">
-          <div data-dojo-type="esri/dijit/metadata/form/Element"
+          <div data-dojo-type="app/gxe/form/Element"
             data-dojo-props="target:'ows:LowerCorner',
-              label:'Lower left corner (lon,lat)'">
-            <div data-dojo-type="esri/dijit/metadata/form/InputText" data-dojo-props=""></div>
+              label:'Lower left corner (lon lat)'">
+            <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true"></div>
           </div>
-          <div data-dojo-type="esri/dijit/metadata/form/Element"
+          <div data-dojo-type="app/gxe/form/Element"
             data-dojo-props="target:'ows:UpperCorner',
-              label:'Upper right corner (lon,lat)'">
-            <div data-dojo-type="esri/dijit/metadata/form/InputText" data-dojo-props=""></div>
+              label:'Upper right corner (lon lat)'">
+            <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true"></div>
           </div>
         </div>
       </div>
