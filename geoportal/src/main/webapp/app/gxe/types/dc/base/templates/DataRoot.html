@@ -26,7 +26,10 @@
           <div data-dojo-type="app/gxe/form/Element"
             data-dojo-props="target:'ows:LowerCorner',
               label:'Lower left corner (lon lat)'">
-            <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true"></div>
+            <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true">
+                <div data-dojo-type="app/gxe/types/dc/base/GeoExtentTool"
+                  data-dojo-props="label:'${i18nBase.geoExtent.button}'"></div>
+            </div>
           </div>
           <div data-dojo-type="app/gxe/form/Element"
             data-dojo-props="target:'ows:UpperCorner',
