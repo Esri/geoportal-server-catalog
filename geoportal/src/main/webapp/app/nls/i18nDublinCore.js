@@ -30,7 +30,11 @@ define({
     title: "Title",
     description: "Description",
     subject: "Keywords",
-    references: "References"
+    references: "References",
+    
+    hints: {
+      coordinates: "Enter space or coma separated pair of numbers."
+    }
     
   })
 });
