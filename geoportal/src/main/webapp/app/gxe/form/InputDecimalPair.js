@@ -25,7 +25,8 @@ function(declare, lang, has, InputText, docUtil, i18nBase) {
         return null;
       }
       
-      for (val in valSplit) {
+      for (var i=0; i<valSplit.length; i++) {
+        var val = valSplit[i];
         if (Number.isNaN(Number.parseFloat(val))) {
           return null;
         }
@@ -33,17 +34,6 @@ function(declare, lang, has, InputText, docUtil, i18nBase) {
       
       return valSplit.join(" ");
     }
-/*    
-    setInputValue: function(value) {
-      if (typeof value === "undefined") {
-        value = null;
-      }
-      value = docUtil.cleanHtml(value);
-      this.focusNode.value = value;
-      this.emitInteractionOccurred();
-      this.applyViewOnly();
-    }
-*/
   });
 
   return oThisClass;
