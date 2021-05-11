@@ -39,9 +39,10 @@ function(declare, lang, on, keys, Templated, template, i18n, ModalDialog) {
       var self = this;
       var u = this.und.value;
       var p = this.pnd.value;
+      var k = this.keep.checked;
       if (u !== null && u.length > 0 && p !== null && p.length > 0) {
         this.dialog.okCancelBar.showWorking(i18n.general.working,true);
-        AppContext.appUser.signIn(u,p).then(function(){
+        AppContext.appUser.signIn(u,p,k).then(function(){
           self.dialog.hide();
         }).otherwise(function(error){
           if (typeof error === "string") self.handleError(error);

@@ -12,6 +12,7 @@ define(["dojo/_base/declare",
         "esri/arcgis/utils"], 
 function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn, 
     esriId, OAuthInfo, arcgisPortal, arcgisUtils) {
+  var KEEP_SIGNED_IN_COOKIE_NAME = "GPT_keep_signed_in";
 	
   var oThisClass = declare(null, {
 
@@ -114,8 +115,18 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         (new SignIn()).show();
       }
     },
+    
+    checkStoredToken: function() {
+      var info = this.retrieveTokenInfo();
+      console.log("Token info", info);
+      if (info) {
+        this.appToken = info.oauthToken;
+        this.geoportalUser = info.user;
+        topic.publish(appTopics.SignedIn,{geoportalUser:info.user});
+      }
+    },
 
-    signIn: function(u,p) {
+    signIn: function(u,p,k) {
       var self = this, dfd = new Deferred(), client = new AppClient();
       client.generateToken(u,p).then(function(oauthToken){
         if (oauthToken && oauthToken.access_token) {
@@ -123,6 +134,15 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
             if (info && info.user) {
               self.appToken = oauthToken;
               self.geoportalUser = info.user;
+              
+              if (k) {
+                var cValue = {
+                  token: oauthToken,
+                  user: info.user
+                };
+                self.preserveTokenInfo(cValue, new Date(Date.now() + oauthToken.expires_in * 1000));
+              }
+              
               topic.publish(appTopics.SignedIn,{geoportalUser:info.user});
               dfd.resolve();
             } else {
@@ -147,6 +167,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     },
     
     signOut: function() {
+      this.deleteTokenInfo();
       esriId.destroyCredentials();
       window.location.reload();
     },
@@ -189,10 +210,40 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         });
         
       } else {
+        AppContext.appUser.checkStoredToken();
         dfd.resolve();
       }
       return dfd;
-    }
+    },
+    
+    preserveTokenInfo: function(cValue, cexpires) {
+      var expires = "expires=" + cexpires.toUTCString();
+      var domain = "domain=" + location.hostname;
+      var path = "path=/" + location.pathname.replaceAll(/^\/+|\/+$/gi,"");
+      var value = btoa(typeof cValue === "object"? JSON.stringify(cValue): cValue);
+      document.cookie = KEEP_SIGNED_IN_COOKIE_NAME + "=" + value + "; " + expires + "; " + domain + "; " + path;
+    },
+    
+    deleteTokenInfo: function() {
+      var domain = "domain=" + location.hostname;
+      var path = "path=/" + location.pathname.replaceAll(/^\/+|\/+$/gi,"");
+      document.cookie = KEEP_SIGNED_IN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; " + domain + "; " + path;
+    },
+
+    retrieveTokenInfo: function() {
+      var name = KEEP_SIGNED_IN_COOKIE_NAME + "=";
+      var ca = document.cookie.split(';');
+      
+      for(var i = 0; i < ca.length; i++) {
+        var c = ca[i];
+        while (c.charAt(0) == ' ') {
+          c = c.substring(1);
+        }
+        if (c.indexOf(name) == 0) {
+          return JSON.parse(atob(c.substring(name.length, c.length)));
+        }
+      }
+    }    
 
   });
 
