@@ -108,55 +108,61 @@ function(declare, lang, array, query, has, registry, domConstruct,
         return;
       }
       
+      var WEST, SOUTH, EAST, NORTH;
+      
       var westWgt = {
         getInputValue: function() {
           var [west, south] = this.extractCornerValues(LowerCorner)||[undefined,undefined];
+          WEST = west;
           return west;
         }.bind(this),
         
         setInputValue: function(value) {
           var [west, south] = this.extractCornerValues(LowerCorner)||[undefined,undefined];
-          west = value;
-          LowerCorner.setInputValue("" + west + " " + south);
+          WEST = west = value;
+          LowerCorner.setInputValue("" + (west||WEST) + " " + (south||SOUTH));
         }.bind(this)
       };
       
       var southWgt = {
         getInputValue: function() {
           var [west, south] = this.extractCornerValues(LowerCorner)||[undefined,undefined];
+          SOUTH = south;
           return south;
         }.bind(this),
         
         setInputValue: function(value) {
           var [west, south] = this.extractCornerValues(LowerCorner)||[undefined,undefined];
-          south = value;
-          LowerCorner.setInputValue("" + west + " " + south);
+          SOUTH = south = value;
+          LowerCorner.setInputValue("" + (west||WEST) + " " + (south||SOUTH));
         }.bind(this)
       };
       
       var eastWgt = {
         getInputValue: function() {
           var [east, north] = this.extractCornerValues(UpperCorner)||[undefined,undefined];
+          EAST = east;
           return east;
         }.bind(this),
         
         setInputValue: function(value) {
           var [east, north] = this.extractCornerValues(UpperCorner)||[undefined,undefined];
-          east = value;
-          UpperCorner.setInputValue("" + east + " " + north);
+          EAST = east = value;
+          UpperCorner.setInputValue("" + (east||EAST) + " " + (north||NORTH));
         }.bind(this)
       };
       
       var northWgt = {
         getInputValue: function() {
           var [east, north] = this.extractCornerValues(UpperCorner)||[undefined,undefined];
+          NORTH = north;
           return north;
         }.bind(this),
         
         setInputValue: function(value) {
           var [east, north] = this.extractCornerValues(UpperCorner)||[undefined,undefined];
-          north = value;
-          UpperCorner.setInputValue("" + east + " " + north);
+          NORTH = north = value;
+          UpperCorner.setInputValue("" + (east||EAST) + " " + (north||NORTH));
         }.bind(this)
       };
       
