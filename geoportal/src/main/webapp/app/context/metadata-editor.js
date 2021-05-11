@@ -4,12 +4,12 @@ define([],function(){var obj={
   editable: {
     // Warning: The editor will be lossy if allowNonGxeDocs is enabled.
     allowNonGxeDocs: false, 
-    geoportalTypes: ["arcgis", "fgdc", "iso19115", "iso19115-2"]
+    geoportalTypes: ["arcgis", "dc", "fgdc", "iso19115", "iso19115-2"]
   },
   
   gxeContext: {
     allowedTypeKeys: [
-      "arcgis", "fgdc", 
+      "arcgis", "dc", "fgdc",
       "iso-19115", "iso-19119", "iso-19115-2",
       "inspire2-iso-19119", "inspire2-iso-19115",  
       "gemini-iso-19115", "gemini-iso-19119"
@@ -29,6 +29,16 @@ define([],function(){var obj={
          path: "/metadata/Esri/ArcGISFormat",
          must: true
       }]
+    },
+    {
+      key: "dc",
+      requiredPath: "app/gxe/types/dc/base/DataDocumentType",
+      interrogationRules: [
+        {
+          path: "/rdf:RDF/rdf:Description/dc:title",
+          must: true
+        }
+      ]
     },
     {
       key: "fgdc",
@@ -133,7 +143,7 @@ define([],function(){var obj={
           value: "2.2"
         }
       ]
-    }   
+    }
 
   ]
   
