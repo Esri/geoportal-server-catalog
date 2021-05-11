@@ -31,6 +31,7 @@ function(lang, array, has, i18nBase, i18nInspire) {
       status.isValid = true;
       status.message = this.formatMessage(status, i18nBase.validation.ok);
       status._continue = true;
+      status.considerHint = status.inputWidget.considerHint || false;
 
       this._checkEmpty(status, value);
       if(!status.isValid || !status._continue) {
