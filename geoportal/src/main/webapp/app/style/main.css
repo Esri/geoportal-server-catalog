@@ -869,6 +869,7 @@ g-item-card-content-info .g-item-card .g-item-title {
 .g-labels-right .form-group input {
   margin-bottom: 10px;
 }
+
 .g-labels-right .control-label {
   text-align: right;
   color: #6e6e6e;
@@ -1179,3 +1180,10 @@ a.dropdown-toggle:focus {
   height: 16px;
   width: 16px;
 }
+
+.g-keepSignedInCheck {
+  position: relative;
+  top: 2px;
+  left: 2px;
+}
+
