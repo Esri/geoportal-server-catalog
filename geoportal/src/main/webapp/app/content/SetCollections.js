@@ -57,7 +57,7 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     
     makeRequestParams: function() {
       var params = {
-        action: "setApprovalStatus",
+        action: "setCollections",
         urlParams: {}
       };
       var status = $(this.collectionsValueInput).val();

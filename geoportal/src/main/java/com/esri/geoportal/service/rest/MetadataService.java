@@ -16,6 +16,7 @@ package com.esri.geoportal.service.rest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.http.request.SetCollectionsRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
 import com.esri.geoportal.lib.elastic.request.DeleteItemsRequest;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
@@ -271,6 +272,27 @@ public class MetadataService {
     try {
       SetApprovalStatusRequest request = GeoportalContext.getInstance().getBean(
           "request.SetApprovalStatusRequest",SetApprovalStatusRequest.class);
+      request.init(user,pretty);
+      request.setParameterMap(hsr.getParameterMap());
+      request.setBody(body);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
+  
+  @PUT
+  @Path("/setCollections")
+  public Response setCollections(
+      String body,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    try {
+      SetCollectionsRequest request = GeoportalContext.getInstance().getBean(
+          "request.SetCollectionsRequest",SetCollectionsRequest.class);
       request.init(user,pretty);
       request.setParameterMap(hsr.getParameterMap());
       request.setBody(body);
