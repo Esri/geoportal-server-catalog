@@ -347,6 +347,9 @@ define({
         posted: "Posted",
         draft: "Draft"
       },
+      setCollections: {
+        caption: "Set Collections"
+      },
       setField: {
         caption: "Set Field",
         tags: {
