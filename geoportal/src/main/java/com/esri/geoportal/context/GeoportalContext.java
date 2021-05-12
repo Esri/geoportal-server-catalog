@@ -54,6 +54,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private boolean supportsGroupBasedAccess = false;
   private String version = "2.6.0";
   private boolean parseGml;
+  private boolean supportsCollections = false;
   
   /** Constructor */
   public GeoportalContext() {}
@@ -151,6 +152,15 @@ public class GeoportalContext implements ApplicationContextAware {
   }
   public void setVersion(String version) {
     this.version = version;
+  }
+  
+  /** Support for collections. */
+  public boolean getSupportsCollections() {
+    return supportsCollections;
+  }
+  /** Support for collections. */
+  public void setSupportsCollections(boolean supportsCollections) {
+    this.supportsCollections = supportsCollections;
   }
   
   /** Methods =============================================================== */
