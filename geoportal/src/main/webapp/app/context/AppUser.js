@@ -118,7 +118,6 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     
     checkStoredToken: function() {
       var info = this.retrieveTokenInfo();
-      console.log("Token info", info);
       if (info) {
         this.appToken = info.oauthToken;
         this.geoportalUser = info.user;
