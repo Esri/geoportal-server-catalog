@@ -11,6 +11,7 @@ function(declare, lang, DocumentType, RootDescriptor, i18nDublinCore) {
     description: i18nDublinCore.documentTypes.data.description,
     key: "dc",
     isService: false,
+    isIso: false,
     metadataStandardName: "Dublin Core",
     metadataStandardVersion: "1.1",
 
