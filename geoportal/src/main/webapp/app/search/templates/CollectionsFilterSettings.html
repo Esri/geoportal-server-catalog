@@ -1,0 +1,89 @@
+<div class="g-settings-pane g-labels-right">
+  <div class="form-group form-group-sm">
+    <label for="${id}_componentLabel" class="control-label col-sm-3"
+      >${i18n.search.componentSettings.componentLabel}</label>
+    <div class="col-sm-8">
+      <input id="${id}_componentLabel" type="text" class="form-control input-sm g-input-text" 
+        placeholder="${i18n.search.componentSettings.componentLabelPlaceholder}"
+        data-dojo-attach-point="componentLabelInput" >
+    </div>
+  </div>
+  <div class="form-group form-group-sm">
+    <label for="${id}_field" class="control-label col-sm-3"
+      >${i18n.search.termsAggregation.settings.field}</label>
+    <div class="col-sm-8">
+	    <input id="${id}_field" type="text" class="form-control g-input-text" 
+	      placeholder="${i18n.search.termsAggregation.settings.fieldPlaceholder}"
+	      data-dojo-attach-point="fieldInput" >
+    </div>
+  </div>
+	<div class="form-group form-group-sm">
+	  <label for="${id}_size" class="control-label col-sm-3"
+	   >${i18n.search.termsAggregation.settings.size}</label>
+	  <div class="col-sm-8">
+		  <input id="${id}_size" type="text" class="form-control g-input-number" 
+		    placeholder="${i18n.search.termsAggregation.settings.sizePlaceholder}"
+		    data-dojo-attach-point="sizeInput" >
+    </div>
+	</div>
+  <div class="form-group form-group-sm">
+    <label for="${id}_minDocCount" class="control-label col-sm-3"
+      >${i18n.search.termsAggregation.settings.minDocCount}</label>
+    <div class="col-sm-8">
+	    <input id="${id}_minDocCount" type="text" class="form-control g-input-number" 
+	      placeholder="${i18n.search.termsAggregation.settings.minDocCountPlaceholder}"
+	      data-dojo-attach-point="minDocCountInput">
+    </div>
+  </div>
+  <div class="form-group form-group-sm">
+    <label for="${id}_missing" class="control-label col-sm-3"
+      >${i18n.search.termsAggregation.settings.missing}</label>
+    <div class="col-sm-8">
+	    <input id="${id}_missing" type="text" class="form-control g-input-text" 
+	      placeholder="${i18n.search.termsAggregation.settings.missingPlaceholder}"
+	      data-dojo-attach-point="missingInput">
+    </div>
+  </div>
+  <!-- 
+  <div class="form-group form-group-sm">
+    <label for="${id}_include" class="control-label col-sm-3"
+      >${i18n.search.termsAggregation.settings.include}</label>
+    <div class="col-sm-8">
+	    <input id="${id}_include" type="text" class="form-control g-input-text" 
+	      placeholder="${i18n.search.termsAggregation.settings.includePlaceholder}"
+	      data-dojo-attach-point="includeInput">
+    </div>
+  </div>
+  <div class="form-group form-group-sm">
+    <label for="${id}_exclude" class="control-label col-sm-3"
+      >${i18n.search.termsAggregation.settings.exclude}</label>
+    <div class="col-sm-8">
+	    <input id="${id}_exclude" type="text" class="form-control g-input-text" 
+	      placeholder="${i18n.search.termsAggregation.settings.excludePlaceholder}"
+	      data-dojo-attach-point="excludeInput">
+    </div>
+  </div>
+  -->
+  <div class="form-group form-group-sm">
+    <label for="${id}_sel1" class="control-label col-sm-3"
+      >${i18n.search.termsAggregation.settings.order.label}</label>
+    <div class="col-sm-8">
+			<select id="${id}_sel1" class="form-control" data-dojo-attach-point="orderSelect">
+			  <option value="">${i18n.search.termsAggregation.settings.order.placeholder}</option>
+			  <option value="countDesc">${i18n.search.termsAggregation.settings.order.countDesc}</option>
+			  <option value="countAsc">${i18n.search.termsAggregation.settings.order.countAsc}</option>
+	      <option value="termAsc">${i18n.search.termsAggregation.settings.order.termAsc}</option>
+	      <option value="termDesc">${i18n.search.termsAggregation.settings.order.termDesc}</option>
+			</select>
+    </div>
+  </div>
+  <div class="form-group form-group-sm">
+    <div class="col-sm-3"></div>
+    <div class="col-sm-8" style="margin-top:10px;">
+      <a href="javascript:void(0)"
+        data-dojo-attach-event="onClick: reset">
+        ${i18n.search.componentSettings.reset}
+      </a>
+    </div>
+  </div>
+</div>
