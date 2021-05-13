@@ -36,8 +36,6 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     },
     
     applyLocally: function(item) {
-      //item["sys_approval_status_s"] = this._localValue;
-      //topic.publish(appTopics.ItemApprovalStatusChanged,{item:item});
       topic.publish(appTopics.RefreshSearchResultPage,{
         searchPane: this.itemCard.searchPane
       });
@@ -45,14 +43,11 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     
     init: function() {
       this.setNodeText(this.itemTitleNode,this.item.title);
-      if (!AppContext.appUser.isAdmin()) {
-        $(this.statusSelect).find("option[value='approved']").remove();
-        $(this.statusSelect).find("option[value='reviewed']").remove();
-        $(this.statusSelect).find("option[value='disapproved']").remove();
-      }
-      var v = this.item["sys_approval_status_s"];
+      var v = this.item["sys_collections_s"];
       if (typeof v === "string" && v.length > 0) {
-        $(this.statusSelect).val(v);
+        $(this.collectionsValueInput).val(v);
+      } else if (Array.isArray(v)) {
+        $(this.collectionsValueInput).val(v.join(","));
       }
       this.applyTo = new ApplyTo({
         item: this.item,
@@ -65,12 +60,12 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
         action: "setCollections",
         urlParams: {}
       };
-      var status = $(this.statusSelect).val();
+      var status = $(this.collectionsValueInput).val();
       if (typeof status !== "string" || status === "" || status === "none") {
-        this.statusSelect.focus();
+        this.collectionsValueInput.focus();
         return null;
       }
-      this._localValue = params.urlParams.approvalStatus = status;
+      this._localValue = params.urlParams.collections = status;
       this.applyTo.appendUrlParams(params);
       return params;
     }
