@@ -94,6 +94,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
       var link = domConstruct.create("a",{
         href: "#",
         onclick: lang.hitch(this,function() {
+          this.activeQClauses = null;
           this.pushQClause(qClause,true);
         })
       },nd);
