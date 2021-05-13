@@ -333,7 +333,8 @@ define({
         draft: "Draft"
       },
       setCollections: {
-        caption: "Set Collections"
+        caption: "Set Collections",
+        collections: "Collections"
       },
       setField: {
         caption: "Set Field",
