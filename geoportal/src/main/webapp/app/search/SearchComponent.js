@@ -66,18 +66,29 @@ function(declare, lang, array, topic, appTopics, Templated, util) {
     },
     
     checkCollection: function(allowedCollection, publishedCollection) {
-      var isNot = false;
-
       if (allowedCollection==="*" && publishedCollection.length>0) {
         return true;
       }
       
-      if (allowedCollection.startsWith("!")) {
-        isNot = true;
-        allowedCollection = allowedCollection.substr(1);
+      
+      if (allowedCollection.startsWith("/")) {
+        
+        var exp = eval(allowedCollection);
+        return exp.test(publishedCollection);
+        
+      } else {
+        
+        var isNot = false;
+
+        if (allowedCollection.startsWith("!")) {
+          isNot = true;
+          allowedCollection = allowedCollection.substr(1);
+        }
+        
+        return allowedCollection===publishedCollection? !isNot: isNot;
+        
       }
 
-      return allowedCollection===publishedCollection? !isNot: isNot;
     },
     
     appendQClauses: function(params) {
