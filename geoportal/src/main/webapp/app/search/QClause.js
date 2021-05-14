@@ -30,7 +30,10 @@ function(declare,lang) {
     constructor: function(args){
       lang.mixin(this,args);
       this.clauseId = oThisClass._staticCounter++;
-    }
+    },
+    
+    // status: false - deleted, true - added
+    onChange: function(status) {}
 
   });
 
