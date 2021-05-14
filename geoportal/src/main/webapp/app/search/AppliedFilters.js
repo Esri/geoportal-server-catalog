@@ -83,6 +83,7 @@ function(declare, lang, array, domConstruct, on, query, domClass, template, i18n
         var aClauses = [];
         array.forEach(component.activeQClauses,function(qClause){
           if (qClause.removable) {
+            qClause.onChange(false);
             component.whenQClauseRemoved(qClause);
           } else {
             aClauses.push(qClause);
@@ -141,6 +142,7 @@ function(declare, lang, array, domConstruct, on, query, domClass, template, i18n
             if (qClause.removable) hasRemovable = true;
             var af = new AppliedFilter({qClause: qClause});
             domConstruct.place(af.domNode, "g-entries-js", "first");
+            qClause.onChange(true);
           }
         });
       });

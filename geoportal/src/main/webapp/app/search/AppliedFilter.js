@@ -70,6 +70,7 @@ function(declare, lang, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, t
           break;
         }
       }
+      qClause.onChange(false);
       if (nClauseIdx != -1) {
         qClauses.splice(nClauseIdx,1);
         qComp.whenQClauseRemoved(qClause);
