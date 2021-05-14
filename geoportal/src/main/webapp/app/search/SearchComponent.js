@@ -15,9 +15,11 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
+        "dojo/topic",
+        "app/context/app-topics",
         "app/common/Templated",
         "app/etc/util"], 
-function(declare, lang, array, Templated, util) {
+function(declare, lang, array, topic, appTopics, Templated, util) {
   
   var oThisClass = declare([Templated], {
   
@@ -26,15 +28,48 @@ function(declare, lang, array, Templated, util) {
     isSearchComponent: true,
     searchOptions: null,
     searchPane: null,
+    allowedCollections: null,
     
     postCreate: function() {
       this.inherited(arguments);
       if (this.conditionallyDisabled) {
         if (this.domNode) this.domNode.style.display = "none";
       }
+      if (!this.conditionallyDisabled && AppContext.geoportal.supportsCollections) {
+        this.own(topic.subscribe(appTopics.CollectionChanged,lang.hitch(this,function(publishedCollection){
+          var enabled = true;
+        
+          if (this.allowedCollections) {
+            if (typeof this.allowedCollections === 'string' && this.allowedCollections.length>0) {
+              
+              enabled = this.checkCollection(this.allowedCollections, publishedCollection);
+              
+            } else if (Array.isArray(this.allowedCollections) && this.allowedCollections.length>0) {
+              
+              enabled = this.allowedCollections.some(lang.hitch(this, function(allowedCollection) {
+                return this.checkCollection(allowedCollection, publishedCollection);
+              }));
+
+            }
+          }
+          
+          if (this.domNode) this.domNode.style.display = enabled? "block": "none";
+        })));
+      }
     },
     
     /* SearchComponent API ============================================= */
+    
+    checkCollection: function(allowedCollection, publishedCollection) {
+        var isNot = false;
+
+        if (allowedCollection.startsWith("!")) {
+          isNot = true;
+          allowedCollection = allowedCollection.substr(1);
+        }
+
+        return allowedCollection===publishedCollection? !isNot: isNot;
+    },
     
     appendQClauses: function(params) {
       array.forEach(this.activeQClauses,function(qClause){
