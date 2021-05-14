@@ -16,13 +16,15 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
         "dojo/dom-construct",
+        "dojo/topic",
+        "app/context/app-topics",
         "dojo/text!./templates/TermsAggregation.html",
         "dojo/i18n!app/nls/resources",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/CollectionsFilterSettings"], 
-function(declare, lang, array, domConstruct, template, i18n, SearchComponent, 
+function(declare, lang, array, domConstruct, topic, appTopics, template, i18n, SearchComponent, 
   DropPane, QClause, CollectionsFilterSettings) {
   
   var oThisClass = declare([SearchComponent], {
@@ -88,7 +90,10 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
         parentQComponent: this,
         removable: true,
         scorable: true,
-        query: query
+        query: query,
+        onChange: (status) => {
+          topic.publish(appTopics.CollectionChanged, (status? term: ""));
+        }
       });
       var nd = domConstruct.create("div",{},this.entriesNode);
       var link = domConstruct.create("a",{
