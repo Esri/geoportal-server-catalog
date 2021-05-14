@@ -36,39 +36,48 @@ function(declare, lang, array, topic, appTopics, Templated, util) {
         if (this.domNode) this.domNode.style.display = "none";
       }
       if (!this.conditionallyDisabled && AppContext.geoportal.supportsCollections) {
-        this.own(topic.subscribe(appTopics.CollectionChanged,lang.hitch(this,function(publishedCollection){
-          var enabled = true;
-        
-          if (this.allowedCollections) {
-            if (typeof this.allowedCollections === 'string' && this.allowedCollections.length>0) {
-              
-              enabled = this.checkCollection(this.allowedCollections, publishedCollection);
-              
-            } else if (Array.isArray(this.allowedCollections) && this.allowedCollections.length>0) {
-              
-              enabled = this.allowedCollections.some(lang.hitch(this, function(allowedCollection) {
-                return this.checkCollection(allowedCollection, publishedCollection);
-              }));
-
-            }
-          }
-          
-          if (this.domNode) this.domNode.style.display = enabled? "block": "none";
-        })));
+        this.own(topic.subscribe(appTopics.CollectionChanged,lang.hitch(this,this.evaluateCollection)));
+        this.evaluateCollection();
       }
     },
     
     /* SearchComponent API ============================================= */
     
-    checkCollection: function(allowedCollection, publishedCollection) {
-        var isNot = false;
+    evaluateCollection(publishedCollection) {
+      publishedCollection = publishedCollection? publishedCollection: '';
+      
+      var enabled = true;
 
-        if (allowedCollection.startsWith("!")) {
-          isNot = true;
-          allowedCollection = allowedCollection.substr(1);
+      if (this.allowedCollections) {
+        if (typeof this.allowedCollections === 'string' && this.allowedCollections.length>0) {
+
+          enabled = this.checkCollection(this.allowedCollections, publishedCollection);
+
+        } else if (Array.isArray(this.allowedCollections) && this.allowedCollections.length>0) {
+
+          enabled = this.allowedCollections.some(lang.hitch(this, function(allowedCollection) {
+            return this.checkCollection(allowedCollection, publishedCollection);
+          }));
+
         }
+      }
 
-        return allowedCollection===publishedCollection? !isNot: isNot;
+      if (this.domNode) this.domNode.style.display = enabled? "block": "none";
+    },
+    
+    checkCollection: function(allowedCollection, publishedCollection) {
+      var isNot = false;
+
+      if (allowedCollection==="*" && publishedCollection.length>0) {
+        return true;
+      }
+      
+      if (allowedCollection.startsWith("!")) {
+        isNot = true;
+        allowedCollection = allowedCollection.substr(1);
+      }
+
+      return allowedCollection===publishedCollection? !isNot: isNot;
     },
     
     appendQClauses: function(params) {
