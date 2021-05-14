@@ -21,7 +21,11 @@
         </div>
         
         <div class="g-filter-collapse" data-dojo-type="app/search/CollectionsFilter"
-          data-dojo-props="field:'sys_collections_s',open:false,label:'${i18n.search.criteria.collections}'">
+          data-dojo-props="
+            conditionallyDisabled: !AppContext.geoportal.supportsCollections,
+            field:'sys_collections_s',
+            open:false,
+            label:'${i18n.search.criteria.collections}'">
         </div>
 
         <div class="g-filter-collapse" data-dojo-type="app/search/TemporalFilter"
