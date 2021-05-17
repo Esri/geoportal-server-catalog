@@ -41,6 +41,7 @@ define(["dojo/_base/declare",
   "app/context/metadata-editor",
   "app/content/SetAccess",
   "app/content/SetApprovalStatus",
+  "app/content/SetCollections",
   "app/content/SetField",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
@@ -56,7 +57,7 @@ define(["dojo/_base/declare",
 function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
-  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata,
+  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetCollections, SetField, UploadMetadata,
   PreviewUtil, PreviewPane, Map, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer) {
 
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -355,6 +356,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       var isPublisher = AppContext.appUser.isPublisher();
       var supportsApprovalStatus = AppContext.geoportal.supportsApprovalStatus;
       var supportsGroupBasedAccess = AppContext.geoportal.supportsGroupBasedAccess;
+      var supportsCollections = AppContext.geoportal.supportsCollections;
       var links = [];
 
       if (this._canEditMetadata(item,isOwner,isAdmin,isPublisher)) {
@@ -401,6 +403,18 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           innerHTML: i18n.content.setApprovalStatus.caption,
           onclick: function() {
             var dialog = new SetApprovalStatus({item:item,itemCard:self});
+            dialog.show();
+          }
+        }));
+      }
+
+      if (supportsCollections && canManage) {
+        links.push(domConstruct.create("a",{
+          "class": "small",
+          href: "javascript:void(0)",
+          innerHTML: i18n.content.setCollections.caption,
+          onclick: function() {
+            var dialog = new SetCollections({item:item,itemCard:self});
             dialog.show();
           }
         }));

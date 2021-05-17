@@ -80,7 +80,8 @@ define({
         accessGroups: "Access Groups",
         missingSource: "Editor/Upload",
         createFilter: "Create Filter",
-        hierarchicalCategory: "Hierarchical Category"
+        hierarchicalCategory: "Hierarchical Category",
+        collections: "Collections"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -331,6 +332,10 @@ define({
         incomplete: "Incomplete",
         posted: "Posted",
         draft: "Draft"
+      },
+      setCollections: {
+        caption: "Set Collections",
+        collections: "Collections"
       },
       setField: {
         caption: "Set Field",
