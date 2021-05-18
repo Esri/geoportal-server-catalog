@@ -289,6 +289,12 @@ define({
       statusChecker: {
         unknown: "Unknown",
         status: "Service availability = ${score}%"
+      },
+      tooltips: {
+        owner: "Owner",
+        date: "Metadata date",
+        permission: "Permission",
+        keywords: "Keywords"
       }
     },
 
