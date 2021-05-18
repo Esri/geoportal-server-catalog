@@ -51,7 +51,7 @@ define(["dojo/_base/declare",
 function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
-  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetField, UploadMetadata, 
+  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetCollections, SetField, UploadMetadata, 
   PreviewUtil, PreviewPane, ItemHtml) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
