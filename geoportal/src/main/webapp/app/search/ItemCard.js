@@ -523,6 +523,23 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       var owner = item.sys_owner_s;
       var date = item.sys_modified_dt;
       var permissions = ""
+      var keywordsArray = item.keywords_s;
+      var keywords = null;
+      
+      var MAX_KEYWORDS_LENGTH = 50;
+      if (keywordsArray && Array.isArray(keywordsArray)) {
+        for (var i=0; i<keywordsArray.length; i++) {
+          var currKeyword = keywordsArray[i];
+          if ( (keywords? keywords.length + ", ".length: 0) + currKeyword.length < MAX_KEYWORDS_LENGTH) {
+            if (keywords) {
+              keywords += ", ";
+            } else {
+              keywords = "";
+            }
+            keywords += currKeyword;
+          }
+        }
+      }
       
       if (typeof date === "string" && date.length > 0) {
         var idx = date.indexOf("T");
@@ -569,6 +586,12 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         }
       } else {
         domStyle.set(this.permissionSection, "display", "none")
+      }
+      
+      if (keywords && keywords.length > 0) {
+        util.setNodeText(this.keywordsNode, keywords);
+      } else {
+        util.setNodeText(this.keywordsNode, i18n.item.notAvailable);
       }
     },
 
