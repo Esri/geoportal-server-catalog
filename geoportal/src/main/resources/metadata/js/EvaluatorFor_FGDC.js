@@ -30,12 +30,13 @@ G.evaluators.fgdc = {
     G.evalProp(task,item,root,"title","idinfo/citation/citeinfo/title");
     G.evalProp(task,item,root,"description","idinfo/descript/abstract");
     G.evalProps(task,item,root,"keywords_s","//themekey | //placekey");
-    G.evalProps(task,item,root,"links_s","idinfo/citation/citeinfo/onlink | distinfo/stdorder/digform/digtopt/onlinopt/computer/networka/networkr");
+    G.evalProps(task,item,root,"links_s","idinfo/citation/citeinfo/onlink | distinfo/stdorder/digform/digtopt/onlinopt/computer/networka/networkr | distInfo/distTranOps/onLineSrc/linkage");
     G.evalProp(task,item,root,"thumbnail_s","idinfo/browse/browsen");
     G.evalProps(task,item,root,"contact_organizations_s","//cntinfo/cntorgp/cntorg");
     G.evalProps(task,item,root,"contact_people_s","//cntinfo/cntorgp/cntper");
     G.evalProps(task,item,root,"contentType_s","distinfo/resdesc");
-    
+    /* for TVA */
+    G.evalProp(task,item,root,"src_site2_cat","dataIdInfo/otherKeys/keyword");	    
     /* hierarchical category */
     /* see: evalBse() method in EvaluatorFor_ISO.js and copy that code here if desired. */
   },
