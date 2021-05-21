@@ -16,6 +16,7 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
         "dojo/dom-construct",
+        "dojo/request",
         "dojo/topic",
         "app/context/app-topics",
         "dojo/text!./templates/TermsAggregation.html",
@@ -24,7 +25,7 @@ define(["dojo/_base/declare",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/CollectionsFilterSettings"], 
-function(declare, lang, array, domConstruct, topic, appTopics, template, i18n, SearchComponent, 
+function(declare, lang, array, domConstruct, dojoRequest, topic, appTopics, template, i18n, SearchComponent, 
   DropPane, QClause, CollectionsFilterSettings) {
   
   var oThisClass = declare([SearchComponent], {
@@ -76,7 +77,8 @@ function(declare, lang, array, domConstruct, topic, appTopics, template, i18n, S
     
     addEntry: function(term,count,missingVal) {
       var name = this.chkName(term);
-      var v = name+" ("+count+")";
+//      var v = name+" ("+count+")";
+      var v = name;
       var tipPattern = i18n.search.appliedFilters.tipPattern;
       var tip = tipPattern.replace("{type}",this.label).replace("{value}",name);
       var query = {"term": {}};
@@ -141,22 +143,35 @@ function(declare, lang, array, domConstruct, topic, appTopics, template, i18n, S
     },
     
     processResults: function(searchResponse) {
-      domConstruct.empty(this.entriesNode);
-      var key = this.getAggregationKey();
-      if (searchResponse.aggregations) {
-        var data = searchResponse.aggregations[key];
-        if (data && data.buckets) {
-          
-          var v, missingVal = null;
-          if (this.props && typeof this.props.missing === "string") {
-            v = lang.trim(this.props.missing);
-            if (v.length > 0) missingVal = v;
+      var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
+
+      if (AppContext.geoportal.supportsApprovalStatus || 
+          AppContext.geoportal.supportsGroupBasedAccess) {
+        var client = new AppClient();
+        url = client.appendAccessToken(url); 
+      }
+      
+      var postData = {
+        aggregations: {
+          collections: {
+            terms: {
+              field: this.field
+            }
           }
-          array.forEach(data.buckets,function(entry){
-            this.addEntry(entry.key,entry.doc_count,missingVal);
-          },this);
         }
       }
+      
+      dojoRequest.post(url,{
+        handleAs: "json",
+        headers: {"Content-Type": "application/json"},
+        data: JSON.stringify(postData)
+      }).then(lang.hitch(this, function(result) {
+        domConstruct.empty(this.entriesNode);
+        var data = result.aggregations.collections;
+        array.forEach(data.buckets,function(entry){
+          this.addEntry(entry.key,entry.doc_count);
+        },this);
+      }));
     }
     
   });
