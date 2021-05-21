@@ -16,6 +16,7 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/_base/array",
         "dojo/dom-construct",
+        "dojo/dom-class",
         "dojo/request",
         "dojo/topic",
         "app/context/app-topics",
@@ -25,7 +26,7 @@ define(["dojo/_base/declare",
         "app/search/DropPane",
         "app/search/QClause",
         "app/search/CollectionsFilterSettings"], 
-function(declare, lang, array, domConstruct, dojoRequest, topic, appTopics, template, i18n, SearchComponent, 
+function(declare, lang, array, domConstruct, domClass, dojoRequest, topic, appTopics, template, i18n, SearchComponent, 
   DropPane, QClause, CollectionsFilterSettings) {
   
   var oThisClass = declare([SearchComponent], {
@@ -40,6 +41,8 @@ function(declare, lang, array, domConstruct, dojoRequest, topic, appTopics, temp
     props: null,
     
     _initialSettings: null,
+    links: [],
+    selectedCollectionName: "",
     
     postCreate: function() {
       this.inherited(arguments);
@@ -98,14 +101,17 @@ function(declare, lang, array, domConstruct, dojoRequest, topic, appTopics, temp
         }
       });
       var nd = domConstruct.create("div",{},this.entriesNode);
+      nd.collectionName = name;
       var link = domConstruct.create("a",{
         href: "#",
         onclick: lang.hitch(this,function() {
           this.activeQClauses = null;
           this.pushQClause(qClause,true);
+          this.selectedCollectionName = name;
         })
       },nd);
       this.setNodeText(link,v);
+      return nd;
     },
     
     chkName: function(term){
@@ -127,6 +133,9 @@ function(declare, lang, array, domConstruct, dojoRequest, topic, appTopics, temp
     },
     
     /* SearchComponent API ============================================= */
+    whenQClauseRemoved: function(qClause) {
+      this.selectedCollectionName = "";
+    },
     
     appendQueryParams: function(params) {
       if (!this.hasField()) return;
@@ -166,12 +175,25 @@ function(declare, lang, array, domConstruct, dojoRequest, topic, appTopics, temp
         headers: {"Content-Type": "application/json"},
         data: JSON.stringify(postData)
       }).then(lang.hitch(this, function(result) {
+        this.links = [];
         domConstruct.empty(this.entriesNode);
         var data = result.aggregations.collections;
-        array.forEach(data.buckets,function(entry){
-          this.addEntry(entry.key,entry.doc_count);
-        },this);
+        array.forEach(data.buckets,lang.hitch(this, function(entry){
+          var link = this.addEntry(entry.key,entry.doc_count);
+          this.links.push(link);
+        }),this);
+        this.highlight(this.selectedCollectionName);
       }));
+    },
+    
+    highlight: function(collectionName) {
+      array.forEach(this.links, function(link) {
+        if (link.collectionName === collectionName) {
+          domClass.add(link, "g-entry-selected");
+        } else {
+          domClass.remove(link, "g-entry-selected");
+        }
+      });
     }
     
   });

@@ -500,6 +500,14 @@ body {
   text-overflow: ellipsis;
 }
 
+.g-entry-selected {
+  font-weight: bold;
+}
+
+.g-entry-selected a::before {
+  content: '\21D2   ';
+}
+
 .g-spatial-filter-map {
   height: 300px !important;
   width: auto !important;
