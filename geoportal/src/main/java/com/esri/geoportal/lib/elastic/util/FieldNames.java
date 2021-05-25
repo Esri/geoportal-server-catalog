@@ -72,8 +72,8 @@ public class FieldNames {
   /** FIELD_SYS_XMLMODIFIED = "sys_xmlmodified_dt" */
   public static String FIELD_SYS_XMLMODIFIED = "sys_xmlmodified_dt";
   
-  /** FIELD_SYS_COLLECTIONS = "sys_collections_s" */
-  public static String FIELD_SYS_COLLECTIONS = "sys_collections_s";
+  /** FIELD_SYS_COLLECTIONS = "src_collections_s" */
+  public static String FIELD_SYS_COLLECTIONS = "src_collections_s";
   
   /* sys (kvp) ===================================================== */
   

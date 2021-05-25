@@ -43,7 +43,7 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     
     init: function() {
       this.setNodeText(this.itemTitleNode,this.item.title);
-      var v = this.item["sys_collections_s"];
+      var v = this.item["src_collections_s"];
       if (typeof v === "string" && v.length > 0) {
         $(this.collectionsValueInput).val(v);
       } else if (Array.isArray(v)) {
