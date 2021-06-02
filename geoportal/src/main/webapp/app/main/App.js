@@ -64,6 +64,7 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }
       
       $("a[href='#searchPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
+        this.setHash("searchPanel");
         router.go("searchPanel");
       }));
       $("a[href='#mapPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
