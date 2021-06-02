@@ -76,12 +76,12 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       
       topic.subscribe(appTopics.AddToMapClicked,lang.hitch(this, function(params){
         if (self.mapPanel.mapWasInitialized) {
-          $("a[href='#mapPanel']").tab("show");
+          router.go("mapPanel");
           self.mapPanel.addToMap(params);
         } else {
           var urlParams = {resource: params.type+":"+this.normalizeUrl(params.url)};
           ignoreMapPanelActivated = true;
-          $("a[href='#mapPanel']").tab("show");
+          router.go("mapPanel");
           self.mapPanel.ensureMap(urlParams);
           ignoreMapPanelActivated = false;
         }
