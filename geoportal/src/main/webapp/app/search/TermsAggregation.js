@@ -92,7 +92,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
       });
       var nd = domConstruct.create("div",{},this.entriesNode);
       var link = domConstruct.create("a",{
-        href: "#",
+        href: "javascript:void(0)",
         onclick: lang.hitch(this,function() {
           this.pushQClause(qClause,true);
         })
