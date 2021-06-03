@@ -144,7 +144,7 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
           link.href = href;
           node.style.display = "";
         } else {
-          link.href = "#";
+          link.href = "javascript:void(0)";
           node.style.display = "none";
         }
       };
