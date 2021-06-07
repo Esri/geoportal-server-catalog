@@ -33,6 +33,7 @@ define({
     references: "References",
     type: "Resource type",
     creator: "Creator",
+    date: "Date",
     
     types: {
       1: "ArcIMS Service",
