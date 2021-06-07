@@ -141,6 +141,11 @@
 
       <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:creator',label:'${i18nDublinCore.creator}',minOccurs:0"></div>
       
+      <div data-dojo-type="esri/dijit/metadata/form/Element" 
+        data-dojo-props="target:'dc:date', label:'${i18nDublinCore.date}', minOccurs:0">
+        <div data-dojo-type="esri/dijit/metadata/form/InputDate" data-dojo-props="fullDate: true, hint: '(yyyy-mm-dd)'"></div>
+      </div>
+      
       <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
            data-dojo-props="target:'ows:WGS84BoundingBox',minOccurs:0">
         <div class="gxeGeoExtentSection">  
