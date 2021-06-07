@@ -32,6 +32,7 @@ define({
     subject: "Keywords",
     references: "References",
     type: "Resource type",
+    creator: "Creator",
     
     types: {
       1: "ArcIMS Service",
