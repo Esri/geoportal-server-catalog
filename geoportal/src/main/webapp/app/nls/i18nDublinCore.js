@@ -34,6 +34,7 @@ define({
     type: "Resource type",
     creator: "Creator",
     date: "Date",
+    language: "Language",
     
     types: {
       1: "ArcIMS Service",
@@ -98,6 +99,37 @@ define({
       
       48:"OGC Web Processing Service 0.4"
    },
+   
+    languages: {
+      ger: "German",
+      dut: "Dutch",
+      eng: "English",
+      fre: "French",
+      ita: "Italian",
+      kor: "Korean",
+      lit: "Lithuanian",
+      nor: "Norwegian",
+      pol: "Polish",
+      por: "Portuguese",
+      rus: "Russian",
+      spa: "Spanish",
+      swe: "Swedish",
+      tur: "Turkish",
+      chi: "Chinese",
+      bul: "Bulgarian",
+      cze: "Czech",
+      dan: "Danish",
+      est: "Estonian",
+      fin: "Finnish",
+      gre: "Greek",
+      hun: "Hungarian",
+      gle: "Irish",
+      lav: "Latvian",
+      mlt: "Maltese",
+      rum: "Romanian",
+      slo: "Slovak",
+      slv: "Slovenia"
+    },
     
     hints: {
       coordinates: "Enter space or coma separated pair of numbers."
