@@ -64,7 +64,7 @@ function(declare, lang, on, event, domConstruct, domClass, TitlePane, i18n) {
 
     addSettingsLink: function() {
       var link = this.settingsNode = domConstruct.create("a",{
-        href: "#",
+        href: "javascript:void(0)",
         onclick: lang.hitch(this,function(e) {
           e.stopPropagation();
         })
