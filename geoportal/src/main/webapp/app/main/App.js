@@ -17,6 +17,7 @@ define(["dojo/_base/declare",
         "dojo/_base/array",
         "dojo/topic",
         "app/context/app-topics",
+        "dojo/router",
         "app/common/Templated",
         "dojo/text!./templates/App.html",
         "dojo/i18n!../nls/resources",
@@ -26,7 +27,7 @@ define(["dojo/_base/declare",
         "app/main/AboutPanel",
         "app/content/MetadataEditor",
         "app/content/UploadMetadata"],
-function(declare, lang, array, topic, appTopics, Templated, template, i18n, util, SearchPanel, MapPanel, AboutPanel,
+function(declare, lang, array, topic, appTopics, router, Templated, template, i18n, util, SearchPanel, MapPanel, AboutPanel,
     MetadataEditor, UploadMetadata) {
 
   var oThisClass = declare([Templated], {
@@ -38,28 +39,50 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
       this.inherited(arguments);
       var self = this;
       this.updateUI();
-
+      
       var ignoreMapPanelActivated = false;
+      
+      router.register("searchPanel", lang.hitch(this, function(evt){ 
+        $("a[href='#searchPanel']").tab("show");
+      }));
+      
+      router.register("mapPanel", lang.hitch(this, function(evt){ 
+        if (!ignoreMapPanelActivated && !this.mapPanel.mapWasInitialized) {
+          this.mapPanel.ensureMap();
+        }
+        $("a[href='#mapPanel']").tab("show");
+      }));
+      
+      router.register("aboutPanel", lang.hitch(this, function(evt){ 
+        $("a[href='#aboutPanel']").tab("show");
+      }));
+      
+      router.startup();
+      if (!location.hash || location.hash.length==0) {
+        this.setHash("searchPanel");
+        router.go("searchPanel");
+      }
+      
       $("a[href='#searchPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
-        this.setHash('searchPanel')
+        this.setHash("searchPanel");
+        router.go("searchPanel");
       }));
       $("a[href='#mapPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
-        this.setHash('mapPanel')
-        if (!ignoreMapPanelActivated && !self.mapPanel.mapWasInitialized) {
-          self.mapPanel.ensureMap();
-        }
+        router.go("mapPanel");
       }));
       $("a[href='#aboutPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
-        this.setHash('aboutPanel')
+        router.go("aboutPanel");
       }));
+
+      
       topic.subscribe(appTopics.AddToMapClicked,lang.hitch(this, function(params){
         if (self.mapPanel.mapWasInitialized) {
-          $("a[href='#mapPanel']").tab("show");
+          router.go("mapPanel");
           self.mapPanel.addToMap(params);
         } else {
           var urlParams = {resource: params.type+":"+this.normalizeUrl(params.url)};
           ignoreMapPanelActivated = true;
-          $("a[href='#mapPanel']").tab("show");
+          router.go("mapPanel");
           self.mapPanel.ensureMap(urlParams);
           ignoreMapPanelActivated = false;
         }
@@ -73,11 +96,6 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
         self.updateUI();
       });
 
-      if (location.hash==null || location.hash.length==0) {
-        this.setHash('searchPanel')
-      } else if ( $("a[href='"+location.hash+"']").length > 0) {
-        $("a[href='"+location.hash+"']").tab("show");
-      }
     },
 
     /* =================================================================================== */
@@ -126,7 +144,7 @@ function(declare, lang, array, topic, appTopics, Templated, template, i18n, util
           link.href = href;
           node.style.display = "";
         } else {
-          link.href = "#";
+          link.href = "javascript:void(0)";
           node.style.display = "none";
         }
       };

@@ -74,7 +74,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     firstButtonClicked: function() {
       if (this.hasLess) {
-        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPanel");
         this.start = 1;
         this.search();
       }
@@ -82,7 +82,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     previousButtonClicked: function() {
       if (this.hasLess) {
-        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPanel");
         this.start = this.previousStart;
         this.search();
       }
@@ -90,7 +90,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     nextButtonClicked: function() {
       if (this.hasMore) {
-        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPanel");
         this.start = this.nextStart;
         this.search();
       }
@@ -98,7 +98,7 @@ function(declare, lang, on, domClass, domAttr, djNumber, topic, string, appTopic
 
     lastButtonClicked: function() {
       if (this.numHits < AppContext.appConfig.system.searchLimit && this.hasMore) {
-        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPane");
+        history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPanel");
         this.start = Math.max(Math.ceil(this.numHits / this.numPerPage)-1, 0)*this.numPerPage + 1
         this.search();
       }
