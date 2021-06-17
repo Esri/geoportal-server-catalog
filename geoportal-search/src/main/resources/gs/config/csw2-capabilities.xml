@@ -67,13 +67,7 @@
     <ows:Operation name="DescribeRecord">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Get xlink:href=""/>
-          <ows:Post xlink:href="">
-            <ows:Constraint name="PostEncoding">
-				  <ows:Value>XML</ows:Value> 
-				  <ows:Value>SOAP</ows:Value> 				  
-			  </ows:Constraint>
-		  </ows:Post>
+          <ows:Get xlink:href="{csw.url}"/>
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
