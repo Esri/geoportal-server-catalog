@@ -137,6 +137,17 @@
         var lcRequest = request.toLowerCase();
         if (lcRequest === "getcapabilities") {
           return this.getCapabilities(task);
+        } else if (lcRequest === "describerecord") {
+          if (this.isCsw2) {
+            return this.describeRecord(task);
+          } else {
+            msg = "CSW: The request parameter is invalid.";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_InvalidParameterValue,"version",msg);
+            promise = task.context.newPromise();
+            promise.reject();
+            return promise;
+          }
         } else if (lcRequest === "getrecordbyid") {
           return this.getRecordById(task);
         } else if (lcRequest === "getrecords") {
@@ -234,6 +245,61 @@
             ows.put(task,ows.OWSCODE_InvalidParameterValue,"sections",msg);
           }
         }
+      }
+
+      if (!task.hasError) {
+        var response = task.response;
+        response.put(response.Status_OK,response.MediaType_APPLICATION_XML,xml);
+        if (mime === "text/xml") {
+          response.mediaType = response.MediaType_TEXT_XML;
+        }
+        promise.resolve();
+      } else {
+        promise.reject();
+      }
+      return promise;
+    }},
+  
+    describeRecord: {writable:true,value:function(task) {
+      var xml, promise = task.context.newPromise();
+      var describeRecordFile = task.config.csw2DescribeRecordFile;
+      
+      var mime = null;
+      var hasTextXml = false;
+      var hasAppXml = false;
+      var hasOther = false;
+      var acceptFormats = task.request.getParameterValues("acceptFormats");
+      if (acceptFormats !== null && acceptFormats.length === 1) {
+        acceptFormats = acceptFormats[0].split(",");
+      }
+      if (acceptFormats != null) {
+        acceptFormats.some(function(s){
+          s = s.toLowerCase();
+          if (s === "application/xml") {
+            hasAppXml = true;
+          } else if (s === "text/xml") {
+            hasTextXml = true;
+          } else if (s.length > 0) {
+            hasOther = true;
+          }
+        });
+      }
+
+      var accept = task.request.getHeader("accept");
+      if (accept === "text/xml") {
+        hasTextXml = true;
+      }
+      if (!hasAppXml && hasTextXml) {
+        mime = "text/xml";
+      } else if (!hasAppXml && !hasTextXml && hasOther) {
+        msg = "CSW: The acceptFormats parameter is invalid.";
+        ows = gs.Object.create(gs.provider.csw.OwsException);
+        ows.put(task,ows.OWSCODE_InvalidParameterValue,"acceptFormats",msg);
+      }
+
+      if (!task.hasError) {
+        xml = task.context.readResourceFile(describeRecordFile,"UTF-8");
+        xml = xml.trim();
       }
 
       if (!task.hasError) {
