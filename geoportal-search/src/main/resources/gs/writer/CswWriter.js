@@ -185,6 +185,23 @@
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);
       //xmlBuilder.writeElement(task.uris.URI_DC,"type",itemType);   // TODO
+      
+      var type_fields = ["apiso_Type_s", "contentType_s", "type_s"];
+      var source = item._source;
+      if (source) {
+        type_fields.forEach(function(tf) {
+          var type = source[tf];
+          if (type) {
+            if (Array.isArray(type)) {
+              type.forEach(function(tp) {
+                xmlBuilder.writeElement(task.uris.URI_DC,"type",tp);
+              });
+            } else if (typeof type === "string") {
+              xmlBuilder.writeElement(task.uris.URI_DC,"type",type);
+            }
+          }
+        });
+      }
 
       if (recordTypeName !== "BriefRecord") {
         this.addAtomCategory(task,xmlBuilder,task.uris.URI_DC,"subject",entry.category);
