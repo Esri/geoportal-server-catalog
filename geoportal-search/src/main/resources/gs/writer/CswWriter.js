@@ -20,6 +20,8 @@
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
 
     uris: {writable: true, value: null},
+    
+    DCTYPE_FIELDS: {writable: true, value: ["apiso_Type_s", "contentType_s", "type_s"]},
 
     /* .......................................................................................... */
 
@@ -186,21 +188,23 @@
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);
       //xmlBuilder.writeElement(task.uris.URI_DC,"type",itemType);   // TODO
       
-      var type_fields = ["apiso_Type_s", "contentType_s", "type_s"];
       var source = item._source;
       if (source) {
-        type_fields.forEach(function(tf) {
+        var dctype;
+        
+        this.DCTYPE_FIELDS.forEach(function(tf) {
           var type = source[tf];
           if (type) {
-            if (Array.isArray(type)) {
-              type.forEach(function(tp) {
-                xmlBuilder.writeElement(task.uris.URI_DC,"type",tp);
-              });
-            } else if (typeof type === "string") {
-              xmlBuilder.writeElement(task.uris.URI_DC,"type",type);
-            }
-          }
-        });
+            (Array.isArray(type)? type: typeof type === "string"? [type]: []).forEach(function(tp) {
+              if (tp) {
+                dctype = tp;
+              }
+            });
+        }});
+      
+        if (dctype) {
+          xmlBuilder.writeElement(task.uris.URI_DC,"type",dctype);
+        }
       }
 
       if (recordTypeName !== "BriefRecord") {
