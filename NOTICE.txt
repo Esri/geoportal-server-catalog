@@ -2,13 +2,13 @@
 ESRI Geoportal Server Catalog
 Copyright Â©2019 Esri. 
 ===============================================================================
-This document includes acknowledgments for the thirdâ€�parties whose software has 
+This document includes acknowledgments for the third parties whose software has 
 been used in permissible forms with the Geoportal Server Catalog and its related 
 products. The list below includes the third party software, the license that 
 applies for that software. The licenses that apply to these thirdâ€�party 
 resources are provided beneath the table in text, or have URLs referenced. 
 Please be aware that when using the Geoportal Server Catalog or its 
-related products, these thirdâ€�party resources are under the protection of their
+related products, these third party resources are under the protection of their
 respective license.
 
 ===============================================================================
@@ -75,6 +75,14 @@ This product includes software developed by The Apache Software Foundation
 (http://www.apache.org/).
 
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
+===============================================================================
+ASM, asm-7.3.1.jar, http://asm.ow2.io/
+ASM Analysis, asm-analysis-7.3.1.jar, http://asm.ow2.io/
+ASM Commons, asm-commons-7.3.1.jar, http://asm.ow2.io/
+ASM Tree, asm-tree-7.3.1.jar, http://asm.ow2.io/
+ASM Utilities, asm-util-7.3.1.jar, http://asm.ow2.io/
+-------------------------------------------------------------------------------
+BSD 3-clause"
 
 ===============================================================================
 Bean Validation API (dependency of 3rd party libraries)
@@ -252,6 +260,11 @@ This library is licensed under the LGPL, version 2.1 or later, and (from version
 NOTE: Oracle is not sponsoring this project, even though the package name (com.sun.jna) might imply otherwise.
 
 ===============================================================================
+JavaBeans(TM) Activation Framework, activation-1.1.jar, http://java.sun.com/javase/technologies/desktop/javabeans/ja ...
+-------------------------------------------------------------------------------
+CDDL 1.0"
+
+===============================================================================
 Javassist (dependency of 3rd party libraries)
 -------------------------------------------------------------------------------
 Copyright (C) 1999- by Shigeru Chiba, All rights reserved.
@@ -395,6 +408,16 @@ License: Apache 2.0
 See Common Open Source Licenses section for a copy of Apache 2.0 License.
 
 ===============================================================================
+OpenJDK Nashorn, nashorn-core-15.2.jar, https://github.com/openjdk/nashorn
+-------------------------------------------------------------------------------
+GPL 2.0
+
+===============================================================================
+OWASP Java HTML Sanitizer, owasp-java-html-sanitizer-r239.jar, http://code.google.com/p/owasp-java-html-sanitizer
+-------------------------------------------------------------------------------
+Apache 2.0
+
+===============================================================================
 SLF4J:
 SLF4J API Module, slf4j-api-1.7.25.jar, https://www.slf4j.org/
 -------------------------------------------------------------------------------
@@ -510,8 +533,11 @@ https://github.com/elastic/x-pack-elasticsearch
 License: Apache 2.0
 
 ===============================================================================
+===============================================================================
+===============================================================================
 Common Open Source Licenses
 ===============================================================================
+
                                  Apache License
                            Version 2.0, January 2004
                         http://www.apache.org/licenses/
