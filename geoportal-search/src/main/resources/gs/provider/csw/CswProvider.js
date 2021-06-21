@@ -204,11 +204,11 @@
           acceptVersions = acceptVersions[0].split(",");
         }
         if (acceptVersions !== null && acceptVersions.length > 0) {
-          var has30 = acceptVersions.some(function(s){
-            return (s === "3.0.0");
+          var has30or202 = acceptVersions.some(function(s){
+            return (s === "2.0.2" || s === "3.0.0");
           });
-          if (!has30) {
-            msg = "CSW: The acceptVersions parameter is invalid, 3.0.0 is required";
+          if (!has30or202) {
+            msg = "CSW: The acceptVersions parameter is invalid, 2.0.2 or 3.0.0 is required";
             ows = gs.Object.create(gs.provider.csw.OwsException);
             ows.put(task,ows.OWSCODE_VersionNegotiationFailed,"acceptVersions",msg);
           }
