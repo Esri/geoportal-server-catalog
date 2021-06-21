@@ -21,7 +21,7 @@
 
     uris: {writable: true, value: null},
     
-    DCTYPE_FIELDS: {writable: true, value: ["apiso_Type_s", "contentType_s", "type_s"]},
+    DCTYPE_FIELDS: {writable: true, value: ["type_s", "contentType_s", "apiso_ServiceType_s", "apiso_Type_s" ]},
 
     /* .......................................................................................... */
 
