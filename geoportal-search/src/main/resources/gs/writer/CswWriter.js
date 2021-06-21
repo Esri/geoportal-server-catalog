@@ -186,7 +186,6 @@
 
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);
-      //xmlBuilder.writeElement(task.uris.URI_DC,"type",itemType);   // TODO
       
       var source = item._source;
       if (source) {
