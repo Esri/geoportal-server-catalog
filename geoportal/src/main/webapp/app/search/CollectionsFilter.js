@@ -103,7 +103,7 @@ function(declare, lang, array, domConstruct, domClass, dojoRequest, topic, appTo
       var nd = domConstruct.create("div",{},this.entriesNode);
       nd.collectionName = name;
       var link = domConstruct.create("a",{
-        href: "#",
+        href: "javascript:void(0)",
         onclick: lang.hitch(this,function() {
           this.activeQClauses = null;
           this.pushQClause(qClause,true);

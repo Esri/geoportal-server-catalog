@@ -1,98 +1,238 @@
 <div data-dojo-attach-point="containerNode">
   <div data-dojo-type="esri/dijit/metadata/form/Element"
-    data-dojo-props="target:'rdf:RDF',label:'${i18nDublinCore.documentTypes.data.caption}'">
-    
-      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'rdf:Description',label:'${i18nDublinCore.content}'">
-      
-        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:identifier',label:'${i18nDublinCore.identifier}'"></div>
-        
-        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:title',label:'${i18nDublinCore.title}',isDocumentTitle:true"></div>
-        
-        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:description',label:'${i18nDublinCore.description}'">
-          <div data-dojo-type="esri/dijit/metadata/form/InputTextArea" data-dojo-props="large:true"></div>
-        </div>
+       data-dojo-props="target:'rdf:RDF',label:'${i18nDublinCore.documentTypes.data.caption}'">
 
-        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:subject',minOccurs:1,maxOccurs:'unbounded', label:'${i18nDublinCore.subject}'">
-          <div data-dojo-type="esri/dijit/metadata/form/InputDelimitedTextArea" data-dojo-props=""></div>
-        </div>
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'rdf:Description',label:'${i18nDublinCore.content}'">
 
-        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dct:references',minOccurs:0,maxOccurs:'unbounded', label:'${i18nDublinCore.references}'">
-        </div>
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:identifier',label:'${i18nDublinCore.identifier}'"></div>
 
-    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
-      data-dojo-props="target:'ows:WGS84BoundingBox',minOccurs:0">
-      <div class="gxeGeoExtentSection">  
-        <div class="gxeGeoExtentCoordinates">
-          <div data-dojo-type="app/gxe/form/Element"
-            data-dojo-props="target:'ows:LowerCorner',
-              label:'Lower left corner (lon lat)'">
-            <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true">
-                <div data-dojo-type="app/gxe/types/dc/base/GeoExtentTool"
-                  data-dojo-props="label:'${i18nBase.geoExtent.button}'"></div>
-            </div>
-          </div>
-          <div data-dojo-type="app/gxe/form/Element"
-            data-dojo-props="target:'ows:UpperCorner',
-              label:'Upper right corner (lon lat)'">
-            <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true"></div>
-          </div>
-        </div>
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:title',label:'${i18nDublinCore.title}',isDocumentTitle:true"></div>
+
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:description',label:'${i18nDublinCore.description}'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputTextArea" data-dojo-props="large:true"></div>
       </div>
-    </div>
-        
-<!--        
-              
-    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
-      data-dojo-props="target:'ows:WGS84BoundingBox',minOccurs:0">
-      <div class="gxeGeoExtentSection">  
-        <div class="gxeGeoExtentCoordinates">  
-          <div data-dojo-type="esri/dijit/metadata/form/Element"
-            data-dojo-props="target:'gmd:westBoundLongitude',
-              label:'${i18nIso.EX_GeographicBoundingBox.westBoundLongitude}'">
-            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
-              data-dojo-props="target:'gco:Decimal',value:-180">
-              <div data-dojo-type="esri/dijit/metadata/form/InputNumber"
-                data-dojo-props="hint:'${i18nBase.hints.longitude}'">
-                <div data-dojo-type="esri/dijit/metadata/form/iso/GeoExtentTool"
-                  data-dojo-props="label:'${i18nBase.geoExtent.button}'"></div>
+
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:subject',minOccurs:1,maxOccurs:'unbounded', label:'${i18nDublinCore.subject}'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputDelimitedTextArea" data-dojo-props=""></div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+           data-dojo-props="target:'ows:WGS84BoundingBox',minOccurs:0">
+        <div class="gxeGeoExtentSection">  
+          <div class="gxeGeoExtentCoordinates">
+            <div data-dojo-type="app/gxe/form/Element"
+                 data-dojo-props="target:'ows:LowerCorner',
+                 label:'Lower left corner (lon lat)'">
+              <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true">
+                <div data-dojo-type="app/gxe/types/dc/base/GeoExtentTool"
+                     data-dojo-props="label:'${i18nBase.geoExtent.button}'"></div>
               </div>
             </div>
-          </div>
-          <div data-dojo-type="esri/dijit/metadata/form/Element"
-            data-dojo-props="target:'gmd:eastBoundLongitude',
-              label:'${i18nIso.EX_GeographicBoundingBox.eastBoundLongitude}'">
-            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
-              data-dojo-props="target:'gco:Decimal',value:180">
-              <div data-dojo-type="esri/dijit/metadata/form/InputNumber"
-                data-dojo-props="hint:'${i18nBase.hints.longitude}'"></div>
-            </div>
-          </div>
-          <div data-dojo-type="esri/dijit/metadata/form/Element"
-            data-dojo-props="target:'gmd:southBoundLatitude',
-              label:'${i18nIso.EX_GeographicBoundingBox.southBoundLatitude}'">
-            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
-              data-dojo-props="target:'gco:Decimal',value:-90">
-              <div data-dojo-type="esri/dijit/metadata/form/InputNumber"
-                data-dojo-props="hint:'${i18nBase.hints.latitude}'"></div>
-            </div>
-          </div>
-          <div data-dojo-type="esri/dijit/metadata/form/Element"
-            data-dojo-props="target:'gmd:northBoundLatitude',
-              label:'${i18nIso.EX_GeographicBoundingBox.northBoundLatitude}'">
-            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
-              data-dojo-props="target:'gco:Decimal',value:90">
-              <div data-dojo-type="esri/dijit/metadata/form/InputNumber"
-                data-dojo-props="hint:'${i18nBase.hints.latitude}'"></div>
+            <div data-dojo-type="app/gxe/form/Element"
+                 data-dojo-props="target:'ows:UpperCorner',
+                 label:'Upper right corner (lon lat)'">
+              <div data-dojo-type="app/gxe/form/InputDecimalPair" data-dojo-props="hint: '${i18nDublinCore.hints.coordinates}', considerHint: true"></div>
             </div>
           </div>
         </div>
-        <div class="gxeGeoExtentViewSection gxeViewOnly"></div>
-        <div class="gxeGeoExtentBottom"></div>
       </div>
-    </div>
 
--->
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dct:references',minOccurs:0,maxOccurs:'unbounded', label:'${i18nDublinCore.references}'">
       </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:type',minOccurs:0, label:'${i18nDublinCore.type}'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'',value:''"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.1}',value:'urn:x-esri:specification:ServiceType:ArcIMS'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.2}',value:'urn:x-esri:specification:ServiceType:ArcGIS'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.3}',value:'urn:ogc:dataFormat:GML:2.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.4}',value:'urn:ogc:dataFormat:GML:2.1.1'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.5}',value:'urn:ogc:dataFormat:GML:2.1.2'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.6}',value:'urn:ogc:dataFormat:GML:3.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.7}',value:'urn:ogc:dataFormat:GML:3.1.1'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.8}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:CORBA'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.9}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:HTTP'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.10}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:HTTP:ebRIM'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.11}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:HTTP:EO'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.12}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:HTTP:FGDC-CSDGM'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.13}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:HTTP:ISO19115/19119'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.14}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:Z39.50'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.15}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:Z39.50:GEOProfile'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.16}',value:'urn:ogc:serviceType:CatalogueService:2.0.1:Z39.50:SRU'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.17}',value:'urn:ogc:serviceType:CatalogueService:2.0.2:CORBA'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.18}',value:'urn:ogc:serviceType:CatalogueService:2.0.2:HTTP'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.19}',value:'urn:ogc:serviceType:CatalogueService:2.0.2:HTTP:ebRIM'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.20}',value:'urn:ogc:serviceType:CatalogueService:2.0.2:HTTP:EO'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.21}',value:'urn:ogc:serviceType:CatalogueService:2.0.2:HTTP:FGDC-CSDGM'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.22}',value:'urn:ogc:serviceType:CatalogueService:2.0.2:HTTP:ISO19115/19119'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.23}',value:'urn:ogc:serviceType:CatalogueService:2.0.2:Z39.50'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.24}',value:'urn:ogc:serviceType:CoordinateTransformationService:1.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.25}',value:'urn:ogc:serviceType:CoordinateTransformationService:1.0:COM'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.26}',value:'urn:ogc:serviceType:CoordinateTransformationService:1.0:CORBA'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.27}',value:'urn:ogc:serviceType:CoordinateTransformationService:1.0:JAVA'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.28}',value:'urn:ogc:serviceType:GridCoverage:1.0:COM'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.29}',value:'urn:ogc:serviceType:GridCoverage:1.0:CORBA'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.30}',value:'urn:ogc:serviceType:OpenLSCoreServices:1.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.31}',value:'urn:ogc:serviceType:OpenLSCoreServices:1.0:SOAP'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.32}',value:'urn:ogc:serviceType:OpenLSCoreServices:1.1'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.33}',value:'urn:ogc:serviceType:KML:2.2'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.34}',value:'urn:ogc:serviceType:SimpleFeatureAccess:1.0:CORBA'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.35}',value:'urn:ogc:serviceType:SimpleFeatureAccess:1.1:OLE/COM'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.36}',value:'urn:ogc:serviceType:SimpleFeatureAccess:1.1:SQL'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.37}',value:'urn:ogc:serviceType:SimpleFeatureAccess:1.2:SQL'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.38}',value:'urn:ogc:serviceType:SensorObservationService:1.0'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.39}',value:'urn:ogc:serviceType:WebCoverageService:1.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.40}',value:'urn:ogc:serviceType:WebCoverageService:1.1.0'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.41}',value:'urn:ogc:serviceType:WebFeatureService:1.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.42}',value:'urn:ogc:serviceType:WebFeatureService:1.1'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.43}',value:'urn:ogc:serviceType:WebMapService:1.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.44}',value:'urn:ogc:serviceType:WebMapService:1.1'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.45}',value:'urn:ogc:serviceType:WebMapService:1.1.1'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.46}',value:'urn:ogc:serviceType:WebMapService:1.3.0'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.47}',value:'urn:ogc:serviceType:WebMapService:Post:0.0.3'"></div>
+            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.types.48}',value:'urn:ogc:serviceType:WebProcessingService:0.4'"></div>
+          </div>
+        </div>
+      </div>
+
+
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:creator',label:'${i18nDublinCore.creator}',minOccurs:0"></div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element" 
+        data-dojo-props="target:'dc:date', label:'${i18nDublinCore.date}', minOccurs:0">
+        <div data-dojo-type="esri/dijit/metadata/form/InputDate" data-dojo-props="fullDate: true, hint: '(yyyy-mm-dd)'"></div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'dc:language',minOccurs:0, label:'${i18nDublinCore.language}'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.ger}',value:'ger'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.dut}',value:'dut'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.eng}',value:'eng'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.fre}',value:'fre'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.ita}',value:'ita'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.kor}',value:'kor'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.lit}',value:'lit'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.nor}',value:'nor'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.pol}',value:'pol'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.por}',value:'por'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.rus}',value:'rus'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.spa}',value:'spa'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.swe}',value:'swe'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.tur}',value:'tur'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.chi}',value:'chi'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.bul}',value:'bul'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.cze}',value:'cze'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.dan}',value:'dan'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.est}',value:'est'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.fin}',value:'fin'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.gre}',value:'gre'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.hun}',value:'hun'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.gle}',value:'gle'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.lav}',value:'lav'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.mlt}',value:'mlt'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.rum}',value:'rum'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.slo}',value:'slo'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"
+              data-dojo-props="label:'${i18nDublinCore.languages.slv}',value:'slv'"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
 
   </div>
 </div>

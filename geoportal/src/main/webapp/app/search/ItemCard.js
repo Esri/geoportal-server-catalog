@@ -328,7 +328,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       },this.actionsNode);
       var ddbtn = domConstruct.create("a",{
         "class": "dropdown-toggle",
-        "href": "#",
+        "href": "javascript:void(0)",
         "data-toggle": "dropdown",
         "aria-haspopup": true,
         "aria-expanded": true,
@@ -507,7 +507,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       },this.actionsNode);
       var ddbtn = domConstruct.create("a",{
         "class": "dropdown-toggle",
-        "href": "#",
+        "href": "javascript:void(0)",
         "data-toggle": "dropdown",
         "aria-haspopup": true,
         "aria-expanded": true,
@@ -853,7 +853,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       } else {
         var titleNode = this.titleNode;
         var htmlNode = domConstruct.create("a",{
-          href: "#",
+          href: "javascript:void(0)",
           title: item.title,
           "aria-label": item.title,
           innerHTML: item.title
