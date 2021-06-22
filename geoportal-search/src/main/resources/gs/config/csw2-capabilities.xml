@@ -90,7 +90,7 @@
     <ows:Operation name="GetRecords">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Get xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
+          <ows:Get xlink:href="{csw.url}" />
           <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
@@ -135,7 +135,7 @@
     <ows:Operation name="GetRecordById">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Get xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2&amp;id=" />
+          <ows:Get xlink:href="{csw.url}" />
           <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
