@@ -332,6 +332,23 @@
           }
         }
       }
+      
+      if (!task.hasError) {
+        var typeName = task.request.getParameterValues("TypeName");
+        if (typeName !== null && typeName.length === 1) {
+          typeName = typeName[0].split(",");
+        }
+        if (typeName !== null && typeName.length > 0) {
+          var hasTypeName = typeName.some(function(s){
+            return (s === "csw:Record" || s === "csw:SummaryRecord" || s === "csw:BriefRecord");
+          });
+          if (!hasTypeName) {
+            msg = "CSW: The typeName parameter is invalid. Only csw:Record, csw:SummaryRecord, csw:BriefRecord allowed.";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_InvalidParameterValue,"typeName",msg);
+          }
+        }
+      }
 
       if (!task.hasError) {
         xml = task.context.readResourceFile(describeRecordFile,"UTF-8");
