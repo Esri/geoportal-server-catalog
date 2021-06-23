@@ -263,6 +263,8 @@
     describeRecord: {writable:true,value:function(task) {
       var xml, promise = task.context.newPromise();
       var describeRecordFile = task.config.csw2DescribeRecordFile;
+      var parser = gs.Object.create(gs.provider.csw.DescribeRecordParser);
+      parser.parseBody(this,task);
       
       var mime = null;
       var hasTextXml = false;
