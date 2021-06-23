@@ -21,11 +21,6 @@
     task: {writable: true, value: null},
     xmlInfo: {writable: true, value: null},
     
-//    ids: {writable: true, value: null},
-//    modifiedFrom: {writable: true, value: null},
-//    modifiedTo: {writable: true, value: null},
-//    q: {writable: true, value: null},
-
     parseBody: {writable:true,value:function(cswProvider,task) {
       this.cswProvider = cswProvider;
       this.task = task;
@@ -67,6 +62,12 @@
       });
 
       xmlInfo.forEachChild(xmlInfo.root,function(level2){
+        if (level2.localName === "TypeName") {
+          var typeName = level2.nodeText;
+          if (typeof typeName === "string" && typeName.trim().length > 0) {
+            cswProvider.addOverrideParameter(task,"TypeName",typeName.trim());
+          }
+        }
       });
 
     }},
