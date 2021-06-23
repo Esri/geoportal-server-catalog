@@ -58,8 +58,11 @@
       }
 
       xmlInfo.forEachAttribute(xmlInfo.root,function(attr){
-        if (attr.localName === "schemaLanguage") {
+        if (attr.localName.toLowerCase() === "schemaLanguage".toLowerCase()) {
           cswProvider.addOverrideParameter(task,"schemaLanguage",attr.nodeText);
+        }
+        if (attr.localName.toLowerCase() === "outputFormat".toLowerCase()) {
+          cswProvider.addOverrideParameter(task,"outputFormat",attr.nodeText);
         }
       });
 
