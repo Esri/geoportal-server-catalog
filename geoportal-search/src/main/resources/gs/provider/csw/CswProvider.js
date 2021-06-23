@@ -296,6 +296,23 @@
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_InvalidParameterValue,"acceptFormats",msg);
       }
+      
+      if (!task.hasError) {
+        var schemaLanguage = task.request.getParameterValues("schemaLanguage");
+        if (schemaLanguage !== null && schemaLanguage.length === 1) {
+          schemaLanguage = schemaLanguage[0].split(",");
+        }
+        if (schemaLanguage !== null && schemaLanguage.length > 0) {
+          var hasSchemaLanguage = schemaLanguage.some(function(s){
+            return (s === "http://www.w3.org/XML/Schema");
+          });
+          if (!hasSchemaLanguage) {
+            msg = "CSW: The schemaLanguage parameter is invalid, 'http://www.w3.org/XML/Schema' is allowed";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_InvalidParameterValue,"schemaLanguage",msg);
+          }
+        }
+      }
 
       if (!task.hasError) {
         xml = task.context.readResourceFile(describeRecordFile,"UTF-8");
