@@ -91,7 +91,11 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}" />
+          <ows:Post xlink:href="{csw.url}" >
+            <ows:Constraint name="PostEncoding">
+              <ows:Value>XML</ows:Value> 
+            </ows:Constraint>
+          </ows:Post>
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
