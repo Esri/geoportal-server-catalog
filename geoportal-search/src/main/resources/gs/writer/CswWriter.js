@@ -203,7 +203,11 @@
       }
 
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
-        entry.bbox.writeOwsBoundingBox(task,xmlBuilder);
+        if (task.isCsw2) {
+          entry.bbox.writeWGS84BoundingBox(task,xmlBuilder);
+        } else {
+          entry.bbox.writeOwsBoundingBox(task,xmlBuilder);
+        }
       }
       
       if (recordTypeName !== "BriefRecord") {
