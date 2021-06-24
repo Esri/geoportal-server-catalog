@@ -247,10 +247,6 @@
 
   </ows:OperationsMetadata>
 
-  <ows:Languages>
-    <ows:Language>en</ows:Language>
-  </ows:Languages>
-
   <ogc:Filter_Capabilities>
     <ogc:Spatial_Capabilities>
       <ogc:GeometryOperands>
