@@ -194,19 +194,20 @@
         this.addAtomText(task,xmlBuilder,task.uris.URI_DCT,"abstract",entry.summary);
         // dct:spatial (summary)
         // csw:TemporalExtent (summary)?
-        if (recordTypeName === "SummaryRecord") {
-          this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
-        } else {
+        if (recordTypeName !== "SummaryRecord") {
           this.addAtomText(task,xmlBuilder,task.uris.URI_DCT,"created",entry.published);
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"creator",entry.author);
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"contributor",entry.contributor);
           this.addAtomText(task,xmlBuilder,task.uris.URI_DC,"rights",entry.rights);
-          this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
         }
       }
 
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
         entry.bbox.writeOwsBoundingBox(task,xmlBuilder);
+      }
+      
+      if (recordTypeName !== "BriefRecord") {
+        this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
       }
 
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
