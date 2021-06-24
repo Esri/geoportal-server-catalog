@@ -237,7 +237,7 @@
       xmlBuilder.writeAttribute("nextRecord",""+searchResult.calcNextRecord(task));
       xmlBuilder.writeAttribute("recordSchema",uris.csw);
       if (options.elementSetName != null && options.elementSetName.length > 0) {
-        xmlBuilder.writeAttribute("elementSetName",options.elementSetName);
+        xmlBuilder.writeAttribute("elementSet",options.elementSetName);
       }
       if (searchResult.itemsPerPage > 0) {
         for (var i=0;i<items.length;i++) {
