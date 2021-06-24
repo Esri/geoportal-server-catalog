@@ -247,15 +247,6 @@
       xmlBuilder.writeElement(uri,"LowerCorner",this.xmin+" "+this.ymin);
       xmlBuilder.writeElement(uri,"UpperCorner",this.xmax+" "+this.ymax);
       xmlBuilder.writeEndElement();
-    }},
-
-    writeWGS84BoundingBox: {writable:true,value:function(task,xmlBuilder) {
-      var uri = task.uris.URI_OWS2;
-      if (task.isCsw2) uri = task.uris.URI_OWS;
-      xmlBuilder.writeStartElement(uri,"WGS84BoundingBox");
-      xmlBuilder.writeElement(uri,"LowerCorner",this.xmin+" "+this.ymin);
-      xmlBuilder.writeElement(uri,"UpperCorner",this.xmax+" "+this.ymax);
-      xmlBuilder.writeEndElement();
     }}
 
   });
