@@ -173,8 +173,6 @@
       var opensearchDscUrl = task.baseUrl+"/opensearch/description";
       cswUrl = this.makeCapabilitiesHref(task,cswUrl);
       opensearchDscUrl = this.makeCapabilitiesHref(task,opensearchDscUrl);
-      var capabilitiesFile = task.config.cswCapabilitiesFile;
-      if (this.isCsw2) capabilitiesFile = task.config.csw2CapabilitiesFile;
 
       var mime = null;
       var hasTextXml = false;
@@ -215,16 +213,24 @@
           acceptVersions = acceptVersions[0].split(",");
         }
         if (acceptVersions !== null && acceptVersions.length > 0) {
-          var has30 = acceptVersions.some(function(s){
-            return (s === "3.0.0");
+          var has30or202 = acceptVersions.some(function(s){
+            return (s === "3.0.0" || s === "2.0.2");
           });
-          if (!has30) {
-            msg = "CSW: The acceptVersions parameter is invalid, 3.0.0 is required";
+          if (!has30or202) {
+            msg = "CSW: The acceptVersions parameter is invalid, 2.0.2 or 3.0.0 is required";
             ows = gs.Object.create(gs.provider.csw.OwsException);
             ows.put(task,ows.OWSCODE_VersionNegotiationFailed,"acceptVersions",msg);
+          } else {
+            if (acceptVersions[0] === "2.0.2") {
+              this.isCsw2 = true;
+              task.isCsw2 = true;
+            }
           }
         }
       }
+
+      var capabilitiesFile = task.config.cswCapabilitiesFile;
+      if (this.isCsw2) capabilitiesFile = task.config.csw2CapabilitiesFile;
 
       if (!task.hasError) {
         xml = task.context.readResourceFile(capabilitiesFile,"UTF-8");
