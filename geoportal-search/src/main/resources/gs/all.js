@@ -54,6 +54,7 @@
       "provider/Provider",
       "provider/csw/CswProvider",
       "provider/csw/GetRecordsParser",
+      "provider/csw/DescribeRecordParser",
       "provider/csw/OwsException",
       "provider/opensearch/OpensearchProvider",
       "target/Target",

@@ -137,6 +137,17 @@
         var lcRequest = request.toLowerCase();
         if (lcRequest === "getcapabilities") {
           return this.getCapabilities(task);
+        } else if (lcRequest === "describerecord") {
+          if (this.isCsw2) {
+            return this.describeRecord(task);
+          } else {
+            msg = "CSW: The request parameter is invalid.";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_InvalidParameterValue,"version",msg);
+            promise = task.context.newPromise();
+            promise.reject();
+            return promise;
+          }
         } else if (lcRequest === "getrecordbyid") {
           return this.getRecordById(task);
         } else if (lcRequest === "getrecords") {
@@ -162,8 +173,6 @@
       var opensearchDscUrl = task.baseUrl+"/opensearch/description";
       cswUrl = this.makeCapabilitiesHref(task,cswUrl);
       opensearchDscUrl = this.makeCapabilitiesHref(task,opensearchDscUrl);
-      var capabilitiesFile = task.config.cswCapabilitiesFile;
-      if (this.isCsw2) capabilitiesFile = task.config.csw2CapabilitiesFile;
 
       var mime = null;
       var hasTextXml = false;
@@ -205,15 +214,23 @@
         }
         if (acceptVersions !== null && acceptVersions.length > 0) {
           var has30or202 = acceptVersions.some(function(s){
-            return (s === "2.0.2" || s === "3.0.0");
+            return (s === "3.0.0" || s === "2.0.2");
           });
           if (!has30or202) {
             msg = "CSW: The acceptVersions parameter is invalid, 2.0.2 or 3.0.0 is required";
             ows = gs.Object.create(gs.provider.csw.OwsException);
             ows.put(task,ows.OWSCODE_VersionNegotiationFailed,"acceptVersions",msg);
+          } else {
+            if (acceptVersions[0] === "2.0.2") {
+              this.isCsw2 = true;
+              task.isCsw2 = true;
+            }
           }
         }
       }
+
+      var capabilitiesFile = task.config.cswCapabilitiesFile;
+      if (this.isCsw2) capabilitiesFile = task.config.csw2CapabilitiesFile;
 
       if (!task.hasError) {
         xml = task.context.readResourceFile(capabilitiesFile,"UTF-8");
@@ -234,6 +251,114 @@
             ows.put(task,ows.OWSCODE_InvalidParameterValue,"sections",msg);
           }
         }
+      }
+
+      if (!task.hasError) {
+        var response = task.response;
+        response.put(response.Status_OK,response.MediaType_APPLICATION_XML,xml);
+        if (mime === "text/xml") {
+          response.mediaType = response.MediaType_TEXT_XML;
+        }
+        promise.resolve();
+      } else {
+        promise.reject();
+      }
+      return promise;
+    }},
+  
+    describeRecord: {writable:true,value:function(task) {
+      var xml, promise = task.context.newPromise();
+      var describeRecordFile = task.config.csw2DescribeRecordFile;
+      var parser = gs.Object.create(gs.provider.csw.DescribeRecordParser);
+      parser.parseBody(this,task);
+      
+      var mime = null;
+      var hasTextXml = false;
+      var hasAppXml = false;
+      var hasOther = false;
+      var acceptFormats = task.request.getParameterValues("acceptFormats");
+      if (acceptFormats !== null && acceptFormats.length === 1) {
+        acceptFormats = acceptFormats[0].split(",");
+      }
+      if (acceptFormats != null) {
+        acceptFormats.some(function(s){
+          s = s.toLowerCase();
+          if (s === "application/xml") {
+            hasAppXml = true;
+          } else if (s === "text/xml") {
+            hasTextXml = true;
+          } else if (s.length > 0) {
+            hasOther = true;
+          }
+        });
+      }
+
+      var accept = task.request.getHeader("accept");
+      if (accept === "text/xml") {
+        hasTextXml = true;
+      }
+      if (!hasAppXml && hasTextXml) {
+        mime = "text/xml";
+      } else if (!hasAppXml && !hasTextXml && hasOther) {
+        msg = "CSW: The acceptFormats parameter is invalid.";
+        ows = gs.Object.create(gs.provider.csw.OwsException);
+        ows.put(task,ows.OWSCODE_InvalidParameterValue,"acceptFormats",msg);
+      }
+      
+      if (!task.hasError) {
+        var outputFormat = task.request.getParameterValues("outputFormat");
+        if (outputFormat !== null && outputFormat.length === 1) {
+          outputFormat = outputFormat[0].split(",");
+        }
+        if (outputFormat !== null && outputFormat.length > 0) {
+          var hasOutputFormat = outputFormat.some(function(s){
+            return (s === "text/xml" || s === "application/xml");
+          });
+          if (!hasOutputFormat) {
+            msg = "CSW: The outputFormat parameter is invalid, Only text/xml or application/xml allowed.";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_InvalidParameterValue,"outputFormat",msg);
+          }
+        }
+      }
+      
+      if (!task.hasError) {
+        var schemaLanguage = task.request.getParameterValues("schemaLanguage");
+        if (schemaLanguage !== null && schemaLanguage.length === 1) {
+          schemaLanguage = schemaLanguage[0].split(",");
+        }
+        if (schemaLanguage !== null && schemaLanguage.length > 0) {
+          var hasSchemaLanguage = schemaLanguage.some(function(s){
+            return (s === "http://www.w3.org/XML/Schema");
+          });
+          if (!hasSchemaLanguage) {
+            msg = "CSW: The schemaLanguage parameter is invalid. Only http://www.w3.org/XML/Schema allowed.";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_InvalidParameterValue,"schemaLanguage",msg);
+          }
+        }
+      }
+      
+      if (!task.hasError) {
+        var typeName = task.request.getParameterValues("TypeName");
+        if (typeName !== null && typeName.length === 1) {
+          typeName = typeName[0].split(",");
+        }
+        if (typeName !== null && typeName.length > 0) {
+          var hasTypeName = typeName.some(function(s){
+            return (s === "csw:Record" || s === "csw:SummaryRecord" || s === "csw:BriefRecord");
+          });
+          if (!hasTypeName) {
+            msg = "CSW: The typeName parameter is invalid. Only csw:Record, csw:SummaryRecord, csw:BriefRecord allowed.";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_InvalidParameterValue,"typeName",msg);
+          }
+        }
+      }
+
+      if (!task.hasError) {
+        xml = task.context.readResourceFile(describeRecordFile,"UTF-8");
+        xml = xml.trim();
       }
 
       if (!task.hasError) {

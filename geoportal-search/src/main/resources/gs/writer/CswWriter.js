@@ -20,6 +20,8 @@
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
 
     uris: {writable: true, value: null},
+    
+    DCTYPE_FIELDS: {writable: true, value: ["type_s", "contentType_s", "apiso_ServiceType_s", "apiso_Type_s" ]},
 
     /* .......................................................................................... */
 
@@ -184,7 +186,25 @@
 
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);
-      //xmlBuilder.writeElement(task.uris.URI_DC,"type",itemType);   // TODO
+      
+      var source = item._source;
+      if (source) {
+        var dctype;
+        
+        this.DCTYPE_FIELDS.forEach(function(tf) {
+          var type = source[tf];
+          if (type) {
+            (Array.isArray(type)? type: typeof type === "string"? [type]: []).forEach(function(tp) {
+              if (tp) {
+                dctype = tp;
+              }
+            });
+        }});
+      
+        if (dctype) {
+          xmlBuilder.writeElement(task.uris.URI_DC,"type",dctype);
+        }
+      }
 
       if (recordTypeName !== "BriefRecord") {
         this.addAtomCategory(task,xmlBuilder,task.uris.URI_DC,"subject",entry.category);
@@ -194,15 +214,14 @@
         this.addAtomText(task,xmlBuilder,task.uris.URI_DCT,"abstract",entry.summary);
         // dct:spatial (summary)
         // csw:TemporalExtent (summary)?
-        if (recordTypeName === "SummaryRecord") {
-          this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
-        } else {
+        if (recordTypeName !== "SummaryRecord") {
           this.addAtomText(task,xmlBuilder,task.uris.URI_DCT,"created",entry.published);
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"creator",entry.author);
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"contributor",entry.contributor);
           this.addAtomText(task,xmlBuilder,task.uris.URI_DC,"rights",entry.rights);
-          this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
         }
+        
+        this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
       }
 
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
@@ -237,7 +256,7 @@
       xmlBuilder.writeAttribute("nextRecord",""+searchResult.calcNextRecord(task));
       xmlBuilder.writeAttribute("recordSchema",uris.csw);
       if (options.elementSetName != null && options.elementSetName.length > 0) {
-        xmlBuilder.writeAttribute("elementSetName",options.elementSetName);
+        xmlBuilder.writeAttribute("elementSet",options.elementSetName);
       }
       if (searchResult.itemsPerPage > 0) {
         for (var i=0;i<items.length;i++) {
