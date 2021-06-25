@@ -40,7 +40,8 @@
     <ows:Operation name="GetCapabilities">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Get xlink:href="{csw.url}" />
+          <ows:Get xlink:href="{csw.url}?request=GetCapabilities&amp;service=CSW&amp;version=3.0.0" />
+          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="AcceptVersions">
@@ -65,7 +66,8 @@
     <ows:Operation name="GetRecords">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Get xlink:href="{csw.url}" />
+          <ows:Get xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=3.0.0" />
+          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
@@ -108,7 +110,8 @@
     <ows:Operation name="GetRecordById">
       <ows:DCP>
         <ows:HTTP>
-          <ows:Get xlink:href="{csw.url}" />
+          <ows:Get xlink:href="{csw.url}?request=GetRecordById&amp;service=CSW&amp;version=3.0.0&amp;id=" />
+          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="outputFormat">
