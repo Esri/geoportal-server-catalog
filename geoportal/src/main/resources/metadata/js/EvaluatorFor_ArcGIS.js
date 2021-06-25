@@ -33,6 +33,7 @@ G.evaluators.arcgis = {
     G.evalProps(task,item,root,"keywords_s","//TopicCatCd/@value | //keyword");
     G.evalProps(task,item,root,"links_s","//linkage");
     G.evalProp(task,item,root,"thumbnail_s","dataIdInfo/graphOver/bgFileName");
+    G.evalProps(task,item,root,"contentType_s","/metadata/distInfo/distributor/distorTran/onLineSrc/orDesc");
   },
 
   evalService: function(task) {
