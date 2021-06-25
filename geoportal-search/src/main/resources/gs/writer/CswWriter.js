@@ -205,7 +205,6 @@
       }
 
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
-        entry.bbox.writeWGS84BoundingBox(task,xmlBuilder);
         entry.bbox.writeOwsBoundingBox(task,xmlBuilder);
       }
 
