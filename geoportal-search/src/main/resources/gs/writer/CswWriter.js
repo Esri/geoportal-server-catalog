@@ -200,14 +200,13 @@
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"contributor",entry.contributor);
           this.addAtomText(task,xmlBuilder,task.uris.URI_DC,"rights",entry.rights);
         }
+        
+        this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
       }
 
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
+        entry.bbox.writeWGS84BoundingBox(task,xmlBuilder);
         entry.bbox.writeOwsBoundingBox(task,xmlBuilder);
-      }
-      
-      if (recordTypeName !== "BriefRecord") {
-        this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
       }
 
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
