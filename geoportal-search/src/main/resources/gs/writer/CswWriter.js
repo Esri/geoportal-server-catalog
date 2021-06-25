@@ -20,6 +20,8 @@
     mediaType: {writable: true, value: gs.base.Response.MediaType_APPLICATION_XML},
 
     uris: {writable: true, value: null},
+    
+    DCTYPE_FIELDS: {writable: true, value: ["type_s", "contentType_s", "apiso_ServiceType_s", "apiso_Type_s" ]},
 
     /* .......................................................................................... */
 
@@ -184,7 +186,25 @@
 
       xmlBuilder.writeElement(task.uris.URI_DC,"identifier",id);
       xmlBuilder.writeElement(task.uris.URI_DC,"title",title);
-      //xmlBuilder.writeElement(task.uris.URI_DC,"type",itemType);   // TODO
+      
+      var source = item._source;
+      if (source) {
+        var dctype;
+        
+        this.DCTYPE_FIELDS.forEach(function(tf) {
+          var type = source[tf];
+          if (type) {
+            (Array.isArray(type)? type: typeof type === "string"? [type]: []).forEach(function(tp) {
+              if (tp) {
+                dctype = tp;
+              }
+            });
+        }});
+      
+        if (dctype) {
+          xmlBuilder.writeElement(task.uris.URI_DC,"type",dctype);
+        }
+      }
 
       if (recordTypeName !== "BriefRecord") {
         this.addAtomCategory(task,xmlBuilder,task.uris.URI_DC,"subject",entry.category);
