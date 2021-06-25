@@ -59,6 +59,7 @@
               <xsd:element ref="dct:modified" minOccurs="0" maxOccurs="unbounded"/>
               <xsd:element ref="dct:abstract" minOccurs="0" maxOccurs="unbounded"/>
               <xsd:element ref="dct:spatial" minOccurs="0" maxOccurs="unbounded"/>
+              <xsd:element ref="dct:references" minOccurs="0" maxOccurs="unbounded"/>
               <xsd:element ref="ows:BoundingBox" minOccurs="0" maxOccurs="unbounded"/>
             </xsd:sequence>
           </xsd:extension>
