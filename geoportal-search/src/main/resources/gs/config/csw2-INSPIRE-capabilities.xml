@@ -48,6 +48,7 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
+          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="AcceptVersions">
@@ -63,11 +64,41 @@
       </ows:Parameter>
     </ows:Operation>
 
+    <ows:Operation name="DescribeRecord">
+      <ows:DCP>
+        <ows:HTTP>
+          <ows:Get xlink:href="{csw.url}"/>
+          <ows:Post xlink:href="{csw.url}" >
+            <ows:Constraint name="PostEncoding">
+              <ows:Value>XML</ows:Value> 
+            </ows:Constraint>
+          </ows:Post>
+        </ows:HTTP>
+      </ows:DCP>
+      <ows:Parameter name="typeName">
+        <ows:Value>csw:Record</ows:Value>
+        <ows:Value>csw:SummaryRecord</ows:Value>
+        <ows:Value>csw:BriefRecord</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="outputFormat">
+        <ows:Value>text/xml</ows:Value>
+        <ows:Value>application/xml</ows:Value>
+      </ows:Parameter>
+      <ows:Parameter name="schemaLanguage">
+        <ows:Value>XMLSCHEMA</ows:Value>
+        <ows:Value>http://www.w3.org/XML/Schema</ows:Value>
+      </ows:Parameter>
+    </ows:Operation>
+
     <ows:Operation name="GetRecords">
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
-          <ows:Post xlink:href="{csw.url}?request=GetRecords&amp;service=CSW&amp;version=2.0.2" />
+          <ows:Post xlink:href="{csw.url}" >
+            <ows:Constraint name="PostEncoding">
+              <ows:Value>XML</ows:Value> 
+            </ows:Constraint>
+          </ows:Post>
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="typeName">
@@ -124,6 +155,7 @@
       <ows:DCP>
         <ows:HTTP>
           <ows:Get xlink:href="{csw.url}" />
+          <ows:Post xlink:href="{csw.url}" />
         </ows:HTTP>
       </ows:DCP>
       <ows:Parameter name="outputFormat">

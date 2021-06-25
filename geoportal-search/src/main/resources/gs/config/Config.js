@@ -28,6 +28,8 @@
 
     csw2CapabilitiesFile: {writable: true, value: "gs/config/csw2-capabilities.xml"},
 
+    csw2DescribeRecordFile: {writable: true, value: "gs/config/csw2-describerecord.xml"},
+
     opensearchDescriptionFile: {writable: true, value: "gs/config/opensearch-description.xml"},
 
     proxyUrl: {writable: true, value: null},
