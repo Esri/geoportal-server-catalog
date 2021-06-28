@@ -206,6 +206,7 @@
         }
       }
 
+      // brief, summary, full
       if (recordTypeName !== "BriefRecord") {
         this.addAtomCategory(task,xmlBuilder,task.uris.URI_DC,"subject",entry.category);
         // dc:format (summary) TODO
@@ -219,9 +220,9 @@
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"creator",entry.author);
           this.addAtomPerson(task,xmlBuilder,task.uris.URI_DC,"contributor",entry.contributor);
           this.addAtomText(task,xmlBuilder,task.uris.URI_DC,"rights",entry.rights);
+          this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
         }
         
-        this.addAtomLink(task,xmlBuilder,task.uris.URI_DCT,"references",entry.link);
       }
 
       if (gs.atom.BBox.isPrototypeOf(entry.bbox)) {
