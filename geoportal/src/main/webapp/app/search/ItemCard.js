@@ -288,7 +288,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
 //          "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
 //          innerHTML: i18n.item.actions.json
 //        },actionsNode);
-        if (v === "json") {
+        if (typeof v === "string" && v === "json") {
           var dataNode = domConstruct.create("a",{
             href: "#",
             innerHTML: i18n.item.actions.data
@@ -296,7 +296,22 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           this.own(on(dataNode, "click", lang.hitch({self: this, item: item}, function(evt){
             this.self._renderDataPopup(item);
           })));
+        } else {
+          var htmlNode = domConstruct.create("a",{
+            href: "#",
+            innerHTML: i18n.item.actions.data
+          },actionsNode);
+          this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
+            var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
+            if (AppContext.geoportal.supportsApprovalStatus || 
+                AppContext.geoportal.supportsGroupBasedAccess) {
+              var client = new AppClient();
+              uri = client.appendAccessToken(uri);
+            }
+            this.self._renderDataHtml(item, uri);
+          })));
         }
+        
         if (AppContext.geoportal.supportsApprovalStatus || 
             AppContext.geoportal.supportsGroupBasedAccess) {
           var client = new AppClient();
@@ -772,27 +787,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     },
 
     _renderTitleLink: function(itemId,item) {
-      var v = item.sys_metadatatype_s;
-      if (typeof v === "string" && v === "json") {
-        util.setNodeText(this.titleNode,item.title);
-      } else {
-        var titleNode = this.titleNode;
-        var htmlNode = domConstruct.create("a",{
-          href: "#",
-          title: item.title,
-          "aria-label": item.title,
-          innerHTML: item.title
-        },titleNode);
-        this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
-          var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
-          if (AppContext.geoportal.supportsApprovalStatus || 
-              AppContext.geoportal.supportsGroupBasedAccess) {
-            var client = new AppClient();
-            uri = client.appendAccessToken(uri);
-          }
-          this.self._renderDataHtml(item, uri);
-        })));
-      }
+      util.setNodeText(this.titleNode,item.title);
     }
   });
 
