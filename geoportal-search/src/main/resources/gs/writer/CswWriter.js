@@ -170,7 +170,12 @@
       if (options.entryOnly) {
         this.marshallOptions(task,options);
         recordTypeName = options.recordTypeName;
-        xmlBuilder.writeStartElementPfx("csw",uris.csw,recordTypeName);
+        if (task.isCsw2) {
+          xmlBuilder.writeStartElementPfx("csw",uris.csw,"GetRecordByIdResponse");
+          xmlBuilder.writeStartElementPfx("csw",uris.csw,recordTypeName);
+        } else {
+          xmlBuilder.writeStartElementPfx("csw",uris.csw,recordTypeName);
+        }
         this.addNamespaces(task,xmlBuilder);
       } else {
         xmlBuilder.writeStartElement(uris.csw,recordTypeName);
@@ -230,6 +235,9 @@
       }
 
       this.beforeEndEntry(task,xmlBuilder,item,options,entry);
+      if (options.entryOnly && task.isCsw2) {
+        xmlBuilder.writeEndElement();
+      }
       xmlBuilder.writeEndElement();
     }},
 
