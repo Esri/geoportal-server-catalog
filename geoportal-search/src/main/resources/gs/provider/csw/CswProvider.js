@@ -183,7 +183,7 @@
         acceptFormats = acceptFormats[0].split(",");
       }
       if (acceptFormats != null) {
-        acceptFormats.some(function(s){
+        acceptFormats.forEach(function(s){
           s = s.toLowerCase();
           if (s === "application/xml") {
             hasAppXml = true;
@@ -202,9 +202,13 @@
       if (!hasAppXml && hasTextXml) {
         mime = "text/xml";
       } else if (!hasAppXml && !hasTextXml && hasOther) {
+        hasTextXml = true;
+        mime = "text/xml";
+        /*
         msg = "CSW: The acceptFormats parameter is invalid.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_InvalidParameterValue,"acceptFormats",msg);
+        */
       }
 
       if (!task.hasError) {
