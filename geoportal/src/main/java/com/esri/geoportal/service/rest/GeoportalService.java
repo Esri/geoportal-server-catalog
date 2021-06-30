@@ -71,6 +71,7 @@ public class GeoportalService {
       jso.add("metadataIndexName",gc.getElasticContext().getItemIndexName());
       jso.add("supportsApprovalStatus",gc.getSupportsApprovalStatus());
       jso.add("supportsGroupBasedAccess",gc.getSupportsGroupBasedAccess());
+      jso.add("supportsCollections",gc.getSupportsCollections());
       
       if (user != null && user.getUsername() != null) {
         JsonObjectBuilder jsoUser = Json.createObjectBuilder()

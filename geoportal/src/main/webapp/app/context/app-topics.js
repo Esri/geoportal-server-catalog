@@ -31,6 +31,9 @@ define([],function(){var obj={
   /* params - {searchPane:obj} */
   RefreshSearchResultPage: "app/RefreshSearchResultPage",
   
+  /* params - {collection:string} */
+  CollectionChanged: "app/CollectionChanged",
+  
   /* params - {geoportalUser:obj} */
   SignedIn: "app/SignedIn",
   

@@ -83,7 +83,8 @@ define({
         dataType: "Data Type",
         mediaType: "Media Type",
         site: "Site",
-        category: "Item Category"
+        category: "Item Category",
+        collections: "Collections"
       },
       componentSettings: {
         componentLabel: "Label",
@@ -346,6 +347,10 @@ define({
         incomplete: "Incomplete",
         posted: "Posted",
         draft: "Draft"
+      },
+      setCollections: {
+        caption: "Set Collections",
+        collections: "Collections"
       },
       setField: {
         caption: "Set Field",
