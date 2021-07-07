@@ -1,0 +1,80 @@
+<div>
+
+    <div class="g-drop-pane" data-dojo-type="app/search/DropPane"
+         data-dojo-attach-point="dropPaneMap"
+         data-dojo-props="title:'${label}',open:true">
+        <div data-dojo-attach-point="searchWidgetNode"></div>
+        <div class="g-spatial-filter-map" data-dojo-attach-point="mapNode">
+            <div class="g-spatial-filter-d3-tooltip" data-dojo-attach-point="tooltipNode"></div>
+            <div data-dojo-attach-point="relationsNode"></div>
+        </div>
+
+        <div class="input-group-btn">
+
+            <button class="btn btn-success btn-sm" type="button"
+                    data-dojo-attach-point="searchButtonMap"
+                    data-dojo-attach-event="onClick: searchMap"
+                    title="${i18n.search.spatialFilter.searchMapLabel}">
+                <span class="esri-icon-search"></span>
+                ${i18n.search.spatialFilter.searchMapLabel}
+            </button>
+        </div>
+
+    <div class="g-drop-pane" data-dojo-type="app/search/DropPane"
+         data-dojo-attach-point="dropPaneBbox"
+         data-dojo-props="title:'${labelbbox}',open:${open}">
+
+
+
+        <table class="g-spatial-filter-bbox ">
+            <tbody>
+            <tr class="g-filter-bbox-input">
+                <td></td>
+                <td><input type="text" class="g-spatial-filter-n"
+                           placeholder="${i18n.search.spatialFilter.north}..."
+                           data-dojo-attach-point="bboxN"
+                           data-dojo-attach-event="onBlur: updateBBox"/>
+                </td>
+                <td></td>
+            </tr>
+            <tr class="g-filter-bbox-input">
+                <td style="column-span: all"><input type="text" class="g-spatial-filter-w"
+                                                    placeholder="${i18n.search.spatialFilter.west}..."
+                                                    data-dojo-attach-point="bboxW"
+                                                    data-dojo-attach-event="onBlur: updateBBox"
+                />
+                </td>
+                <td></td>
+                <td><input type="text" class="g-spatial-filter-e"
+                           placeholder="${i18n.search.spatialFilter.east}..."
+                           data-dojo-attach-point="bboxE"
+                           data-dojo-attach-event="onBlur: updateBBox"/>
+                </td>
+            </tr>
+            <tr class="g-filter-bbox-input">
+                <td></td>
+                <td style="column-span: all"><input type="text" class="g-spatial-filter-s"
+                                                    placeholder="${i18n.search.spatialFilter.south}..."
+                                                    data-dojo-attach-point="bboxS"
+                                                    data-dojo-attach-event="onBlur: updateBBox"/>
+                </td>
+                <td></td>
+            </tr>
+            </tbody>
+        </table>
+
+        <div class="input-group-btn">
+
+            <button class="btn btn-success btn-sm" type="button"
+                    data-dojo-attach-point="searchButtonBbox"
+                    data-dojo-attach-event="onClick: searchBbox"
+                    title="${i18n.search.spatialFilter.searchBboxLabel}">
+                <span class="esri-icon-search"></span>
+                ${i18n.search.spatialFilter.searchBboxLabel}
+            </button>
+        </div>
+    </div>
+
+</div>
+</div>
+
