@@ -29,7 +29,7 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 
 ## Requirements
 
-* Elasticsearch 6.0 or higher
+* Elasticsearch 7.0 or higher
 * Tomcat 9.x
 
 ## Installation
