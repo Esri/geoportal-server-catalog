@@ -93,7 +93,9 @@ namespace com.esri.gpt.csw
                 request.Method = "GET";                             
             }
             else{
-                request.ContentType = "text/xml; charset=UTF-8"; 
+                if(!method.Equals("GET")){
+                  request.ContentType = "text/xml; charset=UTF-8"; 
+                }
                 request.Method = method;
             }
 
