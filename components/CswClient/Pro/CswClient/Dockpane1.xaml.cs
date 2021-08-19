@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Resources;
 using System.Windows;
@@ -266,7 +266,7 @@ namespace GeoportalSearch
         {
 
           List<CswRecord> listItems = new List<CswRecord>();
-          for (int i = 0; i < alRecords.Count - 1; i++)
+          for (int i = 0; i < alRecords.Count; i++)
           {
             listItems.Add((CswRecord)alRecords[i]);
           }
