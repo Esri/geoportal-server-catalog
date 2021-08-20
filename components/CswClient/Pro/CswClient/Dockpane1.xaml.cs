@@ -638,7 +638,7 @@ namespace GeoportalSearch
     /// <returns>view extent as an envelope object</returns>
     private com.esri.gpt.csw.Envelope CurrentMapViewExtent()
     {
-      com.esri.gpt.csw.Envelope envCurrentViewExent = null;
+      com.esri.gpt.csw.Envelope envCurrentViewExent = new com.esri.gpt.csw.Envelope();
       ArcGIS.Core.Geometry.Envelope extent = null;
 
       if(MapView.Active != null)
