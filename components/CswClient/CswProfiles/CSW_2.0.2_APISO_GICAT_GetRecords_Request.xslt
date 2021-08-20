@@ -176,7 +176,7 @@
 		<xsl:variable name="remaining" select="substring-after($newlist, ' ')" />
 		<xsl:if test="not(contains($first,'from:') or contains($first,'to:'))">
 		  <xsl:value-of select="$first" />
-		  <xsl:text>+</xsl:text>
+		  <xsl:text>*</xsl:text>
 		</xsl:if>
 		<xsl:if test="$remaining">
 			<xsl:call-template name="output-keywords">
