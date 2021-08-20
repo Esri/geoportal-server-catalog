@@ -1004,8 +1004,8 @@ namespace GeoportalSearch
         {
           graphicsLayer = LayerFactory.Instance.CreateLayer<ArcGIS.Desktop.Mapping.GraphicsLayer>(gl_param, map);
         }
-        MapPoint lowerLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Minx, record.BoundingBox.Miny);
-        MapPoint upperRightLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy);
+        MapPoint lowerLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Minx, record.BoundingBox.Miny, SpatialReferences.WGS84);
+        MapPoint upperRightLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy, SpatialReferences.WGS84);
 
         Polygon polygon = PolygonBuilder.CreatePolygon(EnvelopeBuilder.CreateEnvelope(lowerLeft, upperRightLeft));
         CIMSymbol polygonSymbol = SymbolFactory.Instance.ConstructPolygonSymbol(CIMColor.CreateRGBColor(255, 255, 0, 0.1));
