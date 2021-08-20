@@ -1394,7 +1394,7 @@ namespace GeoportalSearch
       }
     }
 
-    private void displayFootprinttoolStripButton_Click(object sender, RoutedEventArgs e)
+    private void zoomtoFootprintToolStripButton_Click(object sender, RoutedEventArgs e)
     {
       try
       {
@@ -1437,7 +1437,7 @@ namespace GeoportalSearch
       }
     }
 
-    private void zoomtoFootprintToolStripButton_Click(object sender, RoutedEventArgs e)
+    private void displayFootprinttoolStripButton_Click(object sender, RoutedEventArgs e)
     {
       try
       {
