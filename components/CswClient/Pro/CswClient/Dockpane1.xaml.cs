@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections;
 using System.Resources;
 using System.Windows;
@@ -238,8 +238,8 @@ namespace GeoportalSearch
         searchCriteria.LiveDataAndMapOnly = ((bool)liveDataAndMapsOnlyCheckBox.IsChecked);
         if ((bool)useCurrentExtentCheckBox.IsChecked)
         {
-          try { 
-            searchCriteria.Envelope = CurrentMapViewExtent(); 
+          try {
+            searchCriteria.Envelope = CurrentMapViewExtent();
           }
           catch (Exception ex)
           {
@@ -630,7 +630,7 @@ namespace GeoportalSearch
     }
 
     /// <summary>
-    /// Get current view extent (in geographical coordinate system). 
+    /// Get current view extent (in geographical coordinate system).
     /// </summary>
     /// <remarks>
     /// If error occurred, exception would be thrown.
@@ -1014,7 +1014,7 @@ namespace GeoportalSearch
           Polygon = polygon, //MapPoint
           Symbol = new CIMSymbolReference() { Symbol = polygonSymbol }
         };
-        //Magic happens...Add all the features to the Graphics layer 
+        //Magic happens...Add all the features to the Graphics layer
         graphicsLayer.AddElement(metadataFootprint);
       });
     }
@@ -1126,7 +1126,7 @@ namespace GeoportalSearch
         frmViewMetadata.Show();
         frmViewMetadata.Activate();
 
-        // note: temp file will be deleted when metadata viwer closes. 
+        // note: temp file will be deleted when metadata viwer closes.
         //       see "RemoveTempFileAfterMetadataViewerClosed()"
       }
       catch (Exception ex)
@@ -1394,7 +1394,7 @@ namespace GeoportalSearch
       }
     }
 
-    private void displayFootprinttoolStripButton_Click(object sender, RoutedEventArgs e)
+    private void zoomtoFootprintToolStripButton_Click(object sender, RoutedEventArgs e)
     {
       try
       {
@@ -1404,27 +1404,30 @@ namespace GeoportalSearch
         MapView mapView = MapView.Active;
         Map map = MapView.Active.Map;
 
-        BoundingBox currentExtent = new BoundingBox();
-        currentExtent.Maxx = mapView.Extent.XMax;
-        currentExtent.Minx = mapView.Extent.XMin;
-        currentExtent.Maxy = mapView.Extent.YMax;
-        currentExtent.Miny = mapView.Extent.YMin;
-        BoundingBox newExtent = currentExtent;
+      QueuedTask.Run(() =>
+        {
+          BoundingBox currentExtent = new BoundingBox();
+          currentExtent.Maxx = mapView.Extent.XMax;
+          currentExtent.Minx = mapView.Extent.XMin;
+          currentExtent.Maxy = mapView.Extent.YMax;
+          currentExtent.Miny = mapView.Extent.YMin;
+          BoundingBox newExtent = currentExtent;
 
-        drawfootprint(record, false, false);
-        newExtent = updatedExtent(currentExtent, record.BoundingBox);
+          drawfootprint(record, false, false);
+          newExtent = updatedExtent(currentExtent, record.BoundingBox);
 
-        //zoom to extent of the footprint
-        List<MapPoint> points = new List<MapPoint>
-          {
-            MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Maxy),
-            MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Maxy),
-            MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Miny),
-            MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Miny)
-          };
-        Polygon polygon = PolygonBuilder.CreatePolygon(points, SpatialReferences.WGS84);
+          //zoom to extent of the footprint
+          List<MapPoint> points = new List<MapPoint>
+            {
+              MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Maxy),
+              MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Maxy),
+              MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Miny),
+              MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Miny)
+            };
+          Polygon polygon = PolygonBuilder.CreatePolygon(points, SpatialReferences.WGS84);
 
-        mapView.ZoomTo(polygon);
+          mapView.ZoomTo(polygon);
+        });
       }
       catch (Exception ex)
       {
@@ -1437,7 +1440,7 @@ namespace GeoportalSearch
       }
     }
 
-    private void zoomtoFootprintToolStripButton_Click(object sender, RoutedEventArgs e)
+    private void displayFootprinttoolStripButton_Click(object sender, RoutedEventArgs e)
     {
       try
       {
@@ -1503,7 +1506,7 @@ namespace GeoportalSearch
           QueuedTask.Run(() =>
           {
             graphicsLayer.ClearSelection();
-          });       
+          });
         }
         else
         {
