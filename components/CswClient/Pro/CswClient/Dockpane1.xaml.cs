@@ -141,7 +141,6 @@ namespace GeoportalSearch
           CswProfile profile = catalogProfileComboBox.SelectedItem as CswProfile;
           _cswManager.updateCatalog(catalog, catalogDisplayNameTextBox.Text, catalogUrlTextBox.Text, profile);
           catalog.resetConnection();
-          ClearData();
           AddData();
           catalogListBox.SelectedIndex = index;
           System.Windows.Forms.MessageBox.Show(StringResources.CatalogSavedSuccessfully, StringResources.Success, MessageBoxButtons.OK, MessageBoxIcon.None);
