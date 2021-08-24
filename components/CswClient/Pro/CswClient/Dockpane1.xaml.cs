@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections;
 using System.Resources;
 using System.Windows;
@@ -655,10 +655,15 @@ namespace GeoportalSearch
       }
       else
       {
-        envCurrentViewExent.MinX = extent.XMin;
-        envCurrentViewExent.MaxX = extent.XMax;
-        envCurrentViewExent.MinY = extent.YMin;
-        envCurrentViewExent.MaxY = extent.YMax;
+        MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(extent.XMin, extent.YMin,SpatialReferences.WebMercator);
+        MapPoint upperCorner = MapPointBuilder.CreateMapPoint(extent.XMax, extent.YMax, SpatialReferences.WebMercator);
+        // Convert to Lat/Long WGS84 used by CSW Filter using BBOX
+        MapPoint projectedLowerCorner = (MapPoint)GeometryEngine.Instance.Project(lowerCorner, SpatialReferences.WGS84);
+        MapPoint projectedUpperCorner = (MapPoint)GeometryEngine.Instance.Project(upperCorner, SpatialReferences.WGS84);
+        envCurrentViewExent.MinX = projectedLowerCorner.X;
+        envCurrentViewExent.MaxX = projectedUpperCorner.X;
+        envCurrentViewExent.MinY = projectedLowerCorner.Y;
+        envCurrentViewExent.MaxY = projectedUpperCorner.Y;
       }
 
       return envCurrentViewExent;
@@ -1004,8 +1009,8 @@ namespace GeoportalSearch
         {
           graphicsLayer = LayerFactory.Instance.CreateLayer<ArcGIS.Desktop.Mapping.GraphicsLayer>(gl_param, map);
         }
-        MapPoint lowerLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Minx, record.BoundingBox.Miny);
-        MapPoint upperRightLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy);
+        MapPoint lowerLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Minx, record.BoundingBox.Miny, SpatialReferences.WGS84);
+        MapPoint upperRightLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy, SpatialReferences.WGS84);
 
         Polygon polygon = PolygonBuilder.CreatePolygon(EnvelopeBuilder.CreateEnvelope(lowerLeft, upperRightLeft));
         CIMSymbol polygonSymbol = SymbolFactory.Instance.ConstructPolygonSymbol(CIMColor.CreateRGBColor(255, 255, 0, 0.1));
@@ -1407,10 +1412,16 @@ namespace GeoportalSearch
       QueuedTask.Run(() =>
         {
           BoundingBox currentExtent = new BoundingBox();
-          currentExtent.Maxx = mapView.Extent.XMax;
-          currentExtent.Minx = mapView.Extent.XMin;
-          currentExtent.Maxy = mapView.Extent.YMax;
-          currentExtent.Miny = mapView.Extent.YMin;
+          MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMin, mapView.Extent.YMin, SpatialReferences.WebMercator);
+          MapPoint upperCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMax, mapView.Extent.YMax, SpatialReferences.WebMercator);
+          // Convert to Lat/Long WGS84 used by CSW Filter using BBOX
+          MapPoint projectedLowerCorner = (MapPoint)GeometryEngine.Instance.Project(lowerCorner, SpatialReferences.WGS84);
+          MapPoint projectedUpperCorner = (MapPoint)GeometryEngine.Instance.Project(upperCorner, SpatialReferences.WGS84);
+
+          currentExtent.Maxx = projectedUpperCorner.X;
+          currentExtent.Minx = projectedLowerCorner.X;
+          currentExtent.Maxy = projectedUpperCorner.Y;
+          currentExtent.Miny = projectedLowerCorner.Y;
           BoundingBox newExtent = currentExtent;
 
           drawfootprint(record, false, false);
@@ -1467,11 +1478,18 @@ namespace GeoportalSearch
         MapView mapView = MapView.Active;
         Map map = MapView.Active.Map;
 
+        MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMin, mapView.Extent.YMin, SpatialReferences.WebMercator);
+        MapPoint upperCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMax, mapView.Extent.YMax, SpatialReferences.WebMercator);
+        // Convert to Lat/Long WGS84 used by CSW Filter using BBOX
+        MapPoint projectedLowerCorner = (MapPoint)GeometryEngine.Instance.Project(lowerCorner, SpatialReferences.WGS84);
+        MapPoint projectedUpperCorner = (MapPoint)GeometryEngine.Instance.Project(upperCorner, SpatialReferences.WGS84);
+
         BoundingBox currentExtent = new BoundingBox();
-        currentExtent.Maxx = mapView.Extent.XMax;
-        currentExtent.Minx = mapView.Extent.XMin;
-        currentExtent.Maxy = mapView.Extent.YMax;
-        currentExtent.Miny = mapView.Extent.YMin;
+        currentExtent.Maxx = projectedUpperCorner.X;
+        currentExtent.Minx = projectedLowerCorner.X;
+        currentExtent.Maxy = projectedUpperCorner.Y;
+        currentExtent.Miny = projectedLowerCorner.Y;
+
         BoundingBox newExtent = currentExtent;
         if (showAll)
         {
