@@ -664,8 +664,11 @@ namespace GeoportalSearch
         envCurrentViewExent.MaxX = projectedUpperCorner.X;
         envCurrentViewExent.MinY = projectedLowerCorner.Y;
         envCurrentViewExent.MaxY = projectedUpperCorner.Y;
+        if (Double.IsNaN(envCurrentViewExent.MinX)) { envCurrentViewExent.MinX = -180.0; };
+        if (Double.IsNaN(envCurrentViewExent.MaxX)) { envCurrentViewExent.MaxX = 180.0; };
+        if (Double.IsNaN(envCurrentViewExent.MinY)) { envCurrentViewExent.MinY = -90.0; };
+        if (Double.IsNaN(envCurrentViewExent.MaxY)) { envCurrentViewExent.MaxY = 90.0; };
       }
-
       return envCurrentViewExent;
     }
 
@@ -1422,6 +1425,11 @@ namespace GeoportalSearch
           currentExtent.Minx = projectedLowerCorner.X;
           currentExtent.Maxy = projectedUpperCorner.Y;
           currentExtent.Miny = projectedLowerCorner.Y;
+          if (Double.IsNaN(currentExtent.Minx)) { currentExtent.Minx = -180.0; };
+          if (Double.IsNaN(currentExtent.Maxx)) { currentExtent.Maxx = 180.0; };
+          if (Double.IsNaN(currentExtent.Miny)) { currentExtent.Miny = -90.0; };
+          if (Double.IsNaN(currentExtent.Maxy)) { currentExtent.Maxy = 90.0; };
+
           BoundingBox newExtent = currentExtent;
 
           drawfootprint(record, false, false);
@@ -1489,6 +1497,10 @@ namespace GeoportalSearch
         currentExtent.Minx = projectedLowerCorner.X;
         currentExtent.Maxy = projectedUpperCorner.Y;
         currentExtent.Miny = projectedLowerCorner.Y;
+        if (Double.IsNaN(currentExtent.Minx)) { currentExtent.Minx = -180.0; };
+        if (Double.IsNaN(currentExtent.Maxx)) { currentExtent.Maxx = 180.0; };
+        if (Double.IsNaN(currentExtent.Miny)) { currentExtent.Miny = -90.0; };
+        if (Double.IsNaN(currentExtent.Maxy)) { currentExtent.Maxy = 90.0; };
 
         BoundingBox newExtent = currentExtent;
         if (showAll)
