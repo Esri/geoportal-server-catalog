@@ -46,10 +46,10 @@
 		<xsl:text>&amp;max-results=</xsl:text>
 		<xsl:value-of select="/GetRecords/MaxRecords"/>
 		<xsl:if test="count(/GetRecords/Envelope)>0">
-			<xsl:variable name="minx" select="normalize-space(/GetRecords/Envelope/MinX)"/>
-			<xsl:variable name="miny" select="normalize-space(/GetRecords/Envelope/MinY)"/>
-			<xsl:variable name="maxx" select="normalize-space(/GetRecords/Envelope/MaxX)"/>
-			<xsl:variable name="maxy" select="normalize-space(/GetRecords/Envelope/MaxY)"/>
+			<xsl:variable name="minx" select="translate(normalize-space(/GetRecords/Envelope/MinX, ',', '.'))"/>
+			<xsl:variable name="miny" select="translate(normalize-space(/GetRecords/Envelope/MinY, ',', '.'))"/>
+			<xsl:variable name="maxx" select="translate(normalize-space(/GetRecords/Envelope/MaxX, ',', '.'))"/>
+			<xsl:variable name="maxy" select="translate(normalize-space(/GetRecords/Envelope/MaxY, ',', '.'))"/>
 			<xsl:variable name="diffX">
 				<xsl:call-template name="getDiff">
 					<xsl:with-param name="min" select="$minx"/>
