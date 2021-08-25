@@ -17,7 +17,7 @@
 <xsl:stylesheet version="1.0" xmlns:xsl="http://www.w3.org/1999/XSL/Transform">
     <xsl:output method="xml" indent="no" encoding="UTF-8" omit-xml-declaration="yes"/>
     <xsl:variable name="keyword" select="/GetRecords/KeyWord"/>
-    <xsl:variable name="minX" select="/GetRecords/Envelope/MinX"/>
+    <xsl:variable name="minX" select="translate(/GetRecords/Envelope/MinX, ',', '.')"/>
     <xsl:template match="/">
     
         <xsl:element name="csw:GetRecords" use-attribute-sets="GetRecordsAttributes" xmlns:csw="http://www.opengis.net/cat/csw/2.0.2" xmlns:ogc="http://www.opengis.net/ogc" xmlns:dc="http://www.purl.org/dc/elements/1.1/" xmlns:gml="http://www.opengis.net/gml">
@@ -72,7 +72,7 @@
                 <ogc:PropertyName>iso:BoundingBox</ogc:PropertyName>
                 <gml:Box>
                     <gml:coordinates>
-                        <xsl:value-of select="MinX"/>,<xsl:value-of select="MinY"/>,<xsl:value-of select="MaxX"/>,<xsl:value-of select="MaxY"/>
+                        <xsl:value-of select="translate(MinX, ',', '.')"/>,<xsl:value-of select="translate(MinY, ',', '.')"/>,<xsl:value-of select="translate(MaxX, ',', '.')"/>,<xsl:value-of select="translate(MaxY, ',', '.')"/>
                     </gml:coordinates>
                 </gml:Box>
             </ogc:BBOX>

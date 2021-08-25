@@ -80,8 +80,8 @@
             <ogc:Intersects>
               <ogc:PropertyName>ows:BoundingBox</ogc:PropertyName>
               <gml:Envelope>
-                <gml:lowerCorner><xsl:value-of select="MinX"/><xsl:text> </xsl:text><xsl:value-of select="MinY"/></gml:lowerCorner>
-                <gml:upperCorner><xsl:value-of select="MaxX"/><xsl:text> </xsl:text><xsl:value-of select="MaxY"/></gml:upperCorner>
+                <gml:lowerCorner><xsl:value-of select="translate(MinX, ',', '.')"/><xsl:text> </xsl:text><xsl:value-of select="translate(MinY, ',', '.')"/></gml:lowerCorner>
+                <gml:upperCorner><xsl:value-of select="translate(MaxX, ',', '.')"/><xsl:text> </xsl:text><xsl:value-of select="translate(MaxY, ',', '.')"/></gml:upperCorner>
               </gml:Envelope>
             </ogc:Intersects>
           </xsl:when>
