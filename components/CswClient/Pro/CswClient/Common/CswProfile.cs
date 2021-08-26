@@ -345,18 +345,26 @@ namespace com.esri.gpt.csw
                         record.BoundingBox.Minx = 500.00;
                         record.BoundingBox.Maxy = 500.00;
                     }
-                    XmlNode node = xmlnode.SelectSingleNode("Type");
-                    if (node != null)
-                    {
-                        record.IsLiveDataOrMap = node.InnerText.Equals("liveData", StringComparison.OrdinalIgnoreCase);
-                        if (!record.IsLiveDataOrMap)
-                        {
-                            record.IsLiveDataOrMap = node.InnerText.Equals("downloadableData", StringComparison.OrdinalIgnoreCase);
-                        }
+                    if (filter_livedatamap) { // I.e. the profile has XML attribute SupportContentTypeQuery == True
+                      XmlNode node = xmlnode.SelectSingleNode("Type");
+                      if (node != null)
+                      {
+                          record.IsLiveDataOrMap = node.InnerText.Equals("liveData", StringComparison.OrdinalIgnoreCase);
+                          if (!record.IsLiveDataOrMap)
+                          {
+                              record.IsLiveDataOrMap = node.InnerText.Equals("downloadableData", StringComparison.OrdinalIgnoreCase);
+                          }
+                      }
+                      else
+                      {
+                          // If content type queries are supported by profile but Type was not available, do not enable the Add to map button
+                          record.IsLiveDataOrMap = false;
+                      }
                     }
                     else
                     {
-                        record.IsLiveDataOrMap = false;
+                      // Default to allow Add to map when catalog does not support type queries
+                      record.IsLiveDataOrMap = true;
                     }
 
 
