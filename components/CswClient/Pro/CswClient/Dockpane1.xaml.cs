@@ -13,6 +13,7 @@ using System.Xml;
 using System.Xml.Xsl;
 using System.Xml.XPath;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Collections.Generic;
 using ArcGIS.Desktop.Mapping;
 using ArcGIS.Desktop.Framework;
@@ -234,7 +235,7 @@ namespace GeoportalSearch
         CswSearchCriteria searchCriteria = new CswSearchCriteria();
         searchCriteria.SearchText = searchPhraseTextBox.Text;
         searchCriteria.StartPosition = 1;
-        searchCriteria.MaxRecords = 10; // TO-DO (int)maxResultsNumericUpDown.Value;
+        searchCriteria.MaxRecords = Int32.Parse(maxResults.Text);
         searchCriteria.LiveDataAndMapOnly = ((bool)liveDataAndMapsOnlyCheckBox.IsChecked);
         if ((bool)useCurrentExtentCheckBox.IsChecked)
         {
@@ -1606,5 +1607,12 @@ namespace GeoportalSearch
         //this.gridControl.Width = this.gridControl.ActualWidth + delta;
       }
     }
+
+    private void NumberValidationTextBox(object sender, System.Windows.Input.TextCompositionEventArgs e)
+    {
+        Regex regex = new Regex("[^0-9]+");
+        e.Handled = regex.IsMatch(e.Text);
+    }
+
   }
 }

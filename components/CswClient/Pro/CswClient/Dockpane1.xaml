@@ -1,4 +1,4 @@
-﻿<UserControl x:Class="GeoportalSearch.Dockpane1View"
+<UserControl x:Class="GeoportalSearch.Dockpane1View"
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
@@ -34,6 +34,8 @@
                         <CheckBox x:Name="liveDataAndMapsOnlyCheckBox" Content="Live Data and Maps Only" Margin="10,125,0,412" ></CheckBox>
                         <CheckBox x:Name="useCurrentExtentCheckBox" Content="Use Current Extent" Margin="10,144,0,391" ></CheckBox>
 
+                        <Label x:Name="maxResultsLabel" Content="Max:" HorizontalAlignment="Left" Height="27" Margin="100,165,0,0" VerticalAlignment="Top"/>
+                        <TextBox  x:Name="maxResults" Height="23" Width="120" HorizontalAlignment="Right" Margin="0,168,0,0" VerticalAlignment="Top" Text="10" PreviewTextInput="NumberValidationTextBox" TextAlignment="Right"/>
                         <Label x:Name="resultsLabel" Content="Results:" HorizontalAlignment="Left" Height="27" Margin="10,165,0,0" VerticalAlignment="Top"/>
 
                         <Button x:Name="viewMetadataToolStripButton" VerticalAlignment="Top" HorizontalAlignment="Left" Margin="10,197,0,0" Width="32" Height="32" Background="White" Click="ViewMetadata_Clicked" ToolTip="View Metadata">
