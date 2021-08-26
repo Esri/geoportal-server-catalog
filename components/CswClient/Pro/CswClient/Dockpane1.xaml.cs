@@ -411,7 +411,7 @@ namespace GeoportalSearch
         // populate profiles
         ArrayList _profileList = CswObjectsToArrayList(_cswProfiles);
         List<CswProfile> listItems = new List<CswProfile>();
-        for (int i = 0; i < _profileList.Count - 1; i++)
+        for (int i = 0; i < _profileList.Count; i++)
         {
           listItems.Add((CswProfile)_profileList[i]);
         }
