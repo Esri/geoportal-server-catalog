@@ -529,6 +529,23 @@ namespace GeoportalSearch
       return urlString;
     }
 
+
+    /// <summary>
+    /// Remove trailing question mark or ampersand from a url string
+    /// </summary>
+    /// <param name="urlString">source URL string</param>
+    /// <returns>output URL string</returns>
+    private string RemoveQuestionOrAmpersandToUrlString(string urlString)
+    {
+        urlString = urlString.Trim();
+        string finalChar = urlString.Substring(urlString.Length - 1, 1);    // final char
+        if (finalChar.Equals("?") || finalChar.Equals("&"))
+        {
+           urlString = urlString.Remove(urlString.Length - 1, 1);
+        }
+        return urlString;
+    }
+
     private XmlDocument RetrieveSelectedMetadataFromCatalog(bool bApplyTransform)
     {
       try
@@ -838,13 +855,13 @@ namespace GeoportalSearch
 
       try
       {
-        string _mapServerUrl = AppendQuestionOrAmpersandToUrlString(msi.Server);
+        string _mapServerUrl = RemoveQuestionOrAmpersandToUrlString(msi.Server);
         // append serviceParam to server url
         // todo: does msi.ServiceParam have a leading "?" or "&"?
         if (msi.ServiceParam.Length > 0 && !fromServerUrl)
         {
-          _mapServerUrl = _mapServerUrl + msi.ServiceParam;
           _mapServerUrl = AppendQuestionOrAmpersandToUrlString(_mapServerUrl);
+            _mapServerUrl = _mapServerUrl + msi.ServiceParam;
         }
 
 
@@ -909,13 +926,13 @@ namespace GeoportalSearch
 
       try
       {
-        string url = AppendQuestionOrAmpersandToUrlString(msi.Server);
+        string url = RemoveQuestionOrAmpersandToUrlString(msi.Server);
         // append serviceParam to server url
         // todo: does msi.ServiceParam have a leading "?" or "&"?
         if (msi.ServiceParam.Length > 0 || !fromServerUrl)
         {
-          url = url + msi.ServiceParam;
           url = AppendQuestionOrAmpersandToUrlString(url);
+            url = url + msi.ServiceParam;
         }
 
         CIMStandardDataConnection cIMStandardDataConnection = new CIMStandardDataConnection()
@@ -944,13 +961,13 @@ namespace GeoportalSearch
 
       try
       {
-        string url = AppendQuestionOrAmpersandToUrlString(msi.Server);
+        string url = RemoveQuestionOrAmpersandToUrlString(msi.Server);
         // append serviceParam to server url
         // todo: does msi.ServiceParam have a leading "?" or "&"?
         if (msi.ServiceParam.Length > 0 || !fromServerUrl)
         {
-          url = url + msi.ServiceParam;
           url = AppendQuestionOrAmpersandToUrlString(url);
+            url = url + msi.ServiceParam;
         }
         // Create a connection to the WMS server
         var serverConnection = new CIMInternetServerConnection { URL = url };
