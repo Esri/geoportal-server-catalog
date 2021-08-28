@@ -142,7 +142,7 @@ Outputs the bounding box
           <xsl:attribute name="key">{geo:box}</xsl:attribute>
           <xsl:attribute name="value">
           <xsl:if test="string-length($gptSpatialValues/param[@name='minX']/@value) &gt; 0">
-            <xsl:value-of select="$gptSpatialValues/param[@name='minX']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='minY']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='maxX']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='maxY']/@value"/>
+            <xsl:value-of select="translate($gptSpatialValues/param[@name='minX']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='minY']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='maxX']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='maxY']/@value, ',', '.')"/>
           </xsl:if>
           </xsl:attribute>
         </parameter>
@@ -152,7 +152,7 @@ Outputs the bounding box
           <xsl:attribute name="key">{geo:box?}</xsl:attribute>
           <xsl:attribute name="value">          
           <xsl:if test="string-length($gptSpatialValues/param[@name='minX']/@value) &gt; 0">
-            <xsl:value-of select="$gptSpatialValues/param[@name='minX']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='minY']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='maxX']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='maxY']/@value"/>
+            <xsl:value-of select="translate($gptSpatialValues/param[@name='minX']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='minY']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='maxX']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='maxY']/@value, ',', '.')"/>
           </xsl:if>
           </xsl:attribute>
         </parameter>
@@ -162,52 +162,52 @@ Outputs the bounding box
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxWest}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxWest}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='minX']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='minX']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxWest?}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxWest?}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='minX']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='minX']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
     <!-- South -->
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxSouth}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxSouth}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='minY']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='minY']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxSouth?}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxSouth?}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='minY']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='minY']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
     <!-- East -->
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxEast}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxEast}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='maxX']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='maxX']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxEast?}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxEast?}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='maxX']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='maxX']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
     <!-- North -->
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxNorth}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxNorth}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='maxY']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='maxY']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
     <xsl:if test="contains($searchQueryUrlL, '{gpt:boxNorth?}' )">
       <parameter>
         <xsl:attribute name="key">{gpt:boxNorth?}</xsl:attribute>
-        <xsl:attribute name="value"><xsl:value-of select="$gptSpatialValues/param[@name='maxY']/@value"/></xsl:attribute>
+        <xsl:attribute name="value"><xsl:value-of select="translate($gptSpatialValues/param[@name='maxY']/@value, ',', '.')"/></xsl:attribute>
       </parameter>
     </xsl:if>
   </xsl:template>

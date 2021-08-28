@@ -43,7 +43,7 @@
 	  
       <xsl:if test="/GetRecords/RecordsFullyWithinEnvelope/text() = 'true' or /GetRecords/RecordsIntersectWithEnvelope/text() = 'true' ">
 	       <xsl:text>&amp;bbox=</xsl:text>
-	       <xsl:value-of select="/GetRecords/Envelope/MinX"/>,<xsl:value-of select="/GetRecords/Envelope/MinY"/>,<xsl:value-of select="/GetRecords/Envelope/MaxX"/>,<xsl:value-of select="/GetRecords/Envelope/MaxY"/>
+	       <xsl:value-of select="translate(/GetRecords/Envelope/MinX, ',', '.')"/>,<xsl:value-of select="translate(/GetRecords/Envelope/MinY, ',', '.')"/>,<xsl:value-of select="translate(/GetRecords/Envelope/MaxX, ',', '.')"/>,<xsl:value-of select="translate(/GetRecords/Envelope/MaxY, ',', '.')"/>
        </xsl:if>
 	  
 		<xsl:text>&amp;start=</xsl:text>
