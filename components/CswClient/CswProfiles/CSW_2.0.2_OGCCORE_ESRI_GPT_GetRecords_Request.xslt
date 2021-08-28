@@ -118,7 +118,7 @@ Template default
                 <ogc:PropertyName>Geometry</ogc:PropertyName>
                 <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">
                   <gml:coordinates>
-                    <xsl:value-of select="MinX"/>,<xsl:value-of select="MinY"/>,<xsl:value-of select="MaxX"/>,<xsl:value-of select="MaxY"/>
+                    <xsl:value-of select="translate(MinX, ',', '.')"/>,<xsl:value-of select="translate(MinY, ',', '.')"/>,<xsl:value-of select="translate(MaxX, ',', '.')"/>,<xsl:value-of select="translate(MaxY, ',', '.')"/>
                   </gml:coordinates>
                 </gml:Box>
              </ogc:Within>
@@ -129,7 +129,7 @@ Template default
 		        <ogc:PropertyName>Geometry</ogc:PropertyName>
 		        <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">
 		          <gml:coordinates>
-		            <xsl:value-of select="MinX"/>,<xsl:value-of select="MinY"/>,<xsl:value-of select="MaxX"/>,<xsl:value-of select="MaxY"/>
+		            <xsl:value-of select="translate(MinX, ',', '.')"/>,<xsl:value-of select="translate(MinY, ',', '.')"/>,<xsl:value-of select="translate(MaxX, ',', '.')"/>,<xsl:value-of select="translate(MaxY, ',', '.')"/>
 		          </gml:coordinates>
 		        </gml:Box>
 		     </ogc:BBOX>
@@ -362,7 +362,7 @@ Outputs the bounding box
       <!-- <gml:coordinates>-180,-90,-100,90</gml:coordinates> -->
       <!--  TODO Test &  get values from xpath -->
       <gml:coordinates>
-        <xsl:value-of select="$gptSpatialValues/param[@name='minX']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='minY']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='maxX']/@value"/>,<xsl:value-of select="$gptSpatialValues/param[@name='maxY']/@value"/>
+        <xsl:value-of select="translate($gptSpatialValues/param[@name='minX']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='minY']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='maxX']/@value, ',', '.')"/>,<xsl:value-of select="translate($gptSpatialValues/param[@name='maxY']/@value, ',', '.')"/>
       </gml:coordinates>
     </gml:Box>
   </xsl:template>

@@ -85,7 +85,7 @@
                 <ogc:PropertyName>Geometry</ogc:PropertyName>
                 <gml:Box srsName="http://www.opengis.net/gml/srs/epsg.xml#4326">
                     <gml:coordinates>
-                        <xsl:value-of select="MinX"/>,<xsl:value-of select="MinY"/>,<xsl:value-of select="MaxX"/>,<xsl:value-of select="MaxY"/>
+                        <xsl:value-of select="translate(MinX, ',', '.')"/>,<xsl:value-of select="translate(MinY, ',', '.')"/>,<xsl:value-of select="translate(MaxX, ',', '.')"/>,<xsl:value-of select="translate(MaxY, ',', '.')"/>
                     </gml:coordinates>
                 </gml:Box>
             </ogc:BBOX>

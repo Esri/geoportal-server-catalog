@@ -92,8 +92,8 @@
 			<ogc:BBOX xmlns:gml="http://www.opengis.net/gml">
 				<ogc:PropertyName>iso:BoundingBox</ogc:PropertyName>
 				<gml:Envelope>
-					<gml:lowerCorner><xsl:value-of select="MinX"/> <xsl:value-of select="MinY"/></gml:lowerCorner>
-					<gml:upperCorner><xsl:value-of select="MaxX"/> <xsl:value-of select="MaxY"/></gml:upperCorner>					
+					<gml:lowerCorner><xsl:value-of select="translate(MinX, ',', '.')"/> <xsl:value-of select="translate(MinY, ',', '.')"/></gml:lowerCorner>
+					<gml:upperCorner><xsl:value-of select="translate(MaxX, ',', '.')"/> <xsl:value-of select="translate(MaxY, ',', '.')"/></gml:upperCorner>					
 				</gml:Envelope>
 			</ogc:BBOX>
 		</xsl:if>
