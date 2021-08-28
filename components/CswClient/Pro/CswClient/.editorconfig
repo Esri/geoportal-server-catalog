@@ -9,3 +9,6 @@ dotnet_diagnostic.CS0162.severity = silent
 dotnet_diagnostic.CS1717.severity = silent
 dotnet_diagnostic.CS0649.severity = silent
 dotnet_diagnostic.CS0219.severity = silent
+end_of_line = lf
+indent_style = space
+indent_size = 2
