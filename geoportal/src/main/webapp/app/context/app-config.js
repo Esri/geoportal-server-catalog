@@ -30,7 +30,32 @@ define([],function(){var obj={
     autoResize: true, 
     wrapAround180: true,
     center: [-84.5, 34], 
-    zoom: 5
+    zoom: 5,
+
+    locatorParams: {  
+      sources: [
+        {
+          url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+          name: "World Locator",
+          singleLineFieldName: "SingleLine",
+          placeholder: "Search by Address",
+          countryCode: "US",
+          maxResults: 10,
+          searchInCurrentMapExtent: false,
+          type: "locator"
+        },
+        {
+          url: "https://geocode.arcgis.com/arcgis/rest/services/World/GeocodeServer",
+          name: "Regional Locator",
+          singleLineFieldName: "SingleLine",
+          placeholder: "Search by Address",
+          countryCode: "US",
+          maxResults: 10,
+          searchInCurrentMapExtent: true,
+          type: "locator"
+        }
+      ]
+    }
   },
   
   searchResults: {
