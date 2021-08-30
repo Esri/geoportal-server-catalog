@@ -21,7 +21,7 @@
 		<beans:property name="supportsGroupBasedAccess" value="false" />
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
 		<beans:property name="parseGml" value="false" />
-		<beans:property name="supportsCollections" value="false" />
+		<beans:property name="supportsCollections" value="true" />
 	</beans:bean>
 <!-- the tokens like ${es_cluster:elasticsearch} ${gpt_indexName:metadata}
 represent environment variables that can be used to pass values into a spring configuration context, aka these files

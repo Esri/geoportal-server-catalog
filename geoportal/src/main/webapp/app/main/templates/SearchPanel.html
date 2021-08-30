@@ -16,6 +16,7 @@
             field: 'envelope_geo',
             pointField: 'envelope_cen_pt',
             allowAggregation: true,
+            allowedCollections: ['', '*'],
             open: true,
             label:'${i18n.search.criteria.map}'">
         </div>
@@ -24,6 +25,7 @@
           data-dojo-props="
             conditionallyDisabled: !AppContext.geoportal.supportsCollections,
             field:'src_collections_s',
+            allowedCollections: ['', '*'],
             open:false,
             label:'${i18n.search.criteria.collections}'">
         </div>
@@ -34,6 +36,7 @@
             field:'src_publication_date_dt',
             toField:'src_publication_date_dt',
             interval:'year',
+            allowedCollections: ['', '*'],
             open:false,
             label:'${i18n.search.criteria.date}'">
         </div>
@@ -99,7 +102,10 @@
 
         <!-- e.g. field:'keywords_s',label:'Keywords',props:{size:20,min_doc_count:500} -->
         <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
-          data-dojo-props="field:'keywords_s',label:'${i18n.search.criteria.keywords}',props:{size:20}">
+          data-dojo-props="field:'keywords_s',
+          label:'${i18n.search.criteria.keywords}',
+          allowedCollections: ['', '*'],
+          props:{size:20}">
         </div>
 
 <!--        <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
@@ -125,26 +131,39 @@
         <div class="g-filter-collapse" data-dojo-type="app/search/HierarchyTree"
           data-dojo-props="
             field:'src_site2_cat',
+            allowedCollections: ['', 'Hardcopy Maps'],
             label:'Site'">
         </div>
         
         <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
-          data-dojo-props="field:'src_item_category_s',label:'Item Category',props:{size:20}">
+          data-dojo-props="
+            field:'src_item_category_s',
+            allowedCollections: ['', 'Hardcopy Maps'],
+            label:'Item Category',
+            props:{size:20}">
         </div>
         
         <div class="g-filter-collapse" data-dojo-type="app/search/HierarchyTree"
           data-dojo-props="
             field:'src_category_cat',
+            allowedCollections: ['', 'Fileshare'],
             label:'EGIS Network Share',props:{size:200}">
         </div>
 
         <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
-          data-dojo-props="field:'src_data_type_s',label:'${i18n.search.criteria.dataType}',props:{size:20}">
+          data-dojo-props="
+            field:'src_data_type_s',
+            allowedCollections: ['', 'Hardcopy Maps'],
+            label:'${i18n.search.criteria.dataType}',
+            props:{size:20}">
         </div>
 
+        <!-- MH: hiding as all sources are marked as collections -->
+        <!-- 
         <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
           data-dojo-props="field:'src_source_name_s',label:'${i18n.search.criteria.origin}',props:{size:20, missing:'${i18n.search.criteria.missingSource}'}">
         </div>
+        -->
         
         <div class="g-filter-collapse" data-dojo-type="app/search/TermsAggregation"
           data-dojo-props="
