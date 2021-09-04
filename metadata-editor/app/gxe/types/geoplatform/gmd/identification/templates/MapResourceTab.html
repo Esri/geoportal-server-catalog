@@ -1,0 +1,38 @@
+<div data-dojo-attach-point="containerNode">
+  <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+    data-dojo-props="target:'gmd:MD_MapIdentification',minOccurs:1">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+    <div data-dojo-type="app/gxe/types/geoplatform/gmd/citation/CI_Citation"
+      data-dojo-props="label:'${i18nIso.identificationSection.citation}'"></div>
+
+    <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/identification/ResourceDescription"
+      data-dojo-props="label:'${i18nIso.identificationSection.description}'"></div>
+
+    <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/citation/ResourceContact"
+      data-dojo-props="label:'${i18nIso.identificationSection.contact}'"></div>
+
+    <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/identification/ResourceThumbnail"
+      data-dojo-props="label:'${i18nIso.identificationSection.thumbnail}'"></div>
+
+    <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/identification/ResourceKeywords"
+      data-dojo-props="label:'${i18nIso.identificationSection.keywords}'"></div>
+
+    <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/constraints/ResourceConstraints"
+      data-dojo-props="label:'${i18nIso.identificationSection.constraints}'"></div>
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+      data-dojo-props="target:'gmd:dataset', minOccurs:0, maxOccurs:'unbounded',
+        label:'Dataset'">
+      <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/citation/CI_OnlineResource"></div>
+    </div>
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+      data-dojo-props="target:'gmd:style',minOccurs:0,maxOccurs:'unbounded',
+        label:'Layer'">
+      <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/citation/CI_OnlineResource"></div>
+    </div>
+
+  </div>
+</div>
+</div>
