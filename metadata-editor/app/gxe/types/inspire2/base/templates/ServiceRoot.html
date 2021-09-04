@@ -1,0 +1,27 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'gmd:MD_Metadata',label:'${i18nInspire.documentTypes.service.caption}'">
+
+    <div data-dojo-type="esri/dijit/metadata/form/Attribute"
+      data-dojo-props="target: 'xsi:schemaLocation', value:'http://www.isotc211.org/2005/gmd http://schemas.opengis.net/iso/19139/20060504/gmd/gmd.xsd http://www.isotc211.org/2005/gmx http://schemas.opengis.net/iso/19139/20060504/gmx/gmx.xsd http://www.isotc211.org/2005/srv http://schemas.opengis.net/iso/19139/20060504/srv/srv.xsd',fixed:true,hide:true">
+    </div>    
+    
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+      <div data-dojo-type="app/gxe/types/inspire2/srv/metadataEntity/MetadataSection"
+        data-dojo-props="label:'${i18nIso.sections.metadata}'"></div>
+        
+      <div data-dojo-type="app/gxe/types/inspire2/srv/ServiceIdentification"
+        data-dojo-props="label:'${i18nIso.sections.identification}'"></div>
+      
+      <div data-dojo-type="app/gxe/types/inspire2/srv/distribution/Distribution"
+        data-dojo-props="label:'${i18nIso.sections.distribution}'"></div>
+        
+      <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/Quality"
+        data-dojo-props="label:'${i18nIso.sections.quality}'"></div>
+      
+    </div>
+
+  </div>
+  
+</div>

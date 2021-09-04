@@ -1,0 +1,140 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/ElementChoice">
+    
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+      data-dojo-props="target:'gmd:report',
+        label:'${i18nInspire.dataQuality.conformanceReport.classess.invokable}',
+        matchTopNode:[
+          {
+            qPath: 'gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:title/gmx:Anchor/@xlink:href',
+            qValue: 'http://inspire.ec.europa.eu/id/ats/metadata/2.0/sds-invocable',
+            qMode: 'must'
+          }
+        ]">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+        data-dojo-props="target:'gmd:DQ_DomainConsistency'">
+
+        <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+          data-dojo-props="target:'gmd:result',
+            label:'${i18nIso.DQ_ConformanceResult.caption}'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+            data-dojo-props="target:'gmd:DQ_ConformanceResult'">
+
+            <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+              data-dojo-props="target:'gmd:specification',showHeader:false">
+              <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/InvocableConformanceCitation"></div>
+            </div>
+
+            <div data-dojo-type="esri/dijit/metadata/form/Element"
+              data-dojo-props="target:'gmd:explanation',
+                label:'${i18nIso.DQ_ConformanceResult.explanation}'">
+              <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+                data-dojo-props="target:'gco:CharacterString'">
+                  <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+              </div>
+            </div>
+          
+            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-attach-point="_invocablePass"
+                 data-dojo-props="target:'gmd:pass'">
+              <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+                data-dojo-props="target:'gco:Boolean',fixed:true,value:'true'"></div>
+            </div>
+          </div>
+        </div>  
+
+      </div>
+    </div>  
+  
+    
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+      data-dojo-props="target:'gmd:report',
+        label:'${i18nInspire.dataQuality.conformanceReport.classess.interoperable}',
+        matchTopNode:[
+          {
+            qPath: 'gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:title/gmx:Anchor/@xlink:href',
+            qValue: 'http://inspire.ec.europa.eu/id/ats/metadata/2.0/sds-interoperable',
+            qMode: 'must'
+          }
+        ]">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+        data-dojo-props="target:'gmd:DQ_DomainConsistency'">
+
+        <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+          data-dojo-props="target:'gmd:result',
+            label:'${i18nIso.DQ_ConformanceResult.caption}'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+            data-dojo-props="target:'gmd:DQ_ConformanceResult'">
+
+            <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+              data-dojo-props="target:'gmd:specification',showHeader:false">
+              <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/InteroperableConformanceCitation"></div>
+            </div>
+
+            <div data-dojo-type="esri/dijit/metadata/form/Element"
+              data-dojo-props="target:'gmd:explanation',
+                label:'${i18nIso.DQ_ConformanceResult.explanation}'">
+              <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+                data-dojo-props="target:'gco:CharacterString'">
+                  <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+              </div>
+            </div>
+          
+            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-attach-point="_interoperablePass"
+                 data-dojo-props="target:'gmd:pass'">
+              <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+                data-dojo-props="target:'gco:Boolean',fixed:true,value:'true'"></div>
+            </div>
+          </div>
+        </div>  
+
+      </div>
+    </div>  
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+      data-dojo-props="target:'gmd:report',
+        label:'${i18nInspire.dataQuality.conformanceReport.classess.harmonised}',
+        matchTopNode:[
+          {
+            qPath: 'gmd:DQ_DomainConsistency/gmd:result/gmd:DQ_ConformanceResult/gmd:specification/gmd:CI_Citation/gmd:title/gmx:Anchor/@xlink:href',
+            qValue: 'http://inspire.ec.europa.eu/id/ats/metadata/2.0/sds-harmonised',
+            qMode: 'must'
+          }
+        ]">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+        data-dojo-props="target:'gmd:DQ_DomainConsistency'">
+
+        <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+          data-dojo-props="target:'gmd:result',
+            label:'${i18nIso.DQ_ConformanceResult.caption}'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+            data-dojo-props="target:'gmd:DQ_ConformanceResult'">
+
+            <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+              data-dojo-props="target:'gmd:specification',showHeader:false">
+              <div data-dojo-type="app/gxe/types/inspire2/srv/dataQuality/HarmonisedConformanceCitation"></div>
+            </div>
+
+            <div data-dojo-type="esri/dijit/metadata/form/Element"
+              data-dojo-props="target:'gmd:explanation',
+                label:'${i18nIso.DQ_ConformanceResult.explanation}'">
+              <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+                data-dojo-props="target:'gco:CharacterString'">
+                  <div data-dojo-type="esri/dijit/metadata/form/InputTextArea"></div>
+              </div>
+            </div>
+          
+            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-attach-point="_harmonisedPass"
+                 data-dojo-props="target:'gmd:pass'">
+              <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+                data-dojo-props="target:'gco:Boolean',fixed:true,value:'true'"></div>
+            </div>
+          </div>
+        </div>  
+
+      </div>
+    </div>  
+    
+  </div>
+  
+</div>
