@@ -7,7 +7,6 @@ using System.Windows.Forms;
 using System.Net.Http;
 using System.Reflection;
 using com.esri.gpt.csw;
-
 using System.IO;
 using System.Xml;
 using System.Xml.Xsl;
@@ -43,17 +42,17 @@ namespace GeoportalSearch
 
     // Configure Tab Variables
     private ArrayList _catalogList;
-    private ArrayList _profileList;private bool _newClicked = false;
+    private ArrayList _profileList;
+    private bool _newClicked = false;
     private bool _isCatalogListDirty = false;
 
 
     // Help Tab Variables
     private string _helpFilePath = "";
     private bool _isHelpFileLoaded = false;
-    private static double NONEXSISTANTNUMBER = 500.31415;
+    private static double NonExistantNumber = 500.31415;
     private bool showAll = false;
     private ResourceManager rm = new ResourceManager("com.esri.gpt.csw.StringResources", Assembly.GetExecutingAssembly());
-
     private GraphicsLayer _graphicsLayer = null;
 
     #endregion
@@ -87,12 +86,10 @@ namespace GeoportalSearch
       try
       {
         ClearData();
-
         _newClicked = true;
         deleteCatalogButton.IsEnabled = false;
         saveCatalogButton.IsEnabled = false;
         catalogProfileComboBox.SelectedItem = catalogProfileComboBox.Items[0];
-
         catalogUrlTextBox.Focus();
         catalogListBox.SelectedIndex = -1;
         _isCatalogListDirty = true;
@@ -170,7 +167,10 @@ namespace GeoportalSearch
         else
         {
           CswCatalog catalog = (CswCatalog)catalogListBox.SelectedItem;
-          if (System.Windows.Forms.MessageBox.Show(StringResources.DeleteConfirmation, StringResources.ConfirmDelete, MessageBoxButtons.YesNo) == DialogResult.Yes)
+          if (System.Windows.Forms.MessageBox.Show(
+            StringResources.DeleteConfirmation,
+            StringResources.ConfirmDelete,
+            MessageBoxButtons.YesNo) == DialogResult.Yes)
           {
             _catalogList.Remove(catalog);
             //catalogListBox.Update();
@@ -191,7 +191,8 @@ namespace GeoportalSearch
       }
     }
 
-    private void FindButton_Click(object sender, RoutedEventArgs e) {
+    private void FindButton_Click(object sender, RoutedEventArgs e)
+    {
       StringBuilder sb = new StringBuilder();
       try
       {
@@ -204,11 +205,13 @@ namespace GeoportalSearch
         }
 
         CswCatalog catalog = (CswCatalog)catalogComboBox.SelectedItem;
-        if (catalog == null) { throw new NullReferenceException(StringResources.CswCatalogIsNull); }
+        if (catalog == null)
+        {
+          throw new NullReferenceException(StringResources.CswCatalogIsNull);
+        }
 
         // reset GUI for search results
         ResetSearchResultsGUI();
-
 
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
 
@@ -228,7 +231,7 @@ namespace GeoportalSearch
           }
         }
 
-        // todo: need paging maganism. update SearchCriteria.StartPoistion
+        // todo: need paging mechanism. update SearchCriteria.StartPosition
 
         // generate search criteria
         CswSearchCriteria searchCriteria = new CswSearchCriteria();
@@ -238,14 +241,15 @@ namespace GeoportalSearch
         searchCriteria.LiveDataAndMapOnly = ((bool)liveDataAndMapsOnlyCheckBox.IsChecked);
         if ((bool)useCurrentExtentCheckBox.IsChecked)
         {
-          try {
+          try
+          {
             searchCriteria.Envelope = CurrentMapViewExtent();
           }
           catch (Exception ex)
           {
             String errMsg = StringResources.GetCurrentExtentFailed + "\r\n" +
-                                ex.Message + "\r\n" + "\r\n" +
-                                StringResources.UncheckCurrentExtentAndTryAgain;
+                              ex.Message + "\r\n" + "\r\n" +
+                              StringResources.UncheckCurrentExtentAndTryAgain;
 
             sb.AppendLine(errMsg);
             ShowErrorMessageBox(errMsg);
@@ -273,7 +277,7 @@ namespace GeoportalSearch
 
           resultsListBox.Items.Clear();
           resultsListBox.ItemsSource = listItems;
-          resultsListBox.DisplayMemberPath= "Title";
+          resultsListBox.DisplayMemberPath = "Title";
           resultsListBox.SelectedValuePath = "ID";
           resultsListBox.SelectedIndex = 0;
           showAllFootprintToolStripButton.IsEnabled = catalog.Profile.SupportSpatialBoundary;
@@ -286,7 +290,8 @@ namespace GeoportalSearch
           ShowErrorMessageBox(StringResources.NoRecordsFound);
         }
 
-        resultsLabel.Content = StringResources.SearchResultsLabelText + " (" + alRecords.Count.ToString() + ")";
+        resultsLabel.Content = StringResources.SearchResultsLabelText +
+          " (" + alRecords.Count.ToString() + ")";
       }
       catch (Exception ex)
       {
@@ -301,13 +306,14 @@ namespace GeoportalSearch
     }
 
     #region utils
+
     private void AddData()
     {
       _catalogList = CswObjectsToArrayList(_cswCatalogs);
       _catalogList.Sort();
 
       List<CswCatalog> listItems = new List<CswCatalog>();
-      for (int i=0; i<_cswCatalogs.Count; i++)
+      for (int i = 0; i < _cswCatalogs.Count; i++)
       {
         listItems.Add(_cswCatalogs[i]);
       }
@@ -324,12 +330,12 @@ namespace GeoportalSearch
       catalogUrlTextBox.Text = "";
     }
 
-    private ArrayList CswObjectsToArrayList(CswObjects cswObjs)
+    private ArrayList CswObjectsToArrayList(CswObjects cswObjects)
     {
       ArrayList alCswObjects = new ArrayList();
-      for (int i = 0; i < cswObjs.Count; i++)
+      for (int i = 0; i < cswObjects.Count; i++)
       {
-        alCswObjects.Add(cswObjs[i]);
+        alCswObjects.Add(cswObjects[i]);
       }
       return alCswObjects;
     }
@@ -351,7 +357,6 @@ namespace GeoportalSearch
           catalogProfileComboBox.SelectedItem = catalog.Profile;
           catalogUrlTextBox.Text = catalog.URL;
           catalogDisplayNameTextBox.Text = catalog.Name;
-
           catalogProfileComboBox.IsEnabled = true;
           deleteCatalogButton.IsEnabled = true;
           saveCatalogButton.IsEnabled = false;
@@ -382,22 +387,25 @@ namespace GeoportalSearch
       {
         // version info
         System.Diagnostics.FileVersionInfo fvi = System.Diagnostics.FileVersionInfo.GetVersionInfo(System.Reflection.Assembly.GetExecutingAssembly().Location);
-        //    productBuildNoLabel.Text = "(" + StringResources.BuildNo + " " + fvi.ProductVersion + ")";
+        // productBuildNoLabel.Text = "(" + StringResources.BuildNo + " " + fvi.ProductVersion + ")";
 
         // note: To save loading time, help Tab is not loaded.
         _inited = (LoadSearchTab() && LoadConfigTab());
-        if (_inited && catalogComboBox.Items.Count > 0) catalogComboBox.SelectedIndex = 0;
-
+        if (_inited && catalogComboBox.Items.Count > 0)
+        {
+          catalogComboBox.SelectedIndex = 0;
+        }
         var map = MapView.Active.Map;
         if (map.MapType != MapType.Map)
-          return;// not 2D
-
+        {
+          return; // not 2D
+        }
         if (_graphicsLayer == null)
         {
           var gl_param = new GraphicsLayerCreationParams { Name = "Footprints" };
           QueuedTask.Run(() =>
           {
-            //By default will be added to the top of the TOC
+            // By default will be added to the top of the TOC
             _graphicsLayer = LayerFactory.Instance.CreateLayer<ArcGIS.Desktop.Mapping.GraphicsLayer>(gl_param, map);
           });
         }
@@ -454,7 +462,10 @@ namespace GeoportalSearch
       try
       {
         _cswCatalogs = _cswManager.loadCatalog();
-        if (_cswCatalogs == null) { throw new NullReferenceException(); }
+        if (_cswCatalogs == null)
+        {
+          throw new NullReferenceException();
+        }
 
         _catalogList = CswObjectsToArrayList(_cswCatalogs);
 
@@ -488,7 +499,6 @@ namespace GeoportalSearch
       resultsLabel.Content = StringResources.SearchResultsLabelText;
       //resultsLabel.Refresh();
       resultsListBox.ItemsSource = null;
-
       abstractTextBox.Text = "";
 
       // GUI update for buttons
@@ -496,20 +506,22 @@ namespace GeoportalSearch
       viewMetadataToolStripButton.IsEnabled = false;
       downloadMetadataToolStripButton.IsEnabled = false;
       displayFootprinttoolStripButton.IsEnabled = false;
-      zoomtoFootprintToolStripButton.IsEnabled = false;
+      zoomToFootprintToolStripButton.IsEnabled = false;
       showAllFootprintToolStripButton.IsEnabled = false;
       clearAllFootprinttoolStripButton.IsEnabled = false;
     }
 
     private string GenerateTempFilename(string prefix, string surfix)
     {
-      // todo: use System.IO.Path.GetRandomFileName() to accomodate prefix;
+      // todo: use System.IO.Path.GetRandomFileName() to accommodate prefix;
       //       it will avoid the issue of .tmp file being generated by system
       string tempFilename = System.IO.Path.GetTempFileName();
-      try { System.IO.File.Delete(tempFilename); }
+      try
+      {
+        System.IO.File.Delete(tempFilename);
+      }
       catch { }
       tempFilename = System.IO.Path.ChangeExtension(tempFilename, surfix);
-
       return tempFilename;
     }
 
@@ -524,12 +536,17 @@ namespace GeoportalSearch
       string finalChar = urlString.Substring(urlString.Length - 1, 1);    // final char
       if (!finalChar.Equals("?") && !finalChar.Equals("&"))
       {
-        if (urlString.LastIndexOf("=") > -1) { urlString = urlString + "&"; }
-        else { urlString = urlString + "?"; }
+        if (urlString.LastIndexOf("=") > -1)
+        {
+          urlString = urlString + "&";
+        }
+        else
+        {
+          urlString = urlString + "?";
+        }
       }
       return urlString;
     }
-
 
     /// <summary>
     /// Remove trailing question mark or ampersand from a url string
@@ -538,13 +555,13 @@ namespace GeoportalSearch
     /// <returns>output URL string</returns>
     private string RemoveQuestionOrAmpersandToUrlString(string urlString)
     {
-        urlString = urlString.Trim();
-        string finalChar = urlString.Substring(urlString.Length - 1, 1);    // final char
-        if (finalChar.Equals("?") || finalChar.Equals("&"))
-        {
-           urlString = urlString.Remove(urlString.Length - 1, 1);
-        }
-        return urlString;
+      urlString = urlString.Trim();
+      string finalChar = urlString.Substring(urlString.Length - 1, 1);    // final char
+      if (finalChar.Equals("?") || finalChar.Equals("&"))
+      {
+        urlString = urlString.Remove(urlString.Length - 1, 1);
+      }
+      return urlString;
     }
 
     private XmlDocument RetrieveSelectedMetadataFromCatalog(bool bApplyTransform)
@@ -552,19 +569,37 @@ namespace GeoportalSearch
       try
       {
         // validate
-        if (catalogComboBox.SelectedIndex == -1) { throw new Exception(StringResources.NoCatalogSelected); }
-        if (resultsListBox.SelectedIndex == -1) { throw new Exception(StringResources.NoSearchResultSelected); }
+        if (catalogComboBox.SelectedIndex == -1)
+        {
+          throw new Exception(StringResources.NoCatalogSelected);
+        }
+        if (resultsListBox.SelectedIndex == -1)
+        {
+          throw new Exception(StringResources.NoSearchResultSelected);
+        }
         CswCatalog catalog = (CswCatalog)catalogComboBox.SelectedItem;
-        if (catalog == null) { throw new NullReferenceException(StringResources.CswCatalogIsNull); }
+        if (catalog == null)
+        {
+          throw new NullReferenceException(StringResources.CswCatalogIsNull);
+        }
         CswRecord record = (CswRecord)resultsListBox.SelectedItem;
-        if (record == null) throw new NullReferenceException(StringResources.CswRecordIsNull);
+        if (record == null)
+        {
+          throw new NullReferenceException(StringResources.CswRecordIsNull);
+        }
 
         // connect to catalog if needed
         if (!catalog.IsConnected())
         {
           string errMsg = "";
-          try { catalog.Connect(); }
-          catch (Exception ex) { errMsg = ex.Message; }
+          try
+          {
+            catalog.Connect();
+          }
+          catch (Exception ex)
+          {
+            errMsg = ex.Message;
+          }
 
           // exit if still not connected
           if (!catalog.IsConnected())
@@ -574,16 +609,17 @@ namespace GeoportalSearch
           }
         }
 
-        bool isTransformed = false;
-
         // retrieve metadata doc by its ID
-        if (_searchRequest == null) { _searchRequest = new CswSearchRequest(); }
+        bool isTransformed = false;
+        if (_searchRequest == null)
+        {
+          _searchRequest = new CswSearchRequest();
+        }
         _searchRequest.Catalog = catalog;
         try
         {
           isTransformed = _searchRequest.GetMetadataByID(record.ID, bApplyTransform);
           _mapServerUrl = _searchRequest.GetMapServerUrl();
-
         }
         catch (Exception ex)
         {
@@ -596,7 +632,10 @@ namespace GeoportalSearch
 
         CswSearchResponse response = _searchRequest.GetResponse();
         CswRecord recordMetadata = response.Records[0];
-        if (recordMetadata.FullMetadata.Length == 0) { throw new Exception(StringResources.EmptyMetadata); }
+        if (recordMetadata.FullMetadata.Length == 0)
+        {
+          throw new Exception(StringResources.EmptyMetadata);
+        }
 
         if (!isTransformed)
         {
@@ -628,11 +667,14 @@ namespace GeoportalSearch
       try
       {
         FormViewMetadata frmViewMetadata = (FormViewMetadata)(sender);
-        if (frmViewMetadata != null) { System.IO.File.Delete(frmViewMetadata.MetadataFilePath); }
+        if (frmViewMetadata != null)
+        {
+          System.IO.File.Delete(frmViewMetadata.MetadataFilePath);
+        }
       }
       catch
       {
-        // ignore, if error occurrs when deleting temp file
+        // ignore, if error occurs when deleting temp file
       }
     }
 
@@ -655,41 +697,53 @@ namespace GeoportalSearch
     /// <returns>view extent as an envelope object</returns>
     private com.esri.gpt.csw.Envelope CurrentMapViewExtent()
     {
-      com.esri.gpt.csw.Envelope envCurrentViewExent = new com.esri.gpt.csw.Envelope();
+      com.esri.gpt.csw.Envelope envCurrentViewExtent = new com.esri.gpt.csw.Envelope();
       ArcGIS.Core.Geometry.Envelope extent = null;
 
-      if(MapView.Active != null)
+      if (MapView.Active != null)
       {
         extent = MapView.Active.Extent;
       }
 
       if (extent == null)
       {
-        envCurrentViewExent.MinX = -180.0;
-        envCurrentViewExent.MaxX =  180.0;
-        envCurrentViewExent.MinY =  -90.0;
-        envCurrentViewExent.MaxY =   90.0;
+        envCurrentViewExtent.MinX = -180.0;
+        envCurrentViewExtent.MaxX = 180.0;
+        envCurrentViewExtent.MinY = -90.0;
+        envCurrentViewExtent.MaxY = 90.0;
       }
       else
       {
-        MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(extent.XMin, extent.YMin,SpatialReferences.WebMercator);
+        MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(extent.XMin, extent.YMin, SpatialReferences.WebMercator);
         MapPoint upperCorner = MapPointBuilder.CreateMapPoint(extent.XMax, extent.YMax, SpatialReferences.WebMercator);
         // Convert to Lat/Long WGS84 used by CSW Filter using BBOX
         MapPoint projectedLowerCorner = (MapPoint)GeometryEngine.Instance.Project(lowerCorner, SpatialReferences.WGS84);
         MapPoint projectedUpperCorner = (MapPoint)GeometryEngine.Instance.Project(upperCorner, SpatialReferences.WGS84);
-        envCurrentViewExent.MinX = projectedLowerCorner.X;
-        envCurrentViewExent.MaxX = projectedUpperCorner.X;
-        envCurrentViewExent.MinY = projectedLowerCorner.Y;
-        envCurrentViewExent.MaxY = projectedUpperCorner.Y;
-        if (Double.IsNaN(envCurrentViewExent.MinX)) { envCurrentViewExent.MinX = -180.0; };
-        if (Double.IsNaN(envCurrentViewExent.MaxX)) { envCurrentViewExent.MaxX = 180.0; };
-        if (Double.IsNaN(envCurrentViewExent.MinY)) { envCurrentViewExent.MinY = -90.0; };
-        if (Double.IsNaN(envCurrentViewExent.MaxY)) { envCurrentViewExent.MaxY = 90.0; };
+        envCurrentViewExtent.MinX = projectedLowerCorner.X;
+        envCurrentViewExtent.MaxX = projectedUpperCorner.X;
+        envCurrentViewExtent.MinY = projectedLowerCorner.Y;
+        envCurrentViewExtent.MaxY = projectedUpperCorner.Y;
+        if (Double.IsNaN(envCurrentViewExtent.MinX))
+        {
+          envCurrentViewExtent.MinX = -180.0;
+        };
+        if (Double.IsNaN(envCurrentViewExtent.MaxX))
+        {
+          envCurrentViewExtent.MaxX = 180.0;
+        };
+        if (Double.IsNaN(envCurrentViewExtent.MinY))
+        {
+          envCurrentViewExtent.MinY = -90.0;
+        };
+        if (Double.IsNaN(envCurrentViewExtent.MaxY))
+        {
+          envCurrentViewExtent.MaxY = 90.0;
+        };
       }
-      return envCurrentViewExent;
+      return envCurrentViewExtent;
     }
 
-    private void deleteelements()
+    private void DeleteElements()
     {
       var map = MapView.Active.Map;
       var graphicsLayer = map.GetLayersAsFlattenedList().OfType<ArcGIS.Desktop.Mapping.GraphicsLayer>().FirstOrDefault();
@@ -719,12 +773,24 @@ namespace GeoportalSearch
       try
       {
         // validate
-        if (catalogComboBox.SelectedIndex == -1) { throw new Exception(StringResources.NoCatalogSelected); }
-        if (resultsListBox.SelectedIndex == -1) { throw new Exception(StringResources.NoSearchResultSelected); }
+        if (catalogComboBox.SelectedIndex == -1)
+        {
+          throw new Exception(StringResources.NoCatalogSelected);
+        }
+        if (resultsListBox.SelectedIndex == -1)
+        {
+          throw new Exception(StringResources.NoSearchResultSelected);
+        }
         CswCatalog catalog = (CswCatalog)catalogComboBox.SelectedItem;
-        if (catalog == null) { throw new NullReferenceException(StringResources.CswCatalogIsNull); }
+        if (catalog == null)
+        {
+          throw new NullReferenceException(StringResources.CswCatalogIsNull);
+        }
         CswRecord record = (CswRecord)resultsListBox.SelectedItem;
-        if (record == null) throw new NullReferenceException(StringResources.CswRecordIsNull);
+        if (record == null)
+        {
+          throw new NullReferenceException(StringResources.CswRecordIsNull);
+        }
 
         // connect to catalog if needed
         if (!catalog.IsConnected())
@@ -747,7 +813,6 @@ namespace GeoportalSearch
         {
           _searchRequest.GetAddToMapInfoByID(record.ID);
           _mapServerUrl = _searchRequest.GetMapServerUrl();
-
         }
         catch (Exception ex)
         {
@@ -755,14 +820,11 @@ namespace GeoportalSearch
           System.Diagnostics.Trace.WriteLine(StringResources.RetrieveMetadataFromCatalogFailed);
           System.Diagnostics.Trace.WriteLine(ex.Message);
           System.Diagnostics.Trace.WriteLine(_searchRequest.GetResponse().ResponseXML);
-
         }
-
       }
       catch (Exception ex)
       {
         ShowErrorMessageBox(StringResources.RetrieveMetadataFromCatalogFailed + "\r\n" + ex.Message);
-
       }
     }
 
@@ -795,32 +857,53 @@ namespace GeoportalSearch
         xmlNamespaceManager.AddNamespace("gmd", "http://www.isotc211.org/2005/gmd");
 
         XmlNode nodeMetadata = xmlDoc.SelectSingleNode("//metadata|//cat:metadata|//csw:metadata|//gmd:MD_Metadata", xmlNamespaceManager);
-        if (nodeMetadata == null) { throw new Exception(StringResources.MetadataNodeMissing); }
+        if (nodeMetadata == null)
+        {
+          throw new Exception(StringResources.MetadataNodeMissing);
+        }
 
         // parse out service information
         XmlNode nodeEsri = nodeMetadata.SelectSingleNode("Esri");
-        if (nodeEsri == null) throw new Exception(StringResources.EsriNodeMissing);
+        if (nodeEsri == null)
+        {
+          throw new Exception(StringResources.EsriNodeMissing);
+        }
 
         // server
         XmlNode node = nodeEsri.SelectSingleNode("Server");
-        if (node == null) throw new Exception(StringResources.ServerNodeMissing);
+        if (node == null)
+        {
+          throw new Exception(StringResources.ServerNodeMissing);
+        }
         msi.Server = node.InnerText;
 
         // service
         node = nodeEsri.SelectSingleNode("Service");
-        if (node != null) { msi.Service = node.InnerText; }
+        if (node != null)
+        {
+          msi.Service = node.InnerText;
+        }
 
         // service type
         node = nodeEsri.SelectSingleNode("ServiceType");
-        if (node != null) { msi.ServiceType = node.InnerText; }
+        if (node != null)
+        {
+          msi.ServiceType = node.InnerText;
+        }
 
         // service param
         node = nodeEsri.SelectSingleNode("ServiceParam");
-        if (node != null) { msi.ServiceParam = node.InnerText; }
+        if (node != null)
+        {
+          msi.ServiceParam = node.InnerText;
+        }
 
         // issecured
         node = nodeEsri.SelectSingleNode("issecured");
-        if (node != null) { msi.IsSecured = (node.InnerText.Equals("True", StringComparison.OrdinalIgnoreCase)); }
+        if (node != null)
+        {
+          msi.IsSecured = (node.InnerText.Equals("True", StringComparison.OrdinalIgnoreCase));
+        }
 
         return msi;
       }
@@ -852,8 +935,10 @@ namespace GeoportalSearch
 
     private void AddLayerWCS(MapServiceInfo msi, Boolean fromServerUrl)
     {
-      if (msi == null) { throw new ArgumentNullException(); }
-
+      if (msi == null)
+      {
+        throw new ArgumentNullException();
+      }
       try
       {
         string _mapServerUrl = RemoveQuestionOrAmpersandToUrlString(msi.Server);
@@ -862,44 +947,37 @@ namespace GeoportalSearch
         if (msi.ServiceParam.Length > 0 && !fromServerUrl)
         {
           _mapServerUrl = AppendQuestionOrAmpersandToUrlString(_mapServerUrl);
-            _mapServerUrl = _mapServerUrl + msi.ServiceParam;
+          _mapServerUrl = _mapServerUrl + msi.ServiceParam;
         }
-
-
         // MapServiceInfo msi = new MapServiceInfo();
         String[] s = _mapServerUrl.Trim().Split('?');
-
         _mapServerUrl = s[0] + "?request=GetCapabilities&service=WCS";
         CswClient client = new CswClient();
         String response = client.SubmitHttpRequest("GET", _mapServerUrl, "");
 
         XmlDocument xmlDocument = new XmlDocument();
-        try { xmlDocument.LoadXml(response); }
-        catch (XmlException xmlEx)
-        { }
+        try
+        {
+          xmlDocument.LoadXml(response);
+        }
+        catch (XmlException xmlEx) { }
 
         XmlNodeList contentMetadata = xmlDocument.GetElementsByTagName("ContentMetadata");
-
         if (contentMetadata != null && contentMetadata.Count > 0)
         {
           XmlNodeList coverageList = contentMetadata.Item(0).ChildNodes;
-
           foreach (XmlNode coverage in coverageList)
           {
-
             XmlNodeList nodes = coverage.ChildNodes;
-
             foreach (XmlNode node in nodes)
             {
               if (node.Name.ToLower().Equals("name"))
               {
                 _mapServerUrl = s[0] + "?request=GetCoverage&service=WCS&format=GeoTIFF&coverage=" + node.InnerText;
-
                 try
                 {
                   String filePath = client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, "");
                   AddAGSService(filePath);
-
                 }
                 catch (Exception e)
                 {
@@ -908,23 +986,21 @@ namespace GeoportalSearch
                 }
               }
             }
-
           }
-
         }
-
       }
-
       catch (Exception ex)
       {
-        //  ShowErrorMessageBox(StringResources.AddWcsLayerFailed + "\r\n" + ex.Message);
+        // ShowErrorMessageBox(StringResources.AddWcsLayerFailed + "\r\n" + ex.Message);
       }
     }
 
     private async void AddLayerWFS(MapServiceInfo msi, Boolean fromServerUrl)
     {
-      if (msi == null) { throw new ArgumentNullException(); }
-
+      if (msi == null)
+      {
+        throw new ArgumentNullException();
+      }
       try
       {
         string url = RemoveQuestionOrAmpersandToUrlString(msi.Server);
@@ -933,7 +1009,7 @@ namespace GeoportalSearch
         if (msi.ServiceParam.Length > 0 || !fromServerUrl)
         {
           url = AppendQuestionOrAmpersandToUrlString(url);
-            url = url + msi.ServiceParam;
+          url = url + msi.ServiceParam;
         }
 
         CIMStandardDataConnection cIMStandardDataConnection = new CIMStandardDataConnection()
@@ -958,8 +1034,10 @@ namespace GeoportalSearch
 
     private async void AddLayerWMS(MapServiceInfo msi, Boolean fromServerUrl)
     {
-      if (msi == null) { throw new ArgumentNullException(); }
-
+      if (msi == null)
+      {
+        throw new ArgumentNullException();
+      }
       try
       {
         string url = RemoveQuestionOrAmpersandToUrlString(msi.Server);
@@ -968,12 +1046,11 @@ namespace GeoportalSearch
         if (msi.ServiceParam.Length > 0 || !fromServerUrl)
         {
           url = AppendQuestionOrAmpersandToUrlString(url);
-            url = url + msi.ServiceParam;
+          url = url + msi.ServiceParam;
         }
         // Create a connection to the WMS server
         var serverConnection = new CIMInternetServerConnection { URL = url };
         var connection = new CIMWMSServiceConnection { ServerConnection = serverConnection };
-
         // Add a new layer to the map
         await QueuedTask.Run(() =>
         {
@@ -986,19 +1063,14 @@ namespace GeoportalSearch
       }
     }
 
-    private void AddLayerArcIMS(MapServiceInfo msi)
-    {
-
-    }
+    private void AddLayerArcIMS(MapServiceInfo msi) { }
 
     private async void AddAGSService(string url)
     {
       try
       {
         Map map = MapView.Active.Map;
-
         bool isAlreadyInMap = false;
-
         if (isAlreadyInMap)
         {
           ShowErrorMessageBox(StringResources.MapServiceLayerAlreadyExistInMap);
@@ -1006,7 +1078,6 @@ namespace GeoportalSearch
         }
         else
         {
-
           Uri uri = new Uri(url);
           await QueuedTask.Run(() => LayerFactory.Instance.CreateLayer(uri, MapView.Active.Map));
         }
@@ -1017,7 +1088,7 @@ namespace GeoportalSearch
       }
     }
 
-    private void drawfootprint(CswRecord record, bool refreshview, bool deleteelements)
+    private void drawfootprint(CswRecord record, bool refreshview, bool DeleteElements)
     {
       var gl_param = new GraphicsLayerCreationParams { Name = "Metadata Footprints" };
       var map = MapView.Active.Map;
@@ -1030,9 +1101,8 @@ namespace GeoportalSearch
           graphicsLayer = LayerFactory.Instance.CreateLayer<ArcGIS.Desktop.Mapping.GraphicsLayer>(gl_param, map);
         }
         MapPoint lowerLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Minx, record.BoundingBox.Miny, SpatialReferences.WGS84);
-        MapPoint upperRightLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy, SpatialReferences.WGS84);
-
-        Polygon polygon = PolygonBuilder.CreatePolygon(EnvelopeBuilder.CreateEnvelope(lowerLeft, upperRightLeft));
+        MapPoint upperRight = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy, SpatialReferences.WGS84);
+        Polygon polygon = PolygonBuilder.CreatePolygon(EnvelopeBuilder.CreateEnvelope(lowerLeft, upperRight));
         CIMSymbol polygonSymbol = SymbolFactory.Instance.ConstructPolygonSymbol(CIMColor.CreateRGBColor(255, 255, 0, 0.1));
         CIMPolygonGraphic metadataFootprint = new CIMPolygonGraphic
         {
@@ -1055,6 +1125,7 @@ namespace GeoportalSearch
       double bxmin = footprintExtent.Minx;
       double bymin = footprintExtent.Miny;
       double bymax = footprintExtent.Maxy;
+
       double rxmax = 0.0, rxmin = 0.0, rymax = 0.0, rymin = 0.0;
       if (xmax > bxmax)
       {
@@ -1096,6 +1167,7 @@ namespace GeoportalSearch
 
       return newExtent;
     }
+
     #endregion
 
     private void ViewMetadata_Clicked(object sender, RoutedEventArgs e)
@@ -1108,8 +1180,10 @@ namespace GeoportalSearch
 
         // retrieve metadata
         XmlDocument xmlDoc = RetrieveSelectedMetadataFromCatalog(true);
-        if (xmlDoc == null && styledRecordResponse == null) return;
-
+        if (xmlDoc == null && styledRecordResponse == null)
+        {
+          return;
+        }
         string tmpFilePath = "";
         if (xmlDoc != null && styledRecordResponse == null)
         {
@@ -1121,7 +1195,9 @@ namespace GeoportalSearch
           {
             XmlNode enclosureNode = xmlDoc.GetElementsByTagName("Enclosure")[0];
             if (enclosureNode != null)
+            {
               binaryNode.RemoveChild(enclosureNode);
+            }
           }
 
           String outputStr = xmlDoc.InnerXml.Replace("utf-16", "utf-8");
@@ -1141,8 +1217,7 @@ namespace GeoportalSearch
           fileStream.Close();
           styledRecordResponse = null;
         }
-
-        // pop up a metadata viwer displaying the metadata as HTML
+        // pop up a metadata viewer displaying the metadata as HTML
         FormViewMetadata frmViewMetadata = new FormViewMetadata();
         frmViewMetadata.FormClosed += new FormClosedEventHandler(RemoveTempFileAfterMetadataViewerClosed);
         frmViewMetadata.MetadataTitle = record.Title;
@@ -1150,14 +1225,12 @@ namespace GeoportalSearch
         frmViewMetadata.Navigate(tmpFilePath);
         frmViewMetadata.Show();
         frmViewMetadata.Activate();
-
-        // note: temp file will be deleted when metadata viwer closes.
+        // note: temp file will be deleted when metadata viewer closes.
         //       see "RemoveTempFileAfterMetadataViewerClosed()"
       }
       catch (Exception ex)
       {
         ShowErrorMessageBox(ex.Message);
-
       }
       finally
       {
@@ -1177,41 +1250,34 @@ namespace GeoportalSearch
       {
         // no record selected
         abstractTextBox.Text = "";
-
         // GUI update for buttons
         addToMapToolStripButton.IsEnabled = false;
         viewMetadataToolStripButton.IsEnabled = false;
         downloadMetadataToolStripButton.IsEnabled = false;
         displayFootprinttoolStripButton.IsEnabled = false;
-        zoomtoFootprintToolStripButton.IsEnabled = false;
+        zoomToFootprintToolStripButton.IsEnabled = false;
         showAllFootprintToolStripButton.IsEnabled = catalog.Profile.SupportSpatialBoundary;
         clearAllFootprinttoolStripButton.IsEnabled = catalog.Profile.SupportSpatialBoundary;
-
       }
       else
       {
-        if (record.BoundingBox.Maxx != NONEXSISTANTNUMBER)
+        if (record.BoundingBox.Maxx != NonExistantNumber)
         {
           displayFootprinttoolStripButton.IsEnabled = true;
-          zoomtoFootprintToolStripButton.IsEnabled = true;
+          zoomToFootprintToolStripButton.IsEnabled = true;
         }
         else
         {
           displayFootprinttoolStripButton.IsEnabled = false;
-          zoomtoFootprintToolStripButton.IsEnabled = false;
-
+          zoomToFootprintToolStripButton.IsEnabled = false;
         }
         abstractTextBox.Text = record.Abstract;
         addToMapToolStripButton.IsEnabled = record.IsLiveDataOrMap;
         viewMetadataToolStripButton.IsEnabled = true;
         downloadMetadataToolStripButton.IsEnabled = true;
-
         showAllFootprintToolStripButton.IsEnabled = catalog.Profile.SupportSpatialBoundary;
         clearAllFootprinttoolStripButton.IsEnabled = catalog.Profile.SupportSpatialBoundary;
-
-
       }
-
       System.Windows.Forms.Cursor.Current = Cursors.Default;
     }
 
@@ -1223,8 +1289,10 @@ namespace GeoportalSearch
 
         // retrieve metadata
         XmlDocument xmlDoc = RetrieveSelectedMetadataFromCatalog(false);
-        if (xmlDoc == null) return;
-
+        if (xmlDoc == null)
+        {
+          return;
+        }
         System.Windows.Forms.Cursor.Current = Cursors.Default;
 
         // save to file
@@ -1235,23 +1303,24 @@ namespace GeoportalSearch
         saveFileDialog.Title = StringResources.DownloadMetadataCaption;
         saveFileDialog.CheckFileExists = false;
         saveFileDialog.OverwritePrompt = true;
-        if (saveFileDialog.ShowDialog() == DialogResult.Cancel) return;
+        if (saveFileDialog.ShowDialog() == DialogResult.Cancel)
+        {
+          return;
+        }
         if (saveFileDialog.FileName.Length > 0)
         {
           System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
           try
           {
-
             XmlNode binaryNode = xmlDoc.GetElementsByTagName("Binary")[0];
-
             if (binaryNode != null)
             {
               XmlNode enclosureNode = xmlDoc.GetElementsByTagName("Enclosure")[0];
-
               if (enclosureNode != null)
+              {
                 binaryNode.RemoveChild(enclosureNode);
+              }
             }
-
             xmlDoc.Save(saveFileDialog.FileName);
             System.Windows.Forms.MessageBox.Show(StringResources.FileSaveSucceed, StringResources.DownloadMetadataCaption, MessageBoxButtons.OK, MessageBoxIcon.Information);
           }
@@ -1281,9 +1350,11 @@ namespace GeoportalSearch
       try
       {
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
-
         CswRecord record = (CswRecord)resultsListBox.SelectedItem;
-        if (record == null) throw new NullReferenceException(StringResources.CswRecordIsNull);
+        if (record == null)
+        {
+          throw new NullReferenceException(StringResources.CswRecordIsNull);
+        }
 
         if (record.MapServerURL == null || record.MapServerURL.Trim().Length == 0)
         {
@@ -1293,17 +1364,17 @@ namespace GeoportalSearch
         else
         {
           _mapServerUrl = record.MapServerURL;
-
         }
 
         if (_mapServerUrl != null && _mapServerUrl.Trim().Length > 0)
         {
-
           String serviceType = record.ServiceType;
+
           if (serviceType == null || serviceType.Length == 0)
           {
             serviceType = CswProfile.getServiceType(_mapServerUrl);
           }
+
           if (serviceType.Equals("unknown"))
           {
             System.Diagnostics.Process.Start("IExplore", _mapServerUrl);
@@ -1358,38 +1429,33 @@ namespace GeoportalSearch
           {
             // MapServiceInfo msi = new MapServiceInfo();
             String[] s = _mapServerUrl.Trim().Split('?');
-
             _mapServerUrl = s[0] + "?request=GetCapabilities&service=WCS";
             CswClient client = new CswClient();
             String response = client.SubmitHttpRequest("GET", _mapServerUrl, "");
 
             XmlDocument xmlDocument = new XmlDocument();
-            try { xmlDocument.LoadXml(response); }
-            catch (XmlException xmlEx)
-            { }
+            try
+            {
+              xmlDocument.LoadXml(response);
+            }
+            catch (XmlException xmlEx) { }
 
             XmlNodeList contentMetadata = xmlDocument.GetElementsByTagName("ContentMetadata");
-
             if (contentMetadata != null && contentMetadata.Count > 0)
             {
               XmlNodeList coverageList = contentMetadata.Item(0).ChildNodes;
-
               foreach (XmlNode coverage in coverageList)
               {
-
                 XmlNodeList nodes = coverage.ChildNodes;
-
                 foreach (XmlNode node in nodes)
                 {
                   if (node.Name.ToLower().Equals("name"))
                   {
                     _mapServerUrl = s[0] + "?request=GetCoverage&service=WCS&format=GeoTIFF&coverage=" + node.InnerText;
-
                     try
                     {
                       String filePath = client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, "");
                       AddAGSService(filePath);
-
                     }
                     catch (Exception ee)
                     {
@@ -1398,7 +1464,6 @@ namespace GeoportalSearch
                     }
                   }
                 }
-
               }
             }
             else
@@ -1419,55 +1484,64 @@ namespace GeoportalSearch
       }
     }
 
-    private void zoomtoFootprintToolStripButton_Click(object sender, RoutedEventArgs e)
+    private void zoomToFootprintToolStripButton_Click(object sender, RoutedEventArgs e)
     {
       try
       {
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
         CswRecord record = (CswRecord)(resultsListBox.SelectedItem);
-
         MapView mapView = MapView.Active;
         Map map = MapView.Active.Map;
 
-      QueuedTask.Run(() =>
-        {
-          BoundingBox currentExtent = new BoundingBox();
-          MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMin, mapView.Extent.YMin, SpatialReferences.WebMercator);
-          MapPoint upperCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMax, mapView.Extent.YMax, SpatialReferences.WebMercator);
-          // Convert to Lat/Long WGS84 used by CSW Filter using BBOX
-          MapPoint projectedLowerCorner = (MapPoint)GeometryEngine.Instance.Project(lowerCorner, SpatialReferences.WGS84);
-          MapPoint projectedUpperCorner = (MapPoint)GeometryEngine.Instance.Project(upperCorner, SpatialReferences.WGS84);
+        QueuedTask.Run(() =>
+          {
+            BoundingBox currentExtent = new BoundingBox();
+            MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMin, mapView.Extent.YMin, SpatialReferences.WebMercator);
+            MapPoint upperCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMax, mapView.Extent.YMax, SpatialReferences.WebMercator);
+            // Convert to Lat/Long WGS84 used by CSW Filter using BBOX
+            MapPoint projectedLowerCorner = (MapPoint)GeometryEngine.Instance.Project(lowerCorner, SpatialReferences.WGS84);
+            MapPoint projectedUpperCorner = (MapPoint)GeometryEngine.Instance.Project(upperCorner, SpatialReferences.WGS84);
 
-          currentExtent.Maxx = projectedUpperCorner.X;
-          currentExtent.Minx = projectedLowerCorner.X;
-          currentExtent.Maxy = projectedUpperCorner.Y;
-          currentExtent.Miny = projectedLowerCorner.Y;
-          if (Double.IsNaN(currentExtent.Minx)) { currentExtent.Minx = -180.0; };
-          if (Double.IsNaN(currentExtent.Maxx)) { currentExtent.Maxx = 180.0; };
-          if (Double.IsNaN(currentExtent.Miny)) { currentExtent.Miny = -90.0; };
-          if (Double.IsNaN(currentExtent.Maxy)) { currentExtent.Maxy = 90.0; };
+            currentExtent.Maxx = projectedUpperCorner.X;
+            currentExtent.Minx = projectedLowerCorner.X;
+            currentExtent.Maxy = projectedUpperCorner.Y;
+            currentExtent.Miny = projectedLowerCorner.Y;
 
-          BoundingBox newExtent = currentExtent;
+            if (Double.IsNaN(currentExtent.Minx))
+            {
+              currentExtent.Minx = -180.0;
+            };
+            if (Double.IsNaN(currentExtent.Maxx))
+            {
+              currentExtent.Maxx = 180.0;
+            };
+            if (Double.IsNaN(currentExtent.Miny))
+            {
+              currentExtent.Miny = -90.0;
+            };
+            if (Double.IsNaN(currentExtent.Maxy))
+            {
+              currentExtent.Maxy = 90.0;
+            };
+            BoundingBox newExtent = currentExtent;
 
-          drawfootprint(record, false, false);
-          newExtent = updatedExtent(currentExtent, record.BoundingBox);
+            drawfootprint(record, false, false);
+            newExtent = updatedExtent(currentExtent, record.BoundingBox);
 
-          //zoom to extent of the footprint
-          List<MapPoint> points = new List<MapPoint>
+            //zoom to extent of the footprint
+            List<MapPoint> points = new List<MapPoint>
             {
               MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Maxy),
               MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Maxy),
               MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Miny),
               MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Miny)
             };
-          Polygon polygon = PolygonBuilder.CreatePolygon(points, SpatialReferences.WGS84);
-
-          mapView.ZoomTo(polygon);
-        });
+            Polygon polygon = PolygonBuilder.CreatePolygon(points, SpatialReferences.WGS84);
+            mapView.ZoomTo(polygon);
+          });
       }
       catch (Exception ex)
       {
-
         ShowErrorMessageBox(ex.Message);
       }
       finally
@@ -1483,7 +1557,6 @@ namespace GeoportalSearch
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
         CswRecord record = (CswRecord)(resultsListBox.SelectedItem);
         drawfootprint(record, true, true);
-
       }
       catch (Exception ex)
       {
@@ -1502,7 +1575,6 @@ namespace GeoportalSearch
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
         MapView mapView = MapView.Active;
         Map map = MapView.Active.Map;
-
         MapPoint lowerCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMin, mapView.Extent.YMin, SpatialReferences.WebMercator);
         MapPoint upperCorner = MapPointBuilder.CreateMapPoint(mapView.Extent.XMax, mapView.Extent.YMax, SpatialReferences.WebMercator);
         // Convert to Lat/Long WGS84 used by CSW Filter using BBOX
@@ -1514,10 +1586,23 @@ namespace GeoportalSearch
         currentExtent.Minx = projectedLowerCorner.X;
         currentExtent.Maxy = projectedUpperCorner.Y;
         currentExtent.Miny = projectedLowerCorner.Y;
-        if (Double.IsNaN(currentExtent.Minx)) { currentExtent.Minx = -180.0; };
-        if (Double.IsNaN(currentExtent.Maxx)) { currentExtent.Maxx = 180.0; };
-        if (Double.IsNaN(currentExtent.Miny)) { currentExtent.Miny = -90.0; };
-        if (Double.IsNaN(currentExtent.Maxy)) { currentExtent.Maxy = 90.0; };
+
+        if (Double.IsNaN(currentExtent.Minx))
+        {
+          currentExtent.Minx = -180.0;
+        };
+        if (Double.IsNaN(currentExtent.Maxx))
+        {
+          currentExtent.Maxx = 180.0;
+        };
+        if (Double.IsNaN(currentExtent.Miny))
+        {
+          currentExtent.Miny = -90.0;
+        };
+        if (Double.IsNaN(currentExtent.Maxy))
+        {
+          currentExtent.Maxy = 90.0;
+        };
 
         BoundingBox newExtent = currentExtent;
         if (showAll)
@@ -1526,12 +1611,11 @@ namespace GeoportalSearch
           System.Windows.Forms.ToolTip toolTipForshowAll = new System.Windows.Forms.ToolTip();
           showAllFootprintToolStripButton.ToolTip = StringResources.hideAllFootprintTooltip;
           //imgShowAllFootprints.Source = new BitmapImage(new Uri(@"pack://application:,,,/Images/hideAll.gif"));
-
           foreach (Object obj in resultsListBox.Items)
           {
             currentExtent = newExtent;
             CswRecord record = (CswRecord)obj;
-            if (record.BoundingBox.Maxx != NONEXSISTANTNUMBER)
+            if (record.BoundingBox.Maxx != NonExistantNumber)
             {
               drawfootprint(record, true, false);
               newExtent = updatedExtent(currentExtent, record.BoundingBox);
@@ -1546,9 +1630,7 @@ namespace GeoportalSearch
             MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Miny)
           };
           Polygon polygon = PolygonBuilder.CreatePolygon(points, SpatialReferences.WGS84);
-
           mapView.ZoomTo(polygon);
-
           var graphicsLayer = map.GetLayersAsFlattenedList().OfType<ArcGIS.Desktop.Mapping.GraphicsLayer>().FirstOrDefault();
           QueuedTask.Run(() =>
           {
@@ -1560,13 +1642,11 @@ namespace GeoportalSearch
           showAll = true;
           showAllFootprintToolStripButton.ToolTip = StringResources.showAllFootPrintToolTip;
           //imgShowAllFootprints.Source = new BitmapImage(new Uri(@"pack://application:,,,/Images/showAll.gif"));
-
-          deleteelements();
+          DeleteElements();
         }
       }
       catch (Exception ex)
       {
-
         ShowErrorMessageBox(ex.Message);
       }
       finally
@@ -1580,9 +1660,8 @@ namespace GeoportalSearch
       try
       {
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
-        deleteelements();
+        DeleteElements();
         showAll = true;
-
         showAllFootprintToolStripButton.ToolTip = StringResources.showAllFootPrintToolTip;
         imgShowAllFootprints.Source = new BitmapImage(new Uri(@"Images/showAll.gif"));
       }
@@ -1626,7 +1705,6 @@ namespace GeoportalSearch
         catalogComboBox.ItemsSource = catalogListBox.ItemsSource;
         catalogComboBox.DisplayMemberPath = catalogListBox.DisplayMemberPath;
         catalogComboBox.SelectedValuePath = catalogListBox.SelectedValuePath;
-
         _isCatalogListDirty = false;
       }
     }
@@ -1656,9 +1734,8 @@ namespace GeoportalSearch
 
     private void NumberValidationTextBox(object sender, System.Windows.Input.TextCompositionEventArgs e)
     {
-        Regex regex = new Regex("[^0-9]+");
-        e.Handled = regex.IsMatch(e.Text);
+      Regex regex = new Regex("[^0-9]+");
+      e.Handled = regex.IsMatch(e.Text);
     }
-
   }
 }

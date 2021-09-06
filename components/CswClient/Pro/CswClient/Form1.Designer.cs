@@ -1,4 +1,4 @@
-﻿
+
 namespace GeoportalSearch
 {
   partial class FormViewMetadata
@@ -32,18 +32,18 @@ namespace GeoportalSearch
       System.ComponentModel.ComponentResourceManager resources = new System.ComponentModel.ComponentResourceManager(typeof(FormViewMetadata));
       this.webBrowserViewer = new System.Windows.Forms.WebBrowser();
       this.SuspendLayout();
-      // 
+      //
       // webBrowserViewer
-      // 
+      //
       this.webBrowserViewer.Dock = System.Windows.Forms.DockStyle.Fill;
       this.webBrowserViewer.Location = new System.Drawing.Point(0, 0);
       this.webBrowserViewer.MinimumSize = new System.Drawing.Size(20, 20);
       this.webBrowserViewer.Name = "webBrowserViewer";
       this.webBrowserViewer.Size = new System.Drawing.Size(800, 450);
       this.webBrowserViewer.TabIndex = 0;
-      // 
+      //
       // FormViewMetadata
-      // 
+      //
       this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
       this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
       this.ClientSize = new System.Drawing.Size(800, 450);

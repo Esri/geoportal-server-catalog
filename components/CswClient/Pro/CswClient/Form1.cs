@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -12,18 +12,27 @@ namespace GeoportalSearch
 {
   public partial class FormViewMetadata : Form
   {
+
     #region Private variables
+
     private string _caption = "";
     private string _filePath = "";
+
     #endregion
 
     public string MetadataFilePath
     {
-      get { return _filePath; }
+      get
+      {
+        return _filePath;
+      }
     }
     public string MetadataTitle
     {
-      set { this.Text = value + " - " + _caption; }
+      set
+      {
+        this.Text = value + " - " + _caption;
+      }
     }
     public FormViewMetadata()
     {
@@ -37,7 +46,9 @@ namespace GeoportalSearch
       Uri tmpUri = new Uri(urlString);
       webBrowserViewer.Navigate(tmpUri);
     }
+
     #region Methods
+
     /// <summary>
     /// Updates UI depending on current locale
     /// </summary>
@@ -71,6 +82,8 @@ namespace GeoportalSearch
     {
       _caption = this.Text;   // "Metadata Viewer";
     }
+
     #endregion
+
   }
 }
