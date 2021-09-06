@@ -1,6 +1,9 @@
 define({
   root: ({
-    
+    classes: {
+      ci_citation: "Citation"
+    },
+
     documentTypes: {
       data: {
         caption: "ISO 19115 (Data)",
@@ -101,15 +104,18 @@ define({
     CI_Citation: {
       title: "Title",
       alternateTitle: "Alternate Title",
-      identifier: "Unique Resource Identifier",
-      resource: {
-        title: "Resource Title",
-        date: "Resource Date"
-      },
-      specification: {
-        title: "Specification Title",
-        date: "Specification Date"
-      }
+      date: "Date",
+      edition: "Edition",
+      editionDate: "Edition Date",
+      identifier: "Identifier",
+      citedResponsibleParty: "Cited Responsible Party",
+      presentationForm: "Presentation Form",
+      series: "Series",
+      otherCitationDetails: "Other Citation Details",
+      isbn: "ISBN",
+      issn: "ISSN",
+      onlineResource: "Online Resource",
+      graphic: "Graphic",
     },
     
     CI_Contact: {
@@ -151,25 +157,53 @@ define({
     },
     
     CI_OnLineFunctionCode: {
-      caption: "Function",
       download: "Download",
       information: "Information",
       offlineAccess: "Offline Access",
       order: "Order",
       search: "Search",
-	  apiDocument: "API Document"
+      completeMetadata: "Complete Metadata",
+      browseGraphic: "Browse Graphic",
+      upload: "Upload",
+      emailService: "Email Service",
+      browsing: "Browsing",
+      fileAccess: "File Access"
     },
     
     CI_OnlineResource: {
-      caption: "Online Resource",
       linkage: "URL",
       protocol: "Protocol",
       applicationProfile: "Application Profile",
       name: "Name",
       description: "Description",
-      sFunction: "Function"
+      function: "Function",
+      protocolRequest: "Protocol Request"
     },
     
+    CI_PresentationFormCode: {
+      documentDigital: "Document Digital",
+      documentHardcopy: "Document Hardcopy",
+      imageDigital: "Image Digital",
+      imageHardcopy: "Image Hardcopy",
+      mapDigital: "Map Digital",
+      mapHardcopy: "Map Hardcopy",
+      modelDigital: "Model Digital",
+      modelHardcopy: "Model Hardcopy",
+      profileDigital: "Profile Digital",
+      profileHardcopy: "Profile Hardcopy",
+      tableDigital: "Table Digital",
+      tableHardcopy: "Table Hardcopy",
+      videoDigital: "Video Digital",
+      videoHardcopy: "Video Hardcopy",
+      audioDigital: "Audio Digital",
+      audioHardcopy: "Audio Hardcopy",
+      multimediaDigital: "Multimedia Digital",
+      multimediaHardcopy: "Multimedia Hardcopy",
+      physicalObject: "Physical Object",
+      diagramDigital: "Diagram Digital",
+      diagramHardcopy: "Diagram Hardcopy"
+    },
+
     CI_ResponsibleParty: {
       caption: "Point of Contact",
       individualName: "Individual Name",
@@ -179,8 +213,13 @@ define({
       role: "Role"
     },
     
+    CI_Responsibility: {
+      role: "Role",
+      extent: "Extent",
+      party: "Party"
+    },
+
     CI_RoleCode: {
-      caption: "Role",
       resourceProvider: "Resource Provider",
       custodian: "Custodian",
       owner: "Owner",
@@ -191,9 +230,24 @@ define({
       principalInvestigator: "Principal Investigator",
       processor: "Processor",
       publisher: "Publisher",
-      author: "Author"
+      author: "Author",
+      sponsor: "Sponsor",
+      coAuthor: "Co-author",
+      collaborator: "Collaborator",
+      editor: "Editor",
+      mediator: "Mediator",
+      rightsHolder: "Rights Holder",
+      contributor: "Contributor",
+      funder: "Funder",
+      stakeholder: "Stakeholder",
     },
     
+    CI_Series: {
+      name: "Name",
+      issueIdentification: "Issue Identification",
+      page: "Page"
+    },
+
     CI_Telephone: {
       voice: "Voice",
       facsimile: "Fax"
@@ -232,9 +286,9 @@ define({
     EX_Extent: {
       caption: "Extent",
       description: "Description",
-      geographicElement: "Spatial Extent",
-      temporalElement: "Temporal Extent",
-      verticalElement: "Vertical Extent"
+      geographicElement: "Spatial Element",
+      temporalElement: "Temporal Element",
+      verticalElement: "Vertical Element"
     },
     
     EX_GeographicBoundingBox: {
@@ -258,7 +312,8 @@ define({
     EX_VerticalExtent: {
       minimumValue: "Minimum Value",
       maximumValue: "Maximum Value",
-      verticalCRS: "Vertical CRS"
+      verticalCRS: "Vertical CRS",
+      verticalCRSId: "Vertical CRS ID"
     },
     
     Length: {
@@ -315,9 +370,11 @@ define({
     },
     
     MD_Identifier: {
-      caption: "URI",
-      identifierCaption: "Identifier",
-      code: "Code"
+      authority: "Authority",
+      code: "Code",
+      codeSpace: "Code Space",
+      version: "Version",
+      description: "Description",
     },
     
     MD_Keywords: {
@@ -364,18 +421,34 @@ define({
     
     MD_Metadata: {
       caption: "Metadata",
+      metadataIdentifier: "Identifier",
+      defaultLocale: "Default Locale",
+      parentMetadata: "Parent Metadata",
+      contact: "Metadata Contact",
+      dateInfo: "Date Info",
+      metadataStandard: "Metadata Standard",
+      metadataProfile: "Metadata Profile",
       fileIdentifier: "File Identifier",
+      alternativeMetadataReference: "Alternative Metadata Reference",
+      otherLocale: "Other Locale",
+      metadataLinkage: "Metadata Linkage",
+      spatialRepresentationInfo: "Spatial Representation",
+      metadataExtensionInfo: "Metadata Extension",
+      identificationInfo: "Identification",
+      contentInfo: "Content",
+      distributionInfo: "Distribution",
+      dataQualityInfo: "Quality",
+      portrayalCatalogueInfo: "Portrayal Catalogue",
+      metadataConstraints: "Constraints",
+      metadataMaintenance: "Metadata Maintenance",
+      resourceLineage: "Lineage",
+      metadataScope: "Metadata Scope",
+
       language: "Metadata Language",
       hierarchyLevel: "Hierarchy Level",
       hierarchyLevelName: "Hierarchy Level Name",
-      contact: "Metadata Contact",
       dateStamp: "Metadata Date",
-      metadataStandardName: "Metadata Standard Name",
-      metadataStandardVersion: "Metadata Standard Version",
-      referenceSystemInfo: "Reference System",
-      identificationInfo: "Identification",
-      distributionInfo: "Distribution",
-      dataQualityInfo: "Quality"
+      referenceSystemInfo: "Reference System"
     },
     
     MD_ProgressCode: {
@@ -648,6 +721,17 @@ define({
     ObjectReference: {
       uuidref: "UUID Reference",
       xlinkref: "URL Reference"
+    },
+
+    PT_FreeText: {
+      locale: "Locale",
+      textGroup: "Localized Strings"
+    },
+
+    PT_Locale: {
+      language: "Language",
+      country: "Country",
+      characterEncoding: "Character Encoding"
     },
     
     RS_Identifier: {
