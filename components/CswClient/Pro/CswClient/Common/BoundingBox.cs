@@ -16,49 +16,57 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace com.esri.gpt.csw {
+namespace com.esri.gpt.csw
+{
+  /// <summary>
+  /// Maintains information about bounding box.
+  /// </summary>
+  public class BoundingBox
+  {
+    private double minx;
+    private double maxx;
+    private double miny;
+    private double maxy;
+
+    #region "Properties"
+
     /// <summary>
-    /// Maintains information about bounding box.
+    /// Minx parameter
     /// </summary>
-    public class BoundingBox {
-
-        private double minx;
-        private double maxx;
-        private double miny;
-        private double maxy;
-
-        #region "Properties"
-        /// <summary>
-        /// Minx parameter
-        /// </summary>
-        public double Minx {
-            get { return minx; }
-            set { minx = value; }
-        }
-
-        /// <summary>
-        /// Maxx parameter
-        /// </summary>
-        public double Maxx {
-            get { return maxx; }
-            set { maxx = value; }
-        }
-
-        /// <summary>
-        /// Miny parameter
-        /// </summary>
-        public double Miny {
-            get { return miny; }
-            set { miny = value; }
-        }
-
-        /// <summary>
-        /// Maxy parameter
-        /// </summary>
-        public double Maxy {
-            get { return maxy; }
-            set { maxy = value; }
-        }
-        #endregion
+    public double Minx
+    {
+      get { return minx; }
+      set { minx = value; }
     }
+
+    /// <summary>
+    /// Maxx parameter
+    /// </summary>
+    public double Maxx
+    {
+      get { return maxx; }
+      set { maxx = value; }
+    }
+
+    /// <summary>
+    /// Miny parameter
+    /// </summary>
+    public double Miny
+    {
+      get { return miny; }
+      set { miny = value; }
+    }
+
+    /// <summary>
+    /// Maxy parameter
+    /// </summary>
+    public double Maxy
+    {
+      get { return maxy; }
+      set { maxy = value; }
+    }
+
+    #endregion
+
+  }
 }
