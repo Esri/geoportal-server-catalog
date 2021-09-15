@@ -1,0 +1,21 @@
+<div data-dojo-attach-point="containerNode">
+
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+      data-dojo-props="target:'gmd:className',minOccurs:1,maxOccurs:1,
+        label:'Class Name'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+      data-dojo-props="target:'gmd:conceptIdentifier',minOccurs:0,maxOccurs:1,
+        label:'URI'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+      data-dojo-props="target:'gmd:ontology',minOccurs:1,maxOccurs:1,
+        label:'Ontology'">
+      <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/citation/ResourceCitation"></div>
+    </div>
+
+</div>

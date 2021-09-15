@@ -1,0 +1,22 @@
+<div data-dojo-attach-point="containerNode">
+  <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" 
+    data-dojo-props="target:'gmd:CI_Date',minOccurs:0">
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+      data-dojo-props="target:'gmd:date',label:'${i18nIso.CI_Date.date}'">
+      <div data-dojo-type="app/gxe/form/iso/GcoElement" 
+        data-dojo-props="target:'gco:Date'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputDate" data-dojo-props="hint: '(yyyy or yyyy-mm or yyyy-mm-dd)'"></div>
+      </div>
+    </div>
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'gmd:dateType'" data-dojo-attach-point="_dateType">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement" data-dojo-props="target:'gmd:CI_DateTypeCode'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListAttribute"
+          data-dojo-props="value:'${inspireCodeListPrefix}CI_DateTypeCode'">
+        </div>
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute"
+          data-dojo-props="value:'publication', fixed:true">
+        </div>
+      </div>    
+    </div>            
+  </div>
+</div>

@@ -6,13 +6,6 @@
 <meta http-equiv="X-UA-Compatible" content="IE=edge" />
 <meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
 
-<!--
-<link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
-<link rel="stylesheet" href="//local_server/arcgis_js_api/library/3.28/3.28/esri/themes/calcite/esri/esri.css">
-<link rel="stylesheet" href="//local_server/arcgis_js_api/library/3.28/3.28/esri/dijit/metadata/css/gxe.css"/>
-<link rel="stylesheet" href="//local_server/arcgis_js_api/library/3.28/3.28/esri/dijit/metadata/css/gxe-calcite.css"/>
--->
-
 <link rel="stylesheet" href="//esri.github.io/calcite-bootstrap/assets/css/calcite-bootstrap.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.28/esri/themes/calcite/dijit/calcite.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.28/esri/themes/calcite/esri/esri.css">
@@ -35,32 +28,24 @@
 </script>
 
 <script src="//js.arcgis.com/3.28"></script>
-<!-- <script src="//local_server/arcgis_js_api/library/3.28/3.28"></script>-->
 
 <script>
 
   var gxeWasInitialized = false;
 
   var gxeUnusedTypeKeys = [
-    "gemini-iso-19115", "gemini-iso-19119",
-    "inspire-iso-19115", "inspire-iso-19119",
-	"sdsfie-data", "arcgis-rtx", "geoplatform",
-    "iso-19115", "iso-19119", "iso-19115-2", "fgdc-blm"
+    "gemini-iso-19115", 
+    "gemini-iso-19119",
+    "inspire-iso-19115", 
+    "inspire-iso-19119",
+  	"geoplatform",
   ];
 
   var gxeAllowedTypeKeys = [
-    "iso-19115", "iso-19119", "iso-19115-2", "fgdc", "dublin-core", "arcgis"
+  "iso-19115", "iso-19119", "iso-19115-2", "iso-19115-3" /*, "fgdc", "dublin-core", "arcgis" */
   ];
 
   var gxeTypeDefinitions = [
-    {
-      key: "arcgis-rtx",
-      requiredPath: "app/gxe/types/arcgis-rtx/base/DocumentType",
-      interrogationRules: [{
-         path: "/metadata/Esri/ArcGISstyle['RTX-custom-style']",
-         must: true
-      }]
-    },
 	{
       key: "dublin-core",
       requiredPath: "app/gxe/types/dublin-core/base/DataDocumentType",
@@ -74,14 +59,6 @@
     {
       key: "fgdc",
       requiredPath: "esri/dijit/metadata/types/fgdc/base/DocumentType",
-      interrogationRules: [{
-         path: "/metadata/idinfo/citation",
-         must: true
-      }]
-    },
-    {
-      key: "fgdc-blm",
-      requiredPath: "app/gxe/types/fgdc-blm/base/DocumentType",
       interrogationRules: [{
          path: "/metadata/idinfo/citation",
          must: true
@@ -110,8 +87,16 @@
          path: "/gmi:MI_Metadata",
          must: true
       }]
+    },
+    {
+      key: "iso-19115-3",
+      requiredPath: "app/gxe/types/iso-19115-3/base/DataDocumentType",
+      interrogationRules: [{
+         path: "/mdb:MD_Metadata/mdb:metadataStandard/cit:CI_Citation/cit:title/gco:CharacterString",
+         value: "ISO 19115-3 Geographic Information - Metadata - Part 1: Fundamentals",
+         must: true
+      }]
     }
-
   ];
 
   function openMetadataEditor() {
