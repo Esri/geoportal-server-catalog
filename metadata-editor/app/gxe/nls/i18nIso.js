@@ -127,9 +127,27 @@ define({
     
     CI_DateTypeCode: {
       caption: "Date Type",
-      creation: "Creation Date",
-      publication: "Publication Date",
-      revision: "Revision Date"
+      creation: "Creation",
+      publication: "Pulication",
+      revision: "Revision",
+      expiry: "Expiry",
+      lastUpdate: "Last Update",
+      lastRevision: "Last Revision",
+      nextUpdate: "Next Update",
+      unavailable: "Unavailable",
+      obtainable: "Obtainable",
+      inForce: "In Force",
+      adopted: "Adopted",
+      deprecated: "Deprecated",
+      superseded: "Superseded",
+      replaced: "Replaced",
+      validityBegins: "Validity Begins",
+      validityExpires: "Validity Expires",
+      valid: "Valid",
+      released: "Released",
+      access: "Access",
+      distribution: "Distribution",
+      distributed: "Distributed"
     },
     
     CI_OnLineFunctionCode: {

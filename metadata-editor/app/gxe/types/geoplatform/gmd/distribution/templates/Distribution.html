@@ -1,0 +1,32 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+    data-dojo-props="target:'gmd:distributionInfo',minOccurs:0,maxOccurs:1,
+      label:'${i18nIso.MD_Metadata.distributionInfo}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+      data-dojo-props="target:'gmd:MD_Distribution',minOccurs:0">
+
+      <div data-dojo-type="app/gxe/types/geoplatform/gmd/distribution/DistributionFormat"></div>
+
+      <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+        data-dojo-props="target:'gmd:distributor',minOccurs:0,maxOccurs:'unbounded',label:'Distributor'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+          data-dojo-props="target:'gmd:MD_Distributor',minOccurs:0">
+
+          <div data-dojo-type="app/gxe/types/geoplatform/gmd/distribution/MD_Distributor"></div>
+        </div>
+      </div>
+
+      <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+        data-dojo-props="target:'gmd:distributor',minOccurs:0,maxOccurs:'unbounded',label:'Transfer Options'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+          data-dojo-props="target:'gmd:transferOptions',minOccurs:0">
+
+          <div data-dojo-type="app/gxe/types/geoplatform/gmd/distribution/TransferOptions"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

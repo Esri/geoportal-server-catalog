@@ -1,0 +1,68 @@
+<div data-dojo-attach-point="containerNode">
+
+  <!-- metadata identifier -->
+  <div data-dojo-type="app/gxe/types/iso-19115-3/mdb/metadataIdentifier" data-dojo-props="label:'${i18nIso3.MD_Metadata.metadataIdentifier}'">
+  </div>
+
+  <!-- default Locale -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:defaultLocale',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.MD_Metadata.defaultLocale}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_Locale">
+    </div>
+  </div>
+
+  <!-- parent metadata -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:parentMetadata',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.parentMetadata}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+    </div>
+  </div>
+
+  <!-- contact TODO -->
+
+  <!-- date info -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:dateInfo',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.dateInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Date">
+    </div>
+  </div>
+
+  <!-- metadata standard -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:metadataStandard',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.metadataStandard}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+    </div>
+  </div>  
+
+  <!-- metadata profile -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:metadataProfile',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.metadataProfile}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+    </div>
+  </div>  
+
+  <!-- alternative metadata reference -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:alternativeMetadataReference',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.alternativeMetadataReference}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+    </div>
+  </div> 
+
+  <!-- other Locale -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:otherLocale',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.MD_Metadata.otherLocale}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_Locale" data-dojo-props="label:'PT_Locale'">
+    </div>
+  </div>  
+
+  <!-- metadata linkage TODO -->
+
+  <!--
+    Role name:spatialRepresentationInfo
+    Role name:referenceSystemInfo
+    Role name:metadataExtensionInfo
+    Role name:identificationInfo
+    Role name:contentInfo
+    Role name:distributionInfo
+    Role name:dataQualityInfo
+    Role name:portrayalCatalogueInfo
+    Role name:metadataConstraints
+    Role name:applicationSchemaInfo
+    Role name:metadataMaintenance
+    Role name:resourceLineage
+    Role name:metadataScope
+  -->
+</div>

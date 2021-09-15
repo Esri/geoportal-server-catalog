@@ -1,0 +1,65 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+    data-dojo-props="target:'gmd:report',showHeader:false,
+      matchTopNode:[
+        {
+          qPath: 'gmd:DQ_ConceptualConsistency/gmd:nameOfMeasure/gmx:Anchor/@xlink:href',
+          qValue: 'http://inspire.ec.europa.eu/metadata-codelist/QualityOfServiceCriteriaCode/performance',
+          qMode: 'must'
+        }
+      ]">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" 
+      data-dojo-props="target:'gmd:DQ_ConceptualConsistency'">
+
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-attach-point="_nameOfMeasure"
+        data-dojo-props="target:'gmd:nameOfMeasure'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+          data-dojo-props="target:'gmx:Anchor',showHeader:false,value:'Performance',fixed:true">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute"
+               data-dojo-props="target:'xlink:href',showHeader:false,fixed:true,
+                                value:'http://inspire.ec.europa.eu/metadata-codelist/QualityOfServiceCriteriaCode/performance'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/InputText"></div>
+        </div>
+      </div>  
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'gmd:measureDescription',label:'${i18nInspire.dataQuality.conceptualConsistency.measureDescription}'">    
+        <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+          data-dojo-props="target:'gco:CharacterString'"></div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'gmd:result',
+          label:'${i18nIso.DQ_ConformanceResult.caption}'">
+        
+        <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+          data-dojo-props="target:'gmd:DQ_QuantitativeResult'">
+          
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-attach-point="_valueUnit"
+            data-dojo-props="target:'gmd:valueUnit'">
+            <div data-dojo-type="esri/dijit/metadata/form/Attribute"
+                 data-dojo-props="target:'xlink:href',fixed:true,value:'http://www.opengis.net/def/uom/SI/second'">
+            </div>
+          </div>
+          
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+            data-dojo-props="target:'gmd:value'">
+            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+                 data-dojo-props="target:'gco:Record'">
+              <div data-dojo-type="esri/dijit/metadata/form/Attribute" data-dojo-attach-point="_xs"
+                   data-dojo-props="target:'xmlns:xs',fixed:true,value:'http://www.w3.org/2001/XMLSchema'">
+              </div>
+              <div data-dojo-type="esri/dijit/metadata/form/Attribute" data-dojo-attach-point="_type"
+                   data-dojo-props="target:'xsi:type',fixed:true,value:'xs:double'">
+              </div>
+              <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,hint:'${i18nInspire.dataQuality.conceptualConsistency.hints.performance}'"></div>
+            </div>
+          </div>
+        </div>
+      </div>  
+      
+    </div>
+  </div>  
+
+</div>
