@@ -9,12 +9,14 @@
     </div>
 
     <!-- extent -->
-    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gmd:extent',minOccurs:0,maxOccurs:'unbounded',preferOpen:false,label:'${i18nIso3.CI_Responsibility.extent}'">
-      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/EX_Extent">
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:extent',minOccurs:0,maxOccurs:'unbounded',preferOpen:false,label:'${i18nIso3.CI_Responsibility.extent}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gex/EX_Extent">
       </div>
     </div>
 
     <!-- party -->
-
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:CI_Party',minOccurs:0,maxOccurs:'unbounded',preferOpen:false,label:'${i18nIso3.CI_Responsibility.party}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Party"></div>
+    </div>
   </div>
 </div>
