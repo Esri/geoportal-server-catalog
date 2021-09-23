@@ -6,8 +6,8 @@ define({
 
     documentTypes: {
       data: {
-        caption: "ISO 19115 (Data)",
-        description: ""
+        caption: "ISO 19115-3",
+        description: "ISO 19115-3 Geographic Information - Metadata - Part 1: Fundamentals"
       },
       service: {
         caption: "ISO 19119 (Service)",
@@ -59,7 +59,8 @@ define({
         couplingType: "Coupling Type",
         operation: "Operation",
         operatesOn: "Operates On"
-      }
+      },
+      additionalDocumentation: "Additional Documentation"
     },
     
     distributionSection: {
@@ -81,8 +82,8 @@ define({
       environment: "Environment"
     },
     
-    AbstractMD_Identification: {
-      sAbstract: "Abstract",
+    MD_Identification: {
+      abstract: "Abstract",
       purpose: "Purpose",
       credit: "Credits",
       pointOfContact: "Point of Contact",
@@ -352,7 +353,8 @@ define({
       spatialRepresentationType: "Spatial Representation Type",
       spatialResolution: "Spatial Resolution",
       language: "Resource Language",
-      supplementalInformation: "Supplemental"
+      supplementalInformation: "Supplemental",
+      environmentDescription: "Environment Description"
     },
     
     MD_DigitalTransferOptions: {
