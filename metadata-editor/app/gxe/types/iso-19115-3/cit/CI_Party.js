@@ -9,12 +9,12 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",*/
         //"./CI_Contact",
-        "./CI_RoleCode",
+        //"./CI_RoleCode",
         "dojo/text!./templates/CI_Party.html"
       ],
 function(declare, lang, has, Descriptor, 
-  //Element, Tabs, AbstractObject, CodeListReference, GcoElement, ObjectReference, CI_Contact,
-  CI_RoleCode, template) {
+  //Element, Tabs, AbstractObject, CodeListReference, GcoElement, ObjectReference, CI_Contact,  CI_RoleCode, 
+  template) {
 
   var oThisClass = declare(Descriptor, {
 
