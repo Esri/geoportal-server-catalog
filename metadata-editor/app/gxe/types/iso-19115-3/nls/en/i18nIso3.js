@@ -346,7 +346,12 @@ define({
   
   MD_Constraints: {
     caption: "Usage Constraints",
-    useLimitation: "Use Limitation"
+    useLimitation: "Use Limitation",
+    reference: "Reference",
+    handlingDescription: "Handling Description",
+    classificatoinSystem: "Classification System",
+    userNote: "User Note",
+    otherConstraints: "Other Constraints"
   },
   
   MD_DataIdentification: {
