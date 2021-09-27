@@ -347,7 +347,12 @@ define({
   
   MD_Constraints: {
     caption: "使用約束",
-    useLimitation: "使用限制"
+    useLimitation: "使用限制",
+    reference: "Reference",
+    handlingDescription: "Handling Description",
+    classificatoinSystem: "Classification System",
+    userNote: "User Note",
+    otherConstraints: "Other Constraints"
   },
   
   MD_DataIdentification: {
