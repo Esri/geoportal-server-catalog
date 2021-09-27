@@ -3,13 +3,15 @@ define(["dojo/_base/declare",
         "dojo/has",
         "../base/MyProfileDescriptor",
         "esri/dijit/metadata/form/Element",
-        "../mcc/MD_Identifier",
-        "dojo/text!./templates/metadataIdentifier.html"],
-function(declare, lang, has, Descriptor, Element, MD_Identifier, template) {
+        "esri/dijit/metadata/form/iso/AbstractObject",
+        "dojo/text!./templates/CI_Telephone.html"
+      ],
+function(declare, lang, has, Descriptor, Element, AbstractObject, template) {
 
   var oThisClass = declare(Descriptor, {
 
-    templateString : template
+    templateString: template,
+  
 
   });
 
