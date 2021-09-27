@@ -1,5 +1,5 @@
 <div data-dojo-attach-point="containerNode">
-
+<div data-dojo-type="esri/dijit/metadata/form/Tabs">
   <!-- metadata identifier -->
   <div data-dojo-type="app/gxe/types/iso-19115-3/mdb/metadataIdentifier" data-dojo-props="label:'${i18nIso3.MD_Metadata.metadataIdentifier}'">
   </div>
@@ -16,7 +16,10 @@
     </div>
   </div>
 
-  <!-- contact TODO -->
+  <!-- contact -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:contact', minOccurs:0, maxOccurs:1, preferOpen:true, label:'${i18nIso3.CI_ResponsibleParty.caption}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility"></div>
+  </div>
 
   <!-- date info -->
   <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:dateInfo',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.dateInfo}'">
@@ -48,10 +51,22 @@
     </div>
   </div>  
 
-  <!-- metadata linkage TODO -->
+  
+  <!-- metadata linkage -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:CI_OnlineResource',minOccurs:0, label:'${i18nIso3.MD_Metadata.metadataLinkage}'">
+  <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_OnlineResource">
+  </div>
+</div>
 
-  <!--
-    Role name:spatialRepresentationInfo
+ 
+  <!-- Role name:spatialRepresentationInfo -->
+
+
+  <!-- Role name:spatialRepresentationInfo -->
+ 
+  <div data-dojo-type="app/gxe/types/iso-19115-3/mdb/MD_ReferenceSystem" data-dojo-props="label:'Reference System Info'"></div>
+
+ <!--
     Role name:referenceSystemInfo
     Role name:metadataExtensionInfo
     Role name:identificationInfo
@@ -65,4 +80,5 @@
     Role name:resourceLineage
     Role name:metadataScope
   -->
+</div>
 </div>
