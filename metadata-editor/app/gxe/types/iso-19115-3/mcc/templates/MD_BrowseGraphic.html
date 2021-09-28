@@ -1,0 +1,45 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:MD_BroseGraphic', label:'${i18nIso3.MD_BrowseGraphic.caption}'">
+    
+    <!-- fileName CharacterString-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:fileName',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.MD_BrowseGraphic.fileName}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- fileDescription CharaterString-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:fileDescription',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_BrowseGraphic.fileDescription}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- fileType CharacterString-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:fileType',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_BrowseGraphic.fileType}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- imageConstraints MD_Constraints-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:imageConstraints',minOccurs:0,label:'Image Constraints'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'',value:''"></div>          
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'EPS',value:'EPS'"></div>    
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'GIF',value:'GIF'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'JPEG',value:'JPEG'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'PBM',value:'PBM'"></div>    
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'PS',value:'PS'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'TIFF',value:'TIFF'"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'PDF',value:'PDF'"></div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- linkage CI_OnlineResource-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:linkage',minOccurs:0,label:'${i18nIso3.CI_OnlineResource.linkage}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_OnlineResource"></div>
+    </div>
+
+  </div>
+</div>
