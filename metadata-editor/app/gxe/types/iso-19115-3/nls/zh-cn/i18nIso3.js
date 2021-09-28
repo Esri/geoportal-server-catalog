@@ -28,7 +28,9 @@ define({
     identification: "Identification",
     distribution: "Distribution",
     quality: "Quality",
-    acquisition: "Acquisition"
+    acquisition: "Acquisition",
+    resourceConstraints:"Resource Constraints",
+    resourceLineage:"Resource Lineage"
   },
   
   metadataSection: {
@@ -327,10 +329,36 @@ define({
   },
   
   LI_Lineage: {
-    statement: "Lineage Statement"
+    caption: "Lineage",
+    statement: "Lineage Statement",
+    scope: "Scope",
+    additionalDocumentation:"Additional Documentation",
+    processStep: "Process Step",
+    source: "Lineage Source"
+  },
+
+  LI_ProcessStep: {
+    description: "Description",
+    rationale: "Rationale",
+    stepDateTime:"Step Date Time",
+    processor: "Processor",
+    reference: "Reference",
+    scope: "Scope",
+    source: "Source"
+  },
+
+  LI_Source: {
+    description: "Description",
+    sourceSpatialResolution:"Source Spatial Resolution",
+    sourceReferenceSystem: "Source Reference System",
+    sourceCitation: "Source Citation",
+    sourceMetadata: "Source Metadata",
+    scope: "Scope",
+    sourceStep: "Source Step"
   },
   
   MD_BrowseGraphic: {
+    caption: "Browse Graphic",
     fileName: "Browse Graphic URL",
     fileDescription: "Browse Graphic Caption",
     fileType: "Browse Graphic Type"
@@ -341,7 +369,11 @@ define({
     restricted: "Restricted",
     confidential: "Confidential",
     secret: "Secret",
-    topSecret: "Top Secret"
+    topSecret: "Top Secret",
+    sensitiveButUnclassified:"Sensitive but Unclassified",
+    forOfficialUseOnly: "for Offical Use Only",
+    protected: "Protected",
+    limitedDistribution:"Limited Distribution"
   },
   
   MD_Constraints: {
@@ -351,7 +383,8 @@ define({
     handlingDescription: "Handling Description",
     classificatoinSystem: "Classification System",
     userNote: "User Note",
-    otherConstraints: "Other Constraints"
+    otherConstraints: "Other Constraints",
+    constraintApplicationScope: "Application Scope"
   },
   
   MD_DataIdentification: {
@@ -478,6 +511,13 @@ define({
     distance: "Distance"
   },
   
+  MD_Releasability: {
+    caption: "Releasability",
+    addressee: "Addressee",
+    statement: "Statement",
+    disseminationConstraints: "Dissemination Constraints"
+ },
+ 
   MD_RestrictionCode: {
     copyright: "Copyright",
     patent: "Patent",
@@ -506,9 +546,19 @@ define({
     service: "Service",
     model: "Model",
     tile: "Tile",
-  map: "Map",
-  mapDocument: "Map Document",
-  layer: "Layer"
+    metadata: "metadata",
+    initiative: "Initiative",
+    sample: "Sample",
+    document: "Document",
+    repository: "Repository",
+    aggregate: "Aggregate",
+    product: "Product",
+    collection: "Collection",
+    coverage: "Coverage",
+    application: "Application",
+    map: "Map",
+    mapDocument: "Map Document",
+    layer: "Layer"
   },
   
   MD_ScopeDescription: {
