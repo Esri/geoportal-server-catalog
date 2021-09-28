@@ -28,7 +28,9 @@ define({
     identification: "身份識別",
     distribution: "分佈",
     quality: "品質",
-    acquisition: "收購"
+    acquisition: "收購",
+    resourceConstraints:"資源限制",
+    resourceLineage:"資源譜系"
   },
   
   metadataSection: {
@@ -328,10 +330,36 @@ define({
   },
   
   LI_Lineage: {
-    statement: "譜系說明"
+    caption: "譜系",
+    statement: "譜系說明",
+    scope: "Scope",
+    additionalDocumentation:"Additional Documentation",
+    processStep: "Process Step",
+    source: "Lineage Source"
+  },
+
+  LI_ProcessStep: {
+    description: "Description",
+    rationale: "Rationale",
+    stepDateTime:"Step Date Time",
+    processor: "Processor",
+    reference: "Reference",
+    scope: "Scope",
+    source: "Source"
+  },
+
+  LI_Source: {
+    description: "Description",
+    sourceSpatialResolution:"Source Spatial Resolution",
+    sourceReferenceSystem: "Source Reference System",
+    sourceCitation: "Source Citation",
+    sourceMetadata: "Source Metadata",
+    scope: "Scope",
+    sourceStep: "Source Step"
   },
   
   MD_BrowseGraphic: {
+    caption: "Browse Graphic",
     fileName: "瀏覽圖形 URL",
     fileDescription: "瀏覽圖形標題",
     fileType: "瀏覽圖形類型"
@@ -342,7 +370,11 @@ define({
     restricted: "受限",
     confidential: "機密",
     secret: "機密",
-    topSecret: "絕對機密"
+    topSecret: "絕對機密",
+    sensitiveButUnclassified:"Sensitive but Unclassified",
+    forOfficialUseOnly: "for Offical Use Only",
+    protected: "Protected",
+    limitedDistribution:"Limited Distribution"
   },
   
   MD_Constraints: {
@@ -352,7 +384,8 @@ define({
     handlingDescription: "Handling Description",
     classificatoinSystem: "Classification System",
     userNote: "User Note",
-    otherConstraints: "Other Constraints"
+    otherConstraints: "Other Constraints",
+    constraintApplicationScope: "Application Scope"
   },
   
   MD_DataIdentification: {
@@ -479,6 +512,13 @@ define({
     distance: "距離"
   },
   
+  MD_Releasability: {
+    caption: "Releasability",
+    addressee: "Addressee",
+    statement: "Statement",
+    disseminationConstraints: "Dissemination Constraints"
+ },
+ 
   MD_RestrictionCode: {
     copyright: "版權",
     patent: "專利",
@@ -507,9 +547,19 @@ define({
     service: "服務",
     model: "模型",
     tile: "圖磚",
-  map: "Map",
-  mapDocument: "Map Document",
-  layer: "Layer"
+    metadata: "metadata",
+    initiative: "Initiative",
+    sample: "Sample",
+    document: "Document",
+    repository: "Repository",
+    aggregate: "Aggregate",
+    product: "Product",
+    collection: "Collection",
+    coverage: "Coverage",
+    application: "Application",
+    map: "Map",
+    mapDocument: "Map Document",
+    layer: "Layer"
   },
   
   MD_ScopeDescription: {
