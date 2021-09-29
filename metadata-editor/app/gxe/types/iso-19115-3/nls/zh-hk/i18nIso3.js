@@ -62,7 +62,15 @@ define({
       operation: "操作",
       operatesOn: "運行於"
     },
-    additionalDocumentation: "Additional Documentation"
+    additionalDocumentation: "Additional Documentation",
+    processingLevel: "Processing Level",
+    resourceMaintenance: "Resource Maintenance",
+    graphicOverview: "Graphic Overview",
+    resourceFormat: "Resource Format",
+    descriptiveKeywords: "Descriptive Keywords",
+    resourcSpecificUsage: "Resource Specific Usage",
+    resourceConstraints: "Resource Constraints",
+    associatedResource: "Associated Resource"
 
   },
   
@@ -407,9 +415,35 @@ define({
   
   MD_Format: {
     name: "格式名稱",
-    version: "格式版本"
+    version: "格式版本",
+    formatSpecificationCitation: "Format Specification Citation",
+    amendmentNumber: "Amendment Number",
+    fileDecompressionTechnique: "File Decompression Technique",
+    medium: "Medium",
+    formatDistributor: "Format Distributor"
   },
   
+  MD_Medium: {
+    name: "Medium Name",
+    density: "Density",
+    densityUnits: "Density Units",
+    volumes: "Volumes",
+    mediumFormat:"Medium Format",
+    mediumNote: "Note",
+    identifier: "Identifier"
+  },
+
+  MD_MediumFormatCode: {
+    cpio: "CPIO",
+    tar: "TAR",
+    highSierra: "highSierra",
+    iso9660: "ISO9660",
+    iso9660RockRidge: "ISO9600 rock Ridge",
+    iso9600AppleHFS: "ISO9660 Apple HFS",
+    udf: "UDF"
+  },
+  
+
   MD_Identifier: {
     authority: "Authority",
     code: "Code",
@@ -424,19 +458,76 @@ define({
   },
   
   MD_KeywordTypeCode: {
-    caption: "關鍵字類型",
-    discipline: "專業領域",
-    place: "地點",
-    stratum: "地層",
-    temporal: "時態",
-    theme: "主題",
-  audience: "Audience",
-  subject: "Subject",
-  community: "Community",
-  "function": "Function",
-  domain: "Domain"
+    caption: "Keyword Type",
+    discipline: "Discipline",
+    place: "Place",
+    stratum: "Stratum",
+    temporal: "Temporal",
+    theme: "Theme",
+    dataCentre: "Data centre",
+    featureType: "Feature type",
+    instrument: "Instrument",
+    platform: "Platform",
+    process: "Process",
+    project: "Project",
+    service: "Service",
+    product: "Product",
+    subTopicCategory: "Sub-Topic Category",
+    taxon: "Taxon",
+    audience: "Audience",
+    subject: "Subject",
+    community: "Community",
+    "function": "Function",
+    domain: "Domain"
   },
   
+  MD_Usage: {
+    specificUsage: "Specific Usage",
+    usageDateTime: "Usage DateTime",
+    userDeterminedLimitations: "User Determined Limitations",
+    userContactInfo: "User Contact Info",
+    response: "Response",
+    additionalDocumentation: "Additional Documentation",
+    IdentifiedIssues: "Identified Issues"
+  },
+
+  MD_AssociatedResource: {
+    name: "Name",
+    associationType: "Association Type",
+    initiativeType: "Initiative Type",
+    metadataReference: "Metadata Reference"
+  },
+
+  DS_AssociationTypeCode: {
+    crossReference: "Cross reference",
+    largerWorkCitation: "Larger work citation",
+    partOfSeamlessDatabase: "Part of seamless database",
+    stereoMate: "Stereo mate",
+    isComposedOf: "Is composed of",
+    collectiveTitle: "collective Title",
+    series: "Series",
+    dependency: "Dependency",
+    revisionOf: "Revision Of"
+  },
+
+  DS_InitiativeTypeCode: {
+    campaign: "Campaign",
+    collection: "Collection",
+    exercise: "Exercise",
+    experiment: "Experiment",
+    investigation: "Investigation",
+    mission: "Mission",
+    sensor: "Sensor",
+    operation: "Operation",
+    platform: "Platform",
+    process: "Process",
+    program: "Program",
+    project: "Project",
+    study: "Study",
+    task: "Task",
+    trial: "Trial"
+  },
+
   MD_LegalConstraints: {
     caption: "法律限制",
     accessConstraints: "存取限制",
@@ -458,6 +549,16 @@ define({
     irregular: "不定期",
     notPlanned: "未計劃",
     unknown: "未知"
+  },
+
+  MD_MaintenanceInformation: {
+    caption: "Maintenance Information",
+    maintenanceAndUpdateFrequency: "Maintenance and Update Frequency",
+    maintenanceDate: "Maintenance Date",
+    userDefineMaintenanceFrequency: "User Define Maintenance Frequency",
+    maintenanceScope: "Maintenance Scope",
+    maintenanceNote: "Maintenance Note",
+    contact: "Contact"
   },
   
   MD_Metadata: {
