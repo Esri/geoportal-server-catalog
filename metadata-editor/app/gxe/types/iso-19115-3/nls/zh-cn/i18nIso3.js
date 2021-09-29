@@ -62,7 +62,15 @@ define({
       operation: "Operation",
       operatesOn: "Operates On"
     },
-    additionalDocumentation: "Additional Documentation"
+    additionalDocumentation: "Additional Documentation",
+    processingLevel: "Processing Level",
+    resourceMaintenance: "Resource Maintenance",
+    graphicOverview: "Graphic Overview",
+    resourceFormat: "Resource Format",
+    descriptiveKeywords: "Descriptive Keywords",
+    resourcSpecificUsage: "Resource Specific Usage",
+    resourceConstraints: "Resource Constraints",
+    associatedResource: "Associated Resource"
   },
   
   distributionSection: {
@@ -406,9 +414,35 @@ define({
   
   MD_Format: {
     name: "Format Name",
-    version: "Format Version"
+    version: "Format Version",
+    formatSpecificationCitation: "Format Specification Citation",
+    amendmentNumber: "Amendment Number",
+    fileDecompressionTechnique: "File Decompression Technique",
+    medium: "Medium",
+    formatDistributor: "Format Distributor"
   },
   
+  MD_Medium: {
+    name: "Medium Name",
+    density: "Density",
+    densityUnits: "Density Units",
+    volumes: "Volumes",
+    mediumFormat:"Medium Format",
+    mediumNote: "Note",
+    identifier: "Identifier"
+  },
+
+  MD_MediumFormatCode: {
+    cpio: "CPIO",
+    tar: "TAR",
+    highSierra: "highSierra",
+    iso9660: "ISO9660",
+    iso9660RockRidge: "ISO9600 rock Ridge",
+    iso9600AppleHFS: "ISO9660 Apple HFS",
+    udf: "UDF"
+  },
+  
+
   MD_Identifier: {
     authority: "Authority",
     code: "Code",
@@ -429,13 +463,70 @@ define({
     stratum: "Stratum",
     temporal: "Temporal",
     theme: "Theme",
-  audience: "Audience",
-  subject: "Subject",
-  community: "Community",
-  "function": "Function",
-  domain: "Domain"
+    dataCentre: "Data centre",
+    featureType: "Feature type",
+    instrument: "Instrument",
+    platform: "Platform",
+    process: "Process",
+    project: "Project",
+    service: "Service",
+    product: "Product",
+    subTopicCategory: "Sub-Topic Category",
+    taxon: "Taxon",
+    audience: "Audience",
+    subject: "Subject",
+    community: "Community",
+    "function": "Function",
+    domain: "Domain"
   },
   
+  MD_Usage: {
+    specificUsage: "Specific Usage",
+    usageDateTime: "Usage DateTime",
+    userDeterminedLimitations: "User Determined Limitations",
+    userContactInfo: "User Contact Info",
+    response: "Response",
+    additionalDocumentation: "Additional Documentation",
+    IdentifiedIssues: "Identified Issues"
+  },
+
+  MD_AssociatedResource: {
+    name: "Name",
+    associationType: "Association Type",
+    initiativeType: "Initiative Type",
+    metadataReference: "Metadata Reference"
+  },
+
+  DS_AssociationTypeCode: {
+    crossReference: "Cross reference",
+    largerWorkCitation: "Larger work citation",
+    partOfSeamlessDatabase: "Part of seamless database",
+    stereoMate: "Stereo mate",
+    isComposedOf: "Is composed of",
+    collectiveTitle: "collective Title",
+    series: "Series",
+    dependency: "Dependency",
+    revisionOf: "Revision Of"
+  },
+
+  DS_InitiativeTypeCode: {
+    campaign: "Campaign",
+    collection: "Collection",
+    exercise: "Exercise",
+    experiment: "Experiment",
+    investigation: "Investigation",
+    mission: "Mission",
+    sensor: "Sensor",
+    operation: "Operation",
+    platform: "Platform",
+    process: "Process",
+    program: "Program",
+    project: "Project",
+    study: "Study",
+    task: "Task",
+    trial: "Trial"
+  },
+
   MD_LegalConstraints: {
     caption: "Legal Constraints",
     accessConstraints: "Access Constraints",
@@ -457,6 +548,16 @@ define({
     irregular: "Irregular",
     notPlanned: "Not Planned",
     unknown: "Unknown"
+  },
+
+  MD_MaintenanceInformation: {
+    caption: "Maintenance Information",
+    maintenanceAndUpdateFrequency: "Maintenance and Update Frequency",
+    maintenanceDate: "Maintenance Date",
+    userDefineMaintenanceFrequency: "User Define Maintenance Frequency",
+    maintenanceScope: "Maintenance Scope",
+    maintenanceNote: "Maintenance Note",
+    contact: "Contact"
   },
   
   MD_Metadata: {
