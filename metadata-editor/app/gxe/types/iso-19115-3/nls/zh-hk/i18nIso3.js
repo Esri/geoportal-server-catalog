@@ -628,7 +628,10 @@ define({
     license: "授權",
     intellectualPropertyRights: "智慧財產權",
     restricted: "受限",
-    otherRestrictions: "其他限制"
+    otherRestrictions: "其他限制",
+    unrestricted: "unrestricted",
+    licenceUnrestricted:"licenceUnrestricted",
+    licenceEndUser:"LicenceEndUser"
   },
   
   MD_ScopeCode: {
