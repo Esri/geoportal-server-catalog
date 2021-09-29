@@ -627,7 +627,10 @@ define({
     license: "License",
     intellectualPropertyRights: "Intellectual Property Rights",
     restricted: "Restricted",
-    otherRestrictions: "Other Restrictions"
+    otherRestrictions: "Other Restrictions",
+    unrestricted: "unrestricted",
+    licenceUnrestricted:"licenceUnrestricted",
+    licenceEndUser:"LicenceEndUser"
   },
   
   MD_ScopeCode: {
