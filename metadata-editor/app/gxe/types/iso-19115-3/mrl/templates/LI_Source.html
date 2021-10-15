@@ -1,0 +1,42 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:LI_Source', label:'${i18nIso3.LI_Lineage.source}'">
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+    <!-- description Free Text -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:description',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Source.description}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+    <!-- sourceSpatialResolution MD_Resolution -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:sourceSpatialResolution',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Source.sourceSpatialResolution}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_Resolution"> </div>
+    </div>
+
+    <!-- sourceReferenceSystem MD_ReferenceSystem-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:sourceReferenceSystem',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Source.sourceReferenceSystem}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mrs/MD_ReferenceSystem"> </div>  
+    </div>
+
+    <!-- sourceCitation CI_Citation -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:sourceCitation',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Source.sourceCitation}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+      </div>
+    </div>  
+   
+    <!-- sourceMetadata CI_Citation -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:sourceMetadata',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Source.sourceMetadata}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+      </div>
+    </div>  
+   
+    <!-- scope MD_Scope -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:scope',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Source.scope}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_ScopeCode" data-dojo-props="label:''"></div>
+    </div>
+    <!-- sourceStep LI_ProcessStep -->
+
+    
+    </div> <!-- end Tabs -->
+  </div>
+</div>
