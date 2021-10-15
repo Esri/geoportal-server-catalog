@@ -522,6 +522,15 @@ body {
   font-size: 12px;
 }
 
+.g-spatial-filter-hint {
+  display: flex;
+  align-items: left;
+  width: 100%;
+  padding: 10px 10px 0;
+  font-size: 12px;
+  font-style: italic;
+}
+
 .g-spatial-filter-relation label {
   margin-left: 10px;
   font-weight: 200;
@@ -531,7 +540,15 @@ body {
   position: absolute;
   z-index: 31;
   /* these dims should be fixed but they change in code */
-  left: 25px !important;
+  left: 60px !important;
+  top: 25px !important;
+}
+
+.g-spatial-filter-homebutton {
+  position: absolute;
+  z-index: 31;
+  /* these dims should be fixed but they change in code */
+  left: 23px !important;
   top: 25px !important;
 }
 
