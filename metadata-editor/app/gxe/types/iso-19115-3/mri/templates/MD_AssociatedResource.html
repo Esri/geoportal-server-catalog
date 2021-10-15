@@ -1,0 +1,27 @@
+<div data-dojo-attach-point="containerNode">
+  
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+
+     <!-- name CI_Citation -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:name',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_AssociatedResource.name}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"> </div>
+    </div>
+
+     <!-- associationType DS_AssociationTypeCode -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:associationType',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_AssociatedResource.associationType}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mri/DS_AssociationTypeCode"> </div>
+    </div>
+
+     <!-- initiativeType DS_InitiativeTypeCode -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:initiativeType',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_AssociatedResource.initiativeType}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mri/DS_InitiativeTypeCode"> </div>
+     </div>
+    
+     <!-- metadataReference CI_Citation -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:formatSpecificationCitation',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_AssociatedResource.metadataReference}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"> </div>
+     </div>
+
+     </div>
+  
+</div>
