@@ -49,6 +49,7 @@ define(["dojo/_base/declare",
         "esri/graphic",
         "esri/Color",
         "esri/dijit/PopupTemplate",
+        "esri/dijit/HomeButton",
         "esri/InfoTemplate",
         "esri/dijit/Search",
         "dojo/Deferred",
@@ -57,7 +58,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map,
     ArcGISTiledMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference,
     SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer,
-    SimpleRenderer, Graphic, Color, PopupTemplate, InfoTemplate, SearchWidget, Deferred, Locator) {
+    SimpleRenderer, Graphic, Color, PopupTemplate, HomeButton, InfoTemplate, SearchWidget, Deferred, Locator) {
 
   var oThisClass = declare([SearchComponent], {
 
@@ -395,6 +396,18 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       this._locator = locator;
     },
 
+    initializeHomeButton: function() {
+      var homeButton = new HomeButton({
+        theme: "HomeButton",
+        map: this.map,
+        extent: null,
+        visible: true
+      }, "HomeButton");
+      homeButton.startup();
+      domClass.add(homeButton.domNode,"g-spatial-filter-homebutton");
+      this._homeButton = homeButton;
+    },
+
     initializeMap: function() {
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
@@ -413,6 +426,11 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       this.own(on(map,"Load",lang.hitch(this,function(){
         this.map = map;
         this.initializeLocator();
+
+        if (mapProps.showHomeButton) {
+          this.initializeHomeButton();
+        }
+
         //window.AppContext.searchMap = this.map;
         this.own(on(map,"ExtentChange",lang.hitch(this,function(){
           if (this.getRelation() !== "any") this.search();

@@ -20,7 +20,7 @@ define([],function(){var obj={
   },
   
   search: {
-    allowSettings: true,
+    allowSettings: false,
     useSimpleQueryString: false,
     escapeFilter: false
   },
@@ -31,6 +31,7 @@ define([],function(){var obj={
     wrapAround180: true,
     center: [-84.5, 34], 
     zoom: 5,
+    showHomeButton: true,
 
     locatorParams: {  
       sources: [
