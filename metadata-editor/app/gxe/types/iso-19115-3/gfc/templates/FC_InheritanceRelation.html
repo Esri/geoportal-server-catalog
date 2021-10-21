@@ -1,0 +1,36 @@
+<div data-dojo-attach-point="containerNode">
+
+<!-- name CharacterString M 1 -->
+<div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gfc:name',minOccurs:1,maxOccurs:1,preferOpen:true, label:'${i18nIso3.FC_InheritanceRelation.name}'">
+   
+</div> 
+
+<!-- description CharacterString M 1 -->
+<div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gfc:description',minOccurs:1,maxOccurs:1,preferOpen:true, label:'${i18nIso3.FC_InheritanceRelation.description}'">
+   
+</div>
+
+<!-- uniqueInstance Boolean M 1 -->
+<div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gfc:uniqueInstance',minOccurs:1,maxOccurs:1,preferOpen:true, label:'${i18nIso3.FC_InheritanceRelation.uniqueInstance}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:Boolean',fixed:false,value:'true'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+            <div data-dojo-type="esri/dijit/metadata/form/Options">
+              <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'True',value:'true'"></div>            
+              <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'False',value:'false'"></div>  
+            </div>
+          </div>
+    </div>
+</div>
+
+<!-- subType FC_FeatureType,FC_Binding M 1 -->
+<div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gfc:subType',minOccurs:1,maxOccurs:1,preferOpen:true, label:'${i18nIso3.FC_InheritanceRelation.subtType}'">
+  
+</div>
+
+<!-- superType FC_FeatureType,FC_Binding M 1 -->
+<div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gfc:superType',minOccurs:1,maxOccurs:1,preferOpen:true, label:'${i18nIso3.FC_InheritanceRelation.superType}'">
+   
+</div> 
+
+
+</div>
