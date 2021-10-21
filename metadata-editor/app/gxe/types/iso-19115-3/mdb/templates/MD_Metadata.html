@@ -27,8 +27,8 @@
     </div>
   </div>
 
-  <!-- metadata standard -->
-  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:metadataStandard',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.metadataStandard}'">
+  <!-- metadataStandard CI_Citation O N -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:metadataStandard',minOccurs:0,maxOccurs:'1',preferOpen:false,label:'${i18nIso3.MD_Metadata.metadataStandard}'">
     <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
     </div>
   </div>  
@@ -59,26 +59,72 @@
 </div>
 
  
-  <!-- Role name:spatialRepresentationInfo MD_SpatialRepresentation -->
-
+  <!-- Role name:spatialRepresentationInfo MD_SpatialRepresentation ToDo-->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:spatialRepresentationInfo', label:'${i18nIso3.MD_Metadata.spatialRepresentationInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/msr/MD_SpatialRepresentation"></div>
+  </div>
 
   <!-- Role name:referenceSystemInfo MD_ReferenceSystem -->
   <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:referenceSystemInfo', label:'${i18nIso3.MD_Metadata.referenceSystemInfo}'">
-      <div data-dojo-type="app/gxe/types/iso-19115-3/mrs/MD_ReferenceSystem" data-dojo-props="label:'Reference System Info'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mrs/MD_ReferenceSystem" data-dojo-props="target:'mrs:MD_ReferenceSystem',label:'Reference System Info'"></div>
   </div>
 
-  <!--  Role name:metadataExtensionInfo MD_MetadataExtension ToDo-->
+  <!--  Role name:metadataExtensionInfo MD_MetadataExtensionInformation ToDo-->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:metadataExtensionInfo', label:'${i18nIso3.MD_Metadata.metadataExtensionInfo}'">
+       <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_MetadataExtensionInformation" data-dojo-props="target:'mri:MD_MetadataExtensionInformation'"></div>
+  </div>
 
-  <!--  Role name:identificationInfo MD_Identification ToDo-->
-  <!--  Role name:contentInfo MD_ContentInformation ToDo --> 
-  <!--  Role name:distributionInfo MD_Distribution ToDo -->
-  <!--  Role name:dataQualityInfo DQ_DataQuality ToDo -->
-  <!--  Role name:portrayalCatalogueInfo MD_PortrayalCatalogue ToDo-->
-  <!--  Role name:metadataConstraints MD_Constraints ToDo -->
-  <!--  Role name:applicationSchemaInfo MD_ApplicationSchema ToDo-->
-  <!--  Role name:metadataMaintenance MD_MaintenanceInformation ToDo-->
-  <!--  Role name:resourceLineage LI_Lineage ToDo --> 
-  <!--  Role name:metadataScope LI_MD_MetadataScope ToDo-->
+  <!--  Role name:identificationInfo MD_Identification M N-->
+  <!--  Duplicate on Tab section MD_Identification.
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:identificationInfo', minOccurs:1,maxOccurs:'1', label:'${i18nIso3.MD_Metadata.identificationInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mdb/MD_Identification" data-dojo-props="target:'mri:MD_Identification'"></div>
+  </div>
+  -->
+
+  <!--  Role name:contentInfo MD_ContentInformation -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:contentInfo', label:'${i18nIso3.MD_Metadata.contentInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_ContentInformation" data-dojo-props="target:'mri:MD_ContentInformation'"></div>
+  </div>
+
+  <!--  Role name:distributionInfo MD_Distribution -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:distributionInfo', label:'${i18nIso3.MD_Metadata.distributionInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mrd/MD_Distribution" data-dojo-props="target:'mrd:MD_Distribution'"></div>
+  </div>
+
+  <!--  Role name:dataQualityInfo DQ_DataQuality -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:dataQualityInfo', label:'${i18nIso3.MD_Metadata.dataQualityInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mdq/DQ_DataQuality" data-dojo-props="target:'mdq:DQ_DataQuality'"></div>
+  </div>
+
+  <!--  Role name:portrayalCatalogueInfo MD_PortrayalCatalogue-->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:portrayalCatalogueInfo', label:'${i18nIso3.MD_Metadata.portrayalCatalogueInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mpc/MD_PortrayalCatalogueReference" data-dojo-props="target:'mpc:MD_PortrayalCatalogueReference'"></div>
+  </div>
+
+  <!--  Role name:metadataConstraints MD_Constraints -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:metadataConstraints', label:'${i18nIso3.MD_Metadata.metadataConstraints}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mco/MD_Constraints" data-dojo-props="target:'mco:MD_Constraints'"></div>
+  </div>
+
+  <!--  Role name:applicationSchemaInfo MD_ApplicationSchemaInformation -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:applicationSchemaInfo', label:'${i18nIso3.MD_Metadata.applicationSchemaInfo}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mas/MD_ApplicationSchemaInformation" data-dojo-props="target:'mas:MD_ApplicationSchemaInformation'"></div>
+  </div>
+
+  <!--  Role name:metadataMaintenance MD_MaintenanceInformation -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:metadataMaintenance', label:'${i18nIso3.MD_Metadata.metadataMaintenance}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mmi/MD_MaintenanceInformation" data-dojo-props="target:'mmi:MD_MaintenanceInformation'"></div>
+  </div>
+
+  <!--  Role name:resourceLineage LI_Lineage --> 
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:resourceLineage', label:'${i18nIso3.MD_Metadata.resourceLineage}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mrl/LI_Lineage" data-dojo-props="target:'mrl:LI_Lineage'"></div>
+  </div>
+
+  <!--  Role name:metadataScope MD_MetadataScope -->
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:metadataScope', label:'${i18nIso3.MD_Metadata.metadataScope}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mdb/MD_MetadataScope" data-dojo-props="target:'mdb:MD_MetadataScope'"></div>
+  </div>
 
 </div>
 </div>
