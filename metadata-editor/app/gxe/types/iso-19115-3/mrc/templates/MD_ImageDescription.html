@@ -1,0 +1,99 @@
+<div data-dojo-attach-point="containerNode">
+  
+  <!-- MD_ImageDescription -->
+  <!-- illuminationElevationAngle Real -90 - 90 -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.illuminationElevationAngle}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0">
+        <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:-90,maxValue:90,hint:'illuminationElevationAngle', decimalPlace: 0"></div>
+      </div>
+    </div>
+
+   <!-- illuminationAzimuthAngle Real -90 - 90 -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.illuminationAzimuthAngle}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0">
+        <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:-90,maxValue:90,hint:'illuminationAzimuthAngle', decimalPlace: 0"></div>
+      </div>
+    </div>
+
+    <!-- imagingCondition MD_ImagingConditionCode -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.imagingCondition}'">
+        
+    </div>
+
+    <!-- imageQualityCode MD_Identifier -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.imageQualityCode}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Identifier"> </div>
+    </div>
+
+    <!-- cloudCoverPercentage Real 0,0 - 100,0 -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.cloudCoverPercentage}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0">
+        <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,maxValue:100,hint:'cloudCoverPercentage', decimalPlace: 0"></div>
+      </div>
+    </div>
+
+    <!-- compressionGenerationQuantity Integer -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.compressionGenerationQuantity}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:Integer'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,integerOnly:true,hint:'Enter Integer Number >=0'"></div>
+      </div>
+    </div>
+
+    <!-- triangulationIndicator Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.triangulationIndicator}'">
+
+    </div>
+
+    <!-- radiometricCalibrationDataAvailability Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.radiometricCalibrationDataAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>    
+    </div>
+
+    <!-- cameraCalibrationInformationAvailability Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.cameraCalibrationInformationAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>    
+    </div>
+
+    <!-- filmDistortionInformationAvailability Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.filmDistortionInformationAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>    
+    </div>
+
+    <!-- lensDistortionInformationAvailability Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.lensDistortionInformationAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>    
+    </div>
+
+</div>
