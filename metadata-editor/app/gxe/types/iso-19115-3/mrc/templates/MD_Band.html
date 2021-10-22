@@ -1,0 +1,37 @@
+<div data-dojo-attach-point="containerNode">
+  
+  <!-- MD_Band-->
+  <!-- boundMax Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:attributeDescription',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Band.boundMax}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:90">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'boundMax', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- boundMin Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Band.boundMin}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:90">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'boundMin', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- boundUnit UomLength -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Band.boundUnit}'">
+   
+  </div>
+
+  <!-- peakResponse Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Band.peakResponse}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:90">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'peakResponse', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- toneGradation Integer -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Band.toneGradation}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:Integer'">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,integerOnly:true,hint:'Enter Integer Number >0'"></div>
+    </div>
+  </div>
+
+</div>

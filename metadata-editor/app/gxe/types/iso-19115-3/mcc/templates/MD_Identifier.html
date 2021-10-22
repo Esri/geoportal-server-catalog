@@ -2,29 +2,45 @@
 
   <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:MD_Identifier', label:''">
     
-    <!-- authority -->
-    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:authority',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.MD_Identifier.authority}'">
+    <!-- authority CI_Citation O 1-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:authority',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Identifier.authority}'">
       <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation" data-dojo-props="label:''"></div>
     </div>
-
-    <!-- code -->
-    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:code',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_Identifier.code}'">
-      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    <div class="gxeInput">
+        <div class="gxeHint gxeEditOnly populated">${i18nIso3.hints.Identifier.authority.base}</div>
     </div>
 
-    <!-- codeSpace -->
-    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:codeSpace',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_Identifier.codeSpace}'">
-      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    <!-- code CharacterString M 1-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:code',minOccurs:1, maxOccurs:1, preferOpen:true,label:'${i18nIso3.MD_Identifier.code}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'">
+           <!--<div data-dojo-type="esri/dijit/metadata/form/InputText" data-dojo-props="useUniqueId:true,regenerateIfTemplate:true"></div> -->
+      </div>   
     </div>
+   <!--
+   <div class="gxeInput">
+      <div class="gxeHint gxeEditOnly populated">${i18nIso3.hints.Identifier.code}</div>
+   </div>
+   -->
 
-    <!-- version -->
+    <!-- codeSpace CharacterString O 1-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:codeSpace',minOccurs:0,maxOccurs:1, preferOpen:false,label:'${i18nIso3.MD_Identifier.codeSpace}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString',value:'urn:uuid'"></div>
+    </div>
+    <!--
+    <div class="gxeInput">
+        <div class="gxeHint gxeEditOnly populated">${i18nIso3.hints.Identifier.codespace}</div>
+    </div>
+    -->
+
+    <!-- version CharacterString O 1-->
     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:version',minOccurs:0,label:'${i18nIso3.MD_Identifier.version}'">
       <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
     </div>
 
-    <!-- description -->
+    <!-- description CharacterString O 1-->
     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:description',minOccurs:0,label:'${i18nIso3.MD_Identifier.description}'">
-      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
     </div>
 
   </div>

@@ -40,6 +40,7 @@ function(declare, lang, DocumentType, RootDescriptor) {
       this.addNamespace("mdq", "http://standards.iso.org/iso/19157/-2/mdq/1.0");
       this.addNamespace("dqc", "http://standards.iso.org/iso/19157/-2/dqc/1.0");
       this.addNamespace("gco", "http://standards.iso.org/iso/19115/-3/gco/1.0");
+      this.addNamespace("gfc", "http://standards.iso.org/iso/19110/gfc/1.1");
       this.addNamespace("gml", "http://www.opengis.net/gml/3.2");
       this.addNamespace("xlink", "http://www.w3.org/1999/xlink");
       this.addNamespace("xsi", "http://www.w3.org/2001/XMLSchema-instance");
