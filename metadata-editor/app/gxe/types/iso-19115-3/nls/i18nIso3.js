@@ -93,6 +93,7 @@ define({
     },
     
     MD_Identification: {
+      caption: "Metadata Identification",
       abstract: "Abstract",
       purpose: "Purpose",
       credit: "Credits",
@@ -284,11 +285,14 @@ define({
         validationPerformed: "Validation Performed",
         conformant: "Conformant",
         nonConformant: "Non Conformant"
-      }
+      },
+      result: "ConformanceResult",
+      specification: "Data Quality Specification"
     },
     
     DQ_DataQuality: {
-      report: "Report"
+      report: "Data Quality Report",
+      scope: "Data Quality Scope"
     },
     
     DQ_Scope : {
@@ -366,7 +370,154 @@ define({
       scope: "Scope",
       sourceStep: "Source Step"
     },
+
+    MD_FeatureTypeInfo: {
+      featureTypeName: "Feature Type Name",
+      featureInstanceCount: "Feature Instance Count"
+    },
+    MD_ContentInformation:{
+      caption: "Content Information",
     
+    },
+    MD_FeatureCatalogueDescription: {
+      caption: "Feature Catalogue Description",
+      complianceCode: "Compliance Code",
+      locale: "Locale",
+      includedWithDataset: "Include With Dataset",
+      featureTypes: "Feature Types",
+      featureCatalogueCitation: "Feature Catalogue Citation"
+    },
+    MD_FeatureCatalogue: {
+      caption: "Feature Catalogue",
+      featureCatalogue: "Feature Catalogue"
+    },
+    MD_MetadataExtensionInformation: {
+      extensionOnLineResource: "Extension Online Resource",
+      extendedElementInformation: "Extended Element Information"
+    },
+    MD_ExtendedElementInformation: {
+      name: "Name",
+      defintion: "Definition",
+      obligation: "Obligation",
+      condition: "Condition",
+      dataType: "Data Type",
+      maximumOccurrence: "Maximun Occurrence",
+      domainValue: "Domain Value",
+      parentEntity: "Parent Entity",
+      rule: "Rule",
+      rationale: "Rationale",
+      source: "Source",
+      conceptName: "Concept Name",
+      code: "Code"
+    },
+    FC_FeatureCatalogue: {
+      name: "Feature Catalogue Name",
+      scope: "Scope",
+      fieldOfApplication: "Field of Application",
+      versionNumber: "Version Number",
+      versionDate: "Version Date",
+      producer: "Producer",
+      functionalLanguage: "Functional Language",
+      featureType: "Feature Type",
+      definitionSource: "Definition Source"
+    },
+    FC_InheritanceRelation: {
+      name: "Attribute Name",
+      description: "Attribute Description",
+      uniqueInstance: "Attribute UniqueInstance",
+      subtType: "Subtype",
+      superType: "Super Type"
+    },
+    FC_PropertyType: {
+      memberName: "Member Name",
+      definition: "Definition",
+      cardinality: "Cardinality",
+      featureType: "Feature Type",
+      constrainedBy: "Constrained By",
+      definitionReference: "Definition Reference"
+    },
+    FC_Constraint: {
+      description: "Description"
+    },
+    FC_DefinitionReference: {
+      sourceIdentifier: "Source Identifier",
+      definitionSource: "Definition Source"
+    },
+    FC_DefinitionSource: {
+      caption: "Definition Source",
+      attributeSource: "Attribute Source"
+    },
+    MD_CoverageDescription: {
+      caption: "Coverage Description",
+      attributeDescription: "Attribute Description",
+      processingLevelCode: "Processing Level Code",
+      attributeGroup: "Attribute Group"
+    },
+    MD_AttributeGroup: {
+      contentType: "Content Type",
+      attribute: "Attribute"
+    },
+    MD_RangeDimension: {
+      sequenceIdentifier: "Sequence Identifier",
+      description: "Description",
+      name: "Name"
+    },
+    MD_SampleDimension: {
+      caption: "Sample Dimension",
+      maxValue: "Max Value",
+      minValue: "Min Value",
+      units: "Units",
+      scaleFactor: "Scale Factor",
+      meanValue: "Mean Value",
+      numberOfValues: "Number of Values",
+      standardDeviation: "Standard Deviation",
+      otherPropertyType: "Other Property Type",
+      otherProperty: "Other Property",
+      bitsPerValue: "bits Per Value"
+    },
+    MD_Band: {
+      caption: "Band",
+      boundMax: "Bound Max",
+      boundMin: "Bound Min",
+      boundUnit: "Bound Unit",
+      peakResponse: "Peak Response",
+      toneGradation: "Tone Gradation"
+    },
+    MD_CoverageContentTypeCode:{
+      image: "Image",
+      thematicClassification: "Thematic Classification",
+      physicalMeasurement: "Physical Measurement",
+      auxillaryInformation: "Auxillary Information",
+      qualityInformation: "Quality Information",
+      referenceInformation: "Reference Information",
+      modelResult: "Model Result",
+      coordinate: "Coordinate"
+    },
+    MD_ImageDescription: {
+      caption: "Image Description",
+      illuminationElevationAngle: "Illumination Elevation Angle",
+      illuminationAzimuthAngle: "illumination Azimuth Angle",
+      imagingCondition: "Imaging Condition",
+      imageQualityCode: "Image Quality Code",
+      cloudCoverPercentage: "Cloud Cover Percentage",
+      compressionGenerationQuantity: "Compression Generation Quantity",
+      triangulationIndicator: "Triangulation Indicator",
+      radiometricCalibrationDataAvailability: "Radio Metric Calibration Data Availability",
+      cameraCalibrationInformationAvailability: "Camera Calibration Information Availability",
+      filmDistortionInformationAvailability: "Film Distortion Information Availability",
+      lensDistortionInformationAvailability: "Lens Distortion Information Availability"
+    },
+    FC_FeatureType: {
+      typeName: "Type Name",
+      definition: "Definition",
+      code: "Code",
+      isAbstract:"is Abstract",
+      inheritsFrom: "Inherits From",
+      inheritsTo: "Inherits To",
+      carrierOfCharacteristics: "Carrier of Characteristics",
+      constrainedBy: "Constrained By",
+      definitionReference: "Definition Reference"
+  },
     MD_BrowseGraphic: {
       caption: "Browse Graphic",
       fileName: "Browse Graphic URL",
@@ -398,6 +549,7 @@ define({
     },
     
     MD_DataIdentification: {
+      caption: "Data Identification",
       spatialRepresentationType: "Spatial Representation Type",
       spatialResolution: "Spatial Resolution",
       language: "Resource Language",
@@ -406,12 +558,35 @@ define({
     },
     
     MD_DigitalTransferOptions: {
-      onLine: "Online"
+      unitsOfDistribution: "Units of Distribution",
+      transferSize: "Transfer Size",
+      onLine: "Online",
+      offLine: "Offline",
+      transferFrequency: "Transfer Frequency",
+      distributionFormat: "Distribution Format"
     },
     
+    MD_StandardOrderProcess: {
+      fees: "Fees",
+      plannedAvailableDateTime: "Planned Available DateTime",
+      orderinginstructions: "Ordering Instructions",
+      turnaround: "Turn Around",
+      orderOptionsType: "Order Options Type",
+      orderOptions: "Order Options"
+    },
+
+    MD_Distributor: {
+      distributorContact: "Distributor contact",
+      distributionOrderProcess: "Distribution Order Process",
+      distributorFormat: "Distributor Format",
+      distributorTransferOptions: "Distributor Transfer Options"
+    },
+
     MD_Distribution: {
       distributionFormat: "Distribution Format",
-      transferOptions: "Transfer Options"
+      transferOptions: "Transfer Options",
+      description: "Description",
+      distributor: "Distributor"
     },
     
     MD_Format: {
@@ -453,10 +628,17 @@ define({
     },
     
     MD_Keywords: {
+      keyword: "Keyword",
+      type: "Type",
+      keywordClass: "KeywordClass",
       delimitedCaption: "Keywords",
       thesaurusName: "Associated Thesaurus"
     },
-    
+    MD_KeywordClass:{
+      className: "Class Name",
+      conceptIdentifier: "Concept Identifier",
+      ontology: "Ontology"
+    },
     MD_KeywordTypeCode: {
       caption: "Keyword Type",
       discipline: "Discipline",
@@ -527,7 +709,7 @@ define({
       task: "Task",
       trial: "Trial"
     },
-    
+
     MD_LegalConstraints: {
       caption: "Legal Constraints",
       accessConstraints: "Access Constraints",
@@ -577,14 +759,17 @@ define({
       spatialRepresentationInfo: "Spatial Representation",
       metadataExtensionInfo: "Metadata Extension",
       identificationInfo: "Identification",
-      contentInfo: "Content",
+      contentInfo: "Content Information",
       distributionInfo: "Distribution",
-      dataQualityInfo: "Quality",
+      dataQualityInfo: "Data Quality Info.",
       portrayalCatalogueInfo: "Portrayal Catalogue",
       metadataConstraints: "Constraints",
+      applicationSchemaInfo: "Application Schema Info",
       metadataMaintenance: "Metadata Maintenance",
       resourceLineage: "Lineage",
       metadataScope: "Metadata Scope",
+      resourceScope: "Resource Scope",
+      name: "Scope Name",
 
       language: "Metadata Language",
       hierarchyLevel: "Hierarchy Level",
@@ -631,6 +816,34 @@ define({
       unrestricted: "unrestricted",
       licenceUnrestricted:"licenceUnrestricted",
       licenceEndUser:"LicenceEndUser"
+    },
+
+    MD_PortrayalCatalogueReference: {
+      portrayalCatalogueCitation: "Portrayal Catalogue Citation"
+    },
+
+    MD_ApplicationSchemaInfo: {
+      name: "Name",
+      schemaLanguage: "Schema Language",
+      constraintLanguage: "Constraint Language",
+      schemaAscii: "Schema Ascii",
+      graphicsFile: "Graphics File",
+      softwareDevelopmentFileFormat: "Software Development File Format"
+  },
+
+    MD_Scope: {
+        level: "Level",
+        extent: "Extent",
+        levelDescription: "Level Description"
+    },
+
+    MD_ScopeDescription: {
+      attributes: "Attributes",
+      features: "Features",
+      featureInstances: "Feature Instances",
+      attributeInstances: "Attribute Instances",
+      dataset: "Dataset",
+      other: "Others"
     },
     
     MD_ScopeCode: {
@@ -683,7 +896,85 @@ define({
       classificationSystem: "Classification System",
       handlingDescription: "Handling Description"
     },
-    
+    MD_SpatialRepresentation: {
+      gridSpatialRepresentation: "Grid Spatial Representation",
+      georectified: "Georectified",
+      georeferenceable: "Georeferenceable",
+      vectorSpatialRepresentation: "Vector Spatial Representation",
+      dimension: "Dimension"
+    },
+    MD_GridSpatialRepresentation: {
+      numberOfDimensions: "Number of Dimensions",
+      axisDimensionProperties: "Axis Dimension Properties",
+      cellGeometry: "Cell Geometry",
+      transformationParameterAvailability: "Transformation Parameter Availability"
+    },
+    MD_Georectified: {
+      checkPointAvailability: "Check Point Availability",
+      checkPointDescription: "Check Point Description",
+      cornerPoints: "Corner Points",
+      centrePoint: "Centre Point",
+      pointInPxiel: "Point In Pixel",
+      transformationDimensionDescription:"Transformation Dimension Description",
+      transformationDimensionMapping:"Transformation Dimension Mapping"
+    },
+    MD_Georeferenceable: {
+      controlPointAvailability: "Control Point Availability",
+      orientationParameterAvailability: "Orientation Parameter Availability",
+      orientationParameterDescription: "Orientation Parameter Description",
+      georeferencedParameters: "Georeference Parameters",
+      parameterCitation: "Parameter Citation"
+    },
+    MD_VectorSpatialRepresentation:{
+      topologyLevel: "Topology Level",
+      geometricObjects: "Geometric Object"
+    },
+    MD_Dimension: {
+      dimensionName: "Dimension Name",
+      dimensionSize: "Dimension Size",
+      resolution: "Resolution",
+      dimensionTitle: "Dimension Title",
+      dimensionDescription: "Dimension Description"
+    },
+    MD_GeometricObjects:{
+      geometricObjectType: "Geometric Object Type",
+      geometricObjectCount: "Geometric Object Count"
+    },
+    MD_CellGeometryCode: {
+      point: "Point",
+      area: "Area",
+      voxel: "Voxel",
+      stratum: "Stratum"
+    },
+    MD_DimensionNameTypeCode: {
+      row: "Row",
+      column: "Column",
+      vertical: "Vertical",
+      track: "Track",
+      crossTrack: "Cross Track",
+      line: "Line",
+      sample: "Sample",
+      time: "Time"
+    },
+    MD_TopologyLevelCode: {
+      geometryOnly: "Geometry Only",
+      topology1D: "Topology 1D",
+      planarGraph: "Planar Graph",
+      fullPlanarGraph: "Full Planar Graph",
+      surfaceGraph: "Surface Graph",
+      fullSurfaceGraph: "Full Surface Graph",
+      topology3D: "Topology 3D",
+      fullTopology3D: "Full Topology 3D",
+      abstract: "Abstract"
+    },
+    MD_GeometryObjectTypeCode: {
+      complex: "Complex",
+      composite: "Composite",
+      curve: "Curve",
+      point: "Point",
+      solid: "Solid",
+      surface: "Surface"
+    },
     MD_SpatialRepresentationTypeCode: {
       caption: "Spatial Representation Type",
       vector: "Vector",
@@ -931,7 +1222,39 @@ define({
         unknown: "Unknown"
       }
     },
-    
+
+    hints: {
+        Identifier: {
+                authority: {
+                  base: "the person or party responsible for maintenance of that namespace",
+                  title:"name by which the cited resource is known",
+                  date:  "reference date for the cited resource.",
+                  edition: "version of the cited resource",
+                  editionDate: "date of the edition",
+                  identifier: "value uniquely identifying an object within a namespace",
+                  citedResponsibleParty:"roles, name, contact, and position information.",
+                  presentationForm:"mode in which the resource is represented",
+                  series: "information about the series, or aggregate resource",
+                  otherCitationDetails:"iother information required to complete the citation that is not recorded elsewhere",
+                  ISBN: "international Standard Book Number",
+                  ISSN: "international Standard Serial Number",
+                  onlineResource: "online reference to the cited resource",
+                  graphic: "citation graphic"
+                },
+                code: "Examples EPSG::4326 or EPSG::2326",
+                codespace: "identifier or namespace in which the code is valid"
+        },
+        defaultLocale: "",
+        parentMetadata: "",
+        contact: "party responsible for the metadata information",
+        dateInfo: "date(s) associated with the metadata",
+        metadataStandard:"citation for the standard to which the metadata conforms",
+        metadataProfile: "citation for the profile(s) of the metadata stanard",
+        alternativeMetadataReference:"reference to alternative metadata",
+        otherLocale: "provides information about alternatively used localised character strings",
+        metadataLinkage: "online location where the metadata is available",
+    },
+
     gemet: {
       concept: {
         gemetConceptKeyword: "GEMET Concept Keyword",

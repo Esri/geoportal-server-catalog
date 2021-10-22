@@ -274,7 +274,7 @@ define({
     SQL: "SQL",
     WebServices: "WebServices"
   },
-  
+ 
   DQ_ConformanceResult: {
     caption: "一致性結果",
     explanation: "說明",
@@ -283,11 +283,14 @@ define({
       validationPerformed: "已執行驗證",
       conformant: "一致",
       nonConformant: "不一致"
-    }
+    },
+    result: "ConformanceResult",
+    specification: "Data Quality Specification"
   },
   
   DQ_DataQuality: {
-    report: "報告"
+    report: "報告",
+    scope: "Data Quality Scope"
   },
   
   DQ_Scope : {
@@ -366,6 +369,155 @@ define({
     sourceStep: "Source Step"
   },
   
+  MD_FeatureTypeInfo: {
+    featureTypeName: "Feature Type Name",
+    featureInstanceCount: "Feature Instance Count"
+  },
+
+  MD_ContentInformation:{
+    caption: "Content Information",
+  
+  },
+  MD_FeatureCatalogueDescription: {
+    caption: "Feature Catalogue Description",
+    complianceCode: "Compliance Code",
+    locale: "Locale",
+    includedWithDataset: "Include With Dataset",
+    featureTypes: "Feature Types",
+    featureCatalogueCitation: "Feature Catalogue Citation"
+  },
+  MD_FeatureCatalogue: {
+    caption: "Feature Catalogue",
+    featureCatalogue: "Feature Catalogue"
+  },
+  MD_MetadataExtensionInformation: {
+    extensionOnLineResource: "Extension Online Resource",
+    extendedElementInformation: "Extended Element Information"
+  },
+  MD_ExtendedElementInformation: {
+    name: "Name",
+    defintion: "Definition",
+    obligation: "Obligation",
+    condition: "Condition",
+    dataType: "Data Type",
+    maximumOccurrence: "Maximun Occurrence",
+    domainValue: "Domain Value",
+    parentEntity: "Parent Entity",
+    rule: "Rule",
+    rationale: "Rationale",
+    source: "Source",
+    conceptName: "Concept Name",
+    code: "Code"
+  },
+  FC_FeatureCatalogue: {
+    name: "Feature Catalogue Name",
+    scope: "Scope",
+    fieldOfApplication: "Field of Application",
+    versionNumber: "Version Number",
+    versionDate: "Version Date",
+    producer: "Producer",
+    functionalLanguage: "Functional Language",
+    featureType: "Feature Type",
+    definitionSource: "Definition Source"
+  },
+  FC_InheritanceRelation: {
+    name: "Attribute Name",
+    description: "Attribute Description",
+    uniqueInstance: "Attribute UniqueInstance",
+    subtType: "Subtype",
+    superType: "Super Type"
+  },
+  FC_PropertyType: {
+    memberName: "Member Name",
+    definition: "Definition",
+    cardinality: "Cardinality",
+    featureType: "Feature Type",
+    constrainedBy: "Constrained By",
+    definitionReference: "Definition Reference"
+  },
+  FC_Constraint: {
+    description: "Description"
+  },
+  FC_DefinitionReference: {
+    sourceIdentifier: "Source Identifier",
+    definitionSource: "Definition Source"
+  },
+  FC_DefinitionSource: {
+    caption: "Definition Source",
+    attributeSource: "Attribute Source"
+  },
+  MD_CoverageDescription: {
+    caption: "Coverage Description",
+    attributeDescription: "Attribute Description",
+    processingLevelCode: "Processing Level Code",
+    attributeGroup: "Attribute Group"
+  },
+  MD_AttributeGroup: {
+    contentType: "Content Type",
+    attribute: "Attribute"
+  },
+  MD_RangeDimension: {
+    sequenceIdentifier: "Sequence Identifier",
+    description: "Description",
+    name: "Name"
+  },
+  MD_SampleDimension: {
+    caption: "Sample Dimension",
+    maxValue: "Max Value",
+    minValue: "Min Value",
+    units: "Units",
+    scaleFactor: "Scale Factor",
+    meanValue: "Mean Value",
+    numberOfValues: "Number of Values",
+    standardDeviation: "Standard Deviation",
+    otherPropertyType: "Other Property Type",
+    otherProperty: "Other Property",
+    bitsPerValue: "bits Per Value"
+  },
+  MD_Band: {
+    caption: "Band",
+    boundMax: "Bound Max",
+    boundMin: "Bound Min",
+    boundUnit: "Bound Unit",
+    peakResponse: "Peak Response",
+    toneGradation: "Tone Gradation"
+  },
+  MD_CoverageContentTypeCode:{
+    image: "Image",
+    thematicClassification: "Thematic Classification",
+    physicalMeasurement: "Physical Measurement",
+    auxillaryInformation: "Auxillary Information",
+    qualityInformation: "Quality Information",
+    referenceInformation: "Reference Information",
+    modelResult: "Model Result",
+    coordinate: "Coordinate"
+  },
+  MD_ImageDescription: {
+    caption: "Image Description",
+    illuminationElevationAngle: "Illumination Elevation Angle",
+    illuminationAzimuthAngle: "illumination Azimuth Angle",
+    imagingCondition: "Imaging Condition",
+    imageQualityCode: "Image Quality Code",
+    cloudCoverPercentage: "Cloud Cover Percentage",
+    compressionGenerationQuantity: "Compression Generation Quantity",
+    triangulationIndicator: "Triangulation Indicator",
+    radiometricCalibrationDataAvailability: "Radio Metric Calibration Data Availability",
+    cameraCalibrationInformationAvailability: "Camera Calibration Information Availability",
+    filmDistortionInformationAvailability: "Film Distortion Information Availability",
+    lensDistortionInformationAvailability: "Lens Distortion Information Availability"
+  },
+  FC_FeatureType: {
+    typeName: "Type Name",
+    definition: "Definition",
+    code: "Code",
+    isAbstract:"is Abstract",
+    inheritsFrom: "Inherits From",
+    inheritsTo: "Inherits To",
+    carrierOfCharacteristics: "Carrier of Characteristics",
+    constrainedBy: "Constrained By",
+    definitionReference: "Definition Reference"
+},
+
   MD_BrowseGraphic: {
     caption: "Browse Graphic",
     fileName: "瀏覽圖形 URL",
@@ -397,6 +549,7 @@ define({
   },
   
   MD_DataIdentification: {
+    caption: "Data Identification",
     spatialRepresentationType: "空間表示類型",
     spatialResolution: "空間解析度",
     language: "資源語言",
@@ -405,12 +558,36 @@ define({
   },
   
   MD_DigitalTransferOptions: {
-    onLine: "線上"
+    unitsOfDistribution: "Units of Distribution",
+    transferSize: "Transfer Size",
+    onLine: "Online",
+    offLine: "Offline",
+    transferFrequency: "Transfer Frequency",
+    distributionFormat: "Distribution Format"
   },
+
+  MD_StandardOrderProcess: {
+    fees: "Fees",
+    plannedAvailableDateTime: "Planned Available DateTime",
+    orderinginstructions: "Ordering Instructions",
+    turnaround: "Turn Around",
+    orderOptionsType: "Order Options Type",
+    orderOptions: "Order Options"
+  },
+
+  MD_Distributor: {
+    distributorContact: "Distributor contact",
+    distributionOrderProcess: "Distribution Order Process",
+    distributorFormat: "Distributor Format",
+    distributorTransferOptions: "Distributor Transfer Options"
+  },
+
   
   MD_Distribution: {
     distributionFormat: "分發格式",
-    transferOptions: "傳輸選項"
+    transferOptions: "傳輸選項",
+    description: "Description",
+    distributor: "Distributor"
   },
   
   MD_Format: {
@@ -453,10 +630,18 @@ define({
   },
   
   MD_Keywords: {
+    keyword: "Keyword",
+    type: "Type",
+    keywordClass: "KeywordClass",
     delimitedCaption: "關鍵字",
     thesaurusName: "關聯同義字"
   },
-  
+
+  MD_KeywordClass:{
+    className: "Class Name",
+    conceptIdentifier: "Concept Identifier",
+    ontology: "Ontology"
+  },
   MD_KeywordTypeCode: {
     caption: "Keyword Type",
     discipline: "Discipline",
@@ -577,14 +762,17 @@ define({
     spatialRepresentationInfo: "Spatial Representation",
     metadataExtensionInfo: "Metadata Extension",
     identificationInfo: "Identification",
-    contentInfo: "Content",
+    contentInfo: "Content Information",
     distributionInfo: "Distribution",
     dataQualityInfo: "Quality",
     portrayalCatalogueInfo: "Portrayal Catalogue",
     metadataConstraints: "Constraints",
+    applicationSchemaInfo: "Application Schema Info",
     metadataMaintenance: "Metadata Maintenance",
     resourceLineage: "Lineage",
     metadataScope: "Metadata Scope",
+    resourceScope: "Resource Scope",
+    name: "Scope Name",
 
     language: "中繼資料語言",
     hierarchyLevel: "等級分級",
@@ -633,6 +821,34 @@ define({
     licenceUnrestricted:"licenceUnrestricted",
     licenceEndUser:"LicenceEndUser"
   },
+
+  MD_PortrayalCatalogueReference: {
+    portrayalCatalogueCitation: "Portrayal Catalogue Citation"
+  },
+
+  MD_ApplicationSchemaInfo: {
+    name: "Name",
+    schemaLanguage: "Schema Language",
+    constraintLanguage: "Constraint Language",
+    schemaAscii: "Schema Ascii",
+    graphicsFile: "Graphics File",
+    softwareDevelopmentFileFormat: "Software Development File Format"
+},
+
+  MD_Scope: {
+    level: "Level",
+    extent: "Extent",
+    levelDescription: "Level Description"
+},
+
+MD_ScopeDescription: {
+  attributes: "Attributes",
+  features: "Features",
+  featureInstances: "Feature Instances",
+  attributeInstances: "Attribute Instances",
+  dataset: "Dataset",
+  other: "Others"
+},
   
   MD_ScopeCode: {
     attribute: "屬性",
@@ -682,7 +898,85 @@ define({
     classificationSystem: "分類系統",
     handlingDescription: "處理描述"
   },
-  
+  MD_SpatialRepresentation: {
+    gridSpatialRepresentation: "Grid Spatial Representation",
+    georectified: "Georectified",
+    georeferenceable: "Georeferenceable",
+    vectorSpatialRepresentation: "Vector Spatial Representation",
+    dimension: "Dimension"
+  },
+  MD_GridSpatialRepresentation: {
+    numberOfDimensions: "Number of Dimensions",
+    axisDimensionProperties: "Axis Dimension Properties",
+    cellGeometry: "Cell Geometry",
+    transformationParameterAvailability: "Transformation Parameter Availability"
+  },
+  MD_Georectified: {
+    checkPointAvailability: "Check Point Availability",
+    checkPointDescription: "Check Point Description",
+    cornerPoints: "Corner Points",
+    centrePoint: "Centre Point",
+    pointInPxiel: "Point In Pixel",
+    transformationDimensionDescription:"Transformation Dimension Description",
+    transformationDimensionMapping:"Transformation Dimension Mapping"
+  },
+  MD_Georeferenceable: {
+    controlPointAvailability: "Control Point Availability",
+    orientationParameterAvailability: "Orientation Parameter Availability",
+    orientationParameterDescription: "Orientation Parameter Description",
+    georeferencedParameters: "Georeference Parameters",
+    parameterCitation: "Parameter Citation"
+  },
+  MD_VectorSpatialRepresentation:{
+    topologyLevel: "Topology Level",
+    geometricObjects: "Geometric Object"
+  },
+  MD_Dimension: {
+    dimensionName: "Dimension Name",
+    dimensionSize: "Dimension Size",
+    resolution: "Resolution",
+    dimensionTitle: "Dimension Title",
+    dimensionDescription: "Dimension Description"
+  },
+  MD_GeometricObjects:{
+    geometricObjectType: "Geometric Object Type",
+    geometricObjectCount: "Geometric Object Count"
+  },
+  MD_CellGeometryCode: {
+    point: "Point",
+    area: "Area",
+    voxel: "Voxel",
+    stratum: "Stratum"
+  },
+  MD_DimensionNameTypeCode: {
+    row: "Row",
+    column: "Column",
+    vertical: "Vertical",
+    track: "Track",
+    crossTrack: "Cross Track",
+    line: "Line",
+    sample: "Sample",
+    time: "Time"
+  },
+  MD_TopologyLevelCode: {
+    geometryOnly: "Geometry Only",
+    topology1D: "Topology 1D",
+    planarGraph: "Planar Graph",
+    fullPlanarGraph: "Full Planar Graph",
+    surfaceGraph: "Surface Graph",
+    fullSurfaceGraph: "Full Surface Graph",
+    topology3D: "Topology 3D",
+    fullTopology3D: "Full Topology 3D",
+    abstract: "Abstract"
+  },
+  MD_GeometryObjectTypeCode: {
+    complex: "Complex",
+    composite: "Composite",
+    curve: "Curve",
+    point: "Point",
+    solid: "Solid",
+    surface: "Surface"
+  },
   MD_SpatialRepresentationTypeCode: {
     caption: "空間表示類型",
     vector: "矢量",

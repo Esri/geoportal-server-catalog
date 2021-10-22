@@ -1,0 +1,46 @@
+<div data-dojo-attach-point="containerNode">
+     <!-- controlPointAvailability Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:numberOfDimensions',minOccurs:1,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georeferenceable.controlPointAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>           
+    </div>
+
+    <!-- orientationParameterAvailability Boolean-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:axisDimensionProperties',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georeferenceable.orientationParameterAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>        
+    </div>
+    
+    <!-- orientationParameterDescription Free Text -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:cellGeometry',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georeferenceable.orientationParameterDescription}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+     
+    </div>
+
+    <!-- georeferencedParameters Record -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:transformationParameterAvailability',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georeferenceable.georeferencedParameters}'">
+     
+    </div>
+
+    <!-- parameterCitation CI_Citation -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:transformationParameterAvailability',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georeferenceable.parameterCitation}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"> </div>
+
+    </div>
+
+</div>

@@ -10,10 +10,25 @@ function(declare, lang, domConstruct, DocumentType, PortalItemTransformer, Input
 
     caption: null,
     key: null,
+    isIso: true,
     isService: false,
     metadataStandardName: null,
     metadataStandardVersion: null,
     
+    beforeInitializeElement: function(gxeDocument, element) {
+      this.inherited(arguments);
+      var p = element.gxePath;
+
+      if (p === "/mdb:MD_Metadata/mdb:metadataStandard/cit:CI_Citation/cit:title/gco:CharacterString") {
+         element.value = "ISO 19115-3 Geographic Information - Metadata - Part 1: Fundamentals"
+      }
+      if (p === "/mdb:MD_Metadata/mdb:identificationInfo/mri:MD_DataIdentification/mri:citation/cit:CI_Citation/cit:title/gco:CharacterString"){
+          element.isDocumentTitle = true;
+      }
+
+              
+    },
+
     initializeNamespaces: function() {
         
       //this.addNamespace("dc4", "http://datacite.org/schema/kernel-4");
