@@ -222,21 +222,27 @@
       <version>15.3</version>
     </dependency>
 
-	<!-- individual updates --> 
-	<!-- https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram -->
-	<dependency>
-    <groupId>org.hdrhistogram</groupId>
-    <artifactId>HdrHistogram</artifactId>
-    <version>2.1.12</version>
-</dependency>
+    <!-- individual updates --> 
+    <!-- https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram -->
+    <dependency>
+      <groupId>org.hdrhistogram</groupId>
+      <artifactId>HdrHistogram</artifactId>
+      <version>2.1.12</version>
+    </dependency>
  
-<!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
-<dependency>
-    <groupId>org.javassist</groupId>
-    <artifactId>javassist</artifactId>
-    <version>3.28.0-GA</version>
-</dependency>
+    <!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
+    <dependency>
+      <groupId>org.javassist</groupId>
+      <artifactId>javassist</artifactId>
+      <version>3.28.0-GA</version>
+    </dependency>
   
+    <!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk15on -->
+    <dependency>
+      <groupId>org.bouncycastle</groupId>
+      <artifactId>bcprov-jdk15on</artifactId>
+      <version>1.69</version>
+    </dependency>
 
   </dependencies> 
   
