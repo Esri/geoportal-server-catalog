@@ -265,7 +265,7 @@ public class Val {
       try {
         StringWriter writer = new StringWriter(v.length() * 2);
         OCTAL.translate(v, writer);
-        String out = writer.toString();
+        // String out = writer.toString();
         return writer.toString();
       } catch (IOException var3) {
         throw new RuntimeException(var3);
