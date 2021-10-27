@@ -245,6 +245,20 @@
       <version>1.69</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/io.netty/netty-common -->
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-common</artifactId>
+      <version>4.1.63.Final</version>
+    </dependency>
+
+    <!-- https://mvnrepository.com/artifact/io.netty/netty-codec-http -->
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-codec-http</artifactId>
+      <version>4.1.63.Final</version>
+    </dependency>
+
   </dependencies> 
   
   <build>
