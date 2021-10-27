@@ -98,7 +98,7 @@
     <dependency>
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>x-pack-transport</artifactId>
-      <version>6.8.20</version>
+      <version>5.6.1</version>
     </dependency>
     
     <!-- Spring -->
