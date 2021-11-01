@@ -193,6 +193,26 @@ define({
       function: "Function",
       protocolRequest: "Protocol Request"
     },
+
+    CI_Party: {
+      name: "Name",
+      contactInfo: "Contact Information"
+    },
+
+    CI_Individual:{
+      name: "Name",
+      contactInfo: "Contact Info",
+      positionName: "Position Name"
+
+    },
+
+    CI_Organisation: {
+      name: "Name",
+      contactInfo: "Contact Info",
+      possitionName: "Postion name",
+      logo: "Logo",
+      individual: "Individual"
+    },
     
     CI_PresentationFormCode: {
       documentDigital: "Document Digital",
@@ -290,10 +310,20 @@ define({
       specification: "Data Quality Specification"
     },
     
+    DQ_MeasureReference:  {
+      caption: "Measure Reference",
+      measureIdentification: "Measure Identification",
+      nameOfMeasure: "Name of Measure",
+      measureDescription: "Measure Description"
+    },
+    
     DQ_DataQuality: {
       report: "Data Quality Report",
-      scope: "Data Quality Scope"
+      scope: "Data Quality Scope",
+      measure: "Measure",
+      domainConsistency: "Domain Consistency"
     },
+    
     
     DQ_Scope : {
       level: "Scope (quality information applies to)",
@@ -422,9 +452,9 @@ define({
       definitionSource: "Definition Source"
     },
     FC_InheritanceRelation: {
-      name: "Attribute Name",
-      description: "Attribute Description",
-      uniqueInstance: "Attribute UniqueInstance",
+      name: "Name",
+      description: "Description",
+      uniqueInstance: "UniqueInstance",
       subtType: "Subtype",
       superType: "Super Type"
     },
@@ -445,7 +475,7 @@ define({
     },
     FC_DefinitionSource: {
       caption: "Definition Source",
-      attributeSource: "Attribute Source"
+      source: "Source"
     },
     MD_CoverageDescription: {
       caption: "Coverage Description",
@@ -512,6 +542,7 @@ define({
       definition: "Definition",
       code: "Code",
       isAbstract:"is Abstract",
+      aliases: "Aliases",
       inheritsFrom: "Inherits From",
       inheritsTo: "Inherits To",
       carrierOfCharacteristics: "Carrier of Characteristics",
