@@ -31,16 +31,14 @@
             </div>
             
             <!-- pointOfContact  CI_Responsibility O N -->
-            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdb:contact', minOccurs:0, maxOccurs:'unbounded', preferOpen:true, label:'${i18nIso3.CI_ResponsibleParty.caption}'">
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:pointOfContact', minOccurs:0, maxOccurs:'unbounded', preferOpen:true, label:'${i18nIso3.CI_ResponsibleParty.caption}'">
                 <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility"></div>
             </div>
       
            <!--spatialRepresentationType MD_SpatialRepresentationTypeCode O N -->
            <div data-dojo-type="esri/dijit/metadata/form/Tabs" data-dojo-props="label:'${i18nIso3.identificationSection.resource}'">
-               <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:spatialRepresentationType', label:'${i18nIso.MD_DataIdentification.spatialRepresentationType}'">
-                     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:MD_SpatialRepresentationTypeCode', minOccurs:0, maxOccurs:'unbounded', preferOpen:false, label:'${i18nIso3.MD_SpatialRepresentationTypeCode.caption}'">
-                         <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_SpatialRepresentationTypeCode"></div>
-                     </div>
+               <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:spatialRepresentationType', minOccurs:0, maxOccurs:'unbounded', preferOpen:false, label:'${i18nIso3.MD_SpatialRepresentationTypeCode.caption}'">
+                  <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_SpatialRepresentationTypeCode"></div>
                </div>
                <!--spatialResolution MD_Resolution O N -->
                <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:spatialResolution', minOccurs:0, maxOccurs:1, preferOpen:false, label:'${i18nIso3.MD_DataIdentification.spatialResolution}'">
