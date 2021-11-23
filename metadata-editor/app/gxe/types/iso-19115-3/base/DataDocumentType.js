@@ -15,28 +15,28 @@ function(declare, lang, DocumentType, RootDescriptor) {
 
     initializeNamespaces: function() {
       this.addNamespace("cat", "http://standards.iso.org/iso/19115/-3/cat/1.0");
-      this.addNamespace("cit", "http://standards.iso.org/iso/19115/-3/cit/1.0");
+      this.addNamespace("cit", "http://standards.iso.org/iso/19115/-3/cit/2.0");
       this.addNamespace("gcx", "http://standards.iso.org/iso/19115/-3/gcx/1.0");
       this.addNamespace("gex", "http://standards.iso.org/iso/19115/-3/gex/1.0");
       this.addNamespace("lan", "http://standards.iso.org/iso/19115/-3/lan/1.0");
       this.addNamespace("srv", "http://standards.iso.org/iso/19115/-3/srv/2.0");
-      this.addNamespace("mac", "http://standards.iso.org/iso/19115/-3/mac/1.0");
+      this.addNamespace("mac", "http://standards.iso.org/iso/19115/-3/mac/2.0");
       this.addNamespace("mas", "http://standards.iso.org/iso/19115/-3/mas/1.0");
       this.addNamespace("mcc", "http://standards.iso.org/iso/19115/-3/mcc/1.0");
       this.addNamespace("mco", "http://standards.iso.org/iso/19115/-3/mco/1.0");
       this.addNamespace("mda", "http://standards.iso.org/iso/19115/-3/mda/1.0");
-      this.addNamespace("mdb", "http://standards.iso.org/iso/19115/-3/mdb/1.0");
+      this.addNamespace("mdb", "http://standards.iso.org/iso/19115/-3/mdb/2.0");
       this.addNamespace("mdt", "http://standards.iso.org/iso/19115/-3/mdt/1.0");
       this.addNamespace("mex", "http://standards.iso.org/iso/19115/-3/mex/1.0");
       this.addNamespace("mrl", "http://standards.iso.org/iso/19115/-3/mrl/1.0");
       this.addNamespace("mds", "http://standards.iso.org/iso/19115/-3/mds/1.0");
       this.addNamespace("mmi", "http://standards.iso.org/iso/19115/-3/mmi/1.0");
       this.addNamespace("mpc", "http://standards.iso.org/iso/19115/-3/mpc/1.0");
-      this.addNamespace("mrc", "http://standards.iso.org/iso/19115/-3/mrc/1.0");
+      this.addNamespace("mrc", "http://standards.iso.org/iso/19115/-3/mrc/2.0");
       this.addNamespace("mrd", "http://standards.iso.org/iso/19115/-3/mrd/1.0");
       this.addNamespace("mri", "http://standards.iso.org/iso/19115/-3/mri/1.0");
       this.addNamespace("mrs", "http://standards.iso.org/iso/19115/-3/mrs/1.0");
-      this.addNamespace("msr", "http://standards.iso.org/iso/19115/-3/msr/1.0");
+      this.addNamespace("msr", "http://standards.iso.org/iso/19115/-3/msr/2.0");
       this.addNamespace("mdq", "http://standards.iso.org/iso/19157/-2/mdq/1.0");
       this.addNamespace("dqc", "http://standards.iso.org/iso/19157/-2/dqc/1.0");
       this.addNamespace("gco", "http://standards.iso.org/iso/19115/-3/gco/1.0");

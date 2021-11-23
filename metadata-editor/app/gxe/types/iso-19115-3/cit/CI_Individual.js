@@ -10,7 +10,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "./CI_Contact",
         "./CI_RoleCode",
-        "dojo/text!./templates/CI_Party.html"
+        "dojo/text!./templates/CI_Individual.html"
       ],
 function(declare, lang, has, Descriptor, 
   Element, Tabs, AbstractObject, CodeListReference, GcoElement, ObjectReference, CI_Contact,  CI_RoleCode, 

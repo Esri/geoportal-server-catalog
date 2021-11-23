@@ -7,7 +7,9 @@
        
   <!-- MD_FeatureCatalogue -->
   <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:MD_FeatureCatalogue',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_FeatureCatalogue.caption}'">
-  <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_FeatureCatalogue"> </div>
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'gfc:FC_FeatureCatalogue',minOccurs:0">
+       <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_FeatureCatalogue"> </div>
+    </div>
   </div>
 
    <!-- MD_CoverageDescription -->

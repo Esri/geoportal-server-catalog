@@ -1,0 +1,24 @@
+<div data-dojo-attach-point="containerNode">
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdq:DQ_MeasureReference',minOccurs:1, label:'${i18nIso3.DQ_MeasureReference.caption}'">
+ 
+        <!-- measureIdentification MD_Identifier-->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdq:measureIdentification',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.DQ_MeasureReference.measureIdentification}'">
+          <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Identifier"></div>
+        </div>
+        
+        <!-- nameOfMeasure Free text -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdq:nameOfMeasure',minOccurs:0,preferOpen:false,label:'${i18nIso3.DQ_MeasureReference.nameOfMeasure}'">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+          <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+        </div>
+
+        <!-- measureDescription Free text -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdq:measureDescription',minOccurs:0,preferOpen:false,label:'${i18nIso3.DQ_MeasureReference.measureDescription}'">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+          <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+        </div>
+      
+
+    </div>
+</div>
