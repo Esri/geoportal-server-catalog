@@ -175,7 +175,7 @@ public class ReindexRequest extends com.esri.geoportal.lib.elastic.request.Reind
           if (feedbackCount.get() >= feedbackCountThreshold) {
             feedbackCount.set(0);
             if ((System.currentTimeMillis() - feedbackStartMillis.get()) >= feedbackMillis) {
-              logFeedback(tStart,count.get(),scroller.getTotalHits(),false);
+              logFeedback(tStart,count.get(),scroller.getTotalHits(), false);
               feedbackStartMillis.set(System.currentTimeMillis());
             }
           } 
