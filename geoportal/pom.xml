@@ -60,7 +60,14 @@
 			<artifactId>log4j-slf4j-impl</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
-    
+
+    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+    <dependency>
+        <groupId>org.slf4j</groupId>
+        <artifactId>slf4j-api</artifactId>
+        <version>1.7.32</version>
+    </dependency>
+  
     <!-- json -->
     <dependency>
       <groupId>org.glassfish</groupId>
@@ -99,6 +106,15 @@
       <groupId>org.elasticsearch.client</groupId>
       <artifactId>x-pack-transport</artifactId>
       <version>5.6.1</version>
+      <exclusions>
+
+        <!--  Use updated Netty -->
+        <exclusion>
+          <groupId>io.netty</groupId>
+          <artifactId>netty</artifactId>
+        </exclusion>
+      </exclusions>
+    
     </dependency>
     
     <!-- Spring -->
@@ -245,6 +261,13 @@
       <version>1.69</version>
     </dependency>
 
+    <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+    <dependency>
+      <groupId>io.netty</groupId>
+      <artifactId>netty-all</artifactId>
+      <version>4.1.63.Final</version>
+    </dependency>
+
     <!-- https://mvnrepository.com/artifact/io.netty/netty-common -->
     <dependency>
       <groupId>io.netty</groupId>
@@ -258,7 +281,6 @@
       <artifactId>netty-codec-http</artifactId>
       <version>4.1.63.Final</version>
     </dependency>
-
   </dependencies> 
   
   <build>
