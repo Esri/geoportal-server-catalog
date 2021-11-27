@@ -38,6 +38,7 @@ import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
 // import org.elasticsearch.common.transport.InetSocketTransportAddress;
 import org.elasticsearch.common.transport.TransportAddress;
+import org.elasticsearch.common.xcontent.XContentType;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 
@@ -378,7 +379,7 @@ public class ElasticContext {
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
     String json = JsonUtil.toJson(jso,false);
     AdminClient client = this.getTransportClient().admin();
-    client.indices().prepareCreate(name).setSource(json).get();
+    client.indices().prepareCreate(name).setSource(json, XContentType.JSON).get();
   }
   
   /**
