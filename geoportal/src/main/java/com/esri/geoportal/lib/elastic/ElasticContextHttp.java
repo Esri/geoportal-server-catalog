@@ -19,7 +19,7 @@ import com.esri.geoportal.base.util.Val;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 
 import java.io.FileNotFoundException;
-//import java.math.BigDecimal;
+import java.math.BigDecimal;
 import java.util.Timer;
 import java.util.TimerTask;
 import java.util.Map.Entry;

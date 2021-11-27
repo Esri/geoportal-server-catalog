@@ -143,7 +143,6 @@ public class ReindexRequest extends AppRequest {
           boolean bWriteItem = false;
           try {
             String xml = Val.trim(readXml(ec,itemio,id,fromIndexName,fromVersionCue));
-            // TODO what if the xml is empty?
             //boolean asDraft = false;
             MetadataDocument mdoc = new MetadataDocument();
             mdoc.setItemId(id);
@@ -162,7 +161,7 @@ public class ReindexRequest extends AppRequest {
             }
             
             if (bWriteItem) {
-              JsonObjectBuilder jb = itemio.mixin(mdoc,hit.sourceAsString());
+              JsonObjectBuilder jb = itemio.mixin(mdoc,hit.getSourceAsString()); // elastic update .sourceAsString());
               if (metadataTypeKey != null) jb.add(FieldNames.FIELD_SYS_METADATATYPE,metadataTypeKey);
               mdoc.setJson(JsonUtil.toJson(jb.build(),false));
               itemio.writeItem(ec,mdoc,toIndexName,toIndexName);
