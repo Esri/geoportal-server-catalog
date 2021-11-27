@@ -263,7 +263,7 @@ public class PublishMetadataRequest extends AppRequest {
         builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_SYS_SOURCEURI,sourceUri));
         SearchHits hits = builder.get().getHits();
         // TODO see above fileid issues
-        if (hits.getTotalHits() == 1) searchHit = hits.getAt(0);
+        if (hits.getTotalHits().value == 1) searchHit = hits.getAt(0);
       }
     }
     
