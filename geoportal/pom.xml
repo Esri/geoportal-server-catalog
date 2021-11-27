@@ -108,7 +108,7 @@
       <version>5.6.1</version>
       <exclusions>
 
-        <!--  Use updated Netty -->
+        <!--  Use updated dependencies -->
         <exclusion>
           <groupId>io.netty</groupId>
           <artifactId>netty</artifactId>
@@ -121,7 +121,11 @@
           <groupId>org.yaml</groupId>
           <artifactId>snakeyaml</artifactId>
         </exclusion>  
-      </exclusions>
+        <exclusion>
+          <groupId>com.google.guava</groupId>
+          <artifactId>guava</artifactId>
+        </exclusion>
+    </exclusions>
     </dependency>
     
     <!-- Spring -->
@@ -303,7 +307,14 @@
       <artifactId>snakeyaml</artifactId>
       <version>1.29</version>
     </dependency>
-  </dependencies> 
+
+    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+    <dependency>
+      <groupId>com.google.guava</groupId>
+      <artifactId>guava</artifactId>
+      <version>31.0.1-jre</version>
+    </dependency>
+</dependencies> 
   
   <build>
     <finalName>geoportal</finalName>
