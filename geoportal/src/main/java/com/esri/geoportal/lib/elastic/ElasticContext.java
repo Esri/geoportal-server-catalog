@@ -36,7 +36,8 @@ import org.elasticsearch.client.transport.TransportClient;
 import org.elasticsearch.common.collect.ImmutableOpenMap;
 import org.elasticsearch.common.settings.Settings;
 import org.elasticsearch.common.settings.Settings.Builder;
-import org.elasticsearch.common.transport.InetSocketTransportAddress;
+// import org.elasticsearch.common.transport.InetSocketTransportAddress;
+import org.elasticsearch.common.transport.TransportAddress;
 import org.elasticsearch.transport.client.PreBuiltTransportClient;
 import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
 
@@ -572,7 +573,8 @@ public class ElasticContext {
       for (String node: nodeNames) {
         try {
           InetAddress a = InetAddress.getByName(node);
-          transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
+          // transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
+          transportClient.addTransportAddress(new TransportAddress(a,transportPort));
         } catch (UnknownHostException ex) {
           LOGGER.warn(String.format("Invalid node name: %s", node), ex);
         }
