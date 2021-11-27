@@ -254,7 +254,7 @@ public class PublishMetadataRequest extends AppRequest {
         SearchHits hits = builder.get().getHits();
         // TODO what if there is more than one hit
         // TODO for new items, use the fileid as the key??
-        if (hits.getTotalHits() > 0) searchHit = hits.getAt(0);
+        if (hits.getTotalHits().value > 0) searchHit = hits.getAt(0);
       }
       if (searchHit == null && sourceUri != null && sourceUri.length() > 0) {
         SearchRequestBuilder builder = client.prepareSearch(indexName);
