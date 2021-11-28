@@ -68,7 +68,7 @@ public class AccessUtil {
         builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_FILEID,id));
         SearchHits hits = builder.get().getHits();
         // TODO what if there is more than one hit
-        if (hits.getTotalHits().value == 1) {
+        if (hits.getTotalHits() == 1) {
           //System.err.println("fileid exists: "+id+" - hitId = "+hits.getAt(0).getId());
           return hits.getAt(0).getId();
         }

@@ -145,7 +145,7 @@ public class Scroller {
 
     SearchResponse response = search.get();
     scrollId = response.getScrollId();
-    setTotalHits(response.getHits().getTotalHits().value);
+    setTotalHits(response.getHits().getTotalHits());
 
     while (true) {
       SearchHit[] hits = response.getHits().getHits();
