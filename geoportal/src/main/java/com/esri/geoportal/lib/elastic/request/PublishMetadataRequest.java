@@ -254,7 +254,7 @@ public class PublishMetadataRequest extends AppRequest {
         SearchHits hits = builder.get().getHits();
         // TODO what if there is more than one hit
         // TODO for new items, use the fileid as the key??
-        if (hits.getTotalHits().value > 0) searchHit = hits.getAt(0);
+        if (hits.getTotalHits() > 0) searchHit = hits.getAt(0);
       }
       if (searchHit == null && sourceUri != null && sourceUri.length() > 0) {
         SearchRequestBuilder builder = client.prepareSearch(indexName);
@@ -263,7 +263,7 @@ public class PublishMetadataRequest extends AppRequest {
         builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_SYS_SOURCEURI,sourceUri));
         SearchHits hits = builder.get().getHits();
         // TODO see above fileid issues
-        if (hits.getTotalHits().value == 1) searchHit = hits.getAt(0);
+        if (hits.getTotalHits() == 1) searchHit = hits.getAt(0);
       }
     }
     
