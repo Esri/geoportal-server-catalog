@@ -22,7 +22,8 @@ import java.util.function.Consumer;
 import org.elasticsearch.action.ActionListener;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.index.get.GetField;
+// import org.elasticsearch.index.get.GetField;
+import org.elasticsearch.common.document.DocumentField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -43,7 +44,7 @@ class SimplePromiseExample {
     boolean ok = true;
     if (response.isExists()) {
       ok = false;
-      GetField field = response.getField(ownerField);
+      DocumentField field = response.getField(ownerField);
       if (field != null) {
         String owner = (String)field.getValue();
         LOGGER.info("sys_owner="+owner);

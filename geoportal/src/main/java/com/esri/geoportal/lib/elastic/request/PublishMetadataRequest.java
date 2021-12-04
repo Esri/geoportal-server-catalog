@@ -294,7 +294,7 @@ public class PublishMetadataRequest extends AppRequest {
       } else {
         if (searchHit != null) {
           mdoc.setItemId(searchHit.getId());
-          source = searchHit.getSource();
+          source = searchHit.getSourceAsMap(); // elastic update .getSource();
           sourceAsString = searchHit.getSourceAsString();
         }
       }

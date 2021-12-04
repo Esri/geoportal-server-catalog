@@ -399,7 +399,7 @@ public class Test {
         count++;
         if (count > max) break;
         String id = hit.getId();
-        String xml = (String)hit.getSource().get("xml");
+        String xml = (String)hit.getSourceAsMap().get("xml");
         //System.err.println(id+"\r\n"+xml);
         processed++;
       }
@@ -491,7 +491,7 @@ public class Test {
         public void accept(SearchHit hit) {
           try {
             //System.err.println("count="+count.incrementAndGet()+" ...");
-            String xml = (String)hit.getSource().get("xml");
+            String xml = (String)hit.getSourceAsMap().get("xml");
             //LOGGER.info(""+scroller.getTotalHits()+" "+hit.getId()+"\r\n"+xml);
             RestTemplate rest = new RestTemplate();
             HttpHeaders headers = new HttpHeaders();
@@ -673,7 +673,7 @@ public class Test {
           try {
             System.err.println(count.incrementAndGet());
             String id = hit.getId();
-            String xml = (String)hit.getSource().get("sys_clob");
+            String xml = (String)hit.getSourceAsMap().get("sys_clob");
             //System.err.println(id);
             Path p = Paths.get(dir+id.replace("/xml","")+".xml");
             Files.write(p,xml.getBytes("UTF-8"));
