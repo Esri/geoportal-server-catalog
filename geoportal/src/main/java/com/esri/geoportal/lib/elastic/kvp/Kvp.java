@@ -27,7 +27,8 @@ import org.elasticsearch.action.DocWriteResponse.Result;
 import org.elasticsearch.action.delete.DeleteResponse;
 import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.index.get.GetField;
+// import org.elasticsearch.index.get.GetField;
+import org.elasticsearch.common.document.DocumentField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -223,7 +224,8 @@ public class Kvp {
     if (resp.isExists()) {
       setFound(true);
       try {
-        GetField field = resp.getField(fieldName);
+        // GetField field = resp.getField(fieldName);
+        DocumentField field = resp.getField(fieldName);
         if (field != null) {
           String meta = (String)field.getValue();
           setMeta(meta);

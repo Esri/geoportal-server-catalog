@@ -20,7 +20,8 @@ import org.elasticsearch.action.get.GetRequestBuilder;
 import org.elasticsearch.action.get.GetResponse;
 import org.elasticsearch.action.index.IndexRequestBuilder;
 import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.index.get.GetField;
+import org.elasticsearch.common.document.DocumentField;
+// import org.elasticsearch.index.get.GetField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -56,7 +57,8 @@ public class KvpClob extends Kvp {
     if (resp.isExists()) {
       setFound(true);
       try {
-        GetField field = resp.getField(fieldName);
+        DocumentField field = resp.getField(fieldName);
+        // GetField field = resp.getField(fieldName);
         if (field != null) {
           return (String)field.getValue();
         }

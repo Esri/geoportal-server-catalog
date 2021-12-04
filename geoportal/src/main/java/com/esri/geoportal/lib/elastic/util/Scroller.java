@@ -158,7 +158,7 @@ public class Scroller {
       }
       if (count > max) break;
       SearchScrollRequestBuilder scroll = client.prepareSearchScroll(scrollId);
-      scroll.setScroll(new TimeValue(getKeepAliveMillis()));
+      scroll.setScroll(new TimeValue((long)getKeepAliveMillis()));
       response = scroll.get();
     }
     //System.err.println("processed="+processed.get());
