@@ -10,7 +10,7 @@
   
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <log4j.version>2.15.0</log4j.version>
+    <log4j.version>2.16.0</log4j.version>
     <springframework.version>5.2.18.RELEASE</springframework.version>
     <springsecurity.version>5.3.10.RELEASE</springsecurity.version>
     <jackson.version>2.12.3</jackson.version>
