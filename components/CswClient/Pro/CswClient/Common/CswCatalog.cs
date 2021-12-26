@@ -39,6 +39,7 @@ namespace com.esri.gpt.csw { /// <summary>
         private CswProfile profile;
         private CswCatalogCapabilities capabilities;
         private bool isConnect;
+        private bool isOGCRecords;
 
         #region "Properties"
         /// <summary>

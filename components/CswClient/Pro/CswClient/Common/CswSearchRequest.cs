@@ -84,10 +84,19 @@ namespace com.esri.gpt.csw
             CswProfile profile = _catalog.Profile;
             writeLogMessage("Csw profile used : " + profile.Name);
             // generate getRecords query
-            string requestUrl = _catalog.Capabilities.GetRecords_PostURL;
-            string requestQuery = profile.GenerateCSWGetRecordsRequest(_criteria);
+            string requestUrl = "";
+            string requestQuery = "";
+            if (_catalog.Profile.isOGCRecords)
+            {
+                requestUrl = _catalog.URL;
+                requestQuery = "f=json&q=" + _criteria.SearchText;
+            } else
+            {
+                requestUrl = _catalog.Capabilities.GetRecords_PostURL;
+                requestQuery = profile.GenerateCSWGetRecordsRequest(_criteria);
+            }
 
-         //   requestQuery = "<csw:GetCapabilities xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" request=\"GetCapabilities\" service=\"CSW\" version=\"2.0.2\"/>";
+            //   requestQuery = "<csw:GetCapabilities xmlns:csw=\"http://www.opengis.net/cat/csw/2.0.2\" request=\"GetCapabilities\" service=\"CSW\" version=\"2.0.2\"/>";
 
             requestQuery = requestQuery.Replace("utf-16", "utf-8");
             requestQuery = requestQuery.Replace("UTF-16", "UTF-8");
@@ -98,15 +107,28 @@ namespace com.esri.gpt.csw
             string responseText;
             sb.AppendLine(DateTime.Now + " Sending CSW GetRecords request to endpoint : " + requestUrl);
             sb.AppendLine("Request Query : " + requestQuery);
-            if(!_catalog.Capabilities.GetRecords_IsSoapEndPoint)
-               responseText = _cswClient.SubmitHttpRequest("POST", requestUrl, requestQuery);
+            if (_catalog.Profile.isOGCRecords)
+            {
+                responseText = _cswClient.SubmitHttpRequest("GET", requestUrl, requestQuery);
+            }
             else
-               responseText = _cswClient.SubmitHttpRequest("SOAP", requestUrl, requestQuery);
+            {
+                if (!_catalog.Capabilities.GetRecords_IsSoapEndPoint)
+                    responseText = _cswClient.SubmitHttpRequest("POST", requestUrl, requestQuery);
+                else
+                    responseText = _cswClient.SubmitHttpRequest("SOAP", requestUrl, requestQuery);
+            }
 
             // parse out csw search records
             CswRecords records = new CswRecords();
             sb.AppendLine(DateTime.Now + " Response received : " + responseText);
-            profile.ReadCSWGetRecordsResponse(responseText, records);
+            if (_catalog.Profile.isOGCRecords)
+            {
+                profile.ReadOGCAPIRecordsResponse(responseText, records);
+            } else
+            {
+                profile.ReadCSWGetRecordsResponse(responseText, records);
+            }
             sb.AppendLine(DateTime.Now + " Parsed GetRecords response.");
 
             // populate CSW response

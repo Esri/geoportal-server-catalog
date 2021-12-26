@@ -21,6 +21,8 @@ using ArcGIS.Desktop.Framework.Threading.Tasks;
 using System.Windows.Media.Imaging;
 using ArcGIS.Core.Geometry;
 using System.Linq;
+using ArcGIS.Core.Data;
+using System.Net;
 
 namespace GeoportalSearch
 {
@@ -55,9 +57,9 @@ namespace GeoportalSearch
 
     private GraphicsLayer _graphicsLayer = null;
 
-    #endregion
+        #endregion
 
-    public Dockpane1View()
+        public Dockpane1View()
     {
       InitializeComponent();
       try
@@ -212,7 +214,7 @@ namespace GeoportalSearch
 
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
 
-        if (!catalog.IsConnected())
+        if (!catalog.Profile.isOGCRecords && !catalog.IsConnected())
         {
           string errMsg = "";
           try
@@ -266,9 +268,9 @@ namespace GeoportalSearch
         {
 
           List<CswRecord> listItems = new List<CswRecord>();
-          for (int i = 0; i < alRecords.Count - 1; i++)
+          foreach (object record in alRecords)
           {
-            listItems.Add((CswRecord)alRecords[i]);
+            listItems.Add((CswRecord)record);
           }
 
           resultsListBox.Items.Clear();
@@ -541,7 +543,7 @@ namespace GeoportalSearch
         if (catalog == null) { throw new NullReferenceException(StringResources.CswCatalogIsNull); }
         CswRecord record = (CswRecord)resultsListBox.SelectedItem;
         if (record == null) throw new NullReferenceException(StringResources.CswRecordIsNull);
-
+        
         // connect to catalog if needed
         if (!catalog.IsConnected())
         {
@@ -911,13 +913,17 @@ namespace GeoportalSearch
           url = AppendQuestionOrAmpersandToUrlString(url);
         }
 
-        CIMStandardDataConnection cIMStandardDataConnection = new CIMStandardDataConnection()
-        {
-          WorkspaceConnectionString = @"SWAPXY=TRUE;SWAPXYFILTER=FALSE;URL=" + url,
-          WorkspaceFactory = WorkspaceFactory.WFS,
-          Dataset = "WFS Service Name - TODO",
-          DatasetType = esriDatasetType.esriDTFeatureClass
-        };
+                // TODO - select layer from WFS
+                // for now, get the layer by index
+                String dataset = getWFSLayer(0, url, msi.ServiceType, "2.0.0");
+
+                CIMStandardDataConnection cIMStandardDataConnection = new CIMStandardDataConnection()
+                {
+                    WorkspaceConnectionString = @"SWAPXY=FALSE;SWAPXYFILTER=FALSE;URL=" + url + ";VERSION=2.0.0",
+                    WorkspaceFactory = WorkspaceFactory.WFS,
+                    Dataset = dataset,
+                    DatasetType = esriDatasetType.esriDTFeatureClass
+                };
 
         // Add a new layer to the map
         await QueuedTask.Run(() =>
@@ -927,9 +933,55 @@ namespace GeoportalSearch
       }
       catch (Exception ex)
       {
-        ShowErrorMessageBox(StringResources.AddWmsLayerFailed + "\r\n" + ex.Message);
+        ShowErrorMessageBox(StringResources.AddWfsLayerFailed + "\r\n" + ex.Message);
       }
     }
+
+        private String getWFSLayer(int layerIndex, String serviceUrl, String serviceType, String serviceVersion)
+        {
+            String dataset = "";
+
+            try
+            {
+                String url = serviceUrl + "request=GetCapabilities&service=" + serviceType + "&version=" + serviceVersion;
+                WebRequest request = WebRequest.Create(url);
+                request.Method = "GET";
+                WebResponse response = request.GetResponse();
+                Stream dataStream = response.GetResponseStream();
+                
+                // Open the stream using a StreamReader for easy access.
+                StreamReader reader = new StreamReader(dataStream);
+                // Read the content.
+                string responseFromServer = reader.ReadToEnd();
+                // Display the content.
+                Console.WriteLine(responseFromServer);
+
+                // Close the response.
+                response.Close();
+
+                // Now parse GetCapabilities response to get the first layer
+                XmlDocument xmlDoc = new XmlDocument();
+                xmlDoc.LoadXml(responseFromServer);
+
+                XmlNamespaceManager nsmgr = new XmlNamespaceManager(xmlDoc.NameTable);
+                nsmgr.AddNamespace("wfs", "http://www.opengis.net/wfs/2.0");
+                string xpath = "//wfs:FeatureTypeList/wfs:FeatureType/wfs:Title";
+                var featureTypeNames = xmlDoc.SelectNodes(xpath, nsmgr);
+                foreach (XmlNode feautureTypeName in featureTypeNames)
+                {
+                    Console.WriteLine(feautureTypeName.InnerText);
+                }
+
+                dataset = featureTypeNames[0].InnerText; //"cities";
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessageBox("getWFSLayer ERROR: " + ex.Message);
+                dataset = "";
+            }
+
+            return dataset;
+        }
 
     private async void AddLayerWMS(MapServiceInfo msi, Boolean fromServerUrl)
     {
@@ -996,16 +1048,20 @@ namespace GeoportalSearch
     {
       var gl_param = new GraphicsLayerCreationParams { Name = "Metadata Footprints" };
       var map = MapView.Active.Map;
-      var graphicsLayer = map.GetLayersAsFlattenedList().OfType<ArcGIS.Desktop.Mapping.GraphicsLayer>().FirstOrDefault();
+            var graphicsLayer = this._graphicsLayer; // map.GetLayersAsFlattenedList().OfType<ArcGIS.Desktop.Mapping.GraphicsLayer>().FirstOrDefault();
 
       QueuedTask.Run(() =>
       {
-        if (graphicsLayer == null)
+        if (this._graphicsLayer == null)
         {
           graphicsLayer = LayerFactory.Instance.CreateLayer<ArcGIS.Desktop.Mapping.GraphicsLayer>(gl_param, map);
-        }
-        MapPoint lowerLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Minx, record.BoundingBox.Miny);
-        MapPoint upperRightLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy);
+              this._graphicsLayer = graphicsLayer;
+        } else
+          {
+              graphicsLayer = this._graphicsLayer;
+          }
+        MapPoint lowerLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Minx, record.BoundingBox.Miny, SpatialReferences.WGS84);
+        MapPoint upperRightLeft = MapPointBuilder.CreateMapPoint(record.BoundingBox.Maxx, record.BoundingBox.Maxy, SpatialReferences.WGS84);
 
         Polygon polygon = PolygonBuilder.CreatePolygon(EnvelopeBuilder.CreateEnvelope(lowerLeft, upperRightLeft));
         CIMSymbol polygonSymbol = SymbolFactory.Instance.ConstructPolygonSymbol(CIMColor.CreateRGBColor(255, 255, 0, 0.1));
@@ -1075,70 +1131,81 @@ namespace GeoportalSearch
 
     private void ViewMetadata_Clicked(object sender, RoutedEventArgs e)
     {
-      try
-      {
+            string tmpFilePath = "";
+
+            try
+            {
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
 
         CswRecord record = (CswRecord)(resultsListBox.SelectedItem);
 
-        // retrieve metadata
-        XmlDocument xmlDoc = RetrieveSelectedMetadataFromCatalog(true);
-        if (xmlDoc == null && styledRecordResponse == null) return;
+        CswCatalog catalog = (CswCatalog)catalogComboBox.SelectedItem;
+        if (catalog.Profile.isOGCRecords)
+                {
+                    // OGC Records metadata view is an HTML rendering of the item
+                    tmpFilePath = catalog.URL + "/" + record.ID + "?f=html";
+                }
+                else
+                {
 
-        string tmpFilePath = "";
-        if (xmlDoc != null && styledRecordResponse == null)
-        {
-          // display metadata in XML format
-          tmpFilePath = GenerateTempFilename("Meta", "xml");
-          XmlWriter xmlWriter = new XmlTextWriter(tmpFilePath, Encoding.UTF8);
-          XmlNode binaryNode = xmlDoc.GetElementsByTagName("Binary")[0];
-          if (binaryNode != null)
-          {
-            XmlNode enclosureNode = xmlDoc.GetElementsByTagName("Enclosure")[0];
-            if (enclosureNode != null)
-              binaryNode.RemoveChild(enclosureNode);
-          }
+                // retrieve metadata
+                XmlDocument xmlDoc = RetrieveSelectedMetadataFromCatalog(true);
+                if (xmlDoc == null && styledRecordResponse == null) return;
 
-          String outputStr = xmlDoc.InnerXml.Replace("utf-16", "utf-8");
-          xmlWriter.WriteRaw(outputStr);
-          xmlWriter.Close();
-        }
-        else if (xmlDoc == null && styledRecordResponse != null
-            && styledRecordResponse.Trim().Length > 0)
-        {
-          // display metadata in XML format
-          tmpFilePath = GenerateTempFilename("Meta", "html");
-          FileInfo fileInfo = new FileInfo(tmpFilePath);
-          System.IO.FileStream fileStream = fileInfo.Create();
-          StreamWriter sr = new StreamWriter(fileStream);
-          sr.Write(styledRecordResponse);
-          sr.Close();
-          fileStream.Close();
-          styledRecordResponse = null;
-        }
+                if (xmlDoc != null && styledRecordResponse == null)
+                {
+                  // display metadata in XML format
+                  tmpFilePath = GenerateTempFilename("Meta", "xml");
+                  XmlWriter xmlWriter = new XmlTextWriter(tmpFilePath, Encoding.UTF8);
+                  XmlNode binaryNode = xmlDoc.GetElementsByTagName("Binary")[0];
+                  if (binaryNode != null)
+                  {
+                    XmlNode enclosureNode = xmlDoc.GetElementsByTagName("Enclosure")[0];
+                    if (enclosureNode != null)
+                      binaryNode.RemoveChild(enclosureNode);
+                  }
 
-        // pop up a metadata viwer displaying the metadata as HTML
-        FormViewMetadata frmViewMetadata = new FormViewMetadata();
-        frmViewMetadata.FormClosed += new FormClosedEventHandler(RemoveTempFileAfterMetadataViewerClosed);
-        frmViewMetadata.MetadataTitle = record.Title;
-        // frmViewMetadata.WindowState = FormWindowState.Maximized;
-        frmViewMetadata.Navigate(tmpFilePath);
-        frmViewMetadata.Show();
-        frmViewMetadata.Activate();
+                  String outputStr = xmlDoc.InnerXml.Replace("utf-16", "utf-8");
+                  xmlWriter.WriteRaw(outputStr);
+                  xmlWriter.Close();
+                }
+                else if (xmlDoc == null && styledRecordResponse != null
+                    && styledRecordResponse.Trim().Length > 0)
+                {
+                    // display metadata in XML format
+                    tmpFilePath = GenerateTempFilename("Meta", "html");
+                    FileInfo fileInfo = new FileInfo(tmpFilePath);
+                    System.IO.FileStream fileStream = fileInfo.Create();
+                    StreamWriter sr = new StreamWriter(fileStream);
+                    sr.Write(styledRecordResponse);
+                    sr.Close();
+                    fileStream.Close();
+                    styledRecordResponse = null;
+                }
+                }
 
-        // note: temp file will be deleted when metadata viwer closes. 
-        //       see "RemoveTempFileAfterMetadataViewerClosed()"
-      }
-      catch (Exception ex)
-      {
-        ShowErrorMessageBox(ex.Message);
+                // pop up a metadata viwer displaying the metadata as HTML
+                FormViewMetadata frmViewMetadata = new FormViewMetadata();
+                frmViewMetadata.FormClosed += new FormClosedEventHandler(RemoveTempFileAfterMetadataViewerClosed);
+                frmViewMetadata.MetadataTitle = record.Title;
+                // frmViewMetadata.WindowState = FormWindowState.Maximized;
+                frmViewMetadata.Navigate(tmpFilePath);
+                frmViewMetadata.Show();
+                frmViewMetadata.Activate();
 
-      }
-      finally
-      {
-        styledRecordResponse = null;
-        System.Windows.Forms.Cursor.Current = Cursors.Default;
-      }
+                // note: temp file will be deleted when metadata viwer closes. 
+                //       see "RemoveTempFileAfterMetadataViewerClosed()"
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessageBox(ex.Message);
+
+            }
+            finally
+            {
+                styledRecordResponse = null;
+                System.Windows.Forms.Cursor.Current = Cursors.Default;
+            }
     }
 
     private void ResultsListBox_SelectedIndexChanged(object sender, SelectionChangedEventArgs e)
@@ -1275,7 +1342,7 @@ namespace GeoportalSearch
         {
 
           String serviceType = record.ServiceType;
-          if (serviceType == null || serviceType.Length == 0)
+          if (serviceType == null || serviceType == "unknown" || serviceType.Length == 0)
           {
             serviceType = CswProfile.getServiceType(_mapServerUrl);
           }
@@ -1320,7 +1387,16 @@ namespace GeoportalSearch
             CswProfile.ParseServiceInfoFromUrl(msinfo, _mapServerUrl, serviceType);
             AddLayerWMS(msinfo, true);
           }
-          else if (serviceType.Equals("aims"))
+            else if (serviceType.Equals("wfs"))
+            {
+                MapServiceInfo msinfo = new MapServiceInfo();
+                msinfo.Server = record.MapServerURL;
+                msinfo.Service = record.ServiceName;
+                msinfo.ServiceType = record.ServiceType;
+                CswProfile.ParseServiceInfoFromUrl(msinfo, _mapServerUrl, serviceType);
+                AddLayerWFS(msinfo, true);
+            }
+            else if (serviceType.Equals("aims"))
           {
             MapServiceInfo msinfo = new MapServiceInfo();
             msinfo.Server = record.MapServerURL;
@@ -1411,7 +1487,7 @@ namespace GeoportalSearch
         currentExtent.Miny = mapView.Extent.YMin;
         BoundingBox newExtent = currentExtent;
 
-        drawfootprint(record, false, false);
+        //drawfootprint(record, false, false);
         newExtent = updatedExtent(currentExtent, record.BoundingBox);
 
         //zoom to extent of the footprint

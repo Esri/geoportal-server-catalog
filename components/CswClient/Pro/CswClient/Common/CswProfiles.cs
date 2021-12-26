@@ -101,7 +101,12 @@ namespace com.esri.gpt.csw {
 
                     if (displayResponseXslt != "") { displayResponseXslt = System.IO.Path.Combine(profileDirName, displayResponseXslt); }
 
-                    this.AddProfile(id, new CswProfile(id, name, cswnamespace, description, requestKVPs, requestxslt, responsexslt, metadataxslt, displayResponseXslt,livedatamap, extentsearch, spatialboundary));
+                    // test if this is an OGC API Records profile
+                    node = xmlnode.SelectSingleNode("IsOGCRecords");
+                    bool isOGCRecords = false;
+                    if (node != null) { isOGCRecords = bool.Parse(node.InnerText.Trim()); }
+
+                    this.AddProfile(id, new CswProfile(id, name, cswnamespace, description, requestKVPs, requestxslt, responsexslt, metadataxslt, displayResponseXslt, livedatamap, extentsearch, spatialboundary, isOGCRecords));
                 }
 
             }

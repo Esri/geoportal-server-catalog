@@ -60,7 +60,7 @@ namespace com.esri.gpt.csw
         {
             return SubmitHttpRequest(method, URL, postdata, "", "");
         }
-        
+
         /// <summary>
         /// Submit HTTP Request 
         /// </summary>
@@ -75,46 +75,57 @@ namespace com.esri.gpt.csw
         /// <returns>Response in plain text.</returns>
         public string SubmitHttpRequest(string method, string URL, string postdata, string usr, string pwd)
         {
-            String responseText = "";            
+            String responseText = "";
             HttpWebRequest request;
             Uri uri = new Uri(URL);
             request = (HttpWebRequest)WebRequest.Create(uri);
             request.AllowAutoRedirect = true;
-            
+
             ClientCertRequest.handleClientCert(request, URL);
 
-            if(method.Equals("SOAP")){
-                request.Method = "POST";
-                request.Headers.Add("SOAPAction: Some-URI");
-                request.ContentType = "text/xml; charset=UTF-8"; 
-            }
-            else if (method.Equals("DOWNLOAD"))
+            if (method.Equals("GET"))
             {
-                request.Method = "GET";                             
+                request.Method = "GET";
+                uri = new Uri(URL + "?" + postdata);
             }
-            else{
-                request.ContentType = "text/xml; charset=UTF-8"; 
-                request.Method = method;
+            else
+            {
+                if (method.Equals("SOAP"))
+                {
+                    request.Method = "POST";
+                    request.Headers.Add("SOAPAction: Some-URI");
+                    request.ContentType = "text/xml; charset=UTF-8";
+                }
+                else if (method.Equals("DOWNLOAD"))
+                {
+                    request.Method = "GET";
+                }
+                else
+                {
+                    request.ContentType = "text/xml; charset=UTF-8";
+                    request.Method = method;
+                }
             }
+
 
             // Credential and cookies
             request.CookieContainer = _cookieContainer;
-            
+
             NetworkCredential nc = null;
             String authType = "Negotiate";
             if (_credentialCache.GetCredential(uri, authType) == null && _credentialCache.GetCredential(uri, "Basic") == null)
             {
                 if (!String.IsNullOrEmpty(usr) && !String.IsNullOrEmpty(pwd))
                 {
-                    nc =  new NetworkCredential(usr, pwd);
+                    nc = new NetworkCredential(usr, pwd);
                     _credentialCache.Add(uri, "Basic", nc);
                     _credentialCache.Add(uri, authType, nc);
                 }
-                else{
-                     nc =  System.Net.CredentialCache.DefaultNetworkCredentials;
-                     _credentialCache.Add(uri, authType, nc);  
+                else {
+                    nc = System.Net.CredentialCache.DefaultNetworkCredentials;
+                    _credentialCache.Add(uri, authType, nc);
                 }
-            }           
+            }
             request.Credentials = _credentialCache;
             // post data
             if (request.Method.Equals("POST", StringComparison.OrdinalIgnoreCase))
@@ -127,6 +138,7 @@ namespace com.esri.gpt.csw
                 requestStream.Write(byteTemp, 0, byteTemp.Length);
                 requestStream.Close();
             }
+
 
             HttpWebResponse response = null;
             try{

@@ -20,6 +20,7 @@ using System.Xml.Xsl;
 using System.Xml.XPath;
 using System.IO;
 using System.Globalization;
+using Newtonsoft.Json;
 
 namespace com.esri.gpt.csw
 {
@@ -31,6 +32,7 @@ namespace com.esri.gpt.csw
         private string id;
         private string name;
         private string cswnamespace;
+        private bool isogcrecords;
         private string kvp;
         private string description;
         private string requestxslt;
@@ -146,7 +148,17 @@ namespace com.esri.gpt.csw
         }
 
 
-
+        public bool isOGCRecords
+        {
+            set
+            {
+                isogcrecords = value;
+            }
+            get
+            {
+                return isogcrecords;
+            }
+        }
 
         #endregion
         # region "ConstructorDefinition"
@@ -161,7 +173,60 @@ namespace com.esri.gpt.csw
             ID = sid;
             Name = sname;
             Description = sdescription;
+            isogcrecords = false;
         }
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="sid"></param>
+        /// <param name="sname"></param>
+        /// <param name="sdescription"></param>
+        /// <param name="skvp"></param>
+        /// <param name="srequestxslt"></param>
+        /// <param name="sresponsexslt"></param>
+        /// <param name="smetadataxslt"></param>
+        /// <param name="sdisplayResponseXslt"></param>
+        /// <param name="livedatamap"></param>
+        /// <param name="extentsearch"></param>
+        /// <param name="spatialboundary"></param>
+        /// <param name="isOGCRecords"></param>
+        public CswProfile(string sid, string sname, string scswnamespace, string sdescription, string skvp, string srequestxslt, string sresponsexslt, string smetadataxslt, string sdisplayResponseXslt, bool livedatamap, bool extentsearch, bool spatialboundary, bool isOGCRecords)
+        {
+            ID = sid;
+            Name = sname;
+            CswNamespace = scswnamespace;
+            Description = sdescription;
+            isogcrecords = isOGCRecords;
+            kvp = skvp;
+            requestxslt = srequestxslt;
+            responsexslt = sresponsexslt;
+            metadataxslt = smetadataxslt;
+            displayResponseXslt = sdisplayResponseXslt;
+            filter_livedatamap = livedatamap;
+            filter_extentsearch = extentsearch;
+            filter_spatialboundary = spatialboundary;
+            //enable document() support
+            XsltSettings settings = new XsltSettings(true, true);
+            XmlUrlResolver xmlurlresolver = new XmlUrlResolver();
+            responsexsltobj = new XslCompiledTransform();
+            responsexsltobj.Load(responsexslt, settings, xmlurlresolver);
+            requestxsltobj = new XslCompiledTransform();
+            requestxsltobj.Load(requestxslt, settings, xmlurlresolver);
+            if (metadataxslt.Length > 0)
+            {
+                metadataxsltobj = new XslCompiledTransform();
+                metadataxsltobj.Load(metadataxslt, settings, xmlurlresolver);
+
+            }
+
+            if (displayResponseXslt.Length > 0)
+            {
+                displayResponseXsltObj = new XslCompiledTransform();
+                //enable document() support
+                displayResponseXsltObj.Load(displayResponseXslt, settings, xmlurlresolver);
+            }
+        }
+
         /// <summary>
         /// Constructor
         /// </summary>
@@ -190,6 +255,7 @@ namespace com.esri.gpt.csw
             filter_livedatamap = livedatamap;
             filter_extentsearch = extentsearch;
             filter_spatialboundary = spatialboundary;
+            isogcrecords = false;
             //enable document() support
             XsltSettings settings = new XsltSettings(true, true);
             XmlUrlResolver xmlurlresolver = new XmlUrlResolver();
@@ -233,6 +299,7 @@ namespace com.esri.gpt.csw
             Name = sname;
             CswNamespace = scswnamespace;
             Description = sdescription;
+            isogcrecords = false;
             kvp = skvp;
             requestxslt = srequestxslt;
             responsexslt = sresponsexslt;
@@ -267,6 +334,115 @@ namespace com.esri.gpt.csw
         # region "PublicFunctions"
 
         /// <summary>
+        /// Parse a OGC Records API response (geojson structure). 
+        /// </summary>
+        /// <remarks>
+        /// The OGC Records API is parsed and the records collection is populated
+        /// with the result. The reponse is parsed as GeoJSON.
+        /// </remarks>
+        /// <param name="param1">The string response</param>
+        /// <param name="param2">The recordlist which needs to be populated</param>
+        public void ReadOGCAPIRecordsResponse(string responsestring, CswRecords recordslist)
+        {
+            try
+            {
+                FeatureCollection featureCollection = JsonConvert.DeserializeObject<FeatureCollection>(responsestring);
+                StringWriter writer = new StringWriter();
+
+                foreach (Feature feature in featureCollection.features)
+                {
+                    CswRecord record = new CswRecord();
+                    record.ID = feature.id;
+                    record.Title = feature.properties.title;
+                    record.Abstract = feature.properties.description;
+                    String lowercorner = "";
+                    if (this.SupportSpatialBoundary)
+                    {
+                        lowercorner = feature.properties.extent.spatial.bbox[0][0] + " " + feature.properties.extent.spatial.bbox[0][1];
+                    }
+                    String uppercorner = "";
+                    if (this.SupportSpatialBoundary)
+                    {
+                        uppercorner = feature.properties.extent.spatial.bbox[0][2] + " " + feature.properties.extent.spatial.bbox[0][3];
+                    }
+                    if ((lowercorner.Length > 0 && uppercorner.Length > 0))
+                    {
+                        //Boolean parseFlag = false;
+                        //CultureInfo cultureInfo = new CultureInfo("en-us");
+                        //double pareseResult = 0.0;
+                        //parseFlag = Double.TryParse(lowercorner.Substring(0, lowercorner.IndexOf(' ')), NumberStyles.Number, cultureInfo, out pareseResult);
+                        record.BoundingBox.Minx = feature.properties.extent.spatial.bbox[0][0];
+                        //parseFlag = Double.TryParse(lowercorner.Substring(lowercorner.IndexOf(' ') + 1), NumberStyles.Number, cultureInfo, out pareseResult);
+                        record.BoundingBox.Miny = feature.properties.extent.spatial.bbox[0][1];
+                        //parseFlag = Double.TryParse(uppercorner.Substring(0, uppercorner.IndexOf(' ')), NumberStyles.Number, cultureInfo, out pareseResult);
+                        record.BoundingBox.Maxx = feature.properties.extent.spatial.bbox[0][2];
+                        //parseFlag = Double.TryParse(uppercorner.Substring(uppercorner.IndexOf(' ') + 1), NumberStyles.Number, cultureInfo, out pareseResult);
+                        record.BoundingBox.Maxy = feature.properties.extent.spatial.bbox[0][3];
+                        //if (parseFlag == false)
+                        //{
+                        //    throw new Exception("Number format error");
+                        //}
+
+                    }
+                    else
+                    {
+                        record.BoundingBox.Maxx = 180.00;
+                        record.BoundingBox.Miny = -90.00;
+                        record.BoundingBox.Minx = -180.00;
+                        record.BoundingBox.Maxy = 90.00;
+                    }
+
+                    // TODO - Get live data link
+                    bool isLiveDataOrMap = false;
+                    String serviceType = "";
+                    string mapServerURL = "";
+                    string serviceName = "";
+
+                    // look through associations for wms/wfs
+                    // wms is preferred. if one is found, exit the search
+                    // if wfs is found, make note of it, but keep searching
+                    foreach (Link association in feature.properties.associations) {
+                        if (association.type != null)
+                        {
+                            if (association.type != null && association.type.ToLower().Contains("wms"))
+                            {
+                                isLiveDataOrMap = true;
+                                serviceType = "wms";
+                                mapServerURL = association.href;
+                                serviceName = association.title;
+
+                                break;
+                            }
+
+                            if (association.type.ToLower().Contains("wfs"))
+                            {
+                                isLiveDataOrMap = true;
+                                serviceType = "wfs";
+                                mapServerURL = association.href;
+                                serviceName = association.title;
+                            }
+                        }
+                    }
+
+                    // now add the service info to the record
+                    if (isLiveDataOrMap)
+                    {
+                        record.IsLiveDataOrMap = true;
+                        record.MapServerURL = mapServerURL;
+                        record.ServiceName = serviceName;
+                        record.ServiceType = serviceType;
+                    }
+
+                    recordslist.AddRecord(record.ID.GetHashCode(), record);
+                }
+            }
+            catch (Exception e)
+            {
+                throw e;
+            }
+        }
+
+        /// <summary>
         /// Parse a CSW response. 
         /// </summary>
         /// <remarks>
@@ -277,10 +453,9 @@ namespace com.esri.gpt.csw
         /// <param name="param2">The recordlist which needs to be populated</param>
         public void ReadCSWGetRecordsResponse(string responsestring, CswRecords recordslist)
         {
-
             try
             {
-                TextReader textreader = new StringReader(responsestring);
+                TextReader textreader = new StringReader(responsestring); System.Console.WriteLine(responsestring);
                 XmlTextReader xmltextreader = new XmlTextReader(textreader);
                 //load the Xml doc
                 XPathDocument xPathDoc = new XPathDocument(xmltextreader);
@@ -348,7 +523,7 @@ namespace com.esri.gpt.csw
                     XmlNode node = xmlnode.SelectSingleNode("Type");
                     if (node != null)
                     {
-                        record.IsLiveDataOrMap = node.InnerText.Equals("liveData", StringComparison.OrdinalIgnoreCase);
+                        record.IsLiveDataOrMap = node.InnerText.Equals("liveData", StringComparison.OrdinalIgnoreCase) || node.InnerText.Equals("feature service", StringComparison.OrdinalIgnoreCase) || node.InnerText.Equals("wfs", StringComparison.OrdinalIgnoreCase);
                         if (!record.IsLiveDataOrMap)
                         {
                             record.IsLiveDataOrMap = node.InnerText.Equals("downloadableData", StringComparison.OrdinalIgnoreCase);
@@ -358,7 +533,8 @@ namespace com.esri.gpt.csw
                     {
                         record.IsLiveDataOrMap = false;
                     }
-
+                    // TODO - UC DEMO HACK
+                    //record.IsLiveDataOrMap = true;
 
                     XmlNode referencesNode = xmlnode.SelectSingleNode("References");
                     if (referencesNode != null)
@@ -382,6 +558,8 @@ namespace com.esri.gpt.csw
                     else
                         record.MapServerURL = "";
 
+                    // TODO - UC DEMO HACK
+                    // record.MapServerURL = "https://dservices9.arcgis.com/UILu2wREgFBEuDZW/arcgis/services/European_Capitals/WFSServer";
 
                     recordslist.AddRecord(record.ID.GetHashCode(), record);
                 }
@@ -409,6 +587,7 @@ namespace com.esri.gpt.csw
 
             // determine the service url, name and type
             LinkedList<String> schemeVals = references.get(DcList.getScheme(DcList.Scheme.SERVER));
+            
             if (schemeVals.Count > 0)
             {
                 resourceUrl = chkStr(schemeVals.First.Value);
@@ -420,12 +599,19 @@ namespace com.esri.gpt.csw
                 serviceName = chkStr((schemeVals.First.Value));
             }
 
-            schemeVals = references.get(DcList.getScheme(DcList.Scheme.SERVICE_TYPE));
+            schemeVals = references.get(DcList.getScheme(DcList.Scheme.WFS));
             if (schemeVals.Count > 0)
             {
-                serviceType = (schemeVals.First.Value);
+                resourceUrl = chkStr((schemeVals.First.Value));
+                // serviceType = "WFS";
             }
-            if ((resourceUrl.Length > 0) && (serviceType.Length == 0))
+
+
+            //if (schemeVals.Count > 0)
+            //{
+            //    serviceType = (schemeVals.First.Value);
+            //}
+            if ((resourceUrl.Length > 0)) // && (serviceType.Length == 0))
             {
                 serviceType = getServiceType(resourceUrl);
             }
