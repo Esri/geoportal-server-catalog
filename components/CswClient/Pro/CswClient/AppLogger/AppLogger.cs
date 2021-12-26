@@ -1,4 +1,4 @@
-/* See the NOTICE file distributed with
+﻿/* See the NOTICE file distributed with
  * this work for additional information regarding copyright ownership.
  * Esri Inc. licenses this file to You under the Apache License, Version 2.0
  * (the "License"); you may not use this file except in compliance with
@@ -18,6 +18,9 @@ using System.Text;
 using System.IO;
 using System.Collections;
 using System.Windows;
+using com.esri.gpt.csw;
+// using System.Windows.Forms;
+
 
 namespace com.esri.gpt.logger
 {
@@ -34,24 +37,21 @@ namespace com.esri.gpt.logger
     private int maxFileSize = -1;
     private string dataFolder = null;
     private string xsltPath = null;
-
     #region Properties
-
     /// <summary>
     /// DataFolder variable
     /// </summary>
     public string DataFolder
     {
-      get
-      {
-        return dataFolder;
-      }
-      set
-      {
-        dataFolder = value;
-      }
+        get
+        {
+          return dataFolder;
+        }
+        set
+        {
+          dataFolder = value;
+        }
     }
-
     /// <summary>
     /// XsltPath
     /// </summary>
@@ -66,9 +66,7 @@ namespace com.esri.gpt.logger
         xsltPath = value;
       }
     }
-
     #endregion
-
     /// <summary>
     /// Constructor
     /// </summary>
@@ -82,7 +80,11 @@ namespace com.esri.gpt.logger
         try
         {
           p = configName + ".properties";
-          fStream = File.ReadAllLines("C:/geoportalserver/CswClient.properties"); //; File.ReadAllLines(System.Environment.CurrentDirectory + "/" + configName + ".properties");
+          // File.ReadAllLines(System.Environment.CurrentDirectory + "/" + configName + ".properties");
+          // fStream = File.ReadAllLines("C:/geoportalserver/CswClient.properties"); 
+          var propertiesFile = Utils.GetSpecialFolderPath(SpecialFolder.ExecutingAssembly) + "\\Config\\CswClient.properties";
+          Console.WriteLine("propertiesFile = " + propertiesFile);
+          fStream = File.ReadAllLines(propertiesFile); 
         }
         catch (IOException io)
         {
@@ -94,22 +96,20 @@ namespace com.esri.gpt.logger
           {
             p = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/ESRI/arcgis explorer/AddIns/Cache/CSWSearchDockWindow/" + configName + ".properties";
             try
-            {
+            {                           
               fStream = File.ReadAllLines(p);
             }
             catch (IOException iex)
             {
               try
               {
-                String cmdLine = System.Environment.CommandLine;
+                String cmdLine = System.Environment.CommandLine;                                
                 int idx = cmdLine.IndexOf("Bin");
-                if (idx == -1)
-                {
+                if(idx == -1){
                   idx = cmdLine.IndexOf("bin");
                 }
-                if (idx > -1)
-                {
-                  cmdLine = cmdLine.Substring(0, idx + 3) + "/";
+                if(idx > -1){
+                  cmdLine = cmdLine.Substring(0,idx+3) + "/";
                   cmdLine = cmdLine.Replace("\"", "");
                 }
                 p = cmdLine + configName + ".properties";
@@ -118,12 +118,12 @@ namespace com.esri.gpt.logger
               catch (Exception ex)
               {
                 MessageBox.Show("Could not find " + configName + ".properties file at path " + p, "File Not Found Error",
-                    MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                                MessageBoxButton.OK, MessageBoxImage.Exclamation);
               }
             }
           }
         }
-        if (fStream != null && fStream.Length > 0)
+        if (fStream != null && fStream.Length >0)
         {
           String logFilePath = fStream[0];
           String maxSize = fStream[1];
@@ -142,16 +142,13 @@ namespace com.esri.gpt.logger
           }
           if (configName.Trim().Equals("cswclient", StringComparison.InvariantCultureIgnoreCase))
           {
-            dataFolder = fStream[3];
-            if (dataFolder != null)
-            {
-              dataFolder = dataFolder.Substring(dataFolder.IndexOf("=") + 1);
-            }
-          }
-          if (configName.Trim().Equals("wmcopener", StringComparison.InvariantCultureIgnoreCase))
-          {
-            xsltPath = fStream[3];
-            xsltPath = xsltPath.Substring(xsltPath.IndexOf("=") + 1);
+            // MH - modified to include profiles in the addin itself
+            //dataFolder = fStream[3];
+            //if (dataFolder != null)
+            //{
+            //  dataFolder = dataFolder.Substring(dataFolder.IndexOf("=") + 1);
+            //}
+            dataFolder = Utils.GetSpecialFolderPath(SpecialFolder.ExecutingAssembly) + "/Config/profiles";
           }
         }
       }
@@ -159,11 +156,14 @@ namespace com.esri.gpt.logger
       {
         try
         {
-          File.WriteAllText(System.Environment.CurrentDirectory + "/AppLoggerError.log", ioe.StackTrace + "******** \n" + configName + "\n cur user application data dir : " + System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/ESRI/arcgis explorer/AddIns/Cache/CSWSearchDockWindow" + " \n cur dir " + System.Environment.CurrentDirectory);
+          File.WriteAllText(System.Environment.CurrentDirectory + "/AppLoggerError.log", ioe.StackTrace + "******** \n" + configName + "\n cur user application data dir : " + System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/ESRI/arcgis explorer/AddIns/Cache/CSWSearchDockWindow" + " \n cur dir " + System.Environment.CurrentDirectory);                  
         }
-        catch (Exception ioe2) { }
+        catch (Exception ioe2)
+        { }
       }
-      finally { }
+      finally
+      {            
+      }
     }
 
     /// <summary>
@@ -177,7 +177,7 @@ namespace com.esri.gpt.logger
       try
       {
         if (debug)
-        {
+        {                    
           System.IO.FileInfo fileInfo = new System.IO.FileInfo(logFolder);
           if (fileInfo.Exists && (fileInfo.Length + logMessage.Length) <= maxFileSize)
           {
@@ -196,14 +196,14 @@ namespace com.esri.gpt.logger
             sr = new System.IO.StreamWriter(fileStream);
           }
           sr.WriteLine(logMessage);
-        }
-      }
+        }            
+      } 
       finally
       {
         if (sr != null)
-          sr.Close();
+            sr.Close();
         if (fileStream != null)
-          fileStream.Close();
+            fileStream.Close();
       }
     }
   }

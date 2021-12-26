@@ -18,64 +18,46 @@ using System.Text;
 
 namespace com.esri.gpt.csw
 {
-  /// <summary>
-  /// CswSearchResponse class.
-  /// </summary>
-  /// <remarks>
-  /// CswSearchResponse class is used to store the response for CSW search request.
-  /// </remarks>
-  public class CswSearchResponse
-  {
-    #region Private Variables
-    private string _responseXML;
-    private CswRecords _records;
-
-    #endregion
-    #region Constructor
-
     /// <summary>
-    /// Constructor
+    /// CswSearchResponse class.
     /// </summary>
-    public CswSearchResponse()
+    /// <remarks>
+    /// CswSearchResponse class is used to store the response for CSW search request.
+    /// </remarks>
+    public class CswSearchResponse
     {
-      _responseXML = "";
-      _records = new CswRecords();
+        #region Private Variables
+        private string _responseXML;
+        private CswRecords _records;
+        #endregion
+        #region Constructor
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        public CswSearchResponse()
+        {
+            _responseXML = "";
+            _records = new CswRecords();
+        }
+        #endregion
+        #region PublicMethods
+        /// <summary>
+        /// Response XML
+        /// </summary>
+        public string ResponseXML
+        {
+            get { return _responseXML; }
+            protected internal set { _responseXML = value; }
+        }
+
+        /// <summary>
+        /// CSW Records returned
+        /// </summary>
+        public CswRecords Records
+        {
+            get { return _records; }
+            protected internal set { _records = value; }
+        }
+        #endregion
     }
-
-    #endregion
-    #region PublicMethods
-
-    /// <summary>
-    /// Response XML
-    /// </summary>
-    public string ResponseXML
-    {
-      get
-      {
-        return _responseXML;
-      }
-      protected internal set
-      {
-        _responseXML = value;
-      }
-    }
-
-    /// <summary>
-    /// CSW Records returned
-    /// </summary>
-    public CswRecords Records
-    {
-      get
-      {
-        return _records;
-      }
-      protected internal set
-      {
-        _records = value;
-      }
-    }
-
-    #endregion
-
-  }
 }

@@ -16,31 +16,27 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace com.esri.gpt.csw
-{
-  public class CswRecords : CswObjects
-  {
-    public new CswRecord this[string key]
-    {
-      get { return (CswRecord)base[key]; }
-    }
 
-    public new CswRecord this[int index]
-    {
-      get
-      {
-        return (CswRecord)base[index];
-      }
-    }
+namespace com.esri.gpt.csw {
+   public class CswRecords :CswObjects {
 
-    /// <summary>
-    /// Added record to records object collection
-    /// </summary>
-    /// <param name="key"></param>
-    /// <param name="record"></param>
-    public void AddRecord(object key, CswRecord record)
-    {
-      base.Add(key, record);
+        public new CswRecord this[string key] {
+            get { return (CswRecord)base[key]; }
+        }
+
+        public new CswRecord this[int index] {
+            get {
+                return (CswRecord)base[index];
+            }
+        }
+       /// <summary>
+       /// Added record to records object collection
+       /// </summary>
+       /// <param name="key"></param>
+       /// <param name="record"></param>
+       public void AddRecord(object key, CswRecord record) {
+           base.Add(key, record);
+       }
+
     }
-  }
 }
