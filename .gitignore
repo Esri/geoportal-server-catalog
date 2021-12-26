@@ -144,4 +144,7 @@ geoportal/nb-configuration.xml
 # mpeltonen/sbt-idea plugin
 .idea_modules/
 geoportal/.factorypath
+<<<<<<< Updated upstream
 .vscode/settings.json
+=======
+>>>>>>> Stashed changes
