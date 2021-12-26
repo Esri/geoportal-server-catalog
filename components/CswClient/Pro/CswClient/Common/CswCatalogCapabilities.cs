@@ -16,67 +16,57 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace com.esri.gpt.csw
-{
-  /// <summary>
-  /// Public catalog containing catalog capabilities information.
-  /// </summary>
-  /// <remarks>
-  /// </remarks>
-  public class CswCatalogCapabilities
-  {
-    private string _getRecordByIDGetURL;
-    private string _getRecordsPostURL;
-    private bool _isSoapEndPoint = false;
-
-    #region "Properties"
-
+namespace com.esri.gpt.csw {
     /// <summary>
-    /// GetRecordByID_GetURL parameter
+    /// Public catalog containing catalog capabilities information.
     /// </summary>
-    internal string GetRecordByID_GetURL
-    {
-      set
-      {
-        _getRecordByIDGetURL = Utils.EnsureTrailingQuestionOrAmpersandInURL(value);
-      }
-      get
-      {
-        return _getRecordByIDGetURL;
-      }
-    }
+    /// <remarks>
+    /// </remarks>
+   public class CswCatalogCapabilities {
 
-    /// <summary>
-    /// GetRecords_PostURL parameter
-    /// </summary>
-    internal string GetRecords_PostURL
-    {
-      set
-      {
-        _getRecordsPostURL = value;
-      }
-      get
-      {
-        return _getRecordsPostURL;
-      }
-    }
+       private string _getRecordByIDGetURL;
+       private string _getRecordsPostURL;
+       private bool _isSoapEndPoint = false;
 
-    /// <summary>
-    /// GetRecords_IsSoapEndPoint parameter
-    /// </summary>
-    internal bool GetRecords_IsSoapEndPoint
-    {
-      set
-      {
-        _isSoapEndPoint = value;
-      }
-      get
-      {
-        return _isSoapEndPoint;
-      }
-    }
+       #region "Properties"
+       /// <summary>
+       /// GetRecordByID_GetURL parameter
+       /// </summary>
+       internal string GetRecordByID_GetURL {
+           set {
+               _getRecordByIDGetURL = Utils.EnsureTrailingQuestionOrAmpersandInURL(value);
+           }
+           get {
+               return _getRecordByIDGetURL;
+           }
 
-    #endregion
+       }
+       /// <summary>
+       /// GetRecords_PostURL parameter
+       /// </summary>
+       internal string GetRecords_PostURL {
+           set {
+               _getRecordsPostURL = value;
+           }
+           get {
+               return _getRecordsPostURL;
+           }
+       }
+       /// <summary>
+       /// GetRecords_IsSoapEndPoint parameter
+       /// </summary>
+       internal bool GetRecords_IsSoapEndPoint
+       {
+           set
+           {
+               _isSoapEndPoint = value;
+           }
+           get
+           {
+               return _isSoapEndPoint;
+           }
+       }
 
-  }
+       #endregion
+   }
 }

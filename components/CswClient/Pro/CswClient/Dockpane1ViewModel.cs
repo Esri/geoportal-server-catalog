@@ -1,4 +1,4 @@
-using ArcGIS.Core.CIM;
+﻿using ArcGIS.Core.CIM;
 using ArcGIS.Core.Data;
 using ArcGIS.Core.Geometry;
 using ArcGIS.Desktop.Catalog;
@@ -32,9 +32,8 @@ namespace GeoportalSearch
     {
       DockPane pane = FrameworkApplication.DockPaneManager.Find(_dockPaneID);
       if (pane == null)
-      {
         return;
-      }
+
       pane.Activate();
     }
 
@@ -44,10 +43,7 @@ namespace GeoportalSearch
     private string _heading = "My DockPane";
     public string Heading
     {
-      get
-      {
-        return _heading;
-      }
+      get { return _heading; }
       set
       {
         SetProperty(ref _heading, value, () => Heading);
@@ -58,7 +54,7 @@ namespace GeoportalSearch
   /// <summary>
   /// Button implementation to show the DockPane.
   /// </summary>
-  internal class Dockpane1_ShowButton : Button
+	internal class Dockpane1_ShowButton : Button
   {
     protected override void OnClick()
     {
