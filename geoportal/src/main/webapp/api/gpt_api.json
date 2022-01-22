@@ -1,104 +1,793 @@
+
 {
-	"swagger": "2.0",
-	"info": {
-		"title": "Geoportal Server REST API",
-		"description": "Welcome to the Geoportal Server API",
-		"version": "1.0.6",
-		"termsOfService": "",
-		"contact": {
-			"email": "mhogeweg@esri.com"
-		},
-		"license": {
-			"name": "Apache 2.0",
-			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-		}
-	},
-	"host": "mart3612.esri.com:8443",
-	"basePath": "/geoportal265rc1",
-	"tags": [
-		{
-			"name": "catalog",
-			"description": "Interact with Geoportal Server via simple REST calls",
-			"externalDocs": {
-				"description": "Find out more",
-				"url": "https://github.com/Esri/geoportal-server-catalog"
-			}
-		}
-	],
-	"schemes": ["https"],
-	"paths": {
-		"/rest/geoportal": {
-			"get": {
-				"tags": ["catalog"],
-				"summary": "Get Geoportal info",
-				"description": "",
-				"operationId": "uploadFile",
-				"consumes": [],
-				"produces": ["application/json"],
-				"parameters": [],
-				"responses": {
-					"200": {
-						"description": "successful operation",
-						"schema": {
-							"$ref": "#/definitions/ApiResponse"
-						}
-					}
-				},
-				"security": [{
-					"petstore_auth": ["write:pets", "read:pets"]
-				}]
-			}
-		}
-	},
-	"definitions": {
-		"ApiResponse": {
-			"type": "object",
-			"properties": {
-				"code": {
-					"type": "integer",
-					"format": "int32"
-				},
-				"type": {
-					"type": "string"
-				},
-				"message": {
-					"type": "string"
-				}
-			}
-		},
-		"Category": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer",
-					"format": "int64"
-				},
-				"name": {
-					"type": "string"
-				}
-			},
-			"xml": {
-				"name": "Category"
-			}
-		},
-		"Tag": {
-			"type": "object",
-			"properties": {
-				"id": {
-					"type": "integer",
-					"format": "int64"
-				},
-				"name": {
-					"type": "string"
-				}
-			},
-			"xml": {
-				"name": "Tag"
-			}
-		}
-	},
-	"externalDocs": {
-		"description": "Find out more about Geoportal Server",
-		"url": "https://github.com/Esri/geoportal-server-catalog"
-	}
+  "swagger" : "2.0",
+  "info" : {
+    "description" : "https://github.com/Esri/geoportal-server-catalog",
+    "version" : "2.6.5",
+    "title" : "Esri Geoportal Server",
+    "contact" : {
+      "name" : "portal@esri.com"
+    },
+    "license" : {
+      "name" : "Apache 2.0",
+      "url" : "http://www.apache.org/licenses/LICENSE-2.0.html"
+    }
+  },
+  "basePath" : "/geoportal265rc1/rest",
+  "tags" : [ {
+    "name" : "rest"
+  } ],
+  "paths" : {
+    "/geoportal" : {
+      "get" : {
+        "tags" : [ "rest" ],
+        "summary" : "Provides information on the Geoportal application itself.",
+        "description" : "",
+        "operationId" : "getSelf",
+        "parameters" : [ {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/deleteItems" : {
+      "delete" : {
+        "tags" : [ "rest" ],
+        "summary" : "Delete one or more items.",
+        "operationId" : "deleteItems",
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "query",
+          "description" : "delete this item id only (field: _id)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "owner",
+          "in" : "query",
+          "description" : "delete all items owned by this user (field: sys_owner_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "sourceUri",
+          "in" : "query",
+          "description" : "delete all items associated with this harvesting uri (field: src_source_uri_s)",
+          "required" : false,
+          "type" : "string"
+         }, {
+          "name" : "sourceRef",
+          "in" : "query",
+          "description" : "delete all items associated with this harvesting reference (field: src_source_ref_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "taskRef",
+          "in" : "query",
+          "description" : "delete all items associated with this harvesting task reference (field: src_task_ref_s)",
+          "required" : false,
+          "type" : "string"         
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+         }, {
+          "name" : "body",
+          "in" : "body",
+          "description" : "Delete all items matching the supplied query (JSON Elasticsearch Query DSL)",
+          "required" : false,         
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/item" : {
+      "put" : {
+        "tags" : [ "rest" ],
+        "summary" : "Publish an item.",
+        "description" : "Requires a Publisher role.<ul>Content can be supplied as either:<li>an XML document representing the metadata for the item</li><li>a JSON document representing the item (use xml='xmlString' to supply the metadata)</li></ul>",
+        "operationId" : "put",
+        "consumes" : [ "application/xml", "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "async",
+          "in" : "query",
+          "description" : "returns immediately if true",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/item/{id}" : {
+      "get" : {
+        "tags" : [ "rest" ],
+        "summary" : "Get an item.",
+        "description" : "",
+        "operationId" : "get",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "the item id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "f",
+          "in" : "query",
+          "description" : "the response format",
+          "required" : false,
+          "type" : "string",
+          "enum" : [ "json", "atom", "csw" ]
+        }, {
+          "name" : "includeMetadata",
+          "in" : "query",
+          "description" : "true if metadata xml should be included as a json property",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "put" : {
+        "tags" : [ "rest" ],
+        "summary" : "Publish or update item using the supplied identifier.",
+        "description" : "Requires a Publisher role. Only the item owner (or an Admin) can delete an item.<ul>Content can be supplied as either:<li>an XML document representing the metadata for the item</li><li>a JSON document representing the item (use xml='xmlString' to supply the metadata)</li></ul>",
+        "operationId" : "putWithId",
+        "consumes" : [ "application/xml", "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "path",
+          "description" : "the item id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "delete" : {
+        "tags" : [ "rest" ],
+        "summary" : "Delete an item.",
+        "description" : "Only the item owner (or an Admin) can delete an item.",
+        "operationId" : "delete",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "the item id",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/item/{id}/html" : {
+      "get" : {
+        "tags" : [ "rest" ],
+        "summary" : "Get the HTML details for an item.",
+        "description" : "transformed from the metadata XML",
+        "operationId" : "getHtml",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "the item id",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/item/{id}/xml" : {
+      "get" : {
+        "tags" : [ "rest" ],
+        "summary" : "Get the metadata XML for an item.",
+        "description" : "",
+        "operationId" : "getXml",
+        "parameters" : [ {
+          "name" : "id",
+          "in" : "path",
+          "description" : "the item id",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/realias" : {
+      "get" : {
+        "tags" : [ "rest" ],
+        "summary" : "Reset the index associated with the 'metadata' alias.",
+        "description" : "Requires an Admin role. The active Elasticsearch index is determined by an Elasticsearch alias (alias 'metadata' initially pointing to an index named 'metadata_v1').",
+        "operationId" : "realiasUsingGet",
+        "parameters" : [ {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "indexName",
+          "in" : "query",
+          "description" : "the index to associate with the 'metadata' alias",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/reindex" : {
+      "get" : {
+        "tags" : [ "rest" ],
+        "summary" : "Re-index content.",
+        "description" : "Requires an Admin role. This operation may require a different approach for very large indexes.",
+        "operationId" : "reindexUsingGet",
+        "parameters" : [ {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "fromIndexName",
+          "in" : "query",
+          "description" : "the source",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "toIndexName",
+          "in" : "query",
+          "description" : "the destination",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "fromVersionCue",
+          "in" : "query",
+          "description" : "a cue for the version of the from index (not currently used).",
+          "required" : false,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/search" : {
+      "get" : {
+        "tags" : [ "rest" ],
+        "summary" : "Search for items.",
+        "description" : "",
+        "operationId" : "searchUsingGet",
+        "parameters" : [ {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "f",
+          "in" : "query",
+          "description" : "the response format",
+          "required" : false,
+          "type" : "string",
+          "enum" : [ "atom", "json", "csw", "rss", "csv", "kml", "eros", "json-source" ]
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "description" : "the search terms",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "start",
+          "in" : "query",
+          "description" : "the starting index (1 is the first)",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "num",
+          "in" : "query",
+          "description" : "the number of items to return",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "bbox",
+          "in" : "query",
+          "description" : "the bounding envelope WGS84 (bbox=xmin,ymin,xmax,ymax)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "time",
+          "in" : "query",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "an item id (multiples allowed: id=&id=&id=)",
+          "required" : false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }         
+         }, {
+          "name" : "modified",
+          "in" : "query",
+          "description" : "the modified date for the item (modified=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"               
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "a secondary filter (search terms)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "an item type (multiples allowed: type=&type=&type=)",
+          "required" : false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }              
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"   
+                       
+        }, {
+          "name" : "target",
+          "in" : "query",
+          "description" : "the target catalog, a JSON structure (object or array) with the following properties: url - the target url, type - the type (geoportal|portal|csw2|csw3), profile - the profile, current profiles: CSW2_Geoportal1",
+          "required" : false,
+          "type" : "string"            
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      },
+      "post" : {
+        "tags" : [ "rest" ],
+        "summary" : "Search for items.",
+        "description" : "",
+        "operationId" : "searchUsingPost",
+        "consumes" : [ "application/x-www-form-urlencoded" ],
+        "parameters" : [ {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        }, {
+          "name" : "f",
+          "in" : "query",
+          "description" : "the response format",
+          "required" : false,
+          "type" : "string",
+          "enum" : [ "atom", "json", "csw", "rss", "csv", "kml", "eros", "json-source" ]
+        }, {
+          "name" : "q",
+          "in" : "query",
+          "description" : "the search terms",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "start",
+          "in" : "query",
+          "description" : "the starting index (1 is the first)",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "num",
+          "in" : "query",
+          "description" : "the number of items to return",
+          "required" : false,
+          "type" : "integer"
+        }, {
+          "name" : "bbox",
+          "in" : "query",
+          "description" : "the bounding envelope WGS84 (bbox=xmin,ymin,xmax,ymax)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "time",
+          "in" : "query",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "an item id (multiples allowed: id=&id=&id=)",
+          "required" : false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }         
+         }, {
+          "name" : "modified",
+          "in" : "query",
+          "description" : "the modified date for the item (modified=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"               
+        }, {
+          "name" : "filter",
+          "in" : "query",
+          "description" : "a secondary filter (search terms)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "type",
+          "in" : "query",
+          "description" : "an item type (multiples allowed: type=&type=&type=)",
+          "required" : false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }              
+        }, {
+          "name" : "sort",
+          "in" : "query",
+          "description" : "the time period for the resource (time=start/end) (ISO 8601)",
+          "required" : false,
+          "type" : "string"   
+                       
+        }, {
+          "name" : "target",
+          "in" : "query",
+          "description" : "the target catalog, a JSON structure (object or array) with the following properties: url - the target url, type - the type (geoportal|portal|csw2|csw3|elasticsearch), profile - the profile, current profiles: CSW2_Geoportal1",
+          "required" : false,
+          "type" : "string"            
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/setAccess" : {
+      "put" : {
+        "tags" : [ "rest" ],
+        "summary" : "Set the access level for one or more items (fields: sys_access_s and sys_access_groups_s).",
+        "operationId" : "setAccess",
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "access",
+          "in" : "query",
+          "description" : "the access level: public or private",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "group",
+          "in" : "query",
+          "description" : "the group key, can be supplied multiple times (e.g. ?access=private&group=a&group=b&group=c)",
+          "required" : false,
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "apply change to this item id only (field: _id)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "owner",
+          "in" : "query",
+          "description" : "apply change to all items owned by this user (field: sys_owner_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "sourceUri",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting uri (field: src_source_uri_s)",
+          "required" : false,
+          "type" : "string"
+         }, {
+          "name" : "sourceRef",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting reference (field: src_source_ref_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "taskRef",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting task reference (field: src_task_ref_s)",
+          "required" : false,
+          "type" : "string"         
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+         }, {
+          "name" : "body",
+          "in" : "body",
+          "description" : "Apply change to all items matching the supplied query (JSON Elasticsearch Query DSL)",
+          "required" : false,         
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/setApprovalStatus" : {
+      "put" : {
+        "tags" : [ "rest" ],
+        "summary" : "Set the approval status for one or more items (field: sys_approval_status_s).",
+        "description" : "Requires an Admin role.",
+        "operationId" : "setApprovalStatus",
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "approvalStatus",
+          "in" : "query",
+          "description" : "the new approval status: approved, reviewed, disapproved, incomplete, posted or draft",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "apply change to this item id only (field: _id)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "owner",
+          "in" : "query",
+          "description" : "apply change to all items owned by this user (field: sys_owner_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "sourceUri",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting uri (field: src_source_uri_s)",
+          "required" : false,
+          "type" : "string"
+         }, {
+          "name" : "sourceRef",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting reference (field: src_source_ref_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "taskRef",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting task reference (field: src_task_ref_s)",
+          "required" : false,
+          "type" : "string"         
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+         }, {
+          "name" : "body",
+          "in" : "body",
+          "description" : "Apply change to all items matching the supplied query (JSON Elasticsearch Query DSL)",
+          "required" : false,         
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/setOwner" : {
+      "put" : {
+        "tags" : [ "rest" ],
+        "summary" : "Set the owner for one or more items (field: sys_owner_s).",
+        "description" : "Requires an Admin role.",
+        "operationId" : "setOwner",
+        "consumes" : [ "application/json" ],
+        "parameters" : [ {
+          "name" : "newOwner",
+          "in" : "query",
+          "description" : "the new owner",
+          "required" : true,
+          "type" : "string"
+        }, {
+          "name" : "id",
+          "in" : "query",
+          "description" : "apply change to this item id only (field: _id)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "owner",
+          "in" : "query",
+          "description" : "apply change to all items owned by this user (field: sys_owner_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "sourceUri",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting uri (field: src_source_uri_s)",
+          "required" : false,
+          "type" : "string"
+         }, {
+          "name" : "sourceRef",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting reference (field: src_source_ref_s)",
+          "required" : false,
+          "type" : "string"
+        }, {
+          "name" : "taskRef",
+          "in" : "query",
+          "description" : "apply change to all items associated with this harvesting task reference (field: src_task_ref_s)",
+          "required" : false,
+          "type" : "string"         
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+         }, {
+          "name" : "body",
+          "in" : "body",
+          "description" : "Apply change to all items matching the supplied query (JSON Elasticsearch Query DSL)",
+          "required" : false,         
+          "schema" : {
+            "type" : "string"
+          }
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/transform" : {
+      "post" : {
+        "tags" : [ "rest" ],
+        "summary" : "Transform an XML document.",
+        "description" : "",
+        "operationId" : "transformUsingPost",
+        "consumes" : [ "application/xml" ],
+        "produces" : [ "text/html" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "xslt",
+          "in" : "query",
+          "description" : "the xslt name",
+          "required" : true,
+          "type" : "string"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    },
+    "/metadata/validate" : {
+      "post" : {
+        "tags" : [ "rest" ],
+        "summary" : "Validate an XML document.",
+        "description" : "",
+        "operationId" : "validateUsingPost",
+        "consumes" : [ "application/xml" ],
+        "produces" : [ "application/json" ],
+        "parameters" : [ {
+          "in" : "body",
+          "name" : "body",
+          "required" : false,
+          "schema" : {
+            "type" : "string"
+          }
+        }, {
+          "name" : "pretty",
+          "in" : "query",
+          "description" : "for an indented response",
+          "required" : false,
+          "type" : "boolean"
+        } ],
+        "responses" : {
+          "default" : {
+            "description" : "successful operation"
+          }
+        }
+      }
+    }
+  }
 }
