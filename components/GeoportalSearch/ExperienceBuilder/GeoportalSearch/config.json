@@ -1,0 +1,27 @@
+{
+  "urlTooltip": "https://www.arcgis.com, http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search, http://gptdb1.esri.com:8080/geoportal/csw?service=CSW&request=GetRecords",
+  "typeTooltip": "e.g. portal,  geoportal,  csw2,  csw3",
+  "profileTooltip": "e.g. CSW2_Geoportal1",
+  "filterTooltip": "not applicable to csw",
+  "widgetTitle": "Geoportal Search",
+  "targets": [
+    {
+      "name": "Geoportal 2.6.5",
+      "url": "https://gpt.geocloud.com/geoportal2/rest/metadata/search",
+      "type": "geoportal",
+      "profile": null,
+      "requiredFilter": null,
+      "enabled": true
+    },
+    {
+      "name": "ArcGIS Online",
+      "url": "https://www.arcgis.com",
+      "type": "portal",
+      "profile": null,
+      "requiredFilter": null,
+      "enabled": true,
+      "useProxy": false,
+      "disableContentType": false
+    }
+  ]
+}

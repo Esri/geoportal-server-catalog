@@ -27,6 +27,7 @@ load("classpath:metadata/js/EvaluatorFor_FGDC.js");
 load("classpath:metadata/js/EvaluatorFor_ISO.js");
 load("classpath:metadata/js/EvaluatorFor_ISO_extended.js"); // add  extended class
 load("classpath:metadata/js/GML.js");
+load("classpath:metadata/js/JsonEvaluator.js");
 
 G._metadataTypes =  {
   "iso19115base": {
