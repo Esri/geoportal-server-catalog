@@ -1,0 +1,16 @@
+{
+  "name": "geoportalsearch",
+  "version": "0.0.1",
+  "description": "This package is for the geoportal search widget",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "calcite-react": "^0.60.0",
+    "react-multiselect-checkboxes": "0.0.1",
+    "react-spinners": "^0.11.0"
+  }
+}
