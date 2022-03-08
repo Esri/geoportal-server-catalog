@@ -1,0 +1,157 @@
+.geoportal-search-widget {
+  width: 100%;
+  height: 100%;
+  border-style: solid;
+  border-color: gray;
+  border-width: thin;
+  padding: 5px;
+}
+
+.searchPaneWrapper {
+  width: 100%;
+  height: 25%;
+}
+
+.resultsPaneWrapper {
+  width: 100%;
+  
+}
+
+.searchPane {
+  width: 100%;
+}
+
+.searchPaneMain {
+  display: flex;
+}
+
+.searchBoxText{
+  width: 95%;
+}
+.searchButton {
+  width: 5%;
+}
+
+.g_item_title {
+  margin: 0 5px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #4c4c4c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}   
+
+.g_item_description {
+  margin: 0px 0px 6px 0px;
+  font-size: 12px;
+  box-sizing: border-box;
+}      
+
+.g_item_card {
+  padding: 5px;
+  margin-bottom: 4px;
+  border-top: 0;
+  border-left: 0;
+  border-right: 0;
+  border: 1px solid #e0e0e0;
+  border-bottom-color: #e0e0e0;
+  border-radius: 5px;
+  background: #ffffff;
+}
+
+.g_item_thumbnail {
+  background-image: url(images/placeholder_project120x80.png);
+  background-repeat: no-repeat;
+  background-position: center;
+}
+
+.g_action_bar {
+  text-align: right;
+  white-space: nowrap;
+  font-size: 12px;
+  font-weight: normal;
+  color: #000;
+  padding: 5px 5px;
+}
+
+.g_action_zoomto {
+  padding: 5px 5px;
+}
+
+.g_action_add {
+  padding: 5px 5px;
+}
+
+.g_action_details {
+  padding: 5px 5px;
+}
+
+.g_action_message {
+  padding: 5px 5px;
+  font-size: 9px;
+  font-style: italic;
+}
+
+.g_action_links {
+  margin-top: -4px;
+}
+
+.titleStyle {
+  font-size: 1.10em;
+  text-align: center;
+  font-weight: bold;
+  margin: 10px 0px 10px 0px;
+  text-align: left;
+}
+
+
+
+/* .searchButtonContainer {
+  padding-left: 5px;
+  padding-right: 5px;
+} */
+
+.optionsContainer {
+  display: flex;
+  padding-top: 5px;
+}
+
+.optionsCheckboxLabel {
+  padding-left: 3px;
+}
+
+.relevanceCombo {
+  width: 70px;
+  height: 10px;
+  font-size: 2px;
+  -webkit-appearance: none;
+}
+
+/* .searchResults {
+  width: 100%;
+  overflow-y: scroll;  
+} */
+
+.loadingOverride {
+  display: block;
+  margin: 0 auto;
+  border-color: red;
+}
+
+.g_results_list {
+  overflow-y: scroll;  
+}
+
+
+/* .g_catalogs_list {
+  control: (_, { selectProps: { width } }) => ({
+    width: 300
+  }),
+
+  dropdownButton: (provided, state) => ({
+    ...provided,
+    color: 'black'
+  })
+} */
