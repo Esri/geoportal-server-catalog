@@ -1,0 +1,72 @@
+<div data-dojo-attach-point="containerNode">
+  
+  <!-- MD_SampleDimension-->
+  <!-- maxValue Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:attributeDescription',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.maxValue}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0.0">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'maxValue', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- minValue Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.minValue}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0.0">
+        <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'minValue', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- units UnitsOfMeasure ISO/TS 19103 -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:attributeGroup',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.units}'">
+    
+  </div>
+
+  <!-- scaleFactor Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.scaleFactor}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0.0">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'scaleFactor', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- meanValue Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.meanValue}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0.0">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'meanValue', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- numberOfValues Integer -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.numberOfValues}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:Integer'">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,integerOnly:true,hint:'Enter Integer Number >0'"></div>
+    </div>
+  </div>
+
+  <!-- standardDeviation Real -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.standardDeviation}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"  data-dojo-props="target:'gco:Decimal',value:0.0">
+      <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="hint:'standardDeviation', decimalPlace: 2"></div>
+    </div>
+  </div>
+
+  <!-- otherPropertyType RecordType -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.otherPropertyType}'">
+
+  </div>
+
+  <!-- otherProperty Record -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.otherProperty}'">
+
+  </div>
+
+  <!-- bitsPerValue Record -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_SampleDimension.bitsPerValue}'">
+
+  </div>
+
+  <!-- MD_Band -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:processingLevelCode',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Band.caption}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_Band"> </div>
+  </div>
+
+
+</div>

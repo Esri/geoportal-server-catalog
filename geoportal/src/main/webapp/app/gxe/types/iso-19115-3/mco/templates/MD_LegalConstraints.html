@@ -1,0 +1,51 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:MD_LegalConstraints', label:'${i18nIso3.MD_LegalConstraints.caption}'">
+      <!-- useLimitation freeText-->
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:useLimitation',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Constraints.useLimitation}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+        <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+     </div>
+     <!-- constraintApplicationScope MD_Scope  -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:constraintApplicationScope',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_Constraints.constraintApplicationScope}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Scope"></div>
+  </div>
+
+     <!-- graphic MD_BrowseGraphic -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:constraintApplicationScope',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_BrowseGraphic.caption}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_BrowseGraphic"></div>
+     </div>
+
+     <!-- reference CI_Citation -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:reference',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Constraints.reference}'">
+     <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+     </div>
+  </div>
+
+     <!-- releasability MD_Releasability -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:releasability', minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Releasability.caption}'">
+     <div data-dojo-type="app/gxe/types/iso-19115-3/mco/MD_Releasability"></div>
+  </div>
+     <!-- responsibleParty CI_Responsibility -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:responsibleParty', minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.CI_ResponsibleParty.caption}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility"></div>
+     </div>
+
+    <!-- accessConstraints MD_RestrictionCode-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:accessConstraints',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_LegalConstraints.accessConstraints}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/mco/MD_RestrictionCode" data-dojo-props="label:''"></div>
+    </div>
+
+    <!-- useConstraints Free Text-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:useConstraints',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_LegalConstraints.useConstraints}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mco/MD_RestrictionCode" data-dojo-props="label:''"></div>
+    </div>
+
+    <!-- otherConstraints Free Text-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:otherConstraints',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_LegalConstraints.otherConstraints}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+  </div>
+</div>

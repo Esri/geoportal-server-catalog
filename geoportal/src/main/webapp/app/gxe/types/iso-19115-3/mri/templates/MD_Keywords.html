@@ -1,0 +1,24 @@
+<div data-dojo-attach-point="containerNode">
+  
+
+    <!-- keyword Free Text -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:keyword',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_Keywords.keyword}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+    <!-- type MD_KeywordTypeCode -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:type',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Keywords.type}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_KeywordTypeCode"> </div>
+    </div>
+    <!-- thesaurusName CI_Citation -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:thesaurusName',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Keywords.thesaurusName}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"> </div>
+    </div>
+
+    <!--Role name: keywordClass -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:keywordClass',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Keywords.keywordClass}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_KeywordClass"> </div>
+    </div>
+    
+</div>

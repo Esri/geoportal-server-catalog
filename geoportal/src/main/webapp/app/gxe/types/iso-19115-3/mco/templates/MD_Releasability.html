@@ -1,0 +1,22 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:MD_Releasability', label:'${i18nIso3.MD_Releasability.caption}'">
+    
+    <!-- addressee CI_Responsibility-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:addressee',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.MD_Releasability.addressee}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility" data-dojo-props="label:''"></div>
+    </div>
+
+    <!-- statement Free Text-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:statement',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_Releasability.statement}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+    <!-- disseminationConstraints -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mco:disseminationConstraints',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_Releasability.disseminationConstraints}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility" data-dojo-props="label:''"></div>
+    </div>
+
+  </div>
+</div>

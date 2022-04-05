@@ -145,3 +145,4 @@ geoportal/nb-configuration.xml
 .idea_modules/
 .vscode/settings.json
 geoportal/.factorypath
+geoportal/.vscode/settings.json

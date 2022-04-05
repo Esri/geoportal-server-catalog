@@ -1,0 +1,40 @@
+<div data-dojo-attach-point="containerNode">
+
+        <!-- name CI_Citation -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mas:maintenanceDate',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ApplicationSchemaInfo.name}'">
+            <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+            </div>
+        </div>
+
+        <!-- schemaLanguage Free Text -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mas:maintenanceDate',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ApplicationSchemaInfo.schemaLanguage}'">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+          <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+        </div>
+
+        <!-- constraintLanguage Free Text -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mas:maintenanceScope',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_ApplicationSchemaInfo.constraintLanguage}'">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+          <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+        </div>
+
+        <!-- SchemaAscii Free text -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mas:maintenanceNote',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_ApplicationSchemaInfo.schemaAscii}'">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+          <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+        </div>
+
+        <!-- graphicsFile CI_OnlineResource -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mas:contact', minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ApplicationSchemaInfo.graphicsFile}'">
+          <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_OnlineResource"></div>
+        </div>
+
+         <!-- softwareDevelopmentFileFormat CI_OnlineResource -->
+         <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mas:contact', minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ApplicationSchemaInfo.softwareDevelopmentFileFormat}'">
+          <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_OnlineResource"></div>
+        </div>
+
+   
+
+      
+</div>

@@ -1,0 +1,31 @@
+<div data-dojo-attach-point="containerNode">
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:LI_Lineage',label:''">
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs"> 
+    <!-- statement Free Text-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:statement',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Lineage.statement}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+    <!-- scope MD_Scope -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:scope',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Lineage.scope}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Scope" data-dojo-props="label:''"></div>
+    </div>
+    <!-- additionalDocumentation CI_Citation -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:additionalDocumentation',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Lineage.additionalDocumentation}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"> </div>
+    </div>
+    <!-- Role name:processStep LI_ProcessStep-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:processStep',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Lineage.processStep}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mrl/LI_ProcessStep"> </div>
+      </div>
+    
+    <!-- Role name:source LI_Source -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:source',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_Lineage.source}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mrl/LI_Source"> </div>
+      </div>
+
+    </div> <!-- end Tabs-->
+
+  </div>
+</div>
