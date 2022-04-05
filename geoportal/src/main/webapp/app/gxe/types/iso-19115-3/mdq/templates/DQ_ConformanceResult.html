@@ -1,0 +1,16 @@
+<div data-dojo-attach-point="containerNode">
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdq:DQ_ConformanceResult',minOccurs:1, label:'${i18nIso3.DQ_ConformanceResult.caption}'">
+ 
+        <!-- specification CI_Citation-->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdq:specification',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.DQ_ConformanceResult.specification}'">
+          <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"></div>
+        </div>
+        
+        <!-- explanation Free text -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdq:explanation',minOccurs:0,preferOpen:false,label:'${i18nIso3.DQ_ConformanceResult.explanation}'">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+          <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+        </div>
+</div>
+</div>

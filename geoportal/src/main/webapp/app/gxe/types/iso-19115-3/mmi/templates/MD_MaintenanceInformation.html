@@ -1,0 +1,79 @@
+<div data-dojo-attach-point="containerNode">
+
+        
+        <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'mmi:MD_MaintenanceInformation',minOccurs:0">
+       
+        <!-- maintenanceAndUpdateFrequency MD_MaintenanceFrequencyCode -->
+        <!-- MD_MaintenanceFrequencyCode
+        1. continual continual resource is repeatedly and frequently updated
+        2. daily daily resource is updated each day
+        3. weekly weekly resource is updated on a weekly basis
+        4. fortnightly fortnightly resource is updated every two weeks
+        5. monthly monthly resource is updated each month
+        6. quarterly quarterly resource is updated every three months
+        7. biannually biannually resource is updated twice each year
+        8. annually annually resource is updated every year
+        9. asNeeded asNeeded resource is updated as deemed necessary
+        10. irregular irregular resource is updated in intervals that are uneven in duration
+        11. notPlanned notPlanned there are no plans to update the data
+        12. unknown unknown frequency of maintenance for the data is not known
+        13. periodic periodic resource is updated at regular intervals
+        14. semimonthly semimonthly resource updated twice monthly
+        15 biennially
+        -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mmi:maintenanceAndUpdateFrequency',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_MaintenanceInformation.maintenanceAndUpdateFrequency}'">
+      
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement" data-dojo-props="target:'mmi:MD_MaintenanceFrequencyCode',label:'i18nIso3.MD_MaintenanceFrequencyCode.caption'">
+
+            <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListAttribute" data-dojo-props="value:'http://standards.iso.org/iso/19115/resources/Codelist/cat/codelists.xml#MD_MaintenanceFrequencyCode'"></div>
+        
+            <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute">
+              <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+                <div data-dojo-type="esri/dijit/metadata/form/Options">
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'',value:''"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.continual}',value:'Continual'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.daily}',value:'Daily'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.weekly}',value:'Weekly'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.fortnightly}',value:'Fortnightly'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.monthly}',value:'Monthly'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.quarterly}',value:'Quarterly'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.biannually}',value:'Biannually'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.annually}',value:'Annually'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.asNeeded}',value:'As Needed'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.irregular}',value:'Irregular'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.notPlanned}',value:'Not Planned'"></div>
+                  <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'${i18nIso3.MD_MaintenanceFrequencyCode.unknown}',value:'Unknown'"></div>
+                </div>
+              </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- maintenanceDate CI_DATE -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mmi:maintenanceDate',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_MaintenanceInformation.maintenanceDate}'">
+            <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Date">
+            </div>
+        </div>
+
+        <!-- userDefinedMaintenance TM_PeriodDuration -->
+   
+
+        <!-- maintenanceScope MD_Scope -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mmi:maintenanceScope',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_MaintenanceInformation.maintenanceScope}'">
+          <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Scope"></div>
+        </div>
+        <!-- maintenanceNote Free text -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mmi:maintenanceNote',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_MaintenanceInformation.maintenanceNote}'">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+          <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+        </div>
+
+        <!-- contact CI_Responsibility -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mmi:contact', minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_MaintenanceInformation.contact}'">
+          <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility"></div>
+        </div>
+
+       </div>
+
+      
+</div>

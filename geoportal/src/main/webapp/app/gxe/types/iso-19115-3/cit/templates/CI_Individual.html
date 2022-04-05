@@ -1,0 +1,42 @@
+<div data-dojo-attach-point="containerNode">
+
+<div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'cit:CI_Individual',minOccurs:0">
+  
+  <!-- CI_ResponsibleParty Individual Name -->
+    <!-- name FreeText -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:name',maxOccurs:0, minOccurs:0, label:'${i18nIso3.CI_Individual.name}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+     <!-- contactInfo CI_Contact -->
+     <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+
+      <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'cit:contactInfo',minOccurs:0, label:'${i18nIso3.CI_Individual.contactInfo}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Contact"></div>
+      </div>   
+
+    </div>
+
+    <!-- CI_Individual -->
+    <!-- positionName CI_Individual-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:positionName',minOccurs:0, label:'${i18nIso3.CI_Individual.positionName}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+  
+
+    <!-- CI_ResponsibleParty Organisation Name-->
+    <!--
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:organisationName',minOccurs:0, label:'${i18nIso3.CI_ResponsibleParty.organisationName}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    -->
+   
+
+
+</div>
+
+</div>
+  

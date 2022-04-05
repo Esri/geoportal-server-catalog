@@ -1,0 +1,22 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:CI_Responsibility',label:''">
+    
+
+    <!-- role -->
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'cit:role',minOccurs:1,maxOccurs:1,label:'${i18nIso3.CI_Responsibility.role}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_RoleCode"></div>
+    </div>
+
+    <!-- extent -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:extent',minOccurs:0,maxOccurs:'unbounded',preferOpen:false,label:'${i18nIso3.CI_Responsibility.extent}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gex/EX_Extent">
+      </div>
+    </div>
+
+    <!-- party -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:party',minOccurs:0,maxOccurs:'unbounded',preferOpen:false,label:'${i18nIso3.CI_Responsibility.party}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Organisation"></div>
+    </div>
+  </div>
+</div>

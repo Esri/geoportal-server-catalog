@@ -1,0 +1,112 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:CI_Citation',label:''">
+    
+    <!-- title Free Text M 1-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:title',minOccurs:1,maxOccurs:1, label:'${i18nIso3.CI_Citation.title}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+        <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    <div class="gxeInput">
+        <div class="gxeHint gxeEditOnly populated">${i18nIso3.hints.Identifier.authority.title}</div>
+    </div>
+
+    <!-- alternateTitle Free Text O N-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:alternateTitle',minOccurs:0, maxOccurs:1, preferOpen:false,label:'${i18nIso3.CI_Citation.alternateTitle}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- date CI_Date O N -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:date',minOccurs:0, maxOccurs:'unbounded', preferOpen:false,label:'${i18nIso3.CI_Citation.date}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Date" data-dojo-props="label:'CI_Date'"></div>
+    </div>
+
+    <!-- edition Free Text O 1 -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:edition',minOccurs:0,maxOccurs:1,label:'${i18nIso3.CI_Citation.edition}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+   </div>
+
+    <!-- editionDate DateTime O 1 -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:editionDate',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.CI_Citation.editionDate}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Date">
+      </div>
+    </div>
+  
+    <!-- identifier -->
+    <!-- avoiding 'maximum call stack size exceeded' by not further recursive md_identifier/ci_citation references -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:identifier',minOccurs:0,preferOpen:false,label:'${i18nIso3.CI_Citation.identifier}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:MD_Identifier', label:''">
+    
+        <!-- authority -->
+        <!-- Excluding authority as that results in 'maximum call stack size exceeded' error -->
+
+        <!-- code -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:code',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_Identifier.code}'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'">
+            <!--<div data-dojo-type="esri/dijit/metadata/form/InputText" data-dojo-props="useUniqueId:true,regenerateIfTemplate:true"></div>-->
+          </div>
+        </div>
+    
+        <!-- codeSpace -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:codeSpace',minOccurs:0,preferOpen:true,label:'${i18nIso3.MD_Identifier.codeSpace}'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+        </div>
+    
+        <!-- version -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:version',minOccurs:0,label:'${i18nIso3.MD_Identifier.version}'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+        </div>
+    
+        <!-- description -->
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:description',minOccurs:0,label:'${i18nIso3.MD_Identifier.description}'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+        </div>
+    
+      </div>
+    </div>
+  
+    <!-- citedResponsibleParty CI_Responsibility O N-->
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'cit:citedResponsibleParty',minOccurs:0,maxOccurs:'unbounded',label:'${i18nIso3.CI_Citation.citedResponsibleParty}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility"></div>
+    </div>
+
+    <!-- presentationForm -->
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'cit:presentationForm',minOccurs:1,maxOccurs:1,label:'${i18nIso3.CI_Citation.presentationForm}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_PresentationFormCode"></div>
+    </div>
+
+    <!-- series -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:series',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.CI_Citation.series}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Series">
+      </div>
+    </div>
+  
+    <!-- other citation details -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:otherCitationDetails',minOccurs:0,label:'${i18nIso3.CI_Citation.otherCitationDetails}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- ISBN -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:ISBN',minOccurs:0,label:'${i18nIso3.CI_Citation.isbn}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- ISSN -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:ISSN',minOccurs:0,label:'${i18nIso3.CI_Citation.issn}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- onlineResource -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:onlineResource',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.CI_Citation.onlineResource}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_OnlineResource">
+      </div>
+    </div>
+
+    <!-- graphic -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:graphic',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_BrowseGraphic.caption}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_BrowseGraphic"></div>
+   </div>
+
+  </div>
+</div>

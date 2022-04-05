@@ -1,0 +1,145 @@
+<div data-dojo-attach-point="containerNode">
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'mri:MD_DataIdentification',minOccurs:0">
+        <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+              <!-- citation CI_Citation M 1-->
+              <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:citation',minOccurs:1,maxOccurs:1,preferOpen:true,label:'${i18nIso3.identificationSection.citation}'">
+                <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"></div>
+              </div>
+            
+              <!-- abstract Free text M 1-->         
+              <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:abstract',minOccurs:1,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_Identification.abstract}'">
+                <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+                <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+              </div>
+            
+             <!-- purpose Free Text O 1-->         
+             <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:purpose',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_Identification.purpose}'">
+              <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+              <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+            </div>
+            
+            <!-- credit Free text O N -->       
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:credit',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.MD_Identification.credit}'">
+              <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+              <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+            </div>
+            
+            <!-- status - status of the data acquisition MD_ProgressCode O N-->
+             <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'mri:status',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.MI_Operation.status}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_ProgressCode"></div>
+            </div>
+            
+            <!-- pointOfContact  CI_Responsibility O N -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:pointOfContact', minOccurs:0, maxOccurs:'unbounded', preferOpen:true, label:'${i18nIso3.CI_ResponsibleParty.caption}'">
+                <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility"></div>
+            </div>
+      
+           <!--spatialRepresentationType MD_SpatialRepresentationTypeCode O N -->
+           <div data-dojo-type="esri/dijit/metadata/form/Tabs" data-dojo-props="label:'${i18nIso3.identificationSection.resource}'">
+               <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:spatialRepresentationType', minOccurs:0, maxOccurs:'unbounded', preferOpen:false, label:'${i18nIso3.MD_SpatialRepresentationTypeCode.caption}'">
+                  <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_SpatialRepresentationTypeCode"></div>
+               </div>
+               <!--spatialResolution MD_Resolution O N -->
+               <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:spatialResolution', minOccurs:0, maxOccurs:1, preferOpen:false, label:'${i18nIso3.MD_DataIdentification.spatialResolution}'">
+                 <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_Resolution"></div>
+               </div>
+     
+               <!-- temporalResolution TM_Duration TODO -->
+     
+               <!-- topicCategory M N-->
+               <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:topicCategory',minOccurs:1,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.MD_TopicCategoryCode.caption}'">
+                   <div data-dojo-type="esri/dijit/metadata/form/InputSelectMany" data-dojo-props="subTarget:'mri:MD_TopicCategoryCode'">
+                     <div data-dojo-type="esri/dijit/metadata/form/IsoTopicCategoryOptions"></div>
+                   </div>
+               </div>
+          
+               <!-- extent -->
+               <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mri:extent',minOccurs:0,maxOccurs:'unbounded',showHeader:true,label:'${i18nIso3.EX_Extent.caption}'">
+                 <div data-dojo-type="app/gxe/types/iso-19115-3/gex/EX_Extent"></div>
+               </div>
+          </div>
+          
+          <!-- additionalDocumentation-->
+          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:additionalDocumentation',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.identificationSection.additionalDocumentation}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"> </div>
+          </div>
+     
+           <!--processingLevel MD_Identifier O 1 -->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:processingLevel',minOccurs:0,maxOccurs:'1',preferOpen:false,label:'${i18nIso3.identificationSection.processingLevel}'">
+               <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Identifier" data-dojo-props="label:'${i18nIso3.MD_Metadata.metadataIdentifier}'"></div>
+           </div>
+           <!-- Role name: resourceMaintenance O N-->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:resourceMaintenance',minOccurs:0,maxOccurs:'unbounded',preferOpen:false,label:'${i18nIso3.identificationSection.resourceMaintenance}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mmi/MD_MaintenanceInformation" data-dojo-props="label:'${i18nIso3.MD_MaintenanceInformation.caption}'"></div>
+           </div>
+           <!-- Role name: graphicOverview MD_BrowseGraphic O N -->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:graphicOverview',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.identificationSection.graphicOverview}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_BrowseGraphic"></div>
+          </div>
+           <!-- Role name: resourceFormat MD_Format O N-->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:resourceFormat',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.identificationSection.resourceFormat}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_Format"></div>
+          </div>
+     
+           <!-- Role name: descriptiveKeywords MD_Keywords O N -->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:descriptiveKeywords',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.identificationSection.descriptiveKeywords}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_Keywords"></div>
+          </div>
+     
+           <!-- Role name: resourcSpecificUsage MD_Usage O N-->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:resourcSpecificUsage',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.identificationSection.resourcSpecificUsage}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_Usage"></div>
+          </div>
+     
+           <!-- Role name: resourceConstraints MD_Constraints O N-->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:resourceConstraints',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.identificationSection.resourceConstraints}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mco/MD_Constraints" data-dojo-props="label:'MD_Constraints',minOccurs:0"></div>
+           </div>
+     
+           <!-- Role name: associatedResource MD_AssociatedResource O N-->
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:associatedResource',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.identificationSection.associatedResource}'">
+             <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_AssociatedResource" data-dojo-props="label:'MD_Constraints',minOccurs:0"></div>
+           </div>
+  
+           <!-- MD_DataIdentification -->
+           <!-- ISO 19115-1 Specification
+           <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:MD_DataIdentification',minOccurs:0,maxOccurs:'unbounded',preferOpen:false, label:'${i18nIso3.MD_DataIdentification.caption}'">
+            <div data-dojo-type="app/gxe/types/iso-19115-3/mri/MD_DataIdentification" data-dojo-props="label:'MD_Constraints',minOccurs:0"></div>
+          </div>
+          -->
+  
+            <!-- MD_DataIdentification -->
+            <!-- default Locale -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:defaultLocale',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Metadata.defaultLocale}'">
+              <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_Locale">
+              </div>
+            </div>
+      
+             <!-- other Locale -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:otherLocale',minOccurs:0,maxOccurs:'unbounded',preferOpen:false,label:'${i18nIso3.MD_Metadata.otherLocale}'">
+              <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_Locale" data-dojo-props="label:'PT_Locale'">
+              </div>
+            </div>  
+           
+            <!-- environmentDescription -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:environmentDescription',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_DataIdentification.environmentDescription}'">
+              <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+              <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+            </div>
+      
+            <!-- supplementalInformation -->
+            <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:supplementalInformation',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.MD_DataIdentification.supplementalInformation}'">
+            <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+            <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+            </div>
+      
+            
+  
+     
+           
+            </div> <!-- end tabs -->
+      </div> 
+       
+   
+  </div>

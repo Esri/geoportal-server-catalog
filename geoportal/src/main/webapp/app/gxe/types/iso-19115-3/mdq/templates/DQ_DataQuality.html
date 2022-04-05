@@ -1,0 +1,17 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdq:DQ_DataQuality',minOccurs:0, label:'${i18nIso3.MD_Metadata.dataQualityInfo}'">
+  
+  <!-- scope MD_Scope  -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdq:scope',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.DQ_DataQuality.scope}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Scope"></div>
+  </div>
+
+
+  <!-- report DQ_Domainconsistency  -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mdq:report',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.DQ_DataQuality.report}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mdq/DQ_DomainConsistency"></div>
+  </div>
+
+ 
+</div>

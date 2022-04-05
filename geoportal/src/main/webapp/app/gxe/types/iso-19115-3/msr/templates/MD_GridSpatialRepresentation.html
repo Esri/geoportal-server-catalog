@@ -1,0 +1,32 @@
+<div data-dojo-attach-point="containerNode">
+    <!-- numberOfDimensions Integer -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:numberOfDimensions',minOccurs:1,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_GridSpatialRepresentation.numberOfDimensions}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:Integer'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,integerOnly:true,hint:'Enter Integer Number >0'"></div>
+      </div>
+    </div>
+
+    <!-- axisDimensionProperties MD_Dimension-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:axisDimensionProperties',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_GridSpatialRepresentation.axisDimensionProperties}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/msr/MD_Dimension"> </div>
+    </div>
+    
+    <!-- cellGeometry MD_CellGeometryCode -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:cellGeometry',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_GridSpatialRepresentation.cellGeometry}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/msr/MD_CellGeometryCode"> </div>
+    </div>
+
+    <!-- transformationParameterAvailability Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:transformationParameterAvailability',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_GridSpatialRepresentation.transformationParameterAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>    
+    </div>  
+
+</div>

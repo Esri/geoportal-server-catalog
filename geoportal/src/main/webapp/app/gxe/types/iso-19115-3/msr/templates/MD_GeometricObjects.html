@@ -1,0 +1,14 @@
+<div data-dojo-attach-point="containerNode">
+    <!-- geometricObjectType MD_GeometricObjectTypeCode -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:numberOfDimensions',minOccurs:1,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_GeometricObjects.geometricObjectType}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/msr/MD_GeometricObjectTypeCode"> </div>
+    </div>
+
+    <!-- geometricObjectCount Integer-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:axisDimensionProperties',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_GeometricObjects.geometricObjectCount}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:Integer'">
+        <div data-dojo-type="esri/dijit/metadata/form/InputNumber" data-dojo-props="minValue:0,integerOnly:true,hint:'Enter Integer Number >0'"></div>
+      </div>
+    </div>
+
+</div>

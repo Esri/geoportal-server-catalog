@@ -1,0 +1,33 @@
+<div data-dojo-attach-point="containerNode">
+  
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'mrd:MD_Format', label:''">
+ 
+     <!-- formatSpecificationCitation CI_Citation -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrd:formatSpecificationCitation',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Format.formatSpecificationCitation}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation"> </div>
+    </div>
+
+     <!-- amendmentNumber Free Text -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:amendmentNumber',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_Format.amendmentNumber}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+     <!-- fileDecompressionTechnique Free Text-->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:fileDecompressionTechnique',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_Format.fileDecompressionTechnique}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+     <!-- medium MD_Medium -->
+     <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:medium',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_Format.medium}'">
+          <div data-dojo-type="app/gxe/types/iso-19115-3/mrd/MD_Medium"> </div>
+    </div>
+
+    <!-- Role name: formatDistributor MD_Distributor -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrd:formatDistributor',minOccurs:0,preferOpen:false,label:'${i18nIso3.MD_Format.formatDistributor}'">
+        <!--<div data-dojo-type="app/gxe/types/iso-19115-3/mrd/MD_Distributor"> </div> -->
+    </div>
+     </div>
+  
+</div>

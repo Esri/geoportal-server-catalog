@@ -1,0 +1,46 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:CI_OnlineResource',label:''">
+    
+    <!-- linkage -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:linkage',minOccurs:1,maxOccurs:1,label:'${i18nIso3.CI_OnlineResource.linkage}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+    
+    <!-- protocol -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:protocol',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.CI_OnlineResource.protocol}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+    
+    <!-- applicationProfile -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:applicationProfile',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.CI_OnlineResource.applicationProfile}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    
+    <!-- name -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:name',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.CI_OnlineResource.name}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    
+    <!-- description -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:description',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.CI_OnlineResource.description}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+    <!-- function -->
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'cit:function',minOccurs:1,maxOccurs:1,label:'${i18nIso3.CI_OnlineResource.function}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_OnLineFunctionCode"></div>
+    </div>
+
+    <!-- protocolRequest -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:protocolRequest',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.CI_OnlineResource.protocolRequest}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement" data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+
+
+  </div>
+</div>

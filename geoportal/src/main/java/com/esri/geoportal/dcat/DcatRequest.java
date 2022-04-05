@@ -180,13 +180,22 @@ public abstract class DcatRequest {
     onEnd(complete, exception);
   }
   
+  private static class DcatHeaderExtES7 extends DcatHeaderExt {
+    public Integer value;
+    public String relation;
+  }
+  
   private static class DcatHeaderExt extends DcatHeader {
 
     public Integer start;
     public Integer num;
-    public Integer total;
+    //public Integer total;
+    public DcatHeaderExtES7 total;
     public Integer nextStart;
 
+    public DcatHeaderExt() {
+      System.out.println("here");
+    }
   }
   
 }

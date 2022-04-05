@@ -1,0 +1,32 @@
+<div data-dojo-attach-point="containerNode">
+
+<div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'cit:CI_Organisation',minOccurs:0">
+    <!-- CI_ResponsibleParty Individual Name -->
+    <!-- name FreeText-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:name',maxOccurs:0, minOccurs:0, label:'${i18nIso3.CI_Organisation.name}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    <!-- CI_Contact -->
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+
+      <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'cit:contactInfo',minOccurs:0, label:'${i18nIso3.CI_Organisation.contactInfo}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Contact"></div>
+      </div>   
+
+    </div>
+
+    <!-- logo MD_BrowseGrahic -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:logo',minOccurs:0, label:'${i18nIso3.CI_Organisation.logo}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_BrowseGraphic"></div>
+    </div>
+
+    <!-- individual Position Name-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'cit:individual',minOccurs:0, label:'${i18nIso3.CI_Organisation.individual}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Individual"></div>
+    </div>
+
+    
+</div>
+</div>
+  

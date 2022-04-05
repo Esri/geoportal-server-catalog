@@ -12,7 +12,7 @@ define([],function(){var obj={
       "arcgis", "dc", "fgdc",
       "iso-19115", "iso-19119", "iso-19115-2",
       "inspire2-iso-19119", "inspire2-iso-19115",  
-      "gemini-iso-19115", "gemini-iso-19119"
+      "gemini-iso-19115", "gemini-iso-19119", "iso-19115-3"
     ],
     basemap: "hybrid",
     allowViewXml: true,
@@ -143,8 +143,16 @@ define([],function(){var obj={
           value: "2.2"
         }
       ]
+    },
+    {
+      key: "iso-19115-3",
+      requiredPath: "app/gxe/types/iso-19115-3/base/DataDocumentType",
+      interrogationRules: [{
+         path: "/mdb:MD_Metadata/mdb:metadataStandard/cit:CI_Citation/cit:title/gco:CharacterString",
+         value: "ISO 19115-3 Geographic Information - Metadata - Part 1: Fundamentals",
+         must: true
+      }]
     }
-
   ]
   
 // .......................................................................................
