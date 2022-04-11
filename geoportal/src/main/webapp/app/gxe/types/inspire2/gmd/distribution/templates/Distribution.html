@@ -6,9 +6,12 @@
     <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
       data-dojo-props="target:'gmd:MD_Distribution'">
       
-      <div data-dojo-type="app/gxe/types/inspire2/gmd/distribution/DistributionFormat"></div>
-      <div data-dojo-type="esri/dijit/metadata/types/iso/gmd/distribution/TransferOptions"></div>
-      
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+      <div data-dojo-type="app/gxe/types/inspire2/gmd/distribution/distributionFormat"
+           data-dojo-props="label:'Distribution Format'"></div>
+      <div data-dojo-type="app/gxe/types/inspire2/gmd/distribution/TransferOptions"
+           data-dojo-props="label:'Transfer Options'"></div>
+    </div>
     </div>
   </div>  
   

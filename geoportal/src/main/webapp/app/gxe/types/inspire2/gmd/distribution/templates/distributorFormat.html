@@ -1,0 +1,39 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+       data-dojo-props="target:'gmd:MD_Format'">
+    
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+         data-dojo-props="target:'gmd:name',label:'${i18nIso.MD_Format.name}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+           data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+    
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+         data-dojo-props="target:'gmd:version',label:'${i18nIso.MD_Format.version}'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+        data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+         data-dojo-props="target:'gmd:version',label:'Amendment Number'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+           data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+         data-dojo-props="target:'gmd:version',label:'Specification'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+           data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+         data-dojo-props="target:'gmd:version',label:'File Decompression Technique'">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+           data-dojo-props="target:'gco:CharacterString'"></div>
+    </div>
+
+    <!-- no reference to MD_distributor to avoid infinite loops -->
+</div>
+  
+</div>
