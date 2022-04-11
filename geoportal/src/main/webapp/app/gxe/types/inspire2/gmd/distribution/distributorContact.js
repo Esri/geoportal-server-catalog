@@ -6,9 +6,9 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
-        "./formatDistributor",
-        "dojo/text!./templates/distributionFormat.html"],
-function(declare, lang, has, Descriptor, Element, AbstractObject, GcoElement, ObjectReference, FormatDistributor, template) {
+        "../citation/ResourceContact",
+        "dojo/text!./templates/distributorContact.html"],
+function(declare, lang, has, Descriptor, Element, AbstractObject, GcoElement, ObjectReference, ResourceContact, template) {
 
   var oThisClass = declare(Descriptor, {
 

@@ -6,9 +6,13 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
-        "./formatDistributor",
-        "dojo/text!./templates/distributionFormat.html"],
-function(declare, lang, has, Descriptor, Element, AbstractObject, GcoElement, ObjectReference, FormatDistributor, template) {
+        "esri/dijit/metadata/types/iso/gmd/citation/CI_OnlineFunctionCode",
+        "./distributorContact",
+        "./distributorTransferOptions",
+        "dojo/text!./templates/formatDistributor.html"],
+function(declare, lang, has, Descriptor, Element, AbstractObject, 
+         GcoElement, ObjectReference, CI_OnlineFunctionCode, 
+         DistributorContact, DistributorTransferOptions, template) {
 
   var oThisClass = declare(Descriptor, {
 
