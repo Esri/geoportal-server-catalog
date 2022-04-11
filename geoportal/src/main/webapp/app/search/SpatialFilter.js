@@ -35,6 +35,7 @@ define(["dojo/_base/declare",
         "app/search/SpatialFilterSettings",
         "esri/map",
         "esri/layers/ArcGISTiledMapServiceLayer",
+        "esri/layers/ArcGISDynamicMapServiceLayer",
         "esri/layers/GraphicsLayer",
         "esri/geometry/webMercatorUtils",
         "esri/geometry/Extent",
@@ -55,7 +56,7 @@ define(["dojo/_base/declare",
         "esri/tasks/locator"],
 function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber,
     topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map,
-    ArcGISTiledMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference,
+    ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference,
     SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer,
     SimpleRenderer, Graphic, Color, PopupTemplate, InfoTemplate, SearchWidget, Deferred, Locator) {
 
@@ -403,13 +404,22 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
         v = null;
       }
+
+
       this.map = null;
       var map = new Map(this.mapNode,mapProps);
       if (typeof v === "string" && v.length > 0) {
         v =  util.checkMixedContent(v);
-        var basemap = new ArcGISTiledMapServiceLayer(v);
+        var basemap;
+        if (!mapProps.isTiled) {
+          basemap = new ArcGISDynamicMapServiceLayer(v);
+        } else {
+          basemap = new ArcGISTiledMapServiceLayer(v);
+        }
         map.addLayer(basemap);
       }
+
+
       this.own(on(map,"Load",lang.hitch(this,function(){
         this.map = map;
         this.initializeLocator();
