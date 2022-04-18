@@ -37,6 +37,7 @@ define({
       search: "Search",
       catalog: "Catalog",
       map: "Map",
+      api: "API",
       about: "About",
       admin: "Admin",
       content: "Content",

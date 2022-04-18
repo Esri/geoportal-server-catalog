@@ -1,0 +1,34 @@
+<div data-dojo-attach-point="contentNode">
+    <div class="g-search-pane g-search-panel">
+
+
+        <div class="g-search-bar-row">
+            <div class="g-search-bar">
+            <span class="g-search-bar-title">Shopping Cart</span>
+            </div>
+        </div>
+
+        <div class="g-search-content-row">
+            <table id="cart" style="left:90px;width:100%" data-dojo-attach-point="cartNode">
+                <thead>
+                    <tr>
+                        <th scope="col" style="width:350px">Item</th>
+                        <th scope="col">Title</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+        <div class="g-search-content-row">
+            <button class="btn btn-success btn-sm" style="margin-right:10px" type="button" data-dojo-attach-point="submitButton" data-dojo-attach-event="onClick:clearCart" title="Clear Cart">
+                Clear
+            </button>
+            <button class="btn btn-success btn-sm" style="margin-right:10px" type="button" data-dojo-attach-point="submitButton" data-dojo-attach-event="onClick:continueSearching" title="Continue Searching">
+                Continue Searching
+            </button>
+            <button class="btn btn-success btn-sm" style="margin-right:10px" type="button" data-dojo-attach-point="submitButton" data-dojo-attach-event="onClick:orderCart" title="Order">
+                Order
+            </button>
+        </div>
+    </div>
+</div>

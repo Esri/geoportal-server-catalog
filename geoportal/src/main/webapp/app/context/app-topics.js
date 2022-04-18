@@ -1,6 +1,9 @@
 define([],function(){var obj={
 // .......................................................................................
-        
+
+  /* params - {item:obj}; */
+  AddToCartClicked: "app/AddToCartClicked",
+
   /* params - {type:string, url:string}; */
   AddToMapClicked: "app/AddToMapClicked",
   

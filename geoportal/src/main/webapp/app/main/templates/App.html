@@ -28,6 +28,18 @@
         </a>
       </li>
 
+      <li class="nav-item">
+        <a class="nav-link" href="#apiPanel" data-toggle="tab">
+          ${i18n.nav.api}
+        </a>
+      </li>
+      
+      <li class="nav-item" data-dojo-attach-point="cartPanelBtnNode">
+        <a class="nav-link" href="#cartPanel" data-toggle="tab">
+          Shopping Cart
+        </a>
+      </li>
+      
       <li class="nav-item" data-dojo-attach-point="adminOptionsBtnNode">
         <a
           class="g-nav-dropdown-link dropdown-toggle nav-padding-fix"
@@ -154,6 +166,18 @@
       <div
         data-dojo-type="app/main/MapPanel"
         data-dojo-attach-point="mapPanel"
+      ></div>
+    </div>
+    <div id="apiPanel" role="tabpanel" class="tab-pane fade">
+      <div
+        data-dojo-type="app/main/APIPanel"
+        data-dojo-attach-point="apiPanel"
+      ></div>
+    </div>
+    <div id="cartPanel" role="tabpanel" class="tab-pane fade">
+      <div
+        data-dojo-type="app/main/CartPanel"
+        data-dojo-attach-point="cartPanel"
       ></div>
     </div>
     <div id="aboutPanel" role="tabpanel" class="tab-pane fade">
