@@ -258,15 +258,7 @@ define({
       contact: {
         hint: "At least one contact with role \"Custodian\" must be present for interoperable or harmonised services"
       }
-    },
-
-    MD_Format: {
-      name: "Format Name",
-      version: "Format Version",
-      formatDistributor: "Format Distributor",
-      amendmentNumber: "Amendment Number",
-      specification: "Specification",
-      fileDecompressionTechnique: "File Decompression Technique"
     }
+
   })
 });

@@ -27,6 +27,7 @@ define([],function(){var obj={
 
   searchMap: {
     basemap: "streets",
+    basemapUrl: "",
     isTiled: false,
     autoResize: true,
     wrapAround180: true,
@@ -46,7 +47,8 @@ define([],function(){var obj={
     showLinks: true,
     showCustomLinks: true,
     showOpenSearchLinks: true,
-    showTotalCountInHierarchy: true
+    showTotalCountInHierarchy: true,
+    showShoppingCart: false
   },
 
   statusChecker: {

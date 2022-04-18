@@ -112,6 +112,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
+      this._renderAddToCart(item);
       this._renderServiceStatus(item);
       this._renderUrlLinks(item);
       this._renderId(item);
@@ -263,6 +264,23 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           return true;
         }
       }));
+    },
+
+    _renderAddToCart: function(item) {
+      var show = AppContext.appConfig.searchResults.showShoppingCart;
+      if (show) {
+        var actionsNode = this.actionsNode;
+
+        domConstruct.create("a",{
+          href: "javascript:void(0)",
+          innerHTML: "Add to Cart",
+          title: "Add to Cart",
+          "aria-label": "Add to Cart",
+          onclick: function() {
+            topic.publish(appTopics.AddToCartClicked,item);
+          }
+        },actionsNode);
+      }
     },
 
     _renderItemLinks: function(itemId,item) {
