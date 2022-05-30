@@ -1,16 +1,24 @@
 //a custom pragma to transform your jsx into plain JavaScript
 /** @jsx jsx */
-import { React, AllWidgetProps, jsx } from 'jimu-core'
-import { IMConfig } from '../../config'
-import '../main.css'
+import { React, AllWidgetProps, jsx } from 'jimu-core';
+import { JimuMapView } from 'jimu-arcgis';
+import { IMConfig } from '../../config';
+import Extent from 'esri/geometry/Extent';
+import '../main.css';
+import WidgetContext from '../gs/widget/WidgetContext';
+import ItemCard from './ItemCard';
 
 interface ExtraProps {
-  resultList: any[]
-  clearResults: boolean
+  searchResponse: any;
+  clearResults: boolean;
+  widgetContext: WidgetContext;
+  mapView?: JimuMapView;
 }
 
 export interface IState {
-  results: any
+  results: any;
+  sourceKey: string;
+  sourceType: string;
 }
 
 export default class Widget extends React.PureComponent<
@@ -18,107 +26,73 @@ export default class Widget extends React.PureComponent<
   IState
 > {
   constructor(props) {
-    super(props)
-
-    this.state = {
-      results: null
-    }
+    super(props);
   }
 
   componentDidUpdate(): void {
-    console.log(' componentDidUpdate ')
+    console.log(' componentDidUpdate ');
   }
 
-  // processResultList = () => {
-  //   let resultList = [];
-
-  //   if (!this.props.resultList || this.props.resultList.length <= 0) {
-  //     this.setState({results: []})
-  //   } else {
-  //     for (var i=0; i< this.props.resultList.length; i++) {
-  //       // TODO - render links and corresponding actions (Zoom to, Add, Details, Links)
-  //       // TODO - if action fails, render message in message span
-  //       let item: any =  this.props.resultList[i];
-  //       let itemDiv = (<div className="g_item_card" key={"results"}>
-  //           <div key={i} className="g_item_title">{item.title}</div>
-  //           <div className="g_item_thumbnail"><img key={i} className="g_item_thumbnail" src={item._source.thumbnail_s}/></div>
-  //           <div className="g_item_description">{item.description}</div>
-  //           <div className="g_action_bar">
-  //             <span key={"message_"+i} className="g_action_message"></span>
-  //             <a key={"zoomTo_"+i} className="g_action_zoomto">Zoom to</a>
-  //             <a key={"add_"+i} className="g_action_add">Add</a>
-  //             <a key={"details_"+i} className="g_action_details">Details</a>
-  //             <span key={"links_"+i} className="g_action_links">Links</span>
-  //           </div>
-  //         </div>)
-  //       resultList.push(itemDiv);
-  //     }
-  //     this.setState({results: resultList})
-  //   }
-  // }
+  zoomToExtent = (bbox: any) => {
+    if (bbox) {
+      this.props.mapView.view.extent = new Extent({
+        xmin: bbox.xmin,
+        ymin: bbox.ymin,
+        xmax: bbox.xmax,
+        ymax: bbox.ymax,
+        spatialReference: {
+          wkid: 4326,
+        },
+      });
+    }
+  };
 
   processResultList = () => {
-    let resultList = []
+    let resultList = [];
 
-    if (!this.props.resultList || this.props.resultList.length <= 0) {
-      return <div>No results......</div>
-      // this.setState({results: []})
+    let results = this.props.searchResponse?.results ?? null;
+
+    if (!results || results.length <= 0) {
+      return <div>No results......</div>;
     } else {
-      for (var i = 0; i < this.props.resultList.length; i++) {
-        // TODO - render links and corresponding actions (Zoom to, Add, Details, Links)
-        // TODO - if action fails, render message in message span
-        let item: any = this.props.resultList[i]
-        let itemDiv = (
-          <div className="g_item_card" key={'result' + i}>
-            <div key={i} className="g_item_title">
-              {item.title}
-            </div>
-            <div className="g_item_thumbnail">
-              <img
-                key={i}
-                className="g_item_thumbnail"
-                src={item._source.thumbnail_s}
-              />
-            </div>
-            <div className="g_item_description">{item.description}</div>
-            <div className="g_action_bar">
-              <span key={'message_' + i} className="g_action_message"></span>
-              <a key={'zoomTo_' + i} className="g_action_zoomto">
-                Zoom to
-              </a>
-              <a key={'add_' + i} className="g_action_add">
-                Add
-              </a>
-              <a key={'details_' + i} className="g_action_details">
-                Details
-              </a>
-              <span key={'links_' + i} className="g_action_links">
-                Links
-              </span>
-            </div>
-          </div>
-        )
-        resultList.push(itemDiv)
-      }
-      return resultList
-      // this.setState({results: resultList})
-    }
-  }
+      const showOwner = this.props.widgetContext.widgetConfig.showOwner;
 
-  temp = () => {
-    return <div>test</div>
-  }
+      // TO DO
+      const supportsRemove = this.props.widgetContext.supportsRemove;
+
+      var idsAdded = [];
+      // if (supportsRemove) {
+      //   idsAdded = layerUtil.findLayersAdded(this.getMap(), null).referenceIds;
+      // }
+
+      for (var i = 0; i < results.length; i++) {
+        // TODO - if action fails, render message in message span
+        const item: any = results[i];
+        const itemDiv = (
+          <ItemCard
+            supportsRemove
+            showOwner
+            item={item}
+            key={i + '_' + item.id}
+            canRemove={false}
+            sourceKey={this.props.searchResponse.sourceKey}
+            sourceType={this.props.searchResponse.sourceType}
+            intl={this.props.intl}
+            zoomToExtent={this.zoomToExtent}
+          ></ItemCard>
+        );
+        resultList.push(itemDiv);
+      }
+
+      return resultList;
+    }
+  };
 
   render() {
-    console.log('**render')
     return (
       <div className="jimu-widget">
-        {this.props.clearResults === true ? (
-          <div></div>
-        ) : (
-          this.processResultList()
-        )}
+        {this.props.clearResults === true ? <div></div> : this.processResultList()}
       </div>
-    )
+    );
   }
 }

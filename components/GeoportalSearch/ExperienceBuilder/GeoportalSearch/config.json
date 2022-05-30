@@ -4,6 +4,7 @@
   "profileTooltip": "e.g. CSW2_Geoportal1",
   "filterTooltip": "not applicable to csw",
   "widgetTitle": "Geoportal Search",
+  "showOwner": true,
   "targets": [
     {
       "name": "Geoportal 2.6.5",

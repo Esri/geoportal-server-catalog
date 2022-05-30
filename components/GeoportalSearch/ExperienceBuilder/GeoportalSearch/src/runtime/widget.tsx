@@ -1,89 +1,116 @@
+/* eslint-disable @typescript-eslint/semi */
 /** @jsx jsx */
-import { React, BaseWidget, AllWidgetProps, jsx, appActions, IMState, css } from 'jimu-core';
-import { TextInput, Checkbox, Option, Icon, Button, Label, Loading, LoadingType } from "jimu-ui";
-import { JimuMapViewComponent, JimuMapView } from "jimu-arcgis";
-import { IMConfig } from '../config';
+import { React, AllWidgetProps, jsx } from 'jimu-core';
+import { Loading, LoadingType } from 'jimu-ui';
+import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis';
 
-import SearchPane from "./components/SearchPane"
-import ResultsPane from "./components/ResultsPane"
+import { IMConfig } from '../config';
+import esriConfig from 'esri/config';
+
+import WidgetContext from './gs/widget/WidgetContext';
+
+import SearchPane from './components/SearchPane';
+import ResultsPane from './components/ResultsPane';
 
 import './main.css';
 
-//import Query = require('esri/tasks/support/Query');
-//import QueryTask = require('esri/tasks/QueryTask');
-
-import QueryTask from 'esri/tasks/QueryTask';
-import Query from 'esri/tasks/support/Query';
-
-
-import Select from 'react-select';
-
 export interface IState {
-  jimuMapView: JimuMapView;
-  resultList: Element[],
-  loading: boolean,
-  thumbnail: Element
+  mapView: JimuMapView;
+  loading: boolean;
+  thumbnail: Element;
+  searchResponse: any;
 }
 
+// To integrate 'gs' folder functionality with this ExB widget
+// @ts-ignore
+window.gs = {};
+// @ts-ignore
+window.gsConfig = {
+  isExB: true,
+};
+require('./gs/all');
+
 export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>, IState> {
+  widgetContext: WidgetContext;
+  gs: any;
 
   constructor(props) {
     super(props);
 
     this.state = {
-      jimuMapView: null,
-      resultList: null,
+      mapView: null,
       loading: false,
-      thumbnail: null
+      thumbnail: null,
+      searchResponse: null,
     };
 
+    // @ts-ignore
+    this.gs = window.gs;
   }
 
-  componentDidMount() {
-    
+  componentDidMount() {}
 
-  }
-
-  componentDidUpdate() {
-
-  }
+  componentDidUpdate() {}
 
   //This is used if the map view changes
   activeViewChangeHandler = (jmv: JimuMapView) => {
-    this.setState(prevState => ({
+    this.setState((prevState) => ({
       ...prevState,
-      jimuMapView: jmv as JimuMapView
+      mapView: jmv,
     }));
 
-  }
-  
-  handleResults = (results: []) => {
-    this.setState({resultList: results});
-  }
-  
-    
-  // // TODO - create separate react components for search result list and item
-  
+    this.widgetContext = new WidgetContext(
+      this.props.config,
+      esriConfig.request.proxyUrl,
+      jmv.view.map
+    );
+  };
+
+  handleResults = (searchResponse: any) => {
+    this.setState((prevState) => ({
+      ...prevState,
+      searchResponse: searchResponse,
+    }));
+  };
 
   toggleLoading = (visible: boolean) => {
-    this.setState({ loading: visible })
-  }
+    this.setState((prevState) => ({
+      ...prevState,
+      loading: visible,
+    }));
+  };
 
   render() {
     return (
-      <div className="jimu-widget geoportal-search-widget" >
+      <div className="jimu-widget geoportal-search-widget">
+        <JimuMapViewComponent
+          useMapWidgetId={this.props.useMapWidgetIds?.[0]}
+          onActiveViewChange={this.activeViewChangeHandler}
+        />
         <div className="titleStyle">{this.props.config.widgetTitle}</div>
         <div className="searchPaneWrapper">
-          <SearchPane {...this.props} handleResults={this.handleResults} loading={this.toggleLoading}/>     
+          <SearchPane
+            {...this.props}
+            handleResults={this.handleResults}
+            loading={this.toggleLoading}
+            gs={this.gs}
+            widgetContext={this.widgetContext}
+          />
         </div>
         <div className="resultsPaneWrapper">
-          <ResultsPane {...this.props} resultList={this.state.resultList} clearResults={this.state.loading}/>       
-        </div>    
-        {this.state.loading?
-          (<div style={{ display: 'flex', paddingTop: '5px' }}>
-            <Loading className="loadingOverride" type={LoadingType.Donut}  />
-          </div>)
-        : null}
+          <ResultsPane
+            {...this.props}
+            searchResponse={this.state.searchResponse}
+            clearResults={this.state.loading}
+            widgetContext={this.widgetContext}
+            mapView={this.state.mapView}
+          />
+        </div>
+        {this.state.loading ? (
+          <div style={{ display: 'flex', paddingTop: '5px' }}>
+            <Loading className="loadingOverride" type={LoadingType.Donut} />
+          </div>
+        ) : null}
       </div>
     );
   }

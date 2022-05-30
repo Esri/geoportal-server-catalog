@@ -14,7 +14,7 @@
 
 .resultsPaneWrapper {
   width: 100%;
-  
+
 }
 
 .searchPane {
@@ -32,24 +32,8 @@
   width: 5%;
 }
 
-.g_item_title {
-  margin: 0 5px;
-  padding: 0;
-  font-size: 12px;
-  font-weight: bold;
-  color: #4c4c4c;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}   
 
-.g_item_description {
-  margin: 0px 0px 6px 0px;
-  font-size: 12px;
-  box-sizing: border-box;
-}      
-
-.g_item_card {
+.result_item_card {
   padding: 5px;
   margin-bottom: 4px;
   border-top: 0;
@@ -61,13 +45,41 @@
   background: #ffffff;
 }
 
-.g_item_thumbnail {
-  background-image: url(images/placeholder_project120x80.png);
-  background-repeat: no-repeat;
-  background-position: center;
+.result_item_thumbnail {
+  float: left;
+  height: 60px;
+  width: 90px;
+  overflow: hidden;
 }
 
-.g_action_bar {
+.result_item_title {
+  margin: 0 5px;
+  padding: 0;
+  font-size: 12px;
+  font-weight: bold;
+  color: #4c4c4c;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result_item_info {
+  margin-left: 5px;
+  color: #898989;
+  font-size: 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.result_item_description {
+  margin: 0px 0px 6px 0px;
+  font-size: 12px;
+  box-sizing: border-box;
+}
+
+.result_action_bar {
+  margin-right: 10px;
   text-align: right;
   white-space: nowrap;
   font-size: 12px;
@@ -76,25 +88,31 @@
   padding: 5px 5px;
 }
 
-.g_action_zoomto {
+.result_action_zoomto {
   padding: 5px 5px;
+  text-decoration: none;
+  font-size: .8rem;
 }
 
-.g_action_add {
+.result_action_add {
   padding: 5px 5px;
+  text-decoration: none;
+  font-size: .8rem;
 }
 
-.g_action_details {
+.result_action_details {
   padding: 5px 5px;
+  text-decoration: none;
+  font-size: .8rem;
 }
 
-.g_action_message {
+.result_action_message {
   padding: 5px 5px;
   font-size: 9px;
   font-style: italic;
 }
 
-.g_action_links {
+.result_action_links {
   margin-top: -4px;
 }
 
@@ -131,7 +149,7 @@
 
 /* .searchResults {
   width: 100%;
-  overflow-y: scroll;  
+  overflow-y: scroll;
 } */
 
 .loadingOverride {
@@ -140,12 +158,12 @@
   border-color: red;
 }
 
-.g_results_list {
-  overflow-y: scroll;  
+.results_list {
+  overflow-y: scroll;
 }
 
 
-/* .g_catalogs_list {
+/* .result_catalogs_list {
   control: (_, { selectProps: { width } }) => ({
     width: 300
   }),

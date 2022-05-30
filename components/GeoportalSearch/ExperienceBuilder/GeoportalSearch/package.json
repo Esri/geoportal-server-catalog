@@ -1,14 +1,11 @@
 {
   "name": "geoportalsearch",
   "version": "0.0.1",
-  "description": "This package is for the geoportal search widget",
-  "main": "index.js",
+  "description": "This package is for the Geoportal search widget",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "author": "",
-  "license": "ISC",
-  "dependencies": {
-    "react-multiselect-checkboxes": "0.0.1"
-  }
+  "author": "Esri",
+  "license": "http://www.apache.org/licenses/LICENSE-2.0",
+  "dependencies": {}
 }

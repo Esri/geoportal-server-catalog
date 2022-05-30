@@ -1,45 +1,42 @@
 //a custom pragma to transform your jsx into plain JavaScript
 /** @jsx jsx */
-import { React, AllWidgetProps, jsx } from 'jimu-core'
-import {
-  TextInput,
-  Checkbox,
-  Option,
-  Icon,
-  Button,
-  Label,
-  Loading,
-  LoadingType
-} from 'jimu-ui'
-import { IMConfig } from '../../config'
-
-import ReactMultiSelectCheckboxes from 'react-multiselect-checkboxes'
+import { React, AllWidgetProps, jsx } from 'jimu-core';
+import { TextInput, Checkbox, Option, Icon, Button, Label, Loading, LoadingType } from 'jimu-ui';
+import { IMConfig } from '../../config';
+import WidgetContext from '../gs/widget/WidgetContext';
+import TargetOptions from '../gs/widget/TargetOptions';
 
 interface ExtraProps {
-  handleResults?: (results: []) => void
-  loading?: (visible: boolean) => void
+  handleResults?: (results: any[]) => void;
+  loading?: (visible: boolean) => void;
+  gs?: any;
+  widgetContext: WidgetContext;
 }
 
 export interface IState {
-  relevance: string
-  catalogOptions: any[]
-  selectedOptions: any[]
-  isBbox: boolean
-  isLiveData: boolean
-  totalRecords: number
-  searchText: string
-  searchResults: string
-  resultList: Element[]
-  loading: boolean
-  thumbnail: Element
+  relevance: string;
+  catalogOptions: any[];
+  selectedOptions: any[];
+  isBbox: boolean;
+  isLiveData: boolean;
+  totalRecords: number;
+  searchText: string;
+  searchResults: string;
+  resultList: Element[];
+  loading: boolean;
+  thumbnail: Element;
 }
 
 export default class Widget extends React.PureComponent<
   AllWidgetProps<IMConfig> & ExtraProps,
   IState
 > {
+  private _proc: any;
+  targetOptions: any;
+
   constructor(props) {
-    super(props)
+    super(props);
+    console.log(this.props.gs);
 
     this.state = {
       relevance: 'Relevance',
@@ -52,114 +49,130 @@ export default class Widget extends React.PureComponent<
       searchResults: '',
       resultList: null,
       loading: false,
-      thumbnail: null
-    }
+      thumbnail: null,
+    };
+    this.targetOptions = new TargetOptions();
   }
 
   getCatalogOptions = () => {
-    const targets = this.props.config.targets
-    let allCatalogs = []
-    let inc = 1
+    const targets = this.props.config.targets;
+    let allCatalogs = [];
+    let inc = 1;
 
     targets.forEach((target) => {
-      let catalog = {}
-      catalog['label'] = target.name
-      catalog['id'] = inc
-      catalog['value'] = target.url
+      let catalog = {};
+      catalog['label'] = target.name;
+      catalog['id'] = inc;
+      catalog['value'] = target.url;
 
-      allCatalogs.push(catalog)
-      inc++
-    })
+      allCatalogs.push(catalog);
+      inc++;
+    });
 
-    return allCatalogs
-  }
+    return allCatalogs;
+  };
 
   handleFilterAccept = (value) => {
-    this.setState({ searchText: value })
-  }
+    this.setState({ searchText: value });
+  };
 
   searchBoxOnKeyUp = (event: { key: string }) => {
     if (event.key === 'Enter') {
-      this.search()
+      this.search();
     }
-  }
+  };
 
   searchClick = (event) => {
-    this.search()
-  }
+    this.search();
+  };
 
   // TODO - when relevance changes, re-run the queries and render result
   relevanceOnChange = (event) => {
-    this.setState({ relevance: event.target.value })
-  }
+    this.setState({ relevance: event.target.value });
+  };
 
   // TODO - when bbox checkbox changes, re-run the queries and render result
   bboxOnChange = (event) => {
-    this.setState({ isBbox: event.target.checked })
-  }
+    this.setState({ isBbox: event.target.checked });
+  };
 
   // TODO - when liveData checkbox changes, re-run the queries and render result
   liveDataOnChange = (event) => {
-    this.setState({ isLiveData: event.target.checked })
-  }
+    this.setState({ isLiveData: event.target.checked });
+  };
 
   // TODO - when there is a change in the multi-select, re-run queries and render result
   multiSelectOnChange = (value, event) => {
     if (event.action === 'deselect-option') {
-      this.setState({ selectedOptions: value.filter((o) => o.value) })
+      this.setState({ selectedOptions: value.filter((o) => o.value) });
     }
     if (event.action === 'select-option') {
-      var joined = this.state.selectedOptions.concat(value)
-      this.setState({ selectedOptions: joined })
+      let joined = this.state.selectedOptions.concat(value);
+      this.setState({ selectedOptions: joined });
     }
-  }
+  };
 
-  // TODO - create separate react components for search result list and item
   async search() {
-    this.props.loading(true)
-    let task = {}
+    this.props.loading(true);
+    let task = {};
+    let self = this;
 
     try {
       // this.toggleLoading(true);
-      var parameterMap = this.buildQueryParams(task)
-      parameterMap['f'] = 'json'
+      let parameterMap = this.buildQueryParams(task);
+      parameterMap['f'] = 'json';
 
       let requestInfo = {
         requestUrl: '/request',
         baseUrl: '/base',
         headerMap: {},
-        parameterMap: parameterMap
-      }
+        parameterMap: parameterMap,
+      };
 
-      for (let i = 0; i < this.state.selectedOptions.length; i++) {
-        // TODO - send query to each target
-        // TODO - for not active target, just update result count in target drop-down list
-      }
-      // TODO - replace with the above loop over all registered targets
-      const response = await fetch(
-        `https://gpt.geocloud.com/geoportal2/opensearch?q=${parameterMap['q']}&f=json&from=1&size=100&sort=title.sort%3Aasc&esdsl=%7B%7D`
-      )
+      let result, searchResponse;
 
-      // TODO - for active target, get the detailed result and prepare to render
-      const data = await response.json()
-      this.props.handleResults(data.results)
-      this.props.loading(false)
+      let processor = (this._proc = this.props.gs.Object.create(
+        this.props.gs.context.browser.WebProcessor
+      ).mixin({
+        newConfig: () => {
+          let config = this.props.gs.Object.create(this.props.gs.config.Config);
+          config.proxyUrl = this.props.widgetContext.proxyUrl;
+          return config;
+        },
+      }));
+
+      processor.execute(requestInfo, function (status, mediaType, entity, headers) {
+        console.log(requestInfo);
+        if (processor === self._proc) {
+          try {
+            result = JSON.parse(entity);
+            searchResponse = self.targetOptions.getPrimarySearchResponse(result, task);
+            // console.log(searchResponse);
+            self.props.handleResults(searchResponse);
+          } catch (ex) {
+            console.error(ex);
+          }
+        }
+      });
+
+      this.props.loading(false);
     } catch (err) {
+      console.log(err);
     } finally {
       // this.toggleLoading(false);
     }
   }
 
   buildQueryParams = (task) => {
-    var qRequired = null
-    var requiredFilter = this.state.searchText
+    let qRequired = null;
+    let requiredFilter = this.state.searchText;
     if (typeof requiredFilter === 'string' && requiredFilter.length > 0) {
-      qRequired = requiredFilter
+      qRequired = requiredFilter;
     }
-    var params = {
+    let params = {
       q: qRequired,
-      canSortByRelevance: false
-    }
+      canSortByRelevance: false,
+    };
 
     //Target Options
 
@@ -170,26 +183,22 @@ export default class Widget extends React.PureComponent<
 
     //Live Data
     if (this.state.isLiveData) {
-      params.canSortByRelevance = true
-      params['type'] = 'liveData'
+      params.canSortByRelevance = true;
+      params['type'] = 'liveData';
     }
 
     //Sort Options
-    params['sortField'] = null
-    params['sortOrder'] = null
+    params['sortField'] = null;
+    params['sortOrder'] = null;
 
-    var sortField = this.state.relevance
-    if (
-      sortField !== null &&
-      sortField.length > 0 &&
-      sortField !== 'Relevance'
-    ) {
-      params['sortField'] = sortField
+    var sortField = this.state.relevance;
+    if (sortField !== null && sortField.length > 0 && sortField !== 'Relevance') {
+      params['sortField'] = sortField;
     }
 
-    delete params.canSortByRelevance
-    return params
-  }
+    delete params.canSortByRelevance;
+    return params;
+  };
 
   render() {
     return (
@@ -202,26 +211,13 @@ export default class Widget extends React.PureComponent<
             placeholder={'Search...'}
             className="searchBoxText"
           />
-          <Button
-            className="searchButton"
-            onClick={this.searchClick}
-            aria-label="Button"
-          >
+          <Button className="searchButton" onClick={this.searchClick} aria-label="Button">
             <Icon icon={require('jimu-ui/lib/icons/search.svg')} size="m" />
           </Button>
         </div>
 
         <div id="optionsContainer" className="optionsContainer">
-          <div className="g_catalogs_list">
-            <ReactMultiSelectCheckboxes
-              value={this.state.selectedOptions}
-              css=""
-              onChange={this.multiSelectOnChange}
-              id="catalogSelect"
-              placeholderButtonLabel={'Catalog'}
-              options={this.state.catalogOptions}
-            />
-          </div>
+          <div className="g_catalogs_list"></div>
 
           <div style={{ display: 'flex', paddingTop: '5px' }}>
             <div>
@@ -239,10 +235,7 @@ export default class Widget extends React.PureComponent<
             </div>
 
             <div style={{ paddingLeft: '10px' }}>
-              <select
-                onChange={this.relevanceOnChange}
-                value={this.state.relevance}
-              >
+              <select onChange={this.relevanceOnChange} value={this.state.relevance}>
                 <option value="Relevance" style={{ fontWeight: 'bold' }}>
                   Relevance
                 </option>
@@ -253,6 +246,6 @@ export default class Widget extends React.PureComponent<
           </div>
         </div>
       </div>
-    )
+    );
   }
 }

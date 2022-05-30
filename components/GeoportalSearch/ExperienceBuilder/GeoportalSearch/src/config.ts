@@ -8,6 +8,7 @@ export interface Config {
   filterTooltip: string;
   targets: Array<Target>;
   widgetTitle: string;
+  showOwner: boolean;
 }
 
 export interface Target {
