@@ -9,6 +9,7 @@ export interface Config {
   targets: Array<Target>;
   widgetTitle: string;
   showOwner: boolean;
+  proxyUrl: string;
 }
 
 export interface Target {

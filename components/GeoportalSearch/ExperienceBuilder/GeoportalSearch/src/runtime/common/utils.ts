@@ -1,23 +1,9 @@
 import esriConfig from 'esri/config';
 import esriRequest from 'esri/request';
 
-export function addCors(uri) {
-  // let corsUri = null;
-  // if (typeof uri === "string" && uri.length > 0) {
-  //   if ((uri.indexOf("http://") === 0) || (uri.indexOf("https://") === 0)) {
-  //     corsUri = (new DjUrl(uri)).host; // host or authority?
-  //   } else {
-  //     corsUri = uri;
-  //   }
-  // }
-  // if (typeof corsUri === "string" && corsUri.length > 0) {
-  //   if (esriConfig.defaults.io.corsEnabledServers.indexOf(corsUri) === -1) {
-  //     esriConfig.defaults.io.corsEnabledServers.push(corsUri);
-  //   }
-  // }
-}
 
-export function checkMixedContent(uri) {
+
+export function checkMixedContent(uri): string {
   if (typeof window.location.href === 'string' && window.location.href.indexOf('https://') === 0) {
     if (typeof uri === 'string' && uri.indexOf('http://') === 0) {
       uri = 'https:' + uri.substring(5);
@@ -36,7 +22,7 @@ export function escapeForLucene(value) {
   return value.replace(r, '\\$1');
 }
 
-export function generateId() {
+export function generateId(): string {
   let t = null;
   if (typeof Date.now === 'function') {
     t = Date.now();
@@ -83,13 +69,12 @@ export function readItemJsonData(itemUrl) {
   // },{});
 }
 
-export function readRestInfo(url) {
-  // url = this.checkMixedContent(url);
-  // this.addCors(url);
-  // return esriRequest({
-  //   url: url,
-  //   content: {f: "json"},
-  //   handleAs: "json",
-  //   callbackParamName: "callback"
-  // },{});
+export function readRestInfo(url: string):Promise<__esri.RequestResponse> {
+  url = checkMixedContent(url);
+  return esriRequest(url, {
+    responseType: "json",
+    query: {
+      f: 'json'
+    },
+  });
 }

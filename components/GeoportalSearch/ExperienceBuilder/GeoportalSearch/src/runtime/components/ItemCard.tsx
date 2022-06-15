@@ -5,6 +5,9 @@ import { Dropdown, DropdownButton, DropdownItem, DropdownMenu, Link, Image } fro
 import { Fragment } from 'react';
 import '../main.css';
 import { checkMixedContent } from '../common/utils';
+import Extent from 'esri/geometry/Extent';
+import { MapContext } from '../common/mapContext';
+import { addItem, addLayer, removeLayersFromMap } from '../common/layers/layerUtils';
 
 import defaultMessages from '../translations/default';
 
@@ -12,15 +15,21 @@ import defaultMessages from '../translations/default';
 const placeholderImg = require('../images/placeholder_project120x80.png');
 
 interface ExtraProps {
-  item?: any;
-  key?: string;
-  canRemove: boolean;
-  supportsRemove: boolean;
+  item: any;
+  key: string;
   sourceKey: string;
   sourceType: string;
   showOwner: boolean;
   intl: IntlShape;
-  zoomToExtent?: (bbox: any) => void;
+  layerAdded: boolean;
+  referenceId: string;
+}
+
+export interface IState {
+  // toggle add/remove link after layer is removed/added
+  isAddLabel: boolean;
+  isAddLabelEnabled: boolean;
+  isAddFailed: boolean;
 }
 
 type ResultTypeInfo = {
@@ -33,20 +42,26 @@ type ResultTypeInfo = {
   url?: string;
 };
 
-export default class Widget extends React.PureComponent<ExtraProps, any> {
+class ItemCard extends React.PureComponent<ExtraProps, IState> {
   typeInfo: ResultTypeInfo;
-  referenceId: string;
   itemImagePath: string;
   linksInfo: any[];
 
   constructor(props) {
     super(props);
     this.typeInfo = {};
-    this.referenceId = '';
     this.itemImagePath = '';
     this.linksInfo = [];
+
+    // run this first before setting state
     this.determineType(this.props.item);
     this.processLinks(this.props.item);
+
+    this.state = {
+      isAddLabel: !this.props.layerAdded,
+      isAddLabelEnabled: this.typeInfo.canAdd,
+      isAddFailed: false,
+    };
   }
 
   determineType = (item) => {
@@ -64,8 +79,6 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
       "vector tile service": "Vector Tile Service",
       */
     };
-
-    this.referenceId = this.props.sourceKey + '-refid-' + item.id;
 
     if (Array.isArray(item.links)) {
       item.links.forEach((link) => {
@@ -110,7 +123,6 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
         (this.typeInfo.url.indexOf('http://') === 0 || this.typeInfo.url.indexOf('https://') === 0)
       ) {
         this.typeInfo.canAdd = true;
-        // this.addButton.removeAttribute('disabled');
       }
     }
   };
@@ -156,7 +168,72 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
   };
 
   zoomToExtent = () => {
-    this.props.zoomToExtent(this.props.item.bbox);
+    if (this.props.item.bbox) {
+      const bbox = this.props.item.bbox;
+      // get mapview from context MapContext
+      const mapView = this.context;
+      mapView.view.extent = new Extent({
+        xmin: bbox.xmin,
+        ymin: bbox.ymin,
+        xmax: bbox.xmax,
+        ymax: bbox.ymax,
+        spatialReference: {
+          wkid: 4326,
+        },
+      });
+    }
+  };
+
+  addRemoveClicked = async () => {
+    // get mapview from context MapContext
+    const mapView = this.context;
+
+    if (this.typeInfo?.serviceType && this.typeInfo?.url) {
+      if (this.state.isAddLabel) {
+        // add layer
+        // gray out link while layer is being added
+        this.setState({ isAddLabelEnabled: false });
+        let addPromise = null;
+
+        if (this.typeInfo.portalItem && this.typeInfo.portalItemUrl) {
+          addPromise = addItem(
+            mapView.view.map,
+            this.typeInfo.serviceType,
+            this.typeInfo.url,
+            this.typeInfo.portalItem,
+            this.typeInfo.portalItemUrl,
+            this.props.referenceId
+          );
+        } else {
+          addPromise = addLayer(
+            mapView.view.map,
+            this.typeInfo.serviceType,
+            this.typeInfo.url,
+            this.props.referenceId
+          );
+        }
+
+        addPromise.then(
+          (added: boolean) => {
+            console.log(added);
+            if (added) {
+              this.setState({ isAddLabel: false, isAddLabelEnabled: true, isAddFailed: false });
+            } else {
+              this.setState({ isAddLabel: true, isAddLabelEnabled: true, isAddFailed: true });
+            }
+          },
+          (reason) => {
+            console.error(reason);
+            this.setState({ isAddLabel: true, isAddLabelEnabled: true, isAddFailed: true });
+          }
+        );
+      } else {
+        //remove layer
+        if (removeLayersFromMap(mapView.view.map, this.props.referenceId))
+          this.setState({ isAddLabel: true, isAddLabelEnabled: true, isAddFailed: false });
+        else this.setState({ isAddLabel: false, isAddLabelEnabled: true, isAddFailed: false });
+      }
+    }
   };
 
   detailsClicked = () => {
@@ -287,7 +364,14 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
   itemActionBar = () => {
     return (
       <div className="result_action_bar">
-        <span className="result_action_message"></span>
+        <span className="result_action_message">
+          {this.state.isAddFailed
+            ? this.props.intl.formatMessage({
+                id: 'item.messages.addFailed',
+                defaultMessage: defaultMessages.item.messages.addFailed,
+              })
+            : null}
+        </span>
 
         <Link
           themeStyle={{ type: 'link' }}
@@ -307,14 +391,23 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
 
         <Link
           themeStyle={{ type: 'link' }}
-          onClick={}
+          onClick={this.addRemoveClicked}
           className="result_action_add"
-          style={{ textDecorationLine: 'none' }}
+          style={
+            this.state.isAddLabelEnabled
+              ? { textDecorationLine: 'none' }
+              : { color: 'gray', pointerEvents: 'none', textDecorationLine: 'none' }
+          }
         >
-          {this.props.intl.formatMessage({
-            id: 'item.actions.add',
-            defaultMessage: defaultMessages.item.actions.add,
-          })}
+          {this.state.isAddLabel
+            ? this.props.intl.formatMessage({
+                id: 'item.actions.add',
+                defaultMessage: defaultMessages.item.actions.add,
+              })
+            : this.props.intl.formatMessage({
+                id: 'item.actions.remove',
+                defaultMessage: defaultMessages.item.actions.remove,
+              })}
         </Link>
 
         <Link
@@ -338,7 +431,6 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
     );
   };
 
-  //TO DO - addbutton flag to toggle enable
   renderedItem = () => {
     const itemImage = (
       <div className="result_item_thumbnail">
@@ -368,12 +460,6 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
         {this.typeAndAuthor()}
         {this.itemDateTime()}
         {this.itemActionBar()}
-
-        {/*
-        if (this.canRemove) {
-          util.setNodeText(this.addButton,this.i18n.search.item.actions.remove);
-        }
-         */}
       </div>
     );
     return itemCard;
@@ -387,3 +473,7 @@ export default class Widget extends React.PureComponent<ExtraProps, any> {
     );
   }
 }
+
+// use this to get mapview from context if zoom/add is clicked
+ItemCard.contextType = MapContext;
+export default ItemCard;

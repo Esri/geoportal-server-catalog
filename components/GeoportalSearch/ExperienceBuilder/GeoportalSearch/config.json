@@ -5,6 +5,7 @@
   "filterTooltip": "not applicable to csw",
   "widgetTitle": "Geoportal Search",
   "showOwner": true,
+  "proxyUrl": "",
   "targets": [
     {
       "name": "Geoportal 2.6.5",

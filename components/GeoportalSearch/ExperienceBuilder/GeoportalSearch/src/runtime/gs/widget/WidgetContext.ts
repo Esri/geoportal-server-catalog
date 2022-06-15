@@ -1,6 +1,6 @@
 export default class WidgetContext {
   widgetFolder: string = 'gs/widget';
-  supportsRemove: boolean = true;
+
   map: any;
   proxyUrl: string;
   widgetConfig: any;

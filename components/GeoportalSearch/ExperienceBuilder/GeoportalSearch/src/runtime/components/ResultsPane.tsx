@@ -1,9 +1,7 @@
 //a custom pragma to transform your jsx into plain JavaScript
 /** @jsx jsx */
 import { React, AllWidgetProps, jsx } from 'jimu-core';
-import { JimuMapView } from 'jimu-arcgis';
 import { IMConfig } from '../../config';
-import Extent from 'esri/geometry/Extent';
 import '../main.css';
 import WidgetContext from '../gs/widget/WidgetContext';
 import ItemCard from './ItemCard';
@@ -12,7 +10,7 @@ interface ExtraProps {
   searchResponse: any;
   clearResults: boolean;
   widgetContext: WidgetContext;
-  mapView?: JimuMapView;
+  addedLayersIds: string[];
 }
 
 export interface IState {
@@ -29,23 +27,7 @@ export default class Widget extends React.PureComponent<
     super(props);
   }
 
-  componentDidUpdate(): void {
-    console.log(' componentDidUpdate ');
-  }
 
-  zoomToExtent = (bbox: any) => {
-    if (bbox) {
-      this.props.mapView.view.extent = new Extent({
-        xmin: bbox.xmin,
-        ymin: bbox.ymin,
-        xmax: bbox.xmax,
-        ymax: bbox.ymax,
-        spatialReference: {
-          wkid: 4326,
-        },
-      });
-    }
-  };
 
   processResultList = () => {
     let resultList = [];
@@ -57,29 +39,25 @@ export default class Widget extends React.PureComponent<
     } else {
       const showOwner = this.props.widgetContext.widgetConfig.showOwner;
 
-      // TO DO
-      const supportsRemove = this.props.widgetContext.supportsRemove;
-
-      var idsAdded = [];
-      // if (supportsRemove) {
-      //   idsAdded = layerUtil.findLayersAdded(this.getMap(), null).referenceIds;
-      // }
+      console.log(this.props.addedLayersIds);
 
       for (var i = 0; i < results.length; i++) {
-        // TODO - if action fails, render message in message span
+
         const item: any = results[i];
+        const referenceId: string = item._source.created + '-refid-' + item.id;
+
         const itemDiv = (
           <ItemCard
-            supportsRemove
-            showOwner
+            showOwner = {showOwner}
+            referenceId = {referenceId}
             item={item}
             key={i + '_' + item.id}
-            canRemove={false}
             sourceKey={this.props.searchResponse.sourceKey}
             sourceType={this.props.searchResponse.sourceType}
             intl={this.props.intl}
-            zoomToExtent={this.zoomToExtent}
+            layerAdded={ this.props.addedLayersIds?.length > 0 ? this.props.addedLayersIds.includes(referenceId) : false}
           ></ItemCard>
+
         );
         resultList.push(itemDiv);
       }
