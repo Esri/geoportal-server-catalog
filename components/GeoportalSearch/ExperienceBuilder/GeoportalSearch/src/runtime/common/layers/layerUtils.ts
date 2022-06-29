@@ -1,6 +1,12 @@
 import Map from 'esri/Map';
 import Layer from 'esri/layers/Layer';
 import FeatureServiceUtils from './FeatureServiceUtils';
+import MapServiceUtils from './MapServiceUtils';
+import VectorTileServiceUtils from './VectorTileServiceUtils';
+import KMLUtils from './KMLUtils';
+import ImageServiceUtils from './ImageServiceUtils';
+import WMSUtils from "./WMSUtils";
+import { checkMixedContent } from "../utils";
 
 export function addItem(
   map: __esri.Map,
@@ -16,41 +22,77 @@ export function addItem(
 
 export function addLayer(map: __esri.Map, serviceType: string, url: string, referenceId: string) {
 
-  return new FeatureServiceUtils().getLayerToAdd(url).then(
-    (layers) => {
-      if (layers?.length > 0) return addLayersToMap(map, layers, referenceId);
-      return false;
+  url = checkMixedContent(url);
+  let addPromise = null;
+
+  switch (serviceType) {
+    case "Feature Service":
+      addPromise = new FeatureServiceUtils().getLayersToAdd(url);
+      break;
+
+    case "Map Service":
+      addPromise = new MapServiceUtils().getLayersToAdd(url);
+      break;
+
+    case "Vector Tile Service":
+      addPromise = new VectorTileServiceUtils().getLayersToAdd(url);
+      break;
+
+    case "KML":
+      addPromise = new KMLUtils().getLayersToAdd(url);
+      break;
+
+    case "Image Service":
+      addPromise = new ImageServiceUtils().getLayersToAdd(url);
+      break;
+
+    case "WMS":
+      addPromise = new WMSUtils().getLayersToAdd(url);
+      break;
+
+    default:
+      break;
+  }
+
+  return addPromise.then(
+    (resp) => {
+      // array of layers is returned
+      if (resp?.length && resp?.length > 0)
+        return addLayersToMap(map, resp, referenceId);
+      else
+        return addLayerToMap(map, resp, referenceId); // single layer
+      return null;
     }
     ,
     (error) => {
       console.error(error);
-      return false;
+      return null;
     }
   );
 }
 
-export function addLayerToMap(map: Map, layer: Layer, referenceId: string): boolean {
+export function addLayerToMap(map: Map, layer: Layer, referenceId: string): Layer | null {
   try {
     // @ts-ignore
     layer.xtnReferenceId = referenceId;
     map.add(layer);
-    return true;
+    return layer;
   } catch (e) {
     console.error(e);
-    return false;
+    return null;
   }
 }
 
-export function addLayersToMap(map: Map, layers: Layer[], referenceId: string): boolean {
+export function addLayersToMap(map: Map, layers: Layer[], referenceId: string): Layer[] | null {
   try {
     // @ts-ignore
     layers.forEach((lyr) => (lyr.xtnReferenceId = referenceId));
 
     map.addMany(layers);
-    return true;
+    return layers;
   } catch (e) {
     console.error(e);
-    return false;
+    return null;
   }
 }
 
@@ -72,7 +114,6 @@ export function removeLayersFromMap(map: Map, referenceId: string): boolean {
 export function waitForLayer(layer: __esri.Layer): Promise<any> {
   return layer.when(
     () => {
-      console.log('resolved');
       if (layer.loaded) return layer;
     },
     (error) => error

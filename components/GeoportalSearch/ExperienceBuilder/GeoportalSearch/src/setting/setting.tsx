@@ -1,33 +1,32 @@
-import { React, FormattedMessage, css, jsx } from 'jimu-core';
+import { React } from 'jimu-core';
 import { AllWidgetSettingProps } from 'jimu-for-builder';
 import { Button, Link } from 'jimu-ui';
 import { MapWidgetSelector, SettingSection, SettingRow } from 'jimu-ui/advanced/setting-components';
-import { RefObject } from 'react';
 import { IMConfig } from '../config';
 import { SelectTarget } from './select-target';
 import './setting.css';
 import defaultMessages from './translations/default';
 
 export default class Setting extends React.PureComponent<AllWidgetSettingProps<IMConfig>, any> {
-  ref: any;
 
   constructor(props) {
     super(props);
 
-    this.ref = React.createRef();
-
-    let defaultTarget = (
-      <SelectTarget
-        id={this.generateID()}
-        deleteCallback={this.deleteTarget}
-        ref={this.ref}
-        config={this.props.config}
-        displayDefaults={true}
-        intl={this.props.intl}
-      />
-    );
-    let allTargets = [defaultTarget];
-    this.state = { targets: allTargets };
+    let allTargets = [];
+    if (this.props.config.targets?.length > 0) {
+      this.props.config.targets.forEach(t => {
+        allTargets.push(
+          <SelectTarget
+            deleteCallback={this.deleteTarget}
+            ref={React.createRef()}
+            config={this.props.config}
+            intl={this.props.intl}
+            curTarget={t}
+          />
+        )
+      })
+      this.state = { targets: allTargets };
+    }
 
     this.onSaveClick = this.onSaveClick.bind(this);
     this.propertyChosenHelper = this.propertyChosenHelper.bind(this);
@@ -68,10 +67,6 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
     });
   };
 
-  generateID = () => {
-    return Math.random().toString(16).slice(-4);
-  };
-
   deleteTarget = (id) => {
     let targetsConfig = this.state.targets;
 
@@ -79,19 +74,20 @@ export default class Setting extends React.PureComponent<AllWidgetSettingProps<I
       return;
     }
 
-    const filtered = targetsConfig.filter((obj) => obj.props.id !== id);
+    const filtered = targetsConfig.filter((obj) => obj.ref.current.state.name !== id);
     this.setState({ targets: filtered });
   };
 
   addNewTarget = (event) => {
     let newTarget = (
       <SelectTarget
-        id={this.generateID()}
         deleteCallback={this.deleteTarget}
         ref={React.createRef()}
         config={this.props.config}
         displayDefaults={false}
+        defaultTarget={this.props.config.targets[0]}
         intl={this.props.intl}
+        curTarget={null}
       />
     );
 

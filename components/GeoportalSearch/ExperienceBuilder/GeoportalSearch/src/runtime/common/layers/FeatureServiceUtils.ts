@@ -1,10 +1,11 @@
 import FeatureLayer from 'esri/layers/FeatureLayer';
 import { readRestInfo, generateId } from '../utils';
 import { waitForLayer } from './layerUtils';
+import BaseService from './BaseService';
 
-export default class FeatureServiceUtils {
+export default class FeatureServiceUtils extends BaseService {
 
-  getLayerToAdd = function (url: string) {
+  getLayersToAdd = function (url: string) {
     return readRestInfo(url).then(
        (response) => {
         let res = response.data;
@@ -54,10 +55,4 @@ export default class FeatureServiceUtils {
       }
     );
   };
-
-  // is this needed ??
-  _makeFeatureLayerTitle = (pattern, serviceName, layerName) => {};
-
-  // is this needed ??
-  _processFeatureLayer = (featureLayer, item, itemData) => {};
 }

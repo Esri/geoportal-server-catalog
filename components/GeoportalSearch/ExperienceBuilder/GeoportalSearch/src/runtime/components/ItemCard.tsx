@@ -74,10 +74,9 @@ class ItemCard extends React.PureComponent<ExtraProps, IState> {
       'map service': 'Map Service',
       'wms': 'WMS',
       'kml': 'KML',
-      /*
       "vectortileserver": "Vector Tile Service",
       "vector tile service": "Vector Tile Service",
-      */
+
     };
 
     if (Array.isArray(item.links)) {
@@ -213,20 +212,47 @@ class ItemCard extends React.PureComponent<ExtraProps, IState> {
           );
         }
 
-        addPromise.then(
-          (added: boolean) => {
-            console.log(added);
-            if (added) {
-              this.setState({ isAddLabel: false, isAddLabelEnabled: true, isAddFailed: false });
-            } else {
+        addPromise.then((result: any) => {
+            if (!result) {
+              // not added
               this.setState({ isAddLabel: true, isAddLabelEnabled: true, isAddFailed: true });
+            } else {
+              // array of layers is returned
+              if (result?.length && result.length > 0) {
+                let layerViewPromises = [];
+                result.forEach(lyr => layerViewPromises.push(mapView.view.whenLayerView(lyr)));
+
+                // toggle label etc,  only if all layerviews created successfully
+                return Promise.all(layerViewPromises)
+                  .then((lyrVws) => {
+                    this.setState({ isAddLabel: false, isAddLabelEnabled: true, isAddFailed: false });
+                  })
+                  .catch((err) => {
+                    console.error(err);
+                    this.setState({ isAddLabel: true, isAddLabelEnabled: true, isAddFailed: true });
+                  });
+              } else {
+                // single layer
+                mapView.view.whenLayerView(result)
+                .then((layerView) => {
+                  this.setState({ isAddLabel: false, isAddLabelEnabled: true, isAddFailed: false });
+                })
+                .catch((error) => {
+                  // An error occurred during the layerview creation
+                  console.error(error);
+                  this.setState({ isAddLabel: true, isAddLabelEnabled: true, isAddFailed: true });
+                });
+
+              }
             }
+
           },
           (reason) => {
             console.error(reason);
             this.setState({ isAddLabel: true, isAddLabelEnabled: true, isAddFailed: true });
           }
         );
+
       } else {
         //remove layer
         if (removeLayersFromMap(mapView.view.map, this.props.referenceId))
@@ -333,7 +359,6 @@ class ItemCard extends React.PureComponent<ExtraProps, IState> {
               id: 'item.actions.links',
               defaultMessage: defaultMessages.item.actions.links,
             })}
-            onClick={function noRefCheck() {}}
           >
             {this.props.intl.formatMessage({
               id: 'item.actions.links',

@@ -11,41 +11,43 @@ import defaultMessages from './translations/default'
 
 export interface IProperties {
   config: IMConfig
-  displayDefaults: boolean
   deleteCallback: any
-  id: string
   intl: IntlShape
+  curTarget: any;
+  displayDefaults?: boolean
+  defaultTarget?: any;
 }
 
 export class SelectTarget extends React.PureComponent<IProperties, any> {
   constructor(props) {
     super(props)
 
-    let useDefaults = this.props.displayDefaults
-    let defaultTarget = this.props.config.targets[0]
-
-    if (!defaultTarget) {
+    if (this.props.curTarget) {
+      // populate from existing info
       this.state = {
-        name: '',
-        url: '',
-        type: '',
-        profile: '',
-        filter: '',
-        enabled: false,
-        useProxy: false,
-        disableContentType: false
+        name: this.props.curTarget.name,
+        url: this.props.curTarget.url,
+        type: this.props.curTarget.type,
+        profile: this.props.curTarget.profile,
+        filter: this.props.curTarget.requiredFilter,
+        enabled: this.props.curTarget.enabled,
+        useProxy: this.props.curTarget.useProxy,
+        disableContentType: this.props.curTarget.disableContentType
       }
     } else {
+      // add
+      let useDefaults = this.props.displayDefaults && this.props.defaultTarget
+
       this.state = {
-        name: useDefaults ? defaultTarget.name : '',
-        url: useDefaults ? defaultTarget.url : '',
-        type: useDefaults ? defaultTarget.type : '',
-        profile: useDefaults ? defaultTarget.profile : '',
-        filter: useDefaults ? defaultTarget.requiredFilter : '',
-        enabled: useDefaults ? defaultTarget.enabled : false,
-        useProxy: useDefaults ? defaultTarget.useProxy : false,
+        name: useDefaults ? this.props.defaultTarget.name : '',
+        url: useDefaults ? this.props.defaultTarget.url : '',
+        type: useDefaults ? this.props.defaultTarget.type : '',
+        profile: useDefaults ? this.props.defaultTarget.profile : '',
+        filter: useDefaults ? this.props.defaultTarget.requiredFilter : '',
+        enabled: useDefaults ? this.props.defaultTarget.enabled : false,
+        useProxy: useDefaults ? this.props.defaultTarget.useProxy : false,
         disableContentType: useDefaults
-          ? defaultTarget.disableContentType
+          ? this.props.defaultTarget.disableContentType
           : false
       }
     }
@@ -60,32 +62,6 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
     this.handleDisableContentTypeChange =
       this.handleDisableContentTypeChange.bind(this)
     this.removeCatalog = this.removeCatalog.bind(this)
-  }
-
-  getDefaultValue(propName) {
-    let val = ''
-    if (
-      this.props.config.targets &&
-      this.props.config.targets.length > 0 &&
-      this.props.displayDefaults
-    ) {
-      let target = this.props.config.targets[0]
-      val = target[propName]
-    }
-    return val
-  }
-
-  getDefaultValueBool(propName) {
-    let val = false
-    if (
-      this.props.config.targets &&
-      this.props.config.targets.length > 0 &&
-      this.props.displayDefaults
-    ) {
-      let target = this.props.config.targets[0]
-      val = target[propName]
-    }
-    return val
   }
 
   handleNameChange(value) {
@@ -133,7 +109,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
   }
 
   removeCatalog = (event) => {
-    this.props.deleteCallback(this.props.id)
+    this.props.deleteCallback(this.state.name)
   }
 
   render() {
@@ -159,7 +135,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
                 <td>
                   <TextInput
                     onAcceptValue={this.handleNameChange}
-                    defaultValue={this.getDefaultValue('name')}
+                    defaultValue={this.state.name}
                   />
                 </td>
                 <td>
@@ -189,7 +165,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
                 <td>
                   <TextInput
                     onAcceptValue={this.handleURLChange}
-                    defaultValue={this.getDefaultValue('url')}
+                    defaultValue={this.state.url}
                   />
                 </td>
                 <td>
@@ -217,7 +193,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
                 <td>
                   <TextInput
                     onAcceptValue={this.handleTypeChange}
-                    defaultValue={this.getDefaultValue('type')}
+                    defaultValue={this.state.type}
                   />
                 </td>
                 <td>
@@ -245,7 +221,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
                 <td>
                   <TextInput
                     onAcceptValue={this.handleProfileChange}
-                    defaultValue={this.getDefaultValue('profile')}
+                    defaultValue={this.state.profile}
                   />
                 </td>
                 <td>
@@ -273,7 +249,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
                 <td>
                   <TextInput
                     onAcceptValue={this.handleFilterChange}
-                    defaultValue={this.getDefaultValue('requiredFilter')}
+                    defaultValue={this.state.requiredFilter}
                   />
                 </td>
                 <td>
@@ -297,7 +273,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
             <div className="d-flex w-100">
               <Checkbox
                 onChange={this.handleEnabledChange}
-                checked={this.getDefaultValueBool('enabled')}
+                checked={this.state.enabled}
               />
               <div className="text-truncate ml-2">{this.props.intl.formatMessage({
                         id: 'catalogEnabled',
@@ -308,7 +284,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
             <div className="d-flex w-100">
               <Checkbox
                 onChange={this.handleUseProxyChange}
-                checked={this.getDefaultValueBool('useProxy')}
+                checked={this.state.useProxy}
               />
               <div className="text-truncate ml-2">{this.props.intl.formatMessage({
                         id: 'catalogUseProxy',
@@ -320,7 +296,7 @@ export class SelectTarget extends React.PureComponent<IProperties, any> {
             <div className="d-flex w-100">
               <Checkbox
                 onChange={this.handleDisableContentTypeChange}
-                checked={this.getDefaultValueBool('disableContentType')}
+                checked={this.state.disableContentType}
               />
               <div className="text-truncate ml-2">
               {this.props.intl.formatMessage({

@@ -27,8 +27,6 @@ export default class Widget extends React.PureComponent<
     super(props);
   }
 
-
-
   processResultList = () => {
     let resultList = [];
 
@@ -38,8 +36,6 @@ export default class Widget extends React.PureComponent<
       return <div>No results......</div>;
     } else {
       const showOwner = this.props.widgetContext.widgetConfig.showOwner;
-
-      console.log(this.props.addedLayersIds);
 
       for (var i = 0; i < results.length; i++) {
 
@@ -68,7 +64,7 @@ export default class Widget extends React.PureComponent<
 
   render() {
     return (
-      <div className="jimu-widget">
+      <div className="jimu-widget resultsPane">
         {this.props.clearResults === true ? <div></div> : this.processResultList()}
       </div>
     );
