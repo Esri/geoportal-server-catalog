@@ -3,13 +3,12 @@
 import { React, AllWidgetProps, jsx } from 'jimu-core';
 import { IMConfig } from '../../config';
 import '../main.css';
-import WidgetContext from '../gs/widget/WidgetContext';
 import ItemCard from './ItemCard';
+import defaultMessages from '../translations/default';
 
 interface ExtraProps {
   searchResponse: any;
   clearResults: boolean;
-  widgetContext: WidgetContext;
   addedLayersIds: string[];
 }
 
@@ -33,9 +32,17 @@ export default class Widget extends React.PureComponent<
     let results = this.props.searchResponse?.results ?? null;
 
     if (!results || results.length <= 0) {
-      return <div>No results......</div>;
+      return (
+      <div>
+        <b>
+        {this.props.intl.formatMessage({
+          id: 'resultsPane.noMatch',
+          defaultMessage: defaultMessages.resultsPane.noMatch,
+        })}
+        </b>
+      </div>);
     } else {
-      const showOwner = this.props.widgetContext.widgetConfig.showOwner;
+      const showOwner = this.props.config.showOwner;
 
       for (var i = 0; i < results.length; i++) {
 
@@ -64,7 +71,7 @@ export default class Widget extends React.PureComponent<
 
   render() {
     return (
-      <div className="jimu-widget resultsPane">
+      <div className="resultsPane">
         {this.props.clearResults === true ? <div></div> : this.processResultList()}
       </div>
     );

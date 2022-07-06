@@ -10,6 +10,7 @@ interface ExtraProps {
     toSearch: (id: string, checked: boolean) => void;
     showResults: (id: string) => void;
     count?: number;
+    selectedColor: string;
   }
 
 
@@ -29,15 +30,16 @@ export default class CatalogSelection extends React.PureComponent<ExtraProps, nu
     render() {
         let bkgrdStyle = {};
         if (this.props.selected)
-            bkgrdStyle = {display: 'flex', fontWeight: 'bold'};
+            bkgrdStyle = {fontWeight: 'bold', backgroundColor: this.props.selectedColor};
         else
-            bkgrdStyle = {display: 'flex'};
+            bkgrdStyle = {};
 
         return (
             <div className='catalogItem' style={bkgrdStyle}>
                 <Checkbox aria-label="Checkbox" checked={this.props.checked} onChange={this.handleChanged} />
-                <div onClick={this.selectName} style={{ display: 'flex'}}>
-                    <div>{this.props.name}</div>
+                <div onClick={this.selectName} className='catalogItemDetails'>
+                    <div className='catalogName'>{this.props.name} {'   '}</div>
+                    <div className='catalogSpacing'></div>
                     <div className='catalogCount'>{this.props.count}</div>
                 </div>
             </div>

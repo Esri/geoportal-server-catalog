@@ -1,23 +1,42 @@
 .geoportal-search-widget {
-  width: 100%;
-  height: 100%;
+  min-height: 500px;
+  min-width: 420px;
   border-style: solid;
   border-color: gray;
   border-width: thin;
   padding: 5px;
 }
 
+.titleStyle {
+  font-size: 1.10em;
+  text-align: center;
+  font-weight: bold;
+  margin: 10px 0px 10px 0px;
+  text-align: left;
+  /* height: 15%; */
+}
+
 .searchPaneWrapper {
   width: 100%;
+  /* height: 15%; */
 }
 
 .resultsPaneWrapper {
   width: 100%;
+  height: 70%;
+}
+
+.paginationWrapper {
+  width: 100%;
+  margin-bottom: 3px;
+  margin-left: 30%;
+  /* height: 15%; */
 }
 
 .resultsPane {
   width: 100%;
   overflow-y: auto;
+  height: 98%;
 }
 
 .searchPane {
@@ -54,6 +73,7 @@
   height: 60px;
   width: 90px;
   overflow: hidden;
+  margin-right: 5px;
 }
 
 .result_item_title {
@@ -83,6 +103,7 @@
 }
 
 .result_action_bar {
+  display: flex;
   margin-right: 10px;
   text-align: right;
   white-space: nowrap;
@@ -120,28 +141,26 @@
   margin-top: -4px;
 }
 
-.titleStyle {
-  font-size: 1.10em;
-  text-align: center;
-  font-weight: bold;
-  margin: 10px 0px 10px 0px;
-  text-align: left;
-}
-
-
-
-/* .searchButtonContainer {
-  padding-left: 5px;
-  padding-right: 5px;
-} */
-
 .optionsContainer {
   display: flex;
+  flex-direction: row;
   padding-top: 5px;
+}
+
+.optionsCheckboxItem {
+  padding-top: 8px;
 }
 
 .optionsCheckboxLabel {
   padding-left: 3px;
+}
+
+.arrowStyle {
+  font-weight: bold;
+}
+
+.arrowButtonStyle {
+  font-weight: bold;
 }
 
 .relevanceCombo {
@@ -152,25 +171,46 @@
 }
 
 .catalogsList {
-  width: max-content;
+  padding: 0px;
+  margin: 0px;
+}
+
+.catalogsDropdown {
+  padding: 0.25rem;
+
 }
 
 .catalogItem {
-  display: 'flex';
+  display: flex;
+  width: 100%;
+  padding: 0px;
+  margin: 0px;
 }
 
 .catalogItemDetails {
-  display: 'flex';
+  display: flex;
+  flex-direction: row;
+  justify-content: space-between;
+  flex: 1 0 auto;
+}
+
+.catalogName {
+  /* flex: auto; */
 }
 
 .catalogCount {
-  margin-left: 50px;
+  /* margin-left: auto; */
+  /* margin-right: 0px;
+  margin-left: 50px; */
+  /* width: 15rem; */
+  /* margin-right: 0px;
+  padding-right: 0px; */
+  /* margin-left: 50px; */
 }
 
-/* .searchResults {
-  width: 100%;
-  overflow-y: scroll;
-} */
+.catalogSpacing {
+  width: 50px;
+}
 
 .loadingOverride {
   display: block;

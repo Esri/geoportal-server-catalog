@@ -18,7 +18,7 @@ export default {
   },
   sortOptions: {
     prompt: 'Sort',
-    relevance: 'Relevance',
+    default: 'Default',
     title: 'Title',
     owner: 'Owner',
     date: 'Date',

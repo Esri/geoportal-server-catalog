@@ -388,7 +388,7 @@ class ItemCard extends React.PureComponent<ExtraProps, IState> {
 
   itemActionBar = () => {
     return (
-      <div className="result_action_bar">
+      <div className="result_action_bar" >
         <span className="result_action_message">
           {this.state.isAddFailed
             ? this.props.intl.formatMessage({
@@ -492,7 +492,7 @@ class ItemCard extends React.PureComponent<ExtraProps, IState> {
 
   render() {
     return (
-      <div className="jimu-widget result_item_card" key={this.props.key}>
+      <div className="result_item_card" key={this.props.key}>
         {this.renderedItem()}
       </div>
     );

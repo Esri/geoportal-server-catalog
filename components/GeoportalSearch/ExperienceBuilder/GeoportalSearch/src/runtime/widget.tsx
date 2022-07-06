@@ -1,15 +1,13 @@
 /* eslint-disable @typescript-eslint/semi */
 /** @jsx jsx */
 import { React, AllWidgetProps, jsx } from 'jimu-core';
-import { Loading, LoadingType } from 'jimu-ui';
+import { Loading, LoadingType, Pagination } from 'jimu-ui';
 import { JimuMapViewComponent, JimuMapView } from 'jimu-arcgis';
 
 import { MapContext } from './common/mapContext';
 
 import { IMConfig } from '../config';
 import esriConfig from 'esri/config';
-
-import WidgetContext from './gs/widget/WidgetContext';
 
 import SearchPane from './components/SearchPane';
 import ResultsPane from './components/ResultsPane';
@@ -21,6 +19,7 @@ export interface IState {
   loading: boolean;
   thumbnail: Element;
   searchResponse: any;
+  currentPage: number; // current page selected in pagination
 }
 
 // To integrate 'gs' folder functionality with this ExB widget
@@ -33,10 +32,11 @@ window.gsConfig = {
 require('./gs/all');
 
 export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>, IState> {
-  widgetContext: WidgetContext;
   gs: any;
   mapHandle: any;
   addedLayersIds: string[];
+  searchRef: any;
+  pagesDisplayed:number; // number of pages for pagination
 
   constructor(props) {
     super(props);
@@ -49,7 +49,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       loading: false,
       thumbnail: null,
       searchResponse: null,
+      currentPage: 1
     };
+
+    this.pagesDisplayed = 10;
+    this.searchRef= React.createRef();
 
     // @ts-ignore
     this.gs = window.gs;
@@ -66,19 +70,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       mapView: jmv,
     }));
 
-    this.widgetContext = new WidgetContext(
-      this.props.config,
-      esriConfig.request.proxyUrl,
-      jmv.view.map
-    );
-
     // track layer add/remove
     this.mapHandle = jmv.view.map.watch(
       ['layers.length', 'tables.length'],
       (newValue, oldValue, propertyName) => {
-        console.log(propertyName + ' changed');
-        console.log(oldValue + '  ' + newValue);
-
         // @ts-ignore
         const lyrs = jmv.view.map.layers.filter(lyr => lyr.xtnReferenceId?.length > 0);
 
@@ -91,10 +86,11 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
     );
   };
 
-  handleResults = (searchResponse: any) => {
+  handleSearchResults = (searchResponse: any, newSearch: boolean = false) => {
     this.setState((prevState) => ({
       ...prevState,
       searchResponse: searchResponse,
+      ...(newSearch && { currentPage: 1 }),
     }));
   };
 
@@ -105,7 +101,12 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
     }));
   };
 
+  handleOnChangePage= (clickedPg: number) => {
+    let start = ((clickedPg-1) * this.state.searchResponse.num) + 1;
+    this.searchRef.current?.search(start, false);
 
+    this.setState({currentPage: clickedPg});
+  };
 
   render() {
     return (
@@ -119,10 +120,10 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
           <div className="searchPaneWrapper">
             <SearchPane
               {...this.props}
-              handleResults={this.handleResults}
+              handleSearchResults={this.handleSearchResults}
               loading={this.toggleLoading}
               gs={this.gs}
-              widgetContext={this.widgetContext}
+              ref={this.searchRef}
             />
           </div>
           <div className="resultsPaneWrapper">
@@ -130,9 +131,19 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               {...this.props}
               searchResponse={this.state.searchResponse}
               clearResults={this.state.loading}
-              widgetContext={this.widgetContext}
               addedLayersIds={this.addedLayersIds}
             />
+          </div>
+          <div className="paginationWrapper">
+            {this.state.searchResponse?.total && this.state.searchResponse.total > 0 ?
+            <Pagination
+              current= {this.state.currentPage}
+              onChangePage={this.handleOnChangePage}
+              size="default"
+              totalPage={Math.ceil(this.state.searchResponse.total / this.pagesDisplayed)}
+            />
+            : null}
+
           </div>
         </MapContext.Provider>
         {this.state.loading ? (
