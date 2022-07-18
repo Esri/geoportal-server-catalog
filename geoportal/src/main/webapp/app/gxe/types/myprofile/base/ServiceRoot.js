@@ -8,7 +8,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/types/iso/gmd/metadataEntity/MetadataSection",
         "esri/dijit/metadata/types/iso/srv/ServiceIdentification",
         "dojo/text!./templates/ServiceRoot.html"],
-function(declare, lang, has, Descriptor, Element, Quality, Distribution, 
+function(declare, lang, Descriptor, Element, Tabs, Quality, Distribution, 
   MetadataSection, ServiceIdentification, template) {
 
   var oThisClass = declare(Descriptor, {
