@@ -161,7 +161,6 @@ class SearchPane extends React.PureComponent<AllWidgetProps<IMConfig> & ExtraPro
       }));
 
       processor.execute(requestInfo, function (status, mediaType, entity, headers) {
-        console.log(requestInfo);
         if (processor === self._proc) {
           try {
             let result = JSON.parse(entity);
@@ -175,7 +174,7 @@ class SearchPane extends React.PureComponent<AllWidgetProps<IMConfig> & ExtraPro
 
       this.props.loading(false);
     } catch (err) {
-      console.log(err);
+      console.error(err);
     }
   }
 
