@@ -1,7 +1,18 @@
-import esriConfig from 'esri/config';
+/* See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * Esri Inc. licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
 import esriRequest from 'esri/request';
-
-
 
 export function checkMixedContent(uri): string {
   if (typeof window.location.href === 'string' && window.location.href.indexOf('https://') === 0) {
@@ -31,42 +42,6 @@ export function generateId(): string {
   }
   let r = ('' + Math.random()).replace('0.', 'r');
   return (t + '' + r).replace(/-/g, '');
-}
-
-export function mitigateDropdownClip(dd, ddul) {
-  // Dropdown menus clipped by scrollable container
-  // let reposition = function() {
-  //   let cs = domStyle.getComputedStyle(dd);
-  //   let winBox = win.getBox();
-  //   let ddGeom = domGeometry.position(dd);
-  //   let ddulGeom = domGeometry.position(ddul);
-  //   let t = ddGeom.y + ddGeom.h;
-  //   let l = ddGeom.x;
-  //   domStyle.set(ddul,"top",t+"px");
-  //   domStyle.set(ddul,"left",l+"px");
-  //   let position = t;
-  //   let buttonHeight = ddGeom.h;
-  //   let menuHeight = ddulGeom.h;
-  //   let winHeight = winBox.h;
-  //   if (position > menuHeight && winHeight - position < buttonHeight + menuHeight) {
-  //     t = t - menuHeight - buttonHeight - 4;
-  //     domStyle.set(ddul,"top",t+"px");
-  //   }
-  // };
-  // reposition();
-}
-
-export function readItemJsonData(itemUrl) {
-  // let n = itemUrl.indexOf("?");
-  // if (n !== -1) itemUrl = itemUrl.substring(0,n);
-  // let url = this.checkMixedContent(itemUrl);
-  // url = itemUrl + "/data";
-  // this.addCors(url);
-  // return esriRequest({
-  //   url: url,
-  //   content: {f: "json"}
-  //   handleAs: "json"
-  // },{});
 }
 
 export function readRestInfo(url: string):Promise<__esri.RequestResponse> {
