@@ -26,15 +26,8 @@ interface ExtraProps {
   addedLayersIds: string[];
 }
 
-export interface IState {
-  results: any;
-  sourceKey: string;
-  sourceType: string;
-}
-
 export default class Widget extends React.PureComponent<
-  AllWidgetProps<IMConfig> & ExtraProps,
-  IState
+  AllWidgetProps<IMConfig> & ExtraProps
 > {
   constructor(props) {
     super(props);

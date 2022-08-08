@@ -6,6 +6,7 @@
   "widgetTitle": "Geoportal Search",
   "showOwner": true,
   "proxyUrl": "",
+  "numberOfResultsPerQuery": 10,
   "targets": [
     {
       "name": "Geoportal 2.6.5",

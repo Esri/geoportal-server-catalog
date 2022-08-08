@@ -47,12 +47,8 @@ export interface IState {
   isAscending: boolean;
   boundingBox: string | null;
   isLiveData: boolean;
-  totalRecords: number;
   searchText: string;
   searchResults: { [key: string]: {} };
-  resultList: Element[];
-  loading: boolean;
-  thumbnail: Element;
   catalogCount: { [key: string]: number };
   selectedCatalogIDs: string[];
   primarySearchResponse: string;
@@ -72,11 +68,7 @@ class SearchPane extends React.PureComponent<AllWidgetProps<IMConfig> & ExtraPro
     this.state = {
       boundingBox: null,
       isLiveData: false,
-      totalRecords: 0,
       searchText: null,
-      resultList: null,
-      loading: false,
-      thumbnail: null,
       catalogCount: null,
       selectedCatalogIDs: [...Object.keys(this.enabledCatalogs)], // select all catalogs initially
       primarySearchResponse: Object.keys(this.enabledCatalogs)[0], // select first catalog as primary
@@ -209,12 +201,12 @@ class SearchPane extends React.PureComponent<AllWidgetProps<IMConfig> & ExtraPro
       params['type'] = 'liveData';
     }
 
-    //Sort Options - default is sorting 'Relevance' in desc order
+    //Sort Options - default is sorting 'Relevance'
     params['sortField'] = this.state.sortField;
     params['sortOrder'] = this.state.isAscending ? 'asc' : 'desc';
 
     //number of results per request
-    params['num'] = 10; //30;
+    params['num'] = this.props.config.numberOfResultsPerQuery;
 
     return params;
   };

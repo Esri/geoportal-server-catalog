@@ -50,7 +50,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
   mapHandle: any;
   addedLayersIds: string[];
   searchRef: any;
-  pagesDisplayed:number; // number of pages for pagination
+  resultsPerPage:number; // to calc number of pages for pagination
 
   constructor(props) {
     super(props);
@@ -66,7 +66,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
       currentPage: 1
     };
 
-    this.pagesDisplayed = 10;
+    this.resultsPerPage = this.props.config.numberOfResultsPerQuery;
     this.searchRef= React.createRef();
 
     // @ts-ignore
@@ -154,7 +154,7 @@ export default class Widget extends React.PureComponent<AllWidgetProps<IMConfig>
               current= {this.state.currentPage}
               onChangePage={this.handleOnChangePage}
               size="default"
-              totalPage={Math.ceil(this.state.searchResponse.total / this.pagesDisplayed)}
+              totalPage={Math.ceil(this.state.searchResponse.total / this.resultsPerPage)}
             />
             : null}
 

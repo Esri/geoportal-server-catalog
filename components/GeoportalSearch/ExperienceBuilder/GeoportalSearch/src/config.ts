@@ -15,7 +15,6 @@
 import { ImmutableObject } from 'seamless-immutable';
 
 export interface Config {
-  exampleConfigProperty: string;
   urlTooltip: string;
   typeTooltip: string;
   profileTooltip: string;
@@ -24,6 +23,7 @@ export interface Config {
   widgetTitle: string;
   showOwner: boolean;
   proxyUrl: string;
+  numberOfResultsPerQuery: number;
 }
 
 export interface Target {
