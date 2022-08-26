@@ -28,7 +28,6 @@ import com.esri.geoportal.lib.elastic.request.PublishMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ReindexRequest;
 import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
-import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.Scroller;
 
 import java.io.IOException;
@@ -40,34 +39,38 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
-
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchScrollRequestBuilder;
-import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.cluster.metadata.AliasMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.sort.SortBuilders;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.opensearch.action.admin.indices.delete.DeleteIndexRequest;
+import org.opensearch.client.RestClient;
+import org.opensearch.client.RestClientBuilder;
+import org.opensearch.common.settings.Settings;
+import org.opensearch.action.delete.DeleteRequest;
+import org.opensearch.action.delete.DeleteResponse;
+import org.opensearch.action.get.GetRequest;
+import org.opensearch.action.get.GetResponse;
+import org.opensearch.action.index.IndexRequest;
+import org.opensearch.action.index.IndexResponse;
+import org.opensearch.action.support.master.AcknowledgedResponse;
+import org.opensearch.client.RequestOptions;
+import org.opensearch.client.RestHighLevelClient;
+import org.opensearch.client.indices.CreateIndexRequest;
+import org.opensearch.client.indices.CreateIndexResponse;
+import org.opensearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.support.AbstractApplicationContext;
-import org.springframework.context.support.ClassPathXmlApplicationContext;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -108,7 +111,9 @@ public class Test {
       
       //Test.httpGetItem();
       //Test.httpDeleteItem();
-      Test.httpScroller();
+     // Test.httpScroller();
+    
+       Test.testRestHighLevelClient();
       
     } catch (Throwable t) {
       LOGGER.error(t.getClass().getName());
@@ -126,6 +131,62 @@ public class Test {
     }
   }
   
+  public static void testRestHighLevelClient() throws IOException
+  {
+     //Establish credentials to use basic authentication.
+    //Only for demo purposes. Don't specify your credentials in code.
+    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+
+    credentialsProvider.setCredentials(AuthScope.ANY,
+      new UsernamePasswordCredentials("admin", "admin"));
+
+    //Create a client.
+    RestClientBuilder builder = RestClient.builder(new HttpHost("localhost", 9200, "http"))
+      .setHttpClientConfigCallback((HttpAsyncClientBuilder httpClientBuilder) -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+      //Create a non-default index with custom settings and mappings.
+      try (RestHighLevelClient client = new RestHighLevelClient(builder)) {
+          //Create a non-default index with custom settings and mappings.
+          CreateIndexRequest createIndexRequest = new CreateIndexRequest("custom-index");
+          
+          createIndexRequest.settings(Settings.builder() //Specify in the settings how many shards you want in the index.
+                  .put("index.number_of_shards", 4)
+                  .put("index.number_of_replicas", 3)
+          );
+          //Create a set of maps for the index's mappings.
+          HashMap<String, String> typeMapping = new HashMap<>();
+          typeMapping.put("type", "integer");
+          HashMap<String, Object> ageMapping = new HashMap<>();
+          ageMapping.put("age", typeMapping);
+          HashMap<String, Object> mapping = new HashMap<>();
+          mapping.put("properties", ageMapping);
+          createIndexRequest.mapping(mapping);
+          CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+          
+          //Adding data to the index.
+          IndexRequest request = new IndexRequest("custom-index"); //Add a document to the custom-index we created.
+          request.id("1"); //Assign an ID to the document.
+          
+          HashMap<String, String> stringMapping = new HashMap<>();
+          stringMapping.put("message:", "Testing Java REST client");
+          request.source(stringMapping); //Place your content into the index's source.
+          client.index(request, RequestOptions.DEFAULT);
+          
+          //Getting back the document
+          GetRequest getRequest = new GetRequest("custom-index", "1");
+          GetResponse response = client.get(getRequest, RequestOptions.DEFAULT);
+          
+          System.out.println("response from open search"+response.getSourceAsString());
+          
+          //Delete the document
+          DeleteRequest deleteDocumentRequest = new DeleteRequest("custom-index", "1"); //Index name followed by the ID.
+          client.delete(deleteDocumentRequest, RequestOptions.DEFAULT);
+          
+          //Delete the index
+          DeleteIndexRequest deleteIndexRequest = new DeleteIndexRequest("custom-index"); //Index name.
+          client.indices().delete(deleteIndexRequest, RequestOptions.DEFAULT);
+      } 
+  }
+  
   public static void test1() throws Exception {
     /*
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
@@ -136,9 +197,9 @@ public class Test {
   }
   
   public static void test4() throws Exception {
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    SearchRequestBuilder sr = ec.getTransportClient().prepareSearch();
-    System.err.println(sr);;
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    SearchRequestBuilder sr = ec.getTransportClient().prepareSearch();
+//    System.err.println(sr);;
   }
   
   public static void testPublishJson() throws Exception {
@@ -371,92 +432,92 @@ public class Test {
   
   public static void testScroll() throws Exception {
     
-    String scrollId = null;
-    long keepAliveMillis = 60000L;
-    int pageSize = 100;
-    
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    TransportClient client = ec.getTransportClient();
-    String indexName = ec.getItemIndexName();
-    //String itemType = ec.getMetadataIndexType_item();
-    String xmlItemType = ec.getXmlIndexType();
-    
-    SearchRequestBuilder search = client.prepareSearch(indexName);
-    search.setTypes(xmlItemType);
-    search.setQuery(QueryBuilders.matchAllQuery());
-    search.setScroll(new TimeValue(keepAliveMillis));
-    search.addSort(SortBuilders.fieldSort("_doc"));
-    search.setSize(pageSize);
-    
-    long count = 0, processed = 0, max = Long.MAX_VALUE;
-    
-    SearchResponse response = search.get();
-    scrollId = response.getScrollId();
-    while (true) {
-      SearchHit[] hits = response.getHits().getHits();
-      if (hits.length == 0) break;
-      for (SearchHit hit: hits) {
-        count++;
-        if (count > max) break;
-        String id = hit.getId();
-        String xml = (String)hit.getSourceAsMap().get("xml");
-        //System.err.println(id+"\r\n"+xml);
-        processed++;
-      }
-      if (count > max) break;
-      SearchScrollRequestBuilder scroll = client.prepareSearchScroll(scrollId);
-      scroll.setScroll(new TimeValue(keepAliveMillis));
-      response = scroll.get();
-    }
-    System.err.println("processed="+processed);
-    
-    try {
-      if (scrollId != null) {
-        client.prepareClearScroll().addScrollId(scrollId).get();
-      }
-    } catch (Throwable t) {
-      t.printStackTrace();
-    }
-    
-    //client.prepareClearScroll().
-    //SearchScrollRequestBuilder scroll = client.prepareSearchScroll(scrollId);
-    //scroll.setScroll(new TimeValue(keepAliveMillis));
-    //scroll.r
-    //builder.
-    
-    //client.prepareSearchScroll(scrollId);
-    
-    
-    /*
-    scroll.s
-    scroll.setTypes(xmlItemType);
-    scroll.setQuery(QueryBuilders.matchAllQuery());
-    scroll.setSearchType(SearchType.SCAN);
-    
-    client.prepareClearScroll()
-    client.prepareSearchScroll(scrollId)
-    
-    
-    QueryBuilder qb = QueryBuilders.matchAllQuery();
-
-    SearchResponse scrollResp = client.prepareSearch(test)
-            .setSearchType(SearchType.SCAN)
-            .setScroll(new TimeValue(60000))
-            .setQuery(qb)
-            .setSize(100).execute().actionGet(); //100 hits per shard will be returned for each scroll
-    //Scroll until no hits are returned
-    while (true) {
-
-        for (SearchHit hit : scrollResp.getHits().getHits()) {
-            //Handle the hit...
-        }
-        scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
-        //Break condition: No hits are returned
-        if (scrollResp.getHits().getHits().length == 0) {
-            break;
-        }
-    }
-    */
+//    String scrollId = null;
+//    long keepAliveMillis = 60000L;
+//    int pageSize = 100;
+//    
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    TransportClient client = ec.getTransportClient();
+//    String indexName = ec.getItemIndexName();
+//    //String itemType = ec.getMetadataIndexType_item();
+//    String xmlItemType = ec.getXmlIndexType();
+//    
+//    SearchRequestBuilder search = client.prepareSearch(indexName);
+//    search.setTypes(xmlItemType);
+//    search.setQuery(QueryBuilders.matchAllQuery());
+//    search.setScroll(new TimeValue(keepAliveMillis));
+//    search.addSort(SortBuilders.fieldSort("_doc"));
+//    search.setSize(pageSize);
+//    
+//    long count = 0, processed = 0, max = Long.MAX_VALUE;
+//    
+//    SearchResponse response = search.get();
+//    scrollId = response.getScrollId();
+//    while (true) {
+//      SearchHit[] hits = response.getHits().getHits();
+//      if (hits.length == 0) break;
+//      for (SearchHit hit: hits) {
+//        count++;
+//        if (count > max) break;
+//        String id = hit.getId();
+//        String xml = (String)hit.getSourceAsMap().get("xml");
+//        //System.err.println(id+"\r\n"+xml);
+//        processed++;
+//      }
+//      if (count > max) break;
+//      SearchScrollRequestBuilder scroll = client.prepareSearchScroll(scrollId);
+//      scroll.setScroll(new TimeValue(keepAliveMillis));
+//      response = scroll.get();
+//    }
+//    System.err.println("processed="+processed);
+//    
+//    try {
+//      if (scrollId != null) {
+//        client.prepareClearScroll().addScrollId(scrollId).get();
+//      }
+//    } catch (Throwable t) {
+//      t.printStackTrace();
+//    }
+//    
+//    //client.prepareClearScroll().
+//    //SearchScrollRequestBuilder scroll = client.prepareSearchScroll(scrollId);
+//    //scroll.setScroll(new TimeValue(keepAliveMillis));
+//    //scroll.r
+//    //builder.
+//    
+//    //client.prepareSearchScroll(scrollId);
+//    
+//    
+//    /*
+//    scroll.s
+//    scroll.setTypes(xmlItemType);
+//    scroll.setQuery(QueryBuilders.matchAllQuery());
+//    scroll.setSearchType(SearchType.SCAN);
+//    
+//    client.prepareClearScroll()
+//    client.prepareSearchScroll(scrollId)
+//    
+//    
+//    QueryBuilder qb = QueryBuilders.matchAllQuery();
+//
+//    SearchResponse scrollResp = client.prepareSearch(test)
+//            .setSearchType(SearchType.SCAN)
+//            .setScroll(new TimeValue(60000))
+//            .setQuery(qb)
+//            .setSize(100).execute().actionGet(); //100 hits per shard will be returned for each scroll
+//    //Scroll until no hits are returned
+//    while (true) {
+//
+//        for (SearchHit hit : scrollResp.getHits().getHits()) {
+//            //Handle the hit...
+//        }
+//        scrollResp = client.prepareSearchScroll(scrollResp.getScrollId()).setScroll(new TimeValue(60000)).execute().actionGet();
+//        //Break condition: No hits are returned
+//        if (scrollResp.getHits().getHits().length == 0) {
+//            break;
+//        }
+//    }
+//    */
   }
   
   public static void testScroll2() throws Exception {
@@ -562,56 +623,56 @@ public class Test {
   }
   
   public static void testAlias() throws Exception {
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    //TransportClient client = ec.getTransportClient();
-    //client.admin().indices().
-    
-    AdminClient client = ec.getTransportClient().admin();
-    //req.a
-    //req.get();
-    String name = "metadata";
-    String indexName = "metadata_v1";
-    
-    /*
-    boolean indexExists = client.indices().prepareExists(name).get().isExists();
-    boolean aliasExists = client.indices().prepareAliasesExist(name).get().isExists();
-    System.err.println(indexExists+" "+aliasExists);
-    if (!indexExists) {
-      
-    }
-    */
-    
-    //GetAliasesResponse resp = client.indices().prepareGetAliases(name).get();
-    //if (resp.)
-    
-    IndicesAliasesRequestBuilder req = client.indices().prepareAliases();
-    boolean alreadyAliased = false, foundAlias = false;;
-    ImmutableOpenMap<String,List<AliasMetaData>> aliases;
-    aliases = client.indices().prepareGetAliases(name).get().getAliases();
-    Iterator<ObjectObjectCursor<String,List<AliasMetaData>>> iter = aliases.iterator();
-    while (iter.hasNext()) {
-      ObjectObjectCursor<String,List<AliasMetaData>> o = iter.next();
-      for (AliasMetaData md: o.value) {
-        String s = md.getAlias();
-        if (s != null && s.equals(name)) {
-          foundAlias = true;
-          if (o.key.equals(indexName)) {
-            alreadyAliased = true;
-          } else {
-            req.removeAlias(o.key,s);
-          }
-          break;
-        }
-      }
-      if (foundAlias) break;
-    }
-    if (alreadyAliased) {
-      
-    } else {
-      req.addAlias(indexName,name).get();
-    }
-
-    
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    //TransportClient client = ec.getTransportClient();
+//    //client.admin().indices().
+//    
+//    AdminClient client = ec.getTransportClient().admin();
+//    //req.a
+//    //req.get();
+//    String name = "metadata";
+//    String indexName = "metadata_v1";
+//    
+//    /*
+//    boolean indexExists = client.indices().prepareExists(name).get().isExists();
+//    boolean aliasExists = client.indices().prepareAliasesExist(name).get().isExists();
+//    System.err.println(indexExists+" "+aliasExists);
+//    if (!indexExists) {
+//      
+//    }
+//    */
+//    
+//    //GetAliasesResponse resp = client.indices().prepareGetAliases(name).get();
+//    //if (resp.)
+//    
+//    IndicesAliasesRequestBuilder req = client.indices().prepareAliases();
+//    boolean alreadyAliased = false, foundAlias = false;;
+//    ImmutableOpenMap<String,List<AliasMetaData>> aliases;
+//    aliases = client.indices().prepareGetAliases(name).get().getAliases();
+//    Iterator<ObjectObjectCursor<String,List<AliasMetaData>>> iter = aliases.iterator();
+//    while (iter.hasNext()) {
+//      ObjectObjectCursor<String,List<AliasMetaData>> o = iter.next();
+//      for (AliasMetaData md: o.value) {
+//        String s = md.getAlias();
+//        if (s != null && s.equals(name)) {
+//          foundAlias = true;
+//          if (o.key.equals(indexName)) {
+//            alreadyAliased = true;
+//          } else {
+//            req.removeAlias(o.key,s);
+//          }
+//          break;
+//        }
+//      }
+//      if (foundAlias) break;
+//    }
+//    if (alreadyAliased) {
+//      
+//    } else {
+//      req.addAlias(indexName,name).get();
+//    }
+//
+//    
     /*
     String pfx = name+"_v";
     String idxName = null;
@@ -721,17 +782,17 @@ public class Test {
   }
   
   public static void testBulk() throws Exception {
-    String index = null;
-    String type = null;
-    String id = null;
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    BulkRequestBuilder req = ec.getTransportClient().prepareBulk();
-    //req.add(ec.getTransportClient().prepareDelete(index,type,id));
-    
-    String ownerField = FieldNames.FIELD_SYS_OWNER;
-    String originalOwner = null;
-    String newOwner = null;
-    req.add(ec.getTransportClient().prepareUpdate(index,type,id).setDoc(ownerField,newOwner));
+//    String index = null;
+//    String type = null;
+//    String id = null;
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    BulkRequestBuilder req = ec.getTransportClient().prepareBulk();
+//    //req.add(ec.getTransportClient().prepareDelete(index,type,id));
+//    
+//    String ownerField = FieldNames.FIELD_SYS_OWNER;
+//    String originalOwner = null;
+//    String newOwner = null;
+//    req.add(ec.getTransportClient().prepareUpdate(index,type,id).setDoc(ownerField,newOwner));
   }
   
   

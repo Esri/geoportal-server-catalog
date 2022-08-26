@@ -245,7 +245,7 @@ public class ItemUtil {
     String result = client.sendPost(url,postData,contentType);
     JsonObject response = (JsonObject)JsonUtil.toJsonStructure(result);
     JsonObject hits = response.getJsonObject("hits");
-    int total = !hits.containsKey("total")? 0:
+    int total = (hits == null || !hits.containsKey("total"))? 0:
             hits.get("total").getValueType()==JsonValue.ValueType.NUMBER? hits.getInt("total"):
             hits.get("total").getValueType()!=JsonValue.ValueType.OBJECT? 0:
             !hits.getJsonObject("total").containsKey("value") || hits.getJsonObject("total").get("value").getValueType()!=JsonValue.ValueType.NUMBER? 0:
