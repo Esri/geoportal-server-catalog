@@ -25,9 +25,10 @@ define(["dojo/_base/declare",
         "app/search/SearchComponent",
         "app/search/DropPane",
         "app/search/QClause",
-        "app/search/CollectionsFilterSettings"], 
+        "app/search/CollectionsFilterSettings",
+        "app/context/AppClient"], 
 function(declare, lang, array, domConstruct, domClass, dojoRequest, topic, appTopics, template, i18n, SearchComponent, 
-  DropPane, QClause, CollectionsFilterSettings) {
+  DropPane, QClause, CollectionsFilterSettings, AppClient) {
   
   var oThisClass = declare([SearchComponent], {
     
