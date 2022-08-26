@@ -21,7 +21,7 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import org.elasticsearch.action.get.GetResponse;
+import org.opensearch.action.get.GetResponse;
 /**
  * Response item writer.
  */
@@ -43,7 +43,8 @@ public class ItemWriter {
       throws Exception {
     JsonObjectBuilder jsoRoot = Json.createObjectBuilder();
     jsoRoot.add("_index", getResponse.getIndex());
-    jsoRoot.add("_type", getResponse.getType());
+    //TODO recheck what can be replaced here
+   // jsoRoot.add("_type", getResponse.getType());
     jsoRoot.add("_id", getResponse.getId());
     jsoRoot.add("_version", getResponse.getVersion());
     jsoRoot.add("found", getResponse.isExists());

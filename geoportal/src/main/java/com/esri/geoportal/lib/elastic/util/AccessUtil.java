@@ -22,12 +22,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHits;
+import org.opensearch.action.get.GetRequestBuilder;
+import org.opensearch.action.get.GetResponse;
+import org.opensearch.action.search.SearchRequestBuilder;
+//import org.opensearch.client.transport.TransportClient;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -53,30 +53,31 @@ public class AccessUtil {
    * @return the item id
    */
   public String determineId(String id) {
-    try {
-      ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-      TransportClient client = ec.getTransportClient();
-      GetResponse result = client.prepareGet(
-          ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
-      if (result.isExists()) {
-        //System.err.println("result.isExists: "+id+" - resultId = "+result.getId());
-        return id;
-      } else {
-        SearchRequestBuilder builder = client.prepareSearch(ec.getItemIndexName());
-        builder.setTypes(ec.getActualItemIndexType());
-        builder.setSize(1);
-        builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_FILEID,id));
-        SearchHits hits = builder.get().getHits();
-        // TODO what if there is more than one hit
-        if (hits.getTotalHits() == 1) {
-          //System.err.println("fileid exists: "+id+" - hitId = "+hits.getAt(0).getId());
-          return hits.getAt(0).getId();
-        }
-      }
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-    return id;
+  //  try {
+//      ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//      TransportClient client = ec.getTransportClient();
+//      GetResponse result = client.prepareGet(
+//          ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
+//      if (result.isExists()) {
+//        //System.err.println("result.isExists: "+id+" - resultId = "+result.getId());
+//        return id;
+//      } else {
+//        SearchRequestBuilder builder = client.prepareSearch(ec.getItemIndexName());
+//        builder.setTypes(ec.getActualItemIndexType());
+//        builder.setSize(1);
+//        builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_FILEID,id));
+//        SearchHits hits = builder.get().getHits();
+//        // TODO what if there is more than one hit
+//        if (hits.getTotalHits() == 1) {
+//          //System.err.println("fileid exists: "+id+" - hitId = "+hits.getAt(0).getId());
+//          return hits.getAt(0).getId();
+//        }
+//      }
+//    } catch (Exception e) {
+//      e.printStackTrace();
+//    }
+  //  return id;
+  return null;
   }
   
   /**
@@ -128,74 +129,74 @@ public class AccessUtil {
    */
   @SuppressWarnings({ "unchecked", "rawtypes" })
   public void ensureReadAccess(AppUser user, String id) {
-    if (user.isAdmin()) return;
-    GeoportalContext gc = GeoportalContext.getInstance();
-    if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
-      String v;
-      ElasticContext ec = gc.getElasticContext();
-      GetResponse response = ec.getTransportClient().prepareGet(
-          ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
-      
-      String username = user.getUsername();
-      if (username != null && username.length() > 0) {
-        v = (String)response.getSource().get(FieldNames.FIELD_SYS_OWNER);
-        if (v != null && v.equalsIgnoreCase(username)) return;
-      }
-
-      if (gc.getSupportsApprovalStatus()) {
-        v = (String)response.getSource().get(FieldNames.FIELD_SYS_APPROVAL_STATUS);
-        if (v != null && v.length() > 0) {
-          if (!v.equalsIgnoreCase("approved") && !v.equalsIgnoreCase("reviewed")) {
-            throw new AccessDeniedException(accessDeniedMessage);
-          }
-        };
-      }
-      
-      if (gc.getSupportsGroupBasedAccess()) {
-        v = (String)response.getSource().get(FieldNames.FIELD_SYS_ACCESS);
-        if (v != null && v.equalsIgnoreCase("private")) {
-          boolean ok = false;
-          Object o = response.getSource().get(FieldNames.FIELD_SYS_ACCESS_GROUPS);
-          if (o != null) {
-            List<String> l = null;
-            if (o instanceof String) {
-              v = (String)o;
-              if (v.length() == 0) {
-                ok = true;
-              } else {
-                l = new ArrayList<String>();
-                l.add(v);
-              }
-            } else if (o instanceof List) {
-              l = (List)o;
-            } else {
-              LOGGER.error("Field "+FieldNames.FIELD_SYS_ACCESS_GROUPS+" for item "+id+" is not a List.");
-              throw new AccessDeniedException(accessDeniedMessage);
-            }
-            if (!ok) {
-              if (l.size() == 0) {
-                ok = true;
-              } else {
-                List<Group> groups = user.getGroups();
-                if (groups != null) {
-                  for (Group group: groups) {
-                    for (String groupId: l) {
-                      if (group.id.equals(groupId)) {
-                        ok = true;
-                        break;
-                      }
-                    }
-                    if (ok) break;
-                  }         
-                }
-              }              
-            }
-          }
-          if (!ok) throw new AccessDeniedException(accessDeniedMessage);
-        }
-      }
-      
-    }
+//    if (user.isAdmin()) return;
+//    GeoportalContext gc = GeoportalContext.getInstance();
+//    if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
+//      String v;
+//      ElasticContext ec = gc.getElasticContext();
+//      GetResponse response = ec.getTransportClient().prepareGet(
+//          ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
+//      
+//      String username = user.getUsername();
+//      if (username != null && username.length() > 0) {
+//        v = (String)response.getSource().get(FieldNames.FIELD_SYS_OWNER);
+//        if (v != null && v.equalsIgnoreCase(username)) return;
+//      }
+//
+//      if (gc.getSupportsApprovalStatus()) {
+//        v = (String)response.getSource().get(FieldNames.FIELD_SYS_APPROVAL_STATUS);
+//        if (v != null && v.length() > 0) {
+//          if (!v.equalsIgnoreCase("approved") && !v.equalsIgnoreCase("reviewed")) {
+//            throw new AccessDeniedException(accessDeniedMessage);
+//          }
+//        };
+//      }
+//      
+//      if (gc.getSupportsGroupBasedAccess()) {
+//        v = (String)response.getSource().get(FieldNames.FIELD_SYS_ACCESS);
+//        if (v != null && v.equalsIgnoreCase("private")) {
+//          boolean ok = false;
+//          Object o = response.getSource().get(FieldNames.FIELD_SYS_ACCESS_GROUPS);
+//          if (o != null) {
+//            List<String> l = null;
+//            if (o instanceof String) {
+//              v = (String)o;
+//              if (v.length() == 0) {
+//                ok = true;
+//              } else {
+//                l = new ArrayList<String>();
+//                l.add(v);
+//              }
+//            } else if (o instanceof List) {
+//              l = (List)o;
+//            } else {
+//              LOGGER.error("Field "+FieldNames.FIELD_SYS_ACCESS_GROUPS+" for item "+id+" is not a List.");
+//              throw new AccessDeniedException(accessDeniedMessage);
+//            }
+//            if (!ok) {
+//              if (l.size() == 0) {
+//                ok = true;
+//              } else {
+//                List<Group> groups = user.getGroups();
+//                if (groups != null) {
+//                  for (Group group: groups) {
+//                    for (String groupId: l) {
+//                      if (group.id.equals(groupId)) {
+//                        ok = true;
+//                        break;
+//                      }
+//                    }
+//                    if (ok) break;
+//                  }         
+//                }
+//              }              
+//            }
+//          }
+//          if (!ok) throw new AccessDeniedException(accessDeniedMessage);
+//        }
+//      }
+//      
+//    }
   }
 
   /**
@@ -205,24 +206,24 @@ public class AccessUtil {
    * @throws AccessDeniedException if not
    */
   public void ensureWriteAccess(AppUser user, String id) {
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    String ownerField = FieldNames.FIELD_SYS_OWNER;
-    if (user == null || user.getUsername() == null || user.getUsername().length() == 0) {
-      throw new AccessDeniedException(accessDeniedMessage);
-    }
-    if (user.isAdmin()) return;
-    if (!user.isPublisher()) throw new AccessDeniedException(accessDeniedMessage);
-    
-    GetRequestBuilder request = ec.getTransportClient().prepareGet(
-        ec.getItemIndexName(),ec.getActualItemIndexType(),id);
-    //request.setFetchSource(false);
-    /* ES 2to5 */
-    //request.setFields(ownerField);
-    //request.setStoredFields(ownerField);
-    GetResponse response = request.get();
-    String owner = (String)response.getSource().get(ownerField);
-    boolean ok = (owner != null) && (owner.equalsIgnoreCase(user.getUsername()));
-    if (!ok) throw new AccessDeniedException(notOwnerMessage);
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    String ownerField = FieldNames.FIELD_SYS_OWNER;
+//    if (user == null || user.getUsername() == null || user.getUsername().length() == 0) {
+//      throw new AccessDeniedException(accessDeniedMessage);
+//    }
+//    if (user.isAdmin()) return;
+//    if (!user.isPublisher()) throw new AccessDeniedException(accessDeniedMessage);
+//    
+//    GetRequestBuilder request = ec.getTransportClient().prepareGet(
+//        ec.getItemIndexName(),ec.getActualItemIndexType(),id);
+//    //request.setFetchSource(false);
+//    /* ES 2to5 */
+//    //request.setFields(ownerField);
+//    //request.setStoredFields(ownerField);
+//    GetResponse response = request.get();
+//    String owner = (String)response.getSource().get(ownerField);
+//    boolean ok = (owner != null) && (owner.equalsIgnoreCase(user.getUsername()));
+//    if (!ok) throw new AccessDeniedException(notOwnerMessage);
   }
   
 }

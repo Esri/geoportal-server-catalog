@@ -16,13 +16,13 @@ package com.esri.geoportal.lib.elastic.kvp;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.index.IndexResponse;
-import org.elasticsearch.common.bytes.BytesReference;
-// import org.elasticsearch.index.get.GetField;
-import org.elasticsearch.common.document.DocumentField;
+import org.opensearch.action.get.GetRequestBuilder;
+import org.opensearch.action.get.GetResponse;
+import org.opensearch.action.index.IndexRequestBuilder;
+import org.opensearch.action.index.IndexResponse;
+import org.opensearch.common.bytes.BytesReference;
+// import org.opensearch.index.get.GetField;
+import org.opensearch.common.document.DocumentField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,33 +47,33 @@ public class KvpBlob extends Kvp {
    * @throws Exception
    */
   public BytesReference readBlob(ElasticContext ec) throws Exception {
-    setFound(false);
-    String fieldName = getDataFieldName();
-    GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
-    req.setFetchSource(false);
-    /* ES 2to5 */
-    //req.setFields(fieldName);
-    req.setStoredFields(fieldName);
-    GetResponse resp = req.get();
-    if (resp.isExists()) {
-      setFound(true);
-      try {
-        DocumentField field = resp.getField(fieldName);
-        if (field != null) {
-          Object o = field.getValue();
-          if (o != null) {
-            if (o instanceof BytesReference) {
-              return (BytesReference)o;
-            } else {
-              LOGGER.warn(fieldName+" is not a BytesReference: "+o.getClass().getName());
-            }
-          }
-        }
-      } catch (Exception e) {
-        String msg = getIndexName()+"/"+getIndexType()+"/"+getId();
-        LOGGER.error("Error reading field: "+fieldName+", "+msg,e);
-      }
-    }
+//    setFound(false);
+//    String fieldName = getDataFieldName();
+//    GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
+//    req.setFetchSource(false);
+//    /* ES 2to5 */
+//    //req.setFields(fieldName);
+//    req.setStoredFields(fieldName);
+//    GetResponse resp = req.get();
+//    if (resp.isExists()) {
+//      setFound(true);
+//      try {
+//        DocumentField field = resp.getField(fieldName);
+//        if (field != null) {
+//          Object o = field.getValue();
+//          if (o != null) {
+//            if (o instanceof BytesReference) {
+//              return (BytesReference)o;
+//            } else {
+//              LOGGER.warn(fieldName+" is not a BytesReference: "+o.getClass().getName());
+//            }
+//          }
+//        }
+//      } catch (Exception e) {
+//        String msg = getIndexName()+"/"+getIndexType()+"/"+getId();
+//        LOGGER.error("Error reading field: "+fieldName+", "+msg,e);
+//      }
+//    }
     return null;
   }
   
@@ -99,13 +99,14 @@ public class KvpBlob extends Kvp {
    * @throws Exception
    */
   public IndexResponse writeBase64(ElasticContext ec, String base64) throws Exception {
-    IndexRequestBuilder req = ec.getTransportClient().prepareIndex(getIndexName(),getIndexType(),getId()); 
-    req.setSource(
-      getDataFieldName(), base64,
-      FieldNames.FIELD_SYS_ITEMID, getItemId(),
-      FieldNames.FIELD_SYS_META, getMeta()
-    );
-    return req.get();
+//    IndexRequestBuilder req = ec.getTransportClient().prepareIndex(getIndexName(),getIndexType(),getId()); 
+//    req.setSource(
+//      getDataFieldName(), base64,
+//      FieldNames.FIELD_SYS_ITEMID, getItemId(),
+//      FieldNames.FIELD_SYS_META, getMeta()
+//    );
+//    return req.get();
+    return null;
   }
   
   /**
@@ -116,13 +117,14 @@ public class KvpBlob extends Kvp {
    * @throws Exception
    */
   public IndexResponse writeBytes(ElasticContext ec, byte[] content) throws Exception {
-    IndexRequestBuilder req = ec.getTransportClient().prepareIndex(getIndexName(),getIndexType(),getId()); 
-    req.setSource(
-      getDataFieldName(), content,
-      FieldNames.FIELD_SYS_ITEMID, getItemId(),
-      FieldNames.FIELD_SYS_META, getMeta()
-    );
-    return req.get();
+//    IndexRequestBuilder req = ec.getTransportClient().prepareIndex(getIndexName(),getIndexType(),getId()); 
+//    req.setSource(
+//      getDataFieldName(), content,
+//      FieldNames.FIELD_SYS_ITEMID, getItemId(),
+//      FieldNames.FIELD_SYS_META, getMeta()
+//    );
+//    return req.get();
+        return null;
   }
 
 }

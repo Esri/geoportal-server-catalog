@@ -43,7 +43,7 @@ define([],function(){var obj={
     showFootprint: true,
     showAccess: true,
     showApprovalStatus: true,
-    defaultSort: "title.sort:asc",
+   // defaultSort: "title.sort:asc",
     showLinks: true,
     showCustomLinks: true,
     showOpenSearchLinks: true,
