@@ -133,7 +133,28 @@ function (lang, array, domConstruct, i18n,
             }
           });
         } else {
-          _handleError(map, "Invalid response received from the server");
+        	//Check if single layer
+        	esriRequest({url: url + "?f=pjson"}).then(function(response) {
+                if (response && response.defaultVisibility) {
+                  var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
+                  layer.on("error", function(error) {
+                    _handleError(map, error);
+                  });
+                  layer.on("load", function() {
+                    domConstruct.destroy(map.errorNode);
+                    if (response.extent) {
+                      var extent = new Extent(response.extent);
+                      _setExtent(map, extent);
+                    }
+                  });
+                  map.addLayer(layer);
+                } else {
+                  _handleError(map, "Invalid response received from the server");
+                }
+              }, function(error){
+                _handleError(map, error);
+              });
+          
         }   
       }, function(error){
         _handleError(map, error);
