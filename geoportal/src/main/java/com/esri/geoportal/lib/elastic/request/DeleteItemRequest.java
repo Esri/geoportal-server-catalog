@@ -23,8 +23,8 @@ import com.esri.geoportal.lib.elastic.util.ItemIO;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import org.elasticsearch.action.DocWriteResponse.Result;
-import org.elasticsearch.action.delete.DeleteResponse;
+import org.opensearch.action.DocWriteResponse.Result;
+import org.opensearch.action.delete.DeleteResponse;
 
 /**
  * Delete an item.
