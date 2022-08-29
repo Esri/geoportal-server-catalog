@@ -25,8 +25,8 @@ import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.search.SearchHit;
+import org.opensearch.action.bulk.BulkRequestBuilder;
+import org.opensearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -194,44 +194,44 @@ public class BulkRequest extends AppRequest {
   
   private AppResponse executeWithTransportClient() throws Exception {
     AppResponse response = new AppResponse();
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    AccessUtil au = new AccessUtil();
-    if (getAdminOnly()) {
-      au.ensureAdmin(getUser());
-    } 
-    long tStart = System.currentTimeMillis();
-    AtomicLong count = new AtomicLong();
-    AtomicLong loopCount = new AtomicLong();
-    int docsPerRequest = getDocsPerRequest();
-    Scroller scroller = newScroller(ec);
-    scroller.scroll(
-      new Consumer<SearchHit>(){
-        BulkRequestBuilder bulkRequest = ec.getTransportClient().prepareBulk();
-        @Override
-        public void accept(SearchHit hit) {
-          try {
-            count.incrementAndGet();
-            loopCount.incrementAndGet();
-            boolean last = isLast();
-            appendHit(ec,bulkRequest,hit);
-            if (last || loopCount.get() >= docsPerRequest) {
-              // TODO what about partial failures??
-              bulkRequest.get();
-              loopCount.set(0);
-              bulkRequest = ec.getTransportClient().prepareBulk();
-              logFeedback(tStart,count.get(),scroller.getTotalHits(),last);
-            }
-          } catch (Exception e) {
-            e.printStackTrace();
-          }
-        }
-        public boolean isLast() {
-          return count.get() >= scroller.getTotalHits() || count.get() >= scroller.getMaxDocs();
-        }
-      }
-    );
-    
-    writeOk(response,count.get());
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    AccessUtil au = new AccessUtil();
+//    if (getAdminOnly()) {
+//      au.ensureAdmin(getUser());
+//    } 
+//    long tStart = System.currentTimeMillis();
+//    AtomicLong count = new AtomicLong();
+//    AtomicLong loopCount = new AtomicLong();
+//    int docsPerRequest = getDocsPerRequest();
+//    Scroller scroller = newScroller(ec);
+//    scroller.scroll(
+//      new Consumer<SearchHit>(){
+//        BulkRequestBuilder bulkRequest = ec.getTransportClient().prepareBulk();
+//        @Override
+//        public void accept(SearchHit hit) {
+//          try {
+//            count.incrementAndGet();
+//            loopCount.incrementAndGet();
+//            boolean last = isLast();
+//            appendHit(ec,bulkRequest,hit);
+//            if (last || loopCount.get() >= docsPerRequest) {
+//              // TODO what about partial failures??
+//              bulkRequest.get();
+//              loopCount.set(0);
+//              bulkRequest = ec.getTransportClient().prepareBulk();
+//              logFeedback(tStart,count.get(),scroller.getTotalHits(),last);
+//            }
+//          } catch (Exception e) {
+//            e.printStackTrace();
+//          }
+//        }
+//        public boolean isLast() {
+//          return count.get() >= scroller.getTotalHits() || count.get() >= scroller.getMaxDocs();
+//        }
+//      }
+//    );
+//    
+//    writeOk(response,count.get());
     return response;
   }
     

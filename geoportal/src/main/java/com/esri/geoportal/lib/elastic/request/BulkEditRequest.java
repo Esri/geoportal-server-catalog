@@ -33,12 +33,12 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.script.Script;
-import org.elasticsearch.search.SearchHit;
+import org.opensearch.action.bulk.BulkRequestBuilder;
+import org.opensearch.index.query.BoolQueryBuilder;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.script.Script;
+import org.opensearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -118,19 +118,19 @@ public class BulkEditRequest extends BulkRequest {
    * @param hit the hit
    */
   protected void appendHit(ElasticContext ec, BulkRequestBuilder request, SearchHit hit) {
-    if (this.getUpdateScript() != null) {
-      request.add(ec.getTransportClient().prepareUpdate(
-        ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
-        .setScript(this.getUpdateScript())
-        .setRetryOnConflict(getRetryOnConflict())
-      );
-    } else {
-      request.add(ec.getTransportClient().prepareUpdate(
-        ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
-        .setDoc(this.getUpdateSource())
-        .setRetryOnConflict(getRetryOnConflict())
-      );
-    }
+//    if (this.getUpdateScript() != null) {
+//      request.add(ec.getTransportClient().prepareUpdate(
+//        ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
+//        .setScript(this.getUpdateScript())
+//        .setRetryOnConflict(getRetryOnConflict())
+//      );
+//    } else {
+//      request.add(ec.getTransportClient().prepareUpdate(
+//        ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
+//        .setDoc(this.getUpdateSource())
+//        .setRetryOnConflict(getRetryOnConflict())
+//      );
+//    }
   }
   
   /**
@@ -140,7 +140,7 @@ public class BulkEditRequest extends BulkRequest {
    * @param hit the hit
    */
   protected void appendHit(ElasticContext ec, StringBuilder data, com.esri.geoportal.lib.elastic.http.util.SearchHit hit) {
-    // https://www.elastic.co/guide/en/elasticsearch/reference/current/docs-bulk.html
+    // https://www.elastic.co/guide/en/opensearch/reference/current/docs-bulk.html
     JsonObjectBuilder line1 = Json.createObjectBuilder();
     // should "_retry_on_conflict" be "retry_on_conflict" at ES6?
     String retryName = "_retry_on_conflict";

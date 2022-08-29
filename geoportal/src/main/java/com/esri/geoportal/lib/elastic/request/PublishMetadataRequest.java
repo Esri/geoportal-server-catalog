@@ -37,12 +37,12 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.stream.JsonParsingException;
 
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.SearchHits;
+import org.opensearch.action.get.GetResponse;
+import org.opensearch.action.search.SearchRequestBuilder;
+//import org.opensearch.client.transport.TransportClient;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.search.SearchHit;
+import org.opensearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -183,169 +183,169 @@ public class PublishMetadataRequest extends AppRequest {
   @SuppressWarnings("unused")
   protected void prePublish(ElasticContext ec, AccessUtil au, AppResponse response, MetadataDocument mdoc) 
       throws Exception {
-    mdoc.setRequiresXmlWrite(true);
-    GeoportalContext gc = GeoportalContext.getInstance();
-    ItemIO itemio = new ItemIO();
-    JsonObjectBuilder jb = null;
-    JsonObject eval = null, supplied = null;
-    if (mdoc.hasEvaluatedJson()) {
-      eval = (JsonObject)JsonUtil.toJsonStructure(mdoc.getEvaluatedJson());
-    }
-    if (mdoc.hasSuppliedJson()) {
-      supplied = (JsonObject)JsonUtil.toJsonStructure(mdoc.getSuppliedJson());
-    }    
-    
-    // now
-    String now = DateUtil.nowAsString();
-    
-    // username
-    String username = null;
-    if (this.getUser() != null) {
-      username = Val.trim(this.getUser().getUsername());
-      if (username.length() == 0) username = null;
-    }
-    
-    // id
-    String id = mdoc.getItemId(), fileid = null;
-    //boolean hasFileIdKey = false;
-    if ((fileid == null || fileid.length() == 0) && eval != null) {
-      fileid = Val.trim(JsonUtil.getString(eval,FieldNames.FIELD_FILEID));
-    }
-    if ((fileid == null || fileid.length() == 0) && supplied != null) {
-      fileid = Val.trim(JsonUtil.getString(supplied,FieldNames.FIELD_FILEID));
-    }
-    String sourceUri = null; // TODO use the sourceUri??
-    if (id == null || id.length() == 0) {
-      if (ec.getAllowFileId() && fileid != null && fileid.length() > 0) {
-        // encoded forward slashes %2F will cause issues on Tomcat
-        if (fileid.indexOf("/") == -1) {
-          id = fileid;
-        }
-      }
-    }
-    
-    // metadata type
-    String metadataTypeKey = null;
-    if (mdoc.getMetadataType() != null) {
-      metadataTypeKey = mdoc.getMetadataType().getKey();
-    }
-    
-    TransportClient client = ec.getTransportClient();
-    String indexName = ec.getItemIndexName();
-    String itemType = ec.getActualItemIndexType();
-    GetResponse getResponse = null;
-    SearchHit searchHit = null;
-    Map<String,Object> source = null;
-    String sourceAsString = null;
-    
-    // try to find the item within the index
-    if ((id != null) && (id.length() > 0)) {
-      GetResponse result = client.prepareGet(indexName,itemType,id).get();
-      if (result.isExists()) {
-        getResponse = result;
-        source = getResponse.getSource();
-      }
-    } else {
-      if (fileid != null && fileid.length() > 0) {
-        SearchRequestBuilder builder = client.prepareSearch(indexName);
-        builder.setTypes(itemType);
-        builder.setSize(1);
-        builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_FILEID,fileid));
-        SearchHits hits = builder.get().getHits();
-        // TODO what if there is more than one hit
-        // TODO for new items, use the fileid as the key??
-        if (hits.getTotalHits() > 0) searchHit = hits.getAt(0);
-      }
-      if (searchHit == null && sourceUri != null && sourceUri.length() > 0) {
-        SearchRequestBuilder builder = client.prepareSearch(indexName);
-        builder.setTypes(itemType);
-        builder.setSize(1);
-        builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_SYS_SOURCEURI,sourceUri));
-        SearchHits hits = builder.get().getHits();
-        // TODO see above fileid issues
-        if (hits.getTotalHits() == 1) searchHit = hits.getAt(0);
-      }
-    }
-    
-    // update sys info
-    if (getResponse == null && searchHit == null) {
-      this.setIsNew(true);
-      if ((id != null) && (id.length() > 0)) {
-        // TODO validate the id?
-        mdoc.setItemId(id);
-      } else {
-        mdoc.setItemId(UuidUtil.makeUuid(true));
-      }
-      if (eval == null && supplied != null) {
-        // validate a new json based document
-        String v = Val.trim(JsonUtil.getString(supplied,FieldNames.FIELD_TITLE));
-        if (v != null && v.length() > 0) {
-          mdoc.setTitle(v);
-        } 
-        mdoc.validateTitle();
-        if (metadataTypeKey == null) metadataTypeKey = "json"; // TODO ??
-      }
-      jb = itemio.mixin(mdoc,null);
-    } else {
-      if (getResponse != null) {
-        mdoc.setItemId(getResponse.getId());
-        source = getResponse.getSource();
-        sourceAsString = getResponse.getSourceAsString();
-      } else {
-        if (searchHit != null) {
-          mdoc.setItemId(searchHit.getId());
-          source = searchHit.getSourceAsMap(); // elastic update .getSource();
-          sourceAsString = searchHit.getSourceAsString();
-        }
-      }
-      au.ensureOwner(getUser(),FieldNames.FIELD_SYS_OWNER,source);
-      jb = itemio.mixin(mdoc,sourceAsString);
-      if (mdoc.hasXml()) wasXmlModified(ec,mdoc,source,now,jb);
-    }
-    
-    // TODO sys_hasxml_b
-    
-    boolean setOwner = false;
-    //if (fileid == null) jb.addNull(ItemIO.FIELD_FILEID);
-    //else jb.add(ItemIO.FIELD_FILEID,fileid);
-    if (this.getIsNew()) {
-      jb.add(FieldNames.FIELD_SYS_CREATED,now);
-      jb.add(FieldNames.FIELD_SYS_MODIFIED,now);
-      if (mdoc.hasXml()) jb.add(FieldNames.FIELD_SYS_XMLMODIFIED,now);
-      setOwner = true;
-      if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
-          gc.getDefaultAccessLevel().length() > 0) {
-        jb.add(FieldNames.FIELD_SYS_ACCESS,gc.getDefaultAccessLevel());
-      }
-      if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null && 
-          gc.getDefaultApprovalStatus().length() > 0) {
-        jb.add(FieldNames.FIELD_SYS_APPROVAL_STATUS,gc.getDefaultApprovalStatus());
-      }
-    } else {
-      jb.add(FieldNames.FIELD_SYS_MODIFIED,now);
-      String owner_s = null;
-      String owner_txt = null;
-      if (source != null) {
-        owner_s = Val.trim((String)source.get(FieldNames.FIELD_SYS_OWNER));
-        owner_txt = Val.trim((String)source.get(FieldNames.FIELD_SYS_OWNER_TXT));
-      }
-      if (owner_s == null || owner_s.length() == 0 || owner_txt == null || owner_txt.length() == 0) setOwner = true;
-    }
-    if (setOwner) {
-      if (username == null) {
-        jb.addNull(FieldNames.FIELD_SYS_OWNER);
-        jb.addNull(FieldNames.FIELD_SYS_OWNER_TXT);
-      }
-      else {
-        jb.add(FieldNames.FIELD_SYS_OWNER,username);
-        jb.add(FieldNames.FIELD_SYS_OWNER_TXT,username);
-      }
-    }
-    if (metadataTypeKey != null) {
-      jb.add(FieldNames.FIELD_SYS_METADATATYPE,metadataTypeKey);
-    }
-    
-    mdoc.setJson(JsonUtil.toJson(jb.build(),true));   
+//    mdoc.setRequiresXmlWrite(true);
+//    GeoportalContext gc = GeoportalContext.getInstance();
+//    ItemIO itemio = new ItemIO();
+//    JsonObjectBuilder jb = null;
+//    JsonObject eval = null, supplied = null;
+//    if (mdoc.hasEvaluatedJson()) {
+//      eval = (JsonObject)JsonUtil.toJsonStructure(mdoc.getEvaluatedJson());
+//    }
+//    if (mdoc.hasSuppliedJson()) {
+//      supplied = (JsonObject)JsonUtil.toJsonStructure(mdoc.getSuppliedJson());
+//    }    
+//    
+//    // now
+//    String now = DateUtil.nowAsString();
+//    
+//    // username
+//    String username = null;
+//    if (this.getUser() != null) {
+//      username = Val.trim(this.getUser().getUsername());
+//      if (username.length() == 0) username = null;
+//    }
+//    
+//    // id
+//    String id = mdoc.getItemId(), fileid = null;
+//    //boolean hasFileIdKey = false;
+//    if ((fileid == null || fileid.length() == 0) && eval != null) {
+//      fileid = Val.trim(JsonUtil.getString(eval,FieldNames.FIELD_FILEID));
+//    }
+//    if ((fileid == null || fileid.length() == 0) && supplied != null) {
+//      fileid = Val.trim(JsonUtil.getString(supplied,FieldNames.FIELD_FILEID));
+//    }
+//    String sourceUri = null; // TODO use the sourceUri??
+//    if (id == null || id.length() == 0) {
+//      if (ec.getAllowFileId() && fileid != null && fileid.length() > 0) {
+//        // encoded forward slashes %2F will cause issues on Tomcat
+//        if (fileid.indexOf("/") == -1) {
+//          id = fileid;
+//        }
+//      }
+//    }
+//    
+//    // metadata type
+//    String metadataTypeKey = null;
+//    if (mdoc.getMetadataType() != null) {
+//      metadataTypeKey = mdoc.getMetadataType().getKey();
+//    }
+//    
+//    TransportClient client = ec.getTransportClient();
+//    String indexName = ec.getItemIndexName();
+//    String itemType = ec.getActualItemIndexType();
+//    GetResponse getResponse = null;
+//    SearchHit searchHit = null;
+//    Map<String,Object> source = null;
+//    String sourceAsString = null;
+//    
+//    // try to find the item within the index
+//    if ((id != null) && (id.length() > 0)) {
+//      GetResponse result = client.prepareGet(indexName,itemType,id).get();
+//      if (result.isExists()) {
+//        getResponse = result;
+//        source = getResponse.getSource();
+//      }
+//    } else {
+//      if (fileid != null && fileid.length() > 0) {
+//        SearchRequestBuilder builder = client.prepareSearch(indexName);
+//        builder.setTypes(itemType);
+//        builder.setSize(1);
+//        builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_FILEID,fileid));
+//        SearchHits hits = builder.get().getHits();
+//        // TODO what if there is more than one hit
+//        // TODO for new items, use the fileid as the key??
+//        if (hits.getTotalHits() > 0) searchHit = hits.getAt(0);
+//      }
+//      if (searchHit == null && sourceUri != null && sourceUri.length() > 0) {
+//        SearchRequestBuilder builder = client.prepareSearch(indexName);
+//        builder.setTypes(itemType);
+//        builder.setSize(1);
+//        builder.setQuery(QueryBuilders.matchQuery(FieldNames.FIELD_SYS_SOURCEURI,sourceUri));
+//        SearchHits hits = builder.get().getHits();
+//        // TODO see above fileid issues
+//        if (hits.getTotalHits() == 1) searchHit = hits.getAt(0);
+//      }
+//    }
+//    
+//    // update sys info
+//    if (getResponse == null && searchHit == null) {
+//      this.setIsNew(true);
+//      if ((id != null) && (id.length() > 0)) {
+//        // TODO validate the id?
+//        mdoc.setItemId(id);
+//      } else {
+//        mdoc.setItemId(UuidUtil.makeUuid(true));
+//      }
+//      if (eval == null && supplied != null) {
+//        // validate a new json based document
+//        String v = Val.trim(JsonUtil.getString(supplied,FieldNames.FIELD_TITLE));
+//        if (v != null && v.length() > 0) {
+//          mdoc.setTitle(v);
+//        } 
+//        mdoc.validateTitle();
+//        if (metadataTypeKey == null) metadataTypeKey = "json"; // TODO ??
+//      }
+//      jb = itemio.mixin(mdoc,null);
+//    } else {
+//      if (getResponse != null) {
+//        mdoc.setItemId(getResponse.getId());
+//        source = getResponse.getSource();
+//        sourceAsString = getResponse.getSourceAsString();
+//      } else {
+//        if (searchHit != null) {
+//          mdoc.setItemId(searchHit.getId());
+//          source = searchHit.getSourceAsMap(); // elastic update .getSource();
+//          sourceAsString = searchHit.getSourceAsString();
+//        }
+//      }
+//      au.ensureOwner(getUser(),FieldNames.FIELD_SYS_OWNER,source);
+//      jb = itemio.mixin(mdoc,sourceAsString);
+//      if (mdoc.hasXml()) wasXmlModified(ec,mdoc,source,now,jb);
+//    }
+//    
+//    // TODO sys_hasxml_b
+//    
+//    boolean setOwner = false;
+//    //if (fileid == null) jb.addNull(ItemIO.FIELD_FILEID);
+//    //else jb.add(ItemIO.FIELD_FILEID,fileid);
+//    if (this.getIsNew()) {
+//      jb.add(FieldNames.FIELD_SYS_CREATED,now);
+//      jb.add(FieldNames.FIELD_SYS_MODIFIED,now);
+//      if (mdoc.hasXml()) jb.add(FieldNames.FIELD_SYS_XMLMODIFIED,now);
+//      setOwner = true;
+//      if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
+//          gc.getDefaultAccessLevel().length() > 0) {
+//        jb.add(FieldNames.FIELD_SYS_ACCESS,gc.getDefaultAccessLevel());
+//      }
+//      if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null && 
+//          gc.getDefaultApprovalStatus().length() > 0) {
+//        jb.add(FieldNames.FIELD_SYS_APPROVAL_STATUS,gc.getDefaultApprovalStatus());
+//      }
+//    } else {
+//      jb.add(FieldNames.FIELD_SYS_MODIFIED,now);
+//      String owner_s = null;
+//      String owner_txt = null;
+//      if (source != null) {
+//        owner_s = Val.trim((String)source.get(FieldNames.FIELD_SYS_OWNER));
+//        owner_txt = Val.trim((String)source.get(FieldNames.FIELD_SYS_OWNER_TXT));
+//      }
+//      if (owner_s == null || owner_s.length() == 0 || owner_txt == null || owner_txt.length() == 0) setOwner = true;
+//    }
+//    if (setOwner) {
+//      if (username == null) {
+//        jb.addNull(FieldNames.FIELD_SYS_OWNER);
+//        jb.addNull(FieldNames.FIELD_SYS_OWNER_TXT);
+//      }
+//      else {
+//        jb.add(FieldNames.FIELD_SYS_OWNER,username);
+//        jb.add(FieldNames.FIELD_SYS_OWNER_TXT,username);
+//      }
+//    }
+//    if (metadataTypeKey != null) {
+//      jb.add(FieldNames.FIELD_SYS_METADATATYPE,metadataTypeKey);
+//    }
+//    
+//    mdoc.setJson(JsonUtil.toJson(jb.build(),true));   
   }
   
   /**

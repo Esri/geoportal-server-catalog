@@ -29,7 +29,7 @@ import com.esri.geoportal.lib.elastic.util.ItemIO;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.elasticsearch.action.get.GetResponse;
+import org.opensearch.action.get.GetResponse;
 
 /**
  * Transform metadata.
@@ -139,17 +139,17 @@ public class TransformMetadataRequest extends AppRequest {
    */
   protected AppResponse transform() throws Exception {
     AppResponse response = new AppResponse();
-    String xml = XmlUtil.identity(this.getXml());
-    String xslt = getXslt();
-    if (xslt == null || xslt.length() == 0) {
-      response.writeMissingParameter(this,"xslt");
-      return response;
-    }
-    
-    if (!xslt.startsWith("metadata/")) xslt = "metadata/"+xslt;
-    XsltTemplate xsltTemplate = XsltTemplates.getCompiledTemplate(xslt);
-    String result = xsltTemplate.transform(xml);
-    writeOk(response,result);
+//    String xml = XmlUtil.identity(this.getXml());
+//    String xslt = getXslt();
+//    if (xslt == null || xslt.length() == 0) {
+//      response.writeMissingParameter(this,"xslt");
+//      return response;
+//    }
+//    
+//    if (!xslt.startsWith("metadata/")) xslt = "metadata/"+xslt;
+//    XsltTemplate xsltTemplate = XsltTemplates.getCompiledTemplate(xslt);
+//    String result = xsltTemplate.transform(xml);
+//    writeOk(response,result);
     return response;
   }
   
