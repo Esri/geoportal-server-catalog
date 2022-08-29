@@ -146,8 +146,8 @@ public class BulkEditRequest extends BulkRequest {
     String retryName = "_retry_on_conflict";
     if (ec.getIs6Plus()) retryName = "retry_on_conflict";
     JsonObjectBuilder joBuilder = Json.createObjectBuilder()
-            .add("_id",hit.getId())
-            .add(retryName,this.getRetryOnConflict());
+            .add("_id",hit.getId());
+            //.add(retryName,this.getRetryOnConflict()); //This parameter not working with opensearch
     if (!ec.getIs7Plus()) {
       joBuilder = joBuilder.add("_type",ec.getActualItemIndexType());
     }

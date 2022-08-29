@@ -53,25 +53,25 @@ public class DeleteItemRequest extends AppRequest {
   @Override
   public AppResponse execute() throws Exception {
     AppResponse response = new AppResponse();
-    String id = getId();
-    if (id == null || id.length() == 0) {
-      response.writeIdIsMissing(this);
-      return response;
-    }
-    AccessUtil au = new AccessUtil();
-    id = au.determineId(id);
-    au.ensureWriteAccess(getUser(),id);
-    
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    ItemIO itemio = new ItemIO();
-    DeleteResponse resp = itemio.deleteItem(ec,id);
-    /* ES 2to5 */
-    // if (resp.isFound()) {
-    if (resp.getResult().equals(Result.DELETED)) {
-      this.writeOk(response,resp.getId());
-    } else {
-      response.writeIdNotFound(this,id);
-    }
+//    String id = getId();
+//    if (id == null || id.length() == 0) {
+//      response.writeIdIsMissing(this);
+//      return response;
+//    }
+//    AccessUtil au = new AccessUtil();
+//    id = au.determineId(id);
+//    au.ensureWriteAccess(getUser(),id);
+//    
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    ItemIO itemio = new ItemIO();
+//    DeleteResponse resp = itemio.deleteItem(ec,id);
+//    /* ES 2to5 */
+//    // if (resp.isFound()) {
+//    if (resp.getResult().equals(Result.DELETED)) {
+//      this.writeOk(response,resp.getId());
+//    } else {
+//      response.writeIdNotFound(this,id);
+//    }
     return response;
   }
   
@@ -89,10 +89,10 @@ public class DeleteItemRequest extends AppRequest {
    * @param id the item id
    */
   public void writeOk(AppResponse response, String id) {
-    JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-    jsonBuilder.add("id",id);
-    jsonBuilder.add("status","deleted");
-    response.writeOkJson(this,jsonBuilder);
+//    JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+//    jsonBuilder.add("id",id);
+//    jsonBuilder.add("status","deleted");
+//    response.writeOkJson(this,jsonBuilder);
   }
   
 }
