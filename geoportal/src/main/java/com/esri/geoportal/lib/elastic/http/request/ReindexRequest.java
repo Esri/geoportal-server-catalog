@@ -25,6 +25,7 @@ import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
 import com.esri.geoportal.lib.elastic.http.util.Scroller;
 import com.esri.geoportal.lib.elastic.http.util.SearchHit;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.ItemIO;
 
@@ -41,7 +42,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Re-index content.
  */
-public class ReindexRequest extends com.esri.geoportal.lib.elastic.request.ReindexRequest {
+public class ReindexRequest extends BulkEditRequest {
   
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(ReindexRequest.class);

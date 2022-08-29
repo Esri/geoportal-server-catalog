@@ -97,69 +97,69 @@ public class PublishMetadataRequest extends AppRequest {
   public AppResponse execute() throws Exception {
     //boolean asDraft = false; // TODO asDraft
     AppResponse response = new AppResponse();
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    AccessUtil au = new AccessUtil();
-    au.ensurePublisher(getUser());
-    
-    ItemIO itemIO = new ItemIO();    
-    MetadataDocument mdoc = new MetadataDocument();
-    mdoc.setItemId(this.getId());
-    
-    String content = Val.trim(getContent());
-    String json = null, xml = null;
-    if (content != null && content.length() > 0) {
-      if (content.startsWith("{")) {
-        JsonObject jso = null;
-        try {
-          jso = (JsonObject)JsonUtil.toJsonStructure(content);
-        } catch (JsonParsingException jpe) {
-          throw new UsageException("javax.json.stream.JsonParsingException: Invalid JSON",jpe);
-        }
-        if (jso != null) {
-          json = JsonUtil.toJson(jso,false);
-          if (jso.containsKey("xml") && !jso.isNull("xml")) {
-            String v = Val.trim(jso.getString("xml"));
-            if (v != null && v.length() > 0) {
-              xml = v;
-            }
-          }
-        }
-      } else if (content.startsWith("<")) {
-        xml = content;
-      }
-    }
-    if (json == null && xml == null) {
-      throw new UnrecognizedTypeException();
-    }
-    
-    if (xml != null) {
-      if (json != null) {
-        mdoc.setSuppliedJson(json);
-      }
-      xml = XmlUtil.identity(xml);
-      mdoc.setXml(xml);
-      mdoc.interrogate();
-      mdoc.evaluate();
-      mdoc.validate();
-
-    } else {
-      mdoc.setSuppliedJson(json);
-      // TODO set the title
-      // mdoc.validate();
-      // TODO interrogate evaluate validate
-    }
-    
-    //mdoc.prepareForPublication(this.getContent(),asDraft); // TODO?
-    
-    prePublish(ec,au,response,mdoc);
-    if (mdoc.getJson() == null) {
-      throw new Exception("MetadataDocument::json is empty.");
-    }
-    
-    //LOGGER.trace("xmlHash="+mdoc.getXmlHash());
-    //LOGGER.trace("requiresXmlWrite="+mdoc.getRequiresXmlWrite());
-    itemIO.writeItem(ec,mdoc);
-    this.writeOk(response,mdoc.getItemId());
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    AccessUtil au = new AccessUtil();
+//    au.ensurePublisher(getUser());
+//    
+//    ItemIO itemIO = new ItemIO();    
+//    MetadataDocument mdoc = new MetadataDocument();
+//    mdoc.setItemId(this.getId());
+//    
+//    String content = Val.trim(getContent());
+//    String json = null, xml = null;
+//    if (content != null && content.length() > 0) {
+//      if (content.startsWith("{")) {
+//        JsonObject jso = null;
+//        try {
+//          jso = (JsonObject)JsonUtil.toJsonStructure(content);
+//        } catch (JsonParsingException jpe) {
+//          throw new UsageException("javax.json.stream.JsonParsingException: Invalid JSON",jpe);
+//        }
+//        if (jso != null) {
+//          json = JsonUtil.toJson(jso,false);
+//          if (jso.containsKey("xml") && !jso.isNull("xml")) {
+//            String v = Val.trim(jso.getString("xml"));
+//            if (v != null && v.length() > 0) {
+//              xml = v;
+//            }
+//          }
+//        }
+//      } else if (content.startsWith("<")) {
+//        xml = content;
+//      }
+//    }
+//    if (json == null && xml == null) {
+//      throw new UnrecognizedTypeException();
+//    }
+//    
+//    if (xml != null) {
+//      if (json != null) {
+//        mdoc.setSuppliedJson(json);
+//      }
+//      xml = XmlUtil.identity(xml);
+//      mdoc.setXml(xml);
+//      mdoc.interrogate();
+//      mdoc.evaluate();
+//      mdoc.validate();
+//
+//    } else {
+//      mdoc.setSuppliedJson(json);
+//      // TODO set the title
+//      // mdoc.validate();
+//      // TODO interrogate evaluate validate
+//    }
+//    
+//    //mdoc.prepareForPublication(this.getContent(),asDraft); // TODO?
+//    
+//    prePublish(ec,au,response,mdoc);
+//    if (mdoc.getJson() == null) {
+//      throw new Exception("MetadataDocument::json is empty.");
+//    }
+//    
+//    //LOGGER.trace("xmlHash="+mdoc.getXmlHash());
+//    //LOGGER.trace("requiresXmlWrite="+mdoc.getRequiresXmlWrite());
+//    itemIO.writeItem(ec,mdoc);
+//    this.writeOk(response,mdoc.getItemId());
     return response;
   }
   
@@ -359,35 +359,35 @@ public class PublishMetadataRequest extends AppRequest {
    */
   protected void wasXmlModified(ElasticContext ec, MetadataDocument mdoc, Map<String,Object> elasticSource, 
       String now, JsonObjectBuilder jb) throws Exception {
-    ItemIO itemio = new ItemIO();
-    String xmlModField = FieldNames.FIELD_SYS_XMLMODIFIED;
-    boolean xmlMod = true, compareXmlIfSameHash = true;
-    String hash = itemio.readXmlHash(ec,mdoc.getItemId());
-    if (hash == null) {
-      xmlMod = true;
-    } else if (mdoc.getXml() == null) {
-      xmlMod = true;
-    } else if (hash.equals(MurmurUtil.makeHash(mdoc.getXml()))) {
-      xmlMod = false;
-      if (compareXmlIfSameHash) {
-        LOGGER.trace("Same xml hash, reading xml to compare...");
-        String xml0 = itemio.readXml(ec,mdoc.getItemId());
-        String xml1 = mdoc.getXml();
-        if (xml0 != null && xml1 != null) {
-          xmlMod = !xml0.equals(xml1);
-        } else if (xml1 != null) {
-          xmlMod = true;
-        }          
-      }
-    }
-    if (xmlMod) {
-      jb.add(xmlModField,now);
-    } else {
-      mdoc.setRequiresXmlWrite(false);
-      String v = Val.trim((String)elasticSource.get(xmlModField));
-      if (v == null || v.length() == 0) v = now;
-      jb.add(xmlModField,v);
-    }
+//    ItemIO itemio = new ItemIO();
+//    String xmlModField = FieldNames.FIELD_SYS_XMLMODIFIED;
+//    boolean xmlMod = true, compareXmlIfSameHash = true;
+//    String hash = itemio.readXmlHash(ec,mdoc.getItemId());
+//    if (hash == null) {
+//      xmlMod = true;
+//    } else if (mdoc.getXml() == null) {
+//      xmlMod = true;
+//    } else if (hash.equals(MurmurUtil.makeHash(mdoc.getXml()))) {
+//      xmlMod = false;
+//      if (compareXmlIfSameHash) {
+//        LOGGER.trace("Same xml hash, reading xml to compare...");
+//        String xml0 = itemio.readXml(ec,mdoc.getItemId());
+//        String xml1 = mdoc.getXml();
+//        if (xml0 != null && xml1 != null) {
+//          xmlMod = !xml0.equals(xml1);
+//        } else if (xml1 != null) {
+//          xmlMod = true;
+//        }          
+//      }
+//    }
+//    if (xmlMod) {
+//      jb.add(xmlModField,now);
+//    } else {
+//      mdoc.setRequiresXmlWrite(false);
+//      String v = Val.trim((String)elasticSource.get(xmlModField));
+//      if (v == null || v.length() == 0) v = now;
+//      jb.add(xmlModField,v);
+//    }
   }
   
   /**

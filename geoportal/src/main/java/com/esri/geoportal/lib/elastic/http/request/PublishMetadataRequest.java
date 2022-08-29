@@ -27,6 +27,7 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.ItemIO;
 import com.esri.geoportal.lib.elastic.util.MurmurUtil;
@@ -45,7 +46,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Publish metadata.
  */
-public class PublishMetadataRequest extends com.esri.geoportal.lib.elastic.request.PublishMetadataRequest {
+public class PublishMetadataRequest extends BulkEditRequest {
   
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(PublishMetadataRequest.class);

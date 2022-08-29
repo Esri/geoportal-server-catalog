@@ -47,10 +47,11 @@ public class DeleteItemsRequest extends BulkEditRequest {
     http://localhost:8080/geoportal/rest/metadata/deteteItems?id=68e65338e166458d8425775114487b31
     */
     
-    setAdminOnly(false);
-    setProcessMessage("DeleteItems");
-    //if (true) throw new RuntimeException("DeleteItemsRequest: temporary stop");
-    return super.execute();
+//    setAdminOnly(false);
+//    setProcessMessage("DeleteItems");
+//    //if (true) throw new RuntimeException("DeleteItemsRequest: temporary stop");
+//    return super.execute();
+	  return null;
   }
   
 }

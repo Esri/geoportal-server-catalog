@@ -16,6 +16,7 @@ package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import javax.json.Json;
@@ -24,7 +25,7 @@ import javax.json.JsonObjectBuilder;
 /**
  * Set the approval status for one or more items.
  */
-public class SetApprovalStatusRequest extends com.esri.geoportal.lib.elastic.request.SetApprovalStatusRequest {
+public class SetApprovalStatusRequest extends BulkEditRequest {
   
   /** Constructor. */
   public SetApprovalStatusRequest() {
