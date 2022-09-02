@@ -483,30 +483,30 @@
         requestedParameters.forEach(function(thisParameter){
           switch (thisParameter) {
             case "GetRecords.resultType":
-              domainValues = "<csw:Value>r1</csw:Value><csw:Value>r2</csw:Value>";
+              domainValues = "<csw:Value>hits</csw:Value><csw:Value>results</csw:Value>";
               break;
             case "GetRecords.outputFormat":
-              domainValues = "<csw:Value>o1</csw:Value><csw:Value>o2</csw:Value>";
+              domainValues = "<csw:Value>application/xml</csw:Value><csw:Value>application/atom+xml</csw:Value>";
               break;
             case "GetRecords.outputRecType":
-              domainValues = "<csw:Value>ort1</csw:Value><csw:Value>ort2</csw:Value>";
+              domainValues = "<csw:Value></csw:Value>";
               break;
             case "GetRecords.typeName":
             case "DescribeRecord.typeName":
-              domainValues = "<csw:Value>tn1</csw:Value><csw:Value>tn2</csw:Value>";
+              domainValues = "<csw:Value>csw:Record</csw:Value><csw:Value>csw:SummaryRecord</csw:Value><csw:Value>csw:BriefRecord</csw:Value>";
               break;
             case "GetRecords.ElementSetName":
             case "GetRecordById.ElementSetName":
-              domainValues = "<csw:Value>esn1</csw:Value><csw:Value>esn2</csw:Value>";
+              domainValues = "<csw:Value>brief</csw:Value><csw:Value>summary</csw:Value><csw:Value>full</csw:Value>";
               break;
             case "GetRecords.ElementName":
-              domainValues = "<csw:Value>en1</csw:Value><csw:Value>en2</csw:Value>";
+              domainValues = "<csw:Value></csw:Value>";
               break;
             case "GetRecords.CONSTRAINTLANGUAGE":
-              domainValues = "<csw:Value>cl1</csw:Value><csw:Value>cl2</csw:Value>";
+              domainValues = "<csw:Value>FILTER</csw:Value>";
               break;
             case "DescribeRecord.schemaLanguage":
-              domainValues = "<csw:Value>sl1</csw:Value><csw:Value>sl2</csw:Value>";
+              domainValues = "<csw:Value>XMLSCHEMA</csw:Value>";
             }
             xml = xml + "<csw:DomainValues type=\"csw:Record\">";
             xml = xml + "<csw:ParameterName>" + thisParameter+ "</csw:ParameterName>"
