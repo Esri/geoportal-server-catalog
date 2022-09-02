@@ -107,7 +107,7 @@
         msg = "CSW: The service parameter is missing.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_MissingParameterValue,"service",msg);
-      } else if (ows === null && service.toLowerCase() != "csw") {
+      } else if (ows === null && service.toLowerCase() !== "csw") {
         msg = "CSW: The service parameter must be CSW.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_InvalidParameterValue,"service",msg);
@@ -150,6 +150,8 @@
           }
         } else if (lcRequest === "getrecordbyid") {
           return this.getRecordById(task);
+        } else if (lcRequest === "getdomain") {
+          return this.getDomain(task);
         } else if (lcRequest === "getrecords") {
           return this.getRecords(task);
         } else {
@@ -182,7 +184,7 @@
       if (acceptFormats !== null && acceptFormats.length === 1) {
         acceptFormats = acceptFormats[0].split(",");
       }
-      if (acceptFormats != null) {
+      if (acceptFormats !== null) {
         acceptFormats.forEach(function(s){
           s = s.toLowerCase();
           if (s === "application/xml") {
@@ -284,7 +286,7 @@
       if (acceptFormats !== null && acceptFormats.length === 1) {
         acceptFormats = acceptFormats[0].split(",");
       }
-      if (acceptFormats != null) {
+      if (acceptFormats !== null) {
         acceptFormats.some(function(s){
           s = s.toLowerCase();
           if (s === "application/xml") {
@@ -378,6 +380,155 @@
       return promise;
     }},
 
+    getDomain: {writable:true,value:function(task) {
+      var msg, ows, xml, promise = task.context.newPromise();
+      
+      var mime = null;
+      var hasTextXml = false;
+      var hasAppXml = false;
+      var hasOther = false;
+      var acceptFormats = task.request.getParameterValues("acceptFormats");
+      if (acceptFormats !== null && acceptFormats.length === 1) {
+        acceptFormats = acceptFormats[0].split(",");
+      }
+      if (acceptFormats !== null) {
+        acceptFormats.forEach(function(s){
+          s = s.toLowerCase();
+          if (s === "application/xml") {
+            hasAppXml = true;
+          } else if (s === "text/xml") {
+            hasTextXml = true;
+          } else if (s.length > 0) {
+            hasOther = true;
+          }
+        });
+      }
+
+      var accept = task.request.getHeader("accept");
+      if (accept === "text/xml") {
+        hasTextXml = true;
+      }
+      if (!hasAppXml && hasTextXml) {
+        mime = "text/xml";
+      } else if (!hasAppXml && !hasTextXml && hasOther) {
+        hasTextXml = true;
+        mime = "text/xml";
+      }
+
+      if (!task.hasError) {
+        var acceptVersions = task.request.getParameterValues("acceptVersions");
+        if (acceptVersions !== null && acceptVersions.length === 1) {
+          acceptVersions = acceptVersions[0].split(",");
+        }
+        if (acceptVersions !== null && acceptVersions.length > 0) {
+          var has30or202 = acceptVersions.some(function(s){
+            return (s === "3.0.0" || s === "2.0.2");
+          });
+          if (!has30or202) {
+            msg = "CSW: The acceptVersions parameter is invalid, 2.0.2 or 3.0.0 is required";
+            ows = gs.Object.create(gs.provider.csw.OwsException);
+            ows.put(task,ows.OWSCODE_VersionNegotiationFailed,"acceptVersions",msg);
+          } else {
+            if (acceptVersions[0] === "2.0.2") {
+              this.isCsw2 = true;
+              task.isCsw2 = true;
+            }
+          }
+        }
+      }
+      
+      // check parameterName argument
+      var parameterName = task.request.getParameter("parameterName");
+      if (parameterName === null) {
+        msg = "Missing value. One of propertyname or parametername must be specified.";
+        ows = gs.Object.create(gs.provider.csw.OwsException);
+        ows.put(task,ows.OWSCODE_MissingParameterValue,"parameterName",msg);
+      } else if (parameterName.trim().length === 0) {
+        msg = "CSW: parameterName is empty.";
+        ows = gs.Object.create(gs.provider.csw.OwsException);
+        ows.put(task,ows.OWSCODE_InvalidParameterValue,"parameterName",msg);
+      } else {
+        var allowedParameters = [
+          "GetRecords.resultType", 
+          "GetRecords.outputFormat", 
+          "GetRecords.outputRecType", 
+          "GetRecords.typeName", 
+          "GetRecords.ElementSetName", 
+          "GetRecords.ElementName", 
+          "GetRecords.CONSTRAINTLANGUAGE", 
+          "GetRecordById.ElementSetName", 
+          "DescribeRecord.typeName", 
+          "DescribeRecord.schemaLanguage"
+        ]; 
+        
+        var requestedParameters = parameterName.replace(" ","").split(",");
+        requestedParameters.forEach(function(thisParameter){
+          if (allowedParameters.indexOf(thisParameter)<0) {
+              msg = "CSW: unknown parameterName.";
+              ows = gs.Object.create(gs.provider.csw.OwsException);
+              ows.put(task,ows.OWSCODE_InvalidParameterValue,"parameterName",msg);
+              return;
+          }
+        });
+      }
+      
+      var getDomainFile = task.config.csw2GetDomainFile;
+
+      if (!task.hasError) {
+        xml = task.context.readResourceFile(getDomainFile,"UTF-8");
+        xml = xml.trim();
+        xml = xml.replace("</csw:GetDomainResponse>","");
+        
+        // insert values for requested paramters into GetDomain response xml
+        requestedParameters.forEach(function(thisParameter){
+          switch (thisParameter) {
+            case "GetRecords.resultType":
+              domainValues = "<csw:Value>r1</csw:Value><csw:Value>r2</csw:Value>";
+              break;
+            case "GetRecords.outputFormat":
+              domainValues = "<csw:Value>o1</csw:Value><csw:Value>o2</csw:Value>";
+              break;
+            case "GetRecords.outputRecType":
+              domainValues = "<csw:Value>ort1</csw:Value><csw:Value>ort2</csw:Value>";
+              break;
+            case "GetRecords.typeName":
+            case "DescribeRecord.typeName":
+              domainValues = "<csw:Value>tn1</csw:Value><csw:Value>tn2</csw:Value>";
+              break;
+            case "GetRecords.ElementSetName":
+            case "GetRecordById.ElementSetName":
+              domainValues = "<csw:Value>esn1</csw:Value><csw:Value>esn2</csw:Value>";
+              break;
+            case "GetRecords.ElementName":
+              domainValues = "<csw:Value>en1</csw:Value><csw:Value>en2</csw:Value>";
+              break;
+            case "GetRecords.CONSTRAINTLANGUAGE":
+              domainValues = "<csw:Value>cl1</csw:Value><csw:Value>cl2</csw:Value>";
+              break;
+            case "DescribeRecord.schemaLanguage":
+              domainValues = "<csw:Value>sl1</csw:Value><csw:Value>sl2</csw:Value>";
+            }
+            xml = xml + "<csw:DomainValues type=\"csw:Record\">";
+            xml = xml + "<csw:ParameterName>" + thisParameter+ "</csw:ParameterName>"
+            xml = xml + domainValues;
+            xml = xml + "</csw:DomainValues>";
+        });
+        xml = xml + "</csw:GetDomainResponse>";
+      }
+
+      if (!task.hasError) {
+        var response = task.response;
+        response.put(response.Status_OK,response.MediaType_APPLICATION_XML,xml);
+        if (mime === "text/xml") {
+          response.mediaType = response.MediaType_TEXT_XML;
+        }
+        promise.resolve();
+      } else {
+        promise.reject();
+      }
+      return promise;            
+    }},
+    
     getRecordById: {writable:true,value:function(task) {
       var msg, ows;
       task.request.isItemByIdRequest = true;

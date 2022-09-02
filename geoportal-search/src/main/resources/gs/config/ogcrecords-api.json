@@ -1,0 +1,596 @@
+{
+    "components": {
+        "schemas": {
+            "exception": {
+                "type": "object",
+                "required": ["code"],
+                "properties": {
+                    "code": {
+                        "type": "string"
+                    },
+                    "description": {
+                        "type": "string"
+                    }
+                }
+            },
+            "extent": {
+                "type": "object",
+                "properties": {
+                    "trs": {
+                        "default": "http://www.opengis.net/def/uom/ISO-8601/0/Gregorian",
+                        "description": "Temporal reference system of the coordinates in the temporal extent (property `temporal`). In the Core, only the Gregorian calendar is supported. Extensions may support additional temporal reference systems.",
+                        "type": "string",
+                        "enum": ["http://www.opengis.net/def/uom/ISO-8601/0/Gregorian"]
+                    },
+                    "crs": {
+                        "default": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+                        "description": "Coordinate reference system of the coordinates in the spatial extent (property `spatial`). In the Core, only WGS84 longitude/latitude is supported. Extensions may support additional coordinate reference systems.",
+                        "type": "string",
+                        "enum": ["http://www.opengis.net/def/crs/OGC/1.3/CRS84"]
+                    },
+                    "spatial": {
+                        "minItems": 4,
+                        "maxItems": 6,
+                        "description": "West, north, east, south edges of the spatial extent. The minimum and maximum values apply to the coordinate reference system WGS84 longitude/latitude that is supported in the Core. If, for example, a projected coordinate reference system is used, the minimum and maximum values need to be adjusted.",
+                        "type": "array",
+                        "items": {
+                            "type": "number"
+                        },
+                        "example": [-180, -90, 180, 90]
+                    },
+                    "temporal": {
+                        "minItems": 2,
+                        "maxItems": 2,
+                        "description": "Begin and end times of the temporal extent.",
+                        "type": "array",
+                        "items": {
+                            "format": "dateTime",
+                            "type": "string"
+                        },
+                        "example": ["2011-11-11T12:22:11.000Z", "2012-11-24T12:32:43.000Z"]
+                    }
+                }
+            },
+            "root": {
+                "type": "object",
+                "required": ["links"],
+                "properties": {
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/link"
+                        },
+                        "example": [
+                            {
+                                "href": "{opensearch.url}",
+                                "rel": "self",
+                                "type": "application/json",
+                                "title": "this OGC API - Records landing page as JSON"
+                            },
+                            {
+                                "href": "{opensearch.url}/api",
+                                "rel": "service-desc",
+                                "type": "application/vnd.oai.openapi+json;version=3.0",
+                                "title": "the API definition (OpenAPI document)"
+                            },
+                            {
+                                "href": "{opensearch.url}/conformance",
+                                "rel": "conformance",
+                                "title": "the OGC API conformance classes supported"
+                            },
+                            {
+                                "href": "{opensearch.url}/collections",
+                                "rel": "data",
+                                "title": "the set of available collections"
+                            }
+                        ]
+                    }
+                }
+            },
+            "link": {
+                "type": "object",
+                "required": ["href"],
+                "properties": {
+                    "hreflang": {
+                        "type": "string",
+                        "example": "en"
+                    },
+                    "rel": {
+                        "type": "string",
+                        "example": "prev"
+                    },
+                    "href": {
+                        "type": "string"
+                    },
+                    "type": {
+                        "type": "string",
+                        "example": "application/geo+json"
+                    }
+                }
+            },
+            "collectionInfo": {
+                "type": "object",
+                "required": ["links", "name"],
+                "properties": {
+                    "extent": {
+                        "$ref": "#/components/schemas/extent"
+                    },
+                    "crs": {
+                        "default": ["http://www.opengis.net/def/crs/OGC/1.3/CRS84"],
+                        "description": "The coordinate reference systems in which geometries may be retrieved. Coordinate reference systems are identified by a URI. The first coordinate reference system is the coordinate reference system that is used by default. This is always \"http://www.opengis.net/def/crs/OGC/1.3/CRS84\", i.e. WGS84 longitude/latitude.",
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        }
+                    },
+                    "name": {
+                        "description": "identifier of the collection used, for example, in URIs",
+                        "type": "string",
+                        "example": "buildings"
+                    },
+                    "description": {
+                        "description": "a description of the data in the collection",
+                        "type": "string",
+                        "example": "Buildings in the city of Bonn."
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/link"
+                        },
+                        "example": [{
+                                "rel": "item",
+                                "href": "http://data.example.org/collections/buildings/items",
+                                "type": "application/geo+json",
+                                "title": "Buildings"
+                            }, {
+                                "rel": "describedBy",
+                                "href": "http://example.org/concepts/building.html",
+                                "type": "text/html",
+                                "title": "Coverage for buildings"
+                            }]
+                    },
+                    "title": {
+                        "description": "human readable title of the collection",
+                        "type": "string",
+                        "example": "Buildings"
+                    }
+                }
+            },
+            "req-classes": {
+                "type": "object",
+                "required": ["conformsTo"],
+                "properties": {
+                    "conformsTo": {
+                        "type": "array",
+                        "items": {
+                            "type": "string"
+                        },
+                        "example": ["http://www.opengis.net/spec/ogcapi-common/1.0/conf/core", "http://www.opengis.net/spec/ogcapi-common/1.0/conf/collections", "http://www.opengis.net/spec/ogcapi-common/1.0/conf/oas3", "http://www.opengis.net/spec/ogcapi-common/1.0/conf/html", "http://www.opengis.net/spec/ogcapi-common/1.0/conf/geojson", "http://www.opengis.net/spec/ogcapi-coverages/1.0/conf/core"]
+                    }
+                }
+            },
+            "sortablesInfo": {
+                "type": "array",
+                "items": {
+                    "type": "object",
+                    "required": ["name"],
+                    "properties": {
+                        "name": {
+                            "type": "string"
+                        },
+                        "description": {
+                            "type": "string"
+                        },
+                        "title": {
+                            "type": "string"
+                        }
+                    },
+                    "example": [{
+                            "name": "title",
+                            "title": "Title",
+                            "type": "string"
+                        }, {
+                            "name": "publicationDate",
+                            "title": "Publication Date",
+                            "type": "date"
+                        }]
+                }
+            },
+            "content": {
+                "type": "object",
+                "required": ["collections", "links"],
+                "properties": {
+                    "collections": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/collectionInfo"
+                        }
+                    },
+                    "links": {
+                        "type": "array",
+                        "items": {
+                            "$ref": "#/components/schemas/link"
+                        },
+                        "example": [{
+                                "rel": "self",
+                                "href": "http://data.example.org/collections.json",
+                                "type": "application/json",
+                                "title": "this document"
+                            }, {
+                                "rel": "alternate",
+                                "href": "http://data.example.org/collections.html",
+                                "type": "text/html",
+                                "title": "this document as HTML"
+                            }, {
+                                "rel": "describedBy",
+                                "href": "http://schemas.example.org/1.0/foobar.xsd",
+                                "type": "application/xml",
+                                "title": "XML schema for Acme Corporation data"
+                            }]
+                    }
+                }
+            }
+        },
+        "parameters": {
+            "bbox": {
+                "schema": {
+                    "minItems": 4,
+                    "maxItems": 6,
+                    "type": "array",
+                    "items": {
+                        "type": "number"
+                    }
+                },
+                "in": "query",
+                "explode": false,
+                "name": "bbox",
+                "description": "Only collections that have a geometry that intersects the bounding box are selected. The bounding box is provided as four or six numbers, depending on whether the coordinate reference system includes a vertical axis (elevation or depth):\n* Lower left corner, coordinate axis 1 * Lower left corner, coordinate axis 2 * Lower left corner, coordinate axis 3 (optional) * Upper right corner, coordinate axis 1 * Upper right corner, coordinate axis 2 * Upper right corner, coordinate axis 3 (optional)\nThe coordinate reference system of the values is WGS84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in the parameter `bbox-crs`.\nFor WGS84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude, maximum longitude and maximum latitude. However, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third value (east-most box edge).\nIf a collection has multiple spatial geometry properties, it is the decision of the server whether only a single spatial geometry property is used to determine the extent or all relevant geometries.\n",
+                "style": "form",
+                "required": false
+            },
+            "limit": {
+                "schema": {
+                    "default": 10,
+                    "maximum": 10000,
+                    "type": "integer",
+                    "minimum": 1
+                },
+                "in": "query",
+                "explode": false,
+                "name": "limit",
+                "description": "The optional limit parameter limits the number of items that are\npresented in the response document.\n\nOnly items are counted that are on the first level of the collection in\nthe response document. Nested objects contained within the explicitly\nrequested items shall not be counted.\n\n* Minimum = 1\n* Maximum = 10000\n* Default = 10\n",
+                "style": "form",
+                "required": false
+            },
+            "time": {
+                "schema": {
+                    "type": "string"
+                },
+                "in": "query",
+                "explode": false,
+                "name": "time",
+                "description": "Either a date-time or a period string that adheres to RFC 3339. Examples:\n* A date-time: \"2018-02-12T23:20:50Z\" * A period: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" or \"2018-02-12T00:00:00Z/P1M6DT12H31M12S\"\nOnly collections that have a temporal property that intersects the value of `time` are selected.\nIf a collection has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.",
+                "style": "form",
+                "required": false
+            },
+            "collectionId": {
+                "schema": {
+                    "type": "string"
+                },
+                "in": "path",
+                "explode": false,
+                "name": "collectionId",
+                "description": "Identifier (name) of a specific collection",
+                "style": "simple",
+                "required": true
+            }
+        }
+    },
+    "servers": [{
+            "description": "SwaggerHub API Auto Mocking",
+            "url": "https://virtserver.swaggerhub.com/constantinius/ogc-api-coverages/1.0.0"
+        }],
+    "openapi": "3.0.1",
+    "paths": {
+        "/collections/{collectionId}/sortables": {
+            "get": {
+                "summary": "description of the sorting capabilities offerec on the collection in the catalog",
+                "description": "List of sortable fields in this collection.",
+                "operationId": "getCoverageOffering",
+                "responses": {
+                    "200": {
+                        "description": "Information about the coverage collection.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/sortablesInfo"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "An error occured.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/exception"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "explode": false,
+                        "name": "collectionId",
+                        "description": "Identifier (name) of a specific collection",
+                        "style": "simple",
+                        "required": true
+                    }],
+                "tags": ["Collection"]
+            }
+        },
+        "/collections/{collectionId}/items/{recordId}": {
+            "get": {
+                "responses": {
+                    "200": {
+                        "description": "A successful execution of this operation shall be the requested record returned in the requested media type."
+                    },
+                    "default": {
+                        "description": "An error occured."
+                    }
+                },
+                "parameters": [{
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "explode": false,
+                        "name": "collectionId",
+                        "description": "Identifier (name) of a specific collection",
+                        "style": "simple",
+                        "required": true
+                    }, {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "explode": false,
+                        "name": "recordId",
+                        "description": "Identifier (name) of a specific record",
+                        "style": "simple",
+                        "required": true
+                    }],
+                "tags": ["Record"]
+            }
+        },
+        "/conformance": {
+            "get": {
+                "summary": "information about standards that this API conforms to",
+                "description": "list all requirements classes specified in a standard (e.g., ) that the server conforms to",
+                "operationId": "getRequirementsClasses",
+                "responses": {
+                    "200": {
+                        "description": "the URIs of all requirements classes supported by the server",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/req-classes"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "An error occured.",
+                        "content": {
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/exception"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": ["Capabilities"]
+            }
+        },
+        "/collections": {
+            "get": {
+                "summary": "describe the collections in the dataset",
+                "operationId": "describeCollections",
+                "responses": {
+                    "200": {
+                        "description": "Metdata about the collections shared by this API.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/content"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "An error occured.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/exception"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                        "schema": {
+                            "default": 10,
+                            "maximum": 10000,
+                            "type": "integer",
+                            "minimum": 1
+                        },
+                        "in": "query",
+                        "explode": false,
+                        "name": "limit",
+                        "description": "The optional limit parameter limits the number of items that are\npresented in the response document.\n\nOnly items are counted that are on the first level of the collection in\nthe response document. Nested objects contained within the explicitly\nrequested items shall not be counted.\n\n* Minimum = 1\n* Maximum = 10000\n* Default = 10\n",
+                        "style": "form",
+                        "required": false
+                    }, {
+                        "schema": {
+                            "minItems": 4,
+                            "maxItems": 6,
+                            "type": "array",
+                            "items": {
+                                "type": "number"
+                            }
+                        },
+                        "in": "query",
+                        "explode": false,
+                        "name": "bbox",
+                        "description": "Only collections that have a geometry that intersects the bounding box are selected. The bounding box is provided as four or six numbers, depending on whether the coordinate reference system includes a vertical axis (elevation or depth):\n* Lower left corner, coordinate axis 1 * Lower left corner, coordinate axis 2 * Lower left corner, coordinate axis 3 (optional) * Upper right corner, coordinate axis 1 * Upper right corner, coordinate axis 2 * Upper right corner, coordinate axis 3 (optional)\nThe coordinate reference system of the values is WGS84 longitude/latitude (http://www.opengis.net/def/crs/OGC/1.3/CRS84) unless a different coordinate reference system is specified in the parameter `bbox-crs`.\nFor WGS84 longitude/latitude the values are in most cases the sequence of minimum longitude, minimum latitude, maximum longitude and maximum latitude. However, in cases where the box spans the antimeridian the first value (west-most box edge) is larger than the third value (east-most box edge).\nIf a collection has multiple spatial geometry properties, it is the decision of the server whether only a single spatial geometry property is used to determine the extent or all relevant geometries.\n",
+                        "style": "form",
+                        "required": false
+                    }, {
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "query",
+                        "explode": false,
+                        "name": "time",
+                        "description": "Either a date-time or a period string that adheres to RFC 3339. Examples:\n* A date-time: \"2018-02-12T23:20:50Z\" * A period: \"2018-02-12T00:00:00Z/2018-03-18T12:31:12Z\" or \"2018-02-12T00:00:00Z/P1M6DT12H31M12S\"\nOnly collections that have a temporal property that intersects the value of `time` are selected.\nIf a collection has multiple temporal properties, it is the decision of the server whether only a single temporal property is used to determine the extent or all relevant temporal properties.",
+                        "style": "form",
+                        "required": false
+                    }],
+                "tags": ["Capabilities"]
+            }
+        },
+        "/collections/{collectionId}": {
+            "get": {
+                "summary": "describe the {collectionId} collection",
+                "operationId": "describeCollection",
+                "responses": {
+                    "200": {
+                        "description": "Metadata about the {collectionId} collection shared by this API.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/collectionInfo"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "An error occured.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/exception"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "explode": false,
+                        "name": "collectionId",
+                        "description": "Identifier (name) of a specific collection",
+                        "style": "simple",
+                        "required": true
+                    }],
+                "tags": ["Collection"]
+            }
+        },
+        "/api": {
+            "get": {
+                "summary": "summary",
+                "description": "get the open API spec for this catalog",
+                "operationId": "getAPI",
+                "responses": {
+                    "200": {
+                        "description": "this open API spec"
+                    }
+                },
+                "tags": ["Capabilities"]
+            }
+        },
+        "/": {
+            "get": {
+                "summary": "landing page of this API",
+                "description": "The landing page provides links to the API definition, the Conformance statements and the metadata about the coverage data in this dataset.",
+                "operationId": "getLandingPage",
+                "responses": {
+                    "200": {
+                        "description": "links to the API capabilities",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/root"
+                                }
+                            }
+                        }
+                    }
+                },
+                "tags": ["Capabilities"]
+            }
+        }
+    },
+    "info": {
+        "license": {
+            "name": "Apache 2.0",
+            "url": "https://www.apache.org/licenses/LICENSE-2.0"
+        },
+        "contact": {
+            "name": "Esri, Inc.",
+            "url": "http://www.esri.com/",
+            "email": "portal@esri.com"
+        },
+        "description": "This is a sample OpenAPI definition that conforms to the OGC API - Records Service specification (conformance classes: \"Core\", \"GeoJSON\", \"HTML\" and \"OpenAPI 3.0\").",
+        "title": "A sample API conforming to the OGC API - Records standard",
+        "version": "1.0.0"
+    },
+    "tags": [{
+            "name": "Capabilities",
+            "description": "Essential characteristics of this API including information about the data."
+        }]
+}

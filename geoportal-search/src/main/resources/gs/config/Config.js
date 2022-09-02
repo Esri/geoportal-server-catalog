@@ -29,8 +29,16 @@
     csw2CapabilitiesFile: {writable: true, value: "gs/config/csw2-capabilities.xml"},
 
     csw2DescribeRecordFile: {writable: true, value: "gs/config/csw2-describerecord.xml"},
+    
+    csw2GetDomainFile: {writable: true, value: "gs/config/csw2-getdomain.xml"},
 
     opensearchDescriptionFile: {writable: true, value: "gs/config/opensearch-description.xml"},
+
+    ogcrecordsDescriptionFile: {writable: true, value: "gs/config/ogcrecords-description.json"},
+
+    ogcrecordsConformanceFile: {writable: true, value: "gs/config/ogcrecords-conformance.json"},
+
+    ogcrecordsAPIFile: {writable: true, value: "gs/config/ogcrecords-api.json"},
 
     proxyUrl: {writable: true, value: null},
 
