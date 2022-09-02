@@ -1,0 +1,18 @@
+{
+    "conformsTo": [
+      "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/core",
+      "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/html",
+      "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/json",
+      "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/landing-page",
+      "http://www.opengis.net/spec/ogcapi-common-1/1.0/conf/oas30",
+      "http://www.opengis.net/spec/ogcapi-common-2/1.0/conf/collections",
+      "http://www.opengis.net/spec/ogcapi-common-2/1.0/conf/geojson",
+      "http://www.opengis.net/spec/ogcapi-common-2/1.0/conf/html",
+      "http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/core",
+      "http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/html",
+      "http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/json",
+      "http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/opensearch",
+      "http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/record-filter",
+      "http://www.opengis.net/spec/ogcapi-records-1/1.0/conf/xml"
+    ]
+}
