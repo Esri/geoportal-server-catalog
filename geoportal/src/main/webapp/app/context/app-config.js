@@ -44,6 +44,7 @@ define([],function(){var obj={
     showAccess: true,
     showApprovalStatus: true,
     defaultSort: "\"title\": {\"order\" : \"asc\" , \"ignore_unmapped\" : true}",   
+    sortDesc:"\"title\": {\"order\" : \"desc\" , \"ignore_unmapped\" : true}",
     showLinks: true,
     showCustomLinks: true,
     showOpenSearchLinks: true,
