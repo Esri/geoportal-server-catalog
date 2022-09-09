@@ -42,6 +42,8 @@
 
     ogcrecordsCollectionMetadataFile: {writable: true, value: "gs/config/ogcrecords-collection-metadata.json"},
 
+    ogcrecordsItemsFile: {writable: true, value: "gs/config/ogcrecords-items.json"},
+
     ogcrecordsQueryablesFile: {writable: true, value: "gs/config/ogcrecords-queryables.json"},
 
     ogcrecordsAPIFile: {writable: true, value: "gs/config/ogcrecords-api.json"},

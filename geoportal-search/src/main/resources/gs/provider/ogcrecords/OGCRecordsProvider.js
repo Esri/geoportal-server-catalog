@@ -82,11 +82,23 @@
       return promise;
     }},
 
-    queryables: {writable:true,value:function(task) {
+    collection: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
-      var json = task.context.readResourceFile(task.config.ogcrecordsQueryablesFile,"UTF-8");
+      var json = task.context.readResourceFile(task.config.ogcrecordsCollectionMetadataFile,"UTF-8");
+      json = json.trim();
+      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+      response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
+      promise.resolve();
+      return promise;
+    }},
+
+    items: {writable:true,value:function(task) {
+      var promise = task.context.newPromise();
+      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
+      var response = task.response;
+      var json = task.context.readResourceFile(task.config.ogcrecordsItemsFile,"UTF-8");
       json = json.trim();
       json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
@@ -119,6 +131,8 @@
           return this.collections(task);
       } else if (task.val.endsWith(v,"/ogcrecords/collections/metadata")) {
           return this.collection(task);
+      } else if (task.val.endsWith(v,"/collections/metadata/items")) {
+          return this.items(task);
       } else {
           return this.todo(task);
       }
