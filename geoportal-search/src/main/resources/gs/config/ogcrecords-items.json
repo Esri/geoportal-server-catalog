@@ -1,0 +1,22 @@
+{
+    "type": "FeatureCollection",
+    "features": [],
+    "links": [
+        {
+                "rel": "self",
+                "type": "application/geo+json",
+                "title": "This document",
+                "href": "{url}/collections/metadata/items?{urlparameters}",
+                "hreflang": "en-US"
+        },
+        {
+                "rel": "collection",
+                "type": "application/json",
+                "title": "Link to the Metadata collection",
+                "href": "{url}/collections/metadata",
+                "hreflang": "en-US"
+        }
+    ],
+    "numberMatched": 0,
+    "numberReturned": 0
+}

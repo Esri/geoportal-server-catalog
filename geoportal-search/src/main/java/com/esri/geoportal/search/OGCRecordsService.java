@@ -81,15 +81,14 @@ public class OGCRecordsService extends Application {
       @Context HttpServletRequest hsr) {
     new SearchRequest(asyncResponse).execute(hsr);
   }
-  /*
+
   @GET
-  @Path("/collections/metadata/items/{recordid}")
+  @Path("/collections/metadata/items")
   public void getItem(@Suspended final AsyncResponse asyncResponse,
       @Context SecurityContext sc,
       @Context HttpServletRequest hsr) {
     new SearchRequest(asyncResponse).execute(hsr);
   }
-*/
   
   @GET
   @Path("collections/metadata/queryables")

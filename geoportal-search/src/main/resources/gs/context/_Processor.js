@@ -107,6 +107,7 @@
               || task.val.endsWith(v,"/ogcrecords/collections") 
               || task.val.endsWith(v,"/ogcrecords/collections/queryables") 
               || task.val.endsWith(v,"/ogcrecords/collections/metadata")
+              || task.val.endsWith(v,"/ogcrecords/collections/metadata/items")
               || task.val.endsWith(v,"/ogcrecords/collections/metadata/queryables")
               ) {
         provider = gs.Object.create(gs.provider.ogcrecords.OGCRecordsProvider); 
