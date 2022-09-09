@@ -1,0 +1,37 @@
+{
+    "id": "metadata",
+    "title": "Geoportal Server Metadata",
+    "description": "Esri Geoportal Server Metadata Catalog",
+    "itemType": "record",
+    "crs": "http://www.opengis.net/def/crs/OGC/1.3/CRS84",
+    "links": [
+        {
+            "rel": "self",
+            "type": "application/json",
+            "title": "This document as JSON",
+            "href": "{url}/collections/metadata",
+            "hreflang": "en-US"
+        },
+        {
+            "rel": "parent",
+            "type": "application/json",
+            "title": "Link to all collections",
+            "href": "{url}/collections",
+            "hreflang": "en-US"
+        },
+        {
+            "rel": "queryables",
+            "type": "application/json",
+            "title": "Collection queryables",
+            "href": "{url}/collections/metadata/queryables",
+            "hreflang": "en-US"
+        },
+        {
+            "rel": "items",
+            "type": "application/json",
+            "title": "Items in this collection",
+            "href": "{url}/collections/metadata/items",
+            "hreflang": "en-US"
+        }
+    ]
+}

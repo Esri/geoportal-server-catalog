@@ -38,6 +38,12 @@
 
     ogcrecordsConformanceFile: {writable: true, value: "gs/config/ogcrecords-conformance.json"},
 
+    ogcrecordsCollectionsFile: {writable: true, value: "gs/config/ogcrecords-collections.json"},
+
+    ogcrecordsCollectionMetadataFile: {writable: true, value: "gs/config/ogcrecords-collection-metadata.json"},
+
+    ogcrecordsQueryablesFile: {writable: true, value: "gs/config/ogcrecords-queryables.json"},
+
     ogcrecordsAPIFile: {writable: true, value: "gs/config/ogcrecords-api.json"},
 
     proxyUrl: {writable: true, value: null},
