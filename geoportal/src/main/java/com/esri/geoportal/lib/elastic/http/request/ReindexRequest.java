@@ -211,7 +211,7 @@ public class ReindexRequest extends BulkEditRequest {
    * @param total the total number of items
    * @param finished true if the job has finished
    */
-  private void logFeedback(long tStart, long count, long total, boolean finished) {
+  protected void logFeedback(long tStart, long count, long total, boolean finished) {
     long tEnd = System.currentTimeMillis();
     double tSec = (tEnd - tStart) / 1000.0;
     String msg = "Reindex: "+fromIndexName+"->"+toIndexName;

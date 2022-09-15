@@ -13,23 +13,6 @@
  * limitations under the License.
  */
 package com.esri.geoportal.test;
-import com.esri.geoportal.base.metadata.Evaluator;
-import com.esri.geoportal.base.metadata.MetadataDocument;
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.xml.XmlUtil;
-import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.context.AppUser;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.request.DeleteItemRequest;
-import com.esri.geoportal.lib.elastic.request.GetItemRequest;
-import com.esri.geoportal.lib.elastic.request.GetMetadataRequest;
-import com.esri.geoportal.lib.elastic.request.PublishMetadataRequest;
-import com.esri.geoportal.lib.elastic.request.ReindexRequest;
-import com.esri.geoportal.lib.elastic.request.TransformMetadataRequest;
-import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
-import com.esri.geoportal.lib.elastic.util.Scroller;
-
 import java.io.IOException;
 import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
@@ -53,20 +36,17 @@ import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.opensearch.action.admin.indices.delete.DeleteIndexRequest;
-import org.opensearch.client.RestClient;
-import org.opensearch.client.RestClientBuilder;
-import org.opensearch.common.settings.Settings;
 import org.opensearch.action.delete.DeleteRequest;
-import org.opensearch.action.delete.DeleteResponse;
 import org.opensearch.action.get.GetRequest;
 import org.opensearch.action.get.GetResponse;
 import org.opensearch.action.index.IndexRequest;
-import org.opensearch.action.index.IndexResponse;
-import org.opensearch.action.support.master.AcknowledgedResponse;
 import org.opensearch.client.RequestOptions;
+import org.opensearch.client.RestClient;
+import org.opensearch.client.RestClientBuilder;
 import org.opensearch.client.RestHighLevelClient;
 import org.opensearch.client.indices.CreateIndexRequest;
 import org.opensearch.client.indices.CreateIndexResponse;
+import org.opensearch.common.settings.Settings;
 import org.opensearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -77,6 +57,23 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestTemplate;
+
+import com.esri.geoportal.base.metadata.Evaluator;
+import com.esri.geoportal.base.metadata.MetadataDocument;
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.xml.XmlUtil;
+import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.context.AppUser;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.request.DeleteItemRequest;
+import com.esri.geoportal.lib.elastic.http.request.GetItemRequest;
+import com.esri.geoportal.lib.elastic.http.request.GetMetadataRequest;
+import com.esri.geoportal.lib.elastic.http.request.PublishMetadataRequest;
+import com.esri.geoportal.lib.elastic.http.request.ReindexRequest;
+import com.esri.geoportal.lib.elastic.http.request.TransformMetadataRequest;
+import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
+import com.esri.geoportal.lib.elastic.util.Scroller;
 
 @SuppressWarnings("unused")
 public class Test {
