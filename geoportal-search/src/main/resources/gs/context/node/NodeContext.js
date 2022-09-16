@@ -20,7 +20,8 @@
   gs.context.node.NodeContext = gs.Object.create(gs.context.Context,{
 
     readResourceFile: {writable:true,value:function(path,charset) {
-      path = "../"+path; // TODO this is relative to where node was launched
+      // comment for testing standalone node setup for ogcrecords
+      // path = "../"+path; // TODO this is relative to where node was launched
       if (charset === null || charset.length == 0) charset = "UTF-8";
       return fs.readFileSync(path,{encoding:charset});
     }},
