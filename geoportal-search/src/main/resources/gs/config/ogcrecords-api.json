@@ -62,26 +62,26 @@
                         },
                         "example": [
                             {
-                                "href": "{opensearch.url}",
+                                "href": "{url}",
                                 "rel": "self",
                                 "type": "application/json",
-                                "title": "this OGC API - Records landing page as JSON"
+                                "title": "This OGC API - Records landing page as JSON"
                             },
                             {
-                                "href": "{opensearch.url}/api",
+                                "href": "{url}/api",
                                 "rel": "service-desc",
                                 "type": "application/vnd.oai.openapi+json;version=3.0",
-                                "title": "the API definition (OpenAPI document)"
+                                "title": "The API definition (OpenAPI document)"
                             },
                             {
-                                "href": "{opensearch.url}/conformance",
+                                "href": "{url}/conformance",
                                 "rel": "conformance",
-                                "title": "the OGC API conformance classes supported"
+                                "title": "The OGC API conformance classes supported"
                             },
                             {
-                                "href": "{opensearch.url}/collections",
+                                "href": "{url}/collections",
                                 "rel": "data",
-                                "title": "the set of available collections"
+                                "title": "The set of available collections"
                             }
                         ]
                     }

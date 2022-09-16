@@ -17,7 +17,7 @@
 
   gs.config.Config = gs.Object.create(gs.Proto,{
 
-    defaultTarget: {writable: true, value: "arcgis"},
+    defaultTarget: {writable: true, value: "customElastic"},
     
     // allow POSTing of Elasticsearch DSL (Domain Specific Language) queries and aggregations
     allowDslSearches: {writable: true, value: true},
@@ -61,6 +61,10 @@
 
       var targets = {
 
+        "customElastic": gs.Object.create(gs.target.elastic.CustomElasticTarget).mixin({
+          "searchUrl": "https://gpt.geocloud.com/geoportal2/elastic/metadata/item/_search",
+          "itemBaseUrl": null
+        }),
         "arcgis": gs.Object.create(gs.target.portal.PortalTarget).mixin({
           "portalBaseUrl": "https://www.arcgis.com"
         })

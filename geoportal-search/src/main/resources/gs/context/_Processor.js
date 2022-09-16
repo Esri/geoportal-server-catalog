@@ -99,17 +99,7 @@
           });
         }
         if (!isOsDsc) provider = gs.Object.create(gs.provider.csw.CswProvider);
-      } else if (task.val.endsWith(v,"/ogcrecords") 
-              || task.val.endsWith(v,"/ogcrecords/") 
-              || task.val.endsWith(v,"/ogcrecords/api") 
-              || task.val.endsWith(v,"/ogcrecords/api/") 
-              || task.val.endsWith(v,"/ogcrecords/conformance") 
-              || task.val.endsWith(v,"/ogcrecords/collections") 
-              || task.val.endsWith(v,"/ogcrecords/collections/queryables") 
-              || task.val.endsWith(v,"/ogcrecords/collections/metadata")
-              || task.val.endsWith(v,"/ogcrecords/collections/metadata/items")
-              || task.val.endsWith(v,"/ogcrecords/collections/metadata/queryables")
-              ) {
+      } else if (task.val.startsWith(v, "/ogcrecords")) {
         provider = gs.Object.create(gs.provider.ogcrecords.OGCRecordsProvider); 
       }
       return provider;

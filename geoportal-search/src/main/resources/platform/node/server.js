@@ -58,8 +58,63 @@ app.post("/opensearch/description", function (req, res) {
   execute(req,res,mixinParameters(req));
 });
 
-function execute(req, res, parameterMap) {
+app.get("/ogcrecords", function (req, res) {
+  execute(req,res,req.query);
+});
 
+app.post("/ogcrecords", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/api", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/api", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/conformance", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/conformance", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections/metadata", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata/queryables", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections/metadata/queryables", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata/items", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections/metadata/items", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+function execute(req, res, parameterMap) {
   // TODO need X- headers
   var baseUrl = req.protocol + "://" + req.hostname + ":" +port;
 
@@ -68,7 +123,8 @@ function execute(req, res, parameterMap) {
     "requestBody": req.body,
     "baseUrl": baseUrl,
     "headerMap": req.headers,
-    "parameterMap": parameterMap
+    "parameterMap": parameterMap,
+    "pathParameters": req.params
   };
   //console.log("Processing request:",requestInfo);
   var processor = gs.Object.create(gs.context.node.NodeProcessor);

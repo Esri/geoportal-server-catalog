@@ -30,7 +30,7 @@
 
       var json = task.context.readResourceFile(task.config.ogcrecordsDescriptionFile,"UTF-8");
       json = json.trim();
-      json = json.replace(/{opensearch.url}/g,task.val.escXml(ogcRecordsUrl));
+      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
       var response = task.response;
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
       promise.resolve();
@@ -52,7 +52,7 @@
       var response = task.response;
       var json = task.context.readResourceFile(task.config.ogcrecordsAPIFile,"UTF-8");
       json = json.trim();
-      json = json.replace(/{opensearch.url}/g,task.val.escXml(ogcRecordsUrl));
+      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
       promise.resolve();
       return promise;
@@ -86,11 +86,65 @@
       var promise = task.context.newPromise();
       var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
-      var json = task.context.readResourceFile(task.config.ogcrecordsItemsFile,"UTF-8");
-      json = json.trim();
-      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
-      response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
-      promise.resolve();
+
+      // var results = this.search(task);
+      this.search(task).then(function(res) {
+        // console.log(" results = ", res);
+
+        var totalHits = res.totalHits;
+        var startIndex = res.startIndex;
+        var features = [];
+        var items = res.items;
+        for (i=0;i<items.length;i++) {
+          var geom = {};
+          if (items[i]._source.envelope_geo) {
+            geom = {
+              type: 'Polygon',
+              coordinates: items[i]._source.envelope_geo.coordinates
+            };
+          }          
+
+          var feat = {
+            id: items[i]._id,
+            type: 'Feature',
+            geometry: geom,
+            time: items[i]._source.sys_created_dt,
+            properties: {
+              type: items[i]._source.sys_metadatatype_s,
+              title: items[i]._source.title,
+              recordCreated: items[i]._source.sys_created_dt,
+              recordUpdated: items[i]._source.sys_modified_dt
+            }
+          };
+          features.push(feat);
+        }
+
+        return {totalHits, startIndex, features};
+      }).then(function(info) {
+
+        // get info from json file
+        var json = task.context.readResourceFile(task.config.ogcrecordsItemsFile,"UTF-8");
+        json = json.trim();
+
+        // update url
+        json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+
+        // update counts
+        json = json.replace(/\"{numberMatched}\"/, info.totalHits);
+        json = json.replace(/\"{numberReturned}\"/, info.features.length);
+        json = json.replace(/\"{next}\"/, info.startIndex + info.features.length);
+
+        // update features
+        var feats = JSON.stringify(info.features);
+        json = json.replace(/\"{features}\"/, feats);
+
+        response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
+
+        promise.resolve();
+      })["catch"](function(error){
+        console.log(" err = ", error);
+        promise.reject(error);
+      });
       return promise;
     }},
 
@@ -107,7 +161,7 @@
     execute: {writable:true,value:function(task) {
       var v = task.request.getUrlPath();
       
-      if (task.val.endsWith(v,"/ogcrecords")) {
+      if (task.val.endsWith(v,"/ogcrecords") || task.val.endsWith(v,"/ogcrecords/")) {
           return this.description(task);
       } else if (task.val.endsWith(v,"/ogcrecords/conformance")) {
           return this.conformance(task);
@@ -138,8 +192,7 @@
           task.response.put(task.response.Status_NOT_FOUND,task.response.MediaType_APPLICATION_JSON,msg);
           promise.resolve();
         } else {
-          task.writer.write(task,searchResult);
-          promise.resolve();
+          promise.resolve(searchResult);
         }
       })["catch"](function(error){
         promise.reject(error);
