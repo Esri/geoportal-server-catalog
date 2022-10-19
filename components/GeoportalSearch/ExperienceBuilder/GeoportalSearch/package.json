@@ -10,7 +10,7 @@
   "license": "ISC",
   "dependencies": {
     "calcite-react": "^0.60.0",
-    "react-multiselect-checkboxes": "0.0.1",
+    "react-multiselect-checkboxes": "0.1.1",
     "react-spinners": "^0.11.0"
   }
 }
