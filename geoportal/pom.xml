@@ -310,7 +310,7 @@
     <dependency>
       <groupId>org.yaml</groupId>
       <artifactId>snakeyaml</artifactId>
-      <version>1.29</version>
+      <version>1.32</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
