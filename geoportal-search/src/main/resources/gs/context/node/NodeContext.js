@@ -37,9 +37,11 @@
           body: data
         };
       }
+
       // TODO gs._request path for require
       gs._request(options, function (error, response, body) {
         var msg = "Network error";
+        // console.log(body);
         if (!error && response && response.statusCode === 200) {
           promise.resolve(body);
         } else {

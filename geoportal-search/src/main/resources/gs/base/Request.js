@@ -195,6 +195,7 @@
     headerMap: {writable: true, value: null},
     parameterMap: {writable: true, value: null},
     url: {writable: true, value: null}, // TODO requestUrl
+    pathParameters: {writable: true, value: null},
 
     /* .......................................................................................... */
 
@@ -249,6 +250,10 @@
         return this.url;
       }
       return null;
+    }},
+
+    getPathParameterValue: {writable:true,value:function(key) {
+      return this._getPathParameterValue(this.pathParameters,key);      
     }},
 
     hasQueryParameters: {writable:true,value:function() {
@@ -345,7 +350,17 @@
         }
       }
       return null;
-    }}
+    }},
+
+    _getPathParameterValue: {writable:true,value:function(map,key) {
+      if (map) {        
+        var a = map[key];
+        if (a !== "undefined" && a !== null) {
+          return a;
+        }
+      }
+      return null;
+    }},
 
   });
 
