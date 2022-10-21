@@ -144,6 +144,7 @@
     /* ............................................................................................ */
 
     prepare: {writable:true,value:function(task) {
+      
       var promise = task.context.newPromise();
       if (!this.schema) this.schema = this.newSchema(task);
       var targetRequest = {
@@ -159,8 +160,8 @@
         if (typeof sBody === "string" && sBody.indexOf("{") === 0) {
           sBody = sBody.trim();
           if (sBody.indexOf("{") === 0) {
-            body = JSON.parse(sBody);
-            if (body.query) {
+            body = JSON.parse(sBody);            
+            if (body.query) {              
               targetRequest.musts.push(JSON.parse(JSON.stringify(body.query)));
               delete body.query;
               targetRequest.searchCriteria = body;
@@ -172,7 +173,7 @@
       this.prepareRequiredFilter(task,targetRequest);
       this.prepareQ(task,targetRequest);
       this.prepareFilter(task,targetRequest);
-      this.prepareIds(task,targetRequest);
+      // this.prepareIds(task,targetRequest);
       this.prepareTypes(task,targetRequest);
       this.prepareModified(task,targetRequest);
       this.prepareTimePeriod(task,targetRequest);
@@ -182,13 +183,20 @@
       this.prepareSort(task,targetRequest);
       this.prepareOther(task,targetRequest);
 
+      //OGC Record API support
+      if (task.request.pathParameters && task.request.getPathParameterValue('recordid')) {
+        this.preparePathParameterId(task,targetRequest);
+      } else {
+        this.prepareIds(task,targetRequest);
+      }
+
       // api 5.1 ["q","from","size","sort","df","analyzer","analyze_wildcard",
       //          "default_operator","lenient", "timeout","terminate_after",
       //          "search_type","_source","stored_fields","track_scores","explain"];
 
       if (targetRequest.musts.length > 0) {
         targetRequest.searchCriteria["query"] = {"bool":{"must": targetRequest.musts}};
-        //console.log("targetRequest.searchCriteria="+(JSON.stringify(targetRequest.searchCriteria)));
+        // console.log("targetRequest.searchCriteria="+(JSON.stringify(targetRequest.searchCriteria)));
       }
       
       if (task.request.parameterMap.search_after) {
@@ -279,6 +287,15 @@
       var ids = task.request.getIds();
       if (Array.isArray(ids) && ids.length > 0) {
         targetRequest.musts.push({"terms":{"_id":ids}});
+      }
+    }},
+
+    //OGC Record API support
+    preparePathParameterId: {writable:true,value:function(task,targetRequest) {
+      var recId = task.request.getPathParameterValue('recordid');
+      if (recId) {
+        targetRequest.musts.push({"terms":{"_id": [recId]}});
+        // targetRequest.musts.push({"match":{"_id": {"query": recId}}});
       }
     }},
 
@@ -450,7 +467,12 @@
         var data = null, dataContentType = "application/json";
         if (targetRequest && task.val.hasAnyProperty(targetRequest.searchCriteria)) {
           var criteria = JSON.parse(JSON.stringify(targetRequest.searchCriteria));
-          criteria.track_total_hits = true;
+
+          // to handle elastic search version-dependent error with 'track_total_hits'
+          if (self.schema.useTotalHits) {
+            criteria.track_total_hits = true;
+          }
+          
           data = JSON.stringify(criteria);
         }
         if (typeof self.username === "string" && self.username.length > 0 &&
@@ -475,6 +497,7 @@
                         response.hits.total.value && !isNaN(response.hits.total.value)? response.hits.total.value: response.hits.total: 
                         0;
           if (task.verbose) console.log("totalHits=",searchResult.totalHits);
+          
           var hits = response.hits.hits;
           if (Array.isArray(response.hits.hits)) {
             searchResult.items = response.hits.hits;

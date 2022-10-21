@@ -82,40 +82,31 @@
       return promise;
     }},
 
+    queryables: {writable:true,value:function(task) {
+      var promise = task.context.newPromise();
+      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
+      var response = task.response;
+      var json = task.context.readResourceFile(task.config.ogcrecordsQueryablesFile,"UTF-8");
+      json = json.trim();
+      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+      response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
+      promise.resolve();
+      return promise;
+    }},
+
     items: {writable:true,value:function(task) {
+      var self = this;
       var promise = task.context.newPromise();
       var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
 
-      // var results = this.search(task);
       this.search(task).then(function(res) {
-        // console.log(" results = ", res);
-
         var totalHits = res.totalHits;
         var startIndex = res.startIndex;
         var features = [];
         var items = res.items;
-        for (i=0;i<items.length;i++) {
-          var geom = {};
-          if (items[i]._source.envelope_geo) {
-            geom = {
-              type: 'Polygon',
-              coordinates: items[i]._source.envelope_geo.coordinates
-            };
-          }          
-
-          var feat = {
-            id: items[i]._id,
-            type: 'Feature',
-            geometry: geom,
-            time: items[i]._source.sys_created_dt,
-            properties: {
-              type: items[i]._source.sys_metadatatype_s,
-              title: items[i]._source.title,
-              recordCreated: items[i]._source.sys_created_dt,
-              recordUpdated: items[i]._source.sys_modified_dt
-            }
-          };
+        for (i=0;i<items.length;i++) {          
+          var feat = self.createRecordInfo(items[i]);
           features.push(feat);
         }
 
@@ -148,6 +139,23 @@
       return promise;
     }},
 
+    recordInfo: {writable:true,value:function(task, recId) {
+      var self = this;
+      var promise = task.context.newPromise();
+      var response = task.response;
+      
+      this.search(task).then(function(res) {
+        // console.log(" results = ", res);        
+        var json = self.createRecordInfo(res.items[0]);        
+        response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
+        promise.resolve();
+      })["catch"](function(error){
+        console.log(" err = ", error);
+        promise.reject(error);
+      });
+      return promise;
+    }},
+
     todo: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       var response = task.response;
@@ -159,9 +167,14 @@
     }},
 
     execute: {writable:true,value:function(task) {
-      var v = task.request.getUrlPath();
       
-      if (task.val.endsWith(v,"/ogcrecords") || task.val.endsWith(v,"/ogcrecords/")) {
+      var v = task.request.getUrlPath();
+      var recId = task.request.getPathParameterValue('recordid');
+      // console.log(" recordid ", recId);
+
+      if (recId && v.indexOf("/collections/metadata/items/") > -1) {
+          return this.recordInfo(task, recId);
+      } else if (task.val.endsWith(v,"/ogcrecords") || task.val.endsWith(v,"/ogcrecords/")) {
           return this.description(task);
       } else if (task.val.endsWith(v,"/ogcrecords/conformance")) {
           return this.conformance(task);
@@ -185,6 +198,7 @@
       task.request.parseF(task);
       this.setWriter(task);
       var isSingleIdRequest = this.isSingleIdRequest;
+      
       task.target.search(task).then(function(searchResult){
         if (isSingleIdRequest && (!searchResult.items || searchResult.items.length === 0)) {
           // TODO is this error only for the CSW ets-cat30 test?
@@ -198,8 +212,32 @@
         promise.reject(error);
       });
       return promise;
-    }}
+    }},
 
+    
+    createRecordInfo: {writable:true,value:function(item) {
+      var geom = {};
+      if (item._source.envelope_geo) {
+        geom = {
+          type: 'Polygon',
+          coordinates: item._source.envelope_geo.coordinates
+        };
+      }          
+
+      var feat = {
+        id: item._id,
+        type: 'Feature',
+        geometry: geom,
+        time: item._source.sys_created_dt,
+        properties: {
+          type: item._source.sys_metadatatype_s,
+          title: item._source.title,
+          recordCreated: item._source.sys_created_dt,
+          recordUpdated: item._source.sys_modified_dt
+        }
+      };
+      return feat;
+    }}
   });
 
 }());

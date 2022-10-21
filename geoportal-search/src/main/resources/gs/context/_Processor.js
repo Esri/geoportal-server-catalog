@@ -111,6 +111,7 @@
         body: requestInfo.requestBody,
         headerMap: requestInfo.headerMap,
         parameterMap: requestInfo.parameterMap,
+        pathParameters: requestInfo.pathParameters
       });
       return request;
     }},
@@ -150,6 +151,7 @@
           body: requestInfo.requestBody,
           headerMap: requestInfo.headerMap,
           parameterMap: requestInfo.parameterMap,
+          pathParameters: requestInfo.pathParameters
         });
         task = self.newTask(context,config,request,{
           baseUrl: requestInfo.baseUrl

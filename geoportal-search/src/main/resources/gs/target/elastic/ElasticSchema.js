@@ -19,6 +19,9 @@
 
     isVersion5Plus: {writable: true, value: true},
 
+    // to handle elastic search version-dependent error with 'track_total_hits'
+    useTotalHits: {writable: true, value: true}, 
+
     bboxField: {writable: true, value: null},
     pointField: {writable: true, value: null},
 
