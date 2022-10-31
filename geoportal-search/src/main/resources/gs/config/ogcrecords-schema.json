@@ -1,0 +1,19 @@
+{
+"id": {
+        "title": "id",
+        "type": "string"
+},
+"type": {
+        "title": "type",
+        "type": "string"
+},
+"geometry": {},
+"time": {
+        "title": "time",
+        "type": "string"
+},
+"properties": {
+        "title": "properties",
+        "type": "object"
+}
+}
