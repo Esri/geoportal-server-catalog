@@ -48,6 +48,8 @@
 
     ogcrecordsAPIFile: {writable: true, value: "gs/config/ogcrecords-api.json"},
 
+    ogcrecordsSchemaFile: {writable: true, value: "gs/config/ogcrecords-schema.json"},
+
     proxyUrl: {writable: true, value: null},
 
     _targets: {writable: true, value: null},

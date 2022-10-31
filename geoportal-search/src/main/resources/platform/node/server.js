@@ -122,6 +122,10 @@ app.post("/ogcrecords/collections/metadata/items/:recordid", function (req, res)
   execute(req,res,mixinParameters(req));
 });
 
+app.get("/ogcrecords/collections/metadata/schema", function (req, res) {
+  execute(req,res,req.query);
+});
+
 function execute(req, res, parameterMap) {
   // TODO need X- headers
   var baseUrl = req.protocol + "://" + req.hostname + ":" +port;

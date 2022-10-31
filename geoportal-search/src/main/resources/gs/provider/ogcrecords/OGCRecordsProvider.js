@@ -17,12 +17,13 @@
 
   gs.provider.ogcrecords.OGCRecordsProvider = gs.Object.create(gs.provider.Provider,{
 
+    ogcRecordsUrl: {writable: true, value: null},
+
     isSingleIdRequest: {writable: true, value: false},
 
     description: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
-      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
-
+      
       var qstr = "", url = task.request.url;
       var n = url.indexOf("?");
       if (n !== -1) qstr = url.substring(n + 1).trim();
@@ -30,7 +31,7 @@
 
       var json = task.context.readResourceFile(task.config.ogcrecordsDescriptionFile,"UTF-8");
       json = json.trim();
-      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+      json = json.replace(/{url}/g,task.val.escXml(this.ogcRecordsUrl));
       var response = task.response;
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
       promise.resolve();
@@ -48,11 +49,10 @@
 
     api: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
-      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
       var json = task.context.readResourceFile(task.config.ogcrecordsAPIFile,"UTF-8");
       json = json.trim();
-      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+      json = json.replace(/{url}/g,task.val.escXml(this.ogcRecordsUrl));
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
       promise.resolve();
       return promise;
@@ -60,11 +60,10 @@
 
     collections: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
-      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
       var json = task.context.readResourceFile(task.config.ogcrecordsCollectionsFile,"UTF-8");
       json = json.trim();
-      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+      json = json.replace(/{url}/g,task.val.escXml(this.ogcRecordsUrl));
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
       promise.resolve();
       return promise;
@@ -72,11 +71,10 @@
 
     collection: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
-      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
       var json = task.context.readResourceFile(task.config.ogcrecordsCollectionMetadataFile,"UTF-8");
       json = json.trim();
-      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+      json = json.replace(/{url}/g,task.val.escXml(this.ogcRecordsUrl));
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
       promise.resolve();
       return promise;
@@ -84,11 +82,27 @@
 
     queryables: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
-      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
       var json = task.context.readResourceFile(task.config.ogcrecordsQueryablesFile,"UTF-8");
       json = json.trim();
-      json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+      json = json.replace(/{url}/g,task.val.escXml(this.ogcRecordsUrl));
+      response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
+      promise.resolve();
+      return promise;
+    }},
+
+    schema: {writable:true,value:function(task) {      
+      var promise = task.context.newPromise();
+      var response = task.response;
+      var json;
+      if (task.request.parameterMap && task.request.parameterMap["type"] === "returnables" ) {
+        json = task.context.readResourceFile(task.config.ogcrecordsSchemaFile,"UTF-8");
+        json = json.trim();
+        json = json.replace(/{url}/g,task.val.escXml(this.ogcRecordsUrl));
+      } else {
+        json = "Invalid query parameter!";
+      }
+      
       response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
       promise.resolve();
       return promise;
@@ -97,7 +111,6 @@
     items: {writable:true,value:function(task) {
       var self = this;
       var promise = task.context.newPromise();
-      var ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       var response = task.response;
 
       this.search(task).then(function(res) {
@@ -118,7 +131,7 @@
         json = json.trim();
 
         // update url
-        json = json.replace(/{url}/g,task.val.escXml(ogcRecordsUrl));
+        json = json.replace(/{url}/g,task.val.escXml(self.ogcRecordsUrl));
 
         // update counts
         json = json.replace(/\"{numberMatched}\"/, info.totalHits);
@@ -156,6 +169,7 @@
       return promise;
     }},
 
+
     todo: {writable:true,value:function(task) {
       var promise = task.context.newPromise();
       var response = task.response;
@@ -167,6 +181,7 @@
     }},
 
     execute: {writable:true,value:function(task) {
+      this.ogcRecordsUrl = task.baseUrl+"/ogcrecords"; 
       
       var v = task.request.getUrlPath();
       var recId = task.request.getPathParameterValue('recordid');
@@ -188,6 +203,8 @@
           return this.collection(task);
       } else if (task.val.endsWith(v,"/collections/metadata/items")) {
           return this.items(task);
+      } else if (v.indexOf(v,"/collections/metadata/schema")  > -1) {
+          return this.schema(task);
       } else {
           return this.todo(task);
       }
@@ -216,28 +233,63 @@
 
     
     createRecordInfo: {writable:true,value:function(item) {
+      // logic for 'geometry' property
       var geom = {};
+
+      // per OGC Records API, polygon schema should have min 4 coordinates
+      // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/polygonGeoJSON.yaml
+      // response from elastic search has 2 coords - upper left and lower right - so create 4 coords to 
+      // conform to OGC Records 
       if (item._source.envelope_geo) {
+        var xmin = item._source.envelope_geo.coordinates[0][0];
+        var xmax = item._source.envelope_geo.coordinates[1][0];
+        var ymin = item._source.envelope_geo.coordinates[1][1];
+        var ymax = item._source.envelope_geo.coordinates[0][1];
+
+        var coord = [
+          [xmin, ymin],
+          [xmin, ymax],
+          [xmax, ymax],
+          [xmax, ymin],
+          [xmin, ymin],
+        ];      
+
         geom = {
           type: 'Polygon',
-          coordinates: item._source.envelope_geo.coordinates
+          coordinates: coord
         };
       }          
+
+      // logic for 'time' property - per OGC Records API, 'time' should have min 2 dates. 
+      // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/recordGeoJSON.yaml
+      // TBD - decide which date fields to read. 
+      var timeProperty = null;
+      if (item._source.timeperiod_nst && item._source.timeperiod_nst.begin_dt && item._source.timeperiod_nst.end_dt) {
+        // For now if result has time range, returns the dates else null
+        timeProperty = [item._source.timeperiod_nst.begin_dt, item._source.timeperiod_nst.end_dt];
+      } 
 
       var feat = {
         id: item._id,
         type: 'Feature',
         geometry: geom,
-        time: item._source.sys_created_dt,
-        properties: {
-          type: item._source.sys_metadatatype_s,
-          title: item._source.title,
-          recordCreated: item._source.sys_created_dt,
-          recordUpdated: item._source.sys_modified_dt
-        }
+        time: timeProperty,
+
+        // TBD - for now, sending back all properties from elastic search response, but have to decide how
+        // to map response properties with OGC Records 'recordGeoJSON' schema
+        // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/recordGeoJSON.yaml
+        properties: item._source 
+        // properties: {
+        //   type: item._source.sys_metadatatype_s,
+        //   title: item._source.title,
+        //   recordCreated: item._source.sys_created_dt,
+        //   recordUpdated: item._source.sys_modified_dt
+          
+        // }
       };
       return feat;
     }}
+
   });
 
 }());

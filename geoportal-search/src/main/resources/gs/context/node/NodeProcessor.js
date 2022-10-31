@@ -30,6 +30,7 @@
         ogcrecordsCollectionMetadataFile: "../../gs/config/ogcrecords-collection-metadata.json",
         ogcrecordsQueryablesFile: "../../gs/config/ogcrecords-queryables.json",
         ogcrecordsItemsFile: "../../gs/config/ogcrecords-items.json",
+        ogcrecordsSchemaFile: "../../gs/config/ogcrecords-schema.json",
       });
       return config;
     }},
