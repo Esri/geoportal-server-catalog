@@ -123,7 +123,7 @@
           features.push(feat);
         }
 
-        return {totalHits, startIndex, features};
+        return {totalHits:totalHits, startIndex:startIndex, features:features};
       }).then(function(info) {
 
         // get info from json file
