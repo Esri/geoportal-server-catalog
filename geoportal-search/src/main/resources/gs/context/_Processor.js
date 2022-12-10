@@ -101,6 +101,8 @@
         if (!isOsDsc) provider = gs.Object.create(gs.provider.csw.CswProvider);
       } else if (task.val.startsWith(v, "/ogcrecords")) {
         provider = gs.Object.create(gs.provider.ogcrecords.OGCRecordsProvider); 
+      } else if (task.val.startsWith(v, "/stac")) {
+        provider = gs.Object.create(gs.provider.stac.STACProvider); 
       }
       return provider;
     }},
