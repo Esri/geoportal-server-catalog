@@ -38,10 +38,10 @@ HTTP requests to these endpoints are proxied to the Elasticsearch cluster.
 See: WEB-INF/classes/app-context.html for cluster configuration
 See: WEB-INF/classes/app-security.html for securing these endpoints
 Example: http://localhost:8080/geoportal/elastic/metadata/_mappings?pretty=true
-Example: http://localhost:8080/geoportal/elastic/metadata/item/_search?pretty=true
-Example: http://localhost:8080/geoportal/elastic/metadata/xml/_search?pretty=true
+Example: http://localhost:8080/geoportal/elastic/metadata/item/item/_search?pretty=true
+Example: http://localhost:8080/geoportal/elastic/metadata/xml/item/_search?pretty=true
 
-When using /elastic/metadata/item/_search, POST your query using the 
+When using /elastic/metadata/item/item/_search, POST your query using the 
 Elasticsearch Query DSL (aggregations requests are also supported).
 
 ------------------------------------------------------------------------------------------
@@ -232,7 +232,7 @@ http://localhost:8080/geoportal/opensearch?q=map
 
 http://localhost:8080/geoportal/opensearch?f=json&pretty=true&q=roads&target={"type":"portal","url":"https://www.arcgis.com"}
 
-http://localhost:8080/geoportal/opensearch?f=json&target=[{"key":"a","type":"portal","url":"https://www.arcgis.com"},{"key":"b","type":"geoportal","url":"http://gptdb1:8080/geoportal/elastic/metadata/item/_search"},{"key":"c","type":"csw2","url":"https%3A%2F%2Fgptogc.esri.com%2Fgeoportal%2Fcsw%3Fservice%3DCSW%26request%3DGetRecords","profile":"CSW2_Geoportal1"}]
+http://localhost:8080/geoportal/opensearch?f=json&target=[{"key":"a","type":"portal","url":"https://www.arcgis.com"},{"key":"b","type":"geoportal","url":"http://gptdb1:8080/geoportal/elastic/metadata/item/item/_search"},{"key":"c","type":"csw2","url":"https%3A%2F%2Fgptogc.esri.com%2Fgeoportal%2Fcsw%3Fservice%3DCSW%26request%3DGetRecords","profile":"CSW2_Geoportal1"}]
 
 -------------------------------------------------------------------------------------------
 
