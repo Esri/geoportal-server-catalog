@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
@@ -461,17 +462,17 @@ public class ElasticContext {
 //   * @return the credentials
 //   */
   public String getBasicCredentials() {
-//    String user = getXpackUsername();
-//    String pwd = getXpackPassword();
-//    if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
-//      try {
-//        String cred = user+":"+pwd;
-//        byte[] bytes = java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8"));
-//        String authString = "Basic "+(new String(bytes,"UTF-8"));
-//        return authString;
-//      } catch (UnsupportedEncodingException e) {
-//      }
-//    }
+    String user = getXpackUsername();
+    String pwd = getXpackPassword();
+    if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
+      try {
+        String cred = user+":"+pwd;
+        byte[] bytes = java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8"));
+        String authString = "Basic "+(new String(bytes,"UTF-8"));
+        return authString;
+      } catch (UnsupportedEncodingException e) {
+      }
+    }
     return null;
   }
   
