@@ -18,7 +18,7 @@
 		<beans:property name="harvesterContext" ref="harvesterContext" />
 		<beans:property name="supportsApprovalStatus" value="false" />
 		<beans:property name="defaultApprovalStatus" value="" /> <!-- optional - approved|reviewed|disapproved|incomplete|posted|draft -->
-		<beans:property name="supportsGroupBasedAccess" value="true" />
+		<beans:property name="supportsGroupBasedAccess" value="false" />
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
 		<beans:property name="parseGml" value="false" />
 		<beans:property name="supportsCollections" value="false" />
@@ -38,30 +38,28 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="allowFileId" value="false" />
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
 		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
-		<beans:property name="httpPort" value="443" />
-		<!-- <beans:property name="httpPort" value="9200" /> -->
+		<beans:property name="httpPort" value="9200" />
 		<beans:property name="transportPort" value="9300" />
 		<beans:property name="proxyBufferSize" value="8192" />
 		
 		<!-- complete the following if you have x-pack security enabled,
 		     see https://www.elastic.co/guide/en/x-pack/current/java-clients.html -->
-		 
-		<beans:property name="useHttps" value="true" /> 
-		<beans:property name="xpackUsername" value="gptopensearch" />
-		<beans:property name="xpackPassword" value="gpt$2022.disCovery!" /> 
-		<!-- <beans:property name="xpackHttpType" value="" />
+		<!-- 
+		<beans:property name="useHttps" value="false" />
+		<beans:property name="xpackUsername" value="" />
+		<beans:property name="xpackPassword" value="" />
+		<beans:property name="xpackHttpType" value="" />
 		<beans:property name="xpackTransportType" value="" />
 		<beans:property name="xpackSecurityTransportSslEnabled" value="false" />
 		<beans:property name="xpackSslKey" value="" />
 		<beans:property name="xpackSslCertificate" value="" />
-		<beans:property name="xpackSslCertificateAuthorities" value="" /> -->
-		
+		<beans:property name="xpackSslCertificateAuthorities" value="" />
+		 -->
  
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
-				 <!--  <beans:value>${es_node:localhost}</beans:value> -->
-				<beans:value>search-gpt-opensearch-wadorsdazkujanwbu5pvod6vhe.us-west-1.es.amazonaws.com</beans:value>
+				<beans:value>${es_node:localhost}</beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
