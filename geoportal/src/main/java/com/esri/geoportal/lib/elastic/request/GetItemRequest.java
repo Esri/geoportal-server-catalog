@@ -92,28 +92,28 @@ public class GetItemRequest extends AppRequest {
   @Override
   public AppResponse execute() throws Exception {    
     AppResponse response = new AppResponse();
-    String id = getId();
-    if (id == null || id.length() == 0) {
-      response.writeIdIsMissing(this);
-      return response;
-    }
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    AccessUtil au = new AccessUtil();
-    id = au.determineId(id);
-    au.ensureReadAccess(getUser(),id);
-    
-    this.setXmlField("xml");
-    ItemIO itemio = new ItemIO();
-    GetResponse resp = itemio.getItem(ec,id);
-    if (resp.isExists()) {
-      if (this.getIncludeMetadata()) {
-        setXml(itemio.readXml(ec,id));
-      }
-      ItemWriter writer = newWriter();
-      writer.write(this,response,resp);
-    } else {
-      response.writeIdNotFound(this,id);
-    }
+//    String id = getId();
+//    if (id == null || id.length() == 0) {
+//      response.writeIdIsMissing(this);
+//      return response;
+//    }
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    AccessUtil au = new AccessUtil();
+//    id = au.determineId(id);
+//    au.ensureReadAccess(getUser(),id);
+//    
+//    this.setXmlField("xml");
+//    ItemIO itemio = new ItemIO();
+//    GetResponse resp = itemio.getItem(ec,id);
+//    if (resp.isExists()) {
+//      if (this.getIncludeMetadata()) {
+//        setXml(itemio.readXml(ec,id));
+//      }
+//      ItemWriter writer = newWriter();
+//      writer.write(this,response,resp);
+//    } else {
+//      response.writeIdNotFound(this,id);
+//    }
     return response;
   }
   
