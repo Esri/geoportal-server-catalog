@@ -16,19 +16,6 @@
     <jackson.version>2.12.6.1</jackson.version>
   </properties>
 
-	<repositories>
-		<repository>
-			<id>elasticsearch-releases</id>
-			<url>https://artifacts.elastic.co/maven</url>
-			<releases>
-				<enabled>true</enabled>
-			</releases>
-			<snapshots>
-				<enabled>false</enabled>
-			</snapshots>
-		</repository>
-	</repositories>
-   
   <dependencies>
 
     <!-- servlet api -->
@@ -105,39 +92,7 @@
         <artifactId>opensearch-rest-high-level-client</artifactId>
         <version>2.1.0</version>
     </dependency>
-    <!-- Elasticsearch -->
-    
-    <dependency>
-      <groupId>org.elasticsearch.client</groupId>
-      <artifactId>x-pack-transport</artifactId>
-      <!-- version>5.6.1</version -->
-      <version>6.8.20</version>
-      <!-- version>7.4.1</version -->
-      <!--  Use updated dependencies -->
-      <exclusions>
-        <exclusion>
-          <groupId>io.netty</groupId>
-          <artifactId>netty</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpcomponents-client</artifactId>
-        </exclusion>
-        <exclusion>
-          <groupId>org.yaml</groupId>
-          <artifactId>snakeyaml</artifactId>
-        </exclusion>  
-        <exclusion>
-          <groupId>com.google.guava</groupId>
-          <artifactId>guava</artifactId>
-        </exclusion>
-
-        <exclusion>
-          <groupId>org.apache.httpcomponents</groupId>
-          <artifactId>httpclient</artifactId>
-        </exclusion>        
-    </exclusions>
-    </dependency>
+   
     
     <!-- Spring -->
     <dependency>
