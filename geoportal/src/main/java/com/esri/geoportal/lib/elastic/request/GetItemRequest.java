@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
-import com.esri.geoportal.context.AppRequest;
-import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.response.ItemWriter;
-import com.esri.geoportal.lib.elastic.util.AccessUtil;
-import com.esri.geoportal.lib.elastic.util.ItemIO;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.elasticsearch.action.get.GetResponse;
+import com.esri.geoportal.context.AppRequest;
+import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.lib.elastic.response.ItemWriter;
 
 /**
  * Get an item.

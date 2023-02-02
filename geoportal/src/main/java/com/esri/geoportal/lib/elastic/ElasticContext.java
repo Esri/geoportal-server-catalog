@@ -26,8 +26,6 @@ import org.apache.http.auth.UsernamePasswordCredentials;
 import org.apache.http.client.CredentialsProvider;
 import org.apache.http.impl.client.BasicCredentialsProvider;
 import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
-import org.elasticsearch.client.RestClient;
-import org.elasticsearch.client.RestClientBuilder;
 import org.opensearch.client.RestHighLevelClient;
 //import org.opensearch.transport.client.PreBuiltTransportClient;
 //import org.opensearch.xpack.client.PreBuiltXPackTransportClient;
