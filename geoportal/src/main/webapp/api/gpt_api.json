@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "https://github.com/Esri/geoportal-server-catalog",
-    "version": "2.6.5",
+    "version": "2.7.0",
     "title": "Esri Geoportal Server",
     "contact": {
       "name": "portal@esri.com"

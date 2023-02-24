@@ -14,6 +14,7 @@
  */
 package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import javax.json.Json;
@@ -22,7 +23,7 @@ import javax.json.JsonObjectBuilder;
 /**
  * Set the owner for one or more items.
  */
-public class SetOwnerRequest extends com.esri.geoportal.lib.elastic.request.SetOwnerRequest {
+public class SetOwnerRequest extends BulkEditRequest {
  
   
   /** Constructor. */

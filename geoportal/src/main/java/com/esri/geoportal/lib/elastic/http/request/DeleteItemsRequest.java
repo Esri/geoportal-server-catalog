@@ -15,13 +15,15 @@
 package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
+
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
 /**
  * Delete one or more items.
  */
-public class DeleteItemsRequest extends com.esri.geoportal.lib.elastic.request.DeleteItemsRequest {
+public class DeleteItemsRequest extends BulkEditRequest {
   
   /** Constructor. */
   public DeleteItemsRequest() {

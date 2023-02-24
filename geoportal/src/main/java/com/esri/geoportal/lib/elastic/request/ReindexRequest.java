@@ -33,9 +33,9 @@ import java.util.function.Consumer;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.search.SearchHit;
+import org.opensearch.action.get.GetRequestBuilder;
+import org.opensearch.action.get.GetResponse;
+import org.opensearch.search.SearchHit;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -229,11 +229,11 @@ public class ReindexRequest extends AppRequest {
    * @return the xml
    */
   private String readOldXml(ElasticContext ec, String id, String indexName) {
-    GetRequestBuilder req = ec.getTransportClient().prepareGet(indexName,"xml",id);
-    GetResponse resp = req.get();
-    if (resp.isExists()) {
-      return (String)resp.getSource().get("xml");
-    }
+//    GetRequestBuilder req = ec.getTransportClient().prepareGet(indexName,"xml",id);
+//    GetResponse resp = req.get();
+//    if (resp.isExists()) {
+//      return (String)resp.getSource().get("xml");
+//    }
     return null;
   }
   

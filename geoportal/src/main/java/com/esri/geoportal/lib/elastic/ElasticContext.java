@@ -13,34 +13,22 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic;
-import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.util.Val;
-
 import java.io.UnsupportedEncodingException;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
-import javax.json.JsonObject;
-
-import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
-import org.elasticsearch.common.settings.Settings;
-import org.elasticsearch.common.settings.Settings.Builder;
-// import org.elasticsearch.common.transport.InetSocketTransportAddress;
-import org.elasticsearch.common.transport.TransportAddress;
-import org.elasticsearch.common.xcontent.XContentType;
-import org.elasticsearch.transport.client.PreBuiltTransportClient;
-import org.elasticsearch.xpack.client.PreBuiltXPackTransportClient;
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
+import org.opensearch.client.RestHighLevelClient;
+//import org.opensearch.transport.client.PreBuiltTransportClient;
+//import org.opensearch.xpack.client.PreBuiltXPackTransportClient;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,7 +56,7 @@ public class ElasticContext {
   private String mappingsFile = "config/elastic-mappings.json";
   private String mappingsFile7 = "config/elastic-mappings-7.json";
   private List<String> nodes;
-  private PreBuiltTransportClient transportClient;
+ // private PreBuiltTransportClient transportClient;
   private int transportPort = 9300;
   private boolean useHttps = false;
   private boolean useSeparateXmlItem = true;
@@ -232,12 +220,28 @@ public class ElasticContext {
   }
   
   /** The transport client. */
-  public TransportClient getTransportClient() {
-    return transportClient;
-  }
-  /** The transport client. */
-  public void setTransportClient(PreBuiltTransportClient transportClient) {
-    this.transportClient = transportClient;
+//  public TransportClient getTransportClient() {
+//    return transportClient;
+//  }
+  /** The transport client.
+     * @return  */
+//  public void setTransportClient(PreBuiltTransportClient transportClient) {
+//    this.transportClient = transportClient;
+//  }
+  
+  public RestHighLevelClient openSearchRestClient()
+  {
+      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
+
+    credentialsProvider.setCredentials(AuthScope.ANY,
+      new UsernamePasswordCredentials("admin", "admin"));
+
+    //Create a client.
+    org.opensearch.client.RestClientBuilder builder = org.opensearch.client.RestClient.builder(new HttpHost("localhost", 9200, "http"))
+      .setHttpClientConfigCallback((HttpAsyncClientBuilder httpClientBuilder) -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
+      
+      RestHighLevelClient client = new RestHighLevelClient(builder);
+      return client;
   }
   
   /** The transport port (default=9300) */
@@ -364,8 +368,8 @@ public class ElasticContext {
    */
   protected void _createAlias(String index, String alias) throws Exception {
     //LOGGER.info("Creating alias: "+alias+" for index: "+index);
-    AdminClient client = this.getTransportClient().admin();
-    client.indices().prepareAliases().addAlias(index,alias).get();
+//    AdminClient client = this.getTransportClient().admin();
+//    client.indices().prepareAliases().addAlias(index,alias).get();
   }
   
   /**
@@ -375,11 +379,11 @@ public class ElasticContext {
    */
   protected void _createIndex(String name) throws Exception {
     //LOGGER.info("Creating index: "+name);
-    String path = this.getActualMappingsFile();
-    JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
-    String json = JsonUtil.toJson(jso,false);
-    AdminClient client = this.getTransportClient().admin();
-    client.indices().prepareCreate(name).setSource(json, XContentType.JSON).get();
+//    String path = this.getActualMappingsFile();
+//    JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
+//    String json = JsonUtil.toJson(jso,false);
+//    AdminClient client = this.getTransportClient().admin();
+//    client.indices().prepareCreate(name).setSource(json, XContentType.JSON).get();
   }
   
   /**
@@ -390,53 +394,53 @@ public class ElasticContext {
    */
   public void ensureIndex(String name, boolean considerAsAlias) throws Exception {
     LOGGER.debug("Checking index: "+name);
-    try {
-      if (name == null || name.trim().length() == 0) return;
-      AdminClient client = this.getTransportClient().admin();
-      boolean exists = client.indices().prepareExists(name).get().isExists();
-      if (exists) return;
-      if (name.equals(this.getItemIndexName())) {
-        considerAsAlias = this.getIndexNameIsAlias();
-      }
-      if (name.indexOf("_v") != -1) considerAsAlias = false;
-      if (!considerAsAlias) {
-        _createIndex(name);
-      } else {
-        
-        String pfx = name+"_v";
-        String idxName = null;
-        int sfx = -1;
-        ImmutableOpenMap<String,Settings> all;
-        all = client.indices().prepareGetSettings("*").get().getIndexToSettings();
-        Iterator<ObjectObjectCursor<String,Settings>> iter = all.iterator();
-        while (iter.hasNext()) {
-          ObjectObjectCursor<String,Settings> o = iter.next();
-          if (o.key.startsWith(pfx)) {
-            String s = o.key.substring(pfx.length());
-            int i = Val.chkInt(s,-1);
-            if (i > sfx) {
-              sfx = i;
-              idxName = o.key;
-            }
-          }
-        }
-        if (idxName == null) {
-          idxName = pfx+"1";
-          _createIndex(idxName);
-        }
-        _createAlias(idxName,name);
-      }
-    } catch (Exception e) {
-      LOGGER.error("Error executing ensureIndex()",e);
-      throw e;
-    }
+//    try {
+//      if (name == null || name.trim().length() == 0) return;
+//      AdminClient client = this.getTransportClient().admin();
+//      boolean exists = client.indices().prepareExists(name).get().isExists();
+//      if (exists) return;
+//      if (name.equals(this.getItemIndexName())) {
+//        considerAsAlias = this.getIndexNameIsAlias();
+//      }
+//      if (name.indexOf("_v") != -1) considerAsAlias = false;
+//      if (!considerAsAlias) {
+//        _createIndex(name);
+//      } else {
+//        
+//        String pfx = name+"_v";
+//        String idxName = null;
+//        int sfx = -1;
+//        ImmutableOpenMap<String,Settings> all;
+//        all = client.indices().prepareGetSettings("*").get().getIndexToSettings();
+//        Iterator<ObjectObjectCursor<String,Settings>> iter = all.iterator();
+//        while (iter.hasNext()) {
+//          ObjectObjectCursor<String,Settings> o = iter.next();
+//          if (o.key.startsWith(pfx)) {
+//            String s = o.key.substring(pfx.length());
+//            int i = Val.chkInt(s,-1);
+//            if (i > sfx) {
+//              sfx = i;
+//              idxName = o.key;
+//            }
+//          }
+//        }
+//        if (idxName == null) {
+//          idxName = pfx+"1";
+//          _createIndex(idxName);
+//        }
+//        _createAlias(idxName,name);
+//      }
+//    } catch (Exception e) {
+//      LOGGER.error("Error executing ensureIndex()",e);
+//      throw e;
+//    }
   }
-  
-  /**
-   * Gets the base URL.
-   * @param next round robin if true
-   * @return the base url
-   */
+//  
+//  /**
+//   * Gets the base URL.
+//   * @param next round robin if true
+//   * @return the base url
+//   */
   public String getBaseUrl(boolean next) {
     String node = null;
     if (next) {
@@ -450,11 +454,11 @@ public class ElasticContext {
     String url = scheme+node+":"+port;
     return url;
   }
-  
-  /**
-   * Gets basic credentials if configured.
-   * @return the credentials
-   */
+//  
+//  /**
+//   * Gets basic credentials if configured.
+//   * @return the credentials
+//   */
   public String getBasicCredentials() {
     String user = getXpackUsername();
     String pwd = getXpackPassword();
@@ -503,10 +507,10 @@ public class ElasticContext {
   @PreDestroy
   public void shutdown() throws Exception {
     LOGGER.info("Shutting down ElasticContext...");
-    if (transportClient != null) {
-      transportClient.close();
-      transportClient = null;
-    }
+//    if (transportClient != null) {
+//      transportClient.close();
+//      transportClient = null;
+//    }
   }
   
   /** Startup.
@@ -514,98 +518,98 @@ public class ElasticContext {
   @PostConstruct
   public void startup() {
     LOGGER.info("Starting up ElasticContext...");
-    String[] nodeNames = this.nodesToArray();
-    if ((nodeNames == null) || (nodeNames.length == 0)) {
-      LOGGER.warn("Configuration warning: Elasticsearch - no nodes defined.");
-    } else if (transportClient != null) {
-      LOGGER.warn("Configuration warning: TransportClient has already been started.");
-    } else {
-      boolean hasSettings = false;
-      boolean hasXpack = false;
-      Builder settings = Settings.builder();
-      if (clusterName != null && clusterName.length() > 0) {
-        settings.put("cluster.name",clusterName);
-        hasSettings = true;
-      }
-      String user = this.getXpackUsername();
-      String pwd = this.getXpackPassword();
-      boolean sslEnabled = this.getXpackSecurityTransportSslEnabled();
-      String sslKey = this.getXpackSslKey();
-      String sslCert = this.getXpackSslCertificate();
-      String sslCa = this.getXpackSslCertificateAuthorities();
-      if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
-        settings.put("xpack.security.user",user+":"+pwd);
-        hasXpack = true;
-      }
-      if (sslEnabled) {
-        settings.put("xpack.security.transport.ssl.enabled","true");
-        hasXpack = true;
-      }
-      if (sslKey != null && sslKey.length() > 0) {
-        settings.put("xpack.ssl.key",sslKey);
-        hasXpack = true;
-      }
-      if (sslCert != null && sslCert.length() > 0) {
-        settings.put("xpack.ssl.certificate",sslCert);
-        hasXpack = true;
-      }
-      if (sslCa != null && sslCa.length() > 0) {
-        settings.put("xpack.ssl.certificate_authorities",sslCa);
-        hasXpack = true;
-      }
-      if (this.getXpackHttpType() != null && this.getXpackHttpType().length() > 0) {
-        //System.out.println("*** x-pack http.type="+this.getXpackHttpType());
-        settings.put("http.type",this.getXpackHttpType());
-        hasXpack = true;
-      }
-      if (this.getXpackTransportType() != null && this.getXpackTransportType().length() > 0) {
-        //System.out.println("*** x-pack transport.type="+this.getXpackTransportType());
-        settings.put("transport.type",this.getXpackTransportType());
-        hasXpack = true;
-      }
-      if (hasXpack) {
-        transportClient = new PreBuiltXPackTransportClient(settings.build());
-      } else if (hasSettings) {
-        transportClient = new PreBuiltTransportClient(settings.build());
-      } else {
-        transportClient = new PreBuiltTransportClient(Settings.EMPTY);
-      }
-      
-      for (String node: nodeNames) {
-        try {
-          InetAddress a = InetAddress.getByName(node);
-          // transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
-          transportClient.addTransportAddress(new TransportAddress(a,transportPort));
-        } catch (UnknownHostException ex) {
-          LOGGER.warn(String.format("Invalid node name: %s", node), ex);
-        }
-      }
-      
-      if (this.getAutoCreateIndex()) {
-        String indexName = getItemIndexName();
-        boolean indexNameIsAlias = getIndexNameIsAlias();
-        try {
-          ensureIndex(indexName,indexNameIsAlias);
-        } catch (Exception e) {
-          // keep trying - every 5 minutes
-          long period = 1000 * 60 * 5;
-          long delay = period;
-          Timer timer = new Timer(true);
-          timer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-              try {
-                ensureIndex(indexName,indexNameIsAlias);
-                timer.cancel();
-              } catch (Exception e2) {
-                // logging is handled by ensureIndex
-              }
-            }      
-          },delay,period);
-        }
-      }
-      
-    }
+//    String[] nodeNames = this.nodesToArray();
+//    if ((nodeNames == null) || (nodeNames.length == 0)) {
+//      LOGGER.warn("Configuration warning: Elasticsearch - no nodes defined.");
+//    } else if (transportClient != null) {
+//      LOGGER.warn("Configuration warning: TransportClient has already been started.");
+//    } else {
+//      boolean hasSettings = false;
+//      boolean hasXpack = false;
+//      Builder settings = Settings.builder();
+//      if (clusterName != null && clusterName.length() > 0) {
+//        settings.put("cluster.name",clusterName);
+//        hasSettings = true;
+//      }
+//      String user = this.getXpackUsername();
+//      String pwd = this.getXpackPassword();
+//      boolean sslEnabled = this.getXpackSecurityTransportSslEnabled();
+//      String sslKey = this.getXpackSslKey();
+//      String sslCert = this.getXpackSslCertificate();
+//      String sslCa = this.getXpackSslCertificateAuthorities();
+//      if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
+//        settings.put("xpack.security.user",user+":"+pwd);
+//        hasXpack = true;
+//      }
+//      if (sslEnabled) {
+//        settings.put("xpack.security.transport.ssl.enabled","true");
+//        hasXpack = true;
+//      }
+//      if (sslKey != null && sslKey.length() > 0) {
+//        settings.put("xpack.ssl.key",sslKey);
+//        hasXpack = true;
+//      }
+//      if (sslCert != null && sslCert.length() > 0) {
+//        settings.put("xpack.ssl.certificate",sslCert);
+//        hasXpack = true;
+//      }
+//      if (sslCa != null && sslCa.length() > 0) {
+//        settings.put("xpack.ssl.certificate_authorities",sslCa);
+//        hasXpack = true;
+//      }
+//      if (this.getXpackHttpType() != null && this.getXpackHttpType().length() > 0) {
+//        //System.out.println("*** x-pack http.type="+this.getXpackHttpType());
+//        settings.put("http.type",this.getXpackHttpType());
+//        hasXpack = true;
+//      }
+//      if (this.getXpackTransportType() != null && this.getXpackTransportType().length() > 0) {
+//        //System.out.println("*** x-pack transport.type="+this.getXpackTransportType());
+//        settings.put("transport.type",this.getXpackTransportType());
+//        hasXpack = true;
+//      }
+//      if (hasXpack) {
+//        transportClient = new PreBuiltXPackTransportClient(settings.build());
+//      } else if (hasSettings) {
+//        transportClient = new PreBuiltTransportClient(settings.build());
+//      } else {
+//        transportClient = new PreBuiltTransportClient(Settings.EMPTY);
+//      }
+//      
+//      for (String node: nodeNames) {
+//        try {
+//          InetAddress a = InetAddress.getByName(node);
+//          // transportClient.addTransportAddress(new InetSocketTransportAddress(a,transportPort));
+//          transportClient.addTransportAddress(new TransportAddress(a,transportPort));
+//        } catch (UnknownHostException ex) {
+//          LOGGER.warn(String.format("Invalid node name: %s", node), ex);
+//        }
+//      }
+//      
+//      if (this.getAutoCreateIndex()) {
+//        String indexName = getItemIndexName();
+//        boolean indexNameIsAlias = getIndexNameIsAlias();
+//        try {
+//          ensureIndex(indexName,indexNameIsAlias);
+//        } catch (Exception e) {
+//          // keep trying - every 5 minutes
+//          long period = 1000 * 60 * 5;
+//          long delay = period;
+//          Timer timer = new Timer(true);
+//          timer.scheduleAtFixedRate(new TimerTask() {
+//            @Override
+//            public void run() {
+//              try {
+//                ensureIndex(indexName,indexNameIsAlias);
+//                timer.cancel();
+//              } catch (Exception e2) {
+//                // logging is handled by ensureIndex
+//              }
+//            }      
+//          },delay,period);
+//        }
+//      }
+//      
+//    }
   }
 
 }

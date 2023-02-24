@@ -123,6 +123,8 @@ public class ElasticContextHttp extends ElasticContext {
    */
   public void ensureIndex(String name, boolean considerAsAlias) throws Exception {
     LOGGER.debug("Checking index: "+name);
+  //For OpenSearch this would always be true
+    this.setIs7Plus(true);
     try {
       if (name == null || name.trim().length() == 0) return;
       String result, url;
@@ -132,15 +134,18 @@ public class ElasticContextHttp extends ElasticContext {
       JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
       String version = esinfo.getJsonObject("version").getString("number");
       LOGGER.info("Elasticsearch version: "+version);
-      for (int i=1;i<20;i++) {
-        if (version.indexOf(i+".") == 0) {
-          int primaryVersion = i;
-          //System.out.println("primaryVersion="+primaryVersion);
-          if (primaryVersion >= 6) this.setIs6Plus(true);
-          if (primaryVersion >= 7) this.setIs7Plus(true);
-          break;
-        }
-      }
+//      for (int i=1;i<20;i++) {
+//        if (version.indexOf(i+".") == 0) {
+//          int primaryVersion = i;
+//          //System.out.println("primaryVersion="+primaryVersion);
+//          if (primaryVersion >= 6) this.setIs6Plus(true);
+//          if (primaryVersion >= 7) this.setIs7Plus(true);
+//          break;
+//        }
+//      }
+      
+        
+      
       if (getIs6Plus() && this.getUseSeparateXmlItem()) {
         LOGGER.info("Elasticsearch is version "+version+", setting useSeparateXmlItem=false");
         setUseSeparateXmlItem(false);

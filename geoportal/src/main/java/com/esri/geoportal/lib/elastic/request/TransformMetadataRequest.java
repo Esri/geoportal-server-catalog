@@ -13,11 +13,13 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
+import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
+
+import org.opensearch.action.get.GetResponse;
+
 import com.esri.geoportal.base.metadata.Evaluator;
 import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.xml.XmlUtil;
-import com.esri.geoportal.base.xml.XsltTemplate;
-import com.esri.geoportal.base.xml.XsltTemplates;
 import com.esri.geoportal.context.AppRequest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
@@ -25,11 +27,6 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.ItemIO;
-
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-
-import org.elasticsearch.action.get.GetResponse;
 
 /**
  * Transform metadata.
@@ -139,17 +136,17 @@ public class TransformMetadataRequest extends AppRequest {
    */
   protected AppResponse transform() throws Exception {
     AppResponse response = new AppResponse();
-    String xml = XmlUtil.identity(this.getXml());
-    String xslt = getXslt();
-    if (xslt == null || xslt.length() == 0) {
-      response.writeMissingParameter(this,"xslt");
-      return response;
-    }
-    
-    if (!xslt.startsWith("metadata/")) xslt = "metadata/"+xslt;
-    XsltTemplate xsltTemplate = XsltTemplates.getCompiledTemplate(xslt);
-    String result = xsltTemplate.transform(xml);
-    writeOk(response,result);
+//    String xml = XmlUtil.identity(this.getXml());
+//    String xslt = getXslt();
+//    if (xslt == null || xslt.length() == 0) {
+//      response.writeMissingParameter(this,"xslt");
+//      return response;
+//    }
+//    
+//    if (!xslt.startsWith("metadata/")) xslt = "metadata/"+xslt;
+//    XsltTemplate xsltTemplate = XsltTemplates.getCompiledTemplate(xslt);
+//    String result = xsltTemplate.transform(xml);
+//    writeOk(response,result);
     return response;
   }
   
