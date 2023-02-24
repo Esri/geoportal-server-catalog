@@ -21,6 +21,7 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 
 import java.io.FileNotFoundException;
 
@@ -35,7 +36,7 @@ import org.slf4j.LoggerFactory;
 /**
  * Reset the index alias.
  */
-public class RealiasRequest extends com.esri.geoportal.lib.elastic.request.RealiasRequest {
+public class RealiasRequest extends BulkEditRequest {
   
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(RealiasRequest.class);
