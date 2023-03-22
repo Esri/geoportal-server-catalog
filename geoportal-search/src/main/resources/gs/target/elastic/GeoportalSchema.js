@@ -33,8 +33,8 @@
 
     sortables: {writable: true, value: {
       "_id": "_id",
-      "title": "title.sort",
-      "title.sort": "title.sort",
+      "title": "title",
+      "title.sort": "title",
       "date": "sys_modified_dt",
       "modified": "sys_modified_dt",
       "sys_modified_dt": "sys_modified_dt",
