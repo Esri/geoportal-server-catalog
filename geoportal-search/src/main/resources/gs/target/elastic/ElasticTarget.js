@@ -362,17 +362,32 @@
           if (typeof field === "string" && field.length > 0) {
             var option = {};
             if (sortOption.order === "asc") {
-              option[field] = "asc";
+				if(field ==='title')
+				{
+					option['title.keyword']={"order": "asc", "unmapped_type": "String"}
+				}
+				else{
+					option[field] = "asc";
+				}
+					
+              
             } else if (sortOption.order === "desc") {
-              option[field] = "desc";
+				if(field ==='title')
+				{
+					option['title.keyword']={"order": "desc", "unmapped_type": "String"}
+				}
+				else{
+					option[field] = "desc";
+				}				
+              
             } else {
               option = field;
             }
-            sort.push(option);
+            sort = option;
           }
         });
       }
-      if (sort.length > 0) {
+      if (sort) {
         targetRequest.searchCriteria["sort"] = sort;
       }
     }},
