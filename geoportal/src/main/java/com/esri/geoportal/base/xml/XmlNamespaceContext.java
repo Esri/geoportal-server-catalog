@@ -51,6 +51,7 @@ public class XmlNamespaceContext implements NamespaceContext {
   /**
    * Gets the namespace URI associated with a prefix.
    * @param prefix the prefix
+   * @return URI to the namespace URI
    */
   public String getNamespaceURI(String prefix) {
     if (prefix.equals(XMLConstants.XML_NS_PREFIX)) {
@@ -70,6 +71,7 @@ public class XmlNamespaceContext implements NamespaceContext {
   /**
    * Gets the namespace prefix associated with a URI.
    * @param uri the URI
+   * @return the namespace prefix
    */
   public String getPrefix(String uri) {
     if (uri.equals(XMLConstants.XML_NS_URI)) {
@@ -85,6 +87,7 @@ public class XmlNamespaceContext implements NamespaceContext {
    * Gets the namespace prefix iterator associated with a URI.
    * <br>This method always returns null.
    * @param namespaceURI uri the URI
+   * @return the namespace prefix iterator
    */
   @SuppressWarnings("rawtypes")
   public Iterator getPrefixes(String namespaceURI) {
