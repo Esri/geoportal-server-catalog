@@ -68,7 +68,7 @@ function(declare, array, BaseWidget, _WidgetsInTemplateMixin, SearchPane,
       if (window && window.top && window.top.geoportalServiceInfo) {
         var loc = window.top.location;
         var gpt = window.top.geoportalServiceInfo;
-        return loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/item/_search";
+        return loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/_search";
       }
       return null;
     }

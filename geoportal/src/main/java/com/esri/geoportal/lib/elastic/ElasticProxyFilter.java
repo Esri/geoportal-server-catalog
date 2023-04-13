@@ -79,15 +79,15 @@ public class ElasticProxyFilter implements Filter {
         // _search, _count URI queries (q=) are problematic
         if (path != null && (path.indexOf("_search") != -1 || path.indexOf("_count") != -1)) {
           if (path.indexOf("_search/scroll") == -1) {
-            if (path.indexOf("/"+idxName+"/_search") != -1 || 
+            if (path.indexOf("/"+idxName+"/item/_search") != -1 || 
                 path.indexOf("/"+idxName+"/_count") != -1 ||
-                path.indexOf("/"+idxName+"/clob/_search") != -1 ||
+                path.indexOf("/"+idxName+"/clob/item/_search") != -1 ||
                 path.indexOf("/"+idxName+"/clob/_count") != -1 ||
                 path.indexOf(",") != -1) {
               // Throw an exception here or rely on app-security.xml?
               throw new ServletException("This endpoint is not supported.");
             }
-            if (path.indexOf("/"+idxName+"/"+itmType+"/_search") != -1 || 
+            if (path.indexOf("/"+idxName+"/"+itmType+"/item/_search") != -1 || 
                 path.indexOf("/"+idxName+"/"+itmType+"/_count") != -1 ||
                 path.indexOf("/"+idxName+"/item/_search") != -1 || 
                 path.indexOf("/"+idxName+"/item/_count") != -1) {
@@ -133,13 +133,12 @@ public class ElasticProxyFilter implements Filter {
   
   private JsonObject mergeAccessQuery(HttpServletRequest hsr, AppUser user, String body) 
       throws ServletException{
-    SearchRequest sr = new SearchRequest(user);
-    try {
-      String json = sr.mergeAccessQuery(hsr,body);
-      return (JsonObject)JsonUtil.toJsonStructure(json);
-    } catch (Throwable e) {
-      throw new ServletException(e);
-    }
+		
+		  SearchRequest sr = new SearchRequest(user); try { String json =
+		  sr.mergeAccessQuery(hsr,body); return
+		  (JsonObject)JsonUtil.toJsonStructure(json); } catch (Throwable e) { throw new
+		  ServletException(e); }
+		 
   }
   
   private String readCharacters(HttpServletRequest hsr) throws IOException {

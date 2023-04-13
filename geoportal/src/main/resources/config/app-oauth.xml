@@ -5,8 +5,9 @@
 	xmlns:oauth="http://www.springframework.org/schema/security/oauth2"
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security.xsd
-    http://www.springframework.org/schema/security/oauth2 http://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd">
+    http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-5.8.xsd
+    http://www.springframework.org/schema/security/oauth2 https://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd"> 
+     
   
   <!-- variables =============================================================================== -->  
 	<beans:bean id="jwtSigningKey" class="java.lang.String">

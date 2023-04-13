@@ -16,6 +16,7 @@ package com.esri.geoportal.lib.elastic.http.request;
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import javax.json.Json;
@@ -26,7 +27,7 @@ import javax.json.JsonObjectBuilder;
 /**
  * Set a field value for one or more items.
  */
-public class SetFieldRequest extends com.esri.geoportal.lib.elastic.request.SetFieldRequest {
+public class SetFieldRequest extends BulkEditRequest {
   
   /** Constructor. */
   public SetFieldRequest() {

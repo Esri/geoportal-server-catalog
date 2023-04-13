@@ -23,6 +23,7 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
 import java.io.FileNotFoundException;
@@ -35,7 +36,7 @@ import javax.ws.rs.core.Response;
 /**
  * Transform metadata.
  */
-public class TransformMetadataRequest extends com.esri.geoportal.lib.elastic.request.TransformMetadataRequest {
+public class TransformMetadataRequest extends BulkEditRequest {
   
   /** Instance variables. */
   private boolean forItemDetails;
