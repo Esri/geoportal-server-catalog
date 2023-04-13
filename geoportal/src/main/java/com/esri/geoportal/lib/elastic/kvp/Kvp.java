@@ -23,12 +23,12 @@ import javax.json.Json;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
-import org.elasticsearch.action.DocWriteResponse.Result;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-// import org.elasticsearch.index.get.GetField;
-import org.elasticsearch.common.document.DocumentField;
+import org.opensearch.action.DocWriteResponse.Result;
+import org.opensearch.action.delete.DeleteResponse;
+import org.opensearch.action.get.GetRequestBuilder;
+import org.opensearch.action.get.GetResponse;
+// import org.opensearch.index.get.GetField;
+import org.opensearch.common.document.DocumentField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -125,12 +125,12 @@ public class Kvp {
    * @throws Exception
    */
   public DeleteResponse deleteContent(ElasticContext ec, String id) throws Exception {
-    setFound(false);
-    DeleteResponse resp = ec.getTransportClient().prepareDelete(getIndexName(),getIndexType(),id).get();
-    /* ES 2to5 */
-    //setFound(resp.isFound());
-    setFound(resp.getResult().equals(Result.DELETED));
-    return resp;
+//    setFound(false);
+//    DeleteResponse resp = ec.getTransportClient().prepareDelete(getIndexName(),getIndexType(),id).get();
+//    /* ES 2to5 */
+//    //setFound(resp.isFound());
+//    setFound(resp.getResult().equals(Result.DELETED));
+    return null;
   }
 
   /**
@@ -212,33 +212,33 @@ public class Kvp {
    * @throws Exception
    */
   public JsonObject readMeta(ElasticContext ec) throws Exception {
-    setFound(false);
-    setMeta(null);
-    String fieldName = FieldNames.FIELD_SYS_META;
-    GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
-    req.setFetchSource(false);
-    /* ES 2to5 */
-    //req.setFields(fieldName);
-    req.setStoredFields(fieldName);
-    GetResponse resp = req.get();
-    if (resp.isExists()) {
-      setFound(true);
-      try {
-        // GetField field = resp.getField(fieldName);
-        DocumentField field = resp.getField(fieldName);
-        if (field != null) {
-          String meta = (String)field.getValue();
-          setMeta(meta);
-          if (meta != null && meta.length() > 0) {
-            JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(meta);
-            return jso;
-          }
-        }
-      } catch (Exception e) {
-        String msg = getIndexName()+"/"+getIndexType()+"/"+getId();
-        LOGGER.error("Error reading field: "+fieldName+", "+msg,e);
-      }
-    }
+//    setFound(false);
+//    setMeta(null);
+//    String fieldName = FieldNames.FIELD_SYS_META;
+//    GetRequestBuilder req = ec.getTransportClient().prepareGet(getIndexName(),getIndexType(),getId());
+//    req.setFetchSource(false);
+//    /* ES 2to5 */
+//    //req.setFields(fieldName);
+//    req.setStoredFields(fieldName);
+//    GetResponse resp = req.get();
+//    if (resp.isExists()) {
+//      setFound(true);
+//      try {
+//        // GetField field = resp.getField(fieldName);
+//        DocumentField field = resp.getField(fieldName);
+//        if (field != null) {
+//          String meta = (String)field.getValue();
+//          setMeta(meta);
+//          if (meta != null && meta.length() > 0) {
+//            JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(meta);
+//            return jso;
+//          }
+//        }
+//      } catch (Exception e) {
+//        String msg = getIndexName()+"/"+getIndexType()+"/"+getId();
+//        LOGGER.error("Error reading field: "+fieldName+", "+msg,e);
+//      }
+//    }
     return null;
   }
 

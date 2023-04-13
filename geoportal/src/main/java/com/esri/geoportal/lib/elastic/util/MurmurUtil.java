@@ -14,7 +14,7 @@
  */
 package com.esri.geoportal.lib.elastic.util;
 import java.io.UnsupportedEncodingException;
-import org.elasticsearch.common.hash.MurmurHash3;
+import org.opensearch.common.hash.MurmurHash3;
 
 /**
  * Murmur utilities.

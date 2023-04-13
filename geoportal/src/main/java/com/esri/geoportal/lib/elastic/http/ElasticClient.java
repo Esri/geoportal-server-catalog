@@ -126,6 +126,11 @@ public class ElasticClient {
     return baseUrl + "/" + encode(indexName) + (typeName!=null? "/" + encode(typeName): "");
   }
   
+  public String getTypeUrlForSearch(String indexName, String typeName) throws UnsupportedEncodingException {
+	    typeName = StringUtils.trimToNull(typeName);
+	    return baseUrl + "/" + encode(indexName);
+	  }
+  
   /**
    * Get an XML URL.
    * @param indexName the index name

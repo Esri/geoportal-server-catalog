@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
-import org.elasticsearch.action.bulk.BulkRequestBuilder;
-import org.elasticsearch.search.SearchHit;
+import org.opensearch.action.bulk.BulkRequestBuilder;
+import org.opensearch.search.SearchHit;
 
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.lib.elastic.ElasticContext;
@@ -33,12 +33,12 @@ public class DeleteItemsRequest extends BulkEditRequest {
   
   @Override
   protected void appendHit(ElasticContext ec, BulkRequestBuilder request, SearchHit hit) {
-    request.add(ec.getTransportClient().prepareDelete(
-      ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
-    );
-    request.add(ec.getTransportClient().prepareDelete(
-      ec.getItemIndexName(),ec.getXmlIndexType(),hit.getId()+"_xml")
-    );
+//    request.add(ec.getTransportClient().prepareDelete(
+//      ec.getItemIndexName(),ec.getActualItemIndexType(),hit.getId())
+//    );
+//    request.add(ec.getTransportClient().prepareDelete(
+//      ec.getItemIndexName(),ec.getXmlIndexType(),hit.getId()+"_xml")
+//    );
   }
   
   @Override
@@ -47,10 +47,11 @@ public class DeleteItemsRequest extends BulkEditRequest {
     http://localhost:8080/geoportal/rest/metadata/deteteItems?id=68e65338e166458d8425775114487b31
     */
     
-    setAdminOnly(false);
-    setProcessMessage("DeleteItems");
-    //if (true) throw new RuntimeException("DeleteItemsRequest: temporary stop");
-    return super.execute();
+//    setAdminOnly(false);
+//    setProcessMessage("DeleteItems");
+//    //if (true) throw new RuntimeException("DeleteItemsRequest: temporary stop");
+//    return super.execute();
+	  return null;
   }
   
 }

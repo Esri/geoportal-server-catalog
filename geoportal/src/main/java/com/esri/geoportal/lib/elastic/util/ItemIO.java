@@ -17,6 +17,7 @@ import com.esri.geoportal.base.metadata.MetadataDocument;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.Val;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.ElasticContextHttp;
 import com.esri.geoportal.lib.elastic.kvp.XmlContent;
 
 import java.util.Map.Entry;
@@ -26,13 +27,20 @@ import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 import javax.json.JsonValue;
 
-import org.elasticsearch.action.DocWriteResponse.Result;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.get.GetResponse;
-import org.elasticsearch.action.index.IndexRequestBuilder;
-import org.elasticsearch.action.index.IndexResponse;
+import org.opensearch.action.delete.DeleteResponse;
+import org.opensearch.action.get.GetRequest;
+import org.opensearch.action.get.GetResponse;
+import org.opensearch.action.index.IndexRequest;
+import org.opensearch.action.index.IndexResponse;
+import org.opensearch.client.RequestOptions;
+import org.opensearch.client.RestHighLevelClient;
+import org.opensearch.client.indices.CreateIndexRequest;
+import org.opensearch.client.indices.CreateIndexResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class ItemIO {
+    private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
 
   /** Constructor. */
   public ItemIO() {}
@@ -45,14 +53,15 @@ public class ItemIO {
    * @throws Exception
    */
   public DeleteResponse deleteItem(ElasticContext ec, String id) throws Exception {
-    DeleteResponse resp = ec.getTransportClient().prepareDelete(
-      ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
-    /* ES 2to5 */
-    // if (resp.isFound()) {
-    if (resp.getResult().equals(Result.DELETED)) {
-      (new XmlContent(ec)).deleteContent(ec,id);
-    }
-    return resp;
+//    DeleteResponse resp = ec.getTransportClient().prepareDelete(
+//      ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
+//    /* ES 2to5 */
+//    // if (resp.isFound()) {
+//    if (resp.getResult().equals(Result.DELETED)) {
+//      (new XmlContent(ec)).deleteContent(ec,id);
+//    }
+//    return resp;
+        return null;
   }
   
   /**
@@ -63,8 +72,12 @@ public class ItemIO {
    * @throws Exception
    */
   public GetResponse getItem(ElasticContext ec, String id) throws Exception {
-    return ec.getTransportClient().prepareGet(
-        ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
+//    return ec.getTransportClient().prepareGet(
+//        ec.getItemIndexName(),ec.getActualItemIndexType(),id).get();
+
+    GetRequest getRequest = new GetRequest(ec.getItemIndexName(), id);
+    GetResponse response = ec.openSearchRestClient().get(getRequest, RequestOptions.DEFAULT);
+    return response;
   }
   
   /**
@@ -223,14 +236,33 @@ public class ItemIO {
    */
   public IndexResponse writeItem(ElasticContext ec, MetadataDocument mdoc, 
       String indexName, String xmlIndexName) throws Exception {
-    // TODO how to delete just the xml??
+//    // TODO how to delete just the xml??
     if (mdoc.getRequiresXmlWrite() && mdoc.hasXml()) {
       (new XmlContent(ec)).write(ec,mdoc,xmlIndexName);
     }
-    IndexRequestBuilder req = ec.getTransportClient().prepareIndex(
-        indexName,ec.getActualItemIndexType(),mdoc.getItemId());
-    req.setSource(mdoc.getJson());
-    return req.get();
-  }
+    LOGGER.info("in writeItem");
+//    IndexRequestBuilder req = ec.getTransportClient().prepareIndex(
+//        indexName,ec.getActualItemIndexType(),mdoc.getItemId());
+//        req.setSource(mdoc.getJson());
+//        return req.get();
+    RestHighLevelClient client = ec.openSearchRestClient();
+    CreateIndexRequest createIndexRequest = new CreateIndexRequest(indexName);
 
+//          createIndexRequest.settings(Settings.builder() //Specify in the settings how many shards you want in the index.
+//                  .put("index.number_of_shards", 4)
+//                  .put("index.number_of_replicas", 3)
+//          );
+//                    
+    CreateIndexResponse createIndexResponse = client.indices().create(createIndexRequest, RequestOptions.DEFAULT);
+
+    //Adding data to the index.
+    IndexRequest request = new IndexRequest(indexName); //Add a document to the custom-index we created.
+    request.id(mdoc.getItemId()); //Assign an ID to the document.          
+
+    request.source(mdoc.getJson()); //Place your content into the index's source.
+    IndexResponse indexResponse = client.index(request, RequestOptions.DEFAULT);
+    LOGGER.info("indexResponse "+indexResponse.toString());
+    return indexResponse;
+  }
+         
 }
