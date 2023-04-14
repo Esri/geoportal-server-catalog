@@ -1,6 +1,6 @@
 FROM maven:3-jdk-8 AS gptbuild
 
-MAINTAINER David Valentine dwvalentine@usdc.edu
+LABEL maintainer="David Valentine dwvalentine@usdc.edu"
 
 
 # Install wget and install/updates certificates
