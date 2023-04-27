@@ -160,8 +160,11 @@ public class DcatBuilder {
     }
     if ((node != null) && (node.length() > 0)) {
       String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
-      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();       
-      String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
+      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();    
+    //  String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
+      
+      //For elastic 7.9.3 +
+      String url = scheme+node+":"+port+"/"+idxName+"/_search";
       elastic.add("searchUrl",url);
       info.add("elastic",elastic);
       return info.build().toString();
