@@ -38,22 +38,22 @@ public class SetOwnerRequest extends BulkEditRequest {
     newOwner=
     */
     
-    setAdminOnly(true);
-    setProcessMessage("SetOwner");
-    AppResponse response = new AppResponse();
-    
-    String newOwner = getParameter("newOwner");
-    if (newOwner != null) newOwner = newOwner.trim();
-    if (newOwner == null || newOwner.length() == 0) {
-      response.writeMissingParameter(this,"newOwner");
-      return response;
-    }
-    
-    JsonObjectBuilder jso = Json.createObjectBuilder();
-    jso.add(FieldNames.FIELD_SYS_OWNER,newOwner);
-    jso.add(FieldNames.FIELD_SYS_OWNER_TXT,newOwner);
-    //jso.add(FieldNames.FIELD_SYS_MODIFIED,DateUtil.nowAsString()); // TODO should this be set?
-    setUpdateSource(jso.build().toString());
+//    setAdminOnly(true);
+//    setProcessMessage("SetOwner");
+//    AppResponse response = new AppResponse();
+//    
+//    String newOwner = getParameter("newOwner");
+//    if (newOwner != null) newOwner = newOwner.trim();
+//    if (newOwner == null || newOwner.length() == 0) {
+//      response.writeMissingParameter(this,"newOwner");
+//      return response;
+//    }
+//    
+//    JsonObjectBuilder jso = Json.createObjectBuilder();
+//    jso.add(FieldNames.FIELD_SYS_OWNER,newOwner);
+//    jso.add(FieldNames.FIELD_SYS_OWNER_TXT,newOwner);
+//    //jso.add(FieldNames.FIELD_SYS_MODIFIED,DateUtil.nowAsString()); // TODO should this be set?
+//    setUpdateSource(jso.build().toString());
     
     //System.err.println("updateSource="+this.getUpdateSource());
     //if (true) throw new RuntimeException("SetOwnerRequest: temporary stop");

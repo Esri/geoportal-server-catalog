@@ -15,18 +15,15 @@
 package com.esri.geoportal.search;
 import java.util.HashSet;
 import java.util.Set;
+
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.container.AsyncResponse;
 import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.SecurityContext;
 
 import com.esri.geoportal.context.AppUser;

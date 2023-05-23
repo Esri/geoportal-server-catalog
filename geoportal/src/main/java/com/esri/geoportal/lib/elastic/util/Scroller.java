@@ -19,15 +19,15 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import org.elasticsearch.action.search.SearchRequestBuilder;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.action.search.SearchScrollRequestBuilder;
-import org.elasticsearch.client.transport.TransportClient;
-import org.elasticsearch.common.unit.TimeValue;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
-import org.elasticsearch.search.SearchHit;
-import org.elasticsearch.search.sort.SortBuilders;
+import org.opensearch.action.search.SearchRequestBuilder;
+import org.opensearch.action.search.SearchResponse;
+import org.opensearch.action.search.SearchScrollRequestBuilder;
+//import org.opensearch.client.transport.TransportClient;
+import org.opensearch.common.unit.TimeValue;
+import org.opensearch.index.query.QueryBuilder;
+import org.opensearch.index.query.QueryBuilders;
+import org.opensearch.search.SearchHit;
+import org.opensearch.search.sort.SortBuilders;
 
 /**
  * Scroll through a collection of documents.
@@ -126,50 +126,50 @@ public class Scroller {
    */
   public void scroll(Consumer<SearchHit> callback) {
 
-    String scrollId = null;
-
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    TransportClient client = ec.getTransportClient();
-
-    SearchRequestBuilder search = client.prepareSearch(getIndexName());
-    search.setTypes(getIndexType());
-    search.setQuery(getQuery());
-    search.setScroll(new TimeValue(getKeepAliveMillis()));
-    search.addSort(SortBuilders.fieldSort("_doc"));
-    search.setSize(getPageSize());
-    if (!getFetchSource()) {
-      search.setFetchSource(false);
-    }
-
-    long count = 0, max = getMaxDocs();
-
-    SearchResponse response = search.get();
-    scrollId = response.getScrollId();
-    setTotalHits(response.getHits().getTotalHits());
-
-    while (true) {
-      SearchHit[] hits = response.getHits().getHits();
-      if (hits.length == 0) break;
-      for (SearchHit hit: hits) {
-        count++;
-        if (count > max) break;
-        processed.incrementAndGet();
-        callback.accept(hit);
-      }
-      if (count > max) break;
-      SearchScrollRequestBuilder scroll = client.prepareSearchScroll(scrollId);
-      scroll.setScroll(new TimeValue((long)getKeepAliveMillis()));
-      response = scroll.get();
-    }
-    //System.err.println("processed="+processed.get());
-    
-    try {
-      if (scrollId != null) {
-        client.prepareClearScroll().addScrollId(scrollId).get();
-      }
-    } catch (Throwable t) {
-      t.printStackTrace();
-    }
+//    String scrollId = null;
+//
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    TransportClient client = ec.getTransportClient();
+//
+//    SearchRequestBuilder search = client.prepareSearch(getIndexName());
+//    search.setTypes(getIndexType());
+//    search.setQuery(getQuery());
+//    search.setScroll(new TimeValue(getKeepAliveMillis()));
+//    search.addSort(SortBuilders.fieldSort("_doc"));
+//    search.setSize(getPageSize());
+//    if (!getFetchSource()) {
+//      search.setFetchSource(false);
+//    }
+//
+//    long count = 0, max = getMaxDocs();
+//
+//    SearchResponse response = search.get();
+//    scrollId = response.getScrollId();
+//    setTotalHits(response.getHits().getTotalHits());
+//
+//    while (true) {
+//      SearchHit[] hits = response.getHits().getHits();
+//      if (hits.length == 0) break;
+//      for (SearchHit hit: hits) {
+//        count++;
+//        if (count > max) break;
+//        processed.incrementAndGet();
+//        callback.accept(hit);
+//      }
+//      if (count > max) break;
+//      SearchScrollRequestBuilder scroll = client.prepareSearchScroll(scrollId);
+//      scroll.setScroll(new TimeValue((long)getKeepAliveMillis()));
+//      response = scroll.get();
+//    }
+//    //System.err.println("processed="+processed.get());
+//    
+//    try {
+//      if (scrollId != null) {
+//        client.prepareClearScroll().addScrollId(scrollId).get();
+//      }
+//    } catch (Throwable t) {
+//      t.printStackTrace();
+//    }
   }
 
 }

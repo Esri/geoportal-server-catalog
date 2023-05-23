@@ -13,18 +13,12 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
-import com.esri.geoportal.context.AppRequest;
-import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.response.ItemWriter;
-import com.esri.geoportal.lib.elastic.util.AccessUtil;
-import com.esri.geoportal.lib.elastic.util.ItemIO;
-
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
-import org.elasticsearch.action.get.GetResponse;
+import com.esri.geoportal.context.AppRequest;
+import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.lib.elastic.response.ItemWriter;
 
 /**
  * Get an item.
@@ -92,28 +86,28 @@ public class GetItemRequest extends AppRequest {
   @Override
   public AppResponse execute() throws Exception {    
     AppResponse response = new AppResponse();
-    String id = getId();
-    if (id == null || id.length() == 0) {
-      response.writeIdIsMissing(this);
-      return response;
-    }
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    AccessUtil au = new AccessUtil();
-    id = au.determineId(id);
-    au.ensureReadAccess(getUser(),id);
-    
-    this.setXmlField("xml");
-    ItemIO itemio = new ItemIO();
-    GetResponse resp = itemio.getItem(ec,id);
-    if (resp.isExists()) {
-      if (this.getIncludeMetadata()) {
-        setXml(itemio.readXml(ec,id));
-      }
-      ItemWriter writer = newWriter();
-      writer.write(this,response,resp);
-    } else {
-      response.writeIdNotFound(this,id);
-    }
+//    String id = getId();
+//    if (id == null || id.length() == 0) {
+//      response.writeIdIsMissing(this);
+//      return response;
+//    }
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    AccessUtil au = new AccessUtil();
+//    id = au.determineId(id);
+//    au.ensureReadAccess(getUser(),id);
+//    
+//    this.setXmlField("xml");
+//    ItemIO itemio = new ItemIO();
+//    GetResponse resp = itemio.getItem(ec,id);
+//    if (resp.isExists()) {
+//      if (this.getIncludeMetadata()) {
+//        setXml(itemio.readXml(ec,id));
+//      }
+//      ItemWriter writer = newWriter();
+//      writer.write(this,response,resp);
+//    } else {
+//      response.writeIdNotFound(this,id);
+//    }
     return response;
   }
   

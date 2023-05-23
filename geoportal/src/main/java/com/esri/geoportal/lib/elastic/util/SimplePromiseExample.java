@@ -19,11 +19,11 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 
 import java.util.function.Consumer;
 
-import org.elasticsearch.action.ActionListener;
-import org.elasticsearch.action.get.GetRequestBuilder;
-import org.elasticsearch.action.get.GetResponse;
-// import org.elasticsearch.index.get.GetField;
-import org.elasticsearch.common.document.DocumentField;
+import org.opensearch.action.ActionListener;
+import org.opensearch.action.get.GetRequestBuilder;
+import org.opensearch.action.get.GetResponse;
+// import org.opensearch.index.get.GetField;
+import org.opensearch.common.document.DocumentField;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
@@ -64,51 +64,52 @@ class SimplePromiseExample {
   }
  
   private SimplePromise<Void> ensureWritable(AppUser user, String id, boolean async) {
-    SimplePromise<Void> promise = new SimplePromise<Void>();
-    if (user == null || user.getUsername() == null || user.getUsername().length() == 0) {
-      promise.reject(new AccessDeniedException(accessDeniedMessage));
-    } else {
-      if (user.isAdmin()) {
-        promise.resolve(null);
-      } else if (!user.isPublisher()) {
-        promise.reject(new AccessDeniedException(accessDeniedMessage)); 
-      } else {
-        ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-        String ownerField = FieldNames.FIELD_SYS_OWNER;
-        
-        GetRequestBuilder getItem = ec.getTransportClient().prepareGet(
-            ec.getItemIndexName(),ec.getActualItemIndexType(),id);
-        getItem.setFetchSource(false);
-        /* ES 2to5 */
-        //getItem.setFields(ownerField);
-        getItem.setStoredFields(ownerField);
-        if (!async) {
-          GetResponse response = getItem.get();
-          checkOwner(user,ownerField,response,promise);
-        } else {
-          getItem.execute(new ActionListener<GetResponse>() {
-            @Override
-            public void onResponse(final GetResponse response) {
-              checkOwner(user,ownerField,response,promise);
-            }
-            /* ES 2to5 */
-            /*
-            @Override
-            public void onFailure(final Throwable t) {
-              // TODO log this??
-              promise.reject(t);
-            }
-            */
-            @Override
-            public void onFailure(Exception e) {
-              // TODO log this??
-              promise.reject(e);
-            }
-          });
-        }
-      }
-    }    
-    return promise;
+//    SimplePromise<Void> promise = new SimplePromise<Void>();
+//    if (user == null || user.getUsername() == null || user.getUsername().length() == 0) {
+//      promise.reject(new AccessDeniedException(accessDeniedMessage));
+//    } else {
+//      if (user.isAdmin()) {
+//        promise.resolve(null);
+//      } else if (!user.isPublisher()) {
+//        promise.reject(new AccessDeniedException(accessDeniedMessage)); 
+//      } else {
+//        ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//        String ownerField = FieldNames.FIELD_SYS_OWNER;
+//        
+//        GetRequestBuilder getItem = ec.getTransportClient().prepareGet(
+//            ec.getItemIndexName(),ec.getActualItemIndexType(),id);
+//        getItem.setFetchSource(false);
+//        /* ES 2to5 */
+//        //getItem.setFields(ownerField);
+//        getItem.setStoredFields(ownerField);
+//        if (!async) {
+//          GetResponse response = getItem.get();
+//          checkOwner(user,ownerField,response,promise);
+//        } else {
+//          getItem.execute(new ActionListener<GetResponse>() {
+//            @Override
+//            public void onResponse(final GetResponse response) {
+//              checkOwner(user,ownerField,response,promise);
+//            }
+//            /* ES 2to5 */
+//            /*
+//            @Override
+//            public void onFailure(final Throwable t) {
+//              // TODO log this??
+//              promise.reject(t);
+//            }
+//            */
+//            @Override
+//            public void onFailure(Exception e) {
+//              // TODO log this??
+//              promise.reject(e);
+//            }
+//          });
+//        }
+//      }
+//    }    
+//    return promise;
+    return null;
   }
 
   @SuppressWarnings("unused")

@@ -27,10 +27,10 @@ import java.util.List;
 import javax.json.Json;
 import javax.json.JsonObjectBuilder;
 
-import org.elasticsearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
-import org.elasticsearch.client.AdminClient;
-import org.elasticsearch.cluster.metadata.AliasMetaData;
-import org.elasticsearch.common.collect.ImmutableOpenMap;
+//import org.opensearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
+//import org.opensearch.client.AdminClient;
+//import org.opensearch.cluster.metadata.AliasMetaData;
+import org.opensearch.common.collect.ImmutableOpenMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -62,72 +62,72 @@ public class RealiasRequest extends AppRequest {
   @Override
   public AppResponse execute() throws Exception {
     AppResponse response = new AppResponse();
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    AccessUtil au = new AccessUtil();
-    au.ensureAdmin(getUser());
-    
-    String msgPfx = "Not applicable: ";
-    String name = ec.getItemIndexName();
-    String indexName = this.getIndexName();
-    if (indexName == null || indexName.length() == 0) {
-      throw new UsageException("An indexName is required.");
-    } else if (indexName.equalsIgnoreCase(name)) {
-      throw new UsageException("The indexName is the same as the configured indexName.");
-    }
-    /*
-    if (indexName.indexOf("_v") == -1) {
-      throw new UsageException("The indexName does not contain _v");
-    }
-    */
-    if (!ec.getIndexNameIsAlias()) {
-      throw new UsageException(msgPfx+"config parameter indexNameIsAlias is false");
-    }
-    if (name.indexOf("_v") != -1) {
-      throw new UsageException(msgPfx+"config parameter indexName contains _v");
-    }
-
-    AdminClient client = ec.getTransportClient().admin();
-    if (!client.indices().prepareExists(indexName).get().isExists()) {
-      throw new UsageException("The indexName does not exist");
-    } else if (client.indices().prepareAliasesExist(indexName).get().isExists()) {
-      throw new UsageException("The indexName is an alias");
-    }
-    
-    IndicesAliasesRequestBuilder req = client.indices().prepareAliases();
-    boolean alreadyAliased = false, foundAlias = false;
-    if (client.indices().prepareAliasesExist(name).get().isExists()) {
-      ImmutableOpenMap<String,List<AliasMetaData>> aliases;
-      aliases = client.indices().prepareGetAliases(name).get().getAliases();
-      Iterator<ObjectObjectCursor<String,List<AliasMetaData>>> iter = aliases.iterator();
-      while (iter.hasNext()) {
-        ObjectObjectCursor<String,List<AliasMetaData>> o = iter.next();
-        for (AliasMetaData md: o.value) {
-          String s = md.getAlias();
-          if (s != null && s.equals(name)) {
-            foundAlias = true;
-            if (o.key.equals(indexName)) {
-              alreadyAliased = true;
-            } else {
-              req.removeAlias(o.key,s);
-            }
-            break;
-          }
-        }
-        if (foundAlias) break;
-      }
-    } else if (client.indices().prepareExists(name).get().isExists()) {
-      throw new UsageException("Active index: "+name+" exists but is not an alias");
-    }
- 
-    JsonObjectBuilder jb = Json.createObjectBuilder();
-    if (alreadyAliased) {
-      jb.add("status","alreadyAliased");
-    } else {
-      //LOGGER.info("Re-aliasing: "+name+" for index: "+indexName);
-      req.addAlias(indexName,name).get();
-      jb.add("status","completed");
-    }
-    response.writeOkJson(this,jb);
+//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+//    AccessUtil au = new AccessUtil();
+//    au.ensureAdmin(getUser());
+//    
+//    String msgPfx = "Not applicable: ";
+//    String name = ec.getItemIndexName();
+//    String indexName = this.getIndexName();
+//    if (indexName == null || indexName.length() == 0) {
+//      throw new UsageException("An indexName is required.");
+//    } else if (indexName.equalsIgnoreCase(name)) {
+//      throw new UsageException("The indexName is the same as the configured indexName.");
+//    }
+//    /*
+//    if (indexName.indexOf("_v") == -1) {
+//      throw new UsageException("The indexName does not contain _v");
+//    }
+//    */
+//    if (!ec.getIndexNameIsAlias()) {
+//      throw new UsageException(msgPfx+"config parameter indexNameIsAlias is false");
+//    }
+//    if (name.indexOf("_v") != -1) {
+//      throw new UsageException(msgPfx+"config parameter indexName contains _v");
+//    }
+//
+//    AdminClient client = ec.getTransportClient().admin();
+//    if (!client.indices().prepareExists(indexName).get().isExists()) {
+//      throw new UsageException("The indexName does not exist");
+//    } else if (client.indices().prepareAliasesExist(indexName).get().isExists()) {
+//      throw new UsageException("The indexName is an alias");
+//    }
+//    
+//    IndicesAliasesRequestBuilder req = client.indices().prepareAliases();
+//    boolean alreadyAliased = false, foundAlias = false;
+//    if (client.indices().prepareAliasesExist(name).get().isExists()) {
+//      ImmutableOpenMap<String,List<AliasMetaData>> aliases;
+//      aliases = client.indices().prepareGetAliases(name).get().getAliases();
+//      Iterator<ObjectObjectCursor<String,List<AliasMetaData>>> iter = aliases.iterator();
+//      while (iter.hasNext()) {
+//        ObjectObjectCursor<String,List<AliasMetaData>> o = iter.next();
+//        for (AliasMetaData md: o.value) {
+//          String s = md.getAlias();
+//          if (s != null && s.equals(name)) {
+//            foundAlias = true;
+//            if (o.key.equals(indexName)) {
+//              alreadyAliased = true;
+//            } else {
+//              req.removeAlias(o.key,s);
+//            }
+//            break;
+//          }
+//        }
+//        if (foundAlias) break;
+//      }
+//    } else if (client.indices().prepareExists(name).get().isExists()) {
+//      throw new UsageException("Active index: "+name+" exists but is not an alias");
+//    }
+// 
+//    JsonObjectBuilder jb = Json.createObjectBuilder();
+//    if (alreadyAliased) {
+//      jb.add("status","alreadyAliased");
+//    } else {
+//      //LOGGER.info("Re-aliasing: "+name+" for index: "+indexName);
+//      req.addAlias(indexName,name).get();
+//      jb.add("status","completed");
+//    }
+//    response.writeOkJson(this,jb);
     return response;
   }
   

@@ -18,6 +18,7 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
+import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 
 import java.io.FileNotFoundException;
 import javax.ws.rs.core.MediaType;
@@ -26,7 +27,7 @@ import javax.ws.rs.core.Response;
 /**
  * Get an item.
  */
-public class GetItemRequest extends com.esri.geoportal.lib.elastic.request.GetItemRequest {
+public class GetItemRequest extends BulkEditRequest {
   
   /** Instance variables. */
   private String f;
