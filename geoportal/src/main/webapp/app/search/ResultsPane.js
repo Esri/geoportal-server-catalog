@@ -68,7 +68,7 @@ define(["dojo/_base/declare",
 
                 on(this.sortTitleBtn, "click", lang.hitch(this, function() {
                   this.sortLabel.innerHTML = i18n.search.sort.byTitle;
-                  this.sortField = "title.sort";
+                  this.sortField = AppContext.appConfig.searchResults.defaultSort;
                   if (this.sortDir === null) {
                     this.sortDir = "asc";
                     domClass.remove(this.sortOrderBtn, "desc");
@@ -132,7 +132,15 @@ define(["dojo/_base/declare",
                   this.sortDir = Util.getRequestParam("sort").split(":")[1];
                 }
                 if (this.sortField !== null && this.sortDir !== null) {
-                    params.urlParams.sort = this.sortField + ":" + this.sortDir;
+                	if(this.sortDir == 'asc')
+                		{
+                			params.urlParams.sort = this.sortField;
+                		}
+                	else
+                		{
+                			params.urlParams.sort = AppContext.appConfig.searchResults.sortDesc;
+                		}
+                    
                 }
                 this.statusNode.show();
             },
@@ -157,12 +165,14 @@ define(["dojo/_base/declare",
                     var num = hits.length;
                     var itemsNode = this.itemsNode;
                     array.forEach(hits, function (hit) {
-                        var itemCard = new ItemCard({
-                            itemsNode: this.itemsNode,
-                            searchPane: this.searchPane
-                        });
-                        itemCard.render(hit);
-                        itemCard.placeAt(itemsNode);
+                    	if(hit._id !== '_search'){
+	                        var itemCard = new ItemCard({
+	                            itemsNode: this.itemsNode,
+	                            searchPane: this.searchPane
+	                        });
+	                        itemCard.render(hit);
+	                        itemCard.placeAt(itemsNode);
+	                    }
                     }, this);
                 }
             }

@@ -17,8 +17,8 @@ import com.esri.geoportal.base.metadata.MetadataDocument;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 
 import javax.json.JsonObjectBuilder;
-import org.elasticsearch.action.delete.DeleteResponse;
-import org.elasticsearch.action.index.IndexResponse;
+import org.opensearch.action.delete.DeleteResponse;
+import org.opensearch.action.index.IndexResponse;
 
 /**
  * Key-value pair (XML Clob).

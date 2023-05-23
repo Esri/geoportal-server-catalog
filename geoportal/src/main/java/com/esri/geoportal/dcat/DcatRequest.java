@@ -118,7 +118,10 @@ public abstract class DcatRequest {
       parameterMap.put("size", Integer.toString(PAGE_SIZE));
       
       ArrayNode sortNode = MAPPER.createArrayNode();
-      sortNode.add("_id:asc");
+     // sortNode.add("_id:asc");
+      
+      //For opensearch/elastic 7.9.3 +
+      sortNode.add("_id: {order :asc,ignore_unmapped:true}");
       parameterMap.set("sortBy", sortNode);
       
       if (searchAfter!=null) {
@@ -137,7 +140,8 @@ public abstract class DcatRequest {
   private void processData(JsonNode data) {
     try {
       String lastIdentifier = null;
-
+      LOGGER.trace(String.format("Dcat data received "+data.toString()));
+      
       DcatHeaderExt header = MAPPER.convertValue(data, DcatHeaderExt.class);
       JsonNode dataset = data.get("dataset");
 
@@ -189,8 +193,8 @@ public abstract class DcatRequest {
 
     public Integer start;
     public Integer num;
-    //public Integer total;
-    public DcatHeaderExtES7 total;
+    public Integer total;
+    //public DcatHeaderExtES7 total;
     public Integer nextStart;
 
     public DcatHeaderExt() {

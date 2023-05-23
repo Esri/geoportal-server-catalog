@@ -11,7 +11,7 @@
     },
     {
       "name": "gptdb1",
-      "url": "proxy.jsp?http://gptdb1.esri.com:8080/geoportal/elastic/metadata/item/_search",
+      "url": "proxy.jsp?http://gptdb1.esri.com:8080/geoportal/elastic/metadata/_search",
       "type": "geoportal",
       "profile": null,
       "requiredFilter": null,
