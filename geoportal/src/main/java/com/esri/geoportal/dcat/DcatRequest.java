@@ -119,9 +119,6 @@ public abstract class DcatRequest {
       
       ArrayNode sortNode = MAPPER.createArrayNode();
       sortNode.add("_id:asc");
-      
-      //For opensearch/elastic 7.9.3 +
-     // sortNode.add("_id: {order :asc,ignore_unmapped:true}");
       parameterMap.set("sortBy", sortNode);
       
       if (searchAfter!=null) {
