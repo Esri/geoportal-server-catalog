@@ -14,9 +14,6 @@
  */
 package com.esri.geoportal.dcat;
 
-import java.util.logging.Level;
-import java.util.logging.Logger;
-
 /**
  * DCAT context.
  */
