@@ -136,8 +136,8 @@ public abstract class DcatRequest {
   
   private void processData(JsonNode data) {
     try {
-      String lastIdentifier = null;
-
+      String lastIdentifier = null;      
+      
       DcatHeaderExt header = MAPPER.convertValue(data, DcatHeaderExt.class);
       JsonNode dataset = data.get("dataset");
 
@@ -189,12 +189,12 @@ public abstract class DcatRequest {
 
     public Integer start;
     public Integer num;
-    //public Integer total;
-    public DcatHeaderExtES7 total;
+    public Integer total;
+    //public DcatHeaderExtES7 total;
     public Integer nextStart;
 
     public DcatHeaderExt() {
-      System.out.println("here");
+      //System.out.println("here");
     }
   }
   
