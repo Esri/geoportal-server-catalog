@@ -1,0 +1,35 @@
+{
+  "type": "Catalog",
+  "stac_version": "1.0.0",
+  "id": "Geoportal",
+  "title": "Geoportal Server",
+  "description": "Landing page for Geoportal Server STAC Records API.",
+  "conformsTo": [
+    "https://api.stacspec.org/v1.0.0/core"
+  ],
+  "links": [
+     {
+      "href": "{url}",
+      "rel": "self",
+      "type": "application/json",
+      "title": "This STAC API - Records landing page as JSON"
+    },
+    {
+      "href": "{url}/api",
+      "rel": "service-desc",
+      "type": "application/vnd.oai.openapi+json;version=3.0",
+      "title": "The API definition (OpenAPI document)"
+    },
+    {
+      "href": "{url}/conformance",
+      "rel": "conformance",
+      "title": "The STAC API conformance classes supported"
+    },
+    {
+      "href": "{url}/collections",
+      "rel": "data",
+      "title": "The set of available collections"
+    }
+  ]
+}
+

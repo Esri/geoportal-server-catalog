@@ -1,0 +1,12 @@
+{
+  "links": [
+    {
+      "rel": "parent",
+      "href": "{url}",
+      "type": "application/json",
+      "title": "Landing Page of this STAC Records API"
+    }
+  ],
+    "conformsTo": [
+      "https://api.stacspec.org/v1.0.0/core"]
+}
