@@ -79,6 +79,12 @@
       <artifactId>jersey-hk2</artifactId>
       <version>2.34</version>
     </dependency>
+    <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-json-jackson -->
+	<dependency>
+	    <groupId>org.glassfish.jersey.media</groupId>
+	    <artifactId>jersey-media-json-jackson</artifactId>
+	    <version>2.34</version>
+	</dependency>    
 
     <!-- Jetty servlet proxy -->
     <dependency>

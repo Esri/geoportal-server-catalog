@@ -1,0 +1,22 @@
+{
+	"links": [
+        {
+            "rel": "self",
+            "type": "application/json",
+            "title": "This document as JSON",
+            "href": "{url}/collections"
+        }
+    ],
+  "collections": [
+    {
+      "stac_version": "1.0.0",
+      "stac_extensions": [],
+      "type": "record", 
+      "id": "metadata",
+      "title": "Esri Geoportal Server Metadata",
+      "description": "Geoportal Server Metadata Catalog",
+      "license": "proprietary"
+      }      
+      
+  	]
+}
