@@ -12,8 +12,8 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 
 ## Releases and Downloads
 - 2.7.0 - released June 16, 2023.
-- 2.6.5 - released December 17, 2021, [click here](https://github.com/Esri/geoportal-server-catalog/wiki) for release notes and downloads. Note that this version includes resolution to the Log4j2 vulnerability identified in December 2021.
-- [Older releases](https://github.com/Esri/geoportal-server-catalog/wiki).
+- 2.6.5 - released December 17, 2021. Note that this version includes resolution to the Log4j2 vulnerability identified in December 2021.
+- [All releases](https://github.com/Esri/geoportal-server-catalog/wiki).
 
 ## Can't Wait to Get Started?
 - Try the [sandbox site](https://gpt.geocloud.com/geoportal2) and learn what Geoportal 2 is all about!
