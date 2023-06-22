@@ -184,6 +184,8 @@ public class STACService extends Application {
 			
 			if(bbox !=null && bbox.length()>0)
 				queryMap.put("bbox", bbox);
+			if(datetime !=null && datetime.length()>0)
+				queryMap.put("datetime", datetime);
 			
 			if(from >0)
 			{
@@ -232,10 +234,10 @@ private String prepareResponse(String response,HttpServletRequest hsr,String bbo
 				
 				//Prepare urlparam for next page from=next&size=limit&bbox=bbox
 				int next = from+limit;
-				String urlparam = "from="+next+"&limit="+limit+"&bbox="+bbox;
+				String urlparam = "from="+next+"&limit="+limit+"&bbox="+bbox+"&datetime="+datetime;
 				
 				itemFileString = itemFileString.replaceAll("\\{urlparam\\}", ""+urlparam);
-				
+			//	TODO
 			//	this.createRecord(items);
 				
 			}
@@ -243,8 +245,7 @@ private String prepareResponse(String response,HttpServletRequest hsr,String bbo
 		} catch (IOException | URISyntaxException e) {
 			
 			e.printStackTrace();
-		}
-		
+		}		
 		return itemFileString;
 	}
 
@@ -337,10 +338,40 @@ private String prepareQuery(Map<String,String> queryMap) {
 	return queryStr;
 	}
 
-private String prepareDateTime(Object object) {
+private String prepareDateTime(String datetime) {
 	String query="";	
-	String  field = "sys_modified_dt";
-   
+	String  dateTimeFld = "sys_modified_dt";
+	String dateTimeFldQuery = "";
+	//Find from and to dates https://api.stacspec.org/v1.0.0/ogcapi-features/#tag/Features/operation/getFeatures
+//	Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
+//	Examples:
+//	A date-time: "2018-02-12T23:20:50Z"
+//	A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
+//	Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
+	
+	String fromField = datetime;
+	String toField = "";
+	List<String> dateFlds = Arrays.asList(datetime.split("/"));
+	
+	if(dateFlds.size()>1)
+	{
+		fromField = dateFlds.get(0);
+		toField = dateFlds.get(1);
+	}
+	if(toField.equals("") || toField.equals("..")) {
+		dateTimeFldQuery = "{\"gte\": \""+fromField+"\"}";
+	}
+	else if(fromField.equals(".."))
+	{
+		dateTimeFldQuery ="{\"lte\":\""+toField+"\"}";
+	}
+	else
+	{
+		dateTimeFldQuery ="{\"gte\": \""+fromField+"\",\"lte\":\""+toField+"\"}";
+	}
+
+	query = "{\"range\": {\""+dateTimeFld+"\":"+dateTimeFldQuery+"}}";
+	
 	return query;
 	
 }
