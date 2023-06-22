@@ -13,42 +13,46 @@
  * limitations under the License.
  */
 package com.esri.geoportal.search;
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.json.JsonStructure;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
+import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
+import javax.ws.rs.QueryParam;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.SecurityContext;
+import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.ResponseStatus;
 
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
+import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.http.request.GetItemRequest;
 
 
 
@@ -85,13 +89,7 @@ public class STACService extends Application {
 		return Response.status(status).entity(response).build();
   }
   
-  @POST
-  @Consumes({MediaType.APPLICATION_FORM_URLENCODED})
-  public void post(@Suspended final AsyncResponse asyncResponse,
-      @Context HttpServletRequest hsr,
-      MultivaluedMap<String, String> requestParams) {
-    new SearchRequest(asyncResponse).execute(hsr,requestParams);
-  }
+
   
 	@GET
 	@Path("/conformance")
@@ -162,30 +160,252 @@ public class STACService extends Application {
 		}
 		return Response.status(status).entity(responseJSON).build();
   }
+	
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/collections/metadata/items")
+	public Response getItems(@Context HttpServletRequest hsr, 
+			@QueryParam("limit") int limit,
+			@QueryParam("bbox") String bbox,
+			@QueryParam("datetime") String datetime,
+			@QueryParam("from") int from) throws UnsupportedEncodingException {
+		String responseJSON = null;
+		String response="";
+		Status status = Response.Status.OK;
+		limit = setLimit(limit);
+		
+		String query="";
+				
+		try {
+			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+			ElasticClient client = ElasticClient.newClient();
+			String url = client.getTypeUrlForSearch(ec.getIndexName());
+			Map<String, String> queryMap = new HashMap<String,String>();
+			
+			if(bbox !=null && bbox.length()>0)
+				queryMap.put("bbox", bbox);
+			
+			if(from >0)
+			{
+				url = url+"/_search?size="+limit+"&from="+from;
+			}
+			else
+				url = url+"/_search?size="+limit;
+			
+			
+			query = this.prepareQuery(queryMap);
+			if(query.length()>0)
+				response = client.sendPost(url,query,"application/json");
+			else
+				response = client.sendGet(url);
+			
+			responseJSON = this.prepareResponse(response,hsr,bbox,from,limit,datetime);
+
+		} catch (Exception e) {
+			LOGGER.error("Error in getting items " + e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = ("{\"error\":\"STAC API Collection metadata items response could not be generated.\"}");
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
+
+
+private String prepareResponse(String response,HttpServletRequest hsr,String bbox, int from,int limit, String datetime) {
+		JsonObject resObj = (JsonObject) JsonUtil.toJsonStructure(response);
+		int numberMatched;
+		JsonArray items =null;
+		String numberReturned="";
+		String itemFileString="";
+		try {
+			itemFileString = this.readResourceFile("service/config/stac-items.json",hsr);
+			if(resObj.getJsonObject("hits") != null)
+			{
+				numberMatched = resObj.getJsonObject("hits").getJsonObject("total").getInt("value");
+				
+				items = resObj.getJsonObject("hits").getJsonArray("hits");
+				numberReturned = String.valueOf(items.size());
+				itemFileString = itemFileString.replaceAll("\\{numberMatched\\}",""+numberMatched);
+				itemFileString = itemFileString.replaceAll("\\{numberReturned\\}",numberReturned);
+				itemFileString = itemFileString.replaceAll("\\{start\\}",""+from);				
+				itemFileString = itemFileString.replaceAll("\\{features\\}", items.toString());
+				
+				//Prepare urlparam for next page from=next&size=limit&bbox=bbox
+				int next = from+limit;
+				String urlparam = "from="+next+"&limit="+limit+"&bbox="+bbox;
+				
+				itemFileString = itemFileString.replaceAll("\\{urlparam\\}", ""+urlparam);
+				
+			//	this.createRecord(items);
+				
+			}
+			
+		} catch (IOException | URISyntaxException e) {
+			
+			e.printStackTrace();
+		}
+		
+		return itemFileString;
+	}
+
+//	private void createRecord(JsonArray items) {
+//		JsonObject feature = JsonUtil.newObject();
+//		
+//		for(int i=0;i<items.size();i++)
+//		{
+//			JsonObject item = (JsonObject) items.get(i);
+//
+//		}
+//		
+//		// logic for 'geometry' property
+//	      var geom = {};
+//
+//	      // per OGC Records API, polygon schema should have min 4 coordinates
+//	      // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/polygonGeoJSON.yaml
+//	      // response from elastic search has 2 coords - upper left and lower right - so create 4 coords to 
+//	      // conform to OGC Records 
+//	      if (item._source.envelope_geo) {
+//	        var xmin = item._source.envelope_geo.coordinates[0][0];
+//	        var xmax = item._source.envelope_geo.coordinates[1][0];
+//	        var ymin = item._source.envelope_geo.coordinates[1][1];
+//	        var ymax = item._source.envelope_geo.coordinates[0][1];
+//
+//	        var coord = [
+//	          [xmin, ymin],
+//	          [xmin, ymax],
+//	          [xmax, ymax],
+//	          [xmax, ymin],
+//	          [xmin, ymin],
+//	        ];      
+//
+//	        geom = {
+//	          type: 'Polygon',
+//	          coordinates: coord
+//	        };
+//	      }          
+//
+//	      // logic for 'time' property - per OGC Records API, 'time' should have min 2 dates. 
+//	      // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/recordGeoJSON.yaml
+//	      // TBD - decide which date fields to read. 
+//	      var timeProperty = null;
+//	      if (item._source.timeperiod_nst && item._source.timeperiod_nst.begin_dt && item._source.timeperiod_nst.end_dt) {
+//	        // For now if result has time range, returns the dates else null
+//	        timeProperty = [item._source.timeperiod_nst.begin_dt, item._source.timeperiod_nst.end_dt];
+//	      } 
+//
+//	      var feat = {
+//	        id: item._id,
+//	        type: 'Feature',
+//	        geometry: geom,
+//	        time: timeProperty,
+//
+//	        // TBD - for now, sending back all properties from elastic search response, but have to decide how
+//	        // to map response properties with OGC Records 'recordGeoJSON' schema
+//	        // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/recordGeoJSON.yaml
+//	        properties: item._source 
+//	        // properties: {
+//	        //   type: item._source.sys_metadatatype_s,
+//	        //   title: item._source.title,
+//	        //   recordCreated: item._source.sys_created_dt,
+//	        //   recordUpdated: item._source.sys_modified_dt
+//	          
+//	        // }
+//	      };
+//	      return feat;
+//	}
+
+private String prepareQuery(Map<String,String> queryMap) {	  
+	  String queryStr = "";  	  
+	 JsonArrayBuilder builder = Json.createArrayBuilder();
+		
+	 if (queryMap.containsKey("bbox"))
+	 {
+ 		String bboxQry = this.prepareBbox((String)queryMap.get("bbox"));
+ 		if(bboxQry.length()>0)
+ 			builder.add(JsonUtil.toJsonStructure(bboxQry));
+ 			
+	 }
+	 if (queryMap.containsKey("datetime"))
+	 {
+		 String dateTimeQry = this.prepareDateTime(queryMap.get("datetime"));
+		 if(dateTimeQry.length()>0)
+			 builder.add(JsonUtil.toJsonStructure(dateTimeQry));
+     }
+	 JsonArray filter = builder.build();
+	 if(filter.size()>0)
+		 queryStr = "{\"query\":{\"bool\": {\"must\":"+JsonUtil.toJson(filter)+"}}}";
+	return queryStr;
+	}
+
+private String prepareDateTime(Object object) {
+	String query="";	
+	String  field = "sys_modified_dt";
+   
+	return query;
+	
+}
+
+private String prepareBbox(String bboxString) {
+	 String field = "envelope_geo";
+	  String spatialType = "geo_shape"; // geo_shape or geo_point
+	  String relation = "intersects";
+	 List <String> bbox = Arrays.asList(bboxString.split(",", -1));
+
+     double coords[] = {-180.0,-90.0,180.0,90.0} ;
+     String query = "";      
+     if (bbox.size()> 3) { 
+         if ((Double.parseDouble(bbox.get(0)) < -180.0) && (Double.parseDouble(bbox.get(2)) >= -180.0)) 
+       	  	coords[0] = -180.0;
+         else
+        	 coords[0] = Double.parseDouble(bbox.get(0));
+         if ((Double.parseDouble(bbox.get(1)) < -90.0) && (Double.parseDouble(bbox.get(3)) >= -90.0)) 
+       	  coords[1] = -90.0;
+         else
+        	 coords[1] = Double.parseDouble(bbox.get(1));
+         if ((Double.parseDouble(bbox.get(2)) > 180.0) && (Double.parseDouble(bbox.get(0)) <= 180.0))
+       	  coords[2] = 180.0;
+         else
+        	 coords[2] = Double.parseDouble(bbox.get(2));
+         if ((Double.parseDouble(bbox.get(3)) > 90.0) && (Double.parseDouble(bbox.get(1)) <= 90.0))
+       	  	coords[3] = 90.0;
+         else
+        	 coords[3] = Double.parseDouble(bbox.get(3));
+       }      
+
+     if (coords.length > 3) {
+    	 query= "{\""+spatialType+"\": {\""+field+"\": {\"shape\": {\"type\": \"envelope\","
+					+"\"coordinates\": [["+coords[0]+","+coords[3]+"], ["+coords[2]+","+coords[1]+"]]"
+				+"},\"relation\": \""+relation+"\"}}}";
+		}
+	return query;
+}
+
+private int setLimit(int limit) {
+		if(limit==0 || limit >10000)
+		{
+			limit =10; //default
+		}		
+		return limit;
+	}
 
   @GET
-  @Path("/collections/metadata/items")
-  public void getItem(@Context HttpServletRequest hsr) {
-    
-  }
-  
-  @GET
-  @Path("collections/metadata/queryables")
-  public void getQueryables(@Suspended final AsyncResponse asyncResponse,
-      @Context SecurityContext sc,
-      @Context HttpServletRequest hsr) {
-    new SearchRequest(asyncResponse).execute(hsr);
+  @Path("collections/metadata/items/{featureId}")
+  public Response getItem(@Context HttpServletRequest hsr, @PathParam("featureId") String id) {	 
+	  //To test 92e7716e2865405fb94ed14585649d0f
+	  GetItemRequest request = GeoportalContext.getInstance().getBean(
+	          "request.GetItemRequest",GetItemRequest.class);  
+	  request.init(id, null,false);
+	    try {
+	      AppResponse response = request.executeNOAuth();
+	      return response.build();
+	    } catch (Exception ex) {
+	    	LOGGER.error("Error in get item " + ex.getCause());
+			
+			String responseJSON = ("{\"error\":\"STAC API feature response could not be generated.\"}");
+			 return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseJSON).build();
+		} 	    
   }
 
-  
-
-  @GET
-  @Path("/search")
-  public void getSearch(@Suspended final AsyncResponse asyncResponse,
-      @Context SecurityContext sc,
-      @Context HttpServletRequest hsr) {
-    new SearchRequest(asyncResponse).execute(hsr);
-  }
   
   public String getBaseUrl(HttpServletRequest hsr) {	   
 	    
@@ -211,7 +431,8 @@ public class STACService extends Application {
 	    filedataString = filedataString.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 	    return filedataString;	
 	  } 
-
+  
+ 
   
 }
 

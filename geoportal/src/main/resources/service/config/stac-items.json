@@ -1,0 +1,23 @@
+{
+    "type": "FeatureCollection",
+    "numberMatched": {numberMatched},
+    "numberReturned": {numberReturned},
+    "start":{start},    
+    "features": {features},
+    "links": [       
+        {
+                "rel": "collection",
+                "type": "application/json",
+                "title": "Link to the Metadata collection",
+                "href": "{url}/collections/metadata",
+                "hreflang": "en-US"
+        },
+        {
+                "rel": "next",
+                "type": "application/json",
+                "title": "Link to next page",
+                "href": "{url}/collections/metadata/items?{urlparam}",
+                "hreflang": "en-US"
+        }
+    ]    
+}

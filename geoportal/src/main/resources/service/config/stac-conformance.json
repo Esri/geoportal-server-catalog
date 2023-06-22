@@ -8,5 +8,9 @@
     }
   ],
     "conformsTo": [
-      "https://api.stacspec.org/v1.0.0/core"]
+      "https://api.stacspec.org/v1.0.0/core",     
+      "https://api.stacspec.org/v1.0.0/collections",
+      "https://api.stacspec.org/v1.0.0/ogcapi-features",
+       "https://api.stacspec.org/v1.0.0/item-search"
+      ]
 }

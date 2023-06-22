@@ -126,7 +126,7 @@ public class Scroller {
     String query = this.getQuery();
     String contentType = "application/json;charset=utf-8";
     ElasticClient client = ElasticClient.newClient();
-    String url = client.getTypeUrlForSearch(getIndexName(),getIndexType());
+    String url = client.getTypeUrlForSearch(getIndexName());
     url += "/_search";
     url += "?scroll=" + getKeepAliveMillis() + "ms";
     
