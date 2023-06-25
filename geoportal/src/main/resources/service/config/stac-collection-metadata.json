@@ -20,14 +20,7 @@
             "title": "Link to all collections",
             "href": "{url}/collections",
             "hreflang": "en-US"
-        },
-        {
-            "rel": "queryables",
-            "type": "application/json",
-            "title": "Collection queryables",
-            "href": "{url}/collections/metadata/queryables",
-            "hreflang": "en-US"
-        },
+        },       
         {
             "rel": "items",
             "type": "application/json",
