@@ -1,23 +1,54 @@
 {
-    "type": "FeatureCollection",
-    "numberMatched": {numberMatched},
-    "numberReturned": {numberReturned},
-    "start":{start},    
-    "features": {features},
-    "links": [       
-        {
-                "rel": "collection",
-                "type": "application/json",
-                "title": "Link to the Metadata collection",
-                "href": "{url}/collections/metadata",
-                "hreflang": "en-US"
-        },
-        {
-                "rel": "next",
-                "type": "application/json",
-                "title": "Link to next page",
-                "href": "{url}/collections/metadata/items?{urlparam}",
-                "hreflang": "en-US"
-        }
-    ]    
+"response":
+	{
+	    "type": "FeatureCollection",
+	    "timestamp":"{currenttime}",
+	    "numberMatched": "{numberMatched}",
+	    "numberReturned": "{numberReturned}",
+	    "start":"{start}",    
+	    "features": "{features}",	   
+	    "links": [ 
+	    		{
+	                "rel": "next",
+	                "type": "application/json",
+	                "title": "Next page of results",
+	                "href": "{url}/collections/metadata/items?{urlparam}",
+	                "hreflang": "en-US"
+	        	},      
+		        {
+		                "rel": "parent",
+		                "type": "application/json",
+		                "title": "Link to the Metadata collection",
+		                "href": "{url}/collections/metadata",
+		                "hreflang": "en-US"
+		        },
+		         {
+		                "rel": "root",
+		                "type": "application/json",
+		                "title": "Link to all collections",
+		                "href": "{url}",
+		                "hreflang": "en-US"
+		        }
+	    ]    
+	},
+"featurePropPath":
+	{		
+		"id": "$._id",
+		"collection": "$._index",
+		"type":"feature",
+		"stac_version":"1.0",
+		"geometry": "{geomtery}",
+		"bbox": "{bbox}",		
+		"properties":
+			{
+			"created":"$._source.sys_created_dt",
+			"updated":"$._source.sys_modified_dt"
+			},
+		"assets":
+			{
+			"href": "$._source.links_s",
+			"title":"$._source.title"
+			}
+		
+	}
 }
