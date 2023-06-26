@@ -35,6 +35,7 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.json.JsonValue;
 import javax.servlet.http.HttpServletRequest;
+import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -61,6 +62,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 /**
  * STAC API: Records service provider.
@@ -262,9 +264,69 @@ public class STACService extends Application {
 				val = featureContext.read("$.featurePropPath.assets.title");
 				featureContext.set("$.featurePropPath.assets.title", searchItemCtx.read(val));
 				
-				// TODO add bbox, geometry
-				val = featureContext.read("$.featurePropPath.bbox");
-				featureContext.set("$.featurePropPath.bbox", "todo");	
+				// TODO add bbox, geometry			
+				
+				val = featureContext.read("$.featurePropPath.geometry");
+				JSONArray enveloperArr = searchItemCtx.read(val);
+				HashMap hm = (HashMap) enveloperArr.get(0);
+				
+				JSONArray geomArr = (JSONArray) hm.get("coordinates");
+				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
+				JSONArray geomArr1 = (JSONArray) geomArr.get(1);				
+				System.out.println("Items done "+i);
+				
+				JSONArray coordArr0= new JSONArray();
+				JSONArray coordArr1= new JSONArray();
+				JSONArray coordArr2= new JSONArray();
+				JSONArray coordArr3= new JSONArray();
+				JSONArray coordArr4= new JSONArray();
+				
+				JSONArray finalCoordinateArr = new JSONArray();
+				
+				JSONObject geomObj = new JSONObject();
+				geomObj.put("type", "Polygon");
+				
+				Object o = geomArr0.get(0);				
+				
+				Double xmin = (geomArr0.get(0) instanceof Integer ? Double.valueOf((Integer)geomArr0.get(0)) :(Double) geomArr0.get(0));
+				Double ymax = (geomArr0.get(1) instanceof Integer ? Double.valueOf((Integer)geomArr0.get(1)) :(Double) geomArr0.get(1));				
+						
+				Double xmax = (geomArr1.get(0) instanceof Integer ? Double.valueOf((Integer)geomArr1.get(0)) :(Double) geomArr1.get(0));
+					
+				Double ymin = (geomArr1.get(1) instanceof Integer ? Double.valueOf((Integer)geomArr1.get(1)) :(Double) geomArr1.get(1));
+				
+				coordArr0.add(xmin);
+				coordArr0.add(ymin);				
+				finalCoordinateArr.add(coordArr0);
+				
+				
+				coordArr1.add(xmin);
+				coordArr1.add(ymax);				
+				finalCoordinateArr.add(coordArr1);
+				
+				
+				coordArr2.add(xmax);
+				coordArr2.add(ymax);				
+				finalCoordinateArr.add(coordArr2);
+				
+				
+				coordArr3.add(xmax);
+				coordArr3.add(ymin);				
+				finalCoordinateArr.add(coordArr3);
+				
+				coordArr4.add(xmin);
+				coordArr4.add(ymin);				
+				finalCoordinateArr.add(coordArr4);			
+				
+				geomObj.put("coordinates", finalCoordinateArr);
+				featureContext.set("$.featurePropPath.geometry", geomObj);				
+			
+				JSONArray arr = new JSONArray();
+				arr.add(xmin);
+				arr.add(ymin);
+				arr.add(xmax);
+				arr.add(ymax);
+				featureContext.set("$.featurePropPath.bbox", arr);	
 				
 				jsonArray.add(featureContext.read("$.featurePropPath"));						
 				
@@ -288,71 +350,6 @@ public class STACService extends Application {
 		return finalResponse;
 	}
 
-//	private void createRecord(JsonArray items) {
-//		JsonObject feature = JsonUtil.newObject();
-//		
-//		for(int i=0;i<items.size();i++)
-//		{
-//			JsonObject item = (JsonObject) items.get(i);
-//
-//		}
-//		
-//		// logic for 'geometry' property
-//	      var geom = {};
-//
-//	      // per OGC Records API, polygon schema should have min 4 coordinates
-//	      // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/polygonGeoJSON.yaml
-//	      // response from elastic search has 2 coords - upper left and lower right - so create 4 coords to 
-//	      // conform to OGC Records 
-//	      if (item._source.envelope_geo) {
-//	        var xmin = item._source.envelope_geo.coordinates[0][0];
-//	        var xmax = item._source.envelope_geo.coordinates[1][0];
-//	        var ymin = item._source.envelope_geo.coordinates[1][1];
-//	        var ymax = item._source.envelope_geo.coordinates[0][1];
-//
-//	        var coord = [
-//	          [xmin, ymin],
-//	          [xmin, ymax],
-//	          [xmax, ymax],
-//	          [xmax, ymin],
-//	          [xmin, ymin],
-//	        ];      
-//
-//	        geom = {
-//	          type: 'Polygon',
-//	          coordinates: coord
-//	        };
-//	      }          
-//
-//	      // logic for 'time' property - per OGC Records API, 'time' should have min 2 dates. 
-//	      // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/recordGeoJSON.yaml
-//	      // TBD - decide which date fields to read. 
-//	      var timeProperty = null;
-//	      if (item._source.timeperiod_nst && item._source.timeperiod_nst.begin_dt && item._source.timeperiod_nst.end_dt) {
-//	        // For now if result has time range, returns the dates else null
-//	        timeProperty = [item._source.timeperiod_nst.begin_dt, item._source.timeperiod_nst.end_dt];
-//	      } 
-//
-//	      var feat = {
-//	        id: item._id,
-//	        type: 'Feature',
-//	        geometry: geom,
-//	        time: timeProperty,
-//
-//	        // TBD - for now, sending back all properties from elastic search response, but have to decide how
-//	        // to map response properties with OGC Records 'recordGeoJSON' schema
-//	        // https://github.com/opengeospatial/ogcapi-records/blob/master/core/openapi/schemas/recordGeoJSON.yaml
-//	        properties: item._source 
-//	        // properties: {
-//	        //   type: item._source.sys_metadatatype_s,
-//	        //   title: item._source.title,
-//	        //   recordCreated: item._source.sys_created_dt,
-//	        //   recordUpdated: item._source.sys_modified_dt
-//	          
-//	        // }
-//	      };
-//	      return feat;
-//	}
 
 	private String prepareQuery(Map<String, String> queryMap) {
 		String queryStr = "";
