@@ -37,7 +37,7 @@
 		"collection": "$._index",
 		"type":"feature",
 		"stac_version":"1.0",
-		"geometry": "{geomtery}",
+		"geometry": "$._source.envelope_geo",
 		"bbox": "{bbox}",		
 		"properties":
 			{
