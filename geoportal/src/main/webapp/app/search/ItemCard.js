@@ -31,6 +31,12 @@ define(["dojo/_base/declare",
   "dijit/popup",
   "dojo/text!./templates/ItemCard.html",
   "dojo/i18n!app/nls/resources",
+  "esri/map",
+  "esri/geometry/Extent",
+  "esri/symbols/SimpleFillSymbol",
+  "esri/geometry/Point",
+  "esri/graphic",
+  "esri/layers/GraphicsLayer",
   "app/context/AppClient",
   "app/etc/ServiceType",
   "app/etc/util",
@@ -50,9 +56,9 @@ define(["dojo/_base/declare",
 ], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
-  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
-  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetCollections, SetField, UploadMetadata, 
-  PreviewUtil, PreviewPane, ItemHtml) {
+  template, i18n, Map, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer, AppClient, ServiceType, util, 
+  ConfirmationDialog, ChangeOwner, DeleteItems, MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, 
+  SetCollections, SetField, UploadMetadata, PreviewUtil, PreviewPane, ItemHtml) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
