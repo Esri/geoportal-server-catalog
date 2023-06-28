@@ -27,6 +27,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.json.Json;
@@ -252,20 +253,13 @@ public class STACService extends Application {
 				val = featureContext.read("$.featurePropPath.collection");
 				featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
 
-				val = featureContext.read("$.featurePropPath.properties.created");
-				featureContext.set("$.featurePropPath.properties.created", searchItemCtx.read(val));
-
-				val = featureContext.read("$.featurePropPath.properties.updated");
-				featureContext.set("$.featurePropPath.properties.updated", searchItemCtx.read(val));
-
 				val = featureContext.read("$.featurePropPath.assets.href");
 				featureContext.set("$.featurePropPath.assets.href", searchItemCtx.read(val));
 
 				val = featureContext.read("$.featurePropPath.assets.title");
 				featureContext.set("$.featurePropPath.assets.title", searchItemCtx.read(val));
 				
-				// TODO add bbox, geometry			
-				
+				//add bbox, geometry
 				val = featureContext.read("$.featurePropPath.geometry");
 				JSONArray enveloperArr = searchItemCtx.read(val);
 				HashMap hm = (HashMap) enveloperArr.get(0);
@@ -273,7 +267,7 @@ public class STACService extends Application {
 				JSONArray geomArr = (JSONArray) hm.get("coordinates");
 				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
 				JSONArray geomArr1 = (JSONArray) geomArr.get(1);				
-				System.out.println("Items done "+i);
+				LOGGER.trace("Items done "+i);
 				
 				JSONArray coordArr0= new JSONArray();
 				JSONArray coordArr1= new JSONArray();
@@ -286,30 +280,24 @@ public class STACService extends Application {
 				JSONObject geomObj = new JSONObject();
 				geomObj.put("type", "Polygon");
 				
-				Object o = geomArr0.get(0);				
-				
-				Double xmin = (geomArr0.get(0) instanceof Integer ? Double.valueOf((Integer)geomArr0.get(0)) :(Double) geomArr0.get(0));
-				Double ymax = (geomArr0.get(1) instanceof Integer ? Double.valueOf((Integer)geomArr0.get(1)) :(Double) geomArr0.get(1));				
+				Double xmin = Double.parseDouble(geomArr0.get(0).toString());
+				Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
 						
-				Double xmax = (geomArr1.get(0) instanceof Integer ? Double.valueOf((Integer)geomArr1.get(0)) :(Double) geomArr1.get(0));
-					
-				Double ymin = (geomArr1.get(1) instanceof Integer ? Double.valueOf((Integer)geomArr1.get(1)) :(Double) geomArr1.get(1));
+				Double xmax = Double.parseDouble(geomArr1.get(0).toString());
+				Double ymin = Double.parseDouble(geomArr1.get(1).toString());
 				
 				coordArr0.add(xmin);
 				coordArr0.add(ymin);				
 				finalCoordinateArr.add(coordArr0);
 				
-				
 				coordArr1.add(xmin);
 				coordArr1.add(ymax);				
-				finalCoordinateArr.add(coordArr1);
-				
+				finalCoordinateArr.add(coordArr1);				
 				
 				coordArr2.add(xmax);
 				coordArr2.add(ymax);				
 				finalCoordinateArr.add(coordArr2);
-				
-				
+								
 				coordArr3.add(xmax);
 				coordArr3.add(ymin);				
 				finalCoordinateArr.add(coordArr3);
@@ -319,8 +307,8 @@ public class STACService extends Application {
 				finalCoordinateArr.add(coordArr4);			
 				
 				geomObj.put("coordinates", finalCoordinateArr);
-				featureContext.set("$.featurePropPath.geometry", geomObj);				
-			
+				featureContext.set("$.featurePropPath.geometry", geomObj);	
+							
 				JSONArray arr = new JSONArray();
 				arr.add(xmin);
 				arr.add(ymin);
@@ -328,7 +316,10 @@ public class STACService extends Application {
 				arr.add(ymax);
 				featureContext.set("$.featurePropPath.bbox", arr);	
 				
-				jsonArray.add(featureContext.read("$.featurePropPath"));						
+				//Iterate properties in stac-items.json and populate values
+				this.populateProperties(featureContext,searchItemCtx);			
+				
+				jsonArray.add(featureContext.read("$.featurePropPath"));					
 				
 			}
 					
@@ -344,12 +335,46 @@ public class STACService extends Application {
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", "" + urlparam);
 		} catch (IOException | URISyntaxException e) {
-
+			LOGGER.error("Stac response could not be preapred. "+e.getMessage());
 			e.printStackTrace();
 		}
 		return finalResponse;
 	}
 
+
+	private void populateProperties(DocumentContext featureContext, DocumentContext searchItemCtx) {		
+		HashMap<String, String> propObj = featureContext.read("$.featurePropPath.properties");
+		Set<String> propObjKeys = propObj.keySet();
+		String propKeyVal = "";
+		ArrayList<String> propToBeRemovedList = new ArrayList<String>();
+		
+		for (String propKey : propObjKeys)
+		{
+			try {
+				propKeyVal = String.valueOf(propObj.get(propKey));
+				//If it is a json path, set values from serach result
+				if(propKeyVal.startsWith("$"))
+				{
+					if(searchItemCtx.read(propKeyVal) != null)
+					{
+						featureContext.set("$.featurePropPath.properties."+propKey, searchItemCtx.read(propKeyVal));
+					}
+				}
+			}catch(Exception e)
+				{
+					//If json path not found or error in any property, remove this property in the end.
+					//if removed here, concurrentModificationException
+					propToBeRemovedList.add("$.featurePropPath.properties."+propKey);							
+					LOGGER.trace("key: "+propKey+" could not be added. Reason : "+e.getMessage());
+				}
+			}
+		for(String propToRemove: propToBeRemovedList)
+		{
+			featureContext.delete(propToRemove);	
+		}
+		
+	}
+	
 
 	private String prepareQuery(Map<String, String> queryMap) {
 		String queryStr = "";
