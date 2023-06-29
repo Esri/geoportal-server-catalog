@@ -289,7 +289,7 @@ public class STACService extends Application {
 		
 		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit"): 0);
 		limit = setLimit(limit);		
-		int from = (requestPayload.containsKey("from") ? requestPayload.getInt("from"): -1);
+		int from = (requestPayload.containsKey("from") ? requestPayload.getInt("from"): 0);
 		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime"): null);
 		
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
