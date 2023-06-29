@@ -246,13 +246,7 @@ public class STACService extends Application {
 			{
 				//"LC80100252015082LGN00,LC80100252014287LGN00"
 				if(idList.indexOf("[")<0)
-					queryMap.put("ids", idList);
-				
-				//["LC80100252015082LGN00","LC80100252014287LGN00"] 
-				if(idList.indexOf("[")> -1)
-				{
-					//TODO Parse this string to create a comma separate string
-				}
+					queryMap.put("ids", idList);				
 			}
 			
 			if(intersects != null && intersects.length() >0)
@@ -280,6 +274,103 @@ public class STACService extends Application {
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
+	
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/search")
+	@Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
+	public Response search(@Context HttpServletRequest hsr,@RequestBody String body)
+			throws UnsupportedEncodingException {
+		String responseJSON = null;
+		String response = "";
+		Status status = Response.Status.OK;
+		System.out.println(body);
+		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
+		
+		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit"): 0);
+		limit = setLimit(limit);		
+		int from = (requestPayload.containsKey("from") ? requestPayload.getInt("from"): -1);
+		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime"): null);
+		
+		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
+		JsonArray idArr= (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids"): null);	
+				
+		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects"): null);		
+		
+		String query = "";
+		String bbox="";
+		String ids="";
+
+		try {
+			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+			ElasticClient client = ElasticClient.newClient();
+			String url = client.getTypeUrlForSearch(ec.getIndexName());
+			Map<String, String> queryMap = new HashMap<String, String>();
+
+			if (bboxJsonArr != null && bboxJsonArr.size() > 0)
+			{
+				
+				for(int i=0;i<bboxJsonArr.size();i++)
+				{
+					if(i>0)
+						bbox = bbox+","+bboxJsonArr.get(i);
+					else
+						bbox = bbox+bboxJsonArr.get(i);
+				}
+				queryMap.put("bbox", bbox);
+			}
+				
+			if (datetime != null && datetime.length() > 0)
+			{
+				queryMap.put("datetime", datetime);
+			}
+				
+			
+			if(idArr != null && idArr.size() >0)
+			{			
+				//["LC80100252015082LGN00","LC80100252014287LGN00"] 				
+				for(int i=0; i<idArr.size();i++)
+				{
+					if(i>0)
+						ids = ids+","+idArr.getString(i);
+					else
+						ids = ids+idArr.getString(i);
+				}				
+				queryMap.put("ids", "\""+ids+"\"");
+			}
+			
+			if(intersects != null && !intersects.isEmpty())
+			{
+				queryMap.put("intersects", intersects.toString());
+			}
+				
+
+			if (from > 0) {
+				url = url + "/_search?size=" + limit + "&from=" + from;
+			} else
+			{
+				url = url + "/_search?size=" + limit;
+			}
+				
+
+			query = this.prepareMustQuery(queryMap);
+			System.out.println("final query "+query);
+			if (query.length() > 0)
+				response = client.sendPost(url, query, "application/json");
+			else
+				response = client.sendGet(url);
+
+			responseJSON = this.prepareResponse(response, hsr, bbox, from, limit, datetime,ids,intersects.toString());
+
+		} catch (Exception e) {
+			LOGGER.error("Error in getting items " + e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = ("{\"error\":\"STAC API Collection metadata items response could not be generated.\"}");
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
+
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int from, int limit,
 			String datetime,String ids, String intersects) {
