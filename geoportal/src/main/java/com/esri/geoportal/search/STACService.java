@@ -27,18 +27,17 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
-import javax.json.JsonValue;
 import javax.servlet.http.HttpServletRequest;
-import javax.swing.text.html.HTMLDocument.HTMLReader.IsindexAction;
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -51,6 +50,7 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestBody;
 
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
@@ -197,13 +197,13 @@ public class STACService extends Application {
 			} else
 				url = url + "/_search?size=" + limit;
 
-			query = this.prepareQuery(queryMap);
+			query = this.prepareMustQuery(queryMap);			
 			if (query.length() > 0)
 				response = client.sendPost(url, query, "application/json");
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, from, limit, datetime);
+			responseJSON = this.prepareResponse(response, hsr, bbox, from, limit, datetime,null,null);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
@@ -214,8 +214,75 @@ public class STACService extends Application {
 		return Response.status(status).entity(responseJSON).build();
 	}
 
+	@GET
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/search")
+	public Response search(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
+			@QueryParam("bbox") String bbox,
+			@QueryParam("intersects") String intersects, 
+			@QueryParam("datetime") String datetime, 
+			@QueryParam("ids") String idList,
+			@QueryParam("from") int from)
+			throws UnsupportedEncodingException {
+		String responseJSON = null;
+		String response = "";
+		Status status = Response.Status.OK;
+		limit = setLimit(limit);
+		
+		String query = "";
+
+		try {
+			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+			ElasticClient client = ElasticClient.newClient();
+			String url = client.getTypeUrlForSearch(ec.getIndexName());
+			Map<String, String> queryMap = new HashMap<String, String>();
+
+			if (bbox != null && bbox.length() > 0)
+				queryMap.put("bbox", bbox);
+			if (datetime != null && datetime.length() > 0)
+				queryMap.put("datetime", datetime);
+			
+			if(idList != null && idList.length() >0)
+			{
+				//"LC80100252015082LGN00,LC80100252014287LGN00"
+				if(idList.indexOf("[")<0)
+					queryMap.put("ids", idList);
+				
+				//["LC80100252015082LGN00","LC80100252014287LGN00"] 
+				if(idList.indexOf("[")> -1)
+				{
+					//TODO Parse this string to create a comma separate string
+				}
+			}
+			
+			if(intersects != null && intersects.length() >0)
+				queryMap.put("intersects", intersects);
+
+			if (from > 0) {
+				url = url + "/_search?size=" + limit + "&from=" + from;
+			} else
+				url = url + "/_search?size=" + limit;
+
+			query = this.prepareMustQuery(queryMap);
+			System.out.println("final query "+query);
+			if (query.length() > 0)
+				response = client.sendPost(url, query, "application/json");
+			else
+				response = client.sendGet(url);
+
+			responseJSON = this.prepareResponse(response, hsr, bbox, from, limit, datetime,idList,intersects);
+
+		} catch (Exception e) {
+			LOGGER.error("Error in getting items " + e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = ("{\"error\":\"STAC API Collection metadata items response could not be generated.\"}");
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
+	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int from, int limit,
-			String datetime) {
+			String datetime,String ids, String intersects) {
 		int numberMatched;
 		net.minidev.json.JSONArray items = null;
 	
@@ -323,7 +390,9 @@ public class STACService extends Application {
 				
 			}
 					
-			resourceFilecontext.set("$.response.features", jsonArray);						
+			resourceFilecontext.set("$.response.features", jsonArray);	
+			//No next records then remove Next page
+			
 			
 			JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(resourceFilecontext.jsonString()); 
 			JsonObject resObj =  obj.getJsonObject("response");
@@ -331,7 +400,7 @@ public class STACService extends Application {
 			finalResponse = resObj.toString();
 			// Prepare urlparam for next page from=next&size=limit&bbox=bbox
 			int next = from + limit;
-			String urlparam = "from=" + next + "&limit=" + limit + "&bbox=" + bbox + "&datetime=" + datetime;
+			String urlparam = "from=" + next + "&limit=" + limit + "&bbox=" + bbox + "&datetime=" + datetime+(ids !=null ? "&ids="+ids :"");
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", "" + urlparam);
 		} catch (IOException | URISyntaxException e) {
@@ -371,12 +440,11 @@ public class STACService extends Application {
 		for(String propToRemove: propToBeRemovedList)
 		{
 			featureContext.delete(propToRemove);	
-		}
-		
+		}		
 	}
 	
 
-	private String prepareQuery(Map<String, String> queryMap) {
+	private String prepareMustQuery(Map<String, String> queryMap) {
 		String queryStr = "";
 		JsonArrayBuilder builder = Json.createArrayBuilder();
 
@@ -391,10 +459,39 @@ public class STACService extends Application {
 			if (dateTimeQry.length() > 0)
 				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
 		}
+		if (queryMap.containsKey("ids")) {
+			String idsQry = this.prepareIds(queryMap.get("ids"));
+			if (idsQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(idsQry));
+		}
+		
+		if (queryMap.containsKey("intersects")) {
+			String intersectsQry = this.prepareIntersects(queryMap.get("intersects"));
+			if (intersectsQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(intersectsQry));
+		}
+		
 		JsonArray filter = builder.build();
 		if (filter.size() > 0)
 			queryStr = "{\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}}";
 		return queryStr;
+	}
+
+	private String prepareIntersects(String geoJson) {
+		String query =""; 
+		String field = "shape_geo";
+		String spatialType = "geo_shape"; 
+		String relation = "intersects";
+		JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(geoJson);		
+		
+		query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \""+obj.getString("type")+"\","
+				+ "\"coordinates\":"+ obj.get("coordinates")
+				+ "},\"relation\": \"" + relation + "\"}}}";
+		return query;
+	}
+
+	private String prepareIds(String ids) {
+		return "{\"match\": {\"id\": "+ids+"}}";	
 	}
 
 	private String prepareDateTime(String datetime) {
@@ -428,7 +525,6 @@ public class STACService extends Application {
 		query = "{\"range\": {\"" + dateTimeFld + "\":" + dateTimeFldQuery + "}}";
 
 		return query;
-
 	}
 
 	private String prepareBbox(String bboxString) {
