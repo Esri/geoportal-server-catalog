@@ -4,8 +4,7 @@
 	    "type": "FeatureCollection",
 	    "timestamp":"{currenttime}",
 	    "numberMatched": "{numberMatched}",
-	    "numberReturned": "{numberReturned}",
-	    "start":"{start}",    
+	    "numberReturned": "{numberReturned}",	      
 	    "features": "{features}",	   
 	    "links": [ 
 	    		{
