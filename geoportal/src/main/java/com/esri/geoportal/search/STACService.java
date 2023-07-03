@@ -38,7 +38,9 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
+import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
+import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -51,6 +53,8 @@ import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestParam;
 
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
@@ -270,101 +274,85 @@ public class STACService extends Application {
 		return Response.status(status).entity(responseJSON).build();
 	}
 	
-//	@POST
-//	@Produces(MediaType.APPLICATION_JSON)
-//	@Path("/search")
-//	@Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
-//	public Response search(@Context HttpServletRequest hsr,@RequestBody String body)
-//			throws UnsupportedEncodingException {
-//		String responseJSON = null;
-//		String response = "";
-//		Status status = Response.Status.OK;
-//		System.out.println(body);
-//		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
-//		
-//		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit"): 0);
-//		limit = setLimit(limit);		
-//		int from = (requestPayload.containsKey("from") ? requestPayload.getInt("from"): 0);
-//		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime"): null);
-//		
-//		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
-//		JsonArray idArr= (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids"): null);	
-//				
-//		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects"): null);		
-//		
-//		String query = "";
-//		String bbox="";
-//		String ids="";
-//
-//		try {
-//			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-//			ElasticClient client = ElasticClient.newClient();
-//			String url = client.getTypeUrlForSearch(ec.getIndexName());
-//			Map<String, String> queryMap = new HashMap<String, String>();
-//
-//			if (bboxJsonArr != null && bboxJsonArr.size() > 0)
-//			{
-//				
-//				for(int i=0;i<bboxJsonArr.size();i++)
-//				{
-//					if(i>0)
-//						bbox = bbox+","+bboxJsonArr.get(i);
-//					else
-//						bbox = bbox+bboxJsonArr.get(i);
-//				}
-//				queryMap.put("bbox", bbox);
-//			}
-//				
-//			if (datetime != null && datetime.length() > 0)
-//			{
-//				queryMap.put("datetime", datetime);
-//			}
-//				
-//			
-//			if(idArr != null && idArr.size() >0)
-//			{			
-//				//["LC80100252015082LGN00","LC80100252014287LGN00"] 				
-//				for(int i=0; i<idArr.size();i++)
-//				{
-//					if(i>0)
-//						ids = ids+","+idArr.getString(i);
-//					else
-//						ids = ids+idArr.getString(i);
-//				}				
-//				queryMap.put("ids", "\""+ids+"\"");
-//			}
-//			
-//			if(intersects != null && !intersects.isEmpty())
-//			{
-//				queryMap.put("intersects", intersects.toString());
-//			}
-//				
-//
-//			if (from > 0) {
-//				url = url + "/_search?size=" + limit + "&from=" + from;
-//			} else
-//			{
-//				url = url + "/_search?size=" + limit;
-//			}
-//				
-//
-//			query = this.prepareSearchQuery(queryMap);
-//			System.out.println("final query "+query);
-//			if (query.length() > 0)
-//				response = client.sendPost(url, query, "application/json");
-//			else
-//				response = client.sendGet(url);
-//
-//			responseJSON = this.prepareResponse(response, hsr, bbox, from, limit, datetime,ids,intersects.toString());
-//
-//		} catch (Exception e) {
-//			LOGGER.error("Error in getting items " + e.getCause());
-//			e.printStackTrace();
-//			status = Response.Status.INTERNAL_SERVER_ERROR;
-//			responseJSON = ("{\"error\":\"STAC API Collection metadata search response could not be generated.\"}");
-//		}
-//		return Response.status(status).entity(responseJSON).build();
-//	}
+	@POST
+	@Produces(MediaType.APPLICATION_JSON)
+	@Path("/search")
+	@Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
+	public Response search(@Context HttpServletRequest hsr,@RequestBody String body, @QueryParam("search_after") String search_after)
+			throws UnsupportedEncodingException {
+		String responseJSON = null;
+		String response = "";
+		Status status = Response.Status.OK;
+		//System.out.println(body);
+		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
+		
+		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit"): 0);
+		limit = setLimit(limit);		
+	
+		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime"): null);
+		
+		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
+		JsonArray idArr= (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids"): null);	
+				
+		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects"): null);		
+		
+		String query = "";
+		String bbox="";
+		String ids="";
+
+		try {
+			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+			ElasticClient client = ElasticClient.newClient();
+			String url = client.getTypeUrlForSearch(ec.getIndexName());
+			Map<String, String> queryMap = new HashMap<String, String>();
+
+			if (bboxJsonArr != null && bboxJsonArr.size() > 0) {
+				for (int i = 0; i < bboxJsonArr.size(); i++) {
+					if (i > 0)
+						bbox = bbox + "," + bboxJsonArr.get(i);
+					else
+						bbox = bbox + bboxJsonArr.get(i);
+				}
+				queryMap.put("bbox", bbox);
+			}
+
+			if (datetime != null && datetime.length() > 0) {
+				queryMap.put("datetime", datetime);
+			}
+
+			if (idArr != null && idArr.size() > 0) {
+				// ["LC80100252015082LGN00","LC80100252014287LGN00"]
+				for (int i = 0; i < idArr.size(); i++) {
+					if (i > 0)
+						ids = ids + "," + idArr.getString(i);
+					else
+						ids = ids + idArr.getString(i);
+				}
+				queryMap.put("ids", "\"" + ids + "\"");
+			}
+
+			if (intersects != null && !intersects.isEmpty()) {
+				queryMap.put("intersects", intersects.toString());
+			}
+
+			url = url + "/_search?size=" + limit;
+			query = this.prepareSearchQuery(queryMap,search_after);
+			System.out.println("final query "+query);
+			if (query.length() > 0)
+				response = client.sendPost(url, query, "application/json");
+			else
+				response = client.sendGet(url);
+
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,ids,intersects.toString(),"searchPost");
+
+		} catch (Exception e) {
+			LOGGER.error("Error in getting items " + e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = ("{\"error\":\"STAC API Collection metadata search response could not be generated.\"}");
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
 
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
@@ -379,7 +367,7 @@ public class STACService extends Application {
 		String filePath = "service/config/stac-metadataItems.json";
 		
 		try {
-			if(requestType.equalsIgnoreCase("search"))
+			if(requestType.startsWith("search"))
 				filePath = "service/config/stac-searchItems.json";
 			
 			itemFileString = this.readResourceFile(filePath, hsr);
@@ -420,12 +408,11 @@ public class STACService extends Application {
 				//add bbox, geometry
 				val = featureContext.read("$.featurePropPath.geometry");
 				JSONArray enveloperArr = searchItemCtx.read(val);
-				HashMap hm = (HashMap) enveloperArr.get(0);
+				HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
 				
 				JSONArray geomArr = (JSONArray) hm.get("coordinates");
 				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
-				JSONArray geomArr1 = (JSONArray) geomArr.get(1);				
-				LOGGER.trace("Items done "+i);
+				JSONArray geomArr1 = (JSONArray) geomArr.get(1);
 				
 				JSONArray coordArr0= new JSONArray();
 				JSONArray coordArr1= new JSONArray();
@@ -501,14 +488,20 @@ public class STACService extends Application {
 				} else {
 					encodedIntersect = URLEncoder.encode(intersects, StandardCharsets.UTF_8.toString());
 				}
-			}				
-			
-			String urlparam = "limit=" + limit + 
-					(bbox!=null ? "&bbox="+bbox :"") 
-					+(datetime!=null ? "&datetime="+datetime : "")					
-					+(search_after !=null ? "&search_after="+search_after :"")
-					+(encodedIntersect !=null ? "&intersects="+encodedIntersect :"")
-					+(ids !=null ? "&ids="+ids :"");
+			}	
+			String urlparam="";
+			if (requestType.equalsIgnoreCase("searchPost")) {
+				//In post request, other parameters will be part of request body
+				urlparam = (search_after != null ? "search_after=" + search_after : "");
+
+			} else {
+				urlparam = "limit=" + limit + (bbox != null ? "&bbox=" + bbox : "")
+						+ (datetime != null ? "&datetime=" + datetime : "")
+						+ (search_after != null ? "&search_after=" + search_after : "")
+						+ (encodedIntersect != null ? "&intersects=" + encodedIntersect : "")
+						+ (ids != null ? "&ids=" + ids : "");
+			}
+			 
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", "" + urlparam);
 		} catch (IOException | URISyntaxException e) {
@@ -524,31 +517,27 @@ public class STACService extends Application {
 		Set<String> propObjKeys = propObj.keySet();
 		String propKeyVal = "";
 		ArrayList<String> propToBeRemovedList = new ArrayList<String>();
-		
-		for (String propKey : propObjKeys)
-		{
+
+		for (String propKey : propObjKeys) {
 			try {
 				propKeyVal = String.valueOf(propObj.get(propKey));
-				//If it is a json path, set values from serach result
-				if(propKeyVal.startsWith("$"))
-				{
-					if(searchItemCtx.read(propKeyVal) != null)
-					{
-						featureContext.set("$.featurePropPath.properties."+propKey, searchItemCtx.read(propKeyVal));
+				// If it is a json path, set values from search result
+				if (propKeyVal.startsWith("$")) {
+					if (searchItemCtx.read(propKeyVal) != null) {
+						featureContext.set("$.featurePropPath.properties." + propKey, searchItemCtx.read(propKeyVal));
 					}
 				}
-			}catch(Exception e)
-				{
-					//If json path not found or error in any property, remove this property in the end.
-					//if removed here, concurrentModificationException
-					propToBeRemovedList.add("$.featurePropPath.properties."+propKey);							
-					LOGGER.trace("key: "+propKey+" could not be added. Reason : "+e.getMessage());
-				}
+			} catch (Exception e) {
+				// If json path not found or error in any property, remove this property in the
+				// end.
+				// if removed here, concurrentModificationException
+				propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
+				LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
 			}
-		for(String propToRemove: propToBeRemovedList)
-		{
-			featureContext.delete(propToRemove);	
-		}		
+		}
+		for (String propToRemove : propToBeRemovedList) {
+			featureContext.delete(propToRemove);
+		}
 	}
 	
 
