@@ -121,22 +121,7 @@ public class STACService extends Application {
 		return Response.status(status).entity(responseJSON).build();
 
 	}
-
-	@GET
-	@Path("/api")
-	@Produces(MediaType.APPLICATION_JSON)
-	public Response getApi(@Context HttpServletRequest hsr) {
-		String responseJSON = null;
-		Status status = Response.Status.OK;
-		try {
-			responseJSON = this.readResourceFile("service/config/stac-api.json", hsr);
-		} catch (Exception e) {
-			LOGGER.error("Error in conformance " + e);
-			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API description response could not be generated.\"}");
-		}
-		return Response.status(status).entity(responseJSON).build();
-	}
+	
 
 	@GET
 	@Path("/collections")
