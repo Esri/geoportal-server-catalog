@@ -59,23 +59,6 @@
 			}
 		}
 	},
-	"/stac/api": {
-		"get": {
-			"tags": [
-				"STAC"
-			],
-			"summary": "Link to the collections",
-			"description": "",
-			"operationId": "stacCollection",
-			"parameters": [				
-			],
-			"responses": {
-				"default": {
-					"description": "successful operation"
-				}
-			}
-		}
-	},
 	"/stac/collections/metadata": {
 		"get": {
 			"tags": [
