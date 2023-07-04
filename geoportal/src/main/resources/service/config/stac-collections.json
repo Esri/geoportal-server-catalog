@@ -1,22 +1,35 @@
 {
 	"links": [
-        {
-            "rel": "self",
-            "type": "application/json",
-            "title": "This document as JSON",
-            "href": "{url}/collections"
-        }
-    ],
-  "collections": [
-    {
-      "stac_version": "1.0.0",
-      "stac_extensions": [],
-      "type": "record", 
-      "id": "metadata",
-      "title": "Esri Geoportal Server Metadata",
-      "description": "Geoportal Server Metadata Catalog",
-      "license": "proprietary"
-      }      
-      
-  	]
+		{
+			"rel": "self",
+			"type": "application/json",
+			"title": "This document as JSON",
+			"href": "{url}/collections"
+		}
+	],
+	"collections": [
+		{
+			"stac_version": "1.0.0",
+			"stac_extensions": [],
+			"type": "record",
+			"id": "metadata",
+			"title": "Esri Geoportal Server Metadata",
+			"description": "Geoportal Server Metadata Catalog",
+			"license": "proprietary",
+			"links": [
+				{
+					"rel": "self",
+					"type": "application/json",
+					"title": "Link to the Metadata collection",
+					"href": "{url}/collections/metadata"
+				},
+				{
+					"rel": "root",
+					"type": "application/json",
+					"title": "Link to all collections",
+					"href": "{url}"
+				}
+			]
+		}
+	]
 }
