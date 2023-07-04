@@ -15,13 +15,198 @@
   "basePath": "/geoportal",
   "tags": [
     {
-      "name": "REST"
+      "name": "STAC"
     },
     {
       "name": "CSW"
+    },
+    {
+      "name": "REST"
     }
   ],
-  "paths": {
+  "paths": {  	
+	"/stac": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Landing page for Geoportal Server STAC Records API.",
+			"description": "",
+			"operationId": "stacDescription",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/conformance": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Provides information on STAC API conformance",
+			"description": "",
+			"operationId": "stacConformance",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/api": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Link to the collections",
+			"description": "",
+			"operationId": "stacCollection",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/collections/metadata": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Link to the Metadata collection",
+			"description": "",
+			"operationId": "stacCollectionMetadata",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/collections/metadata/items": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Metadata collection items.",
+        "description": "",
+        "operationId": "stacCollectionMetadataItems",                                                                                                                                                                                        
+        "parameters": [
+          
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Minimum = 1. Maximum = 10000, Default = 10.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "bbox",
+            "in": "query",
+            "description": "Only features that have a geometry that intersects the bounding box are selected.",
+            "required": false,
+            "type": "Array of Numbers"
+          },
+          {
+            "name": "datetime",
+            "in": "query",
+            "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.",
+            "required": false,
+            "type": "String"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/stac/search": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Retrieve Items matching filters.",
+        "description": "Intended as a shorthand API for simple queries.",
+        "operationId": "stacSearch",                                                                                                                                                                                        
+        "parameters": [
+          
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Minimum = 1. Maximum = 10000, Default = 10.",
+            "required": false,
+            "type": "integer"
+          },
+          {
+            "name": "bbox",
+            "in": "query",
+            "description": "Only features that have a geometry that intersects the bounding box are selected.s",
+            "required": false,
+            "type": "Array of Numbers"
+          },
+          {
+            "name": "intersects",
+            "in": "query",
+            "description": "pointGeoJSON (object) or multipointGeoJSON (object) or linestringGeoJSON (object) or multilinestringGeoJSON (object) or polygonGeoJSON (object) or multipolygonGeoJSON (object) or geometrycollectionGeoJSON (object) (geometryGeoJSON)",
+            "required": false,
+            "type": "GeoJSON object"
+          },
+          {
+            "name": "datetime",
+            "in": "query",
+            "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots",
+            "required": false,
+            "type": "String"
+          },
+         
+          {
+            "name": "ids",
+            "in": "query",
+            "description": "Array of Item ids to return.",
+            "required": false,
+            "type": "Array of strings (ids)"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      },    
+      "post": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Retrieve Items matching filters.",
+        "description": "Intended as the standard, full-featured query API.",
+        "operationId": "stacSearchPost",                                                                                                                                                                                        
+        "parameters": [          
+          {
+            "name": "body",
+            "in": "body",
+            "description": "https://api.stacspec.org/v1.0.0/item-search/#tag/Item-Search/operation/postItemSearch",
+            "required": true           
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
     "/rest/geoportal": {
       "get": {
         "tags": [
