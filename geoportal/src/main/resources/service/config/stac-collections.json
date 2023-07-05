@@ -15,7 +15,7 @@
 			"id": "metadata",
 			"title": "Esri Geoportal Server Metadata",
 			"description": "STAC API Powered by Esri Geoportal Server Catalog",
-			"license": "Esri (c) 2003 - 2023, Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0"",
+			"license": "Esri (c) 2003 - 2023, Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0",
 			"links": [
 				{
 					"rel": "self",
