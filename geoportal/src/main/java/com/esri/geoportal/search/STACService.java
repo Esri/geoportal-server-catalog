@@ -24,7 +24,6 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -54,7 +53,6 @@ import javax.ws.rs.core.Response.Status;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestParam;
 
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
@@ -405,6 +403,7 @@ public class STACService extends Application {
 				JSONArray coordArr3= new JSONArray();
 				JSONArray coordArr4= new JSONArray();
 				
+				JSONArray coordinateArr = new JSONArray();
 				JSONArray finalCoordinateArr = new JSONArray();
 				
 				JSONObject geomObj = new JSONObject();
@@ -436,7 +435,8 @@ public class STACService extends Application {
 				coordArr4.add(ymin);				
 				finalCoordinateArr.add(coordArr4);			
 				
-				geomObj.put("coordinates", finalCoordinateArr);
+				coordinateArr.add(finalCoordinateArr);
+				geomObj.put("coordinates", coordinateArr);
 				featureContext.set("$.featurePropPath.geometry", geomObj);	
 							
 				JSONArray arr = new JSONArray();
