@@ -32,7 +32,7 @@
 	},
 "featurePropPath":
 	{	
-		"type":"feature",	
+		"type":"Feature",	
 		"id": "$._id",
 		"collection": "$._index",		
 		"stac_version":"1.0",
