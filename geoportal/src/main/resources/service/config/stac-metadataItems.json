@@ -36,8 +36,8 @@
 		"id": "$._id",
 		"collection": "$._index",		
 		"stac_version":"1.0",
-		"bbox": "{bbox}",	
-		"geometry": "$._source.envelope_geo",			
+		"bbox": "$._source.envelope_geo",	
+		"geometry": "$._source.shape_geo",			
 		"properties":
 			{			
 	       	"eo:sun_azimuth": "$._source._SunAzimuth_l",

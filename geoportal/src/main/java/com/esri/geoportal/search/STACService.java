@@ -389,62 +389,64 @@ public class STACService extends Application {
 				featureContext.set("$.featurePropPath.assets.title", searchItemCtx.read(val));
 				
 				//add bbox, geometry
-				val = featureContext.read("$.featurePropPath.geometry");
+				val = featureContext.read("$.featurePropPath.bbox");
 				JSONArray enveloperArr = searchItemCtx.read(val);
 				HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
 				
 				JSONArray geomArr = (JSONArray) hm.get("coordinates");
 				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
 				JSONArray geomArr1 = (JSONArray) geomArr.get(1);
-				
-				JSONArray coordArr0= new JSONArray();
-				JSONArray coordArr1= new JSONArray();
-				JSONArray coordArr2= new JSONArray();
-				JSONArray coordArr3= new JSONArray();
-				JSONArray coordArr4= new JSONArray();
-				
-				JSONArray coordinateArr = new JSONArray();
-				JSONArray finalCoordinateArr = new JSONArray();
-				
-				JSONObject geomObj = new JSONObject();
-				geomObj.put("type", "Polygon");
-				
+								
 				Double xmin = Double.parseDouble(geomArr0.get(0).toString());
 				Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
 						
 				Double xmax = Double.parseDouble(geomArr1.get(0).toString());
 				Double ymin = Double.parseDouble(geomArr1.get(1).toString());
 				
-				coordArr0.add(xmin);
-				coordArr0.add(ymin);				
-				finalCoordinateArr.add(coordArr0);
-				
-				coordArr1.add(xmin);
-				coordArr1.add(ymax);				
-				finalCoordinateArr.add(coordArr1);				
-				
-				coordArr2.add(xmax);
-				coordArr2.add(ymax);				
-				finalCoordinateArr.add(coordArr2);
-								
-				coordArr3.add(xmax);
-				coordArr3.add(ymin);				
-				finalCoordinateArr.add(coordArr3);
-				
-				coordArr4.add(xmin);
-				coordArr4.add(ymin);				
-				finalCoordinateArr.add(coordArr4);			
-				
-				coordinateArr.add(finalCoordinateArr);
-				geomObj.put("coordinates", coordinateArr);
-				featureContext.set("$.featurePropPath.geometry", geomObj);	
-							
 				JSONArray arr = new JSONArray();
 				arr.add(xmin);
 				arr.add(ymin);
 				arr.add(xmax);
 				arr.add(ymax);
 				featureContext.set("$.featurePropPath.bbox", arr);	
+				
+//				JSONArray coordArr0= new JSONArray();
+//				JSONArray coordArr1= new JSONArray();
+//				JSONArray coordArr2= new JSONArray();
+//				JSONArray coordArr3= new JSONArray();
+//				JSONArray coordArr4= new JSONArray();
+//				
+//				JSONArray coordinateArr = new JSONArray();
+//				JSONArray finalCoordinateArr = new JSONArray();
+//				
+//				JSONObject geomObj = new JSONObject();
+//				geomObj.put("type", "Polygon");
+//				
+//				coordArr4.add(xmin);
+//				coordArr4.add(ymin);				
+//				finalCoordinateArr.add(coordArr4);
+//				
+//				coordArr3.add(xmax);
+//				coordArr3.add(ymin);				
+//				finalCoordinateArr.add(coordArr3);
+//				
+//				coordArr2.add(xmax);
+//				coordArr2.add(ymax);				
+//				finalCoordinateArr.add(coordArr2);
+//				
+//				coordArr1.add(xmin);
+//				coordArr1.add(ymax);				
+//				finalCoordinateArr.add(coordArr1);		
+//				
+//				coordArr0.add(xmin);
+//				coordArr0.add(ymin);				
+//				finalCoordinateArr.add(coordArr4);			
+//				
+//				coordinateArr.add(finalCoordinateArr);
+//				geomObj.put("coordinates", coordinateArr);
+				
+				val = featureContext.read("$.featurePropPath.geometry");
+				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
 				
 				//Iterate properties in stac-items.json and populate values
 				this.populateProperties(featureContext,searchItemCtx);			
