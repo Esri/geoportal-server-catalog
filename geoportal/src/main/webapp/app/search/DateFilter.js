@@ -328,14 +328,14 @@ function(declare, lang, array, on, keys, date, stamp, domConstruct, template, i1
       var dateHistogram = {
         "date_histogram":{
           "field": aggregationField,
-          "interval": interval,
+          "calendar_interval": interval,
           "min_doc_count": minDocCount
         }
       };
       var endDateHistogram = {
         "date_histogram":{
           "field": this.toField,
-          "interval": interval,
+          "calendar_interval": interval,
           "min_doc_count": minDocCount
         }
       };
