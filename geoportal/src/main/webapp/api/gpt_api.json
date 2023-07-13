@@ -115,6 +115,30 @@
         }
       }
     },
+    "/stac/collections/metadata/items/{id}": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Get a feature.",
+        "description": "Get a feature.",
+        "operationId": "stacCollectionMetadataItemWithIds",                                                                                                                                                                                        
+        "parameters": [          
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Stac item id",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
     "/stac/search": {
       "get": {
         "tags": [
