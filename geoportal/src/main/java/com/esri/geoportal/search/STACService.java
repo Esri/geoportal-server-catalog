@@ -56,16 +56,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
-import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
-import com.esri.geoportal.lib.elastic.http.request.GetItemRequest;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
-import net.minidev.json.JSONObject;
 
 /**
  * STAC API: Records service provider.
@@ -194,6 +191,42 @@ public class STACService extends Application {
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = ("{\"error\":\"STAC API Collection metadata items response could not be generated.\"}");
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
+	
+	@GET
+	@Path("collections/metadata/items/{id}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getItem(@Context HttpServletRequest hsr, @PathParam("id") String id) {
+		String responseJSON = null;
+		String response = "";
+		Status status = Response.Status.OK;	
+		String query = "";
+
+		try {
+			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+			ElasticClient client = ElasticClient.newClient();
+			String url = client.getTypeUrlForSearch(ec.getIndexName());
+			Map<String, String> queryMap = new HashMap<String, String>();
+	
+			queryMap.put("ids", "\""+id+"\"");
+			url = url + "/_search";
+
+			query = this.prepareSearchQuery(queryMap,null);
+			//System.out.println("final query "+query);
+			if (query.length() > 0)
+				response = client.sendPost(url, query, "application/json");
+			else
+				response = client.sendGet(url);
+
+			responseJSON = this.prepareResponse(response, hsr, null, 1, null,null,null,"metadataItemId");
+
+		} catch (Exception e) {
+			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = ("{\"error\":\"STAC API Collection metadata item response could not be generated.\"}");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -347,16 +380,14 @@ public class STACService extends Application {
 		String itemFileString = "";		
 		String finalResponse = "";
 		String search_after="";
-		String filePath = "service/config/stac-metadataItems.json";
+		String filePath = "service/config/stac-items.json";
 		
 		try {
-			if(requestType.startsWith("search"))
-				filePath = "service/config/stac-searchItems.json";
-			
 			itemFileString = this.readResourceFile(filePath, hsr);
 
 			DocumentContext elasticResContext = JsonPath.parse(searchRes);
 			DocumentContext resourceFilecontext = JsonPath.parse(itemFileString);
+			DocumentContext linksContext = JsonPath.parse(this.readResourceFile(resourceFilecontext.read("$.response.links"), hsr));
 
 			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
 			String featureTemplateStr = fileObj.getJsonObject("featurePropPath").toString();
@@ -368,7 +399,17 @@ public class STACService extends Application {
 
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
-			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);		
+			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);	
+			
+			if(requestType.startsWith("metadataItems"))
+				resourceFilecontext.set("$.response.links",linksContext.read("$.metadataItem.links"));
+			
+			if(requestType.startsWith("search"))
+				resourceFilecontext.set("$.response.links",linksContext.read("$.searchItem.links"));
+			
+			if(requestType.startsWith("metadataItemId"))
+				resourceFilecontext.set("$.response.links",linksContext.read("$.metadataItemId.links"));
+			
 			
 			JSONArray jsonArray = new JSONArray();
 			
@@ -568,9 +609,7 @@ public class STACService extends Application {
 				
 		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
 				+(queryStr.length()>0 ? ","+queryStr: "")
-				+(searchAfterStr.length()>0 ?","+searchAfterStr : "")+"}";
-		
-		//System.out.println("search query "+searchQuery);
+				+(searchAfterStr.length()>0 ?","+searchAfterStr : "")+"}";		
 		return searchQuery;
 	}
 
@@ -666,22 +705,7 @@ public class STACService extends Application {
 		return limit;
 	}
 
-	@GET
-	@Path("collections/metadata/items/{featureId}")
-	public Response getItem(@Context HttpServletRequest hsr, @PathParam("featureId") String id) {
-		// To test 92e7716e2865405fb94ed14585649d0f
-		GetItemRequest request = GeoportalContext.getInstance().getBean("request.GetItemRequest", GetItemRequest.class);
-		request.init(id, null, false);
-		try {
-			AppResponse response = request.executeNOAuth();
-			return response.build();
-		} catch (Exception ex) {
-			LOGGER.error("Error in get item " + ex.getCause());
-
-			String responseJSON = ("{\"error\":\"STAC API feature response could not be generated.\"}");
-			return Response.status(Response.Status.INTERNAL_SERVER_ERROR).entity(responseJSON).build();
-		}
-	}
+	
 
 	public String getBaseUrl(HttpServletRequest hsr) {
 
