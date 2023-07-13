@@ -449,42 +449,7 @@ public class STACService extends Application {
 				arr.add(ymin);
 				arr.add(xmax);
 				arr.add(ymax);
-				featureContext.set("$.featurePropPath.bbox", arr);	
-				
-//				JSONArray coordArr0= new JSONArray();
-//				JSONArray coordArr1= new JSONArray();
-//				JSONArray coordArr2= new JSONArray();
-//				JSONArray coordArr3= new JSONArray();
-//				JSONArray coordArr4= new JSONArray();
-//				
-//				JSONArray coordinateArr = new JSONArray();
-//				JSONArray finalCoordinateArr = new JSONArray();
-//				
-//				JSONObject geomObj = new JSONObject();
-//				geomObj.put("type", "Polygon");
-//				
-//				coordArr4.add(xmin);
-//				coordArr4.add(ymin);				
-//				finalCoordinateArr.add(coordArr4);
-//				
-//				coordArr3.add(xmax);
-//				coordArr3.add(ymin);				
-//				finalCoordinateArr.add(coordArr3);
-//				
-//				coordArr2.add(xmax);
-//				coordArr2.add(ymax);				
-//				finalCoordinateArr.add(coordArr2);
-//				
-//				coordArr1.add(xmin);
-//				coordArr1.add(ymax);				
-//				finalCoordinateArr.add(coordArr1);		
-//				
-//				coordArr0.add(xmin);
-//				coordArr0.add(ymin);				
-//				finalCoordinateArr.add(coordArr4);			
-//				
-//				coordinateArr.add(finalCoordinateArr);
-//				geomObj.put("coordinates", coordinateArr);
+				featureContext.set("$.featurePropPath.bbox", arr);					
 				
 				val = featureContext.read("$.featurePropPath.geometry");
 				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
@@ -531,7 +496,7 @@ public class STACService extends Application {
 			}
 			 
 
-			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", "" + urlparam);
+			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", "" + URLEncoder.encode(urlparam,StandardCharsets.UTF_8.toString()));
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response could not be preapred. "+e.getMessage());
 			e.printStackTrace();
