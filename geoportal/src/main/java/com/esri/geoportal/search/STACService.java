@@ -395,11 +395,11 @@ public class STACService extends Application {
 
 			numberMatched = elasticResContext.read("$.hits.total.value");
 			items = elasticResContext.read("$.hits.hits");
-			numberReturned = String.valueOf(items.size());
+			//numberReturned = String.valueOf(items.size());
 
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
-			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);	
+				
 			
 			if(requestType.startsWith("metadataItems"))
 				resourceFilecontext.set("$.response.links",linksContext.read("$.metadataItem.links"));
@@ -416,57 +416,22 @@ public class STACService extends Application {
 			for (int i = 0; i < items.size(); i++) {
 				DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
 				DocumentContext searchItemCtx = JsonPath.parse(items.get(i));
-
-				String val = featureContext.read("$.featurePropPath.id");
-				featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
-
-				val = featureContext.read("$.featurePropPath.collection");
-				featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
-
-				val = featureContext.read("$.featurePropPath.assets.href");
-				featureContext.set("$.featurePropPath.assets.href", searchItemCtx.read(val));
-
-				val = featureContext.read("$.featurePropPath.assets.title");
-				featureContext.set("$.featurePropPath.assets.title", searchItemCtx.read(val));
 				
-				//add bbox, geometry
-				val = featureContext.read("$.featurePropPath.bbox");
-				JSONArray enveloperArr = searchItemCtx.read(val);
-				HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
-				
-				JSONArray geomArr = (JSONArray) hm.get("coordinates");
-				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
-				JSONArray geomArr1 = (JSONArray) geomArr.get(1);
-								
-				Double xmin = Double.parseDouble(geomArr0.get(0).toString());
-				Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
-						
-				Double xmax = Double.parseDouble(geomArr1.get(0).toString());
-				Double ymin = Double.parseDouble(geomArr1.get(1).toString());
-				
-				JSONArray arr = new JSONArray();
-				arr.add(xmin);
-				arr.add(ymin);
-				arr.add(xmax);
-				arr.add(ymax);
-				featureContext.set("$.featurePropPath.bbox", arr);					
-				
-				val = featureContext.read("$.featurePropPath.geometry");
-				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
-				
-				//Iterate properties in stac-items.json and populate values
-				this.populateProperties(featureContext,searchItemCtx);			
-				
-				jsonArray.add(featureContext.read("$.featurePropPath"));	
-				if(i== (items.size()-1))
+				//Populate feature 
+				boolean success = this.populateFeature(featureContext,searchItemCtx);			
+				if(success)
 				{
-					JSONArray sortArr = searchItemCtx.read("$.sort");				
-					search_after =  sortArr.get(0).toString();
-				}				
-			}
-					
+					jsonArray.add(featureContext.read("$.featurePropPath"));	
+					if(i== (items.size()-1))
+					{
+						JSONArray sortArr = searchItemCtx.read("$.sort");				
+						search_after =  sortArr.get(0).toString();
+					}		
+				}						
+			}	
+			numberReturned = String.valueOf(jsonArray.size());
 			resourceFilecontext.set("$.response.features", jsonArray);	
-						
+			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);			
 			
 			JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(resourceFilecontext.jsonString()); 
 			JsonObject resObj =  obj.getJsonObject("response");
@@ -505,32 +470,82 @@ public class STACService extends Application {
 	}
 
 
-	private void populateProperties(DocumentContext featureContext, DocumentContext searchItemCtx) {		
+	private boolean populateFeature(DocumentContext featureContext, DocumentContext searchItemCtx) {		
 		HashMap<String, String> propObj = featureContext.read("$.featurePropPath.properties");
 		Set<String> propObjKeys = propObj.keySet();
 		String propKeyVal = "";
 		ArrayList<String> propToBeRemovedList = new ArrayList<String>();
-
-		for (String propKey : propObjKeys) {
-			try {
-				propKeyVal = String.valueOf(propObj.get(propKey));
-				// If it is a json path, set values from search result
-				if (propKeyVal.startsWith("$")) {
-					if (searchItemCtx.read(propKeyVal) != null) {
-						featureContext.set("$.featurePropPath.properties." + propKey, searchItemCtx.read(propKeyVal));
+		boolean featureValid = true;
+		
+		try {
+		
+			String val = featureContext.read("$.featurePropPath.id");
+			featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
+	
+			val = featureContext.read("$.featurePropPath.collection");
+			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
+	
+			val = featureContext.read("$.featurePropPath.assets.href");
+			featureContext.set("$.featurePropPath.assets.href", searchItemCtx.read(val));
+	
+			val = featureContext.read("$.featurePropPath.assets.title");
+			featureContext.set("$.featurePropPath.assets.title", searchItemCtx.read(val));
+			
+			//add bbox, geometry
+			val = featureContext.read("$.featurePropPath.bbox");
+			JSONArray enveloperArr = searchItemCtx.read(val);
+			HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
+			
+			JSONArray geomArr = (JSONArray) hm.get("coordinates");
+			JSONArray geomArr0 = (JSONArray) geomArr.get(0);
+			JSONArray geomArr1 = (JSONArray) geomArr.get(1);
+							
+			Double xmin = Double.parseDouble(geomArr0.get(0).toString());
+			Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
+					
+			Double xmax = Double.parseDouble(geomArr1.get(0).toString());
+			Double ymin = Double.parseDouble(geomArr1.get(1).toString());
+			
+			JSONArray arr = new JSONArray();
+			arr.add(xmin);
+			arr.add(ymin);
+			arr.add(xmax);
+			arr.add(ymax);
+			featureContext.set("$.featurePropPath.bbox", arr);					
+			
+			val = featureContext.read("$.featurePropPath.geometry");
+			featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
+			
+			//Iterate properties, skip property if it is not available
+			for (String propKey : propObjKeys) {
+				try {
+					propKeyVal = String.valueOf(propObj.get(propKey));
+					// If it is a json path, set values from search result
+					if (propKeyVal.startsWith("$")) {
+						if (searchItemCtx.read(propKeyVal) != null) {
+							featureContext.set("$.featurePropPath.properties." + propKey, searchItemCtx.read(propKeyVal));
+						}
 					}
+				} catch (Exception e) {
+					// If json path not found or error in any property, remove this property in the
+					// end.
+					// if removed here, concurrentModificationException
+					propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
+					LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
 				}
-			} catch (Exception e) {
-				// If json path not found or error in any property, remove this property in the
-				// end.
-				// if removed here, concurrentModificationException
-				propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
-				LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
 			}
-		}
+			
+		} catch (Exception e) {
+			// If json path not found or error in any property, skip this feature
+			featureValid = false;
+			LOGGER.trace("feature could not be added. Reason : " + e.getMessage());
+			//System.out.println("feature could not be added. Reason : " + e.getMessage());
+		}		
+		
 		for (String propToRemove : propToBeRemovedList) {
 			featureContext.delete(propToRemove);
 		}
+		return featureValid;
 	}
 	
 
