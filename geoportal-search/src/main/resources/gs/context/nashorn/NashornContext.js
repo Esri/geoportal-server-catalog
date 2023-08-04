@@ -226,10 +226,25 @@
       var con = null, buffer, nRead;
       try {
         var u = new java.net.URL(url);
-        //print(u);
-        java.net.HttpURLConnection.setFollowRedirects(true);
+       // print(u);
+        if(options && options.useHttps)
+        	{        	
+        	 var ssl_ctx = javax.net.ssl.SSLContext.getInstance("TLS");
+    		 //Using a mock trust manager and not validating certificate
+    	     
+    	        var trust_mgr =  new com.esri.geoportal.lib.elastic.http.MockTrustManager(); 
+    		  
+    	        ssl_ctx.init(null,                // key manager
+                        trust_mgr.getTrustManager(),           // trust manager
+                        new java.security.SecureRandom()); // random number generator
+    	        javax.net.ssl.HttpsURLConnection.setDefaultSSLSocketFactory(ssl_ctx.getSocketFactory());
+    	        javax.net.ssl.HttpsURLConnection.setInstanceFollowRedirects(true);
+        	}
+        else{
+        	java.net.HttpURLConnection.setFollowRedirects(true);
+        }
+        	
         con = u.openConnection();
-        con.setInstanceFollowRedirects(true);
 
         if (options && options.basicCredentials &&
             typeof options.basicCredentials.username === "string" &&
@@ -244,6 +259,8 @@
         if (typeof data === "string" && data.length > 0) {
           con.setDoOutput(true);
           con.setRequestMethod("POST");
+          
+        //  print("data "+data);
           var postData = data.getBytes("UTF-8");
           if (typeof dataContentType === "string" && dataContentType.length > 0) {
             con.setRequestProperty( "Content-Type",dataContentType);
@@ -276,7 +293,7 @@
           sw.write(buffer,0,nRead); // TODO comment out this line and Invalid JSON: <json>:1:0 Expected json literal but found eof
         }
         result = sw.toString();
-        //console.log("result",result);
+       // console.log("result",result);
       } catch(e) {
         var msg;
         try {

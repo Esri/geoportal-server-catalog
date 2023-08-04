@@ -495,7 +495,8 @@
           options = {
             basicCredentials: {
               username: self.username,
-              password: self.password
+              password: self.password,
+              useHttps: self.useHttps
             }
           };
         }

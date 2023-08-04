@@ -181,7 +181,7 @@ public class ElasticContext {
   }
   
   public String getActualItemIndexType() {
-    return !getIs7Plus()? getItemIndexType(): "_doc";
+    return !getIs7Plus()? getItemIndexType(): "";
   }
   
   /** The index mappings file (default=config/elastic-mappings.json). */
