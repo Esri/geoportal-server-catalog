@@ -73,9 +73,10 @@ public class BalancerSupport {
     BalancerNode node =  balancerNodes.get(index);
     StringBuilder target = new StringBuilder(node.proxyTo);
     String pathInfo = request.getPathInfo();
-    if (pathInfo != null) {
-      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
-    }
+    //Does not matter now. item type is not used in Elastic 7 plus
+//    if (pathInfo != null) {
+//      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
+//    }
     String query = request.getQueryString();
     if (query != null) {
       try {
