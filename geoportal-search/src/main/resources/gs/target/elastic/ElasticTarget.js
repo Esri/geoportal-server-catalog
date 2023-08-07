@@ -381,7 +381,7 @@
             if (sortOption.order === "asc") {
 				if(field ==='title')
 				{
-					option['title']={"order": "asc", "ignore_unmapped": "true"}
+					option['title.keyword']={"order": "asc", "unmapped_type": "String"}
 				}
 				else{
 					option[field] = "asc";
@@ -391,7 +391,7 @@
             } else if (sortOption.order === "desc") {
 				if(field ==='title')
 				{
-					option['title']={"order": "desc", "ignore_unmapped": "true"}
+					option['title.keyword']={"order": "desc", "unmapped_type": "String"}
 				}
 				else{
 					option[field] = "desc";
