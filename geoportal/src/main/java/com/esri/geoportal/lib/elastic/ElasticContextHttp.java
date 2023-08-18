@@ -59,7 +59,7 @@ public class ElasticContextHttp extends ElasticContext {
    */
   protected void _createAlias(String index, String alias) throws Exception {
     //LOGGER.info("Creating alias: "+alias+" for index: "+index);
-    ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials());
+    ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
     String url = client.getBaseUrl()+"/_aliases";
     JsonObjectBuilder request = Json.createObjectBuilder();
     JsonArrayBuilder actions = Json.createArrayBuilder();
@@ -82,7 +82,7 @@ public class ElasticContextHttp extends ElasticContext {
    */
   protected void _createIndex(String name) throws Exception {
     //LOGGER.info("Creating index: "+name);
-    ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials());
+    ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
     String url = client.getIndexUrl(name);
     String path = this.getActualMappingsFile();
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
@@ -128,7 +128,7 @@ public class ElasticContextHttp extends ElasticContext {
     try {
       if (name == null || name.trim().length() == 0) return;
       String result, url;
-      ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials());
+      ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
       
       result = client.sendGet(client.getBaseUrl());
       JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
