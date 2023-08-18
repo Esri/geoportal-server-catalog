@@ -21,11 +21,17 @@ import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.security.SecureRandom;
+
+import javax.net.ssl.HttpsURLConnection;
+import javax.net.ssl.SSLContext;
+
+import org.apache.commons.lang3.StringUtils;
 
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
-import org.apache.commons.lang3.StringUtils;
 
 /**
  * An HTTP client for Elasticsearch.
@@ -35,6 +41,7 @@ public class ElasticClient {
   /** Instance variables. */
   private String baseUrl;
   private String basicCredentials;
+  private boolean useHttps;
   
   /**
    * Create a new client.
@@ -42,7 +49,7 @@ public class ElasticClient {
    */
   public static ElasticClient newClient() {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials());
+    return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getUseHttps());
   }
   
   /**
@@ -50,9 +57,10 @@ public class ElasticClient {
    * @param baseUrl the Elasticsearch base URL
    * @param basicCredentials basic credentials
    */
-  public ElasticClient(String baseUrl, String basicCredentials) {
+  public ElasticClient(String baseUrl, String basicCredentials,boolean useHttps) {
     this.baseUrl = baseUrl;
     this.basicCredentials = basicCredentials;
+    this.useHttps = useHttps;
   }
   
   /**
@@ -153,18 +161,38 @@ public class ElasticClient {
    * @throws Exception if an exception occurs
    */
   public String send(String method, String url, String data, String dataContentType) throws Exception {
-    String result = null;
-    BufferedReader br = null;
-    DataOutputStream wr = null;
-    StringWriter sw = new StringWriter();
-    HttpURLConnection con = null;
-    String charset = "UTF-8";
-    try {
-      URL u = new java.net.URL(url);
-      HttpURLConnection.setFollowRedirects(true);
-      con = (HttpURLConnection)u.openConnection();
-      con.setRequestMethod(method);
-      con.setInstanceFollowRedirects(true);
+		String result = null;
+	    BufferedReader br = null;
+	    DataOutputStream wr = null;
+	    StringWriter sw = new StringWriter();	   
+	    String charset = "UTF-8";
+	    URLConnection con = null;
+	    URL u = new java.net.URL(url);
+	    try {
+		 if(useHttps)
+		 {
+			 SSLContext ssl_ctx = SSLContext.getInstance("TLS");
+			 //Using a mock trust manager and not validating certificate
+			 MockTrustManager mockTrustMgr = new MockTrustManager();
+			 
+	        ssl_ctx.init(null,                // key manager
+	        		mockTrustMgr.getTrustManager(),// trust manager
+	                     new SecureRandom()); // random number generator
+	        HttpsURLConnection.setDefaultSSLSocketFactory(ssl_ctx.getSocketFactory());
+			 
+			 HttpsURLConnection.setFollowRedirects(true);
+			 con = (HttpsURLConnection)u.openConnection();
+			 ((HttpsURLConnection) con).setRequestMethod(method);
+			 ((HttpsURLConnection) con).setInstanceFollowRedirects(true);
+		 }
+		 else
+		 {
+			 HttpURLConnection.setFollowRedirects(true);
+			 con = (HttpURLConnection)u.openConnection();
+			 ((HttpURLConnection) con).setRequestMethod(method);
+			 ((HttpURLConnection) con).setInstanceFollowRedirects(true);
+		 }
+     
       if (basicCredentials != null && basicCredentials.length() > 0) {
         con.setRequestProperty( "Authorization",basicCredentials);
       }
