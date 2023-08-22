@@ -1,0 +1,47 @@
+{
+    "id": "metadata",
+    "type": "object",
+    "title": "Geoportal Server Metadata",
+    "properties": {
+        "q": {
+                "title": "q",
+                "type": "string"
+        },
+        "bbox": {
+                "title": "bbox",
+                "type": "string"
+        },
+        "id": {
+                "title": "id",
+                "type": "string"
+        },        
+        "provider": {
+                "title": "provider",
+                "type": "string"
+        },
+        "title": {
+                "title": "title",
+                "type": "string"
+        },
+        "time": {
+                "title": "datetime",
+                "type": "string"
+        }
+    },
+    "links": [
+        {
+                "rel": "parent",
+                "type": "application/json",
+                "title": "Collection URL",
+                "href": "{url}/collections/metadata",
+                "hreflang": "en-US"
+        },
+        {
+                "rel": "self",
+                "type": "application/json",
+                "title": "Collection queryables",
+                "href": "{url}/collections/metadata/queryables",
+                "hreflang": "en-US"
+        }
+    ]
+}
