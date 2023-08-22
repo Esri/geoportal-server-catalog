@@ -1,0 +1,30 @@
+{
+"response":
+	{
+	    "type": "FeatureCollection",
+	    "timestamp":"{currenttime}",
+	    "numberMatched": "{numberMatched}",
+	    "numberReturned": "{numberReturned}",	      
+	    "features": "{features}",	   
+	    "links": "service/config/ogcrecords-itemLinks.json"
+	},
+"featurePropPath":
+	{	
+		"type":"Feature",	
+		"id": "$._id",
+		"collection": "$._index",
+		"bbox": "$._source.envelope_geo",	
+		"geometry": "$._source.envelope_cen_pt",			
+		"properties":
+			{	
+			"created":"$._source.sys_created_dt",
+			"updated":"$._source.sys_modified_dt"
+			},
+		"assets":
+			{
+			"href": "$._source.links_s",
+			"title":"$._source.title"
+			}
+		
+	}
+}

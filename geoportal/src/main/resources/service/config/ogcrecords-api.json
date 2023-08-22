@@ -292,7 +292,58 @@
             "url": "https://virtserver.swaggerhub.com/constantinius/ogc-api-coverages/1.0.0"
         }],
     "openapi": "3.0.1",
-    "paths": {        
+    "paths": {
+        "/collections/{collectionId}/sortables": {
+            "get": {
+                "summary": "description of the sorting capabilities offerec on the collection in the catalog",
+                "description": "List of sortable fields in this collection.",
+                "operationId": "getCoverageOffering",
+                "responses": {
+                    "200": {
+                        "description": "Information about the coverage collection.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/sortablesInfo"
+                                }
+                            }
+                        }
+                    },
+                    "default": {
+                        "description": "An error occured.",
+                        "content": {
+                            "text/html": {
+                                "schema": {
+                                    "type": "string"
+                                }
+                            },
+                            "application/json": {
+                                "schema": {
+                                    "$ref": "#/components/schemas/exception"
+                                }
+                            }
+                        }
+                    }
+                },
+                "parameters": [{
+                        "schema": {
+                            "type": "string"
+                        },
+                        "in": "path",
+                        "explode": false,
+                        "name": "collectionId",
+                        "description": "Identifier (name) of a specific collection",
+                        "style": "simple",
+                        "required": true
+                    }],
+                "tags": ["Collection"]
+            }
+        },
         "/collections/{collectionId}/items/{recordId}": {
             "get": {
                 "responses": {
