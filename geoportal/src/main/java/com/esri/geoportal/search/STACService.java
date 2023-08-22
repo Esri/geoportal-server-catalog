@@ -90,7 +90,7 @@ public class STACService extends Application {
 			response = this.readResourceFile("service/config/stac-description.json", hsr);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in conformance " + e);
+			LOGGER.error("Error in root level " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			response = ("{\"error\":\"STAC API Landing Page could not be generated.\"}");
 		}
@@ -128,7 +128,7 @@ public class STACService extends Application {
 			responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in conformance " + e);
+			LOGGER.error("Error in collections " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = ("{\"error\":\"STAC API collection response could not be generated.\"}");
 		}
@@ -145,7 +145,7 @@ public class STACService extends Application {
 			responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in conformance " + e);
+			LOGGER.error("Error in metadata " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = ("{\"error\":\"STAC API collection response could not be generated.\"}");
 		}
@@ -461,7 +461,7 @@ public class STACService extends Application {
 			}
 			 
 
-			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", "" + URLEncoder.encode(urlparam,StandardCharsets.UTF_8.toString()));
+			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response could not be preapred. "+e.getMessage());
 			e.printStackTrace();
@@ -607,7 +607,7 @@ public class STACService extends Application {
 	}
 
 	private String prepareIds(String ids) {
-		return "{\"match\": {\"id\": "+ids+"}}";	
+		return "{\"match\": {\"_id\": "+ids+"}}";	
 	}
 
 	private String prepareDateTime(String datetime) {
