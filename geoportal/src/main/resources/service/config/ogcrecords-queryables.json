@@ -4,28 +4,29 @@
     "title": "Geoportal Server Metadata",
     "properties": {
         "q": {
-                "title": "q",
-                "type": "string"
+                "title": "querydsl",
+                "type": "JSON string"
         },
         "bbox": {
                 "title": "bbox",
-                "type": "string"
-        },
-        "id": {
-                "title": "id",
-                "type": "string"
-        },        
-        "provider": {
-                "title": "provider",
                 "type": "string"
         },
         "title": {
                 "title": "title",
                 "type": "string"
         },
-        "time": {
+        "bbox": {
+                "title": "provider",
+                "type": "string"
+        },
+        
+        "datetime": {
                 "title": "datetime",
                 "type": "string"
+        },
+        "limit": {
+                "title": "limit",
+                "type": "integer"
         }
     },
     "links": [

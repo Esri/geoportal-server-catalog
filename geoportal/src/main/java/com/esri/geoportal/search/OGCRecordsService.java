@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -36,29 +37,22 @@ import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
-import javax.ws.rs.POST;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
 import javax.ws.rs.QueryParam;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.container.Suspended;
 import javax.ws.rs.core.Application;
 import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
 import javax.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
-import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
@@ -197,6 +191,7 @@ public class OGCRecordsService extends Application {
 			@QueryParam("bbox") String bbox, @QueryParam("datetime") String datetime,
 			@QueryParam("title") String title,
 			@QueryParam("provider") String provider,
+			@QueryParam("querydsl") String querydsl,
 			@QueryParam("search_after") String search_after)
 			throws UnsupportedEncodingException {
 		String responseJSON = null;
@@ -220,6 +215,8 @@ public class OGCRecordsService extends Application {
 				queryMap.put("title", title);
 			if (provider != null && provider.length() > 0)
 				queryMap.put("provider", provider);
+			if (querydsl != null && querydsl.length() > 0)
+				queryMap.put("querydsl", querydsl);
 			
 			url = url + "/_search?size=" + limit;			
 			query = this.prepareSearchQuery(queryMap,search_after);	
@@ -229,7 +226,7 @@ public class OGCRecordsService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,null,null,"metadataItems");
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,title,provider,querydsl,"metadataItems");
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
@@ -259,13 +256,13 @@ public class OGCRecordsService extends Application {
 			url = url + "/_search";
 
 			query = this.prepareSearchQuery(queryMap,null);
-			//System.out.println("final query "+query);
+			
 			if (query.length() > 0)
 				response = client.sendPost(url, query, "application/json");
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, null, 1, null,null,null,"metadataItemId");
+			responseJSON = this.prepareResponse(response, hsr, null, 1, null,null,null,null,"metadataItemId");
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
@@ -278,7 +275,7 @@ public class OGCRecordsService extends Application {
 
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
-			String datetime,String title, String provider,String requestType) {
+			String datetime,String title, String provider,String querydsl, String requestType) {
 		int numberMatched;
 		net.minidev.json.JSONArray items = null;
 	
@@ -347,11 +344,19 @@ public class OGCRecordsService extends Application {
 			
 			String urlparam="";
 			
-			urlparam = "limit=" + limit + (bbox != null ? "&bbox=" + bbox : "")
-						+ (datetime != null ? "&datetime=" + datetime : "")
-						+ (title != null ? "&title=" + title : "")
-						+ (provider != null ? "&provider=" + provider : "")						
-						+ (search_after != null ? "&search_after=" + search_after : "");
+			urlparam = "limit=" + limit + (search_after != null ? "&search_after=" + search_after : "");
+			if(querydsl != null)
+			{		
+				querydsl = URLEncoder.encode(querydsl,StandardCharsets.UTF_8.toString());
+				urlparam = urlparam + "&querydsl=" + querydsl;
+			}else
+			{
+				urlparam = urlparam + (bbox != null ? "&bbox=" + bbox : "")
+				+ (datetime != null ? "&datetime=" + datetime : "")
+				+ (title != null ? "&title=" + title : "")
+				+ (provider != null ? "&provider=" + provider : "");
+			}
+			
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response could not be preapred. "+e.getMessage());
@@ -440,47 +445,58 @@ public class OGCRecordsService extends Application {
 	}
 	
 
-	private String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
+	private String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) throws UnsupportedEncodingException {
 		String queryStr = "";
 		JsonArrayBuilder builder = Json.createArrayBuilder();
-
-		if (queryMap.containsKey("bbox")) {
-			String bboxQry = this.prepareBbox((String) queryMap.get("bbox"));
-			if (bboxQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(bboxQry));
-
-		}
-		if (queryMap.containsKey("datetime")) {
-			String dateTimeQry = this.prepareDateTime(queryMap.get("datetime"));
-			if (dateTimeQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
-		}
-		if (queryMap.containsKey("title")) {
-			String titleQry = this.prepareTitle(queryMap.get("title"));
-			if (titleQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(titleQry));
-		}
-		if (queryMap.containsKey("provider")) {
-			String providerQry = this.prepareProvider(queryMap.get("provider"));
-			if (providerQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(providerQry));
-		}
-		if (queryMap.containsKey("ids")) {
-			String idsQry = this.prepareIds(queryMap.get("ids"));
-			if (idsQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(idsQry));
-		}
 		
-		JsonArray filter = builder.build();
-		
-		if (filter.size() > 0) {
-			queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
+		if ((queryMap.containsKey("querydsl") && (queryMap.get("querydsl").toString().length()>0))) {
+			 queryStr = queryMap.get("querydsl");
+			 JsonObject queryObj = (JsonObject) JsonUtil.toJsonStructure(queryStr);
+			 queryStr = queryObj.get("query").toString();
+			 queryStr = "\"query\":"+queryStr;			
 		}
-			String searchAfterStr = "";
-			if(searchAfter!= null && searchAfter.length()>0)
-			{
-				searchAfterStr = "\"search_after\":[\""+searchAfter+"\"]";
+		else
+		{
+			if (queryMap.containsKey("bbox")) {
+				String bboxQry = this.prepareBbox((String) queryMap.get("bbox"));
+				if (bboxQry.length() > 0)
+					builder.add(JsonUtil.toJsonStructure(bboxQry));
+
 			}
+			if (queryMap.containsKey("datetime")) {
+				String dateTimeQry = this.prepareDateTime(queryMap.get("datetime"));
+				if (dateTimeQry.length() > 0)
+					builder.add(JsonUtil.toJsonStructure(dateTimeQry));
+			}
+			if (queryMap.containsKey("title")) {
+				String titleQry = this.prepareTitle(queryMap.get("title"));
+				if (titleQry.length() > 0)
+					builder.add(JsonUtil.toJsonStructure(titleQry));
+			}
+			if (queryMap.containsKey("provider")) {
+				String providerQry = this.prepareProvider(queryMap.get("provider"));
+				if (providerQry.length() > 0)
+					builder.add(JsonUtil.toJsonStructure(providerQry));
+			}
+			if (queryMap.containsKey("ids")) {
+				String idsQry = this.prepareIds(queryMap.get("ids"));
+				if (idsQry.length() > 0)
+					builder.add(JsonUtil.toJsonStructure(idsQry));
+			}
+			
+			JsonArray filter = builder.build();
+			
+			if (filter.size() > 0) {
+				queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
+			}
+		}
+		//System.out.println("final dsl query string "+queryStr);
+		
+		String searchAfterStr = "";
+		if(searchAfter!= null && searchAfter.length()>0)
+		{
+			searchAfterStr = "\"search_after\":[\""+searchAfter+"\"]";
+		}
 				
 		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
 				+(queryStr.length()>0 ? ","+queryStr: "")
