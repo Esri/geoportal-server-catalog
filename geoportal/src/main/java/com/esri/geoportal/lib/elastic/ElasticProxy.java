@@ -92,8 +92,8 @@ public class ElasticProxy extends BalancerServlet {
           balancerSupport.getBalancerNodes().add(new BalancerNode(url));
         }
       }
-      String user = ec.getXpackUsername();
-      String pwd = ec.getXpackPassword();
+      String user = ec.getUsername();
+      String pwd = ec.getPassword();
       if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
         try {
           String cred = user+":"+pwd;
