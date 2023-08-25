@@ -62,16 +62,10 @@ public class ElasticContext {
   private boolean useSeparateXmlItem = true;
   private String xmlIndexType = "clob";
   
-  private String xpackUsername = null;
-  private String xpackPassword = null;
+  private String username = null;
+  private String password = null;
   
-  private String xpackHttpType = null;
-  private String xpackTransportType = null;
   
-  private boolean xpackSecurityTransportSslEnabled = false;
-  private String xpackSslKey = null;
-  private String xpackSslCertificate = null;
-  private String xpackSslCertificateAuthorities = null;
   
   private Integer proxyBufferSize = DEFAULT_PROXY_BUFFER_SIZE;
   
@@ -287,76 +281,24 @@ public class ElasticContext {
   }
   
   /** x-pack credential */
-  public String getXpackUsername() {
-    return this.xpackUsername;
+  public String getUsername() {
+    return this.username;
   }
   /** x-pack credential */
-  public void setXpackUsername(String v) {
-    this.xpackUsername = v;
+  public void setUsername(String v) {
+    this.username = v;
   }
   
   /** x-pack credential */
-  public String getXpackPassword() {
-    return this.xpackPassword;
+  public String getPassword() {
+    return this.password;
   }
   /** x-pack credential */
-  public void setXpackPassword(String v) {
-    this.xpackPassword = v;
+  public void setPassword(String v) {
+    this.password = v;
   }
   
-  /** x-pack http.type security3 or security4 */
-  public String getXpackHttpType() {
-    return this.xpackHttpType;
-  }
-  /** x-pack http.type security3 or security4 */
-  public void setXpackHttpType(String v) {
-    this.xpackHttpType = v;
-  }
   
-  /** x-pack transport.type security3 or security4 */
-  public String getXpackTransportType() {
-    return this.xpackTransportType;
-  }
-  /** x-pack transport.type security3 or security4 */
-  public void setXpackTransportType(String v) {
-    this.xpackTransportType = v;
-  }  
-  
-  /** xpack.security.transport.ssl.enabled */
-  public boolean getXpackSecurityTransportSslEnabled() {
-    return this.xpackSecurityTransportSslEnabled;
-  }
-  /** xpack.security.transport.ssl.enabled */
-  public void setXpackSecurityTransportSslEnabled(boolean v) {
-    this.xpackSecurityTransportSslEnabled = v;
-  }
-  
-  /** xpack.ssl.key */
-  public String getXpackSslKey() {
-    return this.xpackSslKey;
-  }
-  /** xpack.ssl.key */
-  public void setXpackSslKey(String v) {
-    this.xpackSslKey = v;
-  }
-  
-  /** xpack.ssl.certificate */
-  public String getXpackSslCertificate() {
-    return this.xpackSslCertificate;
-  }
-  /** xpack.ssl.certificate */
-  public void setXpackSslCertificate(String v) {
-    this.xpackSslCertificate = v;
-  }
-  
-  /** xpack.ssl.certificate_authorities */
-  public String getXpackSslCertificateAuthorities() {
-    return this.xpackSslCertificateAuthorities;
-  }
-  /** xpack.ssl.certificate_authorities */
-  public void setXpackSslCertificateAuthorities(String v) {
-    this.xpackSslCertificateAuthorities = v;
-  }
   
   /** Methods =============================================================== */
   
@@ -460,8 +402,8 @@ public class ElasticContext {
 //   * @return the credentials
 //   */
   public String getBasicCredentials() {
-    String user = getXpackUsername();
-    String pwd = getXpackPassword();
+    String user = getUsername();
+    String pwd = getPassword();
     if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
       try {
         String cred = user+":"+pwd;
