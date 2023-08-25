@@ -38,23 +38,15 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="allowFileId" value="false" />
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
 		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
-		<beans:property name="httpPort" value="9200" />
-		<beans:property name="transportPort" value="9300" />
+		<beans:property name="httpPort" value="9200" />		
 		<beans:property name="proxyBufferSize" value="8192" />
 		
 		<!-- complete the following if you have x-pack security enabled,
 		     see https://www.elastic.co/guide/en/x-pack/current/java-clients.html -->
-		<!-- 
-		<beans:property name="useHttps" value="false" />
-		<beans:property name="xpackUsername" value="" />
-		<beans:property name="xpackPassword" value="" />
-		<beans:property name="xpackHttpType" value="" />
-		<beans:property name="xpackTransportType" value="" />
-		<beans:property name="xpackSecurityTransportSslEnabled" value="false" />
-		<beans:property name="xpackSslKey" value="" />
-		<beans:property name="xpackSslCertificate" value="" />
-		<beans:property name="xpackSslCertificateAuthorities" value="" />
-		 -->
+		 
+		<beans:property name="useHttps" value="true" />
+		<beans:property name="xpackUsername" value="elastic" />
+		<beans:property name="xpackPassword" value="jd-Bn=Rqix_A2Ta-_h15" />		
  
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
