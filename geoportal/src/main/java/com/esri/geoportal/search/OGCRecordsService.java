@@ -17,7 +17,6 @@ import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URISyntaxException;
-import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
@@ -60,6 +59,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 /**
  * OGC API: Records service provider.
@@ -89,7 +89,8 @@ public class OGCRecordsService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in root level " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			response = ("{\"error\":\"OGCRecords API Landing Page could not be generated.\"}");
+			response = this.generateResponse("500", "OGCRecords API Landing Page could not be generated.");
+			
 		}
 		return Response.status(status).entity(response).build();
 	}
@@ -98,19 +99,16 @@ public class OGCRecordsService extends Application {
 	@Path("/api")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getApi(@Context HttpServletRequest hsr) {
-		String responseJSON = null;
+		String response = null;
 		Status status = Response.Status.OK;
 		try {
-			responseJSON = this.readResourceFile("service/config/ogcrecords-api.json", hsr);
-
+			response = this.readResourceFile("service/config/ogcrecords-api.json", hsr);
 		} catch (Exception e) {
 			LOGGER.error("Error in api " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-
-			responseJSON = ("{\"error\":\"OGCRecords API response could not be generated.\"}");
-
+			response = this.generateResponse("500", "OGCRecords API response could not be generated.");
 		}
-		return Response.status(status).entity(responseJSON).build();
+		return Response.status(status).entity(response).build();
 	}
 
 	@GET
@@ -125,8 +123,7 @@ public class OGCRecordsService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in conformance " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-
-			responseJSON = ("{\"error\":\"OGCRecords API Conformance response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "OGCRecords API Conformance response could not be generated.");
 
 		}
 		return Response.status(status).entity(responseJSON).build();
@@ -145,7 +142,8 @@ public class OGCRecordsService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in collection " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"OGCRecords API collection response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "OGCRecords API collection response could not be generated.");
+			
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -162,7 +160,7 @@ public class OGCRecordsService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in queryables " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"OGCRecords API queryables response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "OGCRecords API queryables response could not be generated.");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -179,7 +177,7 @@ public class OGCRecordsService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in conformance " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"OGCRecords API collection response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "OGCRecords API collection response could not be generated.");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -226,13 +224,14 @@ public class OGCRecordsService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,title,provider,querydsl,"metadataItems");
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,title,provider,querydsl);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"OGCRecords API Collection metadata items response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "OGCRecords API Collection metadata items response could not be generated.");
+			
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -262,20 +261,61 @@ public class OGCRecordsService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, null, 1, null,null,null,null,"metadataItemId");
+			responseJSON = this.prepareSingleItemResponse(response, hsr);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"OGCRecords API Collection metadata item response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "OGCRecords API Collection metadata item response could not be generated.");
+
 		}
 		return Response.status(status).entity(responseJSON).build();
+	}
+	
+	private String prepareSingleItemResponse(String searchRes, HttpServletRequest hsr) {
+		
+		net.minidev.json.JSONArray items = null;
+		String itemFileString = "";		
+		String finalResponse = "";
+		
+		String filePath = "service/config/ogcrecords-item.json";
+		
+		try {
+			itemFileString = this.readResourceFile(filePath, hsr);
+
+			DocumentContext elasticResContext = JsonPath.parse(searchRes);
+			
+			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
+			String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
+			
+			items = elasticResContext.read("$.hits.hits");
+		
+			DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
+			if(items !=null && items.size()>0)
+			{
+				DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
+				
+				//Populate feature 
+				this.populateFeature(featureContext,searchItemCtx);	
+				JsonObject resObj =(JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString());
+				finalResponse = resObj.toString();
+			}
+			else
+			{
+				finalResponse = this.generateResponse("404", "Record not found.");
+			}
+			
+		} catch (IOException | URISyntaxException e) {
+			LOGGER.error("ogcrecords response could not be preapred. "+e.getMessage());
+			e.printStackTrace();
+		}
+		return finalResponse;
 	}
 
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
-			String datetime,String title, String provider,String querydsl, String requestType) {
+			String datetime,String title, String provider,String querydsl) {
 		int numberMatched;
 		net.minidev.json.JSONArray items = null;
 	
@@ -290,7 +330,7 @@ public class OGCRecordsService extends Application {
 
 			DocumentContext elasticResContext = JsonPath.parse(searchRes);
 			DocumentContext resourceFilecontext = JsonPath.parse(itemFileString);
-			DocumentContext linksContext = JsonPath.parse(this.readResourceFile(resourceFilecontext.read("$.response.links"), hsr));
+			
 
 			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
 			String featureTemplateStr = fileObj.getJsonObject("featurePropPath").toString();
@@ -302,16 +342,6 @@ public class OGCRecordsService extends Application {
 
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
-				
-			
-			if(requestType.startsWith("metadataItems"))
-				resourceFilecontext.set("$.response.links",linksContext.read("$.metadataItem.links"));
-			
-			if(requestType.startsWith("search"))
-				resourceFilecontext.set("$.response.links",linksContext.read("$.searchItem.links"));
-			
-			if(requestType.startsWith("metadataItemId"))
-				resourceFilecontext.set("$.response.links",linksContext.read("$.metadataItemId.links"));
 			
 			
 			JSONArray jsonArray = new JSONArray();
@@ -359,7 +389,7 @@ public class OGCRecordsService extends Application {
 			
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
 		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("Stac response could not be preapred. "+e.getMessage());
+			LOGGER.error("ogcrecords response could not be preapred. "+e.getMessage());
 			e.printStackTrace();
 		}
 		return finalResponse;
@@ -381,11 +411,12 @@ public class OGCRecordsService extends Application {
 			val = featureContext.read("$.featurePropPath.collection");
 			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
 	
-			val = featureContext.read("$.featurePropPath.assets.href");
-			featureContext.set("$.featurePropPath.assets.href", searchItemCtx.read(val));
+			//Links
+			val = featureContext.read("$.featurePropPath.links[0].href");
+			featureContext.set("$.featurePropPath.links[0].href", searchItemCtx.read(val));
 	
-			val = featureContext.read("$.featurePropPath.assets.title");
-			featureContext.set("$.featurePropPath.assets.title", searchItemCtx.read(val));
+			val = featureContext.read("$.featurePropPath.links[0].title");
+			featureContext.set("$.featurePropPath.links[0].title", searchItemCtx.read(val));
 			
 			//add bbox, geometry
 			val = featureContext.read("$.featurePropPath.bbox");
@@ -590,10 +621,18 @@ public class OGCRecordsService extends Application {
 		}
 		return limit;
 	}
-
+	
+	private String generateResponse(String code, String resMsg)
+	{	
+		net.minidev.json.JSONObject resObj =  new JSONObject();
+		resObj.put("code", code);
+		resObj.put("description", resMsg);
+		
+		return resObj.toJSONString();
+	}
 	
 
-	public String getBaseUrl(HttpServletRequest hsr) {
+	private String getBaseUrl(HttpServletRequest hsr) {
 
 		StringBuffer requestURL = hsr.getRequestURL();
 		String ctxPath = hsr.getContextPath();
@@ -601,7 +640,7 @@ public class OGCRecordsService extends Application {
 		return baseUrl + "/ogcrecords";
 	}
 
-	public String readResourceFile(String path, HttpServletRequest hsr) throws IOException, URISyntaxException {
+	private String readResourceFile(String path, HttpServletRequest hsr) throws IOException, URISyntaxException {
 		ResourcePath rp = new ResourcePath();
 		URI uri = rp.makeUrl(path).toURI();
 		String filedataString = new String(Files.readAllBytes(Paths.get(uri)), "UTF-8");
