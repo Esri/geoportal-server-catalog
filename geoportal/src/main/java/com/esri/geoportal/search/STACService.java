@@ -93,7 +93,7 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in root level " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			response = ("{\"error\":\"STAC API Landing Page could not be generated.\"}");
+			response = this.generateResponse("500", "STAC API Landing Page could not be generated.");
 		}
 		return Response.status(status).entity(response).build();
 	}
@@ -110,8 +110,7 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in conformance " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-
-			responseJSON = ("{\"error\":\"STAC API Conformance response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "STAC API Conformance response could not be generated.");
 
 		}
 		return Response.status(status).entity(responseJSON).build();
@@ -131,7 +130,7 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in collections " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API collection response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -148,7 +147,7 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in metadata " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API collection response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -191,7 +190,7 @@ public class STACService extends Application {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API Collection metadata items response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "STAC API collection metadata items response could not be generated.");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -221,13 +220,13 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponseSingleItem(response, hsr, null, 1, null,null,null);
+			responseJSON = this.prepareResponseSingleItem(response, hsr);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API Collection metadata itemid response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "STAC API collection metadata item with itemid response could not be generated.");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -286,7 +285,7 @@ public class STACService extends Application {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API Collection search response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "STAC API collection search items response could not be generated.");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -366,14 +365,13 @@ public class STACService extends Application {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API Collection metadata search response could not be generated.\"}");
+			responseJSON = this.generateResponse("500", "STAC API collection search items response could not be generated.");			
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
 
 	//Prepare response for a single feature
-	private String prepareResponseSingleItem(String searchRes, HttpServletRequest hsr, String bbox, int limit,
-			String datetime,String ids, String intersects) {
+	private String prepareResponseSingleItem(String searchRes, HttpServletRequest hsr) {
 		
 		net.minidev.json.JSONArray items = null;
 		String itemFileString = "";		
@@ -385,25 +383,29 @@ public class STACService extends Application {
 			itemFileString = this.readResourceFile(filePath, hsr);
 
 			DocumentContext elasticResContext = JsonPath.parse(searchRes);
-		//	DocumentContext resourceFilecontext = JsonPath.parse(itemFileString);
 			
-			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
-		//	String featureTemplateStr = fileObj.getJsonObject("featurePropPath").toString();
+			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);	
 			String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
 
 			items = elasticResContext.read("$.hits.hits");
 			
 			DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
-			DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
-			
-			//Populate feature 
-			 this.populateFeature(featureContext,searchItemCtx);
-			 JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString()); 
-			 JsonObject resObj =  obj.getJsonObject("featurePropPath");
-			 
-			  
-			 			
-			finalResponse = resObj.toString();
+			if(items != null && items.size()>0)
+			{
+				DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
+				
+				//Populate feature 
+				 this.populateFeature(featureContext,searchItemCtx);
+				 JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString()); 
+				 JsonObject resObj =  obj.getJsonObject("featurePropPath");
+				 			
+				 finalResponse = resObj.toString();
+			}
+			else
+			{
+				finalResponse = this.generateResponse("404", "Record not found.");
+				
+			}
 					
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response for stac-item could not be preapred. "+e.getMessage());
@@ -778,6 +780,15 @@ public class STACService extends Application {
 		// Replace {url}
 		filedataString = filedataString.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 		return filedataString;
+	}
+	
+	private String generateResponse(String code, String resMsg)
+	{	
+		net.minidev.json.JSONObject resObj =  new JSONObject();
+		resObj.put("code", code);
+		resObj.put("description", resMsg);
+		
+		return resObj.toJSONString();
 	}
 
 }
