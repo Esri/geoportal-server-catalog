@@ -63,6 +63,7 @@ import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 /**
  * STAC API: Records service provider.
@@ -220,13 +221,13 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, null, 1, null,null,null,"metadataItemId");
+			responseJSON = this.prepareResponseSingleItem(response, hsr, null, 1, null,null,null);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = ("{\"error\":\"STAC API Collection metadata item response could not be generated.\"}");
+			responseJSON = ("{\"error\":\"STAC API Collection metadata itemid response could not be generated.\"}");
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -370,6 +371,47 @@ public class STACService extends Application {
 		return Response.status(status).entity(responseJSON).build();
 	}
 
+	//Prepare response for a single feature
+	private String prepareResponseSingleItem(String searchRes, HttpServletRequest hsr, String bbox, int limit,
+			String datetime,String ids, String intersects) {
+		
+		net.minidev.json.JSONArray items = null;
+		String itemFileString = "";		
+		String finalResponse = "";
+		
+		String filePath = "service/config/stac-item.json";
+		
+		try {
+			itemFileString = this.readResourceFile(filePath, hsr);
+
+			DocumentContext elasticResContext = JsonPath.parse(searchRes);
+		//	DocumentContext resourceFilecontext = JsonPath.parse(itemFileString);
+			
+			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
+		//	String featureTemplateStr = fileObj.getJsonObject("featurePropPath").toString();
+			String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
+
+			items = elasticResContext.read("$.hits.hits");
+			
+			DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
+			DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
+			
+			//Populate feature 
+			 this.populateFeature(featureContext,searchItemCtx);
+			 JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString()); 
+			 JsonObject resObj =  obj.getJsonObject("featurePropPath");
+			 
+			  
+			 			
+			finalResponse = resObj.toString();
+					
+		} catch (IOException | URISyntaxException e) {
+			LOGGER.error("Stac response for stac-item could not be preapred. "+e.getMessage());
+			e.printStackTrace();
+		}
+		return finalResponse;
+	}
+
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
 			String datetime,String ids, String intersects,String requestType) {
@@ -407,10 +449,7 @@ public class STACService extends Application {
 			if(requestType.startsWith("search"))
 				resourceFilecontext.set("$.response.links",linksContext.read("$.searchItem.links"));
 			
-			if(requestType.startsWith("metadataItemId"))
-				resourceFilecontext.set("$.response.links",linksContext.read("$.metadataItemId.links"));
-			
-			
+						
 			JSONArray jsonArray = new JSONArray();
 			
 			for (int i = 0; i < items.size(); i++) {
@@ -474,7 +513,9 @@ public class STACService extends Application {
 		HashMap<String, String> propObj = featureContext.read("$.featurePropPath.properties");
 		Set<String> propObjKeys = propObj.keySet();
 		String propKeyVal = "";
+		
 		ArrayList<String> propToBeRemovedList = new ArrayList<String>();
+		ArrayList<String> assetToBeRemovedList = new ArrayList<String>();
 		boolean featureValid = true;
 		
 		try {
@@ -484,13 +525,7 @@ public class STACService extends Application {
 	
 			val = featureContext.read("$.featurePropPath.collection");
 			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
-	
-			val = featureContext.read("$.featurePropPath.assets.href");
-			featureContext.set("$.featurePropPath.assets.href", searchItemCtx.read(val));
-	
-			val = featureContext.read("$.featurePropPath.assets.title");
-			featureContext.set("$.featurePropPath.assets.title", searchItemCtx.read(val));
-			
+						
 			//add bbox, geometry
 			val = featureContext.read("$.featurePropPath.bbox");
 			JSONArray enveloperArr = searchItemCtx.read(val);
@@ -516,6 +551,37 @@ public class STACService extends Application {
 			val = featureContext.read("$.featurePropPath.geometry");
 			featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
 			
+			//Fill asset
+			HashMap<String, JSONObject> assetsObj = featureContext.read("$.featurePropPath.assets");
+			Set<String> assetsObjKeys = assetsObj.keySet();		
+			
+			//Iterate Assets
+			HashMap<String, Object> assetObj = null;
+			String assetObjKeyVal ="";
+			for (String assetsObjKey : assetsObjKeys) {
+				try {
+					assetObj = assetsObj.get(assetsObjKey);
+					Set<String> assetObjKeys = assetObj.keySet();
+					
+					for (String assetObjKey : assetObjKeys) {
+						 assetObjKeyVal = String.valueOf(assetObj.get(assetObjKey));
+						
+						// If it is a json path, set values from search result
+						if (assetObjKeyVal.startsWith("$")) {
+							if (searchItemCtx.read(assetObjKeyVal) != null) {
+								featureContext.set("$.featurePropPath.assets." + assetsObjKey+"."+assetObjKey, searchItemCtx.read(assetObjKeyVal));
+							}
+						}
+					}
+					
+				} catch (Exception e) {
+					// If json path not found or error in any asset, remove this asset in the
+					// end.if removed here, concurrentModificationException
+					assetToBeRemovedList.add("$.featurePropPath.assets." + assetsObjKey);
+					LOGGER.trace("key: " + assetsObjKey + " could not be added. Reason : " + e.getMessage());
+				}
+			}		
+			
 			//Iterate properties, skip property if it is not available
 			for (String propKey : propObjKeys) {
 				try {
@@ -539,11 +605,14 @@ public class STACService extends Application {
 			// If json path not found or error in any property, skip this feature
 			featureValid = false;
 			LOGGER.trace("feature could not be added. Reason : " + e.getMessage());
-			//System.out.println("feature could not be added. Reason : " + e.getMessage());
+		//	System.out.println("feature could not be added. Reason : " + e.getMessage());
 		}		
 		
 		for (String propToRemove : propToBeRemovedList) {
 			featureContext.delete(propToRemove);
+		}
+		for (String assetToRemove : assetToBeRemovedList) {			
+			featureContext.delete(assetToRemove);
 		}
 		return featureValid;
 	}
