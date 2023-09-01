@@ -11,8 +11,8 @@
 		{
 			"stac_version": "1.0.0",
 			"stac_extensions": [],
-			"type": "record",
-			"id": "metadata",
+			"type": "collection",
+			"id": "sentinel",
 			"title": "Esri Geoportal Server Metadata",
 			"description": "STAC API Powered by Esri Geoportal Server Catalog",
 			"license": "Esri (c) 2003 - 2023, Apache License, Version 2.0, http://www.apache.org/licenses/LICENSE-2.0",
@@ -26,8 +26,14 @@
 				{
 					"rel": "root",
 					"type": "application/json",
-					"title": "Link to all collections",
+					"title": "Link to STAC entry point",
 					"href": "{url}"
+				},
+				{
+					"rel": "parent",
+					"type": "application/json",
+					"title": "Link to all collections",
+					"href": "{url}/collections"
 				}
 			]
 		}
