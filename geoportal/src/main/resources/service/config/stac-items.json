@@ -26,41 +26,54 @@
         "eo:column": "$._source.column_l",
         "eo:platform": "$._source.src_harvested_dataset_s",
         "eo:epsg": 4326,
-        "sentinel:utm_zone": 47,
-        "sentinel:latitude_band": "X",
-        "sentinel:grid_square": "NC",
-        "sentinel:sequence": "0",
-        "sentinel:product_id": "S2A_MSIL1C_20180417T060631_N0206_R134_T47XNC_20180417T080652",
-        "landsat:product_id": "LC08_L1GT_010022_20180822_20180822_01_RT",
-        "landsat:scene_id": "LC80100222018234LGN00",
-        "landsat:processing_level": "L1GT",
-        "landsat:tier": "RT",
-        "goes:mode": "6",
-        "goes:image-type": "MESOSCALE",
-        "goes:processing-level": "L2",
-        "goes:system-environment": "OR",
-        "goes:mesoscale-image-number": 1,
+	    "sentinel:utm_zone": "$._source.sentinel_utm_zone",
+	    "sentinel:latitude_band": "$._source.sentinel_latitude_band",
+	    "sentinel:grid_square": "$._source.sentinel_grid_square",
+	    "sentinel:sequence": "$._source.sentinel_sequence",
+	    "sentinel:product_id": "$._source.sentinel_product_id",
 		"created":"$._source.sys_created_dt",
 		"updated":"$._source.sys_modified_dt"
 		},
+		"links": [
+			{
+			"rel": "self",
+			"href": "{url}/collections/metadata/items/{itemId}",
+			"type": "application/geo+json"
+			},
+			{
+			"rel": "root",
+			"href": "{url}",
+			"type": "application/json"
+			},
+			{
+			"rel": "parent",
+			"href": "{url}/collections/metadata/items",
+			"type": "application/json"
+			},
+			{
+			"rel": "collection",
+			"href": "{url}/collections/metadata",
+			"type": "application/json"
+			}
+		],
 	"assets":
-	{
-	 "thumbnail": {
-	      "href": "$._source.thumbnail_s",
-	      "title": "Thumbnail",
-	      "type": "image/jpeg",
-	      "roles": [
-	        "thumbnail"
-	      ]
-	    },
-		 "json-metadata": {
-	      "href": "$._source.links_s",
-	      "title": "Extended Metadata",
-	      "type": "application/json",
-	      "roles": [
-	        "metadata"
-	      ]
-	    }		
-	}
+		{
+		 "thumbnail": {
+		      "href": "$._source.thumbnail_s",
+		      "title": "Thumbnail",
+		      "type": "image/jpeg",
+		      "roles": [
+		        "thumbnail"
+		      ]
+		    },
+			 "json-metadata": {
+		      "href": "$._source.links_s",
+		      "title": "Extended Metadata",
+		      "type": "application/json",
+		      "roles": [
+		        "metadata"
+		      ]
+		    }		
+		}
 	}
 }

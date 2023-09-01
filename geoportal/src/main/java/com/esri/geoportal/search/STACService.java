@@ -603,6 +603,10 @@ public class STACService extends Application {
 				}
 			}
 			
+			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
+			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id"));
+			featureContext.set("$.featurePropPath.links[0].href",linkSelfHref);
+			
 		} catch (Exception e) {
 			// If json path not found or error in any property, skip this feature
 			featureValid = false;
