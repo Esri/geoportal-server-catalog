@@ -465,8 +465,12 @@ public class STACService extends Application {
 					jsonArray.add(featureContext.read("$.featurePropPath"));	
 					if(i== (items.size()-1))
 					{
+                                            try {
 						JSONArray sortArr = searchItemCtx.read("$.sort");				
-						search_after =  sortArr.get(0).toString();
+						search_after =  sortArr.get(0).toString();                                                
+                                            } catch (Exception e) {
+                                                search_after = null;
+                                            }
 					}		
 				}						
 			}	

@@ -111,8 +111,13 @@ public class ItemUtil {
   public JsonObject readItemJson(String indexName, String typeName, String id) throws Exception {
     ElasticClient client = ElasticClient.newClient();
     String url = client.getItemUrl(indexName,typeName,id);
-    String result = client.sendGet(url);
-    JsonObject item = (JsonObject)JsonUtil.toJsonStructure(result);
+    JsonObject item;
+    try {
+        String result = client.sendGet(url);
+        item = (JsonObject)JsonUtil.toJsonStructure(result);
+    } catch (Exception e) {
+        item = null;
+    }
     return item;
   }
   
