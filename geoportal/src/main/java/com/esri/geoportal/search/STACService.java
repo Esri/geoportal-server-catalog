@@ -532,30 +532,11 @@ public class STACService extends Application {
 			val = featureContext.read("$.featurePropPath.collection");
 			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
 						
-			//add bbox, geometry
-			val = featureContext.read("$.featurePropPath.bbox");
-			JSONArray enveloperArr = searchItemCtx.read(val);
-			HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
+			//add bbox, geometry				
+			this.setBbox(searchItemCtx,featureContext);		
 			
-			JSONArray geomArr = (JSONArray) hm.get("coordinates");
-			JSONArray geomArr0 = (JSONArray) geomArr.get(0);
-			JSONArray geomArr1 = (JSONArray) geomArr.get(1);
-							
-			Double xmin = Double.parseDouble(geomArr0.get(0).toString());
-			Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
-					
-			Double xmax = Double.parseDouble(geomArr1.get(0).toString());
-			Double ymin = Double.parseDouble(geomArr1.get(1).toString());
+			this.setGeometry(searchItemCtx,featureContext);
 			
-			JSONArray arr = new JSONArray();
-			arr.add(xmin);
-			arr.add(ymin);
-			arr.add(xmax);
-			arr.add(ymax);
-			featureContext.set("$.featurePropPath.bbox", arr);					
-			
-			val = featureContext.read("$.featurePropPath.geometry");
-			featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
 			
 			//Fill asset
 			HashMap<String, JSONObject> assetsObj = featureContext.read("$.featurePropPath.assets");
@@ -627,6 +608,101 @@ public class STACService extends Application {
 		return featureValid;
 	}
 	
+
+	private void setGeometry(DocumentContext searchItemCtx, DocumentContext featureContext) {
+		net.minidev.json.JSONArray valArr = featureContext.read("$.featurePropPath.geometry");
+		String geometryProp = "";		
+		try {
+			if(valArr.size() >0)
+			{
+				geometryProp = (String) valArr.get(0);							
+				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));	
+			}
+		}
+		catch(Exception ex)
+		{
+			//If first path does not work, try second one
+			if(valArr.size() >1)
+			{
+				geometryProp = (String) valArr.get(1);;
+				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));				
+			}
+		}
+	}
+
+	private void setBbox(DocumentContext searchItemCtx, DocumentContext featureContext) {
+		net.minidev.json.JSONArray valArr = featureContext.read("$.featurePropPath.bbox");
+		String bboxProp = "";
+		if(valArr.size() >0)
+		{
+			bboxProp = (String) valArr.get(0);
+			if(!bboxProp.isBlank() && bboxProp.indexOf("envelope_geo")>-1)
+			{
+				this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
+			}			
+			else if(!bboxProp.isBlank() && bboxProp.indexOf("bbox")>-1)
+			{				
+				this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
+			}
+		}
+		if(valArr.size() >1)
+		{
+			bboxProp = (String) valArr.get(1);;
+			if(!bboxProp.isBlank() && bboxProp.indexOf("envelope_geo")>-1)
+			{
+				this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
+			}			
+			else if(!bboxProp.isBlank() && bboxProp.indexOf("bbox")>-1)
+			{				
+				this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
+			}				
+		}
+		
+	}
+
+	private void setBboxAsEnvelopGeo(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
+		try {
+			JSONArray enveloperArr = searchItemCtx.read(bboxProp);
+			
+			//"envelope_geo":[{"type":"envelope","ignore_malformed":"true","coordinates":[[-127.0236257875064,64.01274197384028],[-125.569240728746,63.020232862518167]]}]
+			if(enveloperArr !=null)
+			{
+				@SuppressWarnings("unchecked")
+				HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
+				
+				JSONArray geomArr = (JSONArray) hm.get("coordinates");
+				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
+				JSONArray geomArr1 = (JSONArray) geomArr.get(1);
+								
+				Double xmin = Double.parseDouble(geomArr0.get(0).toString());
+				Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
+						
+				Double xmax = Double.parseDouble(geomArr1.get(0).toString());
+				Double ymin = Double.parseDouble(geomArr1.get(1).toString());
+				
+				JSONArray arr = new JSONArray();
+				arr.add(xmin);
+				arr.add(ymin);
+				arr.add(xmax);
+				arr.add(ymax);
+				featureContext.set("$.featurePropPath.bbox", arr);		
+			}		
+		}catch(Exception ex)		
+		{
+			//DO nothing. Just skip
+		}		
+	}
+	
+	private void setBboxAsBbox(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
+		try
+		{
+		    //"bbox": [-74.09957050999664,-4.611277442089833,-73.1088539899217,-3.6165503784726664]
+			featureContext.set("$.featurePropPath.bbox", searchItemCtx.read(bboxProp));
+		}catch(Exception ex)
+		{
+			//DO nothing. Just skip
+		}
+	}
 
 	private String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
 		String queryStr = "";
