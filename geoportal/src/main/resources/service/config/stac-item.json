@@ -4,8 +4,8 @@
 	"collection": "$._index",		
 	"stac_version":"1.0.0",
 	"stac_extensions":[],
-	"bbox": "$._source.envelope_geo",	
-	"geometry": "$._source.shape_geo",			
+	"bbox": ["$._source.envelope_geo","$._source.bbox"],	
+	"geometry": ["$._source.shape_geo",	"$._source.geometry"],	
 	"properties":
 		{			
        	"eo:sun_azimuth": "$._source._SunAzimuth_l",
