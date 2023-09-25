@@ -359,7 +359,8 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,ids,intersects.toString(),"searchPost");
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,ids,
+					(intersects!=null ?intersects.toString():""),"searchPost");
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
@@ -465,13 +466,13 @@ public class STACService extends Application {
 					jsonArray.add(featureContext.read("$.featurePropPath"));	
 					if(i== (items.size()-1))
 					{
-                                            try {
-						JSONArray sortArr = searchItemCtx.read("$.sort");				
-						search_after =  sortArr.get(0).toString();                                                
-                                            } catch (Exception e) {
-                                                search_after = null;
-                                            }
-					}		
+						try {
+							JSONArray sortArr = searchItemCtx.read("$.sort");
+							search_after = sortArr.get(0).toString();
+						} catch (Exception e) {
+							search_after = null;
+						}
+					}
 				}						
 			}	
 			numberReturned = String.valueOf(jsonArray.size());
@@ -485,7 +486,7 @@ public class STACService extends Application {
 			// Prepare urlparam for next page 	
 			
 			String encodedIntersect=null;
-			if (intersects != null) {
+			if (intersects !=null && !intersects.isBlank()) {
 				if (intersects.contains("%")) {
 					encodedIntersect = intersects;
 				} else {
@@ -527,6 +528,7 @@ public class STACService extends Application {
 		try {
 		
 			String val = featureContext.read("$.featurePropPath.id");
+			String recordId = searchItemCtx.read(val);
 			featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
 	
 			val = featureContext.read("$.featurePropPath.collection");
@@ -567,8 +569,28 @@ public class STACService extends Application {
 					assetToBeRemovedList.add("$.featurePropPath.assets." + assetsObjKey);
 					LOGGER.trace("key: " + assetsObjKey + " could not be added. Reason : " + e.getMessage());
 				}
-			}		
+			}
 			
+			//Add all the assets from stac record, if available
+			try {				 
+				 HashMap<String, JSONObject> stacRecAssetObj = searchItemCtx.read("$._source.assets");
+				 assetsObj = featureContext.read("$.featurePropPath.assets");
+				 if(stacRecAssetObj != null)
+				 {
+					 Set<String> stacRecAssetObjKeys = stacRecAssetObj.keySet();	
+				 
+					 for (String stacRecAssetObjKey : stacRecAssetObjKeys) {					 
+						 assetsObj.put(stacRecAssetObjKey,searchItemCtx.read("$._source.assets."+stacRecAssetObjKey,JSONObject.class));
+					 }
+					 featureContext.set("$.featurePropPath.assets",assetsObj);
+				 }
+			}//if json path ($._source.assets) not found,catch exception and ignore
+			catch(Exception e)
+			{
+				LOGGER.trace("No assets ($._source.assets) in this Stac record with id: "+recordId);
+				
+			}
+			 			
 			//Iterate properties, skip property if it is not available
 			for (String propKey : propObjKeys) {
 				try {
@@ -656,8 +678,7 @@ public class STACService extends Application {
 			{				
 				this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
 			}				
-		}
-		
+		}		
 	}
 
 	private void setBboxAsEnvelopGeo(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
