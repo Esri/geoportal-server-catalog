@@ -5,12 +5,21 @@
   "title": "Geoportal Server",
   "description": "Landing page for Geoportal Server STAC Records API.",
   "conformsTo": [
-    "https://api.stacspec.org/v1.0.0/core"
+      "https://api.stacspec.org/v1.0.0/core",     
+      "https://api.stacspec.org/v1.0.0/collections",
+      "https://api.stacspec.org/v1.0.0/ogcapi-features",
+       "https://api.stacspec.org/v1.0.0/item-search"
   ],
   "links": [
      {
       "href": "{url}",
       "rel": "self",
+      "type": "application/json",
+      "title": "This STAC API - Records landing page as JSON"
+    },
+    {
+      "href": "{url}",
+      "rel": "root",
       "type": "application/json",
       "title": "This STAC API - Records landing page as JSON"
     },
@@ -29,6 +38,12 @@
       "href": "{url}/collections",
       "rel": "data",
       "title": "The set of available collections"
+    },
+     {
+      "href": "{url}/search",
+      "rel": "search",
+      "type": "application/geo+json",
+      "title": "Search the collections"
     }
   ]
 }

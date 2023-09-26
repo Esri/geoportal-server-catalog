@@ -117,6 +117,25 @@ public class STACService extends Application {
 
 	}
 	
+	@GET
+	@Path("/api")
+	@Produces("application/vnd.oai.openapi+json;version=3.0")
+	public Response getApi(@Context HttpServletRequest hsr) {
+		String responseJSON = null;
+		Status status = Response.Status.OK;
+		try {
+			responseJSON = this.readResourceFile("service/config/stac-api.json", hsr);
+
+		} catch (Exception e) {
+			LOGGER.error("Error in api " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.");
+
+		}
+		return Response.status(status).entity(responseJSON).build();
+
+	}
+	
 
 	@GET
 	@Path("/collections")
@@ -153,7 +172,7 @@ public class STACService extends Application {
 	}
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces("application/geo+json")
 	@Path("/collections/metadata/items")
 	public Response getItems(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
 			@QueryParam("bbox") String bbox, @QueryParam("datetime") String datetime, @QueryParam("search_after") String search_after)
@@ -197,7 +216,7 @@ public class STACService extends Application {
 	
 	@GET
 	@Path("collections/metadata/items/{id}")
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces("application/geo+json")
 	public Response getItem(@Context HttpServletRequest hsr, @PathParam("id") String id) {
 		String responseJSON = null;
 		String response = "";
@@ -221,6 +240,10 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 
 			responseJSON = this.prepareResponseSingleItem(response, hsr);
+			if(responseJSON.contains("Record not found"))
+			{
+				status = Response.Status.NOT_FOUND;
+			}
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
@@ -228,6 +251,7 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "STAC API collection metadata item with itemid response could not be generated.");
 		}
+		
 		return Response.status(status).entity(responseJSON).build();
 	}
 

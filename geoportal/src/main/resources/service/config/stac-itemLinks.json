@@ -1,7 +1,14 @@
 {
 "metadataItem":
 	{	     
-	    "links": [ 
+	    "links": [
+		         {
+		                "rel": "self",
+		                "type": "application/json",
+		                "title": "Link to all collections",
+		                "href": "{url}/collections/metadata/items",
+		                "hreflang": "en-US"
+		        },
 	    		{
 	                "rel": "next",
 	                "type": "application/json",
@@ -29,6 +36,13 @@
 	{	     
 	    "links": [ 
 	    		{
+	                "rel": "self",
+	                "type": "application/json",
+	                "title": "Next page of results",
+	                "href": "{url}/search",
+	                "hreflang": "en-US"
+	        	},
+	        	{
 	                "rel": "next",
 	                "type": "application/json",
 	                "title": "Next page of results",
