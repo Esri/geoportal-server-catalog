@@ -19,9 +19,9 @@
 	    "sentinel:latitude_band": "$._source.sentinel_latitude_band",
 	    "sentinel:grid_square": "$._source.sentinel_grid_square",
 	    "sentinel:sequence": "$._source.sentinel_sequence",
-	    "sentinel:product_id": "$._source.sentinel_product_id",
-		"created":"$._source.sys_created_dt",
-		"updated":"$._source.sys_modified_dt"
+	    "sentinel:product_id": "$._source.sentinel_product_id",		
+		"updated":"$._source.sys_modified_dt",
+		"datetime":"$._source.datetime"
 		},		
 	"assets":
 		{
@@ -34,7 +34,7 @@
 		      ]
 		    },
 			 "json-metadata": {
-		      "href": "$._source.links_s",
+		      "href": "$._source.links_s[0]",
 		      "title": "Extended Metadata",
 		      "type": "application/json",
 		      "roles": [

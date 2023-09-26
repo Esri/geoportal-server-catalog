@@ -1,32 +1,59 @@
-{	
+{
 	"stac_version": "1.0.0",
-	"stac_extensions": [ ],
-	"type": "record",
-    "id": "metadata",
-    "title": "Geoportal Server Metadata",
-    "description": "Esri Geoportal Server Metadata Catalog",
-    "license": "proprietary",
-    "links": [
-        {
-            "rel": "self",
-            "type": "application/json",
-            "title": "This document as JSON",
-            "href": "{url}/collections/metadata",
-            "hreflang": "en-US"
-        },
-        {
-            "rel": "parent",
-            "type": "application/json",
-            "title": "Link to all collections",
-            "href": "{url}/collections",
-            "hreflang": "en-US"
-        },       
-        {
-            "rel": "items",
-            "type": "application/json",
-            "title": "Items in this collection",
-            "href": "{url}/collections/metadata/items",
-            "hreflang": "en-US"
-        }
-    ]
+	"stac_extensions": [],
+	"type": "Collection",
+	"id": "metadata",
+	"title": "Geoportal Server Metadata",
+	"description": "Esri Geoportal Server Metadata Catalog",
+	"license": "proprietary",
+	"extent": {
+		"spatial": {
+			"bbox": [
+				[
+					-180.0,
+					 -90.0, 
+					 180.0,
+					  90.0
+				]
+			]
+		},
+		"temporal": {
+			"interval": [
+				[
+					"2018-06-23T00:00:00Z",
+					"2023-09-26T13:44:56Z"
+				]
+			]
+		}
+	},
+	"links": [
+		{
+			"rel": "self",
+			"type": "application/json",
+			"title": "This document as JSON",
+			"href": "{url}/collections/metadata",
+			"hreflang": "en-US"
+		},
+		{
+			"rel": "parent",
+			"type": "application/json",
+			"title": "Link to all collections",
+			"href": "{url}/collections",
+			"hreflang": "en-US"
+		},
+		{
+			"rel": "items",
+			"type": "application/json",
+			"title": "Items in this collection",
+			"href": "{url}/collections/metadata/items",
+			"hreflang": "en-US"
+		},
+		{
+			"rel": "root",
+			"type": "application/json",
+			"title": "Link to STAC entry point",
+			"href": "{url}",
+			"hreflang": "en-US"
+		}
+	]
 }
