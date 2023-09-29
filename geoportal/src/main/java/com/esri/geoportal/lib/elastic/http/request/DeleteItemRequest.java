@@ -62,46 +62,46 @@ public class DeleteItemRequest extends BulkEditRequest {
   @Override
   public AppResponse execute() throws Exception {    
     AppResponse response = new AppResponse();
-//    String id = getId();
-//    if (id == null || id.length() == 0) {
-//      response.writeIdIsMissing(this);
-//      return response;
-//    }
-//    AccessUtil au = new AccessUtil();
-//    id = au.determineId(id); // TODO
-//    au.ensureWriteAccess(getUser(),id); // TODO
-//    
-//    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-//    ElasticClient client = ElasticClient.newClient();
-//    String url = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(),id);
-//    boolean useSeparateXmlItem = ec.getUseSeparateXmlItem();
-//    boolean deletingXml = false;
-//    
-//    try {
-//      String result = client.sendDelete(url);
-//      if (checkResult(result)) {
-//        if (useSeparateXmlItem) {
-//          deletingXml = true;
-//          String url2 = client.getXmlUrl(ec.getIndexName(),ec.getXmlIndexType(),id);
-//          String result2 = client.sendDelete(url2);
-//          if (checkResult(result2)) {
-//            this.writeOk(response,id);
-//          } else {
-//            throw new Exception("Error deleting item.");
-//          }
-//        } else {
-//          this.writeOk(response,id);
-//        }
-//      } else {
-//        throw new Exception("Error deleting XML for item.");
-//      }
-//    } catch (FileNotFoundException e) {
-//      if (deletingXml) {
-//        this.writeOk(response,id);
-//      } else {
-//        response.writeIdNotFound(this,id);
-//      }
-//    }
+   String id = getId();
+   if (id == null || id.length() == 0) {
+     response.writeIdIsMissing(this);
+     return response;
+   }
+   AccessUtil au = new AccessUtil();
+   id = au.determineId(id); // TODO
+   au.ensureWriteAccess(getUser(),id); // TODO
+   
+   ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+   ElasticClient client = ElasticClient.newClient();
+   String url = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(),id);
+   boolean useSeparateXmlItem = ec.getUseSeparateXmlItem();
+   boolean deletingXml = false;
+   
+   try {
+     String result = client.sendDelete(url);
+     if (checkResult(result)) {
+       if (useSeparateXmlItem) {
+         deletingXml = true;
+         String url2 = client.getXmlUrl(ec.getIndexName(),ec.getXmlIndexType(),id);
+         String result2 = client.sendDelete(url2);
+         if (checkResult(result2)) {
+           this.writeOk(response,id);
+         } else {
+           throw new Exception("Error deleting item.");
+         }
+       } else {
+         this.writeOk(response,id);
+       }
+     } else {
+       throw new Exception("Error deleting XML for item.");
+     }
+   } catch (FileNotFoundException e) {
+     if (deletingXml) {
+       this.writeOk(response,id);
+     } else {
+       response.writeIdNotFound(this,id);
+     }
+   }
     return response;
   }
   
