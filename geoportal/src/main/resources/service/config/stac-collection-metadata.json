@@ -5,7 +5,7 @@
 	"id": "metadata",
 	"title": "Geoportal Server Metadata",
 	"description": "Esri Geoportal Server Metadata Catalog",
-	"license": "proprietary",
+	"license": "Apache-2.0",
 	"extent": {
 		"spatial": {
 			"bbox": [
