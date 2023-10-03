@@ -27,7 +27,7 @@
       "name": "REST"
     }
   ],
-  "paths": {  	
+  "paths": {
 	"/stac": {
 		"get": {
 			"tags": [
@@ -53,6 +53,23 @@
 			"summary": "Provides information on STAC API conformance",
 			"description": "",
 			"operationId": "stacConformance",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/api": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "STAC API",
+			"description": "",
+			"operationId": "stacApi",
 			"parameters": [				
 			],
 			"responses": {
