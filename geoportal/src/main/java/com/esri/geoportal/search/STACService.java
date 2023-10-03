@@ -145,6 +145,7 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;
 		try {
 			responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
+			responseJSON= responseJSON.replaceAll("\\{collectionId\\}", "metadata");
 
 		} catch (Exception e) {
 			LOGGER.error("Error in collections " + e);
@@ -155,13 +156,22 @@ public class STACService extends Application {
 	}
 
 	@GET
-	@Path("/collections/metadata")
+	@Path("/collections/{collectionId}")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCollectionMetadata(@Context HttpServletRequest hsr) {
+	public Response getCollectionMetadata(@Context HttpServletRequest hsr,
+			@PathParam("collectionId") String collectionId) {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
 		try {
-			responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
+			if(collectionId == null || collectionId.isBlank() || !collectionId.equals("metadata"))
+			{
+				status = Response.Status.NOT_FOUND;
+			}			
+			else
+			{
+				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
+				responseJSON= responseJSON.replaceAll("\\{collectionId\\}", collectionId);
+			}
 
 		} catch (Exception e) {
 			LOGGER.error("Error in metadata " + e);
@@ -173,9 +183,12 @@ public class STACService extends Application {
 
 	@GET
 	@Produces("application/geo+json")
-	@Path("/collections/metadata/items")
-	public Response getItems(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
-			@QueryParam("bbox") String bbox, @QueryParam("datetime") String datetime, @QueryParam("search_after") String search_after)
+	@Path("/collections/{collectionId}/items")
+	public Response getItems(@Context HttpServletRequest hsr, 
+			@PathParam("collectionId") String collectionId,
+			@QueryParam("limit") int limit,
+			@QueryParam("bbox") String bbox, @QueryParam("datetime") String datetime,
+			@QueryParam("search_after") String search_after)
 			throws UnsupportedEncodingException {
 		String responseJSON = null;
 		String response = "";
@@ -203,7 +216,8 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,null,null,"metadataItems");
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,null,null,
+					"metadataItems",collectionId);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
@@ -215,9 +229,10 @@ public class STACService extends Application {
 	}
 	
 	@GET
-	@Path("collections/metadata/items/{id}")
+	@Path("collections/{collectionId}/items/{id}")
 	@Produces("application/geo+json")
-	public Response getItem(@Context HttpServletRequest hsr, @PathParam("id") String id) {
+	public Response getItem(@Context HttpServletRequest hsr,
+			@PathParam("collectionId") String collectionId, @PathParam("id") String id) {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;	
@@ -263,6 +278,7 @@ public class STACService extends Application {
 			@QueryParam("intersects") String intersects, 
 			@QueryParam("datetime") String datetime, 
 			@QueryParam("ids") String idList,
+			@QueryParam("collections") String collections,
 			@QueryParam("searchAfter") String searchAfter)
 			throws UnsupportedEncodingException {
 		String responseJSON = null;
@@ -303,7 +319,7 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,idList,intersects,"search");
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,idList,intersects,"search","metadata");
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
@@ -333,6 +349,8 @@ public class STACService extends Application {
 		
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
 		JsonArray idArr= (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids"): null);	
+		
+		JsonArray collectionArr = (requestPayload.containsKey("collections") ? requestPayload.getJsonArray("collections"): null);	
 				
 		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects"): null);		
 		
@@ -384,7 +402,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,ids,
-					(intersects!=null ?intersects.toString():""),"searchPost");
+					(intersects!=null ?intersects.toString():""),"searchPost","metadata");
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
@@ -441,7 +459,7 @@ public class STACService extends Application {
 
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
-			String datetime,String ids, String intersects,String requestType) {
+			String datetime,String ids, String intersects,String requestType,String collectionId) {
 		int numberMatched;
 		net.minidev.json.JSONArray items = null;
 	
@@ -532,6 +550,8 @@ public class STACService extends Application {
 			 
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
+
+			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response could not be preapred. "+e.getMessage());
 			e.printStackTrace();
