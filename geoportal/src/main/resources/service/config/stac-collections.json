@@ -47,13 +47,13 @@
 					"rel": "self",
 					"type": "application/json",
 					"title": "Link to the Metadata collection",
-					"href": "{url}/collections/metadata"
+					"href": "{url}/collections/{collectionId}"
 				},				
 				{
 					"rel": "parent",
 					"type": "application/json",
 					"title": "Link to all collections",
-					"href": "{url}/collections"
+					"href": "{url}"
 				},
 				{
 					"rel": "root",

@@ -45,7 +45,7 @@
 	"links": [
 			{
 			"rel": "self",
-			"href": "{url}/collections/metadata/items/{itemId}",
+			"href": "{url}/collections/{collectionId}/items/{itemId}",
 			"type": "application/geo+json"
 			},
 			{
@@ -55,12 +55,12 @@
 			},
 			{
 			"rel": "parent",
-			"href": "{url}/collections/metadata/items",
+			"href": "{url}/collections/{collectionId}/items",
 			"type": "application/json"
 			},
 			{
 			"rel": "collection",
-			"href": "{url}/collections/metadata",
+			"href": "{url}/collections/{collectionId}",
 			"type": "application/json"
 			}
 		]
