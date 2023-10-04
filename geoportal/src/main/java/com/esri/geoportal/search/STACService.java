@@ -244,7 +244,7 @@ public class STACService extends Application {
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
 	
-			queryMap.put("ids", "\""+id+"\"");
+			queryMap.put("ids", id);
 			url = url + "/_search";
 
 			query = this.prepareSearchQuery(queryMap,null);
@@ -386,7 +386,7 @@ public class STACService extends Application {
 					else
 						ids = ids + idArr.getString(i);
 				}
-				queryMap.put("ids", "\"" + ids + "\"");
+				queryMap.put("ids", ids);
 			}
 
 			if (intersects != null && !intersects.isEmpty()) {
@@ -787,6 +787,7 @@ public class STACService extends Application {
 		}
 		if (queryMap.containsKey("ids")) {
 			String idsQry = this.prepareIds(queryMap.get("ids"));
+			System.out.println("ids "+idsQry);
 			if (idsQry.length() > 0)
 				builder.add(JsonUtil.toJsonStructure(idsQry));
 		}
@@ -813,7 +814,7 @@ public class STACService extends Application {
 				+(searchAfterStr.length()>0 ?","+searchAfterStr : "")+"}";		
 		return searchQuery;
 	}
-
+//{"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
 	private String prepareIntersects(String geoJson) {
 		String query =""; 
 		String field = "shape_geo";
@@ -827,8 +828,8 @@ public class STACService extends Application {
 		return query;
 	}
 
-	private String prepareIds(String ids) {
-		return "{\"match\": {\"_id\": "+ids+"}}";	
+	private String prepareIds(String ids) {		
+		return "{\"match\": {\"id\": \""+ids+"\"}}";	
 	}
 
 	private String prepareDateTime(String datetime) {
