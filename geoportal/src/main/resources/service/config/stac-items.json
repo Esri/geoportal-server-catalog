@@ -11,7 +11,7 @@
 "featurePropPath":
 	{	
 	"type":"Feature",	
-	"id": "$._id",
+	"id": "$._source.id",
 	"collection": "$._index",		
 	"stac_version":"1.0.0",
 	"stac_extensions":[],
