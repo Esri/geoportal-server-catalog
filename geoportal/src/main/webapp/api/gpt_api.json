@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "https://github.com/Esri/geoportal-server-catalog",
-    "version": "2.7.0",
+    "version": "2.7.1",
     "title": "Esri Geoportal Server",
     "contact": {
       "name": "portal@esri.com"
@@ -27,7 +27,7 @@
       "name": "REST"
     }
   ],
-  "paths": {
+  "paths": {  	
 	"/stac": {
 		"get": {
 			"tags": [
@@ -62,23 +62,6 @@
 			}
 		}
 	},
-	"/stac/api": {
-		"get": {
-			"tags": [
-				"STAC"
-			],
-			"summary": "STAC API",
-			"description": "",
-			"operationId": "stacApi",
-			"parameters": [				
-			],
-			"responses": {
-				"default": {
-					"description": "successful operation"
-				}
-			}
-		}
-	},
 	"/stac/collections/metadata": {
 		"get": {
 			"tags": [
@@ -103,6 +86,9 @@
         ],
         "summary": "Metadata collection items.",
         "description": "",
+        "produces": [
+          "application/geo+json"
+        ],
         "operationId": "stacCollectionMetadataItems",                                                                                                                                                                                        
         "parameters": [
           
@@ -145,6 +131,9 @@
         ],
         "summary": "Get a feature.",
         "description": "Get a feature.",
+        "produces": [
+          "application/geo+json"
+        ],
         "operationId": "stacCollectionMetadataItemWithIds",                                                                                                                                                                                        
         "parameters": [          
           {
