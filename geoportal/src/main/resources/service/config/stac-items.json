@@ -37,7 +37,7 @@
 		"links": [
 			{
 			"rel": "self",
-			"href": "{url}/collections/{collectionId}/items",
+			"href": "{url}/collections/{collectionId}/items/{itemId}",
 			"type": "application/geo+json"
 			},
 			{

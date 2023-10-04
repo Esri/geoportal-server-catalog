@@ -254,7 +254,7 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponseSingleItem(response, hsr);
+			responseJSON = this.prepareResponseSingleItem(response, hsr,collectionId);
 			if(responseJSON.contains("Record not found"))
 			{
 				status = Response.Status.NOT_FOUND;
@@ -414,7 +414,7 @@ public class STACService extends Application {
 	}
 
 	//Prepare response for a single feature
-	private String prepareResponseSingleItem(String searchRes, HttpServletRequest hsr) {
+	private String prepareResponseSingleItem(String searchRes, HttpServletRequest hsr,String collectionId) {
 		
 		net.minidev.json.JSONArray items = null;
 		String itemFileString = "";		
@@ -449,6 +449,7 @@ public class STACService extends Application {
 				finalResponse = this.generateResponse("404", "Record not found.");
 				
 			}
+			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
 					
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response for stac-item could not be preapred. "+e.getMessage());
