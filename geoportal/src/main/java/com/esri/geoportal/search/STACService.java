@@ -217,7 +217,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,null,null,
-					"metadataItems",collectionId);
+					"metadataItems",collectionId);			
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
@@ -225,7 +225,7 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "STAC API collection metadata items response could not be generated.");
 		}
-		return Response.status(status).entity(responseJSON).build();
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
 	
 	@GET
@@ -259,7 +259,7 @@ public class STACService extends Application {
 			{
 				status = Response.Status.NOT_FOUND;
 			}
-
+			System.out.println(responseJSON);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
 			e.printStackTrace();
@@ -267,11 +267,11 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("500", "STAC API collection metadata item with itemid response could not be generated.");
 		}
 		
-		return Response.status(status).entity(responseJSON).build();
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
 
 	@GET
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces("application/geo+json")
 	@Path("/search")
 	public Response search(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
 			@QueryParam("bbox") String bbox,
@@ -326,11 +326,11 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "STAC API collection search items response could not be generated.");
 		}
-		return Response.status(status).entity(responseJSON).build();
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
 	
 	@POST
-	@Produces(MediaType.APPLICATION_JSON)
+	@Produces("application/geo+json")
 	@Path("/search")
 	@Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
 	public Response search(@Context HttpServletRequest hsr,@RequestBody String body,
@@ -411,7 +411,7 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "STAC API collection search items response could not be generated.");			
 		}
-		return Response.status(status).entity(responseJSON).build();
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
 
 	//Prepare response for a single feature
