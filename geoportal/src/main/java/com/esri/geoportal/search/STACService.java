@@ -248,7 +248,7 @@ public class STACService extends Application {
 			url = url + "/_search";
 
 			query = this.prepareSearchQuery(queryMap,null);
-			//System.out.println("final query "+query);
+			
 			if (query.length() > 0)
 				response = client.sendPost(url, query, "application/json");
 			else
@@ -287,7 +287,7 @@ public class STACService extends Application {
 		limit = setLimit(limit);
 		
 		String query = "";
-
+		//TODO implement collections parameter in search
 		try {
 			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 			ElasticClient client = ElasticClient.newClient();
@@ -308,7 +308,6 @@ public class STACService extends Application {
 			
 			if(intersects != null && intersects.length() >0)
 				queryMap.put("intersects", intersects);
-
 			
 			url = url + "/_search?size=" + limit;
 
@@ -334,7 +333,8 @@ public class STACService extends Application {
 	@Produces(MediaType.APPLICATION_JSON)
 	@Path("/search")
 	@Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
-	public Response search(@Context HttpServletRequest hsr,@RequestBody String body, @QueryParam("search_after") String search_after)
+	public Response search(@Context HttpServletRequest hsr,@RequestBody String body,
+			@QueryParam("search_after") String search_after)
 			throws UnsupportedEncodingException {
 		String responseJSON = null;
 		String response = "";
@@ -350,6 +350,7 @@ public class STACService extends Application {
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
 		JsonArray idArr= (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids"): null);	
 		
+		//TODO implement collection parameter in search
 		JsonArray collectionArr = (requestPayload.containsKey("collections") ? requestPayload.getJsonArray("collections"): null);	
 				
 		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects"): null);		
@@ -820,11 +821,8 @@ public class STACService extends Application {
 		String field = "shape_geo";
 		String spatialType = "geo_shape"; 
 		String relation = "intersects";
-		JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(geoJson);		
 		
-		query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \""+obj.getString("type")+"\","
-				+ "\"coordinates\":"+ obj.get("coordinates")
-				+ "},\"relation\": \"" + relation + "\"}}}";
+		query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": "+geoJson+ ",\"relation\": \"" + relation + "\"}}}";
 		return query;
 	}
 
