@@ -201,7 +201,7 @@
             "description": "Array of Item ids to return.",
             "required": false,
             "type": "Array of strings (ids)",
-            "example":"\"LC80100252015082LGN00,LC80100252014287LGN00\""
+            "example":"LC80100252015082LGN00,LC80100252014287LGN00"
           }
         ],
         "responses": {
