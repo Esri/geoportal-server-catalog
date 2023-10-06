@@ -159,6 +159,9 @@
         ],
         "summary": "Retrieve Items matching filters.",
         "description": "Intended as a shorthand API for simple queries.",
+         "produces": [
+          "application/geo+json"
+        ],
         "operationId": "stacSearch",                                                                                                                                                                                        
         "parameters": [
           
@@ -216,6 +219,9 @@
         ],
         "summary": "Retrieve Items matching filters.",
         "description": "Intended as the standard, full-featured query API.",
+         "produces": [
+          "application/geo+json"
+        ],
         "operationId": "stacSearchPost",                                                                                                                                                                                        
         "parameters": [          
           {
