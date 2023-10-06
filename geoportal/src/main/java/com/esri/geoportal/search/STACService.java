@@ -56,6 +56,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.ResourcePath;
+import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
@@ -193,8 +194,7 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
-		limit = setLimit(limit);
-
+		
 		String query = "";	
 
 		try {
@@ -202,6 +202,8 @@ public class STACService extends Application {
 			ElasticClient client = ElasticClient.newClient();
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
+			
+			limit = setLimit(limit);
 
 			if (bbox != null && bbox.length() > 0)
 				queryMap.put("bbox", bbox);
@@ -219,6 +221,9 @@ public class STACService extends Application {
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,null,null,
 					"metadataItems",collectionId);			
 
+		} catch (InvalidParameterException e) {			
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
@@ -260,6 +265,10 @@ public class STACService extends Application {
 				status = Response.Status.NOT_FOUND;
 			}
 			System.out.println(responseJSON);
+
+		} catch (InvalidParameterException e) {			
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
 			e.printStackTrace();
@@ -284,7 +293,6 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
-		limit = setLimit(limit);
 		
 		String query = "";
 		//TODO implement collections parameter in search
@@ -292,8 +300,9 @@ public class STACService extends Application {
 			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 			ElasticClient client = ElasticClient.newClient();
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
-			Map<String, String> queryMap = new HashMap<String, String>();
-
+			Map<String, String> queryMap = new HashMap<String, String>();	
+			
+			limit = setLimit(limit);
 			if (bbox != null && bbox.length() > 0)
 				queryMap.put("bbox", bbox);
 			if (datetime != null && datetime.length() > 0)
@@ -313,13 +322,23 @@ public class STACService extends Application {
 
 			query = this.prepareSearchQuery(queryMap,searchAfter);
 			System.out.println("final query "+query);
+			
 			if (query.length() > 0)
+			{
 				response = client.sendPost(url, query, "application/json");
+			}
 			else
+			{
 				response = client.sendGet(url);
-
+			}
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,idList,intersects,"search","metadata");
+			
 
+		} catch (InvalidParameterException e) {			
+			status = Response.Status.BAD_REQUEST;
+			System.out.println("Parameter "+e.getParameterName()+": "+e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
+		
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
@@ -327,8 +346,9 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("500", "STAC API collection search items response could not be generated.");
 		}
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
-	}
+	}	
 	
+
 	@POST
 	@Produces("application/geo+json")
 	@Path("/search")
@@ -342,9 +362,7 @@ public class STACService extends Application {
 		//System.out.println(body);
 		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
 		
-		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit"): 0);
-		limit = setLimit(limit);		
-	
+		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit"): 0);	
 		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime"): null);
 		
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
@@ -364,7 +382,8 @@ public class STACService extends Application {
 			ElasticClient client = ElasticClient.newClient();
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
-
+			limit = setLimit(limit);	
+			
 			if (bboxJsonArr != null && bboxJsonArr.size() > 0) {
 				for (int i = 0; i < bboxJsonArr.size(); i++) {
 					if (i > 0)
@@ -405,6 +424,9 @@ public class STACService extends Application {
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,ids,
 					(intersects!=null ?intersects.toString():""),"searchPost","metadata");
 
+		} catch (InvalidParameterException e) {			
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
@@ -789,6 +811,7 @@ public class STACService extends Application {
 		if (queryMap.containsKey("ids")) {
 			String idsQry = this.prepareIds(queryMap.get("ids"));
 			System.out.println("ids "+idsQry);
+			
 			if (idsQry.length() > 0)
 				builder.add(JsonUtil.toJsonStructure(idsQry));
 		}
@@ -871,41 +894,57 @@ public class STACService extends Application {
 
 		double coords[] = { -180.0, -90.0, 180.0, 90.0 };
 		String query = "";
-		if (bbox.size() > 3) {
-			if ((Double.parseDouble(bbox.get(0)) < -180.0) && (Double.parseDouble(bbox.get(2)) >= -180.0))
-				coords[0] = -180.0;
-			else
-				coords[0] = Double.parseDouble(bbox.get(0));
-			if ((Double.parseDouble(bbox.get(1)) < -90.0) && (Double.parseDouble(bbox.get(3)) >= -90.0))
-				coords[1] = -90.0;
-			else
-				coords[1] = Double.parseDouble(bbox.get(1));
-			if ((Double.parseDouble(bbox.get(2)) > 180.0) && (Double.parseDouble(bbox.get(0)) <= 180.0))
-				coords[2] = 180.0;
-			else
-				coords[2] = Double.parseDouble(bbox.get(2));
-			if ((Double.parseDouble(bbox.get(3)) > 90.0) && (Double.parseDouble(bbox.get(1)) <= 90.0))
-				coords[3] = 90.0;
-			else
+		//As per stac API validator, invalid bbox should respond with 400, instead of reaplcing it with defaults
+		if (bbox.size()==4 || bbox.size()==6) {			
+				coords[0] = Double.parseDouble(bbox.get(0));		
+				coords[1] = Double.parseDouble(bbox.get(1));			
+				coords[2] = Double.parseDouble(bbox.get(2));			
 				coords[3] = Double.parseDouble(bbox.get(3));
+				String coordinates = "[[" + coords[0] + "," + coords[3] + "], [" + coords[2] + "," + coords[1] + "]]";
+				if(bbox.size()==6)
+				{
+					coords[4] = Double.parseDouble(bbox.get(4));			
+					coords[5] = Double.parseDouble(bbox.get(5));
+					
+				}
+				
+				query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \"envelope\","
+						+ "\"coordinates\":"+coordinates 
+						+ "},\"relation\": \"" + relation + "\"}}}";
+				return query;
+//			if ((Double.parseDouble(bbox.get(0)) < -180.0) && (Double.parseDouble(bbox.get(2)) >= -180.0))
+//				coords[0] = -180.0;
+//			else
+//				coords[0] = Double.parseDouble(bbox.get(0));
+//			if ((Double.parseDouble(bbox.get(1)) < -90.0) && (Double.parseDouble(bbox.get(3)) >= -90.0))
+//				coords[1] = -90.0;
+//			else
+//				coords[1] = Double.parseDouble(bbox.get(1));
+//			if ((Double.parseDouble(bbox.get(2)) > 180.0) && (Double.parseDouble(bbox.get(0)) <= 180.0))
+//				coords[2] = 180.0;
+//			else
+//				coords[2] = Double.parseDouble(bbox.get(2));
+//			if ((Double.parseDouble(bbox.get(3)) > 90.0) && (Double.parseDouble(bbox.get(1)) <= 90.0))
+//				coords[3] = 90.0;
+//			else
+//				coords[3] = Double.parseDouble(bbox.get(3));
 		}
-
-		if (coords.length > 3) {
-			query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \"envelope\","
-					+ "\"coordinates\": [[" + coords[0] + "," + coords[3] + "], [" + coords[2] + "," + coords[1] + "]]"
-					+ "},\"relation\": \"" + relation + "\"}}}";
+		else
+		{
+			throw new InvalidParameterException("bbox", "Invalid bbox");
 		}
-		return query;
 	}
 
 	private int setLimit(int limit) {
-		if (limit == 0 || limit > 10000) {
-			limit = 10; // default
+		if(limit ==0)
+		{
+			limit = 10; //default
+		}
+		if (limit < 0 || limit > 10000) {
+			throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
 		}
 		return limit;
 	}
-
-	
 
 	public String getBaseUrl(HttpServletRequest hsr) {
 
