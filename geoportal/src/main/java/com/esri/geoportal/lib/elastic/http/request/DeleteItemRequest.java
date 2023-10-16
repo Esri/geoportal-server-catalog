@@ -119,10 +119,10 @@ public class DeleteItemRequest extends BulkEditRequest {
    * @param id the item id
    */
   public void writeOk(AppResponse response, String id) {
-//    JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
-//    jsonBuilder.add("id",id);
-//    jsonBuilder.add("status","deleted");
-//    response.writeOkJson(this,jsonBuilder);
+    JsonObjectBuilder jsonBuilder = Json.createObjectBuilder();
+    jsonBuilder.add("id",id);
+    jsonBuilder.add("status","deleted");
+    response.writeOkJson(this,jsonBuilder);
   }
 
 }
