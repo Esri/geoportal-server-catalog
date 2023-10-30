@@ -6,7 +6,7 @@ define(["dojo/_base/declare",
         "../../base/Descriptor",
         "esri/dijit/metadata/form/iso/AbstractObject",
         "esri/dijit/metadata/form/iso/ObjectReference",
-        "../../gmd/distribution/distributionFormat",
+        "../../gmd/distribution/DistributionFormat",
         "./TransferOptions",
         "dojo/text!./templates/Distribution.html"],
 function(declare, lang, has, domStyle, topic, Descriptor, AbstractObject, ObjectReference, DistributionFormat, TransferOptions, template) {
