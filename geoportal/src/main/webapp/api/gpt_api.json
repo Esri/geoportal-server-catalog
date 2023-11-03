@@ -62,6 +62,23 @@
 			}
 		}
 	},
+	"/stac/collections": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Link to the collections",
+			"description": "",
+			"operationId": "stacCollections",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
 	"/stac/collections/metadata": {
 		"get": {
 			"tags": [
@@ -114,7 +131,7 @@
             "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.",
             "required": false,
             "type": "String",
-            "example":2023-06-12T23:20:50Z/..
+            "example": "2023-06-12T23:20:50Z/.."
           }
         ],
         "responses": {
@@ -195,7 +212,7 @@
             "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots",
             "required": false,
             "type": "String",
-            "example":2023-06-12T23:20:50Z/..
+            "example": "2023-06-12T23:20:50Z/.."
           },
          
           {
@@ -363,7 +380,7 @@
             "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.",
             "required": false,
             "type": "String",
-            "example":2023-06-12T23:20:50Z/..
+            "example": "2023-06-12T23:20:50Z/.."
           }
         ],
         "responses": {
