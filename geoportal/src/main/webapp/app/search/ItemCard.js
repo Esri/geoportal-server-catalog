@@ -105,6 +105,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id;
+      item.title = this._strip(item.title);
       item.title = item.title? item.title: "???";
       var links = this._uniqueLinks(item);
       this._renderTitleLink(item._id, item);
@@ -892,6 +893,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           this.self._renderDataHtml(item, uri);
         })));
       }
+    },
+	  
+    _strip: function(html) {
+      let doc = new DOMParser().parseFromString(html, 'text/html');
+      return doc.body.textContent || "";
     }
   });
 
