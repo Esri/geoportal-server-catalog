@@ -105,7 +105,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id;
-      item.title = this._strip(item.title);
+//      item.title = this._strip(item.title);
       item.title = item.title? item.title: "???";
       var links = this._uniqueLinks(item);
       this._renderTitleLink(item._id, item);
@@ -881,8 +881,10 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           href: "javascript:void(0)",
           title: item.title,
           "aria-label": item.title,
-          innerHTML: item.title
+          //innerHTML: item.title, 
         },titleNode);
+        htmlNode.appendChild(document.createTextNode(item.title));
+        
         this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
           var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
           if (AppContext.geoportal.supportsApprovalStatus || 
