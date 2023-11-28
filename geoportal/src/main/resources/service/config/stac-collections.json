@@ -42,6 +42,24 @@
 					]
 				}
 			},
+			"item_assets": {
+				"thumbnail": {
+					"type": "image/jpeg",
+					"title": "Thumbnail",
+					"description": "A medium sized thumbnail",
+					"roles": [
+						"thumbnail"
+					]
+				},
+				"metadata": {
+					"type": "mtl",
+					"roles": [
+						"metadata"
+					],
+					"title": "Original Metadata",
+					"description": "The original metadata file"
+				}
+			},
 			"links": [
 				{
 					"rel": "self",
