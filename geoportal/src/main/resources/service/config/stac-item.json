@@ -25,22 +25,105 @@
 		},		
 	"assets":
 		{
-		 "thumbnail": {
+		"thumbnail": {
 		      "href": "$._source.thumbnail_s",
 		      "title": "Thumbnail",
+		      "description":"An asset that represents a thumbnail of the Item",
 		      "type": "image/jpeg",
 		      "roles": [
 		        "thumbnail"
 		      ]
 		    },
-			 "json-metadata": {
+		 "json-metadata": {
 		      "href": "$._source.links_s[0]",
 		      "title": "Extended Metadata",
+		      "description":"A metadata sidecar file describing the data in this Item, for example the Landsat-8 MTL file.",
 		      "type": "application/json",
 		      "roles": [
 		        "metadata"
 		      ]
-		   }		
+		   },
+		"visual": {
+	      "href": "",
+	      "title": "3-Band Visual",
+	      "type": "image/tiff; application=geotiff; profile=cloud-optimized",
+	      "description":"An asset that is a full resolution version of the data, processed for visual use",
+	      "roles": [
+	        "visual"
+	      ]
+	    },
+	    "data": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"The data itself.",
+	      "roles": [
+	        "data"
+	      ]
+	    },
+	    "overview": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"An asset that represents a possibly larger view than the thumbnail of the Item",
+	      "roles": [
+	        "overview"
+	      ]
+	    },
+		 "date": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"An asset that provides per-pixel acquisition timestamps, typically serving as metadata to another asset",
+	      "roles": [
+	        "date"
+	      ]
+	    },
+	    "graphic": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"Supporting plot, illustration, or graph associated with the Item",
+	      "roles": [
+	        "graphic"
+	      ]
+	    },
+	    "data-mask": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"File indicating if corresponding pixels have Valid data and various types of invalid data",
+	      "roles": [
+	        "data-mask"
+	      ]
+	    },
+	    "snow-ice": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"Points to a file that indicates whether a pixel is assessed as being snow/ice or not.",
+	      "roles": [
+	        "snow-ice"
+	      ]
+	    },
+	    "land-water": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"Points to a file that indicates whether a pixel is assessed as being land or water.",
+	      "roles": [
+	        "land-water"
+	      ]
+	    },
+	    "water-mask": {
+	      "href": "",
+	      "title": "",
+	      "type": "",
+	      "description":"Points to a file that indicates whether a pixel is assessed as being water (e.g. flooding map).",
+	      "roles": [
+	        "water-mask"
+	      ]
+	    }		   		
 	  },
 	"links": [
 			{
