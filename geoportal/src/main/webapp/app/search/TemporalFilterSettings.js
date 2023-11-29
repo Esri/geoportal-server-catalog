@@ -54,7 +54,8 @@ function(declare, lang, SearchComponentSettings, template, i18n) {
       var chkInput = function(inputNode,defaultVal) {
         var v = inputNode.value;
         if (typeof v === "string" && lang.trim(v).length > 0) {
-          return lang.trim(v);
+          let doc = new DOMParser().parseFromString(v, 'text/html');
+          return doc.body.textContent || "Invalid Setting";
         }
         return defaultVal;
       };
