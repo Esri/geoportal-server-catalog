@@ -53,7 +53,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
         var v = inputNode.value;
         if (typeof v === "string" && lang.trim(v).length > 0) {
           let doc = new DOMParser().parseFromString(v, 'text/html');
-          return doc.body.textContent || "";
+          return doc.body.textContent || "Invalid Setting";
         }
         return defaultVal;
       };
