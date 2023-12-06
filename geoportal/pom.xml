@@ -11,9 +11,9 @@
   <properties>
     <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     <log4j.version>2.17.1</log4j.version>
-    <springframework.version>5.3.25</springframework.version>
-    <springsecurity.version>5.8.1</springsecurity.version>
-    <jackson.version>2.12.6.1</jackson.version>
+    <springframework.version>5.3.27</springframework.version>
+    <springsecurity.version>5.8.5</springsecurity.version>
+    <jackson.version>2.12.7.1</jackson.version>
   </properties>
 
   <dependencies>
@@ -284,7 +284,7 @@
     <dependency>
       <groupId>com.google.guava</groupId>
       <artifactId>guava</artifactId>
-      <version>31.0.1-jre</version>
+      <version>32.0.0-jre</version>
     </dependency>
 
     <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
@@ -375,6 +375,7 @@
           <warSourceDirectory>src/main/webapp</warSourceDirectory>
           <failOnMissingWebXml>false</failOnMissingWebXml>
           <packagingExcludes>WEB-INF/classes/com/**</packagingExcludes>
+          <packagingExcludes>WEB-INF/lib/snakeyaml-1.32.jar</packagingExcludes>
           <!-- 
           <webResources>
             <resource>
