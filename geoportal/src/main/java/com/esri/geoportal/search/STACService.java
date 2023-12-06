@@ -950,7 +950,19 @@ public class STACService extends Application {
 
 		StringBuffer requestURL = hsr.getRequestURL();
 		String ctxPath = hsr.getContextPath();
-		String baseUrl = requestURL.substring(0, requestURL.indexOf(ctxPath) + ctxPath.length());
+                String urlScheme = hsr.getScheme();
+                String urlServerName = hsr.getServerName();
+                int urlPort = hsr.getServerPort();
+		String baseUrl;
+
+		if (ctxPath.length() > 0) {
+        	    baseUrl = requestURL.substring(0, requestURL.indexOf(ctxPath) + ctxPath.length());
+		} else {
+        	    baseUrl = urlScheme + "://" + urlServerName;
+                    if ((urlPort != 80) && (urlPort != 443)) {
+                        baseUrl += ":" + urlPort;
+                }
+		}                
 		return baseUrl + "/stac";
 	}
 
