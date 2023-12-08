@@ -67,7 +67,7 @@
         },
         {
             "rel": "items",
-            "type": "application/json",
+            "type": "application/geo+json",
             "title": "Items in this collection",
             "href": "{url}/collections/{collectionId}/items",
             "hreflang": "en-US"
