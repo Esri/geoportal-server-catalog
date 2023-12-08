@@ -22,7 +22,15 @@
       var config = gs.Object.create(gs.config.Config).mixin({
         cswCapabilitiesFile: "../../gs/config/csw-capabilities.xml",
         csw2CapabilitiesFile: "../../gs/config/csw2-capabilities.xml",
-        opensearchDescriptionFile: "../../gs/config/opensearch-description.xml"
+        opensearchDescriptionFile: "../../gs/config/opensearch-description.xml",
+        ogcrecordsDescriptionFile: "../../gs/config/ogcrecords-description.json",
+        ogcrecordsAPIFile: "../../gs/config/ogcrecords-api.json",
+        ogcrecordsConformanceFile: "../../gs/config/ogcrecords-conformance.json",
+        ogcrecordsCollectionsFile: "../../gs/config/ogcrecords-collections.json",
+        ogcrecordsCollectionMetadataFile: "../../gs/config/ogcrecords-collection-metadata.json",
+        ogcrecordsQueryablesFile: "../../gs/config/ogcrecords-queryables.json",
+        ogcrecordsItemsFile: "../../gs/config/ogcrecords-items.json",
+        ogcrecordsSchemaFile: "../../gs/config/ogcrecords-schema.json",
       });
       return config;
     }},

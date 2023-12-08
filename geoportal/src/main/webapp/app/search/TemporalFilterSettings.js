@@ -15,14 +15,16 @@
 define(["dojo/_base/declare",
         "dojo/_base/lang",
         "app/search/SearchComponentSettings",
+        "app/etc/util",
         "dojo/text!./templates/TemporalFilterSettings.html",
         "dojo/i18n!app/nls/resources"], 
-function(declare, lang, SearchComponentSettings, template, i18n) {
+function(declare, lang, SearchComponentSettings, util,template, i18n) {
   
   var oThisClass = declare([SearchComponentSettings], {
     
     i18n: i18n,
     templateString: template,
+   
     
     postCreate: function() {
       this.inherited(arguments);
@@ -54,7 +56,7 @@ function(declare, lang, SearchComponentSettings, template, i18n) {
       var chkInput = function(inputNode,defaultVal) {
         var v = inputNode.value;
         if (typeof v === "string" && lang.trim(v).length > 0) {
-          return lang.trim(v);
+        	return util.parseSettingForXss(v);          
         }
         return defaultVal;
       };

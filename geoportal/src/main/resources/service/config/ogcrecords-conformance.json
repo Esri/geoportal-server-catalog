@@ -1,0 +1,7 @@
+{
+	"conformsTo": [
+		"https://developer.ogc.org/api/records/index.html#tag/Capabilities", 
+		"https://developer.ogc.org/api/records/index.html#tag/Collection,", 
+		"https://developer.ogc.org/api/records/index.html#tag/Record" 
+	]
+}

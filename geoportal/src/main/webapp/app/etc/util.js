@@ -44,6 +44,12 @@ function (lang) {
         return decodeURIComponent(value);
       }
       return;
+    },
+    
+    parseSettingForXss(inputVal)
+    {
+    	let doc = new DOMParser().parseFromString(inputVal, 'text/html');
+        return doc.body.textContent || "Invalid Setting";
     }
     
   };

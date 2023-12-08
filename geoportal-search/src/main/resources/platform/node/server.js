@@ -33,6 +33,7 @@ app.listen(port, function () {
   console.log("Node: geoportal-search listening on port", port);
 });
 
+// OGC CSW 2.0.2 + 3.0.0 API
 app.get("/csw", function (req, res) {
   execute(req,res,req.query);
 });
@@ -41,6 +42,7 @@ app.post("/csw", function (req, res) {
   execute(req,res,mixinParameters(req));
 });
 
+// OpenSearch API
 app.get("/opensearch", function (req, res) {
   execute(req,res,req.query);
 });
@@ -58,8 +60,149 @@ app.post("/opensearch/description", function (req, res) {
   execute(req,res,mixinParameters(req));
 });
 
-function execute(req, res, parameterMap) {
+// OGC Records API
+app.get("/ogcrecords", function (req, res) {
+  execute(req,res,req.query);
+});
 
+app.post("/ogcrecords", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/api", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/api", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/conformance", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/conformance", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections/metadata", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata/queryables", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections/metadata/queryables", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata/items", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections/metadata/items", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata/items/:recordid", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/ogcrecords/collections/metadata/items/:recordid", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/ogcrecords/collections/metadata/schema", function (req, res) {
+  execute(req,res,req.query);
+});
+
+// STAC API
+app.get("/stac", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/api", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac/api", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.post("/stac/search", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/conformance", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac/conformance", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/collections", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac/collections", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/collections/metadata", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac/collections/metadata", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/collections/metadata/queryables", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac/collections/metadata/queryables", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/collections/metadata/items", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac/collections/metadata/items", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/collections/metadata/items/:recordid", function (req, res) {
+  execute(req,res,req.query);
+});
+
+app.post("/stac/collections/metadata/items/:recordid", function (req, res) {
+  execute(req,res,mixinParameters(req));
+});
+
+app.get("/stac/collections/metadata/schema", function (req, res) {
+  execute(req,res,req.query);
+});
+
+function execute(req, res, parameterMap) {
   // TODO need X- headers
   var baseUrl = req.protocol + "://" + req.hostname + ":" +port;
 
@@ -68,7 +211,8 @@ function execute(req, res, parameterMap) {
     "requestBody": req.body,
     "baseUrl": baseUrl,
     "headerMap": req.headers,
-    "parameterMap": parameterMap
+    "parameterMap": parameterMap,
+    "pathParameters": req.params
   };
   //console.log("Processing request:",requestInfo);
   var processor = gs.Object.create(gs.context.node.NodeProcessor);

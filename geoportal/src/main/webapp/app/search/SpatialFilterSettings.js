@@ -16,9 +16,10 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/number",
         "app/search/SearchComponentSettings",
+        "app/etc/util",
         "dojo/text!./templates/SpatialFilterSettings.html",
         "dojo/i18n!app/nls/resources"], 
-function(declare, lang, number, SearchComponentSettings, template, i18n) {
+function(declare, lang, number, SearchComponentSettings, util,template, i18n) {
   
   var oThisClass = declare([SearchComponentSettings], {
     
@@ -52,7 +53,7 @@ function(declare, lang, number, SearchComponentSettings, template, i18n) {
       var chkInput = function(inputNode,defaultVal) {
         var v = inputNode.value;
         if (typeof v === "string" && lang.trim(v).length > 0) {
-          return lang.trim(v);
+        	return util.parseSettingForXss(v);
         }
         return defaultVal;
       };

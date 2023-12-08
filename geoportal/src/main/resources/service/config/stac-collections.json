@@ -1,0 +1,85 @@
+{
+	"links": [
+		{
+			"rel": "root",
+			"type": "application/json",
+			"title": "This document as JSON",
+			"href": "{url}"
+		},
+		{
+			"rel": "self",
+			"type": "application/json",
+			"title": "This document as JSON",
+			"href": "{url}/collections"
+		}
+	],
+	"collections": [
+		{
+			"stac_version": "1.0.0",
+			"stac_extensions": [],
+			"type": "Collection",
+			"id": "metadata",
+			"title": "Esri Geoportal Server Metadata",
+			"description": "STAC API Powered by Esri Geoportal Server Catalog",
+			"license": "Apache-2.0",
+			"extent": {
+				"spatial": {
+					"bbox": [
+						[
+							-180.0,
+							 -90.0, 
+							 180.0,
+							  90.0
+						]
+					]
+				},
+				"temporal": {
+					"interval": [
+						[
+							"2018-06-23T00:00:00Z",
+							"2023-09-26T13:44:56Z"
+						]
+					]
+				}
+			},
+			"item_assets": {
+				"thumbnail": {
+					"type": "image/jpeg",
+					"title": "Thumbnail",
+					"description": "A medium sized thumbnail",
+					"roles": [
+						"thumbnail"
+					]
+				},
+				"metadata": {
+					"type": "mtl",
+					"roles": [
+						"metadata"
+					],
+					"title": "Original Metadata",
+					"description": "The original metadata file"
+				}
+			},
+			"links": [
+				{
+					"rel": "self",
+					"type": "application/json",
+					"title": "Link to the Metadata collection",
+					"href": "{url}/collections/{collectionId}"
+				},				
+				{
+					"rel": "parent",
+					"type": "application/json",
+					"title": "Link to all collections",
+					"href": "{url}"
+				},
+				{
+					"rel": "root",
+					"type": "application/json",
+					"title": "Link to STAC entry point",
+					"href": "{url}"
+				}
+			]
+		}
+	]
+}

@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "https://github.com/Esri/geoportal-server-catalog",
-    "version": "2.7.0",
+    "version": "2.7.1",
     "title": "Esri Geoportal Server",
     "contact": {
       "name": "portal@esri.com"
@@ -15,13 +15,406 @@
   "basePath": "/geoportal",
   "tags": [
     {
-      "name": "REST"
+      "name": "STAC"
+    },
+    {
+      "name": "OGCRECORDS"
     },
     {
       "name": "CSW"
+    },
+    {
+      "name": "REST"
     }
   ],
-  "paths": {
+  "paths": {  	
+	"/stac": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Landing page for Geoportal Server STAC Records API.",
+			"description": "",
+			"operationId": "stacDescription",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/conformance": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Provides information on STAC API conformance",
+			"description": "",
+			"operationId": "stacConformance",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/collections": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Link to the collections",
+			"description": "",
+			"operationId": "stacCollections",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/collections/metadata": {
+		"get": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Link to the Metadata collection",
+			"description": "",
+			"operationId": "stacCollectionMetadata",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/stac/collections/metadata/items": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Metadata collection items.",
+        "description": "",
+        "produces": [
+          "application/geo+json"
+        ],
+        "operationId": "stacCollectionMetadataItems",                                                                                                                                                                                        
+        "parameters": [
+          
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Minimum = 1. Maximum = 10000, Default = 10.",
+            "required": false,
+            "type": "integer",
+            "example":15
+          },
+          {
+            "name": "bbox",
+            "in": "query",
+            "description": "Only features that have a geometry that intersects the bounding box are selected.",
+            "required": false,
+            "type": "ArrayofNumbers",
+           	"example":"-171.791110603,18.91619,-66.96466,71.3577635769"
+          },
+          {
+            "name": "datetime",
+            "in": "query",
+            "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.",
+            "required": false,
+            "type": "String",
+            "example": "2023-06-12T23:20:50Z/.."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/stac/collections/metadata/items/{id}": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Get a feature.",
+        "description": "Get a feature.",
+        "produces": [
+          "application/geo+json"
+        ],
+        "operationId": "stacCollectionMetadataItemWithIds",                                                                                                                                                                                        
+        "parameters": [          
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Stac item id",
+            "required": true,
+            "type": "string",
+            "example":"LC80100252015082LGN00"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/stac/search": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Retrieve Items matching filters.",
+        "description": "Intended as a shorthand API for simple queries.",
+         "produces": [
+          "application/geo+json"
+        ],
+        "operationId": "stacSearch",                                                                                                                                                                                        
+        "parameters": [
+          
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Minimum = 1. Maximum = 10000, Default = 10.",
+            "required": false,
+            "type": "integer",
+            "example":15
+          },
+          {
+            "name": "bbox",
+            "in": "query",
+            "description": "Only features that have a geometry that intersects the bounding box are selected.s",
+            "required": false,
+            "type": "Array of Numbers",
+            "example":"-171.791110603,18.91619,-66.96466,71.3577635769"
+          },
+          {
+            "name": "intersects",
+            "in": "query",
+            "description": "pointGeoJSON (object) or multipointGeoJSON (object) or linestringGeoJSON (object) or multilinestringGeoJSON (object) or polygonGeoJSON (object) or multipolygonGeoJSON (object) or geometrycollectionGeoJSON (object) (geometryGeoJSON)",
+            "required": false,
+            "type": "GeoJSON object",
+            "example":"{\"type\":\"Polygon\",\"coordinates\":[[[-67.18661657269904,48.297014795971687],[-67.1872,48.2971],[-67.17322376288064,48.33374073671041],[-67.1590065133506,48.371013322480617],[-66.6453207034186,49.7177153248036],[-66.63275537806288,49.750657151284347],[-66.6171,49.7917],[-66.61637825143734,49.79159448137363],[-64.1246,49.4273],[-64.14045802174776,49.39048646945745],[-64.74832861700387,47.979348114350958],[-64.7639,47.9432],[-67.18661657269904,48.297014795971687]]]}"
+          },
+          {
+            "name": "datetime",
+            "in": "query",
+            "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots",
+            "required": false,
+            "type": "String",
+            "example": "2023-06-12T23:20:50Z/.."
+          },
+         
+          {
+            "name": "ids",
+            "in": "query",
+            "description": "Array of Item ids to return.",
+            "required": false,
+            "type": "Array of strings (ids)",
+            "example":"LC80100252015082LGN00,LC80100252014287LGN00"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      },    
+      "post": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Retrieve Items matching filters.",
+        "description": "Intended as the standard, full-featured query API.",
+         "produces": [
+          "application/geo+json"
+        ],
+        "operationId": "stacSearchPost",                                                                                                                                                                                        
+        "parameters": [          
+          {
+            "name": "body",
+            "in": "body",
+            "description": "https://api.stacspec.org/v1.0.0/item-search/#tag/Item-Search/operation/postItemSearch",
+            "required": true,
+            "example":"{\"bbox\":[-66.6459,49.354,-63.4856,51.2101],\"datetime\":\"2018-02-12T00:00:00Z/..\",\"intersects\":{\"type\":\"Polygon\",\"coordinates\":[[[-67.18661657269904,48.297014795971687],[-67.1872,48.2971],[-67.17322376288064,48.33374073671041],[-67.1590065133506,48.371013322480617],[-66.6453207034186,49.7177153248036],[-66.63275537806288,49.750657151284347],[-66.6171,49.7917],[-66.61637825143734,49.79159448137363],[-64.1246,49.4273],[-64.14045802174776,49.39048646945745],[-64.74832861700387,47.979348114350958],[-64.7639,47.9432],[-67.18661657269904,48.297014795971687]]]},\"ids\":[\"LC80100252015082LGN00\",\"LC80100252014287LGN00\"],\"limit\":100}"           
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/ogcrecords": {
+		"get": {
+			"tags": [
+				"OGCRECORDS"
+			],
+			"summary": "Landing page for Geoportal Server OGC Records API.",
+			"description": "",
+			"operationId": "ogcDescription",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/ogcrecords/conformance": {
+		"get": {
+			"tags": [
+				"OGCRECORDS"
+			],
+			"summary": "Provides information on OGCRECORDS API conformance",
+			"description": "",
+			"operationId": "ogcConformance",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/ogcrecords/collections/metadata": {
+		"get": {
+			"tags": [
+				"OGCRECORDS"
+			],
+			"summary": "Link to the Metadata collection",
+			"description": "",
+			"operationId": "ogcCollectionMetadata",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/ogcrecords/collections/metadata/queryables": {
+		"get": {
+			"tags": [
+				"OGCRECORDS"
+			],
+			"summary": "Link to the Metadata queryables",
+			"description": "",
+			"operationId": "ogcCollectionMetadataQuerables",
+			"parameters": [				
+			],
+			"responses": {
+				"default": {
+					"description": "successful operation"
+				}
+			}
+		}
+	},
+	"/ogcrecords/collections/metadata/items": {
+      "get": {
+        "tags": [
+          "OGCRECORDS"
+        ],
+        "summary": "Metadata collection items.",
+        "description": "",
+        "operationId": "ogcCollectionMetadataItems",                                                                                                                                                                                        
+        "parameters": [
+          
+          {
+            "name": "limit",
+            "in": "query",
+            "description": "Minimum = 1. Maximum = 10000, Default = 10.",
+            "required": false,
+            "type": "integer",
+            "example":15
+          },
+          {
+            "name": "querydsl",
+            "in": "query",
+            "description": "Features matching the supplied query (JSON Elasticsearch Query DSL).Other querables are ignored.",
+            "required": false,           
+            "type": "Json string",
+            "example":"{\"query\":{\"bool\": {\"must\":[{\"match\":{\"sys_owner_s\":\"admin\"}}]}}}"
+           },
+          {
+            "name": "bbox",
+            "in": "query",
+            "description": "Only features that have a geometry that intersects the bounding box are selected.",
+            "required": false,
+            "type": "ArrayofNumbers",
+           	"example":"-171.791110603,18.91619,-66.96466,71.3577635769"
+          },
+          {
+            "name": "title",
+            "in": "query",
+            "description": "Only features with title are selected",
+            "required": false,
+            "type": "String",
+           	"example":"SampleFeatureService"
+          },
+          {
+            "name": "provider",
+            "in": "query",
+            "description": "Only features owned by this provider will be selected",
+            "required": false,
+            "type": "String",
+           	"example":"admin"
+          },
+          {
+            "name": "datetime",
+            "in": "query",
+            "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.",
+            "required": false,
+            "type": "String",
+            "example": "2023-06-12T23:20:50Z/.."
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/ogcrecords/collections/metadata/items/{id}": {
+      "get": {
+        "tags": [
+          "OGCRECORDS"
+        ],
+        "summary": "Get a feature.",
+        "description": "Get a feature.",
+        "operationId": "ogcCollectionMetadataItemWithIds",                                                                                                                                                                                        
+        "parameters": [          
+          {
+            "name": "id",
+            "in": "path",
+            "description": "Ogcrecords item id",
+            "required": true,
+            "type": "string",
+            "example":"LC80100252015082LGN00"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
     "/rest/geoportal": {
       "get": {
         "tags": [

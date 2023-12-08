@@ -62,26 +62,26 @@
                         },
                         "example": [
                             {
-                                "href": "{opensearch.url}",
+                                "href": "{url}",
                                 "rel": "self",
                                 "type": "application/json",
-                                "title": "this OGC API - Records landing page as JSON"
+                                "title": "This OGC API - Records landing page as JSON"
                             },
                             {
-                                "href": "{opensearch.url}/api",
+                                "href": "{url}/api",
                                 "rel": "service-desc",
                                 "type": "application/vnd.oai.openapi+json;version=3.0",
-                                "title": "the API definition (OpenAPI document)"
+                                "title": "The API definition (OpenAPI document)"
                             },
                             {
-                                "href": "{opensearch.url}/conformance",
+                                "href": "{url}/conformance",
                                 "rel": "conformance",
-                                "title": "the OGC API conformance classes supported"
+                                "title": "The OGC API conformance classes supported"
                             },
                             {
-                                "href": "{opensearch.url}/collections",
+                                "href": "{url}/collections",
                                 "rel": "data",
-                                "title": "the set of available collections"
+                                "title": "The set of available collections"
                             }
                         ]
                     }
@@ -292,58 +292,7 @@
             "url": "https://virtserver.swaggerhub.com/constantinius/ogc-api-coverages/1.0.0"
         }],
     "openapi": "3.0.1",
-    "paths": {
-        "/collections/{collectionId}/sortables": {
-            "get": {
-                "summary": "description of the sorting capabilities offerec on the collection in the catalog",
-                "description": "List of sortable fields in this collection.",
-                "operationId": "getCoverageOffering",
-                "responses": {
-                    "200": {
-                        "description": "Information about the coverage collection.",
-                        "content": {
-                            "text/html": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/sortablesInfo"
-                                }
-                            }
-                        }
-                    },
-                    "default": {
-                        "description": "An error occured.",
-                        "content": {
-                            "text/html": {
-                                "schema": {
-                                    "type": "string"
-                                }
-                            },
-                            "application/json": {
-                                "schema": {
-                                    "$ref": "#/components/schemas/exception"
-                                }
-                            }
-                        }
-                    }
-                },
-                "parameters": [{
-                        "schema": {
-                            "type": "string"
-                        },
-                        "in": "path",
-                        "explode": false,
-                        "name": "collectionId",
-                        "description": "Identifier (name) of a specific collection",
-                        "style": "simple",
-                        "required": true
-                    }],
-                "tags": ["Collection"]
-            }
-        },
+    "paths": {        
         "/collections/{collectionId}/items/{recordId}": {
             "get": {
                 "responses": {
