@@ -1,6 +1,9 @@
 {
     "type": "FeatureCollection",
-    "features": [],
+    "numberMatched": "{numberMatched}",
+    "numberReturned": "{numberReturned}",
+    "next": "{next}",
+    "features": "{features}",
     "links": [
         {
                 "rel": "self",
@@ -16,7 +19,5 @@
                 "href": "{url}/collections/metadata",
                 "hreflang": "en-US"
         }
-    ],
-    "numberMatched": 0,
-    "numberReturned": 0
+    ]    
 }

@@ -191,9 +191,14 @@ public class SearchRequest {
       port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
       if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
         scheme = "https://";
+        elastic.add("useHttps",true);
       }
-      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackUsername();
-      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackPassword();
+      else
+      {
+    	  elastic.add("useHttps",false);
+      }
+      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUsername();
+      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getPassword();
       if (username != null && username.length() > 0 && password != null && password.length() > 0) {
         elastic.add("username",username);
         elastic.add("password",password);
@@ -230,7 +235,7 @@ public class SearchRequest {
     if ((node != null) && (node.length() > 0)) {
       String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
       String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getActualItemIndexType();       
-      String url = scheme+node+":"+port+"/"+idxName+(itmType!=null? "/"+itmType: "")+"/_search";
+      String url = scheme+node+":"+port+"/"+idxName+"/_search";
       elastic.add("searchUrl",url);
       info.add("elastic",elastic);
       return info;

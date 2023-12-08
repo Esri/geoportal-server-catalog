@@ -126,8 +126,8 @@ public class DcatBuilder {
       if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
         scheme = "https://";
       }
-      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackUsername();
-      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getXpackPassword();
+      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUsername();
+      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getPassword();
       if (username != null && username.length() > 0 && password != null && password.length() > 0) {
         elastic.add("username",username);
         elastic.add("password",password);

@@ -20,7 +20,8 @@
   gs.context.node.NodeContext = gs.Object.create(gs.context.Context,{
 
     readResourceFile: {writable:true,value:function(path,charset) {
-      path = "../"+path; // TODO this is relative to where node was launched
+      // comment for testing standalone node setup for ogcrecords
+      // path = "../"+path; // TODO this is relative to where node was launched
       if (charset === null || charset.length == 0) charset = "UTF-8";
       return fs.readFileSync(path,{encoding:charset});
     }},
@@ -36,9 +37,11 @@
           body: data
         };
       }
+
       // TODO gs._request path for require
       gs._request(options, function (error, response, body) {
         var msg = "Network error";
+        // console.log(body);
         if (!error && response && response.statusCode === 200) {
           promise.resolve(body);
         } else {

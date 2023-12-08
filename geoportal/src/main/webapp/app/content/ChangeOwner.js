@@ -79,7 +79,7 @@ function(declare, keys, on, topic, appTopics, BulkEdit, template, i18n,
     modalShown: function() {
       
       var client = new AppClient();
-      var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/item/_search";
+      var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/_search";
       url = client.appendAccessToken(url); // TODO append access_token?
       
       var usernames = new window.Bloodhound({

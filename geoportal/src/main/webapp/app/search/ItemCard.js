@@ -31,6 +31,12 @@ define(["dojo/_base/declare",
   "dijit/popup",
   "dojo/text!./templates/ItemCard.html",
   "dojo/i18n!app/nls/resources",
+  "esri/map",
+  "esri/geometry/Extent",
+  "esri/symbols/SimpleFillSymbol",
+  "esri/geometry/Point",
+  "esri/graphic",
+  "esri/layers/GraphicsLayer",
   "app/context/AppClient",
   "app/etc/ServiceType",
   "app/etc/util",
@@ -50,9 +56,9 @@ define(["dojo/_base/declare",
 ], 
 function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
-  template, i18n, AppClient, ServiceType, util, ConfirmationDialog, ChangeOwner, DeleteItems,
-  MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, SetCollections, SetField, UploadMetadata, 
-  PreviewUtil, PreviewPane, ItemHtml) {
+  template, i18n, Map, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer, AppClient, ServiceType, util, 
+  ConfirmationDialog, ChangeOwner, DeleteItems, MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, 
+  SetCollections, SetField, UploadMetadata, PreviewUtil, PreviewPane, ItemHtml) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -99,6 +105,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id;
+//      item.title = this._strip(item.title);
       item.title = item.title? item.title: "???";
       var links = this._uniqueLinks(item);
       this._renderTitleLink(item._id, item);
@@ -874,8 +881,10 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           href: "javascript:void(0)",
           title: item.title,
           "aria-label": item.title,
-          innerHTML: item.title
+          //innerHTML: item.title, 
         },titleNode);
+        htmlNode.appendChild(document.createTextNode(item.title));
+        
         this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
           var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
           if (AppContext.geoportal.supportsApprovalStatus || 
@@ -886,6 +895,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           this.self._renderDataHtml(item, uri);
         })));
       }
+    },
+	  
+    _strip: function(html) {
+      let doc = new DOMParser().parseFromString(html, 'text/html');
+      return doc.body.textContent || "";
     }
   });
 

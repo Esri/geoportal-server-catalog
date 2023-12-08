@@ -1,0 +1,32 @@
+{	
+	"type":"Feature",	
+	"id": "$._id",
+	"collection": "$._index",
+	"bbox": "$._source.envelope_geo",	
+	"geometry": "$._source.envelope_cen_pt",			
+	"properties":
+	{	
+	"created":"$._source.sys_created_dt",
+	"updated":"$._source.sys_modified_dt"
+	},
+	"links": [  
+			 {
+				"href": "$._source.links_s",
+				"title":"$._source.title"
+			},
+	        {
+	                "rel": "parent",
+	                "type": "application/json",
+	                "title": "Link to the Metadata collection",
+	                "href": "{url}/collections/metadata",
+	                "hreflang": "en-US"
+	        },
+	         {
+	                "rel": "root",
+	                "type": "application/json",
+	                "title": "Link to all collections",
+	                "href": "{url}",
+	                "hreflang": "en-US"
+	        }
+    ]  
+}

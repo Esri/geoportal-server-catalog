@@ -1,9 +1,14 @@
 {
   "name": "GeoportalSearch-Node",
   "version": "1.0.0",
+  "scripts": {
+      "start": "nodemon server.js -e js,json,xml --watch ../../gs",
+      "debug": "nodemon server.js -e js,json,xml --watch ../../gs"
+  },
   "devDependencies": {
-    "express": "4.15.2",
-    "body-parser": "1.17.1",
-    "request": "2.81.0"
+    "body-parser": "^1.17.1",
+    "express": "^4.15.2",
+    "nodemon": "^2.0.19",
+    "request": "^2.81.0"
   }
 }

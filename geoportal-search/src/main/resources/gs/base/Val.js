@@ -44,6 +44,11 @@
       return (v.indexOf(sfx,(v.length - sfx.length)) !== -1);
     }},
 
+    startsWith: {writable:true,value:function(v,sfx) {
+      if (typeof v !== "string") return null;
+      return (v.indexOf(sfx) === 0);
+    }},
+
     escXml: {writable:true,value:function(s) {
       if (s === null) return null;
       if (s.length === 0) return s;

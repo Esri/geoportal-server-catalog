@@ -118,6 +118,33 @@ public class GetItemRequest extends BulkEditRequest {
     return response;
   }
   
+  public AppResponse executeNOAuth() throws Exception {    
+	    AppResponse response = new AppResponse();
+	    String id = getId();
+	    if (id == null || id.length() == 0) {
+	      response.writeIdIsMissing(this);
+	      return response;
+	    }
+	   	    
+	    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+	    ElasticClient client = ElasticClient.newClient();
+	    String url = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(),id);
+	   
+	    
+	    try {
+	      String result = client.sendGet(url);
+	      //if (this.getIncludeMetadata()) setXml(itemio.readXml(ec,id)); // TODO
+	      if (result != null && result.length() > 0) {
+	        this.writeOk(response,result);
+	      } else {
+	        response.writeIdNotFound(this,id);
+	      }
+	    } catch (FileNotFoundException e) {
+	      response.writeIdNotFound(this,id);
+	    }
+	    return response;
+	  }
+  
   
   /**
    * Initialize.

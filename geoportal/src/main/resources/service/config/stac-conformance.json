@@ -1,0 +1,18 @@
+{
+  "links": [
+    {
+      "rel": "parent",
+      "href": "{url}",
+      "type": "application/json",
+      "title": "Landing Page of this STAC Records API"
+    }
+  ],
+    "conformsTo": [
+      "https://api.stacspec.org/v1.0.0/core", 
+      "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",    
+      "https://api.stacspec.org/v1.0.0/collections",
+      "https://api.stacspec.org/v1.0.0/ogcapi-features",      
+      "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson",
+       "https://api.stacspec.org/v1.0.0/item-search"
+      ]
+}
