@@ -156,7 +156,7 @@ var G = {
       } else if (lc.indexOf("/rest/services/") > 0) {
         for (i=0;i<arcgisTypes.length;i++) {
           v = "/"+arcgisTypes[i].toLowerCase();
-          if (endsWith(lc,v)) {
+          if ((endsWith(lc,v)) || (lc.indexOf(v + "/") > 0)) {
             linkType = arcgisTypes[i];
             linkUrl = url;
             break;
