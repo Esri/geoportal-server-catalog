@@ -91,7 +91,7 @@ G._metadataTypes =  {
     evaluator: G.evaluators.arcgis,
     interrogationXPath: "/metadata/Esri/ArcGISFormat",
     identifier: "ArcGIS-Metadata",
-    detailsXslt: "metadata/details/arcgis-details.xslt",
+    detailsXslt: "metadata/details/arcgis-details.xslt"
   },
   "oai_dc": {
     key: "oai_dc",
