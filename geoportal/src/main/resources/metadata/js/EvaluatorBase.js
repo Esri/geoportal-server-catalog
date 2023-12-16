@@ -177,6 +177,30 @@ var G = {
           linkUrl = url;
         }
       }
+      if (linkType === null) {
+        if (lc.indexOf("cuahsi_1_1.asmx")>= 0) {
+          linkType = "WaterOneFlow";
+          linkUrl = url;
+        }
+      }
+      if (linkType === null) {
+        if (lc.indexOf("/wms.axd/") > 0) {
+          linkType = "WMS";
+          linkUrl = url;
+        }
+      }
+      if (linkType === null) {
+        if (lc.indexOf("/wmts.axd/") > 0) {
+          linkType = "WMTS";
+          linkUrl = url;
+        }
+      }
+      if (linkType === null) {
+        if (lc.indexOf("/wfs.axd/") > 0) {
+          linkType = "WFS";
+          linkUrl = url;
+        }
+      }
     }
     if (linkType !== null && (isHttp || isFtp)) {
       return {linkType:linkType,linkUrl:linkUrl};
