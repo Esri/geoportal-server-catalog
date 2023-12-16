@@ -189,11 +189,9 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
         "mapserver": "Map Service",
         "map service": "Map Service",
         "wms": "WMS",
-        "kml": "KML"
-        /*
+        "kml": "KML",
         "vectortileserver": "Vector Tile Service",
-        "vector tile service": "Vector Tile Service",
-        */
+        "vector tile service": "Vector Tile Service"
       };
 
       this.referenceId = response.sourceKey+"-refid-"+item.id;
