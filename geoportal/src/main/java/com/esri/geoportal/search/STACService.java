@@ -183,7 +183,7 @@ public class STACService extends Application {
 	}
 
 	@GET
-	@Produces("application/json")
+	@Produces("application/geo+json")
 	@Path("/collections/{collectionId}/items")
 	public Response getItems(@Context HttpServletRequest hsr, 
 			@PathParam("collectionId") String collectionId,
@@ -230,7 +230,7 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "STAC API collection metadata items response could not be generated.");
 		}
-		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
 	
 	@GET
