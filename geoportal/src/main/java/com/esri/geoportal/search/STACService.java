@@ -65,6 +65,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 /**
  * STAC API: Records service provider.
@@ -145,8 +146,47 @@ public class STACService extends Application {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
 		try {
+                    GeoportalContext gc = GeoportalContext.getInstance();
+                    // 518 updates
+		    if (!gc.getSupportsCollections()) {
+                        // Geoportal not configured for collections
+                        // STAC will only have 1 STAC collection 'metadata'
 			responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
-			responseJSON= responseJSON.replaceAll("\\{collectionId\\}", "metadata");
+                        responseJSON= responseJSON.replaceAll("\\{collectionId\\}", "metadata");
+                    } else {
+                        // Geoportal configured for collections
+                        // STAC will have collection for each Geoportal collection
+                        responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
+                        JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
+                        JSONArray collectionsArray = (JSONArray) stacCollections.get("collections");
+                        JSONObject collectionsTemplate = (JSONObject) collectionsArray.get(0);
+                        String collectionsTemplateString = collectionsTemplate.toString();
+                        
+                        // Get list of collections
+                        ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+			ElasticClient client = ElasticClient.newClient();
+			String url = client.getTypeUrlForSearch(ec.getIndexName());
+                        url = url + "/_search";
+                        String collectionsSearch = "{\"aggregations\": {\"collections\": {\"terms\": {\"field\": \"src_collections_s\"}}}}";
+
+			String response = client.sendPost(url, collectionsSearch, "application/json");
+                        JSONObject gptResponse = (JSONObject) JSONValue.parse(response);  //JsonUtil.toJsonStructure(response);
+                        JSONObject gptAggregations = (JSONObject) gptResponse.get("aggregations");
+                        JSONObject gptCollections = (JSONObject) gptAggregations.get("collections");
+                        JSONArray gptBuckets = (JSONArray) gptCollections.get("buckets");
+                        
+                        collectionsArray.clear();
+                        for (int i = 0; i < gptBuckets.size(); i++) {
+                            JSONObject bucket = (JSONObject) gptBuckets.get(i);
+                            String collectionName = bucket.getAsString("key");
+                            String thisCollectionString = collectionsTemplateString.replace("{collectionId}", collectionName);
+                            JSONObject thisCollection = (JSONObject) JSONValue.parse(thisCollectionString);
+                            collectionsArray.add(i, JSONValue.parse(thisCollection.toJSONString()));
+                        }
+                        
+                        responseJSON = stacCollections.toString();
+                        System.out.println(responseJSON);
+                    }
 
 		} catch (Exception e) {
 			LOGGER.error("Error in collections " + e);
@@ -164,15 +204,15 @@ public class STACService extends Application {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
 		try {
-			if(collectionId == null || collectionId.isBlank() || !collectionId.equals("metadata"))
-			{
-				status = Response.Status.NOT_FOUND;
-			}			
-			else
-			{
-				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
-				responseJSON= responseJSON.replaceAll("\\{collectionId\\}", collectionId);
-			}
+                    if(collectionId == null || collectionId.isBlank()) // #518 || !collectionId.equals("metadata"))
+                    {
+                        status = Response.Status.NOT_FOUND;
+                    }			
+                    else
+                    {
+                        responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
+                        responseJSON= responseJSON.replaceAll("\\{collectionId\\}", collectionId);
+                    }
 
 		} catch (Exception e) {
 			LOGGER.error("Error in metadata " + e);
@@ -209,6 +249,10 @@ public class STACService extends Application {
 				queryMap.put("bbox", bbox);
 			if (datetime != null && datetime.length() > 0)
 				queryMap.put("datetime", datetime);
+                        GeoportalContext gc = GeoportalContext.getInstance();
+                        if (gc.getSupportsCollections()) {
+                            queryMap.put("collection", collectionId);
+                        }
 			
 			url = url + "/_search?size=" + limit;			
 			query = this.prepareSearchQuery(queryMap,search_after);	
@@ -307,12 +351,16 @@ public class STACService extends Application {
 				queryMap.put("bbox", bbox);
 			if (datetime != null && datetime.length() > 0)
 				queryMap.put("datetime", datetime);
-			
+                        GeoportalContext gc = GeoportalContext.getInstance();
+                        if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
+                            String listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
+                            queryMap.put("collection", listOfCollections);                            
+                        }
 			if(idList != null && idList.length() >0)
 			{
-				//"LC80100252015082LGN00,LC80100252014287LGN00"
-				if(idList.indexOf("[")<0)
-					queryMap.put("ids", idList);				
+                            //"LC80100252015082LGN00,LC80100252014287LGN00"
+                            if(!idList.contains("["))
+                                queryMap.put("ids", idList);				
 			}
 			
 			if(intersects != null && intersects.length() >0)
@@ -381,10 +429,10 @@ public class STACService extends Application {
 			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 			ElasticClient client = ElasticClient.newClient();
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
-			Map<String, String> queryMap = new HashMap<String, String>();
+			Map<String, String> queryMap = new HashMap<>();
 			limit = setLimit(limit);	
 			
-			if (bboxJsonArr != null && bboxJsonArr.size() > 0) {
+			if (bboxJsonArr != null && !bboxJsonArr.isEmpty()) {
 				for (int i = 0; i < bboxJsonArr.size(); i++) {
 					if (i > 0)
 						bbox = bbox + "," + bboxJsonArr.get(i);
@@ -398,7 +446,7 @@ public class STACService extends Application {
 				queryMap.put("datetime", datetime);
 			}
 
-			if (idArr != null && idArr.size() > 0) {
+			if (idArr != null && !idArr.isEmpty()) {
 				// ["LC80100252015082LGN00","LC80100252014287LGN00"]
 				for (int i = 0; i < idArr.size(); i++) {
 					if (i > 0)
@@ -483,10 +531,12 @@ public class STACService extends Application {
 
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
-			String datetime,String ids, String intersects,String requestType,String collectionId) {
+                                       String datetime,String ids, String intersects,String requestType,String collectionId) {
 		int numberMatched;
+                @SuppressWarnings("UnusedAssignment")
 		net.minidev.json.JSONArray items = null;
 	
+                @SuppressWarnings("UnusedAssignment")
 		String numberReturned = "";
 		String itemFileString = "";		
 		String finalResponse = "";
@@ -589,8 +639,8 @@ public class STACService extends Application {
 		Set<String> propObjKeys = propObj.keySet();
 		String propKeyVal = "";
 		
-		ArrayList<String> propToBeRemovedList = new ArrayList<String>();
-		ArrayList<String> assetToBeRemovedList = new ArrayList<String>();
+		ArrayList<String> propToBeRemovedList = new ArrayList<>();
+		ArrayList<String> assetToBeRemovedList = new ArrayList<>();
 		boolean featureValid = true;
 		
 		try {
@@ -703,7 +753,7 @@ public class STACService extends Application {
 		net.minidev.json.JSONArray valArr = featureContext.read("$.featurePropPath.geometry");
 		String geometryProp = "";		
 		try {
-			if(valArr.size() >0)
+			if(!valArr.isEmpty())
 			{
 				geometryProp = (String) valArr.get(0);							
 				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));	
@@ -714,83 +764,81 @@ public class STACService extends Application {
 			//If first path does not work, try second one
 			if(valArr.size() >1)
 			{
-				geometryProp = (String) valArr.get(1);;
+				geometryProp = (String) valArr.get(1);
 				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));				
 			}
 		}
 	}
 
 	private void setBbox(DocumentContext searchItemCtx, DocumentContext featureContext) {
-		net.minidev.json.JSONArray valArr = featureContext.read("$.featurePropPath.bbox");
-		String bboxProp = "";
-		if(valArr.size() >0)
-		{
-			bboxProp = (String) valArr.get(0);
-			if(!bboxProp.isBlank() && bboxProp.indexOf("envelope_geo")>-1)
-			{
-				this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
-			}			
-			else if(!bboxProp.isBlank() && bboxProp.indexOf("bbox")>-1)
-			{				
-				this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
-			}
-		}
-		if(valArr.size() >1)
-		{
-			bboxProp = (String) valArr.get(1);;
-			if(!bboxProp.isBlank() && bboxProp.indexOf("envelope_geo")>-1)
-			{
-				this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
-			}			
-			else if(!bboxProp.isBlank() && bboxProp.indexOf("bbox")>-1)
-			{				
-				this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
-			}				
-		}		
+            net.minidev.json.JSONArray valArr = featureContext.read("$.featurePropPath.bbox");
+            String bboxProp = "";
+            if(!valArr.isEmpty())
+            {
+                bboxProp = (String) valArr.get(0);
+                if(!bboxProp.isBlank() && bboxProp.contains("envelope_geo"))
+                {
+                    this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
+                }			
+                else if(!bboxProp.isBlank() && bboxProp.contains("bbox"))
+                {				
+                    this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
+                }
+            }
+            if(valArr.size() >1)
+            {
+                bboxProp = (String) valArr.get(1);
+                if(!bboxProp.isBlank() && bboxProp.contains("envelope_geo"))
+                {
+                    this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
+                }			
+                else if(!bboxProp.isBlank() && bboxProp.contains("bbox"))
+                {				
+                    this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
+                }				
+            }		
 	}
 
 	private void setBboxAsEnvelopGeo(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
-		try {
-			JSONArray enveloperArr = searchItemCtx.read(bboxProp);
-			
-			//"envelope_geo":[{"type":"envelope","ignore_malformed":"true","coordinates":[[-127.0236257875064,64.01274197384028],[-125.569240728746,63.020232862518167]]}]
-			if(enveloperArr !=null)
-			{
-				@SuppressWarnings("unchecked")
-				HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
-				
-				JSONArray geomArr = (JSONArray) hm.get("coordinates");
-				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
-				JSONArray geomArr1 = (JSONArray) geomArr.get(1);
-								
-				Double xmin = Double.parseDouble(geomArr0.get(0).toString());
-				Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
-						
-				Double xmax = Double.parseDouble(geomArr1.get(0).toString());
-				Double ymin = Double.parseDouble(geomArr1.get(1).toString());
-				
-				JSONArray arr = new JSONArray();
-				arr.add(xmin);
-				arr.add(ymin);
-				arr.add(xmax);
-				arr.add(ymax);
-				featureContext.set("$.featurePropPath.bbox", arr);		
-			}		
-		}catch(Exception ex)		
-		{
-			//DO nothing. Just skip
-		}		
+            try {
+                JSONArray enveloperArr = searchItemCtx.read(bboxProp);
+
+                //"envelope_geo":[{"type":"envelope","ignore_malformed":"true","coordinates":[[-127.0236257875064,64.01274197384028],[-125.569240728746,63.020232862518167]]}]
+                if(enveloperArr !=null)
+                {
+                    @SuppressWarnings("unchecked")
+                    HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
+
+                    JSONArray geomArr = (JSONArray) hm.get("coordinates");
+                    JSONArray geomArr0 = (JSONArray) geomArr.get(0);
+                    JSONArray geomArr1 = (JSONArray) geomArr.get(1);
+
+                    Double xmin = Double.parseDouble(geomArr0.get(0).toString());
+                    Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
+
+                    Double xmax = Double.parseDouble(geomArr1.get(0).toString());
+                    Double ymin = Double.parseDouble(geomArr1.get(1).toString());
+
+                    JSONArray arr = new JSONArray();
+                    arr.add(xmin);
+                    arr.add(ymin);
+                    arr.add(xmax);
+                    arr.add(ymax);
+                    featureContext.set("$.featurePropPath.bbox", arr);		
+                }		
+            }catch(Exception ex)		
+            {
+                    //DO nothing. Just skip
+            }		
 	}
 	
 	private void setBboxAsBbox(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
-		try
-		{
-		    //"bbox": [-74.09957050999664,-4.611277442089833,-73.1088539899217,-3.6165503784726664]
-			featureContext.set("$.featurePropPath.bbox", searchItemCtx.read(bboxProp));
-		}catch(Exception ex)
-		{
-			//DO nothing. Just skip
-		}
+            try {
+                //"bbox": [-74.09957050999664,-4.611277442089833,-73.1088539899217,-3.6165503784726664]
+                featureContext.set("$.featurePropPath.bbox", searchItemCtx.read(bboxProp));
+            } catch(Exception ex) {
+                //DO nothing. Just skip
+            }
 	}
 
 	private String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
@@ -817,21 +865,30 @@ public class STACService extends Application {
 		}
 		
 		if (queryMap.containsKey("intersects")) {
-			String intersectsQry = this.prepareIntersects(queryMap.get("intersects"));
-			if (intersectsQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(intersectsQry));
+                    String intersectsQry = this.prepareIntersects(queryMap.get("intersects"));
+                    if (intersectsQry.length() > 0)
+                        builder.add(JsonUtil.toJsonStructure(intersectsQry));
+		}
+                
+		if (queryMap.containsKey("collection")) {
+                    List<String> clauses = this.prepareCollection(queryMap.get("collection"));
+                    if (!clauses.isEmpty()) {
+                        for (String clause : clauses) {
+                            builder.add(JsonUtil.toJsonStructure(clause));                        
+                        }
+                    }
 		}
 		
 		JsonArray filter = builder.build();
 		
-		if (filter.size() > 0) {
-			queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
+		if (!filter.isEmpty()) {
+                    queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
 		}
-			String searchAfterStr = "";
-			if(searchAfter!= null && searchAfter.length()>0)
-			{
-				searchAfterStr = "\"search_after\":[\""+searchAfter+"\"]";
-			}
+                String searchAfterStr = "";
+                if(searchAfter!= null && searchAfter.length()>0)
+                {
+                        searchAfterStr = "\"search_after\":[\""+searchAfter+"\"]";
+                }
 				
 		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
 				+(queryStr.length()>0 ? ","+queryStr: "")
@@ -859,11 +916,11 @@ public class STACService extends Application {
 		String dateTimeFldQuery = "";
 		// Find from and to dates
 		// https://api.stacspec.org/v1.0.0/ogcapi-features/#tag/Features/operation/getFeatures
-//	Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
-//	Examples:
-//	A date-time: "2018-02-12T23:20:50Z"
-//	A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
-//	Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
+                // Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
+                // Examples:
+                // A date-time: "2018-02-12T23:20:50Z"
+                // A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
+                // Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
 
 		String fromField = datetime;
 		String toField = "";
@@ -896,54 +953,46 @@ public class STACService extends Application {
 		String query = "";
 		//As per stac API validator, invalid bbox should respond with 400, instead of reaplcing it with defaults
 		if (bbox.size()==4 || bbox.size()==6) {			
-				coords[0] = Double.parseDouble(bbox.get(0));		
-				coords[1] = Double.parseDouble(bbox.get(1));			
-				coords[2] = Double.parseDouble(bbox.get(2));			
-				coords[3] = Double.parseDouble(bbox.get(3));
-				String coordinates = "[[" + coords[0] + "," + coords[3] + "], [" + coords[2] + "," + coords[1] + "]]";
-				if(bbox.size()==6)
-				{
-					coords[4] = Double.parseDouble(bbox.get(4));			
-					coords[5] = Double.parseDouble(bbox.get(5));
-					
-				}
-				
-				query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \"envelope\","
-						+ "\"coordinates\":"+coordinates 
-						+ "},\"relation\": \"" + relation + "\"}}}";
-				return query;
-//			if ((Double.parseDouble(bbox.get(0)) < -180.0) && (Double.parseDouble(bbox.get(2)) >= -180.0))
-//				coords[0] = -180.0;
-//			else
-//				coords[0] = Double.parseDouble(bbox.get(0));
-//			if ((Double.parseDouble(bbox.get(1)) < -90.0) && (Double.parseDouble(bbox.get(3)) >= -90.0))
-//				coords[1] = -90.0;
-//			else
-//				coords[1] = Double.parseDouble(bbox.get(1));
-//			if ((Double.parseDouble(bbox.get(2)) > 180.0) && (Double.parseDouble(bbox.get(0)) <= 180.0))
-//				coords[2] = 180.0;
-//			else
-//				coords[2] = Double.parseDouble(bbox.get(2));
-//			if ((Double.parseDouble(bbox.get(3)) > 90.0) && (Double.parseDouble(bbox.get(1)) <= 90.0))
-//				coords[3] = 90.0;
-//			else
-//				coords[3] = Double.parseDouble(bbox.get(3));
+                    coords[0] = Double.parseDouble(bbox.get(0));		
+                    coords[1] = Double.parseDouble(bbox.get(1));			
+                    coords[2] = Double.parseDouble(bbox.get(2));			
+                    coords[3] = Double.parseDouble(bbox.get(3));
+                    String coordinates = "[[" + coords[0] + "," + coords[3] + "], [" + coords[2] + "," + coords[1] + "]]";
+                    if(bbox.size()==6)
+                    {
+                        coords[4] = Double.parseDouble(bbox.get(4));			
+                        coords[5] = Double.parseDouble(bbox.get(5));
+                    }
+
+                    query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \"envelope\","
+                            + "\"coordinates\":"+coordinates 
+                            + "},\"relation\": \"" + relation + "\"}}}";
+                    return query;
 		}
 		else
 		{
-			throw new InvalidParameterException("bbox", "Invalid bbox");
+                    throw new InvalidParameterException("bbox", "Invalid bbox");
 		}
 	}
 
-	private int setLimit(int limit) {
-		if(limit ==0)
-		{
-			limit = 10; //default
-		}
-		if (limit < 0 || limit > 10000) {
-			throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
-		}
-		return limit;
+	private List<String> prepareCollection(String collections) {
+            String[] collectionList = collections.split(",");
+            List<String> clauses = new ArrayList<>();
+            for (String collectionId : collectionList) {
+                clauses.add("{\"match\": {\"src_collections_s\": \""+collectionId+"\"}}");
+            }
+            return clauses;	
+	}
+
+        private int setLimit(int limit) {
+            if(limit ==0)
+            {
+                    limit = 10; //default
+            }
+            if (limit < 0 || limit > 10000) {
+                    throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
+            }
+            return limit;
 	}
 
 	public String getBaseUrl(HttpServletRequest hsr) {
