@@ -4,29 +4,29 @@
             {
                 "rel": "self",
                 "type": "application/geo+json",
-                "title": "Link to all collections",
-                "href": "{url}/collections/metadata/items",
+                "title": "Link to items in this collection: {collectionId}",
+                "href": "{url}/collections/{collectionId}/items",
                 "hreflang": "en-US"
             },
             {
                 "rel": "next",
                 "type": "application/geo+json",
                 "title": "Next page of results",
-                "href": "{url}/collections/metadata/items?{urlparam}",
+                "href": "{url}/collections/{collectionId}/items?{urlparam}",
                 "hreflang": "en-US"
             },
             {
                 "rel": "previous",
                 "type": "application/geo+json",
                 "title": "Next page of results",
-                "href": "{url}/collections/metadata/items?{urlparam}",
+                "href": "{url}/collections/{collectionId}/items?{urlparam}",
                 "hreflang": "en-US"
             },
             {
                 "rel": "parent",
                 "type": "application/json",
-                "title": "Link to the Metadata collection",
-                "href": "{url}/collections/metadata",
+                "title": "Link to the {collectionId} collection",
+                "href": "{url}/collections/{collectionId}",
                 "hreflang": "en-US"
             },
             {
