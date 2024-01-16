@@ -335,7 +335,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     _renderDataHtml: function(item, uri) {
       console.log(item);
       var itemHtml = new ItemHtml({
-        title: item.title,
+        title: this._stripDialogTitle(item.title),
         uri: uri,
         style: "width: 80%; max-width: 80%; height: 80%; max-height: 80%;",
         onHide: function() {
@@ -897,9 +897,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       }
     },
 	  
-    _strip: function(html) {
+    _stripDialogTitle: function(html) {
       let doc = new DOMParser().parseFromString(html, 'text/html');
-      return doc.body.textContent || "";
+      return doc.body.textContent || "Metadata Information";
     }
   });
 
