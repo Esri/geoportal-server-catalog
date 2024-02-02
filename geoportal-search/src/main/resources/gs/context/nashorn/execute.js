@@ -59,9 +59,20 @@ function execute(nhRequest,sRequestInfo,sSelfInfo) {
         if (selfInfo && selfInfo.elastic && selfInfo.elastic.searchUrl) {
           // self target for a Geoportal instance
           var targets = config.getTargets();
+          var baseUrl="";
+          if(requestInfo.baseUrl)
+        	  {
+        	  	baseUrl = requestInfo.baseUrl;
+        	  }        	 
+          //dcat scheduler request
+          else if(requestInfo.parameterMap && requestInfo.parameterMap.baseUrl)
+        	  {
+        	  	baseUrl = requestInfo.parameterMap.baseUrl;
+        	  }
+        	        
           targets.self = gs.Object.create(gs.target.elastic.GeoportalTarget).mixin({
             "searchUrl": selfInfo.elastic.searchUrl,
-            "itemBaseUrl": requestInfo.baseUrl+"/rest/metadata/item"
+            "itemBaseUrl": baseUrl+"/rest/metadata/item"
           });
           if (accessQuery) {
             targets.self.accessQuery = accessQuery;

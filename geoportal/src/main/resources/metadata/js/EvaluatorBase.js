@@ -296,7 +296,7 @@ var G = {
         v = node.getNodeValue();
       }
       if (typeof v === "string") {
-        return v;
+        return this._strip(v);
       }
     }
     return null;
@@ -414,7 +414,12 @@ var G = {
     
     inReader.close();
     return response.toString();
-  }
+  },
   
-  
+  // strip HTML markup from string
+  _strip: function(html) {
+    //var doc = new DOMParser().parseFromString(html, 'text/html');
+    // return doc.body.textContent || "Metadata Information";
+    return html.replace(/<\/?("[^"]*"|'[^']*'|[^>])*(>|$)/g, "HTML Markup Was Removed");
+  }  
 };
