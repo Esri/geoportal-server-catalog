@@ -13,13 +13,14 @@
 
   <beans:bean id="dcatBuilder" class="com.esri.geoportal.dcat.DcatBuilder">
     <beans:constructor-arg ref="dcatCache"/>
+    <beans:property name="baseUrl" value="http://localhost:8080/geoportal" />    
   </beans:bean>
   
   <beans:bean class="com.esri.geoportal.dcat.DcatController" init-method="init" destroy-method="destroy" >
     <!-- DCAT building start time (24 hour clock) or empty to disable auto-generation -->
     <beans:constructor-arg value="15:50"/>
     <beans:constructor-arg ref="dcatCache"/>
-    <beans:constructor-arg ref="dcatBuilder"/>
+    <beans:constructor-arg ref="dcatBuilder"/>    
   </beans:bean>
   
 </beans:beans>
