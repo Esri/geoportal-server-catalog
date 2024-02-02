@@ -18,7 +18,7 @@
 			"stac_version": "1.0.0",
 			"stac_extensions": [],
 			"type": "Collection",
-			"id": "{collectionId}",
+			"id": "metadata",
 			"title": "Esri Geoportal Server Metadata",
 			"description": "STAC API Powered by Esri Geoportal Server Catalog",
 			"license": "Apache-2.0",
