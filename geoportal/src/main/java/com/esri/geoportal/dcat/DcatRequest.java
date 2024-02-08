@@ -50,6 +50,7 @@ public abstract class DcatRequest {
   private final String selfInfo;
   private final ScriptEngine engine;
   private long dataCounter;
+  private String baseUrl;
 
   /**
    * Creates instance of the request.
@@ -62,6 +63,13 @@ public abstract class DcatRequest {
     this.selfInfo = selfInfo;
     this.engine = engine;
   }
+  
+  public DcatRequest(DcatContext dcatContext, String selfInfo, ScriptEngine engine,String baseUrl) {
+	    this.dcatContext = dcatContext;
+	    this.selfInfo = selfInfo;
+	    this.engine = engine;
+	    this.baseUrl = baseUrl;
+	  }
   
   /**
    * Puts response.
@@ -116,6 +124,7 @@ public abstract class DcatRequest {
       requestInfo.set("parameterMap", parameterMap);
       parameterMap.put("f", "dcat");
       parameterMap.put("size", Integer.toString(PAGE_SIZE));
+      parameterMap.put("baseUrl",this.baseUrl);
       
       ArrayNode sortNode = MAPPER.createArrayNode();
       sortNode.add("_id:asc");

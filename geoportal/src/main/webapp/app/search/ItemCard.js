@@ -105,12 +105,11 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id;
-//      item.title = this._strip(item.title);
-      item.title = item.title? item.title: "???";
+      item.title = this._strip(item.title);
       var links = this._uniqueLinks(item);
       this._renderTitleLink(item._id, item);
       this._renderOwnerAndDate(item);
-      util.setNodeText(this.descriptionNode,item.description);
+      util.setNodeText(this.descriptionNode,this._strip(item.description));
       this._renderThumbnail(item);
 
       this._renderFootprint(item);
@@ -335,7 +334,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     _renderDataHtml: function(item, uri) {
       console.log(item);
       var itemHtml = new ItemHtml({
-        title: this._stripDialogTitle(item.title),
+        title: this._strip(item.title),
         uri: uri,
         style: "width: 80%; max-width: 80%; height: 80%; max-height: 80%;",
         onHide: function() {
@@ -850,7 +849,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           href: href,
           target: "_blank",
           "class": "g-item-status",
-          innerHTML: caption
+          innerHTML:this._strip(caption)
         }, actionsNode);
       }
     },
@@ -897,7 +896,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       }
     },
 	  
-    _stripDialogTitle: function(html) {
+    _strip: function(html) {
       let doc = new DOMParser().parseFromString(html, 'text/html');
       return doc.body.textContent || "Metadata Information";
     }
