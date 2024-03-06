@@ -1,0 +1,42 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+    data-dojo-props="target:'gmd:MD_SecurityConstraints',minOccurs:0">
+      
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+      data-dojo-props="target:'gmd:useLimitation',minOccurs:0,maxOccurs:'unbounded',
+        label:'${i18nISO19115.MD_Constraints.useLimitation}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference"
+      data-dojo-props="target:'gmd:classification',
+        label:'${i18nISO19115.MD_SecurityConstraints.classification}'">
+      <div data-dojo-type="app/gxe/types/ISO19115/gmd/constraints/MD_ClassificationCode"></div>
+    </div>  
+     
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+      data-dojo-props="target:'gmd:userNote',minOccurs:0,
+        label:'${i18nISO19115.MD_SecurityConstraints.userNote}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+      data-dojo-props="target:'gmd:classificationSystem',minOccurs:0,
+        label:'${i18nISO19115.MD_SecurityConstraints.classificationSystem}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+    
+    <div data-dojo-type="esri/dijit/metadata/form/Element"
+      data-dojo-props="target:'gmd:handlingDescription',minOccurs:0,
+        label:'${i18nISO19115.MD_SecurityConstraints.handlingDescription}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+  </div>
+  
+</div>
