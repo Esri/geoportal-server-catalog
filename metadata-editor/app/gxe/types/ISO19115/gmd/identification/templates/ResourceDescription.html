@@ -1,0 +1,24 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'gmd:abstract',
+      label:'${i18nISO19115.AbstractMD_Identification.sAbstract}'">
+    <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+    <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText_LargeArea" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+  </div>  
+  
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'gmd:purpose',minOccurs:0,
+      label:'${i18nISO19115.AbstractMD_Identification.purpose}'">
+    <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+    <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+  </div>  
+  
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'gmd:credit',minOccurs:0,maxOccurs:'unbounded',
+      label:'${i18nISO19115.AbstractMD_Identification.credit}'">
+    <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+    <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+  </div>  
+      
+</div>
