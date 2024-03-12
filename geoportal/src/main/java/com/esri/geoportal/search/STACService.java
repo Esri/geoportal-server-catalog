@@ -279,7 +279,7 @@ public class STACService extends Application {
 				queryMap.put("datetime", datetime);
 			GeoportalContext gc = GeoportalContext.getInstance();
 			if (gc.getSupportsCollections()) {
-				queryMap.put("collection", collectionId);
+				queryMap.put("collections", collectionId);
 			}
 
 			url = url + "/_search?size=" + limit;
@@ -365,7 +365,8 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;
 
 		String query = "";
-		// TODO implement collections parameter in search
+		String listOfCollections = null;
+		
 		try {
 			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 			ElasticClient client = ElasticClient.newClient();
@@ -379,8 +380,8 @@ public class STACService extends Application {
 				queryMap.put("datetime", datetime);
 			GeoportalContext gc = GeoportalContext.getInstance();
 			if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
-				String listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
-				queryMap.put("collection", listOfCollections);
+				listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
+				queryMap.put("collections", listOfCollections);
 			}
 			if (idList != null && idList.length() > 0) {
 				// "LC80100252015082LGN00,LC80100252014287LGN00"
@@ -402,7 +403,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 			}
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, idList, intersects, "search",
-					"metadata");
+					listOfCollections);
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -428,7 +429,7 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
-		// System.out.println(body);
+		
 		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
 
 		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit") : 0);
@@ -436,8 +437,7 @@ public class STACService extends Application {
 
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox") : null);
 		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
-
-		// TODO implement collection parameter in search
+		
 		JsonArray collectionArr = (requestPayload.containsKey("collections")
 				? requestPayload.getJsonArray("collections")
 				: null);
@@ -484,7 +484,25 @@ public class STACService extends Application {
 			if (intersects != null && !intersects.isEmpty()) {
 				queryMap.put("intersects", intersects.toString());
 			}
-
+			
+			GeoportalContext gc = GeoportalContext.getInstance();
+			String listOfCollections = "";
+			if ((gc.getSupportsCollections() && collectionArr != null && !collectionArr.isEmpty())) {
+				for(int i=0;i<collectionArr.size();i++)
+				{
+					if(i==0)
+					{
+						listOfCollections = collectionArr.getString(i);
+					}
+					else
+					{
+						listOfCollections = listOfCollections+","+ collectionArr.getString(i);
+					}
+					
+				}								
+				queryMap.put("collections", listOfCollections);
+			}
+			
 			url = url + "/_search?size=" + limit;
 			query = this.prepareSearchQuery(queryMap, search_after);
 			System.out.println("final query " + query);
@@ -494,7 +512,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
-					(intersects != null ? intersects.toString() : ""), "searchPost", "metadata");
+					(intersects != null ? intersects.toString() : ""), "searchPost", collectionArr.toString());
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -553,11 +571,9 @@ public class STACService extends Application {
 
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit, String datetime,
 			String ids, String intersects, String requestType, String collectionId) {
-		int numberMatched;
-		@SuppressWarnings("UnusedAssignment")
+		
+		int numberMatched;		
 		net.minidev.json.JSONArray items = null;
-
-		@SuppressWarnings("UnusedAssignment")
 		String numberReturned = "";
 		String itemFileString = "";
 		String finalResponse = "";
@@ -637,12 +653,13 @@ public class STACService extends Application {
 						+ (datetime != null ? "&datetime=" + datetime : "")
 						+ (search_after != null ? "&search_after=" + search_after : "")
 						+ (encodedIntersect != null ? "&intersects=" + encodedIntersect : "")
-						+ (ids != null ? "&ids=" + ids : "");
+						+ (ids != null ? "&ids=" + ids : "")
+						+((requestType.startsWith("search")) && collectionId != null ? "&collections=" + collectionId : "");
 			}
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
 
-			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
+			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", (collectionId != null ?collectionId:"{collectionId}"));
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response could not be preapred. " + e.getMessage());
 			e.printStackTrace();
@@ -872,13 +889,9 @@ public class STACService extends Application {
 				builder.add(JsonUtil.toJsonStructure(intersectsQry));
 		}
 
-		if (queryMap.containsKey("collection")) {
-			List<String> clauses = this.prepareCollection(queryMap.get("collection"));
-			if (!clauses.isEmpty()) {
-				for (String clause : clauses) {
-					builder.add(JsonUtil.toJsonStructure(clause));
-				}
-			}
+		if (queryMap.containsKey("collections")) {			
+			String collectionQry = this.prepareCollection(queryMap.get("collections"));
+			builder.add(JsonUtil.toJsonStructure(collectionQry));
 		}
 
 		JsonArray filter = builder.build();
@@ -976,13 +989,21 @@ public class STACService extends Application {
 		}
 	}
 
-	private List<String> prepareCollection(String collections) {
+	private String prepareCollection(String collections) {
 		String[] collectionList = collections.split(",");
-		List<String> clauses = new ArrayList<>();
+		//{"bool":{"should":[{"match":{"src_collections_s":"metadata"}},{"match":{"src_collections_s":"north_america"}}]}}
+		
+		StringBuffer collectionQryBuf = new StringBuffer("{\"bool\":{\"should\":[");
+		int i=0;
 		for (String collectionId : collectionList) {
-			clauses.add("{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");
+			if(i ==0)
+				collectionQryBuf.append("{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");	
+			else
+				collectionQryBuf.append(",{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");
+			i++;
 		}
-		return clauses;
+		collectionQryBuf.append("]}}");
+		return collectionQryBuf.toString();
 	}
 
 	private int setLimit(int limit) {
