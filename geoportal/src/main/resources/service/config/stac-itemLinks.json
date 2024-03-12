@@ -16,13 +16,6 @@
                 "hreflang": "en-US"
             },
             {
-                "rel": "previous",
-                "type": "application/geo+json",
-                "title": "Next page of results",
-                "href": "{url}/collections/{collectionId}/items?{urlparam}",
-                "hreflang": "en-US"
-            },
-            {
                 "rel": "parent",
                 "type": "application/json",
                 "title": "Link to the {collectionId} collection",
