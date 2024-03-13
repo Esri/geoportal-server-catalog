@@ -12,7 +12,7 @@
 	{	
 	"type":"Feature",	
 	"id": "$._source.id",
-	"collection": "$._index",		
+	"collection": "$._source.src_collections_s[0]",		
 	"stac_version":"1.0.0",
 	"stac_extensions":[],
 	"bbox": ["$._source.envelope_geo","$._source.bbox"],	
@@ -37,7 +37,7 @@
 		"links": [
 			{
 			"rel": "self",
-			"href": "{url}/collections/{collectionId}/items/{itemId}",
+			"href": "{url}/collections/{itemCollectionId}/items/{itemId}",
 			"type": "application/geo+json"
 			},
 			{
@@ -47,12 +47,12 @@
 			},
 			{
 			"rel": "parent",
-			"href": "{url}/collections/{collectionId}",
+			"href": "{url}/collections/{itemCollectionId}",
 			"type": "application/json"
 			},
 			{
 			"rel": "collection",
-			"href": "{url}/collections/{collectionId}",
+			"href": "{url}/collections/{itemCollectionId}",
 			"type": "application/json"
 			}
 		],
