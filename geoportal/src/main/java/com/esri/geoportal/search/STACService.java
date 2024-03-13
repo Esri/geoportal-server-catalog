@@ -324,6 +324,11 @@ public class STACService extends Application {
 
 			queryMap.put("ids", id);
 			url = url + "/_search";
+			
+			GeoportalContext gc = GeoportalContext.getInstance();
+			if (gc.getSupportsCollections()) {
+				queryMap.put("collections", collectionId);
+			}
 
 			query = this.prepareSearchQuery(queryMap, null);
 
@@ -658,8 +663,12 @@ public class STACService extends Application {
 			}
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
-
-			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", (collectionId != null ?collectionId:"{collectionId}"));
+			
+			if(requestType.equals("metadataItems")) // These are for links href for collection
+			{
+				finalResponse = finalResponse.replaceAll("\\{collectionId\\}", (collectionId != null ?collectionId:"{collectionId}"));
+			}
+			
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("Stac response could not be preapred. " + e.getMessage());
 			e.printStackTrace();
@@ -763,7 +772,19 @@ public class STACService extends Application {
 
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id"));
+			
+			//Support multiple collection, set Item collection id
+			linkSelfHref = linkSelfHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));  
 			featureContext.set("$.featurePropPath.links[0].href", linkSelfHref);
+			
+			String linkParentHref = featureContext.read("$.featurePropPath.links[2].href");
+			linkParentHref = linkParentHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));
+			featureContext.set("$.featurePropPath.links[2].href", linkParentHref);
+			
+			String linkCollectionHref = featureContext.read("$.featurePropPath.links[3].href");
+			linkCollectionHref = linkCollectionHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));
+			featureContext.set("$.featurePropPath.links[3].href", linkCollectionHref);
+			
 
 		} catch (Exception e) {
 			// If json path not found or error in any property, skip this feature
