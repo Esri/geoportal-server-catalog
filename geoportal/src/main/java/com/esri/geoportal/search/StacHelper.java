@@ -1,0 +1,337 @@
+package com.esri.geoportal.search;
+
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import javax.json.Json;
+import javax.json.JsonArray;
+import javax.json.JsonArrayBuilder;
+
+import com.esri.geoportal.base.util.DateUtil;
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.util.exception.InvalidParameterException;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.util.FieldNames;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+
+
+public class StacHelper {
+	
+	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId) throws Exception {	
+		StacItemValidationResponse response = new StacItemValidationResponse();
+		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
+				
+		response = validateFields(requestPayload);
+		if(response.getCode() == null)
+		{
+			response = validateId(requestPayload,collectionId);
+			if(response.getCode() == null)
+			{
+				response.setCode(StacItemValidationResponse.ITEM_VALID);
+			}
+		}
+		return response;
+	}
+	
+	public static String getItemWithItemId(String collectionId,String id) throws Exception {
+		
+		String response = "";		
+		String query = "";
+		
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
+		String url = client.getTypeUrlForSearch(ec.getIndexName());
+		Map<String, String> queryMap = new HashMap<String, String>();
+
+		queryMap.put("ids", id);
+		url = url + "/_search";
+		
+		GeoportalContext gc = GeoportalContext.getInstance();
+		if (gc.getSupportsCollections()) {
+			queryMap.put("collections", collectionId);
+		}
+		query = prepareSearchQuery(queryMap, null);
+
+		if (query.length() > 0)
+			response = client.sendPost(url, query, "application/json");
+		else
+			response = client.sendGet(url);
+		
+		return response;
+
+	}
+	
+	public static String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
+		String queryStr = "";
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+
+		if (queryMap.containsKey("bbox")) {
+			String bboxQry = prepareBbox((String) queryMap.get("bbox"));
+			if (bboxQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(bboxQry));
+
+		}
+		if (queryMap.containsKey("datetime")) {
+			String dateTimeQry = prepareDateTime(queryMap.get("datetime"));
+			if (dateTimeQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
+		}
+		if (queryMap.containsKey("ids")) {
+			String idsQry = prepareIds(queryMap.get("ids"));
+			System.out.println("ids " + idsQry);
+
+			if (idsQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(idsQry));
+		}
+
+		if (queryMap.containsKey("intersects")) {
+			String intersectsQry = prepareIntersects(queryMap.get("intersects"));
+			if (intersectsQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(intersectsQry));
+		}
+
+		if (queryMap.containsKey("collections")) {			
+			String collectionQry = prepareCollection(queryMap.get("collections"));
+			builder.add(JsonUtil.toJsonStructure(collectionQry));
+		}
+
+		JsonArray filter = builder.build();
+
+		if (!filter.isEmpty()) {
+			queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
+		}
+		String searchAfterStr = "";
+		if (searchAfter != null && searchAfter.length() > 0) {
+			searchAfterStr = "\"search_after\":[\"" + searchAfter + "\"]";
+		}
+
+		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
+				+ (queryStr.length() > 0 ? "," + queryStr : "")
+				+ (searchAfterStr.length() > 0 ? "," + searchAfterStr : "") + "}";
+		return searchQuery;
+	}
+
+//{"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
+	private static String prepareIntersects(String geoJson) {
+		String query = "";
+		String field = "shape_geo";
+		String spatialType = "geo_shape";
+		String relation = "intersects";
+
+		query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": " + geoJson + ",\"relation\": \"" + relation
+				+ "\"}}}";
+		return query;
+	}
+
+	private static String prepareIds(String ids) {
+		return "{\"match\": {\"id\": \"" + ids + "\"}}";
+	}
+
+	private static String prepareDateTime(String datetime) {
+		String query = "";
+		//String dateTimeFld = "sys_modified_dt";
+		String dateTimeFld = "datetime";
+		String dateTimeFldQuery = "";
+		// Find from and to dates
+		// https://api.stacspec.org/v1.0.0/ogcapi-features/#tag/Features/operation/getFeatures
+		// Either a date-time or an interval, open or closed. Date and time expressions
+		// adhere to RFC 3339. Open intervals are expressed using double-dots.
+		// Examples:
+		// A date-time: "2018-02-12T23:20:50Z"
+		// A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
+		// Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
+
+		String fromField = datetime;
+		String toField = "";
+		List<String> dateFlds = Arrays.asList(datetime.split("/"));
+
+		if (dateFlds.size() > 1) {
+			fromField = dateFlds.get(0);
+			toField = dateFlds.get(1);
+		}
+		if (toField.equals("") || toField.equals("..")) {
+			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\"}";
+		} else if (fromField.equals("..")) {
+			dateTimeFldQuery = "{\"lte\":\"" + toField + "\"}";
+		} else {
+			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\",\"lte\":\"" + toField + "\"}";
+		}
+
+		query = "{\"range\": {\"" + dateTimeFld + "\":" + dateTimeFldQuery + "}}";
+
+		return query;
+	}
+
+	private static String prepareBbox(String bboxString) {
+		String field = "envelope_geo";
+		String spatialType = "geo_shape"; // geo_shape or geo_point
+		String relation = "intersects";
+		List<String> bbox = Arrays.asList(bboxString.split(",", -1));
+
+		double coords[] = { -180.0, -90.0, 180.0, 90.0 };
+		String query = "";
+		// As per stac API validator, invalid bbox should respond with 400, instead of
+		// reaplcing it with defaults
+		if (bbox.size() == 4 || bbox.size() == 6) {
+			coords[0] = Double.parseDouble(bbox.get(0));
+			coords[1] = Double.parseDouble(bbox.get(1));
+			coords[2] = Double.parseDouble(bbox.get(2));
+			coords[3] = Double.parseDouble(bbox.get(3));
+			String coordinates = "[[" + coords[0] + "," + coords[3] + "], [" + coords[2] + "," + coords[1] + "]]";
+			if (bbox.size() == 6) {
+				coords[4] = Double.parseDouble(bbox.get(4));
+				coords[5] = Double.parseDouble(bbox.get(5));
+			}
+
+			query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \"envelope\","
+					+ "\"coordinates\":" + coordinates + "},\"relation\": \"" + relation + "\"}}}";
+			return query;
+		} else {
+			throw new InvalidParameterException("bbox", "Invalid bbox");
+		}
+	}
+
+	private static String prepareCollection(String collections) {
+		String[] collectionList = collections.split(",");
+		//{"bool":{"should":[{"match":{"src_collections_s":"metadata"}},{"match":{"src_collections_s":"north_america"}}]}}
+		
+		StringBuffer collectionQryBuf = new StringBuffer("{\"bool\":{\"should\":[");
+		int i=0;
+		for (String collectionId : collectionList) {
+			if(i ==0)
+				collectionQryBuf.append("{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");	
+			else
+				collectionQryBuf.append(",{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");
+			i++;
+		}
+		collectionQryBuf.append("]}}");
+		return collectionQryBuf.toString();
+	}
+
+	
+
+
+	private static StacItemValidationResponse validateId(JSONObject requestPayload,String collectionId) throws Exception {
+		String errorMsg ="";
+		StacItemValidationResponse response = new StacItemValidationResponse();
+		
+		//Validate if id exists	
+		String id =  requestPayload.get("id").toString();
+		String itemRes = getItemWithItemId(collectionId, id);
+		DocumentContext elasticResContext = JsonPath.parse(itemRes);
+
+		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+		if (items != null && items.size() > 0) {
+			errorMsg = "stac item with id "+id+" already exists.";
+			response.setCode(StacItemValidationResponse.ID_EXISTS);
+			response.setMessage(errorMsg);
+		}
+		
+		return response;
+	}
+
+	private static StacItemValidationResponse validateFields(JSONObject requestPayload) {
+		String errorMsg ="";
+		StacItemValidationResponse response = new StacItemValidationResponse();
+		
+		if(!requestPayload.containsKey("stac_version"))
+		{
+			errorMsg = errorMsg+"stac_version is mandatory.";
+		}
+		if(!requestPayload.containsKey("id") || 
+				(requestPayload.containsKey("id") && requestPayload.get("id").toString().isBlank()))
+		{
+			errorMsg = errorMsg+" id is mandatory and should not be empty.";
+		}
+		if(!requestPayload.containsKey("geometry"))
+		{
+			errorMsg = errorMsg+" geometry is mandatory.";
+		}
+		
+		if(requestPayload.containsKey("geometry"))
+		{
+			if(requestPayload.get("geometry") != null && (!requestPayload.containsKey("bbox")))
+			errorMsg = errorMsg+" bbox is mandatory if geometry is not null.";
+		}
+		if(!requestPayload.containsKey("properties"))
+		{
+			errorMsg = errorMsg+" properties is mandatory.";
+		}
+		if(requestPayload.containsKey("properties"))
+		{
+			JSONObject prop = (JSONObject) requestPayload.get("properties");
+			if(!prop.containsKey("datetime"))
+			{
+				errorMsg = errorMsg+" datetime is mandatory.";
+			}
+			else if(prop.containsKey("datetime") && prop.get("datetime") == null)
+			{
+				if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime"))
+				{
+					errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
+				}
+			}
+		}
+		if(!requestPayload.containsKey("links"))
+		{
+			errorMsg = errorMsg+" links is mandatory.";
+		}
+		if(requestPayload.containsKey("links"))
+		{
+			JSONArray linkArr = (JSONArray) requestPayload.get("links");
+			
+			for(var i=0; i<linkArr.size();i++)
+			{
+				JSONObject link = (JSONObject) linkArr.get(i);
+				if(!link.containsKey("href") || !link.containsKey("rel"))
+				{
+					errorMsg = errorMsg+" href and rel are mandatory in link object.";
+				}
+			}
+		}
+		if(!requestPayload.containsKey("assets"))
+		{
+			errorMsg = errorMsg+" assets is mandatory.";
+		}
+		if(errorMsg.length()>0)
+		{
+			response.setCode(StacItemValidationResponse.BAD_REQUEST);
+			response.setMessage(errorMsg);
+		}		
+		return response;
+	}
+
+	public static JSONObject prePublish(JSONObject requestPayload, String collectionId) {
+		
+		//Add attributes in propeties
+		JSONObject prop = (JSONObject) requestPayload.get("properties");
+		JSONArray collArr = new JSONArray();
+		collArr.add(collectionId);
+		
+		String date = DateUtil.nowAsString();
+		prop.put(FieldNames.FIELD_STAC_CREATED,date);
+		prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
+		requestPayload.put("properties", prop);
+		
+		requestPayload.put(FieldNames.FIELD_SYS_CREATED,date);
+		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);
+		
+		requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS,collArr);
+		
+		//TODO add geoportal attr sys_access_s and sys_approval_status_s,  SetOwner 
+		
+		return requestPayload;
+	}
+}
+	
+	
+
+
