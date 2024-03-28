@@ -531,8 +531,7 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500","Stac Item could not be added.");
 		}
-		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();
-			
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
 	}
 
 	private Response addFeatureCollection(JSONObject requestPayload, String collectionId) {
