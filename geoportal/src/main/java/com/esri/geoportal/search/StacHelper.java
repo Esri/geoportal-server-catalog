@@ -25,6 +25,13 @@ import net.minidev.json.JSONObject;
 
 public class StacHelper {
 	
+	
+	/** Validates single Stac feature for required fields and duplicate id in collection
+	 * @param requestPayload
+	 * @param collectionId
+	 * @return
+	 * @throws Exception
+	 */
 	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId) throws Exception {	
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
