@@ -532,7 +532,7 @@ public class STACService extends Application {
 		if(async)
 		{
 		 new Thread(() -> {
-					this.executeAddFeature(requestPayload, collectionId,hsr,async);
+					this.executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
 		      }).start();
 		      String responseJSON = generateResponse("202", "Stac Feature creation has been started.");
 		      return Response.status(Status.ACCEPTED)
@@ -541,11 +541,11 @@ public class STACService extends Application {
 		}
 		else
 		{
-			return executeAddFeature(requestPayload, collectionId,hsr,async);
+			return executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
 		}
 	}	
 	
-	private Response executeAddFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async) 
+	private Response executeAddFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async, String reqType) 
 	{
 		String responseJSON = generateResponse("500","Stac Item could not be added.");;
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
@@ -571,8 +571,8 @@ public class STACService extends Application {
 					responseJSON = "Item created";
 					String itemUrlGeoportal = "";
 					
-					//if sync request, create Stac feature for response 
-					if(!async)
+					//if sync request for Feature, create Stac feature for response 
+					if(reqType.equals("Feature") && !async)
 					{
 						String filePath = "service/config/stac-item.json";
 						String itemFileString = this.readResourceFile(filePath, hsr);
@@ -601,7 +601,7 @@ public class STACService extends Application {
 				responseJSON = generateResponse("409", "Item with this id already exists in collection.");
 				status = Response.Status.CONFLICT;
 			}
-			//Bad request, missing field or any field invalid
+			//Bad request, missing field or any field is invalid
 			else
 			{
 				//response json will contain details about validation error like required fields
@@ -619,14 +619,14 @@ public class STACService extends Application {
 				.entity(responseJSON).build();
 	}
 	
-	private Response addFeatureCollection(JSONObject requestPayload, String collectionId, boolean async) {		
+	private Response addFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {		
 		if(async)
 		{
 			 new Thread(() -> {
 			        this.exeFeatureCollection(requestPayload, collectionId);
 			      }).start();
 			      String responseJSON = generateResponse("202", "FeatureCollection creation has been started.");
-			      return Response.status( Status.ACCEPTED)
+			      return Response.status(Status.ACCEPTED)
 							.header("Content-Type", "application/json")
 							.entity(responseJSON).build();
 		}
@@ -637,9 +637,44 @@ public class STACService extends Application {
 	}
 	
 	private Response exeFeatureCollection(JSONObject requestPayload, String collectionId) {
-		// Validate for all features in collection and make a list for valid features to add
-				// Add invalid features in error response	
-		return null;
+		
+		// Add invalid features in error response	
+		String responseJSON = generateResponse("201","FeatureCollection created successfully.");
+		Status status = Response.Status.CREATED;
+		String errorId = "";
+		
+		try {
+			if(requestPayload.containsKey("features"))
+			{
+				 JSONArray features = (JSONArray) requestPayload.get("features");
+				
+				 for(int i =0;i<features.size() ;i++)
+				 {
+					 JSONObject feature = (JSONObject) features.get(i);
+					 Response res = executeAddFeature(feature, collectionId, null, false,"FeatureCollection");
+					 if(res.getStatus() != Response.Status.CREATED.getStatusCode())
+					 {
+						//At least 1 feature could not be added
+						 if(errorId.length()<1)
+							 errorId = feature.getAsString("id");
+						 else
+							 errorId = errorId+", "+feature.getAsString("id");
+					 }				 
+				 }
+				 if(errorId.length()>0)
+				 {
+					 responseJSON = generateResponse("500","Some Features in FeatureCollection  could not be added. "+errorId);
+					 status = Response.Status.INTERNAL_SERVER_ERROR;				 
+				 }
+			}
+		}catch(Exception ex)
+		{
+			responseJSON = generateResponse("500","Features in FeatureCollection  could not be added. "+errorId);
+			status = Response.Status.INTERNAL_SERVER_ERROR;	
+		}
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();
 	}
 
 	// Prepare response for a single feature
