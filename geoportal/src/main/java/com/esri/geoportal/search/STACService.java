@@ -503,101 +503,144 @@ public class STACService extends Application {
 	@Path("/collections/{collectionId}/items")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
 	public Response item(@Context HttpServletRequest hsr,@PathParam("collectionId") String collectionId, 
-			@RequestBody String body)throws Exception {
+			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
 		String responseJSON = "";		
 		Status status = null;
 		
 		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+		
+		//check if it is Feature or FeatureCollection
+		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+		if(type.equalsIgnoreCase("Feature"))
+		{
+			return addFeature(requestPayload,collectionId,hsr,async);
+		}
+		else if(type.equalsIgnoreCase("FeatureCollection"))
+		{
+			return addFeatureCollection(requestPayload,collectionId, async);
+		}
+		else
+		{
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.");			
+		}		
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+	
+	private Response addFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async) 
+	{		
+		if(async)
+		{
+		 new Thread(() -> {
+					this.executeAddFeature(requestPayload, collectionId,hsr,async);
+		      }).start();
+		      String responseJSON = generateResponse("202", "Stac Feature creation has been started.");
+		      return Response.status(Status.ACCEPTED)
+						.header("Content-Type", "application/json")
+						.entity(responseJSON).build();
+		}
+		else
+		{
+			return executeAddFeature(requestPayload, collectionId,hsr,async);
+		}
+	}	
+	
+	private Response executeAddFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async) 
+	{
+		String responseJSON = generateResponse("500","Stac Item could not be added.");;
+		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		try {
-			//check if it is Feature or FeatureCollection
-			String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
-			if(type.equalsIgnoreCase("Feature"))
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
 			{
-				return addFeature(requestPayload,collectionId,hsr);
-			}
-			else if(type.equalsIgnoreCase("FeatureCollection"))
+				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId);
+				
+				String itemJsonString = updatedPayload.toString();
+				
+				ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+				ElasticClient client = ElasticClient.newClient();				
+				
+				String id = updatedPayload.get("id").toString();			
+				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+							
+				responseJSON = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
+				JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+				if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("created"))
+				{					
+					status = Response.Status.CREATED;
+					responseJSON = "Item created";
+					String itemUrlGeoportal = "";
+					
+					//if sync request, create Stac feature for response 
+					if(!async)
+					{
+						String filePath = "service/config/stac-item.json";
+						String itemFileString = this.readResourceFile(filePath, hsr);
+						
+						//Before searching newly added item, sleep for 1 second, otherwise record is not found
+						TimeUnit.SECONDS.sleep(1);
+						
+						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+					}
+					
+					return Response.status(status)
+							.header("Content-Type", "application/json")
+							.header("location",itemUrlGeoportal)
+							.entity(responseJSON).build();				
+				}
+				//Some error in creating item
+				else
+				{
+					LOGGER.info("Stac item with id "+id+" could not be created. ");
+				}
+			}		
+			else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
 			{
-				return addFeatureCollection(requestPayload,collectionId);
+				responseJSON = generateResponse("409", "Item with this id already exists in collection.");
+				status = Response.Status.CONFLICT;
 			}
+			//Bad request, missing field or any field invalid
 			else
 			{
+				//response json will contain details about validation error like required fields
 				status = Response.Status.BAD_REQUEST;
-				responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.");			
-			}
-		}catch(Exception ex)
+				responseJSON = generateResponse("400", validationStatus.getMessage());
+			}		
+		}
+		catch(Exception ex)
 		{
 			LOGGER.error("Error in adding Stac Item " + ex.getCause());
 			ex.printStackTrace();
-			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500","Stac Item could not be added.");
 		}
-		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
-	}
-
-	private Response addFeatureCollection(JSONObject requestPayload, String collectionId) {
-		//Validate for all features in collection and make a list for valid features to add
-		// Add invalid features in error response
-		return null;
-	}
-
-	private Response addFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr) throws UnsupportedEncodingException, Exception
-	{
-		StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId);
-		
-		String responseJSON = generateResponse("500","Stac Item could not be added.");;
-		Status status = Response.Status.INTERNAL_SERVER_ERROR;
-		
-		if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
-		{
-			JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId);
-			
-			String itemJsonString = updatedPayload.toString();
-			
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();				
-			
-			String id = updatedPayload.get("id").toString();			
-			String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
-						
-			responseJSON = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
-			JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
-			if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("created"))
-			{
-				status = Response.Status.CREATED;
-				String filePath = "service/config/stac-item.json";
-				String itemFileString = this.readResourceFile(filePath, hsr);
-				
-				//Before searching newly added item, sleep for 1 second, otherwise record is not found
-				TimeUnit.SECONDS.sleep(1);
-				
-				String itemRes = StacHelper.getItemWithItemId(collectionId, id);
-				responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
-				
-				String itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
-				
-				return Response.status(status)
-						.header("Content-Type", "application/json")
-						.header("location",itemUrlGeoportal)
-						.entity(responseJSON).build();				
-			}
-			
-		}		
-		else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
-		{
-			responseJSON = generateResponse("409", "Item with this id already exists in collection.");
-			status = Response.Status.CONFLICT;
-		}
-		//Bad request, missing field or any field invalid
-		else
-		{
-			//response json will contain details about validation error like required fields
-			status = Response.Status.BAD_REQUEST;
-			responseJSON = generateResponse("400", validationStatus.getMessage());
-		}		
 		return Response.status(status)
 				.header("Content-Type", "application/json")
 				.entity(responseJSON).build();
-	}	
+	}
+	
+	private Response addFeatureCollection(JSONObject requestPayload, String collectionId, boolean async) {		
+		if(async)
+		{
+			 new Thread(() -> {
+			        this.exeFeatureCollection(requestPayload, collectionId);
+			      }).start();
+			      String responseJSON = generateResponse("202", "FeatureCollection creation has been started.");
+			      return Response.status( Status.ACCEPTED)
+							.header("Content-Type", "application/json")
+							.entity(responseJSON).build();
+		}
+		else
+		{
+			return exeFeatureCollection(requestPayload, collectionId);
+		}
+	}
+	
+	private Response exeFeatureCollection(JSONObject requestPayload, String collectionId) {
+		// Validate for all features in collection and make a list for valid features to add
+				// Add invalid features in error response	
+		return null;
+	}
 
 	// Prepare response for a single feature
 	private String prepareResponseSingleItem(String searchRes, String itemFileString, String collectionId) {
