@@ -233,8 +233,7 @@ public class StacHelper {
 			errorMsg = "stac item with id "+id+" already exists.";
 			response.setCode(StacItemValidationResponse.ID_EXISTS);
 			response.setMessage(errorMsg);
-		}
-		
+		}		
 		return response;
 	}
 
@@ -309,25 +308,39 @@ public class StacHelper {
 		return response;
 	}
 
-	public static JSONObject prePublish(JSONObject requestPayload, String collectionId) {
+	public static JSONObject prePublish(JSONObject requestPayload, String collectionId)
+	{
+		//populate Stac item field (collection) with collectionID from URI
+		requestPayload.put("collection",collectionId);
 		
-		//Add attributes in propeties
+		//Add attributes in properties
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
-		JSONArray collArr = new JSONArray();
-		collArr.add(collectionId);
-		
 		String date = DateUtil.nowAsString();
 		prop.put(FieldNames.FIELD_STAC_CREATED,date);
 		prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
 		requestPayload.put("properties", prop);
 		
-		requestPayload.put(FieldNames.FIELD_SYS_CREATED,date);
-		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);
+		//Add Geoportal attributes sys_created_dt, sys_modified_dt, sys_collections_s,sys_access_s and sys_approval_status_s
+		JSONArray collArr = new JSONArray();
+		collArr.add(collectionId);
 		
+		requestPayload.put(FieldNames.FIELD_SYS_CREATED,date);
+		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);		
 		requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS,collArr);
 		
-		//TODO add geoportal attr sys_access_s and sys_approval_status_s,  SetOwner 
-		
+		GeoportalContext gc = GeoportalContext.getInstance();
+		if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
+		          gc.getDefaultAccessLevel().length() > 0) {
+			requestPayload.put(FieldNames.FIELD_SYS_ACCESS,gc.getDefaultAccessLevel());
+		 }
+		 if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null && 
+		          gc.getDefaultApprovalStatus().length() > 0) {
+			 requestPayload.put(FieldNames.FIELD_SYS_APPROVAL_STATUS,gc.getDefaultApprovalStatus());
+		 }
+	    
+		 requestPayload.put(FieldNames.FIELD_SYS_OWNER, null);
+		 requestPayload.put(FieldNames.FIELD_SYS_OWNER_TXT,null);
+	     		    
 		return requestPayload;
 	}
 }
