@@ -22,6 +22,7 @@
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
 		<beans:property name="parseGml" value="false" />
 		<beans:property name="supportsCollections" value="false" />
+		<beans:property name="numFeaturesStacAddItem" value="100" />
 	</beans:bean>
 <!-- the tokens like ${es_cluster:elasticsearch} ${gpt_indexName:metadata}
 represent environment variables that can be used to pass values into a spring configuration context, aka these files
