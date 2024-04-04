@@ -315,40 +315,96 @@ public class StacHelper {
 		return response;
 	}
 
-	public static JSONObject prePublish(JSONObject requestPayload, String collectionId)
+	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate)
 	{
-		//populate Stac item field (collection) with collectionID from URI
-		requestPayload.put("collection",collectionId);
-		
-		//Add attributes in properties
-		JSONObject prop = (JSONObject) requestPayload.get("properties");
 		String date = DateUtil.nowAsString();
-		prop.put(FieldNames.FIELD_STAC_CREATED,date);
-		prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
-		requestPayload.put("properties", prop);
+		JSONObject prop = (JSONObject) requestPayload.get("properties");
 		
-		//Add Geoportal attributes sys_created_dt, sys_modified_dt, sys_collections_s,sys_access_s and sys_approval_status_s
-		JSONArray collArr = new JSONArray();
-		collArr.add(collectionId);
-		
-		requestPayload.put(FieldNames.FIELD_SYS_CREATED,date);
-		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);		
-		requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS,collArr);
-		
-		GeoportalContext gc = GeoportalContext.getInstance();
-		if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
-		          gc.getDefaultAccessLevel().length() > 0) {
-			requestPayload.put(FieldNames.FIELD_SYS_ACCESS,gc.getDefaultAccessLevel());
-		 }
-		 if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null && 
-		          gc.getDefaultApprovalStatus().length() > 0) {
-			 requestPayload.put(FieldNames.FIELD_SYS_APPROVAL_STATUS,gc.getDefaultApprovalStatus());
-		 }
-	    
-		 requestPayload.put(FieldNames.FIELD_SYS_OWNER, null);
-		 requestPayload.put(FieldNames.FIELD_SYS_OWNER_TXT,null);
-	     		    
+		//Add feature
+		if(!forUpdate)
+		{
+			//populate Stac item field (collection) with collectionID from URI
+			requestPayload.put("collection",collectionId);
+			
+			//Add attributes in properties			
+			prop.put(FieldNames.FIELD_STAC_CREATED,date);
+			prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
+			requestPayload.put("properties", prop);
+			
+			//Add Geoportal attributes sys_created_dt, sys_modified_dt, sys_collections_s,sys_access_s and sys_approval_status_s
+			JSONArray collArr = new JSONArray();
+			collArr.add(collectionId);
+			
+			requestPayload.put(FieldNames.FIELD_SYS_CREATED,date);
+			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);		
+			requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS,collArr);
+			
+			GeoportalContext gc = GeoportalContext.getInstance();
+			if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
+			          gc.getDefaultAccessLevel().length() > 0) {
+				requestPayload.put(FieldNames.FIELD_SYS_ACCESS,gc.getDefaultAccessLevel());
+			 }
+			 if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null && 
+			          gc.getDefaultApprovalStatus().length() > 0) {
+				 requestPayload.put(FieldNames.FIELD_SYS_APPROVAL_STATUS,gc.getDefaultApprovalStatus());
+			 }
+		    
+			 requestPayload.put(FieldNames.FIELD_SYS_OWNER, null);
+			 requestPayload.put(FieldNames.FIELD_SYS_OWNER_TXT,null);
+		}
+		//Update Feature
+		else
+		{
+			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);	
+			
+			prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
+			requestPayload.put("properties", prop);
+		}		    
 		return requestPayload;
+	}
+
+	public static StacItemValidationResponse validateStacItemForUpdate(JSONObject requestPayload, 
+			String collectionId, String featureId) throws Exception {
+		
+		String errorMsg = "";
+		StacItemValidationResponse response = new StacItemValidationResponse();
+		response = validateFields(requestPayload);
+		
+		if(response.getCode() == null)
+		{
+			//validate that collectionId and featureId in URL is matching values in Feature body
+			if(!requestPayload.getAsString("id").equals(featureId))
+			{
+				errorMsg = errorMsg+" id in Feature body and Id in path param should be equal.";
+			}
+			if(!(requestPayload.getAsString("collection")!= null && requestPayload.getAsString("collection").equals(collectionId)))
+			{
+				errorMsg = errorMsg+" collection in Feature body and collectionId in path param should be equal.";
+			}
+			if(errorMsg.length()>0)
+			{
+				response.setCode(StacItemValidationResponse.BAD_REQUEST);
+				response.setMessage(errorMsg);
+			}
+			else
+			{
+				//validate it is valid featureId
+				String itemRes = getItemWithItemId(collectionId, featureId);
+				DocumentContext elasticResContext = JsonPath.parse(itemRes);
+
+				net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+				if (items == null || items.size() == 0) {
+					response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
+					response.setMessage("Feature does not exist.");
+				}
+			}
+		}
+		if(response.getCode() == null)
+		{
+			response.setCode(StacItemValidationResponse.ITEM_VALID);
+			response.setMessage("Item is valid.");
+		}
+		return response;
 	}
 }
 	
