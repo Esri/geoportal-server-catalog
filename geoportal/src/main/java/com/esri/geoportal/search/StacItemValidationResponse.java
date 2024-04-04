@@ -4,6 +4,7 @@ public class StacItemValidationResponse {
 	public static String ID_EXISTS = "ID_EXISTS";
 	public static String BAD_REQUEST = "BAD_REQUEST";
 	public static String ITEM_VALID = "ITEM_VALID";
+	public static String ITEM_NOT_FOUND = "ITEM_NOT_FOUND";
 
 	private String code;
 	private String message;

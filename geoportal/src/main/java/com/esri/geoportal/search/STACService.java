@@ -37,6 +37,7 @@ import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -275,26 +276,6 @@ public class STACService extends Application {
 			response = StacHelper.getItemWithItemId(collectionId, id);
 			String itemFileString = this.readResourceFile(filePath, hsr);
 			
-//			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-//			ElasticClient client = ElasticClient.newClient();
-//			String url = client.getTypeUrlForSearch(ec.getIndexName());
-//			Map<String, String> queryMap = new HashMap<String, String>();
-//
-//			queryMap.put("ids", id);
-//			url = url + "/_search";
-//			
-//			GeoportalContext gc = GeoportalContext.getInstance();
-//			if (gc.getSupportsCollections()) {
-//				queryMap.put("collections", collectionId);
-//			}
-//
-//			query = stacHelper.prepareSearchQuery(queryMap, null);
-//
-//			if (query.length() > 0)
-//				response = client.sendPost(url, query, "application/json");
-//			else
-//				response = client.sendGet(url);
-
 			responseJSON = this.prepareResponseSingleItem(response, itemFileString, collectionId);
 			if (responseJSON.contains("Record not found")) {
 				status = Response.Status.NOT_FOUND;
@@ -487,7 +468,7 @@ public class STACService extends Application {
 	}
 	
 	/**
-	 * Stac Transaction - Add item
+	 * Stac Transaction - Add item https://github.com/stac-api-extensions/transaction?tab=readme-ov-file#post
 	 * @param hsr
 	 * @param body partial Item or partial ItemCollection
 	 * @return
@@ -522,6 +503,131 @@ public class STACService extends Application {
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
 	}
 	
+	/**
+	 * Stac Transaction - Update Feature https://github.com/stac-api-extensions/transaction?tab=readme-ov-file#put
+	 * @param hsr
+	 * @param body Feature
+	 * @return
+	 * @throws Exception
+	 */
+	@PUT
+	@Produces("application/json")
+	@Path("/collections/{collectionId}/items/{featureId}")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
+	public Response updateItems(@Context HttpServletRequest hsr,@PathParam("collectionId") String collectionId, 
+			@PathParam("featureId") String featureId,
+			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
+		String responseJSON = "";		
+		Status status = null;
+		
+		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+		
+		//check if it is Feature or FeatureCollection
+		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+		if(type.equalsIgnoreCase("Feature"))
+		{
+			return updateFeature(requestPayload,collectionId,featureId,hsr,async);
+		}
+		else
+		{
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400","type should be Feature.",null);			
+		}		
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+	
+	private Response updateFeature(JSONObject requestPayload, String collectionId, String featureId,HttpServletRequest hsr,
+			boolean async) {
+		if(async)
+		{
+		 new Thread(() -> {
+					this.executeUpdateFeature(requestPayload, collectionId,featureId,hsr,async);
+		      }).start();
+		      String responseJSON = generateResponse("202", "Stac Feature update has been started.",null);
+		      return Response.status(Status.ACCEPTED)
+						.header("Content-Type", "application/json")
+						.entity(responseJSON).build();
+		}
+		else
+		{
+			return executeUpdateFeature(requestPayload, collectionId,featureId,hsr,async);
+		}
+	}
+	
+	private Response executeUpdateFeature(JSONObject requestPayload, String collectionId, String featureId,
+			HttpServletRequest hsr,
+			boolean async) {
+		String responseJSON = generateResponse("500","Stac Feature could not be updated.",null);
+		Status status = Response.Status.INTERNAL_SERVER_ERROR;
+		try {
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
+			{
+				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
+				
+				String id = updatedPayload.get("id").toString();	
+				String itemJsonString = updatedPayload.toString();	
+				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+							
+				responseJSON = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
+				
+				JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+				if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
+				{					
+					status = Response.Status.OK;
+					responseJSON = "Feature updated";
+					String itemUrlGeoportal = "";
+					
+					//if sync request for Feature, create Stac feature for response 
+					if(!async)
+					{
+						String filePath = "service/config/stac-item.json";
+						String itemFileString = this.readResourceFile(filePath, hsr);
+						
+						//Before searching newly added item, sleep for 1 second, otherwise record is not found
+						TimeUnit.SECONDS.sleep(1);
+						
+						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+					}					
+					return Response.status(status)
+							.header("Content-Type", "application/json")
+							.header("location",itemUrlGeoportal)
+							.entity(responseJSON).build();				
+				}
+				//Some error in creating item
+				else
+				{
+					LOGGER.info("Stac item with id "+id+" could not be updated. ");
+				}
+			}
+			else if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_NOT_FOUND))
+			{
+				status = Response.Status.NOT_FOUND;
+				responseJSON = generateResponse("404", validationStatus.getMessage(),null);
+			}
+			else
+			{
+				//response json will contain details about validation error like required fields
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+			}	
+		}catch(Exception ex)
+		{
+			LOGGER.error("Error in updating Stac Item " + ex.getCause());
+			ex.printStackTrace();
+		}
+		//For asynchronous request, log this response message
+		 if(async)
+		 {
+			 LOGGER.info("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON);
+		 }
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();		
+	}
+
 	private Response addFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async) 
 	{		
 		if(async)
@@ -548,7 +654,7 @@ public class STACService extends Application {
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId);
 			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
 			{
-				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId);
+				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
 				
 				String itemJsonString = updatedPayload.toString();								
 				
@@ -588,6 +694,7 @@ public class STACService extends Application {
 					LOGGER.info("Stac item with id "+id+" could not be created. ");
 				}
 			}		
+			
 			else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
 			{
 				responseJSON = generateResponse("409", "Item with this id already exists in collection.",null);
@@ -892,7 +999,7 @@ public class STACService extends Application {
 				}
 			}
 
-			// Add all the assets from stac record, if available
+			// STEP: Add_ALL_ASSET assets from stac record, if available
 			try {
 				HashMap<String, JSONObject> stacRecAssetObj = searchItemCtx.read("$._source.assets");
 				assetsObj = featureContext.read("$.featurePropPath.assets");
@@ -957,8 +1064,20 @@ public class STACService extends Application {
 		for (String propToRemove : propToBeRemovedList) {
 			featureContext.delete(propToRemove);
 		}
+		Object assetObj = null;
 		for (String assetToRemove : assetToBeRemovedList) {
-			featureContext.delete(assetToRemove);
+			//Assets are populated from Feature in step Add_ALL_ASSET (so first validate if it still needs removal
+			assetObj = featureContext.read(assetToRemove);
+			if(assetObj instanceof JSONObject)
+			{
+				JSONObject assetJSONObj = (JSONObject)assetObj;
+				if(assetJSONObj.getAsString("href").contains("$."))// Still JSON path from stac-item.json
+					featureContext.delete(assetToRemove);
+			}
+			else
+			{
+				featureContext.delete(assetToRemove);
+			}			
 		}
 		return featureValid;
 	}
