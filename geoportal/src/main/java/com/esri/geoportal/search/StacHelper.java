@@ -29,14 +29,17 @@ public class StacHelper {
 	/** Validates single Stac feature for required fields and duplicate id in collection
 	 * @param requestPayload
 	 * @param collectionId
+	 * @param validateFields 
 	 * @return
 	 * @throws Exception
 	 */
-	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId) throws Exception {	
+	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId, boolean validateFields) throws Exception {	
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
-				
-		response = validateFields(requestPayload);
+		if(validateFields)
+		{
+			response = validateFields(requestPayload);
+		}		
 		if(response.getCode() == null)
 		{
 			response = validateId(requestPayload,collectionId);
@@ -364,11 +367,14 @@ public class StacHelper {
 	}
 
 	public static StacItemValidationResponse validateStacItemForUpdate(JSONObject requestPayload, 
-			String collectionId, String featureId) throws Exception {
+			String collectionId, String featureId, boolean validateFields) throws Exception {
 		
 		String errorMsg = "";
 		StacItemValidationResponse response = new StacItemValidationResponse();
-		response = validateFields(requestPayload);
+		if(validateFields)
+		{
+			response = validateFields(requestPayload);	
+		}
 		
 		if(response.getCode() == null)
 		{

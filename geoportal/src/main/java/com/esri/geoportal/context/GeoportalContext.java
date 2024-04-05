@@ -55,7 +55,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private String version = "2.7.2";
   private boolean parseGml;
   private boolean supportsCollections = false;
-  private int numFeaturesStacAddItem = 100;
+  
   
   /** Constructor */
   public GeoportalContext() {}
@@ -225,15 +225,5 @@ public class GeoportalContext implements ApplicationContextAware {
     this.parseGml = parseGml;
   }
 
-	/**
-	 * @return number of features allowed in FeatureCollection for Stac Transaction POST request
-	 */
-	public int getNumFeaturesStacAddItem() {
-		return numFeaturesStacAddItem;
-	}
-	
-	public void setNumFeaturesStacAddItem(int numFeaturesStacAddItem) {
-		this.numFeaturesStacAddItem = numFeaturesStacAddItem;
-	}
 
 }

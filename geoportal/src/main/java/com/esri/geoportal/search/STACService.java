@@ -78,7 +78,27 @@ public class STACService extends Application {
 	private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 	private GeoportalContext gc = GeoportalContext.getInstance();
 	private ElasticClient client = ElasticClient.newClient();
+	
+	private int numFeaturesAddItem = 100;
+	private boolean validateFields = false;
 
+	public int getNumFeaturesAddItem() {
+		return numFeaturesAddItem;
+	}
+
+	public void setNumFeaturesAddItem(int numFeaturesAddItem) {
+		this.numFeaturesAddItem = numFeaturesAddItem;
+	}
+
+	public boolean isValidateFields() {
+		return validateFields;
+	}
+
+	public void setValidateFields(boolean validateFields) {
+		this.validateFields = validateFields;
+	}
+
+	
 	@Override
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> resources = new HashSet<Class<?>>();
@@ -560,7 +580,7 @@ public class STACService extends Application {
 		String responseJSON = generateResponse("500","Stac Feature could not be updated.",null);
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		try {
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId);
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId,false);
 			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
 			{
 				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
@@ -651,7 +671,7 @@ public class STACService extends Application {
 		String responseJSON = generateResponse("500","Stac Item could not be added.",null);
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		try {
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId);
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,validateFields);
 			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
 			{
 				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
@@ -753,7 +773,7 @@ public class STACService extends Application {
 				 //For synchronous request, limit number of features in feature collection
 				 if(!async)
 				 {
-					 if(features.size() >gc.getNumFeaturesStacAddItem())
+					 if(features.size() >this.getNumFeaturesAddItem())
 					 {
 						 responseJSON = generateResponse("400","Number of Features in FeatureCollection are more than allowed limit ("+features.size()+") in Synchronous request. For large FeatureCollection include paramter async=true.",null);
 						 status = Response.Status.BAD_REQUEST;
@@ -956,7 +976,7 @@ public class STACService extends Application {
 		try {
 
 			String val = featureContext.read("$.featurePropPath.id");
-			String recordId = searchItemCtx.read(val);
+			String recordId = searchItemCtx.read(val).toString();
 			featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
 
 			val = featureContext.read("$.featurePropPath.collection");
@@ -964,6 +984,13 @@ public class STACService extends Application {
 
 			// add bbox, geometry
 			this.setBbox(searchItemCtx, featureContext);
+			
+			JSONArray bboxArr = featureContext.read("$.featurePropPath.bbox");
+			//No valid bbox in feature
+			if(bboxArr.get(1).toString().contains("$"))
+			{
+				featureContext.delete("$.featurePropPath.bbox");
+			}
 
 			this.setGeometry(searchItemCtx, featureContext);
 
@@ -1039,7 +1066,7 @@ public class STACService extends Application {
 			}
 
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
-			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id"));
+			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
 			
 			//Support multiple collection, set Item collection id
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));  
