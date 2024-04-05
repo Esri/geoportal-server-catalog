@@ -142,7 +142,21 @@ public class StacHelper {
 	}
 
 	private static String prepareIds(String ids) {
-		return "{\"match\": {\"id\": \"" + ids + "\"}}";
+		String[] idList = ids.split(",");
+		//{"bool":{"should":[{"match":{"id":"1"}},{"match":{"id":"2"}}]}}
+		
+		StringBuffer idQryBuf = new StringBuffer("{\"bool\":{\"should\":[");
+		int i=0;
+		for (String id : idList) {
+			if(i ==0)
+				idQryBuf.append("{\"match\": {\"id\": \"" + id + "\"}}");	
+			else
+				idQryBuf.append(",{\"match\": {\"id\": \"" + id + "\"}}");
+			i++;
+		}
+		idQryBuf.append("]}}");
+		return idQryBuf.toString();
+		//return "{\"match\": {\"id\": \"" + ids + "\"}}";
 	}
 
 	private static String prepareDateTime(String datetime) {
