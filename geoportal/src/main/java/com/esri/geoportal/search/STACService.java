@@ -23,23 +23,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -65,6 +63,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 /**
  * STAC API: Records service provider.
@@ -75,7 +74,31 @@ public class STACService extends Application {
 
 	/** Logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);
+	
+	private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+	private GeoportalContext gc = GeoportalContext.getInstance();
+	private ElasticClient client = ElasticClient.newClient();
+	
+	private int numFeaturesAddItem = 100;
+	private boolean validateFields = false;
 
+	public int getNumFeaturesAddItem() {
+		return numFeaturesAddItem;
+	}
+
+	public void setNumFeaturesAddItem(int numFeaturesAddItem) {
+		this.numFeaturesAddItem = numFeaturesAddItem;
+	}
+
+	public boolean isValidateFields() {
+		return validateFields;
+	}
+
+	public void setValidateFields(boolean validateFields) {
+		this.validateFields = validateFields;
+	}
+
+	
 	@Override
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> resources = new HashSet<Class<?>>();
@@ -94,7 +117,7 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in root level " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			response = this.generateResponse("500", "STAC API Landing Page could not be generated.");
+			response = this.generateResponse("500", "STAC API Landing Page could not be generated.",null);
 		}
 		return Response.status(status).entity(response).build();
 	}
@@ -111,13 +134,13 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in conformance " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API Conformance response could not be generated.");
+			responseJSON = this.generateResponse("500", "STAC API Conformance response could not be generated.", null);
 
 		}
 		return Response.status(status).entity(responseJSON).build();
 
 	}
-	
+
 	@GET
 	@Path("/api")
 	@Produces("application/vnd.oai.openapi+json;version=3.0")
@@ -130,13 +153,10 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in api " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.");
-
+			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.",null);
 		}
 		return Response.status(status).entity(responseJSON).build();
-
 	}
-	
 
 	@GET
 	@Path("/collections")
@@ -144,17 +164,46 @@ public class STACService extends Application {
 	public Response getCollections(@Context HttpServletRequest hsr) {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
-		try {
-			responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
-			responseJSON= responseJSON.replaceAll("\\{collectionId\\}", "metadata");
+		try {			
+			// 518 updates
+			if (!gc.getSupportsCollections()) {
+				// Geoportal not configured for collections
+				// STAC will only have 1 STAC collection 'metadata'
+				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
+				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", "metadata");
+			} else {
+				// Geoportal configured for collections
+				// STAC will have collection for each Geoportal collection
+				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
+				JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
+				JSONArray collectionsArray = (JSONArray) stacCollections.get("collections");
+
+				JSONObject collectionsTemplate = (JSONObject) collectionsArray.get(0);
+				String collectionsTemplateString = collectionsTemplate.toString();
+
+				// Get list of collections
+				ArrayList<String> collectionList = this.getCollectionList();
+				collectionsArray.clear();
+				String updatedString = "";
+				for (int i = 0; i < collectionList.size(); i++) {					
+					updatedString = collectionsTemplateString.replace("{collectionId}", collectionList.get(i));
+					JSONObject collectionsObj = (JSONObject) JSONValue.parse(updatedString);
+					collectionsArray.add(collectionsObj);
+				}
+				stacCollections.put("collections", collectionsArray);
+
+				responseJSON = stacCollections.toString();
+				System.out.println(responseJSON);
+			}
 
 		} catch (Exception e) {
 			LOGGER.error("Error in collections " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.");
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",null);
 		}
 		return Response.status(status).entity(responseJSON).build();
-	}
+	} 
+
 
 	@GET
 	@Path("/collections/{collectionId}")
@@ -164,20 +213,20 @@ public class STACService extends Application {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
 		try {
-			if(collectionId == null || collectionId.isBlank() || !collectionId.equals("metadata"))
+			
+			if (!this.validCollection(collectionId)) // #518 || !collectionId.equals("metadata"))
 			{
 				status = Response.Status.NOT_FOUND;
-			}			
-			else
-			{
+			}
+			else {
 				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
-				responseJSON= responseJSON.replaceAll("\\{collectionId\\}", collectionId);
+				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
 			}
 
 		} catch (Exception e) {
 			LOGGER.error("Error in metadata " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.");
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",null);
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
@@ -185,97 +234,85 @@ public class STACService extends Application {
 	@GET
 	@Produces("application/geo+json")
 	@Path("/collections/{collectionId}/items")
-	public Response getItems(@Context HttpServletRequest hsr, 
-			@PathParam("collectionId") String collectionId,
-			@QueryParam("limit") int limit,
-			@QueryParam("bbox") String bbox, @QueryParam("datetime") String datetime,
-			@QueryParam("search_after") String search_after)
-			throws UnsupportedEncodingException {
+	public Response getItems(@Context HttpServletRequest hsr, @PathParam("collectionId") String collectionId,
+			@QueryParam("limit") int limit, @QueryParam("bbox") String bbox, @QueryParam("datetime") String datetime,
+			@QueryParam("search_after") String search_after) throws UnsupportedEncodingException {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
 		
-		String query = "";	
+		String query = "";
 
-		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
+		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
-			
+
 			limit = setLimit(limit);
 
 			if (bbox != null && bbox.length() > 0)
 				queryMap.put("bbox", bbox);
 			if (datetime != null && datetime.length() > 0)
 				queryMap.put("datetime", datetime);
-			
-			url = url + "/_search?size=" + limit;			
-			query = this.prepareSearchQuery(queryMap,search_after);	
-			
+			GeoportalContext gc = GeoportalContext.getInstance();
+			if (gc.getSupportsCollections()) {
+				queryMap.put("collections", collectionId);
+			}
+
+			url = url + "/_search?size=" + limit;
+			query = StacHelper.prepareSearchQuery(queryMap, search_after);
+
 			if (query.length() > 0)
 				response = client.sendPost(url, query, "application/json");
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,null,null,
-					"metadataItems",collectionId);			
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, null, null, "metadataItems",
+					collectionId);
 
-		} catch (InvalidParameterException e) {			
+		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection metadata items response could not be generated.");
+			responseJSON = this.generateResponse("500",
+					"STAC API collection metadata items response could not be generated.",null);
 		}
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
-	
+
 	@GET
 	@Path("collections/{collectionId}/items/{id}")
 	@Produces("application/geo+json")
-	public Response getItem(@Context HttpServletRequest hsr,
-			@PathParam("collectionId") String collectionId, @PathParam("id") String id) {
+	public Response getItem(@Context HttpServletRequest hsr, @PathParam("collectionId") String collectionId,
+			@PathParam("id") String id) {
 		String responseJSON = null;
 		String response = "";
-		Status status = Response.Status.OK;	
-		String query = "";
-
+		Status status = Response.Status.OK;
+		String filePath = "service/config/stac-item.json";
+		
 		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
-			String url = client.getTypeUrlForSearch(ec.getIndexName());
-			Map<String, String> queryMap = new HashMap<String, String>();
-	
-			queryMap.put("ids", id);
-			url = url + "/_search";
-
-			query = this.prepareSearchQuery(queryMap,null);
+			response = StacHelper.getItemWithItemId(collectionId, id);
+			String itemFileString = this.readResourceFile(filePath, hsr);
 			
-			if (query.length() > 0)
-				response = client.sendPost(url, query, "application/json");
-			else
-				response = client.sendGet(url);
-
-			responseJSON = this.prepareResponseSingleItem(response, hsr,collectionId);
-			if(responseJSON.contains("Record not found"))
-			{
+			responseJSON = this.prepareResponseSingleItem(response, itemFileString, collectionId);
+			if (responseJSON.contains("Record not found")) {
 				status = Response.Status.NOT_FOUND;
 			}
 			System.out.println(responseJSON);
 
-		} catch (InvalidParameterException e) {			
+		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
-			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
+			LOGGER.error("Error in getting item with item id: " + id + " " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection metadata item with itemid response could not be generated.");
+			responseJSON = this.generateResponse("500",
+					"STAC API collection metadata item with itemid response could not be generated.",null);
 		}
-		
+
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
 
@@ -283,108 +320,103 @@ public class STACService extends Application {
 	@Produces("application/geo+json")
 	@Path("/search")
 	public Response search(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
-			@QueryParam("bbox") String bbox,
-			@QueryParam("intersects") String intersects, 
-			@QueryParam("datetime") String datetime, 
-			@QueryParam("ids") String idList,
-			@QueryParam("collections") String collections,
-			@QueryParam("searchAfter") String searchAfter)
+			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
+			@QueryParam("datetime") String datetime, @QueryParam("ids") String idList,
+			@QueryParam("collections") String collections, @QueryParam("searchAfter") String searchAfter)
 			throws UnsupportedEncodingException {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
 		
 		String query = "";
-		//TODO implement collections parameter in search
-		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
+		String listOfCollections = null;
+		
+		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
-			Map<String, String> queryMap = new HashMap<String, String>();	
-			
+			Map<String, String> queryMap = new HashMap<String, String>();
+
 			limit = setLimit(limit);
 			if (bbox != null && bbox.length() > 0)
 				queryMap.put("bbox", bbox);
 			if (datetime != null && datetime.length() > 0)
 				queryMap.put("datetime", datetime);
-			
-			if(idList != null && idList.length() >0)
-			{
-				//"LC80100252015082LGN00,LC80100252014287LGN00"
-				if(idList.indexOf("[")<0)
-					queryMap.put("ids", idList);				
+			GeoportalContext gc = GeoportalContext.getInstance();
+			if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
+				listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
+				queryMap.put("collections", listOfCollections);
 			}
-			
-			if(intersects != null && intersects.length() >0)
+			if (idList != null && idList.length() > 0) {
+				// "LC80100252015082LGN00,LC80100252014287LGN00"
+				if (!idList.contains("["))
+					queryMap.put("ids", idList);
+			}
+
+			if (intersects != null && intersects.length() > 0)
 				queryMap.put("intersects", intersects);
-			
+
 			url = url + "/_search?size=" + limit;
 
-			query = this.prepareSearchQuery(queryMap,searchAfter);
-			System.out.println("final query "+query);
-			
-			if (query.length() > 0)
-			{
+			query = StacHelper.prepareSearchQuery(queryMap, searchAfter);
+			System.out.println("final query " + query);
+
+			if (query.length() > 0) {
 				response = client.sendPost(url, query, "application/json");
-			}
-			else
-			{
+			} else {
 				response = client.sendGet(url);
 			}
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,idList,intersects,"search","metadata");
-			
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, idList, intersects, "search",
+					listOfCollections);
 
-		} catch (InvalidParameterException e) {			
+		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
-			System.out.println("Parameter "+e.getParameterName()+": "+e.getMessage());
-			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
-		
+			System.out.println("Parameter " + e.getParameterName() + ": " + e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
+
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection search items response could not be generated.");
+			responseJSON = this.generateResponse("500",
+					"STAC API collection search items response could not be generated.",null);
 		}
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
-	}	
-	
+	}
 
 	@POST
 	@Produces("application/geo+json")
 	@Path("/search")
-	@Consumes({MediaType.APPLICATION_JSON,MediaType.TEXT_PLAIN,MediaType.WILDCARD})
-	public Response search(@Context HttpServletRequest hsr,@RequestBody String body,
-			@QueryParam("search_after") String search_after)
-			throws UnsupportedEncodingException {
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
+	public Response search(@Context HttpServletRequest hsr, @RequestBody String body,
+			@QueryParam("search_after") String search_after) throws UnsupportedEncodingException {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
-		//System.out.println(body);
+		
 		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
-		
-		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit"): 0);	
-		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime"): null);
-		
-		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox"): null);			
-		JsonArray idArr= (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids"): null);	
-		
-		//TODO implement collection parameter in search
-		JsonArray collectionArr = (requestPayload.containsKey("collections") ? requestPayload.getJsonArray("collections"): null);	
-				
-		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects"): null);		
-		
-		String query = "";
-		String bbox="";
-		String ids="";
 
-		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
+		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit") : 0);
+		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime") : null);
+
+		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox") : null);
+		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
+		
+		JsonArray collectionArr = (requestPayload.containsKey("collections")
+				? requestPayload.getJsonArray("collections")
+				: null);
+
+		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects")
+				: null);
+
+		String query = "";
+		String bbox = "";
+		String ids = "";
+
+		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
-			Map<String, String> queryMap = new HashMap<String, String>();
-			limit = setLimit(limit);	
-			
-			if (bboxJsonArr != null && bboxJsonArr.size() > 0) {
+			Map<String, String> queryMap = new HashMap<>();
+			limit = setLimit(limit);
+
+			if (bboxJsonArr != null && !bboxJsonArr.isEmpty()) {
 				for (int i = 0; i < bboxJsonArr.size(); i++) {
 					if (i > 0)
 						bbox = bbox + "," + bboxJsonArr.get(i);
@@ -398,7 +430,7 @@ public class STACService extends Application {
 				queryMap.put("datetime", datetime);
 			}
 
-			if (idArr != null && idArr.size() > 0) {
+			if (idArr != null && !idArr.isEmpty()) {
 				// ["LC80100252015082LGN00","LC80100252014287LGN00"]
 				for (int i = 0; i < idArr.size(); i++) {
 					if (i > 0)
@@ -412,93 +444,442 @@ public class STACService extends Application {
 			if (intersects != null && !intersects.isEmpty()) {
 				queryMap.put("intersects", intersects.toString());
 			}
-
+			
+			GeoportalContext gc = GeoportalContext.getInstance();
+			String listOfCollections = "";
+			if ((gc.getSupportsCollections() && collectionArr != null && !collectionArr.isEmpty())) {
+				for(int i=0;i<collectionArr.size();i++)
+				{
+					if(i==0)
+					{
+						listOfCollections = collectionArr.getString(i);
+					}
+					else
+					{
+						listOfCollections = listOfCollections+","+ collectionArr.getString(i);
+					}
+					
+				}								
+				queryMap.put("collections", listOfCollections);
+			}
+			
 			url = url + "/_search?size=" + limit;
-			query = this.prepareSearchQuery(queryMap,search_after);
-			System.out.println("final query "+query);
+			query = StacHelper.prepareSearchQuery(queryMap, search_after);
+			System.out.println("final query " + query);
 			if (query.length() > 0)
 				response = client.sendPost(url, query, "application/json");
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,ids,
-					(intersects!=null ?intersects.toString():""),"searchPost","metadata");
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
+					(intersects != null ? intersects.toString() : ""), "searchPost", collectionArr.toString());
 
-		} catch (InvalidParameterException e) {			
+		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400", "Parameter "+e.getParameterName()+": "+e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection search items response could not be generated.");			
+			responseJSON = this.generateResponse("500",
+					"STAC API collection search items response could not be generated.",null);
 		}
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
-
-	//Prepare response for a single feature
-	private String prepareResponseSingleItem(String searchRes, HttpServletRequest hsr,String collectionId) {
+	
+	/**
+	 * Stac Transaction - Add item https://github.com/stac-api-extensions/transaction?tab=readme-ov-file#post
+	 * @param hsr
+	 * @param body partial Item or partial ItemCollection
+	 * @return
+	 * @throws Exception
+	 */
+	@POST
+	@Produces("application/json")
+	@Path("/collections/{collectionId}/items")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
+	public Response item(@Context HttpServletRequest hsr,@PathParam("collectionId") String collectionId, 
+			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
+		String responseJSON = "";		
+		Status status = null;
 		
-		net.minidev.json.JSONArray items = null;
-		String itemFileString = "";		
-		String finalResponse = "";
+		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
 		
-		String filePath = "service/config/stac-item.json";
+		//check if it is Feature or FeatureCollection
+		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+		if(type.equalsIgnoreCase("Feature"))
+		{
+			return addFeature(requestPayload,collectionId,hsr,async);
+		}
+		else if(type.equalsIgnoreCase("FeatureCollection"))
+		{
+			return addFeatureCollection(requestPayload,collectionId, async);
+		}
+		else
+		{
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.",null);			
+		}		
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+	
+	/**
+	 * Stac Transaction - Update Feature https://github.com/stac-api-extensions/transaction?tab=readme-ov-file#put
+	 * @param hsr
+	 * @param body Feature
+	 * @return
+	 * @throws Exception
+	 */
+	@PUT
+	@Produces("application/json")
+	@Path("/collections/{collectionId}/items/{featureId}")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
+	public Response updateItems(@Context HttpServletRequest hsr,@PathParam("collectionId") String collectionId, 
+			@PathParam("featureId") String featureId,
+			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
+		String responseJSON = "";		
+		Status status = null;
 		
+		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+		
+		//check if it is Feature or FeatureCollection
+		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+		if(type.equalsIgnoreCase("Feature"))
+		{
+			return updateFeature(requestPayload,collectionId,featureId,hsr,async);
+		}
+		else
+		{
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400","type should be Feature.",null);			
+		}		
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+	
+	private Response updateFeature(JSONObject requestPayload, String collectionId, String featureId,HttpServletRequest hsr,
+			boolean async) {
+		if(async)
+		{
+		 new Thread(() -> {
+					this.executeUpdateFeature(requestPayload, collectionId,featureId,hsr,async);
+		      }).start();
+		      String responseJSON = generateResponse("202", "Stac Feature update has been started.",null);
+		      return Response.status(Status.ACCEPTED)
+						.header("Content-Type", "application/json")
+						.entity(responseJSON).build();
+		}
+		else
+		{
+			return executeUpdateFeature(requestPayload, collectionId,featureId,hsr,async);
+		}
+	}
+	
+	private Response executeUpdateFeature(JSONObject requestPayload, String collectionId, String featureId,
+			HttpServletRequest hsr,
+			boolean async) {
+		String responseJSON = generateResponse("500","Stac Feature could not be updated.",null);
+		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		try {
-			itemFileString = this.readResourceFile(filePath, hsr);
-
-			DocumentContext elasticResContext = JsonPath.parse(searchRes);
-			
-			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);	
-			String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
-
-			items = elasticResContext.read("$.hits.hits");
-			
-			DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
-			if(items != null && items.size()>0)
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId,false);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
 			{
-				DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
+				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
 				
-				//Populate feature 
-				 this.populateFeature(featureContext,searchItemCtx);
-				 JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString()); 
-				 JsonObject resObj =  obj.getJsonObject("featurePropPath");
-				 			
-				 finalResponse = resObj.toString();
+				String id = updatedPayload.get("id").toString();	
+				String itemJsonString = updatedPayload.toString();	
+				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+							
+				responseJSON = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
+				
+				JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+				if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
+				{					
+					status = Response.Status.OK;
+					responseJSON = "Feature updated";
+					String itemUrlGeoportal = "";
+					
+					//if sync request for Feature, create Stac feature for response 
+					if(!async)
+					{
+						String filePath = "service/config/stac-item.json";
+						String itemFileString = this.readResourceFile(filePath, hsr);
+						
+						//Before searching newly added item, sleep for 1 second, otherwise record is not found
+						TimeUnit.SECONDS.sleep(1);
+						
+						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+					}					
+					return Response.status(status)
+							.header("Content-Type", "application/json")
+							.header("location",itemUrlGeoportal)
+							.entity(responseJSON).build();				
+				}
+				//Some error in creating item
+				else
+				{
+					LOGGER.info("Stac item with id "+id+" could not be updated. ");
+				}
+			}
+			else if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_NOT_FOUND))
+			{
+				status = Response.Status.NOT_FOUND;
+				responseJSON = generateResponse("404", validationStatus.getMessage(),null);
 			}
 			else
 			{
-				finalResponse = this.generateResponse("404", "Record not found.");
-				
-			}
-			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
-					
-		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("Stac response for stac-item could not be preapred. "+e.getMessage());
-			e.printStackTrace();
+				//response json will contain details about validation error like required fields
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+			}	
+		}catch(Exception ex)
+		{
+			LOGGER.error("Error in updating Stac Item " + ex.getCause());
+			ex.printStackTrace();
 		}
+		//For asynchronous request, log this response message
+		 if(async)
+		 {
+			 LOGGER.info("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON);
+		 }
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();		
+	}
+
+	private Response addFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async) 
+	{		
+		if(async)
+		{
+		 new Thread(() -> {
+					this.executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
+		      }).start();
+		      String responseJSON = generateResponse("202", "Stac Feature creation has been started.",null);
+		      return Response.status(Status.ACCEPTED)
+						.header("Content-Type", "application/json")
+						.entity(responseJSON).build();
+		}
+		else
+		{
+			return executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
+		}
+	}	
+	
+	private Response executeAddFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async, String reqType) 
+	{
+		String responseJSON = generateResponse("500","Stac Item could not be added.",null);
+		Status status = Response.Status.INTERNAL_SERVER_ERROR;
+		try {
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,validateFields);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
+			{
+				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
+				
+				String itemJsonString = updatedPayload.toString();								
+				
+				String id = updatedPayload.get("id").toString();			
+				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+							
+				responseJSON = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
+				JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+				if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("created"))
+				{					
+					status = Response.Status.CREATED;
+					responseJSON = "Item created";
+					String itemUrlGeoportal = "";
+					
+					//if sync request for Feature, create Stac feature for response 
+					if(reqType.equals("Feature") && !async)
+					{
+						String filePath = "service/config/stac-item.json";
+						String itemFileString = this.readResourceFile(filePath, hsr);
+						
+						//Before searching newly added item, sleep for 1 second, otherwise record is not found
+						TimeUnit.SECONDS.sleep(1);
+						
+						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+					}
+					
+					return Response.status(status)
+							.header("Content-Type", "application/json")
+							.header("location",itemUrlGeoportal)
+							.entity(responseJSON).build();				
+				}
+				//Some error in creating item
+				else
+				{
+					LOGGER.info("Stac item with id "+id+" could not be created. ");
+				}
+			}		
+			
+			else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
+			{
+				responseJSON = generateResponse("409", "Item with this id already exists in collection.",null);
+				status = Response.Status.CONFLICT;
+			}
+			//Bad request, missing field or any field is invalid
+			else
+			{
+				//response json will contain details about validation error like required fields
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+			}		
+		}
+		catch(Exception ex)
+		{
+			LOGGER.error("Error in adding Stac Item " + ex.getCause());
+			ex.printStackTrace();
+		}
+		//For asynchronous request, log this response message
+		 if(async && reqType.equals("Feature"))
+		 {
+			 LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+		 }
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();
+	}
+	
+	private Response addFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {		
+		if(async)
+		{
+			 new Thread(() -> {
+			        this.exeFeatureCollection(requestPayload, collectionId,async);
+			      }).start();
+			      String responseJSON = generateResponse("202", "FeatureCollection creation has been started.",null);
+			      return Response.status(Status.ACCEPTED)
+							.header("Content-Type", "application/json")
+							.entity(responseJSON).build();
+		}
+		else
+		{
+			return exeFeatureCollection(requestPayload, collectionId,async);
+		}
+	}
+	
+	private Response exeFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {
+		
+		// Add invalid features in error response	
+		String responseJSON = generateResponse("201","FeatureCollection created successfully.",null);
+		Status status = Response.Status.CREATED;
+		
+		try {
+			if(requestPayload.containsKey("features"))
+			{
+				 JSONArray features = (JSONArray) requestPayload.get("features");
+				 //For synchronous request, limit number of features in feature collection
+				 if(!async)
+				 {
+					 if(features.size() >this.getNumFeaturesAddItem())
+					 {
+						 responseJSON = generateResponse("400","Number of Features in FeatureCollection are more than allowed limit ("+features.size()+") in Synchronous request. For large FeatureCollection include paramter async=true.",null);
+						 status = Response.Status.BAD_REQUEST;
+					 }
+				 }
+
+				 JSONArray errorMsgArr = new JSONArray();
+				 JSONObject errorMsgObj = new JSONObject();
+				 JSONObject errorObj=null;
+				 
+				 for(int i =0;i<features.size() ;i++)
+				 {
+					 JSONObject feature = (JSONObject) features.get(i);
+					 Response res = executeAddFeature(feature, collectionId, null, false,"FeatureCollection");
+					 if(res.getStatus() != Response.Status.CREATED.getStatusCode())
+					 {
+						 errorMsgObj = new JSONObject();
+						 errorObj = (JSONObject)JSONValue.parse(res.getEntity().toString());						 
+						 
+						 errorMsgObj.put("id", feature.getAsString("id"));
+						 errorMsgObj.put("error",errorObj.get("description"));
+						 
+						 errorMsgArr.add(errorMsgObj);
+					 }				 
+				 }
+				 if(errorMsgArr.size()>0)
+				 {
+					 responseJSON = generateResponse("500","Some Features in FeatureCollection  could not be added.",errorMsgArr);
+					 status = Response.Status.INTERNAL_SERVER_ERROR;					
+				 }
+			}
+		}catch(Exception ex)
+		{
+			responseJSON = generateResponse("500","Error in adding FeatureCollection.",null);
+			status = Response.Status.INTERNAL_SERVER_ERROR;	
+		}
+		//For asynchronous request, log this response message
+		 if(async)
+		 {
+			 LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+		 } 
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();
+	}
+
+	private String generateResponse(String code, String description, JSONArray detailMsgArr) {
+		JSONObject resObj = new JSONObject();
+		resObj.put("code", code);
+		resObj.put("description", description);
+		
+		if(detailMsgArr != null && detailMsgArr.size()>0)
+			resObj.put("detail",detailMsgArr);
+
+		return resObj.toString();
+	}
+
+	// Prepare response for a single feature
+	private String prepareResponseSingleItem(String searchRes, String itemFileString, String collectionId) {
+
+		net.minidev.json.JSONArray items = null;		
+		String finalResponse = "";
+
+		DocumentContext elasticResContext = JsonPath.parse(searchRes);
+
+		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
+		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
+
+		items = elasticResContext.read("$.hits.hits");
+
+		DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
+		if (items != null && items.size() > 0) {
+			DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
+
+			// Populate feature
+			this.populateFeature(featureContext, searchItemCtx);
+			JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString());
+			JsonObject resObj = obj.getJsonObject("featurePropPath");
+
+			finalResponse = resObj.toString();
+		} else {
+			finalResponse = this.generateResponse("404", "Record not found.",null);
+
+		}
+		finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
 		return finalResponse;
 	}
 
-	
-	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
-			String datetime,String ids, String intersects,String requestType,String collectionId) {
-		int numberMatched;
-		net.minidev.json.JSONArray items = null;
-	
-		String numberReturned = "";
-		String itemFileString = "";		
-		String finalResponse = "";
-		String search_after="";
-		String filePath = "service/config/stac-items.json";
+	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit, String datetime,
+			String ids, String intersects, String requestType, String collectionId) {
 		
+		int numberMatched;		
+		net.minidev.json.JSONArray items = null;
+		String numberReturned = "";
+		String itemFileString = "";
+		String finalResponse = "";
+		String search_after = "";
+		String filePath = "service/config/stac-items.json";
+
 		try {
 			itemFileString = this.readResourceFile(filePath, hsr);
 
 			DocumentContext elasticResContext = JsonPath.parse(searchRes);
 			DocumentContext resourceFilecontext = JsonPath.parse(itemFileString);
-			DocumentContext linksContext = JsonPath.parse(this.readResourceFile(resourceFilecontext.read("$.response.links"), hsr));
+			DocumentContext linksContext = JsonPath
+					.parse(this.readResourceFile(resourceFilecontext.read("$.response.links"), hsr));
 
 			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
 			String featureTemplateStr = fileObj.getJsonObject("featurePropPath").toString();
@@ -506,32 +887,28 @@ public class STACService extends Application {
 
 			numberMatched = elasticResContext.read("$.hits.total.value");
 			items = elasticResContext.read("$.hits.hits");
-			//numberReturned = String.valueOf(items.size());
+			// numberReturned = String.valueOf(items.size());
 
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
-				
-			
-			if(requestType.startsWith("metadataItems"))
-				resourceFilecontext.set("$.response.links",linksContext.read("$.metadataItem.links"));
-			
-			if(requestType.startsWith("search"))
-				resourceFilecontext.set("$.response.links",linksContext.read("$.searchItem.links"));
-			
-						
+
+			if (requestType.startsWith("metadataItems"))
+				resourceFilecontext.set("$.response.links", linksContext.read("$.metadataItem.links"));
+
+			if (requestType.startsWith("search"))
+				resourceFilecontext.set("$.response.links", linksContext.read("$.searchItem.links"));
+
 			JSONArray jsonArray = new JSONArray();
-			
+
 			for (int i = 0; i < items.size(); i++) {
 				DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
 				DocumentContext searchItemCtx = JsonPath.parse(items.get(i));
-				
-				//Populate feature 
-				boolean success = this.populateFeature(featureContext,searchItemCtx);			
-				if(success)
-				{
-					jsonArray.add(featureContext.read("$.featurePropPath"));	
-					if(i== (items.size()-1))
-					{
+
+				// Populate feature
+				boolean success = this.populateFeature(featureContext, searchItemCtx);
+				if (success) {
+					jsonArray.add(featureContext.read("$.featurePropPath"));
+					if (i == (items.size() - 1)) {
 						try {
 							JSONArray sortArr = searchItemCtx.read("$.sort");
 							search_after = sortArr.get(0).toString();
@@ -539,29 +916,29 @@ public class STACService extends Application {
 							search_after = null;
 						}
 					}
-				}						
-			}	
+				}
+			}
 			numberReturned = String.valueOf(jsonArray.size());
-			resourceFilecontext.set("$.response.features", jsonArray);	
-			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);			
-			
-			JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(resourceFilecontext.jsonString()); 
-			JsonObject resObj =  obj.getJsonObject("response");
-			 			
+			resourceFilecontext.set("$.response.features", jsonArray);
+			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);
+
+			JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(resourceFilecontext.jsonString());
+			JsonObject resObj = obj.getJsonObject("response");
+
 			finalResponse = resObj.toString();
-			// Prepare urlparam for next page 	
-			
-			String encodedIntersect=null;
-			if (intersects !=null && !intersects.isBlank()) {
+			// Prepare urlparam for next page
+
+			String encodedIntersect = null;
+			if (intersects != null && !intersects.isBlank()) {
 				if (intersects.contains("%")) {
 					encodedIntersect = intersects;
 				} else {
 					encodedIntersect = URLEncoder.encode(intersects, StandardCharsets.UTF_8.toString());
 				}
-			}	
-			String urlparam="";
+			}
+			String urlparam = "";
 			if (requestType.equalsIgnoreCase("searchPost")) {
-				//In post request, other parameters will be part of request body
+				// In post request, other parameters will be part of request body
 				urlparam = (search_after != null ? "search_after=" + search_after : "");
 
 			} else {
@@ -569,68 +946,78 @@ public class STACService extends Application {
 						+ (datetime != null ? "&datetime=" + datetime : "")
 						+ (search_after != null ? "&search_after=" + search_after : "")
 						+ (encodedIntersect != null ? "&intersects=" + encodedIntersect : "")
-						+ (ids != null ? "&ids=" + ids : "");
+						+ (ids != null ? "&ids=" + ids : "")
+						+((requestType.startsWith("search")) && collectionId != null ? "&collections=" + collectionId : "");
 			}
-			 
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
-
-			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
+			
+			if(requestType.equals("metadataItems")) // These are for links href for collection
+			{
+				finalResponse = finalResponse.replaceAll("\\{collectionId\\}", (collectionId != null ?collectionId:"{collectionId}"));
+			}
+			
 		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("Stac response could not be preapred. "+e.getMessage());
+			LOGGER.error("Stac response could not be preapred. " + e.getMessage());
 			e.printStackTrace();
 		}
 		return finalResponse;
 	}
 
-
-	private boolean populateFeature(DocumentContext featureContext, DocumentContext searchItemCtx) {		
+	private boolean populateFeature(DocumentContext featureContext, DocumentContext searchItemCtx) {
 		HashMap<String, String> propObj = featureContext.read("$.featurePropPath.properties");
 		Set<String> propObjKeys = propObj.keySet();
 		String propKeyVal = "";
-		
-		ArrayList<String> propToBeRemovedList = new ArrayList<String>();
-		ArrayList<String> assetToBeRemovedList = new ArrayList<String>();
+
+		ArrayList<String> propToBeRemovedList = new ArrayList<>();
+		ArrayList<String> assetToBeRemovedList = new ArrayList<>();
 		boolean featureValid = true;
-		
+
 		try {
-		
+
 			String val = featureContext.read("$.featurePropPath.id");
-			String recordId = searchItemCtx.read(val);
+			String recordId = searchItemCtx.read(val).toString();
 			featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
-	
+
 			val = featureContext.read("$.featurePropPath.collection");
 			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
-						
-			//add bbox, geometry				
-			this.setBbox(searchItemCtx,featureContext);		
+
+			// add bbox, geometry
+			this.setBbox(searchItemCtx, featureContext);
 			
-			this.setGeometry(searchItemCtx,featureContext);
-			
-			
-			//Fill asset
+			JSONArray bboxArr = featureContext.read("$.featurePropPath.bbox");
+			//No valid bbox in feature
+			if(bboxArr.get(1).toString().contains("$"))
+			{
+				featureContext.delete("$.featurePropPath.bbox");
+			}
+
+			this.setGeometry(searchItemCtx, featureContext);
+
+			// Fill asset
 			HashMap<String, JSONObject> assetsObj = featureContext.read("$.featurePropPath.assets");
-			Set<String> assetsObjKeys = assetsObj.keySet();		
-			
-			//Iterate Assets
+			Set<String> assetsObjKeys = assetsObj.keySet();
+
+			// Iterate Assets
 			HashMap<String, Object> assetObj = null;
-			String assetObjKeyVal ="";
+			String assetObjKeyVal = "";
 			for (String assetsObjKey : assetsObjKeys) {
 				try {
 					assetObj = assetsObj.get(assetsObjKey);
 					Set<String> assetObjKeys = assetObj.keySet();
-					
+
 					for (String assetObjKey : assetObjKeys) {
-						 assetObjKeyVal = String.valueOf(assetObj.get(assetObjKey));
+						assetObjKeyVal = String.valueOf(assetObj.get(assetObjKey));
 						
 						// If it is a json path, set values from search result
 						if (assetObjKeyVal.startsWith("$")) {
 							if (searchItemCtx.read(assetObjKeyVal) != null) {
-								featureContext.set("$.featurePropPath.assets." + assetsObjKey+"."+assetObjKey, searchItemCtx.read(assetObjKeyVal));
+								featureContext.set("$.featurePropPath.assets." + assetsObjKey + "." + assetObjKey,
+										searchItemCtx.read(assetObjKeyVal));
 							}
 						}
 					}
-					
+
 				} catch (Exception e) {
 					// If json path not found or error in any asset, remove this asset in the
 					// end.if removed here, concurrentModificationException
@@ -638,35 +1025,35 @@ public class STACService extends Application {
 					LOGGER.trace("key: " + assetsObjKey + " could not be added. Reason : " + e.getMessage());
 				}
 			}
-			
-			//Add all the assets from stac record, if available
-			try {				 
-				 HashMap<String, JSONObject> stacRecAssetObj = searchItemCtx.read("$._source.assets");
-				 assetsObj = featureContext.read("$.featurePropPath.assets");
-				 if(stacRecAssetObj != null)
-				 {
-					 Set<String> stacRecAssetObjKeys = stacRecAssetObj.keySet();	
-				 
-					 for (String stacRecAssetObjKey : stacRecAssetObjKeys) {					 
-						 assetsObj.put(stacRecAssetObjKey,searchItemCtx.read("$._source.assets."+stacRecAssetObjKey,JSONObject.class));
-					 }
-					 featureContext.set("$.featurePropPath.assets",assetsObj);
-				 }
-			}//if json path ($._source.assets) not found,catch exception and ignore
-			catch(Exception e)
-			{
-				LOGGER.trace("No assets ($._source.assets) in this Stac record with id: "+recordId);
-				
+
+			// STEP: Add_ALL_ASSET assets from stac record, if available
+			try {
+				HashMap<String, JSONObject> stacRecAssetObj = searchItemCtx.read("$._source.assets");
+				assetsObj = featureContext.read("$.featurePropPath.assets");
+				if (stacRecAssetObj != null) {
+					Set<String> stacRecAssetObjKeys = stacRecAssetObj.keySet();
+
+					for (String stacRecAssetObjKey : stacRecAssetObjKeys) {
+						assetsObj.put(stacRecAssetObjKey,
+								searchItemCtx.read("$._source.assets." + stacRecAssetObjKey, JSONObject.class));
+					}
+					featureContext.set("$.featurePropPath.assets", assetsObj);
+				}
+			} // if json path ($._source.assets) not found,catch exception and ignore
+			catch (Exception e) {
+				LOGGER.trace("No assets ($._source.assets) in this Stac record with id: " + recordId);
+
 			}
-			 			
-			//Iterate properties, skip property if it is not available
+
+			// Iterate properties, skip property if it is not available			
 			for (String propKey : propObjKeys) {
 				try {
 					propKeyVal = String.valueOf(propObj.get(propKey));
 					// If it is a json path, set values from search result
 					if (propKeyVal.startsWith("$")) {
 						if (searchItemCtx.read(propKeyVal) != null) {
-							featureContext.set("$.featurePropPath.properties." + propKey, searchItemCtx.read(propKeyVal));
+							featureContext.set("$.featurePropPath.properties." + propKey,
+									searchItemCtx.read(propKeyVal));
 						}
 					}
 				} catch (Exception e) {
@@ -677,45 +1064,64 @@ public class STACService extends Application {
 					LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
 				}
 			}
-			
+
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
-			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id"));
-			featureContext.set("$.featurePropPath.links[0].href",linkSelfHref);
+			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
 			
+			//Support multiple collection, set Item collection id
+			linkSelfHref = linkSelfHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));  
+			featureContext.set("$.featurePropPath.links[0].href", linkSelfHref);
+			
+			String linkParentHref = featureContext.read("$.featurePropPath.links[2].href");
+			linkParentHref = linkParentHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));
+			featureContext.set("$.featurePropPath.links[2].href", linkParentHref);
+			
+			String linkCollectionHref = featureContext.read("$.featurePropPath.links[3].href");
+			linkCollectionHref = linkCollectionHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));
+			featureContext.set("$.featurePropPath.links[3].href", linkCollectionHref);
+			
+
 		} catch (Exception e) {
 			// If json path not found or error in any property, skip this feature
 			featureValid = false;
 			LOGGER.trace("feature could not be added. Reason : " + e.getMessage());
-		//	System.out.println("feature could not be added. Reason : " + e.getMessage());
-		}		
-		
+			// System.out.println("feature could not be added. Reason : " + e.getMessage());
+		}
+
 		for (String propToRemove : propToBeRemovedList) {
 			featureContext.delete(propToRemove);
 		}
-		for (String assetToRemove : assetToBeRemovedList) {			
-			featureContext.delete(assetToRemove);
+		Object assetObj = null;
+		for (String assetToRemove : assetToBeRemovedList) {
+			//Assets are populated from Feature in step Add_ALL_ASSET (so first validate if it still needs removal
+			assetObj = featureContext.read(assetToRemove);
+			if(assetObj instanceof JSONObject)
+			{
+				JSONObject assetJSONObj = (JSONObject)assetObj;
+				if(assetJSONObj.getAsString("href").contains("$."))// Still JSON path from stac-item.json
+					featureContext.delete(assetToRemove);
+			}
+			else
+			{
+				featureContext.delete(assetToRemove);
+			}			
 		}
 		return featureValid;
 	}
-	
 
 	private void setGeometry(DocumentContext searchItemCtx, DocumentContext featureContext) {
 		net.minidev.json.JSONArray valArr = featureContext.read("$.featurePropPath.geometry");
-		String geometryProp = "";		
+		String geometryProp = "";
 		try {
-			if(valArr.size() >0)
-			{
-				geometryProp = (String) valArr.get(0);							
-				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));	
+			if (!valArr.isEmpty()) {
+				geometryProp = (String) valArr.get(0);
+				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));
 			}
-		}
-		catch(Exception ex)
-		{
-			//If first path does not work, try second one
-			if(valArr.size() >1)
-			{
-				geometryProp = (String) valArr.get(1);;
-				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));				
+		} catch (Exception ex) {
+			// If first path does not work, try second one
+			if (valArr.size() > 1) {
+				geometryProp = (String) valArr.get(1);
+				featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(geometryProp));
 			}
 		}
 	}
@@ -723,246 +1129,83 @@ public class STACService extends Application {
 	private void setBbox(DocumentContext searchItemCtx, DocumentContext featureContext) {
 		net.minidev.json.JSONArray valArr = featureContext.read("$.featurePropPath.bbox");
 		String bboxProp = "";
-		if(valArr.size() >0)
-		{
+		if (!valArr.isEmpty()) {
 			bboxProp = (String) valArr.get(0);
-			if(!bboxProp.isBlank() && bboxProp.indexOf("envelope_geo")>-1)
-			{
-				this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
-			}			
-			else if(!bboxProp.isBlank() && bboxProp.indexOf("bbox")>-1)
-			{				
+			if (!bboxProp.isBlank() && bboxProp.contains("envelope_geo")) {
+				this.setBboxAsEnvelopGeo(searchItemCtx, featureContext, bboxProp);
+			} else if (!bboxProp.isBlank() && bboxProp.contains("bbox")) {
 				this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
 			}
 		}
-		if(valArr.size() >1)
-		{
-			bboxProp = (String) valArr.get(1);;
-			if(!bboxProp.isBlank() && bboxProp.indexOf("envelope_geo")>-1)
-			{
-				this.setBboxAsEnvelopGeo(searchItemCtx,featureContext,bboxProp);				
-			}			
-			else if(!bboxProp.isBlank() && bboxProp.indexOf("bbox")>-1)
-			{				
+		if (valArr.size() > 1) {
+			bboxProp = (String) valArr.get(1);
+			if (!bboxProp.isBlank() && bboxProp.contains("envelope_geo")) {
+				this.setBboxAsEnvelopGeo(searchItemCtx, featureContext, bboxProp);
+			} else if (!bboxProp.isBlank() && bboxProp.contains("bbox")) {
 				this.setBboxAsBbox(searchItemCtx, featureContext, bboxProp);
-			}				
-		}		
+			}
+		}
 	}
 
 	private void setBboxAsEnvelopGeo(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
 		try {
 			JSONArray enveloperArr = searchItemCtx.read(bboxProp);
-			
-			//"envelope_geo":[{"type":"envelope","ignore_malformed":"true","coordinates":[[-127.0236257875064,64.01274197384028],[-125.569240728746,63.020232862518167]]}]
-			if(enveloperArr !=null)
-			{
+
+			// "envelope_geo":[{"type":"envelope","ignore_malformed":"true","coordinates":[[-127.0236257875064,64.01274197384028],[-125.569240728746,63.020232862518167]]}]
+			if (enveloperArr != null) {
 				@SuppressWarnings("unchecked")
 				HashMap<String, JSONArray> hm = (HashMap<String, JSONArray>) enveloperArr.get(0);
-				
+
 				JSONArray geomArr = (JSONArray) hm.get("coordinates");
 				JSONArray geomArr0 = (JSONArray) geomArr.get(0);
 				JSONArray geomArr1 = (JSONArray) geomArr.get(1);
-								
+
 				Double xmin = Double.parseDouble(geomArr0.get(0).toString());
-				Double ymax = Double.parseDouble(geomArr0.get(1).toString());				
-						
+				Double ymax = Double.parseDouble(geomArr0.get(1).toString());
+
 				Double xmax = Double.parseDouble(geomArr1.get(0).toString());
 				Double ymin = Double.parseDouble(geomArr1.get(1).toString());
-				
+
 				JSONArray arr = new JSONArray();
 				arr.add(xmin);
 				arr.add(ymin);
 				arr.add(xmax);
 				arr.add(ymax);
-				featureContext.set("$.featurePropPath.bbox", arr);		
-			}		
-		}catch(Exception ex)		
-		{
-			//DO nothing. Just skip
-		}		
-	}
-	
-	private void setBboxAsBbox(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
-		try
-		{
-		    //"bbox": [-74.09957050999664,-4.611277442089833,-73.1088539899217,-3.6165503784726664]
-			featureContext.set("$.featurePropPath.bbox", searchItemCtx.read(bboxProp));
-		}catch(Exception ex)
-		{
-			//DO nothing. Just skip
-		}
-	}
-
-	private String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
-		String queryStr = "";
-		JsonArrayBuilder builder = Json.createArrayBuilder();
-
-		if (queryMap.containsKey("bbox")) {
-			String bboxQry = this.prepareBbox((String) queryMap.get("bbox"));
-			if (bboxQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(bboxQry));
-
-		}
-		if (queryMap.containsKey("datetime")) {
-			String dateTimeQry = this.prepareDateTime(queryMap.get("datetime"));
-			if (dateTimeQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
-		}
-		if (queryMap.containsKey("ids")) {
-			String idsQry = this.prepareIds(queryMap.get("ids"));
-			System.out.println("ids "+idsQry);
-			
-			if (idsQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(idsQry));
-		}
-		
-		if (queryMap.containsKey("intersects")) {
-			String intersectsQry = this.prepareIntersects(queryMap.get("intersects"));
-			if (intersectsQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(intersectsQry));
-		}
-		
-		JsonArray filter = builder.build();
-		
-		if (filter.size() > 0) {
-			queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
-		}
-			String searchAfterStr = "";
-			if(searchAfter!= null && searchAfter.length()>0)
-			{
-				searchAfterStr = "\"search_after\":[\""+searchAfter+"\"]";
+				featureContext.set("$.featurePropPath.bbox", arr);
 			}
-				
-		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
-				+(queryStr.length()>0 ? ","+queryStr: "")
-				+(searchAfterStr.length()>0 ?","+searchAfterStr : "")+"}";		
-		return searchQuery;
-	}
-//{"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
-	private String prepareIntersects(String geoJson) {
-		String query =""; 
-		String field = "shape_geo";
-		String spatialType = "geo_shape"; 
-		String relation = "intersects";
-		
-		query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": "+geoJson+ ",\"relation\": \"" + relation + "\"}}}";
-		return query;
-	}
-
-	private String prepareIds(String ids) {		
-		return "{\"match\": {\"id\": \""+ids+"\"}}";	
-	}
-
-	private String prepareDateTime(String datetime) {
-		String query = "";
-		String dateTimeFld = "sys_modified_dt";
-		String dateTimeFldQuery = "";
-		// Find from and to dates
-		// https://api.stacspec.org/v1.0.0/ogcapi-features/#tag/Features/operation/getFeatures
-//	Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.
-//	Examples:
-//	A date-time: "2018-02-12T23:20:50Z"
-//	A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
-//	Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
-
-		String fromField = datetime;
-		String toField = "";
-		List<String> dateFlds = Arrays.asList(datetime.split("/"));
-
-		if (dateFlds.size() > 1) {
-			fromField = dateFlds.get(0);
-			toField = dateFlds.get(1);
-		}
-		if (toField.equals("") || toField.equals("..")) {
-			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\"}";
-		} else if (fromField.equals("..")) {
-			dateTimeFldQuery = "{\"lte\":\"" + toField + "\"}";
-		} else {
-			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\",\"lte\":\"" + toField + "\"}";
-		}
-
-		query = "{\"range\": {\"" + dateTimeFld + "\":" + dateTimeFldQuery + "}}";
-
-		return query;
-	}
-
-	private String prepareBbox(String bboxString) {
-		String field = "envelope_geo";
-		String spatialType = "geo_shape"; // geo_shape or geo_point
-		String relation = "intersects";
-		List<String> bbox = Arrays.asList(bboxString.split(",", -1));
-
-		double coords[] = { -180.0, -90.0, 180.0, 90.0 };
-		String query = "";
-		//As per stac API validator, invalid bbox should respond with 400, instead of reaplcing it with defaults
-		if (bbox.size()==4 || bbox.size()==6) {			
-				coords[0] = Double.parseDouble(bbox.get(0));		
-				coords[1] = Double.parseDouble(bbox.get(1));			
-				coords[2] = Double.parseDouble(bbox.get(2));			
-				coords[3] = Double.parseDouble(bbox.get(3));
-				String coordinates = "[[" + coords[0] + "," + coords[3] + "], [" + coords[2] + "," + coords[1] + "]]";
-				if(bbox.size()==6)
-				{
-					coords[4] = Double.parseDouble(bbox.get(4));			
-					coords[5] = Double.parseDouble(bbox.get(5));
-					
-				}
-				
-				query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \"envelope\","
-						+ "\"coordinates\":"+coordinates 
-						+ "},\"relation\": \"" + relation + "\"}}}";
-				return query;
-//			if ((Double.parseDouble(bbox.get(0)) < -180.0) && (Double.parseDouble(bbox.get(2)) >= -180.0))
-//				coords[0] = -180.0;
-//			else
-//				coords[0] = Double.parseDouble(bbox.get(0));
-//			if ((Double.parseDouble(bbox.get(1)) < -90.0) && (Double.parseDouble(bbox.get(3)) >= -90.0))
-//				coords[1] = -90.0;
-//			else
-//				coords[1] = Double.parseDouble(bbox.get(1));
-//			if ((Double.parseDouble(bbox.get(2)) > 180.0) && (Double.parseDouble(bbox.get(0)) <= 180.0))
-//				coords[2] = 180.0;
-//			else
-//				coords[2] = Double.parseDouble(bbox.get(2));
-//			if ((Double.parseDouble(bbox.get(3)) > 90.0) && (Double.parseDouble(bbox.get(1)) <= 90.0))
-//				coords[3] = 90.0;
-//			else
-//				coords[3] = Double.parseDouble(bbox.get(3));
-		}
-		else
-		{
-			throw new InvalidParameterException("bbox", "Invalid bbox");
+		} catch (Exception ex) {
+			// DO nothing. Just skip
 		}
 	}
 
-	private int setLimit(int limit) {
-		if(limit ==0)
-		{
-			limit = 10; //default
+	private void setBboxAsBbox(DocumentContext searchItemCtx, DocumentContext featureContext, String bboxProp) {
+		try {
+			// "bbox":
+			// [-74.09957050999664,-4.611277442089833,-73.1088539899217,-3.6165503784726664]
+			featureContext.set("$.featurePropPath.bbox", searchItemCtx.read(bboxProp));
+		} catch (Exception ex) {
+			// DO nothing. Just skip
 		}
-		if (limit < 0 || limit > 10000) {
-			throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
-		}
-		return limit;
 	}
 
+	
 	public String getBaseUrl(HttpServletRequest hsr) {
 
 		StringBuffer requestURL = hsr.getRequestURL();
 		String ctxPath = hsr.getContextPath();
-                String urlScheme = hsr.getScheme();
-                String urlServerName = hsr.getServerName();
-                int urlPort = hsr.getServerPort();
+		String urlScheme = hsr.getScheme();
+		String urlServerName = hsr.getServerName();
+		int urlPort = hsr.getServerPort();
 		String baseUrl;
 
 		if (ctxPath.length() > 0) {
-        	    baseUrl = requestURL.substring(0, requestURL.indexOf(ctxPath) + ctxPath.length());
+			baseUrl = requestURL.substring(0, requestURL.indexOf(ctxPath) + ctxPath.length());
 		} else {
-        	    baseUrl = urlScheme + "://" + urlServerName;
-                    if ((urlPort != 80) && (urlPort != 443)) {
-                        baseUrl += ":" + urlPort;
-                }
-		}                
+			baseUrl = urlScheme + "://" + urlServerName;
+			if ((urlPort != 80) && (urlPort != 443)) {
+				baseUrl += ":" + urlPort;
+			}
+		}
 		return baseUrl + "/stac";
 	}
 
@@ -982,13 +1225,53 @@ public class STACService extends Application {
 		return filedataString;
 	}
 	
-	private String generateResponse(String code, String resMsg)
-	{	
-		net.minidev.json.JSONObject resObj =  new JSONObject();
-		resObj.put("code", code);
-		resObj.put("description", resMsg);
-		
-		return resObj.toJSONString();
+	
+	private ArrayList<String> getCollectionList() throws Exception {
+		String url = client.getTypeUrlForSearch(ec.getIndexName());
+		url = url + "/_search";
+		String collectionsSearch = "{\"aggregations\": {\"collections\": {\"terms\": {\"field\": \"src_collections_s\"}}}}";
+
+		String response = client.sendPost(url, collectionsSearch, "application/json");
+		JSONObject gptResponse = (JSONObject) JSONValue.parse(response); // JsonUtil.toJsonStructure(response);
+		JSONObject gptAggregations = (JSONObject) gptResponse.get("aggregations");
+		JSONObject gptCollections = (JSONObject) gptAggregations.get("collections");
+		JSONArray gptBuckets = (JSONArray) gptCollections.get("buckets");
+
+		ArrayList<String> collectionsList = new ArrayList<String>();
+		for (int i = 0; i < gptBuckets.size(); i++) {
+			JSONObject bucket = (JSONObject) gptBuckets.get(i);
+			String collectionName = bucket.getAsString("key");
+			collectionsList.add(collectionName);
+
+		}
+		return collectionsList;
+	}
+	
+	private boolean validCollection(String collectionId) throws Exception {
+		boolean validId = false;
+		if(collectionId != null && !collectionId.isBlank())
+		{
+			ArrayList<String> collectionList = this.getCollectionList();
+			for(int i=0;i<collectionList.size();i++)
+			{
+				if(collectionList.get(i)!= null && collectionList.get(i).equals(collectionId))
+				{
+					validId = true;
+					break;
+				}
+			}
+		}
+		return validId;		
+	}
+	
+	private int setLimit(int limit) {
+		if (limit == 0) {
+			limit = 10; // default
+		}
+		if (limit < 0 || limit > 10000) {
+			throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
+		}
+		return limit;
 	}
 
 }
