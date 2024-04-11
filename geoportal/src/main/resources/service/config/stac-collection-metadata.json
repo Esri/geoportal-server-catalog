@@ -2,7 +2,7 @@
     "stac_version": "1.0.0",
     "stac_extensions": [],
     "type": "Collection",
-    "id": "metadata",
+    "id": "{collectionId}",
     "title": "Geoportal Server Metadata",
     "description": "Esri Geoportal Server Metadata Catalog",
     "license": "Apache-2.0",
