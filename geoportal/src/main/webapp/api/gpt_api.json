@@ -77,8 +77,54 @@
 					"description": "successful operation"
 				}
 			}
+		},
+		"post": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Add Stac collection in Geoportal catalog",
+			"produces": [
+	          "application/json"
+	        ],
+        	"operationId": "stacCollectionsPost",                                                                                                                                                                                        
+	        "parameters": [          
+	          {
+	            "name": "body",
+	            "in": "body",
+	            "description": "https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md",
+	            "required": true      
+	          }
+        	],
+	        "responses": {
+	          "default": {
+	            "description": "successful operation"
+	          }
+	        }			
+		},
+		"put": {
+			"tags": [
+				"STAC"
+			],
+			"summary": "Update collection",
+			"produces": [
+	          "application/json"
+	        ],
+        	"operationId": "stacCollectionsPut",                                                                                                                                                                                        
+	        "parameters": [          
+	          {
+	            "name": "body",
+	            "in": "body",
+	            "description": "https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md",
+	            "required": true      
+	          }
+        	],
+	        "responses": {
+	          "default": {
+	            "description": "successful operation"
+	          }
+	        }	
 		}
-	},
+	},	
 	"/stac/collections/{collectionId}": {
 		"get": {
 			"tags": [
