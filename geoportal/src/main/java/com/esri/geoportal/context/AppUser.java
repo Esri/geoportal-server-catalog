@@ -17,6 +17,7 @@ import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
@@ -90,19 +91,20 @@ public class AppUser {
   
   /**
    * Initialize based upon an HTTP request.
-   * @param sc the request
+   * @param request the request
    */
-  private void init(HttpServletRequest sc) {
+  private void init(HttpServletRequest request) {
     init(null,false,false);
-    if (sc == null) return;
-    Principal p = sc.getUserPrincipal();
+    if (request == null) return;
+    
+    Principal p = request.getUserPrincipal();
     if (p == null) return;
     groups = new ArrayList<Group>();
     username = p.getName();
     if (username != null && username.length() > 0) {
       isAnonymous = false;
-      isAdmin = sc.isUserInRole("ADMIN");
-      isPublisher = sc.isUserInRole("PUBLISHER");
+      isAdmin = request.isUserInRole("ADMIN");
+      isPublisher = request.isUserInRole("PUBLISHER");
     } else {
       isAnonymous = true;
     }
@@ -137,6 +139,15 @@ public class AppUser {
         }          
       }
     }
+    
+    //check username in GeoportalContext.getUserGroupMap. if it exists(in case of ArcGIS Authentication Provider), add those groups as well
+    GeoportalContext gc = GeoportalContext.getInstance();
+    HashMap<String,ArrayList<Group>> userGroupMap = gc.getUserGroupMap();
+    if(userGroupMap.containsKey(username))
+    {
+    	groups.addAll(userGroupMap.get(username));
+    }
+    	
   }
   
   /**
