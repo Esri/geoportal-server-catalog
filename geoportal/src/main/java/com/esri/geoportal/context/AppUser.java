@@ -21,14 +21,25 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import javax.json.JsonArray;
+import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.core.SecurityContext;
 
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.AuthenticationServiceException;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.web.client.RestTemplate;
 
+import com.esri.geoportal.base.security.ArcGISAuthenticationProvider;
 import com.esri.geoportal.base.security.Group;
+import com.esri.geoportal.base.util.JsonUtil;
 
 /**
  * The user associated with a request.
@@ -42,6 +53,7 @@ public class AppUser {
   private boolean isPublisher;
   private String username;
   
+ 
   /** Constructor */
   public AppUser() {}
   
@@ -121,19 +133,31 @@ public class AppUser {
       OAuth2Authentication auth = (OAuth2Authentication)p;
       if (auth.isAuthenticated()) authorities = auth.getAuthorities();
     }
+    String url ="";
     if (authorities != null) {
       Iterator<GrantedAuthority> iterator = authorities.iterator();
+     
       if (iterator != null) {
         while (iterator.hasNext()){
           GrantedAuthority authority = iterator.next();
           if (authority != null) {
             String name = authority.getAuthority();
-            if (name != null) {
-              if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
-              if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
-                //System.err.println("authority: "+name);
-                groups.add(new Group(name));
-              }
+            if (name != null)
+            {
+            	// this role is ArcGIS token
+            	if (name.indexOf("--urlWithToken--") != -1)
+            	{            		
+            		String urlPrefix = "--urlWithToken--";            		
+            		url = name.substring(urlPrefix.length());
+            	}
+            	else
+            	{
+            		 if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
+                     if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
+                       //System.err.println("authority: "+name);
+                       groups.add(new Group(name));
+                     }
+            	}             
             }
           }
         }          
@@ -147,10 +171,47 @@ public class AppUser {
     {
     	groups.addAll(userGroupMap.get(username));
     }
-    	
+    else
+    {
+    	//Try to retrieve groups from ArcGIS
+    	if(url.length()>0)
+    	{
+    		this.getArcGISUserGroups(username,url);
+    	}
+    }    	
   }
   
-  /**
+  private void getArcGISUserGroups(String username, String url) {
+	    ArcGISAuthenticationProvider provider = new ArcGISAuthenticationProvider();
+	    RestTemplate rest = new RestTemplate();
+	    HttpHeaders headers = new HttpHeaders();
+	    String referer = provider.getThisReferer();
+	    if (referer != null) {
+	      headers.add("Referer",referer);
+	    };
+	    HttpEntity<String> requestEntity = new HttpEntity<String>(headers);
+	    ResponseEntity<String> responseEntity = rest.exchange(url,HttpMethod.GET,requestEntity,String.class);
+	    String response = responseEntity.getBody();
+	    //System.err.println(response);;
+	    //if (response != null) LOGGER.trace(response);
+	    if (!responseEntity.getStatusCode().equals(HttpStatus.OK)) {
+	      throw new AuthenticationServiceException("Error communicating with the authentication service.");
+	    }
+	    JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(response);
+	   
+	    if (jso.containsKey("groups") && !jso.isNull("groups")) {
+	        JsonArray jsoGroups = jso.getJsonArray("groups");
+	        for (int i=0;i<jsoGroups.size();i++) {
+	          JsonObject jsoGroup = jsoGroups.getJsonObject(i);
+	          String groupId = jsoGroup.getString("id");
+	          String groupName = jsoGroup.getString("title");
+	          String groupKey = groupId+"_..._"+groupName;
+	          groups.add(new Group(groupKey));
+	        }
+	    }
+}
+
+/**
    * Initialize.
    * @param username the username 
    * @param isAdmin True is this user has an ADMIN role

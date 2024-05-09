@@ -13,10 +13,6 @@
  * limitations under the License.
  */
 package com.esri.geoportal.base.security;
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.util.Val;
-import com.esri.geoportal.context.GeoportalContext;
-
 import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
@@ -27,8 +23,8 @@ import java.util.List;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
-import org.apache.commons.lang3.StringUtils;
 
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.http.HttpEntity;
@@ -47,6 +43,10 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Component;
 import org.springframework.web.client.RestTemplate;
 
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.util.Val;
+import com.esri.geoportal.context.GeoportalContext;
+
 /**
  * Authentication for ArcGIS OAuth2.
  */
@@ -58,7 +58,7 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
   /** Instance variables. */
   private boolean allUsersCanPublish = false;
   private String appId;
-  private String authorizeUrl; 
+  public String authorizeUrl; 
   private String createAccountUrl;
   private int expirationMinutes = 120;
   private String geoportalAdministratorsGroupId;
@@ -85,7 +85,7 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
   }
 
   /** The ArcGIS OAuth authorize URL. */
-  public String getAuthorizeUrl() {
+   public String getAuthorizeUrl() {
     return authorizeUrl;
   }
   /** The ArcGIS OAuth authorize URL. */
@@ -259,6 +259,8 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
     if (isPublisher) {
       roles.add(new SimpleGrantedAuthority(pfx+"PUBLISHER"));
     }
+    //Save ArcGIS url with token also in roles so that it can be used later to retrieve groups
+    roles.add(new SimpleGrantedAuthority("--urlWithToken--"+url));
     
     if (jso.containsKey("username") && !jso.isNull("username")) {
       if (!username.equals(jso.getString("username"))) {
@@ -279,6 +281,7 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
     	 
     	// Do not add userGroups in Roles, rather save it in GeoportalContext
         //roles.add(new SimpleGrantedAuthority(groupKey));
+    	 
       }
       HashMap<String,ArrayList<Group>> userGroupMap = gc.getUserGroupMap();
       if(!userGroupMap.containsKey(username))
@@ -370,7 +373,7 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
    * Get the local host name (to be used as a referer).
    * @return the referer
    */
-  private String getThisReferer() {
+  public String getThisReferer() {
     try {
       return InetAddress.getLocalHost().getCanonicalHostName();
     } catch (UnknownHostException ex) {
