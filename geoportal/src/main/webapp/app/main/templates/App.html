@@ -3,54 +3,59 @@
     Skip to main content
   </a>
 
-  <nav class="g-header navbar-inverse">
-    <figure class="g-branding" data-dojo-attach-event="onclick: _onHome">
-      <img class="g-brand-logo" src="images/esri-logo-sym.png" />
-      <span class="navbar-brand">${i18n.nav.brand}</span>
-    </figure>
-
-    <ul class="nav navbar-nav">
-      <li class="nav-item active">
+  <nav class="g-header navbar">
+ 	<div class="container-fluid">
+	    <figure class="g-branding"  data-dojo-attach-event="onclick: _onHome">
+	      <img class="g-brand-logo" src="images/esri-logo-sym.png" />
+	      <span class="navbar-brand">${i18n.nav.brand}</span>
+	    </figure>
+	
+    <ul class="nav nav-pills" id="mytab" role="tablist">
+      <li class="nav-item" role="presentation">
         <a
-          class="nav-link"
+          class="nav-link active"
+          aria-current="page"
           href="#searchPanel"
-          data-toggle="tab"
+          id="search-tab" data-bs-toggle="tab"          
+          role="tab" 
+          aria-controls="searchPanel" aria-selected="true"          
           data-dojo-attach-point="searchPanelLink"
         >
           ${i18n.nav.catalog}
-          <span class="sr-only">(current)</span>
+          <span class="visually-hidden">(current)</span>
         </a>
       </li>
 
-      <li class="nav-item">
-        <a class="nav-link" href="#mapPanel" data-toggle="tab">
+      <li class="nav-item" role="presentation">
+        <a class="nav-link" id="map-tab"  href="#mapPanel" data-bs-toggle="tab" role="tab" aria-controls="mapPanel">
           ${i18n.nav.map}
         </a>
       </li>
 
       <li class="nav-item">
-        <a class="nav-link" href="#apiPanel" data-toggle="tab">
+        <a class="nav-link" id="api-tab"  href="#apiPanel" data-bs-toggle="tab" role="tab" aria-controls="apiPanel">
           ${i18n.nav.api}
         </a>
       </li>
       
       <li class="nav-item" data-dojo-attach-point="cartPanelBtnNode">
-        <a class="nav-link" href="#cartPanel" data-toggle="tab">
+        <a class="nav-link" href="#cartPanel" data-bs-toggle="tab">
           Shopping Cart
         </a>
       </li>
       
-      <li class="nav-item" data-dojo-attach-point="adminOptionsBtnNode">
+      <li class="nav-item dropdown" data-dojo-attach-point="adminOptionsBtnNode">
         <a
-          class="g-nav-dropdown-link dropdown-toggle nav-padding-fix"
+          class="nav-link dropdown-toggle"
           href="javascript:void(0)"
           aria-label="Dropdown Menu"
-          data-toggle="dropdown"
+          data-bs-toggle="dropdown"
+          aria-expanded="false"
         >
           <span>${i18n.nav.admin}</span>
-          <svg class="g-nav-dropdown-icon" viewBox="0 0 24 24">
+         <!--  <svg class="g-nav-dropdown-icon" viewBox="0 0 24 24">
             <path d="M7,10L12,15L17,10H7Z" />
-          </svg>
+          </svg> -->
         </a>
 
         <ul class="dropdown-menu">
@@ -58,7 +63,7 @@
           <li data-role="publisher">
             <a
               href="javascript:void(0)"
-              class="small"
+              class=""dropdown-item""
               data-dojo-attach-event="onclick: createMetadataClicked"
             >
               ${i18n.nav.options.createMetadata}
@@ -67,7 +72,7 @@
           <li data-role="publisher">
             <a
               href="javascript:void(0)"
-              class="small"
+              class=""dropdown-item""
               data-dojo-attach-event="onclick: uploadClicked"
             >
               ${i18n.nav.options.uploadMetadata}
@@ -87,8 +92,8 @@
       </li>
 
       <li class="nav-item">
-        <a class="nav-link" href="#aboutPanel" data-toggle="tab">
-          ${i18n.nav.about}
+      	<a class="nav-link" id="about-tab" data-bs-target="#aboutPanel" href="#aboutPanel" data-bs-toggle="tab" role="tab" aria-controls="aboutPanel">
+           ${i18n.nav.about}
         </a>
       </li>
     </ul>
@@ -103,7 +108,7 @@
           href="javascript:void(0)"
           class="dropdown-toggle g-user"
           aria-label="Dropdown Menu"
-          data-toggle="dropdown"
+          data-bs-toggle="dropdown"
         >
           <img class="g-user-thumb" src="images/account-placehold.svg" />
           <span class="g-username" data-dojo-attach-point="usernameNode"></span>
@@ -153,34 +158,35 @@
         ${i18n.nav.signIn}
       </a>
     </div>
+    </div>
   </nav>
 
-  <div class="tab-content">
-    <div id="searchPanel" role="tabpanel" class="tab-pane fade in active">
+  <div class="tab-content" id="myTabContent">
+    <div id="searchPanel" role="tabpanel" class="tab-pane container fade show active">
       <div
         data-dojo-type="app/main/SearchPanel"
         data-dojo-attach-point="searchPanel"
       ></div>
     </div>
-    <div id="mapPanel" role="tabpanel" class="tab-pane fade">
+    <div id="mapPanel" role="tabpanel" class="tab-pane container fade">
       <div
         data-dojo-type="app/main/MapPanel"
         data-dojo-attach-point="mapPanel"
       ></div>
     </div>
-    <div id="apiPanel" role="tabpanel" class="tab-pane fade">
+    <div id="apiPanel" role="tabpanel" class="tab-pane container fade">
       <div
         data-dojo-type="app/main/APIPanel"
         data-dojo-attach-point="apiPanel"
       ></div>
     </div>
-    <div id="cartPanel" role="tabpanel" class="tab-pane fade">
+    <div id="cartPanel" role="tabpanel" class="tab-pane container fade">
       <div
         data-dojo-type="app/main/CartPanel"
         data-dojo-attach-point="cartPanel"
       ></div>
     </div>
-    <div id="aboutPanel" role="tabpanel" class="tab-pane fade">
+    <div id="aboutPanel" role="tabpanel" class="tab-pane container fade">
       <div
         data-dojo-type="app/main/AboutPanel"
         data-dojo-attach-point="aboutPanel"
