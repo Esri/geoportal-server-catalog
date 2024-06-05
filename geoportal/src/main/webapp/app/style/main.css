@@ -1,5 +1,8 @@
 /* RESET */
-html,
+html {
+  font-family: sans-serif;
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%; }
 body,
 .g-app {
   height: 100%;
@@ -129,7 +132,7 @@ body {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  cursor: pointer;
+  cursor: pointer;  
 }
 
 .g-brand-logo {
@@ -140,6 +143,7 @@ body {
 .g-header .g-branding .navbar-brand {
   color: #404040;
   transition: color linear 250ms;
+  padding-left:20px;
 }
 
 .g-header .g-branding .navbar-brand:hover {
@@ -147,30 +151,30 @@ body {
 }
 
 /* HEADER - NAV */
-.g-header.navbar-inverse {
+.navbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 70px;
-  background-color: #fff;
+  background-color: white;
+  padding:0 70px;
 }
 
-.g-header .navbar-nav {
+.nav .nav-pills {
   display: flex;
   align-items: baseline;
   font-weight: 200;
   color: #404040;
 }
 
-.g-header .navbar-nav .nav-item {
+.g-header .navbar .nav-item {
   float: none;
 }
 
-.g-header .navbar-nav .nav-item.active {
+.g-header .navbar .nav-item.active {
   background: transparent;
 }
 
-.g-header .navbar-nav .nav-item .nav-link {
+.g-header .nav .nav-item .nav-link {
   float: none;
   padding-left: 8px;
   padding-right: 8px;
@@ -183,38 +187,23 @@ body {
   transition: all linear 250ms;
 }
 
-.g-header .navbar-nav .nav-item .nav-link:hover,
-.g-header .navbar-nav .nav-item .nav-link:focus {
+.g-header .nav .nav-item .nav-link:hover,
+.g-header .nav .nav-item .nav-link:focus {
   border-bottom: 4px solid #2890ce;
   color: #007ac2;
 }
 
-.g-header .navbar-nav .nav-item.active .nav-link {
+.g-header .nav .nav-item .nav-link.active {
   border-bottom: 4px solid #2890ce;
   background: transparent;
   color: #000;
 }
 
-.g-header .navbar-nav .nav-item .g-nav-dropdown-link {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  background: transparent;
-  color: #404040;
-  transition: color linear 250ms;
-}
-
-.g-header .navbar-nav .nav-item .g-nav-dropdown-link:hover,
-.g-header .navbar-nav .nav-item .g-nav-dropdown-link:focus {
+.g-header .nav .nav-item .g-nav-dropdown-link:hover,
+.g-header .nav .nav-item .g-nav-dropdown-link:focus {
   border: 0;
   background: transparent;
   color: #007ac2;
-}
-
-.g-nav-dropdown-icon {
-  width: 24px;
-  height: 24px;
-  fill: #2890ce;
 }
 
 /* USER ACCOUNT */
