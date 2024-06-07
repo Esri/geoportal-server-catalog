@@ -52,9 +52,10 @@ public class GeoportalContext implements ApplicationContextAware {
   private HarvesterContext harvesterContext;
   private boolean supportsApprovalStatus = false;
   private boolean supportsGroupBasedAccess = false;
-  private String version = "2.6.0";
+  private String version = "2.7.2";
   private boolean parseGml;
   private boolean supportsCollections = false;
+  
   
   /** Constructor */
   public GeoportalContext() {}
@@ -223,5 +224,6 @@ public class GeoportalContext implements ApplicationContextAware {
   public void setParseGml(boolean parseGml) {
     this.parseGml = parseGml;
   }
+
 
 }

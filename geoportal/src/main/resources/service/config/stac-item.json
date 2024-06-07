@@ -8,20 +8,20 @@
 	"geometry": ["$._source.shape_geo",	"$._source.geometry"],	
 	"properties":
 		{			
-       	"eo:sun_azimuth": "$._source._SunAzimuth_l",
-        "eo:sun_elevation": "$._source._SunZenith_l",
-        "eo:cloud_cover": "$._source._CloudCover_l",
-        "eo:row": "$._source._row_l",
-        "eo:column": "$._source.column_l",
-        "eo:platform": "$._source.src_harvested_dataset_s",
+       	"eo:sun_azimuth": "$._source.properties._SunAzimuth_l",
+        "eo:sun_elevation": "$._source.properties._SunZenith_l",
+        "eo:cloud_cover": "$._source.properties._CloudCover_l",
+        "eo:row": "$._source.properties._row_l",
+        "eo:column": "$._source.properties.column_l",
+        "eo:platform": "$._source.properties.src_harvested_dataset_s",
         "eo:epsg": 4326,
-	    "sentinel:utm_zone": "$._source.sentinel_utm_zone",
-	    "sentinel:latitude_band": "$._source.sentinel_latitude_band",
-	    "sentinel:grid_square": "$._source.sentinel_grid_square",
-	    "sentinel:sequence": "$._source.sentinel_sequence",
-	    "sentinel:product_id": "$._source.sentinel_product_id",		
+	    "sentinel:utm_zone": "$._source.properties.sentinel_utm_zone",
+	    "sentinel:latitude_band": "$._source.properties.sentinel_latitude_band",
+	    "sentinel:grid_square": "$._source.properties.sentinel_grid_square",
+	    "sentinel:sequence": "$._source.properties.sentinel_sequence",
+	    "sentinel:product_id": "$._source.properties.sentinel_product_id",		
 		"updated":"$._source.sys_modified_dt",
-		"datetime":"$._source.datetime"
+		"datetime":"$._source.properties.datetime"
 		},		
 	"assets":
 		{

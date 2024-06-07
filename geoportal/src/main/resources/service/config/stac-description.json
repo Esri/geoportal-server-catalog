@@ -46,13 +46,7 @@
       "rel": "search",
       "type": "application/geo+json",
       "title": "Search the collections"
-    },
-    {
-	"href": "{url}/collections/metadata",
-	"rel": "child",
-	"type": "application/json",
-	"title": "Sentinel Catalog"
-	}
+    }
   ]
 }
 
