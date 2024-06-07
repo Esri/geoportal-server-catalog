@@ -1,0 +1,69 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'srv:containsOperations',maxOccurs:'unbounded',
+      label:'${i18nISO19115.SV_ServiceIdentification.containsOperations}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+      data-dojo-props="target:'srv:SV_OperationMetadata',minOccurs:0">
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Element"
+        data-dojo-props="target:'srv:operationName',
+          label:'${i18nISO19115.SV_OperationMetadata.operationName}'">
+        <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+      </div>
+      
+      <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference"
+        data-dojo-props="target:'srv:DCP',maxOccurs:'unbounded',
+          label:'${i18nISO19115.SV_OperationMetadata.DCP}'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement"
+          data-dojo-props="target:'srv:DCPList'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeSpaceAttribute"></div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListAttribute"
+            data-dojo-props="value:'http://www.fgdc.gov/nap/metadata/register/codelists.html#IC_112'"></div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute">
+            <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+              <div data-dojo-type="esri/dijit/metadata/form/Options">
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'',value:''"></div>
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nISO19115.DCPList.XML}',value:'XML'"></div>  
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nISO19115.DCPList.CORBA}',value:'CORBA'"></div>  
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nISO19115.DCPList.JAVA}',value:'JAVA'"></div>  
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nISO19115.DCPList.COM}',value:'COM'"></div>  
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nISO19115.DCPList.SQL}',value:'SQL'"></div>  
+                <div data-dojo-type="esri/dijit/metadata/form/Option"
+                  data-dojo-props="label:'${i18nISO19115.DCPList.WebServices}',value:'WebServices',selected:true"></div>                                                
+              </div>
+            </div>
+          </div>
+        </div>      
+      </div>  
+      
+      <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+        data-dojo-props="target:'srv:connectPoint',maxOccurs:'unbounded',
+          label:'${i18nISO19115.SV_OperationMetadata.connectPoint}'">
+        <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+          data-dojo-props="target:'gmd:CI_OnlineResource',minOccurs:0">
+          <div data-dojo-type="esri/dijit/metadata/form/Element"
+            data-dojo-props="target:'gmd:linkage',
+              label:'${i18nISO19115.CI_OnlineResource.linkage}'">
+            <div data-dojo-type="esri/dijit/metadata/form/iso/GcoElement"
+              data-dojo-props="target:'gmd:URL'"></div>
+          </div>
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference"
+            data-dojo-props="target:'gmd:function',
+              label:'${i18nISO19115.CI_OnlineResource.sFunction}',minOccurs:0">
+            <div data-dojo-type="app/gxe/types/ISO19115/gmd/citation/CI_OnlineFunctionCode"></div>
+          </div>                          
+        </div>
+      </div>
+      
+    </div>
+  </div>  
+      
+</div>

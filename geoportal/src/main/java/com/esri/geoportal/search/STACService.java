@@ -23,23 +23,21 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-import javax.json.Json;
 import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
 import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
+import javax.ws.rs.PUT;
 import javax.ws.rs.Path;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.Produces;
@@ -76,7 +74,31 @@ public class STACService extends Application {
 
 	/** Logger. */
 	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);
+	
+	private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+	private GeoportalContext gc = GeoportalContext.getInstance();
+	private ElasticClient client = ElasticClient.newClient();
+	
+	private int numFeaturesAddItem = 100;
+	private boolean validateFields = false;
 
+	public int getNumFeaturesAddItem() {
+		return numFeaturesAddItem;
+	}
+
+	public void setNumFeaturesAddItem(int numFeaturesAddItem) {
+		this.numFeaturesAddItem = numFeaturesAddItem;
+	}
+
+	public boolean isValidateFields() {
+		return validateFields;
+	}
+
+	public void setValidateFields(boolean validateFields) {
+		this.validateFields = validateFields;
+	}
+
+	
 	@Override
 	public Set<Class<?>> getClasses() {
 		Set<Class<?>> resources = new HashSet<Class<?>>();
@@ -95,7 +117,7 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in root level " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			response = this.generateResponse("500", "STAC API Landing Page could not be generated.");
+			response = this.generateResponse("500", "STAC API Landing Page could not be generated.",null);
 		}
 		return Response.status(status).entity(response).build();
 	}
@@ -112,7 +134,7 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in conformance " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API Conformance response could not be generated.");
+			responseJSON = this.generateResponse("500", "STAC API Conformance response could not be generated.", null);
 
 		}
 		return Response.status(status).entity(responseJSON).build();
@@ -131,11 +153,9 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in api " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.");
-
+			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.",null);
 		}
 		return Response.status(status).entity(responseJSON).build();
-
 	}
 
 	@GET
@@ -144,8 +164,7 @@ public class STACService extends Application {
 	public Response getCollections(@Context HttpServletRequest hsr) {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
-		try {
-			GeoportalContext gc = GeoportalContext.getInstance();
+		try {			
 			// 518 updates
 			if (!gc.getSupportsCollections()) {
 				// Geoportal not configured for collections
@@ -180,33 +199,11 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in collections " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.");
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",null);
 		}
 		return Response.status(status).entity(responseJSON).build();
-	}
+	} 
 
-	private ArrayList<String> getCollectionList() throws Exception {
-		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		ElasticClient client = ElasticClient.newClient();
-		String url = client.getTypeUrlForSearch(ec.getIndexName());
-		url = url + "/_search";
-		String collectionsSearch = "{\"aggregations\": {\"collections\": {\"terms\": {\"field\": \"src_collections_s\"}}}}";
-
-		String response = client.sendPost(url, collectionsSearch, "application/json");
-		JSONObject gptResponse = (JSONObject) JSONValue.parse(response); // JsonUtil.toJsonStructure(response);
-		JSONObject gptAggregations = (JSONObject) gptResponse.get("aggregations");
-		JSONObject gptCollections = (JSONObject) gptAggregations.get("collections");
-		JSONArray gptBuckets = (JSONArray) gptCollections.get("buckets");
-
-		ArrayList<String> collectionsList = new ArrayList<String>();
-		for (int i = 0; i < gptBuckets.size(); i++) {
-			JSONObject bucket = (JSONObject) gptBuckets.get(i);
-			String collectionName = bucket.getAsString("key");
-			collectionsList.add(collectionName);
-
-		}
-		return collectionsList;
-	}
 
 	@GET
 	@Path("/collections/{collectionId}")
@@ -221,7 +218,6 @@ public class STACService extends Application {
 			{
 				status = Response.Status.NOT_FOUND;
 			}
-			
 			else {
 				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
 				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
@@ -230,27 +226,9 @@ public class STACService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in metadata " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.");
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",null);
 		}
 		return Response.status(status).entity(responseJSON).build();
-	}
-
-	private boolean validCollection(String collectionId) throws Exception {
-		boolean validId = false;
-		if(collectionId != null && !collectionId.isBlank())
-		{
-			ArrayList<String> collectionList = this.getCollectionList();
-			for(int i=0;i<collectionList.size();i++)
-			{
-				if(collectionList.get(i)!= null && collectionList.get(i).equals(collectionId))
-				{
-					validId = true;
-					break;
-				}
-			}
-		}
-		return validId;
-		
 	}
 
 	@GET
@@ -262,12 +240,10 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
-
+		
 		String query = "";
 
-		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
+		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
 
@@ -283,7 +259,7 @@ public class STACService extends Application {
 			}
 
 			url = url + "/_search?size=" + limit;
-			query = this.prepareSearchQuery(queryMap, search_after);
+			query = StacHelper.prepareSearchQuery(queryMap, search_after);
 
 			if (query.length() > 0)
 				response = client.sendPost(url, query, "application/json");
@@ -295,13 +271,13 @@ public class STACService extends Application {
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500",
-					"STAC API collection metadata items response could not be generated.");
+					"STAC API collection metadata items response could not be generated.",null);
 		}
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
@@ -314,30 +290,13 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
-		String query = "";
-
+		String filePath = "service/config/stac-item.json";
+		
 		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
-			String url = client.getTypeUrlForSearch(ec.getIndexName());
-			Map<String, String> queryMap = new HashMap<String, String>();
-
-			queryMap.put("ids", id);
-			url = url + "/_search";
+			response = StacHelper.getItemWithItemId(collectionId, id);
+			String itemFileString = this.readResourceFile(filePath, hsr);
 			
-			GeoportalContext gc = GeoportalContext.getInstance();
-			if (gc.getSupportsCollections()) {
-				queryMap.put("collections", collectionId);
-			}
-
-			query = this.prepareSearchQuery(queryMap, null);
-
-			if (query.length() > 0)
-				response = client.sendPost(url, query, "application/json");
-			else
-				response = client.sendGet(url);
-
-			responseJSON = this.prepareResponseSingleItem(response, hsr, collectionId);
+			responseJSON = this.prepareResponseSingleItem(response, itemFileString, collectionId);
 			if (responseJSON.contains("Record not found")) {
 				status = Response.Status.NOT_FOUND;
 			}
@@ -345,13 +304,13 @@ public class STACService extends Application {
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: " + id + " " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500",
-					"STAC API collection metadata item with itemid response could not be generated.");
+					"STAC API collection metadata item with itemid response could not be generated.",null);
 		}
 
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
@@ -368,13 +327,11 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
-
+		
 		String query = "";
 		String listOfCollections = null;
 		
-		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
+		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
 
@@ -399,7 +356,7 @@ public class STACService extends Application {
 
 			url = url + "/_search?size=" + limit;
 
-			query = this.prepareSearchQuery(queryMap, searchAfter);
+			query = StacHelper.prepareSearchQuery(queryMap, searchAfter);
 			System.out.println("final query " + query);
 
 			if (query.length() > 0) {
@@ -413,14 +370,14 @@ public class STACService extends Application {
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
 			System.out.println("Parameter " + e.getParameterName() + ": " + e.getMessage());
-			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500",
-					"STAC API collection search items response could not be generated.");
+					"STAC API collection search items response could not be generated.",null);
 		}
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
@@ -454,9 +411,7 @@ public class STACService extends Application {
 		String bbox = "";
 		String ids = "";
 
-		try {
-			ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-			ElasticClient client = ElasticClient.newClient();
+		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<>();
 			limit = setLimit(limit);
@@ -509,7 +464,7 @@ public class STACService extends Application {
 			}
 			
 			url = url + "/_search?size=" + limit;
-			query = this.prepareSearchQuery(queryMap, search_after);
+			query = StacHelper.prepareSearchQuery(queryMap, search_after);
 			System.out.println("final query " + query);
 			if (query.length() > 0)
 				response = client.sendPost(url, query, "application/json");
@@ -521,56 +476,389 @@ public class STACService extends Application {
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage());
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
 			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500",
-					"STAC API collection search items response could not be generated.");
+					"STAC API collection search items response could not be generated.",null);
 		}
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
+	
+	/**
+	 * Stac Transaction - Add item https://github.com/stac-api-extensions/transaction?tab=readme-ov-file#post
+	 * @param hsr
+	 * @param body partial Item or partial ItemCollection
+	 * @return
+	 * @throws Exception
+	 */
+	@POST
+	@Produces("application/json")
+	@Path("/collections/{collectionId}/items")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
+	public Response item(@Context HttpServletRequest hsr,@PathParam("collectionId") String collectionId, 
+			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
+		String responseJSON = "";		
+		Status status = null;
+		
+		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+		
+		//check if it is Feature or FeatureCollection
+		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+		if(type.equalsIgnoreCase("Feature"))
+		{
+			return addFeature(requestPayload,collectionId,hsr,async);
+		}
+		else if(type.equalsIgnoreCase("FeatureCollection"))
+		{
+			return addFeatureCollection(requestPayload,collectionId, async);
+		}
+		else
+		{
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.",null);			
+		}		
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+	
+	/**
+	 * Stac Transaction - Update Feature https://github.com/stac-api-extensions/transaction?tab=readme-ov-file#put
+	 * @param hsr
+	 * @param body Feature
+	 * @return
+	 * @throws Exception
+	 */
+	@PUT
+	@Produces("application/json")
+	@Path("/collections/{collectionId}/items/{featureId}")
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
+	public Response updateItems(@Context HttpServletRequest hsr,@PathParam("collectionId") String collectionId, 
+			@PathParam("featureId") String featureId,
+			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
+		String responseJSON = "";		
+		Status status = null;
+		
+		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+		
+		//check if it is Feature or FeatureCollection
+		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+		if(type.equalsIgnoreCase("Feature"))
+		{
+			return updateFeature(requestPayload,collectionId,featureId,hsr,async);
+		}
+		else
+		{
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400","type should be Feature.",null);			
+		}		
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+	
+	private Response updateFeature(JSONObject requestPayload, String collectionId, String featureId,HttpServletRequest hsr,
+			boolean async) {
+		if(async)
+		{
+		 new Thread(() -> {
+					this.executeUpdateFeature(requestPayload, collectionId,featureId,hsr,async);
+		      }).start();
+		      String responseJSON = generateResponse("202", "Stac Feature update has been started.",null);
+		      return Response.status(Status.ACCEPTED)
+						.header("Content-Type", "application/json")
+						.entity(responseJSON).build();
+		}
+		else
+		{
+			return executeUpdateFeature(requestPayload, collectionId,featureId,hsr,async);
+		}
+	}
+	
+	private Response executeUpdateFeature(JSONObject requestPayload, String collectionId, String featureId,
+			HttpServletRequest hsr,
+			boolean async) {
+		String responseJSON = generateResponse("500","Stac Feature could not be updated.",null);
+		Status status = Response.Status.INTERNAL_SERVER_ERROR;
+		try {
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId,false);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
+			{
+				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
+				
+				String id = updatedPayload.get("id").toString();	
+				String itemJsonString = updatedPayload.toString();	
+				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+							
+				responseJSON = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
+				
+				JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+				if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
+				{					
+					status = Response.Status.OK;
+					responseJSON = "Feature updated";
+					String itemUrlGeoportal = "";
+					
+					//if sync request for Feature, create Stac feature for response 
+					if(!async)
+					{
+						String filePath = "service/config/stac-item.json";
+						String itemFileString = this.readResourceFile(filePath, hsr);
+						
+						//Before searching newly added item, sleep for 1 second, otherwise record is not found
+						TimeUnit.SECONDS.sleep(1);
+						
+						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+					}					
+					return Response.status(status)
+							.header("Content-Type", "application/json")
+							.header("location",itemUrlGeoportal)
+							.entity(responseJSON).build();				
+				}
+				//Some error in creating item
+				else
+				{
+					LOGGER.info("Stac item with id "+id+" could not be updated. ");
+				}
+			}
+			else if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_NOT_FOUND))
+			{
+				status = Response.Status.NOT_FOUND;
+				responseJSON = generateResponse("404", validationStatus.getMessage(),null);
+			}
+			else
+			{
+				//response json will contain details about validation error like required fields
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+			}	
+		}catch(Exception ex)
+		{
+			LOGGER.error("Error in updating Stac Item " + ex.getCause());
+			ex.printStackTrace();
+		}
+		//For asynchronous request, log this response message
+		 if(async)
+		 {
+			 LOGGER.info("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON);
+		 }
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();		
+	}
+
+	private Response addFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async) 
+	{		
+		if(async)
+		{
+		 new Thread(() -> {
+					this.executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
+		      }).start();
+		      String responseJSON = generateResponse("202", "Stac Feature creation has been started.",null);
+		      return Response.status(Status.ACCEPTED)
+						.header("Content-Type", "application/json")
+						.entity(responseJSON).build();
+		}
+		else
+		{
+			return executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
+		}
+	}	
+	
+	private Response executeAddFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async, String reqType) 
+	{
+		String responseJSON = generateResponse("500","Stac Item could not be added.",null);
+		Status status = Response.Status.INTERNAL_SERVER_ERROR;
+		try {
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,validateFields);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
+			{
+				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
+				
+				String itemJsonString = updatedPayload.toString();								
+				
+				String id = updatedPayload.get("id").toString();			
+				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+							
+				responseJSON = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
+				JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+				if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("created"))
+				{					
+					status = Response.Status.CREATED;
+					responseJSON = "Item created";
+					String itemUrlGeoportal = "";
+					
+					//if sync request for Feature, create Stac feature for response 
+					if(reqType.equals("Feature") && !async)
+					{
+						String filePath = "service/config/stac-item.json";
+						String itemFileString = this.readResourceFile(filePath, hsr);
+						
+						//Before searching newly added item, sleep for 1 second, otherwise record is not found
+						TimeUnit.SECONDS.sleep(1);
+						
+						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+					}
+					
+					return Response.status(status)
+							.header("Content-Type", "application/json")
+							.header("location",itemUrlGeoportal)
+							.entity(responseJSON).build();				
+				}
+				//Some error in creating item
+				else
+				{
+					LOGGER.info("Stac item with id "+id+" could not be created. ");
+				}
+			}		
+			
+			else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
+			{
+				responseJSON = generateResponse("409", "Item with this id already exists in collection.",null);
+				status = Response.Status.CONFLICT;
+			}
+			//Bad request, missing field or any field is invalid
+			else
+			{
+				//response json will contain details about validation error like required fields
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+			}		
+		}
+		catch(Exception ex)
+		{
+			LOGGER.error("Error in adding Stac Item " + ex.getCause());
+			ex.printStackTrace();
+		}
+		//For asynchronous request, log this response message
+		 if(async && reqType.equals("Feature"))
+		 {
+			 LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+		 }
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();
+	}
+	
+	private Response addFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {		
+		if(async)
+		{
+			 new Thread(() -> {
+			        this.exeFeatureCollection(requestPayload, collectionId,async);
+			      }).start();
+			      String responseJSON = generateResponse("202", "FeatureCollection creation has been started.",null);
+			      return Response.status(Status.ACCEPTED)
+							.header("Content-Type", "application/json")
+							.entity(responseJSON).build();
+		}
+		else
+		{
+			return exeFeatureCollection(requestPayload, collectionId,async);
+		}
+	}
+	
+	private Response exeFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {
+		
+		// Add invalid features in error response	
+		String responseJSON = generateResponse("201","FeatureCollection created successfully.",null);
+		Status status = Response.Status.CREATED;
+		
+		try {
+			if(requestPayload.containsKey("features"))
+			{
+				 JSONArray features = (JSONArray) requestPayload.get("features");
+				 //For synchronous request, limit number of features in feature collection
+				 if(!async)
+				 {
+					 if(features.size() >this.getNumFeaturesAddItem())
+					 {
+						 responseJSON = generateResponse("400","Number of Features in FeatureCollection are more than allowed limit ("+features.size()+") in Synchronous request. For large FeatureCollection include paramter async=true.",null);
+						 status = Response.Status.BAD_REQUEST;
+					 }
+				 }
+
+				 JSONArray errorMsgArr = new JSONArray();
+				 JSONObject errorMsgObj = new JSONObject();
+				 JSONObject errorObj=null;
+				 
+				 for(int i =0;i<features.size() ;i++)
+				 {
+					 JSONObject feature = (JSONObject) features.get(i);
+					 Response res = executeAddFeature(feature, collectionId, null, false,"FeatureCollection");
+					 if(res.getStatus() != Response.Status.CREATED.getStatusCode())
+					 {
+						 errorMsgObj = new JSONObject();
+						 errorObj = (JSONObject)JSONValue.parse(res.getEntity().toString());						 
+						 
+						 errorMsgObj.put("id", feature.getAsString("id"));
+						 errorMsgObj.put("error",errorObj.get("description"));
+						 
+						 errorMsgArr.add(errorMsgObj);
+					 }				 
+				 }
+				 if(errorMsgArr.size()>0)
+				 {
+					 responseJSON = generateResponse("500","Some Features in FeatureCollection  could not be added.",errorMsgArr);
+					 status = Response.Status.INTERNAL_SERVER_ERROR;					
+				 }
+			}
+		}catch(Exception ex)
+		{
+			responseJSON = generateResponse("500","Error in adding FeatureCollection.",null);
+			status = Response.Status.INTERNAL_SERVER_ERROR;	
+		}
+		//For asynchronous request, log this response message
+		 if(async)
+		 {
+			 LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+		 } 
+		return Response.status(status)
+				.header("Content-Type", "application/json")
+				.entity(responseJSON).build();
+	}
+
+	private String generateResponse(String code, String description, JSONArray detailMsgArr) {
+		JSONObject resObj = new JSONObject();
+		resObj.put("code", code);
+		resObj.put("description", description);
+		
+		if(detailMsgArr != null && detailMsgArr.size()>0)
+			resObj.put("detail",detailMsgArr);
+
+		return resObj.toString();
+	}
 
 	// Prepare response for a single feature
-	private String prepareResponseSingleItem(String searchRes, HttpServletRequest hsr, String collectionId) {
+	private String prepareResponseSingleItem(String searchRes, String itemFileString, String collectionId) {
 
-		net.minidev.json.JSONArray items = null;
-		String itemFileString = "";
+		net.minidev.json.JSONArray items = null;		
 		String finalResponse = "";
 
-		String filePath = "service/config/stac-item.json";
+		DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
-		try {
-			itemFileString = this.readResourceFile(filePath, hsr);
+		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
+		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
 
-			DocumentContext elasticResContext = JsonPath.parse(searchRes);
+		items = elasticResContext.read("$.hits.hits");
 
-			JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
-			String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
+		DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
+		if (items != null && items.size() > 0) {
+			DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
 
-			items = elasticResContext.read("$.hits.hits");
+			// Populate feature
+			this.populateFeature(featureContext, searchItemCtx);
+			JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString());
+			JsonObject resObj = obj.getJsonObject("featurePropPath");
 
-			DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
-			if (items != null && items.size() > 0) {
-				DocumentContext searchItemCtx = JsonPath.parse(items.get(0));
+			finalResponse = resObj.toString();
+		} else {
+			finalResponse = this.generateResponse("404", "Record not found.",null);
 
-				// Populate feature
-				this.populateFeature(featureContext, searchItemCtx);
-				JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString());
-				JsonObject resObj = obj.getJsonObject("featurePropPath");
-
-				finalResponse = resObj.toString();
-			} else {
-				finalResponse = this.generateResponse("404", "Record not found.");
-
-			}
-			finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
-
-		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("Stac response for stac-item could not be preapred. " + e.getMessage());
-			e.printStackTrace();
 		}
+		finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
 		return finalResponse;
 	}
 
@@ -688,7 +976,7 @@ public class STACService extends Application {
 		try {
 
 			String val = featureContext.read("$.featurePropPath.id");
-			String recordId = searchItemCtx.read(val);
+			String recordId = searchItemCtx.read(val).toString();
 			featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
 
 			val = featureContext.read("$.featurePropPath.collection");
@@ -696,6 +984,13 @@ public class STACService extends Application {
 
 			// add bbox, geometry
 			this.setBbox(searchItemCtx, featureContext);
+			
+			JSONArray bboxArr = featureContext.read("$.featurePropPath.bbox");
+			//No valid bbox in feature
+			if(bboxArr.get(1).toString().contains("$"))
+			{
+				featureContext.delete("$.featurePropPath.bbox");
+			}
 
 			this.setGeometry(searchItemCtx, featureContext);
 
@@ -713,7 +1008,7 @@ public class STACService extends Application {
 
 					for (String assetObjKey : assetObjKeys) {
 						assetObjKeyVal = String.valueOf(assetObj.get(assetObjKey));
-
+						
 						// If it is a json path, set values from search result
 						if (assetObjKeyVal.startsWith("$")) {
 							if (searchItemCtx.read(assetObjKeyVal) != null) {
@@ -731,7 +1026,7 @@ public class STACService extends Application {
 				}
 			}
 
-			// Add all the assets from stac record, if available
+			// STEP: Add_ALL_ASSET assets from stac record, if available
 			try {
 				HashMap<String, JSONObject> stacRecAssetObj = searchItemCtx.read("$._source.assets");
 				assetsObj = featureContext.read("$.featurePropPath.assets");
@@ -750,7 +1045,7 @@ public class STACService extends Application {
 
 			}
 
-			// Iterate properties, skip property if it is not available
+			// Iterate properties, skip property if it is not available			
 			for (String propKey : propObjKeys) {
 				try {
 					propKeyVal = String.valueOf(propObj.get(propKey));
@@ -771,7 +1066,7 @@ public class STACService extends Application {
 			}
 
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
-			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id"));
+			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
 			
 			//Support multiple collection, set Item collection id
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemCollectionId\\}", featureContext.read("$.featurePropPath.collection"));  
@@ -796,8 +1091,20 @@ public class STACService extends Application {
 		for (String propToRemove : propToBeRemovedList) {
 			featureContext.delete(propToRemove);
 		}
+		Object assetObj = null;
 		for (String assetToRemove : assetToBeRemovedList) {
-			featureContext.delete(assetToRemove);
+			//Assets are populated from Feature in step Add_ALL_ASSET (so first validate if it still needs removal
+			assetObj = featureContext.read(assetToRemove);
+			if(assetObj instanceof JSONObject)
+			{
+				JSONObject assetJSONObj = (JSONObject)assetObj;
+				if(assetJSONObj.getAsString("href").contains("$."))// Still JSON path from stac-item.json
+					featureContext.delete(assetToRemove);
+			}
+			else
+			{
+				featureContext.delete(assetToRemove);
+			}			
 		}
 		return featureValid;
 	}
@@ -881,162 +1188,7 @@ public class STACService extends Application {
 		}
 	}
 
-	private String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
-		String queryStr = "";
-		JsonArrayBuilder builder = Json.createArrayBuilder();
-
-		if (queryMap.containsKey("bbox")) {
-			String bboxQry = this.prepareBbox((String) queryMap.get("bbox"));
-			if (bboxQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(bboxQry));
-
-		}
-		if (queryMap.containsKey("datetime")) {
-			String dateTimeQry = this.prepareDateTime(queryMap.get("datetime"));
-			if (dateTimeQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
-		}
-		if (queryMap.containsKey("ids")) {
-			String idsQry = this.prepareIds(queryMap.get("ids"));
-			System.out.println("ids " + idsQry);
-
-			if (idsQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(idsQry));
-		}
-
-		if (queryMap.containsKey("intersects")) {
-			String intersectsQry = this.prepareIntersects(queryMap.get("intersects"));
-			if (intersectsQry.length() > 0)
-				builder.add(JsonUtil.toJsonStructure(intersectsQry));
-		}
-
-		if (queryMap.containsKey("collections")) {			
-			String collectionQry = this.prepareCollection(queryMap.get("collections"));
-			builder.add(JsonUtil.toJsonStructure(collectionQry));
-		}
-
-		JsonArray filter = builder.build();
-
-		if (!filter.isEmpty()) {
-			queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
-		}
-		String searchAfterStr = "";
-		if (searchAfter != null && searchAfter.length() > 0) {
-			searchAfterStr = "\"search_after\":[\"" + searchAfter + "\"]";
-		}
-
-		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
-				+ (queryStr.length() > 0 ? "," + queryStr : "")
-				+ (searchAfterStr.length() > 0 ? "," + searchAfterStr : "") + "}";
-		return searchQuery;
-	}
-
-//{"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
-	private String prepareIntersects(String geoJson) {
-		String query = "";
-		String field = "shape_geo";
-		String spatialType = "geo_shape";
-		String relation = "intersects";
-
-		query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": " + geoJson + ",\"relation\": \"" + relation
-				+ "\"}}}";
-		return query;
-	}
-
-	private String prepareIds(String ids) {
-		return "{\"match\": {\"id\": \"" + ids + "\"}}";
-	}
-
-	private String prepareDateTime(String datetime) {
-		String query = "";
-		String dateTimeFld = "sys_modified_dt";
-		String dateTimeFldQuery = "";
-		// Find from and to dates
-		// https://api.stacspec.org/v1.0.0/ogcapi-features/#tag/Features/operation/getFeatures
-		// Either a date-time or an interval, open or closed. Date and time expressions
-		// adhere to RFC 3339. Open intervals are expressed using double-dots.
-		// Examples:
-		// A date-time: "2018-02-12T23:20:50Z"
-		// A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
-		// Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
-
-		String fromField = datetime;
-		String toField = "";
-		List<String> dateFlds = Arrays.asList(datetime.split("/"));
-
-		if (dateFlds.size() > 1) {
-			fromField = dateFlds.get(0);
-			toField = dateFlds.get(1);
-		}
-		if (toField.equals("") || toField.equals("..")) {
-			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\"}";
-		} else if (fromField.equals("..")) {
-			dateTimeFldQuery = "{\"lte\":\"" + toField + "\"}";
-		} else {
-			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\",\"lte\":\"" + toField + "\"}";
-		}
-
-		query = "{\"range\": {\"" + dateTimeFld + "\":" + dateTimeFldQuery + "}}";
-
-		return query;
-	}
-
-	private String prepareBbox(String bboxString) {
-		String field = "envelope_geo";
-		String spatialType = "geo_shape"; // geo_shape or geo_point
-		String relation = "intersects";
-		List<String> bbox = Arrays.asList(bboxString.split(",", -1));
-
-		double coords[] = { -180.0, -90.0, 180.0, 90.0 };
-		String query = "";
-		// As per stac API validator, invalid bbox should respond with 400, instead of
-		// reaplcing it with defaults
-		if (bbox.size() == 4 || bbox.size() == 6) {
-			coords[0] = Double.parseDouble(bbox.get(0));
-			coords[1] = Double.parseDouble(bbox.get(1));
-			coords[2] = Double.parseDouble(bbox.get(2));
-			coords[3] = Double.parseDouble(bbox.get(3));
-			String coordinates = "[[" + coords[0] + "," + coords[3] + "], [" + coords[2] + "," + coords[1] + "]]";
-			if (bbox.size() == 6) {
-				coords[4] = Double.parseDouble(bbox.get(4));
-				coords[5] = Double.parseDouble(bbox.get(5));
-			}
-
-			query = "{\"" + spatialType + "\": {\"" + field + "\": {\"shape\": {\"type\": \"envelope\","
-					+ "\"coordinates\":" + coordinates + "},\"relation\": \"" + relation + "\"}}}";
-			return query;
-		} else {
-			throw new InvalidParameterException("bbox", "Invalid bbox");
-		}
-	}
-
-	private String prepareCollection(String collections) {
-		String[] collectionList = collections.split(",");
-		//{"bool":{"should":[{"match":{"src_collections_s":"metadata"}},{"match":{"src_collections_s":"north_america"}}]}}
-		
-		StringBuffer collectionQryBuf = new StringBuffer("{\"bool\":{\"should\":[");
-		int i=0;
-		for (String collectionId : collectionList) {
-			if(i ==0)
-				collectionQryBuf.append("{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");	
-			else
-				collectionQryBuf.append(",{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");
-			i++;
-		}
-		collectionQryBuf.append("]}}");
-		return collectionQryBuf.toString();
-	}
-
-	private int setLimit(int limit) {
-		if (limit == 0) {
-			limit = 10; // default
-		}
-		if (limit < 0 || limit > 10000) {
-			throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
-		}
-		return limit;
-	}
-
+	
 	public String getBaseUrl(HttpServletRequest hsr) {
 
 		StringBuffer requestURL = hsr.getRequestURL();
@@ -1072,14 +1224,54 @@ public class STACService extends Application {
 		filedataString = filedataString.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 		return filedataString;
 	}
+	
+	
+	private ArrayList<String> getCollectionList() throws Exception {
+		String url = client.getTypeUrlForSearch(ec.getIndexName());
+		url = url + "/_search";
+		String collectionsSearch = "{\"aggregations\": {\"collections\": {\"terms\": {\"field\": \"src_collections_s\"}}}}";
 
-	private String generateResponse(String code, String resMsg) {
-		net.minidev.json.JSONObject resObj = new JSONObject();
+		String response = client.sendPost(url, collectionsSearch, "application/json");
+		JSONObject gptResponse = (JSONObject) JSONValue.parse(response); // JsonUtil.toJsonStructure(response);
+		JSONObject gptAggregations = (JSONObject) gptResponse.get("aggregations");
+		JSONObject gptCollections = (JSONObject) gptAggregations.get("collections");
+		JSONArray gptBuckets = (JSONArray) gptCollections.get("buckets");
 
-		resObj.put("code", code);
-		resObj.put("description", resMsg);
+		ArrayList<String> collectionsList = new ArrayList<String>();
+		for (int i = 0; i < gptBuckets.size(); i++) {
+			JSONObject bucket = (JSONObject) gptBuckets.get(i);
+			String collectionName = bucket.getAsString("key");
+			collectionsList.add(collectionName);
 
-		return resObj.toJSONString();
+		}
+		return collectionsList;
+	}
+	
+	private boolean validCollection(String collectionId) throws Exception {
+		boolean validId = false;
+		if(collectionId != null && !collectionId.isBlank())
+		{
+			ArrayList<String> collectionList = this.getCollectionList();
+			for(int i=0;i<collectionList.size();i++)
+			{
+				if(collectionList.get(i)!= null && collectionList.get(i).equals(collectionId))
+				{
+					validId = true;
+					break;
+				}
+			}
+		}
+		return validId;		
+	}
+	
+	private int setLimit(int limit) {
+		if (limit == 0) {
+			limit = 10; // default
+		}
+		if (limit < 0 || limit > 10000) {
+			throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
+		}
+		return limit;
 	}
 
 }

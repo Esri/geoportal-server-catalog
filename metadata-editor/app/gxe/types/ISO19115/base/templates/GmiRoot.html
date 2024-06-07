@@ -1,0 +1,17 @@
+<div data-dojo-attach-point="containerNode">
+  <div data-dojo-type="esri/dijit/metadata/form/Element"
+    data-dojo-props="target:'gmi:MI_Metadata',label:'${i18nISO19115.documentTypes.gmi.caption}'">
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+      <div data-dojo-type="app/gxe/types/ISO19115/gmd/metadataEntity/MetadataSection"
+        data-dojo-props="label:'${i18nISO19115.sections.metadata}'"></div>
+      <div data-dojo-type="app/gxe/types/ISO19115/gmd/identification/DataIdentification"
+        data-dojo-props="label:'${i18nISO19115.sections.identification}'"></div>
+      <div data-dojo-type="app/gxe/types/ISO19115/gmd/distribution/Distribution"
+        data-dojo-props="label:'${i18nISO19115.sections.distribution}'"></div>		
+      <div data-dojo-type="app/gxe/types/ISO19115/gmd/dataQuality/Quality"
+        data-dojo-props="label:'${i18nISO19115.sections.quality}'"></div>
+	  <div data-dojo-type="app/gxe/types/ISO19115/gmi/acquisitionInformation/Acquisition"
+        data-dojo-props="label:'${i18nISO19115.sections.acquisition}'"></div>
+    </div>
+  </div>
+</div>

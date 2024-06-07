@@ -88,5 +88,12 @@ public class FieldNames {
   
   /** FIELD_SYS_META = "sys_meta" */
   public static String FIELD_SYS_META = "sys_meta";
-
+  
+  
+  /*------------------------Stac------------------------*/
+  /** FIELD_STAC_CREATED = "created" */
+  public static String FIELD_STAC_CREATED = "created";
+  
+  /** FIELD_STAC_UPDATED = "updated" */
+  public static String FIELD_STAC_UPDATED = "updated";
 }

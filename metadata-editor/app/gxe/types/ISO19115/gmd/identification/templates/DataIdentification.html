@@ -1,0 +1,40 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference"
+    data-dojo-props="target:'gmd:identificationInfo',
+      label:'${i18nISO19115.MD_Metadata.identificationInfo}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"
+      data-dojo-props="target:'gmd:MD_DataIdentification',minOccurs:0">
+      
+      <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+          
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/citation/ResourceCitation"
+          data-dojo-props="label:'${i18nISO19115.identificationSection.citation}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/identification/ResourceDescription"
+          data-dojo-props="label:'${i18nISO19115.identificationSection.description}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/citation/ResourceContact"
+          data-dojo-props="label:'${i18nISO19115.identificationSection.contact}'"></div>
+
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/maintenance/MD_MaintenanceInformation" 
+          data-dojo-props="label:'${i18nISO19115.AbstractMD_Identification.resourceMaintenance}'"></div>
+
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/identification/ResourceThumbnail"
+          data-dojo-props="label:'${i18nISO19115.identificationSection.thumbnail}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/identification/ResourceKeywords"
+          data-dojo-props="label:'${i18nISO19115.identificationSection.keywords}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/constraints/ResourceConstraints"
+          data-dojo-props="label:'${i18nISO19115.identificationSection.constraints}'"></div>
+          
+        <div data-dojo-type="app/gxe/types/ISO19115/gmd/identification/DataResourceTab"
+          data-dojo-props="label:'${i18nISO19115.identificationSection.resource}'"></div>
+                          
+      </div>
+      
+    </div>
+  </div>
+  
+</div>
