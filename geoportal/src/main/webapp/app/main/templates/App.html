@@ -52,18 +52,14 @@
           data-bs-toggle="dropdown"
           aria-expanded="false"
         >
-          <span>${i18n.nav.admin}</span>
-         <!--  <svg class="g-nav-dropdown-icon" viewBox="0 0 24 24">
-            <path d="M7,10L12,15L17,10H7Z" />
-          </svg> -->
+          <span>${i18n.nav.admin}</span>        
         </a>
 
-        <ul class="dropdown-menu">
-          <li class="divider"></li>
+        <ul class="dropdown-menu">         
           <li data-role="publisher">
             <a
               href="javascript:void(0)"
-              class=""dropdown-item""
+              class="dropdown-item"
               data-dojo-attach-event="onclick: createMetadataClicked"
             >
               ${i18n.nav.options.createMetadata}
@@ -72,7 +68,7 @@
           <li data-role="publisher">
             <a
               href="javascript:void(0)"
-              class=""dropdown-item""
+              class="dropdown-item"
               data-dojo-attach-event="onclick: uploadClicked"
             >
               ${i18n.nav.options.uploadMetadata}
@@ -114,9 +110,7 @@
           <span class="g-username" data-dojo-attach-point="usernameNode"></span>
         </a>
 
-        <ul class="dropdown-menu">
-          <li class="divider"></li>
-          <li class="divider"></li>
+        <ul class="dropdown-menu">         
           <li data-dojo-attach-point="createAccountNode">
             <a
               href="javascript:void(0)"
@@ -162,7 +156,7 @@
   </nav>
 
   <div class="tab-content" id="myTabContent">
-    <div id="searchPanel" role="tabpanel" class="tab-pane container fade show active">
+    <div id="searchPanel" role="tabpanel" class="tab-pane fade show active">
       <div
         data-dojo-type="app/main/SearchPanel"
         data-dojo-attach-point="searchPanel"
@@ -174,13 +168,13 @@
         data-dojo-attach-point="mapPanel"
       ></div>
     </div>
-    <div id="apiPanel" role="tabpanel" class="tab-pane container fade">
+    <div id="apiPanel" role="tabpanel" class="tab-pane fade">
       <div
         data-dojo-type="app/main/APIPanel"
         data-dojo-attach-point="apiPanel"
       ></div>
     </div>
-    <div id="cartPanel" role="tabpanel" class="tab-pane container fade">
+    <div id="cartPanel" role="tabpanel" class="tab-pane fade">
       <div
         data-dojo-type="app/main/CartPanel"
         data-dojo-attach-point="cartPanel"
