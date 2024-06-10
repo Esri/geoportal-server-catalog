@@ -1,8 +1,12 @@
 /* RESET */
-html {
-  font-family: sans-serif;
-  -ms-text-size-adjust: 100%;
-  -webkit-text-size-adjust: 100%; }
+html,
+body,
+.g-app {
+  height: 100vh;
+  display: flex;
+  flex-direction: column;
+  overflow: auto;
+}
 body {
   --bs-font-sans-serif: sans-serif;
   --bs-body-font-family: var(--bs-font-sans-serif);
@@ -10,12 +14,6 @@ body {
   overflow: hidden;
   background-color: #f3f3f3;
   font-size: 16px;
-}
-.g-app {
-  height: 100vh;
-  display: flex;
-  flex-direction: column;
-  overflow: auto;
 }
 
 /* DOJO/DIJIT OVERRIDES */
