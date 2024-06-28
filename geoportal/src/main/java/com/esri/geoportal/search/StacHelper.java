@@ -143,15 +143,15 @@ public class StacHelper {
 
 	private static String prepareIds(String ids) {
 		String[] idList = ids.split(",");
-		//{"bool":{"should":[{"match":{"id":"1"}},{"match":{"id":"2"}}]}}
+		//{"bool":{"should":[{"match":{"_id":"1"}},{"match":{"_id":"2"}}]}}
 		
 		StringBuffer idQryBuf = new StringBuffer("{\"bool\":{\"should\":[");
 		int i=0;
 		for (String id : idList) {
 			if(i ==0)
-				idQryBuf.append("{\"match\": {\"id\": \"" + id + "\"}}");	
+				idQryBuf.append("{\"match\": {\"_id\": \"" + id + "\"}}");	
 			else
-				idQryBuf.append(",{\"match\": {\"id\": \"" + id + "\"}}");
+				idQryBuf.append(",{\"match\": {\"_id\": \"" + id + "\"}}");
 			i++;
 		}
 		idQryBuf.append("]}}");
