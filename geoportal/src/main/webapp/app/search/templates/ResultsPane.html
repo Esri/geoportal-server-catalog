@@ -8,7 +8,7 @@
       <div class="g-search-results-sort-container">
         <a class="g-search-results-sort-link dropdown-toggle" href="javascript:void(0)"
           aria-label="Dropdown Menu"
-          data-toggle="dropdown"
+          data-bs-toggle="dropdown" "id":"sortOptDropdownMenuLink"
         >
           <svg class="g-search-results-sort-link-icon" viewBox="0 0 24 24">
             <path fill="currentColor" d="M3,13H15V11H3M3,6V8H21V6M3,18H9V16H3V18Z" />
@@ -20,9 +20,9 @@
             <path d="M7,10L12,15L17,10H7Z" />
           </svg> -->
         </a>
-        <ul class="dropdown-menu">
+        <ul class="dropdown-menu" "aria-labelledby":"sortOptDropdownMenuLink">
            <li data-role="sortOption">
-             <a href="javascript:void(0)" class="small" data-dojo-attach-point="sortRelevanceBtn">
+             <a href="javascript:void(0)" "class"= "small" data-dojo-attach-point="sortRelevanceBtn">
                ${i18n.search.sort.byRelevance}
              </a>
            </li>
