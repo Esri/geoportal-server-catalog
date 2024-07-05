@@ -396,7 +396,7 @@ public class STACService extends Application {
 	public Response search(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("ids") String idList,
-			@QueryParam("collections") String collections, @QueryParam("searchAfter") String searchAfter)
+			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter)
 			throws UnsupportedEncodingException {
 		String responseJSON = null;
 		String response = "";
