@@ -428,7 +428,7 @@ public class STACService extends Application {
 			if (intersects != null && intersects.length() > 0)
 				queryMap.put("intersects", intersects);
 
-			url = url + "/_search?size=" + limit;
+			url = url + "/_search?size=" + (limit+1);
 
 			query = StacHelper.prepareSearchQuery(queryMap, searchAfter);
 			System.out.println("final query " + query);
@@ -965,6 +965,7 @@ public class STACService extends Application {
 		String finalResponse = "";
 		String search_after = "";
 		String filePath = "service/config/stac-items.json";
+		boolean nextLink = false;
 
 		try {
 			itemFileString = this.readResourceFile(filePath, hsr);
@@ -980,10 +981,23 @@ public class STACService extends Application {
 
 			numberMatched = elasticResContext.read("$.hits.total.value");
 			items = elasticResContext.read("$.hits.hits");
+			if(items.size() > limit)
+			{
+				nextLink = true;
+			}
+			
+			//Geoportal asked for 1 extra record to figure out whether next link is needed
+			int itemActualSize = items.size()-1;
 			// numberReturned = String.valueOf(items.size());
 
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
+			
+			//No link for next page
+			if(!nextLink)
+			{
+				linksContext.delete("$.searchItem.links[1]");
+			}
 
 			if (requestType.startsWith("metadataItems"))
 				resourceFilecontext.set("$.response.links", linksContext.read("$.metadataItem.links"));
@@ -993,7 +1007,7 @@ public class STACService extends Application {
 
 			JSONArray jsonArray = new JSONArray();
 
-			for (int i = 0; i < items.size(); i++) {
+			for (int i = 0; i < itemActualSize; i++) {
 				DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
 				DocumentContext searchItemCtx = JsonPath.parse(items.get(i));
 
@@ -1001,7 +1015,7 @@ public class STACService extends Application {
 				boolean success = this.populateFeature(featureContext, searchItemCtx);
 				if (success) {
 					jsonArray.add(featureContext.read("$.featurePropPath"));
-					if (i == (items.size() - 1)) {
+					if (i == (itemActualSize - 1)) {
 						try {
 							JSONArray sortArr = searchItemCtx.read("$.sort");
 							search_after = sortArr.get(0).toString();
