@@ -283,7 +283,7 @@
                 "operationId": "stacSearch",                                                                                                                                                                                        
                 "parameters": [
                     {
-                        "name": "collectionId",
+                        "name": "collections",
                         "in": "query",
                         "description": "Comma separated Collection id",
                         "required": false,
