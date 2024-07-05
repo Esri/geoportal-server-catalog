@@ -326,9 +326,9 @@
                     {
                         "name": "ids",
                         "in": "query",
-                        "description": "Array of Item ids to return.",
+                        "description": "Comma separated list of Item ids to return.",
                         "required": false,
-                        "type": "Array of strings (ids)",
+                        "type": "Comma separated list of Item ids to return",
                         "example": "LC80100252015082LGN00,LC80100252014287LGN00"
                     }
                 ],
