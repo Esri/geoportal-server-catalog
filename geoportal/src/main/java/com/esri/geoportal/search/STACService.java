@@ -987,9 +987,9 @@ public class STACService extends Application {
 			}
 			
 			//Geoportal asked for 1 extra record to figure out whether next link is needed
-			int itemActualSize = items.size()-1;
-			// numberReturned = String.valueOf(items.size());
-
+			//int itemActualSize = items.size()-1;			
+			int itemActualSize = Math.min(limit, items.size());
+			
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
 			
