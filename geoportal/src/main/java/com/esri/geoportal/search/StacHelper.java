@@ -199,9 +199,9 @@ public class StacHelper {
 		int i=0;
 		for (String id : idList) {
 			if(i ==0)
-				idQryBuf.append("{\"match\": {\"id\": \"" + id + "\"}}");	
+				idQryBuf.append("{\"match\": {\"_id\": \"" + id + "\"}}");	
 			else
-				idQryBuf.append(",{\"match\": {\"id\": \"" + id + "\"}}");
+				idQryBuf.append(",{\"match\": {\"_id\": \"" + id + "\"}}");
 			i++;
 		}
 		idQryBuf.append("]}}");
