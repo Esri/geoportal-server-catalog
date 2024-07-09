@@ -108,7 +108,8 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       for (sProp in props) {
         if (props.hasOwnProperty(sProp)) {
           oProp = props[sProp];
-          if (typeof oProp !== "undefined" && oProp !== null) {
+          //#538 sort parameter needs to go in POST body instead of URL query string
+          if (typeof oProp !== "undefined" && oProp !== null && sProp!= "sort") {
             if (url.indexOf("?") === -1) url += "?";
             else url += "&";
             url += sProp+"="+encodeURIComponent(oProp);
@@ -116,12 +117,14 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
         }
       }
       if (!params.hasScorable && typeof params.urlParams.sort === "undefined") {
-        v = AppContext.appConfig.searchResults.defaultSort;
-        if (typeof this.defaultSort === "string" && this.defaultSort.length > 0) {
-          if (url.indexOf("?") === -1) url += "?";
-          else url += "&";
-          url += "sort="+encodeURIComponent(this.defaultSort);
+        if (this.defaultSort) {
+        	  if (postData === null) postData = {};
+        	  postData.sort = this.defaultSort;
         }
+      }
+      if (!params.hasScorable && params.urlParams.sort) {
+          	  if (postData === null) postData = {};
+          	  postData.sort = params.urlParams.sort;
       }
 
       //console.warn("params.queries",params.queries);
