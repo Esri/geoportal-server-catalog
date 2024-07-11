@@ -101,7 +101,7 @@ define(["dojo/_base/declare",
                     this.sortDir = "asc";
                   }
                   this.search();
-                })),
+                }))
               );
             },
 

@@ -13,6 +13,7 @@
  * limitations under the License.
  */
 package com.esri.geoportal.context;
+import com.esri.geoportal.base.security.Group;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.harvester.HarvesterContext;
 
@@ -20,6 +21,10 @@ import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+
 import javax.annotation.PreDestroy;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -55,9 +60,19 @@ public class GeoportalContext implements ApplicationContextAware {
   private String version = "2.7.2";
   private boolean parseGml;
   private boolean supportsCollections = false;
+  // HashMap stores userName and List of User Groups in ArcGISAuthentication
+  private HashMap<String,ArrayList<Group>> userGroupMap = new HashMap<String,ArrayList<Group>>();
   
-  
-  /** Constructor */
+
+  public HashMap<String, ArrayList<Group>> getUserGroupMap() {
+	return userGroupMap;
+}
+
+public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
+	this.userGroupMap = userGroupMap;
+}
+
+/** Constructor */
   public GeoportalContext() {}
   
   /** The Spring application context. */
