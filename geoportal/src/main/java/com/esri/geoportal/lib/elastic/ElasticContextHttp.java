@@ -247,9 +247,11 @@ public class ElasticContextHttp extends ElasticContext {
       
       if (this.getAutoCreateIndex()) {
         String indexName = getItemIndexName();
+        String collectionIndexName = getCollectionIndexName();
         boolean indexNameIsAlias = getIndexNameIsAlias();
         try {
           ensureIndex(indexName,indexNameIsAlias);
+          ensureIndex(collectionIndexName,indexNameIsAlias);
         } catch (Exception e) {
           // keep trying - every 5 minutes
           long period = 1000 * 60 * 5;
@@ -260,6 +262,7 @@ public class ElasticContextHttp extends ElasticContext {
             public void run() {
               try {
                 ensureIndex(indexName,indexNameIsAlias);
+                ensureIndex(collectionIndexName,indexNameIsAlias);
                 timer.cancel();
               } catch (Exception e2) {
                 // logging is handled by ensureIndex

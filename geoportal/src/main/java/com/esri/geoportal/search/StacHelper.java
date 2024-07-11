@@ -1,5 +1,6 @@
 package com.esri.geoportal.search;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -76,7 +77,56 @@ public class StacHelper {
 			response = client.sendGet(url);
 		
 		return response;
+	}
+	
+	/** Returns Array of collections from elastic index 'çollections'
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONArray getCollectionList() throws Exception {
+		ElasticClient client = ElasticClient.newClient();
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		
+		String url = client.getTypeUrlForSearch(ec.getCollectionIndexName());
+		url = url + "/_search";
+		String query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}}";
+		
+		String	response = client.sendPost(url, query, "application/json");	
+		DocumentContext elasticResContext = JsonPath.parse(response);
 
+		net.minidev.json.JSONArray collectionArr = elasticResContext.read("$.hits.hits");
+		JSONArray resCollectionArr = new JSONArray();
+		for(var i=0;i<collectionArr.size();i++)
+		{
+			HashMap elasticCollectionMap = (HashMap) collectionArr.get(i);
+			resCollectionArr.add(elasticCollectionMap.get("_source"));			
+		}
+		return resCollectionArr;
+	}
+	 
+	/** Returns  ArrayList of collection id from elastic index 'çollections'
+	 * @return
+	 * @throws Exception
+	 */
+	@SuppressWarnings("unchecked")
+	public static ArrayList<String> getCollectionIDList() throws Exception
+	{
+		net.minidev.json.JSONArray collectionArr = getCollectionList();
+		
+		HashMap<String, Object> item = null;
+		String collectionId = "";
+		ArrayList<String> collectionList = new ArrayList<String>();
+				
+		if (collectionArr != null && collectionArr.size() > 0) 
+		{
+			for(int i=0;i<collectionArr.size();i++)
+			{
+				item = (HashMap<String, Object>) collectionArr.get(i);
+				collectionId = (String) item.get("id");
+				collectionList.add(collectionId);
+			}
+		}
+		return collectionList;
 	}
 	
 	public static String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
@@ -240,9 +290,6 @@ public class StacHelper {
 		return collectionQryBuf.toString();
 	}
 
-	
-
-
 	private static StacItemValidationResponse validateId(JSONObject requestPayload,String collectionId) throws Exception {
 		String errorMsg ="";
 		StacItemValidationResponse response = new StacItemValidationResponse();
@@ -254,7 +301,7 @@ public class StacHelper {
 
 		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
 		if (items != null && items.size() > 0) {
-			errorMsg = "stac item with id "+id+" already exists.";
+			errorMsg = "stac item with id '"+id+"' already exists.";
 			response.setCode(StacItemValidationResponse.ID_EXISTS);
 			response.setMessage(errorMsg);
 		}		
@@ -425,6 +472,115 @@ public class StacHelper {
 			response.setMessage("Item is valid.");
 		}
 		return response;
+	}
+
+	
+	//Validate Stac collection json as per https://github.com/radiantearth/stac-spec/blob/master/collection-spec/collection-spec.md
+	public static StacItemValidationResponse validateStacCollection(JSONObject requestPayload, boolean update) throws Exception {
+			
+		String errorMsg = "";
+		StacItemValidationResponse response = new StacItemValidationResponse();
+		if(!requestPayload.containsKey("type"))
+		{
+			errorMsg = errorMsg+" type is mandatory.";
+		}
+		
+		if(requestPayload.containsKey("type") && !requestPayload.getAsString("type").equals("Collection"))
+		{
+			errorMsg = errorMsg+" type should be Collection.";
+		}
+		if(!requestPayload.containsKey("stac_version") || 
+				(requestPayload.containsKey("stac_version") && requestPayload.get("stac_version").toString().isBlank()))
+		{
+			errorMsg = errorMsg+" stac_version is mandatory.";
+		}
+		if(!requestPayload.containsKey("id") || 
+				(requestPayload.containsKey("id") && requestPayload.get("id").toString().isBlank()))
+		{
+			errorMsg = errorMsg+" id is mandatory.";
+		}
+		if(!requestPayload.containsKey("description") || 
+				(requestPayload.containsKey("description") && requestPayload.get("description").toString().isBlank()))
+		{
+			errorMsg = errorMsg+" description is mandatory.";
+		}
+		if(!requestPayload.containsKey("license") || 
+				(requestPayload.containsKey("license") && requestPayload.get("license").toString().isBlank()))
+		{
+			errorMsg = errorMsg+" license is mandatory.";
+		}
+		if(!requestPayload.containsKey("providers"))
+		{
+			errorMsg = errorMsg+" providers are mandatory.";
+		}
+		if(!requestPayload.containsKey("extent"))
+		{
+			errorMsg = errorMsg+" extent is mandatory.";
+		}
+		if(!requestPayload.containsKey("links"))
+		{
+			errorMsg = errorMsg+" links are mandatory.";
+		}
+		if(errorMsg.length()>0)
+		{
+			response.setCode(StacItemValidationResponse.BAD_REQUEST);
+			response.setMessage(errorMsg);
+		}
+		else
+		{
+			String id = requestPayload.get("id").toString();
+			//Check if same id collection exist
+			JSONObject itemRes = getCollectionWithId(id);	
+			
+			if(update && (itemRes == null))
+			{
+				errorMsg = "Stac collection with id '"+id+"' does not exist.";
+				response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
+				response.setMessage(errorMsg);
+			}
+			if (!update && (itemRes != null)) {
+				errorMsg = "Stac collection with id '"+id+"' already exists.";
+				response.setCode(StacItemValidationResponse.ID_EXISTS);
+				response.setMessage(errorMsg);
+			}
+			if(errorMsg.length()==0)
+			{
+				response.setCode(StacItemValidationResponse.ITEM_VALID);
+				response.setMessage("success");
+			}
+		}		
+		return response;
+	}
+
+	public static JSONObject getCollectionWithId(String id) throws Exception {
+		String response = "";		
+		String query = "";
+		
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
+		String url = client.getTypeUrlForSearch(ec.getCollectionIndexName());
+		Map<String, String> queryMap = new HashMap<String, String>();
+
+		queryMap.put("ids", id);
+		url = url + "/_search";
+		
+		query = prepareSearchQuery(queryMap, null);
+
+		if (query.length() > 0)
+			response = client.sendPost(url, query, "application/json");
+		else
+			response = client.sendGet(url);
+		
+		DocumentContext elasticResContext = JsonPath.parse(response);
+		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+		JSONObject item = null;
+		
+		if(items != null && items.size()>0)
+		{
+			HashMap itemMap = (HashMap) items.get(0);
+			item = new JSONObject((HashMap)itemMap.get("_source"));
+		}
+		return item;
 	}
 }
 	

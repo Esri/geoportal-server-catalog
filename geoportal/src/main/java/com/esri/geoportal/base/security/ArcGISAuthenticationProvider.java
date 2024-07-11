@@ -22,6 +22,7 @@ import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import javax.json.JsonArray;
@@ -270,9 +271,21 @@ public class ArcGISAuthenticationProvider implements AuthenticationProvider {
     
     GeoportalContext gc = GeoportalContext.getInstance();
     if (gc.getSupportsGroupBasedAccess()) {
+    	ArrayList<Group> groupList = new ArrayList<Group>();
+    	 Group group = null;
       for (String groupKey: groupKeys) {
-        roles.add(new SimpleGrantedAuthority(groupKey));
+    	 group = new Group(groupKey);
+    	 groupList.add(group);
+    	 
+    	// Do not add userGroups in Roles, rather save it in GeoportalContext
+        //roles.add(new SimpleGrantedAuthority(groupKey));
       }
+      HashMap<String,ArrayList<Group>> userGroupMap = gc.getUserGroupMap();
+      if(!userGroupMap.containsKey(username))
+      {
+    	  userGroupMap.put(username, groupList);
+    	  gc.setUserGroupMap(userGroupMap);
+      }      
     }
     return roles;
   }

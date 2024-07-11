@@ -163,6 +163,7 @@ public class STACService extends Application {
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollections(@Context HttpServletRequest hsr) {
 		String responseJSON = null;
+		String finalresponse = "";
 		Status status = Response.Status.OK;
 		try {			
 			// 518 updates
@@ -175,25 +176,14 @@ public class STACService extends Application {
 				// Geoportal configured for collections
 				// STAC will have collection for each Geoportal collection
 				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
+				
 				JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
-				JSONArray collectionsArray = (JSONArray) stacCollections.get("collections");
-
-				JSONObject collectionsTemplate = (JSONObject) collectionsArray.get(0);
-				String collectionsTemplateString = collectionsTemplate.toString();
-
 				// Get list of collections
-				ArrayList<String> collectionList = this.getCollectionList();
-				collectionsArray.clear();
-				String updatedString = "";
-				for (int i = 0; i < collectionList.size(); i++) {					
-					updatedString = collectionsTemplateString.replace("{collectionId}", collectionList.get(i));
-					JSONObject collectionsObj = (JSONObject) JSONValue.parse(updatedString);
-					collectionsArray.add(collectionsObj);
-				}
+				JSONArray collectionsArray = StacHelper.getCollectionList();				
 				stacCollections.put("collections", collectionsArray);
-
-				responseJSON = stacCollections.toString();
-				System.out.println(responseJSON);
+				
+				finalresponse = stacCollections.toString();
+				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));								
 			}
 
 		} catch (Exception e) {
@@ -201,9 +191,84 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",null);
 		}
-		return Response.status(status).entity(responseJSON).build();
+		return Response.status(status).entity(finalresponse).build();
 	} 
 
+	@POST
+	@Path("/collections")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN })
+	public Response addCollection(@Context HttpServletRequest hsr,@RequestBody String body) {	
+		String responseJSON = "";		
+		Status status = null;
+		try {
+			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+			StacItemValidationResponse validationStatus = StacHelper.validateStacCollection(requestPayload,false);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
+			{
+				String id = requestPayload.get("id").toString();			
+				String collectionUrlElastic = client.getItemUrl(ec.getCollectionIndexName(),ec.getActualItemIndexType(), id);
+				responseJSON = client.sendPost(collectionUrlElastic, body, "application/json");	
+			}			
+			else
+			{
+				//response json will contain details about validation error like required fields
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = generateResponse(validationStatus.getCode(), validationStatus.getMessage(),null);
+			}	
+			
+		} catch (Exception e) {
+			LOGGER.error("Error in adding collections " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = this.generateResponse("500", "Stac collection could not be added.",null);
+		}
+		JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+		if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("created"))
+		{					
+			status = Response.Status.CREATED;
+			responseJSON = generateResponse("201", "Stac Collection has been added successfully.",null);				
+		}
+			
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+		
+	@PUT
+	@Path("/collections")
+	@Produces(MediaType.APPLICATION_JSON)
+	@Consumes({ MediaType.APPLICATION_JSON })
+	public Response updateCollection(@Context HttpServletRequest hsr,@RequestBody String body) {	
+		String responseJSON = "";		
+		Status status = null;
+		try {
+			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+			StacItemValidationResponse validationStatus = StacHelper.validateStacCollection(requestPayload,true);
+			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
+			{
+				String id = requestPayload.get("id").toString();			
+				String collectionUrlElastic = client.getItemUrl(ec.getCollectionIndexName(),ec.getActualItemIndexType(), id);
+				responseJSON = client.sendPut(collectionUrlElastic, body, "application/json");	
+			}			
+			else
+			{
+				//response json will contain details about validation error like required fields
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = generateResponse(validationStatus.getCode(), validationStatus.getMessage(),null);
+			}	
+			
+		} catch (Exception e) {
+			LOGGER.error("Error in adding collections " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = this.generateResponse("500", "Stac collection could not be added.",null);
+		}
+		JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+		if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
+		{					
+			status = Response.Status.CREATED;
+			responseJSON = generateResponse("201", "Stac Collection has been updated successfully.",null);				
+		}
+			
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
 
 	@GET
 	@Path("/collections/{collectionId}")
@@ -212,17 +277,26 @@ public class STACService extends Application {
 			@PathParam("collectionId") String collectionId) {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
-		try {
-			
-			if (!this.validCollection(collectionId)) // #518 || !collectionId.equals("metadata"))
-			{
-				status = Response.Status.NOT_FOUND;
-			}
-			else {
-				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
+		
+		try {			
+			if (!gc.getSupportsCollections()) 
+			{	
+				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);			
 				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
 			}
-
+			else
+			{
+				JSONObject collectionObj=  StacHelper.getCollectionWithId(collectionId);
+				if (collectionObj == null) // #518 || !collectionId.equals("metadata"))
+				{
+					status = Response.Status.NOT_FOUND;
+				}
+				else
+				{		
+					responseJSON = collectionObj.toString();
+					responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
+				}
+			}
 		} catch (Exception e) {
 			LOGGER.error("Error in metadata " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
@@ -322,7 +396,7 @@ public class STACService extends Application {
 	public Response search(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("ids") String idList,
-			@QueryParam("collections") String collections, @QueryParam("searchAfter") String searchAfter)
+			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter)
 			throws UnsupportedEncodingException {
 		String responseJSON = null;
 		String response = "";
@@ -354,7 +428,7 @@ public class STACService extends Application {
 			if (intersects != null && intersects.length() > 0)
 				queryMap.put("intersects", intersects);
 
-			url = url + "/_search?size=" + limit;
+			url = url + "/_search?size=" + (limit+1);
 
 			query = StacHelper.prepareSearchQuery(queryMap, searchAfter);
 			System.out.println("final query " + query);
@@ -503,23 +577,32 @@ public class STACService extends Application {
 		String responseJSON = "";		
 		Status status = null;
 		
-		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
-		
-		//check if it is Feature or FeatureCollection
-		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
-		if(type.equalsIgnoreCase("Feature"))
-		{
-			return addFeature(requestPayload,collectionId,hsr,async);
-		}
-		else if(type.equalsIgnoreCase("FeatureCollection"))
-		{
-			return addFeatureCollection(requestPayload,collectionId, async);
+		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
+		{	
+			status = Response.Status.BAD_REQUEST;
+			String baseUrl = this.getBaseUrl(hsr);
+			responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
 		}
 		else
 		{
-			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.",null);			
-		}		
+			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+			//check if it is Feature or FeatureCollection
+			String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+			
+			if(type.equalsIgnoreCase("Feature"))
+			{
+				return addFeature(requestPayload,collectionId,hsr,async);
+			}
+			else if(type.equalsIgnoreCase("FeatureCollection"))
+			{
+				return addFeatureCollection(requestPayload,collectionId, async);
+			}
+			else
+			{
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.",null);			
+			}		
+		}
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
 	}
 	
@@ -538,22 +621,32 @@ public class STACService extends Application {
 			@PathParam("featureId") String featureId,
 			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
 		String responseJSON = "";		
-		Status status = null;
+		Status status = null;		
 		
-		JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
-		
-		//check if it is Feature or FeatureCollection
-		String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
-		if(type.equalsIgnoreCase("Feature"))
-		{
-			return updateFeature(requestPayload,collectionId,featureId,hsr,async);
+		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
+		{	
+			status = Response.Status.BAD_REQUEST;
+			String baseUrl = this.getBaseUrl(hsr);
+			responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
 		}
 		else
 		{
-			status = Response.Status.BAD_REQUEST;
-			responseJSON = this.generateResponse("400","type should be Feature.",null);			
-		}		
-		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+			//check if it is Feature or FeatureCollection
+			String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+			if(type.equalsIgnoreCase("Feature"))
+			{
+				return updateFeature(requestPayload,collectionId,featureId,hsr,async);
+			}
+			else
+			{
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = this.generateResponse("400","type should be Feature.",null);			
+			}		
+			
+		}
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();
+					
 	}
 	
 	private Response updateFeature(JSONObject requestPayload, String collectionId, String featureId,HttpServletRequest hsr,
@@ -872,6 +965,7 @@ public class STACService extends Application {
 		String finalResponse = "";
 		String search_after = "";
 		String filePath = "service/config/stac-items.json";
+		boolean nextLink = false;
 
 		try {
 			itemFileString = this.readResourceFile(filePath, hsr);
@@ -887,10 +981,23 @@ public class STACService extends Application {
 
 			numberMatched = elasticResContext.read("$.hits.total.value");
 			items = elasticResContext.read("$.hits.hits");
-			// numberReturned = String.valueOf(items.size());
-
+			if(items.size() > limit)
+			{
+				nextLink = true;
+			}
+			
+			//Geoportal asked for 1 extra record to figure out whether next link is needed
+			//int itemActualSize = items.size()-1;			
+			int itemActualSize = Math.min(limit, items.size());
+			
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
+			
+			//No link for next page
+			if(!nextLink)
+			{
+				linksContext.delete("$.searchItem.links[1]");
+			}
 
 			if (requestType.startsWith("metadataItems"))
 				resourceFilecontext.set("$.response.links", linksContext.read("$.metadataItem.links"));
@@ -900,7 +1007,7 @@ public class STACService extends Application {
 
 			JSONArray jsonArray = new JSONArray();
 
-			for (int i = 0; i < items.size(); i++) {
+			for (int i = 0; i < itemActualSize; i++) {
 				DocumentContext featureContext = JsonPath.parse(featureTemplateStr);
 				DocumentContext searchItemCtx = JsonPath.parse(items.get(i));
 
@@ -908,7 +1015,7 @@ public class STACService extends Application {
 				boolean success = this.populateFeature(featureContext, searchItemCtx);
 				if (success) {
 					jsonArray.add(featureContext.read("$.featurePropPath"));
-					if (i == (items.size() - 1)) {
+					if (i == (itemActualSize - 1)) {
 						try {
 							JSONArray sortArr = searchItemCtx.read("$.sort");
 							search_after = sortArr.get(0).toString();
@@ -1225,7 +1332,8 @@ public class STACService extends Application {
 		return filedataString;
 	}
 	
-	
+	@Deprecated
+	//Now Collections are stored in a separate index 'çollections'
 	private ArrayList<String> getCollectionList() throws Exception {
 		String url = client.getTypeUrlForSearch(ec.getIndexName());
 		url = url + "/_search";
@@ -1251,7 +1359,7 @@ public class STACService extends Application {
 		boolean validId = false;
 		if(collectionId != null && !collectionId.isBlank())
 		{
-			ArrayList<String> collectionList = this.getCollectionList();
+			ArrayList<String> collectionList = StacHelper.getCollectionIDList();
 			for(int i=0;i<collectionList.size();i++)
 			{
 				if(collectionList.get(i)!= null && collectionList.get(i).equals(collectionId))
