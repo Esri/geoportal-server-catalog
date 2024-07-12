@@ -87,10 +87,10 @@ public class ElasticProxyFilter implements Filter {
               // Throw an exception here or rely on app-security.xml?
               throw new ServletException("This endpoint is not supported.");
             }
-            if (path.indexOf("/"+idxName+"/"+itmType+"/item/_search") != -1 || 
+            if (path.indexOf("/"+idxName+"/"+itmType+"/_search") != -1 || 
                 path.indexOf("/"+idxName+"/"+itmType+"/_count") != -1 ||
-                path.indexOf("/"+idxName+"/item/_search") != -1 || 
-                path.indexOf("/"+idxName+"/item/_count") != -1) {
+                path.indexOf("/"+idxName+"/_search") != -1 || 
+                path.indexOf("/"+idxName+"/_count") != -1) {
               checkAccess = true;
               String qstr = hsr.getQueryString();
               if (qstr != null && qstr.length() > 0) {
