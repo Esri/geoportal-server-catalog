@@ -3,7 +3,7 @@
   "description": "Landing page for Geoportal Server OGC Records API",
   "serverInfo": {
     "title": "Geoportal Server",
-    "version": "2.7.1"
+    "version": "2.7.2"
   },
   "links": [
     {
