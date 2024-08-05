@@ -31,7 +31,7 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 
 ## Requirements
 
-* Elasticsearch 7.x
+* Elasticsearch 7.x or OpenSearch 2.12
 * Tomcat 9.x
 
 ## Installation
