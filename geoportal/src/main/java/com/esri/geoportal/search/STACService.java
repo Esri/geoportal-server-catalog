@@ -73,15 +73,12 @@ import net.minidev.json.JSONValue;
 public class STACService extends Application {
 
 	/** Logger. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);
-	
-	private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-	private GeoportalContext gc = GeoportalContext.getInstance();
-	private ElasticClient client = ElasticClient.newClient();
+	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);		
 	
 	private int numFeaturesAddItem = 100;
 	private boolean validateFields = false;
 
+	
 	public int getNumFeaturesAddItem() {
 		return numFeaturesAddItem;
 	}
@@ -91,13 +88,12 @@ public class STACService extends Application {
 	}
 
 	public boolean isValidateFields() {
-		return validateFields;
+		return this.validateFields;
 	}
 
 	public void setValidateFields(boolean validateFields) {
 		this.validateFields = validateFields;
 	}
-
 	
 	@Override
 	public Set<Class<?>> getClasses() {
@@ -165,6 +161,7 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String finalresponse = "";
 		Status status = Response.Status.OK;
+		GeoportalContext gc = GeoportalContext.getInstance();
 		try {			
 			// 518 updates
 			if (!gc.getSupportsCollections()) {
@@ -201,6 +198,8 @@ public class STACService extends Application {
 	public Response addCollection(@Context HttpServletRequest hsr,@RequestBody String body) {	
 		String responseJSON = "";		
 		Status status = null;
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		try {
 			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
 			StacItemValidationResponse validationStatus = StacHelper.validateStacCollection(requestPayload,false);
@@ -239,6 +238,8 @@ public class STACService extends Application {
 	public Response updateCollection(@Context HttpServletRequest hsr,@RequestBody String body) {	
 		String responseJSON = "";		
 		Status status = null;
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		try {
 			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
 			StacItemValidationResponse validationStatus = StacHelper.validateStacCollection(requestPayload,true);
@@ -277,7 +278,7 @@ public class STACService extends Application {
 			@PathParam("collectionId") String collectionId) {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
-		
+		GeoportalContext gc = GeoportalContext.getInstance();
 		try {			
 			if (!gc.getSupportsCollections()) 
 			{	
@@ -316,7 +317,8 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;
 		
 		String query = "";
-
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
@@ -404,7 +406,8 @@ public class STACService extends Application {
 		
 		String query = "";
 		String listOfCollections = null;
-		
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
@@ -484,7 +487,8 @@ public class STACService extends Application {
 		String query = "";
 		String bbox = "";
 		String ids = "";
-
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<>();
@@ -546,7 +550,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
-					(intersects != null ? intersects.toString() : ""), "searchPost", collectionArr.toString());
+					(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""));
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -576,7 +580,7 @@ public class STACService extends Application {
 			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
 		String responseJSON = "";		
 		Status status = null;
-		
+		GeoportalContext gc = GeoportalContext.getInstance();
 		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
 		{	
 			status = Response.Status.BAD_REQUEST;
@@ -622,7 +626,7 @@ public class STACService extends Application {
 			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
 		String responseJSON = "";		
 		Status status = null;		
-		
+		GeoportalContext gc = GeoportalContext.getInstance();
 		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
 		{	
 			status = Response.Status.BAD_REQUEST;
@@ -672,6 +676,8 @@ public class STACService extends Application {
 			boolean async) {
 		String responseJSON = generateResponse("500","Stac Feature could not be updated.",null);
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		try {
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId,false);
 			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
@@ -763,8 +769,10 @@ public class STACService extends Application {
 	{
 		String responseJSON = generateResponse("500","Stac Item could not be added.",null);
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		try {
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,validateFields);
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,isValidateFields());
 			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
 			{
 				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
@@ -1335,6 +1343,8 @@ public class STACService extends Application {
 	@Deprecated
 	//Now Collections are stored in a separate index 'çollections'
 	private ArrayList<String> getCollectionList() throws Exception {
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
 		String url = client.getTypeUrlForSearch(ec.getIndexName());
 		url = url + "/_search";
 		String collectionsSearch = "{\"aggregations\": {\"collections\": {\"terms\": {\"field\": \"src_collections_s\"}}}}";
