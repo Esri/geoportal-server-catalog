@@ -655,7 +655,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         var south = 90;
         var north = -90;
 
-        if (item.envelope_geo) {
+        if (item.envelope_geo && item.envelope_geo[0]) {
           var west = item.envelope_geo[0].coordinates[0][0];
           var south = item.envelope_geo[0].coordinates[0][1];
           var east = item.envelope_geo[0].coordinates[1][0];
