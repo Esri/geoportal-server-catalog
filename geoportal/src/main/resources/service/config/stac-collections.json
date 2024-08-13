@@ -71,7 +71,7 @@
 					"rel": "parent",
 					"type": "application/json",
 					"title": "Link to all collections",
-					"href": "{url}"
+					"href": "{url}/collections/"
 				},
 				{
 					"rel": "root",

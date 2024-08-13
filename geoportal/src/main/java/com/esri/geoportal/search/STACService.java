@@ -73,27 +73,10 @@ import net.minidev.json.JSONValue;
 public class STACService extends Application {
 
 	/** Logger. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);		
-	
-	private int numFeaturesAddItem = 100;
-	private boolean validateFields = false;
-
-	
-	public int getNumFeaturesAddItem() {
-		return numFeaturesAddItem;
-	}
-
-	public void setNumFeaturesAddItem(int numFeaturesAddItem) {
-		this.numFeaturesAddItem = numFeaturesAddItem;
-	}
-
-	public boolean isValidateFields() {
-		return this.validateFields;
-	}
-
-	public void setValidateFields(boolean validateFields) {
-		this.validateFields = validateFields;
-	}
+	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);
+	private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+	private GeoportalContext gc = GeoportalContext.getInstance();
+	private ElasticClient client = ElasticClient.newClient();
 	
 	@Override
 	public Set<Class<?>> getClasses() {
@@ -161,7 +144,7 @@ public class STACService extends Application {
 		String responseJSON = null;
 		String finalresponse = "";
 		Status status = Response.Status.OK;
-		GeoportalContext gc = GeoportalContext.getInstance();
+		
 		try {			
 			// 518 updates
 			if (!gc.getSupportsCollections()) {
@@ -198,8 +181,7 @@ public class STACService extends Application {
 	public Response addCollection(@Context HttpServletRequest hsr,@RequestBody String body) {	
 		String responseJSON = "";		
 		Status status = null;
-		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		ElasticClient client = ElasticClient.newClient();
+		
 		try {
 			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
 			StacItemValidationResponse validationStatus = StacHelper.validateStacCollection(requestPayload,false);
@@ -238,8 +220,7 @@ public class STACService extends Application {
 	public Response updateCollection(@Context HttpServletRequest hsr,@RequestBody String body) {	
 		String responseJSON = "";		
 		Status status = null;
-		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		ElasticClient client = ElasticClient.newClient();
+	
 		try {
 			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
 			StacItemValidationResponse validationStatus = StacHelper.validateStacCollection(requestPayload,true);
@@ -278,7 +259,7 @@ public class STACService extends Application {
 			@PathParam("collectionId") String collectionId) {
 		String responseJSON = null;
 		Status status = Response.Status.OK;
-		GeoportalContext gc = GeoportalContext.getInstance();
+		
 		try {			
 			if (!gc.getSupportsCollections()) 
 			{	
@@ -317,8 +298,7 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;
 		
 		String query = "";
-		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		ElasticClient client = ElasticClient.newClient();
+		
 		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
@@ -406,8 +386,7 @@ public class STACService extends Application {
 		
 		String query = "";
 		String listOfCollections = null;
-		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		ElasticClient client = ElasticClient.newClient();
+
 		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<String, String>();
@@ -523,7 +502,7 @@ public class STACService extends Application {
 				queryMap.put("intersects", intersects.toString());
 			}
 			
-			GeoportalContext gc = GeoportalContext.getInstance();
+		
 			String listOfCollections = "";
 			if ((gc.getSupportsCollections() && collectionArr != null && !collectionArr.isEmpty())) {
 				for(int i=0;i<collectionArr.size();i++)
@@ -580,7 +559,7 @@ public class STACService extends Application {
 			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
 		String responseJSON = "";		
 		Status status = null;
-		GeoportalContext gc = GeoportalContext.getInstance();
+		
 		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
 		{	
 			status = Response.Status.BAD_REQUEST;
@@ -626,7 +605,7 @@ public class STACService extends Application {
 			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
 		String responseJSON = "";		
 		Status status = null;		
-		GeoportalContext gc = GeoportalContext.getInstance();
+		
 		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
 		{	
 			status = Response.Status.BAD_REQUEST;
@@ -676,8 +655,7 @@ public class STACService extends Application {
 			boolean async) {
 		String responseJSON = generateResponse("500","Stac Feature could not be updated.",null);
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
-		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		ElasticClient client = ElasticClient.newClient();
+
 		try {
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId,false);
 			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
@@ -769,10 +747,9 @@ public class STACService extends Application {
 	{
 		String responseJSON = generateResponse("500","Stac Item could not be added.",null);
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
-		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		ElasticClient client = ElasticClient.newClient();
+
 		try {
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,isValidateFields());
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,gc.isValidateStacFields());
 			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
 			{
 				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
@@ -874,7 +851,7 @@ public class STACService extends Application {
 				 //For synchronous request, limit number of features in feature collection
 				 if(!async)
 				 {
-					 if(features.size() >this.getNumFeaturesAddItem())
+					 if(features.size() >gc.getNumStacFeaturesAddItem())
 					 {
 						 responseJSON = generateResponse("400","Number of Features in FeatureCollection are more than allowed limit ("+features.size()+") in Synchronous request. For large FeatureCollection include paramter async=true.",null);
 						 status = Response.Status.BAD_REQUEST;
