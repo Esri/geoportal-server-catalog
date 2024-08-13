@@ -36,8 +36,8 @@
             {
                 "rel": "self",
                 "type": "application/geo+json",
-                "title": "Next page of results",
-                "href": "{url}/search",
+                "title": "Current page of results",
+                "href": "{url}/search",               
                 "hreflang": "en-US"
             },
             {
@@ -45,6 +45,8 @@
                 "type": "application/geo+json",
                 "title": "Next page of results",
                 "href": "{url}/search?{urlparam}",
+                "method":"POST",
+                "body":"{body}",
                 "hreflang": "en-US"
             },
             {

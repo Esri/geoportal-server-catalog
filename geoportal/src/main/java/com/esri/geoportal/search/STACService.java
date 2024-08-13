@@ -323,7 +323,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, null, null, "metadataItems",
-					collectionId);
+					collectionId,null);
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -410,7 +410,7 @@ public class STACService extends Application {
 			if (intersects != null && intersects.length() > 0)
 				queryMap.put("intersects", intersects);
 
-			url = url + "/_search?size=" + (limit+1);
+			url = url + "/_search?size=" + (limit+1); //Adding one extra so that next page can be figured out
 
 			query = StacHelper.prepareSearchQuery(queryMap, searchAfter);
 			System.out.println("final query " + query);
@@ -421,7 +421,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 			}
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, idList, intersects, "search",
-					listOfCollections);
+					listOfCollections,null);
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -519,8 +519,8 @@ public class STACService extends Application {
 				}								
 				queryMap.put("collections", listOfCollections);
 			}
-			
-			url = url + "/_search?size=" + limit;
+			//Adding one extra so that next page can be figured out
+			url = url + "/_search?size=" + (limit+1);
 			query = StacHelper.prepareSearchQuery(queryMap, search_after);
 			System.out.println("final query " + query);
 			if (query.length() > 0)
@@ -529,7 +529,7 @@ public class STACService extends Application {
 				response = client.sendGet(url);
 
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
-					(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""));
+					(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""),body);
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -941,7 +941,7 @@ public class STACService extends Application {
 	}
 
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit, String datetime,
-			String ids, String intersects, String requestType, String collectionId) {
+			String ids, String intersects, String requestType, String collectionId, String body) {
 		
 		int numberMatched;		
 		net.minidev.json.JSONArray items = null;
@@ -971,8 +971,7 @@ public class STACService extends Application {
 				nextLink = true;
 			}
 			
-			//Geoportal asked for 1 extra record to figure out whether next link is needed
-			//int itemActualSize = items.size()-1;			
+			//Geoportal asked for 1 extra record to figure out whether next link is needed				
 			int itemActualSize = Math.min(limit, items.size());
 			
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
@@ -983,13 +982,6 @@ public class STACService extends Application {
 			{
 				linksContext.delete("$.searchItem.links[1]");
 			}
-
-			if (requestType.startsWith("metadataItems"))
-				resourceFilecontext.set("$.response.links", linksContext.read("$.metadataItem.links"));
-
-			if (requestType.startsWith("search"))
-				resourceFilecontext.set("$.response.links", linksContext.read("$.searchItem.links"));
-
 			JSONArray jsonArray = new JSONArray();
 
 			for (int i = 0; i < itemActualSize; i++) {
@@ -1014,10 +1006,6 @@ public class STACService extends Application {
 			resourceFilecontext.set("$.response.features", jsonArray);
 			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);
 
-			JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(resourceFilecontext.jsonString());
-			JsonObject resObj = obj.getJsonObject("response");
-
-			finalResponse = resObj.toString();
 			// Prepare urlparam for next page
 
 			String encodedIntersect = null;
@@ -1032,8 +1020,12 @@ public class STACService extends Application {
 			if (requestType.equalsIgnoreCase("searchPost")) {
 				// In post request, other parameters will be part of request body
 				urlparam = (search_after != null ? "search_after=" + search_after : "");
+				linksContext.set("$.searchItem.links[1].body",(body != null ? JSONValue.parse(body) : ""));
 
 			} else {
+				linksContext.delete("$.searchItem.links[1].body");
+				linksContext.delete("$.searchItem.links[1].method");
+				
 				urlparam = "limit=" + limit + (bbox != null ? "&bbox=" + bbox : "")
 						+ (datetime != null ? "&datetime=" + datetime : "")
 						+ (search_after != null ? "&search_after=" + search_after : "")
@@ -1041,6 +1033,16 @@ public class STACService extends Application {
 						+ (ids != null ? "&ids=" + ids : "")
 						+((requestType.startsWith("search")) && collectionId != null ? "&collections=" + collectionId : "");
 			}
+			if (requestType.startsWith("metadataItems"))
+				resourceFilecontext.set("$.response.links", linksContext.read("$.metadataItem.links"));
+
+			if (requestType.startsWith("search"))
+				resourceFilecontext.set("$.response.links", linksContext.read("$.searchItem.links"));
+			
+			JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(resourceFilecontext.jsonString());
+			JsonObject resObj = obj.getJsonObject("response");
+
+			finalResponse = resObj.toString();
 
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
 			
@@ -1327,7 +1329,7 @@ public class STACService extends Application {
 		String collectionsSearch = "{\"aggregations\": {\"collections\": {\"terms\": {\"field\": \"src_collections_s\"}}}}";
 
 		String response = client.sendPost(url, collectionsSearch, "application/json");
-		JSONObject gptResponse = (JSONObject) JSONValue.parse(response); // JsonUtil.toJsonStructure(response);
+		JSONObject gptResponse = (JSONObject) JSONValue.parse(response); 
 		JSONObject gptAggregations = (JSONObject) gptResponse.get("aggregations");
 		JSONObject gptCollections = (JSONObject) gptAggregations.get("collections");
 		JSONArray gptBuckets = (JSONArray) gptCollections.get("buckets");
