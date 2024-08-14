@@ -463,6 +463,7 @@ public class STACService extends Application {
 		JsonObject intersects = (requestPayload.containsKey("intersects") ? requestPayload.getJsonObject("intersects")
 				: null);
 
+		//TODO Handle merge=true in Search Pagination
 		String query = "";
 		String bbox = "";
 		String ids = "";
@@ -1020,11 +1021,16 @@ public class STACService extends Application {
 			if (requestType.equalsIgnoreCase("searchPost")) {
 				// In post request, other parameters will be part of request body
 				urlparam = (search_after != null ? "search_after=" + search_after : "");
-				linksContext.set("$.searchItem.links[1].body",(body != null ? JSONValue.parse(body) : ""));
+				if(nextLink)
+					linksContext.set("$.searchItem.links[1].body",(body != null ? JSONValue.parse(body) : ""));
 
 			} else {
-				linksContext.delete("$.searchItem.links[1].body");
-				linksContext.delete("$.searchItem.links[1].method");
+				if(nextLink)
+				{
+					linksContext.delete("$.searchItem.links[1].body");
+					linksContext.delete("$.searchItem.links[1].method");
+					linksContext.delete("$.searchItem.links[1].merge");
+				}				
 				
 				urlparam = "limit=" + limit + (bbox != null ? "&bbox=" + bbox : "")
 						+ (datetime != null ? "&datetime=" + datetime : "")

@@ -211,8 +211,8 @@ public class StacHelper {
 
 	private static String prepareDateTime(String datetime) {
 		String query = "";
-		//String dateTimeFld = "sys_modified_dt";
-		String dateTimeFld = "datetime";
+		String dateTimeFld = FieldNames.FIELD_SYS_MODIFIED;
+		
 		String dateTimeFldQuery = "";
 		// Find from and to dates
 		// https://api.stacspec.org/v1.0.0/ogcapi-features/#tag/Features/operation/getFeatures
