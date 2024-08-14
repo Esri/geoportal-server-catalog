@@ -47,6 +47,7 @@
                 "href": "{url}/search?{urlparam}",
                 "method":"POST",
                 "body":"{body}",
+                "merge":false,
                 "hreflang": "en-US"
             },
             {
