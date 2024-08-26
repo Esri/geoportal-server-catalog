@@ -22,6 +22,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 
 public class StacHelper {
@@ -626,6 +627,83 @@ public class StacHelper {
 			item = new JSONObject((HashMap)itemMap.get("_source"));
 		}
 		return item;
+	}
+
+	public static JSONObject deleteCollectionItems(String collectionId, String idList, boolean deleteCollection) {
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
+		String response = "";
+		JSONObject resObj = new JSONObject();
+		String url ="";
+		String body = "";
+		boolean deleteById = false;
+		
+		try {
+			url =  client.getTypeUrlForSearch(ec.getIndexName());
+			url = url+"/_delete_by_query";			
+			
+			if(idList!=null && !idList.isBlank())
+			{
+				 String ids = prepareIds(idList);
+				 body = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}},"+ids+"]}}}";
+			}
+			else {
+				body = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}}]}}}";
+			}			
+			
+			response = client.sendPost(url, body, "application/json");
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			resObj.put("code", "500");
+			resObj.put("description", "Stac features could not be deleted from collection. "+e.getCause());
+			return resObj;
+		}
+		
+		resObj = (JSONObject) JSONValue.parse(response);
+		int total  = resObj.containsKey("total")? ((Number)(resObj.get("total"))).intValue(): null;
+		int deleted  = resObj.containsKey("deleted")? ((Number)(resObj.get("deleted"))).intValue(): null;
+		
+		if(idList != null && !idList.isBlank())
+		{
+			deleteById = true;
+		}				
+		resObj = new JSONObject();
+		if(!deleteCollection)
+		{
+			resObj.put("code", "200");
+			resObj.put("description", "Stac features found: "+total+", deleted: "+deleted);			
+		}
+		if(deleteCollection)
+		{	//Deleting collection is not allowed if items are deleted by Id
+			if(deleteById)
+			{
+				resObj.put("code", "200");
+				resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Deleting collection is not allowed when items are deleted with id list.");	
+			}			
+			if(!deleteById && deleted != total)
+			{
+				resObj.put("code", "200");
+				resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Collection will not be deleted as some features could not be deleted.");	
+				
+			}
+			if(!deleteById && deleted == total)
+			{
+				//Now delete collection which is an item in Collection Index
+				try {
+					url = client.getTypeUrlForSearch(ec.getCollectionIndexName());			
+					response = client.sendDelete(url+"/_doc/"+collectionId);	
+					resObj.put("code", "200");
+					resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Collection is deleted.");
+				}catch (Exception e) {					
+					e.printStackTrace();
+					resObj.put("code", "500");
+					resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+" but collection could not be deleted."+e.getCause());
+				}
+			}
+		}	
+			
+		return resObj;
 	}
 }
 	
