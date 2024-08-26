@@ -35,6 +35,7 @@ import javax.json.JsonObject;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.POST;
 import javax.ws.rs.PUT;
@@ -67,6 +68,10 @@ import net.minidev.json.JSONValue;
 
 /**
  * STAC API: Records service provider.
+ */
+/**
+ * @author cont_anki
+ *
  */
 @ApplicationPath("stac")
 @Path("")
@@ -371,6 +376,138 @@ public class STACService extends Application {
 
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	}
+	
+	/**
+	 * @param hsr
+	 * @param collectionId
+	 * @param ids - optional - comma separated list of ids, if no ids then all items will be deleted
+	 * @param deleteCollection - optional default=false; if true and no idList, it will delete collection also after deleting all items
+	 * @return
+	 */
+	@DELETE
+	@Path("collections/{collectionId}/items")
+	@Produces("application/json")
+	public Response deleteCollectionItems(@Context HttpServletRequest hsr, 
+			@PathParam("collectionId") String collectionId, @QueryParam("ids") String idList,@QueryParam("deleteCollection") boolean deleteCollection)
+	{
+		String responseJSON = null;		
+		Status status = Response.Status.OK;		
+		
+		try {
+			JSONObject itemRes = StacHelper.getCollectionWithId(collectionId);
+			if(itemRes == null)
+			{
+				responseJSON = this.generateResponse("404", "Collection not found.",null);
+			} 
+			
+			else
+			{
+				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,idList,deleteCollection);
+				responseJSON = resObj.toString();				
+			}
+
+		} catch (InvalidParameterException e) {
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
+		} catch (Exception e) {
+			LOGGER.error("Error in deleting items from collection"+ e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = this.generateResponse("500",
+					"STAC API: Items could not be deleted.",null);
+		}
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+	}
+	
+	
+	/**
+	 * This will all items from collection and then delete collection
+	 * @param hsr
+	 * @param collectionId
+	 * @return
+	 */
+	@DELETE
+	@Path("collections/{collectionId}")
+	@Produces("application/json")
+	public Response deleteCollection(@Context HttpServletRequest hsr, @PathParam("collectionId") String collectionId)
+	{
+		String responseJSON = null;		
+		Status status = Response.Status.OK;		
+		
+		try {
+			JSONObject itemRes = StacHelper.getCollectionWithId(collectionId);
+			if(itemRes == null)
+			{
+				responseJSON = this.generateResponse("404", "Collection not found.",null);
+			} else
+			{
+				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,null,true);
+				responseJSON = resObj.toString();				
+			}
+
+		} catch (InvalidParameterException e) {
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
+		} catch (Exception e) {
+			LOGGER.error("Error in deleting items from collection"+ e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = this.generateResponse("500",
+					"STAC API: Items could not be deleted.",null);
+		}
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+	}
+	
+	@DELETE
+	@Path("collections/{collectionId}/items/{id}")
+	@Produces("application/json")
+	public Response deleteItemById(@Context HttpServletRequest hsr, @PathParam("collectionId") String collectionId,
+			@PathParam("id") String id) {
+		String responseJSON = null;
+		String response = "";
+		Status status = Response.Status.OK;		
+		
+		try {
+			response = StacHelper.getItemWithItemId(collectionId, id);
+			
+			DocumentContext elasticResContext = JsonPath.parse(response);
+			JSONArray items = elasticResContext.read("$.hits.hits");
+			
+			if (items != null && items.size() > 0) {
+				String url = client.getTypeUrlForSearch(ec.getIndexName());
+				response = client.sendDelete(url+"/_doc/"+id);					
+				JSONObject responseObj = (JSONObject) JSONValue.parse(response);
+				String result = "";
+				if(responseObj.containsKey("result"))			
+				{
+					result = responseObj.get("result").toString();
+					if(result.contentEquals("deleted"))
+					{
+						responseJSON = this.generateResponse("200", "Stac feature deleted successfully.",null);
+					}
+					else
+					{
+						status = Response.Status.INTERNAL_SERVER_ERROR;
+						responseJSON = this.generateResponse("500","STAC feature could not be deleted. Result: "+result,null);
+					}
+				}
+			} else {
+				responseJSON = this.generateResponse("404", "Record not found.",null);
+			}
+
+		} catch (InvalidParameterException e) {
+			status = Response.Status.BAD_REQUEST;
+			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
+		} catch (Exception e) {
+			LOGGER.error("Error in deleting item with item id: " + id + " " + e.getCause());
+			e.printStackTrace();
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			responseJSON = this.generateResponse("500","STAC API: Feature could not be deleted.",null);
+		}
+
+		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+	}
+
 
 	@GET
 	@Produces("application/geo+json")
