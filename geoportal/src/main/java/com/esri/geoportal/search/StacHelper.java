@@ -22,6 +22,7 @@ import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 
 public class StacHelper {
@@ -211,8 +212,8 @@ public class StacHelper {
 
 	private static String prepareDateTime(String datetime) {
 		String query = "";
-		//String dateTimeFld = "sys_modified_dt";
-		String dateTimeFld = "datetime";
+		String dateTimeFld = FieldNames.FIELD_SYS_MODIFIED;
+		
 		String dateTimeFldQuery = "";
 		// Find from and to dates
 		// https://api.stacspec.org/v1.0.0/ogcapi-features/#tag/Features/operation/getFeatures
@@ -253,7 +254,7 @@ public class StacHelper {
 		double coords[] = { -180.0, -90.0, 180.0, 90.0 };
 		String query = "";
 		// As per stac API validator, invalid bbox should respond with 400, instead of
-		// reaplcing it with defaults
+		// replacing it with defaults
 		if (bbox.size() == 4 || bbox.size() == 6) {
 			coords[0] = Double.parseDouble(bbox.get(0));
 			coords[1] = Double.parseDouble(bbox.get(1));
@@ -308,6 +309,7 @@ public class StacHelper {
 		return response;
 	}
 
+	//https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md
 	private static StacItemValidationResponse validateFields(JSONObject requestPayload) {
 		String errorMsg ="";
 		StacItemValidationResponse response = new StacItemValidationResponse();
@@ -321,9 +323,10 @@ public class StacHelper {
 		{
 			errorMsg = errorMsg+" id is mandatory and should not be empty.";
 		}
-		if(!requestPayload.containsKey("geometry"))
+		//geometry and bbox is mandatory from stac spec but geoportal will allow combination of shape_geo and envelope_geo as well
+		if(!requestPayload.containsKey("geometry") && !requestPayload.containsKey("shape_geo"))
 		{
-			errorMsg = errorMsg+" geometry is mandatory.";
+			errorMsg = errorMsg+" geometry or shape_geo is mandatory.";
 		}
 		
 		if(requestPayload.containsKey("geometry"))
@@ -331,6 +334,12 @@ public class StacHelper {
 			if(requestPayload.get("geometry") != null && (!requestPayload.containsKey("bbox")))
 			errorMsg = errorMsg+" bbox is mandatory if geometry is not null.";
 		}
+		if(requestPayload.containsKey("shape_geo"))
+		{
+			if(requestPayload.get("shape_geo") != null && (!requestPayload.containsKey("envelope_geo")))
+			errorMsg = errorMsg+" envelope_geo is mandatory if shape_geo is not null.";
+		}
+		
 		if(!requestPayload.containsKey("properties"))
 		{
 			errorMsg = errorMsg+" properties is mandatory.";
@@ -350,23 +359,7 @@ public class StacHelper {
 				}
 			}
 		}
-		if(!requestPayload.containsKey("links"))
-		{
-			errorMsg = errorMsg+" links is mandatory.";
-		}
-		if(requestPayload.containsKey("links"))
-		{
-			JSONArray linkArr = (JSONArray) requestPayload.get("links");
-			
-			for(var i=0; i<linkArr.size();i++)
-			{
-				JSONObject link = (JSONObject) linkArr.get(i);
-				if(!link.containsKey("href") || !link.containsKey("rel"))
-				{
-					errorMsg = errorMsg+" href and rel are mandatory in link object.";
-				}
-			}
-		}
+
 		if(!requestPayload.containsKey("assets"))
 		{
 			errorMsg = errorMsg+" assets is mandatory.";
@@ -395,13 +388,70 @@ public class StacHelper {
 			prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
 			requestPayload.put("properties", prop);
 			
-			//Add Geoportal attributes sys_created_dt, sys_modified_dt, sys_collections_s,sys_access_s and sys_approval_status_s
+			//Add Geoportal attributes sys_created_dt, sys_modified_dt, sys_collections_s,sys_access_s 
+			// sys_approval_status_s,title and url_granule_s
 			JSONArray collArr = new JSONArray();
 			collArr.add(collectionId);
 			
 			requestPayload.put(FieldNames.FIELD_SYS_CREATED,date);
 			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);		
 			requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS,collArr);
+			requestPayload.put(FieldNames.FIELD_TITLE,requestPayload.get("id"));
+			
+			//Add url_granule_s from asset with role thumbnail
+			if(requestPayload.containsKey(FieldNames.FIELD_ASSETS))
+			{
+				JSONObject assetsObj = (JSONObject) requestPayload.get(FieldNames.FIELD_ASSETS);
+				
+				if(assetsObj.keySet().contains(FieldNames.FIELD_THUMBNAIL))
+				{
+					JSONObject thumbnailObj = (JSONObject) assetsObj.get(FieldNames.FIELD_THUMBNAIL);
+					if(thumbnailObj.get("href")!=null)
+					{
+						requestPayload.put(FieldNames.FIELD_URL_GRANULE_S,thumbnailObj.get("href").toString());
+					}
+				}
+			}			
+			//if envelope_geo and shape_geo not present in request, add from bbox and geometry respectively,
+			if(!requestPayload.containsKey(FieldNames.FIELD_SHAPE_GEO) && requestPayload.containsKey(FieldNames.FIELD_GEOMETRY))
+			{
+				requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
+			}
+			
+			if(!requestPayload.containsKey(FieldNames.FIELD_ENVELOPE_GEO) && requestPayload.containsKey(FieldNames.FIELD_BBOX))
+			{
+				JSONArray bbox =(JSONArray) requestPayload.get(FieldNames.FIELD_BBOX);
+				JSONArray envelopeGeoArr = new JSONArray();
+				JSONObject envelopeGeo = new JSONObject();
+				
+				if (bbox.size() == 4) {
+					double coords[] = { -180.0, -90.0, 180.0, 90.0 };
+					
+					coords[0] = Double.parseDouble(bbox.get(0).toString());
+					coords[1] = Double.parseDouble(bbox.get(1).toString());
+					coords[2] = Double.parseDouble(bbox.get(2).toString());
+					coords[3] = Double.parseDouble(bbox.get(3).toString());
+					
+					JSONArray coordinateArr1 = new JSONArray();
+					coordinateArr1.add(0, coords[0]);
+					coordinateArr1.add(1, coords[3]);
+					
+					JSONArray coordinateArr2 = new JSONArray();
+					coordinateArr2.add(0, coords[2]);
+					coordinateArr2.add(1, coords[1]);
+					
+					JSONArray coordinateArr = new JSONArray();
+					coordinateArr.add(0, coordinateArr1);
+					coordinateArr.add(1, coordinateArr2);
+				
+					envelopeGeo.put("coordinates", coordinateArr);
+					envelopeGeo.put("type", "envelope");
+					envelopeGeo.put("ignore_malformed", "true");
+					envelopeGeoArr.add(0,envelopeGeo);
+				
+				requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
+				}
+			}
 			
 			GeoportalContext gc = GeoportalContext.getInstance();
 			if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
@@ -516,11 +566,7 @@ public class StacHelper {
 		if(!requestPayload.containsKey("extent"))
 		{
 			errorMsg = errorMsg+" extent is mandatory.";
-		}
-		if(!requestPayload.containsKey("links"))
-		{
-			errorMsg = errorMsg+" links are mandatory.";
-		}
+		}		
 		if(errorMsg.length()>0)
 		{
 			response.setCode(StacItemValidationResponse.BAD_REQUEST);
@@ -581,6 +627,83 @@ public class StacHelper {
 			item = new JSONObject((HashMap)itemMap.get("_source"));
 		}
 		return item;
+	}
+
+	public static JSONObject deleteCollectionItems(String collectionId, String idList, boolean deleteCollection) {
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
+		String response = "";
+		JSONObject resObj = new JSONObject();
+		String url ="";
+		String body = "";
+		boolean deleteById = false;
+		
+		try {
+			url =  client.getTypeUrlForSearch(ec.getIndexName());
+			url = url+"/_delete_by_query";			
+			
+			if(idList!=null && !idList.isBlank())
+			{
+				 String ids = prepareIds(idList);
+				 body = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}},"+ids+"]}}}";
+			}
+			else {
+				body = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}}]}}}";
+			}			
+			
+			response = client.sendPost(url, body, "application/json");
+		}catch(Exception e)
+		{
+			e.printStackTrace();
+			resObj.put("code", "500");
+			resObj.put("description", "Stac features could not be deleted from collection. "+e.getCause());
+			return resObj;
+		}
+		
+		resObj = (JSONObject) JSONValue.parse(response);
+		int total  = resObj.containsKey("total")? ((Number)(resObj.get("total"))).intValue(): null;
+		int deleted  = resObj.containsKey("deleted")? ((Number)(resObj.get("deleted"))).intValue(): null;
+		
+		if(idList != null && !idList.isBlank())
+		{
+			deleteById = true;
+		}				
+		resObj = new JSONObject();
+		if(!deleteCollection)
+		{
+			resObj.put("code", "200");
+			resObj.put("description", "Stac features found: "+total+", deleted: "+deleted);			
+		}
+		if(deleteCollection)
+		{	//Deleting collection is not allowed if items are deleted by Id
+			if(deleteById)
+			{
+				resObj.put("code", "200");
+				resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Deleting collection is not allowed when items are deleted with id list.");	
+			}			
+			if(!deleteById && deleted != total)
+			{
+				resObj.put("code", "200");
+				resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Collection will not be deleted as some features could not be deleted.");	
+				
+			}
+			if(!deleteById && deleted == total)
+			{
+				//Now delete collection which is an item in Collection Index
+				try {
+					url = client.getTypeUrlForSearch(ec.getCollectionIndexName());			
+					response = client.sendDelete(url+"/_doc/"+collectionId);	
+					resObj.put("code", "200");
+					resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Collection is deleted.");
+				}catch (Exception e) {					
+					e.printStackTrace();
+					resObj.put("code", "500");
+					resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+" but collection could not be deleted."+e.getCause());
+				}
+			}
+		}	
+			
+		return resObj;
 	}
 }
 	
