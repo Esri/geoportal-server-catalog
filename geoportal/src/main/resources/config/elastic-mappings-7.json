@@ -70,10 +70,7 @@
 			"clob":{
 			  "properties":{
 				"sys_clob":{
-				  "type":"keyword",
-				  "index":false,
-				  "store":true,
-				  "doc_values":false
+				  "type":"text"				  
 				},
 				"sys_itemid": {
 				  "type":"keyword"
@@ -200,10 +197,7 @@
 				"_clob": {
 					"match": "*_clob",
 					"mapping": {
-						"type": "keyword",
-						"index": false,
-						"store": true,
-						"doc_values": false
+						"type": "text"
 					}
 				}
 			},

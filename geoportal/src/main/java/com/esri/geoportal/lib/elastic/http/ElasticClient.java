@@ -223,30 +223,24 @@ public class ElasticClient {
           }
         }        
       }
-      br = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
+      int code = ((HttpURLConnection) con).getResponseCode();
+      //In case of error, Read error stream
+      if(code >= 400)
+      {
+    	  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(),charset));         
+      }
+      else
+      {
+    	  br = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
+      }
+      
       int nRead = 0;
       char[] buffer = new char[4096];
       while ((nRead = br.read(buffer,0,4096)) >= 0) {
         sw.write(buffer,0,nRead);
       }
       result = sw.toString();
-//    } catch(IOException ex) {
-//      try {
-//        if (con != null && br == null) {
-//          int code = con.getResponseCode();
-//          System.err.println("code="+code);
-//          br = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
-//          int nRead = 0;
-//          char[] buffer = new char[4096];
-//          while ((nRead = br.read(buffer,0,4096)) >= 0) {
-//            sw.write(buffer,0,nRead);
-//          }
-//          System.err.println("error="+sw.toString());
-//        }
-//      } catch (Exception ex1) {
-//        ex1.printStackTrace();
-//      }
-//      throw ex;
+
     } finally {
       try {if (wr != null) wr.close();} catch(Exception ef) {ef.printStackTrace();}
       try {if (br != null) br.close();} catch(Exception ef) {ef.printStackTrace();}

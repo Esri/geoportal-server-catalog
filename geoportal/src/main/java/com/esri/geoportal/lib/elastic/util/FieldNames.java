@@ -96,4 +96,15 @@ public class FieldNames {
   
   /** FIELD_STAC_UPDATED = "updated" */
   public static String FIELD_STAC_UPDATED = "updated";
+  
+  //Added in Stac item to make compatible with Geoportal
+  public static String FIELD_URL_GRANULE_S = "url_granule_s";
+  
+  public static String FIELD_SHAPE_GEO = "shape_geo";
+  public static String FIELD_ENVELOPE_GEO = "envelope_geo";
+  public static String FIELD_GEOMETRY = "geometry";
+  public static String FIELD_BBOX = "bbox";
+  public static String FIELD_ASSETS = "assets";
+  public static String FIELD_THUMBNAIL = "thumbnail";
+  
 }

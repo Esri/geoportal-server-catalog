@@ -43,6 +43,7 @@
     <security:intercept-url pattern="/stac/search" method="POST" access="permitAll" />     
     <security:intercept-url pattern="/stac/collections/**" method="POST" access="hasRole('ADMIN')" />
     <security:intercept-url pattern="/stac/collections/**" method="PUT" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/stac/collections/**" method="DELETE" access="hasRole('ADMIN')" />
     
     <!-- /rest/metadata/ - the metadata catalog -->
     <security:intercept-url pattern="/rest/metadata/bulk/**" access="hasRole('ADMIN')" />

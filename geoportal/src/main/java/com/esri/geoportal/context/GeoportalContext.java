@@ -61,7 +61,9 @@ public class GeoportalContext implements ApplicationContextAware {
   private boolean parseGml;
   private boolean supportsCollections = false;
   // HashMap stores userName and List of User Groups in ArcGISAuthentication
-  private HashMap<String,ArrayList<Group>> userGroupMap = new HashMap<String,ArrayList<Group>>();
+  private HashMap<String,ArrayList<Group>> userGroupMap = new HashMap<String,ArrayList<Group>>(); 
+  private int numStacFeaturesAddItem = 100; 
+  private boolean validateStacFields = false;
   
 
   public HashMap<String, ArrayList<Group>> getUserGroupMap() {
@@ -178,6 +180,22 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
   public void setSupportsCollections(boolean supportsCollections) {
     this.supportsCollections = supportsCollections;
   }
+  //Number of Stac features allowed in POST request
+	public int getNumStacFeaturesAddItem() {
+		return numStacFeaturesAddItem;
+	}
+
+	public void setNumStacFeaturesAddItem(int numStacFeaturesAddItem) {
+		this.numStacFeaturesAddItem = numStacFeaturesAddItem;
+	}
+	 //Validate Stac fields in Stac Feature in POST request
+	public boolean isValidateStacFields() {
+		return this.validateStacFields;
+	}
+
+	public void setValidateStacFields(boolean validateStacFields) {
+		this.validateStacFields = validateStacFields;
+	}
   
   /** Methods =============================================================== */
 

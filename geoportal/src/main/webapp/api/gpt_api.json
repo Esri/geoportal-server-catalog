@@ -148,6 +148,29 @@
                         "description": "successful operation"
                     }
                 }
+            },
+             "delete": {
+                "tags": [
+                    "STAC"
+                ],
+                "summary": "Delete STAC collection",
+				"description": "",
+                "operationId": "stacCollectionDelete",
+                "parameters": [	
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "description": "Collection id",
+                        "required": true,
+                        "type": "string",
+                        "example": "metadata"
+                    }			
+                ],
+                "responses": {
+                    "default": {
+                        "description": "successful operation"
+                    }
+                }	
             }
         },
         "/stac/collections/{collectionId}/items": {
@@ -232,6 +255,48 @@
                         "description": "successful operation"
                     }
                 }
+            },
+           "delete": {
+                "tags": [
+                    "STAC"
+                ],
+                "summary": "Delete Stac collection items.",
+                "description": "",
+                "produces": [
+                    "application/json"
+                ],
+                "operationId": "delStacCollectionItems",                                                                                                                                                                                        
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "description": "Collection id",
+                        "required": true,
+                        "type": "string",
+                        "example": "metadata"
+                    },
+                    {
+                        "name": "ids",
+                        "in": "query",
+                        "description": "Comma separated list of Stac item id",
+                        "required": false,
+                        "type": "string",
+                        "example": "test_87,test_88"
+                    },
+                    {
+                        "name": "deleteCollection",
+                        "in": "query",
+                        "description": "Default is false. If true, collection will also be deleted. Cannot be used if ids provided.",
+                        "required": false,
+                        "type": "boolean",
+                        "example": "true or false"
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": "successful operation"
+                    }
+                }
             }
         },
         "/stac/collections/{collectionId}/items/{id}": {
@@ -245,6 +310,40 @@
                     "application/geo+json"
                 ],
                 "operationId": "stacCollectionMetadataItemWithIds",                                                                                                                                                                                        
+                "parameters": [
+                    {
+                        "name": "collectionId",
+                        "in": "path",
+                        "description": "Collection id",
+                        "required": true,
+                        "type": "string",
+                        "example": "metadata"
+                    },          
+                    {
+                        "name": "id",
+                        "in": "path",
+                        "description": "Stac item id",
+                        "required": true,
+                        "type": "string",
+                        "example": "LC80100252015082LGN00"
+                    }
+                ],
+                "responses": {
+                    "default": {
+                        "description": "successful operation"
+                    }
+                }
+            },
+             "delete": {
+                "tags": [
+                    "STAC"
+                ],
+                "summary": "Delete a feature.",
+                "description": "Delete a feature.",
+                "produces": [
+                    "application/json"
+                ],
+                "operationId": "deleteStacItemWithId",                                                                                                                                                                                        
                 "parameters": [
                     {
                         "name": "collectionId",
@@ -354,7 +453,7 @@
                         "in": "body",
                         "description": "https://api.stacspec.org/v1.0.0/item-search/#tag/Item-Search/operation/postItemSearch",
                         "required": true,
-                        "example": "{\"bbox\":[-66.6459,49.354,-63.4856,51.2101],\"datetime\":\"2018-02-12T00:00:00Z/2023-07-18T12:31:12Z\",\"intersects\":{\"type\":\"Polygon\",\"coordinates\":[[[-67.18661657269904,48.297014795971687],[-67.1872,48.2971],[-67.17322376288064,48.33374073671041],[-67.1590065133506,48.371013322480617],[-66.6453207034186,49.7177153248036],[-66.63275537806288,49.750657151284347],[-66.6171,49.7917],[-66.61637825143734,49.79159448137363],[-64.1246,49.4273],[-64.14045802174776,49.39048646945745],[-64.74832861700387,47.979348114350958],[-64.7639,47.9432],[-67.18661657269904,48.297014795971687]]]},\"ids\":[\"LC80100252015082LGN00\",\"LC80100252014287LGN00\"],\"limit\":100,\"collections\":[\"metadata\",\"test\"]}"           
+                        "example": "{\"bbox\":[-66.6459,49.354,-63.4856,51.2101],\"datetime\":\"2018-02-12T00:00:00Z/2023-07-18T12:31:12Z\",\"intersects\":{\"type\":\"Polygon\",\"coordinates\":[[[-67.18661657269904,48.297014795971687],[-67.1872,48.2971],[-67.17322376288064,48.33374073671041],[-67.1590065133506,48.371013322480617],[-66.6453207034186,49.7177153248036],[-66.63275537806288,49.750657151284347],[-66.6171,49.7917],[-66.61637825143734,49.79159448137363],[-64.1246,49.4273],[-64.14045802174776,49.39048646945745],[-64.74832861700387,47.979348114350958],[-64.7639,47.9432],[-67.18661657269904,48.297014795971687]]]},\"ids\":[\"LC80100252015082LGN00\",\"LC80100252014287LGN00\"],\"limit\":10,\"collections\":[\"metadata\",\"test\"]}"           
                     }
                 ],
                 "responses": {
