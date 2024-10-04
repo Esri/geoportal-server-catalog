@@ -8,7 +8,6 @@ Esri Geoportal Server v2 now provides the catalog and harvesting capabilities as
 
 This repository contains the capability of **Geoportal Server Catalog**, while it's sibling **[Geoportal Server Harvester](https://github.com/ArcGIS/geoportal-server-harvester)** is managed in a separate repository.
 
-(Note: The long-lived Esri Geoportal Server v1 is now retired; its archive is [available here](https://github.com/Esri/geoportal-server).)
 
 ## Releases and Downloads
 - **2.7.2 - LATEST** - released, October 4, 2024.
