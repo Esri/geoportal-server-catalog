@@ -26,6 +26,7 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 * **Faceted Search** - Configure different facets to allow your user to filter from the hay stack to the needle
 * **Scalability** - Thank you elasticsearch for providing multi-node configuration support
 * **OGC CSW 3.0.0 and CSW 2.0.2** - Standards compliant catalog service interface, includes CSW2 requirements for INSPIRE Discovery Service
+* **Spatio-Temporal Asset Catalog API** - As of Geoportal 2.7.2, it may be used to build a scalable Spatio-Temporal Asset Catalog (STAC) 
 * **Many metadata formats** - Extend the configuration with your favorite XML format
 * **Built-in Viewer** - Use the app we include or build one using Web AppBuilder and hook it up!
 * **No more database** - Yes that's a feature!
