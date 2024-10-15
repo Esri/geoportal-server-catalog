@@ -155,7 +155,9 @@ public class ElasticContextHttp extends ElasticContext {
       try {
         client.sendHead(client.getIndexUrl(name));
         indexExists = true;
-      } catch (FileNotFoundException e) {}
+      } catch (Exception e) {
+        indexExists = false;
+      }
       
       
       if (indexExists) {
@@ -239,7 +241,7 @@ public class ElasticContextHttp extends ElasticContext {
   public void startup() {
     LOGGER.info("Starting up ElasticContextHttp...");
     String[] nodeNames = this.nodesToArray();
-    if ((nodeNames == null) || (nodeNames.length == 0)) {
+        if ((nodeNames == null) || (nodeNames.length == 0)) {
       LOGGER.warn("Configuration warning: Elasticsearch - no nodes defined.");
     } else if (wasStarted) {
       LOGGER.warn("Configuration warning: ElasticContextHttp has already been started.");
@@ -249,9 +251,12 @@ public class ElasticContextHttp extends ElasticContext {
         String indexName = getItemIndexName();
         String collectionIndexName = getCollectionIndexName();
         boolean indexNameIsAlias = getIndexNameIsAlias();
+        boolean supportsCollections = this.getSupportsCollections();
         try {
           ensureIndex(indexName,indexNameIsAlias);
-          ensureIndex(collectionIndexName,indexNameIsAlias);
+          if (supportsCollections) {
+              ensureIndex(collectionIndexName,indexNameIsAlias);
+          }
         } catch (Exception e) {
           // keep trying - every 5 minutes
           long period = 1000 * 60 * 5;
@@ -262,7 +267,9 @@ public class ElasticContextHttp extends ElasticContext {
             public void run() {
               try {
                 ensureIndex(indexName,indexNameIsAlias);
-                ensureIndex(collectionIndexName,indexNameIsAlias);
+                if (supportsCollections) {
+                    ensureIndex(collectionIndexName,indexNameIsAlias);
+                }
                 timer.cancel();
               } catch (Exception e2) {
                 // logging is handled by ensureIndex
