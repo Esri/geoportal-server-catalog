@@ -56,6 +56,7 @@ public class ElasticClient {
    * Constructor.
    * @param baseUrl the Elasticsearch base URL
    * @param basicCredentials basic credentials
+   * @param useHttps use http (false) or https (true)
    */
   public ElasticClient(String baseUrl, String basicCredentials,boolean useHttps) {
     this.baseUrl = baseUrl;
