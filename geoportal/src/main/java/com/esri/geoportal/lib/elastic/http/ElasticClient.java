@@ -29,9 +29,12 @@ import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.ElasticContextHttp;
 
 /**
  * An HTTP client for Elasticsearch.
@@ -42,6 +45,8 @@ public class ElasticClient {
   private String baseUrl;
   private String basicCredentials;
   private boolean useHttps;
+  /** Logger. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
   
   /**
    * Create a new client.
@@ -56,6 +61,7 @@ public class ElasticClient {
    * Constructor.
    * @param baseUrl the Elasticsearch base URL
    * @param basicCredentials basic credentials
+   * @param useHttps use http (false) or https (true)
    */
   public ElasticClient(String baseUrl, String basicCredentials,boolean useHttps) {
     this.baseUrl = baseUrl;
@@ -224,10 +230,19 @@ public class ElasticClient {
         }        
       }
       int code = ((HttpURLConnection) con).getResponseCode();
+      
       //In case of error, Read error stream
       if(code >= 400)
       {
-    	  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(),charset));         
+    	  LOGGER.debug("Error code received : "+code);
+    	  if(((HttpURLConnection) con).getErrorStream()!=null)
+    	  {
+    		  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(),charset)); 
+    	  }    
+    	  else if(((HttpURLConnection) con).getInputStream()!=null)
+    	  {
+    		  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getInputStream(),charset)); 
+    	  }
       }
       else
       {
