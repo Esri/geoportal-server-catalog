@@ -37,7 +37,7 @@
                     "Geoportal JWT Token"
                 ],
                 "summary": "Generates geoportal JWT token",
-                "description": "Generates geoportal JWT token. Append generated access_token with each subsequent request to geoportal server.",
+                "description": "Generates geoportal JWT token for ArcGIS Portal authentication. Append generated access_token with each subsequent request to geoportal server.",
                 "produces": [
                     "application/json"
                 ],
@@ -52,7 +52,7 @@
                      {
                         "name": "password",
                         "in": "query",
-                        "description": "User password. For ArcGIS Portal authentication, prefix ArcGIS token with \\__rtkn\\__",
+                        "description": "User password. For ArcGIS Portal authentication, prefix ArcGIS token with \\__rtkn\\__:",
                         "required": true      
                     },
                      {
