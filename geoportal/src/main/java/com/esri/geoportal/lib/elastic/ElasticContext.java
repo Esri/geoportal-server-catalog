@@ -20,6 +20,7 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import org.apache.http.HttpHost;
 import org.apache.http.auth.AuthScope;
 import org.apache.http.auth.UsernamePasswordCredentials;
@@ -29,9 +30,10 @@ import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.opensearch.client.RestHighLevelClient;
 //import org.opensearch.transport.client.PreBuiltTransportClient;
 //import org.opensearch.xpack.client.PreBuiltXPackTransportClient;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.lib.security.EncryptDecrypt;
 
 /**
  * Elasticsearch context.
@@ -63,9 +65,27 @@ public class ElasticContext {
   private boolean useHttps = false;
   private boolean useSeparateXmlItem = true;
   private String xmlIndexType = "clob";
-  
+  private String base64Key = "";
+  public String getBase64Key() {
+	return base64Key;
+}
+
+public void setBase64Key(String base64Key) {
+	this.base64Key = base64Key;
+}
+
+public String getBase64Iv() {
+	return base64Iv;
+}
+
+public void setBase64Iv(String base64Iv) {
+	this.base64Iv = base64Iv;
+}
+
+private String base64Iv = "";
   private String username = null;
   private String password = null;
+  private boolean encryptPassword = false;
   
   
   
@@ -309,13 +329,33 @@ public class ElasticContext {
     this.username = v;
   }
   
-  /** x-pack credential */
+  /**credential */
   public String getPassword() {
-    return this.password;
+	  String password = this.password;
+	  try{
+		 if(isEncryptPassword())
+		    {
+			 password = EncryptDecrypt.decrypt(this.password,this.base64Key,this.base64Iv);
+		    }
+	    }catch(Exception ex)
+	    {
+	    	LOGGER.error("Elastic password could not be decrypted. "+ex);
+	    	return null;
+	    }
+	  return password;
   }
-  /** x-pack credential */
+  /** credential */
   public void setPassword(String v) {
     this.password = v;
+  }
+  
+  /** use encrypted Password */
+  public boolean isEncryptPassword() {
+    return this.encryptPassword;
+  }
+  /** use encrypted Password */
+  public void setEncryptPassword(boolean encryptPassword) {
+    this.encryptPassword = encryptPassword;
   }
   
   
@@ -421,9 +461,11 @@ public class ElasticContext {
 //   * Gets basic credentials if configured.
 //   * @return the credentials
 //   */
-  public String getBasicCredentials() {
+  public String getBasicCredentials()
+  {
     String user = getUsername();
     String pwd = getPassword();
+   
     if (user != null && user.length() > 0 && pwd != null && pwd.length() > 0) {
       try {
         String cred = user+":"+pwd;
