@@ -26,6 +26,7 @@ load("classpath:metadata/js/EvaluatorFor_DC.js");
 load("classpath:metadata/js/EvaluatorFor_FGDC.js");
 load("classpath:metadata/js/EvaluatorFor_ISO.js");
 load("classpath:metadata/js/EvaluatorFor_ISO_extended.js"); // add  extended class
+load("classpath:metadata/js/EvaluatorFor_ISO19115_3.js");
 load("classpath:metadata/js/GML.js");
 load("classpath:metadata/js/JsonEvaluator.js");
 
@@ -72,14 +73,14 @@ G._metadataTypes =  {
     schematronXslt: null
   },
   "iso19115-3": {
-	    key: "iso19115-3",
-	    evaluator: G.evaluators.iso,
-	    interrogationXPath: "/mdb:MD_Metadata",
-	    identifier: "http://standards.iso.org/iso/19115/-3/mdb",
-	    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
-	    xsdLocation: null,
-	    schematronXslt: null
-	  },
+    key: "iso19115-3",
+    evaluator: G.evaluators.iso19115_3,
+    interrogationXPath: "/mdb:MD_Metadata",
+    identifier: "http://standards.iso.org/iso/19115/-3/mdb",
+    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO19115_3.xsl",
+    xsdLocation: null,
+    schematronXslt: null
+  },
   "fgdc": {
     key: "fgdc",
     evaluator: G.evaluators.fgdc,
@@ -134,10 +135,35 @@ G._initializeTask = function(mdoc) {
   nsmap.put("atom","http://www.w3.org/2005/Atom");
   nsmap.put("oai_dc","http://www.openarchives.org/OAI/2.0/oai_dc/");
   nsmap.put("doc","http://www.lyncode.com/xoai");
-  nsmap.put("mdb", "http://standards.iso.org/iso/19115/-3/mdb/2.0")
-  nsmap.put("mri", "http://standards.iso.org/iso/19115/-3/mri/1.0")
-  
-  
+
+  /* ISO 19115-3 */
+  nsmap.put("cat", "http://standards.iso.org/iso/19115/-3/cat/1.0");
+  nsmap.put("cit", "http://standards.iso.org/iso/19115/-3/cit/2.0");
+  nsmap.put("gcx", "http://standards.iso.org/iso/19115/-3/gcx/1.0");
+  nsmap.put("gex", "http://standards.iso.org/iso/19115/-3/gex/1.0");
+  nsmap.put("lan", "http://standards.iso.org/iso/19115/-3/lan/1.0");
+  nsmap.put("srv", "http://standards.iso.org/iso/19115/-3/srv/2.0");
+  nsmap.put("mac", "http://standards.iso.org/iso/19115/-3/mac/2.0");
+  nsmap.put("mas", "http://standards.iso.org/iso/19115/-3/mas/1.0");
+  nsmap.put("mcc", "http://standards.iso.org/iso/19115/-3/mcc/1.0");
+  nsmap.put("mco", "http://standards.iso.org/iso/19115/-3/mco/1.0");
+  nsmap.put("mda", "http://standards.iso.org/iso/19115/-3/mda/1.0");
+  nsmap.put("mdb", "http://standards.iso.org/iso/19115/-3/mdb/2.0");
+  nsmap.put("mdt", "http://standards.iso.org/iso/19115/-3/mdt/1.0");
+  nsmap.put("mex", "http://standards.iso.org/iso/19115/-3/mex/1.0");
+  nsmap.put("mrl", "http://standards.iso.org/iso/19115/-3/mrl/1.0");
+  nsmap.put("mds", "http://standards.iso.org/iso/19115/-3/mds/1.0");
+  nsmap.put("mmi", "http://standards.iso.org/iso/19115/-3/mmi/1.0");
+  nsmap.put("mpc", "http://standards.iso.org/iso/19115/-3/mpc/1.0");
+  nsmap.put("mrc", "http://standards.iso.org/iso/19115/-3/mrc/2.0");
+  nsmap.put("mrd", "http://standards.iso.org/iso/19115/-3/mrd/1.0");
+  nsmap.put("mri", "http://standards.iso.org/iso/19115/-3/mri/1.0");
+  nsmap.put("mrs", "http://standards.iso.org/iso/19115/-3/mrs/1.0");
+  nsmap.put("msr", "http://standards.iso.org/iso/19115/-3/msr/2.0");
+  nsmap.put("mdq", "http://standards.iso.org/iso/19157/-2/mdq/1.0");
+  nsmap.put("dqc", "http://standards.iso.org/iso/19157/-2/dqc/1.0");
+  nsmap.put("gco3", "http://standards.iso.org/iso/19115/-3/gco/1.0");
+  nsmap.put("gfc", "http://standards.iso.org/iso/19110/gfc/1.1");
   
   var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
   xpath.setNamespaceContext(new com.esri.geoportal.base.xml.XmlNamespaceContext(nsmap));
@@ -187,7 +213,7 @@ G._interrogate = function(mdoc) {
       mdtype.setEvaluatorVersion(type.evaluator.version);
     }
     mdoc.setMetadataType(mdtype);
-    print("metadata type set")
+    print("metadata type set to " + type);
   }
 };
 
@@ -199,6 +225,8 @@ G._evaluate = function(mdoc) {
     metadataType.evaluator.evaluate(task);
     if (typeof task.item.title === "string") {
       task.mdoc.setTitle(task.item.title);
+    } else {
+      task.mdoc.setTitle("Title not found by evaluator");
     }
     task.mdoc.setEvaluatedJson(JSON.stringify(task.item));
     //print(JSON.stringify(task.item));
