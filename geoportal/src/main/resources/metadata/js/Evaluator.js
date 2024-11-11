@@ -71,6 +71,15 @@ G._metadataTypes =  {
     xsdLocation: null,
     schematronXslt: null
   },
+  "iso19115-3": {
+	    key: "iso19115-3",
+	    evaluator: G.evaluators.iso,
+	    interrogationXPath: "/mdb:MD_Metadata",
+	    identifier: "http://standards.iso.org/iso/19115/-3/mdb",
+	    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
+	    xsdLocation: null,
+	    schematronXslt: null
+	  },
   "fgdc": {
     key: "fgdc",
     evaluator: G.evaluators.fgdc,
@@ -125,6 +134,11 @@ G._initializeTask = function(mdoc) {
   nsmap.put("atom","http://www.w3.org/2005/Atom");
   nsmap.put("oai_dc","http://www.openarchives.org/OAI/2.0/oai_dc/");
   nsmap.put("doc","http://www.lyncode.com/xoai");
+  nsmap.put("mdb", "http://standards.iso.org/iso/19115/-3/mdb/2.0")
+  nsmap.put("mri", "http://standards.iso.org/iso/19115/-3/mri/1.0")
+  
+  
+  
   var xpath = javax.xml.xpath.XPathFactory.newInstance().newXPath();
   xpath.setNamespaceContext(new com.esri.geoportal.base.xml.XmlNamespaceContext(nsmap));
 
@@ -149,9 +163,11 @@ G._interrogate = function(mdoc) {
   var type = null, mdType;
   var i, t, keys = Object.keys(G._metadataTypes);
   if (mdoc.hasXml() && keys) {
+	  print("keys "+keys)
     for (i=0;i<keys.length;i++) {
       t = G._metadataTypes[keys[i]];
       if (t.interrogationXPath) {
+    	 
         if (G.hasNode(task,task.dom,t.interrogationXPath)) {
           type = t;
           break;
@@ -171,6 +187,7 @@ G._interrogate = function(mdoc) {
       mdtype.setEvaluatorVersion(type.evaluator.version);
     }
     mdoc.setMetadataType(mdtype);
+    print("metadata type set")
   }
 };
 
