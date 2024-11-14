@@ -37,6 +37,7 @@ G.evaluators.iso19115_3 = {
     G.evalProp(task,item,root,"thumbnail_s","//mcc:MD_BrowseGraphic/mcc:fileName/gco3:CharacterString");
     G.evalProps(task,item,root,"contact_organizations_s","//cit:CI_Responsibility/cit:party/cit:name/*/text()");
     G.evalProps(task,item,root,"contact_people_s","//cit:CI_Responsibility/cit:party/cit:name/*/text()");
+    G.evalProps(task,item,root,"metadata_language_s","/mdb:MD_Metadata/mdb:defaultLocale/lan:PT_Locale/lan:language/lan:LanguageCode/@codeListValue");
     
     /* links */
     //G.evalProps(task,item,root,"links_s","//gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
