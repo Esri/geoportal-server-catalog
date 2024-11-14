@@ -52,6 +52,8 @@
 	<name tagname="mcc:code">Code</name>
 	<name tagname="mcc:codeSpace">Code Space</name>
 	<name tagname="cit:title">Title</name>
+
+        <name tagname="mdb:MD_Metadata">Metadata</name>
         <name tagname="mdb:contentInfo">Content Info</name>
 
   
