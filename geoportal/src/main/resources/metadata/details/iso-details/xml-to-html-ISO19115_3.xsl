@@ -80,7 +80,7 @@
         delivering to a browser for translation.
     -->
     <xsl:param name="g-tag-translation-URI" select="'elements-ISO19115_3.xml'"/>
-    <xsl:param name="g-header-translation-URI" select="'headers-ISO.xml'"/>
+    <xsl:param name="g-header-translation-URI" select="'headers-ISO19115_3.xml'"/>
     <!--
       g-indent-increment
         This parameter specifies the character string to be added before a
@@ -159,8 +159,6 @@
                             </xsl:attribute>
                             <span style="text-transform: capitalize;">
                                 <xsl:apply-templates select="child::title" mode="outIt"/>
-                                <xsl:value-of select="$transname"/>
-                                
                                 <xsl:value-of select="$g-header-translations/*/name[@tagname=$transname]"/>
                             </span>
                         </xsl:element>		
