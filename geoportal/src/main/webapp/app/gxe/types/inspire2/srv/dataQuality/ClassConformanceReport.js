@@ -15,7 +15,7 @@ define(["dojo/_base/declare",
         "./HarmonisedConformanceCitation",
         "../../gmd/dataQuality/ConformanceDegree",
         "dojo/text!./templates/ClassConformanceReport.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, domStyle, Descriptor, Tabs, Element, ElementChoice, InputTextArea, AbstractObject, GcoElement, ObjectReference,
   InvocableConformanceCitation, InteroperableConformanceCitation, HarmonisedConformanceCitation, ConformanceDegree, template, i18nInspire) {
 

@@ -7,7 +7,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/GcoElement",
         "./SpecificationCitationDate",
         "dojo/text!./templates/SpecificationCitation.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Element, AbstractObject, GcoElement, CI_Date, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {

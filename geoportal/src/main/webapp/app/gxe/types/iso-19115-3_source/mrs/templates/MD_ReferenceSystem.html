@@ -1,0 +1,92 @@
+<div data-dojo-attach-point="containerNode">
+    
+    <!--<div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'mdb:referenceSystemInfo', label:'${i18nIso3.MD_Metadata.referenceSystemInfo}'"> -->
+      <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'mrs:MD_ReferenceSystem'">
+
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrs:referenceSystemIdentifier',minOccurs:0,maxOccurs:1,preferOpen:false,label:'Reference System Identifier'">
+            <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Identifier">
+       </div>
+      </div>
+
+       <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'mrs:referenceSystemType', label:'Reference System Type Code'">
+       <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:MD_ReferenceSystemTypeCode', minOccurs:0, maxOccurs:1, preferOpen:false,label:'Reference System Type code'">
+          <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListValueAttribute">
+              <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+                  <div data-dojo-type="esri/dijit/metadata/form/Options">
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'',value:''"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineering-Parametric',        value:'compoundEngineeringParametric'"></div>  
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineering-ParametricTemporal',value:'compoundEngineeringParametricTemporal'"></div>    
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineeringTemporal',           value:'compoundEngineeringTemporal'"></div> 
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineering-Parametric',        value:'compoundEngineeringParametric'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineering-ParametricTemporal',        value:'compoundEngineeringParametricTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineeringTemporal',        value:'compoundEngineeringTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineeringVertical',        value:'compoundEngineeringVertical'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundEngineeringVerticalTemporal',        value:'compoundEngineeringVerticalTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundGeographic2DParametric',        value:'compoundGeographic2DParametric'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundGeographic2DParametricTemporal',        value:'compoundGeographic2DParametricTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundGeographic2DTemporal',        value:'compoundGeographic2DTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundGeographic2DVertical',        value:'compoundGeographic2DVertical'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundGeographic2DVerticalTemporal',        value:'compoundGeographicVerticalTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundGeographic3DTemporal',        value:'compoundGeographic3DTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundProjected2DParametric',        value:'compoundProjected2DParametric'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundProjected2DParametricTemporal',        value:'compoundProjected2DParametricTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundProjectedTemporal',        value:'compoundProjectedTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundProjectedVertical',        value:'compoundProjectedVertical'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'compoundProjectedVerticalTemporal',        value:'compoundProjectedVerticalTemporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'engineering',        value:'engineering'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'engineeringDesign',        value:'engineeringDesign'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'engineeringImage',        value:'engineeringImage'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'geodeticGeocentric',        value:'geodeticGeocentric'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'geodeticGeographic2D',        value:'geodeticGeographic2D'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'geodeticGeographic3D',        value:'geodeticGeographic3D'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'geographicIdentifier',        value:'geographicIdentifier'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'linear',        value:'linear'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'parametric',        value:'parametric'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'projected',        value:'projected'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'temporal',        value:'temporal'"></div>
+                    <div data-dojo-type="esri/dijit/metadata/form/Option" data-dojo-props="label:'vertical',        value:'vertical'"></div>
+
+                  </div>
+              </div>
+          </div> 
+       <!--</div>  -->
+      </div> <!-- End Abstract Object -->
+
+
+     <!--
+
+      1. compoundEngineering-Parametric compoundEngineeringParametric
+      2. compoundEngineering-ParametricTemporal compoundEngineeringParametricTemporal
+      3. compoundEngineeringTemporal compoundEngineeringTemporal
+      4. compoundEngineeringVertical compoundEngineeringVertical
+      5. compoundEngineeringVerticalTemporal compoundEngineeringVerticalTemporal
+      6. compoundGeographic2DParametric compoundGeographic2DParametric
+      7. compoundGeographic2DParametricTemporal compoundGeographic2DParametricTemporal
+      8. compoundGeographic2DTemporal compoundGeographic2DTemporal
+      9. compoundGeographic2DVertical compoundGeographic2DVertical
+      10. compoundGeographic2DVerticalTemporal compoundGeographicVerticalTemporal
+      11. compoundGeographic3DTemporal compoundGeographic3DTemporal
+      12. compoundProjected2DParametric compoundProjected2DParametric
+      13. compoundProjected2DParametricTemporal compoundProjected2DParametricTemporal
+      14. compoundProjectedTemporal compoundProjectedTemporal
+      15. compoundProjectedVertical compoundProjectedVertical
+      16. compoundProjectedVerticalTemporal compoundProjectedVerticalTemporal
+      17. engineering engineering
+      18. engineeringDesign engineeringDesign
+      19. engineeringImage engineeringImage
+      20. geodeticGeocentric geodeticGeocentric
+      21. geodeticGeographic2D geodeticGeographic2D
+      22. geodeticGeographic3D geodeticGeographic3D
+      23. geographicIdentifier geographicIdentifier
+      24. linear linear
+      25. parametric parametric
+      26. projected projected
+      27. temporal temporal
+      28. vertical vertical
+
+     -->
+
+    </div>
+  </div>  
+
+</div>

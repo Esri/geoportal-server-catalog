@@ -11,7 +11,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/types/iso/gmd/identification/DataIdentification",
         "esri/dijit/metadata/types/iso/gmd/metadataEntity/MetadataSection",
         "app/gxe/form/InputDecimalPair",
-        "dojo/i18n!../../../../nls/i18nDublinCore",
+        "dojo/i18n!../../../nls/i18nDublinCore",
         "dojo/text!./templates/DataRoot.html"],
 function(declare, lang, Descriptor, Element, InputDate, GeoExtentTool, CustomElement, Tabs, Quality, Distribution, 
   DataIdentification, MetadataSection, InputDecimalPair, i18nDublinCore, template) {

@@ -1,0 +1,23 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'lan:PT_Locale',label:''">
+    
+    <!-- language code -->
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'lan:language',minOccurs:1,maxOccurs:1,preferOpen:true,label:'${i18nIso3.PT_Locale.language}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/LanguageCode"></div>
+    </div>
+    
+    <!-- country code -->
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'lan:country',minOccurs:0,maxOccurs:1,preferOpen:true,label:'${i18nIso3.PT_Locale.country}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/CountryCode">
+        
+      </div>
+    </div>
+    
+    <!-- character encoding -->
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListReference" data-dojo-props="target:'lan:characterEncoding',minOccurs:1,maxOccurs:1,preferOpen:true,label:'${i18nIso3.PT_Locale.characterEncoding}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/lan/MD_CharacterSetCode"></div>
+    </div>
+
+  </div>
+</div>

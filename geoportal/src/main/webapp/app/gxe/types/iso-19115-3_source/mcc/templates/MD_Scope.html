@@ -1,0 +1,22 @@
+<div data-dojo-attach-point="containerNode">
+
+    <div data-dojo-type="esri/dijit/metadata/form/iso/CodeListElement" data-dojo-props="target:'mcc:MD_Scope'">
+
+    <!-- level MD_Scope -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mcc:level',minOccurs:1,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Scope.level}'">
+        <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_ScopeCode" data-dojo-props="label:''"></div>
+    </div>
+
+    <!-- extent EX_Extent -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:extent',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Scope.extent}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gex/EX_Extent"> </div>
+    </div>
+    
+    <!-- levelDescription -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mri:source',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Scope.levelDescription}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_ScopeDescription"> </div>
+    </div>
+
+    </div>
+
+</div>

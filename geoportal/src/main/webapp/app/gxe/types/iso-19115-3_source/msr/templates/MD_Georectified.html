@@ -1,0 +1,54 @@
+<div data-dojo-attach-point="containerNode">
+    <!-- checkPointAvailability Boolean -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:checkPointAvailability',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georectified.checkPointAvailability}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gco:Boolean', label:''">
+        <div data-dojo-type="esri/dijit/metadata/form/InputSelectOne">
+          <div data-dojo-type="esri/dijit/metadata/form/Options">
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'',value:''"></div>
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'True',value:'true'"></div>            
+            <div data-dojo-type="esri/dijit/metadata/form/Option"  data-dojo-props="label:'False',value:'false'"></div>  
+          </div>
+        </div>
+        </div>    
+    </div>
+
+    <!-- checkPointDescription Free Text-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:checkPointDescription',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georectified.checkPointDescription}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+
+    </div>
+    
+    <!-- cornerPoints GM_Point -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:cornerPoints',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georectified.cornerPoints}'">
+     
+    </div>
+
+    <!-- centrePoint GM_Point -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:centrePoint',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georectified.centrePoint}'">
+     
+    </div>
+
+
+    <!-- pointInPixel MD_PixelOrientationCode -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:pointInPixel',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georectified.pointInPxiel}'">
+     
+    </div>
+
+    <!-- transformationDimensionDescription Free Text -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:transformationDimensionDescription',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georectified.transformationDimensionDescription}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+
+    </div>
+
+    <!-- transformationDimensionMapping Free Text -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'msr:transformationDimensionMapping',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_Georectified.transformationDimensionMapping}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'xxxx',minOccurs:0,maxOccurs:10"></div>
+
+    </div>
+
+
+
+</div>

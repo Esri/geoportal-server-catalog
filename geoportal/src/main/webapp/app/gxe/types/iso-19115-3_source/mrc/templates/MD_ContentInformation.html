@@ -1,0 +1,27 @@
+<div data-dojo-attach-point="containerNode">
+  <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+  <!-- MD_FeatureCatalogueDescription -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:MD_FeatureCatalogueDescription',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_FeatureCatalogueDescription.caption}'">
+       <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_FeatureCatalogueDescription"> </div>
+  </div>
+       
+  <!-- MD_FeatureCatalogue -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:MD_FeatureCatalogue',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_FeatureCatalogue.caption}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject" data-dojo-props="target:'gfc:FC_FeatureCatalogue',minOccurs:0">
+       <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_FeatureCatalogue"> </div>
+    </div>
+  </div>
+
+   <!-- MD_CoverageDescription -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:MD_CoverageDescription',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_CoverageDescription.caption}'">
+  <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_CoverageDescription"> </div>
+  </div>
+
+   <!-- MD_ImageDescription -->
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrc:MD_ImageDescription',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.MD_ImageDescription.caption}'">
+    <div data-dojo-type="app/gxe/types/iso-19115-3/mrc/MD_ImageDescription"> </div>
+  </div>
+
+  </div> <!-- end Tabs -->
+
+</div>

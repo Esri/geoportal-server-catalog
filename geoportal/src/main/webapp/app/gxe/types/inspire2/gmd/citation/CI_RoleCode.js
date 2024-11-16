@@ -10,7 +10,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/CodeListElement",
         "esri/dijit/metadata/form/iso/CodeSpaceAttribute",
         "dojo/text!./templates/CI_RoleCode.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, Descriptor, InputSelectOne, Options, Option, CodeListAttribute, CodeListValueAttribute,
   CodeListElement, CodeSpaceAttribute, template, i18nInspire) {
 
