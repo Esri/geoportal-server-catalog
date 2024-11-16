@@ -1,0 +1,23 @@
+<div data-dojo-attach-point="containerNode">
+      
+  <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'gex:temporalElement',minOccurs:1,maxOccurs:1, label:'${i18nIso3.EX_Extent.temporalElement}'">
+    <div data-dojo-type="esri/dijit/metadata/form/iso/AbstractObject"  data-dojo-props="target:'gex:EX_TemporalExtent',minOccurs:1">
+      <div data-dojo-type="esri/dijit/metadata/form/iso/ObjectReference" data-dojo-props="target:'gex:extent',minOccurs:1,showHeader:false">
+          
+        <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gml:TimePeriod',minOccurs:0,showHeader:false">
+          <div data-dojo-type="esri/dijit/metadata/form/Attribute" data-dojo-props="target:'gml:id',hide:true">  
+            <div data-dojo-type="esri/dijit/metadata/form/InputText" data-dojo-props="useUniqueId:true"></div>  
+          </div>            
+          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gml:beginPosition', label:'${i18nIso3.EX_TemporalExtent.TimePeriod.beginPosition}'">  
+            <div data-dojo-type="esri/dijit/metadata/form/InputDate" data-dojo-props="useNow:true,allowTime:true"></div>
+          </div>  
+          <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'gml:endPosition', label:'${i18nIso3.EX_TemporalExtent.TimePeriod.endPosition}'">  
+            <div data-dojo-type="esri/dijit/metadata/form/InputDate" data-dojo-props="useNow:true,allowTime:true"></div>
+          </div>      
+        </div>
+        
+      </div>          
+    </div>
+  </div>      
+      
+</div>

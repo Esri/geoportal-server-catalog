@@ -1,0 +1,41 @@
+<div data-dojo-attach-point="containerNode">
+
+  <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:LI_ProcessStep', label:'${i18nIso3.LI_Lineage.processStep}'">
+    <div data-dojo-type="esri/dijit/metadata/form/Tabs">
+    <!-- description Free Text -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:description',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_ProcessStep.description}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+    <!-- rationale Free Text-->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:rationale',minOccurs:0,preferOpen:false,label:'${i18nIso3.LI_ProcessStep.rationale}'">
+      <div data-dojo-type="esri/dijit/metadata/form/Attribute" style="display:none;" data-dojo-props="target:'xsi:type',value:'lan:PT_FreeText_PropertyType'"></div>
+      <div data-dojo-type="app/gxe/types/iso-19115-3/gmd/PT_FreeText" data-dojo-props="label:'',minOccurs:0,maxOccurs:10"></div>
+    </div>
+
+    <!-- stepDateTime TM_Primitive -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:stepDateTime',minOccurs:0,preferOpen:false,label:'${i18nIso3.LI_ProcessStep.stepDateTime}'">
+      <div data-dojo-type="esri/dijit/metadata/form/InputDate" data-dojo-props="useNow:true,allowTime:true"></div>
+    </div>
+
+    <!-- processor CI_Responsibiliy -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:processor', minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_ProcessStep.processor}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Responsibility"></div>
+    </div>
+
+    <!--reference CI_Citation -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:reference',minOccurs:0,maxOccurs:1,preferOpen:false,label:'${i18nIso3.LI_ProcessStep.reference}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/cit/CI_Citation">
+      </div>
+    </div>
+    <!--scope MD_Scope -->
+    <div data-dojo-type="esri/dijit/metadata/form/Element" data-dojo-props="target:'mrl:scope',minOccurs:0,maxOccurs:1,preferOpen:false, label:'${i18nIso3.LI_ProcessStep.scope}'">
+      <div data-dojo-type="app/gxe/types/iso-19115-3/mcc/MD_Scope"></div>
+    </div>
+    <!--source LI_Source -->
+
+    
+    </div> <!-- end Tabs -->
+  </div>
+</div>

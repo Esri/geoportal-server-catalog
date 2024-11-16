@@ -13,7 +13,7 @@ define(["dojo/_base/declare",
         "./ClassConformanceReport",
         "../../gmd/dataQuality/ConformanceDegree",
         "dojo/text!./templates/ConformanceReport.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Tabs, Element, InputTextArea, AbstractObject, GcoElement, ObjectReference,
   FreeTextConformanceReport, OfficialTitleConformanceReport, ClassConformanceReport, ConformanceDegree, template, i18nInspire) {
 
