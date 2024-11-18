@@ -7,7 +7,7 @@ define(["dojo/_base/declare",
         "./MD_FeatureCatalogue",
         "./MD_FeatureCatalogueDescription",
         "dojo/text!./templates/MD_ContentInformation.html"],
-function(declare, lang, Descriptor, Element, Attribute, MD_FeatureCatalogue, MD_FeatureCatalogueDescription, template) {
+function(declare, lang, Descriptor, Element, Attribute, MD_CoverageDescription, MD_FeatureCatalogue, MD_FeatureCatalogueDescription, template) {
 
   var oThisClass = declare(Descriptor, {
     
