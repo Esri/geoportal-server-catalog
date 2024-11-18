@@ -17,10 +17,10 @@ define([],function(){var obj={
   gxeContext: {
     allowedTypeKeys: [
       "arcgis", "dc", "fgdc",
-      "iso-19115", "iso-19119", "iso-19115-2",
+      "iso-19115", "iso-19119", "iso-19115-2", "iso-19115-3",
       "inspire2-iso-19119", "inspire2-iso-19115",  
-      "gemini-iso-19115", "gemini-iso-19119",
-      "iso-19115-3"],
+      "gemini-iso-19115", "gemini-iso-19119"
+    ],
     basemap: "hybrid",
     allowViewXml: true,
     showValidateButton: false,

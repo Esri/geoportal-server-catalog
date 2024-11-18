@@ -33,6 +33,15 @@ define({
       resourceLineage:"Resource Lineage"
     },
     
+    parts: {
+        part1: "Part 1",
+        part2: "Part 2",
+        part3: "Part 3",
+        part4: "Part 4",
+        part5: "Part 5",
+        part6: "Part 6"
+    },
+
     metadataSection: {
       identifier: "Identifier",
       contact: "Contact",
