@@ -2,8 +2,9 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "dojo/has",
         "../base/MyProfileDescriptor",
+        "./MD_MediumFormatCode",
         "dojo/text!./templates/MD_Medium.html"],
-function(declare, lang, has, Descriptor, template) {
+function(declare, lang, has, Descriptor, MD_MediumFormatCode, template) {
 
   var oThisClass = declare(Descriptor, {
 

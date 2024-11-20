@@ -8,7 +8,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "esri/dijit/metadata/types/iso/gmd/maintenance/MD_ScopeCode",
         "dojo/text!./templates/Scope.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Element, AbstractObject, CodeListReference, ObjectReference, MD_ScopeCode, template, i18nInspire) {
 
   var oThisClass = declare(Descriptor, {

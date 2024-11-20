@@ -3,7 +3,7 @@ define({
     
     documentTypes: {
       data: {
-        caption: "MyProfile (Data)",
+        caption: "ISO 19115-1",
         description: ""
       },
       service: {

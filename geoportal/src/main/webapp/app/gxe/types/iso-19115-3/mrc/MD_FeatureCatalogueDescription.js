@@ -6,7 +6,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "esri/dijit/metadata/form/iso/AbstractObject",     
         "dojo/text!./templates/MD_FeatureCatalogueDescription.html"],
-function(declare, lang, Descriptor, Element, Attribute, ObjectReference,AbstractObject, template) {
+function(declare, lang, Descriptor, Element, Attribute, ObjectReference, AbstractObject, template) {
 
   var oThisClass = declare(Descriptor, {
     

@@ -33,6 +33,15 @@ define({
       resourceLineage:"Resource Lineage"
     },
     
+    parts: {
+        part1: "Part 1",
+        part2: "Part 2",
+        part3: "Part 3",
+        part4: "Part 4",
+        part5: "Part 5",
+        part6: "Part 6"
+    },
+
     metadataSection: {
       identifier: "Identifier",
       contact: "Contact",
@@ -193,7 +202,7 @@ define({
       function: "Function",
       protocolRequest: "Protocol Request"
     },
-
+    
     CI_Party: {
       name: "Name",
       contactInfo: "Contact Information"
@@ -213,7 +222,7 @@ define({
       logo: "Logo",
       individual: "Individual"
     },
-    
+
     CI_PresentationFormCode: {
       documentDigital: "Document Digital",
       documentHardcopy: "Document Hardcopy",
@@ -309,7 +318,7 @@ define({
       result: "ConformanceResult",
       specification: "Data Quality Specification"
     },
-    
+
     DQ_MeasureReference:  {
       caption: "Measure Reference",
       measureIdentification: "Measure Identification",
@@ -323,7 +332,6 @@ define({
       measure: "Measure",
       domainConsistency: "Domain Consistency"
     },
-    
     
     DQ_Scope : {
       level: "Scope (quality information applies to)",
@@ -446,15 +454,21 @@ define({
       fieldOfApplication: "Field of Application",
       versionNumber: "Version Number",
       versionDate: "Version Date",
+      language: "Language",
+      characterSet: "CharacterSet",
+      locale: "Locale",
       producer: "Producer",
       functionalLanguage: "Functional Language",
+      identifier: "Identifier",
       featureType: "Feature Type",
-      definitionSource: "Definition Source"
+      definitionSource: "Definition Source",
+      inheritanceRelation: "Inheritance Relation"
     },
     FC_InheritanceRelation: {
       name: "Name",
       description: "Description",
       uniqueInstance: "UniqueInstance",
+      designation:"Designation",
       subtType: "Subtype",
       superType: "Super Type"
     },
@@ -539,10 +553,16 @@ define({
     },
     FC_FeatureType: {
       typeName: "Type Name",
+      memberName: "Member Name",
+      roleName: "Role Name",
+      type: "Role Type",
       definition: "Definition",
       code: "Code",
       isAbstract:"is Abstract",
+      isOrdered:"is Ordered",
+      isNavigable:"is Navigable",
       aliases: "Aliases",
+      designation: "Designation",
       inheritsFrom: "Inherits From",
       inheritsTo: "Inherits To",
       carrierOfCharacteristics: "Carrier of Characteristics",

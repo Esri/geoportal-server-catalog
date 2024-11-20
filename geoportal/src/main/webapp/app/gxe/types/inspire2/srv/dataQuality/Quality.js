@@ -13,7 +13,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/types/iso/gmd/dataQuality/Lineage",
         "./Scope",
         "dojo/text!./templates/Quality.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, domStyle, topic, Descriptor, Tabs, AbstractObject, ObjectReference, 
          ConformanceReport, SrvConformanceReport, ConceptualConsistency, Lineage, Scope, 
          template, i18nInspire) {
