@@ -29,7 +29,7 @@ G.evaluators.iso = {
 
   evalBase: function(task) {
     var item = task.item, root = task.root;
-    var iden = G.getNode(task,root,"gmd:identificationInfo/gmd:MD_DataIdentification | gmd:identificationInfo/srv:SV_ServiceIdentification");
+    var iden = G.getNode(task,root,"gmd:identificationInfo/gmd:MD_DataIdentification | gmd:identificationInfo/srv:SV_ServiceIdentification | mdb:identificationInfo/mri:MD_DataIdentification");
 
     /* general */
     G.evalProp(task,item,root,"fileid","gmd:fileIdentifier/*/text()");

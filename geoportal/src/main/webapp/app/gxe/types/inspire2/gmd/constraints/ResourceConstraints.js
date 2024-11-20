@@ -15,7 +15,7 @@ define(["dojo/_base/declare",
         "./OtherConstraints",
         "./UseLimitation",
         "dojo/text!./templates/ResourceConstraints.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, Descriptor, InputSelectOne, Options, Option, AbstractObject, CodeListAttribute,
   CodeListValueAttribute, CodeListElement, CodeListReference, CodeSpaceAttribute, ObjectReference, OtherConstraints,
   UseLimitation, template, i18nInspire) {

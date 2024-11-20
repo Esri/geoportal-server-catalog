@@ -191,7 +191,6 @@ define({
     function: "函數",
     protocolRequest: "Protocol Request"
   },
-
   CI_Party: {
     name: "Name",
     contactInfo: "Contact Information"
@@ -307,7 +306,7 @@ define({
     result: "ConformanceResult",
     specification: "Data Quality Specification"
   },
-  
+
   DQ_MeasureReference:  {
     caption: "Measure Reference",
     measureIdentification: "Measure Identification",
@@ -316,12 +315,11 @@ define({
   },
   
   DQ_DataQuality: {
-    report: "Data Quality Report",
+    report: "報告",
     scope: "Data Quality Scope",
     measure: "Measure",
     domainConsistency: "Domain Consistency"
   },
-  
   
   DQ_Scope : {
     level: "範圍(適用於品質資訊)",
@@ -445,15 +443,21 @@ define({
     fieldOfApplication: "Field of Application",
     versionNumber: "Version Number",
     versionDate: "Version Date",
+    language: "Language",
+    characterSet: "CharacterSet",
+    locale: "Locale",
     producer: "Producer",
     functionalLanguage: "Functional Language",
+    identifier: "Identifier",
     featureType: "Feature Type",
-    definitionSource: "Definition Source"
+    definitionSource: "Definition Source",
+    inheritanceRelation: "Inheritance Relation"
   },
   FC_InheritanceRelation: {
     name: "Name",
     description: "Description",
     uniqueInstance: "UniqueInstance",
+    designation:"Designation",
     subtType: "Subtype",
     superType: "Super Type"
   },
@@ -538,10 +542,16 @@ define({
   },
   FC_FeatureType: {
     typeName: "Type Name",
+    memberName: "Member Name",
+    roleName: "Role Name",
+    type: "Role Type",
     definition: "Definition",
     code: "Code",
     isAbstract:"is Abstract",
+    isOrdered:"is Ordered",
+    isNavigable:"is Navigable",
     aliases: "Aliases",
+    designation: "Designation",
     inheritsFrom: "Inherits From",
     inheritsTo: "Inherits To",
     carrierOfCharacteristics: "Carrier of Characteristics",

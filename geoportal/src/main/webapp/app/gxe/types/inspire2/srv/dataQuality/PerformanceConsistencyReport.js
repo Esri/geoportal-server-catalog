@@ -12,7 +12,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/GcoElement",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "dojo/text!./templates/PerformanceConsistencyReport.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, domStyle, Descriptor, Tabs, Element, InputText, InputTextArea, InputNumber, AbstractObject, GcoElement, ObjectReference,
   template, i18nInspire) {
 

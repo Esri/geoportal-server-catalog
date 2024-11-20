@@ -1,7 +1,7 @@
 define(["dojo/_base/declare",
         "./InspireDocumentType",
         "./ServiceRoot",
-        "dojo/i18n!../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, DocumentType, RootDescriptor, i18nInspire) {
 
   var oThisClass = declare(DocumentType, {

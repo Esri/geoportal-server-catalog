@@ -3,7 +3,7 @@ define(["dojo/_base/declare",
         "dojo/dom-construct",
         "esri/dijit/metadata/types/iso/base/IsoDocumentType",
         "./PortalItemTransformer",
-        "dojo/i18n!../../../../nls/i18nDublinCore",
+        "dojo/i18n!../../../nls/i18nDublinCore",
         "esri/dijit/metadata/form/InputSelectOne"],
 function(declare, lang, domConstruct, DocumentType, PortalItemTransformer, i18nDublinCore,
   InputSelectOne) {
