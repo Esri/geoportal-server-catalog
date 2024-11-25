@@ -1,0 +1,16 @@
+Use this to generate encrypted password for elastic
+Usage: EncryptPassword <plaintext password>
+
+Output will be as below
+
+Encrypting password
+Base64 Key: VR3a3FsC4btYmSEEWv+bH3VQgeHV3I2HyQMag/jQ0Ws=
+Base64 IV: lT+NGhYUhpfq8N7oijC02g==
+encrypted password: fku/ft1rBDCWXmbNMEJ53Q==
+
+Replace these values in app-context.xml or set as environment variables
+
+		<beans:property name="base64Key" value="${gpt_base64Key}" />
+		<beans:property name="base64Iv" value="${gpt_base64Iv}" />
+		<beans:property name="username" value="${gpt_elasticUser}" />
+		<beans:property name="password" value="${gpt_elasticPassword}" />	
