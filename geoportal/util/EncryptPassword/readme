@@ -1,5 +1,10 @@
-Use this to generate encrypted password for elastic
-Usage: EncryptPassword <plaintext password>
+This utility is used generate encrypted password for elastic.
+
+1. Unzip EncryptPaswordClass.zip to same folder
+2. Make sure EncryptPasword.class and EncryptPassword.bat are in same folder
+3. Open command prompt and go to folder \geoportal-server-catalog\geoportal\util\EncryptPassword
+
+	EncryptPassword.bat <plaintext password>
 
 Output will be as below
 
