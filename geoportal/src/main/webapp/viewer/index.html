@@ -32,7 +32,9 @@
                     "esri/core/reactiveUtils",
                     "esri/views/MapView", 
                     "esri/layers/GroupLayer",
+                    "esri/layers/CSVLayer",
                     "esri/layers/FeatureLayer", 
+                    "esri/layers/ImageryTileLayer",
                     "esri/layers/MapImageLayer", 
                     "esri/widgets/Legend",
                     "esri/widgets/LayerList",
@@ -42,7 +44,9 @@
                     reactiveUtils,
                     MapView,
                     GroupLayer,
+                    CSVLayer,
                     FeatureLayer,
+                    ImageryTileLayer,
                     MapImageLayer,
                     Legend,
                     LayerList,
@@ -77,6 +81,18 @@
                             title: title,
                         });
                         thisMap.add(layer);
+                    } else if (type === "ImageryTileLayer") {
+                        const layer = new ImageryTileLayer({
+                            url: url,
+                            title: title,
+                        });
+                        thisMap.add(layer);
+                    } else if (type === "CSV") {
+                        const layer = new CSVLayer({
+                            url: url,
+                            title: title,
+                        });
+                        thisMap.add(layer);
                     }
                 };
 
@@ -100,7 +116,7 @@
 
                     await item.layer.when();
 
-                    if (item.title === "US Demographics") {
+                    if (1 === 1) {  //(item.title === "US Demographics") {
                         // An array of objects defining actions to place in the LayerList.
                         // By making this array two-dimensional, you can separate similar
                         // actions into separate groups with a breaking line.
