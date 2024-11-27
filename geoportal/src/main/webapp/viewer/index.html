@@ -30,25 +30,33 @@
             require([
                     "esri/Map", 
                     "esri/core/reactiveUtils",
+                    "esri/views/SceneView",
                     "esri/views/MapView", 
+                    "esri/widgets/Search",
+                    "esri/widgets/BasemapGallery",
                     "esri/layers/GroupLayer",
                     "esri/layers/CSVLayer",
                     "esri/layers/FeatureLayer", 
                     "esri/layers/ImageryTileLayer",
                     "esri/layers/MapImageLayer", 
                     "esri/widgets/Legend",
+                    "esri/widgets/Expand", 
                     "esri/widgets/LayerList",
                     "esri/widgets/Slider"
                 ], (
                     Map,
                     reactiveUtils,
+                    SceneView,
                     MapView,
+                    Search,
+                    BasemapGallery,
                     GroupLayer,
                     CSVLayer,
                     FeatureLayer,
                     ImageryTileLayer,
                     MapImageLayer,
                     Legend,
+                    Expand,
                     LayerList,
                     Slider) => {
 
@@ -63,10 +71,7 @@
                     zoom: 1,
                     center: [0, 30]
                 });
-                const legend = new Legend({
-                    view: view
-                });
-
+                
                 window.addLayer = function(thisMap, title, type, url) {
                     console.warn("type, url = " + type + " -> " + url);
                     if (type === "MapServer") {
@@ -175,13 +180,50 @@
                     }
                 }
 
+
+                // ADD WIDGETS
                 view.when(() => {
+                    // Add the search widget to the top right corner of the view
+                    const searchWidget = new Expand({
+                        content: new Search({
+                            view: view,
+                            style: "card"
+                        }),
+                        view: view,
+                        group: "top-right",
+                        expanded: false
+                    });
+
+                    view.ui.add(searchWidget, {
+                      position: "top-right"
+                    });
+                    
+                    // add a legend widget instance to the view
+                    // and set the style to 'card'. This is a
+                    // responsive style, which is good for mobile devices
+                    const legend = new Expand({
+                      content: new Legend({
+                        view: view,
+                        style: "card"
+                      }),
+                      view: view,
+                      group: "top-right",
+                      expanded: false
+                    });
+                    view.ui.add(legend, "top-right");
+                    
                     // Create the LayerList widget with the associated actions
                     // and add it to the top-right corner of the view.
-                    const layerList = new LayerList({
+                    const layerList = new Expand({
+                      content: new LayerList({
+                        view: view,
+                        container: document.getElementById("layerListDiv"),
+                        // executes for each ListItem in the LayerList
+                        listItemCreatedFunction: defineActions
+                      }),
                       view: view,
-                      // executes for each ListItem in the LayerList
-                      listItemCreatedFunction: defineActions
+                      group: "top-right",
+                      expanded: false
                     });
 
                     // Event listener that fires each time an action is triggered
@@ -196,7 +238,7 @@
                             // If the full-extent action is triggered then navigate
                             // to the full extent of the visible layer
                             view.goTo(visibleLayer.fullExtent).catch((error) => {
-                                if (error.name != "AbortError") {
+                                if (error.name !== "AbortError") {
                                   console.error(error);
                                 }
                             });
@@ -221,6 +263,21 @@
 
                     // Add widget to the top right corner of the view
                     view.ui.add(layerList, "top-right");
+
+                    // Add basemap gallery
+                    const basemapGallery = new Expand({
+                      content: new BasemapGallery({
+                        view: view,
+                        style: "card"
+                      }),
+                      view: view,
+                      group: "top-right",
+                      expanded: false
+                    });                   
+                    view.ui.add(basemapGallery, {
+                      position: "top-right"
+                    });
+                    
                 });
             });
 
@@ -281,6 +338,7 @@
     </head>
 
     <body>
-        <div id="viewDiv"></div>
+        <div id="viewDiv">
+        </div>
     </body>
 </html>
