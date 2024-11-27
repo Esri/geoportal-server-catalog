@@ -119,6 +119,8 @@ function(declare, lang, VectorTileLayer) {
             type = "GeoRSS";
           } else if (endsWith(lc,".zip")) { 
             type = "Shapefile";
+          } else if (endsWith(lc, ".tiff")) {
+            type = "ImageryTileLayer";  
           }
         }
       }
