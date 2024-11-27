@@ -1,131 +1,270 @@
-<!DOCTYPE HTML>
-<html>
-	<head>
-		<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
-    <meta http-equiv="X-UA-Compatible" content="IE=EDGE" />
-		<title>ArcGIS Web Application</title>
-		<link rel="shortcut icon" href="images/shortcut.ico">
-		<!--[if IE 8]>
-    <link rel="stylesheet" type="text/css"  href="jimu.js/css/jimu-ie.css" />
-    <![endif]-->
-		<style type="text/css">
-		*{box-sizing: border-box;}
-      body,html {
-        width:100%;
-        height:100%;
-        margin:0;
-        padding:0;
-        overflow:hidden;
-      }
-      #main-loading{
-        width: 100%;
-        height: 100%;
-        text-align: center;
-        overflow: hidden;
-      }
-      #main-loading #ie-note{
-        position: absolute;
-        top: 0;
-        bottom: 0;
-        left: 0;
-        right: 0;
-        margin: auto;
-      }
-      #main-loading #ie-note {
-        width: 586px;
-        height: 253px;
-        background-image: url('images/notes.png');
-        padding: 0 30px 40px 30px;
-        font-size: 14px;
-        color: #596679;
-      }
-      #ie-note .hint-title{
-        height: 40px;
-        line-height: 48px;
-        text-align: left;
-        font-weight: bold;
-      }
-      #ie-note .hint-img{
-        background-image: url('images/hint.png');
-        background-position: left;
-        padding-left: 40px;
-        margin-top: 20px;
-        background-repeat: no-repeat;
-        height: 30px;
-        text-align: left;
-        line-height: 30px;
-        font-weight: bold;
-      }
-      #ie-note span{
-        display: block;
-        line-height: 14px;
-      }
-      #main-page{
-        display: none;
-        width: 100%;
-        height: 100%;
-        position: relative;
-      }
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="utf-8" />
+        <meta name="viewport" content="initial-scale=1,maximum-scale=1,user-scalable=no" />
+        <title>MapImageLayer - create dynamic map layers | Sample | ArcGIS Maps SDK for JavaScript 4.31</title>
 
-      #jimu-layout-manager{
-        width: 100%;
-        height: 100%;
-        position: absolute;
-      }
-		</style>
-    <link rel="stylesheet" type="text/css" href="configs/loading/loading.css" />
-		<script>
-			/*******************************
-			* This is the function you can modify to customize the loading page
-			* This function will be invoked when one resource is loaded.
-			********************************/
-			// var progress;
-			// function loadingCallback(url, i, count) {
-			// 	var loading = document.getElementById('main-loading-bar');
-			// 	loading.setAttribute('title', url);
-			//   if(!progress){
-			//     progress = document.createElement('div');
-			//     progress.setAttribute('class', 'loading-progress');
-			//     loading.appendChild(progress);
-			//   }
-			//   progress.style.width = (((i - 1)/count) * 100) + '%';
-			// }
-		</script>
-	</head>
-	<body class="claro jimu-main-font">
+        <link rel="stylesheet" href="https://js.arcgis.com/4.31/esri/themes/light/main.css" />
+        <script src="https://js.arcgis.com/4.31/"></script>
 
-		<div id="main-loading">
+        <style>
+            html,
+            body,
+            #viewDiv {
+                padding: 0;
+                margin: 0;
+                height: 100%;
+                width: 100%;
+            }
 
-			<!-- This is section you can modify to customize the loading page -->
-			<div id="app-loading"></div>
-      <div id="loading-gif"></div>
+            #info-div {
+                background-color: white;
+                border-radius: 8px;
+                padding: 8px;
+                opacity: 0.92;
+            }
+        </style>
 
-			<!-- //////////////////    END    ////////////////////////////// -->
-			<div id="ie-note" style="display:none;">
-        <div class="hint-title">Error</div>
-        <div class="hint-img">Your browser is currently not supported.</div>
-        <p class="hint-text">
-          <span>
-            Please note that creating presentations is not supported in Internet Explorer versions 6, 7.
-          </span>
-          <br>
-          <span>
-            We recommend upgrading to the latest Internet Explorer, Google Chrome, or Firefox.
-          </span>
-          <br>
-          <span>
-            If you are using IE 8 or later, make sure you turn off "Compatibility View".
-          </span>
-        </p>
-      </div>
-		</div>
-		<div id="main-page">
-			<div id="jimu-layout-manager"></div>
-		</div>
+        <script>
+            require([
+                    "esri/Map", 
+                    "esri/core/reactiveUtils",
+                    "esri/views/MapView", 
+                    "esri/layers/GroupLayer",
+                    "esri/layers/FeatureLayer", 
+                    "esri/layers/MapImageLayer", 
+                    "esri/widgets/Legend",
+                    "esri/widgets/LayerList",
+                    "esri/widgets/Slider"
+                ], (
+                    Map,
+                    reactiveUtils,
+                    MapView,
+                    GroupLayer,
+                    FeatureLayer,
+                    MapImageLayer,
+                    Legend,
+                    LayerList,
+                    Slider) => {
 
-		<script src="env.js"></script>
-		<script type="text/javascript" src="simpleLoader.js"></script>
-		<script type="text/javascript" src="init.js"></script>
-	</body>
+                window.map = new Map({
+                    basemap: "gray-vector"
+                            //, layers: [layer]
+                });
+
+                const view = new MapView({
+                    container: "viewDiv",
+                    map: window.map,
+                    zoom: 1,
+                    center: [0, 30]
+                });
+                const legend = new Legend({
+                    view: view
+                });
+
+                window.addLayer = function(thisMap, title, type, url) {
+                    console.warn("type, url = " + type + " -> " + url);
+                    if (type === "MapServer") {
+                        const layer = new MapImageLayer({
+                            url: url,
+                            title: title,
+                        });
+                        thisMap.add(layer);
+                    } else if (type === "FeatureServer") {
+                        const layer = new FeatureLayer({
+                            url: url,
+                            title: title,
+                        });
+                        thisMap.add(layer);
+                    }
+                };
+
+                if (!window.addToMapListener) {
+                    window.addToMapListener = function (params) {
+                        console.warn("addToMapListener", params);
+                        return window.addLayer(window.map, params.title, params.type, params.url);
+                    };
+                };
+
+                this._checkWindowUrl();
+                
+
+                // Creates actions in the LayerList.
+                async function defineActions(event) {
+                    // The event object contains an item property.
+                    // is is a ListItem referencing the associated layer
+                    // and other properties. You can control the visibility of the
+                    // item, its title, and actions using this object.
+                    const { item } = event;
+
+                    await item.layer.when();
+
+                    if (item.title === "US Demographics") {
+                        // An array of objects defining actions to place in the LayerList.
+                        // By making this array two-dimensional, you can separate similar
+                        // actions into separate groups with a breaking line.
+                        item.actionsSections = [
+                            [
+                                {
+                                    title: "Go to full extent",
+                                    icon: "zoom-out-fixed",
+                                    id: "full-extent"
+                                },
+                                {
+                                    title: "Layer information",
+                                    icon: "information",
+                                    id: "information"
+                                }
+                            ],
+                            [
+                                {
+                                    title: "Increase opacity",
+                                    icon: "chevron-up",
+                                    id: "increase-opacity"
+                                },
+                                {
+                                    title: "Decrease opacity",
+                                    icon: "chevron-down",
+                                    id: "decrease-opacity"
+                                }
+                            ]
+                        ];
+                    }
+
+                    // Adds a slider for updating a group layer's opacity
+                    if (item.children.length > 1 && item.parent) {
+                        const slider = new Slider({
+                            min: 0,
+                            max: 1,
+                            precision: 2,
+                            values: [1],
+                            visibleElements: {
+                              labels: true,
+                              rangeLabels: true
+                            }
+                        });
+
+                        item.panel = {
+                            content: slider,
+                            icon: "sliders-horizontal",
+                            title: "Change layer opacity"
+                        };
+
+                        // Watch the slider's values array and update the layer's opacity
+                        reactiveUtils.watch(
+                            () => slider.values.map((value) => value),
+                            (values) => (item.layer.opacity = values[0])
+                        );
+                    }
+                }
+
+                view.when(() => {
+                    // Create the LayerList widget with the associated actions
+                    // and add it to the top-right corner of the view.
+                    const layerList = new LayerList({
+                      view: view,
+                      // executes for each ListItem in the LayerList
+                      listItemCreatedFunction: defineActions
+                    });
+
+                    // Event listener that fires each time an action is triggered
+                    layerList.on("trigger-action", (event) => {
+                        // The layer visible in the view at the time of the trigger.
+                        const visibleLayer = USALayer.visible ? USALayer : censusLayer;
+
+                        // Capture the action id.
+                        const id = event.action.id;
+
+                        if (id === "full-extent") {
+                            // If the full-extent action is triggered then navigate
+                            // to the full extent of the visible layer
+                            view.goTo(visibleLayer.fullExtent).catch((error) => {
+                                if (error.name != "AbortError") {
+                                  console.error(error);
+                                }
+                            });
+                        } else if (id === "information") {
+                            // If the information action is triggered, then
+                            // open the item details page of the service layer
+                            window.open(visibleLayer.url);
+                        } else if (id === "increase-opacity") {
+                            // If the increase-opacity action is triggered, then
+                            // increase the opacity of the GroupLayer by 0.25
+                            if (demographicGroupLayer.opacity < 1) {
+                                demographicGroupLayer.opacity += 0.25;
+                            }
+                        } else if (id === "decrease-opacity") {
+                            // If the decrease-opacity action is triggered, then
+                            // decrease the opacity of the GroupLayer by 0.25
+                            if (demographicGroupLayer.opacity > 0) {
+                                demographicGroupLayer.opacity -= 0.25;
+                            }
+                        }
+                    });
+
+                    // Add widget to the top right corner of the view
+                    view.ui.add(layerList, "top-right");
+                });
+            });
+
+            function _checkWindowUrl() {
+                //console.warn("AddToMap._checkWindowUrl...");
+                var queryObject = this._parseParameters(); // window.queryObject; env.js // <-- did not work well, so using above function
+                if (queryObject.resource) {
+                    var resource = queryObject.resource;
+                    //console.warn("Add to map parameters => " + resource);        
+                    var title = "";
+                    if (queryObject.title) {
+                        title = decodeURIComponent(queryObject.title);
+                    }
+                    var parts = resource.split(":");
+                    if (!parts && parts.length < 2) {
+                        return;
+                    }
+
+                    var linkType = parts[0];
+                    var href = "";
+                    // loop parameter values in array elements since value may contain ':'
+                    for (var i = 1; i < parts.length; i++) {
+                        if (href.length > 0) {
+                            href += ":";
+                        }
+                        href += parts[i];
+                    }
+                    if (href.length === 0)
+                        return;
+                    window.addLayer(map, title, linkType, href);
+                }
+            };
+            
+            function _parseParameters() {
+                var query = window.location.search;
+                if (query.indexOf('?') > -1) {
+                    query = query.substr(1);
+                }
+                var pairs = query.split('&');
+                var queryObject = {};
+                for (var i = 0; i < pairs.length; i++) {
+                    var splits = decodeURIComponent(pairs[i]).split('=');
+                    var parameterValue = "";
+                    // loop parameter values in array elements since value may contain '='
+                    for (var j = 1; j < splits.length; j++) {
+                        if (parameterValue.length > 0) {
+                            parameterValue += "=";
+                        }
+                        parameterValue += splits[j];
+                    }
+                    queryObject[splits[0]] = parameterValue;
+                }
+                return queryObject;
+            };
+            
+            
+        </script>
+    </head>
+
+    <body>
+        <div id="viewDiv"></div>
+    </body>
 </html>
