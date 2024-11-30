@@ -27,6 +27,8 @@
         </style>
 
         <script>
+            var dojoConfig = this.dojoConfig || {};
+            
             require([
                     "esri/Map", 
                     "esri/core/reactiveUtils",
@@ -74,31 +76,42 @@
                 
                 window.addLayer = function(thisMap, title, type, url) {
                     console.warn("type, url = " + type + " -> " + url);
+                    var layer;
                     if (type === "MapServer") {
-                        const layer = new MapImageLayer({
+                        layer = new MapImageLayer({
                             url: url,
-                            title: title,
+                            title: title
                         });
                         thisMap.add(layer);
                     } else if (type === "FeatureServer") {
-                        const layer = new FeatureLayer({
+                        layer = new FeatureLayer({
                             url: url,
-                            title: title,
+                            title: title
                         });
                         thisMap.add(layer);
                     } else if (type === "ImageryTileLayer") {
-                        const layer = new ImageryTileLayer({
+                        layer = new ImageryTileLayer({
                             url: url,
-                            title: title,
+                            title: title
                         });
                         thisMap.add(layer);
                     } else if (type === "CSV") {
-                        const layer = new CSVLayer({
+                        layer = new CSVLayer({
                             url: url,
-                            title: title,
+                            title: title
                         });
                         thisMap.add(layer);
                     }
+                    
+                    view.when(() => {
+                        if ((layer) && (layer.Extent)) {
+                            view.goTo(layer.fullExtent).catch((error) => {
+                                if (error.name !== "AbortError") {
+                                  console.error(error);
+                                }
+                            });
+                        }
+                    });
                 };
 
                 if (!window.addToMapListener) {
@@ -110,77 +123,7 @@
 
                 this._checkWindowUrl();
                 
-
-                // Creates actions in the LayerList.
-                async function defineActions(event) {
-                    // The event object contains an item property.
-                    // is is a ListItem referencing the associated layer
-                    // and other properties. You can control the visibility of the
-                    // item, its title, and actions using this object.
-                    const { item } = event;
-
-                    await item.layer.when();
-
-                    if (1 === 1) {  //(item.title === "US Demographics") {
-                        // An array of objects defining actions to place in the LayerList.
-                        // By making this array two-dimensional, you can separate similar
-                        // actions into separate groups with a breaking line.
-                        item.actionsSections = [
-                            [
-                                {
-                                    title: "Go to full extent",
-                                    icon: "zoom-out-fixed",
-                                    id: "full-extent"
-                                },
-                                {
-                                    title: "Layer information",
-                                    icon: "information",
-                                    id: "information"
-                                }
-                            ],
-                            [
-                                {
-                                    title: "Increase opacity",
-                                    icon: "chevron-up",
-                                    id: "increase-opacity"
-                                },
-                                {
-                                    title: "Decrease opacity",
-                                    icon: "chevron-down",
-                                    id: "decrease-opacity"
-                                }
-                            ]
-                        ];
-                    }
-
-                    // Adds a slider for updating a group layer's opacity
-                    if (item.children.length > 1 && item.parent) {
-                        const slider = new Slider({
-                            min: 0,
-                            max: 1,
-                            precision: 2,
-                            values: [1],
-                            visibleElements: {
-                              labels: true,
-                              rangeLabels: true
-                            }
-                        });
-
-                        item.panel = {
-                            content: slider,
-                            icon: "sliders-horizontal",
-                            title: "Change layer opacity"
-                        };
-
-                        // Watch the slider's values array and update the layer's opacity
-                        reactiveUtils.watch(
-                            () => slider.values.map((value) => value),
-                            (values) => (item.layer.opacity = values[0])
-                        );
-                    }
-                }
-
-
+                
                 // ADD WIDGETS
                 view.when(() => {
                     // Add the search widget to the top right corner of the view
@@ -217,48 +160,11 @@
                     const layerList = new Expand({
                       content: new LayerList({
                         view: view,
-                        container: document.getElementById("layerListDiv"),
-                        // executes for each ListItem in the LayerList
-                        listItemCreatedFunction: defineActions
+                        container: document.getElementById("layerListDiv")
                       }),
                       view: view,
                       group: "top-right",
                       expanded: false
-                    });
-
-                    // Event listener that fires each time an action is triggered
-                    layerList.on("trigger-action", (event) => {
-                        // The layer visible in the view at the time of the trigger.
-                        const visibleLayer = USALayer.visible ? USALayer : censusLayer;
-
-                        // Capture the action id.
-                        const id = event.action.id;
-
-                        if (id === "full-extent") {
-                            // If the full-extent action is triggered then navigate
-                            // to the full extent of the visible layer
-                            view.goTo(visibleLayer.fullExtent).catch((error) => {
-                                if (error.name !== "AbortError") {
-                                  console.error(error);
-                                }
-                            });
-                        } else if (id === "information") {
-                            // If the information action is triggered, then
-                            // open the item details page of the service layer
-                            window.open(visibleLayer.url);
-                        } else if (id === "increase-opacity") {
-                            // If the increase-opacity action is triggered, then
-                            // increase the opacity of the GroupLayer by 0.25
-                            if (demographicGroupLayer.opacity < 1) {
-                                demographicGroupLayer.opacity += 0.25;
-                            }
-                        } else if (id === "decrease-opacity") {
-                            // If the decrease-opacity action is triggered, then
-                            // decrease the opacity of the GroupLayer by 0.25
-                            if (demographicGroupLayer.opacity > 0) {
-                                demographicGroupLayer.opacity -= 0.25;
-                            }
-                        }
                     });
 
                     // Add widget to the top right corner of the view
@@ -277,7 +183,6 @@
                     view.ui.add(basemapGallery, {
                       position: "top-right"
                     });
-                    
                 });
             });
 
@@ -332,13 +237,10 @@
                 }
                 return queryObject;
             };
-            
-            
         </script>
     </head>
 
     <body>
-        <div id="viewDiv">
-        </div>
+        <div id="viewDiv"></div>
     </body>
 </html>
