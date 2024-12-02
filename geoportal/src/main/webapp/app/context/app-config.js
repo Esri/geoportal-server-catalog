@@ -32,7 +32,7 @@ define([],function(){var obj={
     autoResize: true,
     wrapAround180: true,
     center: [-98, 40],
-    zoom: 3
+    zoom: 2
   },
 
   searchResults: {

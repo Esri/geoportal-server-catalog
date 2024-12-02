@@ -19,49 +19,52 @@ define([
   "dojo/i18n!app/nls/resources",
   "esri/request",
   "esri/geometry/Extent",
-  "esri/layers/ArcGISDynamicMapServiceLayer",
+  "esri/layers/MapImageLayer",
   "esri/layers/FeatureLayer",
-  "esri/layers/ArcGISImageServiceLayer",
+  "esri/layers/ImageryLayer",
   "esri/layers/WMSLayer",
-  "esri/geometry/webMercatorUtils",
-  "esri/tasks/GeometryService",
-  "esri/tasks/ProjectParameters"
+  "esri/geometry/support/webMercatorUtils",
+  "esri/rest/geometryService",
+  "esri/rest/support/ProjectParameters",
+  "esri/core/reactiveUtils"
 ],
 function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
-          ArcGISDynamicMapServiceLayer, FeatureLayer, ArcGISImageServiceLayer, WMSLayer,
-          webMercatorUtils, GeometryService, ProjectParameters) {
+          MapImageLayer, FeatureLayer, ImageryLayer, WMSLayer,
+          webMercatorUtils, GeometryService, ProjectParameters,reactiveUtils) {
             
   // declare publicly available geometry server
-  var _gs = new GeometryService("https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
-  
+ // var _gs = new GeometryService("https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+	var _gs = GeometryService;
+	
   // universal error handler
-  var _handleError = function(map, error) {
-    map.emit("update-end-always", map);
+  var _handleError = function(view, error) {
+    //map.emit("update-end-always", map);
     console.error(error);
-    map.errorNode = domConstruct.create("div",{
+    /*map.errorNode = domConstruct.create("div",{
       innerHTML: i18n.search.preview.error, 
       class: "g-preview-error"
-    }, map.container, "first");
+    }, map.container, "first");*/
   };
   
   // sets new extent of the map; uses projection if new extent is not compatible with the map
-  var _setExtent = function(map, extent) {
-    if (!webMercatorUtils.canProject(extent, map)) {
+  var _setExtent = function(view, extent) {
+    if (!webMercatorUtils.canProject(extent, view.extent)) {
       var params = new ProjectParameters();
       params.geometries = [extent];
-      params.outSR = map.spatialReference;
-      
-      _gs.project(params, function(result) {
+      params.outSpatialReference = map.spatialReference;
+      const url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer";
+
+      _gs.project(url,params, function(result) {
         if (result.length > 0) {
           extent = new Extent(result[0]);
-          map.setExtent(extent, true);
+          view.extent = extent;
         }
       }, function(error) {
         console.error(error);
       });
     } else {
-      map.setExtent(extent, true);
+    	view.extent = extent;
     }
   };
   
@@ -69,127 +72,187 @@ function (lang, array, domConstruct, i18n,
   var _layerFactories = {
     
     // map server
-    "MapServer": function(map, url) {
-      var layer = new ArcGISDynamicMapServiceLayer(url, {});
-      layer.on("error", function(error) {
-        _handleError(map, error);
+    "MapServer": function(view, url) {
+      var layer = new MapImageLayer({url});
+      layer.when(function(){
+    	  var extent = new Extent(layer.fullExtent);
+          _setExtent(view, extent);
+    	 // view.goTo(layer.fullExtent);
+    	},
+    	function(error)
+    	{
+    		_handleError(view, error);
+    	}
+      );
+      view.map.add(layer);
+      
+      /*layer.on("error", function(error) {
+        _handleError(view, error);
       });
       layer.on("load", function(response) {
         domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           if (response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
-            _setExtent(map, extent);
+            _setExtent(view, extent);
           }
         } else {
-          _handleError(map, "Invalid response received from the server");
+          _handleError(view, "Invalid response received from the server");
         }
-      });
-      map.addLayer(layer);
+      });*/
+      
     },
    
     // A single feature layer from the map server; see: _getType() function
-    "FeatureLayer": function(map, url) {
-      esriRequest({url: url + "?f=pjson"}).then(function(response) {
-        if (response) {
-          var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
-          layer.on("error", function(error) {
-            _handleError(map, error);
+    "FeatureLayer": function(view, url) {
+      esriRequest(url+"?f=pjson").then(function(response) {
+        if (response && response.data) {
+          var layer = FeatureLayer({url:url});
+          reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+        	  _handleError(view, layer.loadError);
           });
-          layer.on("load", function() {
-            domConstruct.destroy(map.errorNode);
-            if (response.extent) {
-              var extent = new Extent(response.extent);
-              _setExtent(map, extent);
-            }
-          });
-          map.addLayer(layer);
+          reactiveUtils.when(() => layer.loaded === true, () => { 
+        	  if (response.data.extent) {
+                  var extent = new Extent(response.data.extent);
+                  _setExtent(view, extent);
+                }
+          }); 
+          view.map.add(layer);
         } else {
-          _handleError(map, "Invalid response received from the server");
+          _handleError(view, "Invalid response received from the server");
         }
       }, function(error){
-        _handleError(map, error);
+        _handleError(view, error);
       });
     },
     
     // feature server
-    "FeatureServer": function(map, url) {
-      esriRequest({url: url + "?f=pjson"}).then(function(response){
-        if (response && response.layers) {
-          array.forEach(response.layers, function(layer) {
-            if (layer.defaultVisibility) {
-              var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
-              layer.on("error", function(error) {
-                _handleError(map, error);
-              });
-              layer.on("load", function() {
-                domConstruct.destroy(map.errorNode);
-                if (response.fullExtent) {
-                  var extent = new Extent(response.fullExtent);
-                  _setExtent(map, extent);
-                }
-              });
-              map.addLayer(layer);
-            }
-          });
-        } else {
-        	//Check if single layer
-        	esriRequest({url: url + "?f=pjson"}).then(function(response) {
-                if (response && response.defaultVisibility) {
-                  var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});
-                  layer.on("error", function(error) {
-                    _handleError(map, error);
+    "FeatureServer": function(view, url) {
+      esriRequest(url+"?f=pjson").then(function(response){
+        if (response && response.data){
+        	if(response.data.layers)
+        	{        
+        		array.forEach(response.layers, function(layer) {
+		            if (layer.defaultVisibility)
+		            {
+		            	 var layer = new FeatureLayer({url:url+ "/" + layer.id});
+		                  reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+		                	  _handleError(view, layer.loadError);
+		                  });
+		                  reactiveUtils.when(() => layer.loaded === true, () => { 
+		                	  if (response.data.extent) {
+		                          var extent = new Extent(response.data.extent);
+		                          _setExtent(view, extent);
+		                        }
+		                  });
+		             /* var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
+		              layer.on("error", function(error) {
+		                _handleError(view, error);
+		              });
+		              layer.on("load", function() {
+		                domConstruct.destroy(map.errorNode);
+		                if (response.fullExtent) {
+		                  var extent = new Extent(response.fullExtent);
+		                  _setExtent(view, extent);
+		                }
+		              });*/
+		              view.map.add(layer);
+		            }
+	          });
+        	} else {
+        		//Check if single layer        	
+                if (response.data.defaultVisibility) {
+                 // var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});//Not available in JS 4
+                  var layer = new FeatureLayer({url:url});
+                  reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+                	  _handleError(view, layer.loadError);
                   });
-                  layer.on("load", function() {
-                    domConstruct.destroy(map.errorNode);
-                    if (response.extent) {
-                      var extent = new Extent(response.extent);
-                      _setExtent(map, extent);
+                  reactiveUtils.when(() => layer.loaded === true, () => { 
+                	  if (response.data.extent) {
+                          var extent = new Extent(response.data.extent);
+                          _setExtent(view, extent);
+                        }
+                  });   
+                  
+                  //TODO Should I use this?
+                  layer.on("layerview-create", function(event){
+                	  // The LayerView for the layer that emitted this event
+                	  event.layerView;
+                	});
+                  
+                 /* layer.on("load", function() {
+                 //   domConstruct.destroy(map.errorNode);
+                    if (response.data.extent) {
+                      var extent = new Extent(response.data.extent);
+                      _setExtent(view, extent);
                     }
-                  });
-                  map.addLayer(layer);
+                  });*/
+                  view.map.add(layer);
                 } else {
-                  _handleError(map, "Invalid response received from the server");
+                  _handleError(view, "Invalid response received from the server");
                 }
-              }, function(error){
-                _handleError(map, error);
-              });
-          
-        }   
-      }, function(error){
-        _handleError(map, error);
-      });
+              }
+        	}
+        }, 
+        function(error){
+                _handleError(view, error);
+         });
+      
     },
     
     // image server
-    "ImageServer": function(map, url) {
-      var layer = new ArcGISImageServiceLayer(url);
+    "ImageServer": function(view, url) {
+      var layer = new ImageryLayer(url);
       layer.on("error", function(error) {
-        _handleError(map, error);
+        _handleError(view, error);
       });
       layer.on("load", function(response) {
         domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           if (response.layer.fullExtent) {
             var extent = new Extent(response.layer.fullExtent);
-            _setExtent(map, extent);
+            _setExtent(view, extent);
           }
         } else {
-          _handleError(map, "Invalid response received from the server");
+          _handleError(view, "Invalid response received from the server");
         }
       });
-      map.addLayer(layer);
+      view.map.add(layer);
     },
     
     // WMS server
-    "WMS": function(map, url) {
-      map.emit("update-start-forced", map);
-      var layer = new WMSLayer(url.split('?')[0]);
-      layer.on("error", function(error) {
-        _handleError(map, error);
-      });
+    "WMS": function(view, url) {
+    //  map.emit("update-start-forced", map);
+      var urlReq =	url.split('?')[0]
+      var layer = new WMSLayer({url:url.split('?')[0]});
       var extentSet = false;
-      layer.on("load", function(response) {
+      reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+    	  _handleError(view, layer.loadError);
+      });
+      layer.load().then(() => {
+    	  var visibleLayers = lang.clone(layer.visibleLayers);
+          var visibleLayersModified = false;
+          array.forEach(response.layer.layerInfos, function(lyr) {
+            if (visibleLayers.indexOf(lyr.name) < 0) {
+              visibleLayers.push(lyr.name);
+              visibleLayersModified = true;
+            }
+          });
+          if (visibleLayersModified) {
+            layer.setVisibleLayers(visibleLayers);
+          }
+          if (!extentSet && response.layer.fullExtent) {
+            var extent = new Extent(response.layer.fullExtent);
+            _setExtent(map, extent);
+            extentSet = true;
+          }
+      });
+      
+/*      layer.on("error", function(error) {
+        _handleError(view, error);
+      });*/
+     
+/*      layer.on("load", function(response) {
         domConstruct.destroy(map.errorNode);
         if (response && response.layer) {
           var visibleLayers = lang.clone(layer.visibleLayers);
@@ -209,20 +272,18 @@ function (lang, array, domConstruct, i18n,
             extentSet = true;
           }
         } else {
-          _handleError(map, "Invalid response received from the server");
+          _handleError(view, "Invalid response received from the server");
         }
-      });
-      map.addLayer(layer);
+      });*/
+      view.map.add(layer);
     },
     
-    "Shapefile": function(map, url) {
-      map.emit("update-start-forced", map);
+    "Shapefile": function(view, url) {
+   //   map.emit("update-start-forced", map);
       
-      esriRequest({
-        url:url,
-        handleAs:"arraybuffer"
-      }).then(function(content){
-        
+      esriRequest(url,
+        {responseType:"array-buffer"})
+        .then(function(content){
         var formData = new FormData();
         formData.append("file", new Blob([content], {type: "multipart/form-data"}));
         
@@ -255,18 +316,18 @@ function (lang, array, domConstruct, i18n,
           });
           
           if (layers.length > 0) {
-            map.addLayers(layers);
+            view.map.addMany(layers);
             if (totalExtent) {
               _setExtent(map, totalExtent);
             }
           }
           
-          map.emit("update-end-always", map);
+         // map.emit("update-end-always", map);
         }, function(err) {
-          _handleError(map, "Invalid response received from the server");
+          _handleError(view, "Invalid response received from the server");
         });
       }, function(error){
-        _handleError(map, "Invalid response received from the server");
+        _handleError(view, "Invalid response received from the server");
       });
     }
   };
@@ -289,10 +350,10 @@ function (lang, array, domConstruct, i18n,
     },
     
     // create layer for the service and add it to the map
-    addService: function(map, serviceType) {
+    addService: function(view, serviceType) {
       var factory = _layerFactories[_getType(serviceType)];
       if (factory) {
-        factory(map, serviceType.url);
+        factory(view, serviceType.url);
       }
     }
     

@@ -65,8 +65,8 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
       }
       self._polyfill(function(){
         window["require"]([
-          "esri/dijit/metadata/context/GxeContext",
-          "esri/dijit/metadata/context/GxeAdaptor",
+          "../../../gp/dijit/metadata/context/GxeContext",
+          "../../../gp/dijit/metadata/context/GxeAdaptor",
           "app/gxe/editor/EditorDialog"],
         function(GxeContext,GxeAdaptor,EditorDialog) {
           var gxeContext = self._newContext(GxeContext);
@@ -225,16 +225,16 @@ function(declare, lang, array, Deferred, domConstruct, domStyle, topic, appTopic
     
     _polyfill: function(callback) {
       window["require"]([
-        "esri/dijit/metadata/editor/util/LoadDocumentPane",
-        "esri/dijit/metadata/editor/PrimaryToolbar",
-        "esri/dijit/metadata/context/DescriptorMixin",
-        "esri/dijit/metadata/types/inspire/srv/ServiceCategoryOptions",
-        "dojo/i18n!esri/dijit/metadata/nls/i18nBase",
-        "dojo/i18n!esri/dijit/metadata/nls/i18nArcGIS",
-        "dojo/i18n!esri/dijit/metadata/nls/i18nFgdc",
-        "dojo/i18n!esri/dijit/metadata/nls/i18nIso",
-        "dojo/i18n!esri/dijit/metadata/nls/i18nInspire",
-        "dojo/i18n!esri/dijit/metadata/nls/i18nGemini"],
+        "../../../gp/dijit/metadata/editor/util/LoadDocumentPane",
+        "../../../gp/dijit/metadata/editor/PrimaryToolbar",
+        "../../../gp/dijit/metadata/context/DescriptorMixin",
+        "../../../gp/dijit/metadata/types/inspire/srv/ServiceCategoryOptions",
+        "dojo/i18n!../../../gp/dijit/metadata/nls/i18nBase",
+        "dojo/i18n!../../../gp/dijit/metadata/nls/i18nArcGIS",
+        "dojo/i18n!../../../gp/dijit/metadata/nls/i18nFgdc",
+        "dojo/i18n!../../../gp/dijit/metadata/nls/i18nIso",
+        "dojo/i18n!../../../gp/dijit/metadata/nls/i18nInspire",
+        "dojo/i18n!../../../gp/dijit/metadata/nls/i18nGemini"],
       function(LoadDocumentPane, PrimaryToolbar, DescriptorMixin, ServiceCategoryOptions,
         i18nBase, i18nArcGIS, i18nFgdc, i18nIso, i18nInspire, i18nGemini){
         
