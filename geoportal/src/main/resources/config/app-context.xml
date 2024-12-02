@@ -23,7 +23,7 @@
 		<beans:property name="parseGml" value="false" />
 		<beans:property name="supportsCollections" value="false" />
 		<beans:property name="numStacFeaturesAddItem" value="500" />
-                <beans:property name="validateStacFields" value="false" />
+        <beans:property name="validateStacFields" value="false" />		
 	</beans:bean>
 <!-- the tokens like ${es_cluster:elasticsearch} ${gpt_indexName:metadata}
 represent environment variables that can be used to pass values into a spring configuration context, aka these files
@@ -44,12 +44,15 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="httpPort" value="9200" />		
 		<beans:property name="proxyBufferSize" value="8192" />
 		
-		<!-- Uncomment and complete the following if you want to use secured Elastic -->
-		
-		<!-- <beans:property name="useHttps" value="true" />
-		<beans:property name="username" value="" />
-		<beans:property name="password" value="" />		-->
- 
+		<!-- Uncomment and complete the following if you want to use secured index -->
+		<!--
+		<beans:property name="useHttps" value="true" />
+		<beans:property name="encryptPassword" value="false" />
+		<beans:property name="base64Key" value="${gpt_base64Key}" />
+		<beans:property name="base64Iv" value="${gpt_base64Iv}" />
+		<beans:property name="username" value="${gpt_elasticUser}" />
+		<beans:property name="password" value="${gpt_elasticPassword}" />		
+                -->
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
@@ -66,5 +69,5 @@ see: docs/configureByEnvironmentVariable.md
 			</beans:list>
 		</beans:property>
 	</beans:bean>
-	 
+	
 </beans:beans>

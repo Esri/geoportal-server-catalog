@@ -2,8 +2,8 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "esri/dijit/metadata/base/Descriptor",
         "dojo/i18n!esri/dijit/metadata/nls/i18nBase",
-        "dojo/i18n!../nls/i18nIso3",
-        "dojo/i18n!../nls/i18nDublinCore"],
+        "dojo/i18n!../../../nls/i18nIso3",
+        "dojo/i18n!../../../nls/i18nDublinCore"],
 function(declare, lang, Descriptor, i18nBase, i18nIso3, i18nDublinCore) {
 
   var oThisClass = declare(Descriptor, {

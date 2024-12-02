@@ -12,7 +12,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "esri/dijit/metadata/types/iso/gmd/citation/CI_OnlineFunctionCode",
         "dojo/text!./templates/TransferOptions.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, domStyle, topic, Descriptor, Element, Attribute, AbstractObject, CodeListReference, GcoElement, ObjectReference,
   CI_OnlineFunctionCode, template, i18nInspire) {
 
