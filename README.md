@@ -8,9 +8,9 @@ Esri Geoportal Server v2 now provides the catalog and harvesting capabilities as
 
 This repository contains the capability of **Geoportal Server Catalog**, while it's sibling **[Geoportal Server Harvester](https://github.com/ArcGIS/geoportal-server-harvester)** is managed in a separate repository.
 
-(Note: The long-lived Esri Geoportal Server v1 is now retired; its archive is [available here](https://github.com/Esri/geoportal-server).)
 
 ## Releases and Downloads
+- **2.7.2 - LATEST** - released, October 4, 2024.
 - 2.7.1 - released, December 21, 2023.
 - 2.7.0-patch1 - released Sep 11, 2023.
 - 2.6.5 - released December 17, 2021. Note that this version includes resolution to the Log4j2 vulnerability identified in December 2021.
@@ -25,13 +25,14 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 * **Faceted Search** - Configure different facets to allow your user to filter from the hay stack to the needle
 * **Scalability** - Thank you elasticsearch for providing multi-node configuration support
 * **OGC CSW 3.0.0 and CSW 2.0.2** - Standards compliant catalog service interface, includes CSW2 requirements for INSPIRE Discovery Service
+* **Spatio-Temporal Asset Catalog API** - As of Geoportal 2.7.2, it may be used to build a scalable Spatio-Temporal Asset Catalog (STAC) 
 * **Many metadata formats** - Extend the configuration with your favorite XML format
 * **Built-in Viewer** - Use the app we include or build one using Web AppBuilder and hook it up!
 * **No more database** - Yes that's a feature!
 
 ## Requirements
 
-* Elasticsearch 7.x or OpenSearch 2.12
+* Elasticsearch 7.x or higher, or OpenSearch 2.12
 * Tomcat 9.x
 
 ## Installation

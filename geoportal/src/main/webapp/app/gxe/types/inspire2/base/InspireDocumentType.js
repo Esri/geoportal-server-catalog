@@ -4,7 +4,7 @@ define(["dojo/_base/declare",
         "dojo/dom-style",
         "esri/dijit/metadata/types/iso/base/IsoDocumentType",
         "./PortalItemTransformer",
-        "dojo/i18n!../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, domStyle, DocumentType, PortalItemTransformer, i18nInspire) {
 
   var oThisClass = declare(DocumentType, {

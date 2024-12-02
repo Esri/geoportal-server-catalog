@@ -12,7 +12,7 @@ define(["dojo/_base/declare",
         "./PerformanceConsistencyReport",
         "./CapacityConsistencyReport",
         "dojo/text!./templates/ConceptualConsistency.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Tabs, Element, InputTextArea, AbstractObject, GcoElement, ObjectReference,
   AvailabilityConsistencyReport, PerformanceConsistencyReport, CapacityConsistencyReport, template, i18nInspire) {
 

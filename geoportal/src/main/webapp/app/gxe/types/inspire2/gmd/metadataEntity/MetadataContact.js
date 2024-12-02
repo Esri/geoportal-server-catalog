@@ -11,7 +11,7 @@ define(["dojo/_base/declare",
         "esri/dijit/metadata/form/iso/ObjectReference",
         "../citation/CI_RoleCode",
         "dojo/text!./templates/MetadataContact.html",
-        "dojo/i18n!../../../../../nls/i18nInspire"],
+        "dojo/i18n!app/gxe/nls/i18nInspire"],
 function(declare, lang, has, Descriptor, Element, Attribute, Tabs, AbstractObject, CodeListReference, GcoElement, ObjectReference,
   CI_RoleCode, template, i18nInspire) {
   
