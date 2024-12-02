@@ -6,12 +6,12 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "app/context/AppClient",
         "app/common/SignIn",
-        "esri/IdentityManager",
-        "esri/arcgis/OAuthInfo",
-        "esri/arcgis/Portal",
-        "esri/arcgis/utils"], 
+        "esri/identity/IdentityManager",
+        "esri/identity/OAuthInfo",
+        "esri/portal/Portal"
+        ], 
 function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn, 
-    esriId, OAuthInfo, arcgisPortal, arcgisUtils) {
+    esriId, OAuthInfo, arcgisPortal) {
   var KEEP_SIGNED_IN_COOKIE_NAME = "GPT_keep_signed_in";
 	
   var oThisClass = declare(null, {
@@ -87,7 +87,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         
     _showAgsOAuthSignIn: function(oauth) {
       var self = this, portalUrl = oauth.portalUrl;
-      arcgisUtils.arcgisUrl = portalUrl;  // PortalImplementation
+      //arcgisUtils.arcgisUrl = portalUrl;  // PortalImplementation
       esriId.getCredential(portalUrl,{oAuthPopupConfirmation:false}).then(function (){
         var portal = new arcgisPortal.Portal(portalUrl);
         portal.signIn().then(function(portalUser){
@@ -177,7 +177,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       
       if (oauth && oauth.appId) {
         var portalUrl = oauth.portalUrl;
-        arcgisUtils.arcgisUrl = portalUrl;  // PortalImplementation
+       // arcgisUtils.arcgisUrl = portalUrl;  // PortalImplementation
         var info = new OAuthInfo({
           appId: oauth.appId,
           // Uncomment this line to prevent the user's signed in state from being shared

@@ -22,11 +22,12 @@ define(["dojo/_base/declare",
         "dijit/_WidgetsInTemplateMixin",
         "dojo/text!./templates/PreviewPane.html",
         "dojo/i18n!app/nls/resources",
-        "esri/map"
+        "esri/Map",
+        "esri/views/MapView"
       ], 
 function(declare, lang, domConstruct, on, PreviewUtil, 
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
-         Map
+         Map,MapView
          ) {
 
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -49,22 +50,35 @@ function(declare, lang, domConstruct, on, PreviewUtil,
         // create map instance
         var mapProps = this.map || AppContext.appConfig.searchMap || {};
         if (mapProps) mapProps = lang.clone(mapProps);
-        this.map = new Map(this.mapNode, mapProps);
+      //  this.map = new Map(this.mapNode, mapProps);
+        this.map = new Map(mapProps);
         
-        this.own(on(this.map, "load", lang.hitch(this, function(){
+        const view = new MapView({
+        	  container:this.mapNode,
+        	  map:  this.map, 
+        	  center: mapProps.center,
+        	  zoom: mapProps.zoom      	  
+        	});
+        view.ui.remove("attribution");   
+        
+        view.when(lang.hitch(this,function() {    	
+        	PreviewUtil.addService(view, this.serviceType);
+      	}))    
+        
+/*        this.own(on(this.map, "load", lang.hitch(this, function(){
           // add service
           PreviewUtil.addService(this.map, this.serviceType);
-        })));
+        })));*/
 
-        this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
+/*        this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
 
         this.own(on(this.map, "update-start-forced", lang.hitch(this, function(args) {
-          this._showLoading(args);
+         this._showLoading(args);
           this.forcedLoading = true;
         })));
 
         this.own(on(this.map, "update-end", lang.hitch(this, function(args) { 
-          if (!this.forcedLoading) {
+         if (!this.forcedLoading) {
             this._hideLoading(args); 
           }
         })));
@@ -72,7 +86,7 @@ function(declare, lang, domConstruct, on, PreviewUtil,
         this.own(on(this.map, "update-end-always", lang.hitch(this, function(args) {
           this._hideLoading(args);
           this.forcedLoading = false;
-        })));
+        })));*/
       }
     },
     
@@ -83,7 +97,7 @@ function(declare, lang, domConstruct, on, PreviewUtil,
       this.inherited(arguments);
     },
     
-    _showLoading: function(args) {
+/*    _showLoading: function(args) {
       esri.show(this.loading);
       if (this.tout == null) {
         this.tout = setTimeout(lang.hitch(this, function() { this._hideLoading(args); }), 360000);
@@ -100,7 +114,7 @@ function(declare, lang, domConstruct, on, PreviewUtil,
         clearTimeout(this.tout);
         this.tout = null;
       }
-    }
+    }*/
 
   });
 
