@@ -254,6 +254,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
       array.some(links, lang.hitch(this, function(u){
         var serviceType = new ServiceType();
         serviceType.checkUrl(u);
+        serviceType.title = item.title;
         //console.warn("serviceType",serviceType.isSet(),serviceType);
         if (serviceType.isSet()) {
           domConstruct.create("a",{

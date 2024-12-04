@@ -97,7 +97,10 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
           router.go("mapPanel");
           self.mapPanel.addToMap(params);
         } else {
-          var urlParams = {resource: params.type+":"+this.normalizeUrl(params.url)};
+          var urlParams = {
+              title: params.title,
+              resource: params.type+":"+this.normalizeUrl(params.url)
+          };
           ignoreMapPanelActivated = true;
           router.go("mapPanel");
           self.mapPanel.ensureMap(urlParams);
