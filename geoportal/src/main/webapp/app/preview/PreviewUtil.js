@@ -17,20 +17,21 @@ define([
   "dojo/_base/array",
   "dojo/dom-construct",
   "dojo/i18n!app/nls/resources",
-  "esri/request",
-  "esri/geometry/Extent",
-  "esri/layers/MapImageLayer",
-  "esri/layers/FeatureLayer",
-  "esri/layers/ImageryLayer",
-  "esri/layers/WMSLayer",
-  "esri/geometry/support/webMercatorUtils",
-  "esri/rest/geometryService",
-  "esri/rest/support/ProjectParameters",
-  "esri/core/reactiveUtils"
+  "esri4/request",
+  "esri4/geometry/Extent",
+  "esri4/layers/MapImageLayer",
+  "esri4/layers/FeatureLayer",
+  "esri4/layers/ImageryLayer",
+  "esri4/layers/WMSLayer",
+  "esri4/layers/WFSLayer",
+  "esri4/geometry/support/webMercatorUtils",
+  "esri4/rest/geometryService",
+  "esri4/rest/support/ProjectParameters",
+  "esri4/core/reactiveUtils"
 ],
 function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
-          MapImageLayer, FeatureLayer, ImageryLayer, WMSLayer,
+          MapImageLayer, FeatureLayer, ImageryLayer, WMSLayer,WFSLayer,
           webMercatorUtils, GeometryService, ProjectParameters,reactiveUtils) {
             
   // declare publicly available geometry server
@@ -225,6 +226,64 @@ function (lang, array, domConstruct, i18n,
     //  map.emit("update-start-forced", map);
       var urlReq =	url.split('?')[0]
       var layer = new WMSLayer({url:url.split('?')[0]});
+      var extentSet = false;
+      reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+    	  _handleError(view, layer.loadError);
+      });
+      layer.load().then(() => {
+    	  var visibleLayers = lang.clone(layer.visibleLayers);
+          var visibleLayersModified = false;
+          array.forEach(response.layer.layerInfos, function(lyr) {
+            if (visibleLayers.indexOf(lyr.name) < 0) {
+              visibleLayers.push(lyr.name);
+              visibleLayersModified = true;
+            }
+          });
+          if (visibleLayersModified) {
+            layer.setVisibleLayers(visibleLayers);
+          }
+          if (!extentSet && response.layer.fullExtent) {
+            var extent = new Extent(response.layer.fullExtent);
+            _setExtent(map, extent);
+            extentSet = true;
+          }
+      });
+      
+/*      layer.on("error", function(error) {
+        _handleError(view, error);
+      });*/
+     
+/*      layer.on("load", function(response) {
+        domConstruct.destroy(map.errorNode);
+        if (response && response.layer) {
+          var visibleLayers = lang.clone(layer.visibleLayers);
+          var visibleLayersModified = false;
+          array.forEach(response.layer.layerInfos, function(lyr) {
+            if (visibleLayers.indexOf(lyr.name) < 0) {
+              visibleLayers.push(lyr.name);
+              visibleLayersModified = true;
+            }
+          });
+          if (visibleLayersModified) {
+            layer.setVisibleLayers(visibleLayers);
+          }
+          if (!extentSet && response.layer.fullExtent) {
+            var extent = new Extent(response.layer.fullExtent);
+            _setExtent(map, extent);
+            extentSet = true;
+          }
+        } else {
+          _handleError(view, "Invalid response received from the server");
+        }
+      });*/
+      view.map.add(layer);
+    },
+    
+ // WMS server
+    "WFS": function(view, url) {
+    //  map.emit("update-start-forced", map);
+      var urlReq =	url.split('?')[0]
+      var layer = new WFSLayer({url:url.split('?')[0]});
       var extentSet = false;
       reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
     	  _handleError(view, layer.loadError);

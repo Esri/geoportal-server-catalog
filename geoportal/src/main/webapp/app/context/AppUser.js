@@ -6,12 +6,12 @@ define(["dojo/_base/declare",
         "dojo/i18n!app/nls/resources",
         "app/context/AppClient",
         "app/common/SignIn",
-        "esri/identity/IdentityManager",
-        "esri/identity/OAuthInfo",
-        "esri/portal/Portal"
+        "esri4/identity/IdentityManager",
+        "esri4/identity/OAuthInfo",
+        "esri4/portal/Portal"
         ], 
 function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn, 
-    esriId, OAuthInfo, arcgisPortal) {
+    esriId, OAuthInfo, Portal) {
   var KEEP_SIGNED_IN_COOKIE_NAME = "GPT_keep_signed_in";
 	
   var oThisClass = declare(null, {
@@ -86,25 +86,29 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     },
         
     _showAgsOAuthSignIn: function(oauth) {
-      var self = this, portalUrl = oauth.portalUrl;
+      var self = this, portalUrl = oauth.portalUrl+"/sharing";
       //arcgisUtils.arcgisUrl = portalUrl;  // PortalImplementation
-      esriId.getCredential(portalUrl,{oAuthPopupConfirmation:false}).then(function (){
-        var portal = new arcgisPortal.Portal(portalUrl);
-        portal.signIn().then(function(portalUser){
-          //console.warn("portalUser",portalUser);
-          self.arcgisPortalUser = portalUser;
-          var u = portalUser.username;
-          var p = "__rtkn__:"+portalUser.credential.token;
-          self.signIn(u,p).then(function(){
-          }).otherwise(function(error){
-            // TODO handle 
-            console.warn("Error occurred while signing in:",error);
+      esriId.getCredential(portalUrl,{oAuthPopupConfirmation:false})
+      .then(function(Credential){
+        var portal = new Portal({
+            authMode: "immediate"
+        });      
+        portal.url = oauth.portalUrl;
+        
+        portal.load().then(() => {        	
+        	 self.arcgisPortalUser = portal.user;
+             var u = portal.user.username;
+             var p = "__rtkn__:"+portal.user.credential.token;
+             self.signIn(u,p).then(function(){
+             }).catch(function(error){
+               // TODO handle 
+               console.warn("Error occurred while signing in:",error);
+             });
           });
-        }).otherwise(function(error){
-          // TODO handle 
-          console.warn("Error occurred while signing in:",error);
-        });
-      });
+        })
+        .catch(function(error) {          
+        	console.warn("Error occurred while signing in:",error);
+        });     
     },
     
     showSignIn: function() {
@@ -147,14 +151,14 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
             } else {
               dfd.reject(i18n.general.error);
             } 
-          }).otherwise(function(error){
+          }).catch(function(error){
             console.warn(error);
             dfd.reject(i18n.general.error);
           });
         } else {
           dfd.reject(i18n.login.invalidCredentials);
         }
-      }).otherwise(function(error){
+      }).catch(function(error){
         var msg = i18n.general.error;
         if (error) {
           if (error.status === 400) msg = i18n.login.invalidCredentials;
@@ -188,26 +192,35 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
           popup: true
         });
         esriId.registerOAuthInfos([info]);
-
-        esriId.checkSignInStatus(portalUrl).then(function(){
-          var portal = new arcgisPortal.Portal(portalUrl);
-          portal.signIn().then(function(portalUser){
-            //console.warn("portalUser.....",portalUser);
-            self.arcgisPortalUser = portalUser;
-            var u = portalUser.username;
-            var p = "__rtkn__:"+portalUser.credential.token;
-            self.signIn(u,p).then(function(){
-              dfd.resolve();
-            }).otherwise(function(error){
-              dfd.resolve();
-            });
-          }).otherwise(function(error){
-            dfd.resolve();
-          });
-        }).otherwise(function(error){
-          dfd.resolve();
-        });
         
+        esriId
+        .checkSignInStatus(info.portalUrl + "/sharing")
+        .then(() => {
+            const portal = new Portal({
+            authMode: "immediate"
+          });
+          // Check if using a portal other than ArcGIS Online.
+          if (info.portalUrl !== "https://www.arcgis.com") {
+            portal.url = info.portalUrl;
+          }
+          // Load the portal, display the name and username, then call the query items function.
+          portal.load().then(() => {
+        	  self.arcgisPortalUser = portal.user;
+              var u = portal.user.username;
+              var p = "__rtkn__:"+portal.user.credential.token;
+              self.signIn(u,p).then(function(){
+            	  dfd.resolve();
+              }).catch(function(error){
+                // TODO handle 
+                console.warn("Error occurred while signing in:",error);
+                dfd.resolve();
+              });
+        })
+        .catch(() => {
+          // If not signed in, then show the sign in button.
+        	dfd.resolve();
+        	});
+        })   
       } else {
         AppContext.appUser.checkStoredToken();
         dfd.resolve();

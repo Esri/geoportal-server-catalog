@@ -31,7 +31,7 @@ define([],function(){var obj={
   typeDefinitions: [
     {
       key: "arcgis",
-      requiredPath: "../../../gp/dijit/metadata/types/arcgis/base/DocumentType",
+      requiredPath: "esri/dijit/metadata/types/arcgis/base/DocumentType",
       interrogationRules: [{
          path: "/metadata/Esri/ArcGISFormat",
          must: true
@@ -49,7 +49,7 @@ define([],function(){var obj={
     },
     {
       key: "fgdc",
-      requiredPath: "../../../gp/dijit/metadata/types/fgdc/base/DocumentType",
+      requiredPath: "esri/dijit/metadata/types/fgdc/base/DocumentType",
       interrogationRules: [{
          path: "/metadata/idinfo/citation",
          must: true
@@ -93,7 +93,7 @@ define([],function(){var obj={
     },
     {
       key: "iso-19115",
-      requiredPath: "../../../gp/dijit/metadata/types/iso/base/DataDocumentType",
+      requiredPath: "esri/dijit/metadata/types/iso/base/DataDocumentType",
       interrogationRules: [{
          path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
          must: true
@@ -101,7 +101,7 @@ define([],function(){var obj={
     },
     {
       key: "iso-19119",
-      requiredPath: "../../../gp/dijit/metadata/types/iso/base/ServiceDocumentType",
+      requiredPath: "esri/dijit/metadata/types/iso/base/ServiceDocumentType",
       interrogationRules: [{
          path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
          must: true
@@ -109,7 +109,7 @@ define([],function(){var obj={
     },
     {
       key: "iso-19115-2",
-      requiredPath: "../../../gp/dijit/metadata/types/iso/base/GmiDocumentType",
+      requiredPath: "esri/dijit/metadata/types/iso/base/GmiDocumentType",
       interrogationRules: [{
          path: "/gmi:MI_Metadata",
          must: true
@@ -117,7 +117,7 @@ define([],function(){var obj={
     },
     {
       key: "gemini-iso-19115",
-      requiredPath: "../../../gp/dijit/metadata/types/gemini/base/DataDocumentType",
+      requiredPath: "esri/dijit/metadata/types/gemini/base/DataDocumentType",
       interrogationRules: [
         {
           path: "/gmd:MD_Metadata/gmd:identificationInfo/gmd:MD_DataIdentification",
@@ -135,7 +135,7 @@ define([],function(){var obj={
     },
     {
       key: "gemini-iso-19119",
-      requiredPath: "../../../gp/dijit/metadata/types/gemini/base/ServiceDocumentType",
+      requiredPath: "esri/dijit/metadata/types/gemini/base/ServiceDocumentType",
       interrogationRules: [
         {
           path: "/gmd:MD_Metadata/gmd:identificationInfo/srv:SV_ServiceIdentification",
