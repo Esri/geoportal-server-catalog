@@ -11,10 +11,6 @@
 <link rel="stylesheet" href="//js.arcgis.com/4.30/esri/css/main.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.36/esri/themes/calcite/dijit/calcite.css">
 <link rel="stylesheet" href="//js.arcgis.com/3.36/esri/themes/calcite/esri/esri.css">
-<!-- <link rel="stylesheet" href="./lib/calcite.css"/>
-<link rel="stylesheet" href="./lib/esri.css"/> -->
-<!-- <link rel="stylesheet" href="./lib/gxe.css"/>
-<link rel="stylesheet" href="./lib/gxe-calcite.css"/> -->
 <link rel="stylesheet" href="//js.arcgis.com/3.36/esri/dijit/metadata/css/gxe.css"/>
 <link rel="stylesheet" href="//js.arcgis.com/3.36/esri/dijit/metadata/css/gxe-calcite.css"/>
 <link rel="stylesheet" href="./app/style/main.css">
@@ -38,9 +34,8 @@
     locale: "en",
     async: true,
     parseOnLoad: true,
-    packages: [
-    	
-    	{
+    packages: [    	
+    	/* {
             name: "dojo",
             location: "https://js.arcgis.com/3.36/dojo"
           },
@@ -51,12 +46,20 @@
           {
             name: "dojox",
             location: "https://js.arcgis.com/3.36/dojox"
+          }, */
+          {
+              name: "esri4",
+              location: "https://js.arcgis.com/4.30/esri"
           },
           {
               name: 'app',
               location: location.pathname.replace(/\/[^/]*$/, '') + '/app',
           }
-    ]
+    	]/* ,
+    	has:{
+    		"dojo-preload-i18n-Api":false
+    	} */
+    
   };
   
 </script>
@@ -67,7 +70,7 @@
 <script src="./lib/jquery-3.7.1.min.js"></script>
 <script src="./lib/bootstrap-5.3.3.min.js"></script> 
 <script src="./lib/typeahead.js"></script>
-<script src="//js.arcgis.com/4.30/"></script>
+<script src="//js.arcgis.com/3.36/"></script>
 <script src="./custom/custom.js"></script>
 
 <script>
@@ -75,7 +78,7 @@ require(["app","dojo/i18n!app/nls/resources"],function(app,i18n) {
   var isIE = navigator.userAgent.indexOf("MSIE ")!=-1 || navigator.userAgent.indexOf("Trident/")!=-1;
   if (!isIE) {
     document.getElementById("app-loading-node").style.display = "block";
-    require(["dojo/ready","esri/config","app/context/AppContext","app/context/AppStarter"],
+    require(["dojo/ready","esri4/config","app/context/AppContext","app/context/AppStarter"],
     function(ready,esriConfig,AppContext,AppStarter) {
       window.AppContext = new AppContext();
       ready(function() {       

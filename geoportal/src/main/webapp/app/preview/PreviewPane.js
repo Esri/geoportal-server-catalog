@@ -22,8 +22,8 @@ define(["dojo/_base/declare",
         "dijit/_WidgetsInTemplateMixin",
         "dojo/text!./templates/PreviewPane.html",
         "dojo/i18n!app/nls/resources",
-        "esri/Map",
-        "esri/views/MapView"
+        "esri4/Map",
+        "esri4/views/MapView"
       ], 
 function(declare, lang, domConstruct, on, PreviewUtil, 
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
