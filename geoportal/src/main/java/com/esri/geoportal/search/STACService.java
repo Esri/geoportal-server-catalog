@@ -361,7 +361,7 @@ public class STACService extends Application {
 	@Path("collections/{collectionId}/items/{id}")
 	@Produces("application/geo+json")
 	public Response getItem(@Context HttpServletRequest hsr, @PathParam("collectionId") String collectionId,
-			@PathParam("id") String id) {
+			@PathParam("id") String id, @QueryParam("outCRS") String outCRS) {
 		String responseJSON = null;
 		String response = "";
 		Status status = Response.Status.OK;
@@ -377,6 +377,13 @@ public class STACService extends Application {
 				status = Response.Status.NOT_FOUND;
 			}
 			System.out.println(responseJSON);
+                        
+                        // if reprojecting STAC geometries is supported and a
+                        // geometry service has been configured, try projecting 
+                        // from internal CRS (4326) to requested outCRS
+                        if (("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomTransformService().isEmpty())) {
+                           LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomTransformService());
+                        }
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
