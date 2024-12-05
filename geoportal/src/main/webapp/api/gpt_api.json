@@ -368,7 +368,7 @@
                         "required": true,
                         "type": "string",
                         "example": "metadata"
-                    },          
+                    },
                     {
                         "name": "id",
                         "in": "path",
@@ -376,6 +376,14 @@
                         "required": true,
                         "type": "string",
                         "example": "LC80100252015082LGN00"
+                    },
+                    {
+                        "name": "outCRS",
+                        "in": "query",
+                        "description": "CRS to return item geometries in",
+                        "required": false,
+                        "type": "string",
+                        "example": "3857"
                     }
                 ],
                 "responses": {
