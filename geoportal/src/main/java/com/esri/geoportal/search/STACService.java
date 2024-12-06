@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
+import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 
 import javax.json.JsonArray;
@@ -59,12 +60,17 @@ import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.service.stac.Asset;
+import com.esri.geoportal.service.stac.Collection;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import java.util.List;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
+import net.minidev.json.JSONArray;
+
 
 /**
  * STAC API: Records service provider.
@@ -383,6 +389,37 @@ public class STACService extends Application {
                         // from internal CRS (4326) to requested outCRS
                         if (("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomTransformService().isEmpty())) {
                            LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomTransformService());
+                           
+                            // get the collection metadata
+                            Collection collection = new Collection(collectionId);
+
+                            // check if outCRS is known for this collection
+                            List<String> availableCRS = collection.getAvailableCRS();
+                            if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
+
+                                // source CRS is fixed
+                                String sourceCRS = "4326";
+
+                                // if not EPSG:nnnnn get the esri WKT representation of the CRS and reproject
+                                // else use just the EPSG code
+                                String requestedCRS = "";
+                                if (!outCRS.startsWith("EPSG:")) {
+                                   Asset theAsset = collection.getAsset(outCRS);
+                                   requestedCRS = theAsset.getEsriWKT();
+                                   
+                                } else {
+                                    requestedCRS = outCRS.replace("EPSG:", "");
+                                }
+                                LOGGER.debug("requestedCRS = " + requestedCRS);
+
+                                // get the item geometry
+                                DocumentContext item = JsonPath.parse(responseJSON);
+                                JSONObject geometry = new JSONObject((Map<String, ?>) item.read("geometry"));
+                                LOGGER.debug("geometry = " + geometry.toString()); 
+
+                            } else {
+                                LOGGER.warn("WARNING - outCRS " + outCRS + " is not known for collection " + collectionId +". Outputting tag in native CRS.");
+                            }
                         }
 
 		} catch (InvalidParameterException e) {
@@ -724,36 +761,29 @@ public class STACService extends Application {
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
 	public Response item(@Context HttpServletRequest hsr,@PathParam("collectionId") String collectionId, 
 			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
-		String responseJSON = "";		
-		Status status = null;
-		
-		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
-		{	
-			status = Response.Status.BAD_REQUEST;
-			String baseUrl = this.getBaseUrl(hsr);
-			responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
-		}
-		else
-		{
-			JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
-			//check if it is Feature or FeatureCollection
-			String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
-			
-			if(type.equalsIgnoreCase("Feature"))
-			{
-				return addFeature(requestPayload,collectionId,hsr,async);
-			}
-			else if(type.equalsIgnoreCase("FeatureCollection"))
-			{
-				return addFeatureCollection(requestPayload,collectionId, async);
-			}
-			else
-			{
-				status = Response.Status.BAD_REQUEST;
-				responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.",null);			
-			}		
-		}
-		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+            String responseJSON = "";		
+            Status status = null;
+
+            if(gc.getSupportsCollections() && !validCollection(collectionId)) {
+                status = Response.Status.BAD_REQUEST;
+                String baseUrl = this.getBaseUrl(hsr);
+                responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
+            
+            } else {
+                JSONObject requestPayload = (JSONObject) JSONValue.parse(body);
+                //check if it is Feature or FeatureCollection
+                String type = (requestPayload.containsKey("type") ? requestPayload.get("type").toString() : "");
+
+                if(type.equalsIgnoreCase("Feature")) {
+                        return addFeature(requestPayload,collectionId,hsr,async);
+                } else if(type.equalsIgnoreCase("FeatureCollection")) {
+                        return addFeatureCollection(requestPayload,collectionId, async);
+                } else {
+                        status = Response.Status.BAD_REQUEST;
+                        responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.",null);			
+                }		
+            }
+            return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
 	}
 	
 	/**
@@ -896,104 +926,117 @@ public class STACService extends Application {
 
 	private Response addFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async) 
 	{		
-		if(async)
-		{
-		 new Thread(() -> {
-					this.executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
-		      }).start();
-		      String responseJSON = generateResponse("202", "Stac Feature creation has been started.",null);
-		      return Response.status(Status.ACCEPTED)
-						.header("Content-Type", "application/json")
-						.entity(responseJSON).build();
-		}
-		else
-		{
-			return executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
-		}
+            if(async) {
+                new Thread(() -> {
+                    this.executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
+                }).start();
+             
+                String responseJSON = generateResponse("202", "Stac Feature creation has been started.",null);
+                return Response.status(Status.ACCEPTED)
+                               .header("Content-Type", "application/json")
+                               .entity(responseJSON).build();
+            } else {
+                return executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
+            }
 	}	
 	
 	private Response executeAddFeature(JSONObject requestPayload, String collectionId, HttpServletRequest hsr,boolean async, String reqType) 
 	{
-		String responseJSON = generateResponse("500","Stac Item could not be added.",null);
-		Status status = Response.Status.INTERNAL_SERVER_ERROR;
-		JSONArray detailErrArray = new JSONArray();
-		String elasticResJson = "";
+            String responseJSON = generateResponse("500","Stac Item could not be added.",null);
+            Status status = Response.Status.INTERNAL_SERVER_ERROR;
+            JSONArray detailErrArray = new JSONArray();
+            String elasticResJson = "";
 
-		try {
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,gc.isValidateStacFields());
-			if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
-			{
-				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
-				
-				String itemJsonString = updatedPayload.toString();								
-				
-				String id = updatedPayload.get("id").toString();			
-				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
-							
-				elasticResJson = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
-				JSONObject elasticResObj = (JSONObject) JSONValue.parse(elasticResJson);
-				if(elasticResObj.containsKey("result") && elasticResObj.get("result").toString().contentEquals("created"))
-				{					
-					status = Response.Status.CREATED;				
-					responseJSON = generateResponse("201","Stac Item added.",null);
-					String itemUrlGeoportal = "";
-					
-					//if sync request for Feature, create Stac feature for response 
-					if(reqType.equals("Feature") && !async)
-					{
-						String filePath = "service/config/stac-item.json";
-						String itemFileString = this.readResourceFile(filePath, hsr);
-						
-						//Before searching newly added item, sleep for 1 second, otherwise record is not found
-						TimeUnit.SECONDS.sleep(1);
-						
-						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
-						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
-						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
-					}
-					
-					return Response.status(status)
-							.header("Content-Type", "application/json")
-							.header("location",itemUrlGeoportal)
-							.entity(responseJSON).build();				
-				}
-				//Some error in creating item
-				else
-				{					
-					detailErrArray.add(elasticResObj);
-					responseJSON = generateResponse("500","Stac Item could not be added." ,detailErrArray);
-					LOGGER.info("Stac item with id "+id+" could not be created. ");
-				}
-			}		
-			
-			else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
-			{
-				responseJSON = generateResponse("409", "Item with this id already exists in collection.",null);
-				status = Response.Status.CONFLICT;
-			}
-			//Bad request, missing field or any field is invalid
-			else
-			{
-				//response json will contain details about validation error like required fields
-				status = Response.Status.BAD_REQUEST;				
-				responseJSON = generateResponse("400", validationStatus.getMessage(),null);
-			}		
-		}
-		catch(Exception ex)
-		{
-			LOGGER.error("Error in adding Stac Item " + ex.getCause());
-			detailErrArray.add(ex.getMessage());
-			responseJSON = generateResponse("500","Stac Item could not be added.",detailErrArray);
-			ex.printStackTrace();
-		}
-		//For asynchronous request, log this response message
-		 if(async && reqType.equals("Feature"))
-		 {
-			 LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
-		 }
-		return Response.status(status)
-				.header("Content-Type", "application/json")
-				.entity(responseJSON).build();
+            try {
+                    StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,gc.isValidateStacFields());
+                    if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID))
+                    {
+                            JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
+
+                            String itemJsonString = updatedPayload.toString();								
+
+                            String id = "";
+                            if (updatedPayload.containsKey("id")) {
+                                id = updatedPayload.getAsString("id");
+                            }
+                            if (id.length()<1) {
+                                // issue 572 - generate unique item id if configured to do so
+                                if (gc.isCanStacAutogenerateId()) {
+                                    // generate a UUID to be used as id
+                                    UUID guid = UUID.randomUUID();
+                                    id = guid.toString();
+                                    
+                                    // save the id to the payload
+                                    updatedPayload.put("id", id);
+                                    itemJsonString = updatedPayload.toString();
+                                }
+                            }
+                            String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+
+                            elasticResJson = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
+                            JSONObject elasticResObj = (JSONObject) JSONValue.parse(elasticResJson);
+                            if(elasticResObj.containsKey("result") && elasticResObj.get("result").toString().contentEquals("created"))
+                            {					
+                                    status = Response.Status.CREATED;				
+                                    responseJSON = generateResponse("201","Stac Item added.",null);
+                                    String itemUrlGeoportal = "";
+
+                                    //if sync request for Feature, create Stac feature for response 
+                                    if(reqType.equals("Feature") && !async)
+                                    {
+                                            String filePath = "service/config/stac-item.json";
+                                            String itemFileString = this.readResourceFile(filePath, hsr);
+
+                                            //Before searching newly added item, sleep for 1 second, otherwise record is not found
+                                            TimeUnit.SECONDS.sleep(1);
+
+                                            String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+                                            responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+                                            itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+                                    }
+
+                                    return Response.status(status)
+                                                    .header("Content-Type", "application/json")
+                                                    .header("location",itemUrlGeoportal)
+                                                    .entity(responseJSON).build();				
+                            }
+                            //Some error in creating item
+                            else
+                            {					
+                                    detailErrArray.add(elasticResObj);
+                                    responseJSON = generateResponse("500","Stac Item could not be added." ,detailErrArray);
+                                    LOGGER.info("Stac item with id "+id+" could not be created. ");
+                            }
+                    }		
+
+                    else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
+                    {
+                            responseJSON = generateResponse("409", "Item with this id already exists in collection.",null);
+                            status = Response.Status.CONFLICT;
+                    }
+                    //Bad request, missing field or any field is invalid
+                    else
+                    {
+                            //response json will contain details about validation error like required fields
+                            status = Response.Status.BAD_REQUEST;				
+                            responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+                    }		
+            }
+            catch(Exception ex)
+            {
+                    LOGGER.error("Error in adding Stac Item " + ex.getCause());
+                    detailErrArray.add(ex.getMessage());
+                    responseJSON = generateResponse("500","Stac Item could not be added.",detailErrArray);
+                    ex.printStackTrace();
+            }
+            //For asynchronous request, log this response message
+             if(async && reqType.equals("Feature"))
+             {
+                     LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+             }
+            return Response.status(status)
+                            .header("Content-Type", "application/json")
+                            .entity(responseJSON).build();
 	}
 	
 	private Response addFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {		
