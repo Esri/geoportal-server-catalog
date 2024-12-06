@@ -64,6 +64,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private HashMap<String,ArrayList<Group>> userGroupMap = new HashMap<String,ArrayList<Group>>(); 
   private int numStacFeaturesAddItem = 100; 
   private boolean validateStacFields = false;
+  private String canStacAutogenerateId = "false";
   private String canStacGeomTransform = "false";
   private String geomTransformService = "";
   
@@ -200,20 +201,29 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 		this.validateStacFields = validateStacFields;
 	}
 
+        
+        // Support for autogenerating item id
+	public boolean isCanStacAutogenerateId() {
+            return "true".equals(this.canStacAutogenerateId);
+	}
+	public void setCanStacAutogenerateId(String canStacAutogenerateId) {
+            this.canStacAutogenerateId = canStacAutogenerateId;
+	}
+
+        
         // Support for transforming the CRS of STAC geometries
 	public String isCanStacGeomTransform() {
             return this.canStacGeomTransform;
 	}
-
 	public void setCanStacGeomTransform(String canStacGeomTransform) {
             this.canStacGeomTransform = canStacGeomTransform;
 	}
 
+        
         // The ArcGIS Geometry service used to reproject STAC geometries
 	public String getGeomTransformService() {
             return this.geomTransformService;
 	}
-
 	public void setGeomTransformService(String geomTransformService) {
 		this.geomTransformService = geomTransformService;
 	}

@@ -35,22 +35,29 @@ public class StacHelper {
 	 * @return
 	 * @throws Exception
 	 */
-	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId, boolean validateFields) throws Exception {	
-		StacItemValidationResponse response = new StacItemValidationResponse();
-		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
-		if(validateFields)
-		{
-			response = validateFields(requestPayload);
-		}		
-		if(response.getCode() == null)
-		{
-			response = validateId(requestPayload,collectionId);
-			if(response.getCode() == null)
-			{
-				response.setCode(StacItemValidationResponse.ITEM_VALID);
-			}
-		}
-		return response;
+	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,
+                String collectionId, boolean validateFields) throws Exception {
+            
+            StacItemValidationResponse response = new StacItemValidationResponse();
+            //Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
+            if(validateFields) {
+                response = validateFields(requestPayload);
+            }		
+            if(response.getCode() == null) {
+                // issue 572 only validate id if autogenerating id is off
+                GeoportalContext gc = GeoportalContext.getInstance();
+                if (!gc.isCanStacAutogenerateId()) {
+                    response = validateId(requestPayload,collectionId);
+                    if(response.getCode() == null) {
+                        response.setCode(StacItemValidationResponse.ITEM_VALID);
+                    }
+                } else {
+                    if(response.getCode() == null) {
+                        response.setCode(StacItemValidationResponse.ITEM_VALID);
+                    }                    
+                }
+            }
+            return response;
 	}
 	
 	public static String getItemWithItemId(String collectionId,String id) throws Exception {
@@ -110,8 +117,7 @@ public class StacHelper {
 	 * @throws Exception
 	 */
 	@SuppressWarnings("unchecked")
-	public static ArrayList<String> getCollectionIDList() throws Exception
-	{
+	public static ArrayList<String> getCollectionIDList() throws Exception {
 		net.minidev.json.JSONArray collectionArr = getCollectionList();
 		
 		HashMap<String, Object> item = null;
@@ -180,7 +186,7 @@ public class StacHelper {
 		return searchQuery;
 	}
 
-//{"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
+        // {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
 	private static String prepareIntersects(String geoJson) {
 		String query = "";
 		String field = "shape_geo";
@@ -321,7 +327,10 @@ public class StacHelper {
 		if(!requestPayload.containsKey("id") || 
 				(requestPayload.containsKey("id") && requestPayload.get("id").toString().isBlank()))
 		{
+                    GeoportalContext gc = GeoportalContext.getInstance();
+                    if (!"true".equals(gc.isCanStacAutogenerateId())) {
 			errorMsg = errorMsg+" id is mandatory and should not be empty.";
+                    }
 		}
 		//geometry and bbox is mandatory from stac spec but geoportal will allow combination of shape_geo and envelope_geo as well
 		if(!requestPayload.containsKey("geometry") && !requestPayload.containsKey("shape_geo"))
@@ -372,8 +381,7 @@ public class StacHelper {
 		return response;
 	}
 
-	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate)
-	{
+	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) {
 		String date = DateUtil.nowAsString();
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
 		
@@ -401,56 +409,54 @@ public class StacHelper {
 			//Add url_granule_s from asset with role thumbnail
 			if(requestPayload.containsKey(FieldNames.FIELD_ASSETS))
 			{
-				JSONObject assetsObj = (JSONObject) requestPayload.get(FieldNames.FIELD_ASSETS);
-				
-				if(assetsObj.keySet().contains(FieldNames.FIELD_THUMBNAIL))
-				{
-					JSONObject thumbnailObj = (JSONObject) assetsObj.get(FieldNames.FIELD_THUMBNAIL);
-					if(thumbnailObj.get("href")!=null)
-					{
-						requestPayload.put(FieldNames.FIELD_URL_GRANULE_S,thumbnailObj.get("href").toString());
-					}
-				}
+                            JSONObject assetsObj = (JSONObject) requestPayload.get(FieldNames.FIELD_ASSETS);
+
+                            if(assetsObj.keySet().contains(FieldNames.FIELD_THUMBNAIL)) {
+                                JSONObject thumbnailObj = (JSONObject) assetsObj.get(FieldNames.FIELD_THUMBNAIL);
+                                if(thumbnailObj.get("href")!=null) {
+                                        requestPayload.put(FieldNames.FIELD_URL_GRANULE_S,thumbnailObj.get("href").toString());
+                                }
+                            }
 			}			
 			//if envelope_geo and shape_geo not present in request, add from bbox and geometry respectively,
 			if(!requestPayload.containsKey(FieldNames.FIELD_SHAPE_GEO) && requestPayload.containsKey(FieldNames.FIELD_GEOMETRY))
 			{
-				requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
+                            requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
 			}
 			
 			if(!requestPayload.containsKey(FieldNames.FIELD_ENVELOPE_GEO) && requestPayload.containsKey(FieldNames.FIELD_BBOX))
 			{
-				JSONArray bbox =(JSONArray) requestPayload.get(FieldNames.FIELD_BBOX);
-				JSONArray envelopeGeoArr = new JSONArray();
-				JSONObject envelopeGeo = new JSONObject();
-				
-				if (bbox.size() == 4) {
-					double coords[] = { -180.0, -90.0, 180.0, 90.0 };
-					
-					coords[0] = Double.parseDouble(bbox.get(0).toString());
-					coords[1] = Double.parseDouble(bbox.get(1).toString());
-					coords[2] = Double.parseDouble(bbox.get(2).toString());
-					coords[3] = Double.parseDouble(bbox.get(3).toString());
-					
-					JSONArray coordinateArr1 = new JSONArray();
-					coordinateArr1.add(0, coords[0]);
-					coordinateArr1.add(1, coords[3]);
-					
-					JSONArray coordinateArr2 = new JSONArray();
-					coordinateArr2.add(0, coords[2]);
-					coordinateArr2.add(1, coords[1]);
-					
-					JSONArray coordinateArr = new JSONArray();
-					coordinateArr.add(0, coordinateArr1);
-					coordinateArr.add(1, coordinateArr2);
-				
-					envelopeGeo.put("coordinates", coordinateArr);
-					envelopeGeo.put("type", "envelope");
-					envelopeGeo.put("ignore_malformed", "true");
-					envelopeGeoArr.add(0,envelopeGeo);
-				
-				requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
-				}
+                            JSONArray bbox =(JSONArray) requestPayload.get(FieldNames.FIELD_BBOX);
+                            JSONArray envelopeGeoArr = new JSONArray();
+                            JSONObject envelopeGeo = new JSONObject();
+
+                            if (bbox.size() == 4) {
+                                double coords[] = { -180.0, -90.0, 180.0, 90.0 };
+
+                                coords[0] = Double.parseDouble(bbox.get(0).toString());
+                                coords[1] = Double.parseDouble(bbox.get(1).toString());
+                                coords[2] = Double.parseDouble(bbox.get(2).toString());
+                                coords[3] = Double.parseDouble(bbox.get(3).toString());
+
+                                JSONArray coordinateArr1 = new JSONArray();
+                                coordinateArr1.add(0, coords[0]);
+                                coordinateArr1.add(1, coords[3]);
+
+                                JSONArray coordinateArr2 = new JSONArray();
+                                coordinateArr2.add(0, coords[2]);
+                                coordinateArr2.add(1, coords[1]);
+
+                                JSONArray coordinateArr = new JSONArray();
+                                coordinateArr.add(0, coordinateArr1);
+                                coordinateArr.add(1, coordinateArr2);
+
+                                envelopeGeo.put("coordinates", coordinateArr);
+                                envelopeGeo.put("type", "envelope");
+                                envelopeGeo.put("ignore_malformed", "true");
+                                envelopeGeoArr.add(0,envelopeGeo);
+
+                                requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
+                            }
 			}
 			
 			GeoportalContext gc = GeoportalContext.getInstance();
@@ -469,10 +475,10 @@ public class StacHelper {
 		//Update Feature
 		else
 		{
-			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);	
-			
-			prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
-			requestPayload.put("properties", prop);
+                    requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);	
+
+                    prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
+                    requestPayload.put("properties", prop);
 		}		    
 		return requestPayload;
 	}
@@ -484,7 +490,7 @@ public class StacHelper {
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		if(validateFields)
 		{
-			response = validateFields(requestPayload);	
+                    response = validateFields(requestPayload);	
 		}
 		
 		if(response.getCode() == null)
@@ -492,28 +498,28 @@ public class StacHelper {
 			//validate that collectionId and featureId in URL is matching values in Feature body
 			if(!requestPayload.getAsString("id").equals(featureId))
 			{
-				errorMsg = errorMsg+" id in Feature body and Id in path param should be equal.";
+                            errorMsg = errorMsg+" id in Feature body and Id in path param should be equal.";
 			}
 			if(!(requestPayload.getAsString("collection")!= null && requestPayload.getAsString("collection").equals(collectionId)))
 			{
-				errorMsg = errorMsg+" collection in Feature body and collectionId in path param should be equal.";
+                            errorMsg = errorMsg+" collection in Feature body and collectionId in path param should be equal.";
 			}
 			if(errorMsg.length()>0)
 			{
-				response.setCode(StacItemValidationResponse.BAD_REQUEST);
-				response.setMessage(errorMsg);
+                            response.setCode(StacItemValidationResponse.BAD_REQUEST);
+                            response.setMessage(errorMsg);
 			}
 			else
 			{
-				//validate it is valid featureId
-				String itemRes = getItemWithItemId(collectionId, featureId);
-				DocumentContext elasticResContext = JsonPath.parse(itemRes);
+                            //validate it is valid featureId
+                            String itemRes = getItemWithItemId(collectionId, featureId);
+                            DocumentContext elasticResContext = JsonPath.parse(itemRes);
 
-				net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
-				if (items == null || items.size() == 0) {
-					response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
-					response.setMessage("Feature does not exist.");
-				}
+                            net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+                            if (items == null || items.size() == 0) {
+                                response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
+                                response.setMessage("Feature does not exist.");
+                            }
 			}
 		}
 		if(response.getCode() == null)
