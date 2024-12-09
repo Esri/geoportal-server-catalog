@@ -62,14 +62,17 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.service.stac.Asset;
 import com.esri.geoportal.service.stac.Collection;
+import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import java.util.List;
+import java.util.logging.Level;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import net.minidev.json.JSONArray;
+import net.minidev.json.parser.JSONParser;
 
 
 /**
@@ -387,7 +390,7 @@ public class STACService extends Application {
                         // if reprojecting STAC geometries is supported and a
                         // geometry service has been configured, try projecting 
                         // from internal CRS (4326) to requested outCRS
-                        if (("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomTransformService().isEmpty())) {
+                        if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomTransformService().isEmpty())) {
                            LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomTransformService());
                            
                             // get the collection metadata
@@ -416,7 +419,53 @@ public class STACService extends Application {
                                 DocumentContext item = JsonPath.parse(responseJSON);
                                 JSONObject geometry = new JSONObject((Map<String, ?>) item.read("geometry"));
                                 LOGGER.debug("geometry = " + geometry.toString()); 
-
+                                String coordinates = geometry.getAsString("coordinates");
+                                String geometryType = geometry.getAsString("type");
+                                String geometries = "{\"geometryType\": \"esriGeometryPolygon\", "
+                                        + "\"geometries\": [ "
+                                        + "{ \"rings\": " + coordinates + "}"
+                                        + "]}";
+                                
+                                // get the geometry engine
+                                GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeomTransformService());
+                                
+                                String formData = "inSr=4326";
+                                formData += "&outSR=" + requestedCRS;
+                                formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
+                                formData += "&transformation=";
+                                formData += "&transformForward=true";
+                                formData += "&vertical=false";
+                                formData += "&f=json";
+                                
+                                String theGetURL = geometryClient.getBaseUrl() + "?" + formData;
+                                
+                                String geometryResponse = "";
+                                try {
+                                    geometryResponse = geometryClient.doProjection(geometryClient.getBaseUrl(), formData);
+                                } catch (IOException ex) {
+                                    java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
+                                }
+                                
+                                if (!geometryResponse.isBlank()) {
+                                    JSONParser x = new JSONParser();
+                                    JSONObject responseObject = (JSONObject) x.parse(responseJSON);
+                                    JSONObject geometryResponseObject = (JSONObject) x.parse(geometryResponse);
+                                    JSONArray projectedGeometries = (JSONArray) geometryResponseObject.get("geometries");
+                                    JSONObject rings = (JSONObject) projectedGeometries.get(0);
+                                    JSONArray theRings = (JSONArray) rings.get("rings");
+                                    JSONObject newGeometry = new JSONObject();
+                                    newGeometry.put("type", "Polygon");
+                                    newGeometry.put("coordinates", theRings);
+                                    responseObject.put("geometry", newGeometry);
+                                    responseJSON = responseObject.toString();
+                                }
+                                                               
+                                //response = geometryClient.sendGet(geometryClient.getBaseUrl());
+                                
+                                //response = geometryClient.sendPost(geometryClient.getBaseUrl(), 
+                                //        formData, 
+                                //        "application/json; charset=UTF-8");
+                                LOGGER.debug("Project response -> " + response);
                             } else {
                                 LOGGER.warn("WARNING - outCRS " + outCRS + " is not known for collection " + collectionId +". Outputting tag in native CRS.");
                             }
