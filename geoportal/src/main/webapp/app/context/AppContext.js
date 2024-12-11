@@ -2,7 +2,7 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "app/context/app-config",
         "app/context/AppUser",
-        "esri/Basemap"],
+        "esri4/Basemap"],
 function(declare, lang, appConfig, AppUser, esriBasemaps) {
 
   var oThisClass = declare(null, {
