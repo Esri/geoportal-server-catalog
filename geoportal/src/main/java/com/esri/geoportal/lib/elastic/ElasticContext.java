@@ -36,7 +36,7 @@ import org.slf4j.LoggerFactory;
 import com.esri.geoportal.lib.security.EncryptDecrypt;
 
 /**
- * Elasticsearch context.
+ * Elasticsearch OR OpenSearch context.
  */
 public class ElasticContext {
   private static final int DEFAULT_PROXY_BUFFER_SIZE = 4096;
@@ -66,28 +66,55 @@ public class ElasticContext {
   private boolean useSeparateXmlItem = true;
   private String xmlIndexType = "clob";
   private String base64Key = "";
+  private String engineType = "";
+  private String awsOpenSearchType = "";
+  private String awsOpenSearchRegion = "";
+  
+  
+  public String getAwsOpenSearchRegion() {
+    return awsOpenSearchRegion;
+  }
+
+  public void setAwsOpenSearchRegion(String awsOpenSearchRegion) {
+    this.awsOpenSearchRegion = awsOpenSearchRegion;
+  }
+  
+  public String getAwsOpenSearchType() {
+    return awsOpenSearchType;
+  }
+
+  public void setAwsOpenSearchType(String awsOpenSearchType) {
+    this.awsOpenSearchType = awsOpenSearchType;
+  }  
+  
+  public String getEngineType() {
+    return engineType;
+  }
+
+  public void setEngineType(String engineType) {
+    this.engineType = engineType;
+  }
+
   public String getBase64Key() {
-	return base64Key;
-}
+    return base64Key;
+  }
 
-public void setBase64Key(String base64Key) {
-	this.base64Key = base64Key;
-}
+  public void setBase64Key(String base64Key) {
+          this.base64Key = base64Key;
+  }
 
-public String getBase64Iv() {
-	return base64Iv;
-}
+  public String getBase64Iv() {
+          return base64Iv;
+  }
 
-public void setBase64Iv(String base64Iv) {
-	this.base64Iv = base64Iv;
-}
+  public void setBase64Iv(String base64Iv) {
+          this.base64Iv = base64Iv;
+  }
 
-private String base64Iv = "";
+  private String base64Iv = "";
   private String username = null;
   private String password = null;
   private boolean encryptPassword = false;
-  
-  
   
   private Integer proxyBufferSize = DEFAULT_PROXY_BUFFER_SIZE;
   
@@ -110,7 +137,7 @@ private String base64Iv = "";
     this.proxyBufferSize = proxyBufferSize!=null? proxyBufferSize: DEFAULT_PROXY_BUFFER_SIZE;
   }
   
-  /** Allow internal metadata file idenitfiers to be used as the Elasticsearch _id .*/
+  /** Allow internal metadata file identifiers to be used as the Elasticsearch _id .*/
   public boolean getAllowFileId() {
     return allowFileId;
   }

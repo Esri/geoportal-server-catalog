@@ -21,7 +21,7 @@
 		<beans:property name="supportsGroupBasedAccess" value="false" />
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
 		<beans:property name="parseGml" value="false" />
-		<beans:property name="supportsCollections" value="false" />
+		<beans:property name="supportsCollections" value="true" />
 		<beans:property name="numStacFeaturesAddItem" value="500" />
         <beans:property name="validateStacFields" value="false" />		
 	</beans:bean>
@@ -34,29 +34,33 @@ see: docs/configureByEnvironmentVariable.md
  -->
 	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContextHttp">
 		<beans:property name="clusterName" value="${es_cluster:elasticsearch}" />
-		<beans:property name="indexName" value="${gpt_indexName:metadata}" />
-		<beans:property name="collectionIndexName" value="${gpt_collectionIndexName:collections}" />
+		<beans:property name="indexName" value="${gpt_indexName:stac_items}" />
+		<beans:property name="collectionIndexName" value="${gpt_collectionIndexName:stac_collections}" />
 		<beans:property name="indexNameIsAlias" value="true" />
 		<beans:property name="autoCreateIndex" value="true" />
 		<beans:property name="allowFileId" value="false" />
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
 		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
-		<beans:property name="httpPort" value="9200" />		
+		<beans:property name="httpPort" value="443" />		
 		<beans:property name="proxyBufferSize" value="8192" />
 		
 		<!-- Uncomment and complete the following if you want to use secured index -->
-		<!--
 		<beans:property name="useHttps" value="true" />
 		<beans:property name="encryptPassword" value="false" />
+		<!--
 		<beans:property name="base64Key" value="${gpt_base64Key}" />
 		<beans:property name="base64Iv" value="${gpt_base64Iv}" />
-		<beans:property name="username" value="${gpt_elasticUser}" />
-		<beans:property name="password" value="${gpt_elasticPassword}" />		
-                -->
+    -->
+		<beans:property name="username" value="" />
+		<beans:property name="password" value="" />
+    <beans:property name="engineType" value="opensearch"/> <!-- null | opensearch | elasticsearch -->		
+		<beans:property name="awsOpenSearchType" value="severless"/> <!-- null | serverless | managed -->
+    <beans:property name="awsOpenSearchRegion" value="us-east-1"/> <!-- null | valid AWS region -->
+                		
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
-				<beans:value>${es_node:localhost}</beans:value>
+				<beans:value></beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
