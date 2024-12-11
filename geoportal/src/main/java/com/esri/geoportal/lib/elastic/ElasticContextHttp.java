@@ -35,7 +35,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 /**
- * Elasticsearch context (HTTP based, no Transport client.
+ * Elasticsearch or OpenSearch context (HTTP based, no Transport client.
  */
 public class ElasticContextHttp extends ElasticContext {
   
@@ -133,21 +133,10 @@ public class ElasticContextHttp extends ElasticContext {
       result = client.sendGet(client.getBaseUrl());
       JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
       String version = esinfo.getJsonObject("version").getString("number");
-      LOGGER.info("Elasticsearch version: "+version);
-//      for (int i=1;i<20;i++) {
-//        if (version.indexOf(i+".") == 0) {
-//          int primaryVersion = i;
-//          //System.out.println("primaryVersion="+primaryVersion);
-//          if (primaryVersion >= 6) this.setIs6Plus(true);
-//          if (primaryVersion >= 7) this.setIs7Plus(true);
-//          break;
-//        }
-//      }
-      
-        
+      LOGGER.info("Search Engine version: "+version);       
       
       if (getIs6Plus() && this.getUseSeparateXmlItem()) {
-        LOGGER.info("Elasticsearch is version "+version+", setting useSeparateXmlItem=false");
+        LOGGER.info("Search Engine is version "+version+", setting useSeparateXmlItem=false");
         setUseSeparateXmlItem(false);
       }
       
@@ -158,7 +147,6 @@ public class ElasticContextHttp extends ElasticContext {
       } catch (Exception e) {
         indexExists = false;
       }
-      
       
       if (indexExists) {
         boolean hasClobDocType = false;

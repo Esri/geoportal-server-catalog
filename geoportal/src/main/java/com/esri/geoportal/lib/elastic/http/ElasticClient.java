@@ -36,8 +36,11 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.ElasticContextHttp;
 
+import org.opensearch.client.OpenSearchClient;
+
+
 /**
- * An HTTP client for Elasticsearch.
+ * An HTTP client for Elasticsearch OR OpenSearch.
  */
 public class ElasticClient {
   
@@ -45,6 +48,11 @@ public class ElasticClient {
   private String baseUrl;
   private String basicCredentials;
   private boolean useHttps;
+  private String awsOpenSearchType;
+  private String awsOpenSearchRegion;
+  private boolean isAWSServerless;
+  
+
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
   
@@ -54,19 +62,40 @@ public class ElasticClient {
    */
   public static ElasticClient newClient() {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getUseHttps());
+    if ("serverless".equals(ec.getAwsOpenSearchType())) {
+      return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getAwsOpenSearchType(), ec.getAwsOpenSearchRegion());
+    } else {
+      return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getUseHttps());
+    }
+  }
+  
+  /**
+   * Constructor for AWS OpenSearch Serverless.
+   * @param baseUrl the AWS OpenSearch base URL
+   * @param basicCredentials credentials
+   * @param awsOpenSearchType null | serverless | managed
+   * @param awsOpenSearchRegion null | valid AWS region
+   */
+  public ElasticClient(String baseUrl, String basicCredentials,String awsOpenSearchType, String awsOpenSearchRegion) {
+    this.baseUrl = baseUrl;
+    this.basicCredentials = basicCredentials;
+    this.useHttps = true;
+    this.awsOpenSearchType = awsOpenSearchType;
+    this.awsOpenSearchRegion = awsOpenSearchRegion;
+    this.isAWSServerless = "serverless".equals(awsOpenSearchType);
   }
   
   /**
    * Constructor.
-   * @param baseUrl the Elasticsearch base URL
+   * @param baseUrl the Elasticsearch OR OpenSearch base URL
    * @param basicCredentials basic credentials
-   * @param useHttps use http (false) or https (true)
+   * @param useHttps use HTTP (false) or HTTPS (true)
    */
   public ElasticClient(String baseUrl, String basicCredentials,boolean useHttps) {
     this.baseUrl = baseUrl;
     this.basicCredentials = basicCredentials;
     this.useHttps = useHttps;
+    this.isAWSServerless = false;
   }
   
   /**
@@ -168,39 +197,43 @@ public class ElasticClient {
    */
   public String send(String method, String url, String data, String dataContentType) throws Exception {
 		String result = null;
-	    BufferedReader br = null;
-	    DataOutputStream wr = null;
-	    StringWriter sw = new StringWriter();	   
-	    String charset = "UTF-8";
-	    URLConnection con = null;
-	    URL u = new java.net.URL(url);
-	    try {
-		 if(useHttps)
-		 {
-			 SSLContext ssl_ctx = SSLContext.getInstance("TLS");
-			 //Using a mock trust manager and not validating certificate
-			 MockTrustManager mockTrustMgr = new MockTrustManager();
-			 
-	        ssl_ctx.init(null,                // key manager
-	        		mockTrustMgr.getTrustManager(),// trust manager
-	                     new SecureRandom()); // random number generator
-	        HttpsURLConnection.setDefaultSSLSocketFactory(ssl_ctx.getSocketFactory());
-			 
-			 HttpsURLConnection.setFollowRedirects(true);
-			 con = (HttpsURLConnection)u.openConnection();
-			 ((HttpsURLConnection) con).setRequestMethod(method);
-			 ((HttpsURLConnection) con).setInstanceFollowRedirects(true);
-		 }
-		 else
-		 {
-			 HttpURLConnection.setFollowRedirects(true);
-			 con = (HttpURLConnection)u.openConnection();
-			 ((HttpURLConnection) con).setRequestMethod(method);
-			 ((HttpURLConnection) con).setInstanceFollowRedirects(true);
-		 }
-     
-      if (basicCredentials != null && basicCredentials.length() > 0) {
-        con.setRequestProperty( "Authorization",basicCredentials);
+    BufferedReader br = null;
+    DataOutputStream wr = null;
+    StringWriter sw = new StringWriter();	   
+    String charset = "UTF-8";
+    URLConnection con = null;
+    URL u = new java.net.URL(url);
+    try {
+      if (isAWSServerless) {
+        // AWS OpenSearch Serverless
+        
+      } else {
+        // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch
+        if(useHttps) {
+          SSLContext ssl_ctx = SSLContext.getInstance("TLS");
+          //Using a mock trust manager and not validating certificate
+          MockTrustManager mockTrustMgr = new MockTrustManager();
+
+          ssl_ctx.init(null,                // key manager
+                       mockTrustMgr.getTrustManager(),// trust manager
+                       new SecureRandom()); // random number generator
+          HttpsURLConnection.setDefaultSSLSocketFactory(ssl_ctx.getSocketFactory());
+
+          HttpsURLConnection.setFollowRedirects(true);
+          con = (HttpsURLConnection)u.openConnection();
+          ((HttpsURLConnection) con).setRequestMethod(method);
+          ((HttpsURLConnection) con).setInstanceFollowRedirects(true);
+
+        } else {
+          HttpURLConnection.setFollowRedirects(true);
+          con = (HttpURLConnection)u.openConnection();
+          ((HttpURLConnection) con).setRequestMethod(method);
+          ((HttpURLConnection) con).setInstanceFollowRedirects(true);
+        }
+
+        if (basicCredentials != null && basicCredentials.length() > 0) {
+          con.setRequestProperty( "Authorization",basicCredentials);
+        }
       }
       
       if (data != null && data.length() > 0) {
