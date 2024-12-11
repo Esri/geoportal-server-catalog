@@ -938,11 +938,11 @@ g-item-card-content-info .g-item-card .g-item-title {
   right: 0;
   height: calc(100% - 96px);
 }
-.g-mapframe-container > iframe {
+/* .g-mapframe-container > iframe {
   width: 100%;
   height: 100%;
   border: none;
-}
+} */
 
 /*
 .g-input-number {
