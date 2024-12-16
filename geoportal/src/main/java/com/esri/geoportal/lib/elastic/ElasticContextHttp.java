@@ -82,7 +82,16 @@ public class ElasticContextHttp extends ElasticContext {
    */
   protected void _createIndex(String name) throws Exception {
     //LOGGER.info("Creating index: "+name);
-    ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
+	  ElasticClient client = null;
+	  if(!getAwsOpenSearchType().equals("serverless"))
+      {
+    	  client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
+      }
+      else
+      {
+    	  client = new ElasticClient(getBaseUrl(false),
+    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+      }
     String url = client.getIndexUrl(name);
     String path = this.getActualMappingsFile();
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
@@ -128,17 +137,26 @@ public class ElasticContextHttp extends ElasticContext {
     try {
       if (name == null || name.trim().length() == 0) return;
       String result, url;
-      ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
-      
-      result = client.sendGet(client.getBaseUrl());
-      JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
-      String version = esinfo.getJsonObject("version").getString("number");
-      LOGGER.info("Search Engine version: "+version);       
-      
-      if (getIs6Plus() && this.getUseSeparateXmlItem()) {
-        LOGGER.info("Search Engine is version "+version+", setting useSeparateXmlItem=false");
-        setUseSeparateXmlItem(false);
+      ElasticClient client;
+      if(!getAwsOpenSearchType().equals("serverless"))
+      {
+    	  client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
       }
+      else
+      {
+    	  client = new ElasticClient(getBaseUrl(false),
+    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+      }
+      //TODO discuss
+//      result = client.sendGet(client.getBaseUrl());
+//      JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
+//      String version = esinfo.getJsonObject("version").getString("number");
+//      LOGGER.info("Search Engine version: "+version);       
+//      
+//      if (getIs6Plus() && this.getUseSeparateXmlItem()) {
+//        LOGGER.info("Search Engine is version "+version+", setting useSeparateXmlItem=false");
+//        setUseSeparateXmlItem(false);
+//      }
       
       boolean indexExists = false;
       try {
@@ -193,6 +211,7 @@ public class ElasticContextHttp extends ElasticContext {
         int sfx = -1;
         
         url = client.getBaseUrl()+"/_aliases";
+        //TODO Discuss and fix
         result = client.sendGet(url);
         if (result != null && result.length() > 0 && result.indexOf("{") == 0) {
           JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(result);

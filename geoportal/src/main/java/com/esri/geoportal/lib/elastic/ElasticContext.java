@@ -69,8 +69,24 @@ public class ElasticContext {
   private String engineType = "";
   private String awsOpenSearchType = "";
   private String awsOpenSearchRegion = "";
+  private String awsOpenSearchAccessKeyId = "";
+  private String awsOpenSearchSecretAccessKey = "";
   
-  
+  public String getAwsOpenSearchAccessKeyId() {
+	return awsOpenSearchAccessKeyId;
+	}
+	
+	public void setAwsOpenSearchAccessKeyId(String awsOpenSearchAccessKeyId) {
+		this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
+	}
+	
+	public String getAwsOpenSearchSecretAccessKey() {
+		return awsOpenSearchSecretAccessKey;
+	}
+	
+	public void setAwsOpenSearchSecretAccessKey(String awsOpenSearchSecretAccessKey) {
+		this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
+	}
   public String getAwsOpenSearchRegion() {
     return awsOpenSearchRegion;
   }
