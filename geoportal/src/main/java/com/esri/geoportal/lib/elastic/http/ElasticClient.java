@@ -23,8 +23,18 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+import java.util.Locale;
+import java.util.TimeZone;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
@@ -50,39 +60,22 @@ public class ElasticClient {
   private boolean useHttps;
   private String awsOpenSearchType;
   private String awsOpenSearchRegion;
-  private boolean isAWSServerless;
+  private String awsOpenSearchAccessKeyId;
+  private String awsOpenSearchSecretAccessKey;
+  private String hostName = "";
   
 
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
+
   
   /**
    * Create a new client.
    * @return the client
    */
   public static ElasticClient newClient() {
-    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    if ("serverless".equals(ec.getAwsOpenSearchType())) {
-      return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getAwsOpenSearchType(), ec.getAwsOpenSearchRegion());
-    } else {
-      return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getUseHttps());
-    }
-  }
-  
-  /**
-   * Constructor for AWS OpenSearch Serverless.
-   * @param baseUrl the AWS OpenSearch base URL
-   * @param basicCredentials credentials
-   * @param awsOpenSearchType null | serverless | managed
-   * @param awsOpenSearchRegion null | valid AWS region
-   */
-  public ElasticClient(String baseUrl, String basicCredentials,String awsOpenSearchType, String awsOpenSearchRegion) {
-    this.baseUrl = baseUrl;
-    this.basicCredentials = basicCredentials;
-    this.useHttps = true;
-    this.awsOpenSearchType = awsOpenSearchType;
-    this.awsOpenSearchRegion = awsOpenSearchRegion;
-    this.isAWSServerless = "serverless".equals(awsOpenSearchType);
+	ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getUseHttps());
   }
   
   /**
@@ -94,11 +87,19 @@ public class ElasticClient {
   public ElasticClient(String baseUrl, String basicCredentials,boolean useHttps) {
     this.baseUrl = baseUrl;
     this.basicCredentials = basicCredentials;
-    this.useHttps = useHttps;
-    this.isAWSServerless = false;
+    this.useHttps = useHttps;    
   }
   
-  /**
+  public ElasticClient(String baseUrl, boolean useHttps, String awsOpenSearchType, String awsOpenSearchRegion,
+		  String awsOpenSearchAccessKeyId, String awsOpenSearchSecretAccessKey) {
+	    this.baseUrl = baseUrl;	   
+	    this.useHttps = useHttps; 
+	    this.awsOpenSearchType = awsOpenSearchType; 
+	    this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
+	    this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
+	  }
+  
+/**
    * URL encode a value.
    * @param value the value
    * @return the encoded value
@@ -196,20 +197,15 @@ public class ElasticClient {
    * @throws Exception if an exception occurs
    */
   public String send(String method, String url, String data, String dataContentType) throws Exception {
-		String result = null;
+	String result = null;
     BufferedReader br = null;
     DataOutputStream wr = null;
     StringWriter sw = new StringWriter();	   
     String charset = "UTF-8";
     URLConnection con = null;
     URL u = new java.net.URL(url);
-    try {
-      if (isAWSServerless) {
-        // AWS OpenSearch Serverless
-        
-      } else {
-        // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch
-        if(useHttps) {
+    try {      
+      if(useHttps) {
           SSLContext ssl_ctx = SSLContext.getInstance("TLS");
           //Using a mock trust manager and not validating certificate
           MockTrustManager mockTrustMgr = new MockTrustManager();
@@ -229,12 +225,18 @@ public class ElasticClient {
           con = (HttpURLConnection)u.openConnection();
           ((HttpURLConnection) con).setRequestMethod(method);
           ((HttpURLConnection) con).setInstanceFollowRedirects(true);
+       }
+      if (isAWSServerless()) {
+          //Add AWS4 signature for OpenSearch Serverless requests, signature changes as per RESTAPI path including query strings so need to generate for each request
+      	  String authHeader = addAWSSignature(method, url, con); 
+      	  con.setRequestProperty("Authorization",authHeader);
+      	  
+        } else {
+          // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch 
+          if (basicCredentials != null && basicCredentials.length() > 0) {
+            con.setRequestProperty( "Authorization",basicCredentials);
+          }
         }
-
-        if (basicCredentials != null && basicCredentials.length() > 0) {
-          con.setRequestProperty( "Authorization",basicCredentials);
-        }
-      }
       
       if (data != null && data.length() > 0) {
         //System.err.println("sendData="+data);
@@ -349,6 +351,144 @@ public class ElasticClient {
    */
   public String sendPut(String url, String data, String dataContentType) throws Exception {
     return send("PUT",url,data,dataContentType);
+  }
+  
+  // Helper methods for AWS Signature
+  
+  private String addAWSSignature(String reqMethod, String url, URLConnection con) throws NoSuchAlgorithmException
+  {	
+  	 String AWS_ACCESS_KEY_ID = this.awsOpenSearchAccessKeyId;
+     String AWS_SECRET_ACCESS_KEY = this.awsOpenSearchSecretAccessKey;
+   // private String AWS_SESSION_TOKEN = System.getenv("AWS_SESSION_TOKEN");
+     
+     String RESTAPIHOST = getHostName();
+     String RESTAPIPATH = getApiPath(url,RESTAPIHOST);	//"/gsdb_items_v1";
+     
+     LOGGER.debug("AWS OS host= "+RESTAPIHOST+", RESTAPIPATH= "+RESTAPIPATH);
+
+     String METHOD = reqMethod;
+     String SERVICE = "aoss";
+     String REGION = this.awsOpenSearchRegion;
+     String ALGORITHM = "AWS4-HMAC-SHA256";
+	  
+	  // Create a datetime object for signing
+      SimpleDateFormat dateFormat = new SimpleDateFormat("yyyyMMdd'T'HHmmss'Z'", Locale.US);
+      dateFormat.setTimeZone(TimeZone.getTimeZone("UTC"));
+      String amzDate = dateFormat.format(new Date());
+      String dateStamp = amzDate.substring(0, 8);
+
+      // Create the canonical request
+      String canonicalUri = RESTAPIPATH;
+      String canonicalQuerystring = "";
+      String canonicalHeaders = "host:" + RESTAPIHOST + "\n";
+      String signedHeaders = "host";
+      String payloadHash = sha256Hex("");
+      String canonicalRequest = METHOD + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
+
+      // Create the string to sign
+      String credentialScope = dateStamp + "/" + REGION + "/" + SERVICE + "/" + "aws4_request";
+      String hashedCanonicalRequest = sha256Hex(canonicalRequest);
+      String stringToSign = ALGORITHM + "\n" + amzDate + "\n" + credentialScope + "\n" + hashedCanonicalRequest;
+
+      // Sign the string
+      byte[] signingKey = getSignatureKey(AWS_SECRET_ACCESS_KEY, dateStamp, REGION, SERVICE);
+      String signature = hmacSha256Hex(signingKey, stringToSign);
+
+      // Add signing information to the request
+      String authorizationHeader = ALGORITHM + " " + "Credential=" + AWS_ACCESS_KEY_ID + "/" + credentialScope + ", " + "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
+      
+      con.setRequestProperty("Host", RESTAPIHOST);
+      con.setRequestProperty("x-amz-date", amzDate);
+      
+      return authorizationHeader;
+  }
+
+private String getHostName() {
+	if(this.hostName.isBlank())
+	{
+		String hostname = "";
+		int startIndex;
+		if(useHttps)
+			startIndex = 8; //https://
+		else
+			startIndex = 7;
+		
+		hostname = this.baseUrl.substring(startIndex);
+		if(hostname.indexOf(":") > -1)
+		{
+			hostname = hostname.substring(0,hostname.indexOf(":"));
+		}
+		this.hostName = hostname;
+	}	
+	return this.hostName;
+}
+
+private String getApiPath(String url,String hostName) {
+	String apiPath="";
+	int hostnameIndex = url.indexOf(hostName);
+	
+	int colonIndex = url.indexOf(":443");
+	if(colonIndex > -1 )
+	{
+		apiPath = url.substring(hostnameIndex+hostName.length()+4);
+	}
+		
+	int endIndex = url.indexOf("?");
+	if(endIndex > -1)
+		apiPath = apiPath.substring(0,endIndex);	
+	
+	return apiPath;
+  }
+  
+  private String getQueryString(String url) {
+		
+		return null;
+		}
+
+
+
+private byte[] getSignatureKey(String key, String dateStamp, String regionName, String serviceName) throws NoSuchAlgorithmException {
+      byte[] kSecret = ("AWS4" + key).getBytes(StandardCharsets.UTF_8);
+      byte[] kDate = hmacSha256(kSecret, dateStamp);
+      byte[] kRegion = hmacSha256(kDate, regionName);
+      byte[] kService = hmacSha256(kRegion, serviceName);
+      return hmacSha256(kService, "aws4_request");
+  }
+
+  private String hmacSha256Hex(byte[] key, String data) throws NoSuchAlgorithmException {
+      return bytesToHex(hmacSha256(key, data));
+  }
+
+  private byte[] hmacSha256(byte[] key, String data) {
+      try {
+          Mac mac = Mac.getInstance("HmacSHA256");
+          mac.init(new SecretKeySpec(key, "HmacSHA256"));
+          return mac.doFinal(data.getBytes(StandardCharsets.UTF_8));
+      } catch (NoSuchAlgorithmException e) {
+          throw new RuntimeException("Error: HmacSHA256 algorithm not available", e);
+      } catch (InvalidKeyException e) {
+          throw new RuntimeException("Error: Invalid key for HmacSHA256", e);
+      }
+  }
+
+  private String sha256Hex(String data) throws NoSuchAlgorithmException {
+      return bytesToHex(MessageDigest.getInstance("SHA-256").digest(data.getBytes(StandardCharsets.UTF_8)));
+  }
+
+  private String bytesToHex(byte[] bytes) {
+      StringBuilder result = new StringBuilder();
+      for (byte b : bytes) {
+          result.append(String.format("%02x", b));
+      }
+      return result.toString();
+  }
+  
+  private boolean isAWSServerless() {	  
+	  if(this.awsOpenSearchType.equals("serverless"))
+	  {
+		  return true;
+	  }
+	  return false;
   }
   
 }

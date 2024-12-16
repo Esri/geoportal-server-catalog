@@ -53,14 +53,16 @@ see: docs/configureByEnvironmentVariable.md
     -->
 		<beans:property name="username" value="" />
 		<beans:property name="password" value="" />
-    <beans:property name="engineType" value="opensearch"/> <!-- null | opensearch | elasticsearch -->		
-		<beans:property name="awsOpenSearchType" value="severless"/> <!-- null | serverless | managed -->
-    <beans:property name="awsOpenSearchRegion" value="us-east-1"/> <!-- null | valid AWS region -->
+    	<beans:property name="engineType" value="opensearch"/> <!-- null | opensearch | elasticsearch -->		
+		<beans:property name="awsOpenSearchType" value="serverless"/> <!-- null | serverless | managed -->
+		<beans:property name="awsOpenSearchRegion" value="${gpt_awsRegion}"/> <!-- null | valid AWS region -->
+    	<beans:property name="awsOpenSearchAccessKeyId" value="${gpt_awsAccessKeyID}"/>
+    	<beans:property name="awsOpenSearchSecretAccessKey" value="${gpt_awsSecretAccessKey}"/>
                 		
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
-				<beans:value></beans:value>
+				<beans:value>${es_node:txjwwmxxavpt5fulgmxc.us-east-1.aoss.amazonaws.com}</beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
