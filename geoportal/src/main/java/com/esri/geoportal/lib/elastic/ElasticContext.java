@@ -51,7 +51,7 @@ public class ElasticContext {
   private String clusterName = null;
   private int httpPort = 9200;
   private String indexName = "metadata";
-  private boolean supportsCollections = false;
+  private boolean autoCreateCollectionIndex = false;
   private String collectionIndexName = "collections";
   private boolean indexNameIsAlias = true;
   private boolean is6Plus = false;
@@ -212,12 +212,12 @@ public class ElasticContext {
   }
 
   /** supports collections or not */
-  public boolean getSupportsCollections() {
-    return supportsCollections;
+  public boolean getAutoCreateCollectionIndex() {
+    return autoCreateCollectionIndex;
   }
   /** supports collections or not */
-  public void setSupportsCollections(boolean doesSupportCollections) {
-    this.supportsCollections = doesSupportCollections;
+  public void setAutoCreateCollectionIndex(boolean autoCreateCollectionIndex) {
+    this.autoCreateCollectionIndex = autoCreateCollectionIndex;
   }
   
   /** Treat the index name as an alias. */

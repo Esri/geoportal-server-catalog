@@ -63,7 +63,7 @@ public class ElasticClient {
   private String awsOpenSearchAccessKeyId;
   private String awsOpenSearchSecretAccessKey;
   private String hostName = "";
-  
+  private String qryString = "";  
 
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
@@ -75,7 +75,14 @@ public class ElasticClient {
    */
   public static ElasticClient newClient() {
 	ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-    return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getUseHttps());
+	if(ec.getAwsOpenSearchType().equals("serverless"))
+	{
+		return new ElasticClient(ec.getBaseUrl(false),
+				ec.getUseHttps(),ec.getAwsOpenSearchType(),ec.getAwsOpenSearchRegion(),ec.getAwsOpenSearchAccessKeyId(),ec.getAwsOpenSearchSecretAccessKey());
+	}
+	else {
+		return new ElasticClient(ec.getBaseUrl(true),ec.getBasicCredentials(),ec.getUseHttps());
+	}    
   }
   
   /**
@@ -95,6 +102,7 @@ public class ElasticClient {
 	    this.baseUrl = baseUrl;	   
 	    this.useHttps = useHttps; 
 	    this.awsOpenSearchType = awsOpenSearchType; 
+	    this.awsOpenSearchRegion = awsOpenSearchRegion;
 	    this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
 	    this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
 	  }
@@ -228,7 +236,7 @@ public class ElasticClient {
        }
       if (isAWSServerless()) {
           //Add AWS4 signature for OpenSearch Serverless requests, signature changes as per RESTAPI path including query strings so need to generate for each request
-      	  String authHeader = addAWSSignature(method, url, con); 
+      	  String authHeader = addAWSSignature(method, url, con,data,dataContentType); 
       	  con.setRequestProperty("Authorization",authHeader);
       	  
         } else {
@@ -243,7 +251,7 @@ public class ElasticClient {
         con.setDoOutput(true);
         byte[] bytes = data.getBytes("UTF-8");
         if (dataContentType != null && dataContentType.length() > 0) {
-          con.setRequestProperty( "Content-Type",dataContentType);
+          con.setRequestProperty("content-type",dataContentType);
         }
         con.setRequestProperty("charset","UTF-8");
         con.setRequestProperty("Content-Length",""+bytes.length);
@@ -355,7 +363,7 @@ public class ElasticClient {
   
   // Helper methods for AWS Signature
   
-  private String addAWSSignature(String reqMethod, String url, URLConnection con) throws NoSuchAlgorithmException
+  private String addAWSSignature(String reqMethod, String url, URLConnection con, String data, String dataContentType ) throws NoSuchAlgorithmException
   {	
   	 String AWS_ACCESS_KEY_ID = this.awsOpenSearchAccessKeyId;
      String AWS_SECRET_ACCESS_KEY = this.awsOpenSearchSecretAccessKey;
@@ -379,10 +387,29 @@ public class ElasticClient {
 
       // Create the canonical request
       String canonicalUri = RESTAPIPATH;
-      String canonicalQuerystring = "";
-      String canonicalHeaders = "host:" + RESTAPIHOST + "\n";
-      String signedHeaders = "host";
-      String payloadHash = sha256Hex("");
+      String canonicalQuerystring = getQueryString();
+      String canonicalHeaders ="";
+      String signedHeaders = "";
+      String payloadHash ="";
+      
+      if(data != null && !data.isBlank())
+      {
+    	  payloadHash = sha256Hex(data);
+    	  
+    	  canonicalHeaders = "content-type:"+ ((dataContentType!=null && !dataContentType.isBlank())? dataContentType:"application/json")+ "\n" + 
+                  "host:" + RESTAPIHOST + "\n" +
+                  "x-amz-content-sha256:" + payloadHash + "\n" +
+                  "x-amz-date:" + amzDate + "\n";
+    	  signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date"; 
+    	  con.setRequestProperty("x-amz-content-sha256", payloadHash);
+      }
+      else
+      {
+    	  payloadHash = sha256Hex("");
+    	  canonicalHeaders = "host:" + RESTAPIHOST + "\n";
+    	  signedHeaders = "host";
+      }      	
+      
       String canonicalRequest = METHOD + "\n" + canonicalUri + "\n" + canonicalQuerystring + "\n" + canonicalHeaders + "\n" + signedHeaders + "\n" + payloadHash;
 
       // Create the string to sign
@@ -399,6 +426,7 @@ public class ElasticClient {
       
       con.setRequestProperty("Host", RESTAPIHOST);
       con.setRequestProperty("x-amz-date", amzDate);
+      
       
       return authorizationHeader;
   }
@@ -424,26 +452,32 @@ private String getHostName() {
 }
 
 private String getApiPath(String url,String hostName) {
+	String tempStr = "";
 	String apiPath="";
 	int hostnameIndex = url.indexOf(hostName);
 	
 	int colonIndex = url.indexOf(":443");
 	if(colonIndex > -1 )
 	{
-		apiPath = url.substring(hostnameIndex+hostName.length()+4);
+		tempStr = url.substring(hostnameIndex+hostName.length()+4);
 	}
 		
-	int endIndex = url.indexOf("?");
+	int endIndex = tempStr.indexOf("?");
 	if(endIndex > -1)
-		apiPath = apiPath.substring(0,endIndex);	
-	
+	{
+		apiPath = tempStr.substring(0,endIndex);
+		this.qryString = tempStr.substring(endIndex+1);
+	}
+	else
+	{
+		apiPath = tempStr;
+	}
 	return apiPath;
   }
   
-  private String getQueryString(String url) {
-		
-		return null;
-		}
+  private String getQueryString() {		
+		return this.qryString;
+  }
 
 
 
