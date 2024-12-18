@@ -58,7 +58,7 @@ public class ElasticClient {
   private String baseUrl;
   private String basicCredentials;
   private boolean useHttps;
-  private String awsOpenSearchType;
+  private String awsOpenSearchType = "";
   private String awsOpenSearchRegion;
   private String awsOpenSearchAccessKeyId;
   private String awsOpenSearchSecretAccessKey;
