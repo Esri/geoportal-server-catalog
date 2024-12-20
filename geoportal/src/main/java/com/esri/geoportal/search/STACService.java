@@ -438,7 +438,7 @@ public class STACService extends Application {
 	
 	
 	/**
-	 * This will all items from collection and then delete collection
+	 * This will delete all items from collection and then delete collection
 	 * @param hsr
 	 * @param collectionId
 	 * @return
