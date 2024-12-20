@@ -30,6 +30,7 @@ import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Locale;
 import java.util.TimeZone;
 
@@ -45,8 +46,6 @@ import org.slf4j.LoggerFactory;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.ElasticContextHttp;
-
-import org.opensearch.client.OpenSearchClient;
 
 
 /**
@@ -236,8 +235,11 @@ public class ElasticClient {
        }
       if (isAWSServerless()) {
           //Add AWS4 signature for OpenSearch Serverless requests, signature changes as per RESTAPI path including query strings so need to generate for each request
-      	  String authHeader = addAWSSignature(method, url, con,data,dataContentType); 
-      	  con.setRequestProperty("Authorization",authHeader);
+      	  HashMap<String,String> authHeader = generateAWSSignature(method, url,data,dataContentType); 
+      	  con.setRequestProperty("Host", authHeader.get("RESTAPIHOST"));
+      	  con.setRequestProperty("x-amz-date", authHeader.get("amzDate"));
+      	  con.setRequestProperty("x-amz-content-sha256", authHeader.get("payloadHash"));
+      	  con.setRequestProperty("Authorization",authHeader.get("authorizationHeader"));
       	  
         } else {
           // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch 
@@ -363,14 +365,14 @@ public class ElasticClient {
   
   // Helper methods for AWS Signature
   
-  private String addAWSSignature(String reqMethod, String url, URLConnection con, String data, String dataContentType ) throws NoSuchAlgorithmException
+  public HashMap<String,String> generateAWSSignature(String reqMethod, String url, String data, String dataContentType ) throws NoSuchAlgorithmException
   {	
   	 String AWS_ACCESS_KEY_ID = this.awsOpenSearchAccessKeyId;
-     String AWS_SECRET_ACCESS_KEY = this.awsOpenSearchSecretAccessKey;
-   // private String AWS_SESSION_TOKEN = System.getenv("AWS_SESSION_TOKEN");
+     String AWS_SECRET_ACCESS_KEY = this.awsOpenSearchSecretAccessKey;  
      
      String RESTAPIHOST = getHostName();
-     String RESTAPIPATH = getApiPath(url,RESTAPIHOST);	//"/gsdb_items_v1";
+     String RESTAPIPATH = getApiPath(url,RESTAPIHOST);	//Path after https://hostname and before query string(?)
+     HashMap<String,String> awsSignature = new HashMap<String, String>();
      
      LOGGER.debug("AWS OS host= "+RESTAPIHOST+", RESTAPIPATH= "+RESTAPIPATH);
 
@@ -400,8 +402,7 @@ public class ElasticClient {
                   "host:" + RESTAPIHOST + "\n" +
                   "x-amz-content-sha256:" + payloadHash + "\n" +
                   "x-amz-date:" + amzDate + "\n";
-    	  signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date"; 
-    	  con.setRequestProperty("x-amz-content-sha256", payloadHash);
+    	  signedHeaders = "content-type;host;x-amz-content-sha256;x-amz-date";
       }
       else
       {
@@ -424,11 +425,12 @@ public class ElasticClient {
       // Add signing information to the request
       String authorizationHeader = ALGORITHM + " " + "Credential=" + AWS_ACCESS_KEY_ID + "/" + credentialScope + ", " + "SignedHeaders=" + signedHeaders + ", " + "Signature=" + signature;
       
-      con.setRequestProperty("Host", RESTAPIHOST);
-      con.setRequestProperty("x-amz-date", amzDate);
+      awsSignature.put("RESTAPIHOST",RESTAPIHOST );
+      awsSignature.put("amzDate", amzDate );
+      awsSignature.put("payloadHash", payloadHash);
+      awsSignature.put("authorizationHeader",authorizationHeader );
       
-      
-      return authorizationHeader;
+      return awsSignature;
   }
 
 private String getHostName() {
@@ -517,7 +519,7 @@ private byte[] getSignatureKey(String key, String dateStamp, String regionName, 
       return result.toString();
   }
   
-  private boolean isAWSServerless() {	  
+  public boolean isAWSServerless() {	  
 	  if(this.awsOpenSearchType.equals("serverless"))
 	  {
 		  return true;

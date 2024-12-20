@@ -226,7 +226,9 @@
       var con = null, buffer, nRead;
       try {
         var u = new java.net.URL(url);
-       // print(u);
+ 
+		var client = com.esri.geoportal.lib.elastic.http.ElasticClient.newClient();;
+        print(u);
         if(options && options.useHttps)
         	{        	
         	 var ssl_ctx = javax.net.ssl.SSLContext.getInstance("TLS");
@@ -245,7 +247,7 @@
         }
         	
         con = u.openConnection();
-
+        
         if (options && options.basicCredentials &&
             typeof options.basicCredentials.username === "string" &&
             options.basicCredentials.username.length > 0 &&
@@ -255,15 +257,25 @@
           cred = new java.lang.String(java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8")),"UTF-8");
           con.setRequestProperty( "Authorization","Basic "+cred);
         }
+        if(client.isAWSServerless())
+        	{
+        	var authSignature = client.generateAWSSignature("POST", url, data, dataContentType);
+        	print("Nashorn Context AWS "+authSignature.get("RESTAPIHOST")+", "+authSignature.get("amzDate")+", "+authSignature.get("payloadHash"));
+        	
+        	con.setRequestProperty("Host", authSignature.get("RESTAPIHOST"));
+    		con.setRequestProperty("x-amz-date", authSignature.get("amzDate"));
+    		con.setRequestProperty("x-amz-content-sha256", authSignature.get("payloadHash"));
+    		con.setRequestProperty("Authorization",authSignature.get("authorizationHeader"));
+        	}
 
         if (typeof data === "string" && data.length > 0) {
           con.setDoOutput(true);
           con.setRequestMethod("POST");
           
-        //  print("data "+data);
+          print("data "+data);
           var postData = data.getBytes("UTF-8");
           if (typeof dataContentType === "string" && dataContentType.length > 0) {
-            con.setRequestProperty( "Content-Type",dataContentType);
+            con.setRequestProperty( "content-Type",dataContentType);
           }
           con.setRequestProperty("charset","UTF-8");
           con.setRequestProperty("Content-Length",""+postData.length);
@@ -293,7 +305,7 @@
           sw.write(buffer,0,nRead); // TODO comment out this line and Invalid JSON: <json>:1:0 Expected json literal but found eof
         }
         result = sw.toString();
-       // console.log("result",result);
+        print("result",result);
       } catch(e) {
         var msg;
         try {
