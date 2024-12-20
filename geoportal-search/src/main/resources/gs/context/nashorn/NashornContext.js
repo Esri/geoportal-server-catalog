@@ -228,7 +228,7 @@
         var u = new java.net.URL(url);
  
 		var client = com.esri.geoportal.lib.elastic.http.ElasticClient.newClient();;
-        print(u);
+        //print(u);
         if(options && options.useHttps)
         	{        	
         	 var ssl_ctx = javax.net.ssl.SSLContext.getInstance("TLS");
@@ -260,7 +260,7 @@
         if(client.isAWSServerless())
         	{
         	var authSignature = client.generateAWSSignature("POST", url, data, dataContentType);
-        	print("Nashorn Context AWS "+authSignature.get("RESTAPIHOST")+", "+authSignature.get("amzDate")+", "+authSignature.get("payloadHash"));
+        	//print("Nashorn Context AWS "+authSignature.get("RESTAPIHOST")+", "+authSignature.get("amzDate")+", "+authSignature.get("payloadHash"));
         	
         	con.setRequestProperty("Host", authSignature.get("RESTAPIHOST"));
     		con.setRequestProperty("x-amz-date", authSignature.get("amzDate"));
@@ -272,7 +272,7 @@
           con.setDoOutput(true);
           con.setRequestMethod("POST");
           
-          print("data "+data);
+          //print("search data "+data);
           var postData = data.getBytes("UTF-8");
           if (typeof dataContentType === "string" && dataContentType.length > 0) {
             con.setRequestProperty( "content-Type",dataContentType);
@@ -305,7 +305,7 @@
           sw.write(buffer,0,nRead); // TODO comment out this line and Invalid JSON: <json>:1:0 Expected json literal but found eof
         }
         result = sw.toString();
-        print("result",result);
+       // print("result",result);
       } catch(e) {
         var msg;
         try {
