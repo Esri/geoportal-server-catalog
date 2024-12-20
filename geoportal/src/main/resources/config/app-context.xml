@@ -38,6 +38,7 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="collectionIndexName" value="${gpt_collectionIndexName:stac_collections}" />
 		<beans:property name="indexNameIsAlias" value="true" />
 		<beans:property name="autoCreateIndex" value="true" />
+		<beans:property name="autoCreateCollectionIndex" value="true" />		
 		<beans:property name="allowFileId" value="false" />
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
 		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
