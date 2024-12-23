@@ -9,6 +9,7 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
+import javax.ws.rs.core.Response;
 
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
@@ -635,23 +636,48 @@ public class StacHelper {
 		String response = "";
 		JSONObject resObj = new JSONObject();
 		String url ="";
-		String body = "";
+		
 		boolean deleteById = false;
+		int deletedSuccess = 0;		
+		int total = 0; 
 		
 		try {
 			url =  client.getTypeUrlForSearch(ec.getIndexName());
-			url = url+"/_delete_by_query";			
-			
-			if(idList!=null && !idList.isBlank())
-			{
-				 String ids = prepareIds(idList);
-				 body = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}},"+ids+"]}}}";
+
+			ArrayList<String> idArrList = new ArrayList<String>();
+			if(idList ==null || idList.isBlank()) {				
+				String idSearch = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}}]}}}";
+				String searchRes = client.sendPost(url+"/_search", idSearch, "application/json");
+				DocumentContext elasticResContext = JsonPath.parse(searchRes);
+
+				net.minidev.json.JSONArray resArr = elasticResContext.read("$.hits.hits");
+				
+				for(var i=0;i<resArr.size();i++)
+				{
+					HashMap<?, ?> elasticCollectionMap = (HashMap<?, ?>) resArr.get(i);
+					idArrList.add((String) elasticCollectionMap.get("_id"));			
+				}
 			}
-			else {
-				body = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}}]}}}";
-			}			
-			
-			response = client.sendPost(url, body, "application/json");
+			else
+			{
+				idArrList = (ArrayList<String>) Arrays.asList(idList.split("\\s*,\\s*"));
+			}
+			total = idArrList.size();
+			for(int i = 0; i<idArrList.size();i++)
+			{
+				response = client.sendDelete(url+"/_doc/"+idArrList.get(i));					
+				JSONObject responseObj = (JSONObject) JSONValue.parse(response);
+				String result = "";
+				if(responseObj.containsKey("result"))			
+				{
+					result = responseObj.get("result").toString();
+					if(result.contentEquals("deleted"))
+					{
+						deletedSuccess++;
+					}
+					
+				}
+			}
 		}catch(Exception e)
 		{
 			e.printStackTrace();
@@ -659,10 +685,6 @@ public class StacHelper {
 			resObj.put("description", "Stac features could not be deleted from collection. "+e.getCause());
 			return resObj;
 		}
-		
-		resObj = (JSONObject) JSONValue.parse(response);
-		int total  = resObj.containsKey("total")? ((Number)(resObj.get("total"))).intValue(): null;
-		int deleted  = resObj.containsKey("deleted")? ((Number)(resObj.get("deleted"))).intValue(): null;
 		
 		if(idList != null && !idList.isBlank())
 		{
@@ -672,37 +694,36 @@ public class StacHelper {
 		if(!deleteCollection)
 		{
 			resObj.put("code", "200");
-			resObj.put("description", "Stac features found: "+total+", deleted: "+deleted);			
+			resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess));
 		}
 		if(deleteCollection)
 		{	//Deleting collection is not allowed if items are deleted by Id
 			if(deleteById)
 			{
 				resObj.put("code", "200");
-				resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Deleting collection is not allowed when items are deleted with id list.");	
+				resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Deleting collection is not allowed when items are deleted with id list.");	
 			}			
-			if(!deleteById && deleted != total)
+			if(!deleteById && deletedSuccess != total)
 			{
 				resObj.put("code", "200");
-				resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Collection will not be deleted as some features could not be deleted.");	
+				resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Collection will not be deleted as some features could not be deleted.");	
 				
 			}
-			if(!deleteById && deleted == total)
+			if(!deleteById && deletedSuccess == total)
 			{
 				//Now delete collection which is an item in Collection Index
 				try {
 					url = client.getTypeUrlForSearch(ec.getCollectionIndexName());			
 					response = client.sendDelete(url+"/_doc/"+collectionId);	
 					resObj.put("code", "200");
-					resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+". Collection is deleted.");
+					resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+". Collection is deleted.");
 				}catch (Exception e) {					
 					e.printStackTrace();
 					resObj.put("code", "500");
-					resObj.put("description", "Stac features found: "+total+", deleted: "+deleted+" but collection could not be deleted."+e.getCause());
+					resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+" but collection could not be deleted."+e.getCause());
 				}
 			}
-		}	
-			
+		}				
 		return resObj;
 	}
 }
