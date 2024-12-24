@@ -14,6 +14,7 @@
  */
 package com.esri.geoportal.service.stac;
 
+import com.esri.geoportal.base.security.Group;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -24,9 +25,14 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
+
+import net.minidev.json.JSONObject;
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +40,9 @@ import org.slf4j.LoggerFactory;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.http.MockTrustManager;
 import java.io.IOException;
+import java.util.Map;
+import java.util.Map.Entry;
+import net.minidev.json.JSONArray;
 
 /**
  * An HTTP client for Geometry service.
@@ -46,6 +55,11 @@ public class GeometryServiceClient {
     private String baseUrl;
     private String basicCredentials;
     private boolean useHttps;
+
+    // Create a HashMap of geojson and WKT to arcgis geometry types
+    private Map<String, String> geometryTypes = new HashMap<>();
+    private Map<String, String> wktTypes = new HashMap<>();
+    
 
     /**
      * Logger.
@@ -69,6 +83,24 @@ public class GeometryServiceClient {
      */
     public GeometryServiceClient(String baseUrl) {
         this.baseUrl = baseUrl;
+
+        // Add key-value pairs, GeoJSON as keys, ArcGIS types as values
+        this.geometryTypes.put("Point", "esriGeometryPoint");
+        this.geometryTypes.put("MultiPoint", "esriGeometryMultipoint");
+        this.geometryTypes.put("LineString", "esriGeometryPolyline");
+        this.geometryTypes.put("MultiLineString", "esriGeometryPolyline");
+        this.geometryTypes.put("Polygon", "esriGeometryPolygon");
+        this.geometryTypes.put("MultiPolygon", "esriGeometryPolygon");
+        this.geometryTypes.put("bbox", "esriGeometryEnvelope");
+        
+        // Add key-value pairs, WKT as keys, ArcGIS types as values
+        this.wktTypes.put("POINT", "esriGeometryPoint");
+        this.wktTypes.put("MULTIPOINT", "esriGeometryMultipoint");
+        this.wktTypes.put("LINESTRING", "esriGeometryPolyline");
+        this.wktTypes.put("MULTILINESTRING", "esriGeometryPolyline");
+        this.wktTypes.put("POLYGON", "esriGeometryPolygon");
+        this.wktTypes.put("MULTIPOLYGON", "esriGeometryPolygon");
+        this.wktTypes.put("POLYHEDRAL", "esriGeometryPolygon");        
     }
 
     /**
@@ -216,11 +248,25 @@ public class GeometryServiceClient {
     }
     
     
-    public String doProjection(String url, String formData) throws IOException {
-        //String url = "https://your-form-endpoint";
-        //String formData = "name=" + URLEncoder.encode("John Doe", "UTF-8") + "&email=" + URLEncoder.encode("john.doe@example.com", "UTF-8");
+    /**
+     * project the provided geometries
+     *
+     * @param geometries the geometries to project
+     * @param inCRS the CRS the data is in
+     * @param outCRS the CRS the data should be projected to
+     * @return the projected geometries
+     * @throws IOException if an issue occurs in communicating with the geometry service
+     */
+    public String doProjection(String geometries, String inCRS, String outCRS) throws IOException {
+        String formData = "inSr=" + inCRS;
+        formData += "&outSR=" + outCRS;
+        formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
+        formData += "&transformation=";
+        formData += "&transformForward=true";
+        formData += "&vertical=false";
+        formData += "&f=json";
 
-        URL obj = new URL(url);
+        URL obj = new URL(this.baseUrl);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         // Set the request method to POST
@@ -241,7 +287,7 @@ public class GeometryServiceClient {
 
         BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
         String inputLine;
-        StringBuffer response = new StringBuffer();
+        StringBuilder response = new StringBuilder();
 
         while ((inputLine = in.readLine()) != null) {
             response.append(inputLine);
@@ -249,5 +295,146 @@ public class GeometryServiceClient {
         in.close();
 
         return response.toString();
+    }
+
+    /*
+     * Get the ArcGIS geometry type based on a GeoJSON type
+     *
+     * @param inGeoJSONType the GeoJSON geometry type
+     * @return the corresponding ArcGIS geometry type or null if no corresponding type found
+    */
+    public String getArcGISGeometryType(String inGeoJSONType) {
+      String gt; 
+      
+      try {
+        gt = this.geometryTypes.get(inGeoJSONType);
+      } catch (Exception ex) {
+        LOGGER.error("Unknown GeoJSON geometry type: " + inGeoJSONType);
+        gt = null;
+      }
+        
+      return gt;
+    }
+
+
+    /*
+     * Get the ArcGIS geometry type based on a WKT type
+     *
+     * @param inWKTType the WKT geometry type
+     * @return the corresponding ArcGIS geometry type or null if no corresponding type found
+    */
+    public String getArcGISGeometryTypeFromWKT(String inWKTType) {
+      String gt; 
+      
+      try {
+        gt = this.wktTypes.get(inWKTType);
+      } catch (Exception ex) {
+        LOGGER.error("Unknown WKT geometry type: " + inWKTType);
+        gt = null;
+      }
+        
+      return gt;
+    }
+
+    
+    /*
+     * Get the GeoJSON geometry type based on an ArcGIS type
+     *
+     * @param inArcGISType the ArcGIS geometry type
+     * @return the corresponding GeoJSON geometry type or null if no corresponding type found
+    */
+    public String getGeoJSONGeometryType(String inArcGISType) {
+      String gt = null; 
+      
+      try {
+        for (Entry<String, String> entry: this.geometryTypes.entrySet()) {
+          if (entry.getValue().equals(inArcGISType)) {
+            gt = entry.getKey();
+          }
+        }
+      } catch (Exception ex) {
+        LOGGER.error("Unknown ArcGIS geometry type: " + inArcGISType);
+        gt = null;
+      }
+        
+      return gt;
+    }
+
+    
+    /*
+     * Get the WKT geometry type based on an ArcGIS type
+     *
+     * @param inArcGISType the ArcGIS geometry type
+     * @return the corresponding WKT geometry type or null if no corresponding type found
+    */
+    public String getWKTGeometryType(String inArcGISType) {
+      String gt = null; 
+      
+      try {
+        for (Entry<String, String> entry: this.wktTypes.entrySet()) {
+          if (entry.getValue().equals(inArcGISType)) {
+            gt = entry.getKey();
+          }
+        }
+      } catch (Exception ex) {
+        LOGGER.error("Unknown ArcGIS geometry type: " + inArcGISType);
+        gt = null;
+      }
+        
+      return gt;
     }    
+
+
+    /*
+     * turn a WKT geometry into an ArcGIS geometry
+     * using basic string manipulation as the two are similar
+     *
+     * @param wktGeometryType the WKT geometry type (in upper case)
+     * @param wktGeometry the WKT geometry
+     * @return the corresponding ArcGIS geometry as a JSON string
+    */
+    public String getArcGISGeometry(String wktGeometryType, JSONObject wktGeometry) {
+      String geometries = "";
+      
+      JSONObject geometry = (JSONObject) wktGeometry.get(wktGeometryType.toLowerCase());
+      String wkt = geometry.getAsString("wkt");
+      
+      if (!wkt.isEmpty()) {
+        wkt = wkt.substring(wkt.indexOf(" ") + 1);
+        String coordinates = wkt.replace("(", "[").replace(")", "]").replace(", ", "],[").replace(" ", ",");
+        
+        geometries = "{\"geometryType\": \"" + this.getArcGISGeometryTypeFromWKT(wktGeometryType) + "\", "
+          + "\"geometries\": [ " 
+          + "{ \"rings\": " + coordinates + "}"
+          + "]}";
+      }
+      
+      return geometries;
+    }
+    
+
+    /*
+     * turn a ArcGIS geometry into a WKT geometry
+     *
+     * @param wktGeometryType to be produced (in upper case)
+     * @param arcgisGeometry the ArcGIS geometry
+     * @return the corresponding WKT geometry as a string
+    */
+    public String getWKTGeometry(String wktGeometryType, JSONObject arcgisGeometry) {
+      JSONArray rings = (JSONArray) arcgisGeometry.get("rings");
+      String wkt = "";
+      
+      if (!rings.isEmpty()) {
+        String ags = rings.toString();
+        wkt = wktGeometryType 
+              + " " 
+              + ags.substring(ags.indexOf(":")+1)
+              .replace(",", " ")
+              .replace("] [", ", ")
+              .replace("[", "(")
+              .replace("]", ")");
+      }
+      
+      return wkt;
+    }
 }

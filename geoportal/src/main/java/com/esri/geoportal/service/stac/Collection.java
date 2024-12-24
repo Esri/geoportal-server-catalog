@@ -41,6 +41,7 @@ public class Collection {
 
             theAssets.keySet().forEach((String key) -> {
                 Asset thisAsset = new Asset(this.getJSONObject(theAssets.get(key)));
+                this.addAsset(key, thisAsset);
                 LOGGER.debug(key + ": esri_wkt = " + thisAsset.getEsriWKT());
             });
         } catch (Exception ex) {
