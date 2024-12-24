@@ -67,6 +67,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private String canStacAutogenerateId = "false";
   private String canStacGeomTransform = "false";
   private String geomTransformService = "";
+  private String geomWKTField = "";
   
 
   public HashMap<String, ArrayList<Group>> getUserGroupMap() {
@@ -211,7 +212,7 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 	}
 
         
-        // Support for transforming the CRS of STAC geometries
+  // Support for transforming the CRS of STAC geometries
 	public String isCanStacGeomTransform() {
             return this.canStacGeomTransform;
 	}
@@ -220,12 +221,22 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 	}
 
         
-        // The ArcGIS Geometry service used to reproject STAC geometries
+  // The ArcGIS Geometry service used to reproject STAC geometries
 	public String getGeomTransformService() {
             return this.geomTransformService;
 	}
 	public void setGeomTransformService(String geomTransformService) {
 		this.geomTransformService = geomTransformService;
+	}
+
+        
+  // If this is set, the field in the STAC item properties holds
+  // a dictionary of WKT geometries to be reprojected as well
+	public String getGeomWKTField() {
+            return this.geomWKTField;
+	}
+	public void setGeomWKTField(String geomWKTField) {
+		this.geomWKTField = geomWKTField;
 	}
 
   /** Methods =============================================================== */

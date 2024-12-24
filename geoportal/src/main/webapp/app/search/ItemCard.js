@@ -647,24 +647,28 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
     _renderFootprint: function(item) {
       var show = AppContext.appConfig.searchResults.showFootprint;
       var footprintNode = this.footprintNode;
-      if (show && item.shape_geo) {
-        var extent;
+      if (show && item.shape_geo && item.shape_geo.coordinates) {
+        var extent = null;
 
         var west = 180;
         var east = -180;
         var south = 90;
         var north = -90;
 
-        if (item.envelope_geo && item.envelope_geo[0]) {
+        
+        // try to find geometries to base a footprint on abd create an extent
+        
+        // 1 - use envelope_geo if present to get the extent
+        if (item.envelope_geo && Array.isArray(item.envelope_geo)) {
           var west = item.envelope_geo[0].coordinates[0][0];
           var south = item.envelope_geo[0].coordinates[0][1];
           var east = item.envelope_geo[0].coordinates[1][0];
           var north = item.envelope_geo[0].coordinates[1][1];
           extent = new Extent({xmin:west, ymin:south, xmax:east, ymax:north, spatialReference:{wkid:4326}}); 
-        };
-  
-        if (item.shape_geo) {
-
+        }
+        
+        // 2 - use shape_geo if present
+        if (item.shape_geo && item.shape_geo.coordinates && Array.isArray(item.shape_geo.coordinates)) {
           for (var i=0; i<item.shape_geo.coordinates[0].length; i++) {
             var coordinate = item.shape_geo.coordinates[0][i];
             west = Math.min(west, coordinate[0]);
@@ -881,22 +885,55 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         util.setNodeText(this.titleNode,item.title);
       } else {
         var titleNode = this.titleNode;
+        
+        // generate link for the title:
+        // 1 - if the item includes a links array then look for a link with rel=self
+        var theLink = "";
+        var theTarget = "_blank";
+        if ((item.links) && (item.links[0])) {
+          for (i=0; i<item.links.length; i++) {
+            if (item.links[i].rel === 'self') {
+              theLink = item.links[i].href;
+              break;
+            }
+          }
+        }
+        // 2 - if not found, look for and take the first link in url_granule_s array
+        if (theLink.length < 1) {
+          if (item.url_granule_s) {
+            if (item.url_granule_s[0]) {
+              theLink = item.url_granule_s[0];
+            }
+          }
+        }
+        // 3 - if still not found, use this
+        if (theLink.length < 1) {
+          theLink = "javascript:void(0)";
+          theTarget = "";
+        }
+        
         var htmlNode = domConstruct.create("a",{
-          href: "javascript:void(0)",
+          href: theLink,
           title: item.title,
           "aria-label": item.title,
+          "target": theTarget,
           //innerHTML: item.title, 
         },titleNode);
         htmlNode.appendChild(document.createTextNode(item.title));
         
         this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
-          var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
-          if (AppContext.geoportal.supportsApprovalStatus || 
-              AppContext.geoportal.supportsGroupBasedAccess) {
-            var client = new AppClient();
-            uri = client.appendAccessToken(uri);
-          }
-          this.self._renderDataHtml(item, uri);
+          // if target = _blank, it means this is a STAC configuration and 
+          // the title links to a separate API call. Otherwise try to render 
+          // the HTML view of the metadata
+          if (evt.srcElement.target != "_blank") {
+            var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
+            if (AppContext.geoportal.supportsApprovalStatus || 
+                AppContext.geoportal.supportsGroupBasedAccess) {
+              var client = new AppClient();
+              uri = client.appendAccessToken(uri);
+            }
+            this.self._renderDataHtml(item, uri);
+          } 
         })));
       }
     },
