@@ -27,6 +27,30 @@ public class Collection {
         
     }
     
+    
+    // Constructor with collection JSON Object
+    public Collection(JSONObject collectionObj) {
+        this.collectionId = collectionObj.getAsString("id");
+        try {
+            this.body = collectionObj;
+            this.title = collectionObj.getAsString("title");
+            JSONObject extent = this.getJSONObject(collectionObj.get("extent"));
+            this.geometry = this.getJSONObject(extent.get("spatial"));
+
+            JSONObject theAssets = this.getJSONObject(collectionObj.get("assets"));
+            this.availableCRS = new ArrayList<>(theAssets.keySet());
+
+            theAssets.keySet().forEach((String key) -> {
+                Asset thisAsset = new Asset(this.getJSONObject(theAssets.get(key)));
+                this.addAsset(key, thisAsset);
+                LOGGER.debug(key + ": esri_wkt = " + thisAsset.getEsriWKT());
+            });
+        } catch (Exception ex) {
+            LOGGER.error("Error in creating collection " + collectionId + ": " + ex);
+        }				
+    };
+
+    
     // Constructor with collectionId
     public Collection(String collectionId) {
         this.collectionId = collectionId;
