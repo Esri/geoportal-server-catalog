@@ -77,8 +77,9 @@ import net.minidev.json.parser.ParseException;
 
 
 /**
- * STAC API: Records service provider.
+ * STAC API service provider.
  */
+
 /**
  * @author cont_anki
  *
@@ -163,7 +164,9 @@ public class STACService extends Application {
 	@GET
 	@Path("/collections")
 	@Produces(MediaType.APPLICATION_JSON)
-	public Response getCollections(@Context HttpServletRequest hsr) {
+	public Response getCollections(@Context HttpServletRequest hsr, 
+          @QueryParam("outCRS") String outCRS) {
+    
 		String responseJSON = null;
 		String finalresponse = "";
 		Status status = Response.Status.OK;
@@ -176,6 +179,7 @@ public class STACService extends Application {
 				// STAC will only have 1 STAC collection 'metadata'
 				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
 				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", "metadata");
+        
 			} else {
 				// Geoportal configured for collections
 				// STAC will have collection for each Geoportal collection
@@ -183,9 +187,43 @@ public class STACService extends Application {
 				
 				JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
 				// Get list of collections
-				JSONArray collectionsArray = StacHelper.getCollectionList();				
+				JSONArray collectionsArray = StacHelper.getCollectionList();
+        
+        // if reprojecting STAC geometries is supported and a
+        // geometry service has been configured, try projecting 
+        // from internal CRS (4326) to requested outCRS
+        if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomTransformService().isEmpty())) {
+          LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomTransformService());
+
+          // get the features from the response
+          JSONParser jsonParser = new JSONParser();
+          JSONArray responseObject = (JSONArray) jsonParser.parse(collectionsArray.toString());
+
+          // each feature is a STAC item that needs projecting
+          for (int i=0; i<responseObject.size(); i++) {
+            JSONObject collectionObj = (JSONObject) responseObject.get(i);
+
+            // get the collection metadata
+            Collection theCollection = new Collection(collectionObj);
+            List<String> availableCRS = theCollection.getAvailableCRS();
+
+            if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
+              JSONObject responseJSONObject = projectCollectionGeometries(collectionObj.toString(), "4326", outCRS);
+              collectionsArray.set(i, responseJSONObject);
+            }
+            else {
+              // set internal CRS EPSG:4326 as default for output
+              collectionObj.put("outCRS", "EPSG:4326");
+              collectionsArray.set(i, collectionObj);
+
+              LOGGER.warn("Requested CRS (" + outCRS + ") not available for collection " 
+                      + collectionObj.getAsString("id") 
+                      + ". Output provided in native CRS.");          
+            }
+          }
+        }
+
 				stacCollections.put("collections", collectionsArray);
-				
 				finalresponse = stacCollections.toString();
 				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));								
 			}
@@ -284,7 +322,9 @@ public class STACService extends Application {
 	@Path("/collections/{collectionId}")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollectionMetadata(@Context HttpServletRequest hsr,
-			@PathParam("collectionId") String collectionId) {
+			@PathParam("collectionId") String collectionId,
+      @QueryParam("outCRS") String outCRS) {
+    
 		String responseJSON = null;
 		Status status = Response.Status.OK;
 		JSONArray detailErrArray = new JSONArray();
@@ -297,14 +337,38 @@ public class STACService extends Application {
 			}
 			else
 			{
-				JSONObject collectionObj=  StacHelper.getCollectionWithId(collectionId);
+				JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
 				if (collectionObj == null) // #518 || !collectionId.equals("metadata"))
 				{
 					status = Response.Status.NOT_FOUND;
 				}
 				else
-				{		
-					responseJSON = collectionObj.toString();
+				{
+          responseJSON = collectionObj.toString();
+
+          // #574 project collection geometry to outCRS if provided and valid
+          // if reprojecting STAC geometries is supported and a
+          // geometry service has been configured, try projecting 
+          // from internal CRS (4326) to requested outCRS
+          if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomTransformService().isEmpty())) {
+            LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomTransformService());
+            Collection theCollection = new Collection(collectionObj);
+            List<String> availableCRS = theCollection.getAvailableCRS();
+            
+            if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
+              JSONObject responseJSONObject = projectCollectionGeometries(collectionObj.toString(), "4326", outCRS);
+              responseJSON = responseJSONObject.toString();
+            }
+
+            // done
+            LOGGER.debug("Projected response -> " + responseJSON);
+
+          } else {
+            responseJSON = collectionObj.toString();
+
+            LOGGER.warn("WARNING - outCRS " + outCRS + " is not known for collection " + collectionId +". Outputting tag in native CRS.");
+          }
+          
 					responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 				}
 			}
@@ -314,9 +378,11 @@ public class STACService extends Application {
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated. "+e.getMessage(),detailErrArray);
 		}
+    
 		return Response.status(status).entity(responseJSON).build();
 	}
 
+  
 	@GET
 	@Produces("application/geo+json")
 	@Path("/collections/{collectionId}/items")
@@ -1662,6 +1728,12 @@ public class STACService extends Application {
 	}
   
   
+  /*
+   * Get the geometry from the field
+   *
+   * @param item - DocumentContext JSON Object of the item
+   * @param geometryField - the field to get the geometry from
+  */
   private String getItemGeometry(DocumentContext item, String geometryField) {
     String geometries = null;
     
@@ -1701,20 +1773,65 @@ public class STACService extends Application {
   
 
   /*
+   * Get the geometry from the field
+   *
+   * @param item - JSONObject JSON Object of the item. if an item, this is the 
+   *               item JSON. if a collection this is the spatial dictionary
+   * @param geometryField - the field to get the geometry from
+  */
+  private String getGeometryFromField(JSONObject item, String geometryField, boolean isCollection) {
+    String geometries = null;
+    
+    switch(geometryField) {
+      case "bbox":
+        JSONArray bbox = (JSONArray) item.get(geometryField);
+        if (isCollection) {
+          bbox = (JSONArray) bbox.get(0);
+        }
+        
+        LOGGER.debug("geometry = " + bbox.toString()); 
+
+        geometries = "{\"geometryType\": \"esriGeometryEnvelope\", "
+        + "\"geometries\": [{"
+        + "\"xmin\": " + bbox.get(0) + ", "
+        + "\"ymin\": " + bbox.get(1) + ", "
+        + "\"xmax\": " + bbox.get(2) + ", "
+        + "\"ymax\": " + bbox.get(3) + "}]}";
+        break;
+
+      case "geometry":
+        JSONObject geometry = (JSONObject) item.get(geometryField);
+        LOGGER.debug("geometry = " + geometry.toString()); 
+
+        String coordinates = geometry.getAsString("coordinates");
+
+        String geometryType = geometry.getAsString("type");
+        geometries = "{\"geometryType\": \"" + geometryClient.getArcGISGeometryType(geometryType) + "\", "
+        + "\"geometries\": [ "
+        + "{ \"rings\": " + coordinates + "}"
+        + "]}";
+        break;
+        
+      default:
+        LOGGER.error("Unknown geometry field: " + geometryField);
+    }
+
+    return geometries;
+  }  
+  
+  
+  /*
    * Project an Individual item
    *
-   * @param collection - the collection object of which the item is member
-   * @param responseJSON - the item JSON from the index
-   * @paran outCRS - the requested CRS
+   * @param outCRS - the requested CRS
+   *
+   * @returns - either the EPSG code, or the WKT definition of the CRS from the collection
   */
-  private JSONObject projectItemGeometries(Collection collection, String responseJSON, String outCRS) throws ParseException {
-
-      // source CRS is fixed
-      String sourceCRS = "4326";
-
+  private String getRequestedCRS(Collection collection, String outCRS) {
+    
       // if not EPSG:nnnnn get the esri WKT representation of the CRS and reproject
       // else use just the EPSG code
-      String requestedCRS = "";
+      String requestedCRS;
       if (!outCRS.startsWith("EPSG:")) {
          Asset theAsset = collection.getAsset(outCRS);
          String wkt = theAsset.getEsriWKT();
@@ -1725,6 +1842,55 @@ public class STACService extends Application {
       }
       LOGGER.debug("requestedCRS = " + requestedCRS);
 
+      return requestedCRS;
+  }
+   
+  
+  /*
+   * Project an Individual item
+   *
+   * @param outCRS - the requested CRS
+   *
+   * @returns - either the EPSG code, or the WKT definition of the CRS from the collection
+  */
+  private String getRequestedCRS(JSONObject collectionObj, String outCRS) {
+    
+      // if not EPSG:nnnnn get the esri WKT representation of the CRS and reproject
+      // else use just the EPSG code
+      String requestedCRS;
+      
+      if (!outCRS.startsWith("EPSG:")) {
+         JSONObject theAssets = (JSONObject) collectionObj.get("assets");
+         JSONObject theCRS = (JSONObject) theAssets.get(outCRS);
+         String wkt = theCRS.getAsString("esri:wkt");
+         requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
+
+      } else {
+          requestedCRS = outCRS.replace("EPSG:", "");
+      }
+      LOGGER.debug("requestedCRS = " + requestedCRS);
+
+      return requestedCRS;
+  }
+  
+  
+
+  /*
+   * Project an Individual item
+   *
+   * @param collection - the collection object of which the item is member
+   * @param responseJSON - the item JSON from the index
+   * @param outCRS - the requested CRS
+   *
+   * @returns 
+  */
+  private JSONObject projectItemGeometries(Collection collection, String responseJSON, String outCRS) throws ParseException {
+
+      // source CRS is fixed
+      String sourceCRS = "4326";
+      
+      String requestedCRS = getRequestedCRS(collection, outCRS);
+      
       String[] geometryFields = {"geometry", "bbox"};
 
       // use the STAC item JSON string as JSON object
@@ -1831,6 +1997,90 @@ public class STACService extends Application {
           }
         }
       }
+
+    return responseObject;
+  }
+
+
+  /*
+   * Project an Individual item
+   *
+   * @param collectionObject - the input collection JSON Object
+   * @param inCRS - the CRS of the input
+   * @paran outCRS - the requested CRS
+  */
+  private JSONObject projectCollectionGeometries(String theCollectionJSON, String inCRS, String outCRS) throws ParseException {
+
+    JSONParser jsonParser = new JSONParser();
+    JSONObject theCollection = (JSONObject) jsonParser.parse(theCollectionJSON);
+    
+    String requestedCRS = getRequestedCRS(theCollection, outCRS);
+
+    String[] geometryFields = {"geometry", "bbox"};
+
+    JSONObject responseObject = theCollection;
+    JSONObject extent = new JSONObject((Map<String, ?>) responseObject.get("extent"));
+    JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
+
+    // Loop over all geometry fields
+    for (String thisGeometryField: geometryFields) {
+
+      // get the item geometry
+      String geometries = this.getGeometryFromField((JSONObject) spatial, thisGeometryField, true);
+
+      // project the geometry
+      String geometryResponse = "";
+      try {
+          geometryResponse = geometryClient.doProjection(geometries, inCRS, requestedCRS);
+      } catch (IOException ex) {
+          java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
+      }
+
+      // update the STAC JSON with the projected geometry
+      if (!geometryResponse.isBlank()) {
+
+        // get projected geometries as JSON object
+        try {
+          JSONObject geometryResponseObject = (JSONObject) jsonParser.parse(geometryResponse);
+          JSONArray projectedGeometries = (JSONArray) geometryResponseObject.get("geometries");             
+
+          switch (thisGeometryField) {
+            case "geometry":
+              JSONObject rings = (JSONObject) projectedGeometries.get(0);
+              JSONArray theRings = (JSONArray) rings.get("rings");
+              JSONObject geometry = (JSONObject) spatial.get("geometry");
+              geometry.put("type", "Polygon");
+              geometry.put("coordinates", theRings);
+
+              break;
+
+            case "bbox":
+              JSONArray bbox = (JSONArray) spatial.get("bbox");
+              
+              JSONObject newBbox = (JSONObject) projectedGeometries.get(0);
+              JSONArray projectedBbox = new JSONArray();
+              projectedBbox.add(newBbox.get("xmin"));
+              projectedBbox.add(newBbox.get("ymin"));
+              projectedBbox.add(newBbox.get("xmax"));
+              projectedBbox.add(newBbox.get("ymax"));
+              JSONArray firstBbox = new JSONArray();
+              firstBbox.add(projectedBbox);
+              bbox.set(0, firstBbox);
+
+              break;
+
+            default:
+              LOGGER.error("Unsupported geometry field: " + thisGeometryField);
+          }
+          
+          responseObject.put("outCRS", outCRS);
+
+        } catch (ParseException ex) {
+          LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
+        }
+      }
+    }
+
 
     return responseObject;
   }
