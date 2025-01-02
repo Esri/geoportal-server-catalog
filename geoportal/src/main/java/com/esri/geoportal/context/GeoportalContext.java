@@ -68,7 +68,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private String canStacGeomTransform = "false";
   private String geomTransformService = "";
   private String geomWKTField = "";
-  
+  private String geomCRSField = "";
 
   public HashMap<String, ArrayList<Group>> getUserGroupMap() {
 	return userGroupMap;
@@ -180,10 +180,12 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
   public boolean getSupportsCollections() {
     return supportsCollections;
   }
+  
   /** Support for collections. */
   public void setSupportsCollections(boolean supportsCollections) {
     this.supportsCollections = supportsCollections;
   }
+  
   //Number of Stac features allowed in POST request
 	public int getNumStacFeaturesAddItem() {
 		return numStacFeaturesAddItem;
@@ -201,29 +203,27 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 	public void setValidateStacFields(boolean validateStacFields) {
 		this.validateStacFields = validateStacFields;
 	}
-
-        
-        // Support for autogenerating item id
+      
+  // Support for autogenerating item id
 	public boolean isCanStacAutogenerateId() {
-            return "true".equals(this.canStacAutogenerateId);
+    return "true".equals(this.canStacAutogenerateId);
 	}
 	public void setCanStacAutogenerateId(String canStacAutogenerateId) {
-            this.canStacAutogenerateId = canStacAutogenerateId;
+    this.canStacAutogenerateId = canStacAutogenerateId;
 	}
-
         
   // Support for transforming the CRS of STAC geometries
 	public String isCanStacGeomTransform() {
-            return this.canStacGeomTransform;
+    return this.canStacGeomTransform;
 	}
 	public void setCanStacGeomTransform(String canStacGeomTransform) {
-            this.canStacGeomTransform = canStacGeomTransform;
+    this.canStacGeomTransform = canStacGeomTransform;
 	}
 
         
   // The ArcGIS Geometry service used to reproject STAC geometries
 	public String getGeomTransformService() {
-            return this.geomTransformService;
+    return this.geomTransformService;
 	}
 	public void setGeomTransformService(String geomTransformService) {
 		this.geomTransformService = geomTransformService;
@@ -233,12 +233,23 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
   // If this is set, the field in the STAC item properties holds
   // a dictionary of WKT geometries to be reprojected as well
 	public String getGeomWKTField() {
-            return this.geomWKTField;
+    return this.geomWKTField;
 	}
 	public void setGeomWKTField(String geomWKTField) {
 		this.geomWKTField = geomWKTField;
 	}
 
+        
+  // If this is set, the field in the STAC item properties holds
+  // CRS of its geometries
+	public String getGeomCRSField() {
+    return this.geomCRSField;
+	}
+	public void setGeomCRSField(String geomCRSField) {
+		this.geomCRSField = geomCRSField;
+	}
+
+  
   /** Methods =============================================================== */
 
   /**
