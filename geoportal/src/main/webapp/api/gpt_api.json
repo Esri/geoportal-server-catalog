@@ -15,9 +15,6 @@
   "basePath": "/geoportal",
   "tags": [
     {
-      "name": "Geoportal JWT Token"
-    },
-    {
       "name": "STAC"
     },
     {
@@ -31,53 +28,6 @@
     }
   ],
   "paths": {
-    "/oauth/token": {            
-      "post": {
-        "tags": [
-          "Geoportal JWT Token"
-        ],
-        "summary": "Generates geoportal JWT token",
-        "description": "Generates geoportal JWT token for ArcGIS Portal authentication. Append generated access_token with each subsequent request to geoportal server.",
-        "produces": [
-          "application/json"
-        ],
-        "operationId": "genJwtToken",                                                                                                                                                                                        
-        "parameters": [                   
-          {
-            "name": "username",
-            "in": "query",
-            "description": "User name",
-            "required": true      
-          },
-          {
-            "name": "password",
-            "in": "query",
-            "description": "User password. For ArcGIS Portal authentication, prefix ArcGIS token with \\__rtkn\\__:",
-            "required": true      
-          },
-          {
-            "name": "client_id",
-            "in": "query",
-            "description": "Client id for token. This will always be geoportal-client",
-            "required": true,
-            "example": "geoportal-client"     
-          },
-          {
-            "name": "grant_type",
-            "in": "query",
-            "description": "Grant type for token. This will always be password",
-            "required": true,
-            "example": "password"    
-          }
-        ],
-        "responses": {
-          "default": {
-            "description": "successful operation"
-          }
-        }
-      }
-    },
-
     "/stac": {
       "get": {
         "tags": [
@@ -383,7 +333,7 @@
         "produces": [
           "application/geo+json"
         ],
-        "operationId": "stacCollectionMetadataItemWithIds",                                                                                                                                                                                        
+        "operationId": "stacGetItem",                                                                                                                                                                                        
         "parameters": [
           {
             "name": "collectionId",
@@ -408,6 +358,86 @@
             "required": false,
             "type": "string",
             "example": "EPSG:3857"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Update a STAC item.",
+        "description": "Update a STAC item.",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "stacItemPut",                                                                                                                                                                                        
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "path",
+            "description": "Collection id",
+            "required": true,
+            "type": "string",
+            "example": "metadata"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "STAC item id",
+            "required": true,
+            "type": "string",
+            "example": "LC80100252015082LGN00"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "https://github.com/radiantearth/stac-spec/blob/master/collection-spec/item-spec.md",
+            "required": true      
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      },
+      "patch": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Update parts of a STAC item.",
+        "description": "Update provided parts of a STAC item.",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "stacItemPatch",                                                                                                                                                                                        
+        "parameters": [
+          {
+            "name": "collectionId",
+            "in": "path",
+            "description": "Collection id",
+            "required": true,
+            "type": "string",
+            "example": "metadata"
+          },
+          {
+            "name": "id",
+            "in": "path",
+            "description": "STAC item id",
+            "required": true,
+            "type": "string",
+            "example": "LC80100252015082LGN00"
+          },
+          {
+            "name": "body",
+            "in": "body",
+            "description": "https://github.com/radiantearth/stac-spec/blob/master/collection-spec/item-spec.md",
+            "required": true      
           }
         ],
         "responses": {
@@ -703,6 +733,52 @@
             "required": true,
             "type": "string",
             "example": "LC80100252015082LGN00"
+          }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/oauth/token": {            
+      "post": {
+        "tags": [
+          "REST"
+        ],
+        "summary": "Generates geoportal JWT token",
+        "description": "Generates geoportal JWT token for ArcGIS Portal authentication. Append generated access_token with each subsequent request to geoportal server.",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "genJwtToken",                                                                                                                                                                                        
+        "parameters": [                   
+          {
+            "name": "username",
+            "in": "query",
+            "description": "User name",
+            "required": true      
+          },
+          {
+            "name": "password",
+            "in": "query",
+            "description": "User password. For ArcGIS Portal authentication, prefix ArcGIS token with \\__rtkn\\__:",
+            "required": true      
+          },
+          {
+            "name": "client_id",
+            "in": "query",
+            "description": "Client id for token. This will always be geoportal-client",
+            "required": true,
+            "example": "geoportal-client"     
+          },
+          {
+            "name": "grant_type",
+            "in": "query",
+            "description": "Grant type for token. This will always be password",
+            "required": true,
+            "example": "password"    
           }
         ],
         "responses": {
