@@ -14,7 +14,6 @@
  */
 package com.esri.geoportal.service.stac;
 
-import com.esri.geoportal.base.security.Group;
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
 import java.io.InputStreamReader;
@@ -25,7 +24,6 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
-import java.util.ArrayList;
 import java.util.HashMap;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -394,19 +392,64 @@ public class GeometryServiceClient {
      * @return the corresponding ArcGIS geometry as a JSON string
     */
     public String getArcGISGeometry(String wktGeometryType, JSONObject wktGeometry) {
+
+      String arcgisGeometryType = this.getArcGISGeometryTypeFromWKT(wktGeometryType);
       String geometries = "";
       
       JSONObject geometry = (JSONObject) wktGeometry.get(wktGeometryType.toLowerCase());
       String wkt = geometry.getAsString("wkt");
       
       if (!wkt.isEmpty()) {
-        wkt = wkt.substring(wkt.indexOf(" ") + 1);
-        String coordinates = wkt.replace("(", "[").replace(")", "]").replace(", ", "],[").replace(" ", ",");
+        boolean hasZ = wkt.contains("Z");
+        String startOfCoordinates = hasZ ? "Z" : wktGeometryType;
+        String wktCoordinates = wkt.substring(wkt.indexOf(startOfCoordinates) + startOfCoordinates.length())
+                                   .trim();
         
-        geometries = "{\"geometryType\": \"" + this.getArcGISGeometryTypeFromWKT(wktGeometryType) + "\", "
-          + "\"geometries\": [ " 
-          + "{ \"rings\": " + coordinates + "}"
-          + "]}";
+        String coordinates = wktCoordinates.trim()
+                                           .replace("(", "[")
+                                           .replace(")", "]")
+                                           .replace(", ", "],[")
+                                           .replace(" ", ",");
+        
+        switch (wktGeometryType) {
+          case "POINT":
+            String[] points = wktCoordinates.replace("(", "").replace(")", "").split(" ");
+            String x = points[0];
+            String y = points[1];
+           
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", "
+              + "\"geometries\": [ " 
+              + "{ \"x\": " + x + ", \"y\": " + y;
+            
+            // if point has Z coordinate, add it to the output
+            if (hasZ) {
+              String z = points[2];
+              geometries += ", \"z\": " + z;
+            }
+            
+            // close JSON string
+            geometries += "}]}";            
+              
+            break;
+            
+          case "LINESTRING":
+            geometries = "TODO";
+            break;
+            
+          case "POLYGON":
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", "
+              + "\"geometries\": [ " 
+              + "{ \"rings\": " + coordinates + "}"
+              + "]}";
+            break;
+            
+          case "POLYHEDRAL":
+            geometries = "TODO";
+            break;
+            
+          default:
+            geometries = "UNSUPPORTED WKT TYPE";
+        }
       }
       
       return geometries;
@@ -421,19 +464,60 @@ public class GeometryServiceClient {
      * @return the corresponding WKT geometry as a string
     */
     public String getWKTGeometry(String wktGeometryType, JSONObject arcgisGeometry) {
-      JSONArray rings = (JSONArray) arcgisGeometry.get("rings");
-      String wkt = "";
       
-      if (!rings.isEmpty()) {
-        String ags = rings.toString();
-        wkt = wktGeometryType 
-              + " " 
-              + ags.substring(ags.indexOf(":")+1)
-              .replace(",", " ")
-              .replace("] [", ", ")
-              .replace("[", "(")
-              .replace("]", ")");
-      }
+      String wkt = "";
+      switch (wktGeometryType) {
+          case "POINT":
+            String x = arcgisGeometry.getAsString("x");
+            String y = arcgisGeometry.getAsString("y");
+
+            boolean hasZ = arcgisGeometry.containsKey("z");
+            wkt = wktGeometryType;
+            
+            if (hasZ) {
+              wkt += " Z ";
+            } else {
+              wkt += " ";
+            }
+            
+            wkt += " (" + x + " " + y;
+            
+            if (hasZ) {
+              String z = arcgisGeometry.getAsString("z");
+              wkt += " " + z;
+            }
+            
+            wkt += ")";
+            
+            break;
+            
+          case "LINESTRING":
+            wkt = "TODO";
+            break;
+            
+          case "POLYGON":
+            JSONArray rings = (JSONArray) arcgisGeometry.get("rings");
+
+            if (!rings.isEmpty()) {
+              String ags = rings.toString();
+              wkt = wktGeometryType 
+                    + " " 
+                    + ags.substring(ags.indexOf(":")+1)
+                    .replace(",", " ")
+                    .replace("] [", ", ")
+                    .replace("[", "(")
+                    .replace("]", ")");
+            }
+
+            break;
+            
+          case "POLYHEDRAL":
+            wkt = "TODO";
+            break;
+            
+          default:
+            wkt = "UNSUPPORTED WKT TYPE";
+        }
       
       return wkt;
     }
