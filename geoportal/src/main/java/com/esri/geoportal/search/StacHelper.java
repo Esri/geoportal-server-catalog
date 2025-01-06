@@ -32,7 +32,7 @@ import net.minidev.json.parser.JSONParser;
 public class StacHelper {
 	
 	
-	/** Validates single Stac feature for required fields and duplicate id in collection
+	/** Validates single STAC feature for required fields and duplicate id in collection
 	 * @param requestPayload
 	 * @param collectionId
 	 * @param validateFields 
@@ -91,6 +91,27 @@ public class StacHelper {
 		
 		return response;
 	}
+  
+  
+  public static JSONObject getSTACItemById(String collectionId,
+          String itemId) throws Exception {
+    
+    JSONObject theSTACItem = null;
+    JSONParser jsonParser = new JSONParser();
+
+    String itemJSON = StacHelper.getItemWithItemId(collectionId, itemId);
+    JSONObject gptItem = (JSONObject) jsonParser.parse(itemJSON);
+    JSONObject hits = (JSONObject) gptItem.get("hits");
+    JSONArray hitsArray = (JSONArray) hits.get("hits");
+    
+    if (!hitsArray.isEmpty()) {
+      JSONObject theGPTItem = (JSONObject) hitsArray.get(0);
+      theSTACItem = (JSONObject) theGPTItem.get("_source");
+    }
+    
+    // {"hits":{"hits":[{"_source": {}}]}}
+    return theSTACItem;
+  }
 
   
 	/** Returns Array of collections from elastic index 'çollections'
@@ -777,5 +798,29 @@ public class StacHelper {
       LOGGER.debug("requestedCRS = " + requestedCRS);
 
       return requestedCRS;
+  }
+  
+  
+  public static JSONObject mergeJSON(JSONObject source, JSONObject updates) {
+    JSONObject result = source;
+    
+    for (String key: updates.keySet()) {
+            Object value = updates.get(key);
+            if (!result.containsKey(key)) {
+                // new value for "key":
+                result.put(key, value);
+            } else {
+                // existing value for "key" - recursively deep merge:
+                if (value instanceof JSONObject) {
+                    JSONObject valueSource = (JSONObject) source.get(key);
+                    JSONObject updatesValue = (JSONObject) updates.get(key);
+                    JSONObject mergedSub = mergeJSON(valueSource, updatesValue);
+                    result.put(key, mergedSub);
+                } else {
+                    result.put(key, value);
+                }
+            }
+    }
+    return result;
   }
 }
