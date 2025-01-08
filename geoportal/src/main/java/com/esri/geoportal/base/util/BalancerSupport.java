@@ -19,11 +19,11 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.servlet.http.HttpServletRequest;
 
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.http.ElasticClient;
 
 
 /**
