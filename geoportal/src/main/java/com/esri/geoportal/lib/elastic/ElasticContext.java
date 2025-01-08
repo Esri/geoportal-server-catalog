@@ -71,8 +71,17 @@ public class ElasticContext {
   private String awsOpenSearchRegion = "";
   private String awsOpenSearchAccessKeyId = "";
   private String awsOpenSearchSecretAccessKey = "";
+  private String awsAPIGatewayEndpoint = "";
   
-  public String getAwsOpenSearchAccessKeyId() {
+  public String getAwsAPIGatewayEndpoint() {
+	return awsAPIGatewayEndpoint;
+  }
+
+	public void setAwsAPIGatewayEndpoint(String awsAPIGatewayEndpoint) {
+		this.awsAPIGatewayEndpoint = awsAPIGatewayEndpoint;
+	}
+
+	public String getAwsOpenSearchAccessKeyId() {
 	return awsOpenSearchAccessKeyId;
 	}
 	
