@@ -34,8 +34,8 @@ see: docs/configureByEnvironmentVariable.md
  -->
 	<beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContextHttp">
 		<beans:property name="clusterName" value="${es_cluster:elasticsearch}" />
-		<beans:property name="indexName" value="${gpt_indexName:stac_items}" />
-		<beans:property name="collectionIndexName" value="${gpt_collectionIndexName:stac_collections}" />
+		<beans:property name="indexName" value="${gpt_indexName:metadata}" />
+		<beans:property name="collectionIndexName" value="${gpt_collectionIndexName:collections}" />
 		<beans:property name="indexNameIsAlias" value="true" />
 		<beans:property name="autoCreateIndex" value="true" />
 		<beans:property name="autoCreateCollectionIndex" value="true" />		
@@ -59,6 +59,7 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="awsOpenSearchRegion" value="${gpt_awsRegion}"/> <!-- null | valid AWS region -->
     	<beans:property name="awsOpenSearchAccessKeyId" value="${gpt_awsAccessKeyID}"/>
     	<beans:property name="awsOpenSearchSecretAccessKey" value="${gpt_awsSecretAccessKey}"/>
+    	<beans:property name="awsAPIGatewayEndpoint" value="https://u20qihwvf9.execute-api.us-east-1.amazonaws.com/opensearch-api-test"/>
                 		
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->

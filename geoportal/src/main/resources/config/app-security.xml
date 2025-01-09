@@ -59,12 +59,12 @@
     <security:intercept-url pattern="/rest/metadata/**" access="hasRole('PUBLISHER')" />
     
     <!-- /elastic/ - proxied to the Elasticsearch cluster -->
-    <security:intercept-url pattern="/elastic/stac_items/_count/**" access="permitAll" />
-    <security:intercept-url pattern="/elastic/stac_items/*/_count/**" access="permitAll" />
-    <security:intercept-url pattern="/elastic/stac_items/_search/**" access="permitAll" />
-    <security:intercept-url pattern="/elastic/stac_items/*/_search/**" access="permitAll" />
-    <security:intercept-url pattern="/elastic/stac_items/_mappings/**" method="GET" access="permitAll" />
-    <security:intercept-url pattern="/elastic/stac_items/*/_mappings/**" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/_count/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_count/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/_search/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_search/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/_mappings/**" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_mappings/**" method="GET" access="permitAll" />
     <security:intercept-url pattern="/elastic/_search/scroll/**" access="permitAll" />
     <security:intercept-url pattern="/elastic/**" access="hasRole('ADMIN')" />
     
