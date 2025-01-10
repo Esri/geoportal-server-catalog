@@ -61,8 +61,7 @@ public class ElasticClient {
   private String awsOpenSearchRegion;
   private String awsOpenSearchAccessKeyId;
   private String awsOpenSearchSecretAccessKey;
-  private String hostName = "";
-  private String qryString = "";  
+  private String hostName = ""; 
 
   /** Logger. */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
@@ -389,7 +388,7 @@ public class ElasticClient {
 
       // Create the canonical request
       String canonicalUri = RESTAPIPATH;
-      String canonicalQuerystring = getQueryString();
+      String canonicalQuerystring = getQueryString(url);
       String canonicalHeaders ="";
       String signedHeaders = "";
       String payloadHash ="";
@@ -467,8 +466,7 @@ private String getApiPath(String url,String hostName) {
 	int endIndex = tempStr.indexOf("?");
 	if(endIndex > -1)
 	{
-		apiPath = tempStr.substring(0,endIndex);
-		this.qryString = tempStr.substring(endIndex+1);
+		apiPath = tempStr.substring(0,endIndex);		
 	}
 	else
 	{
@@ -477,8 +475,14 @@ private String getApiPath(String url,String hostName) {
 	return apiPath;
   }
   
-  private String getQueryString() {		
-		return this.qryString;
+  private String getQueryString(String url) {
+	  String qryString = "";
+	  	int index = url.indexOf("?");
+		if(index > -1)
+		{
+			qryString = url.substring(index+1);		
+		}
+		return qryString;
   }
 
 
