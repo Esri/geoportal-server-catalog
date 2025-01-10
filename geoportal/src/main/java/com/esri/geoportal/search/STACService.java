@@ -1051,14 +1051,13 @@ public class STACService extends Application {
 		String responseJSON = "";
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		JSONArray detailErrArray = new JSONArray();
+    Response responseObject = null;
         
 		try {
       // validate incoming JSON
       // TO-DO
       
       // get existing item
-      //String itemJSON = StacHelper.getItemWithItemId(collectionId, featureId);
-      //JSONObject existingItem = (JSONObject) jsonParser.parse(itemJSON);
       JSONObject existingItem = StacHelper.getSTACItemById(collectionId, featureId);
       
       // if payload has geomCRSField and geomWKT field, project 
@@ -1087,7 +1086,7 @@ public class STACService extends Application {
           JSONObject updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
 
           // update feature (will reproject)
-          Response responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
+          responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
     			responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
 
         } else {
@@ -1107,9 +1106,14 @@ public class STACService extends Application {
       LOGGER.info("request: /collections/"+collectionId+"/items/"+featureId+"; method:PATCH; response: \n"+responseJSON);
     }
     
-		return Response.status(status)
-				.header("Content-Type", "application/json")
-				.entity(responseJSON).build();		
+    if (responseObject != null) {
+      return responseObject;
+      
+    } else {
+      return Response.status(status)
+          .header("Content-Type", "application/json")
+          .entity(responseJSON).build();		
+    }
 	}
  
   
@@ -2179,15 +2183,15 @@ public class STACService extends Application {
               // get projected geometries as JSON object
               try {
                 JSONObject geometryResponseObject = (JSONObject) jsonParser.parse(geometryResponse);
-                JSONArray projectedGeometries = (JSONArray) geometryResponseObject.get("geometries");
+                if (geometryResponseObject.containsKey("geometries")) {
+                  JSONArray projectedGeometries = (JSONArray) geometryResponseObject.get("geometries");
 
-                String wktGeometry = geometryClient.getWKTGeometry(geometryType.toUpperCase(), 
-                        (JSONObject) projectedGeometries.get(0));
-                JSONObject geometryToUpdate = (JSONObject) geometry_wkt_in.get(geometryType);
-                geometryToUpdate.put("wkt", wktGeometry);
+                  String wktGeometry = geometryClient.getWKTGeometry(geometryType.toUpperCase(), projectedGeometries);
+                  JSONObject geometryToUpdate = (JSONObject) geometry_wkt_in.get(geometryType);
+                  geometryToUpdate.put("wkt", wktGeometry);
 
-                properties.put("gsdb:crs", outCRS);
-
+                  properties.put("gsdb:crs", outCRS);
+                }
               } catch (ParseException ex) {
                 LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
               }

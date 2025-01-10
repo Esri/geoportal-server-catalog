@@ -405,21 +405,21 @@ public class GeometryServiceClient {
         String wktCoordinates = wkt.substring(wkt.indexOf(startOfCoordinates) + startOfCoordinates.length())
                                    .trim();
         
-        String coordinates = wktCoordinates.trim()
-                                           .replace("(", "[")
-                                           .replace(")", "]")
-                                           .replace(", ", "],[")
-                                           .replace(" ", ",");
-        
         switch (wktGeometryType) {
           case "POINT":
+            // POINT (30 10 20)
             String[] points = wktCoordinates.replace("(", "").replace(")", "").split(" ");
             String x = points[0];
             String y = points[1];
            
-            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", "
-              + "\"geometries\": [ " 
-              + "{ \"x\": " + x + ", \"y\": " + y;
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [ { ";
+            
+            // if point has Z coordinate, set it so in the output
+            if (hasZ) {
+              geometries += "\"hasZ\": true, ";
+            }
+            
+            geometries += "\"x\": " + x + ", \"y\": " + y;            
             
             // if point has Z coordinate, add it to the output
             if (hasZ) {
@@ -428,30 +428,112 @@ public class GeometryServiceClient {
             }
             
             // close JSON string
-            geometries += "}]}";            
+            geometries += "}]}";
               
             break;
             
           case "LINESTRING":
-            geometries = "TODO";
+            // LINESTRING Z (30 10 0, 10 30 10, 40 40 20)
+            /*
+              {
+                "geometryType" : "esriGeometryPolyline",
+                  "geometries" : [{ 
+                    "paths": [[[-117,34],[-116,34],[-117,33]]]
+                  }]
+              }            
+            */
+            
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", "
+              + "\"geometries\": [ { ";
+            
+            // if point has Z coordinate, set it so in the output
+            if (hasZ) {
+              geometries += "\"hasZ\": true, ";
+            }
+            
+            // add the paths to the geometry
+            geometries += "\"paths\": [[";
+            String[] wktPath = wktCoordinates.replace("(", "").replace(")", "").split(",");
+            for (String pathPoint : wktPath) {
+              geometries += "[ " + pathPoint.trim().replace(" ", ", ") + "], ";
+            }
+            
+            // close the JSON
+            geometries += "]]}]}";
+            
             break;
             
           case "POLYGON":
-            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", "
-              + "\"geometries\": [ " 
-              + "{ \"rings\": " + coordinates + "}"
-              + "]}";
+            /*
+              POLYGON Z ((35 10 0, 45 45 10, 15 40 20, 10 20 30, 35 10 0))
+            */
+                    
+            String coordinates = wktCoordinates.trim()
+                                               .replace("(", "[")
+                                               .replace(")", "]")
+                                               .replace(", ", "],[")
+                                               .replace(" ", ",");
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [ {";
+
+            // if point has Z coordinate, set it so in the output
+            if (hasZ) {
+              geometries += "\"hasZ\": true, ";
+            }
+            
+            geometries += "\"rings\": " + coordinates + "}]}";
+            
             break;
             
           case "POLYHEDRAL":
-            geometries = "TODO";
+            /*
+              POLYHEDRALSURFACE Z ( PATCHES
+              ((5 50 0, 6 50 0, 6 51 0, 5 51 0, 5 50 0)),
+              ((5 50 0, 6 50 0, 6 50 1, 5 50 1, 5 50 0)),
+              ((5 50 0, 5 51 0, 5 51 1, 5 50 1, 5 50 0)),
+              ((6 51 1, 5 51 1, 5 50 1, 6 50 1, 6 51 1)),
+              ((6 51 1, 5 51 1, 5 51 0, 6 51 0, 6 51 1)),
+              ((6 51 1, 6 51 0, 6 50 0, 6 50 1, 6 51 1))
+              )
+            */
+            
+            String patches = wkt.trim().substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+            String regex = "[))]";
+            String[] polygons = patches.split(regex);
+            
+            // now build ArcGIS geometry as list of polygon geometries
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [";
+
+            for (String polygon : polygons) {
+              if (!polygon.isEmpty()) {
+                // start polygon json
+                geometries += "{";
+                geometries += "\"hasZ\": true, ";  // polyhedral always has Z
+                geometries += "\"rings\": [[";
+
+                String polyCoordinateString = polygon.replace(", ((","").replace("((","");
+                String[] polyCoordinates = polyCoordinateString.split(",");
+
+                // add points to poly
+                for (String poly : polyCoordinates) {
+                  geometries += "[ " + poly.trim().replace(" ", ", ") + "], ";
+                }
+                geometries += "]]}, ";
+              }
+            }
+
+            // close the JSON
+            geometries += "]}";
+            
+            geometries = geometries.replace("], ]", "]]").replace("[ ],", "").replace("}, ]", "}]");
             break;
             
           default:
+            LOGGER.debug("getArcGISGeometry " + wktGeometryType + ": UNSUPPORTED WKT TYPE");
             geometries = "UNSUPPORTED WKT TYPE";
         }
       }
       
+      LOGGER.debug("getArcGISGeometry " + wktGeometryType + ": " + geometries);
       return geometries;
     }
     
@@ -463,11 +545,27 @@ public class GeometryServiceClient {
      * @param arcgisGeometry the ArcGIS geometry
      * @return the corresponding WKT geometry as a string
     */
-    public String getWKTGeometry(String wktGeometryType, JSONObject arcgisGeometry) {
+    public String getWKTGeometry(String wktGeometryType, JSONArray arcgisGeometries) {
       
       String wkt = "";
+      JSONObject arcgisGeometry;
       switch (wktGeometryType) {
           case "POINT":
+            /*
+              FROM:
+              {
+                "geometryType" : "esriGeometryPoint",
+                  "geometries" : [{ 
+                    "x": 30,
+                    "y": 10,
+                    "z":  0
+                  }]
+              }
+
+              TO: 
+              POINT Z (30 10 0)
+            */
+            arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
             String x = arcgisGeometry.getAsString("x");
             String y = arcgisGeometry.getAsString("y");
 
@@ -492,10 +590,42 @@ public class GeometryServiceClient {
             break;
             
           case "LINESTRING":
-            wkt = "TODO";
+            /*
+              FROM:
+              {
+                "geometryType" : "esriGeometryPolyline",
+                  "geometries" : [{ 
+                    "paths": [[[-117,34],[-116,34],[-117,33]]]
+                  }]
+              }
+
+              TO: 
+              LINESTRING Z (30 10 0, 10 30 10, 40 40 20)
+            */
+
+            arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
+            JSONArray paths = (JSONArray) arcgisGeometry.get("paths");
+            JSONArray firstPath = (JSONArray) paths.get(0);
+            JSONArray firstPoint = (JSONArray) firstPath.get(0);
+            
+            boolean lineHasZ = (firstPoint.size() == 3);
+            
+            wkt = "LINESTRING";
+            wkt += lineHasZ ? " Z " : " ";
+            
+            if (!paths.isEmpty()) {
+              String agsPaths = paths.toString();
+              wkt += agsPaths.substring(agsPaths.indexOf(":")+1)
+                             .trim()
+                             .replace(",", " ")
+                             .replace("] [", ", ")
+                             .replace("[", "(")
+                             .replace("]", ")");
+            }            
             break;
             
           case "POLYGON":
+            arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
             JSONArray rings = (JSONArray) arcgisGeometry.get("rings");
 
             if (!rings.isEmpty()) {
@@ -512,7 +642,51 @@ public class GeometryServiceClient {
             break;
             
           case "POLYHEDRAL":
-            wkt = "TODO";
+            /*
+              FROM:
+              {
+                "geometryType": "esriGeometryPolygon", 
+                "geometries": [
+                  {"hasZ": true, "rings": [[[ 5, 50, 0], [ 6, 50, 0], [ 6, 51, 0], [ 5, 51, 0], [ 5, 50, 0]]]}, 
+                  ...
+                  {"hasZ": true, "rings": [[ [ 6, 51, 1], [ 6, 51, 0], [ 6, 50, 0], [ 6, 50, 1], [ 6, 51, 1]]]}
+                ]
+              }
+
+              TO: 
+              POLYHEDRALSURFACE Z ( 
+                PATCHES ((5 50 0, 6 50 0, 6 51 0, 5 51 0, 5 50 0)),
+                        ...
+                        ((6 51 1, 6 51 0, 6 50 0, 6 50 1, 6 51 1))
+              )
+            */
+            
+            // start wkt, polyhedralsurface always has Z
+            wkt = "POLYHEDRALSURFACE Z ( PATCHES ";
+            
+            /* 
+              the polyhedral geometry is stored in the ArcGIS JSON as
+              a list of polygons. every face of the polyhedral is stored
+              as a polygon with 1 ring
+            */
+            for (int i=0; i<arcgisGeometries.size(); i++) {
+              JSONObject face = (JSONObject) arcgisGeometries.get(i);
+              JSONArray edges = (JSONArray) face.get("rings");
+              if (!edges.isEmpty()) {
+                JSONArray firstEdge = (JSONArray) edges.get(0);
+
+                wkt += firstEdge.toString()
+                                .replace(",", " ")
+                                .replace("] [", ", ")
+                                .replace("[", "(")
+                                .replace("]", ")");
+              }
+            }
+            wkt = wkt.replace("))((", ")), ((");
+            
+            // finish wkt
+            wkt += " )";
+            
             break;
             
           default:
