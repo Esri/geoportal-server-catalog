@@ -216,7 +216,8 @@ public class StacHelper {
 	}
 
 
-  // {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
+  // {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, 
+  // {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
 	private static String prepareIntersects(String geoJson) {
 		String query = "";
 		String field = "shape_geo";
