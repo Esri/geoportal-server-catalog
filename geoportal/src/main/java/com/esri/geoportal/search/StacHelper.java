@@ -644,7 +644,7 @@ public class StacHelper {
 		try {
 			url =  client.getTypeUrlForSearch(ec.getIndexName());
 
-			ArrayList<String> idArrList = new ArrayList<String>();
+			List<String> idArrList = new ArrayList<String>();
 			if(idList ==null || idList.isBlank()) {				
 				String idSearch = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}}]}}}";
 				String searchRes = client.sendPost(url+"/_search", idSearch, "application/json");
@@ -660,7 +660,8 @@ public class StacHelper {
 			}
 			else
 			{
-				idArrList = (ArrayList<String>) Arrays.asList(idList.split("\\s*,\\s*"));
+				List <String>idInputList =  Arrays.asList(idList.split("\\s*,\\s*"));
+				idArrList = idInputList;
 			}
 			total = idArrList.size();
 			for(int i = 0; i<idArrList.size();i++)
@@ -674,8 +675,7 @@ public class StacHelper {
 					if(result.contentEquals("deleted"))
 					{
 						deletedSuccess++;
-					}
-					
+					}					
 				}
 			}
 		}catch(Exception e)
@@ -694,19 +694,19 @@ public class StacHelper {
 		if(!deleteCollection)
 		{
 			resObj.put("code", "200");
-			resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess));
+			resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess));
 		}
 		if(deleteCollection)
 		{	//Deleting collection is not allowed if items are deleted by Id
 			if(deleteById)
 			{
 				resObj.put("code", "200");
-				resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Deleting collection is not allowed when items are deleted with id list.");	
+				resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Deleting collection is not allowed when items are deleted with id list.");	
 			}			
 			if(!deleteById && deletedSuccess != total)
 			{
 				resObj.put("code", "200");
-				resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Collection will not be deleted as some features could not be deleted.");	
+				resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Collection will not be deleted as some features could not be deleted.");	
 				
 			}
 			if(!deleteById && deletedSuccess == total)
@@ -716,11 +716,11 @@ public class StacHelper {
 					url = client.getTypeUrlForSearch(ec.getCollectionIndexName());			
 					response = client.sendDelete(url+"/_doc/"+collectionId);	
 					resObj.put("code", "200");
-					resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+". Collection is deleted.");
+					resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+". Collection is deleted.");
 				}catch (Exception e) {					
 					e.printStackTrace();
 					resObj.put("code", "500");
-					resObj.put("description", "Stac features found: "+total+", deleted: "+deletedSuccess+" but collection could not be deleted."+e.getCause());
+					resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+" but collection could not be deleted."+e.getCause());
 				}
 			}
 		}				
