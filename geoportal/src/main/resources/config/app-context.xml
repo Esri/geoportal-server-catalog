@@ -43,28 +43,30 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
 		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
 		<beans:property name="httpPort" value="443" />		
-		<beans:property name="proxyBufferSize" value="8192" />
+		<beans:property name="proxyBufferSize" value="8192" />		
 		
-		<!-- Uncomment and complete the following if you want to use secured index -->
 		<beans:property name="useHttps" value="true" />
-		<beans:property name="encryptPassword" value="false" />
-		<!--
-		<beans:property name="base64Key" value="${gpt_base64Key}" />
-		<beans:property name="base64Iv" value="${gpt_base64Iv}" />
-    -->
 		<beans:property name="username" value="" />
 		<beans:property name="password" value="" />
+		<beans:property name="encryptPassword" value="false" />
+		<!-- If encryptPassword =true, Uncomment below and configure the keys -->
+		<!-- 
+		<beans:property name="base64Key" value="${gpt_base64Key}" />
+		<beans:property name="base64Iv" value="${gpt_base64Iv}" />
+    	-->
+
+		<!-- Configure below for AWS OpenSearch Serverless -->		
     	<beans:property name="engineType" value="opensearch"/> <!-- null | opensearch | elasticsearch -->		
-		<beans:property name="awsOpenSearchType" value="serverless"/> <!-- null | serverless | managed -->
+		<beans:property name="awsOpenSearchType" value=""/> <!-- null for all other types of Opensearch | serverless | managed -->
 		<beans:property name="awsOpenSearchRegion" value="${gpt_awsRegion}"/> <!-- null | valid AWS region -->
     	<beans:property name="awsOpenSearchAccessKeyId" value="${gpt_awsAccessKeyID}"/>
     	<beans:property name="awsOpenSearchSecretAccessKey" value="${gpt_awsSecretAccessKey}"/>
-    	<beans:property name="awsAPIGatewayEndpoint" value="https://u20qihwvf9.execute-api.us-east-1.amazonaws.com/opensearch-api-test"/>
+    	<beans:property name="awsAPIGatewayEndpoint" value=""/> <!-- API gateway endpoint -->    	
                 		
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
-				<beans:value>${es_node:txjwwmxxavpt5fulgmxc.us-east-1.aoss.amazonaws.com}</beans:value>
+				<beans:value>${es_node:}</beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
