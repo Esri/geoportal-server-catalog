@@ -103,7 +103,12 @@ public class STACService extends Application {
 		return resources;
 	}
 
-	@GET
+  /**
+   *
+   * @param hsr
+   * @return
+   */
+  @GET
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response get(@Context HttpServletRequest hsr) {
 		String response;
@@ -1054,9 +1059,6 @@ public class STACService extends Application {
     Response responseObject = null;
         
 		try {
-      // validate incoming JSON
-      // TO-DO
-      
       // get existing item
       JSONObject existingItem = StacHelper.getSTACItemById(collectionId, featureId);
       
@@ -1911,78 +1913,7 @@ public class STACService extends Application {
 		}
 		return limit;
 	}
-  
-  
-  /*
-   * Get the geometry from the field
-   *
-   * @param item - DocumentContext JSON Object of the item
-   * @param geometryField - the field to get the geometry from
-  */
-  private String getItemGeometry(JSONObject item, String geometryField) {
-    String geometries = null;
     
-    switch(geometryField) {
-      case "envelope_geo":
-        
-        try {
-          JSONArray envelopes = (JSONArray) item.get(geometryField);
-          JSONObject firstEnvelope = (JSONObject) envelopes.get(0);
-          //JSONObject envelope = new JSONObject((Map<String, ?>) firstEnvelope.get(0));
-          JSONArray envelopeCoordinates = (JSONArray) firstEnvelope.get("coordinates");
-          JSONArray upperLeft = (JSONArray) envelopeCoordinates.get(0);
-          JSONArray lowerRight = (JSONArray) envelopeCoordinates.get(1);
-
-          LOGGER.debug("geometry = " + firstEnvelope.toString()); 
-
-          geometries = "{\"geometryType\": \"esriGeometryEnvelope\", "
-          + "\"geometries\": [{"
-          + "\"xmin\": " + upperLeft.get(0) + ", "
-          + "\"ymin\": " + lowerRight.get(1) + ", "
-          + "\"xmax\": " + lowerRight.get(0) + ", "
-          + "\"ymax\": " + upperLeft.get(1) + "}]}";
-
-        } catch (Exception ex) {
-          geometries = "";
-          LOGGER.debug("getItemGeometry did not find envelope_geo field"); 
-        }
-
-        break;
-        
-      case "bbox":
-        JSONArray bbox = (JSONArray) item.get(geometryField);
-        
-        LOGGER.debug("geometry = " + bbox.toString()); 
-
-        geometries = "{\"geometryType\": \"esriGeometryEnvelope\", "
-        + "\"geometries\": [{"
-        + "\"xmin\": " + bbox.get(0) + ", "
-        + "\"ymin\": " + bbox.get(1) + ", "
-        + "\"xmax\": " + bbox.get(2) + ", "
-        + "\"ymax\": " + bbox.get(3) + "}]}";
-        break;
-
-      case "geometry":
-      case "shape_geo":
-        JSONObject geometry = new JSONObject((Map<String, ?>) item.get(geometryField));
-        LOGGER.debug("geometry = " + geometry.toString()); 
-
-        String coordinates = geometry.getAsString("coordinates");
-
-        String geometryType = geometry.getAsString("type");
-        geometries = "{\"geometryType\": \"" + geometryClient.getArcGISGeometryType(geometryType) + "\", "
-        + "\"geometries\": [ "
-        + "{ \"rings\": " + coordinates + "}"
-        + "]}";
-        break;
-        
-      default:
-        LOGGER.error("Unknown geometry field: " + geometryField);
-    }
-
-    return geometries;
-  }
-  
 
   /*
    * Get the geometry from the field
@@ -2057,15 +1988,14 @@ public class STACService extends Application {
     // use the STAC item JSON string as JSON object
     JSONParser jsonParser = new JSONParser();
     JSONObject responseObject = (JSONObject) jsonParser.parse(responseJSON);
-    //DocumentContext item = JsonPath.parse(responseJSON);
-
+    
     // Loop over all geometry fields
     for (String thisGeometryField: geometryFields) {
       
       if (responseObject.containsKey(thisGeometryField)) {
 
         // get the item geometry
-        String geometries = this.getItemGeometry(responseObject, thisGeometryField);
+        String geometries = geometryClient.getItemGeometry(responseObject, thisGeometryField);
 
         if ((geometries != null) && (!geometries.isEmpty())) {
           // project the geometry

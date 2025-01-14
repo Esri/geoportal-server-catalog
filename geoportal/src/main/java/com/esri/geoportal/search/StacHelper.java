@@ -18,10 +18,12 @@ import static com.esri.geoportal.context.GeoportalContext.LOGGER;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
+import com.esri.geoportal.service.stac.StacContext;
 import com.esri.geoportal.service.stac.Asset;
 import com.esri.geoportal.service.stac.Collection;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import java.util.logging.Level;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -67,13 +69,13 @@ public class StacHelper {
 
 	public static String getItemWithItemId(String collectionId,String id) throws Exception {
 		
-		String response = "";		
-		String query = "";
+		String response;		
+		String query;
 		
 		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 		ElasticClient client = ElasticClient.newClient();
 		String url = client.getTypeUrlForSearch(ec.getIndexName());
-		Map<String, String> queryMap = new HashMap<String, String>();
+		Map<String, String> queryMap = new HashMap<>();
 
 		queryMap.put("ids", id);
 		url = url + "/_search";
@@ -92,7 +94,41 @@ public class StacHelper {
 		return response;
 	}
   
+
+  /** Get STAC items where a field matches a provided value
+   * 
+   * @param collectionId
+   * @param fieldName - json path to a field, for example: properties.somepropertyname
+   * @param fieldValue
+   * @return
+   * @throws Exception 
+   */
+	public static String getItemWithFieldValue(String collectionId,String fieldName, String fieldValue) throws Exception {
+		
+		String response;		
+		String query;
+		
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
+		String url = client.getTypeUrlForSearch(ec.getIndexName());
+
+		url = url + "/_search";
+		
+		query = "{\"query\": {\"query_string\": {\"query\": \"" + fieldValue + "\",\"fields\"  : [\"" + fieldName + "\"]}}}";
+
+    response = client.sendPost(url, query, "application/json");
+		
+		return response;
+	}
   
+  
+  /** Get a STAC item based on a provided collectionId and itemId
+   * 
+   * @param collectionId
+   * @param itemId
+   * @return
+   * @throws Exception 
+   */  
   public static JSONObject getSTACItemById(String collectionId,
           String itemId) throws Exception {
     
@@ -354,64 +390,77 @@ public class StacHelper {
 		String errorMsg ="";
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		
-		if(!requestPayload.containsKey("stac_version"))
-		{
+		if(!requestPayload.containsKey("stac_version")) {
 			errorMsg = errorMsg+"stac_version is mandatory.";
 		}
+    
 		if(!requestPayload.containsKey("id") || 
-				(requestPayload.containsKey("id") && requestPayload.get("id").toString().isBlank()))
-		{
-                    GeoportalContext gc = GeoportalContext.getInstance();
-                    if (!"true".equals(gc.isCanStacAutogenerateId())) {
-			errorMsg = errorMsg+" id is mandatory and should not be empty.";
-                    }
+				(requestPayload.containsKey("id") 
+        && requestPayload.get("id").toString().isBlank())) {
+      
+      GeoportalContext gc = GeoportalContext.getInstance();
+      if (!"true".equals(gc.isCanStacAutogenerateId())) {
+    		errorMsg = errorMsg+" id is mandatory and should not be empty.";
+      }
 		}
+    
 		//geometry and bbox is mandatory from stac spec but geoportal will allow combination of shape_geo and envelope_geo as well
-		if(!requestPayload.containsKey("geometry") && !requestPayload.containsKey("shape_geo"))
-		{
+		if(!requestPayload.containsKey("geometry") && !requestPayload.containsKey("shape_geo")) {
 			errorMsg = errorMsg+" geometry or shape_geo is mandatory.";
 		}
 		
-		if(requestPayload.containsKey("geometry"))
-		{
+		if(requestPayload.containsKey("geometry")) {
 			if(requestPayload.get("geometry") != null && (!requestPayload.containsKey("bbox")))
 			errorMsg = errorMsg+" bbox is mandatory if geometry is not null.";
 		}
-		if(requestPayload.containsKey("shape_geo"))
-		{
+
+    if(requestPayload.containsKey("shape_geo")) {
 			if(requestPayload.get("shape_geo") != null && (!requestPayload.containsKey("envelope_geo")))
 			errorMsg = errorMsg+" envelope_geo is mandatory if shape_geo is not null.";
 		}
 		
-		if(!requestPayload.containsKey("properties"))
-		{
+		if(!requestPayload.containsKey("properties")) {
 			errorMsg = errorMsg+" properties is mandatory.";
 		}
-		if(requestPayload.containsKey("properties"))
-		{
+    
+		if(requestPayload.containsKey("properties")) {
 			JSONObject prop = (JSONObject) requestPayload.get("properties");
-			if(!prop.containsKey("datetime"))
-			{
+
+      if(!prop.containsKey("datetime")) {
 				errorMsg = errorMsg+" datetime is mandatory.";
-			}
-			else if(prop.containsKey("datetime") && prop.get("datetime") == null)
-			{
-				if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime"))
-				{
+
+      } else if(prop.containsKey("datetime") && prop.get("datetime") == null) {
+        
+				if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime")) {
 					errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
 				}
 			}
 		}
 
-		if(!requestPayload.containsKey("assets"))
-		{
-			errorMsg = errorMsg+" assets is mandatory.";
+		if(!requestPayload.containsKey("assets")) {
+			errorMsg = errorMsg + " assets is mandatory.";
 		}
-		if(errorMsg.length()>0)
-		{
+    
+  	StacContext sc = StacContext.getInstance();
+    for (String validationRule : sc.getValidationRules()) {
+      LOGGER.debug("Validation rule: " + validationRule);
+      try {
+        JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload);
+        if (!validationResult.getAsString("passes").equals("true")) {
+          errorMsg = errorMsg + " Failed validation rule ";
+          errorMsg = errorMsg + validationRule + ": ";
+          errorMsg = errorMsg + validationResult.getAsString("message");
+        }
+      } catch (Exception ex) {
+        errorMsg = errorMsg + Level.SEVERE + " - StacItemValidationResponse: " +  ex.getMessage();
+      }
+    }
+    
+		if(errorMsg.length()>0) {
 			response.setCode(StacItemValidationResponse.BAD_REQUEST);
 			response.setMessage(errorMsg);
-		}		
+		}
+    
 		return response;
 	}
 
