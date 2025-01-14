@@ -51,6 +51,8 @@ public class GeometryServiceClient {
      * Instance variables.
      */
     private String baseUrl;
+    private String projectUrl;
+    private String intersectUrl;
     private String basicCredentials;
     private boolean useHttps;
 
@@ -70,7 +72,7 @@ public class GeometryServiceClient {
      * @return the client
      */
     public static GeometryServiceClient newClient() {
-        String geometryService = GeoportalContext.getInstance().getGeomTransformService();
+        String geometryService = GeoportalContext.getInstance().getGeomtryService();
         return new GeometryServiceClient(geometryService);
     }
 
@@ -81,6 +83,8 @@ public class GeometryServiceClient {
      */
     public GeometryServiceClient(String baseUrl) {
         this.baseUrl = baseUrl;
+        this.projectUrl = baseUrl + "/project";
+        this.intersectUrl = baseUrl + "/intersect";
 
         // Add key-value pairs, GeoJSON as keys, ArcGIS types as values
         this.geometryTypes.put("Point", "esriGeometryPoint");
@@ -137,7 +141,7 @@ public class GeometryServiceClient {
         DataOutputStream wr = null;
         StringWriter sw = new StringWriter();
         String charset = "UTF-8";
-        URLConnection con = null;
+        URLConnection con;
         URL u = new java.net.URL(url);
         try {
             SSLContext ssl_ctx = SSLContext.getInstance("TLS");
@@ -247,24 +251,20 @@ public class GeometryServiceClient {
     
     
     /**
-     * project the provided geometries
+     * intersect the two geometries
      *
-     * @param geometries the geometries to project
-     * @param inCRS the CRS the data is in
-     * @param outCRS the CRS the data should be projected to
-     * @return the projected geometries
+     * @param geometryOne
+     * @param geometryTwo
+     * @return true if and only if the geometries intersect
      * @throws IOException if an issue occurs in communicating with the geometry service
      */
-    public String doProjection(String geometries, String inCRS, String outCRS) throws IOException {
-        String formData = "inSr=" + inCRS;
-        formData += "&outSR=" + outCRS;
-        formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
-        formData += "&transformation=";
-        formData += "&transformForward=true";
-        formData += "&vertical=false";
+    public String doIntersect(String geometryOne, String geometryTwo) throws IOException {
+        String formData = "sr=4326";
+        formData += "&geometries=" + URLEncoder.encode(geometryOne, "UTF-8");
+        formData += "&geometry=" + URLEncoder.encode(geometryTwo, "UTF-8");
         formData += "&f=json";
 
-        URL obj = new URL(this.baseUrl);
+        URL obj = new URL(this.intersectUrl);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
 
         // Set the request method to POST
@@ -295,6 +295,57 @@ public class GeometryServiceClient {
         return response.toString();
     }
 
+
+    /**
+     * project the provided geometries
+     *
+     * @param geometries the geometries to project
+     * @param inCRS the CRS the data is in
+     * @param outCRS the CRS the data should be projected to
+     * @return the projected geometries
+     * @throws IOException if an issue occurs in communicating with the geometry service
+     */
+    public String doProjection(String geometries, String inCRS, String outCRS) throws IOException {
+        String formData = "inSr=" + inCRS;
+        formData += "&outSR=" + outCRS;
+        formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
+        formData += "&transformation=";
+        formData += "&transformForward=true";
+        formData += "&vertical=false";
+        formData += "&f=json";
+
+        URL obj = new URL(this.projectUrl);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+
+        // Set the request method to POST
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        con.setRequestProperty("Content-Length", Integer.toString(formData.getBytes().length));
+        con.setDoOutput(true);
+
+        // Send the form data
+        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+        wr.writeBytes(formData);
+        wr.flush();
+        wr.close();
+
+        // Read the response
+        int responseCode = con.getResponseCode();
+        System.out.println("Response Code : " + responseCode);
+
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+
+        return response.toString();
+    }
+
+    
     /*
      * Get the ArcGIS geometry type based on a GeoJSON type
      *
