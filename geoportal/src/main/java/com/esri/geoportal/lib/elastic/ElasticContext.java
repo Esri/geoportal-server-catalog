@@ -110,106 +110,129 @@ private String base64Iv = "";
     this.proxyBufferSize = proxyBufferSize!=null? proxyBufferSize: DEFAULT_PROXY_BUFFER_SIZE;
   }
   
-  /** Allow internal metadata file idenitfiers to be used as the Elasticsearch _id .*/
+  /** Allow internal metadata file identifiers to be used as the Elasticsearch _id
+   * @return .*/
   public boolean getAllowFileId() {
     return allowFileId;
   }
-  /** Allow internal metadata file idenitfiers to be used as the Elasticsearch _id .*/
+  /** Allow internal metadata file identifiers to be used as the Elasticsearch _id
+   * @param allowFileId.*/
   public void setAllowFileId(boolean allowFileId) {
     this.allowFileId = allowFileId;
   }
 
-  /** Auto-create the metadata index if required. */
+  /** Auto-create the metadata index if required.
+   * @return  */
   public boolean getAutoCreateIndex() {
     return autoCreateIndex;
   }
-  /** Auto-create the metadata index if required. */
+  /** Auto-create the metadata index if required.
+   * @param autoCreateIndex */
   public void setAutoCreateIndex(boolean autoCreateIndex) {
     this.autoCreateIndex = autoCreateIndex;
   }
   
-  /** The cluster name. */
+  /** The cluster name.
+   * @return  */
   public String getClusterName() {
     return clusterName;
   }
-  /** The cluster name. */
+  /** The cluster name.
+   * @param clusterName */
   public void setClusterName(String clusterName) {
     this.clusterName = clusterName;
   }
   
-  /** The HTTP port (default=9200) */
+  /** The HTTP port (default=9200)
+   * @return  */
   public int getHttpPort() {
     return httpPort;
   }
-  /** The HTTP port (default=9200) */
+  /** The HTTP port (default=9200)
+   * @param httpPort */
   public void setHttpPort(int httpPort) {
     this.httpPort = httpPort;
   }
 
-  /** The metadata index name (default=metadata). */
+  /** The metadata index name (default=metadata).
+   * @return  */
   public String getIndexName() {
     return this.indexName;
   }
-  /** The metadata index name (default=metadata). */
+  /** The metadata index name (default=metadata).
+   * @param indexName */
   public void setIndexName(String indexName) {
     this.indexName = indexName;
   }
-  /** The collections index name (default=collections). */
+  /** The collections index name (default=collections).
+   * @return  */
   public String getCollectionIndexName() {
 		return collectionIndexName;
   }
-  /** The collections index name (default=collections). */
+  /** The collections index name (default=collections).
+   * @param collectionIndexName */
  public void setCollectionIndexName(String collectionIndexName) {
 	this.collectionIndexName = collectionIndexName;
  }
 
-  /** Treat the index name as an alias. */
+  /** Treat the index name as an alias.
+   * @return  */
   public boolean getIndexNameIsAlias() {
     return indexNameIsAlias;
   }
 
-  /** supports collections or not */
+  /** supports collections or not
+   * @return  */
   public boolean getSupportsCollections() {
     return supportsCollections;
   }
-  /** supports collections or not */
+  /** supports collections or not
+   * @param doesSupportCollections */
   public void setSupportsCollections(boolean doesSupportCollections) {
     this.supportsCollections = doesSupportCollections;
   }
   
-  /** Treat the index name as an alias. */
+  /** Treat the index name as an alias.
+   * @param indexNameIsAlias */
   public void setIndexNameIsAlias(boolean indexNameIsAlias) {
     this.indexNameIsAlias = indexNameIsAlias;
   }
   
-  /** Version 6+ */
+  /** Version 6+
+   * @return  */
   public boolean getIs6Plus() {
     return is6Plus;
   }
-  /** Version 6+ */
+  /** Version 6+
+   * @param is6Plus */
   public void setIs6Plus(boolean is6Plus) {
     this.is6Plus = is6Plus;
   }
   
-  /** Version 7+ */
+  /** Version 7+
+   * @return  */
   public boolean getIs7Plus() {
     return is7Plus;
   }
-  /** Version 7+ */
+  /** Version 7+
+   * @param is7Plus */
   public void setIs7Plus(boolean is7Plus) {
     this.is7Plus = is7Plus;
   }
   
-  /** The index name holding metadata items. */
+  /** The index name holding metadata items.
+   * @return  */
   public String getItemIndexName() {
     return this.indexName;
   }
 
-  /** The item index type (default=item). */
+  /** The item index type (default=item).
+   * @return  */
   public String getItemIndexType() {
     return this.itemIndexType;
   }
-  /** The item index type (default=item). */
+  /** The item index type (default=item).
+   * @param itemIndexType */
   public void setItemIndexType(String itemIndexType) {
     this.itemIndexType = itemIndexType;
   }
