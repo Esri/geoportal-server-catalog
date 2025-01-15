@@ -23,6 +23,7 @@ G.evaluators.iso19115_3 = {
     this.evalSpatial(task);
     this.evalTemporal(task);
     this.evalLinks(task);
+    this.evalTheme(task);
   },
 
   evalBase: function(task) {
@@ -38,6 +39,7 @@ G.evaluators.iso19115_3 = {
     G.evalProps(task,item,root,"contact_organizations_s","//cit:CI_Responsibility/cit:party/cit:name/*/text()");
     G.evalProps(task,item,root,"contact_people_s","//cit:CI_Responsibility/cit:party/cit:name/*/text()");
     G.evalProps(task,item,root,"metadata_language_s","/mdb:MD_Metadata/mdb:defaultLocale/lan:PT_Locale/lan:language/lan:LanguageCode/@codeListValue");
+    
     
     /* links */
     //G.evalProps(task,item,root,"links_s","//gmd:CI_OnlineResource/gmd:linkage/gmd:URL");
@@ -142,6 +144,11 @@ G.evaluators.iso19115_3 = {
 //      print(exception);
 //    }
     
+  },
+  
+  evalTheme: function(task) {	
+    var item = task.item, root = task.root;    
+    G.evalProps(task,item,root,"ggim_theme_s","/mdb:MD_Metadata/mdb:identificationInfo/mri:MD_DataIdentification/mri:descriptiveKeywords/mri:MD_Keywords[./mri:thesaurusName/cit:CI_Citation/cit:title/gco3:CharacterString='UN GGIM']/mri:keyword/gco3:CharacterString");
   },
 
   evalService: function(task) {
