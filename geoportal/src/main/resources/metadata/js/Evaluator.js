@@ -212,8 +212,7 @@ G._interrogate = function(mdoc) {
     if (type.evaluator && type.evaluator.version) {
       mdtype.setEvaluatorVersion(type.evaluator.version);
     }
-    mdoc.setMetadataType(mdtype);
-    print("metadata type set to " + type);
+    mdoc.setMetadataType(mdtype);    
   }
 };
 
