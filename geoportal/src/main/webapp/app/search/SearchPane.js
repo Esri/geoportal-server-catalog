@@ -128,10 +128,15 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       }
 
       //console.warn("params.queries",params.queries);
+      if (postData === null) postData = {};
+      //#581 ElasticSearch 8.0 is returning extra item with id as _search so excluding that item in search query
+      var boolObj = {};    
+      boolObj.must_not ={"term":{"_id":"_search"}};
       if (params.queries && params.queries.length > 0) {
-        if (postData === null) postData = {};
-        postData.query = {"bool":{"must":params.queries}};
+    	 boolObj.must = params.queries;        
       } 
+      postData.query = {"bool":boolObj};
+      
       if (params.aggregations) {
         if (postData === null) postData = {};
         postData.aggregations = params.aggregations;
