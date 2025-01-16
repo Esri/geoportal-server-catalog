@@ -266,9 +266,9 @@ private AppResponse executeWithTransportClient() throws Exception {
    * @param ec the Elastic context
    * @return the scroller
    */
-//  protected com.esri.geoportal.lib.elastic.http.util.Scroller newHttpScroller(ElasticContext ec) {
-//    return null;
-//  }
+  protected com.esri.geoportal.lib.elastic.http.util.Scroller newHttpScroller(ElasticContext ec) {
+    return null;
+  }
   
   /**
    * Create the PIT Search scroller.
@@ -284,9 +284,9 @@ private AppResponse executeWithTransportClient() throws Exception {
    * @param ec the Elastic context
    * @return the scroller
    */
-//  protected Scroller newScroller(ElasticContext ec) {
-//    return null;
-//  }
+  protected Scroller newScroller(ElasticContext ec) {
+    return null;
+  }
   
   /**
    * Write the response. 

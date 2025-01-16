@@ -329,21 +329,21 @@ public class BulkEditRequest extends BulkRequest {
    * @param ec the Elastic context
    * @return the scroller
    */
-//  protected com.esri.geoportal.lib.elastic.http.util.Scroller newHttpScroller(ElasticContext ec) {
-//    //QueryBuilder qtmp = this.newScrollerQuery(ec);
-//    //System.out.println("BulkEditRequest.query.transport="+qtmp.toString());
-//    
-//    String q = this.newHttpScrollerQuery(ec);
-//    LOGGER.debug("BulkEditRequest.query="+q); // TODO temporary
-//    com.esri.geoportal.lib.elastic.http.util.Scroller scroller = new com.esri.geoportal.lib.elastic.http.util.Scroller();
-//    scroller.setIndexName(ec.getItemIndexName());
-//    scroller.setIndexType(ec.getActualItemIndexType());
-//    scroller.setQuery(q);
-//    scroller.setFetchSource(false);
-//    scroller.setPageSize(getScrollerPageSize());
-//    //scroller.setMaxDocs(10);
-//    return scroller;
-//  }
+  protected com.esri.geoportal.lib.elastic.http.util.Scroller newHttpScroller(ElasticContext ec) {
+    //QueryBuilder qtmp = this.newScrollerQuery(ec);
+    //System.out.println("BulkEditRequest.query.transport="+qtmp.toString());
+    
+    String q = this.newHttpScrollerQuery(ec);
+    LOGGER.debug("BulkEditRequest.query="+q); // TODO temporary
+    com.esri.geoportal.lib.elastic.http.util.Scroller scroller = new com.esri.geoportal.lib.elastic.http.util.Scroller();
+    scroller.setIndexName(ec.getItemIndexName());
+    scroller.setIndexType(ec.getActualItemIndexType());
+    scroller.setQuery(q);
+    scroller.setFetchSource(false);
+    scroller.setPageSize(getScrollerPageSize());
+    //scroller.setMaxDocs(10);
+    return scroller;
+  }
   
   /**
    * Create the HTTP scroller query.
@@ -382,17 +382,17 @@ public class BulkEditRequest extends BulkRequest {
    * @param ec the Elastic context
    * @return the scroller
    */
-//  protected Scroller newScroller(ElasticContext ec) {
-//    QueryBuilder q = this.newScrollerQuery(ec);
-//    Scroller scroller = new Scroller();
-//    scroller.setIndexName(ec.getItemIndexName());
-//    scroller.setIndexType(ec.getActualItemIndexType());
-//    scroller.setQuery(q);
-//    scroller.setFetchSource(false);
-//    scroller.setPageSize(getScrollerPageSize());
-//    //scroller.setMaxDocs(10);
-//    return scroller;
-//  }
+  protected Scroller newScroller(ElasticContext ec) {
+    QueryBuilder q = this.newScrollerQuery(ec);
+    Scroller scroller = new Scroller();
+    scroller.setIndexName(ec.getItemIndexName());
+    scroller.setIndexType(ec.getActualItemIndexType());
+    scroller.setQuery(q);
+    scroller.setFetchSource(false);
+    scroller.setPageSize(getScrollerPageSize());
+    //scroller.setMaxDocs(10);
+    return scroller;
+  }
   
   /**
    * Create the scroller query.
