@@ -20,6 +20,7 @@ import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.util.PITSearchScroller;
 import com.esri.geoportal.lib.elastic.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.Scroller;
@@ -299,6 +300,28 @@ public class BulkEditRequest extends BulkRequest {
       }
     }
     return null;
+  }
+  
+  
+  /**
+   * Create the PIT search scroller.
+   * @param ec the Elastic context
+   * @return the scroller
+   */
+  protected PITSearchScroller newPitSearchScroller(ElasticContext ec) {
+    //QueryBuilder qtmp = this.newScrollerQuery(ec);
+    //System.out.println("BulkEditRequest.query.transport="+qtmp.toString());
+    
+    String q = this.newHttpScrollerQuery(ec);
+    LOGGER.debug("BulkEditRequest.query="+q); // TODO temporary
+    PITSearchScroller scroller = new PITSearchScroller();
+    scroller.setIndexName(ec.getItemIndexName());
+    scroller.setIndexType(ec.getActualItemIndexType());
+    scroller.setQuery(q);
+    scroller.setFetchSource(false);
+    scroller.setPageSize(getScrollerPageSize());
+    //scroller.setMaxDocs(10);
+    return scroller;
   }
   
   /**

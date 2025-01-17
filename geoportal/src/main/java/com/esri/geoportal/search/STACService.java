@@ -203,7 +203,7 @@ public class STACService extends Application {
 			{
 				String id = requestPayload.get("id").toString();			
 				String collectionUrlElastic = client.getItemUrl(ec.getCollectionIndexName(),ec.getActualItemIndexType(), id);
-				responseJSON = client.sendPost(collectionUrlElastic, body, "application/json");	
+				responseJSON = client.sendPut(collectionUrlElastic, body, "application/json");	
 			}			
 			else
 			{
@@ -438,7 +438,7 @@ public class STACService extends Application {
 	
 	
 	/**
-	 * This will all items from collection and then delete collection
+	 * This will delete all items from collection and then delete collection
 	 * @param hsr
 	 * @param collectionId
 	 * @return
@@ -923,7 +923,7 @@ public class STACService extends Application {
 				String id = updatedPayload.get("id").toString();			
 				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
 							
-				elasticResJson = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
+				elasticResJson = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
 				JSONObject elasticResObj = (JSONObject) JSONValue.parse(elasticResJson);
 				if(elasticResObj.containsKey("result") && elasticResObj.get("result").toString().contentEquals("created"))
 				{					
@@ -942,6 +942,11 @@ public class STACService extends Application {
 						
 						String itemRes = StacHelper.getItemWithItemId(collectionId, id);
 						responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+						//Sometimes item is not found immediately after being added. Since we reached here, it means record is added.
+							if(responseJSON.contains("404"))
+							{
+								responseJSON = generateResponse("201","Stac Item is added.",null);
+							}
 						itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
 					}
 					
