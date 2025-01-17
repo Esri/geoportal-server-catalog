@@ -41,29 +41,22 @@ public class StacHelper {
 	 * @return
 	 * @throws Exception
 	 */
-	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,
-                String collectionId, boolean validateFields) throws Exception {
-            
-    StacItemValidationResponse response = new StacItemValidationResponse();
-    //Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
-    if(validateFields) {
-        response = validateFields(requestPayload);
-    }		
-    if(response.getCode() == null) {
-        // issue 572 only validate id if autogenerating id is off
-        GeoportalContext gc = GeoportalContext.getInstance();
-        if (!gc.isCanStacAutogenerateId()) {
-            response = validateId(requestPayload,collectionId);
-            if(response.getCode() == null) {
-                response.setCode(StacItemValidationResponse.ITEM_VALID);
-            }
-        } else {
-            if(response.getCode() == null) {
-                response.setCode(StacItemValidationResponse.ITEM_VALID);
-            }                    
-        }
-    }
-    return response;
+	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId, boolean validateFields) throws Exception {	
+		StacItemValidationResponse response = new StacItemValidationResponse();
+		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
+		if(validateFields)
+		{
+			response = validateFields(requestPayload);
+		}		
+		if(response.getCode() == null)
+		{
+			response = validateId(requestPayload,collectionId);
+			if(response.getCode() == null)
+			{
+				response.setCode(StacItemValidationResponse.ITEM_VALID);
+			}
+		}
+		return response;
 	}
 
 
@@ -666,13 +659,13 @@ public class StacHelper {
 			//Check if same id collection exist
 			JSONObject itemRes = getCollectionWithId(id);	
 			
-			if(update && (itemRes == null))
+			if(update && (itemRes.isEmpty()))
 			{
 				errorMsg = "Stac collection with id '"+id+"' does not exist.";
 				response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
 				response.setMessage(errorMsg);
 			}
-			if (!update && (itemRes != null)) {
+			if (!update && (!itemRes.isEmpty())) {
 				errorMsg = "Stac collection with id '"+id+"' already exists.";
 				response.setCode(StacItemValidationResponse.ID_EXISTS);
 				response.setMessage(errorMsg);
