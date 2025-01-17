@@ -17,7 +17,13 @@ package com.esri.geoportal.service.stac;
 
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.search.StacHelper;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+import java.util.logging.Level;
+import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
 
@@ -36,6 +42,8 @@ public class StacContext {
   private static final Logger LOGGER = LoggerFactory.getLogger(StacContext.class);
   private static StacContext SINGLETON = null;
   private final GeoportalContext gc = GeoportalContext.getInstance();
+  private final JSONParser jsonParser = new JSONParser();
+  private final GeometryServiceClient gsc = gc.getGeometryServiceClient();
 
   private List<String> validationRules;
   
@@ -96,7 +104,12 @@ public class StacContext {
     switch (ruleType) {
       case "unique":
         key = ruleElements[1];
-        String value = properties.getAsString(key);
+        String value;
+        if (key.contains("properties.")) {
+          value = properties.getAsString(key.replace("properties.", ""));
+        } else {
+          value = properties.getAsString(key);
+        }
         
         passes = !indexHasValue(collectionId, key, value);
         message = passes ? "OK!" : 
@@ -154,36 +167,84 @@ public class StacContext {
   
   
   public boolean itemIntersectsCollection(JSONObject item, String collectionId) {
-    boolean intersects = false;
-    GeometryServiceClient gsc = gc.getGeometryServiceClient();
+    boolean intersects = true;
     JSONObject properties = (JSONObject) item.get("properties");
     
-    String[] geometryFields = {"geometry", "bbox", "envelope_geo", "shape_geo", "geometry_wkt"};
+    String[] geometryFields = {"geometry"};  // , "bbox", "envelope_geo", "shape_geo"};
+    Set<String> geometryFieldSet = Set.of(geometryFields);
+    Set<String> intersection = new HashSet<>(item.keySet());
+    intersection.retainAll(geometryFieldSet);
 
-    // Loop over all geometry fields
-    for (String thisGeometryField: geometryFields) {
+    try {
+      // Get collection geometry
+      JSONObject collection = (JSONObject) StacHelper.getCollectionWithId(collectionId);
+      JSONObject collectionObj = (JSONObject) jsonParser.parse(collection.toString()); // (JSONObject) collectionObj.get("extent");
+      JSONObject collectionExtent = (JSONObject) collectionObj.get("extent");
+      JSONObject collectionSpatial = (JSONObject) collectionExtent.get("spatial");
+      JSONObject collectionGeometry = (JSONObject) collectionSpatial.get("geometry");
+      JSONArray collectionCoordinates =(JSONArray) collectionGeometry.get("coordinates");
+
+      JSONObject collectionGeometryAGS = new JSONObject();
+      JSONObject collectionGeometryAGSRings = new JSONObject();
+      collectionGeometryAGS.put("geometryType", "esriGeometryPolygon");
+      collectionGeometryAGSRings.put("rings", collectionCoordinates);
+      collectionGeometryAGS.put("geometry", collectionGeometryAGSRings);
+      String collectionAGSGeometry = collectionGeometryAGS.toString();
       
-      if (item.containsKey(thisGeometryField)) {
-        
-        // get the item geometry
-        String geometry = gsc.getItemGeometry(item, thisGeometryField);
+      // Loop over all geometry fields
+      for (String thisGeometryField: intersection) {
 
-        if ((geometry != null) && (!geometry.isEmpty())) {
-          // see if the geometry intersects the collection geometry
-          // TODO
-        }
-        
-      } else {
-        
-        // see if the field is in the item properties        
-        if (properties.containsKey(thisGeometryField)) {
-          // TODO
+        if (item.containsKey(thisGeometryField)) {
+
+          // get the item geometry
+          String geometry = gsc.getItemGeometry(item, thisGeometryField);
+
+          if ((geometry != null) && (!geometry.isEmpty())) {
+            // see if the geometry intersects the collection geometry
+            intersects = intersects && doesIntersect(geometry, collectionAGSGeometry);
+          }
         }
       }
-    }
-    
+
+      // see if the item properties include the geomWKTField (see app-context.xml)
+      if (properties.containsKey(gc.getGeomWKTField())) {
+        JSONObject geometry_wkt_in = (JSONObject) properties.get(gc.getGeomWKTField());
+        String[] geometryTypes = { "point", "linestring", "polygon", "polyhedral"};
+        for (String geometryType: geometryTypes) {
+          if (geometry_wkt_in.containsKey(geometryType)) {
+            String arcgisGeometry = gsc.getArcGISGeometry(geometryType.toUpperCase(), geometry_wkt_in);
+            if ((arcgisGeometry != null) && (!arcgisGeometry.isEmpty())) {
+              // see if the geometry intersects the collection geometry
+              intersects = intersects && doesIntersect(arcgisGeometry, collectionAGSGeometry);
+            }
+          }
+        }
+      }
+    } catch (Exception ex) {
+      java.util.logging.Logger.getLogger(StacContext.class.getName()).log(Level.SEVERE, null, ex);
+    }   
     return intersects;
   }
 
-  
+  public boolean doesIntersect(String geometry, String collectionGeometry) {
+    boolean intersects = false;
+    
+    try {
+      // see if the geometry intersects the collection geometry
+      String intersectResponse = gsc.doIntersect(geometry, collectionGeometry);
+      JSONObject intersectResponseObj = (JSONObject) jsonParser.parse(intersectResponse);
+      JSONArray intersectGeometries = (JSONArray) intersectResponseObj.get("geometries");
+      JSONObject intersectPaths = (JSONObject) intersectGeometries.get(0);
+      
+      // if the paths is not an empty array, the two geometries intersect
+      intersects = !intersectPaths.isEmpty();
+      
+    } catch (Exception ex) {
+      LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
+      intersects = false;
+      
+    } finally {
+      return intersects;
+    }
+  }
 }

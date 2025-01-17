@@ -708,7 +708,7 @@ public class StacHelper {
 		
 		DocumentContext elasticResContext = JsonPath.parse(response);
 		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
-		JSONObject item = null;
+		JSONObject item = new JSONObject();
 		
 		if(items != null && items.size()>0)
 		{
