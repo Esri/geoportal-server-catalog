@@ -18,6 +18,8 @@ import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.http.util.BaseScroller;
+import com.esri.geoportal.lib.elastic.http.util.PITSearchScroller;
 import com.esri.geoportal.lib.elastic.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.util.Scroller;
 
@@ -144,6 +146,7 @@ public class BulkRequest extends AppRequest {
   
   private AppResponse executeWithHttpClient() throws Exception {
     AppResponse response = new AppResponse();
+    BaseScroller scroller;
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     AccessUtil au = new AccessUtil();
     if (getAdminOnly()) {
@@ -153,7 +156,18 @@ public class BulkRequest extends AppRequest {
     AtomicLong count = new AtomicLong();
     AtomicLong loopCount = new AtomicLong();
     int docsPerRequest = getDocsPerRequest();
-    com.esri.geoportal.lib.elastic.http.util.Scroller scroller = newHttpScroller(ec);
+    
+    // AWS Serverless - use search_after with PIT, 
+    if("serverless".equals(ec.getAwsOpenSearchType()))
+	{
+    	scroller = newPitSearchScroller(ec);
+	}
+    else
+    {
+    	//TODO probably remove usage of old scroller, Elastic Search and Open search behaves differently for point in time so need extensive test
+    	scroller = newHttpScroller(ec);
+    }
+
     scroller.scroll(
       new Consumer<com.esri.geoportal.lib.elastic.http.util.SearchHit>(){
         StringBuilder data = new StringBuilder();
@@ -192,7 +206,9 @@ public class BulkRequest extends AppRequest {
     return response;
   }
   
-  private AppResponse executeWithTransportClient() throws Exception {
+
+
+private AppResponse executeWithTransportClient() throws Exception {
     AppResponse response = new AppResponse();
 //    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 //    AccessUtil au = new AccessUtil();
@@ -260,6 +276,15 @@ public class BulkRequest extends AppRequest {
    */
   protected com.esri.geoportal.lib.elastic.http.util.Scroller newHttpScroller(ElasticContext ec) {
     return null;
+  }
+  
+  /**
+   * Create the PIT Search scroller.
+   * @param ec the Elastic context
+   * @return the scroller
+   */
+  protected PITSearchScroller newPitSearchScroller(ElasticContext ec) {	
+	return null;
   }
   
   /**

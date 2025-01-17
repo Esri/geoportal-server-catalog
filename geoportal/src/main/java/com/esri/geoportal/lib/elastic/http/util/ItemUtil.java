@@ -238,7 +238,7 @@ public class ItemUtil {
   public JsonObject searchForFileId(String indexName, String typeName, String fileid) throws Exception {
     if (fileid == null || fileid.length() == 0) return null;
     ElasticClient client = ElasticClient.newClient();
-    String url = client.getTypeUrl(indexName,typeName);
+    String url = client.getTypeUrlForSearch(indexName);
     url += "/_search";
     String field = FieldNames.FIELD_FILEID;
     JsonObjectBuilder request = Json.createObjectBuilder();

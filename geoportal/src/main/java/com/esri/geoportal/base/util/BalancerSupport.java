@@ -19,7 +19,11 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicLong;
+
 import javax.servlet.http.HttpServletRequest;
+
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
 
 
 /**
@@ -31,6 +35,7 @@ public class BalancerSupport {
   protected final AtomicLong balancerCount = new AtomicLong();
   private List<BalancerNode> balancerNodes = new ArrayList<>();
   private boolean is7Plus;
+  private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 
   public boolean getIs7Plus() {
     return is7Plus;
@@ -67,15 +72,25 @@ public class BalancerSupport {
    * @param request the request
    * @return the url
    */
-  public String rewriteTarget(HttpServletRequest request) {
-    if (balancerNodes.size() == 0) return null;
-    int index = (int)(balancerCount.getAndIncrement() % balancerNodes.size());
-    BalancerNode node =  balancerNodes.get(index);
-    StringBuilder target = new StringBuilder(node.proxyTo);
-    String pathInfo = request.getPathInfo();
-    if (pathInfo != null) {
-      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
+  public String rewriteTarget(HttpServletRequest request) {   
+    
+    StringBuilder target= null;
+    if(ec.getAwsOpenSearchType().equals("serverless"))
+    {
+    	//AWS opensearch serverless calls AWS API gateway endpoint which calls AWS lambda function(python) to execute search request
+    	target = new StringBuilder(ec.getAwsAPIGatewayEndpoint());
     }
+    else
+    {
+    	if (balancerNodes.size() == 0) return null;
+        int index = (int)(balancerCount.getAndIncrement() % balancerNodes.size());
+        BalancerNode node =  balancerNodes.get(index);
+    	target = new StringBuilder(node.proxyTo);
+    	String pathInfo = request.getPathInfo();
+	    if (pathInfo != null) {
+	      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
+	    }
+    }    
     String query = request.getQueryString();
     if (query != null) {
       try {
