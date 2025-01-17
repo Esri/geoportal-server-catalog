@@ -666,13 +666,13 @@ public class StacHelper {
 			//Check if same id collection exist
 			JSONObject itemRes = getCollectionWithId(id);	
 			
-			if(update && (itemRes == null))
+			if(update && (itemRes.isEmpty()))
 			{
 				errorMsg = "Stac collection with id '"+id+"' does not exist.";
 				response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
 				response.setMessage(errorMsg);
 			}
-			if (!update && (itemRes != null)) {
+			if (!update && (!itemRes.isEmpty())) {
 				errorMsg = "Stac collection with id '"+id+"' already exists.";
 				response.setCode(StacItemValidationResponse.ID_EXISTS);
 				response.setMessage(errorMsg);
