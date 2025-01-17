@@ -70,7 +70,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private boolean validateStacFields = false;
   private String canStacAutogenerateId = "false";
   private String canStacGeomTransform = "false";
-  private String geomtryService = "";
+  private String geometryService = "";
   private String geomWKTField = "";
   private String geomCRSField = "";
 
@@ -251,12 +251,12 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 	}
 
   // The ArcGIS Geometry service used to reproject STAC geometries
-	public String getGeomtryService() {
-    return this.geomtryService;
+	public String getGeometryService() {
+    return this.geometryService;
 	}
-	public void setGeomtryService(String geomtryService) {
-		this.geomtryService = geomtryService;
-    this.geometryServiceClient = new GeometryServiceClient(geomtryService);
+	public void setGeometryService(String geometryService) {
+		this.geometryService = geometryService;
+    this.geometryServiceClient = new GeometryServiceClient(geometryService);
 
 	}
 

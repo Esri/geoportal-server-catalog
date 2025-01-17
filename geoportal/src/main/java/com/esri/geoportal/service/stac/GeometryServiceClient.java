@@ -72,7 +72,7 @@ public class GeometryServiceClient {
      * @return the client
      */
     public static GeometryServiceClient newClient() {
-        String geometryService = GeoportalContext.getInstance().getGeomtryService();
+        String geometryService = GeoportalContext.getInstance().getGeometryService();
         return new GeometryServiceClient(geometryService);
     }
 

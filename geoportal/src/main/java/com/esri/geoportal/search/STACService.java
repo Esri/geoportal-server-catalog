@@ -91,7 +91,7 @@ public class STACService extends Application {
 	private final ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 	private final GeoportalContext gc = GeoportalContext.getInstance();
 	private final ElasticClient client = ElasticClient.newClient();
-  private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeomtryService());
+  private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
 
   private final String INTERNAL_CRS = "EPSG:4326";
   
@@ -197,8 +197,8 @@ public class STACService extends Application {
         // if reprojecting STAC geometries is supported and a
         // geometry service has been configured, try projecting 
         // from internal CRS (4326) to requested outCRS
-        if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomtryService().isEmpty())) {
-          LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomtryService());
+        if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+          LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
           // get the features from the response
           JSONParser jsonParser = new JSONParser();
@@ -357,8 +357,8 @@ public class STACService extends Application {
           // if reprojecting STAC geometries is supported and a
           // geometry service has been configured, try projecting 
           // from internal CRS (4326) to requested outCRS
-          if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomtryService().isEmpty())) {
-            LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomtryService());
+          if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+            LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
             Collection theCollection = new Collection(collectionObj);
             List<String> availableCRS = theCollection.getAvailableCRS();
             
@@ -436,8 +436,8 @@ public class STACService extends Application {
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
       // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomtryService().isEmpty())) {
-        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomtryService());
+      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
         // get the collection metadata
         Collection collection = new Collection(collectionId);
@@ -506,8 +506,8 @@ public class STACService extends Application {
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
       // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomtryService().isEmpty())) {
-        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomtryService());
+      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
          // get the collection metadata
          Collection collection = new Collection(collectionId);
@@ -738,8 +738,8 @@ public class STACService extends Application {
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
       // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomtryService().isEmpty())) {
-        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomtryService());
+      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
         JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
         responseJSON = projectedResponseObj.toString();        
@@ -863,8 +863,8 @@ public class STACService extends Application {
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
       // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeomtryService().isEmpty())) {
-        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeomtryService());
+      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
         JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
         responseJSON = projectedResponseObj.toString();        
