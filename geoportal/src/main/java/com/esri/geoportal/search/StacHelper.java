@@ -98,22 +98,29 @@ public class StacHelper {
    */
 	public static String getItemWithFieldValue(String collectionId,String fieldName, String fieldValue) throws Exception {
 		
-		String response;		
-		String query;
-		
 		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 		ElasticClient client = ElasticClient.newClient();
 		String url = client.getTypeUrlForSearch(ec.getIndexName());
 
 		url = url + "/_search";
-		
-		query = "{\"query\": {\"query_string\": {\"query\": \"" + fieldValue + "\",\"fields\"  : [\"" + fieldName + "\"]}}}";
-
-    response = client.sendPost(url, query, "application/json");
+    
+    String query = "{\"_source\": {\"include\": [\"" + fieldName + "\"]},";
+		query += "\"query\": {\"match\": {\"" + fieldName + "\": {\"query\": \"" + escapeSearchCharacters(fieldValue) + "\", \"operator\": \"and\"}}}}";
+    
+    String response = client.sendPost(url, query, "application/json");
 		
 		return response;
 	}
   
+  /**
+   * Escape certain characters in the value to be searched for
+   * Indexes tend to tokenize the value (for example on dashes)
+   * @param inputValue
+   * @return 
+   */
+  public static String escapeSearchCharacters(String inputValue) {
+    return inputValue.replace("-", " ");
+  }
   
   /** Get a STAC item based on a provided collectionId and itemId
    * 
