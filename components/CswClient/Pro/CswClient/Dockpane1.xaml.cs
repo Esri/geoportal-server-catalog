@@ -23,6 +23,7 @@ using ArcGIS.Core.Geometry;
 using System.Linq;
 using ArcGIS.Core.Data;
 using System.Net;
+using ArcGIS.Core.Internal.Geometry;
 
 namespace GeoportalSearch
 {
@@ -928,7 +929,8 @@ namespace GeoportalSearch
         // Add a new layer to the map
         await QueuedTask.Run(() =>
         {
-          Layer layer = LayerFactory.Instance.CreateLayer(cIMStandardDataConnection, MapView.Active.Map);
+            System.Uri cIMStandardDataConnectionUri = new System.Uri(url);
+          Layer layer = LayerFactory.Instance.CreateLayer(cIMStandardDataConnectionUri, MapView.Active.Map);
         });
       }
       catch (Exception ex)
@@ -1000,11 +1002,11 @@ namespace GeoportalSearch
         // Create a connection to the WMS server
         var serverConnection = new CIMInternetServerConnection { URL = url };
         var connection = new CIMWMSServiceConnection { ServerConnection = serverConnection };
-
+                System.Uri connectionUri = new System.Uri(url);
         // Add a new layer to the map
         await QueuedTask.Run(() =>
         {
-          var layer = LayerFactory.Instance.CreateLayer(connection, MapView.Active.Map);
+          var layer = LayerFactory.Instance.CreateLayer(connectionUri, MapView.Active.Map);
         });
       }
       catch (Exception ex)

@@ -128,21 +128,34 @@
 
         // get info from json file
         var json = task.context.readResourceFile(task.config.ogcrecordsItemsFile,"UTF-8");
+        
         json = json.trim();
 
         // update url
         json = json.replace(/{url}/g,task.val.escXml(self.ogcRecordsUrl));
-
+        
+        /*
         // update counts
-        json = json.replace(/\"{numberMatched}\"/, info.totalHits);
-        json = json.replace(/\"{numberReturned}\"/, info.features.length);
-        json = json.replace(/\"{next}\"/, info.startIndex + info.features.length);
+        json = json.replace(/\"{numberMatched}\"/, int(info.totalHits));
+        json = json.replace(/\"{numberReturned}\"/, int(info.features.length));
+        json = json.replace(/\"{next}\"/, int(info.startIndex) + int(info.features.length));
 
         // update features
         var feats = JSON.stringify(info.features);
         json = json.replace(/\"{features}\"/, feats);
-
+        
         response.put(response.Status_OK,response.MediaType_APPLICATION_JSON,json);
+        */
+        var jsonObj = JSON.parse(json);
+        jsonObj["numberMatched"] = int(info.totalHits);
+        jsonObj["numberReturned"] = int(info.features.length);
+        jsonObj["next"] =  int(info.startIndex + info.features.length);
+        jsonObj["features"] = info.features;
+        
+        console.log("jsonObj = " + JSON.stringify(jsonObj));
+        console.log("jsonObj[\"numberMatched\"] = " + jsonObj["numberMatched"]);
+
+        response.put(response.Status_OK, response.MediaType_APPLICATION_JSON, JSON.stringify(jsonObj));
 
         promise.resolve();
       })["catch"](function(error){
