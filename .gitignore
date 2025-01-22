@@ -146,3 +146,15 @@ geoportal/nb-configuration.xml
 .vscode/settings.json
 geoportal/.factorypath
 geoportal/.vscode/settings.json
+/components/CswClient/Pro/CswClient/.vs/CswClient/DesignTimeBuild
+/components/CswClient/Pro/CswClient/.vs/CswClient/FileContentIndex
+/components/CswClient/Pro/CswClient/.vs
+components/CswClient/Pro/CswClient/Backup-2.x.zip
+components/CswClient/Pro/CswClient/Migration-2025-01-21_22-24-42.html
+components/CswClient/Pro/CswClient/Migration-2025-01-21_22-24-42.txt
+components/CswClient/Pro/CswClient/obj/CswClient.csproj.nuget.dgspec.json
+components/CswClient/Pro/CswClient/obj/CswClient.csproj.nuget.g.props
+components/CswClient/Pro/CswClient/obj/CswClient.csproj.nuget.g.targets
+/components/CswClient/Pro/CswClient/obj
+components/CswClient/Pro/CswClient/Properties/launchSettings.json
+geoportal/src/main/resources/metadata/js/.LCKEvaluator.js~
