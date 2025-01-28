@@ -49,19 +49,23 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="username" value="" />
 		<beans:property name="password" value="" />
 		<beans:property name="encryptPassword" value="false" />
-		<!-- If encryptPassword =true, Uncomment below and configure the keys -->
-		<!-- 
-		<beans:property name="base64Key" value="${gpt_base64Key}" />
-		<beans:property name="base64Iv" value="${gpt_base64Iv}" />
-    	-->
+		<!--  if encryptPassword = true,uncomment and configure base64Key and  base64Iv
+		https://github.com/Esri/geoportal-server-catalog/tree/master/geoportal/doc/encrypt_password -->
+		
+		<!--<beans:property name="base64Key" value="${gpt_base64Key}" />
+		<beans:property name="base64Iv" value="${gpt_base64Iv}" /> -->		
 
 		<!-- Configure below for AWS OpenSearch Serverless -->		
     	<beans:property name="engineType" value="opensearch"/> <!-- null | opensearch | elasticsearch -->		
 		<beans:property name="awsOpenSearchType" value=""/> <!-- null for all other types of Opensearch | serverless | managed -->
-		<beans:property name="awsOpenSearchRegion" value="${gpt_awsRegion}"/> <!-- null | valid AWS region -->
+		<!--If awsOpenSearchType = serverless, uncomment and configure awsOpenSearchRegion ( null | valid AWS region),
+			awsOpenSearchAccessKeyId, awsOpenSearchSecretAccessKey and awsAPIGatewayEndpoint (API gateway endpoint) 
+			https://github.com/Esri/geoportal-server-catalog/tree/master/geoportal/doc/aws-serverless -->
+		<!-- 		
+		<beans:property name="awsOpenSearchRegion" value="${gpt_awsRegion}"/> 
     	<beans:property name="awsOpenSearchAccessKeyId" value="${gpt_awsAccessKeyID}"/>
     	<beans:property name="awsOpenSearchSecretAccessKey" value="${gpt_awsSecretAccessKey}"/>
-    	<beans:property name="awsAPIGatewayEndpoint" value=""/> <!-- API gateway endpoint -->    	
+    	<beans:property name="awsAPIGatewayEndpoint" value=""/>  	-->
                 		
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
