@@ -16,10 +16,13 @@ define(["dojo/_base/declare",
         "dojo/_base/lang",
         "app/common/Templated",
         "dojo/text!./templates/MapPanel.html",
-        "dojo/i18n!../nls/resources",
+        "dojo/i18n!../gs/widget/nls/strings",
         "dojo/sniff",
         "dojo/dom-style",
         "dojo/dom-geometry",
+        "dojo/dom-construct",
+        "dojo/_base/array",
+        "dojo/Deferred",
         "esri4/Map",
         "esri4/views/MapView",
         "esri4/layers/TileLayer",
@@ -29,11 +32,16 @@ define(["dojo/_base/declare",
         "esri4/widgets/FeatureTable",
         "esri4/widgets/Legend",
         "esri4/widgets/Locate",
-        "esri4/Graphic"/*,
+        "esri4/widgets/Home",
+        "esri4/Graphic",
+        "esri4/widgets/Expand",
         "../gs/widget/SearchPane",
-        "../gs/widget/WidgetContext"*/], 
-function(declare, lang, Templated, template, i18n, has, domStyle, domGeometry,
-		Map,MapView,TileLayer, MapImageLayer,SearchWidget,LayerList,FeatureTable,Legend,Locate,Graphic /*,SearchPane,WidgetContext*/) {
+        "../gs/widget/WidgetContext"], 
+function(declare, lang, Templated, template, i18n, has, domStyle, 
+		domGeometry,domConstruct,array,Deferred,
+		Map,MapView,TileLayer, MapImageLayer,SearchWidget,LayerList,FeatureTable,
+		Legend,Locate,Home,Graphic,Expand,
+		SearchPane,WidgetContext) {
 
   var oThisClass = declare([Templated], {
 
@@ -44,24 +52,57 @@ function(declare, lang, Templated, template, i18n, has, domStyle, domGeometry,
     
     postCreate: function() {
       this.inherited(arguments);
+      this.readConfig();
+    },
+    
+    readConfig:function()
+    {
+    	dfd = new Deferred();
+        fetch('app/gs/config/geoportal-search.json')
+        .then(response => response.json())
+        .then(data => {       
+          this.config = data;
+          dfd.resolve();
+        })
+        .catch(error => {
+          // Handle errors
+          console.error('Error not able to load config:', error);
+        });
+        return dfd;
     },
     
     addToMap: function(params) {
+    	//TODO look at AddToMap Widget.js and LayerProcessor.js
       var mapWindow  = this.mapNode.contentWindow;
       if (mapWindow && typeof mapWindow.addToMapListener === "function") {
         mapWindow.addToMapListener(params);
       }
     },
-  //Check Widget.js for opening map panel
+  //Opening map panel
     ensureMap: function(urlParams) {
+    	if(!this.config)
+    	{
+    		this.readConfig().then(()=>{
+    			this.loadMapPanel();
+    		})
+    		.catch(error => {
+    	          // Handle errors
+    	          console.error('Map panel could not be loaded.', error);
+    	    });;
+    	}
+    	else
+    	{
+    		this.loadMapPanel();
+    	}
+    },
+    loadMapPanel:function(){
 		var mapProps = AppContext.appConfig.searchMap || {};
 	    if (mapProps) mapProps = lang.clone(mapProps);
 	    var v = mapProps.basemapUrl;
 	    delete mapProps.basemapUrl;
 	    if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
 	      v = null;
-	    }
-	    
+	    }	    
 	    var map = new Map({basemap:"streets"});
 	    
 		const view = new MapView({
@@ -72,74 +113,128 @@ function(declare, lang, Templated, template, i18n, has, domStyle, domGeometry,
 	  	});
 		this.view = view;
 		
-		 if (typeof v === "string" && v.length > 0) {
-		        v =  util.checkMixedContent(v);
-	        var basemap;
-	        if (!mapProps.isTiled) {
-	          basemap = new MapImageLayer(v);
-	        } else {
-	          basemap = new TileLayer(v);
-	        }
-	        map.add(basemap);
-	      }
-		      
-	
-	      this.view.when(lang.hitch(this,function() { 
-	    	  const searchWidget = new SearchWidget({
-	    		  view: this.view
-	    		});
-	    	  this.view.ui.add(searchWidget, {
-	    		  position: "top-left",
-	    		  index: 0
-	    		}); 
-	    	  const layerList = new LayerList({
-	    		  view: view
-	    		});
-	    		// Adds widget below other elements in the top left corner of the view
-	    		view.ui.add(layerList, {
-	    		  position: "top-left"
-	    		});
-	    		
-	    		let locateWidget = new Locate({
-	    			  view: view,   // Attaches the Locate button to the view
-	    			  graphic: new Graphic({
-	    			    symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
-	    			    // graphic placed at the location of the user when found
-	    			  })
-	    			});
-	    		view.ui.add(locateWidget, "top-left");
-	    		
-	    		let legend = new Legend({
-	    			  view: view
-	    		});
+	 if (typeof v === "string" && v.length > 0) {
+	        v =  util.checkMixedContent(v);
+        var basemap;
+        if (!mapProps.isTiled) {
+          basemap = new MapImageLayer(v);
+        } else {
+          basemap = new TileLayer(v);
+        }
+        map.add(basemap);
+      }
+	   this.map = map; 
+      this.view.when(lang.hitch(this,function() {  
+    	  var localGeoportalUrl = this._createLocalCatalogUrl();
+	   	   if (localGeoportalUrl) {
+			   var target;
+			   for(var i=0;i<this.config.targets.length;i++)
+			   {
+				   target = this.config.targets[i];		   
+				   if (target.type === "geoportal" && !target.url) {
+				         this.config.targets[i].url = localGeoportalUrl;
+				         break;
+				   }
+			   }
+	   	   }
+    	//Add geoportal search widget
+  		var widgetContext = new WidgetContext({
+              i18n: i18n,
+              view: this.view,
+              proxyUrl: esriConfig.defaults.io.proxyUrl,
+              wabWidget: this,
+              widgetConfig: this.config
+            });
+	  		let node = domConstruct.create("div",{
+	  			width: "500px",
+	  			height: "500px"
+	  		});
+            var gpSearchWidget = new SearchPane({
+              i18n: widgetContext.i18n,
+              widgetContext: widgetContext
+            },node);
+            gpSearchWidget.startup();
+            
+            let gpSearchExpand = new Expand({
+   	    	 expandIcon: "query",  
+   	    	 expandTooltip: "Geoportal Search", 
+   	    	 view: view,
+   	    	 content: gpSearchWidget
+      	     });
+      	     view.ui.add(gpSearchExpand, {
+    		  position: "top-left",
+    		  index: 0
+    		});
+      	   let searchWidget = new SearchWidget({
+    		  view: this.view
+    		});
 
-	    		view.ui.add(legend, "bottom-right");
-	    	
-	    	  
-	     }))    	
-    	
-    	//Try this for Geoportal Search in expander (geoportal-search - widget.js
-//        var localGeoportalUrl = this._createLocalCatalogUrl();
-//        if (localGeoportalUrl) {
-//          array.forEach(this.config.targets, function(target){
-//            if (target.type === "geoportal" && !target.url) {
-//              target.url = localGeoportalUrl;
-//            }
-//          });
-//        }
-//        var widgetContext = new WidgetContext({
-//          i18n: i18n,
-//          map: this.map,
-//          proxyUrl: esriConfig.defaults.io.proxyUrl,
-//          wabWidget: this,
-//          widgetConfig: this.config
-//        });
-//        var searchPane = new SearchPane({
-//          i18n: widgetContext.i18n,
-//          widgetContext: widgetContext
-//        },this.widgetNode);
-//        searchPane.startup();
-    	
+    	  let searchWidgetExpand = new Expand({
+    	    	 expandIcon: "search",  
+    	    	 expandTooltip: "Find Address or Place", 
+    	    	 view: view,
+    	    	 content: searchWidget
+       	     });
+       	     view.ui.add(searchWidgetExpand, {
+    		  position: "top-left",
+    		  index: 1
+    		});
+    	  
+    	  let layerList = new LayerList({
+    		  view: view
+    		});
+    		let layerListExpand = new Expand({
+   	    	 expandIcon: "layers",  
+   	    	 expandTooltip: "Map Layers", 
+   	    	 view: view,
+   	    	 content: layerList
+      	     });
+      	     view.ui.add(layerListExpand, {
+    		  position: "top-left",
+    		  index: 2
+    		});
+    		
+//    		let locateWidget = new Locate({
+//    			  view: view,   // Attaches the Locate button to the view
+//    			  graphic: new Graphic({
+//    			    symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
+//    			    // graphic placed at the location of the user when found
+//    			  })
+//    			});
+//    		view.ui.add(locateWidget, {
+//    		  position: "top-left",
+//    		  index: 4
+//    		});
+    		
+    		let homeWidget = new Home({
+    			  view: view
+    			});
+
+			// adds the home widget to the top left corner of the MapView
+			view.ui.add(homeWidget, {
+	    		  position: "top-left",
+	    		  index: 4
+	    		});
+   	     	
+   	     	
+    		let legend = new Legend({
+    			  view: view
+    		}); 
+    		let legendExpand = new Expand({
+    	    	 expandIcon: "legend",  
+    	    	 expandTooltip: "Legend", 
+    	    	 view: view,
+    	    	 content: legend
+       	     });
+       	     view.ui.add(legendExpand, {
+    		  position: "top-left",
+    		  index: 3
+    		});
+        	     
+	     }))   
+	     
+
+    	        //TODO                                                                                         Add an expand here and open geoportal Search widget in expand
     	
 //    	var url = "./viewer/index.html"; // TODO config this?
 //      if (!this.mapWasInitialized) {
@@ -160,7 +255,15 @@ function(declare, lang, Templated, template, i18n, has, domStyle, domGeometry,
 //        //console.warn("viewerUrl",url);
 //        this.mapFrameNode.src = url;
 //      }
-    }
+    },
+    _createLocalCatalogUrl: function() {    
+        if (window && window.top && window.top.geoportalServiceInfo) {
+          var loc = window.top.location;
+          var gpt = window.top.geoportalServiceInfo;
+          return loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/_search";
+        }
+        return null;
+      }
 
   });
 

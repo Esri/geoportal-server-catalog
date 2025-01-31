@@ -168,7 +168,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
             component.processResults(response);
           });
         }
-      }).otherwise(function(error){
+      }).catch(function(error){
         if (!dfd.isCanceled()) {
           if (error && error.dojoType && error.dojoType === "cancel") {
           } else {
