@@ -142,7 +142,7 @@ G._initializeTask = function(mdoc) {
   nsmap.put("gcx", "http://standards.iso.org/iso/19115/-3/gcx/1.0");
   nsmap.put("gex", "http://standards.iso.org/iso/19115/-3/gex/1.0");
   nsmap.put("lan", "http://standards.iso.org/iso/19115/-3/lan/1.0");
-  nsmap.put("srv", "http://standards.iso.org/iso/19115/-3/srv/2.0");
+  nsmap.put("srv3", "http://standards.iso.org/iso/19115/-3/srv/2.0");
   nsmap.put("mac", "http://standards.iso.org/iso/19115/-3/mac/2.0");
   nsmap.put("mas", "http://standards.iso.org/iso/19115/-3/mas/1.0");
   nsmap.put("mcc", "http://standards.iso.org/iso/19115/-3/mcc/1.0");
@@ -212,8 +212,7 @@ G._interrogate = function(mdoc) {
     if (type.evaluator && type.evaluator.version) {
       mdtype.setEvaluatorVersion(type.evaluator.version);
     }
-    mdoc.setMetadataType(mdtype);
-    print("metadata type set to " + type);
+    mdoc.setMetadataType(mdtype);    
   }
 };
 
