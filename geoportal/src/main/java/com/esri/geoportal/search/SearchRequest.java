@@ -39,6 +39,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+
 /**
  * Search request (geoportal-search based).
  */
@@ -183,33 +186,44 @@ public class SearchRequest {
   private JsonObjectBuilder getSelfInfo() {
     JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
+    GeoportalContext gc = com.esri.geoportal.context.GeoportalContext.getInstance();
+    ElasticContext ec = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext();
     String node = null;
     String scheme = "http://";
     int port = 9200;
     try {
-      node = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getNextNode();
-      port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
-      if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
+      node = ec.getNextNode();
+      port = ec.getHttpPort();
+      if (ec.getUseHttps()) {
         scheme = "https://";
         elastic.add("useHttps",true);
       }
       else
       {
     	  elastic.add("useHttps",false);
+      }      
+      if(ec.getAwsOpenSearchType().equals("serverless"))
+      {
+    	  elastic.add("awsOpenSearchRegion",ec.getAwsOpenSearchRegion());
+          elastic.add("awsOpenSearchAccessKeyId",ec.getAwsOpenSearchAccessKeyId());
+          elastic.add("awsOpenSearchSecretAccessKey",ec.getAwsOpenSearchSecretAccessKey());
       }
-      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUsername();
-      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getPassword();
-      if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-        elastic.add("username",username);
-        elastic.add("password",password);
+      else
+      {
+    	  String username = ec.getUsername();
+          String password = ec.getPassword();
+    	  if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+    	        elastic.add("username",username);
+    	        elastic.add("password",password);
+    	      }
       }
     } catch (Throwable t) {
       t.printStackTrace();
     }
     try {
       JsonObjectBuilder access = Json.createObjectBuilder();
-      access.add("supportsApprovalStatus",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsApprovalStatus());
-      access.add("supportsGroupBasedAccess",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess());    
+      access.add("supportsApprovalStatus",gc.getSupportsApprovalStatus());
+      access.add("supportsGroupBasedAccess",gc.getSupportsGroupBasedAccess());    
       com.esri.geoportal.context.AppUser user = null;
       if (this.appUser != null && this.appUser instanceof com.esri.geoportal.context.AppUser) {
         user = (com.esri.geoportal.context.AppUser)appUser;
@@ -217,7 +231,7 @@ public class SearchRequest {
       if (user != null && user.getUsername() != null) {
         access.add("username",user.getUsername());
         access.add("isAdmin",user.isAdmin());
-        if (com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()) {
+        if (gc.getSupportsGroupBasedAccess()) {
           JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
           List<com.esri.geoportal.base.security.Group> groups = user.getGroups();
           if (groups != null) {
@@ -233,8 +247,7 @@ public class SearchRequest {
       t.printStackTrace();
     }
     if ((node != null) && (node.length() > 0)) {
-      String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
-      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getActualItemIndexType();       
+      String idxName = ec.getIndexName();          
       String url = scheme+node+":"+port+"/"+idxName+"/_search";
       elastic.add("searchUrl",url);
       info.add("elastic",elastic);
