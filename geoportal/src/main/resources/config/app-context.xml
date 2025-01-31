@@ -21,7 +21,7 @@
 		<beans:property name="supportsGroupBasedAccess" value="false" />
 		<beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
 		<beans:property name="parseGml" value="false" />
-		<beans:property name="supportsCollections" value="false" />
+		<beans:property name="supportsCollections" value="true" />
 		<beans:property name="numStacFeaturesAddItem" value="500" />
         <beans:property name="validateStacFields" value="false" />		
 	</beans:bean>
@@ -41,22 +41,22 @@ see: docs/configureByEnvironmentVariable.md
 		<beans:property name="allowFileId" value="false" />
 		<beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
 		<beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
-		<beans:property name="httpPort" value="9200" />		
+		<beans:property name="httpPort" value="443" />		
 		<beans:property name="proxyBufferSize" value="8192" />
 		
-		<!-- Uncomment and complete the following if you want to use secured index -->
-		<!--
+		<!-- Uncomment and complete the following if you want to use secured Elastic -->
+		
 		<beans:property name="useHttps" value="true" />
-		<beans:property name="encryptPassword" value="false" />
+		<beans:property name="encryptPassword" value="true" />
 		<beans:property name="base64Key" value="${gpt_base64Key}" />
 		<beans:property name="base64Iv" value="${gpt_base64Iv}" />
 		<beans:property name="username" value="${gpt_elasticUser}" />
 		<beans:property name="password" value="${gpt_elasticPassword}" />		
-                -->
+ 
 		<beans:property name="nodes">
 			<!-- The list of host names within the Elasticsearch cluster, one value element per host -->
 			<beans:list>
-				<beans:value>${es_node:localhost}</beans:value>
+				<beans:value>${es_node:search-gpt-elasticsearch-kphlqxp4gpcgo574xzkfxeusc4.us-west-1.es.amazonaws.com}</beans:value>
 			</beans:list>
 		</beans:property>
 	</beans:bean>
