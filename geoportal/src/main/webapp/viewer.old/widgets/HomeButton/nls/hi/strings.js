@@ -1,3 +1,0 @@
-define({
-  "_widgetLabel": "होम"
-});

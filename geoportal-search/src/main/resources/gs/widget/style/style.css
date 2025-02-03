@@ -62,7 +62,7 @@
 	width: 100%;
 	left: 0;
 	right: 0;
-	top: 70px;
+	top: 50px;
 	bottom: 44px;
 	overflow-x: hidden;
 	overflow-y: auto;
@@ -98,6 +98,7 @@
   color: #196fa6;
   text-decoration: none;
   line-height: 20px;
+  top: 20px
   padding: 5px 5px;
 }
 
@@ -418,5 +419,6 @@
 .geoportal-search.settings .form-group .dijitTextBox {
   width: 300px;
 }
+
 
 /* ........................................................................ */
