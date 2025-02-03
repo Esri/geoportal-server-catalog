@@ -160,3 +160,5 @@ components/CswClient/Pro/CswClient/Properties/launchSettings.json
 geoportal/src/main/resources/metadata/js/.LCKEvaluator.js~
 /components/CswClient/Pro/CswClient/.vs/CswClient/FileContentIndex
 components/CswClient/Pro/CswClient/.vs/CswClient/FileContentIndex/f37114e8-cba6-4c58-87b6-3ae31e401666.vsidx
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json

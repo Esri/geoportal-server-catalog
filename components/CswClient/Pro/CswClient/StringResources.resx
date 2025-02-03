@@ -197,7 +197,7 @@
     <value>Failed to connect to map service.</value>
   </data>
   <data name="AddWmsLayerFailed" xml:space="preserve">
-    <value>Failed to add WMS map service layer.</value>
+    <value>Failed to add WMS layer</value>
   </data>
   <data name="RetrieveMetadataFromCatalogFailed" xml:space="preserve">
     <value>Failed to retrieve metadata from catalog.</value>

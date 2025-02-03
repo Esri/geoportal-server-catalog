@@ -999,10 +999,10 @@ namespace GeoportalSearch
           url = url + msi.ServiceParam;
           url = AppendQuestionOrAmpersandToUrlString(url);
         }
-        // Create a connection to the WMS server
-        var serverConnection = new CIMInternetServerConnection { URL = url };
-        var connection = new CIMWMSServiceConnection { ServerConnection = serverConnection };
-                System.Uri connectionUri = new System.Uri(url);
+                // Create a connection to the WMS server
+                CIMInternetServerConnection serverConnection = new() { URL = url };
+                CIMWMSServiceConnection connection = new() { ServerConnection = serverConnection };
+                System.Uri connectionUri = new(url);
         // Add a new layer to the map
         await QueuedTask.Run(() =>
         {
@@ -1015,7 +1015,33 @@ namespace GeoportalSearch
       }
     }
 
-    private void AddLayerArcIMS(MapServiceInfo msi)
+        // Create a connection to the WMTS server
+        private async void AddLayerWMTS(MapServiceInfo msi, Boolean fromServerUrl)
+        {
+            if (msi == null) { throw new ArgumentNullException(); }
+
+            try
+            {
+                string url = msi.Server;
+
+                CIMInternetServerConnection serverConnection = new() { URL = url };
+                CIMWMTSServiceConnection connection = new() { ServerConnection = serverConnection };
+                Uri uri = new(url);
+                System.Uri connectionUri = uri;
+
+                await QueuedTask.Run(() =>
+                {
+                    var layer = LayerFactory.Instance.CreateLayer(connectionUri,
+                                                                  MapView.Active.Map);
+                });
+            }
+            catch (Exception ex)
+            {
+                ShowErrorMessageBox("Adding WMTS failed\r\n" + ex.Message);
+            }
+        }
+
+        private void AddLayerArcIMS(MapServiceInfo msi)
     {
 
     }
@@ -1046,10 +1072,10 @@ namespace GeoportalSearch
       }
     }
 
-    private void drawfootprint(CswRecord record, bool refreshview, bool deleteelements)
-    {
-      var gl_param = new GraphicsLayerCreationParams { Name = "Metadata Footprints" };
-      var map = MapView.Active.Map;
+        private void drawfootprint(CswRecord record, bool refreshview, bool deleteelements)
+        {
+            var gl_param = new GraphicsLayerCreationParams { Name = "Metadata Footprints" };
+            var map = MapView.Active.Map;
             var graphicsLayer = this._graphicsLayer; // map.GetLayersAsFlattenedList().OfType<ArcGIS.Desktop.Mapping.GraphicsLayer>().FirstOrDefault();
 
       QueuedTask.Run(() =>
@@ -1326,70 +1352,101 @@ namespace GeoportalSearch
       {
         System.Windows.Forms.Cursor.Current = Cursors.WaitCursor;
 
-        CswRecord record = (CswRecord)resultsListBox.SelectedItem;
-        if (record == null) throw new NullReferenceException(StringResources.CswRecordIsNull);
+            CswRecord record = (CswRecord)resultsListBox.SelectedItem;
+            if (record == null) throw new NullReferenceException(StringResources.CswRecordIsNull);
 
-        if (record.MapServerURL == null || record.MapServerURL.Trim().Length == 0)
-        {
-          // retrieve metadata
-          RetrieveAddToMapInfoFromCatalog();
-        }
-        else
-        {
-          _mapServerUrl = record.MapServerURL;
-
-        }
-
-        if (_mapServerUrl != null && _mapServerUrl.Trim().Length > 0)
-        {
-
-          String serviceType = record.ServiceType;
-          if (serviceType == null || serviceType == "unknown" || serviceType.Length == 0)
-          {
-            serviceType = CswProfile.getServiceType(_mapServerUrl);
-          }
-          if (serviceType.Equals("unknown"))
-          {
-            System.Diagnostics.Process.Start("IExplore", _mapServerUrl);
-            System.Windows.Forms.Cursor.Current = Cursors.Default;
-            return;
-          }
-          else if (serviceType.Equals("ags"))
-          {
-            if (_mapServerUrl.ToLower().Contains("arcgis/rest"))
+            if (record.MapServerURL == null || record.MapServerURL.Trim().Length == 0)
             {
-              var urlparts = _mapServerUrl.Split('/');
-              if (urlparts != null && urlparts.Length > 0)
-              {
-                var lastPartOfUrl = urlparts[urlparts.Length - 1];
-                if (lastPartOfUrl.Length > 0 && IsNumeric(lastPartOfUrl))
-                {
-                  // CswClient client = new CswClient();
-                  AddAGSService(_mapServerUrl);
-                }
-                else
-                {
-                  _mapServerUrl = _mapServerUrl + "?f=lyr";
-                  CswClient client = new CswClient();
-                  AddAGSService(client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, ""));
-                }
-              }
+                // retrieve metadata
+                RetrieveAddToMapInfoFromCatalog();
             }
             else
             {
-              AddAGSService(_mapServerUrl);
+                  _mapServerUrl = record.MapServerURL;
+
             }
-          }
-          else if (serviceType.Equals("wms"))
-          {
-            MapServiceInfo msinfo = new MapServiceInfo();
-            msinfo.Server = record.MapServerURL;
-            msinfo.Service = record.ServiceName;
-            msinfo.ServiceType = record.ServiceType;
-            CswProfile.ParseServiceInfoFromUrl(msinfo, _mapServerUrl, serviceType);
-            AddLayerWMS(msinfo, true);
-          }
-            else if (serviceType.Equals("wfs"))
+
+            if (_mapServerUrl != null && _mapServerUrl.Trim().Length > 0)
+            {
+
+                  String serviceType = record.ServiceType;
+                  if (serviceType == null || serviceType == "unknown" || serviceType.Length == 0)
+                  {
+                        serviceType = CswProfile.getServiceType(_mapServerUrl);
+                  }
+                  if (serviceType.Equals("unknown"))
+                  {
+                        System.Diagnostics.Process.Start("IExplore", _mapServerUrl);
+                        System.Windows.Forms.Cursor.Current = Cursors.Default;
+                        return;
+                  }
+                  else if (serviceType.Equals("ags"))
+                  {
+                        String lowerMapServerUrl = _mapServerUrl.ToLower();
+                        if (_mapServerUrl.ToLower().Contains("arcgis/rest"))
+                        {
+                            if (lowerMapServerUrl.Contains("wmsserver"))
+                            {
+                                serviceType = "wms";
+                            } 
+                            else if (lowerMapServerUrl.Contains("mapserver/wmts"))
+                            {
+                                serviceType = "wmts";
+                            } 
+                            else if (lowerMapServerUrl.Contains("mapserver/wfsserver"))
+                            {
+                                serviceType = "wfs";
+                            } 
+                            else if (lowerMapServerUrl.Contains("mapserver/wcsserver"))
+                            {
+                                serviceType = "wfs";
+                            }
+                            else 
+                            {
+                                var urlparts = _mapServerUrl.Split('/');
+                                if (urlparts != null && urlparts.Length > 0)
+                                {
+                                    var lastPartOfUrl = urlparts[urlparts.Length - 1];
+                                    if (lastPartOfUrl.Length > 0 && IsNumeric(lastPartOfUrl))
+                                    {
+                                        // CswClient client = new CswClient();
+                                        AddAGSService(_mapServerUrl);
+                                    }
+                                    else
+                                    {
+                                        _mapServerUrl = _mapServerUrl + "?f=lyr";
+                                        CswClient client = new CswClient();
+                                        AddAGSService(client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, ""));
+                                    }
+                                }
+                            }
+                        } 
+                        else
+                        {
+                          AddAGSService(_mapServerUrl);
+                        }
+                      }
+
+                      // likely an OGC service
+                      if (serviceType.Equals("wms"))
+                      {
+                        MapServiceInfo msinfo = new MapServiceInfo();
+                        msinfo.Server = record.MapServerURL;
+                        msinfo.Service = record.ServiceName;
+                        msinfo.ServiceType = record.ServiceType;
+                        CswProfile.ParseServiceInfoFromUrl(msinfo, _mapServerUrl, serviceType);
+                        AddLayerWMS(msinfo, true);
+                      }
+                        else if (serviceType.Equals("wmts"))
+                        {
+                            MapServiceInfo msinfo = new MapServiceInfo();
+                            msinfo.Server = record.MapServerURL;
+                            msinfo.Service = record.ServiceName;
+                            msinfo.ServiceType = record.ServiceType;
+                            CswProfile.ParseServiceInfoFromUrl(msinfo, _mapServerUrl, serviceType);
+                            AddLayerWMTS(msinfo, true);
+                        }
+                    else if (serviceType.Equals("wfs"))
             {
                 MapServiceInfo msinfo = new MapServiceInfo();
                 msinfo.Server = record.MapServerURL;
@@ -1429,7 +1486,6 @@ namespace GeoportalSearch
 
               foreach (XmlNode coverage in coverageList)
               {
-
                 XmlNodeList nodes = coverage.ChildNodes;
 
                 foreach (XmlNode node in nodes)
@@ -1442,7 +1498,6 @@ namespace GeoportalSearch
                     {
                       String filePath = client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, "");
                       AddAGSService(filePath);
-
                     }
                     catch (Exception ee)
                     {
