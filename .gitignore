@@ -150,4 +150,3 @@ geoportal/.vscode/settings.json
 .vs/slnx.sqlite
 .vs/VSWorkspaceState.json
 /components/CswClient/Pro/CswClient/.vs
-geoportal/src/main/resources/config/app-context.xml
