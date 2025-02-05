@@ -53,6 +53,7 @@ public class ElasticContext {
   private String indexName = "metadata";
   private boolean supportsCollections = false;
   private String collectionIndexName = "collections";
+  private boolean autoCreateCollectionIndex = false;
   private boolean indexNameIsAlias = true;
   private boolean is6Plus = false;
   private boolean is7Plus = false;
@@ -190,6 +191,15 @@ private String base64Iv = "";
    * @param doesSupportCollections */
   public void setSupportsCollections(boolean doesSupportCollections) {
     this.supportsCollections = doesSupportCollections;
+  }
+
+  /** supports collections or not */
+  public boolean getAutoCreateCollectionIndex() {
+    return autoCreateCollectionIndex;
+  }
+  /** supports collections or not */
+  public void setAutoCreateCollectionIndex(boolean autoCreateCollectionIndex) {
+    this.autoCreateCollectionIndex = autoCreateCollectionIndex;
   }
   
   /** Treat the index name as an alias.
