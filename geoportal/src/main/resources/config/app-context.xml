@@ -40,8 +40,8 @@
   -->
   <beans:bean id="elasticContext" class="com.esri.geoportal.lib.elastic.ElasticContextHttp">
     <beans:property name="clusterName" value="elasticsearch" />
-    <beans:property name="indexName" value="${gpt_indexName:metadata}" />
-    <beans:property name="collectionIndexName" value="${gpt_collectionIndexName:collections}" />
+    <beans:property name="indexName" value="${gpt_indexName}" />
+    <beans:property name="collectionIndexName" value="${gpt_collectionIndexName}" />
     <beans:property name="indexNameIsAlias" value="true" />
     <beans:property name="autoCreateIndex" value="true" />
     <beans:property name="autoCreateCollectionIndex" value="true" />		
@@ -53,23 +53,23 @@
 		<beans:property name="proxyBufferSize" value="8192" />		
           	
     <!-- Uncomment and complete the following if you want to use secured index -->
-    <beans:property name="useHttps" value="false" />
+    <beans:property name="useHttps" value="true" />
     <beans:property name="encryptPassword" value="false" />
     <!-- If encryptPassword =true, Uncomment below and configure the keys -->
 		<!--
     <beans:property name="base64Key" value="${gpt_base64Key}" />
     <beans:property name="base64Iv" value="${gpt_base64Iv}" />
+    -->
     <beans:property name="username" value="" />
     <beans:property name="password" value="" />	
-    -->
     
 		<!-- Configure below for AWS OpenSearch Serverless -->		
-   	<!-- beans:property name="engineType" value="${gpt_engineType:opensearch}"/--> <!-- null | opensearch | elasticsearch -->		
-		<!-- beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType:}"/--> <!-- null for all other types of Opensearch | serverless | managed -->
-		<!-- beans:property name="awsOpenSearchRegion" value="${gpt_awsOpenSearchRegion:}"/--> <!-- null | valid AWS region -->
-   	<!-- beans:property name="awsOpenSearchAccessKeyId" value="${gpt_awsOpenSearchAccessKeyID:}"/-->
-   	<!-- beans:property name="awsOpenSearchSecretAccessKey" value="${gpt_awsOpenSearchSecretAccessKey:}"/-->
-   	<!-- beans:property name="awsAPIGatewayEndpoint" value="${gpt_awsOpenSearchSecretAccessKey:}"/--> <!-- API gateway endpoint -->    	
+   	<beans:property name="engineType" value="${gpt_engineType:opensearch}"/> <!-- null | opensearch | elasticsearch -->		
+		<beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType}"/> <!-- null for all other types of Opensearch | serverless | managed -->
+		<beans:property name="awsOpenSearchRegion" value="${gpt_awsOpenSearchRegion}"/> <!-- null | valid AWS region -->
+   	<beans:property name="awsOpenSearchAccessKeyId" value="${gpt_awsOpenSearchAccessKeyID}"/>
+   	<beans:property name="awsOpenSearchSecretAccessKey" value="${gpt_awsOpenSearchSecretAccessKey}"/>
+   	<beans:property name="awsAPIGatewayEndpoint" value="${gpt_awsOpenSearchSecretAccessKey}"/> <!-- API gateway endpoint -->    	
                 		
     <beans:property name="nodes">
       <!-- The list of host names within the Elasticsearch cluster, one value element per host -->
