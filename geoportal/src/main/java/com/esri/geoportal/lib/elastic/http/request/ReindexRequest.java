@@ -24,6 +24,7 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
 import com.esri.geoportal.lib.elastic.http.util.Scroller;
+import com.esri.geoportal.lib.elastic.http.util.PITSearchScroller;
 import com.esri.geoportal.lib.elastic.http.util.SearchHit;
 import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
@@ -128,7 +129,7 @@ public class ReindexRequest extends BulkEditRequest {
     
     ItemIO itemio = new ItemIO();
     ItemUtil itemUtil = new ItemUtil();
-    Scroller scroller = new Scroller();
+    PITSearchScroller scroller = new PITSearchScroller();
     scroller.setIndexName(fromIndexName);
     scroller.setIndexType("item");
     //scroller.setMaxDocs(3); // TODO temporary

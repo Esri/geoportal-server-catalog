@@ -156,7 +156,7 @@
       var realQueryables = {
         "apiso:Language": "apiso_Language_s"
       }
-      var anytextAliases = ["","anytext","format","subject"];
+      var anytextAliases = ["","anytext","csw:anytext","format","subject"];  // #582
       if (!ignoreValidation) anytextAliases.push("dc:type");
 
       var name = null, lc = "", locator, ows, msg;

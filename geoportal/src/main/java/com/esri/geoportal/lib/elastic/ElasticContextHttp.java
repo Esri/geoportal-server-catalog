@@ -14,15 +14,9 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic;
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.util.Val;
-import com.esri.geoportal.lib.elastic.http.ElasticClient;
-
-import java.io.FileNotFoundException;
-import java.math.BigDecimal;
+import java.util.Map.Entry;
 import java.util.Timer;
 import java.util.TimerTask;
-import java.util.Map.Entry;
 
 import javax.annotation.PostConstruct;
 import javax.json.Json;
@@ -34,8 +28,12 @@ import javax.json.JsonValue;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.util.Val;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
+
 /**
- * Elasticsearch context (HTTP based, no Transport client.
+ * Elasticsearch or OpenSearch context (HTTP based, no Transport client.
  */
 public class ElasticContextHttp extends ElasticContext {
   
@@ -59,7 +57,16 @@ public class ElasticContextHttp extends ElasticContext {
    */
   protected void _createAlias(String index, String alias) throws Exception {
     //LOGGER.info("Creating alias: "+alias+" for index: "+index);
-    ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
+	  ElasticClient client = null;
+	  if(!getAwsOpenSearchType().equals("serverless"))
+      {
+    	  client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
+      }
+      else
+      {
+    	  client = new ElasticClient(getBaseUrl(false),
+    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+      }
     String url = client.getBaseUrl()+"/_aliases";
     JsonObjectBuilder request = Json.createObjectBuilder();
     JsonArrayBuilder actions = Json.createArrayBuilder();
@@ -82,7 +89,16 @@ public class ElasticContextHttp extends ElasticContext {
    */
   protected void _createIndex(String name) throws Exception {
     //LOGGER.info("Creating index: "+name);
-    ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
+	  ElasticClient client = null;
+	  if(!getAwsOpenSearchType().equals("serverless"))
+      {
+    	  client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
+      }
+      else
+      {
+    	  client = new ElasticClient(getBaseUrl(false),
+    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+      }
     String url = client.getIndexUrl(name);
     String path = this.getActualMappingsFile();
     JsonObject jso = (JsonObject)JsonUtil.readResourceFile(path);
@@ -128,26 +144,25 @@ public class ElasticContextHttp extends ElasticContext {
     try {
       if (name == null || name.trim().length() == 0) return;
       String result, url;
-      ElasticClient client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
-      
-      result = client.sendGet(client.getBaseUrl());
-      JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
-      String version = esinfo.getJsonObject("version").getString("number");
-      LOGGER.info("Elasticsearch version: "+version);
-//      for (int i=1;i<20;i++) {
-//        if (version.indexOf(i+".") == 0) {
-//          int primaryVersion = i;
-//          //System.out.println("primaryVersion="+primaryVersion);
-//          if (primaryVersion >= 6) this.setIs6Plus(true);
-//          if (primaryVersion >= 7) this.setIs7Plus(true);
-//          break;
-//        }
-//      }
-      
-        
-      
-      if (getIs6Plus() && this.getUseSeparateXmlItem()) {
-        LOGGER.info("Elasticsearch is version "+version+", setting useSeparateXmlItem=false");
+      ElasticClient client;
+      if(!getAwsOpenSearchType().equals("serverless"))
+      {
+    	client = new ElasticClient(getBaseUrl(false),getBasicCredentials(),getUseHttps());
+    	
+    	//AWS serverless does not allow baseURl get so removed from that option
+        result = client.sendGet(client.getBaseUrl());
+        JsonObject esinfo = (JsonObject)JsonUtil.toJsonStructure(result);
+        String version = esinfo.getJsonObject("version").getString("number");
+        LOGGER.info("Search Engine version: "+version);
+      }
+      else
+      {
+    	  client = new ElasticClient(getBaseUrl(false),
+    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+      }
+     
+      if (this.getUseSeparateXmlItem()) {
+        LOGGER.info("Search Engine setting useSeparateXmlItem=false");
         setUseSeparateXmlItem(false);
       }
       
@@ -158,7 +173,6 @@ public class ElasticContextHttp extends ElasticContext {
       } catch (Exception e) {
         indexExists = false;
       }
-      
       
       if (indexExists) {
         boolean hasClobDocType = false;
@@ -205,6 +219,7 @@ public class ElasticContextHttp extends ElasticContext {
         int sfx = -1;
         
         url = client.getBaseUrl()+"/_aliases";
+        
         result = client.sendGet(url);
         if (result != null && result.length() > 0 && result.indexOf("{") == 0) {
           JsonObject jso = (JsonObject)JsonUtil.toJsonStructure(result);
@@ -251,10 +266,11 @@ public class ElasticContextHttp extends ElasticContext {
         String indexName = getItemIndexName();
         String collectionIndexName = getCollectionIndexName();
         boolean indexNameIsAlias = getIndexNameIsAlias();
-        boolean supportsCollections = this.getSupportsCollections();
+        boolean autoCreateCollectionIndex = getAutoCreateCollectionIndex();
+       
         try {
           ensureIndex(indexName,indexNameIsAlias);
-          if (supportsCollections) {
+          if (autoCreateCollectionIndex) {
               ensureIndex(collectionIndexName,indexNameIsAlias);
           }
         } catch (Exception e) {
@@ -267,7 +283,7 @@ public class ElasticContextHttp extends ElasticContext {
             public void run() {
               try {
                 ensureIndex(indexName,indexNameIsAlias);
-                if (supportsCollections) {
+                if (autoCreateCollectionIndex) {
                     ensureIndex(collectionIndexName,indexNameIsAlias);
                 }
                 timer.cancel();
