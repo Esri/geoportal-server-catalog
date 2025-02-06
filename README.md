@@ -10,7 +10,8 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 
 
 ## Releases and Downloads
-- **2.7.2 - LATEST** - released, October 4, 2024.
+- **2.7.2.1 - LATEST** - released, November 22, 2024.
+- 2.7.2 - released, October 4, 2024.
 - 2.7.1 - released, December 21, 2023.
 - 2.7.0-patch1 - released Sep 11, 2023.
 - 2.6.5 - released December 17, 2021. Note that this version includes resolution to the Log4j2 vulnerability identified in December 2021.
