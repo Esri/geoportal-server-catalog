@@ -259,7 +259,7 @@ public class STACService extends Application {
 			{
 				String id = requestPayload.get("id").toString();			
 				String collectionUrlElastic = client.getItemUrl(ec.getCollectionIndexName(),ec.getActualItemIndexType(), id);
-				responseJSON = client.sendPost(collectionUrlElastic, body, "application/json");	
+				responseJSON = client.sendPut(collectionUrlElastic, body, "application/json");	
 			}			
 			else
 			{
@@ -1287,7 +1287,7 @@ public class STACService extends Application {
         
         String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
 
-        elasticResJson = client.sendPost(itemUrlElastic, itemJsonString, "application/json");
+        elasticResJson = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
         JSONObject elasticResObj = (JSONObject) JSONValue.parse(elasticResJson);
         
         if(elasticResObj.containsKey("result") && elasticResObj.get("result").toString().contentEquals("created")) {					
