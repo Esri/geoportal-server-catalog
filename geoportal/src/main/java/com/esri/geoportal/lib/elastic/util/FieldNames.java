@@ -90,7 +90,7 @@ public class FieldNames {
   public static String FIELD_SYS_META = "sys_meta";
   
   
-  /*------------------------Stac------------------------*/
+  /*----------------------- STAC -----------------------*/
   /** FIELD_STAC_CREATED = "created" */
   public static String FIELD_STAC_CREATED = "created";
   
@@ -106,5 +106,4 @@ public class FieldNames {
   public static String FIELD_BBOX = "bbox";
   public static String FIELD_ASSETS = "assets";
   public static String FIELD_THUMBNAIL = "thumbnail";
-  
 }
