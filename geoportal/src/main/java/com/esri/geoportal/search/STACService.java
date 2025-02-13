@@ -2091,7 +2091,7 @@ public class STACService extends Application {
     JSONObject geometry_wkt_in = (JSONObject) properties.get(geomWKTField);
     List<String> geometryTypes = new ArrayList<>();
     geometryTypes.add("point");
-    geometryTypes.add("linestring");
+    geometryTypes.add("multilinestring");
     geometryTypes.add("polygon");
     geometryTypes.add("polyhedral");
     for (String geometryType: geometryTypes) {

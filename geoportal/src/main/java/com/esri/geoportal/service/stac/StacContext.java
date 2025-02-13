@@ -209,7 +209,7 @@ public class StacContext {
       // see if the item properties include the geomWKTField (see app-context.xml)
       if (properties.containsKey(gc.getGeomWKTField())) {
         JSONObject geometry_wkt_in = (JSONObject) properties.get(gc.getGeomWKTField());
-        String[] geometryTypes = { "point", "linestring", "polygon", "polyhedral"};
+        String[] geometryTypes = { "point", "linestring", "multilinestring", "polygon", "polyhedral"};
         for (String geometryType: geometryTypes) {
           if (geometry_wkt_in.containsKey(geometryType)) {
             String arcgisGeometry = gsc.getArcGISGeometry(geometryType.toUpperCase(), geometry_wkt_in);
