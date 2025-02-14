@@ -20,14 +20,14 @@ define(["dojo/_base/declare",
   "./layerUtil",
   "../util",
   "esri4/layers/MapImageLayer",
-  "esri4/layers/TileLayer",
-//  "esri4/layers/DynamicLayerInfo",
+  "esri4/layers/TileLayer",  
   "esri4/rest/support/ImageParameters",
-  "esri4/core/reactiveUtils"
-  /*"esri4/layers/LayerDrawingOptions"*/],
+  "esri4/core/reactiveUtils",
+  /*"esri4/layers/LayerDrawingOptions",
+  "esri4/layers/DynamicLayerInfo"*/],
 function(declare, lang, array, Deferred, all, layerUtil, util,
-		MapImageLayer, TileLayer, /*DynamicLayerInfo,*/
-  ImageParameters/*, LayerDrawingOptions*/,reactiveUtils) {
+		MapImageLayer, TileLayer,
+  ImageParameters,reactiveUtils/*,LayerDrawingOptions, DynamicLayerInfo*/) {
 
   var _def = declare(null, {
 
@@ -45,6 +45,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
           var options = {id: util.generateId()};
           if (response.tileInfo) {
             lyr = new TileLayer(serviceUrl, options);
+            lyr.load();
           } else {
             if (response && response.supportedImageFormatTypes &&
                 response.supportedImageFormatTypes.indexOf("PNG32") !== -1) {
@@ -52,10 +53,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
               options.imageParameters.format = "png32";
             }
             lyr = new MapImageLayer(serviceUrl);
-            lyr.load();
-
-          //  self.view.map.add(layer);
-            
+            lyr.load();            
             self._processDynamicLayer(response,lyr,itemData);
           }
           return self._waitThenAddDynamicLayer(lyr,item,itemData);
@@ -69,71 +67,84 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
       return dfd;
     },
 
-    //TODO Test
-    _processDynamicLayer: function(restResponse,layer,itemData) {
+    //TODO Test with AGOL Map service
+    _processDynamicLayer: function(restResponse,layer,item) {
+    	if(!item)
+		{
+			return;
+		}
+    	else
+		{
+			itemData = item.data;
+		}    	
       if (!itemData || !itemData.layers || itemData.layers.length === 0) {
         return;
       }
-      var expressions = [];
-      var dynamicLayerInfo;
-      var dynamicLayerInfos = [];
-      var drawingOptions;
-      var drawingOptionsArray = [];
+    //  var expressions = [];
+      var dynamicSubLayer;
+      var dynamicSubLayers = [];
+   //   var drawingOptions;
+    //  var drawingOptionsArray = [];
       var source;
-      array.forEach(itemData.layers, function(layerInfo){
-        if (layerInfo.layerDefinition && layerInfo.layerDefinition.definitionExpression) {
-          expressions[layerInfo.id] = layerInfo.layerDefinition.definitionExpression;
-        }
-        if (layerInfo.layerDefinition && layerInfo.layerDefinition.source) {
-          dynamicLayerInfo = null;
-          source = layerInfo.layerDefinition.source;
+      array.forEach(itemData.layers, function(sublayer){
+//        if (sublayer.definitionExpression) {
+//          expressions[sublayers.id] = sublayers.definitionExpression.definitionExpression;
+//        }
+        if (sublayer.source) {
+          dynamicSublayers = null;
+          source = sublayer.source;
           if (source.type === "mapLayer") {
-            var metaLayerInfos = array.filter(restResponse.layers, function(rlyr) {
+            var metaSublayerInfos = array.filter(restResponse.layers, function(rlyr) {
               return rlyr.id === source.mapLayerId;
             });
-            if (metaLayerInfos.length) {
-              dynamicLayerInfo = lang.mixin(metaLayerInfos[0], layerInfo);
+            if (metaSublayerInfos.length) {
+            	dynamicSubLayer = lang.mixin(metaLayerInfos[0], sublayer);
             }
           } else {
-            dynamicLayerInfo = lang.mixin({}, layerInfo);
+        	  dynamicSubLayer = lang.mixin({}, sublayer);
           }
-          if (dynamicLayerInfo) {
-            dynamicLayerInfo.source = source;
+          if (dynamicSubLayer) {
+        	  dynamicSubLayer.source = source;
             delete dynamicLayerInfo.popupInfo;
-//            dynamicLayerInfo = new DynamicLayerInfo(dynamicLayerInfo);
+            dynamicSubLayer = new Sublayer(dynamicSubLayer);
             if (itemData.visibleLayers) {
               var vis = ((typeof itemData.visibleLayers) === "string") ?
                 itemData.visibleLayers.split(",") : itemData.visibleLayers;
-//              if (array.indexOf(vis, layerInfo.id) > -1) {
+                if(array.indexOf(vis, sublayer.id) > -1) {
+                	dynamicSubLayer.visible = true;
+                } else {
+                	dynamicSubLayer.visible = false;
+                }
+                
+//              if (array.indexOf(vis, sublayer.id) > -1) {
 //                dynamicLayerInfo.defaultVisibility = true;
 //              } else {
 //                dynamicLayerInfo.defaultVisibility = false;
 //              }
             }
-           // dynamicLayerInfos.push(dynamicLayerInfo);
+            if (sublayer.renderer) {
+            	dynamicSubLayer.renderer = sublayer.renderer;
+            }            
+            dynamicSubLayers.push(dynamicSubLayer);
           }
         }
-        if (layerInfo.layerDefinition && layerInfo.layerDefinition.source &&
-            layerInfo.layerDefinition.drawingInfo) {
-//          drawingOptions = new LayerDrawingOptions(layerInfo.layerDefinition.drawingInfo);
-//          drawingOptionsArray[layerInfo.id] = drawingOptions;
-        }
+        
       });
-
-      if (expressions.length > 0) {
-        layer.setLayerDefinitions(expressions);
-      }
-      if (dynamicLayerInfos.length > 0) {
-        layer.setDynamicLayerInfos(dynamicLayerInfos, true);
-        if (drawingOptionsArray.length > 0) {
-          layer.setLayerDrawingOptions(drawingOptionsArray, true);
-        }
-      } else {
-        //var checkVisibleLayers = true;
-      }
+//
+//      if (expressions.length > 0) {
+//        layer.setLayerDefinitions(expressions);
+//      }
+//      if (dynamicLayerInfos.length > 0) {
+//        layer.setDynamicLayerInfos(dynamicLayerInfos, true);
+//        if (drawingOptionsArray.length > 0) {
+//          layer.setLayerDrawingOptions(drawingOptionsArray, true);
+//        }
+//      } else {
+//        //var checkVisibleLayers = true;
+//      }
     },
 
-    _setDynamicLayerInfoTemplates: function(layer) {
+    _setDynamicLayerPopupTemplates: function(layer) {
       var self = this, templates = null, dfds = [];
 
       var readLayer = function(lInfo) {
@@ -143,10 +154,8 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
           var result = response.data; 
           try {
             var popupInfo = layerUtil.newPopupInfo(result);
-            if (popupInfo) {
-              templates[lInfo.id] = {
-                infoTemplate: layerUtil.newInfoTemplate(popupInfo)
-              };
+            if (popupInfo) {            	
+            	lInfo.popupTemplate = layerUtil.newPopupTemplate(popupInfo);
             }
           } catch(exp) {
             console.warn("Error setting popup.");
@@ -156,21 +165,16 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
         return dfd;
       };
 
-      if (layer.infoTemplates === null) {
-        array.forEach(layer.layerInfos, function(lInfo) {
-          if (templates === null) {
-            templates = {};
-          }
-          if (!lInfo.subLayerIds) {
+      if (!layer.popupTemplate) {
+        array.forEach(layer.allSublayers._items, function(lInfo) {   
+          if (!lInfo.popupTemplate) {
             dfds.push(readLayer(lInfo));
           }
         });
       }
       if (dfds.length > 0) {
         all(dfds).then(function(){
-          if (templates) {
-            layer.infoTemplates = templates;
-          }
+        	console.log("popup set for all sublayers");
         }).catch(function(ex){
           console.warn("Error reading sublayers.");
           console.error(ex);
@@ -181,53 +185,49 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
     _waitThenAddDynamicLayer: function(lyr,item,itemData) {
       var self = this;
       dfd = new Deferred();
-      reactiveUtils.watch(() => lyr.loadStatus,(loadStatus) => {
-    	  console.log(loadStatus);
-      });
+
       reactiveUtils.watch(() => lyr.loadError,(loadError) => {
-    	  console.log(loadError);
+    	  if (loadError.message && (loadError.message.indexOf("Unable to complete") !== -1)) {
+              console.warn("layerAccessError", loadError);
+              dfd.reject(new Error(i18n.search.layerInaccessible));
+            } else {
+              dfd.reject(loadError);
+            }
       });
       reactiveUtils.watch(() => lyr.loaded === true,() => {
     	  console.log("layer loaded");
+    	  var templates = null;
+    	  var popupSet = false;
+          array.forEach(lyr.allSublayers._items, function(sublayer) { 
+            var cfgLyr = null;
+            if (itemData) {
+          	itemDataObj = itemData.data;
+              array.some(itemDataObj.layers, function(l) {
+                if (sublayer.id === l.id) {
+                  cfgLyr = l;
+                  return true;
+                }
+              });
+            }
+            var popupInfo = null;
+            
+            if (cfgLyr && cfgLyr.popupInfo) {
+              popupInfo = cfgLyr.popupInfo;
+            }
+            if (popupInfo) {
+            	sublayer.popupTemplate = layerUtil.newPopupTemplate(popupInfo,cfgLyr.name);
+            	popupSet= true;
+            }
+          });
+          if(!popupSet)
+          {
+        	  self._setDynamicLayerPopupTemplates(lyr);
+           }
+          layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
+          dfd.resolve(lyr);
+    	  
       });
-     // layerUtil.waitForLayer(this.i18n,lyr).then(function(layer) {
-      lyr.when(() => {
-//        var templates = null;
-//        array.forEach(lyr.layerInfos, function(layerInfo) {
-//          var cfgLyr = null;
-//          if (itemData) {
-//            array.some(itemData.layers, function(l) {
-//              if (layerInfo.id === l.id) {
-//                cfgLyr = l;
-//                return true;
-//              }
-//            });
-//          }
-//          var popupInfo = null;
-//          if (cfgLyr && cfgLyr.popupInfo) {
-//            popupInfo = cfgLyr.popupInfo;
-//          }
-//          if (popupInfo) {
-//            if (templates === null) {
-//              templates = {};
-//            }
-//            templates[layerInfo.id] = {
-//              infoTemplate: layerUtil.newInfoTemplate(popupInfo,layerInfo.name)
-//            };
-//          }
-//        });
-//        if (layer.infoTemplates === null) {
-//          if (templates) {
-//            layer.infoTemplates = templates;
-//          } else {
-//            self._setDynamicLayerInfoTemplates(layer);
-//          }
-//        }
-        layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
-        dfd.resolve(layer);
-      }).catch(function(error){
-        dfd.reject(error);
-      });
+
       return dfd;
     }
 
