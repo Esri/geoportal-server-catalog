@@ -58,7 +58,7 @@ function(declare, array, SearchComponent, template, ItemCard, layerUtil, util) {
         var supportsRemove = this.getWidgetContext().supportsRemove;
         var idsAdded = [];
         if (supportsRemove) {
-          idsAdded = layerUtil.findLayersAdded(this.getMap(),null).referenceIds;
+          idsAdded = layerUtil.findLayersAdded(this.getView(),null).referenceIds;
         }
         array.forEach(searchResponse.results, function(result) {
           //console.warn(result.id,idsAdded);

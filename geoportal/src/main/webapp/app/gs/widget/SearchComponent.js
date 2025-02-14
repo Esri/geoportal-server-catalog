@@ -40,12 +40,12 @@ function(declare, _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin) {
 
     /* utilities ======================================================= */
 
-    getMap: function() {
-      if (this.searchPane && this.searchPane.widgetContext) {
-        return this.searchPane.widgetContext.getMap();
-      }
-      return null;
-    },
+//    getMap: function() {
+//      if (this.searchPane && this.searchPane.widgetContext) {
+//        return this.searchPane.widgetContext.getMap();
+//      }
+//      return null;
+//    },
     
     getView: function() {
         if (this.searchPane && this.searchPane.widgetContext) {

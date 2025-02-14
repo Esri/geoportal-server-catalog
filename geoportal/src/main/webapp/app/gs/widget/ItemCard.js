@@ -14,6 +14,7 @@
  */
 define(["dojo/_base/declare",
   "dojo/_base/array",
+  "dojo/_base/lang",
   "dojo/date/locale",
   "dojo/dom-class",
   "dijit/_WidgetBase",
@@ -24,11 +25,12 @@ define(["dojo/_base/declare",
   "dojo/text!./templates/ItemCard.html",
   "./layers/layerUtil",
   "./util",
+  "app/etc/ServiceType",
   "dijit/popup",
   "dijit/TooltipDialog",
   "dijit/form/DropDownButton"],
-function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
-  _WidgetsInTemplateMixin, Extent, SpatialReference, template, layerUtil, util, popup) {
+function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
+  _WidgetsInTemplateMixin, Extent, SpatialReference, template, layerUtil, util,ServiceType, popup) {
 
   var _def = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -98,11 +100,11 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       var dfd, item = null, itemData = null;
       if (typeInfo && typeInfo.serviceType && typeInfo.url) {
         if (this.canRemove) {
-          var map = this.resultsPane.getMap();
-          var lyrs = layerUtil.findLayersAdded(map,referenceId).layers;
+          var mapView = this.resultsPane.getView();
+          var lyrs = layerUtil.findLayersAdded(mapView,referenceId).layers;
           array.forEach(lyrs,function(lyr) {
             // TODO what about Pro?
-            map.removeLayer(lyr);
+        	  mapView.map.layers.remove(lyr);
           });
           this.canRemove = false;
           util.setNodeText(self.messageNode,"");
@@ -238,6 +240,21 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       if (!typeInfo.type && item._source && item._source.type) {
         typeInfo.type = item._source.type;
       }
+      //Determine service type - similar done in Catalog app
+      var urlLinks = item._source.links_s;
+      if (!typeInfo.type && urlLinks.length >0)
+	  {
+    	  array.some(urlLinks, lang.hitch(this, function(u){
+    	        var serviceType = new ServiceType();
+    	        serviceType.checkUrl(u);
+    	        serviceType.title = item.title;    	        
+    	        if (serviceType.isSet()) {
+    	        	typeInfo.type = serviceType.type;
+    	        	typeInfo.url = u;
+    	        }
+    	  }))
+	  }
+      
       if (typeInfo.type) {
         typeInfo.serviceType = addable[typeInfo.type.toLowerCase()];
         if (typeInfo.serviceType && typeof typeInfo.url === "string" &&
@@ -249,6 +266,10 @@ function(declare, array, locale, domClass, _WidgetBase, _TemplatedMixin,
       }
       this.typeInfo = typeInfo;
     },
+    
+    
+    
+    
 
     formatDate: function(date) {
       if (typeof(date) === "number") date = new Date(date);

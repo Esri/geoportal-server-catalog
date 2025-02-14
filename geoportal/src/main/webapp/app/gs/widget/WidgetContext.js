@@ -57,9 +57,9 @@ function(declare, lang, LayerLoader) {
       }
     },
 
-    getMap: function() {
-      return this.map;
-    },
+//    getMap: function() {
+//      return this.map;
+//    },
     
     getView: function() {
         return this.view;
