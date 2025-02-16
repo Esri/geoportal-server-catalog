@@ -689,7 +689,7 @@ public class STACService extends Application {
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
-      @QueryParam("outCRS") String outCRS)
+      @QueryParam("outCRS") String outCRS, @QueryParam("filter") String filter)
 			throws UnsupportedEncodingException {
 		String responseJSON;
 		String response;
@@ -720,6 +720,11 @@ public class STACService extends Application {
 
 			if (intersects != null && intersects.length() > 0)
 				queryMap.put("intersects", intersects);
+
+      // issue 573
+      if (filter != null && filter.length() > 0) {
+        queryMap.put("filterClause", filter);
+      }
 
 			url = url + "/_search?size=" + (limit+1); //Adding one extra so that next page can be figured out
 
@@ -789,6 +794,10 @@ public class STACService extends Application {
 		JsonObject intersects = (requestPayload.containsKey("intersects") 
         ? requestPayload.getJsonObject("intersects")
 				: null);
+    
+    String filterClause = (requestPayload.containsKey("filterClause") 
+        ? requestPayload.getString("filterClause")
+				: null);
 
 		//TODO Handle merge=true in Search Pagination
 		String query;
@@ -829,8 +838,7 @@ public class STACService extends Application {
 			if (intersects != null && !intersects.isEmpty()) {
 				queryMap.put("intersects", intersects.toString());
 			}
-			
-		
+					
 			String listOfCollections = "";
 			if ((gc.getSupportsCollections() && collectionArr != null && !collectionArr.isEmpty())) {
 				for(int i=0;i<collectionArr.size();i++)
@@ -847,6 +855,12 @@ public class STACService extends Application {
 				}								
 				queryMap.put("collections", listOfCollections);
 			}
+
+      // issue 573
+			if (filterClause != null && filter.length() > 0) {
+        String filterQry = StacHelper.prepareFilter(filterClause);
+        queryMap.put("filterClause", filterQry);
+      }
       
 			//Adding one extra so that next page can be figured out
 			url = url + "/_search?size=" + (limit+1);
