@@ -19,8 +19,10 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.search.StacHelper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import net.minidev.json.JSONArray;
@@ -46,6 +48,7 @@ public class StacContext {
   private final GeometryServiceClient gsc = gc.getGeometryServiceClient();
 
   private List<String> validationRules;
+  private Map<String, String> fieldMappings = new HashMap<>();
   
   
   /**
@@ -72,7 +75,7 @@ public class StacContext {
     }
   }
 
-  /** Default access level. 
+  /** Gets validation rules 
    * @return list of validation rules 
    */
   public List<String> getValidationRules() {
@@ -86,7 +89,35 @@ public class StacContext {
   public void setValidationRules(List<String> validationRules) {
     this.validationRules = validationRules;
   }
+
+  /** Gets field mappings
+   * @return list of validation rules 
+   */
+  public Map<String, String> getFieldMappings() {
+    return fieldMappings;
+  }
   
+  /** 
+   * Sets validation rules
+   * @param fieldMappings defined in app-context
+   */
+  public void setFieldMappings(List<String> fieldMappings) {
+    Map<String, String> theMap = new HashMap();
+
+    try {
+      for (String field : fieldMappings) {
+        String[] parts = field.split("=");
+        String stacField = parts[0].trim();
+        String indexField = parts[1].trim();
+        theMap.put(stacField, indexField);
+      }
+      this.fieldMappings = theMap;
+      
+    } catch (Exception ex) {
+      LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
+      throw ex;
+    }    
+  }  
   
   /* ========== Validation Rule functions here ========== */
   
