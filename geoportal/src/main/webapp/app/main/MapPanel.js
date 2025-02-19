@@ -32,15 +32,17 @@ define(["dojo/_base/declare",
         "esri4/widgets/FeatureTable",
         "esri4/widgets/Legend",
         "esri4/widgets/Locate",
-        "esri4/widgets/Home",
+        "esri4/widgets/Home",  
+        "esri4/form/elements/inputs/SwitchInput",
         "esri4/Graphic",
         "esri4/widgets/Expand",
+        "esri4/core/reactiveUtils",
         "../gs/widget/SearchPane",
         "../gs/widget/WidgetContext"], 
 function(declare, lang, Templated, template, i18n, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
 		Map,MapView,TileLayer, MapImageLayer,SearchWidget,LayerList,FeatureTable,
-		Legend,Locate,Home,Graphic,Expand,
+		Legend,Locate,Home,SwitchInput,Graphic,Expand,reactiveUtils,
 		SearchPane,WidgetContext) {
 
   var oThisClass = declare([Templated], {
@@ -214,8 +216,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 			view.ui.add(homeWidget, {
 	    		  position: "top-left",
 	    		  index: 4
-	    		});
-   	     	
+	    		});   	     	
    	     	
     		let legend = new Legend({
     			  view: view
@@ -230,9 +231,59 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     		  position: "top-left",
     		  index: 3
     		});
-        	     
-	     }))   
+       	  const switchInput = new SwitchInput({
+       	      label: "Show Attribute Table",
+       	      checked: true,
+       	    });
+       	  let switchExpand = new Expand({
+  	    	 expandIcon: "layers",  
+  	    	 expandTooltip: "Toggle Attribute table", 
+  	    	 view: view,
+  	    	 content: switchInput
+     	     });
+       	  view.ui.add(switchExpand,{position:"top-right"});
+       	
+       	  this.featureTable = new FeatureTable({
+       		  returnGeometryEnabled: true,
+       		  view: view,
+       		  container: "tableContainer",
+       		  visible:false,
+       		  visibleElements: {
+                // Autocast to VisibleElements
+                menuItems: {
+                  clearSelection: true,
+                  refreshData: true,
+                  toggleColumns: true,
+                  selectedRecordsShowAllToggle: true
+                }},
+       		  actionColumnConfig: {
+       		    label: "Zoom to feature",
+       		    icon: "zoom-to-object",
+       		    callback: ({ feature }) => view.goTo(feature)
+       		  }
+       		});
+	     view.ui.add(this.featureTable, {
+    		  position: "bottom-left"
+    		});
 	     
+	     reactiveUtils.on(()=>view.popup, "trigger-action", (event)=>{
+	    	  // If the zoom-out action is clicked, fire the zoomOut() function
+	    	  if(event.action.id === "view-attribute-table"){
+	    	    // in this case the view zooms out two LODs on each click
+	    		  
+	    		  this.openAttrTable(event,this.featureTable);
+	    	  }
+	    	});
+	               
+	     
+//	     view.popup.on("trigger-action", function(event){
+//		  // If the zoom-out action is clicked, fire the zoomOut() function
+//		  if(event.action.id === "view-attribute-table"){
+//		    openAttrTable(event);
+//		  }
+//	     });
+		  
+      }));  
 
     	        //TODO                                                                                         Add an expand here and open geoportal Search widget in expand
     	
@@ -256,6 +307,14 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 //        this.mapFrameNode.src = url;
 //      }
     },
+    
+    openAttrTable:function(event,featureTable)
+    {
+    	//find the layers added
+    	featureTable.visible = true;
+    	console.log("open table");
+    },
+    
     _createLocalCatalogUrl: function() {    
         if (window && window.top && window.top.geoportalServiceInfo) {
           var loc = window.top.location;
