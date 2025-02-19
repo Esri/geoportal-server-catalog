@@ -25,10 +25,11 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
       //console.warn("_addLayer",layer);
       //console.warn("map",this.map);
       if (view && layer) {
-        layer.xtnAddData = true; // TODO?
+        //layer.xtnAddData = true; // TODO?
+    	 layer.id =  referenceId;
         if (item) {
-          layer.xtnItemId = item.id; // TODO?
-          layer.xtnReferenceId = referenceId; // TODO?
+//          layer.xtnItemId = item.id; // TODO confirm with Urban
+//          layer.xtnReferenceId = referenceId; // TODO?
           //console.log("layer.xtnReferenceId",layer.xtnReferenceId);
           if (!layer.arcgisProps && item) {
             layer.arcgisProps = {
@@ -87,7 +88,7 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
       return item;
     },
 
-    findLayersAdded: function(view,itemId) {
+    findLayersAdded: function(view,referenceId) {
       var ids = [], referenceIds = [], layers = [];
       var response = {
         referenceIds: referenceIds,
@@ -98,38 +99,62 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
       }
       var checkId = (typeof referenceId === "string" && referenceId.length > 0);
       
-      view.map.allLayers.forEach(function(lyr) {  
-	          layers.push(lyr);	 
-	          referenceIds.push(lyr.id);
-    	});
+      array.forEach(view.map.layers.items, function(item) {
+          ids.push(item.id);
+        });
+
+        array.forEach(ids, function(id) {
+          var lyr = view.map.findLayerById(id);
+          if (lyr && typeof lyr.id === "string" &&
+              lyr.id.length > 0) {
+            //console.warn("found added layer",lyr);
+            if (!checkId || lyr.id === referenceId) {
+              layers.push(lyr);
+              if (referenceIds.indexOf(lyr.id) === -1) {
+                referenceIds.push(lyr.id);
+              }
+            }
+          }
+        });
       return response;
     },
 
     newPopupTemplate: function(popupInfo,title) {
       if (popupInfo) {
     	if(!title ? (popupTitle = popupInfo.title): (popupTitle=title))    		    		
-        try {    	
-          var popupTemplate = new PopupTemplate({
-            description: popupInfo.description,
-            title: popupTitle,
-            content:[{
-                	type:"fields",
-                	fieldInfos: popupInfo.fieldInfos
-            	},
-            	{
-            		type:"media",
-            		mediaInfos: popupInfo.mediaInfos	
-            	},
-            	{
-            		type:"attachments"
-            	}
-            ]
-          });
+        try {
+	    	let viewInAttrTable = {
+	      		  // This text is displayed as a tooltip
+	      		  title: "View in attribute table",
+	      		  // The ID by which to reference the action in the event handler
+	      		  id: "view-attribute-table",
+	      		  // Sets the icon font used to style the action button
+	      		  className: "esri-icon-table"
+	      		};
+	          var popupTemplate = new PopupTemplate({
+	            description: popupInfo.description,
+	            title: popupTitle,
+	            content:[{
+	                	type:"fields",
+	                	fieldInfos: popupInfo.fieldInfos
+	            	},
+	            	{
+	            		type:"media",
+	            		mediaInfos: popupInfo.mediaInfos	
+	            	},
+	            	{
+	            		type:"attachments"
+	            	}
+	            ],
+	            actions:[viewInAttrTable]
+	          });
+
+        	
           return popupTemplate;
         } catch (ex) {
           console.error(ex);
         }
-      }
+      }     
       return popupTemplate;
     },
 

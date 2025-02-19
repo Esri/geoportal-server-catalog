@@ -33,6 +33,7 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
     itemUrl: null,
     //map: null,
     view: null,
+    referenceId: null,
 
     constructor: function(args) {
       lang.mixin(this, args);
