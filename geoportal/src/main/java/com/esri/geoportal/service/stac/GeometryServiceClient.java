@@ -266,6 +266,8 @@ public class GeometryServiceClient {
 
         URL obj = new URL(this.intersectUrl);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        
+        LOGGER.debug("com.esri.geoportal.service.stac - doIntersect: formData = " + formData);     
 
         // Set the request method to POST
         con.setRequestMethod("POST");
