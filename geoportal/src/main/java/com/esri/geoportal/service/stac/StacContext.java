@@ -266,9 +266,10 @@ public class StacContext {
       JSONObject intersectResponseObj = (JSONObject) jsonParser.parse(intersectResponse);
       JSONArray intersectGeometries = (JSONArray) intersectResponseObj.get("geometries");
       JSONObject intersectPaths = (JSONObject) intersectGeometries.get(0);
+      JSONArray intersectRings = (JSONArray) intersectPaths.get("rings");
       
       // if the paths is not an empty array, the two geometries intersect
-      intersects = !intersectPaths.isEmpty();
+      intersects = !intersectRings.isEmpty();
       
     } catch (Exception ex) {
       LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
