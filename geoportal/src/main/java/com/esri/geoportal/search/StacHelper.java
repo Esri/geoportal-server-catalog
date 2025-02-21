@@ -372,18 +372,23 @@ public class StacHelper {
 		return collectionQryBuf.toString();
 	}
   
-  private static String prepareFilter(String filterClause) {
+  public static String prepareFilter(String filterClause) {
     String filterField;
     String filterValue;
-    StringBuffer collectionQryBuf = new StringBuffer("{\"bool\":{\"should\":[");
-
+    StacContext sc = StacContext.getInstance();
+    Map<String, String> fieldMapping = sc.getFieldMappings();
+    
 		String[] clauseList = filterClause.split("AND");
 		//{"bool":{"must":[{"match":{"clause_field1":"clause_value1"}},{"match":{"clause_field2":"clause_value2"}}]}}
 		
-		StringBuilder filterQryBuf = new StringBuilder("{\"bool\":{\"must\":[");
+		StringBuilder filterQryBuf = new StringBuilder("{\"bool\":{\"should\":[");
 		int i=0;
 		for (String clause : clauseList) {
       filterField = clause.split("=")[0].trim();
+      // replace filterField with mapped index field if the filterField is mapped
+      if (fieldMapping.containsKey(filterField)) {
+        filterField = fieldMapping.get(filterField);
+      }
       filterValue = clause.split("=")[1].trim();
 			if(i>0) {
         filterQryBuf.append(",");

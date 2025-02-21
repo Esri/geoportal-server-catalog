@@ -857,7 +857,7 @@ public class STACService extends Application {
 			}
 
       // issue 573
-			if (filterClause != null && filter.length() > 0) {
+			if (filterClause != null && filterClause.length() > 0) {
         String filterQry = StacHelper.prepareFilter(filterClause);
         queryMap.put("filterClause", filterQry);
       }
@@ -1265,29 +1265,29 @@ public class STACService extends Application {
     String elasticResJson;    
 
     try {
+      String id = "";
+      if (requestPayload.containsKey("id")) {
+        id = requestPayload.getAsString("id");
+      }
+
+      if (id.length()<1) {
+        // issue 572 - generate unique item id if configured to do so
+        // do this before validating the STAC item
+        if (gc.isCanStacAutogenerateId()) {
+          // generate a UUID to be used as id
+          UUID guid = UUID.randomUUID();
+          id = guid.toString();
+
+          // save the id to the payload
+          requestPayload.put("id", id);
+        }
+      }
       StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,gc.isValidateStacFields());
       
       if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
         JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
 
         String itemJsonString = updatedPayload.toString();								
-
-        String id = "";
-        if (updatedPayload.containsKey("id")) {
-          id = updatedPayload.getAsString("id");
-        }
-        
-        if (id.length()<1) {
-          // issue 572 - generate unique item id if configured to do so
-          if (gc.isCanStacAutogenerateId()) {
-            // generate a UUID to be used as id
-            UUID guid = UUID.randomUUID();
-            id = guid.toString();
-
-            // save the id to the payload
-            updatedPayload.put("id", id);
-          }
-        }
                     
         // issue 574 - project payload if submitted with geometries not in 4326
         JSONObject projectedPayload = updatedPayload;
