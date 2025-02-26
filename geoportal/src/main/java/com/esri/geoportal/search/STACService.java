@@ -604,7 +604,7 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
 		try {
 			JSONObject itemRes = StacHelper.getCollectionWithId(collectionId);
-			if(itemRes == null)
+			if(itemRes == null || itemRes.isEmpty())
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
 			} else
