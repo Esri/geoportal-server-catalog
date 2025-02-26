@@ -53,7 +53,7 @@
     <beans:property name="proxyBufferSize" value="8192" />		
           	
     <!-- Uncomment and complete the following if you want to use secured index -->
-    <beans:property name="useHttps" value="false" />
+    <beans:property name="useHttps" value="true" />
     <beans:property name="encryptPassword" value="false" />
     
     <!-- If encryptPassword =true, Uncomment below and configure the keys -->
