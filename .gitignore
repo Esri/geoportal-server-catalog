@@ -146,3 +146,8 @@ geoportal/nb-configuration.xml
 .vscode/settings.json
 geoportal/.factorypath
 geoportal/.vscode/settings.json
+/components/CswClient/Pro/CswClient/obj
+.vs/slnx.sqlite
+.vs/VSWorkspaceState.json
+/components/CswClient/Pro/CswClient/.vs
+components/CswClient/Pro/CswClient/.vs/CswClient/FileContentIndex/f37114e8-cba6-4c58-87b6-3ae31e401666.vsidx
