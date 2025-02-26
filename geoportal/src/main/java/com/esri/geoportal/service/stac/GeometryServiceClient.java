@@ -581,6 +581,18 @@ public class GeometryServiceClient {
             /*
               POLYGON Z ((35 10 0, 45 45 10, 15 40 20, 10 20 30, 35 10 0))
             */
+            
+            /*
+              {
+                "geometryType": "esriGeometryPolygon",
+                "geometry": {
+                  "rings": [
+                    [[-117,34],[-116,34],[-117,33],[-117,34]],
+                    [[-115,44],[-114,43],[-115,43],[-115,44]]
+                  ]
+                }
+              }
+            */
                     
             String coordinates = wktCoordinates.trim()
                                                .replace("(", "[")
@@ -594,7 +606,7 @@ public class GeometryServiceClient {
               geometries += "\"hasZ\": true, ";
             }
             
-            geometries += "\"rings\": " + coordinates + "}]}";
+            geometries += "\"rings\": [" + coordinates + "]}]}";
             
             break;
             
