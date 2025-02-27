@@ -3,7 +3,7 @@ define([],function(){var obj={
 
   system: {
     searchLimit: 10000,
-    secureCatalogApp:true
+    secureCatalogApp:false
   },
 
   edit: {
