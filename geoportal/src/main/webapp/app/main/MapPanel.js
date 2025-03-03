@@ -27,6 +27,7 @@ define(["dojo/_base/declare",
         "esri4/views/MapView",
         "esri4/layers/TileLayer",
         "esri4/layers/MapImageLayer",
+        "esri4/layers/FeatureLayer",
         "esri4/widgets/Search",
         "esri4/widgets/LayerList",
         "esri4/widgets/FeatureTable",
@@ -37,12 +38,14 @@ define(["dojo/_base/declare",
         "esri4/Graphic",
         "esri4/widgets/Expand",
         "esri4/core/reactiveUtils",
+        "esri4/widgets/FeatureTable/Grid/support/ButtonMenuItem",
+        "esri4/widgets/FeatureTable/Grid/support/ButtonMenu",
         "../gs/widget/SearchPane",
         "../gs/widget/WidgetContext"], 
 function(declare, lang, Templated, template, i18n, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
-		Map,MapView,TileLayer, MapImageLayer,SearchWidget,LayerList,FeatureTable,
-		Legend,Locate,Home,SwitchInput,Graphic,Expand,reactiveUtils,
+		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,SearchWidget,LayerList,FeatureTable,
+		Legend,Locate,Home,SwitchInput,Graphic,Expand,reactiveUtils,ButtonMenuItem,ButtonMenu,
 		SearchPane,WidgetContext) {
 
   var oThisClass = declare([Templated], {
@@ -231,58 +234,12 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     		  position: "top-left",
     		  index: 3
     		});
-       	  const switchInput = new SwitchInput({
-       	      label: "Show Attribute Table",
-       	      checked: true,
-       	    });
-       	  let switchExpand = new Expand({
-  	    	 expandIcon: "layers",  
-  	    	 expandTooltip: "Toggle Attribute table", 
-  	    	 view: view,
-  	    	 content: switchInput
-     	     });
-       	  view.ui.add(switchExpand,{position:"top-right"});
-       	
-       	  this.featureTable = new FeatureTable({
-       		  returnGeometryEnabled: true,
-       		  view: view,
-       		  container: "tableContainer",
-       		  visible:false,
-       		  visibleElements: {
-                // Autocast to VisibleElements
-                menuItems: {
-                  clearSelection: true,
-                  refreshData: true,
-                  toggleColumns: true,
-                  selectedRecordsShowAllToggle: true
-                }},
-       		  actionColumnConfig: {
-       		    label: "Zoom to feature",
-       		    icon: "zoom-to-object",
-       		    callback: ({ feature }) => view.goTo(feature)
-       		  }
-       		});
-	     view.ui.add(this.featureTable, {
-    		  position: "bottom-left"
-    		});
 	     
-	     reactiveUtils.on(()=>view.popup, "trigger-action", (event)=>{
-	    	  // If the zoom-out action is clicked, fire the zoomOut() function
-	    	  if(event.action.id === "view-attribute-table"){
-	    	    // in this case the view zooms out two LODs on each click
-	    		  
-	    		  this.openAttrTable(event,this.featureTable);
+	     reactiveUtils.on(()=>view.popup, "trigger-action", (event)=>{	    	 
+	    	  if(event.action.id === "view-attribute-table"){	    	   
+	    		  this.openAttrTable(view.popup.selectedFeature);
 	    	  }
 	    	});
-	               
-	     
-//	     view.popup.on("trigger-action", function(event){
-//		  // If the zoom-out action is clicked, fire the zoomOut() function
-//		  if(event.action.id === "view-attribute-table"){
-//		    openAttrTable(event);
-//		  }
-//	     });
-		  
       }));  
 
     	        //TODO                                                                                         Add an expand here and open geoportal Search widget in expand
@@ -307,14 +264,60 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 //        this.mapFrameNode.src = url;
 //      }
     },
-    
-    openAttrTable:function(event,featureTable)
-    {
-    	//find the layers added
-    	featureTable.visible = true;
-    	console.log("open table");
+
+    openAttrTable:function(selectedFeature)
+    {   
+    	console.log("selected feature "+selectedFeature.attributes.OBJECTID);
+    	let id = selectedFeature.attributes.OBJECTID;
+    	//Below can be used to show only selected record
+//    	var featureLayer = new FeatureLayer({url:selectedFeature.sourceLayer.url,
+//    			definitionExpression: "OBJECTID = "+id});
+    	var featureLayer = new FeatureLayer(selectedFeature.sourceLayer.url);
+    	var tableContainer = document.getElementById("tableContainer");
+    	
+    	if(this.featureTable)
+    		{
+    			try{
+    				this.featureTable.destroy();
+    			}catch(error)
+    			{
+    				console.error(error);
+    			}
+    			tableContainer.innerHTML = "";
+    		}
+    	var container = document.createElement("div");
+    	
+    	tableContainer.appendChild(container);    	
+    	
+		let table = this.featureTable = new FeatureTable({
+   		  returnGeometryEnabled: true,
+   		  view: this.view,
+   		  layer: featureLayer,
+   		  container: container,
+   		  visible:true,
+   		  columnReorderingEnabled:true, 		  
+ 		  highlightEnabled:true,
+   		  visibleElements: {
+            // Autocast to VisibleElements
+            menuItems: {
+              clearSelection: true,
+              refreshData: true,
+              toggleColumns: true,
+              selectedRecordsShowAllToggle: true
+            }},
+   		  menuConfig:{
+			  items:[
+				  { 	
+					  label: "Close",   					 
+					  icon: "x-circle",
+					  clickFunction: ()=> {
+						  this.featureTable.visible =false;                     
+					  }
+				  }
+			  ]
+   		  }
+   		});    	
     },
-    
     _createLocalCatalogUrl: function() {    
         if (window && window.top && window.top.geoportalServiceInfo) {
           var loc = window.top.location;

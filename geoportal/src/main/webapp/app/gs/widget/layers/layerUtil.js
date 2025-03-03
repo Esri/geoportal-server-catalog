@@ -125,7 +125,7 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
         try {
 	    	let viewInAttrTable = {
 	      		  // This text is displayed as a tooltip
-	      		  title: "View in attribute table",
+	      		  title: "show attribute table",
 	      		  // The ID by which to reference the action in the event handler
 	      		  id: "view-attribute-table",
 	      		  // Sets the icon font used to style the action button
