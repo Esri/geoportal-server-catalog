@@ -604,7 +604,7 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
 		try {
 			JSONObject itemRes = StacHelper.getCollectionWithId(collectionId);
-			if(itemRes == null)
+			if(itemRes == null || itemRes.isEmpty())
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
 			} else
@@ -689,7 +689,7 @@ public class STACService extends Application {
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
-      @QueryParam("outCRS") String outCRS)
+      @QueryParam("outCRS") String outCRS, @QueryParam("filter") String filter)
 			throws UnsupportedEncodingException {
 		String responseJSON;
 		String response;
@@ -720,6 +720,11 @@ public class STACService extends Application {
 
 			if (intersects != null && intersects.length() > 0)
 				queryMap.put("intersects", intersects);
+
+      // issue 573
+      if (filter != null && filter.length() > 0) {
+        queryMap.put("filterClause", filter);
+      }
 
 			url = url + "/_search?size=" + (limit+1); //Adding one extra so that next page can be figured out
 
@@ -789,6 +794,10 @@ public class STACService extends Application {
 		JsonObject intersects = (requestPayload.containsKey("intersects") 
         ? requestPayload.getJsonObject("intersects")
 				: null);
+    
+    String filterClause = (requestPayload.containsKey("filterClause") 
+        ? requestPayload.getString("filterClause")
+				: null);
 
 		//TODO Handle merge=true in Search Pagination
 		String query;
@@ -829,8 +838,7 @@ public class STACService extends Application {
 			if (intersects != null && !intersects.isEmpty()) {
 				queryMap.put("intersects", intersects.toString());
 			}
-			
-		
+					
 			String listOfCollections = "";
 			if ((gc.getSupportsCollections() && collectionArr != null && !collectionArr.isEmpty())) {
 				for(int i=0;i<collectionArr.size();i++)
@@ -847,6 +855,12 @@ public class STACService extends Application {
 				}								
 				queryMap.put("collections", listOfCollections);
 			}
+
+      // issue 573
+			if (filterClause != null && filterClause.length() > 0) {
+        String filterQry = StacHelper.prepareFilter(filterClause);
+        queryMap.put("filterClause", filterQry);
+      }
       
 			//Adding one extra so that next page can be figured out
 			url = url + "/_search?size=" + (limit+1);
@@ -1251,29 +1265,29 @@ public class STACService extends Application {
     String elasticResJson;    
 
     try {
+      String id = "";
+      if (requestPayload.containsKey("id")) {
+        id = requestPayload.getAsString("id");
+      }
+
+      if (id.length()<1) {
+        // issue 572 - generate unique item id if configured to do so
+        // do this before validating the STAC item
+        if (gc.isCanStacAutogenerateId()) {
+          // generate a UUID to be used as id
+          UUID guid = UUID.randomUUID();
+          id = guid.toString();
+
+          // save the id to the payload
+          requestPayload.put("id", id);
+        }
+      }
       StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,gc.isValidateStacFields());
       
       if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
         JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
 
         String itemJsonString = updatedPayload.toString();								
-
-        String id = "";
-        if (updatedPayload.containsKey("id")) {
-          id = updatedPayload.getAsString("id");
-        }
-        
-        if (id.length()<1) {
-          // issue 572 - generate unique item id if configured to do so
-          if (gc.isCanStacAutogenerateId()) {
-            // generate a UUID to be used as id
-            UUID guid = UUID.randomUUID();
-            id = guid.toString();
-
-            // save the id to the payload
-            updatedPayload.put("id", id);
-          }
-        }
                     
         // issue 574 - project payload if submitted with geometries not in 4326
         JSONObject projectedPayload = updatedPayload;
@@ -2091,7 +2105,7 @@ public class STACService extends Application {
     JSONObject geometry_wkt_in = (JSONObject) properties.get(geomWKTField);
     List<String> geometryTypes = new ArrayList<>();
     geometryTypes.add("point");
-    geometryTypes.add("linestring");
+    geometryTypes.add("multilinestring");
     geometryTypes.add("polygon");
     geometryTypes.add("polyhedral");
     for (String geometryType: geometryTypes) {

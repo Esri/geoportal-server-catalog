@@ -19,8 +19,10 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.search.StacHelper;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
 import net.minidev.json.JSONArray;
@@ -46,6 +48,7 @@ public class StacContext {
   private final GeometryServiceClient gsc = gc.getGeometryServiceClient();
 
   private List<String> validationRules;
+  private Map<String, String> fieldMappings = new HashMap<>();
   
   
   /**
@@ -72,7 +75,7 @@ public class StacContext {
     }
   }
 
-  /** Default access level. 
+  /** Gets validation rules 
    * @return list of validation rules 
    */
   public List<String> getValidationRules() {
@@ -86,7 +89,35 @@ public class StacContext {
   public void setValidationRules(List<String> validationRules) {
     this.validationRules = validationRules;
   }
+
+  /** Gets field mappings
+   * @return list of validation rules 
+   */
+  public Map<String, String> getFieldMappings() {
+    return fieldMappings;
+  }
   
+  /** 
+   * Sets validation rules
+   * @param fieldMappings defined in app-context
+   */
+  public void setFieldMappings(List<String> fieldMappings) {
+    Map<String, String> theMap = new HashMap();
+
+    try {
+      for (String field : fieldMappings) {
+        String[] parts = field.split("=");
+        String stacField = parts[0].trim();
+        String indexField = parts[1].trim();
+        theMap.put(stacField, indexField);
+      }
+      this.fieldMappings = theMap;
+      
+    } catch (Exception ex) {
+      LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
+      throw ex;
+    }    
+  }  
   
   /* ========== Validation Rule functions here ========== */
   
@@ -209,7 +240,7 @@ public class StacContext {
       // see if the item properties include the geomWKTField (see app-context.xml)
       if (properties.containsKey(gc.getGeomWKTField())) {
         JSONObject geometry_wkt_in = (JSONObject) properties.get(gc.getGeomWKTField());
-        String[] geometryTypes = { "point", "linestring", "polygon", "polyhedral"};
+        String[] geometryTypes = { "point", "linestring", "multilinestring", "polygon", "polyhedral"};
         for (String geometryType: geometryTypes) {
           if (geometry_wkt_in.containsKey(geometryType)) {
             String arcgisGeometry = gsc.getArcGISGeometry(geometryType.toUpperCase(), geometry_wkt_in);
@@ -235,9 +266,13 @@ public class StacContext {
       JSONObject intersectResponseObj = (JSONObject) jsonParser.parse(intersectResponse);
       JSONArray intersectGeometries = (JSONArray) intersectResponseObj.get("geometries");
       JSONObject intersectPaths = (JSONObject) intersectGeometries.get(0);
-      
-      // if the paths is not an empty array, the two geometries intersect
-      intersects = !intersectPaths.isEmpty();
+      if (intersectPaths.containsKey("rings")) {
+        JSONArray intersectRings = (JSONArray) intersectPaths.get("rings");
+        intersects = !intersectRings.isEmpty();    
+      } else {
+        // if the paths is not an empty array, the two geometries intersect
+        intersects = !intersectPaths.isEmpty();        
+      }      
       
     } catch (Exception ex) {
       LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());

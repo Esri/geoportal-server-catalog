@@ -235,6 +235,11 @@ public class StacHelper {
 			String collectionQry = prepareCollection(queryMap.get("collections"));
 			builder.add(JsonUtil.toJsonStructure(collectionQry));
 		}
+    
+		if (queryMap.containsKey("filterClause")) {			
+			String filterQry = prepareFilter(queryMap.get("filterClause"));
+			builder.add(JsonUtil.toJsonStructure(filterQry));
+		}
 
 		JsonArray filter = builder.build();
 
@@ -366,6 +371,38 @@ public class StacHelper {
 		collectionQryBuf.append("]}}");
 		return collectionQryBuf.toString();
 	}
+  
+  public static String prepareFilter(String filterClause) {
+    String filterField;
+    String filterValue;
+    StacContext sc = StacContext.getInstance();
+    Map<String, String> fieldMapping = sc.getFieldMappings();
+    
+		String[] clauseList = filterClause.split("AND");
+		//{"bool":{"must":[{"match":{"clause_field1":"clause_value1"}},{"match":{"clause_field2":"clause_value2"}}]}}
+		
+		StringBuilder filterQryBuf = new StringBuilder("{\"bool\":{\"should\":[");
+		int i=0;
+		for (String clause : clauseList) {
+      filterField = clause.split("=")[0].trim();
+      // replace filterField with mapped index field if the filterField is mapped
+      if (fieldMapping.containsKey(filterField)) {
+        filterField = fieldMapping.get(filterField);
+      }
+      filterValue = clause.split("=")[1].trim();
+			if(i>0) {
+        filterQryBuf.append(",");
+      }
+      filterQryBuf.append("{\"match\": {\"")
+                  .append(filterField)
+                  .append("\": \"")
+                  .append(filterValue)
+                  .append("\"}}");	
+			i++;
+		}
+		filterQryBuf.append("]}}");
+		return filterQryBuf.toString();    
+  }
 
 	private static StacItemValidationResponse validateId(JSONObject requestPayload,String collectionId) throws Exception {
 		String errorMsg;
@@ -566,6 +603,16 @@ public class StacHelper {
       requestPayload.put("properties", prop);
 		}
 
+    // in either add/update map STAC fields from app-context fieldMappings to index fields
+    StacContext sc = StacContext.getInstance();
+    for (Map.Entry<String,String> entry : sc.getFieldMappings().entrySet()) {
+      String stacField = entry.getKey();
+      if(prop.containsKey(stacField)) {
+        String indexField = entry.getValue();
+        requestPayload.put(indexField, prop.get(stacField));
+      }
+    }
+    
 		return requestPayload;
 	}
 
