@@ -297,6 +297,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
    		  visible:true,
    		  columnReorderingEnabled:true, 		  
  		  highlightEnabled:true,
+ 		  highlightIds:[id],
    		  visibleElements: {
             // Autocast to VisibleElements
             menuItems: {
