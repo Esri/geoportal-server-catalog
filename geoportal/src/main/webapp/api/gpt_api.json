@@ -549,6 +549,14 @@
             "required": false,
             "type": "string",
             "example": "EPSG:3857"
+          },
+          {
+            "name": "filter",
+            "in": "query",
+            "description": "A filter to be applied to the search using one of the STAC item properties, for example status=active",
+            "required": false,
+            "type": "string",
+            "example": "status=active"
           }
         ],
         "responses": {

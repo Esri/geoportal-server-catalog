@@ -266,6 +266,8 @@ public class GeometryServiceClient {
 
         URL obj = new URL(this.intersectUrl);
         HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        
+        LOGGER.debug("com.esri.geoportal.service.stac - doIntersect: formData = " + formData);     
 
         // Set the request method to POST
         con.setRequestMethod("POST");
@@ -514,9 +516,82 @@ public class GeometryServiceClient {
             
             break;
             
+          case "MULTILINESTRING":
+            // MULTILINESTRING Z ((30 10 0, 10 30 10, 40 40 20), (31 10 0, 11 30 10, 41 40 20))
+            /*
+              {
+                "geometryType" : "esriGeometryPolyline",
+                  "geometries" : [{ 
+                    "paths": [[[-117,34],[-116,34],[-117,33]], [[-17,34],[-16,34],[-17,33]]]
+                  }]
+              }            
+            */
+            
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", "
+              + "\"geometries\": [ { ";
+            
+            // if point has Z coordinate, set it so in the output
+            if (hasZ) {
+              geometries += "\"hasZ\": true, ";
+            }
+            
+            // add the paths to the geometry
+            geometries += "\"paths\": [[";
+			
+            String[] wktPathML = wktCoordinates.split("\\),[ ]*\\(");
+            boolean firstPath = true;
+            for (String pathPoint : wktPathML) {
+              if (firstPath) {
+                firstPath = false;
+              } else {
+                geometries += ", ";
+              }
+              geometries += "[";
+
+              String thisPath = pathPoint.trim().replace("((", "").replace("))", "");
+              System.out.println(thisPath);
+              boolean firstPoint = true;
+
+              String[] thesePoints = thisPath.split(",");
+              for (String thisPoint : thesePoints) {
+                if (firstPoint) {
+                  firstPoint = false;
+                } else {
+                  geometries += ", ";
+                }
+                geometries += "[";
+
+                String theEsriPoint = thisPoint.trim().replaceAll(" +", " ").replace(" ", ", ");
+
+                System.out.println(theEsriPoint);
+
+                geometries += theEsriPoint;
+                geometries += "]";
+              }
+              geometries += "]";				
+            }
+
+            // close the JSON
+            geometries += "]}]}";
+                    
+            
+            break;
+            
           case "POLYGON":
             /*
               POLYGON Z ((35 10 0, 45 45 10, 15 40 20, 10 20 30, 35 10 0))
+            */
+            
+            /*
+              {
+                "geometryType": "esriGeometryPolygon",
+                "geometry": {
+                  "rings": [
+                    [[-117,34],[-116,34],[-117,33],[-117,34]],
+                    [[-115,44],[-114,43],[-115,43],[-115,44]]
+                  ]
+                }
+              }
             */
                     
             String coordinates = wktCoordinates.trim()
@@ -531,7 +606,7 @@ public class GeometryServiceClient {
               geometries += "\"hasZ\": true, ";
             }
             
-            geometries += "\"rings\": " + coordinates + "}]}";
+            geometries += "\"rings\": [" + coordinates + "]}]}";
             
             break;
             
@@ -600,6 +675,11 @@ public class GeometryServiceClient {
       
       String wkt = "";
       JSONObject arcgisGeometry;
+      JSONArray paths;
+      JSONArray firstPath;
+      JSONArray firstPoint;
+      boolean lineHasZ;
+      
       switch (wktGeometryType) {
           case "POINT":
             /*
@@ -655,11 +735,11 @@ public class GeometryServiceClient {
             */
 
             arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
-            JSONArray paths = (JSONArray) arcgisGeometry.get("paths");
-            JSONArray firstPath = (JSONArray) paths.get(0);
-            JSONArray firstPoint = (JSONArray) firstPath.get(0);
+            paths = (JSONArray) arcgisGeometry.get("paths");
+            firstPath = (JSONArray) paths.get(0);
+            firstPoint = (JSONArray) firstPath.get(0);
             
-            boolean lineHasZ = (firstPoint.size() == 3);
+            lineHasZ = (firstPoint.size() == 3);
             
             wkt = "LINESTRING";
             wkt += lineHasZ ? " Z " : " ";
@@ -673,6 +753,46 @@ public class GeometryServiceClient {
                              .replace("[", "(")
                              .replace("]", ")");
             }            
+            break;
+            
+          case "MULTILINESTRING":
+            /*
+              FROM:
+              {
+                "geometryType" : "esriGeometryPolyline",
+                  "geometries" : [{ 
+                    "paths": [[[-117,34,0],[-116,34,10],[-117,33,20]], [[-17,34,0],[-16,34,10],[-17,33,20]]]
+                  }]
+              }            
+            
+              TO:
+              MULTILINESTRING Z ((30 10 0, 10 30 10, 40 40 20), (31 10 0, 11 30 10, 41 40 20))
+            */
+            
+            arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
+            paths = (JSONArray) arcgisGeometry.get("paths");
+            firstPath = (JSONArray) paths.get(0);
+            firstPoint = (JSONArray) firstPath.get(0);
+            
+            lineHasZ = (firstPoint.size() == 3);
+            
+            wkt = "MULTILINESTRING";
+            wkt += lineHasZ ? " Z " : " ";
+            
+            if (!paths.isEmpty()) {
+              String agsPaths = paths.toString();
+              wkt += agsPaths.substring(agsPaths.indexOf(":")+1)
+                            .trim()
+                            .replace(",", " ")
+                            .replace("] [", ", ")
+                            .replace("[", "(")
+                            .replace("]", ")")
+                            .replace("((", "(")
+                            .replace("))", ")")
+                            .replaceAll(" +", " ")
+                            .replace(") (", "), (");
+            }
+
             break;
             
           case "POLYGON":

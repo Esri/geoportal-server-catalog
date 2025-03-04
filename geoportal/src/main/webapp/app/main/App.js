@@ -69,6 +69,12 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }));
       
       router.startup();
+      //#606 Show signin for Catalog app on load
+      if(AppContext.appConfig.system.secureCatalogApp)
+      {
+    	  AppContext.appUser.showSignIn();
+      }
+    	  
       if (!location.hash || location.hash.length==0) {
         this.setHash("searchPanel");
         router.go("searchPanel");
