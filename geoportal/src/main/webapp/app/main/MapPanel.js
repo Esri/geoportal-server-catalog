@@ -240,6 +240,21 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 	    		  this.openAttrTable(view.popup.selectedFeature);
 	    	  }
 	    	});
+	     reactiveUtils.watch(
+	             () => view.popup.viewModel?.active,
+	             () => {
+	               selectedFeature = view.popup.selectedFeature;
+	               if (selectedFeature !== null && view.popup.visible !== false) {
+	            	   if(this.featureTable)
+	            		   {
+	            		   this.featureTable.highlightIds.removeAll();
+	            		   this.featureTable.highlightIds.add(view.popup.selectedFeature.attributes.OBJECTID);
+	  	                 	
+	            		   }
+	                 
+	               }
+	             }
+	           );
       }));  
 
     	        //TODO                                                                                         Add an expand here and open geoportal Search widget in expand
