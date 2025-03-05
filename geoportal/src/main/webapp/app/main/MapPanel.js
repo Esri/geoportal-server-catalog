@@ -116,7 +116,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 	  	  center: mapProps.center,
 	  	  zoom: mapProps.zoom      	  
 	  	});
-		this.view = view;
+		
 		
 	 if (typeof v === "string" && v.length > 0) {
 	        v =  util.checkMixedContent(v);
@@ -127,9 +127,8 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
           basemap = new TileLayer(v);
         }
         map.add(basemap);
-      }
-	   this.map = map; 
-      this.view.when(lang.hitch(this,function() {  
+      }	   
+      view.when(lang.hitch(this,function() {  
     	  var localGeoportalUrl = this._createLocalCatalogUrl();
 	   	   if (localGeoportalUrl) {
 			   var target;
@@ -145,7 +144,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     	//Add geoportal search widget
   		var widgetContext = new WidgetContext({
               i18n: i18n,
-              view: this.view,
+              view: view,
               proxyUrl: esriConfig.defaults.io.proxyUrl,
               wabWidget: this,
               widgetConfig: this.config
@@ -241,20 +240,21 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 	    	  }
 	    	});
 	     reactiveUtils.watch(
-	             () => view.popup.viewModel?.active,
-	             () => {
-	               selectedFeature = view.popup.selectedFeature;
-	               if (selectedFeature !== null && view.popup.visible !== false) {
-	            	   if(this.featureTable)
-	            		   {
-	            		   this.featureTable.highlightIds.removeAll();
-	            		   this.featureTable.highlightIds.add(view.popup.selectedFeature.attributes.OBJECTID);
-	  	                 	
-	            		   }
-	                 
-	               }
-	             }
-	           );
+             () => view.popup.viewModel?.active,
+             () => {
+               selectedFeature = view.popup.selectedFeature;
+               if (selectedFeature !== null && view.popup.visible !== false) {
+            	   if(this.featureTable)
+            		   {
+            		   this.featureTable.highlightIds.removeAll();
+            		   this.featureTable.highlightIds.add(view.popup.selectedFeature.attributes.OBJECTID);
+  	                 	
+            		   }
+                 
+               }
+             }
+	      );
+	     this.view = view;
       }));  
 
     	        //TODO                                                                                         Add an expand here and open geoportal Search widget in expand

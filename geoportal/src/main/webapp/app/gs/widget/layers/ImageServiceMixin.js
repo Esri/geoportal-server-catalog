@@ -17,12 +17,11 @@ define(["dojo/_base/declare",
   "./layerUtil",
   "../util",
   "esri4/core/lang",
-  "esri4/layers/ImageryLayer",
-  //"esri4/layers/ImageServiceParameters",
+  "esri4/layers/ImageryLayer", 
   "esri4/layers/support/MosaicRule",
   "esri4/layers/support/RasterFunction"],
 function(declare, Deferred, layerUtil, util, esriLang, ImageryLayer,
-  /*ImageServiceParameters,*/ MosaicRule, RasterFunction) {
+   MosaicRule, RasterFunction) {
 
   var _def = declare(null, {
 
@@ -40,26 +39,24 @@ function(declare, Deferred, layerUtil, util, esriLang, ImageryLayer,
       };
       itemData = itemData || {};
 
-      if (esriLang.isDefined(itemData.visibility) && itemData.visibility === false) {
-        layerObject.visibility = false; // TODO?
+      if (itemData.visible && itemData.visible === false) {
+        layerObject.visible = false; // TODO?
       }
-      if (esriLang.isDefined(itemData.opacity)) {
+      if (itemData.opacity) {
         layerObject.opacity = itemData.opacity;
       }
-      if (esriLang.isDefined(itemData.minScale) &&
-         !esriLang.isDefined(layerObject.minScale)) {
+      if (itemData.minScale && !layerObject.minScale) {
         layerObject.minScale = itemData.minScale;
       }
-      if (esriLang.isDefined(itemData.maxScale) &&
-         !esriLang.isDefined(layerObject.maxScale)) {
+      if (itemData.maxScale && !layerObject.maxScale) {
         layerObject.maxScale = itemData.maxScale;
       }
-      if (esriLang.isDefined(itemData.refreshInterval) &&
-         !esriLang.isDefined(layerObject.refreshInterval)) {
+      if (itemData.refreshInterval &&
+         !layerObject.refreshInterval) {
         layerObject.refreshInterval = itemData.refreshInterval;
       }
-      if (itemData.popupInfo && !layerObject.popupInfo && !layerObject.disablePopup) {
-        layerObject.popupInfo = itemData.popupInfo;
+      if (itemData.popupTemplate && !layerObject.popupTemplate && layerObject.popupEnabled) {
+        layerObject.popupTemplate = itemData.popupTemplate;
       }
       if (itemData.renderingRule && !layerObject.renderingRule) {
         layerObject.renderingRule = itemData.renderingRule;
@@ -76,79 +73,28 @@ function(declare, Deferred, layerUtil, util, esriLang, ImageryLayer,
       if (itemData.format && !layerObject.format) {
         layerObject.format = itemData.format;
       }
-      if (esriLang.isDefined(itemData.compressionQuality) &&
-         !esriLang.isDefined(layerObject.compressionQuality)) {
+      if (itemData.compressionQuality &&
+         !layerObject.compressionQuality) {
         layerObject.compressionQuality = itemData.compressionQuality;
       }
       if (itemData.layerDefinition && itemData.layerDefinition.definitionExpression &&
-         (!esriLang.isDefined(layerObject.layerDefinition) ||
-          !esriLang.isDefined(layerObject.layerDefinition.definitionExpression))) {
+         (!layerObject.layerDefinition ||
+          !layerObject.layerDefinition.definitionExpression)) {
         layerObject.layerDefinition = layerObject.layerDefinition || {};
         layerObject.layerDefinition.definitionExpression =
           itemData.layerDefinition.definitionExpression;
       }
-      
-      //TODO Fix
-      var props={};
-//      var imageServiceParameters = new ImageServiceParameters();
-//      //imageServiceParameters.bandIds = layerObject.bandIds;
-//      if (layerObject.bandIds !== null) {
-//        imageServiceParameters.bandIds = layerObject.bandIds;
-//      }
-//      if (layerObject.format !== null) {
-//        imageServiceParameters.format = layerObject.format;
-//        if (layerObject.compressionQuality !== null) {
-//          imageServiceParameters.compressionQuality = layerObject.compressionQuality;
-//        }
-//      }
-//      if (layerObject.renderingRule && layerObject.renderingRule.rasterFunction) {
-//        var rasterFunction = new RasterFunction(layerObject.renderingRule);
-//        imageServiceParameters.renderingRule = rasterFunction;
-//      }
-//      if (layerObject.mosaicRule) {
-//        var mosaicRule = new MosaicRule(layerObject.mosaicRule);
-//        imageServiceParameters.mosaicRule = mosaicRule;
-//      }
-//      if (esriLang.isDefined(layerObject.noData)) {
-//        imageServiceParameters.noData = layerObject.noData;
-//      }
-//      if (esriLang.isDefined(layerObject.noDataInterpretation)) {
-//        imageServiceParameters.noDataInterpretation = layerObject.noDataInterpretation;
-//      }
-//      if (esriLang.isDefined(layerObject.interpolation)) {
-//        imageServiceParameters.interpolation = layerObject.interpolation;
-//      }
-//
-//      var props = {
-//        imageServiceParameters: imageServiceParameters,
-//        opacity: layerObject.opacity,
-//        visible: layerObject.visibility
-//      };
-      if (esriLang.isDefined(layerObject.mapLayerId)) {
-        props.id = layerObject.mapLayerId;
-      }
-      if (esriLang.isDefined(layerObject.minScale)) {
-        props.minScale = layerObject.minScale;
-      }
-      if (esriLang.isDefined(layerObject.maxScale)) {
-        props.maxScale = layerObject.maxScale;
-      }
-      if (esriLang.isDefined(layerObject.refreshInterval)) {
-        props.refreshInterval = layerObject.refreshInterval;
-      }
-      if (esriLang.isDefined(layerObject.resourceInfo)) {
-        props.resourceInfo = layerObject.resourceInfo;
-      }
 
-      var lyr = new ImageryLayer(layerUtil.checkUrl(layerUrl),props);
+      var lyr = new ImageryLayer(layerUrl);
+      lyr.load();
       layerUtil.waitForLayer(this.i18n,lyr).then(function(layer){
         if (layerObject.layerDefinition && layerObject.layerDefinition.definitionExpression) {
           layer.setDefinitionExpression(layerObject.layerDefinition.definitionExpression,true);
         }
-        // TODO setInfoTemplate
-        //if (!options.ignorePopups && layerObject.popupInfo) {
-        //  layer.setInfoTemplate(new clazz(layerObject.popupInfo));
-        //}
+       
+        if (layerObject.popupTempplate) {
+          layer.setPopupTemplate(popupTempplate);
+        }
         /*
         rasterUtil.populateLayerWROInfo(layer,true).then(
           function(){dfd.resolve(layer);},
