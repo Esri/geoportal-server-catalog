@@ -45,11 +45,7 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
         view.map.add(layer);
       }
     },
-
-    checkUrl: function(url) {
-      //return agsUtils._checkUrl(url);
-    },
-
+    
     getDefaultPortalFieldInfo: function(serviceFieldInfo){
       //serviceFieldInfo: {name,alias,type,...}
       var fieldName = serviceFieldInfo.name;
@@ -183,85 +179,42 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
     },
     
     //TODO check later, most probably it will be redundant after layer type fixes
-//    waitForLayer: function(i18n,layer) {
-//        var dfd = new Deferred();
-//        var handles = [];
-//        if (layer.loaded) {
-//          dfd.resolve(layer);
-//          return dfd;
-//        }
-//        if (layer.loadStatus ==="failed") {
-//          dfd.reject(layer.loadError);
-//          return dfd;
-//        }
-//        var clearHandles = function() {
-//          array.forEach(handles, function(h) {
-//            h.remove();
-//          });
-//        };
-//        //console.warn("_waitForLayer");
-//        handles.push(reactiveUtils.when(() => layer.loaded === true, () => {        	
-//        	clearHandles();
-//            dfd.resolve(layerLoaded.layer);
-//            }));
-//          
-//   
-//        handles.push(reactiveUtils.when(() => layer.loadStatus ==="failed", () =>{
-//          //console.warn("_waitForLayer.error",layerError);
-//          clearHandles();
-//          var error = layerError.error;
-//          try {           
-//              console.warn("layerAccessError", error);
-//              dfd.reject(new Error(i18n.search.layerInaccessible));           
-//          } catch (ex) {
-//            //console.warn("layerAccessError",ex);
-//            dfd.reject(error);
-//          }
-//        }));
-//        return dfd;
-//      }
-
-//    waitForLayer: function(i18n,layer) {
-//      var dfd = new Deferred();
-//      var handles = [];
-//      if (layer.loaded) {
-//        dfd.resolve(layer);
-//        return dfd;
-//      }
-//      if (layer.loadError) {
-//        dfd.reject(layer.loadError);
-//        return dfd;
-//      }
-//      var clearHandles = function() {
-//        array.forEach(handles, function(h) {
-//          h.remove();
-//        });
-//      };
-//      //console.warn("_waitForLayer");
-//      handles.push(layer.on("load", function(layerLoaded) {
-//        //console.warn("_waitForLayer.load",layerLoaded);
-//        clearHandles();
-//        dfd.resolve(layerLoaded.layer);
-//      }));
-//      handles.push(layer.on("error", function(layerError) {
-//        //console.warn("_waitForLayer.error",layerError);
-//        clearHandles();
-//        var error = layerError.error;
-//        try {
-//          if (error.message && (error.message.indexOf("Unable to complete") !== -1)) {
-//            console.warn("layerAccessError", error);
-//            dfd.reject(new Error(i18n.search.layerInaccessible));
-//          } else {
-//            dfd.reject(error);
-//          }
-//        } catch (ex) {
-//          //console.warn("layerAccessError",ex);
-//          dfd.reject(error);
-//        }
-//      }));
-//      return dfd;
-//    }
-
+    waitForLayer: function(i18n,layer) {
+        var dfd = new Deferred();
+        var handles = [];
+        if (layer.loaded) {
+          dfd.resolve(layer);
+          return dfd;
+        }
+        if (layer.loadStatus ==="failed") {
+          dfd.reject(layer.loadError);
+          return dfd;
+        }
+        var clearHandles = function() {
+          array.forEach(handles, function(h) {
+            h.remove();
+          });
+        };
+        
+        handles.push(reactiveUtils.when(() => layer.loaded === true, () => {        	
+        	clearHandles();
+            dfd.resolve(layer);
+            }));
+          
+   
+        handles.push(reactiveUtils.when(() => layer.loadStatus ==="failed", () =>{        
+          clearHandles();
+          var error = layer.loadError;
+          try {           
+              console.warn("layerAccessError", error);
+              dfd.reject(new Error(i18n.search.layerInaccessible));           
+          } catch (ex) {
+            //console.warn("layerAccessError",ex);
+            dfd.reject(error);
+          }
+        }));
+        return dfd;
+      }
   };
 
   return _def;
