@@ -941,6 +941,12 @@ g-item-card-content-info .g-item-card .g-item-title {
   border: none;
 }
 
+.g-mapframe-container > iframe {
+  width: 100%;
+  height: 100%;
+  border: none;
+}
+
 #mapViewContainer {
    display: flex;
    flex-direction: column;
