@@ -106,45 +106,45 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
       return dfd;
     },
 
-    _makeFeatureLayerTitle: function(pattern,serviceName,layerName) {
-      var n, v, regexp;
-      try {
-        if (serviceName && layerName && (serviceName === layerName)) {
-          return serviceName;
-        } else if (serviceName && layerName) {
-          // try to remove a timestamp suffix
-          n = layerName.indexOf(serviceName);
-          if (n === 0) {
-            v = layerName.substring(n + serviceName.length + 1);
-            if (v.length >= 13) {
-              regexp = /^\d+$/;
-              if (regexp.test(v)) {
-                return serviceName;
-              }
-            }
-          }
-        }
-      } catch (ex) {}
-      v = pattern.replace("{serviceName}",serviceName).replace("{layerName}",layerName);
-      return v;
-    },
+//    _makeFeatureLayerTitle: function(pattern,serviceName,layerName) {
+//      var n, v, regexp;
+//      try {
+//        if (serviceName && layerName && (serviceName === layerName)) {
+//          return serviceName;
+//        } else if (serviceName && layerName) {
+//          // try to remove a timestamp suffix
+//          n = layerName.indexOf(serviceName);
+//          if (n === 0) {
+//            v = layerName.substring(n + serviceName.length + 1);
+//            if (v.length >= 13) {
+//              regexp = /^\d+$/;
+//              if (regexp.test(v)) {
+//                return serviceName;
+//              }
+//            }
+//          }
+//        }
+//      } catch (ex) {}
+//      v = pattern.replace("{serviceName}",serviceName).replace("{layerName}",layerName);
+//      return v;
+//    },
 
-    _processFeatureLayer: function(featureLayer,item,itemData) {
+    _processFeatureLayer: function(featureLayer,item,itemDataObj) {
       if (!item) return featureLayer;
       var self = this;
       var dlPattern = this.i18n.search.featureLayerTitlePattern;
       var opLayer = null;
-      //TODO test with subLayers
+      var itemData = itemDataObj.data;
+      
       if (itemData && itemData.layers && (itemData.layers.length > 0)) {
         array.some(itemData.layers, function(info) {
           var layerDefinition, jsonRenderer, renderer, isCustomTemplate = false;
           var popInfo, jsonPopInfo, layerPopupTemplate;
           if (info.id === featureLayer.layerId) {
             //console.warn("layerInfo",info);
-            if (info.popupTemplate) {
-              popInfo = info.popupInfo;
-              jsonPopInfo = JSON.parse(JSON.stringify(popInfo));
-              layerPopupTemplate = new PopupTemplate(popupTemplate);
+            if (info.popupInfo) {
+              popInfo = info.popupInfo;              
+              layerPopupTemplate = layerUtil.newPopupTemplate(popInfo,info.title);
               featureLayer.popupTemplate = layerPopupTemplate;
               isCustomTemplate = true;
             }
@@ -155,16 +155,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
             if (info.refreshInterval) {
               featureLayerrefreshInterval = info.refreshInterval;
             }
-            if (info.showLegend) {
-              // TODO?
-              console.log("");
-            }
-            if (info.timeAnimation) {
-              if (info.timeAnimation === false) {
-                // TODO?
-                console.log("");
-              }
-            }
+           
             layerDefinition = info.layerDefinition;
             if (layerDefinition) {
               if (layerDefinition.definitionExpression) {
@@ -174,20 +165,12 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
                 featureLayer.displayField = layerDefinition.displayField;
               }
               
-            if (layerDefinition.renderer) {
+            if (layerDefinition.drawingInfo && layerDefinition.drawingInfo.renderer) {
               jsonRenderer = JSON.parse(
-                JSON.stringify(layerDefinition.renderer)
+                JSON.stringify(layerDefinition.drawingInfo.renderer)
               );
-              renderer = jsonRendererUtils.fromJson(jsonRenderer);
-              if (jsonRenderer.type && (jsonRenderer.type === "classBreaks")) {
-                renderer.isMaxInclusive = true;
-              }
               featureLayer.renderer = renderer;
             }
-//            if (esriLang.isDefined(layerDefinition.drawingInfo.transparency)) {
-//              // TODO validate before setting?
-//              featureLayer.setOpacity(1 - (layerDefinition.drawingInfo.transparency / 100));
-//            }
               
               if (layerDefinition.minScale) {
                 featureLayer.minScale = layerDefinition.minScale;
@@ -208,7 +191,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
               url: featureLayer.url,
               id: featureLayer.id,
               itemId: item.id,
-              title: self._makeFeatureLayerTitle(dlPattern,item.title,featureLayer.name)
+              title: item.title
             };
             return true;
           }
@@ -220,7 +203,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
           url: featureLayer.url,
           id: featureLayer.id,
           itemId: item.id,
-          title: self._makeFeatureLayerTitle(dlPattern,item.title,featureLayer.name)
+          title: item.title
         };
         self._setFeatureLayerPopupTemplate(featureLayer,null,opLayer.title);
         return opLayer;
@@ -229,9 +212,9 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
 
     _setFeatureLayerPopupTemplate: function(featureLayer,popupTemplate,title) {
       if (!popupTemplate) {
-    	  popupTemplate = layerUtil.newPopupInfo(featureLayer,title);
+    	  popupInfo = layerUtil.newPopupInfo(featureLayer,title);
       }
-      var template = layerUtil.newPopupTemplate(popupTemplate,title);
+      var template = layerUtil.newPopupTemplate(popupInfo,title);
       featureLayer.popupTemplate = template;
     }
 
