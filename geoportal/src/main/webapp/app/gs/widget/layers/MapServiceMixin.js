@@ -39,6 +39,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
         if (response && typeof response.type === "string" &&
            (response.type === "Feature Layer" || response.type === "Table")) {
           isSingleFeatureLayer = true;
+          //TODO test
           return self.addFeatureService(serviceUrl,item,itemData);
         } else {
           var lyr;
@@ -157,9 +158,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
             }
       });
       reactiveUtils.watch(() => lyr.loaded === true,() => {
-    	  console.log("layer loaded");
-    	 // var templates = null;
-    	 // var popupSet = false;
+    	  //console.log("layer loaded");    	 
     	  layerUtil.setMapServicePopupTemplate(lyr,itemData);
           layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
           dfd.resolve(lyr);

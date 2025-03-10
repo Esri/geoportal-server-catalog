@@ -81,8 +81,8 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
               
               if (lc.indexOf("/featureserver") > 0) {
                 var dfds = [];
-                array.forEach(info.layers,function(li){
-                  var lid = util.generateRandomId();
+                array.forEach(info.data.layers,function(li){
+                  var lid = util.generateId();
                   var lyr = new FeatureLayer(url+"/"+li.id,{id:lid,outFields:["*"]});
                   lyr.load();
                   dfds.push(self.waitForLayer(lyr));
@@ -115,7 +115,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
           });
           
         } else if (lc.indexOf("/imageserver") > 0) { 
-          layer = new ArcGISImageServiceLayer(url,{id:id});
+          layer = new ImageryLayer(url,{id:id});
           layer.load();
           this.waitThenAdd(dfd,view,type,layer);
           
@@ -240,13 +240,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
     },
     
     newPopupTemplate: function(layer) {
-      /*
-      var popupInfo = loader._newPopupInfo(lyr);
-      if (popupInfo) {
-        loader._setFeatureLayerPopupTemplate(lyr,popupInfo,null);
-      }
-      */
-      var popupInfo = layerUtil.newPopupInfo(layer,layer.name);
+      var popupInfo = layerUtil.newPopupInfo(layer,(layer.title? layer.title: layer.name));
       var popupTemplate = layerUtil.newPopupTemplate(popupInfo);
      
       return popupTemplate;
