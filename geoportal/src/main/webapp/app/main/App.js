@@ -105,7 +105,9 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
         } else {
           var urlParams = {
               title: params.title,
-              resource: params.type+":"+this.normalizeUrl(params.url)
+              resource: params.type+":"+this.normalizeUrl(params.url),
+              url: this.normalizeUrl(params.url),
+              type:params.type
           };
           ignoreMapPanelActivated = true;
           router.go("mapPanel");

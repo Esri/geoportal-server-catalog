@@ -41,12 +41,13 @@ define(["dojo/_base/declare",
         "esri4/widgets/FeatureTable/Grid/support/ButtonMenuItem",
         "esri4/widgets/FeatureTable/Grid/support/ButtonMenu",
         "../gs/widget/SearchPane",
-        "../gs/widget/WidgetContext"], 
+        "../gs/widget/WidgetContext",
+        "../gs/base/LayerProcessor"], 
 function(declare, lang, Templated, template, i18n, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
 		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,SearchWidget,LayerList,FeatureTable,
 		Legend,Locate,Home,SwitchInput,Graphic,Expand,reactiveUtils,ButtonMenuItem,ButtonMenu,
-		SearchPane,WidgetContext) {
+		SearchPane,WidgetContext,LayerProcessor) {
 
   var oThisClass = declare([Templated], {
 
@@ -78,13 +79,11 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     
     addToMap: function(params) {
     	//TODO look at AddToMap Widget.js and LayerProcessor.js
-      var mapWindow  = this.mapNode.contentWindow;
-      if (mapWindow && typeof mapWindow.addToMapListener === "function") {
-        mapWindow.addToMapListener(params);
-      }
+    	this.addLayer(params,this.view);
     },
   //Opening map panel
     ensureMap: function(urlParams) {
+    	this.urlParams = urlParams;
     	if(!this.config)
     	{
     		this.readConfig().then(()=>{
@@ -257,27 +256,13 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 	     this.view = view;
       }));  
 
-    	        //TODO                                                                                         Add an expand here and open geoportal Search widget in expand
-    	
-//    	var url = "./viewer/index.html"; // TODO config this?
-//      if (!this.mapWasInitialized) {
-//        this.mapWasInitialized = true;
-//        if (urlParams) {
-//          var sProp = null, oProp = null, props = urlParams;
-//          for (sProp in props) {
-//            if (props.hasOwnProperty(sProp)) {
-//              oProp = props[sProp];
-//              if (typeof oProp !== "undefined" && oProp !== null) {
-//                if (url.indexOf("?") === -1) url += "?";
-//                else url += "&";
-//                url += sProp+"="+encodeURIComponent(oProp);
-//              }
-//            }
-//          }
-//        }
-//        //console.warn("viewerUrl",url);
-//        this.mapFrameNode.src = url;
-//      }
+   
+      if (!this.mapWasInitialized) {
+        this.mapWasInitialized = true;
+        if (this.urlParams) {
+        	this.addLayer(this.urlParams,view);
+        }
+      }
     },
 
     openAttrTable:function(selectedFeature)
@@ -341,8 +326,35 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
           return loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/_search";
         }
         return null;
-      }
-
+      },
+      
+      addLayer: function(params,view){
+          // console.warn("AddToMap.addLayer...",type,url);     
+    	  var url = params.url;
+    	  var type = params.type;    	  
+          var dfd = new Deferred();
+        
+          var processor = new LayerProcessor();
+          processor.addLayer(view,type,url).then(function(result){
+            if (result) {
+              dfd.resolve(result);
+            } else {
+              dfd.reject("Failed");
+              console.warn("AddToMap failed for",url);
+              popupMsg();
+            }
+          }).catch(function(error){
+            dfd.reject(error);
+            if (typeof error === "string" && error === "Unsupported") {
+              console.warn("AddToMap: Unsupported type",type,url);
+            } else {
+              console.warn("AddToMap failed for",url);
+              console.warn(error);
+            }
+           alert("Add to Map failed");
+          }); 
+          return dfd;
+        }
   });
 
   return oThisClass;
