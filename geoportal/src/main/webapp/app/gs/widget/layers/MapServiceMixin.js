@@ -144,44 +144,6 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
 //      }
     },
 
-    _setDynamicLayerPopupTemplates: function(layer) {
-      var self = this, templates = null, dfds = [];
-
-      var readLayer = function(lInfo) {
-    	
-        var dfd = util.readRestInfo(layer.url + "/" + lInfo.id);
-        dfd.then(function(response){
-          var result = response.data; 
-          try {
-            var popupInfo = layerUtil.newPopupInfo(result);
-            if (popupInfo) {            	
-            	lInfo.popupTemplate = layerUtil.newPopupTemplate(popupInfo);
-            }
-          } catch(exp) {
-            console.warn("Error setting popup.");
-            console.error(exp);
-          }
-        });
-        return dfd;
-      };
-
-      if (!layer.popupTemplate) {
-        array.forEach(layer.allSublayers._items, function(lInfo) {   
-          if (!lInfo.popupTemplate) {
-            dfds.push(readLayer(lInfo));
-          }
-        });
-      }
-      if (dfds.length > 0) {
-        all(dfds).then(function(){
-        	console.log("popup set for all sublayers");
-        }).catch(function(ex){
-          console.warn("Error reading sublayers.");
-          console.error(ex);
-        });
-      }
-    },
-
     _waitThenAddDynamicLayer: function(lyr,item,itemData) {
       var self = this;
       dfd = new Deferred();
@@ -196,33 +158,9 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
       });
       reactiveUtils.watch(() => lyr.loaded === true,() => {
     	  console.log("layer loaded");
-    	  var templates = null;
-    	  var popupSet = false;
-          array.forEach(lyr.allSublayers._items, function(sublayer) { 
-            var cfgLyr = null;
-            if (itemData) {
-          	itemDataObj = itemData.data;
-              array.some(itemDataObj.layers, function(l) {
-                if (sublayer.id === l.id) {
-                  cfgLyr = l;
-                  return true;
-                }
-              });
-            }
-            var popupInfo = null;
-            
-            if (cfgLyr && cfgLyr.popupInfo) {
-              popupInfo = cfgLyr.popupInfo;
-            }
-            if (popupInfo) {
-            	sublayer.popupTemplate = layerUtil.newPopupTemplate(popupInfo,cfgLyr.name);
-            	popupSet= true;
-            }
-          });
-          if(!popupSet)
-          {
-        	  self._setDynamicLayerPopupTemplates(lyr);
-           }
+    	 // var templates = null;
+    	 // var popupSet = false;
+    	  layerUtil.setMapServicePopupTemplate(lyr,itemData);
           layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
           dfd.resolve(lyr);
     	  

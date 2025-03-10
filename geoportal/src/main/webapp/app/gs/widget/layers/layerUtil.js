@@ -14,23 +14,25 @@
  */
 define(["dojo/_base/array",
   "dojo/Deferred",
+  "dojo/_base/lang",
+  "dojo/promise/all",
   "../util",
   "esri4/PopupTemplate",  
   "esri4/core/reactiveUtils"],
-function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
+function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemplate,
 		reactiveUtils) {
   var _def = {
 
     addMapLayer: function(view,layer,item,referenceId) {
-      //console.warn("_addLayer",layer);
-      //console.warn("map",this.map);
+      // console.warn("_addLayer",layer);
+      // console.warn("map",this.map);
       if (view && layer) {
-        //layer.xtnAddData = true; // TODO?
+        // layer.xtnAddData = true; // TODO?
     	 layer.id =  referenceId;
         if (item) {
-//          layer.xtnItemId = item.id; // TODO confirm with Urban
-//          layer.xtnReferenceId = referenceId; // TODO?
-          //console.log("layer.xtnReferenceId",layer.xtnReferenceId);
+		// layer.xtnItemId = item.id; // TODO confirm with Urban
+		// layer.xtnReferenceId = referenceId; // TODO?
+          // console.log("layer.xtnReferenceId",layer.xtnReferenceId);
           if (!layer.arcgisProps && item) {
             layer.arcgisProps = {
               title: item.title
@@ -47,7 +49,7 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
     },
     
     getDefaultPortalFieldInfo: function(serviceFieldInfo){
-      //serviceFieldInfo: {name,alias,type,...}
+      // serviceFieldInfo: {name,alias,type,...}
       var fieldName = serviceFieldInfo.name;
       var item = {
         fieldName: fieldName,
@@ -58,7 +60,7 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
         stringFieldOption: "text-box"
       };
 
-      //https://developers.arcgis.com/javascript/jsapi/field-amd.html#type
+      // https://developers.arcgis.com/javascript/jsapi/field-amd.html#type
       var type = serviceFieldInfo.type;
       switch (type) {
         case "esriFieldTypeSmallInteger":
@@ -103,7 +105,7 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
           var lyr = view.map.findLayerById(id);
           if (lyr && typeof lyr.id === "string" &&
               lyr.id.length > 0) {
-            //console.warn("found added layer",lyr);
+            // console.warn("found added layer",lyr);
             if (!checkId || lyr.id === referenceId) {
               layers.push(lyr);
               if (referenceIds.indexOf(lyr.id) === -1) {
@@ -122,7 +124,8 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
 	    	let viewInAttrTable = {
 	      		  // This text is displayed as a tooltip
 	      		  title: "show attribute table",
-	      		  // The ID by which to reference the action in the event handler
+	      		  // The ID by which to reference the action in the event
+					// handler
 	      		  id: "view-attribute-table",
 	      		  // Sets the icon font used to style the action button
 	      		  className: "esri-icon-table"
@@ -178,7 +181,6 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
       return null;
     },
     
-    //TODO check later, most probably it will be redundant after layer type fixes
     waitForLayer: function(i18n,layer) {
         var dfd = new Deferred();
         var handles = [];
@@ -209,12 +211,80 @@ function(array, Deferred, util, /*agsUtils, InfoTemplate,*/ PopupTemplate,
               console.warn("layerAccessError", error);
               dfd.reject(new Error(i18n.search.layerInaccessible));           
           } catch (ex) {
-            //console.warn("layerAccessError",ex);
+            // console.warn("layerAccessError",ex);
             dfd.reject(error);
           }
         }));
         return dfd;
-      }
+      },
+      
+      setMapServicePopupTemplate:function(lyr,itemData)
+      { 
+    	 
+    	  var popupSet = false;
+      array.forEach(lyr.allSublayers._items, lang.hitch(this,function(sublayer) { 
+          var cfgLyr = null;
+          if (itemData) {
+        	itemDataObj = itemData.data;
+            array.some(itemDataObj.layers, function(l) {
+              if (sublayer.id === l.id) {
+                cfgLyr = l;
+                return true;
+              }
+            });
+          }
+          var popupInfo = null;
+          
+          if (cfgLyr && cfgLyr.popupInfo) {
+            popupInfo = cfgLyr.popupInfo;
+          }
+          if (popupInfo) {
+          	sublayer.popupTemplate = this.newPopupTemplate(popupInfo,cfgLyr.name);
+          	popupSet= true;
+          }
+        }));
+        if(!popupSet)
+        {
+      	  this._setDynamicLayerPopupTemplates(lyr);
+         }
+      },
+      _setDynamicLayerPopupTemplates: function(layer) {
+          var self = this, templates = null, dfds = [];
+
+          var readLayer = function(lInfo) {
+        	
+            var dfd = util.readRestInfo(layer.url + "/" + lInfo.id);
+            dfd.then(function(response){
+              var result = response.data; 
+              try {
+                var popupInfo = self.newPopupInfo(result);
+                if (popupInfo) {            	
+                	lInfo.popupTemplate = self.newPopupTemplate(popupInfo);
+                }
+              } catch(exp) {
+                console.warn("Error setting popup.");
+                console.error(exp);
+              }
+            });
+            return dfd;
+          };
+
+          if (!layer.popupTemplate) {
+            array.forEach(layer.allSublayers._items, function(lInfo) {   
+              if (!lInfo.popupTemplate) {
+                dfds.push(readLayer(lInfo));
+              }
+            });
+          }
+          if (dfds.length > 0) {
+            all(dfds).then(function(){
+            	console.log("popup set for all sublayers");
+            }).catch(function(ex){
+              console.warn("Error reading sublayers.");
+              console.error(ex);
+            });
+          }
+        }
   };
 
   return _def;
