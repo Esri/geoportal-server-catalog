@@ -21,13 +21,14 @@ define(["dojo/_base/declare",
   "./MapServiceMixin",
   "./VectorTileServiceMixin",
   "./WMSMixin",
+  "./WFSMixin",
   "./layerUtil",
   "../util"],
 function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
-  KMLMixin, MapServiceMixin, VectorTileServiceMixin, WMSMixin, layerUtil, util) {
+  KMLMixin, MapServiceMixin, VectorTileServiceMixin, WMSMixin,WFSMixin, layerUtil, util) {
 
   var _def = declare([FeatureServiceMixin,ImageServiceMixin,KMLMixin,
-                      MapServiceMixin,VectorTileServiceMixin,WMSMixin], {
+                      MapServiceMixin,VectorTileServiceMixin,WMSMixin,WFSMixin], {
 
     i18n: null,
     itemUrl: null,
@@ -66,7 +67,9 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
         return this.addVectorTileService(serviceUrl,item,itemData);
       } else if (serviceType === "WMS") {
         return this.addWMS(serviceUrl,item,itemData);
-      } else if (serviceType === "KML") {
+      }else if (serviceType === "WFS") {
+        return this.addWFS(serviceUrl,item,itemData);
+      }else if (serviceType === "KML") {
         return this.addKML(serviceUrl,item,itemData);
       } else {
         // TODO not supported message?
@@ -77,7 +80,7 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
     },
 
     _readItemJsonData: function(serviceType,itemUrl) {
-      var types = ["Feature Service","Image Service","Map Service","WMS"];
+      var types = ["Feature Service","Image Service","Map Service","WMS","WFS"];
       if (types.indexOf(serviceType) !== -1) {
         return util.readItemJsonData(itemUrl);
       } else {

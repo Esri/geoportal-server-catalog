@@ -262,26 +262,27 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       } else if (dcl === "esri.layers.MapImageLayer" ||
           dcl === "esri.layers.TileLayer") {
     	  layerUtil.setMapServicePopupTemplate(layer);
+      }else if (dcl === "esri.layers.WMSLayer") {
+    	  layer.popupTemplate = this.newPopupTemplate(layer);
       }
+      
     },
     
     setWMSVisibleLayers: function(layer) {
-      var maxLayers = 10, lyrNames = [];
+      var maxLayers = 10, wmsSublyrCollection = [];
       if (layer) {
-        array.some(layer.layerInfos,function(lyrInfo){
-          //console.warn("lyrInfo",lyrInfo);
-          if (typeof lyrInfo.name === "string" && lyrInfo.name.length > 0) {
-            if (lyrNames.length < maxLayers) {
-              lyrNames.push(lyrInfo.name);
+        array.some(layer.allSublayers._items,function(wmsSublayer){          
+          if (typeof wmsSublayer.title === "string" && wmsSublayer.title.length > 0) {
+            if (wmsSublyrCollection.length < maxLayers) {            	
+            	wmsSublayer.visible = true;
+            	wmsSublayer.popupEnabled = true;
+            	wmsSublyrCollection.push(wmsSublayer);            	
             } else {
               return true;
             }
           }
         });
-        //console.warn("lyrNames",lyrNames);
-        if (lyrNames.length <= maxLayers) {
-          layer.setVisibleLayers(lyrNames);
-        }
+        layer.sublayers = wmsSublyrCollection;        
       }
     },
     

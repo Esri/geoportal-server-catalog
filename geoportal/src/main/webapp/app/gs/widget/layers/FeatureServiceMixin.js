@@ -20,7 +20,7 @@ define(["dojo/_base/declare",
   "../util",
   "esri4/core/lang",
   "esri4/PopupTemplate",
-  "esri4/layers/FeatureLayer",
+  "esri4/layers/WFSLayer",
   "esri4/geometry/support/jsonUtils"],
 function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate,
   FeatureLayer, jsonRendererUtils) {

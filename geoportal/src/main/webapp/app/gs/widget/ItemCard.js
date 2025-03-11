@@ -191,6 +191,7 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "mapserver": "Map Service",
         "map service": "Map Service",
         "wms": "WMS",
+        "wfs": "WFS",
         "kml": "KML",
         "vectortileserver": "Vector Tile Service",
         "vector tile service": "Vector Tile Service"
