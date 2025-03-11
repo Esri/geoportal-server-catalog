@@ -77,8 +77,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
         return dfd;
     },
     
-    addToMap: function(params) {
-    	//TODO look at AddToMap Widget.js and LayerProcessor.js
+    addToMap: function(params) {    	
     	this.addLayer(params,this.view);
     },
   //Opening map panel
@@ -341,7 +340,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
             } else {
               dfd.reject("Failed");
               console.warn("AddToMap failed for",url);
-              popupMsg();
+              //popupMsg();
             }
           }).catch(function(error){
             dfd.reject(error);

@@ -105,8 +105,8 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
         } else {
           var urlParams = {
               title: params.title,
-              resource: params.type+":"+this.normalizeUrl(params.url),
-              url: this.normalizeUrl(params.url),
+              resource: params.type+":"+params.url,
+              url: params.url,
               type:params.type
           };
           ignoreMapPanelActivated = true;
@@ -222,16 +222,16 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       
       
     },
-
-    normalizeUrl: function(url) {
-      var services = ["mapserver", "imageserver", "featureserver", "streamserver", "vectortileserver"];
-      var selSrv = array.filter(services, function(srv) { return url.toLowerCase().indexOf(srv)>=0; });
-      if (selSrv && selSrv.length>0) {
-        var srv = selSrv[0];
-        url = url.substr(0, url.toLowerCase().indexOf(srv) + srv.length);
-      }
-      return url;
-    },
+//TODO check later if it is needed or remove
+//    normalizeUrl: function(url) {
+//      var services = ["mapserver", "imageserver", "featureserver", "streamserver", "vectortileserver"];
+//      var selSrv = array.filter(services, function(srv) { return url.toLowerCase().indexOf(srv)>=0; });
+//      if (selSrv && selSrv.length>0) {
+//        var srv = selSrv[0];
+//        url = url.substr(0, url.toLowerCase().indexOf(srv) + srv.length);
+//      }
+//      return url;
+//    },
     
     _onHome: function() {
       this.searchPanelLink.click()
