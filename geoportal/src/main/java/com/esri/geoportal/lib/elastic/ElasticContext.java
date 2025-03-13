@@ -35,6 +35,9 @@ import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.lib.security.EncryptDecrypt;
 
+import software.amazon.awssdk.auth.credentials.AwsCredentials;
+import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
+
 /**
  * Elasticsearch OR OpenSearch context.
  */
@@ -86,7 +89,17 @@ public class ElasticContext {
 	}
 	
 	public void setAwsOpenSearchAccessKeyId(String awsOpenSearchAccessKeyId) {
-		this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
+		if(awsOpenSearchAccessKeyId.isBlank())
+		{
+			//if it is blank, retrieve from InstanceProfileCredentialsProvider
+			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
+			AwsCredentials credentials = provider.resolveCredentials();			
+			this.awsOpenSearchAccessKeyId = credentials.accessKeyId();			
+		}
+		else
+		{
+			this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
+		}
 	}
 	
 	public String getAwsOpenSearchSecretAccessKey() {
@@ -94,7 +107,18 @@ public class ElasticContext {
 	}
 	
 	public void setAwsOpenSearchSecretAccessKey(String awsOpenSearchSecretAccessKey) {
-		this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
+		if(awsOpenSearchSecretAccessKey.isBlank())
+		{
+			//if it is blank, retrieve from InstanceProfileCredentialsProvider
+			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
+			AwsCredentials credentials = provider.resolveCredentials();		
+			this.awsOpenSearchAccessKeyId = credentials.secretAccessKey();			
+		}
+		else
+		{
+			this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
+		}
+		
 	}
   public String getAwsOpenSearchRegion() {
     return awsOpenSearchRegion;
