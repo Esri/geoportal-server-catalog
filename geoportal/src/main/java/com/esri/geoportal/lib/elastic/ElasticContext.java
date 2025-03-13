@@ -93,9 +93,7 @@ public class ElasticContext {
 		{
 			//if it is blank, retrieve from InstanceProfileCredentialsProvider
 			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
-			AwsCredentials credentials = provider.resolveCredentials();
-			//TODO remove after testing
-			LOGGER.info("accesskey: "+credentials.accessKeyId());
+			AwsCredentials credentials = provider.resolveCredentials();			
 			this.awsOpenSearchAccessKeyId = credentials.accessKeyId();			
 		}
 		else
@@ -113,9 +111,7 @@ public class ElasticContext {
 		{
 			//if it is blank, retrieve from InstanceProfileCredentialsProvider
 			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
-			AwsCredentials credentials = provider.resolveCredentials();
-			//TODO remove after testing
-			LOGGER.info("secretrAccesskey: "+credentials.secretAccessKey());
+			AwsCredentials credentials = provider.resolveCredentials();		
 			this.awsOpenSearchAccessKeyId = credentials.secretAccessKey();			
 		}
 		else
