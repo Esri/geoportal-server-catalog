@@ -112,8 +112,9 @@ function(declare, lang, VectorTileLayer) {
         }
         if (type === null) {
           if (endsWith(lc,".kml") || endsWith(lc,".kmz") || endsWith(lc,"kml.php") ||
-              lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 || 
-              lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
+              lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 ||  lc.indexOf("?format=kml") > 0 ||
+              lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0 || lc.indexOf("?format=kmz") > 0
+              || lc.indexOf("&format=kml") > 0 || lc.indexOf("&format=kmz") > 0){
             type = "KML";
           } else if (endsWith(lc,".csv") || lc.indexOf("f=kml") > 0) {
             type = "CSV";

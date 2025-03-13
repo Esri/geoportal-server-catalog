@@ -26,6 +26,7 @@ function(declare, layerUtil, util, KMLLayer) {
         id: util.generateId()
       };
       var lyr = new KMLLayer(serviceUrl,options);
+      lyr.load();
       var dfd = layerUtil.waitForLayer(self.i18n,lyr);
       dfd.then(function(layer) {
         if (layer && item) {
