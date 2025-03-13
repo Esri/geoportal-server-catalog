@@ -323,11 +323,10 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
          return dfd;
     },
     
-    waitThenAdd: function(dfd,view,type,layer) {
-      //console.warn("waitThenAdd",type,layer);
+    waitThenAdd: function(dfd,view,type,layer) {      
       var self = this;
       this.waitForLayer(layer).then(function(lyr){
-        //console.warn("waitThenAdd.ok",type,lyr);
+       
         var templates = null;
         if (type === "WMS") {
           self.setWMSVisibleLayers(lyr);

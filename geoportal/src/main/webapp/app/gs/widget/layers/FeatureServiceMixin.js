@@ -210,8 +210,8 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
       }
     },
 
-    _setFeatureLayerPopupTemplate: function(featureLayer,popupTemplate,title) {
-      if (!popupTemplate) {
+    _setFeatureLayerPopupTemplate: function(featureLayer,popupInfo,title) {
+      if (!popupInfo) {
     	  popupInfo = layerUtil.newPopupInfo(featureLayer,title);
       }
       var template = layerUtil.newPopupTemplate(popupInfo,title);
