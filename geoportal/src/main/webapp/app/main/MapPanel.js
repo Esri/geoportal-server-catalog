@@ -350,8 +350,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
               dfd.resolve(result);
             } else {
               dfd.reject("Failed");
-              console.warn("AddToMap failed for",url);
-              //popupMsg();
+              console.warn("AddToMap failed for",url);             
             }
           }).catch(function(error){
             dfd.reject(error);
@@ -361,7 +360,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
               console.warn("AddToMap failed for",url);
               console.warn(error);
             }
-           alert("Add to Map failed");
+           //TODO add popup alert("Add to Map failed");
           }); 
           return dfd;
         }
