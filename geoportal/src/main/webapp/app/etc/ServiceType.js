@@ -21,8 +21,8 @@ function(declare, lang, VectorTileLayer) {
     type 
       ArcGIS - FeatureServer MapServer ImageServer VectorTileServer StreamServer
       WMS
-      WMTS - not yet working with wab 2.0
-      WFS - not yet with wab 2.0
+      WMTS - 
+      WFS - 
       KML
       GeoRSS
       CSV
@@ -83,10 +83,13 @@ function(declare, lang, VectorTileLayer) {
           }
         } else if (lc.indexOf("/com.esri.wms.esrimap") !== -1) {
           type = "WMS";
+        } else if (lc.indexOf("/mapserver/wmts") !== -1) {
+          type = "WMTS";
         } else if (lc.indexOf("/mapserver/wmsserver") !== -1) {
           type = "WMS";
-        } else if (lc.indexOf("/rest/services") > 0) {
-          if (lc.indexOf("/mapserver") > 0) {
+        }
+        else if (lc.indexOf("/rest/services") > 0) {
+          if ((lc.indexOf("/mapserver") > 0) && (lc.indexOf("/mapserver/wmts") <0)) {
             type = "MapServer";
           } else if (lc.indexOf("/featureserver") > 0) {
             type = "FeatureServer";

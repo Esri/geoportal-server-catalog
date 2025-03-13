@@ -22,13 +22,14 @@ define(["dojo/_base/declare",
   "./VectorTileServiceMixin",
   "./WMSMixin",
   "./WFSMixin",
+  "./WMTSMixin",
   "./layerUtil",
   "../util"],
 function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
-  KMLMixin, MapServiceMixin, VectorTileServiceMixin, WMSMixin,WFSMixin, layerUtil, util) {
+  KMLMixin, MapServiceMixin, VectorTileServiceMixin, WMSMixin,WFSMixin, WMTSMixin,layerUtil, util) {
 
   var _def = declare([FeatureServiceMixin,ImageServiceMixin,KMLMixin,
-                      MapServiceMixin,VectorTileServiceMixin,WMSMixin,WFSMixin], {
+                      MapServiceMixin,VectorTileServiceMixin,WMSMixin,WFSMixin,WMTSMixin], {
 
     i18n: null,
     itemUrl: null,
@@ -71,6 +72,8 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
         return this.addWFS(serviceUrl,item,itemData);
       }else if (serviceType === "KML") {
         return this.addKML(serviceUrl,item,itemData);
+      }else if (serviceType === "WMTS") {
+          return this.addWMTS(serviceUrl,item,itemData);
       } else {
         // TODO not supported message?
         var dfd = new Deferred();

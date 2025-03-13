@@ -191,6 +191,7 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "mapserver": "Map Service",
         "map service": "Map Service",
         "wms": "WMS",
+        "wmts":"WMTS",
         "wfs": "WFS",
         "kml": "KML",
         "vectortileserver": "Vector Tile Service",
@@ -208,7 +209,22 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         url: null
       };
       var self = this;
-      if (Array.isArray(item.links)) {
+      //Determine service type - similar done in Catalog app
+      var urlLinks = item._source.links_s;
+      if (!typeInfo.type && urlLinks.length >0)
+	  {
+    	  array.some(urlLinks, lang.hitch(this, function(u){
+    	        var serviceType = new ServiceType();
+    	        serviceType.checkUrl(u);
+    	        serviceType.title = item.title;    	        
+    	        if (serviceType.isSet()) {
+    	        	typeInfo.type = serviceType.type;
+    	        	typeInfo.url = u;
+    	        }
+    	  }))
+	  }
+      
+      if (!typeInfo.type && Array.isArray(item.links)) {
         item.links.forEach(function(link){
           if (link.rel === "related") {
             if (typeof link.dctype === "string" && link.dctype.length > 0) {
@@ -241,20 +257,7 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
       if (!typeInfo.type && item._source && item._source.type) {
         typeInfo.type = item._source.type;
       }
-      //Determine service type - similar done in Catalog app
-      var urlLinks = item._source.links_s;
-      if (!typeInfo.type && urlLinks.length >0)
-	  {
-    	  array.some(urlLinks, lang.hitch(this, function(u){
-    	        var serviceType = new ServiceType();
-    	        serviceType.checkUrl(u);
-    	        serviceType.title = item.title;    	        
-    	        if (serviceType.isSet()) {
-    	        	typeInfo.type = serviceType.type;
-    	        	typeInfo.url = u;
-    	        }
-    	  }))
-	  }
+     
       
       if (typeInfo.type) {
         typeInfo.serviceType = addable[typeInfo.type.toLowerCase()];
