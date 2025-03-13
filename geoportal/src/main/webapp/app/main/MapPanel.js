@@ -28,6 +28,7 @@ define(["dojo/_base/declare",
         "esri4/layers/TileLayer",
         "esri4/layers/MapImageLayer",
         "esri4/layers/FeatureLayer",
+        "esri4/layers/WFSLayer",
         "esri4/widgets/Search",
         "esri4/widgets/LayerList",
         "esri4/widgets/FeatureTable",
@@ -45,7 +46,7 @@ define(["dojo/_base/declare",
         "../gs/base/LayerProcessor"], 
 function(declare, lang, Templated, template, i18n, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
-		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,SearchWidget,LayerList,FeatureTable,
+		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
 		Legend,Locate,Home,SwitchInput,Graphic,Expand,reactiveUtils,ButtonMenuItem,ButtonMenu,
 		SearchPane,WidgetContext,LayerProcessor) {
 
@@ -271,7 +272,16 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     	//Below can be used to show only selected record
 //    	var featureLayer = new FeatureLayer({url:selectedFeature.sourceLayer.url,
 //    			definitionExpression: "OBJECTID = "+id});
-    	var featureLayer = new FeatureLayer(selectedFeature.sourceLayer.url);
+    	var serviceUrl = selectedFeature.sourceLayer.url;
+    	if(this.urlParams && this.urlParams.type == 'WFS' || serviceUrl.indexOf('WFSServer')>-1)
+    		{
+    		var layerToAdd = new WFSLayer({url:serviceUrl});
+    		}
+    	else
+    		{
+    		var layerToAdd = new FeatureLayer(serviceUrl);
+    		}
+    	
     	var tableContainer = document.getElementById("tableContainer");
     	
     	if(this.featureTable)
@@ -291,7 +301,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 		let table = this.featureTable = new FeatureTable({
    		  returnGeometryEnabled: true,
    		  view: this.view,
-   		  layer: featureLayer,
+   		  layer: layerToAdd,
    		  container: container,
    		  visible:true,
    		  columnReorderingEnabled:true, 		  
@@ -332,6 +342,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     	  var url = params.url;
     	  var type = params.type;    	  
           var dfd = new Deferred();
+          this.urlParams = params;
         
           var processor = new LayerProcessor();
           processor.addLayer(view,type,url).then(function(result){

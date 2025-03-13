@@ -18,29 +18,85 @@ define(["dojo/_base/declare",
   "dojo/Deferred",
   "./layerUtil",
   "../util",  
-  "esri4/layers/WFSLayer"
+  "esri4/layers/WFSLayer",
+  "esri4/layers/ogc/wfsUtils"
  ],
-function(declare, array, all, Deferred, layerUtil, util, WFSLayer) {
+function(declare, array, all, Deferred, layerUtil, util, WFSLayer,wfsUtils) {
 
   var _def = declare(null, {
 
     addWFS: function(serviceUrl,item,itemData) {
       var dfd = new Deferred();
+      var layerDfds = [],featureLayers = [];
       var referenceId = util.generateId();
-	  var options = {id:referenceId,url:serviceUrl};
-      var layer = new WFSLayer(options);
-      layer.load();
-      //TODO handle portal item 
+      
       var self = this;
-      layerUtil.waitForLayer(self.i18n,layer).then(function(lyr){        
-    	  var popupInfo = layerUtil.newPopupInfo(lyr,(lyr.title? lyr.title: lyr.name));
-          var popupTemplate = layerUtil.newPopupTemplate(popupInfo);
-          lyr.popupTemplate = popupTemplate;
-          layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
-          dfd.resolve(lyr);
-      }).catch(function(error){        
-        dfd.reject(error);
+      wfsUtils.getCapabilities(serviceUrl).then((wfsCapabilities) => {
+    	  featureTypes =  wfsCapabilities.featureTypes;
+    	  self.featureLen = featureTypes.length;
+    	  //Allow max 10
+    	  if(self.featureLen >10)
+    		  {
+    		  self.featureLen = 10;
+    		  }
+    	  featureTypes.forEach((feature) => {
+    		  wfsUtils.getWFSLayerInfo(wfsCapabilities, feature.title).then((wfsLayerInfo) => {
+      		    // create a WFSLayer from the layer info
+      		    layer = WFSLayer.fromWFSLayerInfo(wfsLayerInfo);
+      		    layer.load();
+      		    layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));	
+      		   //TODO Urban why returning without all promise. Also do we need to show all layers? or just top  
+      		  all(layerDfds).then(function(results)
+  			      {
+  			    	  if(results.length === self.featureLen)
+  			    		  {
+  			    		  console.log("all features loaded");
+	  			    		array.forEach(results, function(result) {
+	    			              featureLayers.push(result);
+	    			            });	    			    	  
+	    			    	  featureLayers.reverse();
+	    			          return featureLayers;
+  			    		  }
+  			    	  
+  			      }).then(function()
+  			      {
+  					  array.forEach(featureLayers, function(lyr) {		    		 
+  		            	  var popupInfo = layerUtil.newPopupInfo(lyr,(lyr.title? lyr.title: lyr.name));
+  		                  var popupTemplate = layerUtil.newPopupTemplate(popupInfo);
+  		                  lyr.popupTemplate = popupTemplate;
+  		                  layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);	
+  		                  dfd.resolve();
+  		               
+  		              });
+  			      })
+  			      .then(function() {
+  			          dfd.resolve(featureLayers);
+  			        }).catch(function(error) {
+  			          console.error(error);
+  			          dfd.reject(error);
+  			        });
+  		    
+    		  });
+    	  })
       });
+		  
+
+     
+    //This adds single top layer 
+//	  var options = {id:referenceId,url:serviceUrl};
+//      var layer = new WFSLayer(options);
+//      layer.load();
+//      //TODO Do we need to handle portal item 
+//      var self = this;
+//      layerUtil.waitForLayer(self.i18n,layer).then(function(lyr){        
+//    	  var popupInfo = layerUtil.newPopupInfo(lyr,(lyr.title? lyr.title: lyr.name));
+//          var popupTemplate = layerUtil.newPopupTemplate(popupInfo);
+//          lyr.popupTemplate = popupTemplate;
+//          layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
+//          dfd.resolve(lyr);
+//      }).catch(function(error){        
+//        dfd.reject(error);
+//      });
       
       return dfd;
     }
