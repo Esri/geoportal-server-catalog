@@ -70,7 +70,7 @@ def process_project(pro_project):
     # Access the first map in the list
     for map_obj in map_list:
         if len(item_list)==0: #process all items
-            continue
+            read_publish_item(map_obj)
         else:
             if map_obj.name in item_list:
                 print("reading metadata for map", map_obj.name)
@@ -79,7 +79,7 @@ def process_project(pro_project):
         layer_list = map_obj.listLayers()
         for layer_obj in layer_list:
             if len(item_list) == 0:  # process all items
-                continue
+                read_publish_item(layer_obj)
             else:
                 if layer_obj.name in item_list:
                     print("reading metadata for layer", layer_obj.name)
