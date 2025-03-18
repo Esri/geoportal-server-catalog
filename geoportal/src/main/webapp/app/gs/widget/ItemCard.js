@@ -102,9 +102,8 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         if (this.canRemove) {
           var mapView = this.resultsPane.getView();
           var lyrs = layerUtil.findLayersAdded(mapView,referenceId).layers;
-          array.forEach(lyrs,function(lyr) {
-            // TODO what about Pro?
-        	  mapView.map.layers.remove(lyr);
+          array.forEach(lyrs,function(lyr) {            
+        	  mapView.map.layers.remove(lyr);        	  
           });
           this.canRemove = false;
           util.setNodeText(self.messageNode,"");

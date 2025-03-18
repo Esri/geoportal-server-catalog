@@ -87,7 +87,7 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
     },
 
     findLayersAdded: function(view,referenceId) {
-      var ids = [], referenceIds = [], layers = [];
+      var ids = [], referenceIds = [], layers = []; allLayers=[];
       var response = {
         referenceIds: referenceIds,
         layers: layers
@@ -97,23 +97,18 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
       }
       var checkId = (typeof referenceId === "string" && referenceId.length > 0);
       
-      array.forEach(view.map.layers.items, function(item) {
-          ids.push(item.id);
-        });
-
-        array.forEach(ids, function(id) {
-          var lyr = view.map.findLayerById(id);
-          if (lyr && typeof lyr.id === "string" &&
-              lyr.id.length > 0) {
-            // console.warn("found added layer",lyr);
-            if (!checkId || lyr.id === referenceId) {
-              layers.push(lyr);
-              if (referenceIds.indexOf(lyr.id) === -1) {
-                referenceIds.push(lyr.id);
-              }
+      allLayers = view.map.layers.items;
+      array.forEach(allLayers, function(lyr) {
+	  if (lyr && typeof lyr.id === "string" && lyr.id.length > 0)
+		{
+		  if (!checkId || lyr.id === referenceId) {
+            layers.push(lyr);
+            if (referenceIds.indexOf(lyr.id) === -1) {
+              referenceIds.push(lyr.id);
             }
-          }
-        });
+          	}
+		 }    	  
+      	});
       return response;
     },
 
