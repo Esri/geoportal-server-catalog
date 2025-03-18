@@ -211,7 +211,7 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
       var self = this;
       //Determine service type - similar done in Catalog app
       var urlLinks = item._source.links_s;
-      if (!typeInfo.type && urlLinks.length >0)
+      if (!typeInfo.type && urlLinks && urlLinks.length >0)
 	  {
     	  array.some(urlLinks, lang.hitch(this, function(u){
     	        var serviceType = new ServiceType();
