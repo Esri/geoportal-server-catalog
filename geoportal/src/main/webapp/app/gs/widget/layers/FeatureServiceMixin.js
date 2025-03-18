@@ -20,7 +20,7 @@ define(["dojo/_base/declare",
   "../util",
   "esri4/core/lang",
   "esri4/PopupTemplate",
-  "esri4/layers/WFSLayer",
+  "esri4/layers/FeatureLayer",
   "esri4/geometry/support/jsonUtils"],
 function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate,
   FeatureLayer, jsonRendererUtils) {
@@ -130,8 +130,13 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
 //    },
 
     _processFeatureLayer: function(featureLayer,item,itemDataObj) {
-      if (!item) return featureLayer;
-      var self = this;
+    	var self = this;
+      if (!item) 
+    	  {
+    	  	self._setFeatureLayerPopupTemplate(featureLayer,null,featureLayer.title);
+    	  	return featureLayer;
+    	  }
+      
       var dlPattern = this.i18n.search.featureLayerTitlePattern;
       var opLayer = null;
       var itemData = itemDataObj.data;
@@ -210,8 +215,8 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
       }
     },
 
-    _setFeatureLayerPopupTemplate: function(featureLayer,popupInfo,title) {
-      if (!popupInfo) {
+    _setFeatureLayerPopupTemplate: function(featureLayer,popupTemplate,title) {
+      if (!popupTemplate) {
     	  popupInfo = layerUtil.newPopupInfo(featureLayer,title);
       }
       var template = layerUtil.newPopupTemplate(popupInfo,title);
