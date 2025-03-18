@@ -1,6 +1,8 @@
 
 /* ........................................................................ */
-
+html {
+		font-size:16px;
+	}
 .geoportal-search-wab {
 	position: relative;
 	width: 100%;
@@ -441,5 +443,12 @@
   font-weight:bold;
   padding-left:30px;  
 }
+.geoportal-search .pagination .esri-icon-right, 
+.geoportal-search .pagination .esri-icon-expand,
+.geoportal-search .pagination .esri-icon-left {
+	font-size: 12px;
+}
+
+
 
 /* ........................................................................ */
