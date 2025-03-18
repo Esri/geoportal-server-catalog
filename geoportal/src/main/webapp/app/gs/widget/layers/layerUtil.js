@@ -224,8 +224,9 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
     	  var popupSet = false;
       array.forEach(lyr.allSublayers._items, lang.hitch(this,function(sublayer) { 
           var cfgLyr = null;
-          if (itemData) {
-        	itemDataObj = itemData.data;
+          if (itemData && itemData.data) {
+        	  itemDataObj = itemData.data;
+        	
             array.some(itemDataObj.layers, function(l) {
               if (sublayer.id === l.id) {
                 cfgLyr = l;
