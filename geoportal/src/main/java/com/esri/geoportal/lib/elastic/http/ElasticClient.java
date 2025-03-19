@@ -239,6 +239,9 @@ public class ElasticClient {
       	  con.setRequestProperty("x-amz-date", authHeader.get("amzDate"));
       	  con.setRequestProperty("x-amz-content-sha256", authHeader.get("payloadHash"));
       	  con.setRequestProperty("Authorization",authHeader.get("authorizationHeader"));
+      	LOGGER.debug("accessKey= "+this.awsOpenSearchAccessKeyId+", secretAccessKey= "+this.awsOpenSearchSecretAccessKey);
+      	LOGGER.debug("method= "+method+", url= "+url+", data="+data+", dataContentType="+  dataContentType);
+      	LOGGER.debug("Host= "+authHeader.get("RESTAPIHOST")+", x-amz-date= "+authHeader.get("amzDate")+", x-amz-content-sha256="+authHeader.get("payloadHash")+", Authorization="+authHeader.get("authorizationHeader"));
       	  
         } else {
           // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch 
