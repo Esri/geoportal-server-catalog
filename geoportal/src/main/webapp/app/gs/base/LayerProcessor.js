@@ -124,7 +124,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
           if (!VectorTileLayer.supported()) {
             dfd.reject("Unsupported");
           } else {
-            this.checkVectorTileUrl(url,null,{}).then(function(vturl){
+            this.checkVectorTileUrl(url,{}).then(function(vturl){
               layer = new VectorTileLayer(vturl,{id:id});
               layer.load();
               self.waitThenAdd(dfd,view,type,layer);
@@ -200,7 +200,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       return dfd;
     },
     
-    checkVectorTileUrl: function(url,itemUrl,operationalLayer) {
+    checkVectorTileUrl: function(url,operationalLayer) {
       var dfd = new Deferred();
       var endsWith = function(sv,sfx) {
         return (sv.indexOf(sfx,(sv.length - sfx.length)) !== -1);
@@ -211,31 +211,16 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
         return dfd;
       } 
       var params = {url:null,content:{},handleAs:"json",callbackParamName:"callback"};
-      if (itemUrl) {
-        params.url = this.itemUrl+"/resources/styles/root.json";
-        esriRequest(params,{}).then(function(){
-          operationalLayer.styleUrl = params.url;
-          dfd.resolve(params.url);
-        }).catch(function(){
-          params.url = url+"/resources/styles/root.json";
-          esriRequest(params,{}).then(function(){
-            operationalLayer.styleUrl = params.url;
-            dfd.resolve(params.url);
-          }).catch(function(){
-            operationalLayer.url = url;
-            dfd.resolve(url);
-          });
-        });
-      } else {
-        params.url = url+"/resources/styles/root.json";
-        esriRequest(params,{}).then(function(){
-          operationalLayer.styleUrl = params.url;
-          dfd.resolve(params.url);
-        }).catch(function(){
-          operationalLayer.url = url;
-          dfd.resolve(url);
-        });
-      }
+
+	    params.url = url+"/resources/styles/root.json";
+	    esriRequest(params,{}).then(function(){
+	      operationalLayer.styleUrl = params.url;
+	      dfd.resolve(params.url);
+	    }).catch(function(){
+	      operationalLayer.url = url;
+	      dfd.resolve(url);
+	    });
+  
       return dfd;
     },
     
