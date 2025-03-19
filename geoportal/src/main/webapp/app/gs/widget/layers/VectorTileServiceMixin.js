@@ -33,10 +33,12 @@ function(declare, Deferred, layerUtil, util, esriRequest, VectorTileLayer) {
           url = util.checkMixedContent(url);
           var props = {
             id: util.generateId(),
-            opacity: 1,
+            opacity:0.5,
+            blendMode:"multiply",
             visible: true
           };
           var lyr = new VectorTileLayer(url,props);
+          lyr.load();
           return layerUtil.waitForLayer(self.i18n,lyr);
         }
       }).then(function(layer) {
@@ -63,22 +65,7 @@ function(declare, Deferred, layerUtil, util, esriRequest, VectorTileLayer) {
         handleAs: "json",
         callbackParamName: "callback"
       };
-      if (this.itemUrl) {
-        params.url = this.itemUrl + "/resources/styles/root.json";
-        esriRequest(params, {}).then(function() {
-          operationalLayer.styleUrl = params.url;
-          dfd.resolve(params.url);
-        }).catch(function() {
-          params.url = url + "/resources/styles/root.json";
-          esriRequest(params, {}).then(function() {
-            operationalLayer.styleUrl = params.url;
-            dfd.resolve(params.url);
-          }).catch(function() {
-            operationalLayer.url = url;
-            dfd.resolve(url);
-          });
-        });
-      } else {
+
         params.url = url + "/resources/styles/root.json";
         esriRequest(params, {}).then(function() {
           operationalLayer.styleUrl = params.url;
@@ -87,7 +74,7 @@ function(declare, Deferred, layerUtil, util, esriRequest, VectorTileLayer) {
           operationalLayer.url = url;
           dfd.resolve(url);
         });
-      }
+      
       return dfd;
     }
 
