@@ -169,7 +169,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     		  index: 0
     		});
       	   let searchWidget = new SearchWidget({
-    		  view: this.view
+    		  view: view
     		});
 
     	  let searchWidgetExpand = new Expand({
