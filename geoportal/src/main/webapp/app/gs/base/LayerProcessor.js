@@ -30,6 +30,7 @@ define([
   "esri4/layers/KMLLayer",
   "esri4/layers/StreamLayer",
   "esri4/layers/VectorTileLayer",
+  "esri4/layers/ImageryTileLayer",
   "esri4/layers/WFSLayer",
   "esri4/layers/WMSLayer",
   "esri4/layers/WMTSLayer",
@@ -40,7 +41,7 @@ define([
   "../widget/layers/layerUtil"],
 function(declare, lang, array, Deferred, all, i18n, esriRequest,
 		MapImageLayer, ImageryLayer, TileLayer, CSVLayer, 
-  FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, WFSLayer, WMSLayer, WMTSLayer, 
+  FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, 
   /*WMTSLayerInfo,*/ PopupTemplate,reactiveUtils,util,layerUtil){
   
   return declare(null, {
@@ -194,7 +195,11 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
         layer = new CSVLayer(url,{id:id});
         layer.load();
         this.waitThenAdd(dfd,view,type,layer);
-      } else {
+      }else if (type === "ImageryTileLayer") {
+          layer = new ImageryTileLayer(url,{id:id});
+          layer.load();
+          this.waitThenAdd(dfd,view,type,layer);
+        }else {
         dfd.reject("Unsupported");
       }
       return dfd;

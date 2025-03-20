@@ -194,7 +194,8 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "wfs": "WFS",
         "kml": "KML",
         "vectortileserver": "Vector Tile Service",
-        "vector tile service": "Vector Tile Service"
+        "vector tile service": "Vector Tile Service",
+        "imagerytilelayer": "Imagery Tile Layer"
       };
 
       this.referenceId = response.sourceKey+"-refid-"+item.id;
