@@ -94,7 +94,22 @@ public class ElasticContext {
 			//if it is blank, retrieve from InstanceProfileCredentialsProvider
 			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
 			AwsCredentials credentials = provider.resolveCredentials();			
-			this.awsOpenSearchAccessKeyId = credentials.accessKeyId();			
+			this.awsOpenSearchAccessKeyId = credentials.accessKeyId();	
+      LOGGER.debug("AWS info: ");
+      LOGGER.debug("provider:     " + provider.toString());
+      LOGGER.debug("provider id type: " + provider.identityType().descriptorString());
+      LOGGER.debug("provider canonic: " + provider.identityType().getCanonicalName());
+      LOGGER.debug("provider name: " + provider.identityType().getName());
+      LOGGER.debug("provider p: " + provider.identityType().getPackageName());
+      LOGGER.debug("provider s: " + provider.identityType().getSimpleName());
+      LOGGER.debug("provider t: " + provider.identityType().getTypeName());
+      LOGGER.debug("provider g: " + provider.identityType().toGenericString());
+      LOGGER.debug("provider str: " + provider.identityType().toString());
+      LOGGER.debug("toString:     " + credentials.toString());
+      LOGGER.debug("accountId:    " + credentials.accountId());
+      LOGGER.debug("providerName: " + credentials.providerName());
+      LOGGER.debug("providerName: " + provider.resolveIdentity().toString());
+      
 		}
 		else
 		{
@@ -548,8 +563,15 @@ public class ElasticContext {
     }
     int port = getHttpPort();
     String scheme = "http://";
-    if (getUseHttps()) scheme = "https://";
-    String url = scheme+node+":"+port;
+    String portInfo = ":" + port;
+    
+    if (getUseHttps()) {
+      scheme = "https://";
+      portInfo = "";
+    }
+    
+    String url = scheme + node + portInfo;
+    
     return url;
   }
 //  

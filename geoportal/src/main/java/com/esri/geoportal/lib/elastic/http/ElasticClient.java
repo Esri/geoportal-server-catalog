@@ -47,6 +47,13 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.ElasticContextHttp;
 
+import software.amazon.awssdk.auth.credentials.AwsSessionCredentials;
+import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.regions.Region;
+import software.amazon.awssdk.services.sts.StsClient;
+import software.amazon.awssdk.services.sts.model.AssumeRoleRequest;
+import software.amazon.awssdk.services.sts.model.AssumeRoleResponse;
+
 
 /**
  * An HTTP client for Elasticsearch OR OpenSearch.
@@ -235,11 +242,33 @@ public class ElasticClient {
       if (isAWSServerless()) {
           //Add AWS4 signature for OpenSearch Serverless requests, signature changes as per RESTAPI path including query strings so need to generate for each request
       	  HashMap<String,String> authHeader = generateAWSSignature(method, url,data,dataContentType); 
+          
+          //MH
+          getAWSSessionToken();
+          
       	  con.setRequestProperty("Host", authHeader.get("RESTAPIHOST"));
       	  con.setRequestProperty("x-amz-date", authHeader.get("amzDate"));
       	  con.setRequestProperty("x-amz-content-sha256", authHeader.get("payloadHash"));
       	  con.setRequestProperty("Authorization",authHeader.get("authorizationHeader"));
+
+          LOGGER.debug("accessKey            = " + this.awsOpenSearchAccessKeyId);
+          LOGGER.debug("secretAccessKey      = " + this.awsOpenSearchSecretAccessKey);
+          LOGGER.debug("method               = " + method);
+          LOGGER.debug("url                  = " + url);
+          LOGGER.debug("data                 = " + data);
+          LOGGER.debug("dataContentType      = " + dataContentType);
+          LOGGER.debug("Host                 = " + authHeader.get("RESTAPIHOST"));
+          LOGGER.debug("x-amz-date           = " + authHeader.get("amzDate"));
+          LOGGER.debug("x-amz-content-sha256 = " + authHeader.get("payloadHash"));
+          LOGGER.debug("Authorization        = " + authHeader.get("authorizationHeader"));
       	  
+          String curl = "curl --location --" + method + " '" + url + "'";
+          curl = curl + " --header 'Host:" + authHeader.get("RESTAPIHOST") + "' ";
+          curl = curl + " --header 'x-amz-date:" + authHeader.get("amzDate") + "' ";
+          curl = curl + " --header 'x-amz-content-sha256:" + authHeader.get("payloadHash") + "' ";
+          curl = curl + " --header 'Authorization:" + authHeader.get("authorizationHeader") + "'";
+          LOGGER.debug("curl                 = " + curl);
+          
         } else {
           // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch 
           if (basicCredentials != null && basicCredentials.length() > 0) {
@@ -278,7 +307,10 @@ public class ElasticClient {
       //In case of error, Read error stream
       if(code >= 400)
       {
-    	  LOGGER.debug("Error code received : "+code);
+        String responseMessage = ((HttpURLConnection) con).getResponseMessage();
+
+    	  LOGGER.debug("Error code received: " + method + " " + url + " -> " + code + ": " + responseMessage);
+        
     	  if(((HttpURLConnection) con).getErrorStream()!=null)
     	  {
     		  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(),charset)); 
@@ -364,6 +396,34 @@ public class ElasticClient {
   
   // Helper methods for AWS Signature
   
+  public void getAWSSessionToken() {
+// Create an STS client
+        StsClient stsClient = StsClient.builder()
+                .region(Region.US_EAST_1) // Replace with your desired region
+                .build();
+
+        // Define the AssumeRole request
+        AssumeRoleRequest assumeRoleRequest = AssumeRoleRequest.builder()
+                .roleArn("arn:aws:iam::235494792917:role/DREGsDBElasticBeanstalkServiceRole") 
+                .roleSessionName("MySession")
+                .build();
+
+        // Assume the role and get the response
+        AssumeRoleResponse assumeRoleResponse = stsClient.assumeRole(assumeRoleRequest);
+
+        // Extract the session credentials
+        AwsSessionCredentials credentials = AwsSessionCredentials.create(
+                assumeRoleResponse.credentials().accessKeyId(),
+                assumeRoleResponse.credentials().secretAccessKey(),
+                assumeRoleResponse.credentials().sessionToken()
+        );
+
+        // Get the session token
+        String sessionToken = credentials.sessionToken();
+        LOGGER.debug("AWS_SESSION_TOKEN: " + sessionToken);
+
+  };
+  
   public HashMap<String,String> generateAWSSignature(String reqMethod, String url, String data, String dataContentType ) throws NoSuchAlgorithmException
   {	
   	 String AWS_ACCESS_KEY_ID = this.awsOpenSearchAccessKeyId;
@@ -405,7 +465,6 @@ public class ElasticClient {
       }
       else
       {
-    	  payloadHash = sha256Hex("");
     	  canonicalHeaders = "host:" + RESTAPIHOST + "\n";
     	  signedHeaders = "host";
       }      	
