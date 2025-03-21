@@ -16,6 +16,7 @@ package com.esri.geoportal.lib.elastic.http;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -32,6 +33,7 @@ import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.TimeZone;
 
 import javax.crypto.Mac;
@@ -46,6 +48,19 @@ import org.slf4j.LoggerFactory;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.ElasticContextHttp;
+
+import software.amazon.awssdk.http.AbortableInputStream;
+import software.amazon.awssdk.http.ContentStreamProvider;
+import software.amazon.awssdk.http.HttpExecuteRequest;
+import software.amazon.awssdk.http.HttpExecuteResponse;
+import software.amazon.awssdk.http.SdkHttpClient;
+import software.amazon.awssdk.http.SdkHttpMethod;
+import software.amazon.awssdk.http.SdkHttpRequest;
+import software.amazon.awssdk.http.SdkHttpResponse;
+import software.amazon.awssdk.http.apache.ApacheHttpClient;
+import software.amazon.awssdk.http.auth.aws.signer.AwsV4HttpSigner;
+import software.amazon.awssdk.http.auth.spi.signer.SignedRequest;
+import software.amazon.awssdk.identity.spi.AwsCredentialsIdentity;
 
 
 /**
@@ -233,75 +248,153 @@ public class ElasticClient {
           ((HttpURLConnection) con).setInstanceFollowRedirects(true);
        }
       if (isAWSServerless()) {
+    	  
+    	  AwsV4HttpSigner signer = AwsV4HttpSigner.create();
+
+   	   // Specify AWS credentials. Credential providers that are used by the SDK by default are
+   	   // available in the module "auth" (e.g. DefaultCredentialsProvider).
+   	   AwsCredentialsIdentity credentials =
+   			   AwsCredentialsIdentity.create(this.awsOpenSearchAccessKeyId, this.awsOpenSearchSecretAccessKey);
+
+   	   // Create the HTTP request to be signed
+   	   SdkHttpRequest httpRequest =
+   	       SdkHttpRequest.builder()
+   	                     .uri(url)
+   	                     .method(convertSdkMethod(method))
+   	                     .putHeader("Content-Type", "application/json")
+   	                     .build();
+
+   	   // Create the request payload to be signed
+   	   ContentStreamProvider requestPayload =
+   	       ContentStreamProvider.fromUtf8String(data==null?"":data);
+
+
+   	   // Sign the request.
+   	   SignedRequest signedRequest =
+   	       signer.sign(r -> r.identity(credentials)
+   	                         .request(httpRequest)
+   	                         .payload(requestPayload)
+   	                         .putProperty(AwsV4HttpSigner.SERVICE_SIGNING_NAME, "aoss")
+   	                         .putProperty(AwsV4HttpSigner.REGION_NAME, this.awsOpenSearchRegion));
+   	                        
+
+   	   // Create and HTTP client and send the request. ApacheHttpClient requires the 'apache-client' module.
+   	   try (SdkHttpClient httpClient = ApacheHttpClient.create()) {
+   	       HttpExecuteRequest httpExecuteRequest =
+   	           HttpExecuteRequest.builder()
+   	                             .request(signedRequest.request())
+   	                             .contentStreamProvider(signedRequest.payload().orElse(null))
+   	                             .build();
+
+   	       HttpExecuteResponse response =
+   	           httpClient.prepareRequest(httpExecuteRequest).call();
+   	       
+   	       SdkHttpResponse httpResponse = response.httpResponse();
+   	       
+   	       if (httpResponse.isSuccessful()) {
+   	    	    System.out.println("Response Status Code: " + httpResponse.statusCode());
+
+   	    	    // Get the response body
+   	    	    Optional<AbortableInputStream> responseBody = response.responseBody();
+
+   	    	    // Check if the response body is available
+   	    	    if (responseBody.isPresent()) {
+   	    	        try (AbortableInputStream inputStream = responseBody.get()) {
+   	    	            // Read the response body
+   	    	            try (BufferedReader reader =new BufferedReader(new InputStreamReader(inputStream,charset))) {
+   	    	            		int nRead = 0;
+		   	    		      char[] buffer = new char[4096];
+		   	    		      while ((nRead = reader.read(buffer,0,4096)) >= 0) {
+		   	    		        sw.write(buffer,0,nRead);
+		   	    		      }
+		   	    		      result = sw.toString();
+		   	    		      LOGGER.debug("result from opensearch "+result);
+
+   	    	            }
+   	    	        } catch (IOException e) {
+   	    	            e.printStackTrace();
+   	    	        }
+   	    	    } else {
+   	    	        System.out.println("Response body is empty.");
+   	    	    }
+   	    	} else {
+   	    	    System.out.println("Response failed with status code: " + httpResponse.statusCode());
+   	    	}
+	   	 } catch (IOException e) {
+		       System.err.println("HTTP Request Failed.");
+		       e.printStackTrace();
+		   }
+    	  
           //Add AWS4 signature for OpenSearch Serverless requests, signature changes as per RESTAPI path including query strings so need to generate for each request
-      	  HashMap<String,String> authHeader = generateAWSSignature(method, url,data,dataContentType); 
-      	  con.setRequestProperty("Host", authHeader.get("RESTAPIHOST"));
-      	  con.setRequestProperty("x-amz-date", authHeader.get("amzDate"));
-      	  con.setRequestProperty("x-amz-content-sha256", authHeader.get("payloadHash"));
-      	  con.setRequestProperty("Authorization",authHeader.get("authorizationHeader"));
-      	LOGGER.debug("accessKey= "+this.awsOpenSearchAccessKeyId+", secretAccessKey= "+this.awsOpenSearchSecretAccessKey);
-      	LOGGER.debug("method= "+method+", url= "+url+", data="+data+", dataContentType="+  dataContentType);
-      	LOGGER.debug("Host= "+authHeader.get("RESTAPIHOST")+", x-amz-date= "+authHeader.get("amzDate")+", x-amz-content-sha256="+authHeader.get("payloadHash")+", Authorization="+authHeader.get("authorizationHeader"));
+//      	  HashMap<String,String> authHeader = generateAWSSignature(method, url,data,dataContentType); 
+//      	  con.setRequestProperty("Host", authHeader.get("RESTAPIHOST"));
+//      	  con.setRequestProperty("x-amz-date", authHeader.get("amzDate"));
+//      	  con.setRequestProperty("x-amz-content-sha256", authHeader.get("payloadHash"));
+//      	  con.setRequestProperty("Authorization",authHeader.get("authorizationHeader"));
+//      	LOGGER.debug("accessKey= "+this.awsOpenSearchAccessKeyId+", secretAccessKey= "+this.awsOpenSearchSecretAccessKey);
+//      	LOGGER.debug("method= "+method+", url= "+url+", data="+data+", dataContentType="+  dataContentType);
+//      	LOGGER.debug("Host= "+authHeader.get("RESTAPIHOST")+", x-amz-date= "+authHeader.get("amzDate")+", x-amz-content-sha256="+authHeader.get("payloadHash")+", Authorization="+authHeader.get("authorizationHeader"));
       	  
-        } else {
+        }//NOT serverless
+      	else {
           // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch 
           if (basicCredentials != null && basicCredentials.length() > 0) {
             con.setRequestProperty( "Authorization",basicCredentials);
           }
-        }
       
-      if (data != null && data.length() > 0) {
-        //System.err.println("sendData="+data);
-        con.setDoOutput(true);
-        byte[] bytes = data.getBytes("UTF-8");
-        if (dataContentType != null && dataContentType.length() > 0) {
-          con.setRequestProperty("content-type",dataContentType);
-        }
-        con.setRequestProperty("charset","UTF-8");
-        con.setRequestProperty("Content-Length",""+bytes.length);
-        wr = new DataOutputStream(con.getOutputStream());
-        wr.write(bytes);
+	      if (data != null && data.length() > 0) {
+	        //System.err.println("sendData="+data);
+	        con.setDoOutput(true);
+	        byte[] bytes = data.getBytes("UTF-8");
+	        if (dataContentType != null && dataContentType.length() > 0) {
+	          con.setRequestProperty("content-type",dataContentType);
+	        }
+	        con.setRequestProperty("charset","UTF-8");
+	        con.setRequestProperty("Content-Length",""+bytes.length);
+	        wr = new DataOutputStream(con.getOutputStream());
+	        wr.write(bytes);
+	      }
+	      String contentType = con.getContentType();
+	      if (contentType != null) {
+	        String[] a = contentType.split(";");
+	        for (String v: a) {
+	          v = v.trim();
+	          if (v.toLowerCase().startsWith("charset=")) {
+	            String cs = v.substring("charset=".length()).trim();
+	            if (cs.length() > 0) {
+	              charset = cs;
+	              break;
+	            }
+	          }
+	        }        
+	      }
+	      int code = ((HttpURLConnection) con).getResponseCode();
+	      
+	      //In case of error, Read error stream
+	      if(code >= 400)
+	      {
+	    	  LOGGER.debug("Error code received : "+code);
+	    	  if(((HttpURLConnection) con).getErrorStream()!=null)
+	    	  {
+	    		  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(),charset)); 
+	    	  }    
+	    	  else if(((HttpURLConnection) con).getInputStream()!=null)
+	    	  {
+	    		  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getInputStream(),charset)); 
+	    	  }
+	      }
+	      else
+	      {
+	    	  br = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
+	      }
+	      
+	      int nRead = 0;
+	      char[] buffer = new char[4096];
+	      while ((nRead = br.read(buffer,0,4096)) >= 0) {
+	        sw.write(buffer,0,nRead);
+	      }
+	      result = sw.toString();
       }
-      String contentType = con.getContentType();
-      if (contentType != null) {
-        String[] a = contentType.split(";");
-        for (String v: a) {
-          v = v.trim();
-          if (v.toLowerCase().startsWith("charset=")) {
-            String cs = v.substring("charset=".length()).trim();
-            if (cs.length() > 0) {
-              charset = cs;
-              break;
-            }
-          }
-        }        
-      }
-      int code = ((HttpURLConnection) con).getResponseCode();
-      
-      //In case of error, Read error stream
-      if(code >= 400)
-      {
-    	  LOGGER.debug("Error code received : "+code);
-    	  if(((HttpURLConnection) con).getErrorStream()!=null)
-    	  {
-    		  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(),charset)); 
-    	  }    
-    	  else if(((HttpURLConnection) con).getInputStream()!=null)
-    	  {
-    		  br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getInputStream(),charset)); 
-    	  }
-      }
-      else
-      {
-    	  br = new BufferedReader(new InputStreamReader(con.getInputStream(),charset));
-      }
-      
-      int nRead = 0;
-      char[] buffer = new char[4096];
-      while ((nRead = br.read(buffer,0,4096)) >= 0) {
-        sw.write(buffer,0,nRead);
-      }
-      result = sw.toString();
 
     } finally {
       try {if (wr != null) wr.close();} catch(Exception ef) {ef.printStackTrace();}
@@ -309,6 +402,25 @@ public class ElasticClient {
     }
     //System.err.println("result:\r\n"+result);
     return result;
+  }
+  
+  private SdkHttpMethod convertSdkMethod(String method)
+  {
+	 switch(method)
+	 {
+	 case "HEAD":
+		 return SdkHttpMethod.HEAD;
+	 case "GET":
+		 return SdkHttpMethod.GET;
+	 case "POST":
+		 return SdkHttpMethod.POST;
+	 case "PUT":
+		 return SdkHttpMethod.PUT;
+	 case "DELETE":
+		 return SdkHttpMethod.DELETE;	 
+	 
+	 }
+	return null;
   }
   
   /**
