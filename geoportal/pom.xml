@@ -312,7 +312,13 @@
 	    <artifactId>auth</artifactId>
 	    <version>2.30.33</version>
 	</dependency>
-
+  
+	<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/sts -->
+	<dependency>
+	    <groupId>software.amazon.awssdk</groupId>
+	    <artifactId>sts</artifactId>
+	    <version>2.30.33</version>
+	</dependency>
   </dependencies>
   
   <build>
