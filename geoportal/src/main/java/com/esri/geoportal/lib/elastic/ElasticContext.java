@@ -550,6 +550,10 @@ public class ElasticContext {
     String scheme = "http://";
     if (getUseHttps()) scheme = "https://";
     String url = scheme+node+":"+port;
+    if(getAwsOpenSearchType().equals("serverless"))
+    {
+    	url = this.getAwsAPIGatewayEndpoint();
+    }
     return url;
   }
 //  

@@ -77,7 +77,7 @@ public class BalancerSupport {
     StringBuilder target= null;
     if(ec.getAwsOpenSearchType().equals("serverless"))
     {
-    	//AWS opensearch serverless calls AWS API gateway endpoint which calls AWS lambda function(python) to execute search request
+    	//AWS opensearch serverless calls AWS ALB or API gateway endpoint which calls AWS lambda function(python) to execute search request
     	target = new StringBuilder(ec.getAwsAPIGatewayEndpoint());
     }
     else
@@ -86,10 +86,11 @@ public class BalancerSupport {
         int index = (int)(balancerCount.getAndIncrement() % balancerNodes.size());
         BalancerNode node =  balancerNodes.get(index);
     	target = new StringBuilder(node.proxyTo);
-    	String pathInfo = request.getPathInfo();
-	    if (pathInfo != null) {
-	      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
-	    }
+    }
+	String pathInfo = request.getPathInfo();
+    if (pathInfo != null) {
+      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
+    
     }    
     String query = request.getQueryString();
     if (query != null) {
