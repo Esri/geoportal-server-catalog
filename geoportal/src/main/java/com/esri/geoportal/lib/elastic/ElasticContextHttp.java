@@ -64,7 +64,7 @@ public class ElasticContextHttp extends ElasticContext {
       }
       else
       {
-    	  client = new ElasticClient(getBaseUrl(false),
+    	  client = new ElasticClient(this.getAwsAPIGatewayEndpoint(),
     			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
       }
     String url = client.getBaseUrl()+"/_aliases";

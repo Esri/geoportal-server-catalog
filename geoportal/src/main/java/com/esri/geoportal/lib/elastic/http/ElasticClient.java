@@ -47,7 +47,6 @@ import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.ElasticContextHttp;
 
 import software.amazon.awssdk.http.AbortableInputStream;
 import software.amazon.awssdk.http.ContentStreamProvider;
@@ -79,7 +78,7 @@ public class ElasticClient {
   private String hostName = ""; 
 
   /** Logger. */
-  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticContextHttp.class);
+  private static final Logger LOGGER = LoggerFactory.getLogger(ElasticClient.class);
 
   
   /**
@@ -247,83 +246,10 @@ public class ElasticClient {
           ((HttpURLConnection) con).setRequestMethod(method);
           ((HttpURLConnection) con).setInstanceFollowRedirects(true);
        }
-      if (isAWSServerless()) {
+//      if (isAWSServerless())
+  //    {
     	  
-    	  AwsV4HttpSigner signer = AwsV4HttpSigner.create();
-
-   	   // Specify AWS credentials. Credential providers that are used by the SDK by default are
-   	   // available in the module "auth" (e.g. DefaultCredentialsProvider).
-   	   AwsCredentialsIdentity credentials =
-   			   AwsCredentialsIdentity.create(this.awsOpenSearchAccessKeyId, this.awsOpenSearchSecretAccessKey);
-
-   	   // Create the HTTP request to be signed
-   	   SdkHttpRequest httpRequest =
-   	       SdkHttpRequest.builder()
-   	                     .uri(url)
-   	                     .method(convertSdkMethod(method))
-   	                     .putHeader("Content-Type", "application/json")
-   	                     .build();
-
-   	   // Create the request payload to be signed
-   	   ContentStreamProvider requestPayload =
-   	       ContentStreamProvider.fromUtf8String(data==null?"":data);
-
-
-   	   // Sign the request.
-   	   SignedRequest signedRequest =
-   	       signer.sign(r -> r.identity(credentials)
-   	                         .request(httpRequest)
-   	                         .payload(requestPayload)
-   	                         .putProperty(AwsV4HttpSigner.SERVICE_SIGNING_NAME, "aoss")
-   	                         .putProperty(AwsV4HttpSigner.REGION_NAME, this.awsOpenSearchRegion));
-   	                        
-
-   	   // Create and HTTP client and send the request. ApacheHttpClient requires the 'apache-client' module.
-   	   try (SdkHttpClient httpClient = ApacheHttpClient.create()) {
-   	       HttpExecuteRequest httpExecuteRequest =
-   	           HttpExecuteRequest.builder()
-   	                             .request(signedRequest.request())
-   	                             .contentStreamProvider(signedRequest.payload().orElse(null))
-   	                             .build();
-
-   	       HttpExecuteResponse response =
-   	           httpClient.prepareRequest(httpExecuteRequest).call();
-   	       
-   	       SdkHttpResponse httpResponse = response.httpResponse();
-   	       
-   	       if (httpResponse.isSuccessful()) {
-   	    	    System.out.println("Response Status Code: " + httpResponse.statusCode());
-
-   	    	    // Get the response body
-   	    	    Optional<AbortableInputStream> responseBody = response.responseBody();
-
-   	    	    // Check if the response body is available
-   	    	    if (responseBody.isPresent()) {
-   	    	        try (AbortableInputStream inputStream = responseBody.get()) {
-   	    	            // Read the response body
-   	    	            try (BufferedReader reader =new BufferedReader(new InputStreamReader(inputStream,charset))) {
-   	    	            		int nRead = 0;
-		   	    		      char[] buffer = new char[4096];
-		   	    		      while ((nRead = reader.read(buffer,0,4096)) >= 0) {
-		   	    		        sw.write(buffer,0,nRead);
-		   	    		      }
-		   	    		      result = sw.toString();
-		   	    		      LOGGER.debug("result from opensearch "+result);
-
-   	    	            }
-   	    	        } catch (IOException e) {
-   	    	            e.printStackTrace();
-   	    	        }
-   	    	    } else {
-   	    	        System.out.println("Response body is empty.");
-   	    	    }
-   	    	} else {
-   	    	    System.out.println("Response failed with status code: " + httpResponse.statusCode());
-   	    	}
-	   	 } catch (IOException e) {
-		       System.err.println("HTTP Request Failed.");
-		       e.printStackTrace();
-		   }
+    	  
     	  
           //Add AWS4 signature for OpenSearch Serverless requests, signature changes as per RESTAPI path including query strings so need to generate for each request
 //      	  HashMap<String,String> authHeader = generateAWSSignature(method, url,data,dataContentType); 
@@ -335,8 +261,8 @@ public class ElasticClient {
 //      	LOGGER.debug("method= "+method+", url= "+url+", data="+data+", dataContentType="+  dataContentType);
 //      	LOGGER.debug("Host= "+authHeader.get("RESTAPIHOST")+", x-amz-date= "+authHeader.get("amzDate")+", x-amz-content-sha256="+authHeader.get("payloadHash")+", Authorization="+authHeader.get("authorizationHeader"));
       	  
-        }//NOT serverless
-      	else {
+//        }//NOT serverless
+ //     	else {
           // AWS OpenSearch Managed OR local OpenSearch OR Elasticsearch 
           if (basicCredentials != null && basicCredentials.length() > 0) {
             con.setRequestProperty( "Authorization",basicCredentials);
@@ -394,7 +320,7 @@ public class ElasticClient {
 	        sw.write(buffer,0,nRead);
 	      }
 	      result = sw.toString();
-      }
+   //   }
 
     } finally {
       try {if (wr != null) wr.close();} catch(Exception ef) {ef.printStackTrace();}
@@ -646,4 +572,84 @@ private byte[] getSignatureKey(String key, String dateStamp, String regionName, 
 	  return false;
   }
   
+  //TODO remove this. Just keeping this until AWS access issue is fixed. Below was also tried but did not work
+  
+//  private void signRequest()
+//  {
+//	  AwsV4HttpSigner signer = AwsV4HttpSigner.create();
+//
+//  	   // Specify AWS credentials. Credential providers that are used by the SDK by default are
+//  	   // available in the module "auth" (e.g. DefaultCredentialsProvider).
+//  	   AwsCredentialsIdentity credentials =
+//  			   AwsCredentialsIdentity.create(this.awsOpenSearchAccessKeyId, this.awsOpenSearchSecretAccessKey);
+//
+//  	   // Create the HTTP request to be signed
+//  	   SdkHttpRequest httpRequest =
+//  	       SdkHttpRequest.builder()
+//  	                     .uri(url)
+//  	                     .method(convertSdkMethod(method))
+//  	                     .putHeader("Content-Type", "application/json")
+//  	                     .build();
+//
+//  	   // Create the request payload to be signed
+//  	   ContentStreamProvider requestPayload =
+//  	       ContentStreamProvider.fromUtf8String(data==null?"":data);
+//
+//
+//  	   // Sign the request.
+//  	   SignedRequest signedRequest =
+//  	       signer.sign(r -> r.identity(credentials)
+//  	                         .request(httpRequest)
+//  	                         .payload(requestPayload)
+//  	                         .putProperty(AwsV4HttpSigner.SERVICE_SIGNING_NAME, "aoss")
+//  	                         .putProperty(AwsV4HttpSigner.REGION_NAME, this.awsOpenSearchRegion));
+//  	                        
+//
+//  	   // Create and HTTP client and send the request. ApacheHttpClient requires the 'apache-client' module.
+//  	   try (SdkHttpClient httpClient = ApacheHttpClient.create()) {
+//  	       HttpExecuteRequest httpExecuteRequest =
+//  	           HttpExecuteRequest.builder()
+//  	                             .request(signedRequest.request())
+//  	                             .contentStreamProvider(signedRequest.payload().orElse(null))
+//  	                             .build();
+//
+//  	       HttpExecuteResponse response =
+//  	           httpClient.prepareRequest(httpExecuteRequest).call();
+//  	       
+//  	       SdkHttpResponse httpResponse = response.httpResponse();
+//  	       
+//  	       if (httpResponse.isSuccessful()) {
+//  	    	   LOGGER.debug("Response Status Code: " + httpResponse.statusCode());
+//
+//  	    	    // Get the response body
+//  	    	    Optional<AbortableInputStream> responseBody = response.responseBody();
+//
+//  	    	    // Check if the response body is available
+//  	    	    if (responseBody.isPresent()) {
+//  	    	        try (AbortableInputStream inputStream = responseBody.get()) {
+//  	    	            // Read the response body
+//  	    	            try (BufferedReader reader =new BufferedReader(new InputStreamReader(inputStream,charset))) {
+//  	    	            		int nRead = 0;
+//		   	    		      char[] buffer = new char[4096];
+//		   	    		      while ((nRead = reader.read(buffer,0,4096)) >= 0) {
+//		   	    		        sw.write(buffer,0,nRead);
+//		   	    		      }
+//		   	    		      result = sw.toString();
+//		   	    		      LOGGER.debug("result from opensearch "+result);
+//
+//  	    	            }
+//  	    	        } catch (IOException e) {
+//  	    	            e.printStackTrace();
+//  	    	        }
+//  	    	    } else {
+//  	    	    	LOGGER.debug("Response body is empty.");
+//  	    	    }
+//  	    	} else {
+//  	    		LOGGER.debug("Response failed with status code: " + httpResponse.statusCode());
+//  	    	}
+//	   	 } catch (IOException e) {
+//	   		 	LOGGER.debug("HTTP Request Failed.");
+//		       e.printStackTrace();
+//		   }
+//  }
 }
