@@ -135,16 +135,28 @@ public class StacContext {
     switch (ruleType) {
       case "unique":
         key = ruleElements[1];
+        String[] uniqueKeyFields = key.split(",");
         String value;
-        if (key.contains("properties.")) {
-          value = properties.getAsString(key.replace("properties.", ""));
-        } else {
-          value = properties.getAsString(key);
+
+        boolean hasFields = true;
+        message = "";
+        for (String ukField: uniqueKeyFields) {          
+          if (ukField.contains("properties.")) {
+            value = properties.getAsString(ukField.replace("properties.", ""));
+          } else {
+            value = properties.getAsString(ukField);
+          }
+
+          boolean ukFieldExists = indexHasValue(collectionId, ukField, value);
+          hasFields = hasFields && ukFieldExists;
+          if (ukFieldExists) {
+            message += ukField + " = '" + value + "'. ";  
+          }
         }
         
-        passes = !indexHasValue(collectionId, key, value);
-        message = passes ? "OK!" : 
-                "Field " + key + " with value '" + value + "' is not unique";
+        passes = !hasFields;
+        message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + message;          
+        
         break;
         
       case "intersects_collection":
