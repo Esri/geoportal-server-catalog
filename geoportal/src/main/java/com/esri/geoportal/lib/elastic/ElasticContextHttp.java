@@ -64,8 +64,7 @@ public class ElasticContextHttp extends ElasticContext {
       }
       else
       {
-    	  client = new ElasticClient(this.getAwsAPIGatewayEndpoint(),
-    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+    	  client = new ElasticClient(this.getAwsALBEndpoint(), getUseHttps(),getAwsOpenSearchType());
       }
     String url = client.getBaseUrl()+"/_aliases";
     JsonObjectBuilder request = Json.createObjectBuilder();
@@ -97,7 +96,7 @@ public class ElasticContextHttp extends ElasticContext {
       else
       {
     	  client = new ElasticClient(getBaseUrl(false),
-    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+    			  getUseHttps(),getAwsOpenSearchType());
       }
     String url = client.getIndexUrl(name);
     String path = this.getActualMappingsFile();
@@ -158,7 +157,7 @@ public class ElasticContextHttp extends ElasticContext {
       else
       {
     	  client = new ElasticClient(getBaseUrl(false),
-    			  getUseHttps(),getAwsOpenSearchType(),getAwsOpenSearchRegion(),getAwsOpenSearchAccessKeyId(),getAwsOpenSearchSecretAccessKey());
+    			  getUseHttps(),getAwsOpenSearchType());
       }
      
       if (this.getUseSeparateXmlItem()) {

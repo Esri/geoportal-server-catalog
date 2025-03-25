@@ -71,63 +71,17 @@ public class ElasticContext {
   private String base64Key = "";
   private String engineType = "";
   private String awsOpenSearchType = "";
-  private String awsOpenSearchRegion = "";
-  private String awsOpenSearchAccessKeyId = "";
-  private String awsOpenSearchSecretAccessKey = "";
-  private String awsAPIGatewayEndpoint = "";
   
-  public String getAwsAPIGatewayEndpoint() {
-	return awsAPIGatewayEndpoint;
-  }
-
-	public void setAwsAPIGatewayEndpoint(String awsAPIGatewayEndpoint) {
-		this.awsAPIGatewayEndpoint = awsAPIGatewayEndpoint;
-	}
-
-	public String getAwsOpenSearchAccessKeyId() {
-	return awsOpenSearchAccessKeyId;
-	}
-	
-	public void setAwsOpenSearchAccessKeyId(String awsOpenSearchAccessKeyId) {
-		if(awsOpenSearchAccessKeyId.isBlank())
-		{
-			//if it is blank, retrieve from InstanceProfileCredentialsProvider
-			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
-			AwsCredentials credentials = provider.resolveCredentials();			
-			this.awsOpenSearchAccessKeyId = credentials.accessKeyId();			
-		}
-		else
-		{
-			this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
-		}
-	}
-	
-	public String getAwsOpenSearchSecretAccessKey() {
-		return awsOpenSearchSecretAccessKey;
-	}
-	
-	public void setAwsOpenSearchSecretAccessKey(String awsOpenSearchSecretAccessKey) {
-		if(awsOpenSearchSecretAccessKey.isBlank())
-		{
-			//if it is blank, retrieve from InstanceProfileCredentialsProvider
-			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
-			AwsCredentials credentials = provider.resolveCredentials();		
-			this.awsOpenSearchAccessKeyId = credentials.secretAccessKey();			
-		}
-		else
-		{
-			this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
-		}
-		
-	}
-  public String getAwsOpenSearchRegion() {
-    return awsOpenSearchRegion;
-  }
-
-  public void setAwsOpenSearchRegion(String awsOpenSearchRegion) {
-    this.awsOpenSearchRegion = awsOpenSearchRegion;
-  }
+  private String awsALBEndpoint = "";
   
+  public String getAwsALBEndpoint() {
+	return awsALBEndpoint;
+  }
+
+	public void setAwsALBEndpoint(String awsALBEndpoint) {
+		this.awsALBEndpoint = awsALBEndpoint;
+	}
+	
   public String getAwsOpenSearchType() {
     return awsOpenSearchType;
   }
@@ -364,7 +318,7 @@ public class ElasticContext {
       final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
     credentialsProvider.setCredentials(AuthScope.ANY,
-      new UsernamePasswordCredentials("admin", "admin"));
+      new UsernamePasswordCredentials("",""));
 
     //Create a client.
     org.opensearch.client.RestClientBuilder builder = org.opensearch.client.RestClient.builder(new HttpHost("localhost", 9200, "http"))
@@ -540,19 +494,24 @@ public class ElasticContext {
 //   * @return the base url
 //   */
   public String getBaseUrl(boolean next) {
-    String node = null;
-    if (next) {
-      node = getNextNode();
-    } else {
-      node = nodesToArray()[0];
-    }
-    int port = getHttpPort();
-    String scheme = "http://";
-    if (getUseHttps()) scheme = "https://";
-    String url = scheme+node+":"+port;
+	 String url;
+    
     if(getAwsOpenSearchType().equals("serverless"))
     {
-    	url = this.getAwsAPIGatewayEndpoint();
+    	url = this.getAwsALBEndpoint();
+    }
+    else
+    {
+    	String node = null;
+        if (next) {
+          node = getNextNode();
+        } else {
+          node = nodesToArray()[0];
+        }
+        int port = getHttpPort();
+        String scheme = "http://";
+        if (getUseHttps()) scheme = "https://";
+        url = scheme+node+":"+port;
     }
     return url;
   }
