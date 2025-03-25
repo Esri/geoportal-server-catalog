@@ -77,8 +77,8 @@ public class BalancerSupport {
     StringBuilder target= null;
     if(ec.getAwsOpenSearchType().equals("serverless"))
     {
-    	//AWS opensearch serverless calls AWS ALB or API gateway endpoint which calls AWS lambda function(python) to execute search request
-    	target = new StringBuilder(ec.getAwsAPIGatewayEndpoint());
+    	//AWS opensearch serverless calls AWS ALB which calls AWS lambda function(python) to execute search request
+    	target = new StringBuilder(ec.getAwsALBEndpoint());
     }
     else
     {
