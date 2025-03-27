@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.lib.security.EncryptDecrypt;
 
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 
 /**
  * Elasticsearch OR OpenSearch context.

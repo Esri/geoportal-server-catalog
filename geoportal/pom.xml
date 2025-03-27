@@ -310,37 +310,7 @@
 	    <artifactId>json-smart</artifactId>
 	    <version>2.5.0</version>
 	</dependency>
- 	
-	<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/auth -->
-	<dependency>
-	    <groupId>software.amazon.awssdk</groupId>
-	    <artifactId>auth</artifactId>
-	    <version>2.30.33</version>
-	</dependency>
-	<dependency>
-		<groupId>software.amazon.awssdk</groupId>
-		<artifactId>sts</artifactId>
-		<version>2.30.33</version>
-	</dependency>
-	<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/http-auth -->
-	<dependency>
-	    <groupId>software.amazon.awssdk</groupId>
-	    <artifactId>http-auth</artifactId>
-	    <version>2.31.4</version>
-	</dependency>
-	<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/apache-client -->
-
-	
-	<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/aws-sdk-java -->
-	<dependency>
-    <groupId>software.amazon.awssdk</groupId>
-	    <artifactId>aws-sdk-java</artifactId>
-	    <version>2.31.5</version>
-	    <scope>provided</scope>
-	</dependency>
-	
-
-  </dependencies>
+</dependencies>
   
   <build>
     <finalName>geoportal</finalName>
