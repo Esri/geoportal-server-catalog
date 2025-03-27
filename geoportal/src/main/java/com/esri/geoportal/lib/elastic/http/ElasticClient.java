@@ -221,7 +221,16 @@ public class ElasticClient {
 	        con.setDoOutput(true);
 	        byte[] bytes = data.getBytes("UTF-8");
 	        if (dataContentType != null && dataContentType.length() > 0) {
-	          con.setRequestProperty("content-type",dataContentType);
+	        	if(isAWSServerless() && url.contains("_bulk"))
+	        	{
+	        		//ALB is not processing application/x-ndjson
+	        		 con.setRequestProperty("content-type","application/json");
+	        	}
+	        	else
+	        	{
+	        		 con.setRequestProperty("content-type",dataContentType);
+	        	}
+	         
 	        }
 	        con.setRequestProperty("charset","UTF-8");
 	        con.setRequestProperty("Content-Length",""+bytes.length);
