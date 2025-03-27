@@ -223,7 +223,6 @@ public class ElasticClient {
 	        if (dataContentType != null && dataContentType.length() > 0) {
 	        	if(isAWSServerless() && url.contains("_bulk"))
 	        	{
-	        		//ALB is not processing application/x-ndjson
 	        		 con.setRequestProperty("content-type","application/json");
 	        	}
 	        	else
