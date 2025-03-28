@@ -35,8 +35,6 @@ import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.lib.security.EncryptDecrypt;
 
-import software.amazon.awssdk.auth.credentials.AwsCredentials;
-import software.amazon.awssdk.auth.credentials.InstanceProfileCredentialsProvider;
 
 /**
  * Elasticsearch OR OpenSearch context.
@@ -71,78 +69,17 @@ public class ElasticContext {
   private String base64Key = "";
   private String engineType = "";
   private String awsOpenSearchType = "";
-  private String awsOpenSearchRegion = "";
-  private String awsOpenSearchAccessKeyId = "";
-  private String awsOpenSearchSecretAccessKey = "";
-  private String awsAPIGatewayEndpoint = "";
   
-  public String getAwsAPIGatewayEndpoint() {
-	return awsAPIGatewayEndpoint;
-  }
-
-	public void setAwsAPIGatewayEndpoint(String awsAPIGatewayEndpoint) {
-		this.awsAPIGatewayEndpoint = awsAPIGatewayEndpoint;
-	}
-
-	public String getAwsOpenSearchAccessKeyId() {
-	return awsOpenSearchAccessKeyId;
-	}
-	
-	public void setAwsOpenSearchAccessKeyId(String awsOpenSearchAccessKeyId) {
-		if(awsOpenSearchAccessKeyId.isBlank())
-		{
-			//if it is blank, retrieve from InstanceProfileCredentialsProvider
-			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
-			AwsCredentials credentials = provider.resolveCredentials();			
-			this.awsOpenSearchAccessKeyId = credentials.accessKeyId();	
-      LOGGER.debug("AWS info: ");
-      LOGGER.debug("provider:     " + provider.toString());
-      LOGGER.debug("provider id type: " + provider.identityType().descriptorString());
-      LOGGER.debug("provider canonic: " + provider.identityType().getCanonicalName());
-      LOGGER.debug("provider name: " + provider.identityType().getName());
-      LOGGER.debug("provider p: " + provider.identityType().getPackageName());
-      LOGGER.debug("provider s: " + provider.identityType().getSimpleName());
-      LOGGER.debug("provider t: " + provider.identityType().getTypeName());
-      LOGGER.debug("provider g: " + provider.identityType().toGenericString());
-      LOGGER.debug("provider str: " + provider.identityType().toString());
-      LOGGER.debug("toString:     " + credentials.toString());
-      LOGGER.debug("accountId:    " + credentials.accountId());
-      LOGGER.debug("providerName: " + credentials.providerName());
-      LOGGER.debug("providerName: " + provider.resolveIdentity().toString());
-      
-		}
-		else
-		{
-			this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
-		}
-	}
-	
-	public String getAwsOpenSearchSecretAccessKey() {
-		return awsOpenSearchSecretAccessKey;
-	}
-	
-	public void setAwsOpenSearchSecretAccessKey(String awsOpenSearchSecretAccessKey) {
-		if(awsOpenSearchSecretAccessKey.isBlank())
-		{
-			//if it is blank, retrieve from InstanceProfileCredentialsProvider
-			InstanceProfileCredentialsProvider provider = InstanceProfileCredentialsProvider.create();
-			AwsCredentials credentials = provider.resolveCredentials();		
-			this.awsOpenSearchAccessKeyId = credentials.secretAccessKey();			
-		}
-		else
-		{
-			this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
-		}
-		
-	}
-  public String getAwsOpenSearchRegion() {
-    return awsOpenSearchRegion;
-  }
-
-  public void setAwsOpenSearchRegion(String awsOpenSearchRegion) {
-    this.awsOpenSearchRegion = awsOpenSearchRegion;
-  }
+  private String awsALBEndpoint = "";
   
+  public String getAwsALBEndpoint() {
+	return awsALBEndpoint;
+  }
+
+	public void setAwsALBEndpoint(String awsALBEndpoint) {
+		this.awsALBEndpoint = awsALBEndpoint;
+	}
+	
   public String getAwsOpenSearchType() {
     return awsOpenSearchType;
   }
@@ -379,7 +316,7 @@ public class ElasticContext {
       final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
     credentialsProvider.setCredentials(AuthScope.ANY,
-      new UsernamePasswordCredentials("admin", "admin"));
+      new UsernamePasswordCredentials("",""));
 
     //Create a client.
     org.opensearch.client.RestClientBuilder builder = org.opensearch.client.RestClient.builder(new HttpHost("localhost", 9200, "http"))
@@ -555,23 +492,25 @@ public class ElasticContext {
 //   * @return the base url
 //   */
   public String getBaseUrl(boolean next) {
-    String node = null;
-    if (next) {
-      node = getNextNode();
-    } else {
-      node = nodesToArray()[0];
+	 String url;
+    
+    if(getAwsOpenSearchType().equals("serverless"))
+    {
+    	url = this.getAwsALBEndpoint();
     }
-    int port = getHttpPort();
-    String scheme = "http://";
-    String portInfo = ":" + port;
-    
-    if (getUseHttps()) {
-      scheme = "https://";
-      portInfo = "";
+    else
+    {
+    	String node = null;
+        if (next) {
+          node = getNextNode();
+        } else {
+          node = nodesToArray()[0];
+        }
+        int port = getHttpPort();
+        String scheme = "http://";
+        if (getUseHttps()) scheme = "https://";
+        url = scheme+node+":"+port;
     }
-    
-    String url = scheme + node + portInfo;
-    
     return url;
   }
 //  

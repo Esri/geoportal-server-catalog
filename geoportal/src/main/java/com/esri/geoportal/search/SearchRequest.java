@@ -202,20 +202,13 @@ public class SearchRequest {
       {
     	  elastic.add("useHttps",false);
       }      
-      if(ec.getAwsOpenSearchType().equals("serverless"))
-      {
-    	  elastic.add("awsOpenSearchRegion",ec.getAwsOpenSearchRegion());
-          elastic.add("awsOpenSearchAccessKeyId",ec.getAwsOpenSearchAccessKeyId());
-          elastic.add("awsOpenSearchSecretAccessKey",ec.getAwsOpenSearchSecretAccessKey());
-      }
-      else
-      {
-    	  String username = ec.getUsername();
-          String password = ec.getPassword();
-    	  if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-    	        elastic.add("username",username);
-    	        elastic.add("password",password);
-    	      }
+     
+	  String username = ec.getUsername();
+      String password = ec.getPassword();
+	  if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+	        elastic.add("username",username);
+	        elastic.add("password",password);
+    	      
       }
     } catch (Throwable t) {
       t.printStackTrace();

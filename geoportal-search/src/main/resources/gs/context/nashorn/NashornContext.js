@@ -219,6 +219,7 @@
     },
 
     sendHttpRequest: function(url, data, dataContentType, options) {
+    	print("url",url);
       var result = null;
       var br = null, br2 = null, wr = null;
       var sw = new java.io.StringWriter();
@@ -257,17 +258,6 @@
           cred = new java.lang.String(java.util.Base64.getEncoder().encode(cred.getBytes("UTF-8")),"UTF-8");
           con.setRequestProperty( "Authorization","Basic "+cred);
         }
-        if(client.isAWSServerless())
-        	{
-        	var authSignature = client.generateAWSSignature("POST", url, data, dataContentType);
-        	//print("Nashorn Context AWS "+authSignature.get("RESTAPIHOST")+", "+authSignature.get("amzDate")+", "+authSignature.get("payloadHash"));
-        	
-        	con.setRequestProperty("Host", authSignature.get("RESTAPIHOST"));
-    		con.setRequestProperty("x-amz-date", authSignature.get("amzDate"));
-    		con.setRequestProperty("x-amz-content-sha256", authSignature.get("payloadHash"));
-    		con.setRequestProperty("Authorization",authSignature.get("authorizationHeader"));
-        	}
-
         if (typeof data === "string" && data.length > 0) {
           con.setDoOutput(true);
           con.setRequestMethod("POST");
