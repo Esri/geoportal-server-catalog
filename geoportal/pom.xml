@@ -16,8 +16,8 @@
     <jackson.version>2.12.7.1</jackson.version>
   </properties>
 
+	
   <dependencies>
-
     <!-- servlet api -->
     <dependency>
       <groupId>javax.servlet</groupId>
@@ -305,10 +305,21 @@
 	    <artifactId>json-smart</artifactId>
 	    <version>2.5.0</version>
 	</dependency>
-	
-
-  </dependencies> 
+ 	
+	<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/auth -->
+	<dependency>
+	    <groupId>software.amazon.awssdk</groupId>
+	    <artifactId>auth</artifactId>
+	    <version>2.30.33</version>
+	</dependency>
   
+	<!-- https://mvnrepository.com/artifact/software.amazon.awssdk/sts -->
+	<dependency>
+	    <groupId>software.amazon.awssdk</groupId>
+	    <artifactId>sts</artifactId>
+	    <version>2.30.33</version>
+	</dependency>
+  </dependencies>
   
   <build>
     <finalName>geoportal</finalName>
