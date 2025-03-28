@@ -1315,13 +1315,14 @@ public class STACService extends Application {
             String itemFileString = this.readResourceFile(filePath, hsr);
 
             //Before searching newly added item, sleep for 1 second, otherwise record is not found
-            TimeUnit.SECONDS.sleep(1);
-
-            String itemRes = StacHelper.getItemWithItemId(collectionId, id);
-            responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
-            itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+            if(!ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
+            {
+            	TimeUnit.SECONDS.sleep(1);
+            	String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+                responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+                itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+            }             
           }
-
           return Response.status(status)
                          .header("Content-Type", "application/json")
                          .header("location",itemUrlGeoportal)
