@@ -48,7 +48,7 @@
 	<beans:property name="allowFileId" value="false" />
     <beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
     <beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
-    <beans:property name="httpPort" value="443" />		
+    <beans:property name="httpPort" value="9200" />		
 	<beans:property name="transportPort" value="9300" />  
 	<beans:property name="proxyBufferSize" value="8192" />		
           	
@@ -64,15 +64,15 @@
 	<beans:property name="password" value="" />
     
 	<beans:property name="engineType" value="${gpt_engineType:opensearch}"/> <!-- null | opensearch | elasticsearch -->		
-	<beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType:serverless}"/> <!-- null for all other types of Opensearch | serverless | managed -->
+	<beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType:}"/> <!-- null for all other types of Opensearch | serverless | managed -->
 	<!--If awsOpenSearchType = serverless, uncomment and configure awsALBEndpoint (AWS ALB)
 		https://github.com/Esri/geoportal-server-catalog/tree/master/geoportal/doc/aws-serverless -->
-	<beans:property name="awsALBEndpoint" value="https://opensearch.aes-ps.com"/>	
+	<!-- <beans:property name="awsALBEndpoint" value="https://opensearch.aes-ps.com"/>	 -->
 	
     <beans:property name="nodes">
       <!-- The list of host names within the Elasticsearch cluster, one value element per host -->
       <beans:list>
-        <beans:value>${es_node:txjwwmxxavpt5fulgmxc.us-east-1.aoss.amazonaws.com}</beans:value>
+        <beans:value>${es_node:}</beans:value>
       </beans:list>
     </beans:property>
   </beans:bean>
