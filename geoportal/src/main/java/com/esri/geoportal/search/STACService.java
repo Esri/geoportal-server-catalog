@@ -1425,8 +1425,8 @@ public class STACService extends Application {
 				 }
 				 if(!errorMsgArr.isEmpty())
 				 {
-					 responseJSON = generateResponse("500","Some Features in FeatureCollection  could not be added.",errorMsgArr);
-					 status = Response.Status.INTERNAL_SERVER_ERROR;					
+					 responseJSON = generateResponse("400","Some Features in FeatureCollection  could not be added.",errorMsgArr);
+					 status = Response.Status.BAD_REQUEST;					
 				 }
 			}
       
