@@ -63,7 +63,11 @@ function(declare, array,all, Deferred, layerUtil, util, OGCFeatureLayer) {
     				  if (layer && item) {
         		          layer.title = item.title;
         		        }
-        		        layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
+    			      var popupInfo = layerUtil.newPopupInfo(layer,(layer.title? layer.title: layer.name));
+    			      //attrTableNotAllowed = true for OGCFeatureLayer as FeatureTable not supported by OGCFeatureLayer
+    			      layer.popupTemplate = layerUtil.newPopupTemplate(popupInfo,"",true);  
+    			      
+        		      layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
         		        
     			  }); 
     			  dfd.resolve(featureLayers);
