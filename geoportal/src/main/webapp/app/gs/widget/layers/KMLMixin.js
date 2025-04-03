@@ -31,6 +31,7 @@ function(declare, layerUtil, util, KMLLayer) {
           layer.title = item.title;
         }
         layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
+        dfd.resolve(layer);
       });
       return dfd;
     }
