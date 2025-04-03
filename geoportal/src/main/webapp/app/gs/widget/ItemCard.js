@@ -196,7 +196,7 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "vectortileserver": "Vector Tile Service",
         "vector tile service": "Vector Tile Service",
         "imagerytilelayer": "Imagery Tile Layer",
-        "ogcfeatureserver": "OGC Feature Service"
+        "ogcfeatureserver": "OGC Feature Server"
         
       };
 

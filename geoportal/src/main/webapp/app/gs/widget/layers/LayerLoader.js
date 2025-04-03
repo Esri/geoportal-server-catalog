@@ -82,7 +82,7 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
           return this.addWMTS(serviceUrl,item,itemData);
       }else if (serviceType === "Imagery Tile Layer") {
           return this.addImageryTileLayer(serviceUrl,item,itemData);
-      }else if (serviceType === "OGC Feature Service") {
+      }else if (serviceType === "OGC Feature Server") {
           return this.addOGCFeatureLayer(serviceUrl,item,itemData);
       }
       else {
@@ -94,7 +94,7 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
     },
 
     _readItemJsonData: function(serviceType,itemUrl) {
-      var types = ["Feature Service","Image Service","Map Service","WMS","WFS"];
+      var types = ["Feature Service","Image Service","Map Service","WMS","WFS","OGC Feature Server","KML","WMTS","Imagery Tile Layer"];
       if (types.indexOf(serviceType) !== -1) {
         return util.readItemJsonData(itemUrl);
       } else {

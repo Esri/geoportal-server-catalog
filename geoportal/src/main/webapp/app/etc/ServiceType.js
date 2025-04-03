@@ -125,8 +125,8 @@ function(declare, lang, VectorTileLayer) {
             type = "Shapefile";
           } else if (endsWith(lc, ".tiff")) {
             type = "ImageryTileLayer";  
-          } else if (lc.indexOf("OGCFeatureServer")>-1) {
-            type = "OGC Feature Service";  
+          } else if (lc.indexOf("ogcfeatureserver")>-1) {
+            type = "OGCFeatureServer";  
           }
           
         }

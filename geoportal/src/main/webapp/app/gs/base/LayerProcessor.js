@@ -34,6 +34,7 @@ define([
   "esri4/layers/WFSLayer",
   "esri4/layers/WMSLayer",
   "esri4/layers/WMTSLayer",
+  "esri4/layers/OGCFeatureLayer",
  // "esri4/layers/WMTSLayerInfo",
   "esri4/PopupTemplate",
   "esri4/core/reactiveUtils",
@@ -41,7 +42,8 @@ define([
   "../widget/layers/layerUtil"],
 function(declare, lang, array, Deferred, all, i18n, esriRequest,
 		MapImageLayer, ImageryLayer, TileLayer, CSVLayer, 
-  FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, 
+  FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, 
+  ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, OGCFeatureLayer,
   /*WMTSLayerInfo,*/ PopupTemplate,reactiveUtils,util,layerUtil){
   
   return declare(null, {
@@ -199,10 +201,64 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
           layer = new ImageryTileLayer(url,{id:id});
           layer.load();
           this.waitThenAdd(dfd,view,type,layer);
-        }else {
+      }else if (type === "OGCFeatureServer") {
+    	this.addOGCFeatureLayer(url,view);       
+      }
+      else {
         dfd.reject("Unsupported");
       }
       return dfd;
+    },
+    
+    addOGCFeatureLayer:function(serviceUrl,view)
+    {
+        var self = this, layerDfds = [];
+        var dfd = new Deferred();
+        //Read collections 
+        var collectionUrl = serviceUrl+"/collections";
+        util.readRestInfo(collectionUrl).then(function(result) {
+      	  var response = result.data; 
+      	  var list = [];
+      	  if(response.collections)
+      	  {
+      		  var collectionList = response.collections;
+      		  var collection;
+      		  for(var i=0;i<collectionList.length;i++)
+  			  {
+      			  collection = collectionList[i];
+      			  if(collection.id)
+  				  {
+      				  list.push(collection.id);
+  				  }
+  			  }      		  
+      		  if (list.length > 0) {	
+      	            array.forEach(list, function(collectionId)
+      	            {	             
+  		                var layer = new OGCFeatureLayer({
+  		                  url:serviceUrl,
+  		                  id: util.generateId(),
+  		                  collectionId:collectionId
+  		                });
+  		                layer.load();
+  		                layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
+  	            });
+      		  	}else {    	            
+      	            console.warn("No OGC feature layers...");
+      	        }
+      		  all(layerDfds).then(function(featureLayers){
+      			  array.forEach(featureLayers, function(layer) {
+      				self.setPopupTemplate(layer);
+      				view.map.add(layer);         		        
+      			  }); 
+      			  dfd.resolve(featureLayers);
+      		  });
+      	  }
+        }).catch(function(error) {
+            console.error(error);
+            dfd.reject(error);
+          });
+        return dfd;
+    	
     },
     
     checkVectorTileUrl: function(url,operationalLayer) {
@@ -229,10 +285,9 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       return dfd;
     },
     
-    newPopupTemplate: function(layer) {
+    newPopupTemplate: function(layer,attrTableNotAllowed) {
       var popupInfo = layerUtil.newPopupInfo(layer,(layer.title? layer.title: layer.name));
-      var popupTemplate = layerUtil.newPopupTemplate(popupInfo);
-     
+      var popupTemplate = layerUtil.newPopupTemplate(popupInfo,"",attrTableNotAllowed);     
       return popupTemplate;
     },
     
@@ -254,6 +309,10 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
     	  layerUtil.setMapServicePopupTemplate(layer);
       }else if (dcl === "esri.layers.WMSLayer") {
     	  layer.popupTemplate = this.newPopupTemplate(layer);
+      }
+      else if (dcl === "esri.layers.OGCFeatureLayer") {
+    	  //attrTableNotallowed = true as FeatureTable not supported by OGCFeatureLayer
+    	  layer.popupTemplate = this.newPopupTemplate(layer,true);
       }
       
     },

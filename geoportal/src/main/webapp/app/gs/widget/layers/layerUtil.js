@@ -112,7 +112,7 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
       return response;
     },
 
-    newPopupTemplate: function(popupInfo,title) {
+    newPopupTemplate: function(popupInfo,title,attrTableNotAllowed) {
       if (popupInfo) {
     	if(!title ? (popupTitle = popupInfo.title): (popupTitle=title))    		    		
         try {
@@ -140,7 +140,7 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
 	            		type:"attachments"
 	            	}
 	            ],
-	            actions:[viewInAttrTable]
+	            actions:(!attrTableNotAllowed ? [viewInAttrTable]:[])
 	          });
 
         	
