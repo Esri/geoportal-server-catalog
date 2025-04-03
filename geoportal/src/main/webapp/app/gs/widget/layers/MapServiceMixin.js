@@ -42,10 +42,9 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
           //TODO test
           return self.addFeatureService(serviceUrl,item,itemData);
         } else {
-          var lyr;
-          var options = {id: util.generateId()};
+          var lyr;         
           if (response.tileInfo) {
-            lyr = new TileLayer(serviceUrl, options);
+            lyr = new TileLayer({url:serviceUrl,id: util.generateId()});
             lyr.load();
           } else {
             if (response && response.supportedImageFormatTypes &&
@@ -53,7 +52,7 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
               options.imageParameters = new ImageParameters();
               options.imageParameters.format = "png32";
             }
-            lyr = new MapImageLayer(serviceUrl);
+            lyr = new MapImageLayer({url:serviceUrl,id:util.generateId()});
             lyr.load();            
             self._processDynamicLayer(response,lyr,itemData);
           }

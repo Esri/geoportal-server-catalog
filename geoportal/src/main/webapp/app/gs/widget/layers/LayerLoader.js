@@ -24,16 +24,18 @@ define(["dojo/_base/declare",
   "./WFSMixin",
   "./WMTSMixin",
   "./ImageryTileLayerMixin",
+  "./OGCFeatureLayerMixin",
   "./layerUtil",
   "../util"],
 function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
   KMLMixin, MapServiceMixin, VectorTileServiceMixin, WMSMixin,WFSMixin,
-  WMTSMixin,ImageryTileLayerMixin,
+  WMTSMixin,ImageryTileLayerMixin,OGCFeatureLayerMixin,
   layerUtil, util) {
 
   var _def = declare([FeatureServiceMixin,ImageServiceMixin,KMLMixin,
                       MapServiceMixin,
-                      VectorTileServiceMixin,WMSMixin,WFSMixin,WMTSMixin,ImageryTileLayerMixin], {
+                      VectorTileServiceMixin,WMSMixin,WFSMixin,WMTSMixin,
+                      ImageryTileLayerMixin,OGCFeatureLayerMixin], {
 
     i18n: null,
     itemUrl: null,
@@ -80,7 +82,10 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
           return this.addWMTS(serviceUrl,item,itemData);
       }else if (serviceType === "Imagery Tile Layer") {
           return this.addImageryTileLayer(serviceUrl,item,itemData);
-      }else {
+      }else if (serviceType === "OGC Feature Service") {
+          return this.addOGCFeatureLayer(serviceUrl,item,itemData);
+      }
+      else {
         // TODO not supported message?
         var dfd = new Deferred();
         dfd.resolve(null);
