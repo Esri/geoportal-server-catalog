@@ -95,12 +95,7 @@ function(declare, Deferred, layerUtil, util, esriLang, ImageryLayer,
         if (layerObject.popupTempplate) {
           layer.setPopupTemplate(popupTempplate);
         }
-        /*
-        rasterUtil.populateLayerWROInfo(layer,true).then(
-          function(){dfd.resolve(layer);},
-          function(error2){dfd.reject(error2);}
-        );
-        */
+       
         layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
         dfd.resolve(layer);
       }).catch(function(error){

@@ -195,7 +195,9 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "kml": "KML",
         "vectortileserver": "Vector Tile Service",
         "vector tile service": "Vector Tile Service",
-        "imagerytilelayer": "Imagery Tile Layer"
+        "imagerytilelayer": "Imagery Tile Layer",
+        "ogcfeatureserver": "OGC Feature Service"
+        
       };
 
       this.referenceId = response.sourceKey+"-refid-"+item.id;

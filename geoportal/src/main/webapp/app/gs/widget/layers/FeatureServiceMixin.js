@@ -37,7 +37,8 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
         if (response && typeof response.type === "string" &&
            (response.type === "Feature Layer" || response.type === "Table")) {
           // a single layer registered from a service /FeatureServer/1 or /MapServer/2
-          var layer = new FeatureLayer(serviceUrl, {
+          var layer = new FeatureLayer({
+        	url:serviceUrl,
             id: util.generateId(),
             outFields: ["*"]
           });
@@ -106,28 +107,6 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
       return dfd;
     },
 
-//    _makeFeatureLayerTitle: function(pattern,serviceName,layerName) {
-//      var n, v, regexp;
-//      try {
-//        if (serviceName && layerName && (serviceName === layerName)) {
-//          return serviceName;
-//        } else if (serviceName && layerName) {
-//          // try to remove a timestamp suffix
-//          n = layerName.indexOf(serviceName);
-//          if (n === 0) {
-//            v = layerName.substring(n + serviceName.length + 1);
-//            if (v.length >= 13) {
-//              regexp = /^\d+$/;
-//              if (regexp.test(v)) {
-//                return serviceName;
-//              }
-//            }
-//          }
-//        }
-//      } catch (ex) {}
-//      v = pattern.replace("{serviceName}",serviceName).replace("{layerName}",layerName);
-//      return v;
-//    },
 
     _processFeatureLayer: function(featureLayer,item,itemDataObj) {
     	var self = this;
