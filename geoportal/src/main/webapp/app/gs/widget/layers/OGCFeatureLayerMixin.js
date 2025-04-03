@@ -25,6 +25,7 @@ function(declare, array,all, Deferred, layerUtil, util, OGCFeatureLayer) {
 
     addOGCFeatureLayer: function(serviceUrl,item,itemData) {
       var self = this, layerDfds = [];
+      var dfd = new Deferred();
       //Read collections 
       var collectionUrl = serviceUrl+"/collections";
       util.readRestInfo(collectionUrl).then(function(result) {
@@ -63,7 +64,9 @@ function(declare, array,all, Deferred, layerUtil, util, OGCFeatureLayer) {
         		          layer.title = item.title;
         		        }
         		        layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
-    			  });    			
+        		        
+    			  }); 
+    			  dfd.resolve(featureLayers);
     		  });
     	  }
       }).catch(function(error) {

@@ -104,6 +104,7 @@ function(declare, array, layerUtil, util, WMSLayer, /*WMSLayerInfo,*/
           layer.spatialReference.wkid = wkid;
         }
         layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
+        dfd.resolve(layer);
       });
       return dfd;
     },
