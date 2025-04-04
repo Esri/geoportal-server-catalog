@@ -22,18 +22,16 @@ function(declare, layerUtil, util, ImageryTileLayer) {
 
     addImageryTileLayer: function(serviceUrl,item,itemData) {
       var self = this;
-      var tempId = util.generateId();
-      var options = {
-        id: util.generateId()
-      };
-      var lyr = new ImageryTileLayer({url:serviceUrl,id:tempId});
+      var layerId = util.generateId();
+      
+      var lyr = new ImageryTileLayer({url:serviceUrl,id:layerId});
       lyr.load();
       var dfd = layerUtil.waitForLayer(self.i18n,lyr);
       dfd.then(function(layer) {
         if (layer && item) {
           layer.title = item.title;
         }
-        layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
+        layerUtil.addMapLayer(self.view,layer,item,null);
         self.view.goTo(layer.fullExtent);
       });
       return dfd;

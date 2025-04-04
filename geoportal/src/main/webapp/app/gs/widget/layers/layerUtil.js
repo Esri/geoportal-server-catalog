@@ -23,29 +23,22 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
 		reactiveUtils) {
   var _def = {
 
-    addMapLayer: function(view,layer,item,referenceId) {
-      // console.warn("_addLayer",layer);
-      // console.warn("map",this.map);
-      if (view && layer) {
-        // layer.xtnAddData = true; // TODO?
-    	 layer.id =  referenceId;
-        if (item) {
-		// layer.xtnItemId = item.id; // TODO confirm with Urban
-		// layer.xtnReferenceId = referenceId; // TODO?
-          // console.log("layer.xtnReferenceId",layer.xtnReferenceId);
-          if (!layer.arcgisProps && item) {
-            layer.arcgisProps = {
-              title: item.title
-            };
-            layer._titleForLegend = item.title;
-          }
-          if (typeof layer.title !== "string" || layer.title.length === 0) {
-            layer.title = item.title;
-          }
-          
-        }
-        view.map.add(layer);
+    addMapLayer: function(view,layer,item,referenceId) {   
+      if (view && layer ) {  
+    	  if(referenceId)
+    	  {
+    		  layer.id =  referenceId;
+    	  }
+	      if (item) {           
+	        layer._titleForLegend = item.title;
+	     
+		      if (typeof layer.title !== "string" || layer.title.length === 0) {
+		        layer.title = item.title;
+		      }
+	      } 
+	      view.map.add(layer);
       }
+      
     },
     
     getDefaultPortalFieldInfo: function(serviceFieldInfo){

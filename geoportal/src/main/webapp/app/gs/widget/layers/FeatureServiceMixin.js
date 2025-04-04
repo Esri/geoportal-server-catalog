@@ -96,7 +96,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
               layer.title = opLayer.title;
             }
           }
-          layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
+          layerUtil.addMapLayer(self.view,layer,item,null);
         });
       }).then(function() {
         dfd.resolve(featureLayers);
