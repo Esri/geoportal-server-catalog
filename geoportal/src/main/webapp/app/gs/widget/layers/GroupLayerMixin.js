@@ -13,30 +13,42 @@
  * limitations under the License.
  */
 define(["dojo/_base/declare",
+	"dojo/_base/array",
+	 "dojo/promise/all",
+	  "dojo/Deferred",
   "./layerUtil",
   "../util",
-  "esri4/layers/ImageryTileLayer"],
-function(declare, layerUtil, util, ImageryTileLayer) {
+  "esri4/layers/GroupLayer"],
+function(declare, array,all, Deferred, layerUtil, util, GroupLayer) {
 
   var _def = declare(null, {
 
-    addImageryTileLayer: function(serviceUrl,item,itemData) {
+    addGroupLayer: function(serviceUrl,item,itemDataObj) {
+      var itemData;
       var self = this;
-      var layerId = util.generateId();
-      
-      var lyr = new ImageryTileLayer({url:serviceUrl,id:layerId});
-      lyr.load();
-      var dfd = layerUtil.waitForLayer(self.i18n,lyr);
-      dfd.then(function(layer) {
-        if (layer && item) {
-          layer.title = item.title;
-        }
-        layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
-        self.view.goTo(layer.fullExtent);
-      });
+      if(itemDataObj)
+    	  itemData = itemDataObj.data;
+      if(itemData && itemData.layers)
+	  {
+    	  var groupLayer = new GroupLayer({
+    		  title: itemData.title, 
+    		  portalItem: {
+    		    id: item.id 
+    		  }    		 
+    		});
+    	  groupLayer.load();
+    	  var dfd = layerUtil.waitForLayer(self.i18n,groupLayer);
+          dfd.then(function(layer) {           
+            layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
+            dfd.resolve(layer);
+          });
+	  }
+      else
+	  {
+    	  dfd.reject("no layers to add");
+	  }
       return dfd;
     }
-
   });
 
   return _def;

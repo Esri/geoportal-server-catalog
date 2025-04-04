@@ -37,8 +37,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
         if (response && typeof response.type === "string" &&
            (response.type === "Feature Layer" || response.type === "Table")) {
           // a single layer registered from a service /FeatureServer/1 or /MapServer/2
-          var layer = new FeatureLayer({
-        	url:serviceUrl,
+          var layer = new FeatureLayer(serviceUrl, {
             id: util.generateId(),
             outFields: ["*"]
           });
@@ -96,7 +95,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
               layer.title = opLayer.title;
             }
           }
-          layerUtil.addMapLayer(self.view,layer,item,null);
+          layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
         });
       }).then(function() {
         dfd.resolve(featureLayers);

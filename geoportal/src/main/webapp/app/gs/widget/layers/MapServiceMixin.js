@@ -49,8 +49,8 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
           } else {
             if (response && response.supportedImageFormatTypes &&
                 response.supportedImageFormatTypes.indexOf("PNG32") !== -1) {
-              options.imageParameters = new ImageParameters();
-              options.imageParameters.format = "png32";
+//              options.imageParameters = new ImageParameters();
+//              options.imageParameters.format = "png32";
             }
             lyr = new MapImageLayer({url:serviceUrl,id:util.generateId()});
             lyr.load();            
