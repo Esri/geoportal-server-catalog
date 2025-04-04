@@ -98,7 +98,7 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
       var typeInfo = this.typeInfo;
       var referenceId = this.referenceId;
       var dfd, item = null, itemData = null;
-      if (typeInfo && typeInfo.serviceType && typeInfo.url) {
+      if (typeInfo && typeInfo.serviceType) {
         if (this.canRemove) {
           var mapView = this.resultsPane.getView();
           var lyrs = layerUtil.findLayersAdded(mapView,referenceId).layers;
@@ -196,7 +196,8 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "vectortileserver": "Vector Tile Service",
         "vector tile service": "Vector Tile Service",
         "imagerytilelayer": "Imagery Tile Layer",
-        "ogcfeatureserver": "OGC Feature Server"
+        "ogcfeatureserver": "OGC Feature Server",
+        "group layer":"Group Layer"
         
       };
 
@@ -263,6 +264,12 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
       
       if (typeInfo.type) {
         typeInfo.serviceType = addable[typeInfo.type.toLowerCase()];
+        //In group layer, url is null
+        if(typeInfo.serviceType === "Group Layer")
+    	{
+        	typeInfo.canAdd = true;
+            this.addButton.removeAttribute("disabled");
+    	}
         if (typeInfo.serviceType && typeof typeInfo.url === "string" &&
            (typeInfo.url.indexOf("http://") === 0 ||
             typeInfo.url.indexOf("https://") === 0)) {

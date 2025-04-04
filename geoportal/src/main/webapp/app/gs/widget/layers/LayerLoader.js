@@ -25,17 +25,18 @@ define(["dojo/_base/declare",
   "./WMTSMixin",
   "./ImageryTileLayerMixin",
   "./OGCFeatureLayerMixin",
+  "./GroupLayerMixin",
   "./layerUtil",
   "../util"],
 function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
   KMLMixin, MapServiceMixin, VectorTileServiceMixin, WMSMixin,WFSMixin,
-  WMTSMixin,ImageryTileLayerMixin,OGCFeatureLayerMixin,
+  WMTSMixin,ImageryTileLayerMixin,OGCFeatureLayerMixin,GroupLayerMixin,
   layerUtil, util) {
 
   var _def = declare([FeatureServiceMixin,ImageServiceMixin,KMLMixin,
                       MapServiceMixin,
                       VectorTileServiceMixin,WMSMixin,WFSMixin,WMTSMixin,
-                      ImageryTileLayerMixin,OGCFeatureLayerMixin], {
+                      ImageryTileLayerMixin,OGCFeatureLayerMixin,GroupLayerMixin], {
 
     i18n: null,
     itemUrl: null,
@@ -84,6 +85,8 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
           return this.addImageryTileLayer(serviceUrl,item,itemData);
       }else if (serviceType === "OGC Feature Server") {
           return this.addOGCFeatureLayer(serviceUrl,item,itemData);
+      }else if (serviceType === "Group Layer") {
+          return this.addGroupLayer(serviceUrl,item,itemData);
       }
       else {
         // TODO not supported message?
@@ -94,7 +97,7 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
     },
 
     _readItemJsonData: function(serviceType,itemUrl) {
-      var types = ["Feature Service","Image Service","Map Service","WMS","WFS","OGC Feature Server","KML","WMTS","Imagery Tile Layer"];
+      var types = ["Feature Service","Image Service","Map Service","WMS","WFS","OGC Feature Server","KML","WMTS","Imagery Tile Layer","Group Layer"];
       if (types.indexOf(serviceType) !== -1) {
         return util.readItemJsonData(itemUrl);
       } else {
