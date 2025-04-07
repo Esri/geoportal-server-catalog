@@ -35,6 +35,7 @@ define([
   "esri4/layers/WMSLayer",
   "esri4/layers/WMTSLayer",
   "esri4/layers/OGCFeatureLayer",
+  "esri4/layers/GroupLayer",
  // "esri4/layers/WMTSLayerInfo",
   "esri4/PopupTemplate",
   "esri4/core/reactiveUtils",
@@ -43,7 +44,7 @@ define([
 function(declare, lang, array, Deferred, all, i18n, esriRequest,
 		MapImageLayer, ImageryLayer, TileLayer, CSVLayer, 
   FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, 
-  ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, OGCFeatureLayer,
+  ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, OGCFeatureLayer,GroupLayer,
   /*WMTSLayerInfo,*/ PopupTemplate,reactiveUtils,util,layerUtil){
   
   return declare(null, {
@@ -53,8 +54,6 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
     },
   
     addLayer: function(view,type,url) {
-      //console.warn("esri.version",esri.version);
-      //console.warn("view.extent",view.extent);
       var dfd = new Deferred();
       if (typeof type !== "string" || type.length === 0 ||
           typeof url !== "string" || url.length === 0) {
@@ -150,37 +149,11 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
         layer = new WMSLayer(url,{id:id});
         layer.load();
         this.waitThenAdd(dfd,view,type,layer);
-      } else if (type === "WMTS") {
-        /*
-        var layerInfo = new WMTSLayerInfo({
-          identifier: "opengeo:countries",
-          tileMatrixSet: "EPSG:4326",
-          format: "png"
-        });
-        var options = {
-          serviceMode: "KVP",
-          layerInfo: layerInfo
-        };
-        url = url.substring(0,url.indexOf("?"));
-        url = "http://v2.suite.opengeo.org/geoserver/gwc/service/wmts";
-        */
+      } else if (type === "WMTS") {       
         layer = new WMTSLayer(url,{id:id});
         layer.load();
         this.waitThenAdd(dfd,view,type,layer);
-      } else if (type === "WFS") {
-        /*
-        var options = {
-          "id": id,
-          "url": "http://suite.opengeo.org/geoserver/wfs",
-          "version": "1.1.0",
-          "nsLayerName": "http://medford.opengeo.org|citylimits",
-          "wkid": 3857,
-          "mode": "SNAPSHOT",
-          "maxFeatures": 100,
-          "showDetails": true,
-          "PopupTemplate": new PopupTemplate()
-        };
-        */
+      } else if (type === "WFS") {       
         var options = {id:id,url:url,};
         layer = new WFSLayer(options);
         layer.load();
@@ -204,11 +177,15 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       }else if (type === "OGCFeatureServer") {
     	this.addOGCFeatureLayer(url,view);       
       }
+      else if (type === "GroupLayer") {
+    	  layerUtil.addGroupLayer(url,null,null,view,null);       
+        }
       else {
         dfd.reject("Unsupported");
       }
       return dfd;
-    },
+    },   
+
     
     addOGCFeatureLayer:function(serviceUrl,view)
     {

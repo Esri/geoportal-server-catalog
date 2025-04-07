@@ -48,6 +48,22 @@ function(array, DjUrl, domGeometry, domStyle, win, esriConfig, esriRequest) {
       }
       return uri;
     },
+    
+    readItemServiceType: function(item_type_s)
+    {
+    	//['urn:ogc:serviceType:GroupLayer:1.3.0']
+    	var serviceType = null;
+    	if(item_type_s.length >0)
+    	{
+    		var itemTypeStrArr=  item_type_s[0].split(':');
+        	if(itemTypeStrArr.length > 3)
+    		{
+        		serviceType = itemTypeStrArr[3];
+    		}
+    	}
+    	
+    	return serviceType;
+    },
 
     endsWith: function(sv, sfx) {
       return (sv.indexOf(sfx, (sv.length - sfx.length)) !== -1);

@@ -14,8 +14,9 @@
  */
 define(["dojo/_base/declare",
         "dojo/_base/lang",
+        "../gs/widget/util",
         "esri4/layers/VectorTileLayer",],
-function(declare, lang, VectorTileLayer) {
+function(declare, lang, util,VectorTileLayer) {
   
   /*
     type 
@@ -63,7 +64,7 @@ function(declare, lang, VectorTileLayer) {
       lang.mixin(this,args);
     },
 
-    checkUrl: function(url) {
+    checkUrl: function(url,item) {
       var endsWith = function(v,sfx) {
         return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);
       };
@@ -128,13 +129,16 @@ function(declare, lang, VectorTileLayer) {
           } else if (lc.indexOf("ogcfeatureserver")>-1) {
             type = "OGCFeatureServer";  
           }
-          
+          //Portal item type
+          else if (item && item.type_s) {
+        	  type = util.readItemServiceType(item.type_s);
+          }  
         }
       }
 
       this.type = type;
       this.url = url;
-    },
+    },  
     
     isSet: function() {
       if (typeof this.type === "string" && this.type.length > 0) {
