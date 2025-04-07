@@ -197,7 +197,8 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "vector tile service": "Vector Tile Service",
         "imagerytilelayer": "Imagery Tile Layer",
         "ogcfeatureserver": "OGC Feature Server",
-        "group layer":"Group Layer"
+        "group layer":"Group Layer",
+        "grouplayer":"Group Layer"	
         
       };
 
@@ -260,7 +261,19 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
       if (!typeInfo.type && item._source && item._source.type) {
         typeInfo.type = item._source.type;
       }
-     
+      //For Group Layer
+      if (!typeInfo.type && item && item._source && item._source && item._source.type_s)
+      {    	 
+      	//Geoportal Catalog
+    	  typeInfo.type = util.readItemServiceType(item._source.type_s);
+    	  if(typeInfo.type &&  typeInfo.type === 'GroupLayer')
+		  {
+    		  if(urlLinks && urlLinks.length >0)
+			  {
+    			  typeInfo.url = urlLinks[0];
+			  }    		  
+		  }  
+      }
       
       if (typeInfo.type) {
         typeInfo.serviceType = addable[typeInfo.type.toLowerCase()];
@@ -279,10 +292,6 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
       }
       this.typeInfo = typeInfo;
     },
-    
-    
-    
-    
 
     formatDate: function(date) {
       if (typeof(date) === "number") date = new Date(date);

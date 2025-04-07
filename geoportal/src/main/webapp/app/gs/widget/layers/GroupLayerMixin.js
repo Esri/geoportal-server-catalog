@@ -24,29 +24,10 @@ function(declare, array,all, Deferred, layerUtil, util, GroupLayer) {
   var _def = declare(null, {
 
     addGroupLayer: function(serviceUrl,item,itemDataObj) {
-      var itemData;
-      var self = this;
-      if(itemDataObj)
-    	  itemData = itemDataObj.data;
-      if(itemData && itemData.layers)
-	  {
-    	  var groupLayer = new GroupLayer({
-    		  title: itemData.title, 
-    		  portalItem: {
-    		    id: item.id 
-    		  }    		 
-    		});
-    	  groupLayer.load();
-    	  var dfd = layerUtil.waitForLayer(self.i18n,groupLayer);
-          dfd.then(function(layer) {           
-            layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
-            dfd.resolve(layer);
-          });
-	  }
-      else
-	  {
-    	  dfd.reject("no layers to add");
-	  }
+    	var self = this;
+    	
+    	var dfd = layerUtil.addGroupLayer(serviceUrl,(item?item.id:null),itemDataObj,self.view,self.referenceId);
+
       return dfd;
     }
   });

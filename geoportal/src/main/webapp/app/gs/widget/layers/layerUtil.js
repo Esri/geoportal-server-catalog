@@ -18,9 +18,10 @@ define(["dojo/_base/array",
   "dojo/promise/all",
   "../util",
   "esri4/PopupTemplate",  
-  "esri4/core/reactiveUtils"],
+  "esri4/core/reactiveUtils",
+  "esri4/layers/GroupLayer"],
 function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemplate,
-		reactiveUtils) {
+		reactiveUtils,GroupLayer) {
   var _def = {
 
     addMapLayer: function(view,layer,item,referenceId) {   
@@ -204,13 +205,36 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
           }
         }));
         return dfd;
-      },
+    },
+    
+    setGroupLayerPopupTemplate:function(groupLyr,itemData)
+    {   	  
+      array.forEach(groupLyr.allLayers._items, lang.hitch(this,function(layer) { 
+        var cfgLyr = null;       
+      	
+	      array.some(itemData.layers, function(portalItemLayer) {
+	        if (layer.title === portalItemLayer.title) {
+	          cfgLyr = portalItemLayer;
+	          return true;
+	        }
+	      });
+        
+        var popupInfo = null;
+        
+        if (cfgLyr && cfgLyr.popupInfo) {
+          popupInfo = cfgLyr.popupInfo;
+        }
+        if (popupInfo) {
+        	layer.popupTemplate = this.newPopupTemplate(popupInfo,cfgLyr.name);        	
+        }
+      }));
+    },
       
       setMapServicePopupTemplate:function(lyr,itemData)
       { 
     	 
     	  var popupSet = false;
-      array.forEach(lyr.allSublayers._items, lang.hitch(this,function(sublayer) { 
+        array.forEach(lyr.allSublayers._items, lang.hitch(this,function(sublayer) { 
           var cfgLyr = null;
           if (itemData && itemData.data) {
         	  itemDataObj = itemData.data;
@@ -273,6 +297,54 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
               console.error(ex);
             });
           }
+        },
+        
+        addGroupLayer: function(itemUrl,itemId,itemDataObj,view, referenceId) {
+            var itemData, dfd;   
+            var self = this;
+            if(itemDataObj)
+          	  itemData = itemDataObj.data;
+          if(!itemData)
+    	  {
+        	  let idIndex = itemUrl.indexOf("?id=");
+          	  let itemId = itemUrl.substring(idIndex+4);
+          	  
+          	  if(itemUrl.indexOf("arcgis.com")>-1)
+        	  {
+          		itemInfoUrl = "https://www.arcgis.com/sharing/rest/content/items/"+itemId;
+        	  }else{
+        		  let baseUrlIndex = itemUrl.indexOf("/home");
+        		  let baseUrl = itemUrl.substring(baseUrlIndex);
+        		  itemInfoUrl = baseUrl+"/sharing/rest/content/items/"+itemId;
+        	  }
+          	util.readItemJsonData(itemInfoUrl).then(function(itemDataObj){
+        		  dfd = self.addGroupLayerToMap(itemId,itemDataObj.data,view,null);
+
+        	}); 	  
+    	  }
+          else if(itemData && itemData.layers)
+      	  {
+        	  dfd = self.addGroupLayerToMap(itemId,itemData,view,referenceId);
+      	  }
+           return dfd;
+      },
+        addGroupLayerToMap:function(itemId,itemData,view,referenceId)
+        {
+        	var self = this;
+        	var groupLayer = new GroupLayer({
+        		  title: itemData.title, 
+        		  portalItem: {
+        		    id: itemId 
+        		  }    		 
+        		});
+        	  groupLayer.load();
+        	  var dfd = self.waitForLayer(self.i18n,groupLayer);
+              dfd.then(function(layer) {  
+              	self.setGroupLayerPopupTemplate(layer,itemData);
+              	self.addMapLayer(view,layer,null,referenceId);
+                dfd.resolve(layer);
+              });
+            return dfd;
         }
   };
 

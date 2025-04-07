@@ -253,8 +253,9 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
       var actionsNode = this.actionsNode;
       array.some(links, lang.hitch(this, function(u){
         var serviceType = new ServiceType();
-        serviceType.checkUrl(u);
+        serviceType.checkUrl(u,item);
         serviceType.title = item.title;
+        
         //console.warn("serviceType",serviceType.isSet(),serviceType);
         if (serviceType.isSet()) {
           domConstruct.create("a",{
@@ -267,7 +268,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
             }
           },actionsNode);
 
-          // create clickable 'Preview' link if allowes
+          // create clickable 'Preview' link if allows
           if (PreviewUtil.canPreview(serviceType)) {
             this._renderPreview(item, actionsNode, serviceType);
           }
