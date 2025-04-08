@@ -16,12 +16,15 @@ define(["dojo/_base/array",
   "dojo/Deferred",
   "dojo/_base/lang",
   "dojo/promise/all",
+  "dojo/Deferred",
   "../util",
   "esri4/PopupTemplate",  
   "esri4/core/reactiveUtils",
-  "esri4/layers/GroupLayer"],
-function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemplate,
-		reactiveUtils,GroupLayer) {
+  "esri4/layers/GroupLayer",
+  "esri4/portal/Portal",
+  "esri4/portal/PortalItem"],
+function(array, Deferred,lang, all,Deferred,util, PopupTemplate,
+		reactiveUtils,GroupLayer,Portal,PortalItem) {
   var _def = {
 
     addMapLayer: function(view,layer,item,referenceId) {   
@@ -300,8 +303,10 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
         },
         
         addGroupLayer: function(itemUrl,itemId,itemDataObj,view, referenceId) {
-            var itemData, dfd;   
+            var itemData;
+            var dfd = new Deferred();   
             var self = this;
+            var portalBaseUrl;
             if(itemDataObj)
           	  itemData = itemDataObj.data;
           if(!itemData)
@@ -312,14 +317,14 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
           	  if(itemUrl.indexOf("arcgis.com")>-1)
         	  {
           		itemInfoUrl = "https://www.arcgis.com/sharing/rest/content/items/"+itemId;
-        	  }else{
-        		  let baseUrlIndex = itemUrl.indexOf("/home");
-        		  let baseUrl = itemUrl.substring(baseUrlIndex);
-        		  itemInfoUrl = baseUrl+"/sharing/rest/content/items/"+itemId;
+        	  }//On Premise Portal
+          	  else{
+        		  let homeIndex = itemUrl.indexOf("/home");
+        		  portalBaseUrl = itemUrl.substring(0,homeIndex);
+        		  itemInfoUrl = portalBaseUrl+"/sharing/rest/content/items/"+itemId;
         	  }
           	util.readItemJsonData(itemInfoUrl).then(function(itemDataObj){
-        		  dfd = self.addGroupLayerToMap(itemId,itemDataObj.data,view,null);
-
+        		  dfd = self.addGroupLayerToMap(itemId,itemDataObj.data,view,null,portalBaseUrl);
         	}); 	  
     	  }
           else if(itemData && itemData.layers)
@@ -328,14 +333,31 @@ function(array, Deferred,lang, all,util, /* agsUtils, InfoTemplate, */ PopupTemp
       	  }
            return dfd;
       },
-        addGroupLayerToMap:function(itemId,itemData,view,referenceId)
+       addGroupLayerToMap:function(itemId,itemData,view,referenceId,portalBaseUrl)
         {
         	var self = this;
+        	let arcGisPortal;
+        	if(portalBaseUrl)
+    		{
+        		arcGisPortal = new Portal({
+          		  url: portalBaseUrl
+          		});
+    		}
+        	else
+    		{
+        		arcGisPortal = new Portal({
+            		  url: "https://www.arcgis.com" 
+            		});
+    		}
+        	let item = new PortalItem({
+        		  id: itemId,
+        		  portal: arcGisPortal // This loads the item
+        		});
+        	
         	var groupLayer = new GroupLayer({
         		  title: itemData.title, 
-        		  portalItem: {
-        		    id: itemId 
-        		  }    		 
+        		  portalItem: item
+        		
         		});
         	  groupLayer.load();
         	  var dfd = self.waitForLayer(self.i18n,groupLayer);
