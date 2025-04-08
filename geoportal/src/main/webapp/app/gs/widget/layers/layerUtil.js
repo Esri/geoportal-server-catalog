@@ -323,15 +323,19 @@ function(array, Deferred,lang, all,Deferred,util, PopupTemplate,
         		  portalBaseUrl = itemUrl.substring(0,homeIndex);
         		  itemInfoUrl = portalBaseUrl+"/sharing/rest/content/items/"+itemId;
         	  }
-          	util.readItemJsonData(itemInfoUrl).then(function(itemDataObj){
+          	var readItemJson = util.readItemJsonData(itemInfoUrl);
+          	readItemJson.then(function(itemDataObj){
         		  dfd = self.addGroupLayerToMap(itemId,itemDataObj.data,view,null,portalBaseUrl);
+        		  dfd.then(function(result){
+        			  dfd.resolve(result);
+        		  })
         	}); 	  
     	  }
           else if(itemData && itemData.layers)
       	  {
         	  dfd = self.addGroupLayerToMap(itemId,itemData,view,referenceId);
       	  }
-           return dfd;
+           return dfd.promise;
       },
        addGroupLayerToMap:function(itemId,itemData,view,referenceId,portalBaseUrl)
         {
