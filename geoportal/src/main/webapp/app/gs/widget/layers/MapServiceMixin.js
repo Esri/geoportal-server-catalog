@@ -22,41 +22,41 @@ define(["dojo/_base/declare",
   "esri4/layers/MapImageLayer",
   "esri4/layers/TileLayer",  
   "esri4/rest/support/ImageParameters",
-  "esri4/core/reactiveUtils",
-  /*"esri4/layers/LayerDrawingOptions",
-  "esri4/layers/DynamicLayerInfo"*/],
+  "esri4/core/reactiveUtils"
+  ],
 function(declare, lang, array, Deferred, all, layerUtil, util,
 		MapImageLayer, TileLayer,
-  ImageParameters,reactiveUtils/*,LayerDrawingOptions, DynamicLayerInfo*/) {
+  ImageParameters,reactiveUtils) {
 
   var _def = declare(null, {
 
     addMapService: function(serviceUrl,item,itemData) {
       var self = this, dfd = new Deferred();
       var isSingleFeatureLayer = false;
+      var isTilelayer = false;
+      var lyrImageFormat = "PNG24"
       util.readRestInfo(serviceUrl).then(function(result) {
     	var response = result.data; 
         if (response && typeof response.type === "string" &&
            (response.type === "Feature Layer" || response.type === "Table")) {
-          isSingleFeatureLayer = true;
-          //TODO test
+          isSingleFeatureLayer = true;          
           return self.addFeatureService(serviceUrl,item,itemData);
         } else {
           var lyr;         
           if (response.tileInfo) {
-            lyr = new TileLayer({url:serviceUrl,id: util.generateId()});
+        	isTilelayer = true;  
+            lyr = new TileLayer({url:serviceUrl,tileInfo:response.tileInfo,id: util.generateId()});
             lyr.load();
           } else {
             if (response && response.supportedImageFormatTypes &&
                 response.supportedImageFormatTypes.indexOf("PNG32") !== -1) {
-//              options.imageParameters = new ImageParameters();
-//              options.imageParameters.format = "png32";
+            	lyrImageFormat = "PNG32";             
             }
-            lyr = new MapImageLayer({url:serviceUrl,id:util.generateId()});
-            lyr.load();            
-            self._processDynamicLayer(response,lyr,itemData);
+            lyr = new MapImageLayer({url:serviceUrl,id:util.generateId(),imageFormat:lyrImageFormat});
+           
+            lyr.load();
           }
-          return self._waitThenAddDynamicLayer(lyr,item,itemData);
+          return self._waitThenAddDynamicLayer(lyr,item,itemData,isTilelayer);
         }
       }).then(function(result) {
         dfd.resolve(result);
@@ -66,85 +66,8 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
       });
       return dfd;
     },
-
-    //TODO Test with AGOL Map service
-    _processDynamicLayer: function(restResponse,layer,item) {
-    	if(!item)
-		{
-			return;
-		}
-    	else
-		{
-			itemData = item.data;
-		}    	
-      if (!itemData || !itemData.layers || itemData.layers.length === 0) {
-        return;
-      }
-    //  var expressions = [];
-      var dynamicSubLayer;
-      var dynamicSubLayers = [];
-   //   var drawingOptions;
-    //  var drawingOptionsArray = [];
-      var source;
-      array.forEach(itemData.layers, function(sublayer){
-//        if (sublayer.definitionExpression) {
-//          expressions[sublayers.id] = sublayers.definitionExpression.definitionExpression;
-//        }
-        if (sublayer.source) {
-          dynamicSublayers = null;
-          source = sublayer.source;
-          if (source.type === "mapLayer") {
-            var metaSublayerInfos = array.filter(restResponse.layers, function(rlyr) {
-              return rlyr.id === source.mapLayerId;
-            });
-            if (metaSublayerInfos.length) {
-            	dynamicSubLayer = lang.mixin(metaLayerInfos[0], sublayer);
-            }
-          } else {
-        	  dynamicSubLayer = lang.mixin({}, sublayer);
-          }
-          if (dynamicSubLayer) {
-        	  dynamicSubLayer.source = source;
-            delete dynamicLayerInfo.popupInfo;
-            dynamicSubLayer = new Sublayer(dynamicSubLayer);
-            if (itemData.visibleLayers) {
-              var vis = ((typeof itemData.visibleLayers) === "string") ?
-                itemData.visibleLayers.split(",") : itemData.visibleLayers;
-                if(array.indexOf(vis, sublayer.id) > -1) {
-                	dynamicSubLayer.visible = true;
-                } else {
-                	dynamicSubLayer.visible = false;
-                }
-                
-//              if (array.indexOf(vis, sublayer.id) > -1) {
-//                dynamicLayerInfo.defaultVisibility = true;
-//              } else {
-//                dynamicLayerInfo.defaultVisibility = false;
-//              }
-            }
-            if (sublayer.renderer) {
-            	dynamicSubLayer.renderer = sublayer.renderer;
-            }            
-            dynamicSubLayers.push(dynamicSubLayer);
-          }
-        }
-        
-      });
-//
-//      if (expressions.length > 0) {
-//        layer.setLayerDefinitions(expressions);
-//      }
-//      if (dynamicLayerInfos.length > 0) {
-//        layer.setDynamicLayerInfos(dynamicLayerInfos, true);
-//        if (drawingOptionsArray.length > 0) {
-//          layer.setLayerDrawingOptions(drawingOptionsArray, true);
-//        }
-//      } else {
-//        //var checkVisibleLayers = true;
-//      }
-    },
-
-    _waitThenAddDynamicLayer: function(lyr,item,itemData) {
+    
+    _waitThenAddDynamicLayer: function(lyr,item,itemData,isTileLayer) {
       var self = this;
       dfd = new Deferred();
 
@@ -157,8 +80,9 @@ function(declare, lang, array, Deferred, all, layerUtil, util,
             }
       });
       reactiveUtils.watch(() => lyr.loaded === true,() => {
-    	  //console.log("layer loaded");    	 
-    	  layerUtil.setMapServicePopupTemplate(lyr,itemData);
+    	  //console.log("layer loaded");    
+    	  if(!isTileLayer)
+    		  layerUtil.setMapServicePopupTemplate(lyr,itemData);
           layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
           dfd.resolve(lyr);
     	  
