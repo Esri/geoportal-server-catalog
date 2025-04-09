@@ -49,13 +49,12 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
             array.forEach(response.layers,function(lyr){              
               list.push(lyr);
             });
+          }          
+          if (response && response.tables && response.tables.length > 0) {
+            array.forEach(response.tables,function(tbl){            	
+              list.push(tbl);
+            });
           }
-          //TODO is it needed?
-//          if (response && response.tables && response.tables.length > 0) {
-//            array.forEach(response.tables,function(tbl){            	
-//              list.push(tbl);
-//            });
-//          }
           if (list.length > 0) {
             array.forEach(list, function(lyr) {
               var bAdd = true;

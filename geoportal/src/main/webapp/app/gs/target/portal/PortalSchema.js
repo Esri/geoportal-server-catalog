@@ -150,7 +150,7 @@
       return links;
     }},
     
-    //TODO ask urban, do we need this?
+  
     itemToAtomEntry: {writable:true,value:function(task,item) {
       var entry = gs.Object.create(gs.atom.Entry);
       entry.id = item["id"];

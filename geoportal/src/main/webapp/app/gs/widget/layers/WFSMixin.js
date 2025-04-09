@@ -45,7 +45,7 @@ function(declare, array, all, Deferred, layerUtil, util, WFSLayer,wfsUtils) {
       		    layer = WFSLayer.fromWFSLayerInfo(wfsLayerInfo);
       		    layer.load();
       		    layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));	
-      		   //TODO Urban why returning without all promise. Also do we need to show all layers? or just top  
+      		     
       		  all(layerDfds).then(function(results)
   			      {
   			    	  if(results.length === self.featureLen)
@@ -79,24 +79,6 @@ function(declare, array, all, Deferred, layerUtil, util, WFSLayer,wfsUtils) {
     		  });
     	  })
       });
-		  
-
-     
-    //This adds single top layer 
-//	  var options = {id:referenceId,url:serviceUrl};
-//      var layer = new WFSLayer(options);
-//      layer.load();
-//      //TODO Do we need to handle portal item 
-//      var self = this;
-//      layerUtil.waitForLayer(self.i18n,layer).then(function(lyr){        
-//    	  var popupInfo = layerUtil.newPopupInfo(lyr,(lyr.title? lyr.title: lyr.name));
-//          var popupTemplate = layerUtil.newPopupTemplate(popupInfo);
-//          lyr.popupTemplate = popupTemplate;
-//          layerUtil.addMapLayer(self.view,lyr,item,self.referenceId);
-//          dfd.resolve(lyr);
-//      }).catch(function(error){        
-//        dfd.reject(error);
-//      });
       
       return dfd;
     }
