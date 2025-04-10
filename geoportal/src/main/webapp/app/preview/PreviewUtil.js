@@ -59,14 +59,13 @@ function (lang, array, domConstruct, i18n,
       var params = new ProjectParameters();
       params.geometries = [extent];
       params.outSpatialReference = view.spatialReference;
-      const url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer";
-    //  const url = "https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer";
-      _gs.project(url,params, function(result) {
-        if (result.length > 0) {
-          extent = new Extent(result[0]);
-          view.extent = extent;
+      //const url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer";
+      const url = "https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer";
+      _gs.project(url,params).then(function(result) {
+        if (result.length > 0) {          
+          view.goTo(result[0]);         
         }
-      }, function(error) {
+      }).catch( function(error) {
         console.error(error);
       });
     } else {
