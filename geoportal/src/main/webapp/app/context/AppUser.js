@@ -98,7 +98,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         portal.load().then(() => {        	
         	 self.arcgisPortalUser = portal.user;
              var u = portal.user.username;
-             var p = "__rtkn__:"+portal.user.credential.token;
+             var p = "__rtkn__:"+portal.credential.token;
              self.signIn(u,p).then(function(){
              }).catch(function(error){
                // TODO handle 
@@ -195,7 +195,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         
         esriId
         .checkSignInStatus(info.portalUrl + "/sharing")
-        .then(() => {
+        .then(function(result) {
             const portal = new Portal({
             authMode: "immediate"
           });
@@ -207,7 +207,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
           portal.load().then(() => {
         	  self.arcgisPortalUser = portal.user;
               var u = portal.user.username;
-              var p = "__rtkn__:"+portal.user.credential.token;
+              var p = "__rtkn__:"+portal.credential.token;
               self.signIn(u,p).then(function(){
             	  dfd.resolve();
               }).catch(function(error){
@@ -216,11 +216,15 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
                 dfd.resolve();
               });
         })
-        .catch(() => {
+        .catch(function(error){
           // If not signed in, then show the sign in button.
         	dfd.resolve();
         	});
-        })   
+        })
+        .catch(function(error){
+        	// If not signed in, then show the sign in button.
+        	dfd.resolve();        	
+        });
       } else {
         AppContext.appUser.checkStoredToken();
         dfd.resolve();
