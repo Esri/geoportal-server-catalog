@@ -22,8 +22,11 @@ define([
   "esri4/layers/MapImageLayer",
   "esri4/layers/FeatureLayer",
   "esri4/layers/ImageryLayer",
+  "esri4/layers/ImageryTileLayer",
   "esri4/layers/WMSLayer",
   "esri4/layers/WFSLayer",
+  "esri4/layers/KMLLayer",
+  "esri4/layers/WMTSLayer",
   "esri4/geometry/support/webMercatorUtils",
   "esri4/rest/geometryService",
   "esri4/rest/support/ProjectParameters",
@@ -31,14 +34,15 @@ define([
 ],
 function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
-          MapImageLayer, FeatureLayer, ImageryLayer, WMSLayer,WFSLayer,
+          MapImageLayer, FeatureLayer, ImageryLayer, ImageryTileLayer,WMSLayer,
+          WFSLayer,KMLLayer,WMTSLayer,
           webMercatorUtils, GeometryService, ProjectParameters,reactiveUtils) {
             
-  // declare publicly available geometry server
- // var _gs = new GeometryService("https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer");
+  // declare publicly available geometry server 
 	var _gs = GeometryService;
 	
   // universal error handler
+	//Fix error handler
   var _handleError = function(view, error) {
     //map.emit("update-end-always", map);
     console.error(error);
@@ -49,13 +53,14 @@ function (lang, array, domConstruct, i18n,
   };
   
   // sets new extent of the map; uses projection if new extent is not compatible with the map
-  var _setExtent = function(view, extent) {
-    if (!webMercatorUtils.canProject(extent, view.extent)) {
+  var _setExtent = function(view, extent,layerFullExtent) {
+    if (!webMercatorUtils.canProject(extent, view)) {
+     //TODO Test/fix geometry service projection
       var params = new ProjectParameters();
       params.geometries = [extent];
-      params.outSpatialReference = map.spatialReference;
+      params.outSpatialReference = view.spatialReference;
       const url = "https://sampleserver6.arcgisonline.com/arcgis/rest/services/Utilities/Geometry/GeometryServer";
-
+    //  const url = "https://utility.arcgisonline.com/ArcGIS/rest/services/Geometry/GeometryServer";
       _gs.project(url,params, function(result) {
         if (result.length > 0) {
           extent = new Extent(result[0]);
@@ -65,7 +70,7 @@ function (lang, array, domConstruct, i18n,
         console.error(error);
       });
     } else {
-    	view.extent = extent;
+    	view.goTo(layerFullExtent);
     }
   };
   
@@ -76,46 +81,33 @@ function (lang, array, domConstruct, i18n,
     "MapServer": function(view, url) {
       var layer = new MapImageLayer({url});
       layer.when(function(){
-    	  var extent = new Extent(layer.fullExtent);
-          _setExtent(view, extent);
-    	 // view.goTo(layer.fullExtent);
+    	  //TODO fix in all services
+    	 // domConstruct.destroy(map.errorNode);
+    	  if(layer.fullExtent)
+		  {  
+    		  var extent = new Extent(layer.fullExtent);
+              _setExtent(view, extent,layer.fullExtent);    		
+		  }    	 
     	},
-    	function(error)
-    	{
+    	function(error){
     		_handleError(view, error);
     	}
       );
       view.map.add(layer);
-      
-      /*layer.on("error", function(error) {
-        _handleError(view, error);
-      });
-      layer.on("load", function(response) {
-        domConstruct.destroy(map.errorNode);
-        if (response && response.layer) {
-          if (response.layer.fullExtent) {
-            var extent = new Extent(response.layer.fullExtent);
-            _setExtent(view, extent);
-          }
-        } else {
-          _handleError(view, "Invalid response received from the server");
-        }
-      });*/
-      
     },
    
     // A single feature layer from the map server; see: _getType() function
     "FeatureLayer": function(view, url) {
       esriRequest(url+"?f=pjson").then(function(response) {
         if (response && response.data) {
-          var layer = FeatureLayer({url:url});
+          var layer = new FeatureLayer({url:url});
           reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
         	  _handleError(view, layer.loadError);
           });
           reactiveUtils.when(() => layer.loaded === true, () => { 
         	  if (response.data.extent) {
                   var extent = new Extent(response.data.extent);
-                  _setExtent(view, extent);
+                  _setExtent(view, extent,response.data.extent);
                 }
           }); 
           view.map.add(layer);
@@ -133,7 +125,7 @@ function (lang, array, domConstruct, i18n,
         if (response && response.data){
         	if(response.data.layers)
         	{        
-        		array.forEach(response.layers, function(layer) {
+        		array.forEach(response.data.layers, function(layer) {
 		            if (layer.defaultVisibility)
 		            {
 		            	 var layer = new FeatureLayer({url:url+ "/" + layer.id});
@@ -141,53 +133,29 @@ function (lang, array, domConstruct, i18n,
 		                	  _handleError(view, layer.loadError);
 		                  });
 		                  reactiveUtils.when(() => layer.loaded === true, () => { 
-		                	  if (response.data.extent) {
-		                          var extent = new Extent(response.data.extent);
-		                          _setExtent(view, extent);
+		                	// domConstruct.destroy(map.errorNode);
+		                	  if (response.data.fullExtent) {
+		                          var extent = new Extent(response.data.fullExtent);
+		                          _setExtent(view, extent,response.data.fullExtent);
 		                        }
-		                  });
-		             /* var layer = FeatureLayer(url + "/" + layer.id, {mode: FeatureLayer.MODE_SNAPSHOT});
-		              layer.on("error", function(error) {
-		                _handleError(view, error);
-		              });
-		              layer.on("load", function() {
-		                domConstruct.destroy(map.errorNode);
-		                if (response.fullExtent) {
-		                  var extent = new Extent(response.fullExtent);
-		                  _setExtent(view, extent);
-		                }
-		              });*/
+		                  });		            
 		              view.map.add(layer);
 		            }
 	          });
         	} else {
         		//Check if single layer        	
-                if (response.data.defaultVisibility) {
-                 // var layer = FeatureLayer(url, {mode: FeatureLayer.MODE_SNAPSHOT});//Not available in JS 4
+                if (response.data.defaultVisibility) {                 
                   var layer = new FeatureLayer({url:url});
                   reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
                 	  _handleError(view, layer.loadError);
                   });
                   reactiveUtils.when(() => layer.loaded === true, () => { 
+                	 // domConstruct.destroy(map.errorNode);
                 	  if (response.data.extent) {
                           var extent = new Extent(response.data.extent);
-                          _setExtent(view, extent);
+                          _setExtent(view, extent,response.data.extent);
                         }
-                  });   
-                  
-                  //TODO Should I use this?
-                  layer.on("layerview-create", function(event){
-                	  // The LayerView for the layer that emitted this event
-                	  event.layerView;
-                	});
-                  
-                 /* layer.on("load", function() {
-                 //   domConstruct.destroy(map.errorNode);
-                    if (response.data.extent) {
-                      var extent = new Extent(response.data.extent);
-                      _setExtent(view, extent);
-                    }
-                  });*/
+                  });                  
                   view.map.add(layer);
                 } else {
                   _handleError(view, "Invalid response received from the server");
@@ -204,22 +172,78 @@ function (lang, array, domConstruct, i18n,
     // image server
     "ImageServer": function(view, url) {
       var layer = new ImageryLayer(url);
-      layer.on("error", function(error) {
-        _handleError(view, error);
+      
+      reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+    	  _handleError(view, layer.loadError);
       });
-      layer.on("load", function(response) {
-        domConstruct.destroy(map.errorNode);
-        if (response && response.layer) {
-          if (response.layer.fullExtent) {
-            var extent = new Extent(response.layer.fullExtent);
-            _setExtent(view, extent);
-          }
-        } else {
-          _handleError(view, "Invalid response received from the server");
-        }
-      });
+      reactiveUtils.when(() => layer.loaded === true, () => { 
+    	 // domConstruct.destroy(map.errorNode);
+    	  if (layer.fullExtent) {
+              var extent = new Extent(layer.fullExtent);
+              _setExtent(view, extent,layer.fullExtent);
+            }
+      });                  
       view.map.add(layer);
-    },
+   },
+   
+   // image tile layer
+   "ImageryTileLayer": function(view, url) {
+     var layer = new ImageryTileLayer(url);
+     
+     reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+   	  _handleError(view, layer.loadError);
+     });
+     reactiveUtils.when(() => layer.loaded === true, () => { 
+   	 // domConstruct.destroy(map.errorNode);
+   	  if (layer.fullExtent) {
+             var extent = new Extent(layer.fullExtent);
+             _setExtent(view, extent,layer.fullExtent);
+           }
+     });                  
+     view.map.add(layer);
+  },
+  
+	//KML layer
+	  "KML": function(view, url) {
+	    var layer = new KMLLayer(url);
+	    
+	    reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+	  	  _handleError(view, layer.loadError);
+	    });
+	    reactiveUtils.when(() => layer.loaded === true, () => { 
+	  	 // domConstruct.destroy(map.errorNode);
+	  	  if (layer.fullExtent) {
+	            var extent = new Extent(layer.fullExtent);
+	            _setExtent(view, extent,layer.fullExtent);
+	          }
+	    });                  
+	    view.map.add(layer);
+	 },
+	 
+	//WMTS layer
+	  "WMTS": function(view, url) {
+	    var layer = new WMTSLayer(url);
+	    
+	    reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+	  	  _handleError(view, layer.loadError);
+	    });
+	    reactiveUtils.when(() => layer.loaded === true, () => { 
+	  	 // domConstruct.destroy(map.errorNode);
+    	 if (layer.fullExtents && layer.fullExtents.length >0) {
+ 	  		 var layerExtent = layer.fullExtents[0];
+ 	  	  }else if(!layerExtent && layer.fullExtent)
+  		  {
+  		  	layerExtent = layer.fullExtent;
+  		  }
+ 	  	  if(layerExtent)
+  		  {
+ 	  		  var extent = new Extent(layerExtent);
+	          _setExtent(view, extent,extent);
+  		  } 
+	    });                  
+	    view.map.add(layer);
+	 },
+
     
     // WMS server
     "WMS": function(view, url) {
@@ -230,56 +254,16 @@ function (lang, array, domConstruct, i18n,
       reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
     	  _handleError(view, layer.loadError);
       });
-      layer.load().then(() => {
-    	  var visibleLayers = lang.clone(layer.visibleLayers);
-          var visibleLayersModified = false;
-          array.forEach(response.layer.layerInfos, function(lyr) {
-            if (visibleLayers.indexOf(lyr.name) < 0) {
-              visibleLayers.push(lyr.name);
-              visibleLayersModified = true;
-            }
-          });
-          if (visibleLayersModified) {
-            layer.setVisibleLayers(visibleLayers);
-          }
-          if (!extentSet && response.layer.fullExtent) {
-            var extent = new Extent(response.layer.fullExtent);
-            _setExtent(map, extent);
-            extentSet = true;
-          }
-      });
-      
-/*      layer.on("error", function(error) {
-        _handleError(view, error);
-      });*/
-     
-/*      layer.on("load", function(response) {
-        domConstruct.destroy(map.errorNode);
-        if (response && response.layer) {
-          var visibleLayers = lang.clone(layer.visibleLayers);
-          var visibleLayersModified = false;
-          array.forEach(response.layer.layerInfos, function(lyr) {
-            if (visibleLayers.indexOf(lyr.name) < 0) {
-              visibleLayers.push(lyr.name);
-              visibleLayersModified = true;
-            }
-          });
-          if (visibleLayersModified) {
-            layer.setVisibleLayers(visibleLayers);
-          }
-          if (!extentSet && response.layer.fullExtent) {
-            var extent = new Extent(response.layer.fullExtent);
-            _setExtent(map, extent);
-            extentSet = true;
-          }
-        } else {
-          _handleError(view, "Invalid response received from the server");
-        }
-      });*/
+      reactiveUtils.when(() => layer.loaded === true, () => { 
+ 	  	 // domConstruct.destroy(map.errorNode);
+ 	  	  if (layer.fullExtent) {
+ 	            var extent = new Extent(layer.fullExtent);
+ 	            _setExtent(view, extent,layer.fullExtent);
+ 	          }
+ 	    }); 
       view.map.add(layer);
     },
-    
- // WMS server
+ 
     "WFS": function(view, url) {
     //  map.emit("update-start-forced", map);
       var urlReq =	url.split('?')[0]
@@ -289,51 +273,12 @@ function (lang, array, domConstruct, i18n,
     	  _handleError(view, layer.loadError);
       });
       layer.load().then(() => {
-    	  var visibleLayers = lang.clone(layer.visibleLayers);
-          var visibleLayersModified = false;
-          array.forEach(response.layer.layerInfos, function(lyr) {
-            if (visibleLayers.indexOf(lyr.name) < 0) {
-              visibleLayers.push(lyr.name);
-              visibleLayersModified = true;
-            }
-          });
-          if (visibleLayersModified) {
-            layer.setVisibleLayers(visibleLayers);
-          }
-          if (!extentSet && response.layer.fullExtent) {
-            var extent = new Extent(response.layer.fullExtent);
-            _setExtent(map, extent);
+          if (!extentSet && layer.fullExtent) {
+            var extent = new Extent(layer.fullExtent);
+            _setExtent(view, extent,layer.fullExtent);
             extentSet = true;
           }
       });
-      
-/*      layer.on("error", function(error) {
-        _handleError(view, error);
-      });*/
-     
-/*      layer.on("load", function(response) {
-        domConstruct.destroy(map.errorNode);
-        if (response && response.layer) {
-          var visibleLayers = lang.clone(layer.visibleLayers);
-          var visibleLayersModified = false;
-          array.forEach(response.layer.layerInfos, function(lyr) {
-            if (visibleLayers.indexOf(lyr.name) < 0) {
-              visibleLayers.push(lyr.name);
-              visibleLayersModified = true;
-            }
-          });
-          if (visibleLayersModified) {
-            layer.setVisibleLayers(visibleLayers);
-          }
-          if (!extentSet && response.layer.fullExtent) {
-            var extent = new Extent(response.layer.fullExtent);
-            _setExtent(map, extent);
-            extentSet = true;
-          }
-        } else {
-          _handleError(view, "Invalid response received from the server");
-        }
-      });*/
       view.map.add(layer);
     },
     
