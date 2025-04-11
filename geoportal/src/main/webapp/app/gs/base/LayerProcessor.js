@@ -181,8 +181,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
         dfd.reject("Unsupported");
       }
       return dfd;
-    },   
-
+    },  
     
     addOGCFeatureLayer:function(serviceUrl,view)
     {

@@ -18,8 +18,7 @@ define(["dojo/_base/declare",
 	  "dojo/Deferred",
   "./layerUtil",
   "../util",
-  "esri4/layers/GroupLayer",
-  
+  "esri4/layers/GroupLayer",  
   "esri4/portal/Portal",
   "esri4/portal/PortalItem"],
 function(declare, array,all, Deferred, layerUtil, util, GroupLayer,Portal,PortalItem) {
