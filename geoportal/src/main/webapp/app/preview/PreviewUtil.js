@@ -27,6 +27,7 @@ define([
   "esri4/layers/WFSLayer",
   "esri4/layers/KMLLayer",
   "esri4/layers/WMTSLayer",
+  "esri4/layers/VectorTileLayer",
   "esri4/geometry/support/webMercatorUtils",
   "esri4/rest/geometryService",
   "esri4/rest/support/ProjectParameters",
@@ -35,7 +36,7 @@ define([
 function (lang, array, domConstruct, i18n,
           esriRequest, Extent,
           MapImageLayer, FeatureLayer, ImageryLayer, ImageryTileLayer,WMSLayer,
-          WFSLayer,KMLLayer,WMTSLayer,
+          WFSLayer,KMLLayer,WMTSLayer,VectorTileLayer,
           webMercatorUtils, GeometryService, ProjectParameters,reactiveUtils) {
             
   // declare publicly available geometry server 
@@ -54,8 +55,7 @@ function (lang, array, domConstruct, i18n,
   
   // sets new extent of the map; uses projection if new extent is not compatible with the map
   var _setExtent = function(view, extent,layerFullExtent) {
-    if (!webMercatorUtils.canProject(extent, view)) {
-     //TODO Test/fix geometry service projection
+    if (!webMercatorUtils.canProject(extent, view)) {     
       var params = new ProjectParameters();
       params.geometries = [extent];
       params.outSpatialReference = view.spatialReference;
@@ -167,6 +167,23 @@ function (lang, array, domConstruct, i18n,
          });
       
     },
+    
+    // Group Layer
+    "VectorTileLayer": function(view, url) {
+      var layer = new VectorTileLayer(url);
+      
+      reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+    	  _handleError(view, layer.loadError);
+      });
+      reactiveUtils.when(() => layer.loaded === true, () => { 
+    	 // domConstruct.destroy(map.errorNode);
+    	  if (layer.fullExtent) {
+              var extent = new Extent(layer.fullExtent);
+              _setExtent(view, extent,layer.fullExtent);
+            }
+      });                  
+      view.map.add(layer);
+   },
     
     // image server
     "ImageServer": function(view, url) {

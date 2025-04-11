@@ -122,10 +122,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
           this.waitThenAdd(dfd,view,type,layer);
           
         } else if (lc.indexOf("/vectortileserver") > 0 || 
-            lc.indexOf("/resources/styles/root.json") > 0) { 
-          if (!VectorTileLayer.supported()) {
-            dfd.reject("Unsupported");
-          } else {
+            lc.indexOf("/resources/styles/root.json") > 0) {          
             this.checkVectorTileUrl(url,{}).then(function(vturl){
               layer = new VectorTileLayer(vturl,{id:id});
               layer.load();
@@ -133,7 +130,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
             }).catch(function(error){
               dfd.reject(error);
             });
-          }
+          
         } else if (lc.indexOf("/streamserver") > 0) {
           layer = new StreamLayer(url, {
             id: id,
