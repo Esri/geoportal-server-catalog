@@ -17,6 +17,7 @@ define([
   "dojo/_base/array",
   "dojo/dom-construct",
   "dojo/i18n!app/nls/resources",
+  "dojo/promise/all",
   "esri4/request",
   "esri4/geometry/Extent",
   "esri4/layers/MapImageLayer",
@@ -28,16 +29,23 @@ define([
   "esri4/layers/KMLLayer",
   "esri4/layers/WMTSLayer",
   "esri4/layers/VectorTileLayer",
+  "esri4/layers/OGCFeatureLayer",
+  "esri4/layers/GroupLayer",
   "esri4/geometry/support/webMercatorUtils",
   "esri4/rest/geometryService",
   "esri4/rest/support/ProjectParameters",
-  "esri4/core/reactiveUtils"
+  "esri4/core/reactiveUtils",
+  "esri4/portal/Portal",
+  "esri4/portal/PortalItem",
+  "../gs/widget/util",
+  "../gs/widget/layers/layerUtil"
 ],
-function (lang, array, domConstruct, i18n,
+function (lang, array, domConstruct, i18n,all,
           esriRequest, Extent,
           MapImageLayer, FeatureLayer, ImageryLayer, ImageryTileLayer,WMSLayer,
-          WFSLayer,KMLLayer,WMTSLayer,VectorTileLayer,
-          webMercatorUtils, GeometryService, ProjectParameters,reactiveUtils) {
+          WFSLayer,KMLLayer,WMTSLayer,VectorTileLayer,OGCFeatureLayer,GroupLayer,
+          webMercatorUtils, GeometryService, ProjectParameters,reactiveUtils,Portal,PortalItem,
+          util,layerUtil) {
             
   // declare publicly available geometry server 
 	var _gs = GeometryService;
@@ -124,22 +132,22 @@ function (lang, array, domConstruct, i18n,
         if (response && response.data){
         	if(response.data.layers)
         	{        
-        		array.forEach(response.data.layers, function(layer) {
-		            if (layer.defaultVisibility)
-		            {
-		            	 var layer = new FeatureLayer({url:url+ "/" + layer.id});
-		                  reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
-		                	  _handleError(view, layer.loadError);
-		                  });
-		                  reactiveUtils.when(() => layer.loaded === true, () => { 
-		                	// domConstruct.destroy(map.errorNode);
-		                	  if (response.data.fullExtent) {
-		                          var extent = new Extent(response.data.fullExtent);
-		                          _setExtent(view, extent,response.data.fullExtent);
-		                        }
-		                  });		            
-		              view.map.add(layer);
-		            }
+    		array.forEach(response.data.layers, function(layer) {
+	            if (layer.defaultVisibility)
+	            {
+	            	 var layer = new FeatureLayer({url:url+ "/" + layer.id});
+	                  reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
+	                	  _handleError(view, layer.loadError);
+	                  });
+	                  reactiveUtils.when(() => layer.loaded === true, () => { 
+	                	// domConstruct.destroy(map.errorNode);
+	                	  if (response.data.fullExtent) {
+	                          var extent = new Extent(response.data.fullExtent);
+	                          _setExtent(view, extent,response.data.fullExtent);
+	                        }
+	                  });		            
+	              view.map.add(layer);
+	            }
 	          });
         	} else {
         		//Check if single layer        	
@@ -168,8 +176,8 @@ function (lang, array, domConstruct, i18n,
       
     },
     
-    // Group Layer
-    "VectorTileLayer": function(view, url) {
+    // VectorTile Layer
+    "VectorTileServer": function(view, url) {
       var layer = new VectorTileLayer(url);
       
       reactiveUtils.when(() => layer.loadStatus ==="failed", () => { 
@@ -184,6 +192,99 @@ function (lang, array, domConstruct, i18n,
       });                  
       view.map.add(layer);
    },
+   
+   // OGC Feature Layer
+   "OGCFeatureServer": function(view, url) {	   
+    var self = this, layerDfds = [];   
+    //Read collections 
+    var collectionUrl = url+"/collections";
+    util.readRestInfo(collectionUrl).then(function(result) {
+  	  var response = result.data; 
+  	  var list = [];
+  	  if(response.collections)
+  	  {
+  		  var collectionList = response.collections;
+  		  var collection;
+  		  for(var i=0;i<collectionList.length;i++)
+		  {
+  			  collection = collectionList[i];
+  			  if(collection.id)
+			  {
+  				  list.push(collection.id);
+			  }
+		  }      		  
+  		  if (list.length > 0) {	
+  	            array.forEach(list, function(collectionId)
+  	            {	             
+	                var layer = new OGCFeatureLayer({
+	                  url:url,
+	                  id: util.generateId(),
+	                  collectionId:collectionId
+	                });
+	                layer.load();
+	                layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
+            });
+  		  	}else {    	            
+  		  		console.warn("No OGC feature layers...");
+      	     }
+      		  all(layerDfds).then(function(featureLayers){
+      			  array.forEach(featureLayers, function(layer) {
+      				if (layer.fullExtent) {
+      		             var extent = new Extent(layer.fullExtent);
+      		             _setExtent(view, extent,layer.fullExtent);
+      		           }
+      				view.map.add(layer);         		        
+      			  });       			 
+      		  });
+      	  }
+        }).catch(function(error) {
+            console.error(error);
+        });	
+   	},
+   	
+ // Group Layer
+    "GroupLayer": function(view, url) {	   
+    	let idIndex = url.indexOf("?id=");
+	 	let itemId = url.substring(idIndex+4);
+	 	var portalBaseUrl;  
+	 	  if(url.indexOf("arcgis.com")>-1)
+		  {
+		 		itemInfoUrl = "https://www.arcgis.com/sharing/rest/content/items/"+itemId;
+		  }//On Premise Portal
+		 	  else{
+			  let homeIndex = url.indexOf("/home");
+			  portalBaseUrl = url.substring(0,homeIndex);
+			  itemInfoUrl = portalBaseUrl+"/sharing/rest/content/items/"+itemId;
+		  }
+	 	var readItemJson = util.readItemJsonData(itemInfoUrl);
+	 	readItemJson.then(function(itemDataObj){
+	 		var itemData = itemDataObj.data;
+	 		let arcGisPortal;
+	   	if(portalBaseUrl && portalBaseUrl.length >0)
+		{
+	   		arcGisPortal = new Portal({url: portalBaseUrl});
+		}
+	   	else
+		{
+	   		arcGisPortal = new Portal({url: "https://www.arcgis.com"});
+		}
+	   	let item = new PortalItem({
+	   		  id: itemId,
+	   		  portal: arcGisPortal // This loads the item
+	   		});
+	   	
+	   	var groupLayer = new GroupLayer({
+	   		  title: itemData.title, 
+	   		  portalItem: item	   		
+	   		});
+	   	  groupLayer.load();
+	   	  var lyrDfd = layerUtil.waitForLayer(self.i18n,groupLayer);
+	   	  lyrDfd.then(function(layer) {
+	      	   view.map.add(layer);	      	  
+	         });
+	 	}); 	  
+   },
+     
     
     // image server
     "ImageServer": function(view, url) {
