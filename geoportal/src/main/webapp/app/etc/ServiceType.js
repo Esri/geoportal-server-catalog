@@ -100,9 +100,7 @@ function(declare, lang, util,VectorTileLayer) {
             type = "StreamServer";
           } else if (lc.indexOf("/vectortileserver") > 0 || 
               lc.indexOf("/resources/styles/root.json") > 0) {
-            if (VectorTileLayer && VectorTileLayer.supported()) {
-              type = "VectorTileServer";
-            }
+              type = "VectorTileServer";            
           }
         } else if (lc.indexOf("/wms.axd/") > 0) {
           type = "WMS";

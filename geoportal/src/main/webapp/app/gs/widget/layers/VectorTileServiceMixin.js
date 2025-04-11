@@ -28,54 +28,20 @@ function(declare, Deferred, layerUtil, util, esriRequest, VectorTileLayer) {
         dfd.resolve(null);
         return dfd;
       }
-      this._checkVectorTileUrl(serviceUrl,opLayer).then(function(url) {
-        if ((typeof url === "string") && (url.length > 0)) {
-          url = util.checkMixedContent(url);
-          var props = {
-            id: util.generateId(),
-            opacity:0.5,
-            blendMode:"multiply",
-            visible: true
-          };
-          var lyr = new VectorTileLayer(url,props);
-          lyr.load();
-          return layerUtil.waitForLayer(self.i18n,lyr);
-        }
-      }).then(function(layer) {
-        if (layer) {
-          layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
-        }
-        dfd.resolve(layer);
-      }).catch(function(error) {
-        dfd.reject(error);
-      });
-      return dfd;
-    },
-
-    _checkVectorTileUrl: function(url,operationalLayer) {
-      var dfd = new Deferred();
-      if (util.endsWith(url,".json")) {
-        operationalLayer.styleUrl = url;
-        dfd.resolve(url);
-        return dfd;
-      }
-      var params = {
-        url: null,
-        content: {},
-        handleAs: "json",
-        callbackParamName: "callback"
-      };
-
-        params.url = url + "/resources/styles/root.json";
-        esriRequest(params, {}).then(function() {
-          operationalLayer.styleUrl = params.url;
-          dfd.resolve(params.url);
-        }).catch(function() {
-          operationalLayer.url = url;
-          dfd.resolve(url);
-        });
+      var self = this;
+      var layerId = util.generateId();
       
-      return dfd;
+      var lyr = new VectorTileLayer({url:serviceUrl,id:layerId,opacity:1,visible:true});
+      lyr.load();
+      var dfd = layerUtil.waitForLayer(self.i18n,lyr);
+      dfd.then(function(layer) {
+        if (layer && item) {
+          layer.title = item.title;
+        }
+        layerUtil.addMapLayer(self.view,layer,item,self.referenceId);
+        self.view.goTo(layer.fullExtent);
+      });
+      return dfd;      
     }
 
   });
