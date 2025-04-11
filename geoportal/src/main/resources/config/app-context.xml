@@ -67,7 +67,7 @@
 	<beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType:}"/> <!-- null for all other types of Opensearch | serverless | managed -->
 	<!--If awsOpenSearchType = serverless, uncomment and configure awsALBEndpoint (AWS ALB)
 		https://github.com/Esri/geoportal-server-catalog/tree/master/geoportal/doc/aws-serverless -->
-	<!-- <beans:property name="awsALBEndpoint" value="https://opensearch.aes-ps.com"/>	 -->
+	<!-- <beans:property name="awsALBEndpoint" value=""/>	 -->
 	
     <beans:property name="nodes">
       <!-- The list of host names within the Elasticsearch cluster, one value element per host -->
