@@ -795,8 +795,8 @@ public class STACService extends Application {
         ? requestPayload.getJsonObject("intersects")
 				: null);
     
-    String filterClause = (requestPayload.containsKey("filterClause") 
-        ? requestPayload.getString("filterClause")
+    String filterClause = (requestPayload.containsKey("filter") 
+        ? requestPayload.getString("filter")
 				: null);
 
 		//TODO Handle merge=true in Search Pagination
@@ -858,8 +858,8 @@ public class STACService extends Application {
 
       // issue 573
 			if (filterClause != null && filterClause.length() > 0) {
-        String filterQry = StacHelper.prepareFilter(filterClause);
-        queryMap.put("filterClause", filterQry);
+        //String filterQry = StacHelper.prepareFilter(filterClause);
+        queryMap.put("filterClause", filterClause); //filterQry);
       }
       
 			//Adding one extra so that next page can be figured out
