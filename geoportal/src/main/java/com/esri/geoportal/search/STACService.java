@@ -2264,7 +2264,7 @@ public class STACService extends Application {
 
     }
     
-    return null;
+    return responseObject;
   }
   
   
