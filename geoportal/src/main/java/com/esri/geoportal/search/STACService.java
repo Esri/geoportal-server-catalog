@@ -795,8 +795,8 @@ public class STACService extends Application {
         ? requestPayload.getJsonObject("intersects")
 				: null);
     
-    String filterClause = (requestPayload.containsKey("filterClause") 
-        ? requestPayload.getString("filterClause")
+    String filterClause = (requestPayload.containsKey("filter") 
+        ? requestPayload.getString("filter")
 				: null);
 
 		//TODO Handle merge=true in Search Pagination
@@ -858,8 +858,8 @@ public class STACService extends Application {
 
       // issue 573
 			if (filterClause != null && filterClause.length() > 0) {
-        String filterQry = StacHelper.prepareFilter(filterClause);
-        queryMap.put("filterClause", filterQry);
+        //String filterQry = StacHelper.prepareFilter(filterClause);
+        queryMap.put("filterClause", filterClause); //filterQry);
       }
       
 			//Adding one extra so that next page can be figured out
@@ -1315,13 +1315,14 @@ public class STACService extends Application {
             String itemFileString = this.readResourceFile(filePath, hsr);
 
             //Before searching newly added item, sleep for 1 second, otherwise record is not found
-            TimeUnit.SECONDS.sleep(1);
-
-            String itemRes = StacHelper.getItemWithItemId(collectionId, id);
-            responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
-            itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+            if(!ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
+            {
+            	TimeUnit.SECONDS.sleep(1);
+            	String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+                responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+                itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+            }             
           }
-
           return Response.status(status)
                          .header("Content-Type", "application/json")
                          .header("location",itemUrlGeoportal)
@@ -1424,8 +1425,8 @@ public class STACService extends Application {
 				 }
 				 if(!errorMsgArr.isEmpty())
 				 {
-					 responseJSON = generateResponse("500","Some Features in FeatureCollection  could not be added.",errorMsgArr);
-					 status = Response.Status.INTERNAL_SERVER_ERROR;					
+					 responseJSON = generateResponse("400","Some Features in FeatureCollection  could not be added.",errorMsgArr);
+					 status = Response.Status.BAD_REQUEST;					
 				 }
 			}
       
