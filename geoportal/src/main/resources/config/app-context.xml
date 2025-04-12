@@ -83,7 +83,7 @@
         <!-- 
           rule definition string:
           rule_type ::= <type_unique> | <type_intersects_collection>
-          type_unique ::= 'unique | ' <field_name>
+          type_unique ::= 'unique | ' <field1_name>,<field2_name>,...,<fieldN_name>
           type_intersects_collection ::= 'intersects_collection'
        
         <beans:value>${gpt_stacValidationRule1}</beans:value>
