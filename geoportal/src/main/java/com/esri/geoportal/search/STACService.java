@@ -170,6 +170,7 @@ public class STACService extends Application {
 	@Path("/collections")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollections(@Context HttpServletRequest hsr, 
+          @QueryParam("f") String f,
           @QueryParam("outCRS") String outCRS) {
     
 		String responseJSON;
@@ -229,8 +230,43 @@ public class STACService extends Application {
         }
 
 				stacCollections.put("collections", collectionsArray);
-				finalresponse = stacCollections.toString();
-				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));								
+        
+        // final output formatting
+        if ((f != null) && "geojson".equals(f)) {
+          // if f=geojson, output the list of collections as a type GeoJSON FeatureCollection vs STAC Collection
+       
+          JSONObject geojsonCollections = new JSONObject();
+          geojsonCollections.put("type", "FeatureCollection");
+          geojsonCollections.put("features", stacCollections.get("collections"));
+          JSONArray geojsonCollectionsList = new JSONArray();
+          
+          for (int i=0; i<collectionsArray.size(); i++) {
+            JSONObject collectionProperties = new JSONObject();
+            JSONObject geojsonCollection = new JSONObject();
+            net.minidev.json.JSONObject thisCollection = new JSONObject((Map<String, ?>) collectionsArray.get(i));
+            geojsonCollection.put("type", "Feature");
+            collectionProperties.put("objectid", i);
+            collectionProperties.put("id", thisCollection.getAsString("id"));
+            collectionProperties.put("title", thisCollection.getAsString("title"));
+            collectionProperties.put("description", thisCollection.getAsString("description"));
+
+            geojsonCollection.put("properties", collectionProperties);
+            JSONObject extent = new JSONObject((Map<String, ?>) thisCollection.get("extent"));
+            JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
+            geojsonCollection.put("bbox", spatial.get("bbox"));
+            geojsonCollection.put("geometry", spatial.get("geometry"));
+            
+            geojsonCollectionsList.add(geojsonCollection);
+          }
+          geojsonCollections.put("features", geojsonCollectionsList);
+          
+          finalresponse = geojsonCollections.toString();
+        } else {
+          // respond in STAC JSON
+          finalresponse = stacCollections.toString();
+        }
+          
+				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 			}
 
 		} catch (Exception e) {
@@ -345,7 +381,7 @@ public class STACService extends Application {
 			else
 			{
 				JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
-				if (collectionObj == null) // #518 || !collectionId.equals("metadata"))
+				if (collectionObj.isEmpty()) // #518 || !collectionId.equals("metadata"))
 				{
 					status = Response.Status.NOT_FOUND;
 				}
