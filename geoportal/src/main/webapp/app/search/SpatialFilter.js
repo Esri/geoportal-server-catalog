@@ -177,9 +177,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       this.own(topic.subscribe(appTopics.OnMouseEnterResultItem,function(params){
         if (!self.highlightItemOnHover) return;
         try {
-          var map = self.map, geometry, outSR;
-          if (map && params && params.item && params.item.envelope_geo) {
-            outSR = map.spatialReference;
+          var view = self.view, geometry, outSR;
+          if (view && params && params.item && params.item.envelope_geo) {
+            outSR = view.spatialReference;
             var env = lang.isArray(params.item.envelope_geo) && params.item.envelope_geo.length>0? params.item.envelope_geo[0].coordinates: params.item.envelope_geo.coordinates;
             if (env) {
               geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
@@ -188,15 +188,14 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
           if (geometry && webMercatorUtils.canProject(geometry,outSR)) {
             var projected = webMercatorUtils.project(geometry,outSR);
             if (!self._highlighted) {
-              var symbol = new SimpleFillSymbol(
-                SimpleFillSymbol.STYLE_SOLID,
-                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,0,0]), 2),
-                new Color([255,255,0,0.3]));
-              self._highlighted = new Graphic(projected,symbol);
-              map.graphics.add(self._highlighted);
+              var symbol = new SimpleFillSymbol({style:"solid",color:[255,255,0,0.3],
+            	  				outline:{color:[255,0,0],width:2}});
+                  
+              self._highlighted = new Graphic({geometry:projected,symbol:symbol});
+              view.graphics.add(self._highlighted);
             } else {
-              self._highlighted.setGeometry(projected);
-              self._highlighted.show();
+              self._highlighted.geometry = projected;
+              self._highlighted.visible = true;
             }
             self._highlighted.xtnItemId = params.item._id;
           }
@@ -207,13 +206,13 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       }));
 
       this.own(topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
-        if (self._highlighted) self._highlighted.hide();
+        if (self._highlighted) self._highlighted.visible = false;
       }));
 
       var positionLocator = true;
       this.own(aspect.after(this.dropPane,"_setOpenAttr",function() {
-        if (positionLocator && self.map && self.map._slider && self._locator) {
-          var sliderPos = domGeometry.position(self.map._slider);
+        if (positionLocator && self.map && self.view.map._slider && self._locator) {
+          var sliderPos = domGeometry.position(self.view.map._slider);
           if (sliderPos.x > 0) {
             var nd = self._locator.domNode;
             domStyle.set(nd,"left",Math.round(sliderPos.x)+"px");
