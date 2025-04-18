@@ -5,3 +5,4 @@ name: "CodeQL Configuration For JS/Python Components of geoportal-server-catalog
 # It also means that if you are accidentally building test or automation code into your output, then it will be picked up by the scanner.
 paths-ignore:
   - geoportal/src/main/webapp/viewer
+  - components/GeoportalSearch/WebAppBuilder
