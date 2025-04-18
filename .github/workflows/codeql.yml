@@ -18,12 +18,28 @@ on:
       - "[0-9]+.[0-9]+.[0-9]+*"
       - "[0-9]+.[0-9]+.[0-9]+.[0-9]+*"
       - "patch-*"
+    paths-ignore:
+      - geoportal/src/main/webapp/viewer/jimu.js
+      - .gitattributes
+      - docker
+      - "**.gitignore"
+      - "**.md"
+      - "**.txt"
+
   pull_request:
     branches:
       - "master"
       - "[0-9]+.[0-9]+.[0-9]+*"
       - "[0-9]+.[0-9]+.[0-9]+.[0-9]+*"
       - "patch-*"
+    paths-ignore:
+      - geoportal/src/main/webapp/viewer/jimu.js
+      - .gitattributes
+      - docker
+      - "**.gitignore"
+      - "**.md"
+      - "**.txt"
+
   schedule:
     - cron: '23 5 * * 1'
 
