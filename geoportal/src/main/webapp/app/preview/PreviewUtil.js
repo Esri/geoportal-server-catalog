@@ -50,15 +50,14 @@ function (lang, array, domConstruct, i18n,all,
   // declare publicly available geometry server 
 	var _gs = GeometryService;
 	
-  // universal error handler
-	//Fix error handler
+  // universal error handler	
   var _handleError = function(view, error) {
-    //map.emit("update-end-always", map);
-    console.error(error);
-    /*map.errorNode = domConstruct.create("div",{
-      innerHTML: i18n.search.preview.error, 
-      class: "g-preview-error"
-    }, map.container, "first");*/
+   
+    console.log(error);
+    view.errorNode = domConstruct.create("div",{
+        innerHTML: i18n.search.preview.error, 
+        class: "g-preview-error"
+      }, view.container, "first");   
   };
   
   // sets new extent of the map; uses projection if new extent is not compatible with the map
@@ -86,20 +85,19 @@ function (lang, array, domConstruct, i18n,all,
     
     // map server
     "MapServer": function(view, url) {
-      var layer = new MapImageLayer({url});
+      var layer = new MapImageLayer({url});      
       layer.when(function(){
-    	  //TODO fix in all services
-    	 // domConstruct.destroy(map.errorNode);
+    	  domConstruct.destroy(view.errorNode);
     	  if(layer.fullExtent)
 		  {  
     		  var extent = new Extent(layer.fullExtent);
-              _setExtent(view, extent,layer.fullExtent);    		
+              _setExtent(view, extent,layer.fullExtent);             
 		  }    	 
     	},
     	function(error){
     		_handleError(view, error);
     	}
-      );
+      );     
       view.map.add(layer);
     },
    
@@ -112,6 +110,7 @@ function (lang, array, domConstruct, i18n,all,
         	  _handleError(view, layer.loadError);
           });
           reactiveUtils.when(() => layer.loaded === true, () => { 
+        	  domConstruct.destroy(view.errorNode);
         	  if (response.data.extent) {
                   var extent = new Extent(response.data.extent);
                   _setExtent(view, extent,response.data.extent);
@@ -140,7 +139,7 @@ function (lang, array, domConstruct, i18n,all,
 	                	  _handleError(view, layer.loadError);
 	                  });
 	                  reactiveUtils.when(() => layer.loaded === true, () => { 
-	                	// domConstruct.destroy(map.errorNode);
+	                	  domConstruct.destroy(view.errorNode);
 	                	  if (response.data.fullExtent) {
 	                          var extent = new Extent(response.data.fullExtent);
 	                          _setExtent(view, extent,response.data.fullExtent);
@@ -157,7 +156,7 @@ function (lang, array, domConstruct, i18n,all,
                 	  _handleError(view, layer.loadError);
                   });
                   reactiveUtils.when(() => layer.loaded === true, () => { 
-                	 // domConstruct.destroy(map.errorNode);
+                	  domConstruct.destroy(view.errorNode);
                 	  if (response.data.extent) {
                           var extent = new Extent(response.data.extent);
                           _setExtent(view, extent,response.data.extent);
@@ -184,7 +183,7 @@ function (lang, array, domConstruct, i18n,all,
     	  _handleError(view, layer.loadError);
       });
       reactiveUtils.when(() => layer.loaded === true, () => { 
-    	 // domConstruct.destroy(map.errorNode);
+    	  domConstruct.destroy(view.errorNode);
     	  if (layer.fullExtent) {
               var extent = new Extent(layer.fullExtent);
               _setExtent(view, extent,layer.fullExtent);
@@ -229,6 +228,7 @@ function (lang, array, domConstruct, i18n,all,
       	     }
       		  all(layerDfds).then(function(featureLayers){
       			  array.forEach(featureLayers, function(layer) {
+      				domConstruct.destroy(view.errorNode);
       				if (layer.fullExtent) {
       		             var extent = new Extent(layer.fullExtent);
       		             _setExtent(view, extent,layer.fullExtent);
@@ -238,7 +238,7 @@ function (lang, array, domConstruct, i18n,all,
       		  });
       	  }
         }).catch(function(error) {
-            console.error(error);
+        	 _handleError(view, error);
         });	
    	},
    	
@@ -280,8 +280,12 @@ function (lang, array, domConstruct, i18n,all,
 	   	  groupLayer.load();
 	   	  var lyrDfd = layerUtil.waitForLayer(self.i18n,groupLayer);
 	   	  lyrDfd.then(function(layer) {
+	   		domConstruct.destroy(view.errorNode);
 	      	   view.map.add(layer);	      	  
-	         });
+	         })
+	         .catch(function(error) {
+	        	 _handleError(view, error);
+	         });	
 	 	}); 	  
    },
      
@@ -294,7 +298,7 @@ function (lang, array, domConstruct, i18n,all,
     	  _handleError(view, layer.loadError);
       });
       reactiveUtils.when(() => layer.loaded === true, () => { 
-    	 // domConstruct.destroy(map.errorNode);
+    	 domConstruct.destroy(view.errorNode);
     	  if (layer.fullExtent) {
               var extent = new Extent(layer.fullExtent);
               _setExtent(view, extent,layer.fullExtent);
@@ -311,7 +315,7 @@ function (lang, array, domConstruct, i18n,all,
    	  _handleError(view, layer.loadError);
      });
      reactiveUtils.when(() => layer.loaded === true, () => { 
-   	 // domConstruct.destroy(map.errorNode);
+   	 domConstruct.destroy(view.errorNode);
    	  if (layer.fullExtent) {
              var extent = new Extent(layer.fullExtent);
              _setExtent(view, extent,layer.fullExtent);
@@ -328,7 +332,7 @@ function (lang, array, domConstruct, i18n,all,
 	  	  _handleError(view, layer.loadError);
 	    });
 	    reactiveUtils.when(() => layer.loaded === true, () => { 
-	  	 // domConstruct.destroy(map.errorNode);
+	  	 domConstruct.destroy(view.errorNode);
 	  	  if (layer.fullExtent) {
 	            var extent = new Extent(layer.fullExtent);
 	            _setExtent(view, extent,layer.fullExtent);
@@ -345,7 +349,7 @@ function (lang, array, domConstruct, i18n,all,
 	  	  _handleError(view, layer.loadError);
 	    });
 	    reactiveUtils.when(() => layer.loaded === true, () => { 
-	  	 // domConstruct.destroy(map.errorNode);
+	  	 domConstruct.destroy(view.errorNode);
     	 if (layer.fullExtents && layer.fullExtents.length >0) {
  	  		 var layerExtent = layer.fullExtents[0];
  	  	  }else if(!layerExtent && layer.fullExtent)
@@ -363,8 +367,7 @@ function (lang, array, domConstruct, i18n,all,
 
     
     // WMS server
-    "WMS": function(view, url) {
-    //  map.emit("update-start-forced", map);
+    "WMS": function(view, url) {   
       var urlReq =	url.split('?')[0]
       var layer = new WMSLayer({url:url.split('?')[0]});
       var extentSet = false;
@@ -372,7 +375,7 @@ function (lang, array, domConstruct, i18n,all,
     	  _handleError(view, layer.loadError);
       });
       reactiveUtils.when(() => layer.loaded === true, () => { 
- 	  	 // domConstruct.destroy(map.errorNode);
+ 	  	 domConstruct.destroy(view.errorNode);
  	  	  if (layer.fullExtent) {
  	            var extent = new Extent(layer.fullExtent);
  	            _setExtent(view, extent,layer.fullExtent);
@@ -381,8 +384,7 @@ function (lang, array, domConstruct, i18n,all,
       view.map.add(layer);
     },
  
-    "WFS": function(view, url) {
-    //  map.emit("update-start-forced", map);
+    "WFS": function(view, url) {    
       var urlReq =	url.split('?')[0]
       var layer = new WFSLayer({url:url.split('?')[0]});
       var extentSet = false;
@@ -390,6 +392,7 @@ function (lang, array, domConstruct, i18n,all,
     	  _handleError(view, layer.loadError);
       });
       layer.load().then(() => {
+    	  domConstruct.destroy(view.errorNode);
           if (!extentSet && layer.fullExtent) {
             var extent = new Extent(layer.fullExtent);
             _setExtent(view, extent,layer.fullExtent);
@@ -399,8 +402,7 @@ function (lang, array, domConstruct, i18n,all,
       view.map.add(layer);
     },
     
-    "Shapefile": function(view, url) {
-   //   map.emit("update-start-forced", map);
+    "Shapefile": function(view, url) {  
       
       esriRequest(url,
         {responseType:"array-buffer"})
@@ -442,8 +444,7 @@ function (lang, array, domConstruct, i18n,all,
               _setExtent(map, totalExtent);
             }
           }
-          
-         // map.emit("update-end-always", map);
+         
         }, function(err) {
           _handleError(view, "Invalid response received from the server");
         });
