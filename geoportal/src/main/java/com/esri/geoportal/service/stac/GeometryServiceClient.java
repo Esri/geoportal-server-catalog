@@ -920,16 +920,19 @@ public class GeometryServiceClient {
 
       case "geometry":
       case "shape_geo":
-        JSONObject geometry = new JSONObject((Map<String, ?>) item.get(geometryField));
-        LOGGER.debug("geometry = " + geometry.toString()); 
+        if(item.containsKey(geometryField) && item.get(geometryField) != null){
+          JSONObject geometry = new JSONObject((Map<String, ?>) item.get(geometryField));
+          LOGGER.debug("geometry = " + geometry.toString()); 
 
-        String coordinates = geometry.getAsString("coordinates");
+          String coordinates = geometry.getAsString("coordinates");
 
-        String geometryType = geometry.getAsString("type");
-        geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
-        + "\"geometries\": [ "
-        + "{ \"rings\": " + coordinates + "}"
-        + "]}";
+          String geometryType = geometry.getAsString("type");
+          geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+          + "\"geometries\": [ "
+          + "{ \"rings\": " + coordinates + "}"
+          + "]}";
+        }        
+
         break;
         
       default:

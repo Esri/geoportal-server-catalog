@@ -10,8 +10,7 @@ credentials = boto3.Session().get_credentials()
 awsauth = AWS4Auth(credentials.access_key, credentials.secret_key, region, service, session_token=credentials.token)
 
 # The OpenSearch domain endpoint with https:// and without a trailing slash
-host = 'https://73ndg6pb0y39khhm7ij7.us-east-1.aoss.amazonaws.com'
-#host = 'https://txjwwmxxavpt5fulgmxc.us-east-1.aoss.amazonaws.com'
+host = ''
 
 # Lambda execution starts here
 def lambda_handler(event, context):
