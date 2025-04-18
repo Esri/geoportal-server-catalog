@@ -381,7 +381,7 @@ public class StacHelper {
 		String[] clauseList = filterClause.split("AND");
 		//{"bool":{"must":[{"match":{"clause_field1":"clause_value1"}},{"match":{"clause_field2":"clause_value2"}}]}}
 		
-		StringBuilder filterQryBuf = new StringBuilder("{\"bool\":{\"should\":[");
+		StringBuilder filterQryBuf = new StringBuilder("{\"bool\":{\"must\":[");
 		int i=0;
 		for (String clause : clauseList) {
       filterField = clause.split("=")[0].trim();

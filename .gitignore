@@ -154,3 +154,4 @@ components/CswClient/Pro/CswClient/.vs/CswClient/FileContentIndex/f37114e8-cba6-
 geoportal/src/main/resources/config/app-context.xml.esri
 geoportal/src/main/resources/config/app-context.xml.not
 geoportal/src/main/resources/config/app-context.xml.xom
+geoportal/src/main/resources/config/app-context.local

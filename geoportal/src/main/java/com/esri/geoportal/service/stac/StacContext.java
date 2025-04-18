@@ -162,8 +162,7 @@ public class StacContext {
       case "intersects_collection":
         passes = itemIntersectsCollection(item, collectionId);
         
-        message = passes ? "OK!" : 
-                "Item geometry does not intersect geometry of collection " + collectionId;
+        message = passes ? "Geometry validation OK!" : "Item geometry does not intersect geometry of collection " + collectionId;
 
         break;
         
