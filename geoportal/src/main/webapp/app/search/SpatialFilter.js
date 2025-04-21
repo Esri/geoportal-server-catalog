@@ -211,7 +211,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
 
       var positionLocator = true;
       this.own(aspect.after(this.dropPane,"_setOpenAttr",function() {
-        if (positionLocator && self.map && self.view.map._slider && self._locator) {
+        if (positionLocator && self.view && self.view.map._slider && self._locator) {
           var sliderPos = domGeometry.position(self.view.map._slider);
           if (sliderPos.x > 0) {
             var nd = self._locator.domNode;
@@ -269,11 +269,10 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     },
 
     equalInterval: function(min,max) {
-      var newsym = function(size) {
-        var olclr = Color.fromHex("#7A7A7A");
-        var sym = new SimpleMarkerSymbol()
-        sym.size = size;
-        sym.outline = new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,olclr,1);
+      var newsym = function(size) {       
+//        var sym = new SimpleMarkerSymbol({size:size,color:[255,255,255],
+//        	outline:new SimpleLineSymbol({style:"solid", color:[122, 122, 122],width:1})}); 
+        var sym = new SimpleMarkerSymbol({size:"1px",color:[0, 255, 255],outline:null});
         return sym;
       };
       var defaultSym = new SimpleMarkerSymbol();
@@ -287,10 +286,11 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       var v3 = min+(2*iv);
       var v4 = max;
       // 2,5,8,12 - 4,8,12,16
-      renderer.addClassBreakInfo(v0,v1,newsym(4));
-      renderer.addClassBreakInfo(v1,v2,newsym(8));
-      renderer.addClassBreakInfo(v2,v3,newsym(12));
-      renderer.addClassBreakInfo(v3,v4,newsym(16));
+      renderer.addClassBreakInfo({minValue:v0,maxValue:v1,symbol:newsym(4)});
+      renderer.addClassBreakInfo({minValue:v1,maxValue:v2,symbol:newsym(8)});
+      renderer.addClassBreakInfo({minValue:v2,maxValue:v3,symbol:newsym(12)});
+      renderer.addClassBreakInfo({minValue:v3,maxValue:v4,symbol:newsym(16)});
+
       return renderer;
     },
 
@@ -302,7 +302,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         return null;
       };
       var precision = null, level = null, lodToGeo = this.lodToGeoHashGridPrecision;
-      if (this.map && lodToGeo) {
+      if (this.view && lodToGeo) {
         level = this.view.zoom;
         if (lodToGeo.hasOwnProperty(level)) {
           precision = getInt(lodToGeo[level]);
@@ -372,32 +372,33 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       addChoice(i18n.search.spatialFilter.within,"within");
     },
 
-    initializeLocator: function() {
-      if (!this.showLocator) return;
-      var params = {
-        map: this.map,
-        enableButtonMode: true,
-        enableHighlight: false,
-        enableInfoWindow: false,
-        showInfoWindowOnSelect: false
-      };
-      var cfgParams = this.locatorParams;
-      if (!cfgParams && AppContext.appConfig.searchMap) {
-        cfgParams = AppContext.appConfig.searchMap.locatorParams;
-      }
-      if (cfgParams) {
-        var sources = this._convertConfig(cfgParams);
-        if (sources && sources.length > 0) {
-          lang.mixin(params,cfgParams);
-          params.sources = sources;
-        }
-      }
-      //if (cfgParams) lang.mixin(params,cfgParams);
-      var locator = new SearchWidget(params,this.searchWidgetNode);
-      locator.startup();
-      domClass.add(locator.domNode,"g-spatial-filter-locator");
-      this._locator = locator;
-    },
+    //Not used currently
+//    initializeLocator: function() {
+//      if (!this.showLocator) return;
+//      var params = {
+//        map: this.map,
+//        enableButtonMode: true,
+//        enableHighlight: false,
+//        enableInfoWindow: false,
+//        showInfoWindowOnSelect: false
+//      };
+//      var cfgParams = this.locatorParams;
+//      if (!cfgParams && AppContext.appConfig.searchMap) {
+//        cfgParams = AppContext.appConfig.searchMap.locatorParams;
+//      }
+//      if (cfgParams) {
+//        var sources = this._convertConfig(cfgParams);
+//        if (sources && sources.length > 0) {
+//          lang.mixin(params,cfgParams);
+//          params.sources = sources;
+//        }
+//      }
+//      //if (cfgParams) lang.mixin(params,cfgParams);
+//      var locator = new SearchWidget(params,this.searchWidgetNode);
+//      locator.startup();
+//      domClass.add(locator.domNode,"g-spatial-filter-locator");
+//      this._locator = locator;
+//    },
 
     initializeMap: function() {
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
@@ -582,20 +583,20 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
 
     processResults: function(searchResponse) {
       this._clearTmpHandles();
-      if (this._highlighted) this._highlighted.hide();
+      if (this._highlighted) this._highlighted.visible = false;
       if (!searchResponse.aggregations) return;
-      var map = this.map, lyr;
-      if (map) {
-        lyr = map.findLayerById("clusters");
-        if (lyr) map.remove(lyr);
+      var view = this.view, lyr;
+      if (view) {
+        lyr = view.map.findLayerById("clusters");
+        if (lyr) view.map.remove(lyr);
       }
       var key = this.getAggregationKey();
       var data = searchResponse.aggregations[key];
-      if (map && data && data.buckets && data.buckets.length > 0) {
+      if (view && data && data.buckets && data.buckets.length > 0) {
         var clusterLayer = new GraphicsLayer({
           id: "clusters"
         });
-        var min = null, max = null, outSR = map.spatialReference;
+        var min = null, max = null, outSR = view.spatialReference;
         var geohash = new GeohashEx();
         array.forEach(data.buckets,function(entry){
           var key = entry.key;
@@ -605,12 +606,12 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             if (min === null || count < min) min = count;
             if (max === null || count > max) max = count;
             var loc = geohash.decode(entry.key);
-            var pt = new Point(loc.longitude,loc.latitude,new SpatialReference(4326));
+            var pt = new Point({longitude:loc.longitude,latitude:loc.latitude,spatialReference:SpatialReference.WGS84});
             if (webMercatorUtils.canProject(pt,outSR)) {
               var pt2 = webMercatorUtils.project(pt,outSR);
               if (pt2) {
                 var attributes = {"Count":count};
-                clusterLayer.add(new Graphic(pt2,null,attributes));
+                clusterLayer.add(new Graphic({geometry:pt2,attributes:attributes}));
               }
             }
           } catch(ex) {
@@ -621,7 +622,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         if (max === null) max = min;
         var renderer = this.equalInterval(min,max);
         clusterLayer.renderer = renderer;
-        map.add(clusterLayer);
+        view.map.add(clusterLayer);
         //console.warn("clusterLayer",clusterLayer);
 
         var countPattern = i18n.search.spatialFilter.countPattern;
