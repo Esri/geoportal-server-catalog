@@ -622,7 +622,8 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         if (max === null) max = min;
         var renderer = this.equalInterval(min,max);
         clusterLayer.renderer = renderer;
-        view.map.add(clusterLayer);
+        //TODO JS4, renderer can not be set on GraphicsLayer, fix this
+      //  view.map.add(clusterLayer);
         //console.warn("clusterLayer",clusterLayer);
 
         var countPattern = i18n.search.spatialFilter.countPattern;
