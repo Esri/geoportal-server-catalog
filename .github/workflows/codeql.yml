@@ -68,7 +68,7 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: true
-      
+
     strategy:
       fail-fast: false
       matrix:
@@ -97,7 +97,7 @@ jobs:
       name: Setup .NET Framework
       uses: actions/setup-dotnet@v4
       with:
-        dotnet-version: '4.8.x'
+        dotnet-version: '4.8.1'
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
@@ -131,10 +131,10 @@ jobs:
         cd geoportal
         # Build the GeoPortal Server
         echo "Building GeoPortal Server"
-        mvn install
+        mvn clean install -DskipTests
         echo "Building GeoPortal Server Catalog"
         cd ../geoportal-search
-        mvn install
+        mvn clean install -DskipTests
     
     - if : matrix.build-mode == 'manual' && matrix.language == 'csharp'
       name: Build C# code
