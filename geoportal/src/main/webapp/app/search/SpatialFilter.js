@@ -511,9 +511,13 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         return qry;
       };
 
-      if (map && relation !== "any") {
-        //console.warn("map.geographicExtent",map.geographicExtent);
-        var env = map.geographicExtent;
+      if (map && relation !== "any") {        
+    	var env = map.geographicExtent;
+    	if(!env)
+		{
+    		env = webMercatorUtils.webMercatorToGeographic(this.view.extent, false);
+		}
+       
         if (env) {
           env1 = {xmin:env.xmin,ymin:env.ymin,xmax:env.xmax,ymax:env.ymax};
           if (map.wrapAround180) {
