@@ -53,7 +53,7 @@ jobs:
     #   - https://gh.io/supported-runners-and-hardware-resources
     #   - https://gh.io/using-larger-runners (GitHub.com only)
     # Consider using larger runners or machines with greater resources for possible analysis time improvements.
-    runs-on: ${{ (matrix.language == 'swift' && 'macos-latest') || 'ubuntu-latest' }}
+    runs-on: ${{ (matrix.language == 'csharp' && 'windows-latest') || 'ubuntu-latest' }}
     permissions:
       # required for all workflows
       security-events: write
@@ -64,7 +64,11 @@ jobs:
       # only required for workflows in private repositories
       #actions: read
       #contents: read
-
+    env:
+      DOTNET_CLI_TELEMETRY_OPTOUT: 1
+      DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
+      DOTNET_NOLOGO: true
+      
     strategy:
       fail-fast: false
       matrix:
@@ -89,6 +93,11 @@ jobs:
     - name: Checkout repository
       uses: actions/checkout@v4
 
+    - if : matrix.build-mode == 'manual' && matrix.language == 'csharp'
+      name: Setup .NET Framework
+      uses: actions/setup-dotnet@v4
+      with:
+        dotnet-version: '4.8.x'
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
@@ -129,7 +138,7 @@ jobs:
     
     - if : matrix.build-mode == 'manual' && matrix.language == 'csharp'
       name: Build C# code
-      shell: bash
+      shell: pwsh
       run: |
         cd components/CswClient/Pro/CswClient
         # Build the Pro Extension
