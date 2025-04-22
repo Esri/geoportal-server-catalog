@@ -94,10 +94,12 @@ jobs:
       uses: actions/checkout@v4
 
     - if : matrix.build-mode == 'manual' && matrix.language == 'csharp'
-      name: Setup .NET Framework
-      uses: actions/setup-dotnet@v4
-      with:
-        dotnet-version: '4.8.1'
+      name: Setup MSBuild
+      uses: microsoft/setup-msbuild@v2
+      #name: Setup .NET Framework
+      #uses: actions/setup-dotnet@v4
+      #with:
+      #  dotnet-version: '4.8.1'
     # Add any setup steps before running the `github/codeql-action/init` action.
     # This includes steps like installing compilers or runtimes (`actions/setup-node`
     # or others). This is typically only required for manual builds.
