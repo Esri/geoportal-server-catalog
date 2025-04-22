@@ -373,34 +373,6 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       addChoice(i18n.search.spatialFilter.within,"within");
     },
 
-    //Not used currently
-//    initializeLocator: function() {
-//      if (!this.showLocator) return;
-//      var params = {
-//        map: this.map,
-//        enableButtonMode: true,
-//        enableHighlight: false,
-//        enableInfoWindow: false,
-//        showInfoWindowOnSelect: false
-//      };
-//      var cfgParams = this.locatorParams;
-//      if (!cfgParams && AppContext.appConfig.searchMap) {
-//        cfgParams = AppContext.appConfig.searchMap.locatorParams;
-//      }
-//      if (cfgParams) {
-//        var sources = this._convertConfig(cfgParams);
-//        if (sources && sources.length > 0) {
-//          lang.mixin(params,cfgParams);
-//          params.sources = sources;
-//        }
-//      }
-//      //if (cfgParams) lang.mixin(params,cfgParams);
-//      var locator = new SearchWidget(params,this.searchWidgetNode);
-//      locator.startup();
-//      domClass.add(locator.domNode,"g-spatial-filter-locator");
-//      this._locator = locator;
-//    },
-
     initializeMap: function() {
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
@@ -457,16 +429,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     			 }
     	  	}
     	});
-      
 
-//      this.own(on(map,"Load",lang.hitch(this,function(){
-//        this.map = map;
-//        this.initializeLocator();
-//        //window.AppContext.searchMap = this.map;
-//        this.own(on(map,"ExtentChange",lang.hitch(this,function(){
-//          if (this.getRelation() !== "any") this.search();
-//        })));
-//      })));
     },
 
     /* SearchComponent API ============================================= */
@@ -594,9 +557,6 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       var key = this.getAggregationKey();
       var data = searchResponse.aggregations[key];
       if (view && data && data.buckets && data.buckets.length > 0) {
-//        var clusterLayer = new GraphicsLayer({
-//          id: "clusters"
-//        });
         var graphicArr =[];
         var min = null, max = null, outSR = view.spatialReference;
         var geohash = new GeohashEx();
@@ -617,9 +577,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
               if (pt2) {
                 var attributes = {"Count":count,"OBJECTID": id};
                 graphicArr.push(new Graphic({geometry:pt2,attributes:attributes}));
-                id++;
-               
-               // clusterLayer.add(new Graphic({geometry:pt2,attributes:attributes}));
+                id++;              
               }
             }
           } catch(ex) {
@@ -633,6 +591,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         var clusterLayer = new FeatureLayer({
             source: graphicArr,
             id: "clusters",
+            title:"clusters",
             objectIdField: "OBJECTID",
             fields: [
             	{
@@ -646,7 +605,10 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             ]});
        
        clusterLayer.renderer = renderer;
-        view.map.add(clusterLayer);
+       view.when(lang.hitch(this,function() {    	
+    	   view.map.add(clusterLayer);
+     	}))    	
+        
         //console.warn("clusterLayer",clusterLayer);
 
         var countPattern = i18n.search.spatialFilter.countPattern;
