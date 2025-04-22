@@ -38,6 +38,7 @@ define(["dojo/_base/declare",
         "esri4/layers/TileLayer",
         "esri4/layers/MapImageLayer",
         "esri4/layers/GraphicsLayer",
+        "esri4/layers/FeatureLayer",
         "esri4/geometry/support/webMercatorUtils",
         "esri4/geometry/Extent",
         "esri4/geometry/Point",
@@ -58,7 +59,7 @@ define(["dojo/_base/declare",
         "esri4/geometry/support/webMercatorUtils"],
 function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber,
     topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map,MapView,
-    TileLayer, MapImageLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference,
+    TileLayer, MapImageLayer, GraphicsLayer, FeatureLayer,webMercatorUtils, Extent, Point, SpatialReference,
     SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer,
     SimpleRenderer, Graphic, Color, PopupTemplate, SearchWidget, reactiveUtils,Deferred, Locator,WebMercatorUtils) {
 
@@ -270,9 +271,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
 
     equalInterval: function(min,max) {
       var newsym = function(size) {       
-//        var sym = new SimpleMarkerSymbol({size:size,color:[255,255,255],
-//        	outline:new SimpleLineSymbol({style:"solid", color:[122, 122, 122],width:1})}); 
-        var sym = new SimpleMarkerSymbol({size:"1px",color:[0, 255, 255],outline:null});
+        var sym = new SimpleMarkerSymbol({size:size,
+        	outline:new SimpleLineSymbol({style:"solid", color:[122, 122, 122],width:1})}); 
+        
         return sym;
       };
       var defaultSym = new SimpleMarkerSymbol();
@@ -511,13 +512,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         return qry;
       };
 
-      if (map && relation !== "any") {        
-    	var env = map.geographicExtent;
-    	if(!env)
-		{
-    		env = webMercatorUtils.webMercatorToGeographic(this.view.extent, false);
-		}
-       
+      if (map && relation !== "any") {
+        //console.warn("map.geographicExtent",map.geographicExtent);
+        var env = map.geographicExtent;
         if (env) {
           env1 = {xmin:env.xmin,ymin:env.ymin,xmax:env.xmax,ymax:env.ymax};
           if (map.wrapAround180) {
@@ -597,11 +594,15 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       var key = this.getAggregationKey();
       var data = searchResponse.aggregations[key];
       if (view && data && data.buckets && data.buckets.length > 0) {
-        var clusterLayer = new GraphicsLayer({
-          id: "clusters"
-        });
+//        var clusterLayer = new GraphicsLayer({
+//          id: "clusters"
+//        });
+        var graphicArr =[];
         var min = null, max = null, outSR = view.spatialReference;
         var geohash = new GeohashEx();
+        if (min === null) min = 0;
+        if (max === null) max = min;
+        var id =1;
         array.forEach(data.buckets,function(entry){
           var key = entry.key;
           var docCount = entry.doc_count;
@@ -614,8 +615,11 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             if (webMercatorUtils.canProject(pt,outSR)) {
               var pt2 = webMercatorUtils.project(pt,outSR);
               if (pt2) {
-                var attributes = {"Count":count};
-                clusterLayer.add(new Graphic({geometry:pt2,attributes:attributes}));
+                var attributes = {"Count":count,"OBJECTID": id};
+                graphicArr.push(new Graphic({geometry:pt2,attributes:attributes}));
+                id++;
+               
+               // clusterLayer.add(new Graphic({geometry:pt2,attributes:attributes}));
               }
             }
           } catch(ex) {
@@ -625,9 +629,24 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         if (min === null) min = 0;
         if (max === null) max = min;
         var renderer = this.equalInterval(min,max);
-        clusterLayer.renderer = renderer;
-        //TODO JS4, renderer can not be set on GraphicsLayer, fix this
-      //  view.map.add(clusterLayer);
+       
+        var clusterLayer = new FeatureLayer({
+            source: graphicArr,
+            id: "clusters",
+            objectIdField: "OBJECTID",
+            fields: [
+            	{
+	              name: "OBJECTID",
+	              type: "oid"
+            	},
+	            {
+            	  name: "Count",
+   	              type: "integer"
+	            }
+            ]});
+       
+       clusterLayer.renderer = renderer;
+        view.map.add(clusterLayer);
         //console.warn("clusterLayer",clusterLayer);
 
         var countPattern = i18n.search.spatialFilter.countPattern;
