@@ -222,16 +222,6 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       
       
     },
-//TODO check later if it is needed or remove
-//    normalizeUrl: function(url) {
-//      var services = ["mapserver", "imageserver", "featureserver", "streamserver", "vectortileserver"];
-//      var selSrv = array.filter(services, function(srv) { return url.toLowerCase().indexOf(srv)>=0; });
-//      if (selSrv && selSrv.length>0) {
-//        var srv = selSrv[0];
-//        url = url.substr(0, url.toLowerCase().indexOf(srv) + srv.length);
-//      }
-//      return url;
-//    },
     
     _onHome: function() {
       this.searchPanelLink.click()
