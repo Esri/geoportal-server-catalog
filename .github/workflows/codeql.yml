@@ -122,10 +122,10 @@ jobs:
         cd geoportal
         # Build the GeoPortal Server
         echo "Building GeoPortal Server"
-        mvn compile
+        mvn install
         echo "Building GeoPortal Server Catalog"
         cd ../geoportal-search
-        mvn compile
+        mvn install
     
     - if : matrix.build-mode == 'manual' && matrix.language == 'csharp'
       name: Build C# code
