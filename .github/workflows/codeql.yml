@@ -145,7 +145,7 @@ jobs:
         cd components/CswClient/Pro/CswClient
         # Build the Pro Extension
         echo "Building Pro Extension"
-        msbuild CswSearch.sln" /p:platform="any cpu" /p:configuration="release"
+        msbuild CswSearch.sln /p:platform="any cpu" /p:configuration="release"
 
     - name: Perform CodeQL Analysis
       uses: github/codeql-action/analyze@v3
