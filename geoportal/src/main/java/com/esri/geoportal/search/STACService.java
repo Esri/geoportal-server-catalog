@@ -170,7 +170,6 @@ public class STACService extends Application {
 	@Path("/collections")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollections(@Context HttpServletRequest hsr, 
-          @QueryParam("f") String f,
           @QueryParam("outCRS") String outCRS) {
     
 		String responseJSON;
@@ -230,43 +229,8 @@ public class STACService extends Application {
         }
 
 				stacCollections.put("collections", collectionsArray);
-        
-        // final output formatting
-        if ((f != null) && "geojson".equals(f)) {
-          // if f=geojson, output the list of collections as a type GeoJSON FeatureCollection vs STAC Collection
-       
-          JSONObject geojsonCollections = new JSONObject();
-          geojsonCollections.put("type", "FeatureCollection");
-          geojsonCollections.put("features", stacCollections.get("collections"));
-          JSONArray geojsonCollectionsList = new JSONArray();
-          
-          for (int i=0; i<collectionsArray.size(); i++) {
-            JSONObject collectionProperties = new JSONObject();
-            JSONObject geojsonCollection = new JSONObject();
-            net.minidev.json.JSONObject thisCollection = new JSONObject((Map<String, ?>) collectionsArray.get(i));
-            geojsonCollection.put("type", "Feature");
-            collectionProperties.put("objectid", i);
-            collectionProperties.put("id", thisCollection.getAsString("id"));
-            collectionProperties.put("title", thisCollection.getAsString("title"));
-            collectionProperties.put("description", thisCollection.getAsString("description"));
-
-            geojsonCollection.put("properties", collectionProperties);
-            JSONObject extent = new JSONObject((Map<String, ?>) thisCollection.get("extent"));
-            JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
-            geojsonCollection.put("bbox", spatial.get("bbox"));
-            geojsonCollection.put("geometry", spatial.get("geometry"));
-            
-            geojsonCollectionsList.add(geojsonCollection);
-          }
-          geojsonCollections.put("features", geojsonCollectionsList);
-          
-          finalresponse = geojsonCollections.toString();
-        } else {
-          // respond in STAC JSON
-          finalresponse = stacCollections.toString();
-        }
-          
-				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
+				finalresponse = stacCollections.toString();
+				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));								
 			}
 
 		} catch (Exception e) {
@@ -353,8 +317,8 @@ public class STACService extends Application {
 		JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
 		if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
 		{					
-			status = Response.Status.CREATED;
-			responseJSON = generateResponse("201", "Stac Collection has been updated successfully.",null);				
+			status = Response.Status.OK;
+			responseJSON = generateResponse("200", "Stac Collection has been updated successfully.",null);				
 		}
 			
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
@@ -381,7 +345,7 @@ public class STACService extends Application {
 			else
 			{
 				JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
-				if (collectionObj.isEmpty()) // #518 || !collectionId.equals("metadata"))
+				if (collectionObj == null || collectionObj.isEmpty()) // #518 || !collectionId.equals("metadata"))
 				{
 					status = Response.Status.NOT_FOUND;
 				}
@@ -643,6 +607,7 @@ public class STACService extends Application {
 			if(itemRes == null || itemRes.isEmpty())
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
+				status = Response.Status.NOT_FOUND;
 			} else
 			{
 				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,null,true);
@@ -660,7 +625,7 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("500",
 					"STAC API: Items could not be deleted.",detailErrArray);
 		}
-		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();
 	}
 	
 	@DELETE
