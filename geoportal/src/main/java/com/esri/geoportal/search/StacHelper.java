@@ -633,7 +633,7 @@ public class StacHelper {
 			{
         errorMsg = errorMsg+" id in Feature body and Id in path param should be equal.";
 			}
-			if(!(requestPayload.getAsString("collection")!= null && requestPayload.getAsString("collection").equals(collectionId)))
+			if(requestPayload.getAsString("collection")!= null && !requestPayload.getAsString("collection").equals(collectionId))
 			{
         errorMsg = errorMsg+" collection in Feature body and collectionId in path param should be equal.";
 			}
