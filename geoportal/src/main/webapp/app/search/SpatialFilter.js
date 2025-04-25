@@ -546,6 +546,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     },
 
     processResults: function(searchResponse) {
+      const process = async () => {  
+    	if(this.view) await this.view.when();
+     
       this._clearTmpHandles();
       if (this._highlighted) this._highlighted.visible = false;
       if (!searchResponse.aggregations) return;
@@ -592,7 +595,8 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             source: graphicArr,
             id: "clusters",
             title:"clusters",
-            objectIdField: "OBJECTID",
+            geometryType:"point",
+            objectIdField: "OBJECTID",         
             fields: [
             	{
 	              name: "OBJECTID",
@@ -602,37 +606,53 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             	  name: "Count",
    	              type: "integer"
 	            }
-            ]});
+            ],
+            renderer: renderer
+            });
+      
+       view.map.add(clusterLayer);  
        
-       clusterLayer.renderer = renderer;
-       view.when(lang.hitch(this,function() {    	
-    	   view.map.add(clusterLayer);
-     	}))    	
-        
-        //console.warn("clusterLayer",clusterLayer);
+       var countPattern = i18n.search.spatialFilter.countPattern;
+       var tooltip = d3.select(this.tooltipNode);
+       tooltip.style("opacity", 0);
+       var hideTooltip = function() {
+         tooltip.transition().duration(500).style("opacity", 0);
+       };
+      
+       view.on("pointer-move", function (evt) {
+           const screenPoint = {
+             x: evt.x,
+             y: evt.y
+           };
 
-        var countPattern = i18n.search.spatialFilter.countPattern;
-        var tooltip = d3.select(this.tooltipNode);
-        tooltip.style("opacity", 0);
-        var hideTooltip = function() {
-          tooltip.transition().duration(500).style("opacity", 0);
-        };
-        this._tmpHandles.push(clusterLayer.on("mouse-over",function(evt){
-          if (evt.graphic && evt.graphic.attributes) {
-            var c = djNumber.format(evt.graphic.attributes["Count"]);
-            var txt = countPattern.replace("{count}",c);
-            tooltip.transition().duration(200).style("opacity", 1);
-            tooltip.html(txt)
-              .style("left", (evt.pageX + 12) + "px")
-              .style("top", (evt.pageY - 20) + "px");
-          } else {
-            hideTooltip();
-          }
-        }));
-        this._tmpHandles.push(clusterLayer.on("mouse-out",function(evt){
-          hideTooltip();
-        }));
-      }
+           view.hitTest(screenPoint)
+             .then(function (response) {
+            	 let c = null;
+            	 response.results.some(result => {            		 
+            		 if(result && result.layer && result.layer.id === "clusters"
+            			 && result.graphic && result.graphic.attributes)
+        			 {
+            			 c = result.graphic.attributes.Count;
+            			 return true;
+        			 }
+            	 }); 
+            	 if (c!=null){
+            		 const txt = countPattern.replace("{count}",c);
+                     tooltip.transition().duration(200).style("opacity", 1);
+                     tooltip.html(txt)
+                       .style("left", (evt.x + 12) + "px")
+                       .style("top", (evt.y - 20) + "px"); 
+            	 }
+            	 else{
+            		 hideTooltip();
+            	 }	
+             });
+         });
+      	}
+      } 
+      
+      process();
+      
     },
 
     whenQClauseRemoved: function(qClause) {
