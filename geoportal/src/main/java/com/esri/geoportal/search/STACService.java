@@ -699,6 +699,7 @@ public class STACService extends Application {
 					}
 				}
 			} else {
+				status = Response.Status.NOT_FOUND;
 				responseJSON = this.generateResponse("404", "Record not found.",null);
 			}
 
