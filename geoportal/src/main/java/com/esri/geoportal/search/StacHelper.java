@@ -879,8 +879,12 @@ public class StacHelper {
       String requestedCRS;
       if (!theCRS.startsWith("EPSG:")) {
          Asset theAsset = collection.getAsset(theCRS);
-         String wkt = theAsset.getEsriWKT();
-         requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
+         if (theAsset != null) {
+          String wkt = theAsset.getEsriWKT();
+          requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
+         } else {
+           requestedCRS = theCRS;
+         }
 
       } else {
           requestedCRS = theCRS.replace("EPSG:", "");
