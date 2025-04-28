@@ -121,12 +121,11 @@ public class StacContext {
   
   /* ========== Validation Rule functions here ========== */
   
-  public JSONObject passesValidation(String validationRule, JSONObject item) throws Exception {
+  public JSONObject passesValidation(String validationRule, JSONObject item, String collectionId) throws Exception {
     boolean passes;
     String message;
-    JSONObject response = new JSONObject();
-    
-    String collectionId = item.getAsString("collection");
+    JSONObject response = new JSONObject();    
+   
     JSONObject properties = (JSONObject) item.get("properties");
     String[] ruleElements = validationRule.split("\\|");
     String ruleType = ruleElements[0];
