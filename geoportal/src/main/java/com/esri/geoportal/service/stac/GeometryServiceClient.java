@@ -313,7 +313,7 @@ public class GeometryServiceClient {
         formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
         formData += "&transformation=";
         formData += "&transformForward=true";
-        formData += "&vertical=false";
+        formData += "&vertical=true";
         formData += "&f=json";
 
         URL obj = new URL(this.projectUrl);
@@ -797,13 +797,16 @@ public class GeometryServiceClient {
             
           case "POLYGON":
             arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
+            String polyHasZ = arcgisGeometry.getAsString("hasZ");
+            hasZ = polyHasZ.equalsIgnoreCase("true");
             JSONArray rings = (JSONArray) arcgisGeometry.get("rings");
 
             if (!rings.isEmpty()) {
               String ags = rings.toString();
-              wkt = wktGeometryType 
-                    + " " 
-                    + ags.substring(ags.indexOf(":")+1)
+              wkt = wktGeometryType;
+              wkt += hasZ ? " Z " : " ";
+              
+              wkt += ags.substring(ags.indexOf(":")+1)
                     .replace(",", " ")
                     .replace("] [", ", ")
                     .replace("[", "(")
@@ -884,7 +887,6 @@ public class GeometryServiceClient {
         try {
           JSONArray envelopes = (JSONArray) item.get(geometryField);
           JSONObject firstEnvelope = (JSONObject) envelopes.get(0);
-          //JSONObject envelope = new JSONObject((Map<String, ?>) firstEnvelope.get(0));
           JSONArray envelopeCoordinates = (JSONArray) firstEnvelope.get("coordinates");
           JSONArray upperLeft = (JSONArray) envelopeCoordinates.get(0);
           JSONArray lowerRight = (JSONArray) envelopeCoordinates.get(1);
@@ -910,12 +912,26 @@ public class GeometryServiceClient {
         
         LOGGER.debug("geometry = " + bbox.toString()); 
 
-        geometries = "{\"geometryType\": \"esriGeometryEnvelope\", "
-        + "\"geometries\": [{"
-        + "\"xmin\": " + bbox.get(0) + ", "
-        + "\"ymin\": " + bbox.get(1) + ", "
-        + "\"xmax\": " + bbox.get(2) + ", "
-        + "\"ymax\": " + bbox.get(3) + "}]}";
+        geometries = "{\"geometryType\": \"esriGeometryEnvelope\", \"geometries\": [{";
+        
+        if (bbox.size() == 4) {
+          geometries = geometries + "\"xmin\": " + bbox.get(0) + ", "
+                                  + "\"ymin\": " + bbox.get(1) + ", "
+                                  + "\"xmax\": " + bbox.get(2) + ", "
+                                  + "\"ymax\": " + bbox.get(3) + "}]}";
+          
+        } else if (bbox.size() == 6) {
+          geometries = geometries + "\"xmin\": " + bbox.get(0) + ", "
+                                  + "\"ymin\": " + bbox.get(1) + ", "
+                                  + "\"zmin\": " + bbox.get(3) + ", "
+                                  + "\"xmax\": " + bbox.get(3) + ", "
+                                  + "\"ymax\": " + bbox.get(4) + ", "
+                                  + "\"zmax\": " + bbox.get(5) + "}]}";
+          
+        } else {
+          LOGGER.error("BBOX is of wrong dimensions: " + bbox.size());
+          geometries = null;
+        }
         break;
 
       case "geometry":
@@ -937,6 +953,7 @@ public class GeometryServiceClient {
         
       default:
         LOGGER.error("Unknown geometry field: " + geometryField);
+        geometries = null;
     }
 
     return geometries;

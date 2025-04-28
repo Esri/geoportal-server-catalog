@@ -2091,10 +2091,18 @@ public class STACService extends Application {
                 case "bbox":
                   JSONObject bbox = (JSONObject) projectedGeometries.get(0);
                   JSONArray projectedBbox = new JSONArray();
+                  
                   projectedBbox.add(bbox.get("xmin"));
                   projectedBbox.add(bbox.get("ymin"));
+                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
+                    projectedBbox.add(bbox.get("zmin"));
+                  }
+                  
                   projectedBbox.add(bbox.get("xmax"));
                   projectedBbox.add(bbox.get("ymax"));
+                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
+                    projectedBbox.add(bbox.get("zmax"));
+                  }
 
                   responseObject.put("bbox", projectedBbox);
 
@@ -2328,7 +2336,8 @@ public class STACService extends Application {
           List<String> availableCRS = collection.getAvailableCRS();
           if ((availableCRS.contains(inCRS)) || (inCRS.startsWith("EPSG:"))) {
             String requestedCRS = StacHelper.getRequestedCRS(collection, inCRS);
-            responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, INTERNAL_CRS);
+            //responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, INTERNAL_CRS);
+            responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, "{\"wkid\": 4326, \"vcsWkid\": 115807 }");
           }
         }
       }
