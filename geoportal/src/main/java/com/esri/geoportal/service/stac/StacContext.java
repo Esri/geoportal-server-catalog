@@ -273,16 +273,23 @@ public class StacContext {
     try {
       // see if the geometry intersects the collection geometry
       String intersectResponse = gsc.doIntersect(geometry, collectionGeometry);
-      JSONObject intersectResponseObj = (JSONObject) jsonParser.parse(intersectResponse);
-      JSONArray intersectGeometries = (JSONArray) intersectResponseObj.get("geometries");
-      JSONObject intersectPaths = (JSONObject) intersectGeometries.get(0);
-      if (intersectPaths.containsKey("rings")) {
-        JSONArray intersectRings = (JSONArray) intersectPaths.get("rings");
-        intersects = !intersectRings.isEmpty();    
-      } else {
-        // if the paths is not an empty array, the two geometries intersect
-        intersects = !intersectPaths.isEmpty();        
-      }      
+      if(intersectResponse.indexOf("\"code\":400")>-1)
+      {
+    	  LOGGER.error("Intersct failed "+intersectResponse);
+      }
+      else
+      {
+    	  JSONObject intersectResponseObj = (JSONObject) jsonParser.parse(intersectResponse);
+          JSONArray intersectGeometries = (JSONArray) intersectResponseObj.get("geometries");
+          JSONObject intersectPaths = (JSONObject) intersectGeometries.get(0);
+          if (intersectPaths.containsKey("rings")) {
+            JSONArray intersectRings = (JSONArray) intersectPaths.get("rings");
+            intersects = !intersectRings.isEmpty();    
+          } else {
+            // if the paths is not an empty array, the two geometries intersect
+            intersects = !intersectPaths.isEmpty();        
+          }      
+      }
       
     } catch (Exception ex) {
       LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
