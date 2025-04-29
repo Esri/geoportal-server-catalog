@@ -941,12 +941,30 @@ public class GeometryServiceClient {
           LOGGER.debug("geometry = " + geometry.toString()); 
 
           String coordinates = geometry.getAsString("coordinates");
-
+          
           String geometryType = geometry.getAsString("type");
-          geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
-          + "\"geometries\": [ "
-          + "{ \"rings\": " + coordinates + "}"
-          + "]}";
+          if(geometryType.equalsIgnoreCase("Polygon"))
+          {
+        	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+        	          + "\"geometries\": [ "
+        	          + "{ \"rings\": " + coordinates + "}"
+        	          + "]}";
+          }
+          else if(geometryType.equalsIgnoreCase("Point"))
+          {
+        	  JSONArray pointArr =(JSONArray) geometry.get("coordinates");
+        	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+        	          + "\"geometries\": [ "
+        	          + "{ \"x\": " + pointArr.get(0) + ",\"y\":" + pointArr.get(1)+"}"
+        	          + "]}";
+          }
+          else if(geometryType.equalsIgnoreCase("MultilineString"))
+          {
+        	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");
+        	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+        	          + "\"geometries\": [{\"paths\":"+polylineArr+"}]}";
+        	         
+          }
         }        
 
         break;
