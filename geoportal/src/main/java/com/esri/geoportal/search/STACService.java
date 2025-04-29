@@ -1109,10 +1109,12 @@ public class STACService extends Application {
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		JSONArray detailErrArray = new JSONArray();
     Response responseObject = null;
+    JSONObject updatedItem = null;
         
 		try {
       // get existing item
       JSONObject existingItem = StacHelper.getSTACItemById(collectionId, featureId);
+      String existingItemJSON = existingItem.toString();
       
       // if payload has geomCRSField and geomWKT field, project 
       // from internal CRS (EPSG:4326) to geomCRSField value
@@ -1121,13 +1123,14 @@ public class STACService extends Application {
         
         if (properties.containsKey(gc.getGeomWKTField()) 
             && properties.containsKey(gc.getGeomCRSField())) {
+          
+          // the PATCH body includes geometries, reproject if needed
 
           String patchCRS = properties.getAsString(gc.getGeomCRSField());
           
           // Only project if the submitted CRS is not the same as the internal CRS
           if (!patchCRS.equalsIgnoreCase(INTERNAL_CRS)) {
             Collection collection = new Collection(collectionId);
-            String existingItemJSON = existingItem.toString();
 
             // project existing item from internal CRS to CRS submitted in the PATCH
             existingItem = projectItemGeometries(collection, 
@@ -1135,19 +1138,18 @@ public class STACService extends Application {
                                                  INTERNAL_CRS.replace("EPSG:", ""),
                                                  patchCRS);            
           }
-         
-          // merge JSON from existing item with requestPayload
-          JSONObject updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
-
-          // update feature (will reproject)
-          responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
-    			responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
-
-        } else {
-          LOGGER.debug("Got partial geometry info for " + featureId);
-    			responseJSON = generateResponse("500", "STAC Item " + featureId + " not updated due to missing geometry information.", detailErrArray);
         }
+
+        // merge JSON from existing item with requestPayload
+        updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
+        responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
       }
+      
+      
+      // update feature (will reproject)
+      responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
+
+      
       
 		} catch(Exception ex) {
 			LOGGER.error("Error in patching STAC Item: " + ex.getMessage());
