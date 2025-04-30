@@ -38,6 +38,7 @@ define(["dojo/_base/declare",
         "esri4/form/elements/inputs/SwitchInput",
         "esri4/Graphic",
         "esri4/widgets/Expand",
+        "esri4/widgets/BasemapGallery",
         "esri4/core/reactiveUtils",
         "esri4/widgets/FeatureTable/Grid/support/ButtonMenuItem",
         "esri4/widgets/FeatureTable/Grid/support/ButtonMenu",
@@ -47,7 +48,7 @@ define(["dojo/_base/declare",
 function(declare, lang, Templated, template, i18n, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
 		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
-		Legend,Locate,Home,SwitchInput,Graphic,Expand,reactiveUtils,ButtonMenuItem,ButtonMenu,
+		Legend,Locate,Home,SwitchInput,Graphic,Expand,BasemapGallery,reactiveUtils,ButtonMenuItem,ButtonMenu,
 		SearchPane,WidgetContext,LayerProcessor) {
 
   var oThisClass = declare([Templated], {
@@ -185,6 +186,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     	  
     	  let layerList = new LayerList({
     		  view: view
+    		  ,listItemCreatedFunction: defineActions
     		});
     		let layerListExpand = new Expand({
    	    	 expandIcon: "layers",  
@@ -196,19 +198,31 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     		  position: "top-left",
     		  index: 2
     		});
-    		
-//    		let locateWidget = new Locate({
-//    			  view: view,   // Attaches the Locate button to the view
-//    			  graphic: new Graphic({
-//    			    symbol: { type: "simple-marker" }  // overwrites the default symbol used for the
-//    			    // graphic placed at the location of the user when found
-//    			  })
-//    			});
-//    		view.ui.add(locateWidget, {
-//    		  position: "top-left",
-//    		  index: 4
-//    		});
-    		
+      	    
+      	   async function defineActions(event) {
+      		  const item = event.item;
+
+      		  await item.layer.when();      		 
+      		    // An array of objects defining actions to place in the LayerList.By making this array two-dimensional, you can separate similar
+      		    // actions into separate groups with a breaking line.
+      		    item.actionsSections = [
+      		      [
+      		        {
+      		          title: "Go to full extent",
+      		          icon: "zoom-out-fixed",
+      		          id: "full-extent"
+      		        }],
+      		        [{
+      		          title: "Remove",
+      		          icon: "minus-circle",
+      		          id: "remove-layer"
+      		        }
+      		      ]
+      		    ];
+      		  } 
+	      	 layerList.on("trigger-action", (event) => {
+	       		this.executeLayerlistActions(event);
+	       	 });
     		let homeWidget = new Home({
     			  view: view
     			});
@@ -217,7 +231,22 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 			view.ui.add(homeWidget, {
 	    		  position: "top-left",
 	    		  index: 4
-	    		});   	     	
+	    		});   	 
+			
+			let basemapWidget = new BasemapGallery({
+  			  view: view
+  			});
+			let basemapExpand = new Expand({
+   	    	 expandIcon: "basemap",  
+   	    	 expandTooltip: "Basemap", 
+   	    	 view: view,
+   	    	 content: basemapWidget
+      	     });
+			// adds the basemap widget to the top right corner of the MapView
+			view.ui.add(basemapExpand, {
+	    		  position: "top-right",
+	    		  index: 1
+	    		});  
    	     	
     		let legend = new Legend({
     			  view: view
@@ -263,6 +292,20 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
         	this.addLayer(this.urlParams,view);
         }
       }
+    },
+    
+    executeLayerlistActions:function(event)
+    {
+    	if(event.action && event.action.id === 'full-extent' &&
+    			event.item && event.item.layer) 
+		{
+    		this.view.goTo(event.item.layer.fullExtent);
+		}
+    	if(event.action && event.action.id === 'remove-layer') 
+		{
+    		const layerToRemove = this.view.map.findLayerById(event.item.layer.id);
+    		this.view.map.layers.remove(layerToRemove);
+		}		
     },
 
     openAttrTable:function(selectedFeature)
