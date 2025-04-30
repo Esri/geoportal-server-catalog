@@ -16,7 +16,12 @@
 package com.esri.geoportal.service.stac;
 
 import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.search.StacHelper;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -125,35 +130,43 @@ public class StacContext {
     boolean passes;
     String message;
     JSONObject response = new JSONObject();    
-   
+    boolean ukFieldExists = false;
     JSONObject properties = (JSONObject) item.get("properties");
     String[] ruleElements = validationRule.split("\\|");
     String ruleType = ruleElements[0];
     String key;
     
-    switch (ruleType) {
+    switch (ruleType) {    
       case "unique":
         key = ruleElements[1];
         String[] uniqueKeyFields = key.split(",");
-        String value;
-
-        boolean hasFields = true;
+        String value;  
+        String searchQry="";
         message = "";
-        for (String ukField: uniqueKeyFields) {          
+        String filterClause="";
+        int cnt =1;
+        for (String ukField: uniqueKeyFields) { 
+        	
           if (ukField.contains("properties.")) {
             value = properties.getAsString(ukField.replace("properties.", ""));
           } else {
             value = properties.getAsString(ukField);
           }
-
-          boolean ukFieldExists = indexHasValue(collectionId, ukField, value);
-          hasFields = hasFields && ukFieldExists;
-          if (ukFieldExists) {
-            message += ukField + " = '" + value + "'. ";  
+          //Prepare filter clause fldName=fldValue AND fldName=fldValue ex:xom:source_key_id=testpolygon1 AND xom:source_system=testitem
+          if(cnt ==1)
+          {
+        	  filterClause = ukField+"="+ value; 
           }
+          else
+          {
+        	  filterClause = filterClause+" AND " + ukField+"="+ value;
+          }
+          cnt++;
+          searchQry = StacHelper.prepareFilter(filterClause);
         }
-        
-        passes = !hasFields;
+          
+        ukFieldExists = indexHasValue(collectionId, searchQry);
+        passes = !ukFieldExists;
         message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + message;          
         
         break;
@@ -187,18 +200,29 @@ public class StacContext {
    * @param value value to check for
    * @return true if and only if the index already has an item with this value for this field
    */
-  public boolean indexHasValue(String collectionId, String key, String value) throws Exception {
-    LOGGER.debug("Testing if the index has an entry with field " + key + " = indexHasValue(String collectionId, String key, String value)" + value);
-    
+  private boolean indexHasValue(String collectionId, String filterQry) throws Exception {
+    LOGGER.debug("Testing if the index has an entry with filter " + filterQry);
+    String searchResponse = "";	
+    boolean valueExists = false;
     try {
-      String searchResponse = StacHelper.getItemWithFieldValue(collectionId, key, value);
-
-      JSONParser jsonParser = new JSONParser();
-      JSONObject responseObject = (JSONObject) jsonParser.parse(searchResponse);
-      JSONObject hits = (JSONObject) responseObject.get("hits");
-      JSONObject total = (JSONObject) hits.get("total");
-      Number hitCount = total.getAsNumber("value");
-      return (hitCount.longValue() > 0);
+		ElasticClient client = ElasticClient.newClient();
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		String url = client.getTypeUrlForSearch(ec.getIndexName());
+		url = url+"/_search";
+    	if (filterQry.length() > 0)
+    	{
+    		String queryStr = "{\"query\":"+filterQry+"}";
+    	    searchResponse = client.sendPost(url, queryStr, "application/json");    	    	
+    	    	
+	    	DocumentContext elasticResContext = JsonPath.parse(searchResponse);
+			net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");		
+			
+			if(items != null && items.size()>0)
+			{
+				valueExists= true;
+			}
+    	}    		
+		return valueExists;
       
     } catch (Exception ex) {
       LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
