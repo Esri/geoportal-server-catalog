@@ -68,19 +68,20 @@ jobs:
       DOTNET_CLI_TELEMETRY_OPTOUT: 1
       DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 1
       DOTNET_NOLOGO: true
-
+      PRO_SDK_DOWNLOAD_URL: "https://marketplace.visualstudio.com/_apis/public/gallery/publishers/Esri/vsextensions/ArcGISProSDKTemplates/latest/vspackage"
+      PRO_SDK_DOWNLOAD_NAME: "proapp-sdk-templates.vsix"
     strategy:
       fail-fast: false
       matrix:
         include:
         - language: csharp
           build-mode: manual
-        - language: java-kotlin
-          build-mode: manual
-        - language: javascript-typescript
-          build-mode: none
-        - language: python
-          build-mode: none
+        #- language: java-kotlin
+        #  build-mode: manual
+        #- language: javascript-typescript
+        #  build-mode: none
+        #- language: python
+        #  build-mode: none
         # CodeQL supports the following values keywords for 'language': 'actions', 'c-cpp', 'csharp', 'go', 'java-kotlin', 'javascript-typescript', 'python', 'ruby', 'swift'
         # Use `c-cpp` to analyze code written in C, C++ or both
         # Use 'java-kotlin' to analyze code written in Java, Kotlin or both
@@ -96,6 +97,13 @@ jobs:
     - if : matrix.build-mode == 'manual' && matrix.language == 'csharp'
       name: Setup MSBuild
       uses: microsoft/setup-msbuild@v2
+
+    - if : matrix.build-mode == 'manual' && matrix.language == 'csharp'
+      name: Install Pro SDK
+      shell: pwsh
+      run: |
+        Start-BitsTransfer -Source "$env:PRO_SDK_DOWNLOAD_URL" -Destination "$env:TEMP\$env:PRO_SDK_DOWNLOAD_NAME"
+        VSIXInstaller.exe /quiet "$env:TEMP\$env:PRO_SDK_DOWNLOAD_NAME"
       #name: Setup .NET Framework
       #uses: actions/setup-dotnet@v4
       #with:
