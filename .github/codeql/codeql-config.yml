@@ -1,0 +1,8 @@
+name: "CodeQL Configuration For JS/Python Components of geoportal-server-catalog"
+
+# This has no effect on languages that are built as part of the analysis.
+# Because those scans analyze whatever is built, you exclude things from the scan by excluding them from the build.
+# It also means that if you are accidentally building test or automation code into your output, then it will be picked up by the scanner.
+paths-ignore:
+  - geoportal/src/main/webapp/viewer
+  - components/GeoportalSearch/WebAppBuilder
