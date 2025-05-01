@@ -75,12 +75,13 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       if (type === "ArcGIS") {
         if (lc.indexOf("/featureserver") > 0 || lc.indexOf("/mapserver") > 0) {   
           util.readRestInfo(url).then(function(info){
+
             //console.warn("restInfo",info);
-            if (info && typeof info.type === "string" && info.type === "Feature Layer") {
+            if (info && info.data && info.data.type && typeof info.data.type === "string" && info.data.type === "Feature Layer") {
               layer = new FeatureLayer(url,{id:id,outFields:["*"]});
-              self.waitThenAdd(dfd,map,type,layer);
-            } else {
-              
+              layer.load();
+              self.waitThenAdd(dfd,view,type,layer);
+            } else {              
               if (lc.indexOf("/featureserver") > 0) {
                 var dfds = [];
                 array.forEach(info.data.layers,function(li){
@@ -103,7 +104,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
                 });
   
               } else if (lc.indexOf("/mapserver") > 0) {
-                if (info.tileInfo) {
+                if (info && info.data && info.data.tileInfo) {
                   layer = new TileLayer(url,{id:id});
                 } else {
                   layer = new MapImageLayer(url,{id:id});
