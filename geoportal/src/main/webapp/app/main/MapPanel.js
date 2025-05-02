@@ -44,12 +44,13 @@ define(["dojo/_base/declare",
         "esri4/widgets/FeatureTable/Grid/support/ButtonMenu",
         "../gs/widget/SearchPane",
         "../gs/widget/WidgetContext",
-        "../gs/base/LayerProcessor"], 
+        "../gs/base/LayerProcessor",
+        "app/context/AppClient"], 
 function(declare, lang, Templated, template, i18n, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
 		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
 		Legend,Locate,Home,SwitchInput,Graphic,Expand,BasemapGallery,reactiveUtils,ButtonMenuItem,ButtonMenu,
-		SearchPane,WidgetContext,LayerProcessor) {
+		SearchPane,WidgetContext,LayerProcessor,AppClient) {
 
   var oThisClass = declare([Templated], {
 
@@ -375,7 +376,14 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
         if (window && window.top && window.top.geoportalServiceInfo) {
           var loc = window.top.location;
           var gpt = window.top.geoportalServiceInfo;
-          return loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/_search";
+          var url = loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/_search";
+          
+          if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
+                  AppContext.geoportal.supportsGroupBasedAccess)) {
+          	  var client = new AppClient();         
+              url = client.appendAccessToken(url); 
+          }
+          return url;
         }
         return null;
       },
