@@ -47,7 +47,7 @@ public class StacHelper {
 		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
 		if(validateFields)
 		{
-			response = validateFields(requestPayload);
+			response = validateFields(requestPayload,collectionId);
 		}		
 		if(response.getCode() == null)
 		{
@@ -424,7 +424,7 @@ public class StacHelper {
 
   
 	// https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md
-	private static StacItemValidationResponse validateFields(JSONObject requestPayload) {
+	private static StacItemValidationResponse validateFields(JSONObject requestPayload,String collectionId) {
 		String errorMsg ="";
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		
@@ -483,7 +483,7 @@ public class StacHelper {
     for (String validationRule : sc.getValidationRules()) {
       LOGGER.debug("Validation rule: " + validationRule);
       try {
-        JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload);
+        JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId);
         if (!validationResult.getAsString("passes").equals("true")) {
           errorMsg = errorMsg + " Failed validation rule ";
           errorMsg = errorMsg + validationRule + ": ";
@@ -623,7 +623,7 @@ public class StacHelper {
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		if(validateFields)
 		{
-      response = validateFields(requestPayload);	
+      response = validateFields(requestPayload,collectionId);	
 		}
 		
 		if(response.getCode() == null)
@@ -633,7 +633,7 @@ public class StacHelper {
 			{
         errorMsg = errorMsg+" id in Feature body and Id in path param should be equal.";
 			}
-			if(!(requestPayload.getAsString("collection")!= null && requestPayload.getAsString("collection").equals(collectionId)))
+			if(requestPayload.getAsString("collection")!= null && !requestPayload.getAsString("collection").equals(collectionId))
 			{
         errorMsg = errorMsg+" collection in Feature body and collectionId in path param should be equal.";
 			}
@@ -879,8 +879,12 @@ public class StacHelper {
       String requestedCRS;
       if (!theCRS.startsWith("EPSG:")) {
          Asset theAsset = collection.getAsset(theCRS);
-         String wkt = theAsset.getEsriWKT();
-         requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
+         if (theAsset != null) {
+          String wkt = theAsset.getEsriWKT();
+          requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
+         } else {
+           requestedCRS = theCRS;
+         }
 
       } else {
           requestedCRS = theCRS.replace("EPSG:", "");

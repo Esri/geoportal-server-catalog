@@ -78,6 +78,14 @@
             "required": false,
             "type": "string",
             "example": "EPSG:3857"
+          },
+          {
+            "name": "f",
+            "in": "query",
+            "description": "Output format of the collections list",
+            "required": false,
+            "type": "string",
+            "example": "geojson"
           }
         ],
         "responses": {
