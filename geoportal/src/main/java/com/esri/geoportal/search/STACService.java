@@ -170,6 +170,7 @@ public class STACService extends Application {
 	@Path("/collections")
 	@Produces(MediaType.APPLICATION_JSON)
 	public Response getCollections(@Context HttpServletRequest hsr, 
+          @QueryParam("f") String f,
           @QueryParam("outCRS") String outCRS) {
     
 		String responseJSON;
@@ -229,8 +230,43 @@ public class STACService extends Application {
         }
 
 				stacCollections.put("collections", collectionsArray);
-				finalresponse = stacCollections.toString();
-				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));								
+        
+        // final output formatting
+        if ((f != null) && "geojson".equals(f)) {
+          // if f=geojson, output the list of collections as a type GeoJSON FeatureCollection vs STAC Collection
+       
+          JSONObject geojsonCollections = new JSONObject();
+          geojsonCollections.put("type", "FeatureCollection");
+          geojsonCollections.put("features", stacCollections.get("collections"));
+          JSONArray geojsonCollectionsList = new JSONArray();
+          
+          for (int i=0; i<collectionsArray.size(); i++) {
+            JSONObject collectionProperties = new JSONObject();
+            JSONObject geojsonCollection = new JSONObject();
+            net.minidev.json.JSONObject thisCollection = new JSONObject((Map<String, ?>) collectionsArray.get(i));
+            geojsonCollection.put("type", "Feature");
+            collectionProperties.put("objectid", i);
+            collectionProperties.put("id", thisCollection.getAsString("id"));
+            collectionProperties.put("title", thisCollection.getAsString("title"));
+            collectionProperties.put("description", thisCollection.getAsString("description"));
+
+            geojsonCollection.put("properties", collectionProperties);
+            JSONObject extent = new JSONObject((Map<String, ?>) thisCollection.get("extent"));
+            JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
+            geojsonCollection.put("bbox", spatial.get("bbox"));
+            geojsonCollection.put("geometry", spatial.get("geometry"));
+            
+            geojsonCollectionsList.add(geojsonCollection);
+          }
+          geojsonCollections.put("features", geojsonCollectionsList);
+          
+          finalresponse = geojsonCollections.toString();
+        } else {
+          // respond in STAC JSON
+          finalresponse = stacCollections.toString();
+        }
+          
+				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 			}
 
 		} catch (Exception e) {
@@ -317,8 +353,8 @@ public class STACService extends Application {
 		JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
 		if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
 		{					
-			status = Response.Status.CREATED;
-			responseJSON = generateResponse("201", "Stac Collection has been updated successfully.",null);				
+			status = Response.Status.OK;
+			responseJSON = generateResponse("200", "Stac Collection has been updated successfully.",null);				
 		}
 			
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
@@ -345,7 +381,7 @@ public class STACService extends Application {
 			else
 			{
 				JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
-				if (collectionObj == null) // #518 || !collectionId.equals("metadata"))
+				if (collectionObj == null || collectionObj.isEmpty()) // #518 || !collectionId.equals("metadata"))
 				{
 					status = Response.Status.NOT_FOUND;
 				}
@@ -607,6 +643,7 @@ public class STACService extends Application {
 			if(itemRes == null || itemRes.isEmpty())
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
+				status = Response.Status.NOT_FOUND;
 			} else
 			{
 				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,null,true);
@@ -624,7 +661,7 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("500",
 					"STAC API: Items could not be deleted.",detailErrArray);
 		}
-		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();
 	}
 	
 	@DELETE
@@ -662,6 +699,7 @@ public class STACService extends Application {
 					}
 				}
 			} else {
+				status = Response.Status.NOT_FOUND;
 				responseJSON = this.generateResponse("404", "Record not found.",null);
 			}
 
@@ -1071,10 +1109,12 @@ public class STACService extends Application {
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		JSONArray detailErrArray = new JSONArray();
     Response responseObject = null;
+    JSONObject updatedItem = null;
         
 		try {
       // get existing item
       JSONObject existingItem = StacHelper.getSTACItemById(collectionId, featureId);
+      String existingItemJSON = existingItem.toString();
       
       // if payload has geomCRSField and geomWKT field, project 
       // from internal CRS (EPSG:4326) to geomCRSField value
@@ -1083,13 +1123,14 @@ public class STACService extends Application {
         
         if (properties.containsKey(gc.getGeomWKTField()) 
             && properties.containsKey(gc.getGeomCRSField())) {
+          
+          // the PATCH body includes geometries, reproject if needed
 
           String patchCRS = properties.getAsString(gc.getGeomCRSField());
           
           // Only project if the submitted CRS is not the same as the internal CRS
           if (!patchCRS.equalsIgnoreCase(INTERNAL_CRS)) {
             Collection collection = new Collection(collectionId);
-            String existingItemJSON = existingItem.toString();
 
             // project existing item from internal CRS to CRS submitted in the PATCH
             existingItem = projectItemGeometries(collection, 
@@ -1097,19 +1138,18 @@ public class STACService extends Application {
                                                  INTERNAL_CRS.replace("EPSG:", ""),
                                                  patchCRS);            
           }
-         
-          // merge JSON from existing item with requestPayload
-          JSONObject updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
-
-          // update feature (will reproject)
-          responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
-    			responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
-
-        } else {
-          LOGGER.debug("Got partial geometry info for " + featureId);
-    			responseJSON = generateResponse("500", "STAC Item " + featureId + " not updated due to missing geometry information.", detailErrArray);
         }
+
+        // merge JSON from existing item with requestPayload
+        updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
+        responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
       }
+      
+      
+      // update feature (will reproject)
+      responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
+
+      
       
 		} catch(Exception ex) {
 			LOGGER.error("Error in patching STAC Item: " + ex.getMessage());
@@ -2053,10 +2093,18 @@ public class STACService extends Application {
                 case "bbox":
                   JSONObject bbox = (JSONObject) projectedGeometries.get(0);
                   JSONArray projectedBbox = new JSONArray();
+                  
                   projectedBbox.add(bbox.get("xmin"));
                   projectedBbox.add(bbox.get("ymin"));
+                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
+                    projectedBbox.add(bbox.get("zmin"));
+                  }
+                  
                   projectedBbox.add(bbox.get("xmax"));
                   projectedBbox.add(bbox.get("ymax"));
+                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
+                    projectedBbox.add(bbox.get("zmax"));
+                  }
 
                   responseObject.put("bbox", projectedBbox);
 
@@ -2290,7 +2338,8 @@ public class STACService extends Application {
           List<String> availableCRS = collection.getAvailableCRS();
           if ((availableCRS.contains(inCRS)) || (inCRS.startsWith("EPSG:"))) {
             String requestedCRS = StacHelper.getRequestedCRS(collection, inCRS);
-            responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, INTERNAL_CRS);
+            //responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, INTERNAL_CRS);
+            responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, "{\"wkid\": 4326, \"vcsWkid\": 115807 }");
           }
         }
       }
