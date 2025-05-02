@@ -22,11 +22,12 @@ define(["dojo/_base/declare",
         "dijit/_WidgetsInTemplateMixin",
         "dojo/text!./templates/PreviewPane.html",
         "dojo/i18n!app/nls/resources",
-        "esri/map"
+        "esri4/Map",
+        "esri4/views/MapView"
       ], 
 function(declare, lang, domConstruct, on, PreviewUtil, 
          _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, template, i18n,
-         Map
+         Map,MapView
          ) {
 
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
@@ -45,61 +46,31 @@ function(declare, lang, domConstruct, on, PreviewUtil,
     startup: function() {
       this.inherited(arguments);
 
-      if (this.map == null) {
+      if (this.view == null) {
         // create map instance
         var mapProps = this.map || AppContext.appConfig.searchMap || {};
-        if (mapProps) mapProps = lang.clone(mapProps);
-        this.map = new Map(this.mapNode, mapProps);
+        if (mapProps) mapProps = lang.clone(mapProps);      
+        this.map = new Map(mapProps);
         
-        this.own(on(this.map, "load", lang.hitch(this, function(){
-          // add service
-          PreviewUtil.addService(this.map, this.serviceType);
-        })));
-
-        this.own(on(this.map, "update-start", lang.hitch(this, this._showLoading)));
-
-        this.own(on(this.map, "update-start-forced", lang.hitch(this, function(args) {
-          this._showLoading(args);
-          this.forcedLoading = true;
-        })));
-
-        this.own(on(this.map, "update-end", lang.hitch(this, function(args) { 
-          if (!this.forcedLoading) {
-            this._hideLoading(args); 
-          }
-        })));
+        this.view = new MapView({
+        	  container:this.mapNode,
+        	  map:  this.map, 
+        	  center: mapProps.center,
+        	  zoom: mapProps.zoom      	  
+        	});
         
-        this.own(on(this.map, "update-end-always", lang.hitch(this, function(args) {
-          this._hideLoading(args);
-          this.forcedLoading = false;
-        })));
+        this.view.ui.remove("attribution");   
+        
+        this.view.when(lang.hitch(this,function() {    	
+        	PreviewUtil.addService(this.view, this.serviceType);
+      	})) 
       }
     },
     
     destroy: function() {
       // make sure to destroy map instance
-      this.map.destroy();
-      this.map = null;
+      this.view = null;
       this.inherited(arguments);
-    },
-    
-    _showLoading: function(args) {
-      esri.show(this.loading);
-      if (this.tout == null) {
-        this.tout = setTimeout(lang.hitch(this, function() { this._hideLoading(args); }), 360000);
-      }
-    },
-    
-    _hideLoading: function(args) {
-      this._clearTimeout();
-      esri.hide(this.loading);
-    },
-    
-    _clearTimeout: function() {
-      if (this.tout != null) {
-        clearTimeout(this.tout);
-        this.tout = null;
-      }
     }
 
   });

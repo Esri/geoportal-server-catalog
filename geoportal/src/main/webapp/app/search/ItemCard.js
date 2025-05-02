@@ -19,10 +19,12 @@ define(["dojo/_base/declare",
   "dojo/topic",
   "dojo/request/xhr",
   "dojo/on",
+  "dojo/query",
   "app/context/app-topics",
   "dojo/dom-style",
   "dojo/dom-class",
   "dojo/dom-construct",
+  "dojo/dom-attr",
   "dijit/_WidgetBase",
   "dijit/_TemplatedMixin",
   "dijit/_WidgetsInTemplateMixin",
@@ -31,12 +33,14 @@ define(["dojo/_base/declare",
   "dijit/popup",
   "dojo/text!./templates/ItemCard.html",
   "dojo/i18n!app/nls/resources",
-  "esri/map",
-  "esri/geometry/Extent",
-  "esri/symbols/SimpleFillSymbol",
-  "esri/geometry/Point",
-  "esri/graphic",
-  "esri/layers/GraphicsLayer",
+  "esri4/Map",
+  "esri4/views/MapView",
+  "esri4/geometry/Extent",
+  "esri4/symbols/SimpleFillSymbol",
+  "esri4/geometry/Point",
+  "esri4/Graphic",
+  "esri4/layers/GraphicsLayer",
+  "esri4/widgets/Zoom",
   "app/context/AppClient",
   "app/etc/ServiceType",
   "app/etc/util",
@@ -54,9 +58,9 @@ define(["dojo/_base/declare",
   "app/preview/PreviewPane",
   "app/search/ItemHtml"
 ], 
-function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domClass, domConstruct,
+function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domStyle, domClass, domConstruct,domAttr,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
-  template, i18n, Map, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer, AppClient, ServiceType, util, 
+  template, i18n, Map,MapView, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer,Zoom, AppClient, ServiceType, util, 
   ConfirmationDialog, ChangeOwner, DeleteItems, MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, 
   SetCollections, SetField, UploadMetadata, PreviewUtil, PreviewPane, ItemHtml) {
   
@@ -249,7 +253,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
       var actionsNode = this.actionsNode;
       array.some(links, lang.hitch(this, function(u){
         var serviceType = new ServiceType();
-        serviceType.checkUrl(u);
+        serviceType.checkUrl(u,item);
+        serviceType.title = item.title;
+        
         //console.warn("serviceType",serviceType.isSet(),serviceType);
         if (serviceType.isSet()) {
           domConstruct.create("a",{
@@ -262,7 +268,7 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
             }
           },actionsNode);
 
-          // create clickable 'Preview' link if allowes
+          // create clickable 'Preview' link if allows
           if (PreviewUtil.canPreview(serviceType)) {
             this._renderPreview(item, actionsNode, serviceType);
           }
@@ -314,8 +320,9 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           "aria-label": string.substitute(i18n.item.actions.titleFormat, {action: i18n.item.actions.json, title: item.title}),
           innerHTML: i18n.item.actions.json
         },actionsNode);
-        if (AppContext.geoportal.supportsApprovalStatus ||
-            AppContext.geoportal.supportsGroupBasedAccess) {
+       
+        if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
+                AppContext.geoportal.supportsGroupBasedAccess)) {
           var client = new AppClient();
           htmlNode.href = client.appendAccessToken(htmlNode.href);
           xmlNode.href = client.appendAccessToken(xmlNode.href);
@@ -682,45 +689,58 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         var mapOptions = {
           basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
           //center: [item.envelope_cen_pt.lon, item.envelope_cen_pt.lat],
-          isClickRecenter: false,
-          isDoubleClickZoom: false,
-          isKeyboardNavigation: false,
-          isMapNavigation: true,
-          isPan: true,
-          isPinchZoom: false,
-          isRubberbandZoom: false,
-          isScrollWheel: false,
-          slider: true,
-          logo: false,
-          showAttribution: false,
-          nav: false,
-          wrapAround180: true,
-          extent: extent
+          //TODO 
+//          isClickRecenter: false,
+//          isDoubleClickZoom: false,
+//          isKeyboardNavigation: false,
+//          isMapNavigation: true,
+//          isPan: true,
+//          isPinchZoom: false,
+//          isRubberbandZoom: false,
+//          isScrollWheel: false,
+//          slider: true,
+//          logo: false,
+//          showAttribution: false,
+//          nav: false,
+//          wrapAround180: true,
+//          extent: extent
         };
+        //var map = new Map(this.footprintMap, mapOptions);
 
-        var map = new Map(this.footprintMap, mapOptions);
+        var map = new Map(mapOptions);
 
         var gl = new GraphicsLayer({ id: "footprint" });
-        map.addLayer(gl);
+        map.add(gl);
+        var polygon = {
+        	    type: "polygon", 
+        	    rings: item.shape_geo.coordinates
+        	  };
         var footprint = {
-          "geometry":{"rings": item.shape_geo.coordinates}, 
+          "geometry":polygon, 
           "spatialReference":{"wkid":4326}, 
           "symbol":{
             "color":[0,0,0,64],
             "outline":{
               "color":[0,0,0,255], 
               "width":1,
-              "type":"esriSLS",
-              "style":"esriSLSSolid"
+              "type":"simple-line",
+              "style":"solid"
             }, 
-            "type":"esriSFS","style":"esriSFSSolid"
+            "type":"simple-fill","style":"solid"
           }
         };
         var graphic = new Graphic(footprint);
         gl.add(graphic);
         
-        map.setExtent(extent, true);
-
+        const view = new MapView({
+        	  container:this.footprintNode,
+        	  map: map,        	 
+        	  extent: extent
+        	});     
+        view.ui.remove("attribution");     
+        // TODO  zoom inside map view top left, not working
+      //  view.ui.move("zoom", "top-left");
+      
       } else {
         footprintNode.style.display = "none";
       }
@@ -871,10 +891,10 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
         var esId = item._id;
         var fid = item.fileid;
 
-        dojo.attr(idNode,{ 'esId': esId } );
+        domAttr.set(idNode,{ 'esId': esId } );
 
         if (fid) {
-            dojo.attr(idNode,{ 'fileid': fid } );
+        	domAttr.set(idNode,{ 'fileid': fid } );
         }
 
     },
@@ -927,11 +947,12 @@ function(declare, lang, array, string, topic, xhr, on, appTopics, domStyle, domC
           // the HTML view of the metadata
           if (evt.srcElement.target != "_blank") {
             var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
-            if (AppContext.geoportal.supportsApprovalStatus || 
-                AppContext.geoportal.supportsGroupBasedAccess) {
-              var client = new AppClient();
-              uri = client.appendAccessToken(uri);
-            }
+            
+            if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
+                    AppContext.geoportal.supportsGroupBasedAccess)) {
+            	  var client = new AppClient();    
+                  url = client.appendAccessToken(url); 
+             }
             this.self._renderDataHtml(item, uri);
           } 
         })));

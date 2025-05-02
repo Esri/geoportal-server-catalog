@@ -61,7 +61,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private GeometryServiceClient geometryServiceClient;
   private boolean supportsApprovalStatus = false;
   private boolean supportsGroupBasedAccess = false;
-  private String version = "2.7.2.1";
+  private String version = "3.0.0";
   private boolean parseGml;
   private boolean supportsCollections = false;
   // HashMap stores userName and List of User Groups in ArcGISAuthentication

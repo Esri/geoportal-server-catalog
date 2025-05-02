@@ -1,8 +1,8 @@
 /**
  * From: https://github.com/Esri/developer-support/tree/master/web-js/geohash-class-and-finder
  */
-define(["dojo/_base/declare", "dojo/_base/lang", "esri/geometry/Extent",
-        "esri/geometry/Point"],
+define(["dojo/_base/declare", "dojo/_base/lang", "esri4/geometry/Extent",
+        "esri4/geometry/Point"],
 function(declare, lang, Extent, Point) {
   return declare(null, {
       BASE32_CODES: "0123456789bcdefghjkmnpqrstuvwxyz",

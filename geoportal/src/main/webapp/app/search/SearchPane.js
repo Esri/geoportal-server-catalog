@@ -103,10 +103,10 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
       var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/_search";
       var v, postData = null;
 
-      if (AppContext.geoportal.supportsApprovalStatus || 
-          AppContext.geoportal.supportsGroupBasedAccess) {
-        var client = new AppClient();
-        url = client.appendAccessToken(url); 
+      if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
+              AppContext.geoportal.supportsGroupBasedAccess)) {
+      	  var client = new AppClient();         
+          url = client.appendAccessToken(url); 
       }
       
       var sProp = null, oProp = null, props = params.urlParams;
@@ -178,7 +178,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
             component.processResults(response);
           });
         }
-      }).otherwise(function(error){
+      }).catch(function(error){
         if (!dfd.isCanceled()) {
           if (error && error.dojoType && error.dojoType === "cancel") {
           } else {
