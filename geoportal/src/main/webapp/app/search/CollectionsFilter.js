@@ -154,11 +154,11 @@ function(declare, lang, array, domConstruct, domClass, dojoRequest, topic, appTo
     
     processResults: function(searchResponse) {
       var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/_search";
-
-      if (AppContext.geoportal.supportsApprovalStatus || 
-          AppContext.geoportal.supportsGroupBasedAccess) {
-        var client = new AppClient();
-        url = client.appendAccessToken(url); 
+      
+      if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
+              AppContext.geoportal.supportsGroupBasedAccess)) {
+      	  var client = new AppClient();         
+            url = client.appendAccessToken(url); 
       }
       
       var postData = {
