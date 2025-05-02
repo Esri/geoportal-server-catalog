@@ -33,32 +33,35 @@ define(["dojo/_base/declare",
         "app/etc/GeohashEx",
         "app/etc/util",
         "app/search/SpatialFilterSettings",
-        "esri/map",
-        "esri/layers/ArcGISTiledMapServiceLayer",
-        "esri/layers/ArcGISDynamicMapServiceLayer",
-        "esri/layers/GraphicsLayer",
-        "esri/geometry/webMercatorUtils",
-        "esri/geometry/Extent",
-        "esri/geometry/Point",
-        "esri/SpatialReference",
-        "esri/symbols/SimpleMarkerSymbol",
-        "esri/symbols/SimpleLineSymbol",
-        "esri/symbols/SimpleFillSymbol",
-        "esri/symbols/PictureMarkerSymbol",
-        "esri/renderers/ClassBreaksRenderer",
-        "esri/renderers/SimpleRenderer",
-        "esri/graphic",
-        "esri/Color",
-        "esri/dijit/PopupTemplate",
-        "esri/InfoTemplate",
-        "esri/dijit/Search",
+        "esri4/Map",
+        "esri4/views/MapView",
+        "esri4/layers/TileLayer",
+        "esri4/layers/MapImageLayer",
+        "esri4/layers/GraphicsLayer",
+        "esri4/layers/FeatureLayer",
+        "esri4/geometry/support/webMercatorUtils",
+        "esri4/geometry/Extent",
+        "esri4/geometry/Point",
+        "esri4/geometry/SpatialReference",
+        "esri4/symbols/SimpleMarkerSymbol",
+        "esri4/symbols/SimpleLineSymbol",
+        "esri4/symbols/SimpleFillSymbol",
+        "esri4/symbols/PictureMarkerSymbol",
+        "esri4/renderers/ClassBreaksRenderer",
+        "esri4/renderers/SimpleRenderer",
+        "esri4/Graphic",
+        "esri4/Color",
+        "esri4/PopupTemplate",        
+        "esri4/widgets/Search",
+        "esri4/core/reactiveUtils",
         "dojo/Deferred",
-        "esri/tasks/locator"],
+        "esri4/rest/locator",
+        "esri4/geometry/support/webMercatorUtils"],
 function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber,
-    topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map,
-    ArcGISTiledMapServiceLayer, ArcGISDynamicMapServiceLayer, GraphicsLayer, webMercatorUtils, Extent, Point, SpatialReference,
+    topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map,MapView,
+    TileLayer, MapImageLayer, GraphicsLayer, FeatureLayer,webMercatorUtils, Extent, Point, SpatialReference,
     SimpleMarkerSymbol, SimpleLineSymbol, SimpleFillSymbol, PictureMarkerSymbol, ClassBreaksRenderer,
-    SimpleRenderer, Graphic, Color, PopupTemplate, InfoTemplate, SearchWidget, Deferred, Locator) {
+    SimpleRenderer, Graphic, Color, PopupTemplate, SearchWidget, reactiveUtils,Deferred, Locator,WebMercatorUtils) {
 
   var oThisClass = declare([SearchComponent], {
 
@@ -175,9 +178,9 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       this.own(topic.subscribe(appTopics.OnMouseEnterResultItem,function(params){
         if (!self.highlightItemOnHover) return;
         try {
-          var map = self.map, geometry, outSR;
-          if (map && params && params.item && params.item.envelope_geo) {
-            outSR = map.spatialReference;
+          var view = self.view, geometry, outSR;
+          if (view && params && params.item && params.item.envelope_geo) {
+            outSR = view.spatialReference;
             var env = lang.isArray(params.item.envelope_geo) && params.item.envelope_geo.length>0? params.item.envelope_geo[0].coordinates: params.item.envelope_geo.coordinates;
             if (env) {
               geometry = new Extent(env[0][0],env[1][1],env[1][0],env[0][1],new SpatialReference(4326));
@@ -186,15 +189,14 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
           if (geometry && webMercatorUtils.canProject(geometry,outSR)) {
             var projected = webMercatorUtils.project(geometry,outSR);
             if (!self._highlighted) {
-              var symbol = new SimpleFillSymbol(
-                SimpleFillSymbol.STYLE_SOLID,
-                new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID, new Color([255,0,0]), 2),
-                new Color([255,255,0,0.3]));
-              self._highlighted = new Graphic(projected,symbol);
-              map.graphics.add(self._highlighted);
+              var symbol = new SimpleFillSymbol({style:"solid",color:[255,255,0,0.3],
+            	  				outline:{color:[255,0,0],width:2}});
+                  
+              self._highlighted = new Graphic({geometry:projected,symbol:symbol});
+              view.graphics.add(self._highlighted);
             } else {
-              self._highlighted.setGeometry(projected);
-              self._highlighted.show();
+              self._highlighted.geometry = projected;
+              self._highlighted.visible = true;
             }
             self._highlighted.xtnItemId = params.item._id;
           }
@@ -205,13 +207,13 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       }));
 
       this.own(topic.subscribe(appTopics.OnMouseLeaveResultItem,function(params){
-        if (self._highlighted) self._highlighted.hide();
+        if (self._highlighted) self._highlighted.visible = false;
       }));
 
       var positionLocator = true;
       this.own(aspect.after(this.dropPane,"_setOpenAttr",function() {
-        if (positionLocator && self.map && self.map._slider && self._locator) {
-          var sliderPos = domGeometry.position(self.map._slider);
+        if (positionLocator && self.view && self.view.map._slider && self._locator) {
+          var sliderPos = domGeometry.position(self.view.map._slider);
           if (sliderPos.x > 0) {
             var nd = self._locator.domNode;
             domStyle.set(nd,"left",Math.round(sliderPos.x)+"px");
@@ -268,14 +270,15 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     },
 
     equalInterval: function(min,max) {
-      var newsym = function(size) {
-        var olclr = Color.fromHex("#7A7A7A");
-        var sym = new SimpleMarkerSymbol().setSize(size);
-        sym.setOutline(new SimpleLineSymbol(SimpleLineSymbol.STYLE_SOLID,olclr,1));
+      var newsym = function(size) {       
+        var sym = new SimpleMarkerSymbol({size:size,
+        	outline:new SimpleLineSymbol({style:"solid", color:[122, 122, 122],width:1})}); 
+        
         return sym;
       };
-      var defaultSym = new SimpleMarkerSymbol().setSize(0);
-      var renderer = new ClassBreaksRenderer(defaultSym,"Count");
+      var defaultSym = new SimpleMarkerSymbol();
+      defaultSym.size = 0;
+      var renderer = new ClassBreaksRenderer({field:"Count"});
       // TODO isMaxInclusive ??
       var iv = (max - min) / 4;
       var v0 = 0;
@@ -284,10 +287,11 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       var v3 = min+(2*iv);
       var v4 = max;
       // 2,5,8,12 - 4,8,12,16
-      renderer.addBreak(v0,v1,newsym(4));
-      renderer.addBreak(v1,v2,newsym(8));
-      renderer.addBreak(v2,v3,newsym(12));
-      renderer.addBreak(v3,v4,newsym(16));
+      renderer.addClassBreakInfo({minValue:v0,maxValue:v1,symbol:newsym(4)});
+      renderer.addClassBreakInfo({minValue:v1,maxValue:v2,symbol:newsym(8)});
+      renderer.addClassBreakInfo({minValue:v2,maxValue:v3,symbol:newsym(12)});
+      renderer.addClassBreakInfo({minValue:v3,maxValue:v4,symbol:newsym(16)});
+
       return renderer;
     },
 
@@ -299,8 +303,8 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         return null;
       };
       var precision = null, level = null, lodToGeo = this.lodToGeoHashGridPrecision;
-      if (this.map && lodToGeo) {
-        level = this.map.getLevel();
+      if (this.view && lodToGeo) {
+        level = this.view.zoom;
         if (lodToGeo.hasOwnProperty(level)) {
           precision = getInt(lodToGeo[level]);
         } else if (level > 10 && lodToGeo.hasOwnProperty("max")) {
@@ -369,33 +373,6 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       addChoice(i18n.search.spatialFilter.within,"within");
     },
 
-    initializeLocator: function() {
-      if (!this.showLocator) return;
-      var params = {
-        map: this.map,
-        enableButtonMode: true,
-        enableHighlight: false,
-        enableInfoWindow: false,
-        showInfoWindowOnSelect: false
-      };
-      var cfgParams = this.locatorParams;
-      if (!cfgParams && AppContext.appConfig.searchMap) {
-        cfgParams = AppContext.appConfig.searchMap.locatorParams;
-      }
-      if (cfgParams) {
-        var sources = this._convertConfig(cfgParams);
-        if (sources && sources.length > 0) {
-          lang.mixin(params,cfgParams);
-          params.sources = sources;
-        }
-      }
-      //if (cfgParams) lang.mixin(params,cfgParams);
-      var locator = new SearchWidget(params,this.searchWidgetNode);
-      locator.startup();
-      domClass.add(locator.domNode,"g-spatial-filter-locator");
-      this._locator = locator;
-    },
-
     initializeMap: function() {
       var mapProps = this.map || AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
@@ -407,27 +384,52 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
 
 
       this.map = null;
-      var map = new Map(this.mapNode,mapProps);
+      var map = new Map({basemap:"streets"});
+      this.view = new MapView({
+      	  container:this.mapNode,
+      	  map: map, 
+      	  center: mapProps.center,
+      	  zoom: mapProps.zoom      	  
+      	});
+      
+      this.view.ui.remove("attribution");   
       if (typeof v === "string" && v.length > 0) {
         v =  util.checkMixedContent(v);
         var basemap;
         if (!mapProps.isTiled) {
-          basemap = new ArcGISDynamicMapServiceLayer(v);
+          basemap = new MapImageLayer(v);
         } else {
-          basemap = new ArcGISTiledMapServiceLayer(v);
+          basemap = new TileLayer(v);
         }
-        map.addLayer(basemap);
+        map.add(basemap);
       }
+      
 
+      this.view.when(lang.hitch(this,function() {    	
+    	  this.map = map;
+    	  window.AppContext.searchMap = this.map
+    	  // this.initializeLocator();
+    	  const searchWidget = new SearchWidget({
+    		  view: this.view
+    		});
+    	  this.view.ui.add(searchWidget, {
+    		  position: "top-left",
+    		  index: 0
+    		});  
+    	}))    	
+      
+      reactiveUtils.when(() => this.view.stationary === true, () => {    	 
+    	  // Get the new extent of the view only when view is stationary.
+    	  if (this.view.extent) {
+    		  if (this.getRelation() !== "any") 
+    			 {    			
+    			  var proJExtent = webMercatorUtils.webMercatorToGeographic(this.view.extent, false)
+    			  this.map.geographicExtent = proJExtent;
+    			  this.search();
+    			 }
+    	  	}
+    	});
 
-      this.own(on(map,"Load",lang.hitch(this,function(){
-        this.map = map;
-        this.initializeLocator();
-        //window.AppContext.searchMap = this.map;
-        this.own(on(map,"ExtentChange",lang.hitch(this,function(){
-          if (this.getRelation() !== "any") this.search();
-        })));
-      })));
     },
 
     /* SearchComponent API ============================================= */
@@ -530,6 +532,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         this.appendQClauses(params);
       }
 
+      //TODO test this
       if (this.allowAggregation && this.hasPointField()) {
         // TODO does this need a filter
         var key = this.getAggregationKey();
@@ -543,22 +546,26 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     },
 
     processResults: function(searchResponse) {
+      const process = async () => {  
+    	if(this.view) await this.view.when();
+     
       this._clearTmpHandles();
-      if (this._highlighted) this._highlighted.hide();
+      if (this._highlighted) this._highlighted.visible = false;
       if (!searchResponse.aggregations) return;
-      var map = this.map, lyr;
-      if (map) {
-        lyr = map.getLayer("clusters");
-        if (lyr) map.removeLayer(lyr);
+      var view = this.view, lyr;
+      if (view) {
+        lyr = view.map.findLayerById("clusters");
+        if (lyr) view.map.remove(lyr);
       }
       var key = this.getAggregationKey();
       var data = searchResponse.aggregations[key];
-      if (map && data && data.buckets && data.buckets.length > 0) {
-        var clusterLayer = new GraphicsLayer({
-          id: "clusters"
-        });
-        var min = null, max = null, outSR = map.spatialReference;
+      if (view && data && data.buckets && data.buckets.length > 0) {
+        var graphicArr =[];
+        var min = null, max = null, outSR = view.spatialReference;
         var geohash = new GeohashEx();
+        if (min === null) min = 0;
+        if (max === null) max = min;
+        var id =1;
         array.forEach(data.buckets,function(entry){
           var key = entry.key;
           var docCount = entry.doc_count;
@@ -567,12 +574,13 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             if (min === null || count < min) min = count;
             if (max === null || count > max) max = count;
             var loc = geohash.decode(entry.key);
-            var pt = new Point(loc.longitude,loc.latitude,new SpatialReference(4326));
+            var pt = new Point({longitude:loc.longitude,latitude:loc.latitude,spatialReference:SpatialReference.WGS84});
             if (webMercatorUtils.canProject(pt,outSR)) {
               var pt2 = webMercatorUtils.project(pt,outSR);
               if (pt2) {
-                var attributes = {"Count":count};
-                clusterLayer.add(new Graphic(pt2,null,attributes));
+                var attributes = {"Count":count,"OBJECTID": id};
+                graphicArr.push(new Graphic({geometry:pt2,attributes:attributes}));
+                id++;              
               }
             }
           } catch(ex) {
@@ -582,32 +590,69 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
         if (min === null) min = 0;
         if (max === null) max = min;
         var renderer = this.equalInterval(min,max);
-        clusterLayer.setRenderer(renderer);
-        map.addLayer(clusterLayer);
-        //console.warn("clusterLayer",clusterLayer);
+       
+        var clusterLayer = new FeatureLayer({
+            source: graphicArr,
+            id: "clusters",
+            title:"clusters",
+            geometryType:"point",
+            objectIdField: "OBJECTID",         
+            fields: [
+            	{
+	              name: "OBJECTID",
+	              type: "oid"
+            	},
+	            {
+            	  name: "Count",
+   	              type: "integer"
+	            }
+            ],
+            renderer: renderer
+            });
+      
+       view.map.add(clusterLayer);  
+       
+       var countPattern = i18n.search.spatialFilter.countPattern;
+       var tooltip = d3.select(this.tooltipNode);
+       tooltip.style("opacity", 0);
+       var hideTooltip = function() {
+         tooltip.transition().duration(500).style("opacity", 0);
+       };
+      
+       view.on("pointer-move", function (evt) {
+           const screenPoint = {
+             x: evt.x,
+             y: evt.y
+           };
 
-        var countPattern = i18n.search.spatialFilter.countPattern;
-        var tooltip = d3.select(this.tooltipNode);
-        tooltip.style("opacity", 0);
-        var hideTooltip = function() {
-          tooltip.transition().duration(500).style("opacity", 0);
-        };
-        this._tmpHandles.push(clusterLayer.on("mouse-over",function(evt){
-          if (evt.graphic && evt.graphic.attributes) {
-            var c = djNumber.format(evt.graphic.attributes["Count"]);
-            var txt = countPattern.replace("{count}",c);
-            tooltip.transition().duration(200).style("opacity", 1);
-            tooltip.html(txt)
-              .style("left", (evt.pageX + 12) + "px")
-              .style("top", (evt.pageY - 20) + "px");
-          } else {
-            hideTooltip();
-          }
-        }));
-        this._tmpHandles.push(clusterLayer.on("mouse-out",function(evt){
-          hideTooltip();
-        }));
-      }
+           view.hitTest(screenPoint)
+             .then(function (response) {
+            	 let c = null;
+            	 response.results.some(result => {            		 
+            		 if(result && result.layer && result.layer.id === "clusters"
+            			 && result.graphic && result.graphic.attributes)
+        			 {
+            			 c = result.graphic.attributes.Count;
+            			 return true;
+        			 }
+            	 }); 
+            	 if (c!=null){
+            		 const txt = countPattern.replace("{count}",c);
+                     tooltip.transition().duration(200).style("opacity", 1);
+                     tooltip.html(txt)
+                       .style("left", (evt.x + 12) + "px")
+                       .style("top", (evt.y - 20) + "px"); 
+            	 }
+            	 else{
+            		 hideTooltip();
+            	 }	
+             });
+         });
+      	}
+      } 
+      
+      process();
+      
     },
 
     whenQClauseRemoved: function(qClause) {
