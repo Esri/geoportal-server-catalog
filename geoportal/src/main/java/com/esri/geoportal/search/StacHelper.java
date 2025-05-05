@@ -42,13 +42,10 @@ public class StacHelper {
 	 * @return
 	 * @throws Exception
 	 */
-	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId, boolean validateFields) throws Exception {	
+	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId, boolean validateAllFields) throws Exception {	
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
-		if(validateFields)
-		{
-			response = validateFields(requestPayload,collectionId);
-		}		
+    response = validateFields(requestPayload,collectionId, validateAllFields);
 		if(response.getCode() == null)
 		{
 			response = validateId(requestPayload,collectionId);
@@ -424,61 +421,66 @@ public class StacHelper {
 
   
 	// https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md
-	private static StacItemValidationResponse validateFields(JSONObject requestPayload,String collectionId) {
+	private static StacItemValidationResponse validateFields(JSONObject requestPayload,String collectionId, boolean validateAllFields) {
 		String errorMsg ="";
 		StacItemValidationResponse response = new StacItemValidationResponse();
-		
-		if(!requestPayload.containsKey("stac_version")) {
-			errorMsg = errorMsg+"stac_version is mandatory.";
-		}
     
-		if(!requestPayload.containsKey("id") || 
-				(requestPayload.containsKey("id") 
-        && requestPayload.get("id").toString().isBlank())) {
-      
-      GeoportalContext gc = GeoportalContext.getInstance();
-      if (!"true".equals(gc.isCanStacAutogenerateId())) {
-    		errorMsg = errorMsg+" id is mandatory and should not be empty.";
+    if (validateAllFields) {
+      // validate all these fields
+		
+      if(!requestPayload.containsKey("stac_version")) {
+        errorMsg = errorMsg+"stac_version is mandatory.";
       }
-		}
-    
-		//geometry and bbox is mandatory from stac spec but geoportal will allow combination of shape_geo and envelope_geo as well
-		if(!requestPayload.containsKey("geometry") && !requestPayload.containsKey("shape_geo")) {
-			errorMsg = errorMsg+" geometry or shape_geo is mandatory.";
-		}
-		
-		if(requestPayload.containsKey("geometry")) {
-			if(requestPayload.get("geometry") != null && (!requestPayload.containsKey("bbox")))
-			errorMsg = errorMsg+" bbox is mandatory if geometry is not null.";
-		}
 
-    if(requestPayload.containsKey("shape_geo")) {
-			if(requestPayload.get("shape_geo") != null && (!requestPayload.containsKey("envelope_geo")))
-			errorMsg = errorMsg+" envelope_geo is mandatory if shape_geo is not null.";
-		}
-		
-		if(!requestPayload.containsKey("properties")) {
-			errorMsg = errorMsg+" properties is mandatory.";
-		}
-    
-		if(requestPayload.containsKey("properties")) {
-			JSONObject prop = (JSONObject) requestPayload.get("properties");
+      if(!requestPayload.containsKey("id") || 
+          (requestPayload.containsKey("id") 
+          && requestPayload.get("id").toString().isBlank())) {
 
-      if(!prop.containsKey("datetime")) {
-				errorMsg = errorMsg+" datetime is mandatory.";
+        GeoportalContext gc = GeoportalContext.getInstance();
+        if (!"true".equals(gc.isCanStacAutogenerateId())) {
+          errorMsg = errorMsg+" id is mandatory and should not be empty.";
+        }
+      }
 
-      } else if(prop.containsKey("datetime") && prop.get("datetime") == null) {
-        
-				if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime")) {
-					errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
-				}
-			}
-		}
+      //geometry and bbox is mandatory from stac spec but geoportal will allow combination of shape_geo and envelope_geo as well
+      if(!requestPayload.containsKey("geometry") && !requestPayload.containsKey("shape_geo")) {
+        errorMsg = errorMsg+" geometry or shape_geo is mandatory.";
+      }
 
-		if(!requestPayload.containsKey("assets")) {
-			errorMsg = errorMsg + " assets is mandatory.";
-		}
-    
+      if(requestPayload.containsKey("geometry")) {
+        if(requestPayload.get("geometry") != null && (!requestPayload.containsKey("bbox")))
+        errorMsg = errorMsg+" bbox is mandatory if geometry is not null.";
+      }
+
+      if(requestPayload.containsKey("shape_geo")) {
+        if(requestPayload.get("shape_geo") != null && (!requestPayload.containsKey("envelope_geo")))
+        errorMsg = errorMsg+" envelope_geo is mandatory if shape_geo is not null.";
+      }
+
+      if(!requestPayload.containsKey("properties")) {
+        errorMsg = errorMsg+" properties is mandatory.";
+      }
+
+      if(requestPayload.containsKey("properties")) {
+        JSONObject prop = (JSONObject) requestPayload.get("properties");
+
+        if(!prop.containsKey("datetime")) {
+          errorMsg = errorMsg+" datetime is mandatory.";
+
+        } else if(prop.containsKey("datetime") && prop.get("datetime") == null) {
+
+          if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime")) {
+            errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
+          }
+        }
+      }
+
+      if(!requestPayload.containsKey("assets")) {
+        errorMsg = errorMsg + " assets is mandatory.";
+      }
+    }    
+
+    // always validate the configure validation rules
   	StacContext sc = StacContext.getInstance();
     for (String validationRule : sc.getValidationRules()) {
       LOGGER.debug("Validation rule: " + validationRule);
@@ -617,14 +619,12 @@ public class StacHelper {
 	}
 
 	public static StacItemValidationResponse validateStacItemForUpdate(JSONObject requestPayload, 
-			String collectionId, String featureId, boolean validateFields) throws Exception {
+			String collectionId, String featureId, boolean validateAllFields) throws Exception {
 		
 		String errorMsg = "";
 		StacItemValidationResponse response = new StacItemValidationResponse();
-		if(validateFields)
-		{
-      response = validateFields(requestPayload,collectionId);	
-		}
+
+    response = validateFields(requestPayload,collectionId, validateAllFields);	
 		
 		if(response.getCode() == null)
 		{

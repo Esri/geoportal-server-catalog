@@ -1204,8 +1204,8 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
     
 		try {			
-	        // 574
-	        JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
+      // 574
+      JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
 			
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,false);
       
