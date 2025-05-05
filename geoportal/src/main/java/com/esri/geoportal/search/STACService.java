@@ -1198,23 +1198,22 @@ public class STACService extends Application {
                                         String collectionId, 
                                         String featureId, 
                                         HttpServletRequest hsr, 
-                                        boolean async) {
-    
+                                        boolean async) {    
 		String responseJSON;
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		JSONArray detailErrArray = new JSONArray();
     
-		try {
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(requestPayload,collectionId,featureId,false);
+		try {			
+	        // 574
+	        JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
+			
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,false);
       
 			if (validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
-				JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
-        
-        // 574
-        JSONObject projectedPayload = projectIncomingItem(updatedPayload,collectionId);
+				JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,false);
 				
-				String id = projectedPayload.get("id").toString();	
-				String itemJsonString = projectedPayload.toString();	
+				String id = updatedPayload.get("id").toString();	
+				String itemJsonString = updatedPayload.toString();	
 				String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
 							
 				responseJSON = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
