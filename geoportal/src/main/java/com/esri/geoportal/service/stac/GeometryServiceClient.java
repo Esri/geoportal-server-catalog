@@ -796,6 +796,24 @@ public class GeometryServiceClient {
             break;
             
           case "POLYGON":
+            /*
+            
+            FROM:
+            {
+              "geometryType": "esriGeometryPolygon", 
+              "geometries": [{ 
+                  "rings": [[
+                      [-94.081413026234017,30.072937583749404],
+                      [-94.081501246364283,30.072936242583417],
+                      ...
+                      [-94.081413026234017,30.072937583749404]
+                    ]]
+                }]
+            }
+            
+            TO: 
+              POLYGON ((35 10, 45 45, 15 40, 10 20, 35 10),(20 30, 35 35, 30 20, 20 30))
+            */
             arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
             String polyHasZ = arcgisGeometry.getAsString("hasZ");
             hasZ = polyHasZ.equalsIgnoreCase("true");
@@ -810,7 +828,9 @@ public class GeometryServiceClient {
                     .replace(",", " ")
                     .replace("] [", ", ")
                     .replace("[", "(")
-                    .replace("]", ")");
+                    .replace("]", ")")
+                    .replace("(((", "((")
+                    .replace(")))", "))");
             }
 
             break;
