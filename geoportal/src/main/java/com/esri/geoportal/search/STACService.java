@@ -1322,22 +1322,21 @@ public class STACService extends Application {
           requestPayload.put("id", id);
         }
       }
-      StacItemValidationResponse validationStatus = StacHelper.validateStacItem(requestPayload,collectionId,gc.isValidateStacFields());
+      
+      // issue 574 - project payload if submitted with geometries not in 4326
+      JSONObject projectedPayload = requestPayload;
+      try {
+        projectedPayload = projectIncomingItem(requestPayload,collectionId);
+      } catch (ParseException e) {
+        LOGGER.error("Error parsing incoming item: " + e.getMessage());
+      }
+      
+      StacItemValidationResponse validationStatus = StacHelper.validateStacItem(projectedPayload,collectionId,gc.isValidateStacFields());
       
       if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
-        JSONObject updatedPayload = StacHelper.prePublish(requestPayload,collectionId,false);
+        JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,false);
 
-        String itemJsonString = updatedPayload.toString();								
-                    
-        // issue 574 - project payload if submitted with geometries not in 4326
-        JSONObject projectedPayload = updatedPayload;
-        try {
-          projectedPayload = projectIncomingItem(updatedPayload,collectionId);
-        } catch (ParseException e) {
-          LOGGER.error("Error parsing incoming item: " + e.getMessage());
-        }
-
-        itemJsonString = projectedPayload.toString();
+        String itemJsonString = updatedPayload.toString();		
         
         String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
 
