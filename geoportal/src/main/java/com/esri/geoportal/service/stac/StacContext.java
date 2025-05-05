@@ -128,7 +128,7 @@ public class StacContext {
   
   public JSONObject passesValidation(String validationRule, JSONObject item, String collectionId) throws Exception {
     boolean passes;
-    String message;
+    String message = "";
     JSONObject response = new JSONObject();    
     boolean ukFieldExists = false;
     JSONObject properties = (JSONObject) item.get("properties");
@@ -142,7 +142,6 @@ public class StacContext {
         String[] uniqueKeyFields = key.split(",");
         String value;  
         String searchQry="";
-        message = "";
         String filterClause="";
         int cnt =1;
         for (String ukField: uniqueKeyFields) { 
@@ -178,6 +177,63 @@ public class StacContext {
 
         break;
         
+      case "geometry_source_matches":
+        passes = true;
+        String itemId = item.getAsString("id");
+        JSONObject existingItem = StacHelper.getSTACItemById(collectionId, itemId);
+        
+        if (existingItem == null) {
+          // this is a new item
+          passes = true;
+          
+        } else {
+          
+          // this is an existing item, check the geometry source
+          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, "gsdb:geometry_wkt");
+          JSONObject newGeometryWKT = (JSONObject) getProperty(item, "gsdb:geometry_wkt");
+
+          // loop over keys in newGeometryWKT
+          //   if the key exists in existingGeometryWKT 
+          //     if the new geometry source equals the existing geometry source
+          //       the new geometry is allowed
+          //     else
+          //       the new geometry is NOT allowed, stop testing, rule failed
+          //   else next, this new geometry is allowed
+          for (String geometryType: newGeometryWKT.keySet()) { 
+            if (existingGeometryWKT.containsKey(geometryType)) {
+              JSONObject existingGeometry = (JSONObject) existingGeometryWKT.get(geometryType);
+              JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);
+
+              String existingGeometrySource = null;
+              String newGeometrySource = null;
+
+              if (newGeometry.containsKey("geometry_source")) {
+                newGeometrySource = newGeometry.getAsString("geometry_source");
+              }
+              if (newGeometry.containsKey("geometry_source")) {
+                existingGeometrySource = existingGeometry.getAsString("geometry_source");
+              }
+
+              if ((existingGeometrySource != null) && (newGeometrySource != null)) {
+                passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+              }
+              
+              if (!passes) {
+                message = "Geometry source validation failed: submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
+                break;
+              }
+
+            } else {
+              passes = passes && true;
+            }
+
+          }
+        }
+
+        message = passes ? "Geometry source validation: OK!" : message;          
+        
+        break;
+        
       default:
         LOGGER.debug("Unsupported validation rule: " + validationRule);
         passes = false;
@@ -192,6 +248,26 @@ public class StacContext {
     return response;
   }
   
+  
+  /**
+   * Get geometry wkt object
+   * @param theItem the STAC item for which to get the geometry WKT field
+   * @param theProperty the STAC property to get
+   */
+  private JSONObject getProperty(JSONObject theItem, String theProperty) {
+      JSONObject thePropertyValue = null;
+      if (theItem != null) {
+        if (theItem.containsKey("properties")) {
+          JSONObject existingProperties = (JSONObject) theItem.get("properties");
+
+          if (existingProperties.containsKey(theProperty)) {
+            thePropertyValue = (JSONObject) existingProperties.get(theProperty);
+          }
+        }
+      }
+      
+      return thePropertyValue;
+  }
     
   /** 
    * Sets validation rules
