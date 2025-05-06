@@ -25,12 +25,13 @@ define(["dojo/_base/declare",
         "app/main/SearchPanel",
         "app/main/MapPanel",
         "app/main/APIPanel",
+        "app/main/CollectionsPanel",
         "app/main/CartPanel",
         "app/main/AboutPanel",
         "app/content/MetadataEditor",
         "app/content/UploadMetadata"],
 function(declare, lang, array, topic, appTopics, router, Templated, template, i18n, util, 
-    SearchPanel, MapPanel, APIPanel, CartPanel, AboutPanel,
+    SearchPanel, MapPanel, APIPanel, CollectionsPanel, CartPanel, AboutPanel,
     MetadataEditor, UploadMetadata) {
 
   var oThisClass = declare([Templated], {
@@ -63,6 +64,10 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       router.register("cartPanel", lang.hitch(this, function(evt){ 
         $("a[href='#cartPanel']").tab("show");
       }));
+
+      router.register("collectionsPanel", lang.hitch(this, function(evt){ 
+        $("a[href='#collectionsPanel']").tab("show");
+      }));
       
       router.register("aboutPanel", lang.hitch(this, function(evt){ 
         $("a[href='#aboutPanel']").tab("show");
@@ -89,6 +94,9 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }));
       $("a[href='#apiPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
         router.go("apiPanel");
+      }));
+      $("a[href='#collectionsPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
+        router.go("collectionsPanel");
       }));
       $("a[href='#cartPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
         router.go("cartPanel");
