@@ -1,31 +1,9 @@
-<div style="display: flex; width: 100%">
+<div class="container-stac-admin">
   <!-- TODO: separate styles to stylesheet -->
 
-  <div
-    style="
-      width: 450px;
-      padding: 10px 10px 0 10px;
-      display: flex;
-      flex-direction: column;
-    "
-  >
-    <div
-      style="
-        background-color: white;
-        width: 100%;
-        height: 50%;
-        margin-bottom: 10px;
-        padding: 10px;
-      "
-    >
-      <div
-        style="
-          display: flex;
-          justify-content: space-between;
-          align-items: center;
-          margin: 0 0 10px 0;
-        "
-      >
+  <div id="left-panel">
+    <div class="collections-section">
+      <div class="collections-header">
         <p style="font-weight: bold; font-size: 18px; margin: 0 15px 0 0">
           Collections
         </p>
@@ -57,19 +35,8 @@
           </p>
         </div>
       </div>
-      <div style="position: relative; margin: 0 0 10px 0">
-        <input
-          type="text"
-          style="
-            width: 100%;
-            border: 1px solid #e6e6e6;
-            background-color: #f7f7f7;
-            height: 35px;
-            padding: 0 0 0 40px;
-            font-size: 14px;
-          "
-          placeholder="Search..."
-        />
+      <div class="search-input-container">
+        <input type="text" class="search-input" placeholder="Search..." />
         <div style="position: absolute; top: 3px; left: 12px; width: 20px">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
             <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
@@ -80,42 +47,32 @@
           </svg>
         </div>
       </div>
-      <div
-        class="container-list"
-        style="height: calc(100% - 90px); overflow-y: scroll"
-      >
-        <div class="list-item"><input type="checkbox" />Collection 1</div>
-        <div class="list-item"><input type="checkbox" />Collection 2</div>
-        <div class="list-item"><input type="checkbox" />Collection 3</div>
-        <div class="list-item"><input type="checkbox" />Collection 4</div>
-        <div class="list-item"><input type="checkbox" />Collection 5</div>
-        <div class="list-item"><input type="checkbox" />Collection 6</div>
-        <div class="list-item"><input type="checkbox" />Collection 7</div>
-        <div class="list-item"><input type="checkbox" />Collection 8</div>
-        <div class="list-item"><input type="checkbox" />Collection 9</div>
-        <div class="list-item"><input type="checkbox" />Collection 10</div>
-        <div class="list-item"><input type="checkbox" />Collection 11</div>
-        <div class="list-item"><input type="checkbox" />Collection 12</div>
-        <div class="list-item"><input type="checkbox" />Collection 13</div>
-        <div class="list-item"><input type="checkbox" />Collection 14</div>
-        <div class="list-item"><input type="checkbox" />Collection 15</div>
-        <div class="list-item"><input type="checkbox" />Collection 16</div>
-        <div class="list-item"><input type="checkbox" />Collection 17</div>
-        <div class="list-item"><input type="checkbox" />Collection 18</div>
-        <div class="list-item"><input type="checkbox" />Collection 19</div>
-        <div class="list-item"><input type="checkbox" />Collection 20</div>
+      <div class="container-collections-list">
+        <div class="collections-list">
+          <div class="list-item"><input type="checkbox" />Collection 1</div>
+          <div class="list-item"><input type="checkbox" />Collection 2</div>
+          <div class="list-item"><input type="checkbox" />Collection 3</div>
+          <div class="list-item"><input type="checkbox" />Collection 4</div>
+          <div class="list-item"><input type="checkbox" />Collection 5</div>
+          <div class="list-item"><input type="checkbox" />Collection 6</div>
+          <div class="list-item"><input type="checkbox" />Collection 7</div>
+          <div class="list-item"><input type="checkbox" />Collection 8</div>
+          <div class="list-item"><input type="checkbox" />Collection 9</div>
+          <div class="list-item"><input type="checkbox" />Collection 10</div>
+          <div class="list-item"><input type="checkbox" />Collection 11</div>
+          <div class="list-item"><input type="checkbox" />Collection 12</div>
+          <div class="list-item"><input type="checkbox" />Collection 13</div>
+          <div class="list-item"><input type="checkbox" />Collection 14</div>
+          <div class="list-item"><input type="checkbox" />Collection 15</div>
+          <div class="list-item"><input type="checkbox" />Collection 16</div>
+          <div class="list-item"><input type="checkbox" />Collection 17</div>
+          <div class="list-item"><input type="checkbox" />Collection 18</div>
+          <div class="list-item"><input type="checkbox" />Collection 19</div>
+          <div class="list-item"><input type="checkbox" />Collection 20</div>
+        </div>
       </div>
     </div>
-    <div
-      style="
-        background-color: white;
-        width: 100%;
-        height: 50%;
-        margin-bottom: 10px;
-      "
-    >
-      GeoJSON: place
-    </div>
+    <div class="info-section">GeoJSON: place</div>
   </div>
   <div id="mapViewContainerCollections">
     <div
@@ -123,7 +80,7 @@
       id="mapNode"
       data-dojo-attach-point="mapNode"
     ></div>
-    <div id="tableContainer" class="tableContainer"></div>
+    <!-- <div id="tableContainer" class="tableContainer"></div> -->
   </div>
   <div id="container-confirm-modal" data-dojo-attach-point="modalContainer">
     <div id="confirm-modal">
@@ -164,6 +121,60 @@
     </div>
   </div>
   <style>
+    .container-stac-admin {
+      display: flex;
+      width: 100%;
+    }
+
+    #left-panel {
+      width: 400px;
+      padding: 10px 10px 0 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .collections-section {
+      background-color: white;
+      width: 100%;
+      flex-grow: 1;
+      margin-bottom: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .collections-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 10px 0;
+    }
+
+    .search-input {
+      width: 100%;
+      border: 1px solid #e6e6e6;
+      background-color: #f7f7f7;
+      height: 35px;
+      padding: 0 0 0 40px;
+      font-size: 14px;
+    }
+
+    .search-input-container {
+      position: relative;
+      margin: 0 0 10px 0;
+    }
+
+    .container-collections-list {
+      flex: 1 1 0;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .collections-list {
+      flex: 1 1 0;
+      overflow-y: scroll;
+    }
+
     .collections-action:hover {
       text-decoration: underline;
     }
@@ -173,7 +184,7 @@
     }
 
     .list-item {
-      padding: 3px;
+      padding: 10px 3px;
       border-left: 1px solid rgb(206, 206, 206);
       border-top: 1px solid rgb(206, 206, 206);
       border-right: 1px solid rgb(206, 206, 206);
@@ -183,9 +194,16 @@
       margin: 0 10px 0 10px;
     }
 
+    .info-section {
+      background-color: white;
+      width: 100%;
+      flex-grow: 1;
+      margin-bottom: 10px;
+    }
+
     #mapViewContainerCollections {
       display: flex;
-      width: 100%;
+      flex-grow: 1;
     }
 
     .g-mapframe-container-norm {
@@ -194,23 +212,25 @@
       left: 0;
       bottom: 4px;
       right: 0;
-      height: 100%;
-      width: 100%;
+      display: flex;
+      flex-grow: 1;
       border: none;
     }
 
     .g-mapframe-container-norm > iframe {
       width: 100%;
-      height: 100%;
       border: none;
     }
 
     #container-confirm-modal {
       width: 100%;
-      height: calc(100% - 100px);
+      height: 100%;
       background-color: rgb(0, 0, 0, 0.2);
       position: absolute;
-      display: none;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      display: flex;
       align-items: center;
       justify-content: center;
     }
