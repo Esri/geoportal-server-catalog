@@ -1,10 +1,163 @@
-<div>
-  <div id="mapViewContainer">
+<div style="display: flex; width: 100%">
+  <!-- TODO: separate styles to stylesheet -->
+
+  <div
+    style="
+      width: 450px;
+      padding: 10px 10px 0 10px;
+      display: flex;
+      flex-direction: column;
+    "
+  >
     <div
-      class="g-mapframe-container"
+      style="
+        background-color: white;
+        width: 100%;
+        height: 50%;
+        margin-bottom: 10px;
+        padding: 10px;
+      "
+    >
+      <div
+        style="
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin: 0 0 10px 0;
+        "
+      >
+        <p style="font-weight: bold; font-size: 18px; margin: 0 15px 0 0">
+          Collections
+        </p>
+        <div style="display: flex; align-items: center">
+          <p
+            style="
+              color: rgb(0, 102, 255);
+              margin: 0 15px 0 0;
+              cursor: pointer;
+              padding: 0;
+              font-size: 14px;
+            "
+          >
+            New
+          </p>
+          <p
+            style="
+              color: rgb(219, 38, 38);
+              cursor: pointer;
+              padding: 0;
+              margin: 0;
+              font-size: 14px;
+            "
+          >
+            Delete
+          </p>
+        </div>
+      </div>
+      <div style="position: relative; margin: 0 0 10px 0">
+        <input
+          type="text"
+          style="
+            width: 100%;
+            border: 1px solid #e6e6e6;
+            background-color: #f7f7f7;
+            height: 35px;
+            padding: 0 0 0 40px;
+            font-size: 14px;
+          "
+          placeholder="Search..."
+        />
+        <div style="position: absolute; top: 3px; left: 12px; width: 20px">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+            <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+            <path
+              fill="darkgray"
+              d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+            />
+          </svg>
+        </div>
+      </div>
+      <div
+        class="container-list"
+        style="height: calc(100% - 90px); overflow-y: scroll"
+      >
+        <div class="list-item"><input type="checkbox" />Collection 1</div>
+        <div class="list-item"><input type="checkbox" />Collection 2</div>
+        <div class="list-item"><input type="checkbox" />Collection 3</div>
+        <div class="list-item"><input type="checkbox" />Collection 4</div>
+        <div class="list-item"><input type="checkbox" />Collection 5</div>
+        <div class="list-item"><input type="checkbox" />Collection 6</div>
+        <div class="list-item"><input type="checkbox" />Collection 7</div>
+        <div class="list-item"><input type="checkbox" />Collection 8</div>
+        <div class="list-item"><input type="checkbox" />Collection 9</div>
+        <div class="list-item"><input type="checkbox" />Collection 10</div>
+        <div class="list-item"><input type="checkbox" />Collection 11</div>
+        <div class="list-item"><input type="checkbox" />Collection 12</div>
+        <div class="list-item"><input type="checkbox" />Collection 13</div>
+        <div class="list-item"><input type="checkbox" />Collection 14</div>
+        <div class="list-item"><input type="checkbox" />Collection 15</div>
+        <div class="list-item"><input type="checkbox" />Collection 16</div>
+        <div class="list-item"><input type="checkbox" />Collection 17</div>
+        <div class="list-item"><input type="checkbox" />Collection 18</div>
+        <div class="list-item"><input type="checkbox" />Collection 19</div>
+        <div class="list-item"><input type="checkbox" />Collection 20</div>
+      </div>
+    </div>
+    <div
+      style="
+        background-color: white;
+        width: 100%;
+        height: 50%;
+        margin-bottom: 10px;
+      "
+    >
+      GeoJSON: place
+    </div>
+  </div>
+  <div id="mapViewContainerCollections">
+    <div
+      class="g-mapframe-container-norm"
       id="mapNode"
       data-dojo-attach-point="mapNode"
     ></div>
     <div id="tableContainer" class="tableContainer"></div>
   </div>
+  <style>
+    .list-item:last-child {
+      border-bottom: 1px solid rgb(206, 206, 206);
+    }
+
+    .list-item {
+      padding: 3px;
+      border-left: 1px solid rgb(206, 206, 206);
+      border-top: 1px solid rgb(206, 206, 206);
+      border-right: 1px solid rgb(206, 206, 206);
+    }
+
+    .list-item > input {
+      margin: 0 10px 0 10px;
+    }
+
+    #mapViewContainerCollections {
+      display: flex;
+      width: 100%;
+    }
+
+    .g-mapframe-container-norm {
+      position: initial;
+      top: 48px;
+      left: 0;
+      bottom: 4px;
+      right: 0;
+      height: 100%;
+      width: 100%;
+      border: none;
+    }
+
+    .g-mapframe-container-norm > iframe {
+      width: 100%;
+      height: 100%;
+      border: none;
+    }
+  </style>
 </div>
