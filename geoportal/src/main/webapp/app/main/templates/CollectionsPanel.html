@@ -31,6 +31,7 @@
         </p>
         <div style="display: flex; align-items: center">
           <p
+            class="collections-action"
             style="
               color: rgb(0, 102, 255);
               margin: 0 15px 0 0;
@@ -42,6 +43,7 @@
             New
           </p>
           <p
+            class="collections-action"
             style="
               color: rgb(219, 38, 38);
               cursor: pointer;
@@ -122,7 +124,41 @@
     ></div>
     <div id="tableContainer" class="tableContainer"></div>
   </div>
+  <div id="container-confirm-modal">
+    <div id="confirm-modal">
+      <div id="confirm-modal-header" class="confirm-modal-section">
+        <p>Delete Collection?</p>
+        <div id="modal-close-button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+            <path
+              d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"
+            />
+          </svg>
+        </div>
+      </div>
+      <div id="confirm-modal-body" class="confirm-modal-section">
+        <p>
+          Are you sure you would like to delete collection(s)? This action is
+          irreversible.
+        </p>
+      </div>
+
+      <div id="confirm-modal-footer" class="confirm-modal-section">
+        <button id="confirm-modal-secondary" class="confirm-modal-button">
+          Cancel
+        </button>
+        <button id="confirm-modal-primary" class="confirm-modal-button">
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
   <style>
+    .collections-action:hover {
+      text-decoration: underline;
+    }
+
     .list-item:last-child {
       border-bottom: 1px solid rgb(206, 206, 206);
     }
@@ -158,6 +194,76 @@
       width: 100%;
       height: 100%;
       border: none;
+    }
+
+    #container-confirm-modal {
+      width: 100%;
+      height: calc(100% - 100px);
+      background-color: rgb(0, 0, 0, 0.2);
+      position: absolute;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #confirm-modal {
+      width: 700px;
+      height: 250px;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .confirm-modal-section {
+      padding: 10px;
+    }
+
+    #confirm-modal-header {
+      flex: 0 0 50px;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #confirm-modal-header > p {
+      margin: 0;
+      padding: 0;
+    }
+
+    #confirm-modal-body {
+      flex: 1 1 auto;
+    }
+
+    #confirm-modal-footer {
+      flex: 0 0 50px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .confirm-modal-button {
+      border: none;
+      padding: 5px;
+      margin-left: 10px;
+      min-width: 100px;
+      border-radius: 5px;
+    }
+
+    #confirm-modal-secondary {
+      background-color: white;
+      border: 1px solid rgb(0, 102, 255);
+      color: rgb(0, 102, 255);
+    }
+
+    #confirm-modal-primary {
+      background-color: rgb(240, 27, 27);
+      color: white;
+    }
+
+    #modal-close-button {
+      width: 15px;
+      cursor: pointer;
     }
   </style>
 </div>
