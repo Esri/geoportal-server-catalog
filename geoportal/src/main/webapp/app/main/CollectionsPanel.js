@@ -108,14 +108,18 @@ define([
       this.newCollection.addEventListener("click", () => {
         this.leftPanelCreateView.style.display = "flex";
         this.leftPanelListView.style.display = "none";
+        this.collectionEditorTitle.innerHTML = "Create New Collection";
+        this.collectionEditorConfirm.innerHTML = "Create Collection";
       });
-      this.createCollection.addEventListener("click", () => {
+      this.collectionEditorConfirm.addEventListener("click", () => {
         this.leftPanelCreateView.style.display = "none";
         this.leftPanelListView.style.display = "flex";
       });
-      this.updateCollection.addEventListener("click", () => {
+      this.editCollection.addEventListener("click", () => {
         this.leftPanelCreateView.style.display = "flex";
         this.leftPanelListView.style.display = "none";
+        this.collectionEditorTitle.innerHTML = "Update Collection";
+        this.collectionEditorConfirm.innerHTML = "Update Collection";
       });
     },
 

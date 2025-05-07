@@ -380,7 +380,7 @@
             <div class="info-action-container">
               <p class="info-zoom-action">Zoom</p>
               <p
-                data-dojo-attach-point="updateCollection"
+                data-dojo-attach-point="editCollection"
                 class="info-update-action"
               >
                 Update
@@ -411,7 +411,12 @@
     <div id="create-view" data-dojo-attach-point="leftPanelCreateView">
       <div class="create-section">
         <div class="create-section-body">
-          <p class="create-collection-title">Create New Collection</p>
+          <p
+            data-dojo-attach-point="collectionEditorTitle"
+            class="create-collection-title"
+          >
+            Create New Collection
+          </p>
           <div class="fields-list">
             <label class="create-collection-label">Geometry:</label>
             <div class="create-draw-tools">
@@ -489,7 +494,7 @@
         <div class="create-section-bottom">
           <button
             class="create-collection-button"
-            data-dojo-attach-point="createCollection"
+            data-dojo-attach-point="collectionEditorConfirm"
           >
             Create Collection
           </button>
