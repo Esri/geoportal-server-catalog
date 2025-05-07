@@ -103,6 +103,19 @@ define([
         this.modalContainer.style.display = "none";
       });
       this.deleteCollection.addEventListener("click", () => {
+        // Get all checked checkboxes with the class "list-item-checkbox"
+        const checkedBoxes = this.collectionsList.querySelectorAll(
+          ".list-item-checkbox:checked"
+        );
+
+        const selectedIds = [];
+        // Iterate over them
+        checkedBoxes.forEach((checkbox) => {
+          // Get data from a custom attribute, like data-city
+          selectedIds.push(checkbox.getAttribute("data-id"));
+        });
+        this.modalContainerCollectionsListLength.innerHTML = selectedIds.length;
+        this.modalContainerCollectionsList.innerHTML = selectedIds.join(", ");
         this.modalContainer.style.display = "flex";
       });
       this.newCollection.addEventListener("click", () => {
