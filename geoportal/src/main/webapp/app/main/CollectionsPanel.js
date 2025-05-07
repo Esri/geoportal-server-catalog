@@ -113,6 +113,10 @@ define([
         this.leftPanelCreateView.style.display = "none";
         this.leftPanelListView.style.display = "flex";
       });
+      this.updateCollection.addEventListener("click", () => {
+        this.leftPanelCreateView.style.display = "flex";
+        this.leftPanelListView.style.display = "none";
+      });
     },
 
     readConfig: function () {

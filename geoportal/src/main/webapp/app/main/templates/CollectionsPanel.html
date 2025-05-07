@@ -139,7 +139,15 @@
           </div>
         </div>
         <div class="info-body">
-          <p class="info-body-title">GEOJSON: Collection 1</p>
+          <div class="info-body-header">
+            <p class="info-body-title">GEOJSON: Collection 1</p>
+            <p
+              data-dojo-attach-point="updateCollection"
+              class="info-update-action"
+            >
+              Update
+            </p>
+          </div>
           <div class="info-table-wrapper">
             <table class="info-table">
               <tbody>
@@ -384,6 +392,23 @@
       padding: 10px;
       display: flex;
       flex-direction: column;
+    }
+
+    .info-body-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-update-action {
+      color: #0066ff;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+    }
+
+    .info-update-action:hover {
+      text-decoration: underline;
     }
 
     .info-body-title {
