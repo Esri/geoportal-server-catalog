@@ -222,14 +222,32 @@
       </div>
     </div>
     <div id="create-view" data-dojo-attach-point="leftPanelCreateView">
-      <p>Create New Collection</p>
-      <input type="text" />
-      <input type="text" />
-      <input type="text" />
-      <input type="text" />
-      <button data-dojo-attach-point="createCollection">
-        Create Collection
-      </button>
+      <div class="create-section">
+        <div class="create-section-body">
+          <p class="create-collection-title">Create New Collection</p>
+          <div class="fields-list">
+            <label class="create-collection-label">xom:discipline</label>
+            <input type="text" />
+
+            <label class="create-collection-label">xom:ecl_id</label>
+            <input type="text" />
+
+            <label class="create-collection-label">xom:ecl_version</label>
+            <input type="text" />
+
+            <label class="create-collection-label">xom:edp_equip_id</label>
+            <input type="text" />
+          </div>
+        </div>
+        <div class="create-section-bottom">
+          <button
+            class="create-collection-button"
+            data-dojo-attach-point="createCollection"
+          >
+            Create Collection
+          </button>
+        </div>
+      </div>
     </div>
   </div>
   <div id="mapViewContainerCollections">
@@ -288,7 +306,6 @@
       height: 100%;
       width: 100%;
       display: flex;
-      /* display: none; */
       flex-direction: column;
     }
 
@@ -325,7 +342,7 @@
     .search-input {
       width: 100%;
       border: 1px solid #e6e6e6;
-      background-color: #f7f7f7;
+      background-color: #f7f7f7fa;
       height: 35px;
       padding: 0 0 0 40px;
       font-size: 14px;
@@ -456,6 +473,52 @@
 
     .info-table tr:nth-child(2n) {
       background-color: #ededed;
+    }
+
+    .create-section {
+      background-color: white;
+      width: 100%;
+      flex-grow: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .create-section-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+    }
+
+    .fields-list {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+      overflow-y: scroll;
+    }
+
+    .create-section-bottom {
+      display: flex;
+      flex: 0 0 50px;
+    }
+
+    .create-collection-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .create-collection-label {
+      margin-top: 15px;
+    }
+
+    .create-collection-button {
+      margin-top: 40px;
+      border: none;
+      background-color: #1653ad;
+      color: white;
+      border-radius: 5px;
+      height: 40px;
+      width: 100%;
     }
 
     #mapViewContainerCollections {
