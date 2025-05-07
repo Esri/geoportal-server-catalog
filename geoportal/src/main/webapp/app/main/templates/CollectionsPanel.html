@@ -51,6 +51,7 @@
               margin: 0;
               font-size: 14px;
             "
+            data-dojo-attach-point="deleteCollection"
           >
             Delete
           </p>
@@ -124,7 +125,7 @@
     ></div>
     <div id="tableContainer" class="tableContainer"></div>
   </div>
-  <div id="container-confirm-modal">
+  <div id="container-confirm-modal" data-dojo-attach-point="modalContainer">
     <div id="confirm-modal">
       <div id="confirm-modal-header" class="confirm-modal-section">
         <p>Delete Collection?</p>
@@ -145,10 +146,18 @@
       </div>
 
       <div id="confirm-modal-footer" class="confirm-modal-section">
-        <button id="confirm-modal-secondary" class="confirm-modal-button">
+        <button
+          id="confirm-modal-secondary"
+          class="confirm-modal-button"
+          data-dojo-attach-point="modalSecondaryButton"
+        >
           Cancel
         </button>
-        <button id="confirm-modal-primary" class="confirm-modal-button">
+        <button
+          id="confirm-modal-primary"
+          class="confirm-modal-button"
+          data-dojo-attach-point="modalPrimaryButton"
+        >
           Delete
         </button>
       </div>
@@ -201,7 +210,7 @@
       height: calc(100% - 100px);
       background-color: rgb(0, 0, 0, 0.2);
       position: absolute;
-      display: flex;
+      display: none;
       align-items: center;
       justify-content: center;
     }
