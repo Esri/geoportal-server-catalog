@@ -161,7 +161,7 @@ define([
       if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
         v = null;
       }
-      var map = new Map({ basemap: "streets" });
+      var map = new Map({ basemap: "streets-night-vector" });
 
       const view = new MapView({
         container: this.mapNode,
