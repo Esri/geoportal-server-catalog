@@ -141,12 +141,15 @@
         <div class="info-body">
           <div class="info-body-header">
             <p class="info-body-title">GEOJSON: Collection 1</p>
-            <p
-              data-dojo-attach-point="updateCollection"
-              class="info-update-action"
-            >
-              Update
-            </p>
+            <div class="info-action-container">
+              <p class="info-zoom-action">Zoom</p>
+              <p
+                data-dojo-attach-point="updateCollection"
+                class="info-update-action"
+              >
+                Update
+              </p>
+            </div>
           </div>
           <div class="info-table-wrapper">
             <table class="info-table">
@@ -398,6 +401,22 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+    }
+
+    .info-action-container {
+      display: flex;
+    }
+
+    .info-zoom-action {
+      color: #414141;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+      margin-right: 15px;
+    }
+
+    .info-zoom-action:hover {
+      text-decoration: underline;
     }
 
     .info-update-action {
