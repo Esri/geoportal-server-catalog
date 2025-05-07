@@ -212,18 +212,18 @@ define([
             },
             node
           );
-          gpSearchWidget.startup();
+          // gpSearchWidget.startup();
 
-          let gpSearchExpand = new Expand({
-            expandIcon: "query",
-            expandTooltip: "Geoportal Search",
-            view: view,
-            content: gpSearchWidget,
-          });
-          view.ui.add(gpSearchExpand, {
-            position: "top-left",
-            index: 0,
-          });
+          // let gpSearchExpand = new Expand({
+          //   expandIcon: "query",
+          //   expandTooltip: "Geoportal Search",
+          //   view: view,
+          //   content: gpSearchWidget,
+          // });
+          // view.ui.add(gpSearchExpand, {
+          //   position: "top-left",
+          //   index: 0,
+          // });
           let searchWidget = new SearchWidget({
             view: view,
           });
@@ -301,7 +301,7 @@ define([
           });
           // adds the basemap widget to the top right corner of the MapView
           view.ui.add(basemapExpand, {
-            position: "top-right",
+            position: "top-left",
             index: 1,
           });
 
