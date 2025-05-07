@@ -105,6 +105,14 @@ define([
       this.deleteCollection.addEventListener("click", () => {
         this.modalContainer.style.display = "flex";
       });
+      this.newCollection.addEventListener("click", () => {
+        this.leftPanelCreateView.style.display = "flex";
+        this.leftPanelListView.style.display = "none";
+      });
+      this.createCollection.addEventListener("click", () => {
+        this.leftPanelCreateView.style.display = "none";
+        this.leftPanelListView.style.display = "flex";
+      });
     },
 
     readConfig: function () {

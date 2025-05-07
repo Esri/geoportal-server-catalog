@@ -2,7 +2,7 @@
   <!-- TODO: separate styles to stylesheet -->
 
   <div id="left-panel">
-    <div id="list-view">
+    <div id="list-view" data-dojo-attach-point="leftPanelListView">
       <div class="collections-section">
         <div class="collections-header">
           <p style="font-weight: bold; font-size: 18px; margin: 0 15px 0 0">
@@ -11,13 +11,7 @@
           <div style="display: flex; align-items: center">
             <p
               class="collections-action"
-              style="
-                color: #0066ff;
-                margin: 0 15px 0 0;
-                cursor: pointer;
-                padding: 0;
-                font-size: 14px;
-              "
+              data-dojo-attach-point="newCollection"
             >
               New
             </p>
@@ -215,6 +209,16 @@
         </div>
       </div>
     </div>
+    <div id="create-view" data-dojo-attach-point="leftPanelCreateView">
+      <p>Create New Collection</p>
+      <input type="text" />
+      <input type="text" />
+      <input type="text" />
+      <input type="text" />
+      <button data-dojo-attach-point="createCollection">
+        Create Collection
+      </button>
+    </div>
   </div>
   <div id="mapViewContainerCollections">
     <div
@@ -272,6 +276,15 @@
       height: 100%;
       width: 100%;
       display: flex;
+      /* display: none; */
+      flex-direction: column;
+    }
+
+    #create-view {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      display: none;
       flex-direction: column;
     }
 
@@ -320,6 +333,14 @@
     .collections-list {
       flex: 1 1 0;
       overflow-y: scroll;
+    }
+
+    .collections-action {
+      color: #0066ff;
+      margin: 0 15px 0 0;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
     }
 
     .collections-action:hover {
