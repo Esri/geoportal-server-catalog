@@ -45,6 +45,8 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       this.updateUI();
       
       var ignoreMapPanelActivated = false;
+      var ignoreCollectionPanelActivated = false;
+
       
       router.register("searchPanel", lang.hitch(this, function(evt){ 
         $("a[href='#searchPanel']").tab("show");
@@ -66,6 +68,9 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }));
 
       router.register("collectionsPanel", lang.hitch(this, function(evt){ 
+        if (!ignoreCollectionPanelActivated && !this.collectionsPanel.mapWasInitialized) {
+          this.collectionsPanel.ensureMap();
+        }
         $("a[href='#collectionsPanel']").tab("show");
       }));
       
