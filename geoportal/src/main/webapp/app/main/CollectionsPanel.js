@@ -91,7 +91,20 @@ define([
 
     postCreate: function () {
       this.inherited(arguments);
+      this.initializeListeners();
       this.readConfig();
+    },
+
+    initializeListeners: function () {
+      this.modalSecondaryButton.addEventListener("click", () => {
+        this.modalContainer.style.display = "none";
+      });
+      this.modalPrimaryButton.addEventListener("click", () => {
+        this.modalContainer.style.display = "none";
+      });
+      this.deleteCollection.addEventListener("click", () => {
+        this.modalContainer.style.display = "flex";
+      });
     },
 
     readConfig: function () {
