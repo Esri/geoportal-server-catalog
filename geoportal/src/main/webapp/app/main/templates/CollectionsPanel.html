@@ -43,12 +43,16 @@
           </div>
         </div>
         <div class="container-collections-list">
-          <div class="collections-list">
+          <div
+            data-dojo-attach-point="collectionsList"
+            class="collections-list"
+          >
             <div class="list-item">
               <span class="list-item-title"
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Rotterdam"
                 />Rotterdam</span
               >
 
@@ -67,6 +71,7 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Hamburg"
                 />Hamburg</span
               >
               <div class="item-info-button">
@@ -83,6 +88,7 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Antwerp"
                 />Antwerp</span
               >
               <div class="item-info-button">
@@ -99,6 +105,7 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Marseille"
                 />Marseille</span
               >
               <div class="item-info-button">
@@ -115,46 +122,8 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Gothenburg"
                 />Gothenburg</span
-              >
-              <div class="item-info-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path
-                    d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
-                  />
-                  <path fill="none" d="M0 0h24v24H0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="list-item">
-              <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Geona</span
-              >
-              <div class="item-info-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path
-                    d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
-                  />
-                  <path fill="none" d="M0 0h24v24H0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="list-item">
-              <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Osaka</span
-              >
-              <div class="item-info-button">
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                  <path
-                    d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
-                  />
-                  <path fill="none" d="M0 0h24v24H0z" />
-                </svg>
-              </div>
-            </div>
-            <div class="list-item">
-              <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Busan</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -170,6 +139,58 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Geona"
+                />Geona</span
+              >
+              <div class="item-info-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </div>
+            </div>
+            <div class="list-item">
+              <span class="list-item-title"
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Osaka"
+                />Osaka</span
+              >
+              <div class="item-info-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </div>
+            </div>
+            <div class="list-item">
+              <span class="list-item-title"
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Busan"
+                />Busan</span
+              >
+              <div class="item-info-button">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </div>
+            </div>
+            <div class="list-item">
+              <span class="list-item-title"
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Manila"
                 />Manila</span
               >
               <div class="item-info-button">
@@ -186,6 +207,7 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Valencia"
                 />Valencia</span
               >
               <div class="item-info-button">
@@ -202,6 +224,7 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Seattle"
                 />Seattle</span
               >
               <div class="item-info-button">
@@ -218,6 +241,7 @@
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
+                  data-id="Vancouver"
                 />Vancouver</span
               >
               <div class="item-info-button">
@@ -231,8 +255,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                13</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 13"
+                />Collection 13</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -245,8 +272,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                14</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 14"
+                />Collection 14</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -259,8 +289,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                15</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 15"
+                />Collection 15</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -273,8 +306,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                16</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 16"
+                />Collection 16</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -287,8 +323,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                17</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 17"
+                />Collection 17</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -301,8 +340,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                18</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 18"
+                />Collection 18</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -315,8 +357,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                19</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 19"
+                />Collection 19</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -329,8 +374,11 @@
             </div>
             <div class="list-item">
               <span class="list-item-title"
-                ><input class="list-item-checkbox" type="checkbox" />Collection
-                20</span
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="Collection 20"
+                />Collection 20</span
               >
               <div class="item-info-button">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
@@ -525,8 +573,11 @@
       </div>
       <div id="confirm-modal-body" class="confirm-modal-section">
         <p>
-          Are you sure you would like to delete collection(s)? This action is
+          Are you sure you would like to delete <span data-dojo-attach-point="modalContainerCollectionsListLength"></span> collection(s)? This action is
           irreversible.
+          <div data-dojo-attach-point="modalContainerCollectionsList">
+
+          </div>
         </p>
       </div>
 
