@@ -307,13 +307,13 @@ public class GeometryServiceClient {
      * @return the projected geometries
      * @throws IOException if an issue occurs in communicating with the geometry service
      */
-    public String doProjection(String geometries, String inCRS, String outCRS) throws IOException {
+    public String doProjection(String geometries, String inCRS, String outCRS, Boolean vertical) throws IOException {
         String formData = "inSr=" + inCRS;
         formData += "&outSR=" + outCRS;
         formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
         formData += "&transformation=";
         formData += "&transformForward=true";
-        formData += "&vertical=true";
+        formData += "&vertical=" + vertical.toString();
         formData += "&f=json";
 
         URL obj = new URL(this.projectUrl);
@@ -625,6 +625,7 @@ public class GeometryServiceClient {
             String patches = wkt.trim().substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
             String regex = "[))]";
             String[] polygons = patches.split(regex);
+            hasZ = true;  // polyhedral always has Z
             
             // now build ArcGIS geometry as list of polygon geometries
             geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [";
@@ -816,7 +817,11 @@ public class GeometryServiceClient {
             */
             arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
             String polyHasZ = arcgisGeometry.getAsString("hasZ");
-            hasZ = polyHasZ.equalsIgnoreCase("true");
+            if (polyHasZ != null && !polyHasZ.isEmpty()) {
+              hasZ = polyHasZ.equalsIgnoreCase("true");
+            } else {
+              hasZ = false;
+            }
             JSONArray rings = (JSONArray) arcgisGeometry.get("rings");
 
             if (!rings.isEmpty()) {
