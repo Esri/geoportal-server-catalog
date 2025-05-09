@@ -571,7 +571,7 @@ public class STACService extends Application {
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500",
-					"STAC API collection metadata item with itemid response could not be generated.",detailErrArray);
+					"STAC API response for item with id=" + id + " could not be generated.",detailErrArray);
 		}
 
 		return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
@@ -2037,7 +2037,9 @@ public class STACService extends Application {
     String requestedCRS = StacHelper.getRequestedCRS(collection, outCRS);
 
     String[] geometryFields = {"geometry", "bbox", "envelope_geo", "shape_geo"};
-
+    Boolean sourceCRSisEPSG = sourceCRS.toUpperCase().startsWith("EPSG:") || sourceCRS.matches("-?\\d+(\\.\\d+)?");
+    Boolean requestedCRSisEPSG = outCRS.toUpperCase().startsWith("EPSG:") || outCRS.matches("-?\\d+(\\.\\d+)?");
+    
     // use the STAC item JSON string as JSON object
     JSONParser jsonParser = new JSONParser();
     JSONObject responseObject = (JSONObject) jsonParser.parse(responseJSON);
@@ -2055,14 +2057,16 @@ public class STACService extends Application {
           String geometryResponse = "";
 
           if (sourceCRS.contains("EPSG:")) {
-            sourceCRS = sourceCRS.replace("EPSG:", "");
+            sourceCRS = sourceCRS.replace("EPSG:", "");   
+            sourceCRSisEPSG = true;
           }
           if (requestedCRS.contains("EPSG:")) {
             requestedCRS = requestedCRS.replace("EPSG:", "");
+            requestedCRSisEPSG = true;
           }
 
           try {
-              geometryResponse = geometryClient.doProjection(geometries, sourceCRS, requestedCRS);
+              geometryResponse = geometryClient.doProjection(geometries, sourceCRS, requestedCRS, false);
           } catch (IOException ex) {
               java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
           }
@@ -2159,12 +2163,25 @@ public class STACService extends Application {
       if (null != geometry_wkt_in) {
         if (geometry_wkt_in.containsKey(geometryType)) {
           String arcgisGeometry = geometryClient.getArcGISGeometry(geometryType.toUpperCase(), geometry_wkt_in);
+          
+          JSONObject geometry = (JSONObject) geometry_wkt_in.get(geometryType.toLowerCase());
+          String wkt = geometry.getAsString("wkt");
 
+          Boolean hasZ = wkt.contains("Z");
+          if (hasZ) {
+            if (sourceCRSisEPSG) {                    
+              sourceCRS = "{\"wkid\": " + sourceCRS + ", \"vcsWkid\": 115807 }";              
+            }
+            if (requestedCRSisEPSG) {                    
+              requestedCRS = "{\"wkid\": " + requestedCRS + ", \"vcsWkid\": 115807 }";              
+            }
+          }
+          
           if (!arcgisGeometry.isEmpty()) {
             // project the geometry
             String geometryResponse = "";
             try {
-              geometryResponse = geometryClient.doProjection(arcgisGeometry, sourceCRS, requestedCRS);
+              geometryResponse = geometryClient.doProjection(arcgisGeometry, sourceCRS, requestedCRS, hasZ);
             } catch (IOException ex) {
               LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
             }
@@ -2227,7 +2244,7 @@ public class STACService extends Application {
       // project the geometry
       String geometryResponse = "";
       try {
-          geometryResponse = geometryClient.doProjection(geometries, inCRS, requestedCRS);
+          geometryResponse = geometryClient.doProjection(geometries, inCRS, requestedCRS, false);
       } catch (IOException ex) {
           java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
       }
