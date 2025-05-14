@@ -405,13 +405,13 @@ define([
       this.editorPrimary.innerHTML = "Update Collection";
       let collectionInputs = `
           <label class="editor-label">description:</label>
-          <textArea style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
+          <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
 
           <label class="editor-label">id:</label>
-          <input class="editor-input" type="text" placeholder="value..."value="${properties.id}" />
+          <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."value="${properties.id}" disabled />
 
           <label class="editor-label">title:</label>
-          <input class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
+          <input id="collection-title-input" class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
       `;
       this.editorInputForm.innerHTML = collectionInputs;
     },
@@ -454,6 +454,15 @@ define([
       this.infoTableBody.innerHTML = tableRows.join("");
     },
 
+    getUpdatedProperties: function () {
+      return {
+        id: document.getElementById("collection-id-input").value,
+        description: document.getElementById("collection-description-input")
+          .value,
+        title: document.getElementById("collection-title-input").value,
+      };
+    },
+
     initializeListeners: function () {
       // Collection Events
       this.deleteCollectionButton.addEventListener("click", () => {
@@ -472,7 +481,11 @@ define([
       // Editor Events
       this.editorPrimary.addEventListener("click", () => {
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
-          this.handleUpdateCollection();
+          const updatedProperties = this.getUpdatedProperties();
+          this.handleUpdateCollection(
+            this.selectedCollection.id,
+            updatedProperties
+          );
         } else if (this.appActionState === this.actions.CREATE_COLLECTION) {
           this.handleCreateCollection();
         }
