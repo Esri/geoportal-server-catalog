@@ -100,6 +100,7 @@ define([
 
     appActionState: "NONE",
     collections: [],
+    selectedCollection: null,
     sampleCollection: [
       {
         id: 1,
@@ -345,9 +346,9 @@ define([
 
     handleReadCollection: function (id) {
       this.appActionState = this.actions.READ_COLLECTION;
-      const result = this.readCollection(id);
-      if (result) {
-        this.updateCollectionInfoBox(result);
+      this.selectedCollection = this.readCollection(id);
+      if (this.selectedCollection) {
+        this.updateCollectionInfoBox(this.selectedCollection);
       }
     },
 
