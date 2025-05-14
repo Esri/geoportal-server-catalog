@@ -98,6 +98,144 @@ define([
 
     appActionState: "NONE",
     collections: [],
+    sampleCollection: [
+      {
+        id: 1,
+        title: "Rotterdam",
+        description:
+          "A port city in the Netherlands known for modern architecture.",
+      },
+      {
+        id: 2,
+        title: "Hamburg",
+        description:
+          "A major port city in northern Germany, famous for its maritime heritage.",
+      },
+      {
+        id: 3,
+        title: "Antwerp",
+        description:
+          "A city in Belgium known for its diamond district and medieval architecture.",
+      },
+      {
+        id: 4,
+        title: "Marseille",
+        description:
+          "A vibrant port city in southern France, known for its Mediterranean culture.",
+      },
+      {
+        id: 5,
+        title: "Gothenburg",
+        description:
+          "A coastal city in Sweden known for its picturesque canals and cultural scene.",
+      },
+      {
+        id: 6,
+        title: "Geona",
+        description:
+          "A port city in Italy known for its rich maritime history and architecture.",
+      },
+      {
+        id: 7,
+        title: "Osaka",
+        description:
+          "A city in Japan, known for its modern architecture and nightlife.",
+      },
+      {
+        id: 8,
+        title: "Busan",
+        description:
+          "A port city in South Korea, famous for its beaches and seafood.",
+      },
+      {
+        id: 9,
+        title: "Manila",
+        description:
+          "The capital of the Philippines, known for its historic landmarks and vibrant culture.",
+      },
+      {
+        id: 10,
+        title: "Valencia",
+        description:
+          "A city in Spain, known for its futuristic architecture and beaches.",
+      },
+      {
+        id: 11,
+        title: "Seattle",
+        description:
+          "A major city in Washington, USA, known for its tech scene and iconic Space Needle.",
+      },
+      {
+        id: 12,
+        title: "Vancouver",
+        description:
+          "A coastal city in Canada, known for its stunning natural beauty and multicultural vibe.",
+      },
+      {
+        id: 13,
+        title: "Collection 1",
+        description: "A unique collection showcasing diverse items.",
+      },
+      {
+        id: 14,
+        title: "Collection 2",
+        description: "A curated set of rare objects for collectors.",
+      },
+      {
+        id: 15,
+        title: "Collection 3",
+        description: "A set of artistic pieces representing various cultures.",
+      },
+      {
+        id: 16,
+        title: "Collection 4",
+        description:
+          "A collection of historical artifacts with cultural significance.",
+      },
+      {
+        id: 17,
+        title: "Collection 5",
+        description: "A diverse selection of modern art pieces.",
+      },
+      {
+        id: 18,
+        title: "Collection 6",
+        description: "A set of vintage items from different eras.",
+      },
+      {
+        id: 19,
+        title: "Collection 7",
+        description:
+          "A collection of iconic memorabilia from the 20th century.",
+      },
+      {
+        id: 20,
+        title: "Collection 8",
+        description: "A rare collection of limited-edition items.",
+      },
+      {
+        id: 21,
+        title: "Collection 9",
+        description: "A selection of unusual and quirky artifacts.",
+      },
+      {
+        id: 22,
+        title: "Collection 10",
+        description:
+          "A collection of items with artistic and historical value.",
+      },
+      {
+        id: 23,
+        title: "Collection 11",
+        description: "A set of collectible items from famous designers.",
+      },
+      {
+        id: 24,
+        title: "Collection 12",
+        description:
+          "A curated collection of items related to a specific theme.",
+      },
+    ],
 
     postCreate: function () {
       this.inherited(arguments);
@@ -109,146 +247,7 @@ define([
     },
 
     getAllCollections: function () {
-      const collections = [
-        {
-          id: 1,
-          title: "Rotterdam",
-          description:
-            "A port city in the Netherlands known for modern architecture.",
-        },
-        {
-          id: 2,
-          title: "Hamburg",
-          description:
-            "A major port city in northern Germany, famous for its maritime heritage.",
-        },
-        {
-          id: 3,
-          title: "Antwerp",
-          description:
-            "A city in Belgium known for its diamond district and medieval architecture.",
-        },
-        {
-          id: 4,
-          title: "Marseille",
-          description:
-            "A vibrant port city in southern France, known for its Mediterranean culture.",
-        },
-        {
-          id: 5,
-          title: "Gothenburg",
-          description:
-            "A coastal city in Sweden known for its picturesque canals and cultural scene.",
-        },
-        {
-          id: 6,
-          title: "Geona",
-          description:
-            "A port city in Italy known for its rich maritime history and architecture.",
-        },
-        {
-          id: 7,
-          title: "Osaka",
-          description:
-            "A city in Japan, known for its modern architecture and nightlife.",
-        },
-        {
-          id: 8,
-          title: "Busan",
-          description:
-            "A port city in South Korea, famous for its beaches and seafood.",
-        },
-        {
-          id: 9,
-          title: "Manila",
-          description:
-            "The capital of the Philippines, known for its historic landmarks and vibrant culture.",
-        },
-        {
-          id: 10,
-          title: "Valencia",
-          description:
-            "A city in Spain, known for its futuristic architecture and beaches.",
-        },
-        {
-          id: 11,
-          title: "Seattle",
-          description:
-            "A major city in Washington, USA, known for its tech scene and iconic Space Needle.",
-        },
-        {
-          id: 12,
-          title: "Vancouver",
-          description:
-            "A coastal city in Canada, known for its stunning natural beauty and multicultural vibe.",
-        },
-        {
-          id: 13,
-          title: "Collection 1",
-          description: "A unique collection showcasing diverse items.",
-        },
-        {
-          id: 14,
-          title: "Collection 2",
-          description: "A curated set of rare objects for collectors.",
-        },
-        {
-          id: 15,
-          title: "Collection 3",
-          description:
-            "A set of artistic pieces representing various cultures.",
-        },
-        {
-          id: 16,
-          title: "Collection 4",
-          description:
-            "A collection of historical artifacts with cultural significance.",
-        },
-        {
-          id: 17,
-          title: "Collection 5",
-          description: "A diverse selection of modern art pieces.",
-        },
-        {
-          id: 18,
-          title: "Collection 6",
-          description: "A set of vintage items from different eras.",
-        },
-        {
-          id: 19,
-          title: "Collection 7",
-          description:
-            "A collection of iconic memorabilia from the 20th century.",
-        },
-        {
-          id: 20,
-          title: "Collection 8",
-          description: "A rare collection of limited-edition items.",
-        },
-        {
-          id: 21,
-          title: "Collection 9",
-          description: "A selection of unusual and quirky artifacts.",
-        },
-        {
-          id: 22,
-          title: "Collection 10",
-          description:
-            "A collection of items with artistic and historical value.",
-        },
-        {
-          id: 23,
-          title: "Collection 11",
-          description: "A set of collectible items from famous designers.",
-        },
-        {
-          id: 24,
-          title: "Collection 12",
-          description:
-            "A curated collection of items related to a specific theme.",
-        },
-      ];
-
+      const collections = this.sampleCollection;
       return collections;
     },
 
@@ -344,11 +343,18 @@ define([
 
     handleReadCollection: function (id) {
       this.appActionState = this.actions.READ_COLLECTION;
-      this.readCollection(id);
+      const result = this.readCollection(id);
+      if (result) {
+        this.updateCollectionInfoBox(result);
+      }
     },
 
     readCollection: function (id = "test") {
       console.log("Reading Collection", id);
+      const collectionResult = this.sampleCollection.find(
+        (c) => String(c.id) === String(id)
+      );
+      return collectionResult ? collectionResult : null;
     },
 
     getSelectedCollections: function () {
@@ -401,6 +407,18 @@ define([
       }
       this.leftPanelEditorView.style.display = "flex";
       this.leftPanelListView.style.display = "none";
+    },
+
+    updateCollectionInfoBox: function (properties) {
+      let tableRows = Object.entries(properties).map(([key, value]) => {
+        return `    
+                <tr>
+                  <td>${key}</td>
+                  <td>${value}</td>
+                </tr>`;
+      });
+      this.infoTableTitle.innerHTML = properties.title;
+      this.infoTableBody.innerHTML = tableRows.join("");
     },
 
     initializeListeners: function () {
