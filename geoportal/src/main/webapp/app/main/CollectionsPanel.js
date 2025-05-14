@@ -534,25 +534,6 @@ define([
               }
             }
           }
-          //Add geoportal search widget
-          var widgetContext = new WidgetContext({
-            i18n: i18n,
-            view: view,
-            proxyUrl: esriConfig.defaults.io.proxyUrl,
-            wabWidget: this,
-            widgetConfig: this.config,
-          });
-          let node = domConstruct.create("div", {
-            width: "500px",
-            height: "500px",
-          });
-          var gpSearchWidget = new SearchPane(
-            {
-              i18n: widgetContext.i18n,
-              widgetContext: widgetContext,
-            },
-            node
-          );
 
           let searchWidget = new SearchWidget({
             view: view,
