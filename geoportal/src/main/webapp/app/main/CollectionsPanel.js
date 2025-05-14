@@ -86,18 +86,17 @@ define([
   var oThisClass = declare([Templated], {
     i18n: i18n,
     templateString: template,
-
     mapWasInitialized: false,
 
     actions: {
-      DELETE: "DELETE",
-      UPDATE: "UPDATE",
-      CREATE: "CREATE",
-      READ: "READ",
+      DELETE_COLLECTION: "DELETE_COLLECTION",
+      UPDATE_COLLECTION: "UPDATE_COLLECTION",
+      CREATE_COLLECTION: "CREATE_COLLECTION",
+      READ_COLLECTION: "READ_COLLECTION",
       NONE: "NONE",
     },
 
-    collectionAction: "NONE",
+    appActionState: "NONE",
 
     postCreate: function () {
       this.inherited(arguments);
@@ -105,24 +104,43 @@ define([
       this.readConfig();
     },
 
-    handleDeleteCollection: function (id) {
-      this.collectionAction = this.actions.DELETE;
-      console.log("Deleting Collection: ", id);
+    handleDeleteCollections: function () {
+      this.appActionState = this.actions.DELETE_COLLECTION;
+      this.deleteCollection();
+      this.hideModal();
+    },
+
+    deleteCollection: function (id = "0") {
+      console.log("Deleting Collection", id);
     },
 
     handleCreateCollection: function (properties) {
-      this.collectionAction = this.actions.CREATE;
+      this.appActionState = this.actions.CREATE_COLLECTION;
+      this.createCollection();
+      this.hideEditor();
+    },
+
+    createCollection: function (properties = {}) {
       console.log("Creating Collection", properties);
     },
 
     handleUpdateCollection: function (id, properties) {
-      this.collectionAction = this.actions.UPDATE;
+      this.appActionState = this.actions.UPDATE_COLLECTION;
+      this.updateCollection(id, properties);
+      this.hideEditor();
+    },
+
+    updateCollection: function (id = "0", properties = {}) {
       console.log("Updating Collection", id, properties);
     },
 
     handleReadCollection: function (id) {
-      this.collectionAction = this.actions.READ;
-      console.log("Reading Collection", ids);
+      this.appActionState = this.actions.READ_COLLECTION;
+      this.readCollection();
+    },
+
+    readCollection: function (id) {
+      console.log("Reading Collection", id);
     },
 
     getSelectedCollections: function () {
@@ -142,6 +160,7 @@ define([
     },
 
     hideModal: function () {
+      this.appActionState = this.actions.NONE;
       this.modalContainer.style.display = "none";
     },
 
@@ -153,15 +172,16 @@ define([
     },
 
     hideEditor: function () {
+      this.appActionState = this.actions.NONE;
       this.leftPanelEditorView.style.display = "none";
       this.leftPanelListView.style.display = "flex";
     },
 
     showEditor: function () {
-      if (this.collectionAction === this.actions.CREATE) {
+      if (this.appActionState === this.actions.CREATE_COLLECTION) {
         this.collectionEditorTitle.innerHTML = "Create New Collection";
         this.editorPrimary.innerHTML = "Create Collection";
-      } else if (this.collectionAction === this.actions.UPDATE) {
+      } else if (this.appActionState === this.actions.UPDATE_COLLECTION) {
         this.collectionEditorTitle.innerHTML = "Update Collection";
         this.editorPrimary.innerHTML = "Update Collection";
       }
@@ -172,20 +192,25 @@ define([
     initializeListeners: function () {
       // Collection Events
       this.deleteCollectionButton.addEventListener("click", () => {
-        this.collectionAction = this.actions.DELETE;
+        this.appActionState = this.actions.DELETE_COLLECTION;
         this.showModal();
       });
       this.newCollection.addEventListener("click", () => {
-        this.collectionAction = this.actions.CREATE;
+        this.appActionState = this.actions.CREATE_COLLECTION;
         this.showEditor();
       });
       this.editCollection.addEventListener("click", () => {
-        this.collectionAction = this.actions.UPDATE;
+        this.appActionState = this.actions.UPDATE_COLLECTION;
         this.showEditor();
       });
 
       // Editor Events
       this.editorPrimary.addEventListener("click", () => {
+        if (this.appActionState === this.actions.UPDATE_COLLECTION) {
+          this.handleUpdateCollection();
+        } else if (this.appActionState === this.actions.CREATE_COLLECTION) {
+          this.handleCreateCollection();
+        }
         this.hideEditor();
       });
       this.editorSecondary.addEventListener("click", () => {
@@ -197,7 +222,9 @@ define([
         this.hideModal();
       });
       this.modalPrimaryButton.addEventListener("click", () => {
-        this.hideModal();
+        if (this.appActionState === this.actions.DELETE_COLLECTION) {
+          this.handleDeleteCollections();
+        }
       });
     },
 
