@@ -344,6 +344,14 @@ define([
 
     updateCollection: function (id = "0", properties = {}) {
       console.log("Updating Collection", id, properties);
+      this.collections = this.collections.map((c) => {
+        if (String(c.id) === String(id)) {
+          return properties;
+        }
+        return c;
+      });
+      this.handleReadCollection(id);
+      this.renderCollectionList(this.collections);
     },
 
     handleReadCollection: function (id) {
@@ -354,9 +362,9 @@ define([
       }
     },
 
-    readCollection: function (id = "test") {
+    readCollection: function (id = 0) {
       console.log("Reading Collection", id);
-      const collectionResult = this.sampleCollection.find(
+      const collectionResult = this.collections.find(
         (c) => String(c.id) === String(id)
       );
       return collectionResult ? collectionResult : null;
