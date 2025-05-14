@@ -97,20 +97,217 @@ define([
     },
 
     appActionState: "NONE",
+    collections: [],
 
     postCreate: function () {
       this.inherited(arguments);
-      this.initializeListeners();
       this.readConfig();
+
+      this.initializeListeners();
+      this.collections = this.getAllCollections();
+      this.renderCollectionList(this.collections);
+    },
+
+    getAllCollections: function () {
+      const collections = [
+        {
+          id: 1,
+          title: "Rotterdam",
+          description:
+            "A port city in the Netherlands known for modern architecture.",
+        },
+        {
+          id: 2,
+          title: "Hamburg",
+          description:
+            "A major port city in northern Germany, famous for its maritime heritage.",
+        },
+        {
+          id: 3,
+          title: "Antwerp",
+          description:
+            "A city in Belgium known for its diamond district and medieval architecture.",
+        },
+        {
+          id: 4,
+          title: "Marseille",
+          description:
+            "A vibrant port city in southern France, known for its Mediterranean culture.",
+        },
+        {
+          id: 5,
+          title: "Gothenburg",
+          description:
+            "A coastal city in Sweden known for its picturesque canals and cultural scene.",
+        },
+        {
+          id: 6,
+          title: "Geona",
+          description:
+            "A port city in Italy known for its rich maritime history and architecture.",
+        },
+        {
+          id: 7,
+          title: "Osaka",
+          description:
+            "A city in Japan, known for its modern architecture and nightlife.",
+        },
+        {
+          id: 8,
+          title: "Busan",
+          description:
+            "A port city in South Korea, famous for its beaches and seafood.",
+        },
+        {
+          id: 9,
+          title: "Manila",
+          description:
+            "The capital of the Philippines, known for its historic landmarks and vibrant culture.",
+        },
+        {
+          id: 10,
+          title: "Valencia",
+          description:
+            "A city in Spain, known for its futuristic architecture and beaches.",
+        },
+        {
+          id: 11,
+          title: "Seattle",
+          description:
+            "A major city in Washington, USA, known for its tech scene and iconic Space Needle.",
+        },
+        {
+          id: 12,
+          title: "Vancouver",
+          description:
+            "A coastal city in Canada, known for its stunning natural beauty and multicultural vibe.",
+        },
+        {
+          id: 13,
+          title: "Collection 1",
+          description: "A unique collection showcasing diverse items.",
+        },
+        {
+          id: 14,
+          title: "Collection 2",
+          description: "A curated set of rare objects for collectors.",
+        },
+        {
+          id: 15,
+          title: "Collection 3",
+          description:
+            "A set of artistic pieces representing various cultures.",
+        },
+        {
+          id: 16,
+          title: "Collection 4",
+          description:
+            "A collection of historical artifacts with cultural significance.",
+        },
+        {
+          id: 17,
+          title: "Collection 5",
+          description: "A diverse selection of modern art pieces.",
+        },
+        {
+          id: 18,
+          title: "Collection 6",
+          description: "A set of vintage items from different eras.",
+        },
+        {
+          id: 19,
+          title: "Collection 7",
+          description:
+            "A collection of iconic memorabilia from the 20th century.",
+        },
+        {
+          id: 20,
+          title: "Collection 8",
+          description: "A rare collection of limited-edition items.",
+        },
+        {
+          id: 21,
+          title: "Collection 9",
+          description: "A selection of unusual and quirky artifacts.",
+        },
+        {
+          id: 22,
+          title: "Collection 10",
+          description:
+            "A collection of items with artistic and historical value.",
+        },
+        {
+          id: 23,
+          title: "Collection 11",
+          description: "A set of collectible items from famous designers.",
+        },
+        {
+          id: 24,
+          title: "Collection 12",
+          description:
+            "A curated collection of items related to a specific theme.",
+        },
+      ];
+
+      return collections;
+    },
+
+    renderCollectionList: function (collections = []) {
+      console.log("rendering collection list: ", collections);
+
+      const collectionHTML = collections.map((collection) => {
+        return `
+          <div class="list-item">
+              <span class="list-item-title"
+                ><input
+                  class="list-item-checkbox"
+                  type="checkbox"
+                  data-id="${collection.id}"
+                  data-title="${collection.title}"
+                />${collection.title}</span
+              >
+
+              <div class="item-info-button" onclick="${this.handleReadCollection}">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </div>
+            </div>
+        `;
+      });
+      this.collectionsList.innerHTML = collectionHTML.join("");
     },
 
     handleDeleteCollections: function () {
       this.appActionState = this.actions.DELETE_COLLECTION;
-      this.deleteCollection();
+
+      // loop through and delete every collection selected
+      const collectionsToBeDeleted = this.getSelectedCollections();
+      collectionsToBeDeleted.forEach((collection) => {
+        this.deleteCollection(collection.id);
+      });
+
+      this.collections = this.collections.filter((c) => {
+        const found = collectionsToBeDeleted.find((ctb) => {
+          return String(ctb.id) === String(c.id);
+        });
+        if (found) {
+          return false;
+        }
+        return true;
+      });
+
+      this.renderCollectionList(this.collections);
       this.hideModal();
     },
 
-    deleteCollection: function (id = "0") {
+    deleteCollection: function (id) {
+      if (!id) {
+        return console.error("collection id required to delete");
+      }
       console.log("Deleting Collection", id);
     },
 
@@ -134,12 +331,12 @@ define([
       console.log("Updating Collection", id, properties);
     },
 
-    handleReadCollection: function (id) {
+    handleReadCollection: function _readCollection(e) {
       this.appActionState = this.actions.READ_COLLECTION;
       this.readCollection();
     },
 
-    readCollection: function (id) {
+    readCollection: function (id = "test") {
       console.log("Reading Collection", id);
     },
 
@@ -149,14 +346,17 @@ define([
         ".list-item-checkbox:checked"
       );
 
-      const selectedIds = [];
+      const selectedCollections = [];
       // Iterate over them
       checkedBoxes.forEach((checkbox) => {
         // Get data from a custom attribute, like data-city
-        selectedIds.push(checkbox.getAttribute("data-id"));
+        selectedCollections.push({
+          id: checkbox.getAttribute("data-id"),
+          title: checkbox.getAttribute("data-title"),
+        });
       });
 
-      return selectedIds;
+      return selectedCollections;
     },
 
     hideModal: function () {
@@ -166,9 +366,12 @@ define([
 
     showModal: function () {
       this.modalContainer.style.display = "flex";
-      const selectedIds = this.getSelectedCollections();
-      this.modalContainerCollectionsListLength.innerHTML = selectedIds.length;
-      this.modalContainerCollectionsList.innerHTML = selectedIds.join(", ");
+      const selectedCollections = this.getSelectedCollections();
+      this.modalContainerCollectionsListLength.innerHTML =
+        selectedCollections.length;
+      this.modalContainerCollectionsList.innerHTML = selectedCollections
+        .map((c) => c.title)
+        .join(", ");
     },
 
     hideEditor: function () {
