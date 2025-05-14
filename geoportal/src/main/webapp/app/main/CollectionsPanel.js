@@ -400,13 +400,43 @@ define([
       this.leftPanelListView.style.display = "flex";
     },
 
+    renderUpdateCollectionEditor: function (properties) {
+      this.collectionEditorTitle.innerHTML = "Update Collection";
+      this.editorPrimary.innerHTML = "Update Collection";
+      let collectionInputs = `
+          <label class="editor-label">description:</label>
+          <textArea style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
+
+          <label class="editor-label">id:</label>
+          <input class="editor-input" type="text" placeholder="value..."value="${properties.id}" />
+
+          <label class="editor-label">title:</label>
+          <input class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
+      `;
+      this.editorInputForm.innerHTML = collectionInputs;
+    },
+
+    renderCreateCollectionEditor: function () {
+      this.collectionEditorTitle.innerHTML = "Create New Collection";
+      this.editorPrimary.innerHTML = "Create Collection";
+      let collectionInputs = `
+      <label class="editor-label">description:</label>
+      <textArea style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
+
+      <label class="editor-label">id:</label>
+      <input class="editor-input" type="text" placeholder="value..."/>
+
+      <label class="editor-label">title:</label>
+      <input class="editor-input" type="text" placeholder="value..."/>
+  `;
+      this.editorInputForm.innerHTML = collectionInputs;
+    },
+
     showEditor: function () {
       if (this.appActionState === this.actions.CREATE_COLLECTION) {
-        this.collectionEditorTitle.innerHTML = "Create New Collection";
-        this.editorPrimary.innerHTML = "Create Collection";
+        this.renderCreateCollectionEditor();
       } else if (this.appActionState === this.actions.UPDATE_COLLECTION) {
-        this.collectionEditorTitle.innerHTML = "Update Collection";
-        this.editorPrimary.innerHTML = "Update Collection";
+        this.renderUpdateCollectionEditor(this.selectedCollection);
       }
       this.leftPanelEditorView.style.display = "flex";
       this.leftPanelListView.style.display = "none";
