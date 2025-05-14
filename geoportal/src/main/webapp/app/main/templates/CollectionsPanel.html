@@ -46,8 +46,7 @@
           <div
             data-dojo-attach-point="collectionsList"
             class="collections-list"
-          >
-          </div>
+          ></div>
         </div>
       </div>
       <div class="info-section" style="display: flex; flex-direction: column">
@@ -82,7 +81,9 @@
         </div>
         <div class="info-body">
           <div class="info-body-header">
-            <p class="info-body-title" data-dojo-attach-point="infoTableTitle">Collection Info</p>
+            <p class="info-body-title" data-dojo-attach-point="infoTableTitle">
+              Collection Info
+            </p>
             <div class="info-action-container">
               <p class="info-zoom-action">Zoom</p>
               <p
@@ -95,8 +96,7 @@
           </div>
           <div class="info-table-wrapper">
             <table class="info-table">
-              <tbody data-dojo-attach-point="infoTableBody">
-              </tbody>
+              <tbody data-dojo-attach-point="infoTableBody"></tbody>
             </table>
           </div>
         </div>
@@ -164,35 +164,23 @@
               </div>
             </div>
             <label class="editor-label">description:</label>
-            <input
-              class="editor-input"
-              type="text"
-              placeholder="value..."
-            />
+            <input class="editor-input" type="text" placeholder="value..." />
 
             <label class="editor-label">id:</label>
-            <input
-              class="editor-input"
-              type="text"
-              placeholder="value..."
-            />
+            <input class="editor-input" type="text" placeholder="value..." />
 
             <label class="editor-label">title:</label>
-            <input
-              class="editor-input"
-              type="text"
-              placeholder="value..."
-            />
+            <input class="editor-input" type="text" placeholder="value..." />
           </div>
         </div>
         <div class="editor-actions-section">
           <button
-          class="editor-button"
-          id="editor-secondary"
-          data-dojo-attach-point="editorSecondary"
-        >
-          Cancel
-        </button>
+            class="editor-button"
+            id="editor-secondary"
+            data-dojo-attach-point="editorSecondary"
+          >
+            Cancel
+          </button>
           <button
             class="editor-button"
             id="editor-primary"
@@ -227,12 +215,13 @@
       </div>
       <div id="confirm-modal-body" class="confirm-modal-section">
         <p>
-          Are you sure you would like to delete <span data-dojo-attach-point="modalContainerCollectionsListLength"></span> collection(s)? This action is
-          irreversible.
-          <div data-dojo-attach-point="modalContainerCollectionsList">
-
-          </div>
+          Are you sure you would like to delete
+          <span
+            data-dojo-attach-point="modalContainerCollectionsListLength"
+          ></span>
+          collection(s)? This action is irreversible.
         </p>
+        <div data-dojo-attach-point="modalContainerCollectionsList"></div>
       </div>
 
       <div id="confirm-modal-footer" class="confirm-modal-section">
@@ -515,7 +504,7 @@
     #editor-secondary {
       background-color: white;
       color: #1653ad;
-      border: 1px solid #1653ad
+      border: 1px solid #1653ad;
     }
 
     #mapViewContainerCollections {
