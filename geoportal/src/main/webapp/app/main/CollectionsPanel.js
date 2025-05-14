@@ -267,7 +267,7 @@ define([
                 />${collection.title}</span
               >
 
-              <div class="item-info-button" onclick="${this.handleReadCollection}">
+              <div class="item-info-button" data-id="${collection.id}" id="test">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path
                     d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
@@ -279,6 +279,17 @@ define([
         `;
       });
       this.collectionsList.innerHTML = collectionHTML.join("");
+
+      const infoButtons =
+        this.collectionsList.querySelectorAll(".item-info-button");
+      if (infoButtons?.length > 0) {
+        infoButtons.forEach((button) => {
+          const id = button.getAttribute("data-id");
+          button.onclick = (e) => {
+            this.handleReadCollection(id);
+          };
+        });
+      }
     },
 
     handleDeleteCollections: function () {
@@ -331,9 +342,9 @@ define([
       console.log("Updating Collection", id, properties);
     },
 
-    handleReadCollection: function _readCollection(e) {
+    handleReadCollection: function (id) {
       this.appActionState = this.actions.READ_COLLECTION;
-      this.readCollection();
+      this.readCollection(id);
     },
 
     readCollection: function (id = "test") {
