@@ -332,6 +332,8 @@ define([
 
     createCollection: function (properties = {}) {
       console.log("Creating Collection", properties);
+      this.collections.push(properties);
+      this.renderCollectionList(this.collections);
     },
 
     handleUpdateCollection: function (id, properties) {
