@@ -326,7 +326,7 @@ define([
 
     handleCreateCollection: function (properties) {
       this.appActionState = this.actions.CREATE_COLLECTION;
-      this.createCollection();
+      this.createCollection(this.getCreateFieldValues());
       this.hideEditor();
     },
 
@@ -421,13 +421,13 @@ define([
       this.editorPrimary.innerHTML = "Create Collection";
       let collectionInputs = `
       <label class="editor-label">description:</label>
-      <textArea style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
+      <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
 
       <label class="editor-label">id:</label>
-      <input class="editor-input" type="text" placeholder="value..."/>
+      <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."/>
 
       <label class="editor-label">title:</label>
-      <input class="editor-input" type="text" placeholder="value..."/>
+      <input id="collection-title-input" class="editor-input" type="text" placeholder="value..."/>
   `;
       this.editorInputForm.innerHTML = collectionInputs;
     },
@@ -454,7 +454,16 @@ define([
       this.infoTableBody.innerHTML = tableRows.join("");
     },
 
-    getUpdatedProperties: function () {
+    getUpdateFieldValues: function () {
+      return {
+        id: document.getElementById("collection-id-input").value,
+        description: document.getElementById("collection-description-input")
+          .value,
+        title: document.getElementById("collection-title-input").value,
+      };
+    },
+
+    getCreateFieldValues: function () {
       return {
         id: document.getElementById("collection-id-input").value,
         description: document.getElementById("collection-description-input")
@@ -481,7 +490,7 @@ define([
       // Editor Events
       this.editorPrimary.addEventListener("click", () => {
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
-          const updatedProperties = this.getUpdatedProperties();
+          const updatedProperties = this.getUpdateFieldValues();
           this.handleUpdateCollection(
             this.selectedCollection.id,
             updatedProperties
