@@ -89,54 +89,114 @@ define([
 
     mapWasInitialized: false,
 
+    actions: {
+      DELETE: "DELETE",
+      UPDATE: "UPDATE",
+      CREATE: "CREATE",
+      READ: "READ",
+    },
+
+    collectionAction: "READ",
+
     postCreate: function () {
       this.inherited(arguments);
       this.initializeListeners();
       this.readConfig();
     },
 
-    initializeListeners: function () {
-      this.modalSecondaryButton.addEventListener("click", () => {
-        this.modalContainer.style.display = "none";
-      });
-      this.modalPrimaryButton.addEventListener("click", () => {
-        this.modalContainer.style.display = "none";
-      });
-      this.deleteCollection.addEventListener("click", () => {
-        // Get all checked checkboxes with the class "list-item-checkbox"
-        const checkedBoxes = this.collectionsList.querySelectorAll(
-          ".list-item-checkbox:checked"
-        );
+    handleDeleteCollection: function (id) {
+      this.collectionAction = this.actions.DELETE;
+      console.log("Deleting Collection: ", id);
+    },
 
-        const selectedIds = [];
-        // Iterate over them
-        checkedBoxes.forEach((checkbox) => {
-          // Get data from a custom attribute, like data-city
-          selectedIds.push(checkbox.getAttribute("data-id"));
-        });
-        this.modalContainerCollectionsListLength.innerHTML = selectedIds.length;
-        this.modalContainerCollectionsList.innerHTML = selectedIds.join(", ");
-        this.modalContainer.style.display = "flex";
+    handleCreateCollection: function (properties) {
+      this.collectionAction = this.actions.CREATE;
+      console.log("Creating Collection", properties);
+    },
+
+    handleUpdateCollection: function (id, properties) {
+      this.collectionAction = this.actions.UPDATE;
+      console.log("Updating Collection", id, properties);
+    },
+
+    handleReadCollection: function (id) {
+      this.collectionAction = this.actions.READ;
+      console.log("Reading Collection", ids);
+    },
+
+    getSelectedCollections: function () {
+      // Get all checked checkboxes with the class "list-item-checkbox"
+      const checkedBoxes = this.collectionsList.querySelectorAll(
+        ".list-item-checkbox:checked"
+      );
+
+      const selectedIds = [];
+      // Iterate over them
+      checkedBoxes.forEach((checkbox) => {
+        // Get data from a custom attribute, like data-city
+        selectedIds.push(checkbox.getAttribute("data-id"));
       });
-      this.newCollection.addEventListener("click", () => {
-        this.leftPanelEditorView.style.display = "flex";
-        this.leftPanelListView.style.display = "none";
+
+      return selectedIds;
+    },
+
+    hideModal: function () {
+      this.modalContainer.style.display = "none";
+    },
+
+    showModal: function () {
+      this.modalContainer.style.display = "flex";
+      const selectedIds = this.getSelectedCollections();
+      this.modalContainerCollectionsListLength.innerHTML = selectedIds.length;
+      this.modalContainerCollectionsList.innerHTML = selectedIds.join(", ");
+    },
+
+    hideEditor: function () {
+      this.leftPanelEditorView.style.display = "none";
+      this.leftPanelListView.style.display = "flex";
+    },
+
+    showEditor: function () {
+      if (this.collectionAction === this.actions.CREATE) {
         this.collectionEditorTitle.innerHTML = "Create New Collection";
         this.editorPrimary.innerHTML = "Create Collection";
-      });
-      this.editorPrimary.addEventListener("click", () => {
-        this.leftPanelEditorView.style.display = "none";
-        this.leftPanelListView.style.display = "flex";
-      });
-      this.editorSecondary.addEventListener("click", () => {
-        this.leftPanelEditorView.style.display = "none";
-        this.leftPanelListView.style.display = "flex";
-      });
-      this.editCollection.addEventListener("click", () => {
-        this.leftPanelEditorView.style.display = "flex";
-        this.leftPanelListView.style.display = "none";
+      } else if (this.collectionAction === this.actions.UPDATE) {
         this.collectionEditorTitle.innerHTML = "Update Collection";
         this.editorPrimary.innerHTML = "Update Collection";
+      }
+      this.leftPanelEditorView.style.display = "flex";
+      this.leftPanelListView.style.display = "none";
+    },
+
+    initializeListeners: function () {
+      // Collection Events
+      this.deleteCollectionButton.addEventListener("click", () => {
+        this.collectionAction = this.actions.DELETE;
+        this.showModal();
+      });
+      this.newCollection.addEventListener("click", () => {
+        this.collectionAction = this.actions.CREATE;
+        this.showEditor();
+      });
+      this.editCollection.addEventListener("click", () => {
+        this.collectionAction = this.actions.UPDATE;
+        this.showEditor();
+      });
+
+      // Editor Events
+      this.editorPrimary.addEventListener("click", () => {
+        this.hideEditor();
+      });
+      this.editorSecondary.addEventListener("click", () => {
+        this.hideEditor();
+      });
+
+      // Modal Events
+      this.modalSecondaryButton.addEventListener("click", () => {
+        this.hideModal();
+      });
+      this.modalPrimaryButton.addEventListener("click", () => {
+        this.hideModal();
       });
     },
 
@@ -233,18 +293,7 @@ define([
             },
             node
           );
-          // gpSearchWidget.startup();
 
-          // let gpSearchExpand = new Expand({
-          //   expandIcon: "query",
-          //   expandTooltip: "Geoportal Search",
-          //   view: view,
-          //   content: gpSearchWidget,
-          // });
-          // view.ui.add(gpSearchExpand, {
-          //   position: "top-left",
-          //   index: 0,
-          // });
           let searchWidget = new SearchWidget({
             view: view,
           });
