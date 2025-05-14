@@ -94,9 +94,10 @@ define([
       UPDATE: "UPDATE",
       CREATE: "CREATE",
       READ: "READ",
+      NONE: "NONE",
     },
 
-    collectionAction: "READ",
+    collectionAction: "NONE",
 
     postCreate: function () {
       this.inherited(arguments);
