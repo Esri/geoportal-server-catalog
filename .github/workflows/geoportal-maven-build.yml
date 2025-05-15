@@ -3,17 +3,26 @@
 
 name: Maven Package
 
+#on:
+#release:
+#types: [created]
+
+
 on:
-  release:
-    types: [created]
+  push:
+    branches: [ "JS4_Stac" ]
+  pull_request:
+    branches: [ "JS4_Stac" ]
+
+env:
+  PROJECT_LOCATION: geoportal
+  ELASTIC_BEANSTALK_NAME: my-beanstalk-name
+  ELASTIC_BEANSTALK_ENV_NAME: my-beanstalk-env-name
 
 jobs:
   build:
 
     runs-on: windows-latest
-    permissions:
-      contents: read
-      packages: write
 
     steps:
     - uses: actions/checkout@v4
@@ -22,13 +31,46 @@ jobs:
       with:
         java-version: '17.0.2+8'
         distribution: 'adopt'
-        server-id: github # Value of the distributionManagement/repository/id field of the pom.xml
-        settings-path: ${{ github.workspace }} # location for the settings.xml file
-
+        cache: maven
     - name: Build with Maven
-      run: mvn -B package --file pom.xml
+      run: mvn -B package --file ${{env.PROJECT_LOCATION}}/pom.xml
+    - name: Checkout tools repo
+      uses: actions/checkout@v4
+      with:
+        repository: EsriPS/exxonmobil-gsdb
+        token: ${{ secrets.RB_PAT }}
+        path: exxonmobil-gsdb
 
-    #- name: Publish to GitHub Packages Apache Maven
-      #run: mvn deploy -s $GITHUB_WORKSPACE/settings.xml
-      #env:
-        #GITHUB_TOKEN: ${{ github.token }}
+    - name: Extract ${{env.PROJECT_LOCATION}}/target/geoportal.war
+      run: 7z x ${{env.PROJECT_LOCATION}}/target/geoportal.war -ogeoportal_war
+
+    - name: List directory content
+      shell: cmd
+      run: for /D %%Y in (*) do echo %%Y
+
+    - name: Copy config files
+      run: |
+        Copy-Item -Path "exxonmobil-gsdb\geoportal server\WEB-INF\classes\config\*" -Destination "geoportal_war\WEB-INF\classes\config" -Recurse -Force
+        Copy-Item -Path "exxonmobil-gsdb\geoportal server\WEB-INF\classes\service\config\*" -Destination "geoportal_war\WEB-INF\classes\service\config" -Recurse -Force
+
+    - name: Archive geoportal_war to geoportal.war
+      run: 7z a geoportal.war .\geoportal_war\*
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: geoportal-artifact
+        path: geoportal.war
+      #deploy:
+
+      #runs-on: windows-latest
+      #needs: build
+
+      #steps:
+      #- uses: actions/download-artifact@v4.1.7
+      #- name: Configure AWS Credentials
+      # uses: aws-actions/configure-aws-credentials@v4
+      # with:
+      #   aws-region: us-east-1
+      #   aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+      #   aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
