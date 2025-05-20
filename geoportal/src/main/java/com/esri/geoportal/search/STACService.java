@@ -1441,15 +1441,27 @@ public class STACService extends Application {
 						 status = Response.Status.BAD_REQUEST;
 					 }
 				 }
-
+				 
+				 JSONArray createdMsgArr = new JSONArray();
 				 JSONArray errorMsgArr = new JSONArray();
 				 JSONObject errorMsgObj;
+				 JSONObject createdMsgObj;
 				 JSONObject errorObj;
+				 JSONObject statusObj = new JSONObject();
 				 
 				 for(int i =0;i<features.size() ;i++)
 				 {
 					 JSONObject feature = (JSONObject) features.get(i);
 					 Response res = executeAddFeature(feature, collectionId, null, false,"FeatureCollection");
+					 
+					 if(res.getStatus() == Response.Status.CREATED.getStatusCode())
+					 {
+						 createdMsgObj = new JSONObject();
+						 createdMsgObj.put("id", feature.getAsString("id"));
+						 createdMsgObj.put("status", "created");
+						 createdMsgArr.add(createdMsgObj);
+					 }
+					 
 					 if(res.getStatus() != Response.Status.CREATED.getStatusCode())
 					 {
 						 errorMsgObj = new JSONObject();
@@ -1459,13 +1471,13 @@ public class STACService extends Application {
 						 errorMsgObj.put("error",errorObj.get("description"));
 						 
 						 errorMsgArr.add(errorMsgObj);
-					 }				 
+					 }					 
+					 statusObj.put("created",createdMsgArr);
+					 statusObj.put("failed",errorMsgArr);
+					 
 				 }
-				 if(!errorMsgArr.isEmpty())
-				 {
-					 responseJSON = generateResponse("400","Some Features in FeatureCollection  could not be added.",errorMsgArr);
-					 status = Response.Status.BAD_REQUEST;					
-				 }
+				 responseJSON = generateFeatureCollectionRes("200",statusObj);
+				 status = Response.Status.OK;
 			}
       
 		} catch(Exception ex) {			
@@ -1485,6 +1497,13 @@ public class STACService extends Application {
 	}
 
   
+	private String generateFeatureCollectionRes(String code, JSONObject statusObj) {		
+		JSONObject resObj = new JSONObject();
+		resObj.put("code", code);
+		resObj.put("detail",statusObj);	
+		return resObj.toString();
+	}
+
 	private String generateResponse(String code, String description, JSONArray detailMsgArr) {
 		JSONObject resObj = new JSONObject();
 		resObj.put("code", code);
