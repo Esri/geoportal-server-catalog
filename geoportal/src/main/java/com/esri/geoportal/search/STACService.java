@@ -727,7 +727,7 @@ public class STACService extends Application {
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
-      @QueryParam("outCRS") String outCRS, @QueryParam("filter") String filter)
+			@QueryParam("outCRS") String outCRS, @QueryParam("status") String itemStatus,@QueryParam("filter") String filter)
 			throws UnsupportedEncodingException {
 		String responseJSON;
 		String response;
@@ -758,11 +758,26 @@ public class STACService extends Application {
 
 			if (intersects != null && intersects.length() > 0)
 				queryMap.put("intersects", intersects);
+			
+			//valid values 'active' and 'ínactive'
+			if (itemStatus != null && itemStatus.length() > 0)
+				queryMap.put("status", itemStatus);
 
-      // issue 573
-      if (filter != null && filter.length() > 0) {
-        queryMap.put("filterClause", filter);
-      }
+	       // issue 573
+	       if (filter != null && filter.length() > 0) {
+	         queryMap.put("filterClause", filter);
+	       }
+	     //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
+	       if ((outCRS != null) &&  listOfCollections!=null && listOfCollections.length()>0)
+	       {
+	    	   String[] collectionList = listOfCollections.split(",");
+	    		  if(collectionList.length>1)
+	    		  {
+	    			  status = Response.Status.BAD_REQUEST;    				
+	    			  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
+	    			  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+	    		  }
+	       }
 
 			url = url + "/_search?size=" + (limit+1); //Adding one extra so that next page can be figured out
 
@@ -778,18 +793,17 @@ public class STACService extends Application {
                                           idList, intersects, "search", 
                                           listOfCollections,null);
       
-      // if reprojecting STAC geometries is supported and a
-      // geometry service has been configured, try projecting 
-      // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-
-        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
-        responseJSON = projectedResponseObj.toString();        
-        
-        // done
-        LOGGER.debug("Project response -> " + responseJSON);
-      }      
+	      // if reprojecting STAC geometries is supported and a 
+	      // geometry service has been configured, try projecting from internal CRS (4326) to requested outCRS
+	      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+	        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+	
+	        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
+	        responseJSON = projectedResponseObj.toString();        
+	        
+	        // done
+	        LOGGER.debug("Project response -> " + responseJSON);
+	      }      
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -832,17 +846,16 @@ public class STACService extends Application {
 		JsonObject intersects = (requestPayload.containsKey("intersects") 
         ? requestPayload.getJsonObject("intersects")
 				: null);
-    
-    String filterClause = (requestPayload.containsKey("filter") 
-        ? requestPayload.getString("filter")
-				: null);
+		String itemStatus = (requestPayload.containsKey("status") ? requestPayload.getString("status"): null);
+	    String filterClause = (requestPayload.containsKey("filter") 
+	        ? requestPayload.getString("filter")
+					: null);
 
 		//TODO Handle merge=true in Search Pagination
 		String query;
 		String bbox = "";
 		String ids = "";
-		//ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-		//ElasticClient client = ElasticClient.newClient();
+
 		try {			
 			String url = client.getTypeUrlForSearch(ec.getIndexName());
 			Map<String, String> queryMap = new HashMap<>();
@@ -893,13 +906,25 @@ public class STACService extends Application {
 				}								
 				queryMap.put("collections", listOfCollections);
 			}
+			
+			//valid values 'active' and 'ínactive'
+			if (itemStatus != null && itemStatus.length() > 0)
+				queryMap.put("status", itemStatus);
 
-      // issue 573
+			// issue 573
 			if (filterClause != null && filterClause.length() > 0) {
-        //String filterQry = StacHelper.prepareFilter(filterClause);
-        queryMap.put("filterClause", filterClause); //filterQry);
-      }
+		        //String filterQry = StacHelper.prepareFilter(filterClause);
+		        queryMap.put("filterClause", filterClause); //filterQry);
+		    }
       
+		 //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
+	       if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
+	       {
+			  status = Response.Status.BAD_REQUEST;    				
+			  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
+			  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+	    		  
+	       }
 			//Adding one extra so that next page can be figured out
 			url = url + "/_search?size=" + (limit+1);
 			query = StacHelper.prepareSearchQuery(queryMap, search_after);
@@ -912,18 +937,18 @@ public class STACService extends Application {
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
 					(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""),body);
       
-      // if reprojecting STAC geometries is supported and a
-      // geometry service has been configured, try projecting 
-      // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-
-        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
-        responseJSON = projectedResponseObj.toString();        
-        
-        // done
-        LOGGER.debug("Project response -> " + responseJSON);
-      }
+	      // if reprojecting STAC geometries is supported and a
+	      // geometry service has been configured, try projecting 
+	      // from internal CRS (4326) to requested outCRS
+	      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+	        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+	
+	        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
+	        responseJSON = projectedResponseObj.toString();        
+	        
+	        // done
+	        LOGGER.debug("Project response -> " + responseJSON);
+	      }
       
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
