@@ -232,6 +232,11 @@ public class StacHelper {
 			String collectionQry = prepareCollection(queryMap.get("collections"));
 			builder.add(JsonUtil.toJsonStructure(collectionQry));
 		}
+		
+		if (queryMap.containsKey("status")) {			
+			String statusQry = prepareStatus(queryMap.get("status"));
+			builder.add(JsonUtil.toJsonStructure(statusQry));
+		}
     
 		if (queryMap.containsKey("filterClause")) {			
 			String filterQry = prepareFilter(queryMap.get("filterClause"));
@@ -255,7 +260,13 @@ public class StacHelper {
 	}
 
 
-  // {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, 
+  private static String prepareStatus(String status) {
+		return prepareFilter("gsdb:status="+status);
+		
+	}
+
+
+	// {"type": "GeometryCollection", "geometries": [{"type": "Point", "coordinates": [100.0, 0.0]}, 
   // {"type": "LineString", "coordinates": [[101.0, 0.0], [102.0, 1.0]]}]}
 	private static String prepareIntersects(String geoJson) {
 		String query = "";
