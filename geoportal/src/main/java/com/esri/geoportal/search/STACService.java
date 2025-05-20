@@ -1437,8 +1437,11 @@ public class STACService extends Application {
 				 {
 					 if(features.size() >gc.getNumStacFeaturesAddItem())
 					 {
-						 responseJSON = generateResponse("400","Number of Features in FeatureCollection are more than allowed limit ("+features.size()+") in Synchronous request. For large FeatureCollection include paramter async=true.",null);
+						 responseJSON = generateResponse("400","Number of Features {"+features.size()+"} in FeatureCollection are more than allowed limit {"+gc.getNumStacFeaturesAddItem()+"} in Synchronous request. For large FeatureCollection include paramter async=true.",null);
 						 status = Response.Status.BAD_REQUEST;
+						 return Response.status(status)
+				                   .header("Content-Type", "application/json")
+				                   .entity(responseJSON).build();
 					 }
 				 }
 				 
@@ -1487,9 +1490,9 @@ public class STACService extends Application {
 		}
     
 		//For asynchronous request, log this response message
-    if(async) {
-      LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
-    }
+	    if(async) {
+	      LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+	    }
     
 		return Response.status(status)
                    .header("Content-Type", "application/json")
