@@ -974,11 +974,12 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
           // the HTML view of the metadata
           if (evt.srcElement.target != "_blank") {
             var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
-            if (AppContext.geoportal.supportsApprovalStatus || 
-                AppContext.geoportal.supportsGroupBasedAccess) {
-              var client = new AppClient();
-              uri = client.appendAccessToken(uri);
-            }
+            
+            if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
+                    AppContext.geoportal.supportsGroupBasedAccess)) {
+            	  var client = new AppClient();    
+                  url = client.appendAccessToken(url); 
+             }
             this.self._renderDataHtml(item, uri);
           } 
         })));
