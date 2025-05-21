@@ -56,13 +56,14 @@ define(["dojo/_base/declare",
   "app/content/UploadMetadata",
   "app/preview/PreviewUtil",
   "app/preview/PreviewPane",
+  "app/search/ItemData",
   "app/search/ItemHtml"
 ], 
 function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domStyle, domClass, domConstruct,domAttr,
   _WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin, Tooltip, TooltipDialog, popup,
   template, i18n, Map,MapView, Extent, SimpleFillSymbol, Point, Graphic, GraphicsLayer,Zoom, AppClient, ServiceType, util, 
   ConfirmationDialog, ChangeOwner, DeleteItems, MetadataEditor, gxeConfig, SetAccess, SetApprovalStatus, 
-  SetCollections, SetField, UploadMetadata, PreviewUtil, PreviewPane, ItemHtml) {
+  SetCollections, SetField, UploadMetadata, PreviewUtil, PreviewPane, ItemData, ItemHtml) {
   
   var oThisClass = declare([_WidgetBase, _TemplatedMixin, _WidgetsInTemplateMixin], {
 
@@ -336,6 +337,19 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
           xmlNode.style.display = "none";
         }
       }
+    },
+
+    _renderDataPopup: function(item) {
+      console.log(item);
+      var itemData = new ItemData({
+        title: this.i18n.item.itemData.title + " - " + item.title,
+        item: item,
+        style: "width: 80%; max-width: 80%;",
+        onHide: function() {
+          itemData.destroy();
+        }
+      });
+      itemData.show();
     },
     
     _renderDataHtml: function(item, uri) {
@@ -901,8 +915,21 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
 
     _renderTitleLink: function(itemId,item) {
       var v = item.sys_metadatatype_s;
-      if (typeof v === "string" && v === "json") {
-        util.setNodeText(this.titleNode,item.title);
+      var recordType = item.type ? item.type : "XML metadata";
+      var titleNode = this.titleNode;
+
+      if ((recordType && recordType === "Feature") || (typeof v === "string" && v === "json")) {
+        //util.setNodeText(this.titleNode,item.title);
+
+        var htmlNode = domConstruct.create("a",{
+          href: "#",
+          innerHTML: item.title
+        },titleNode);
+        //htmlNode.appendChild(document.createTextNode(item.title));
+        this.own(on(htmlNode, "click", lang.hitch({self: this, item: item}, function(evt){
+          this.self._renderDataPopup(item);
+        })));
+
       } else {
         var titleNode = this.titleNode;
         
@@ -947,12 +974,11 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
           // the HTML view of the metadata
           if (evt.srcElement.target != "_blank") {
             var uri = "./rest/metadata/item/"+encodeURIComponent(itemId) + "/html";
-            
-            if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
-                    AppContext.geoportal.supportsGroupBasedAccess)) {
-            	  var client = new AppClient();    
-                  url = client.appendAccessToken(url); 
-             }
+            if (AppContext.geoportal.supportsApprovalStatus || 
+                AppContext.geoportal.supportsGroupBasedAccess) {
+              var client = new AppClient();
+              uri = client.appendAccessToken(uri);
+            }
             this.self._renderDataHtml(item, uri);
           } 
         })));
