@@ -536,7 +536,7 @@ public class GeometryServiceClient {
             }
             
             // add the paths to the geometry
-            geometries += "\"paths\": [[";
+            geometries += "\"paths\": [";
 			
             String[] wktPathML = wktCoordinates.split("\\),[ ]*\\(");
             boolean firstPath = true;
