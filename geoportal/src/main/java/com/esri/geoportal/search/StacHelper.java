@@ -45,7 +45,7 @@ public class StacHelper {
 	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId, boolean validateAllFields) throws Exception {	
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
-    response = validateFields(requestPayload,collectionId, validateAllFields);
+    response = validateFields(requestPayload,collectionId, validateAllFields,false);
 		if(response.getCode() == null)
 		{
 			response = validateId(requestPayload,collectionId);
@@ -432,7 +432,8 @@ public class StacHelper {
 
   
 	// https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md
-	private static StacItemValidationResponse validateFields(JSONObject requestPayload,String collectionId, boolean validateAllFields) {
+	private static StacItemValidationResponse validateFields(JSONObject requestPayload,String collectionId, boolean validateAllFields,
+			boolean forUpdate) {
 		String errorMsg ="";
 		StacItemValidationResponse response = new StacItemValidationResponse();
     
@@ -496,7 +497,7 @@ public class StacHelper {
     for (String validationRule : sc.getValidationRules()) {
       LOGGER.debug("Validation rule: " + validationRule);
       try {
-        JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId);
+        JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId,forUpdate);
         if (!validationResult.getAsString("passes").equals("true")) {
           errorMsg = errorMsg + " Failed validation rule ";
           errorMsg = errorMsg + validationRule + ": ";
@@ -564,7 +565,7 @@ public class StacHelper {
         JSONArray envelopeGeoArr = new JSONArray();
         JSONObject envelopeGeo = new JSONObject();
 
-        if (bbox.size() == 4) {
+        if (bbox!=null &&bbox.size() == 4) {
           double coords[] = { -180.0, -90.0, 180.0, 90.0 };
 
           coords[0] = Double.parseDouble(bbox.get(0).toString());
@@ -630,44 +631,39 @@ public class StacHelper {
 	}
 
 	public static StacItemValidationResponse validateStacItemForUpdate(JSONObject requestPayload, 
-			String collectionId, String featureId, boolean validateAllFields) throws Exception {
+		String collectionId, String featureId, boolean validateAllFields) throws Exception {
 		
 		String errorMsg = "";
 		StacItemValidationResponse response = new StacItemValidationResponse();
 
-    response = validateFields(requestPayload,collectionId, validateAllFields);	
-		
-		if(response.getCode() == null)
-		{
-			//validate that collectionId and featureId in URL is matching values in Feature body
-			if(!requestPayload.getAsString("id").equals(featureId))
-			{
-        errorMsg = errorMsg+" id in Feature body and Id in path param should be equal.";
-			}
-			if(requestPayload.getAsString("collection")!= null && !requestPayload.getAsString("collection").equals(collectionId))
-			{
-        errorMsg = errorMsg+" collection in Feature body and collectionId in path param should be equal.";
-			}
-			if(errorMsg.length()>0)
-			{
-        response.setCode(StacItemValidationResponse.BAD_REQUEST);
-        response.setMessage(errorMsg);
-			}
-			else
-			{
-        //validate it is valid featureId
-        String itemRes = getItemWithItemId(collectionId, featureId);
-        DocumentContext elasticResContext = JsonPath.parse(itemRes);
+		response = validateFields(requestPayload, collectionId, validateAllFields,true); //forUpdate=true if it is update request
 
-        net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
-        if (items == null || items.size() == 0) {
-            response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
-            response.setMessage("Feature does not exist.");
-        }
+		if (response.getCode() == null) {
+			// validate that collectionId and featureId in URL is matching values in Feature
+			// body
+			if (!requestPayload.getAsString("id").equals(featureId)) {
+				errorMsg = errorMsg + " id in Feature body and Id in path param should be equal.";
+			}
+			if (requestPayload.getAsString("collection") != null
+					&& !requestPayload.getAsString("collection").equals(collectionId)) {
+				errorMsg = errorMsg + " collection in Feature body and collectionId in path param should be equal.";
+			}
+			if (errorMsg.length() > 0) {
+				response.setCode(StacItemValidationResponse.BAD_REQUEST);
+				response.setMessage(errorMsg);
+			} else {
+				// validate it is valid featureId
+				String itemRes = getItemWithItemId(collectionId, featureId);
+				DocumentContext elasticResContext = JsonPath.parse(itemRes);
+
+				net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+				if (items == null || items.size() == 0) {
+					response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
+					response.setMessage("Feature does not exist.");
+				}
 			}
 		}
-		if(response.getCode() == null)
-		{
+		if (response.getCode() == null) {
 			response.setCode(StacItemValidationResponse.ITEM_VALID);
 			response.setMessage("Item is valid.");
 		}

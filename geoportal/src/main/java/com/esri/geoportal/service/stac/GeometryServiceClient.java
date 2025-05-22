@@ -16,6 +16,7 @@ package com.esri.geoportal.service.stac;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -25,22 +26,20 @@ import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
-
-import net.minidev.json.JSONObject;
-
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.http.MockTrustManager;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
+
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
 
 /**
  * An HTTP client for Geometry service.
