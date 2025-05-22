@@ -598,6 +598,7 @@ public class GeometryServiceClient {
                                                .replace("(", "[")
                                                .replace(")", "]")
                                                .replace(", ", "],[")
+                                               .replace(",", "],[")
                                                .replace(" ", ",");
             geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [ {";
 
