@@ -45,29 +45,33 @@
     <beans:property name="indexNameIsAlias" value="true" />
     <beans:property name="autoCreateIndex" value="true" />
     <beans:property name="autoCreateCollectionIndex" value="true" />		
-	<beans:property name="allowFileId" value="false" />
+    <beans:property name="allowFileId" value="false" />
     <beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
     <beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
     <beans:property name="httpPort" value="9200" />		
-	<beans:property name="transportPort" value="9300" />  
-	<beans:property name="proxyBufferSize" value="8192" />		
+    <beans:property name="transportPort" value="9300" />  
+    <beans:property name="proxyBufferSize" value="8192" />		
           	
     <!-- Uncomment and complete the following if you want to use secured index -->
-    <beans:property name="useHttps" value="true" />
+    <beans:property name="useHttps" value="false" />
     <beans:property name="encryptPassword" value="false" />
+
     <!-- If encryptPassword =true, Uncomment below and configure the keys -->
-	<!-- 
+    <!-- 
     <beans:property name="base64Key" value="${gpt_base64Key}" />
-    <beans:property name="base64Iv" value="${gpt_base64Iv}" /> -->
+    <beans:property name="base64Iv" value="${gpt_base64Iv}" /> 
+    -->
    
-   <beans:property name="username" value="" />
-	<beans:property name="password" value="" />
+    <beans:property name="username" value="" />
+    <beans:property name="password" value="" />
     
-	<beans:property name="engineType" value="${gpt_engineType:opensearch}"/> <!-- null | opensearch | elasticsearch -->		
-	<beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType:}"/> <!-- null for all other types of Opensearch | serverless | managed -->
-	<!--If awsOpenSearchType = serverless, uncomment and configure awsALBEndpoint (AWS ALB)
+    <beans:property name="engineType" value="${gpt_engineType:opensearch}"/> <!-- null | opensearch | elasticsearch -->		
+    <beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType:}"/> <!-- null for all other types of Opensearch | serverless | managed -->
+    <!--If awsOpenSearchType = serverless, uncomment and configure awsALBEndpoint (AWS ALB)
 		https://github.com/Esri/geoportal-server-catalog/tree/master/geoportal/doc/aws-serverless -->
-	<!-- <beans:property name="awsALBEndpoint" value=""/>	 -->
+    <!-- 
+    <beans:property name="awsALBEndpoint" value=""/>
+    -->
 	
     <beans:property name="nodes">
       <!-- The list of host names within the Elasticsearch cluster, one value element per host -->
@@ -89,6 +93,27 @@
         <beans:value>${gpt_stacValidationRule1}</beans:value>
         <beans:value>${gpt_stacValidationRule2}</beans:value>-->
       </beans:list> 
+    </beans:property>
+    <beans:property name="fieldMappings">
+      <beans:list>
+        <!-- 
+          field mapping string:
+          field_mapping ::= stac_field_name=index_field_name
+          stac_field_name=index_field_name ::= name + [_txt | _s | _b | _i | _l | _f | _d | _dt | _cat ]
+          _txt ::= free text field
+          _s ::= keyword field
+          _b ::= boolean field
+          _i ::= integer field
+          _l ::= long field
+          _f ::= float field
+          _d ::= double field
+          _dt ::= date field: e.g. 2025-01-16T11:35:56.732Z
+          _cat ::= hierarchical category field: e.g. continent > country > state/province > county/municipality > city > neighborhood ...          
+        -->
+	<!--
+        <beans:value>prefix:stac_property=index_field_suffix</beans:value>
+	-->
+      </beans:list>
     </beans:property>
   </beans:bean>  
   
