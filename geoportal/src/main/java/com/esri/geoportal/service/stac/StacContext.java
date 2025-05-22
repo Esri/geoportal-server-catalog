@@ -126,7 +126,7 @@ public class StacContext {
   
   /* ========== Validation Rule functions here ========== */
   
-  public JSONObject passesValidation(String validationRule, JSONObject item, String collectionId) throws Exception {
+  public JSONObject passesValidation(String validationRule, JSONObject item, String collectionId,boolean forUpdate) throws Exception {
     boolean passes;
     String message = "";
     JSONObject response = new JSONObject();    
@@ -135,6 +135,7 @@ public class StacContext {
     String[] ruleElements = validationRule.split("\\|");
     String ruleType = ruleElements[0];
     String key;
+    String itemId = item.getAsString("id");
     
     switch (ruleType) {    
       case "unique":
@@ -164,7 +165,7 @@ public class StacContext {
           searchQry = StacHelper.prepareFilter(filterClause);
         }
           
-        ukFieldExists = indexHasValue(collectionId, searchQry);
+        ukFieldExists = indexHasValue(collectionId, searchQry,forUpdate,itemId);
         passes = !ukFieldExists;
         message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + message;          
         
@@ -178,8 +179,7 @@ public class StacContext {
         break;
         
       case "geometry_source_matches":
-        passes = true;
-        String itemId = item.getAsString("id");
+        passes = true;       
         JSONObject existingItem = StacHelper.getSTACItemById(collectionId, itemId);
         
         if (existingItem == null) {
@@ -274,9 +274,11 @@ public class StacContext {
    * @param collectionId collection to check for uniqueness of field
    * @param key name of the field to check for uniqueness on 
    * @param value value to check for
+   * @param forUpdate if rqeuest is for item update
+   * @param itemId 
    * @return true if and only if the index already has an item with this value for this field
    */
-  private boolean indexHasValue(String collectionId, String filterQry) throws Exception {
+  private boolean indexHasValue(String collectionId, String filterQry,boolean forUpdate, String itemId) throws Exception {
     LOGGER.debug("Testing if the index has an entry with filter " + filterQry);
     String searchResponse = "";	
     boolean valueExists = false;
@@ -295,7 +297,18 @@ public class StacContext {
 			
 			if(items != null && items.size()>0)
 			{
-				valueExists= true;
+				if(!forUpdate)
+					valueExists= true;
+				else
+				{//if it is update request, and unique key is for same item, it is not issue
+					HashMap<String, JSONObject> itemMap =  (HashMap<String, JSONObject>) items.get(0);
+					JSONObject item = new JSONObject(itemMap.get("_source"));
+					String id = item.getAsString("id");
+					if(!id.contentEquals(itemId))
+					{
+						valueExists= true;
+					}
+				}
 			}
     	}    		
 		return valueExists;
