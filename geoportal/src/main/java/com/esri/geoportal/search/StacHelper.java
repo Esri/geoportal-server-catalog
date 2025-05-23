@@ -520,113 +520,130 @@ public class StacHelper {
 	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) {
 		String date = DateUtil.nowAsString();
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
-		
-		//Add feature
-		if(!forUpdate)
-		{
-			//populate STAC item field (collection) with collectionID from URI
-			requestPayload.put("collection",collectionId);
+		StacContext sc = StacContext.getInstance();
+		// Add feature
+		if (!forUpdate) {
+			// populate STAC item field (collection) with collectionID from URI
+			requestPayload.put("collection", collectionId);
+
+			// Add attributes in properties
+			prop.put(FieldNames.FIELD_STAC_CREATED, date);
+			prop.put(FieldNames.FIELD_STAC_UPDATED, date);
 			
-			//Add attributes in properties			
-			prop.put(FieldNames.FIELD_STAC_CREATED,date);
-			prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
+			//Check for geom_wkt field, if exists, iterate over all geometries and fill update_date
+			if(prop.containsKey(sc.getWktGeomFld()))
+			{
+				JSONObject wktGeom = (JSONObject)prop.get(sc.getWktGeomFld());
+				for (Map.Entry<String, Object> entry : wktGeom.entrySet()) {
+					String geomObjKey = entry.getKey();
+					JSONObject geomObj = (JSONObject) wktGeom.get(geomObjKey);
+					if(!geomObj.containsKey("update_date"))
+					{
+						geomObj.put("update_date",date);	
+					}
+				}			
+			}
+			
 			requestPayload.put("properties", prop);
-			
-			//Add Geoportal attributes sys_created_dt, sys_modified_dt, sys_collections_s,sys_access_s 
+
+			// Add Geoportal attributes sys_created_dt, sys_modified_dt,
+			// sys_collections_s,sys_access_s
 			// sys_approval_status_s,title and url_granule_s
 			JSONArray collArr = new JSONArray();
 			collArr.add(collectionId);
-			
-			requestPayload.put(FieldNames.FIELD_SYS_CREATED,date);
-			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);		
-			requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS,collArr);
-			requestPayload.put(FieldNames.FIELD_TITLE,requestPayload.get("id"));
-			
-			//Add url_granule_s from asset with role thumbnail
-			if(requestPayload.containsKey(FieldNames.FIELD_ASSETS))
-			{
-        JSONObject assetsObj = (JSONObject) requestPayload.get(FieldNames.FIELD_ASSETS);
 
-        if(assetsObj.keySet().contains(FieldNames.FIELD_THUMBNAIL)) {
-          JSONObject thumbnailObj = (JSONObject) assetsObj.get(FieldNames.FIELD_THUMBNAIL);
-          if(thumbnailObj.get("href")!=null) {
-            requestPayload.put(FieldNames.FIELD_URL_GRANULE_S,thumbnailObj.get("href").toString());
-          }
-        }
+			requestPayload.put(FieldNames.FIELD_SYS_CREATED, date);
+			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
+			requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS, collArr);
+			requestPayload.put(FieldNames.FIELD_TITLE, requestPayload.get("id"));
+
+			// Add url_granule_s from asset with role thumbnail
+			if (requestPayload.containsKey(FieldNames.FIELD_ASSETS)) {
+				JSONObject assetsObj = (JSONObject) requestPayload.get(FieldNames.FIELD_ASSETS);
+
+				if (assetsObj.keySet().contains(FieldNames.FIELD_THUMBNAIL)) {
+					JSONObject thumbnailObj = (JSONObject) assetsObj.get(FieldNames.FIELD_THUMBNAIL);
+					if (thumbnailObj.get("href") != null) {
+						requestPayload.put(FieldNames.FIELD_URL_GRANULE_S, thumbnailObj.get("href").toString());
+					}
+				}
 			}
-            
-			//if envelope_geo and shape_geo not present in request, add from bbox and geometry respectively,
-			if(!requestPayload.containsKey(FieldNames.FIELD_SHAPE_GEO) && requestPayload.containsKey(FieldNames.FIELD_GEOMETRY)) {
-        requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
+
+			// if envelope_geo and shape_geo not present in request, add from bbox and
+			// geometry respectively,
+			if (!requestPayload.containsKey(FieldNames.FIELD_SHAPE_GEO)
+					&& requestPayload.containsKey(FieldNames.FIELD_GEOMETRY)) {
+				requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
 			}
-			
-			if(!requestPayload.containsKey(FieldNames.FIELD_ENVELOPE_GEO) && requestPayload.containsKey(FieldNames.FIELD_BBOX)) {
-        JSONArray bbox =(JSONArray) requestPayload.get(FieldNames.FIELD_BBOX);
-        JSONArray envelopeGeoArr = new JSONArray();
-        JSONObject envelopeGeo = new JSONObject();
 
-        if (bbox!=null &&bbox.size() == 4) {
-          double coords[] = { -180.0, -90.0, 180.0, 90.0 };
+			if (!requestPayload.containsKey(FieldNames.FIELD_ENVELOPE_GEO)
+					&& requestPayload.containsKey(FieldNames.FIELD_BBOX)) {
+				JSONArray bbox = (JSONArray) requestPayload.get(FieldNames.FIELD_BBOX);
+				JSONArray envelopeGeoArr = new JSONArray();
+				JSONObject envelopeGeo = new JSONObject();
 
-          coords[0] = Double.parseDouble(bbox.get(0).toString());
-          coords[1] = Double.parseDouble(bbox.get(1).toString());
-          coords[2] = Double.parseDouble(bbox.get(2).toString());
-          coords[3] = Double.parseDouble(bbox.get(3).toString());
+				if (bbox != null && bbox.size() == 4) {
+					double coords[] = { -180.0, -90.0, 180.0, 90.0 };
 
-          JSONArray coordinateArr1 = new JSONArray();
-          coordinateArr1.add(0, coords[0]);
-          coordinateArr1.add(1, coords[3]);
+					coords[0] = Double.parseDouble(bbox.get(0).toString());
+					coords[1] = Double.parseDouble(bbox.get(1).toString());
+					coords[2] = Double.parseDouble(bbox.get(2).toString());
+					coords[3] = Double.parseDouble(bbox.get(3).toString());
 
-          JSONArray coordinateArr2 = new JSONArray();
-          coordinateArr2.add(0, coords[2]);
-          coordinateArr2.add(1, coords[1]);
+					JSONArray coordinateArr1 = new JSONArray();
+					coordinateArr1.add(0, coords[0]);
+					coordinateArr1.add(1, coords[3]);
 
-          JSONArray coordinateArr = new JSONArray();
-          coordinateArr.add(0, coordinateArr1);
-          coordinateArr.add(1, coordinateArr2);
+					JSONArray coordinateArr2 = new JSONArray();
+					coordinateArr2.add(0, coords[2]);
+					coordinateArr2.add(1, coords[1]);
 
-          envelopeGeo.put("coordinates", coordinateArr);
-          envelopeGeo.put("type", "envelope");
-          envelopeGeo.put("ignore_malformed", "true");
-          envelopeGeoArr.add(0,envelopeGeo);
+					JSONArray coordinateArr = new JSONArray();
+					coordinateArr.add(0, coordinateArr1);
+					coordinateArr.add(1, coordinateArr2);
 
-          requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
-        }
+					envelopeGeo.put("coordinates", coordinateArr);
+					envelopeGeo.put("type", "envelope");
+					envelopeGeo.put("ignore_malformed", "true");
+					envelopeGeoArr.add(0, envelopeGeo);
+
+					requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
+				}
 			}
-			
+
 			GeoportalContext gc = GeoportalContext.getInstance();
-			if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null && 
-			          gc.getDefaultAccessLevel().length() > 0) {
-				requestPayload.put(FieldNames.FIELD_SYS_ACCESS,gc.getDefaultAccessLevel());
-      }
-      if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null && 
-			          gc.getDefaultApprovalStatus().length() > 0) {
-        requestPayload.put(FieldNames.FIELD_SYS_APPROVAL_STATUS,gc.getDefaultApprovalStatus());
-      }
-		    
-      requestPayload.put(FieldNames.FIELD_SYS_OWNER, null);
-      requestPayload.put(FieldNames.FIELD_SYS_OWNER_TXT,null);
+			if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null
+					&& gc.getDefaultAccessLevel().length() > 0) {
+				requestPayload.put(FieldNames.FIELD_SYS_ACCESS, gc.getDefaultAccessLevel());
+			}
+			if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null
+					&& gc.getDefaultApprovalStatus().length() > 0) {
+				requestPayload.put(FieldNames.FIELD_SYS_APPROVAL_STATUS, gc.getDefaultApprovalStatus());
+			}
+
+			requestPayload.put(FieldNames.FIELD_SYS_OWNER, null);
+			requestPayload.put(FieldNames.FIELD_SYS_OWNER_TXT, null);
 		}
 
-    //Update Feature
-		else
-		{
-      requestPayload.put(FieldNames.FIELD_SYS_MODIFIED,date);	
+		// Update Feature
+		else {
+			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
 
-      prop.put(FieldNames.FIELD_STAC_UPDATED,date);		
-      requestPayload.put("properties", prop);
+			prop.put(FieldNames.FIELD_STAC_UPDATED, date);
+			requestPayload.put("properties", prop);
 		}
 
-    // in either add/update map STAC fields from app-context fieldMappings to index fields
-    StacContext sc = StacContext.getInstance();
-    for (Map.Entry<String,String> entry : sc.getFieldMappings().entrySet()) {
-      String stacField = entry.getKey();
-      if(prop.containsKey(stacField)) {
-        String indexField = entry.getValue();
-        requestPayload.put(indexField, prop.get(stacField));
-      }
-    }
-    
+		// in either add/update map STAC fields from app-context fieldMappings to index
+		// fields
+		
+		for (Map.Entry<String, String> entry : sc.getFieldMappings().entrySet()) {
+			String stacField = entry.getKey();
+			if (prop.containsKey(stacField)) {
+				String indexField = entry.getValue();
+				requestPayload.put(indexField, prop.get(stacField));
+			}
+		}
+
 		return requestPayload;
 	}
 

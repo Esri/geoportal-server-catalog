@@ -54,6 +54,7 @@ public class StacContext {
 
   private List<String> validationRules;
   private Map<String, String> fieldMappings = new HashMap<>();
+  private String wktGeomFld = "gsdb:geometry_wkt";
   
   
   /**
@@ -122,7 +123,15 @@ public class StacContext {
       LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
       throw ex;
     }    
-  }  
+  } 
+  
+  	public String getWktGeomFld() {
+		return wktGeomFld;
+	}
+
+	public void setWktGeomFld(String wktGeomFld) {
+		this.wktGeomFld = wktGeomFld;
+	}
   
   /* ========== Validation Rule functions here ========== */
   
@@ -412,4 +421,6 @@ public class StacContext {
       return intersects;
     }
   }
+
+
 }
