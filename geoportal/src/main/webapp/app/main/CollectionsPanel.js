@@ -242,17 +242,37 @@ define([
       },
     ],
 
+    getStacBaseUrl: function () {
+      if (window && window.top && window.top.geoportalServiceInfo) {
+        var loc = window.top.location;
+        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;
+        return stacBaseUrl;
+      }
+      return null;
+    },
+
     postCreate: function () {
       this.inherited(arguments);
       this.readConfig();
 
       this.initializeListeners();
-      this.collections = this.getAllCollections();
-      this.renderCollectionList(this.collections);
+      const handleGetCollections = async () => {
+        this.collections = await this.getAllCollections();
+        this.renderCollectionList(this.collections);
+      };
+      handleGetCollections();
     },
 
-    getAllCollections: function () {
-      const collections = this.sampleCollection;
+    getAllCollections: async function () {
+      let collections = [];
+      try {
+        const url = `${this.getStacBaseUrl()}/collections`;
+        const response = await fetch(url);
+        const result = await response.json();
+        collections = result.collections;
+      } catch (e) {
+        collections = this.sampleCollection;
+      }
       return collections;
     },
 
