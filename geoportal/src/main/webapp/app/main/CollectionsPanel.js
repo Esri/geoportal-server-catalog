@@ -282,7 +282,7 @@ define([
       const collectionHTML = collections.map((collection) => {
         return `
           <div class="list-item">
-              <span class="list-item-title"
+              <span class="list-item-title truncate-text"
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
