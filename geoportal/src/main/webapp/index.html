@@ -30,28 +30,6 @@
 <div id="app-browser-incompatible-node" class="g-browser-incompatible">
 	  <span id="app-browser-incompatible-msg" style="width:100%"></span>
 </div>
-<!--
-<script type="text/javascript">
-  window.dojoConfig = {
-    locale: "en",
-    async: true,
-    parseOnLoad: true,
-
-    packages: [
-          {
-              name: "esri4",
-              location: "https://js.arcgis.com/4.30/esri"
-          },
-          {
-              name: 'app',
-              location: location.pathname.replace(/\/[^/]*$/, '') + '/app',
-          }
-    	]
-  };
-  
-</script>
--->
-
 <script src="./lib/init.js"></script>
 <script src="./lib/d3-3.5.5.js"></script>
 <script src="./lib/popper.min.js"></script>
@@ -61,30 +39,7 @@
 <script src="./lib/typeahead.js"></script>
 <script src="https://js.arcgis.com/3.36/"></script>
 <script src="./custom/custom.js"></script>
-
-<!--
-<script>
-require(["app","dojo/i18n!app/nls/resources"],function(app,i18n) {
-  var isIE = navigator.userAgent.indexOf("MSIE ")!=-1 || navigator.userAgent.indexOf("Trident/")!=-1;
-  if (!isIE) {
-    document.getElementById("app-loading-node").style.display = "block";
-    require(["dojo/ready","esri4/config","app/context/AppContext","app/context/AppStarter"],
-    function(ready,esriConfig,AppContext,AppStarter) {
-      window.AppContext = new AppContext();
-      ready(function() {       
-        esriConfig.request.proxyUrl = "viewer/proxy.jsp";
-        (new AppStarter()).startupApp();
-      });
-    });
-  } else {
-    console.log("Your browser is no longer supported.");
-    document.getElementById("app-browser-incompatible-node").style.display = "block";
-    document.getElementById("app-browser-incompatible-node").innerHTML = i18n.general.incompatible;
-  }
-});
-</script>
--->
-<script src="./lib/startup.js"></script>
+<script src="./app/main/startup.js"></script>
 
 </body>
 </html>
