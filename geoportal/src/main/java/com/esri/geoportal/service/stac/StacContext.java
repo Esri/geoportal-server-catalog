@@ -55,9 +55,9 @@ public class StacContext {
   private List<String> validationRules;
   private Map<String, String> fieldMappings = new HashMap<>();
   private String wktGeomFld = "gsdb:geometry_wkt";
-  
-  
-  /**
+  private String statusFld = "gsdb:status";
+
+/**
    * Get the single instance.
    * @return the instance
    */
@@ -131,6 +131,14 @@ public class StacContext {
 
 	public void setWktGeomFld(String wktGeomFld) {
 		this.wktGeomFld = wktGeomFld;
+	}
+	
+	public String getStatusFld() {
+		return statusFld;
+	}
+
+	public void setStatusFld(String statusFld) {
+		this.statusFld = statusFld;
 	}
   
   /* ========== Validation Rule functions here ========== */

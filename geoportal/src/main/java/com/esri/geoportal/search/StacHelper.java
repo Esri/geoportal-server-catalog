@@ -261,7 +261,8 @@ public class StacHelper {
 
 
   private static String prepareStatus(String status) {
-		return prepareFilter("gsdb:status="+status);
+	  	StacContext sc = StacContext.getInstance();
+		return prepareFilter(sc.getStatusFld()+"="+status);
 		
 	}
 
