@@ -75,6 +75,7 @@ import net.minidev.json.parser.JSONParser;
 import net.minidev.json.parser.ParseException;
 
 
+
 /**
  * STAC API service provider.
  */
@@ -937,7 +938,7 @@ public class STACService extends Application {
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
 					(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""),body);
       
-	      // if reprojecting STAC geometries is supported and a
+	      // if re-projecting STAC geometries is supported and a
 	      // geometry service has been configured, try projecting 
 	      // from internal CRS (4326) to requested outCRS
 	      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
@@ -1452,6 +1453,7 @@ public class STACService extends Application {
 		// Add invalid features in error response	
 		String responseJSON = generateResponse("201","FeatureCollection created successfully.",null);
 		Status status = Response.Status.CREATED;
+		String responseCode;
 		JSONArray detailErrArray = new JSONArray();
 		try {
 			if(requestPayload.containsKey("features"))
@@ -1499,13 +1501,23 @@ public class STACService extends Application {
 						 errorMsgObj.put("error",errorObj.get("description"));
 						 
 						 errorMsgArr.add(errorMsgObj);
+						 //At least one item failed so response code would be 400
+						 status = Response.Status.BAD_REQUEST;
 					 }					 
 					 statusObj.put("created",createdMsgArr);
 					 statusObj.put("failed",errorMsgArr);
 					 
 				 }
-				 responseJSON = generateFeatureCollectionRes("200",statusObj);
-				 status = Response.Status.OK;
+				 if(status.equals(Response.Status.BAD_REQUEST))
+				 {
+					 responseCode = "400";
+				 }
+				 else
+				 {
+					 responseCode = "201";
+				 }
+				 responseJSON = generateFeatureCollectionRes(responseCode,statusObj);
+				 
 			}
       
 		} catch(Exception ex) {			
