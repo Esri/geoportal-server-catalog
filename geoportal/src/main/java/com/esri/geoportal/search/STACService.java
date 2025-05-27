@@ -794,21 +794,29 @@ public class STACService extends Application {
 			} else {
 				response = client.sendGet(url);
 			}
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, 
-                                          idList, intersects, "search", 
-                                          listOfCollections,null);
-      
-	      // if reprojecting STAC geometries is supported and a 
-	      // geometry service has been configured, try projecting from internal CRS (4326) to requested outCRS
-	      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-	        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-	
-	        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
-	        responseJSON = projectedResponseObj.toString();        
-	        
-	        // done
-	        LOGGER.debug("Project response -> " + responseJSON);
-	      }      
+			if(response.contains("error"))
+			{
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = this.generateResponse("400", response,null);				
+			}
+			else
+			{
+				responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, 
+                        idList, intersects, "search", 
+                        listOfCollections,null);
+
+				// if re-projecting STAC geometries is supported and a 
+				// geometry service has been configured, try projecting from internal CRS (4326) to requested outCRS
+				if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+				LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+				
+				JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
+				responseJSON = projectedResponseObj.toString();        
+				
+				// done
+				LOGGER.debug("Projected response -> " + responseJSON);
+				} 
+			}
 
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
@@ -938,22 +946,29 @@ public class STACService extends Application {
 				response = client.sendPost(url, query, "application/json");
 			else
 				response = client.sendGet(url);
-
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
-					(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""),body);
-      
-	      // if re-projecting STAC geometries is supported and a
-	      // geometry service has been configured, try projecting 
-	      // from internal CRS (4326) to requested outCRS
-	      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-	        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-	
-	        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
-	        responseJSON = projectedResponseObj.toString();        
-	        
-	        // done
-	        LOGGER.debug("Project response -> " + responseJSON);
-	      }
+			
+			if(response.contains("error"))
+			{
+				status = Response.Status.BAD_REQUEST;
+				responseJSON = this.generateResponse("400", response,null);				
+			}
+			else {
+				responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
+						(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""),body);
+	      
+		      // if re-projecting STAC geometries is supported and a
+		      // geometry service has been configured, try projecting 
+		      // from internal CRS (4326) to requested outCRS
+			      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+				        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+				
+				        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
+				        responseJSON = projectedResponseObj.toString();             
+				        
+				        // done
+				        LOGGER.debug("Project response -> " + responseJSON);
+			      }
+			}
       
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
