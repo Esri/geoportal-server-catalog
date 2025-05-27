@@ -234,26 +234,64 @@ define([
     postCreate: function () {
       this.inherited(arguments);
       this.readConfig();
+    },
 
+    handleMapReady: function (view) {
       this.initializeListeners();
+
       const handleGetCollections = async () => {
         this.collections = await this.getAllCollections();
         this.renderCollectionList(this.collections);
+        this.renderCollectionGraphics(this.collections, view);
       };
       handleGetCollections();
+    },
+
+    renderCollectionGraphics: async function (collections, view) {
+      const fillSymbol = {
+        type: "simple-fill", // autocasts as new SimpleFillSymbol()
+        color: [255, 165, 0, 0.3],
+        outline: {
+          color: [255, 165, 0],
+          width: 2,
+        },
+      };
+
+      let lastGraphic = null;
+      collections.forEach((collection, index) => {
+        if (collection.geometry) {
+          const graphic = new Graphic({
+            symbol: fillSymbol,
+            geometry: {
+              rings: collection.geometry.coordinates,
+              type: collection.geometry.type.toLowerCase(),
+            },
+          });
+          lastGraphic = graphic;
+          const graphicsLayer = new GraphicsLayer({
+            title: collection.properties.id,
+          });
+          graphicsLayer.add(graphic);
+          view.map.layers.add(graphicsLayer);
+        }
+      });
+      setTimeout(() => {
+        //timeout because map hasnt rendered
+        view.goTo(lastGraphic);
+      }, 3000);
     },
 
     getAllCollections: async function () {
       let collections = [];
       try {
-        let url = `${this.getStacBaseUrl()}/collections`;
+        let url = `${this.getStacBaseUrl()}/collections?f=geojson`;
         if (AppContext.appConfig.system.secureCatalogApp) {
           var client = new AppClient();
           url = client.appendAccessToken(url);
         }
         const response = await fetch(url);
         const result = await response.json();
-        collections = result.collections;
+        collections = result.features;
       } catch (e) {
         collections = this.sampleCollection;
       }
@@ -364,7 +402,7 @@ define([
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
       if (this.selectedCollection) {
-        this.updateCollectionInfoBox(this.selectedCollection);
+        this.updateCollectionInfoBox(this.selectedCollection.properties);
       }
     },
 
@@ -747,6 +785,8 @@ define([
           this.addLayer(this.urlParams, view);
         }
       }
+
+      this.handleMapReady(view);
     },
 
     executeLayerlistActions: function (event) {
