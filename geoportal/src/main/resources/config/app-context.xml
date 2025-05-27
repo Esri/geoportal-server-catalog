@@ -81,8 +81,7 @@
     </beans:property>
   </beans:bean>
             
-  <beans:bean id="stacContext" class="com.esri.geoportal.service.stac.StacContext">
-     <beans:property name="wktGeomFld" value="gsdb:geometry_wkt"/>
+  <beans:bean id="stacContext" class="com.esri.geoportal.service.stac.StacContext">    
     <beans:property name="statusFld" value="gsdb:status"/>  
     <beans:property name="validationRules">
       <beans:list>
