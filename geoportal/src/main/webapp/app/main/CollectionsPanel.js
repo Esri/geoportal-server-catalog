@@ -246,7 +246,11 @@ define([
     getAllCollections: async function () {
       let collections = [];
       try {
-        const url = `${this.getStacBaseUrl()}/collections`;
+        let url = `${this.getStacBaseUrl()}/collections`;
+        if (AppContext.appConfig.system.secureCatalogApp) {
+          var client = new AppClient();
+          url = client.appendAccessToken(url);
+        }
         const response = await fetch(url);
         const result = await response.json();
         collections = result.collections;
