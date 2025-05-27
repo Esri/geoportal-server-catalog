@@ -270,12 +270,12 @@ define([
                 ><input
                   class="list-item-checkbox"
                   type="checkbox"
-                  data-id="${collection.id}"
-                  data-title="${collection.title}"
-                />${collection.title}</span
+                  data-id="${collection.properties.id}"
+                  data-title="${collection.properties.title}"
+                />${collection.properties.title}</span
               >
 
-              <div class="item-info-button" data-id="${collection.id}" id="test">
+              <div class="item-info-button" data-id="${collection.properties.id}">
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path
                     d="M17 16h-5.525a5.95 5.95 0 0 0-.172-1H17zm2-7h-9v1h9zm0 3h-9v.544q.193.22.364.456H19zm3 8H11.818l-.913-.913c.014-.028.023-.059.037-.087H21V7h-4V3H8v8.053a5.945 5.945 0 0 0-1-.356V2h11.4L22 5.6zM21 5.69L18.31 3H18v3h3zM8.926 19.23l3.085 3.084a.476.476 0 0 1 0 .674l-.017.017a.476.476 0 0 1-.673 0L8.237 19.92A4.383 4.383 0 1 1 9.9 16.5a4.358 4.358 0 0 1-.974 2.73zM5.5 19.9a3.4 3.4 0 1 0-3.4-3.4 3.404 3.404 0 0 0 3.4 3.4z"
@@ -311,7 +311,7 @@ define([
 
       this.collections = this.collections.filter((c) => {
         const found = collectionsToBeDeleted.find((ctb) => {
-          return String(ctb.id) === String(c.id);
+          return String(ctb.id) === String(c.properties.id);
         });
         if (found) {
           return false;
@@ -351,8 +351,8 @@ define([
     updateCollection: function (id = "0", properties = {}) {
       console.log("Updating Collection", id, properties);
       this.collections = this.collections.map((c) => {
-        if (String(c.id) === String(id)) {
-          return properties;
+        if (String(c.properties.id) === String(id)) {
+          c.properties = properties;
         }
         return c;
       });
@@ -371,7 +371,7 @@ define([
     readCollection: function (id = 0) {
       console.log("Reading Collection", id);
       const collectionResult = this.collections.find(
-        (c) => String(c.id) === String(id)
+        (c) => String(c.properties.id) === String(id)
       );
       return collectionResult ? collectionResult : null;
     },
