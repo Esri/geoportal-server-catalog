@@ -489,6 +489,8 @@ define([
     },
 
     initializeListeners: function () {
+      const that = this;
+
       // Collection Events
       this.deleteCollectionButton.addEventListener("click", () => {
         this.appActionState = this.actions.DELETE_COLLECTION;
@@ -528,6 +530,17 @@ define([
         if (this.appActionState === this.actions.DELETE_COLLECTION) {
           this.handleDeleteCollections();
         }
+      });
+
+      // List Filtering
+      this.collectionSearchInput.addEventListener("input", function () {
+        const collectionElements =
+          that.collectionsList.querySelectorAll(".list-item");
+        const filterText = this.value.toLowerCase();
+        collectionElements.forEach((el) => {
+          const itemText = el.textContent.toLowerCase();
+          el.classList.toggle("hidden", !itemText.includes(filterText));
+        });
       });
     },
 
