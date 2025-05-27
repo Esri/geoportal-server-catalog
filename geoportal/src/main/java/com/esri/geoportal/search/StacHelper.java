@@ -9,7 +9,6 @@ import java.util.Map;
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
-import javax.ws.rs.core.Response;
 
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
@@ -153,12 +152,30 @@ public class StacHelper {
 	 * @throws Exception
 	 */
 	public static JSONArray getCollectionList() throws Exception {
+    return getCollectionList(10000);
+  }
+
+  
+	/** Returns Array of collections from elastic index 'çollections'
+	 * @return
+	 * @throws Exception
+	 */
+	public static JSONArray getCollectionList(int limit) throws Exception {
 		ElasticClient client = ElasticClient.newClient();
 		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 		
 		String url = client.getTypeUrlForSearch(ec.getCollectionIndexName());
-		url = url + "/_search";
-		String query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}}";
+    
+    // 616 - only allow max number to return
+		url = url + "/_search?size=" + limit;    
+    String searchAfterStr = "";
+    // TODO - full pagination for collections list
+    //    if (searchAfter != null && !searchAfter.isBlank()) {
+    //      searchAfterStr = ", \"search_after\":[\"" + searchAfter + "\"]";
+    //    } else {
+    //      searchAfterStr = "";
+    //    }
+		String query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}" + searchAfterStr + "}";
 		
 		String	response = client.sendPost(url, query, "application/json");	
 		DocumentContext elasticResContext = JsonPath.parse(response);
@@ -522,6 +539,7 @@ public class StacHelper {
 		String date = DateUtil.nowAsString();
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
 		StacContext sc = StacContext.getInstance();
+		GeoportalContext gc = GeoportalContext.getInstance();
 		// Add feature
 		if (!forUpdate) {
 			// populate STAC item field (collection) with collectionID from URI
@@ -532,9 +550,9 @@ public class StacHelper {
 			prop.put(FieldNames.FIELD_STAC_UPDATED, date);
 			
 			//Check for geom_wkt field, if exists, iterate over all geometries and fill update_date
-			if(prop.containsKey(sc.getWktGeomFld()))
+			if(prop.containsKey(gc.getGeomWKTField()))
 			{
-				JSONObject wktGeom = (JSONObject)prop.get(sc.getWktGeomFld());
+				JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
 				for (Map.Entry<String, Object> entry : wktGeom.entrySet()) {
 					String geomObjKey = entry.getKey();
 					JSONObject geomObj = (JSONObject) wktGeom.get(geomObjKey);
@@ -611,8 +629,7 @@ public class StacHelper {
 					requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
 				}
 			}
-
-			GeoportalContext gc = GeoportalContext.getInstance();
+			
 			if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null
 					&& gc.getDefaultAccessLevel().length() > 0) {
 				requestPayload.put(FieldNames.FIELD_SYS_ACCESS, gc.getDefaultAccessLevel());
