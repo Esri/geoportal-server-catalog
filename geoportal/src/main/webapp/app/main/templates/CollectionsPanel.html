@@ -31,7 +31,12 @@
           </div>
         </div>
         <div class="search-input-container">
-          <input type="text" class="search-input" placeholder="Search..." />
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search..."
+            data-dojo-attach-point="collectionSearchInput"
+          />
           <div style="position: absolute; top: 3px; left: 12px; width: 20px">
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
               <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
@@ -600,6 +605,10 @@
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    .hidden {
+      display: none;
     }
   </style>
 </div>
