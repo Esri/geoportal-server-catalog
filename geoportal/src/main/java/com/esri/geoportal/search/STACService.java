@@ -1189,10 +1189,7 @@ public class STACService extends Application {
         updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
         responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
       }
-      
-      
-      // update feature (will reproject)
-      responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
+       responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
 
       
       
@@ -1249,8 +1246,8 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
     
 		try {			
-      // 574
-      JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
+	      // 574
+	      JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
 			
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,false);
       

@@ -669,9 +669,21 @@ public class StacHelper {
 		String collectionId, String featureId, boolean validateAllFields) throws Exception {
 		
 		String errorMsg = "";
-		StacItemValidationResponse response = new StacItemValidationResponse();
+		StacItemValidationResponse response = new StacItemValidationResponse();		
+		
+		//First validate, it is valid featureId
+		String itemRes = getItemWithItemId(collectionId, featureId);
+		DocumentContext elasticResContext = JsonPath.parse(itemRes);
 
-		response = validateFields(requestPayload, collectionId, validateAllFields,true); //forUpdate=true if it is update request
+		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+		if (items == null || items.size() == 0) {
+			response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
+			response.setMessage("Feature does not exist.");
+		}
+		
+		if (response.getCode() == null) {
+			response = validateFields(requestPayload, collectionId, validateAllFields,true); //forUpdate=true if it is update request
+		}
 
 		if (response.getCode() == null) {
 			// validate that collectionId and featureId in URL is matching values in Feature
@@ -686,17 +698,7 @@ public class StacHelper {
 			if (errorMsg.length() > 0) {
 				response.setCode(StacItemValidationResponse.BAD_REQUEST);
 				response.setMessage(errorMsg);
-			} else {
-				// validate it is valid featureId
-				String itemRes = getItemWithItemId(collectionId, featureId);
-				DocumentContext elasticResContext = JsonPath.parse(itemRes);
-
-				net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
-				if (items == null || items.size() == 0) {
-					response.setCode(StacItemValidationResponse.ITEM_NOT_FOUND);
-					response.setMessage("Feature does not exist.");
-				}
-			}
+			} 
 		}
 		if (response.getCode() == null) {
 			response.setCode(StacItemValidationResponse.ITEM_VALID);

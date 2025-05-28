@@ -22,8 +22,6 @@ import com.esri.geoportal.search.StacHelper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -49,7 +47,7 @@ public class StacContext {
   private static final Logger LOGGER = LoggerFactory.getLogger(StacContext.class);
   private static StacContext SINGLETON = null;
   private final GeoportalContext gc = GeoportalContext.getInstance();
-  private final JSONParser jsonParser = new JSONParser();
+  private final JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
   private final GeometryServiceClient gsc = gc.getGeometryServiceClient();
 
   private List<String> validationRules;
@@ -196,8 +194,7 @@ public class StacContext {
           // this is a new item
           passes = true;
           
-        } else {
-          
+        } else {          
           // this is an existing item, check the geometry source
           JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, "gsdb:geometry_wkt");
           JSONObject newGeometryWKT = (JSONObject) getProperty(item, "gsdb:geometry_wkt");
@@ -209,34 +206,38 @@ public class StacContext {
           //     else
           //       the new geometry is NOT allowed, stop testing, rule failed
           //   else next, this new geometry is allowed
-          for (String geometryType: newGeometryWKT.keySet()) { 
-            if (existingGeometryWKT.containsKey(geometryType)) {
-              JSONObject existingGeometry = (JSONObject) existingGeometryWKT.get(geometryType);
-              JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);
+          if(existingGeometryWKT!=null && newGeometryWKT!=null)
+          {
+              for (String geometryType: newGeometryWKT.keySet())
+              { 
+                  if (existingGeometryWKT.containsKey(geometryType)) {
+                    JSONObject existingGeometry = (JSONObject) existingGeometryWKT.get(geometryType);
+                    JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);
 
-              String existingGeometrySource = null;
-              String newGeometrySource = null;
+                    String existingGeometrySource = null;
+                    String newGeometrySource = null;
 
-              if (newGeometry.containsKey("geometry_source")) {
-                newGeometrySource = newGeometry.getAsString("geometry_source");
-              }
-              if (newGeometry.containsKey("geometry_source")) {
-                existingGeometrySource = existingGeometry.getAsString("geometry_source");
-              }
+                    if (newGeometry.containsKey("geometry_source")) {
+                      newGeometrySource = newGeometry.getAsString("geometry_source");
+                    }
+                    if (newGeometry.containsKey("geometry_source")) {
+                      existingGeometrySource = existingGeometry.getAsString("geometry_source");
+                    }
 
-              if ((existingGeometrySource != null) && (newGeometrySource != null)) {
-                passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
-              }
-              
-              if (!passes) {
-                message = "Geometry source validation failed: submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
-                break;
-              }
+                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {
+                      passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+                    }
+                    
+                    if (!passes) {
+                      message = "Geometry source validation failed: submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
+                      break;
+                    }
 
-            } else {
-              passes = passes && true;
-            }
+                  } else {
+                    passes = passes && true;
+                  }
 
+              } 
           }
         }
 
