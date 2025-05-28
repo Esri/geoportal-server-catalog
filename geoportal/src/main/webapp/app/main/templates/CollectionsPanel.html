@@ -92,7 +92,7 @@
             <div class="info-action-container">
               <p
                 data-dojo-attach-point="zoomCollection"
-                class="info-zoom-action"
+                class="info-zoom-action disabled"
               >
                 Zoom
               </p>
@@ -383,7 +383,7 @@
     }
 
     .info-zoom-action {
-      color: #414141;
+      color: #0066ff;
       cursor: pointer;
       padding: 0;
       font-size: 14px;
@@ -614,6 +614,16 @@
 
     .hidden {
       display: none;
+    }
+
+    .disabled {
+      color: gray;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+
+    .disabled:hover {
+      text-decoration: none;
     }
   </style>
 </div>
