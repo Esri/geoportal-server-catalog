@@ -341,21 +341,23 @@ define([
 
       // loop through and delete every collection selected
       const collectionsToBeDeleted = this.getSelectedCollections();
-      collectionsToBeDeleted.forEach((collection) => {
-        this.deleteCollection(collection.id);
-      });
+      const allDeletePromises = collectionsToBeDeleted.map((collection) =>
+        this.deleteCollection(collection.id)
+      );
 
-      this.collections = this.collections.filter((c) => {
-        const found = collectionsToBeDeleted.find((ctb) => {
-          return String(ctb.id) === String(c.properties.id);
+      Promise.all(allDeletePromises).then((results) => {
+        this.collections = this.collections.filter((c) => {
+          const found = collectionsToBeDeleted.find((ctb) => {
+            return String(ctb.id) === String(c.properties.id);
+          });
+          if (found) {
+            return false;
+          }
+          return true;
         });
-        if (found) {
-          return false;
-        }
-        return true;
-      });
 
-      this.renderCollectionList(this.collections);
+        this.renderCollectionList(this.collections);
+      });
       this.hideModal();
     },
 
