@@ -320,6 +320,7 @@ define([
     handleReadCollection: function (id) {
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
+      this.handleUpdateButtonEnabled();
       if (this.selectedCollection) {
         this.updateCollectionInfoBox(
           this.selectedCollection.properties,
@@ -400,6 +401,16 @@ define([
       } else {
         this.editorPrimaryButton.disabled = true;
         this.editorPrimaryButton.classList.add("disabled-button");
+      }
+    },
+
+    handleUpdateButtonEnabled: function () {
+      if (this.selectedCollection) {
+        this.editCollectionButton.disabled = false;
+        this.editCollectionButton.classList.remove("disabled");
+      } else {
+        this.editCollectionButton.disabled = true;
+        this.editCollectionButton.classList.add("disabled");
       }
     },
 
@@ -567,6 +578,11 @@ define([
       );
       const collectionTitleInput = this.editorInputForm.querySelector(
         "#collection-title-input"
+      );
+
+      this.handleEditorPrimaryButtonEnabled(
+        collectionIdInput.value,
+        collectionTitleInput.value
       );
 
       collectionDescriptionInput.addEventListener("input", (e) => {
