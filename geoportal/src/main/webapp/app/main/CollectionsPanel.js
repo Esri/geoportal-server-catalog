@@ -415,7 +415,10 @@ define([
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
       if (this.selectedCollection) {
-        this.updateCollectionInfoBox(this.selectedCollection.properties);
+        this.updateCollectionInfoBox(
+          this.selectedCollection.properties,
+          this.selectedCollection.graphic
+        );
         this.handleZoomTo(this.selectedCollection.graphic);
       }
     },
@@ -516,7 +519,7 @@ define([
       this.leftPanelListView.style.display = "none";
     },
 
-    updateCollectionInfoBox: function (properties) {
+    updateCollectionInfoBox: function (properties, isZoomEnabled) {
       let tableRows = Object.entries(properties).map(([key, value]) => {
         return `    
                 <tr>
@@ -524,6 +527,7 @@ define([
                   <td>${value}</td>
                 </tr>`;
       });
+      this.zoomCollection.classList.toggle("disabled", !isZoomEnabled);
       this.infoTableTitle.innerHTML = properties.title;
       this.infoTableBody.innerHTML = tableRows.join("");
     },
