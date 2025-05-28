@@ -227,6 +227,10 @@ define([
       }
     },
 
+    rerenderCollectionsList: function () {
+      setTimeout(() => this.handleGetCollections(this.view), 3000);
+    },
+
     handleDeleteCollections: function () {
       this.appActionState = this.actions.DELETE_COLLECTION;
 
@@ -238,7 +242,7 @@ define([
 
       Promise.all(allDeletePromises).then((results) => {
         // API takes some time to delete
-        setTimeout(() => this.handleGetCollections(this.view), 3000);
+        this.rerenderCollectionsList();
         this.handleDeleteCollectionEnabled();
       });
       this.hideModal();
