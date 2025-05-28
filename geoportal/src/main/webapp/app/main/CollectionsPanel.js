@@ -26,6 +26,7 @@ define([
   "esri4/layers/FeatureLayer",
   "esri4/layers/WFSLayer",
   "esri4/layers/GraphicsLayer",
+  "esri4/widgets/Sketch/SketchViewModel",
   "esri4/widgets/Search",
   "esri4/widgets/LayerList",
   "esri4/widgets/FeatureTable",
@@ -53,6 +54,7 @@ define([
   FeatureLayer,
   WFSLayer,
   GraphicsLayer,
+  SketchViewModel,
   SearchWidget,
   LayerList,
   FeatureTable,
@@ -72,6 +74,7 @@ define([
     templateString: template,
     mapWasInitialized: false,
     view: null,
+    sketchVM: null,
 
     actions: {
       DELETE_COLLECTION: "DELETE_COLLECTION",
@@ -85,143 +88,14 @@ define([
     collections: [],
     selectedCollection: null,
     collectionIdsToBeDeleted: [],
+    selectedGraphic: null,
 
     sampleCollection: [
       {
         id: 1,
-        title: "Rotterdam",
+        title: "Sample Collection",
         description:
           "A port city in the Netherlands known for modern architecture.",
-      },
-      {
-        id: 2,
-        title: "Hamburg",
-        description:
-          "A major port city in northern Germany, famous for its maritime heritage.",
-      },
-      {
-        id: 3,
-        title: "Antwerp",
-        description:
-          "A city in Belgium known for its diamond district and medieval architecture.",
-      },
-      {
-        id: 4,
-        title: "Marseille",
-        description:
-          "A vibrant port city in southern France, known for its Mediterranean culture.",
-      },
-      {
-        id: 5,
-        title: "Gothenburg",
-        description:
-          "A coastal city in Sweden known for its picturesque canals and cultural scene.",
-      },
-      {
-        id: 6,
-        title: "Geona",
-        description:
-          "A port city in Italy known for its rich maritime history and architecture.",
-      },
-      {
-        id: 7,
-        title: "Osaka",
-        description:
-          "A city in Japan, known for its modern architecture and nightlife.",
-      },
-      {
-        id: 8,
-        title: "Busan",
-        description:
-          "A port city in South Korea, famous for its beaches and seafood.",
-      },
-      {
-        id: 9,
-        title: "Manila",
-        description:
-          "The capital of the Philippines, known for its historic landmarks and vibrant culture.",
-      },
-      {
-        id: 10,
-        title: "Valencia",
-        description:
-          "A city in Spain, known for its futuristic architecture and beaches.",
-      },
-      {
-        id: 11,
-        title: "Seattle",
-        description:
-          "A major city in Washington, USA, known for its tech scene and iconic Space Needle.",
-      },
-      {
-        id: 12,
-        title: "Vancouver",
-        description:
-          "A coastal city in Canada, known for its stunning natural beauty and multicultural vibe.",
-      },
-      {
-        id: 13,
-        title: "Collection 1",
-        description: "A unique collection showcasing diverse items.",
-      },
-      {
-        id: 14,
-        title: "Collection 2",
-        description: "A curated set of rare objects for collectors.",
-      },
-      {
-        id: 15,
-        title: "Collection 3",
-        description: "A set of artistic pieces representing various cultures.",
-      },
-      {
-        id: 16,
-        title: "Collection 4",
-        description:
-          "A collection of historical artifacts with cultural significance.",
-      },
-      {
-        id: 17,
-        title: "Collection 5",
-        description: "A diverse selection of modern art pieces.",
-      },
-      {
-        id: 18,
-        title: "Collection 6",
-        description: "A set of vintage items from different eras.",
-      },
-      {
-        id: 19,
-        title: "Collection 7",
-        description:
-          "A collection of iconic memorabilia from the 20th century.",
-      },
-      {
-        id: 20,
-        title: "Collection 8",
-        description: "A rare collection of limited-edition items.",
-      },
-      {
-        id: 21,
-        title: "Collection 9",
-        description: "A selection of unusual and quirky artifacts.",
-      },
-      {
-        id: 22,
-        title: "Collection 10",
-        description:
-          "A collection of items with artistic and historical value.",
-      },
-      {
-        id: 23,
-        title: "Collection 11",
-        description: "A set of collectible items from famous designers.",
-      },
-      {
-        id: 24,
-        title: "Collection 12",
-        description:
-          "A curated collection of items related to a specific theme.",
       },
     ],
 
@@ -241,6 +115,7 @@ define([
 
     handleMapReady: function (view) {
       this.initializeListeners();
+      this.initializeSketchViewModel(view);
 
       const handleGetCollections = async () => {
         this.collections = await this.getAllCollections();
@@ -411,16 +286,17 @@ define([
       }
     },
 
-    handleCreateCollection: function (properties) {
+    handleCreateCollection: function () {
       this.appActionState = this.actions.CREATE_COLLECTION;
-      this.createCollection(this.getCreateFieldValues());
+      this.createCollection({ properties: this.getCreateFieldValues() });
       this.hideEditor();
     },
 
-    createCollection: function (properties = {}) {
-      console.log("Creating Collection", properties);
-      this.collections.push(properties);
+    createCollection: function (collection = {}) {
+      console.log("Creating Collection", collection);
+      this.collections.push(collection);
       this.renderCollectionList(this.collections);
+      console.log("selected graphic", this.selectedGraphic);
     },
 
     handleUpdateCollection: function (id, properties) {
@@ -517,6 +393,16 @@ define([
       }
     },
 
+    handleEditorPrimaryButtonEnabled: function (id, title) {
+      if (!this.isBlank(id) && !this.isBlank(title)) {
+        this.editorPrimaryButton.disabled = false;
+        this.editorPrimaryButton.classList.remove("disabled-button");
+      } else {
+        this.editorPrimaryButton.disabled = true;
+        this.editorPrimaryButton.classList.add("disabled-button");
+      }
+    },
+
     hideModal: function () {
       this.appActionState = this.actions.NONE;
       this.modalContainer.style.display = "none";
@@ -540,7 +426,7 @@ define([
 
     renderUpdateCollectionEditor: function (properties) {
       this.collectionEditorTitle.innerHTML = "Update Collection";
-      this.editorPrimary.innerHTML = "Update Collection";
+      this.editorPrimaryButton.innerHTML = "Update Collection";
       let collectionInputs = `
           <label class="editor-label">description:</label>
           <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
@@ -552,11 +438,12 @@ define([
           <input id="collection-title-input" class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
       `;
       this.editorInputForm.innerHTML = collectionInputs;
+      this.initializeCollectionFormListeners();
     },
 
     renderCreateCollectionEditor: function () {
       this.collectionEditorTitle.innerHTML = "Create New Collection";
-      this.editorPrimary.innerHTML = "Create Collection";
+      this.editorPrimaryButton.innerHTML = "Create Collection";
       let collectionInputs = `
       <label class="editor-label">description:</label>
       <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
@@ -568,6 +455,7 @@ define([
       <input id="collection-title-input" class="editor-input" type="text" placeholder="value..."/>
   `;
       this.editorInputForm.innerHTML = collectionInputs;
+      this.initializeCollectionFormListeners();
     },
 
     showEditor: function () {
@@ -632,7 +520,7 @@ define([
       });
 
       // Editor Events
-      this.editorPrimary.addEventListener("click", () => {
+      this.editorPrimaryButton.addEventListener("click", () => {
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
           const updatedProperties = this.getUpdateFieldValues();
           this.handleUpdateCollection(
@@ -668,6 +556,118 @@ define([
           el.classList.toggle("hidden", !itemText.includes(filterText));
         });
       });
+    },
+
+    initializeCollectionFormListeners: function () {
+      const collectionDescriptionInput = this.editorInputForm.querySelector(
+        "#collection-description-input"
+      );
+      const collectionIdInput = this.editorInputForm.querySelector(
+        "#collection-id-input"
+      );
+      const collectionTitleInput = this.editorInputForm.querySelector(
+        "#collection-title-input"
+      );
+
+      collectionDescriptionInput.addEventListener("input", (e) => {
+        console.log(e);
+        this.handleEditorPrimaryButtonEnabled(
+          collectionIdInput.value,
+          collectionTitleInput.value
+        );
+      });
+
+      collectionIdInput.addEventListener("input", (e) => {
+        console.log(e);
+        this.handleEditorPrimaryButtonEnabled(
+          collectionIdInput.value,
+          collectionTitleInput.value
+        );
+      });
+
+      collectionTitleInput.addEventListener("input", (e) => {
+        console.log(e);
+        this.handleEditorPrimaryButtonEnabled(
+          collectionIdInput.value,
+          collectionTitleInput.value
+        );
+      });
+    },
+
+    initializeSketchViewModel: function (view) {
+      const polygonSymbol = {
+        type: "simple-fill",
+        color: "#f2bc94",
+        outline: {
+          color: "#722620",
+          width: 3,
+        },
+      };
+
+      const sketchGraphicsLayer = new GraphicsLayer({
+        title: "sketch",
+      });
+
+      view.map.layers.add(sketchGraphicsLayer);
+
+      const sketchVM = new SketchViewModel({
+        view: view,
+        polygonSymbol: polygonSymbol,
+        layer: sketchGraphicsLayer,
+      });
+
+      sketchVM.on("create", (e) => {
+        if (e.state === "complete") {
+          if (e.tool === "circle") {
+            this.drawCircleButton.classList.remove("sketch-active-tool");
+          } else if (e.tool === "polygon") {
+            this.drawPolygonButton.classList.remove("sketch-active-tool");
+          }
+
+          this.selectedGraphic = e.graphic;
+          sketchGraphicsLayer.graphics.forEach((g) => {
+            if (g !== e.graphic) {
+              sketchGraphicsLayer.remove(g);
+            }
+          });
+        }
+      });
+
+      this.sketchVM = sketchVM;
+
+      this.drawPolygonButton.onclick = (e) => {
+        console.log(e);
+        sketchVM.create("polygon");
+        this.drawPolygonButton.classList.add("sketch-active-tool");
+      };
+
+      this.drawCircleButton.onclick = (e) => {
+        console.log(e);
+        sketchVM.create("circle");
+        this.drawCircleButton.classList.add("sketch-active-tool");
+      };
+
+      this.undoButton.onclick = (e) => {
+        console.log(e);
+        sketchVM.undo();
+      };
+
+      this.redoButton.onclick = (e) => {
+        console.log(e);
+        sketchVM.redo();
+      };
+
+      this.deletePolygonButton.onclick = (e) => {
+        console.log(e);
+        sketchGraphicsLayer.removeAll();
+        this.selectedGraphic = null;
+      };
+    },
+
+    isBlank: function (value) {
+      return (
+        value === null || value === undefined || value.toString().trim() === ""
+      );
     },
 
     readConfig: function () {
