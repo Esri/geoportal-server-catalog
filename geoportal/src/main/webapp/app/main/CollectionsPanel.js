@@ -113,16 +113,18 @@ define([
       this.readConfig();
     },
 
+    handleGetCollections: async function (view) {
+      console.log("handleGetCollections");
+      this.collections = await this.getAllCollections();
+      this.renderCollectionList(this.collections);
+      this.renderCollectionGraphics(this.collections, view);
+    },
+
     handleMapReady: function (view) {
       this.initializeListeners();
       this.initializeSketchViewModel(view);
 
-      const handleGetCollections = async () => {
-        this.collections = await this.getAllCollections();
-        this.renderCollectionList(this.collections);
-        this.renderCollectionGraphics(this.collections, view);
-      };
-      handleGetCollections();
+      this.handleGetCollections(view);
     },
 
     renderCollectionGraphics: async function (collections, view) {
@@ -235,29 +237,8 @@ define([
       );
 
       Promise.all(allDeletePromises).then((results) => {
-        this.collections = this.collections.filter((c) => {
-          const found = collectionsToBeDeleted.find((ctb) => {
-            return String(ctb.id) === String(c.properties.id);
-          });
-          if (found) {
-            return false;
-          }
-          return true;
-        });
-
-        this.collectionIdsToBeDeleted = this.collectionIdsToBeDeleted.filter(
-          (id) => {
-            const found = collectionsToBeDeleted.find((ctb) => {
-              return String(ctb.id) === String(id);
-            });
-            if (found) {
-              return false;
-            }
-            return true;
-          }
-        );
-
-        this.renderCollectionList(this.collections);
+        // API takes some time to delete
+        setTimeout(() => this.handleGetCollections(this.view), 3000);
         this.handleDeleteCollectionEnabled();
       });
       this.hideModal();
