@@ -359,11 +359,24 @@ define([
       this.hideModal();
     },
 
-    deleteCollection: function (id) {
+    deleteCollection: async function (id) {
       if (!id) {
         return console.error("collection id required to delete");
       }
-      console.log("Deleting Collection", id);
+      try {
+        console.log("Deleting Collection", id);
+        let url = `${this.getStacBaseUrl()}/collections/${id}`;
+        var client = new AppClient();
+        url = client.appendAccessToken(url);
+        const response = await fetch(url, {
+          method: "DELETE",
+        });
+        const result = await response.json();
+        return result;
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
     },
 
     handleCreateCollection: function (properties) {
