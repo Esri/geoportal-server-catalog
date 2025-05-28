@@ -9,25 +9,19 @@
             Collections
           </p>
           <div style="display: flex; align-items: center">
-            <p
+            <button
               class="collections-action"
-              data-dojo-attach-point="newCollection"
+              data-dojo-attach-point="newCollectionButton"
             >
               New
-            </p>
-            <p
-              class="collections-action"
-              style="
-                color: rgb(219, 38, 38);
-                cursor: pointer;
-                padding: 0;
-                margin: 0;
-                font-size: 14px;
-              "
+            </button>
+            <button
+              class="collections-action collections-action-delete disabled"
               data-dojo-attach-point="deleteCollectionButton"
+              disabled
             >
               Delete
-            </p>
+            </button>
           </div>
         </div>
         <div class="search-input-container">
@@ -90,18 +84,19 @@
               Collection Info
             </p>
             <div class="info-action-container">
-              <p
-                data-dojo-attach-point="zoomCollection"
-                class="info-zoom-action disabled"
+              <button
+                data-dojo-attach-point="zoomCollectionButton"
+                class="info-actions info-actions-zoom disabled"
+                disabled
               >
                 Zoom
-              </p>
-              <p
-                data-dojo-attach-point="editCollection"
-                class="info-update-action"
+              </button>
+              <button
+                data-dojo-attach-point="editCollectionButton"
+                class="info-actions info-actions-edit"
               >
                 Update
-              </p>
+              </button>
             </div>
           </div>
           <div class="info-table-wrapper">
@@ -319,10 +314,20 @@
       cursor: pointer;
       padding: 0;
       font-size: 14px;
+      border: none;
+      background-color: white;
     }
 
     .collections-action:hover {
       text-decoration: underline;
+    }
+
+    .collections-action-delete {
+      color: rgb(219, 38, 38);
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      font-size: 14px;
     }
 
     .list-item:last-child {
@@ -382,26 +387,20 @@
       display: flex;
     }
 
-    .info-zoom-action {
+    .info-actions {
       color: #0066ff;
       cursor: pointer;
       padding: 0;
       font-size: 14px;
+      border: none;
+      background-color: white;
+    }
+
+    .info-actions-zoom {
       margin-right: 15px;
     }
 
-    .info-zoom-action:hover {
-      text-decoration: underline;
-    }
-
-    .info-update-action {
-      color: #0066ff;
-      cursor: pointer;
-      padding: 0;
-      font-size: 14px;
-    }
-
-    .info-update-action:hover {
+    .info-actions:hover {
       text-decoration: underline;
     }
 

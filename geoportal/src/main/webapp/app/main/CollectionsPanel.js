@@ -84,6 +84,8 @@ define([
     appActionState: "NONE",
     collections: [],
     selectedCollection: null,
+    collectionIdsToBeDeleted: [],
+
     sampleCollection: [
       {
         id: 1,
@@ -334,13 +336,25 @@ define([
           };
         });
       }
+
+      const checkBoxes = this.collectionsList.querySelectorAll(
+        ".list-item-checkbox"
+      );
+      if (checkBoxes?.length > 0) {
+        checkBoxes.forEach((cbox) => {
+          const id = cbox.getAttribute("data-id");
+          cbox.onclick = (e) => {
+            this.handleClickCheckbox(id);
+          };
+        });
+      }
     },
 
     handleDeleteCollections: function () {
       this.appActionState = this.actions.DELETE_COLLECTION;
 
       // loop through and delete every collection selected
-      const collectionsToBeDeleted = this.getSelectedCollections();
+      const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
       const allDeletePromises = collectionsToBeDeleted.map((collection) =>
         this.deleteCollection(collection.id)
       );
@@ -356,7 +370,20 @@ define([
           return true;
         });
 
+        this.collectionIdsToBeDeleted = this.collectionIdsToBeDeleted.filter(
+          (id) => {
+            const found = collectionsToBeDeleted.find((ctb) => {
+              return String(ctb.id) === String(id);
+            });
+            if (found) {
+              return false;
+            }
+            return true;
+          }
+        );
+
         this.renderCollectionList(this.collections);
+        this.handleDeleteCollectionEnabled();
       });
       this.hideModal();
     },
@@ -374,7 +401,10 @@ define([
           method: "DELETE",
         });
         const result = await response.json();
-        return result;
+        return {
+          response: result,
+          id: id,
+        };
       } catch (e) {
         console.error(e);
         return null;
@@ -437,7 +467,7 @@ define([
       return collectionResult ? collectionResult : null;
     },
 
-    getSelectedCollections: function () {
+    getCollectionsToBeDeleted: function () {
       // Get all checked checkboxes with the class "list-item-checkbox"
       const checkedBoxes = this.collectionsList.querySelectorAll(
         ".list-item-checkbox:checked"
@@ -456,6 +486,37 @@ define([
       return selectedCollections;
     },
 
+    handleClickCheckbox: function (id) {
+      const index = this.collectionIdsToBeDeleted.indexOf(id);
+
+      if (index > -1) {
+        this.collectionIdsToBeDeleted.splice(index, 1);
+      } else {
+        this.collectionIdsToBeDeleted.push(id);
+      }
+      this.handleDeleteCollectionEnabled();
+    },
+
+    handleDeleteCollectionEnabled: function () {
+      if (this.collectionIdsToBeDeleted.length > 0) {
+        this.deleteCollectionButton.disabled = false;
+        this.deleteCollectionButton.classList.remove("disabled");
+      } else {
+        this.deleteCollectionButton.disabled = true;
+        this.deleteCollectionButton.classList.add("disabled");
+      }
+    },
+
+    handleZoomCollectionEnabled: function () {
+      if (this.selectedCollection.graphic) {
+        this.zoomCollectionButton.disabled = false;
+        this.zoomCollectionButton.classList.remove("disabled");
+      } else {
+        this.zoomCollectionButton.disabled = true;
+        this.zoomCollectionButton.classList.add("disabled");
+      }
+    },
+
     hideModal: function () {
       this.appActionState = this.actions.NONE;
       this.modalContainer.style.display = "none";
@@ -463,7 +524,7 @@ define([
 
     showModal: function () {
       this.modalContainer.style.display = "flex";
-      const selectedCollections = this.getSelectedCollections();
+      const selectedCollections = this.getCollectionsToBeDeleted();
       this.modalContainerCollectionsListLength.innerHTML =
         selectedCollections.length;
       this.modalContainerCollectionsList.innerHTML = selectedCollections
@@ -527,9 +588,9 @@ define([
                   <td>${value}</td>
                 </tr>`;
       });
-      this.zoomCollection.classList.toggle("disabled", !isZoomEnabled);
       this.infoTableTitle.innerHTML = properties.title;
       this.infoTableBody.innerHTML = tableRows.join("");
+      this.handleZoomCollectionEnabled();
     },
 
     getUpdateFieldValues: function () {
@@ -558,15 +619,15 @@ define([
         this.appActionState = this.actions.DELETE_COLLECTION;
         this.showModal();
       });
-      this.newCollection.addEventListener("click", () => {
+      this.newCollectionButton.addEventListener("click", () => {
         this.appActionState = this.actions.CREATE_COLLECTION;
         this.showEditor();
       });
-      this.editCollection.addEventListener("click", () => {
+      this.editCollectionButton.addEventListener("click", () => {
         this.appActionState = this.actions.UPDATE_COLLECTION;
         this.showEditor();
       });
-      this.zoomCollection.addEventListener("click", () => {
+      this.zoomCollectionButton.addEventListener("click", () => {
         this.handleZoomTo(this.selectedCollection.graphic);
       });
 
