@@ -71,6 +71,7 @@ define([
     i18n: i18n,
     templateString: template,
     mapWasInitialized: false,
+    view: null,
 
     actions: {
       DELETE_COLLECTION: "DELETE_COLLECTION",
@@ -267,6 +268,7 @@ define([
               type: collection.geometry.type.toLowerCase(),
             },
           });
+          collection.graphic = graphic;
           lastGraphic = graphic;
           const graphicsLayer = new GraphicsLayer({
             title: collection.properties.id,
@@ -275,10 +277,6 @@ define([
           view.map.layers.add(graphicsLayer);
         }
       });
-      setTimeout(() => {
-        //timeout because map hasnt rendered
-        view.goTo(lastGraphic);
-      }, 3000);
     },
 
     getAllCollections: async function () {
@@ -403,6 +401,13 @@ define([
       this.selectedCollection = this.readCollection(id);
       if (this.selectedCollection) {
         this.updateCollectionInfoBox(this.selectedCollection.properties);
+        this.handleZoomTo(this.selectedCollection.graphic);
+      }
+    },
+
+    handleZoomTo: function (feature) {
+      if (feature) {
+        this.view.goTo(feature);
       }
     },
 
@@ -541,6 +546,9 @@ define([
       this.editCollection.addEventListener("click", () => {
         this.appActionState = this.actions.UPDATE_COLLECTION;
         this.showEditor();
+      });
+      this.zoomCollection.addEventListener("click", () => {
+        this.handleZoomTo(this.selectedCollection.graphic);
       });
 
       // Editor Events
