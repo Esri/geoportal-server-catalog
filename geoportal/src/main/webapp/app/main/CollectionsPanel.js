@@ -180,10 +180,29 @@ define([
       });
     },
 
-    getAllCollections: async function () {
+    getCollectionById: async function (id) {
+      let collection = null;
+      try {
+        let url = `${this.getStacBaseUrl()}/collections/${this.replaceSpaceWithPlus(
+          id
+        )}`;
+        if (AppContext.appConfig.system.secureCatalogApp) {
+          var client = new AppClient();
+          url = client.appendAccessToken(url);
+        }
+        const response = await fetch(url);
+        const result = await response.json();
+        collection = result;
+      } catch (e) {
+        collection = this.sampleCollection;
+      }
+      return collection;
+    },
+
+    getAllCollections: async function (f = "geojson") {
       let collections = [];
       try {
-        let url = `${this.getStacBaseUrl()}/collections?f=geojson`;
+        let url = `${this.getStacBaseUrl()}/collections?f=${f}`;
         if (AppContext.appConfig.system.secureCatalogApp) {
           var client = new AppClient();
           url = client.appendAccessToken(url);
@@ -324,12 +343,20 @@ define([
     handleCreateCollection: function () {
       this.appActionState = this.actions.CREATE_COLLECTION;
       this.updateIsLoading(true);
+      this.sketchVM.complete();
+
       const { id, description, title } = this.getCreateFieldValues();
-      const geo = this.selectedGraphic?.geometry
-        ? webMercatorUtils.webMercatorToGeographic(
-            this.selectedGraphic.geometry
-          )
-        : null;
+      let tempGeometry = null;
+
+      if (this.selectedGraphic?.geometry) {
+        tempGeometry = this.selectedGraphic?.geometry.spatialReference
+          .isWebMercator
+          ? webMercatorUtils.webMercatorToGeographic(
+              this.selectedGraphic.geometry
+            )
+          : this.selectedGraphic.geometry;
+      }
+
       const collection = {
         type: "Collection",
         stac_version: "1.0.0",
@@ -345,7 +372,7 @@ define([
             bbox: [],
             geometry: {
               type: "Polygon",
-              coordinates: geo?.rings,
+              coordinates: tempGeometry?.rings,
             },
           },
           temporal: {
@@ -394,22 +421,63 @@ define([
       }
     },
 
-    handleUpdateCollection: function (id, properties) {
+    handleUpdateCollection: async function (id, properties) {
       this.appActionState = this.actions.UPDATE_COLLECTION;
-      this.updateCollection(id, properties);
+      this.updateIsLoading(true);
+      this.sketchVM.complete();
+
+      // get collection full object
+      let collection = await this.getCollectionById(id);
+
+      // replace properties with new properties
+      const { title: newTitle, description: newDescription } = properties;
+      collection.id = this.replaceSpaceWithPlus(collection.id);
+      collection.title = newTitle;
+      collection.description = newDescription;
+      let tempGeometry = null;
+
+      if (this.selectedGraphic?.geometry) {
+        tempGeometry = this.selectedGraphic?.geometry.spatialReference
+          .isWebMercator
+          ? webMercatorUtils.webMercatorToGeographic(
+              this.selectedGraphic.geometry
+            )
+          : this.selectedGraphic.geometry;
+      }
+      collection.extent.spatial.geometry = {
+        type: "Polygon",
+        coordinates: tempGeometry?.rings,
+      };
+
+      await this.updateCollection(collection);
+      this.rerenderCollectionsList(this.collections);
+      this.showAllGraphicsLayers(this.view);
+      this.sketchGraphicsLayer.removeAll();
+      this.handleReadCollection(id);
       this.hideEditor();
     },
 
-    updateCollection: function (id = "0", properties = {}) {
-      console.log("Updating Collection", id, properties);
-      this.collections = this.collections.map((c) => {
-        if (String(c.properties.id) === String(id)) {
-          c.properties = properties;
-        }
-        return c;
-      });
-      this.handleReadCollection(id);
-      this.renderCollectionsList(this.collections);
+    updateCollection: async function (collection) {
+      try {
+        console.log("Updating Collection", collection.id);
+        let url = `${this.getStacBaseUrl()}/collections`;
+        var client = new AppClient();
+        url = client.appendAccessToken(url);
+        const response = await fetch(url, {
+          method: "PUT",
+          body: JSON.stringify(collection),
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        const result = await response.json();
+        return {
+          response: result,
+          id: collection.id,
+        };
+      } catch (e) {
+        console.error(e);
+      }
     },
 
     handleReadCollection: function (id) {
@@ -535,8 +603,8 @@ define([
       this.collectionEditorTitle.innerHTML = "Update Collection";
       this.editorPrimaryButton.innerHTML = "Update Collection";
       let collectionInputs = `
-          <label class="editor-label">id <span class="required">*</span>:</label>
-          <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."value="${properties.id}" />
+          <label class="editor-label">id:</label>
+          <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."value="${properties.id}" disabled />
 
           <label class="editor-label">title <span class="required">*</span>:</label>
           <input id="collection-title-input" class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
@@ -785,6 +853,12 @@ define([
               sketchGraphicsLayer.remove(g);
             }
           });
+        }
+      });
+
+      sketchVM.on("update", (e) => {
+        if (e.state === "complete") {
+          this.selectedGraphic = e.graphics[0];
         }
       });
 
