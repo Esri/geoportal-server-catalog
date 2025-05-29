@@ -136,7 +136,7 @@ define([
     handleGetCollections: async function (view) {
       console.log("handleGetCollections");
       this.collections = await this.getAllCollections();
-      this.renderCollectionList(this.collections);
+      this.renderCollectionsList(this.collections);
       this.renderCollectionGraphics(this.collections, view);
     },
 
@@ -197,7 +197,7 @@ define([
       return collections;
     },
 
-    renderCollectionList: function (collections = []) {
+    renderCollectionsList: function (collections = []) {
       console.log("rendering collection list: ", collections);
 
       const collectionHTML = collections.map((collection) => {
@@ -409,7 +409,7 @@ define([
         return c;
       });
       this.handleReadCollection(id);
-      this.renderCollectionList(this.collections);
+      this.renderCollectionsList(this.collections);
     },
 
     handleReadCollection: function (id) {
@@ -680,7 +680,7 @@ define([
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
           const updatedProperties = this.getUpdateFieldValues();
           this.handleUpdateCollection(
-            this.selectedCollection.id,
+            this.selectedCollection.properties.id,
             updatedProperties
           );
         } else if (this.appActionState === this.actions.CREATE_COLLECTION) {
