@@ -4,29 +4,31 @@
 	"collection": "$._index",
 	"bbox": "$._source.envelope_geo",	
 	"geometry": "$._source.envelope_cen_pt",			
-	"properties":
-	{	
-	"created":"$._source.sys_created_dt",
-	"updated":"$._source.sys_modified_dt"
+	"properties":	{	
+    "created":"$._source.sys_created_dt",
+  	"updated":"$._source.sys_modified_dt",
+    "type": "$._source.apiso_Format_s",
+    "title": "$._source.title",
+    "description": "$._source.description"
 	},
 	"links": [  
-			 {
-				"href": "$._source.links_s",
-				"title":"$._source.title"
-			},
-	        {
-	                "rel": "parent",
-	                "type": "application/json",
-	                "title": "Link to the Metadata collection",
-	                "href": "{url}/collections/metadata",
-	                "hreflang": "en-US"
-	        },
-	         {
-	                "rel": "root",
-	                "type": "application/json",
-	                "title": "Link to all collections",
-	                "href": "{url}",
-	                "hreflang": "en-US"
-	        }
-    ]  
+    {
+      "href": "$._source.links_s",
+      "title":"$._source.title"
+    },
+    {
+      "rel": "parent",
+      "type": "application/json",
+      "title": "Link to the Metadata collection",
+      "href": "{url}/collections/metadata",
+      "hreflang": "en-US"
+    },
+    {
+      "rel": "root",
+      "type": "application/json",
+      "title": "Link to all collections",
+      "href": "{url}",
+      "hreflang": "en-US"
+    }
+  ]  
 }

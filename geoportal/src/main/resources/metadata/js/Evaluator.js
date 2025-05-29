@@ -58,10 +58,10 @@ G._metadataTypes =  {
     evaluator: G.evaluators.iso,
     interrogationXPath: "/gmd:MD_Metadata",
     identifier: "http://www.isotc211.org/2005/gmd",
-    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl",
+    detailsXslt: "metadata/details/iso-details/xml-to-html-ISO.xsl"
     //xsdLocation: "http://www.ngdc.noaa.gov/metadata/published/xsd/schema.xsd",
     //schematronXslt: "metadata/schematron/Gemini2_R2r2-schematron.xslt",
-    toKnownXslt: null
+    //toKnownXslt: "metadata/xslt/identity.xslt"
   },
   "iso19115-2": {
     key: "iso19115-2",
@@ -212,7 +212,8 @@ G._interrogate = function(mdoc) {
     if (type.evaluator && type.evaluator.version) {
       mdtype.setEvaluatorVersion(type.evaluator.version);
     }
-    mdoc.setMetadataType(mdtype);    
+    mdoc.setMetadataType(mdtype);
+    print("metadata type set to " + type.identifier + " to known xslt = " + type.toKnownXslt);
   }
 };
 

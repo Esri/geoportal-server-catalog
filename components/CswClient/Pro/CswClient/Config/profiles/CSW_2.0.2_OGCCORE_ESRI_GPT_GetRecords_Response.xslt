@@ -58,6 +58,9 @@
                   <xsl:otherwise>
                     <xsl:for-each select="./dct:references">
                       <xsl:if test="@scheme = 'WFS'">liveData</xsl:if>
+                      <xsl:if test="@scheme = 'WMS'">liveData</xsl:if>
+                      <xsl:if test="@scheme = 'MapServer'">liveData</xsl:if>
+
                     </xsl:for-each>
                   </xsl:otherwise>
                 </xsl:choose>
