@@ -296,7 +296,7 @@ define([
     handleCreateCollection: function () {
       this.appActionState = this.actions.CREATE_COLLECTION;
       const { id, description, title } = this.getCreateFieldValues();
-      const geo = this.selectedGraphic.geometry
+      const geo = this.selectedGraphic?.geometry
         ? webMercatorUtils.webMercatorToGeographic(
             this.selectedGraphic.geometry
           )
@@ -316,7 +316,7 @@ define([
             bbox: [[-95, 30, -94, 30.06]],
             geometry: {
               type: "Polygon",
-              coordinates: geo.rings,
+              coordinates: geo?.rings,
             },
           },
           temporal: {
