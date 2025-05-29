@@ -175,7 +175,7 @@ public class StacContext {
           
         ukFieldExists = indexHasValue(collectionId, searchQry,forUpdate,itemId);
         passes = !ukFieldExists;
-        message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + message;          
+        message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + key;          
         
         break;
         

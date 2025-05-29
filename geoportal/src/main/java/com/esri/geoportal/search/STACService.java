@@ -1504,6 +1504,20 @@ public class STACService extends Application {
 					 {
 						 createdMsgObj = new JSONObject();
 						 createdMsgObj.put("id", feature.getAsString("id"));
+						 JSONObject prop = (JSONObject) feature.get("properties");
+						 if(prop!=null)
+						 {
+							 //Exxon specific
+							 if(prop.getAsString("xom:source_system")!=null)
+							 {
+								 createdMsgObj.put("xom:source_system", prop.getAsString("xom:source_system")); 
+							 }						 
+							 if(prop.getAsString("xom:source_key_id")!=null)
+							 {
+								 createdMsgObj.put("xom:source_key_id", prop.getAsString("xom:source_key_id")); 
+							 } 
+						 }
+						 
 						 createdMsgObj.put("status", "created");
 						 createdMsgArr.add(createdMsgObj);
 					 }
