@@ -20,12 +20,12 @@ G.evaluators.iso = {
   evaluate: function(task) {
     try {
       this.evalBase(task);
-      //this.evalService(task);
-      //this.evalSpatial(task);
-      //this.evalTemporal(task);
-      //this.evalInspire(task);
-      //this.evalOther(task);
-      //this.evalLinks(task);
+      this.evalService(task);
+      this.evalSpatial(task);
+      this.evalTemporal(task);
+      this.evalInspire(task);
+      this.evalOther(task);
+      this.evalLinks(task);
     } catch(exception) {
       print("EvaluatorFor_ISO Exception: " + exception);
     }
