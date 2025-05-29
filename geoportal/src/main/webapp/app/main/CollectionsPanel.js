@@ -285,7 +285,7 @@ define([
       // loop through and delete every collection selected
       const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
       const allDeletePromises = collectionsToBeDeleted.map((collection) => {
-        if (collection.id === that.selectedCollection.properties.id) {
+        if (collection.id === that.selectedCollection?.properties?.id) {
           this.emptyCollectionInfoBox();
           this.selectedCollection = null;
         }
