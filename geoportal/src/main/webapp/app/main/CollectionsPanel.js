@@ -344,7 +344,7 @@ define([
         providers: [],
         extent: {
           spatial: {
-            bbox: [[-95, 30, -94, 30.06]],
+            bbox: [],
             geometry: {
               type: "Polygon",
               coordinates: geo?.rings,
