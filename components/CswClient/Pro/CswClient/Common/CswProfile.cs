@@ -523,7 +523,7 @@ namespace com.esri.gpt.csw
                     XmlNode node = xmlnode.SelectSingleNode("Type");
                     if (node != null)
                     {
-                        record.IsLiveDataOrMap = node.InnerText.Equals("liveData", StringComparison.OrdinalIgnoreCase) || node.InnerText.Equals("feature service", StringComparison.OrdinalIgnoreCase) || node.InnerText.Equals("wfs", StringComparison.OrdinalIgnoreCase);
+                        record.IsLiveDataOrMap = node.InnerText.Equals("urn:x-esri:specification:ServiceType:ArcGIS", StringComparison.OrdinalIgnoreCase) || node.InnerText.Equals("liveData", StringComparison.OrdinalIgnoreCase) || node.InnerText.Contains("service", StringComparison.OrdinalIgnoreCase) || node.InnerText.Equals("feature service", StringComparison.OrdinalIgnoreCase) || node.InnerText.Equals("wfs", StringComparison.OrdinalIgnoreCase);
                         if (!record.IsLiveDataOrMap)
                         {
                             record.IsLiveDataOrMap = node.InnerText.Equals("downloadableData", StringComparison.OrdinalIgnoreCase);
@@ -593,6 +593,12 @@ namespace com.esri.gpt.csw
                 resourceUrl = chkStr(schemeVals.First.Value);
             }
 
+            schemeVals = references.get(DcList.getScheme(DcList.Scheme.MAPSERVER));
+            if (schemeVals.Count > 0)
+            {
+                resourceUrl = chkStr((schemeVals.First.Value));
+            }
+
             schemeVals = references.get(DcList.getScheme(DcList.Scheme.SERVICE));
             if (schemeVals.Count > 0)
             {
@@ -606,6 +612,19 @@ namespace com.esri.gpt.csw
                 // serviceType = "WFS";
             }
 
+            schemeVals = references.get(DcList.getScheme(DcList.Scheme.WMS));
+            if (schemeVals.Count > 0)
+            {
+                resourceUrl = chkStr((schemeVals.First.Value));
+                // serviceType = "WFS";
+            }
+
+            schemeVals = references.get(DcList.getScheme(DcList.Scheme.SERVICE));
+            if (schemeVals.Count > 0)
+            {
+                resourceUrl = chkStr((schemeVals.First.Value));
+                // serviceType = "WFS";
+            }
 
             //if (schemeVals.Count > 0)
             //{
