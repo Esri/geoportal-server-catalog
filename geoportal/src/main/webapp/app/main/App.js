@@ -69,6 +69,12 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }));
       
       router.startup();
+      //#606 Show signin for Catalog app on load
+      if(AppContext.appConfig.system.secureCatalogApp)
+      {
+    	  AppContext.appUser.showSignIn();
+      }
+    	  
       if (!location.hash || location.hash.length==0) {
         this.setHash("searchPanel");
         router.go("searchPanel");
@@ -97,7 +103,12 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
           router.go("mapPanel");
           self.mapPanel.addToMap(params);
         } else {
-          var urlParams = {resource: params.type+":"+this.normalizeUrl(params.url)};
+          var urlParams = {
+              title: params.title,
+              resource: params.type+":"+params.url,
+              url: params.url,
+              type:params.type
+          };
           ignoreMapPanelActivated = true;
           router.go("mapPanel");
           self.mapPanel.ensureMap(urlParams);
@@ -210,16 +221,6 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }
       
       
-    },
-
-    normalizeUrl: function(url) {
-      var services = ["mapserver", "imageserver", "featureserver", "streamserver", "vectortileserver"];
-      var selSrv = array.filter(services, function(srv) { return url.toLowerCase().indexOf(srv)>=0; });
-      if (selSrv && selSrv.length>0) {
-        var srv = selSrv[0];
-        url = url.substr(0, url.toLowerCase().indexOf(srv) + srv.length);
-      }
-      return url;
     },
     
     _onHome: function() {

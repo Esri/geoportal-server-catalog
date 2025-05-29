@@ -29,9 +29,6 @@ public class EncryptDecrypt {
 	public static String decrypt(String encryptedText,String base64Key, String base64Iv ) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
 	{		
 		String algorithm = "AES/CBC/PKCS5Padding";	 
-//		    
-//	    String base64Key = "8MYDuAq/sqR+ewHHy1KqTSP31AjVwU+2OpTRusqDI1U=";
-//        String base64Iv = "lCKPw6sG7JcQ0SWUbwtkdQ==";
         
         byte[] decodedKey = Base64.getDecoder().decode(base64Key);
         byte[] decodedIv = Base64.getDecoder().decode(base64Iv);

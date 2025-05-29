@@ -224,7 +224,7 @@ public class MetadataDocument {
         XsltTemplate xsltTemplate = XsltTemplates.getCompiledTemplate(toKnownXslt);
         String result = xsltTemplate.transform(getXml());
         this.setXml(result);
-        if (hasXml()) this.updateDom();;
+        if (hasXml()) this.updateDom();
         this.interrogate();
 
         //evaluator.interrogate(this);

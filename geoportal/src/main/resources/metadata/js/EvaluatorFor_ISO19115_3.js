@@ -89,9 +89,9 @@ G.evaluators.iso19115_3 = {
      * reverse_hierarchy_tokenizer within elastic-mappings.json and
      * elastic-mappings-7.json, then recreate Elastic Search index.
      * 
-     * If the source is metadata or, more acuratelly: a field from within metadata
+     * If the source is metadata or, more accurately: a field from within metadata
      * use G.evalProps to read that information and put into 'src_category_cat
-     * property (Eample 1)
+     * property (Example 1)
      * 
      * If the source of the metadata is an UNC folder or WAF folder, it is possible
      * to use folder structure as category (Example 2)
@@ -148,7 +148,7 @@ G.evaluators.iso19115_3 = {
   
   evalTheme: function(task) {	
     var item = task.item, root = task.root;    
-    G.evalProps(task,item,root,"ggim_theme_s","/mdb:MD_Metadata/mdb:identificationInfo/mri:MD_DataIdentification/mri:descriptiveKeywords/mri:MD_Keywords[./mri:thesaurusName/cit:CI_Citation/cit:title/gco3:CharacterString='UN GGIM']/mri:keyword/gco3:CharacterString");
+    G.evalProps(task,item,root,"src_category_cat","/mdb:MD_Metadata/mdb:identificationInfo/mri:MD_DataIdentification/mri:descriptiveKeywords/mri:MD_Keywords[./mri:thesaurusName/cit:CI_Citation/cit:title/gco3:CharacterString='UN GGIM']/mri:keyword/gco3:CharacterString");
   },
 
   evalService: function(task) {

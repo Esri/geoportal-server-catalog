@@ -16,6 +16,8 @@ package com.esri.geoportal.context;
 import com.esri.geoportal.base.security.Group;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.harvester.HarvesterContext;
+import com.esri.geoportal.service.stac.GeometryServiceClient;
+import com.esri.geoportal.service.stac.StacContext;
 
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
@@ -55,16 +57,22 @@ public class GeoportalContext implements ApplicationContextAware {
   private String defaultApprovalStatus;
   private ElasticContext elasticContext;
   private HarvesterContext harvesterContext;
+  private StacContext stacContext;
+  private GeometryServiceClient geometryServiceClient;
   private boolean supportsApprovalStatus = false;
   private boolean supportsGroupBasedAccess = false;
-  private String version = "2.7.2";
+  private String version = "3.0.0";
   private boolean parseGml;
   private boolean supportsCollections = false;
   // HashMap stores userName and List of User Groups in ArcGISAuthentication
-  private HashMap<String,ArrayList<Group>> userGroupMap = new HashMap<String,ArrayList<Group>>(); 
+  private HashMap<String,ArrayList<Group>> userGroupMap = new HashMap<>(); 
   private int numStacFeaturesAddItem = 100; 
   private boolean validateStacFields = false;
-  
+  private String canStacAutogenerateId = "false";
+  private String canStacGeomTransform = "false";
+  private String geometryService = "";
+  private String geomWKTField = "";
+  private String geomCRSField = "";
 
   public HashMap<String, ArrayList<Group>> getUserGroupMap() {
 	return userGroupMap;
@@ -77,7 +85,8 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 /** Constructor */
   public GeoportalContext() {}
   
-  /** The Spring application context. */
+  /** The Spring application context.
+   * @return  */
   public ApplicationContext getApplicationContext() {
     return applicationContext;
   }
@@ -104,29 +113,35 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
     }
   }
   
-  /** Default access level. */
+  /** Default access level.
+   * @return  */
   public String getDefaultAccessLevel() {
     return defaultAccessLevel;
   }
-  /** Default access level . */
+  /** Default access level .
+   * @param defaultAccessLevel */
   public void setDefaultAccessLevel(String defaultAccessLevel) {
     this.defaultAccessLevel = defaultAccessLevel;
   }
   
-  /** Default approval status. */
+  /** Default approval status.
+   * @return  */
   public String getDefaultApprovalStatus() {
     return defaultApprovalStatus;
   }
-  /** Default approval status. */
+  /** Default approval status.
+   * @param defaultApprovalStatus */
   public void setDefaultApprovalStatus(String defaultApprovalStatus) {
     this.defaultApprovalStatus = defaultApprovalStatus;
   }
  
-  /** The Elasticsearch context. */
+  /** The Elasticsearch context.
+   * @return the elasticContext */
   public ElasticContext getElasticContext() {
     return elasticContext;
   }
-  /** The Elasticsearch context. */
+  /** The Elasticsearch context.
+   * @param elasticContext */
   public void setElasticContext(ElasticContext elasticContext) {
     this.elasticContext = elasticContext;
   }
@@ -145,11 +160,30 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
   public void setHarvesterContext(HarvesterContext harvesterContext) {
     this.harvesterContext = harvesterContext;
   }
+
+  /**
+   * Gets STAC context.
+   * @return STAC context
+   */
+  public StacContext getStacContext() {
+    return stacContext;
+  }
+  /**
+   * Sets STAC context.
+   * @param stacContext context 
+   */
+  public void setStacContext(StacContext stacContext) {
+    this.stacContext = stacContext;
+  }
+
+  public GeometryServiceClient getGeometryServiceClient() {
+    return this.geometryServiceClient;
+  }
   
   /** Support for document approval status. */
   public boolean getSupportsApprovalStatus() {
     return supportsApprovalStatus;
-  }
+  } 
   /** Support for document approval status. */
   public void setSupportsApprovalStatus(boolean supportsApprovalStatus) {
     this.supportsApprovalStatus = supportsApprovalStatus;
@@ -176,10 +210,12 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
   public boolean getSupportsCollections() {
     return supportsCollections;
   }
+  
   /** Support for collections. */
   public void setSupportsCollections(boolean supportsCollections) {
     this.supportsCollections = supportsCollections;
   }
+  
   //Number of Stac features allowed in POST request
 	public int getNumStacFeaturesAddItem() {
 		return numStacFeaturesAddItem;
@@ -188,6 +224,7 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 	public void setNumStacFeaturesAddItem(int numStacFeaturesAddItem) {
 		this.numStacFeaturesAddItem = numStacFeaturesAddItem;
 	}
+        
 	 //Validate Stac fields in Stac Feature in POST request
 	public boolean isValidateStacFields() {
 		return this.validateStacFields;
@@ -196,6 +233,53 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 	public void setValidateStacFields(boolean validateStacFields) {
 		this.validateStacFields = validateStacFields;
 	}
+      
+  // Support for autogenerating item id
+	public boolean isCanStacAutogenerateId() {
+    return "true".equals(this.canStacAutogenerateId);
+	}
+	public void setCanStacAutogenerateId(String canStacAutogenerateId) {
+    this.canStacAutogenerateId = canStacAutogenerateId;
+	}
+        
+  // Support for transforming the CRS of STAC geometries
+	public String isCanStacGeomTransform() {
+    return this.canStacGeomTransform;
+	}
+	public void setCanStacGeomTransform(String canStacGeomTransform) {
+    this.canStacGeomTransform = canStacGeomTransform;
+	}
+
+  // The ArcGIS Geometry service used to reproject STAC geometries
+	public String getGeometryService() {
+    return this.geometryService;
+	}
+	public void setGeometryService(String geometryService) {
+		this.geometryService = geometryService;
+    this.geometryServiceClient = new GeometryServiceClient(geometryService);
+
+	}
+
+        
+  // If this is set, the field in the STAC item properties holds
+  // a dictionary of WKT geometries to be reprojected as well
+	public String getGeomWKTField() {
+    return this.geomWKTField;
+	}
+	public void setGeomWKTField(String geomWKTField) {
+		this.geomWKTField = geomWKTField;
+	}
+
+        
+  // If this is set, the field in the STAC item properties holds
+  // CRS of its geometries
+	public String getGeomCRSField() {
+    return this.geomCRSField;
+	}
+	public void setGeomCRSField(String geomCRSField) {
+		this.geomCRSField = geomCRSField;
+	}
+
   
   /** Methods =============================================================== */
 

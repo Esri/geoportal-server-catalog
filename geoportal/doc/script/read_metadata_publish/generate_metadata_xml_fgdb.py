@@ -65,7 +65,7 @@ def read_metadata(folder, dataset):
 
 def publish_metadata(metadata):
     #print(metadata)
-    r = requests.put(url=server, data=metadata, auth=auth, headers=headers)
+    r = requests.put(url=server, data=metadata, auth=auth, headers=headers,verify=False)
     result = r.json()
     print(f"{r.status_code} content['resTitle'] - {result}\n'")
 

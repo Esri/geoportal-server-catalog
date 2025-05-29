@@ -287,6 +287,11 @@ define({
           downloadFTP: "Download (FTP)"
         }
       },
+      itemData: {
+        title: "Item Details",
+        attribute: "Attribute",
+        value: "Value"
+      },
       statusChecker: {
         unknown: "Unknown",
         status: "Service availability = ${score}%"
