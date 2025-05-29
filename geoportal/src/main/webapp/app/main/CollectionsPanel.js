@@ -970,7 +970,7 @@ define([
             content: searchWidget,
           });
           view.ui.add(searchWidgetExpand, {
-            position: "top-left",
+            position: "top-right",
             index: 1,
           });
 
@@ -985,7 +985,7 @@ define([
           });
           view.ui.add(layerListExpand, {
             position: "top-left",
-            index: 2,
+            index: 1,
           });
 
           let homeWidget = new Home({
@@ -994,7 +994,7 @@ define([
 
           // adds the home widget to the top left corner of the MapView
           view.ui.add(homeWidget, {
-            position: "top-left",
+            position: "top-right",
             index: 4,
           });
 
@@ -1009,7 +1009,7 @@ define([
           });
           // adds the basemap widget to the top right corner of the MapView
           view.ui.add(basemapExpand, {
-            position: "top-left",
+            position: "top-right",
             index: 1,
           });
           this.view = view;
