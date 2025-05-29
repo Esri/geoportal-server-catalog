@@ -14,15 +14,16 @@
  */
 define(["dojo/_base/declare",
         "dojo/_base/lang",
-        "esri/layers/VectorTileLayer",],
-function(declare, lang, VectorTileLayer) {
+        "../gs/widget/util",
+        "esri4/layers/VectorTileLayer",],
+function(declare, lang, util,VectorTileLayer) {
   
   /*
     type 
       ArcGIS - FeatureServer MapServer ImageServer VectorTileServer StreamServer
       WMS
-      WMTS - not yet working with wab 2.0
-      WFS - not yet with wab 2.0
+      WMTS - 
+      WFS - 
       KML
       GeoRSS
       CSV
@@ -63,7 +64,7 @@ function(declare, lang, VectorTileLayer) {
       lang.mixin(this,args);
     },
 
-    checkUrl: function(url) {
+    checkUrl: function(url,item) {
       var endsWith = function(v,sfx) {
         return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);
       };
@@ -83,10 +84,13 @@ function(declare, lang, VectorTileLayer) {
           }
         } else if (lc.indexOf("/com.esri.wms.esrimap") !== -1) {
           type = "WMS";
+        } else if (lc.indexOf("/mapserver/wmts") !== -1) {
+          type = "WMTS";
         } else if (lc.indexOf("/mapserver/wmsserver") !== -1) {
           type = "WMS";
-        } else if (lc.indexOf("/rest/services") > 0) {
-          if (lc.indexOf("/mapserver") > 0) {
+        }
+        else if (lc.indexOf("/rest/services") > 0) {
+          if ((lc.indexOf("/mapserver") > 0) && (lc.indexOf("/mapserver/wmts") <0)) {
             type = "MapServer";
           } else if (lc.indexOf("/featureserver") > 0) {
             type = "FeatureServer";
@@ -96,9 +100,7 @@ function(declare, lang, VectorTileLayer) {
             type = "StreamServer";
           } else if (lc.indexOf("/vectortileserver") > 0 || 
               lc.indexOf("/resources/styles/root.json") > 0) {
-            if (VectorTileLayer && VectorTileLayer.supported()) {
-              type = "VectorTileServer";
-            }
+              type = "VectorTileServer";            
           }
         } else if (lc.indexOf("/wms.axd/") > 0) {
           type = "WMS";
@@ -109,8 +111,9 @@ function(declare, lang, VectorTileLayer) {
         }
         if (type === null) {
           if (endsWith(lc,".kml") || endsWith(lc,".kmz") || endsWith(lc,"kml.php") ||
-              lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 || 
-              lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0) {
+              lc.indexOf("?f=kml") > 0 || lc.indexOf("&f=kml") > 0 ||  lc.indexOf("?format=kml") > 0 ||
+              lc.indexOf("?f=kmz") > 0 || lc.indexOf("&f=kmz") > 0 || lc.indexOf("?format=kmz") > 0
+              || lc.indexOf("&format=kml") > 0 || lc.indexOf("&format=kmz") > 0){
             type = "KML";
           } else if (endsWith(lc,".csv") || lc.indexOf("f=kml") > 0) {
             type = "CSV";
@@ -119,13 +122,21 @@ function(declare, lang, VectorTileLayer) {
             type = "GeoRSS";
           } else if (endsWith(lc,".zip")) { 
             type = "Shapefile";
+          } else if (endsWith(lc, ".tiff")) {
+            type = "ImageryTileLayer";  
+          } else if (lc.indexOf("ogcfeatureserver")>-1) {
+            type = "OGCFeatureServer";  
           }
+          //Portal item type
+          else if (item && item.type_s) {
+        	  type = util.readItemServiceType(item.type_s);
+          }  
         }
       }
 
       this.type = type;
       this.url = url;
-    },
+    },  
     
     isSet: function() {
       if (typeof this.type === "string" && this.type.length > 0) {

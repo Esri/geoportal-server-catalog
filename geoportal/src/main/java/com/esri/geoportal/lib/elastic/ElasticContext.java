@@ -35,6 +35,7 @@ import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.lib.security.EncryptDecrypt;
 
+
 /**
  * Elasticsearch OR OpenSearch context.
  */
@@ -68,42 +69,17 @@ public class ElasticContext {
   private String base64Key = "";
   private String engineType = "";
   private String awsOpenSearchType = "";
-  private String awsOpenSearchRegion = "";
-  private String awsOpenSearchAccessKeyId = "";
-  private String awsOpenSearchSecretAccessKey = "";
-  private String awsAPIGatewayEndpoint = "";
   
-  public String getAwsAPIGatewayEndpoint() {
-	return awsAPIGatewayEndpoint;
-  }
-
-	public void setAwsAPIGatewayEndpoint(String awsAPIGatewayEndpoint) {
-		this.awsAPIGatewayEndpoint = awsAPIGatewayEndpoint;
-	}
-
-	public String getAwsOpenSearchAccessKeyId() {
-	return awsOpenSearchAccessKeyId;
-	}
-	
-	public void setAwsOpenSearchAccessKeyId(String awsOpenSearchAccessKeyId) {
-		this.awsOpenSearchAccessKeyId = awsOpenSearchAccessKeyId;
-	}
-	
-	public String getAwsOpenSearchSecretAccessKey() {
-		return awsOpenSearchSecretAccessKey;
-	}
-	
-	public void setAwsOpenSearchSecretAccessKey(String awsOpenSearchSecretAccessKey) {
-		this.awsOpenSearchSecretAccessKey = awsOpenSearchSecretAccessKey;
-	}
-  public String getAwsOpenSearchRegion() {
-    return awsOpenSearchRegion;
-  }
-
-  public void setAwsOpenSearchRegion(String awsOpenSearchRegion) {
-    this.awsOpenSearchRegion = awsOpenSearchRegion;
-  }
+  private String awsALBEndpoint = "";
   
+  public String getAwsALBEndpoint() {
+	return awsALBEndpoint;
+  }
+
+	public void setAwsALBEndpoint(String awsALBEndpoint) {
+		this.awsALBEndpoint = awsALBEndpoint;
+	}
+	
   public String getAwsOpenSearchType() {
     return awsOpenSearchType;
   }
@@ -166,56 +142,68 @@ public class ElasticContext {
   public boolean getAllowFileId() {
     return allowFileId;
   }
-  /** Allow internal metadata file idenitfiers to be used as the Elasticsearch _id .*/
+  /** Allow internal metadata file identifiers to be used as the Elasticsearch _id
+   * @param allowFileId.*/
   public void setAllowFileId(boolean allowFileId) {
     this.allowFileId = allowFileId;
   }
 
-  /** Auto-create the metadata index if required. */
+  /** Auto-create the metadata index if required.
+   * @return  */
   public boolean getAutoCreateIndex() {
     return autoCreateIndex;
   }
-  /** Auto-create the metadata index if required. */
+  /** Auto-create the metadata index if required.
+   * @param autoCreateIndex */
   public void setAutoCreateIndex(boolean autoCreateIndex) {
     this.autoCreateIndex = autoCreateIndex;
   }
   
-  /** The cluster name. */
+  /** The cluster name.
+   * @return  */
   public String getClusterName() {
     return clusterName;
   }
-  /** The cluster name. */
+  /** The cluster name.
+   * @param clusterName */
   public void setClusterName(String clusterName) {
     this.clusterName = clusterName;
   }
   
-  /** The HTTP port (default=9200) */
+  /** The HTTP port (default=9200)
+   * @return  */
   public int getHttpPort() {
     return httpPort;
   }
-  /** The HTTP port (default=9200) */
+  /** The HTTP port (default=9200)
+   * @param httpPort */
   public void setHttpPort(int httpPort) {
     this.httpPort = httpPort;
   }
 
-  /** The metadata index name (default=metadata). */
+  /** The metadata index name (default=metadata).
+   * @return  */
   public String getIndexName() {
     return this.indexName;
   }
-  /** The metadata index name (default=metadata). */
+  /** The metadata index name (default=metadata).
+   * @param indexName */
   public void setIndexName(String indexName) {
     this.indexName = indexName;
   }
-  /** The collections index name (default=collections). */
+  /** The collections index name (default=collections).
+   * @return  */
   public String getCollectionIndexName() {
 		return collectionIndexName;
   }
-  /** The collections index name (default=collections). */
+  /** The collections index name (default=collections).
+   * @param collectionIndexName */
  public void setCollectionIndexName(String collectionIndexName) {
 	this.collectionIndexName = collectionIndexName;
  }
 
-  /** Treat the index name as an alias. */
+  /** Treat the index name as an alias.
+   * @return  */
   public boolean getIndexNameIsAlias() {
     return indexNameIsAlias;
   }
@@ -228,40 +216,48 @@ public class ElasticContext {
   public void setAutoCreateCollectionIndex(boolean autoCreateCollectionIndex) {
     this.autoCreateCollectionIndex = autoCreateCollectionIndex;
   }
-  
-  /** Treat the index name as an alias. */
+ 
+  /** Treat the index name as an alias.
+   * @param indexNameIsAlias */
   public void setIndexNameIsAlias(boolean indexNameIsAlias) {
     this.indexNameIsAlias = indexNameIsAlias;
   }
   
-  /** Version 6+ */
+  /** Version 6+
+   * @return  */
   public boolean getIs6Plus() {
     return is6Plus;
   }
-  /** Version 6+ */
+  /** Version 6+
+   * @param is6Plus */
   public void setIs6Plus(boolean is6Plus) {
     this.is6Plus = is6Plus;
   }
   
-  /** Version 7+ */
+  /** Version 7+
+   * @return  */
   public boolean getIs7Plus() {
     return is7Plus;
   }
-  /** Version 7+ */
+  /** Version 7+
+   * @param is7Plus */
   public void setIs7Plus(boolean is7Plus) {
     this.is7Plus = is7Plus;
   }
   
-  /** The index name holding metadata items. */
+  /** The index name holding metadata items.
+   * @return  */
   public String getItemIndexName() {
     return this.indexName;
   }
 
-  /** The item index type (default=item). */
+  /** The item index type (default=item).
+   * @return  */
   public String getItemIndexType() {
     return this.itemIndexType;
   }
-  /** The item index type (default=item). */
+  /** The item index type (default=item).
+   * @param itemIndexType */
   public void setItemIndexType(String itemIndexType) {
     this.itemIndexType = itemIndexType;
   }
@@ -320,7 +316,7 @@ public class ElasticContext {
       final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
     credentialsProvider.setCredentials(AuthScope.ANY,
-      new UsernamePasswordCredentials("admin", "admin"));
+      new UsernamePasswordCredentials("",""));
 
     //Create a client.
     org.opensearch.client.RestClientBuilder builder = org.opensearch.client.RestClient.builder(new HttpHost("localhost", 9200, "http"))
@@ -496,16 +492,25 @@ public class ElasticContext {
 //   * @return the base url
 //   */
   public String getBaseUrl(boolean next) {
-    String node = null;
-    if (next) {
-      node = getNextNode();
-    } else {
-      node = nodesToArray()[0];
+	 String url;
+    
+    if(getAwsOpenSearchType().equals("serverless"))
+    {
+    	url = this.getAwsALBEndpoint();
     }
-    int port = getHttpPort();
-    String scheme = "http://";
-    if (getUseHttps()) scheme = "https://";
-    String url = scheme+node+":"+port;
+    else
+    {
+    	String node = null;
+        if (next) {
+          node = getNextNode();
+        } else {
+          node = nodesToArray()[0];
+        }
+        int port = getHttpPort();
+        String scheme = "http://";
+        if (getUseHttps()) scheme = "https://";
+        url = scheme+node+":"+port;
+    }
     return url;
   }
 //  
