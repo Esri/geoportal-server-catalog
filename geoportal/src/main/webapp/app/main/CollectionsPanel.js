@@ -527,14 +527,14 @@ define([
       this.collectionEditorTitle.innerHTML = "Update Collection";
       this.editorPrimaryButton.innerHTML = "Update Collection";
       let collectionInputs = `
-          <label class="editor-label">description:</label>
-          <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
-
-          <label class="editor-label">id:</label>
+          <label class="editor-label">id <span class="required">*</span>:</label>
           <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."value="${properties.id}" />
 
-          <label class="editor-label">title:</label>
+          <label class="editor-label">title <span class="required">*</span>:</label>
           <input id="collection-title-input" class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
+
+          <label class="editor-label">description:</label>
+          <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
       `;
       this.editorInputForm.innerHTML = collectionInputs;
       this.initializeCollectionFormListeners();
@@ -544,14 +544,14 @@ define([
       this.collectionEditorTitle.innerHTML = "Create New Collection";
       this.editorPrimaryButton.innerHTML = "Create Collection";
       let collectionInputs = `
-      <label class="editor-label">description:</label>
-      <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
-
-      <label class="editor-label">id:</label>
+      <label class="editor-label">id <span class="required">*</span>:</label>
       <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."/>
 
-      <label class="editor-label">title:</label>
+      <label class="editor-label">title <span class="required">*</span>:</label>
       <input id="collection-title-input" class="editor-input" type="text" placeholder="value..."/>
+
+      <label class="editor-label">description:</label>
+      <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
   `;
       this.editorInputForm.innerHTML = collectionInputs;
       this.initializeCollectionFormListeners();
@@ -604,11 +604,15 @@ define([
       });
     },
 
-    handleCancelUpdate: function () {
+    handleCancelUpdateCollection: function () {
       if (this.selectedCollection.graphic) {
         this.sketchGraphicsLayer.removeAll();
       }
       this.showAllGraphicsLayers(this.view);
+    },
+
+    handleCancelCreateCollection: function () {
+      this.sketchGraphicsLayer.removeAll();
     },
 
     updateCollectionInfoBox: function (properties, isZoomEnabled) {
@@ -677,7 +681,9 @@ define([
       });
       this.editorSecondary.addEventListener("click", () => {
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
-          this.handleCancelUpdate();
+          this.handleCancelUpdateCollection();
+        } else if (this.appActionState === this.actions.CREATE_COLLECTION) {
+          this.handleCancelCreateCollection();
         }
         this.hideEditor();
       });
