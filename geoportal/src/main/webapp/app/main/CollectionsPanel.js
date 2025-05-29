@@ -280,12 +280,17 @@ define([
     handleDeleteCollections: function () {
       this.appActionState = this.actions.DELETE_COLLECTION;
       this.updateIsLoading(true);
+      const that = this;
 
       // loop through and delete every collection selected
       const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
-      const allDeletePromises = collectionsToBeDeleted.map((collection) =>
-        this.deleteCollection(collection.id)
-      );
+      const allDeletePromises = collectionsToBeDeleted.map((collection) => {
+        if (collection.id === that.selectedCollection.properties.id) {
+          this.emptyCollectionInfoBox();
+          this.selectedCollection = null;
+        }
+        return this.deleteCollection(collection.id);
+      });
 
       Promise.all(allDeletePromises)
         .then((results) => {
@@ -293,6 +298,7 @@ define([
           this.rerenderCollectionsList();
           this.collectionIdsToBeDeleted = [];
           this.handleDeleteCollectionEnabled();
+          this.handleUpdateButtonEnabled();
         })
         .catch((e) => {
           console.error(e);
@@ -686,6 +692,13 @@ define([
                 </tr>`;
       });
       this.infoTableTitle.innerHTML = properties.title;
+      this.infoTableBody.innerHTML = tableRows.join("");
+      this.handleZoomCollectionEnabled();
+    },
+
+    emptyCollectionInfoBox: function () {
+      let tableRows = [];
+      this.infoTableTitle.innerHTML = "Collection Info";
       this.infoTableBody.innerHTML = tableRows.join("");
       this.handleZoomCollectionEnabled();
     },
