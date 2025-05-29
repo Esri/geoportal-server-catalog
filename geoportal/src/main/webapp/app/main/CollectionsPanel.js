@@ -37,6 +37,7 @@ define([
   "esri4/widgets/Expand",
   "esri4/widgets/BasemapGallery",
   "esri4/core/reactiveUtils",
+  "esri4/geometry/support/webMercatorUtils",
   "../gs/widget/WidgetContext",
   "../gs/base/LayerProcessor",
   "app/context/AppClient",
@@ -65,6 +66,7 @@ define([
   Expand,
   BasemapGallery,
   reactiveUtils,
+  webMercatorUtils,
   WidgetContext,
   LayerProcessor,
   AppClient
@@ -89,6 +91,7 @@ define([
     selectedCollection: null,
     collectionIdsToBeDeleted: [],
     selectedGraphic: null,
+    sketchGraphicsLayer: null,
 
     sampleCollection: [
       {
@@ -227,7 +230,24 @@ define([
       }
     },
 
+    removeAllCollectionGraphicsLayers: function (view) {
+      let layersToRemove = [];
+      view.map.layers.items.forEach((layer, index) => {
+        if (layer.title !== "sketch") {
+          layersToRemove.push(layer);
+        }
+      });
+      layersToRemove.forEach((layer) => {
+        view.map.layers.remove(layer);
+      });
+    },
+
+    resetSketch: function () {
+      this.sketchGraphicsLayer.removeAll();
+    },
+
     rerenderCollectionsList: function () {
+      this.removeAllCollectionGraphicsLayers(this.view);
       setTimeout(() => this.handleGetCollections(this.view), 3000);
     },
 
@@ -273,15 +293,72 @@ define([
 
     handleCreateCollection: function () {
       this.appActionState = this.actions.CREATE_COLLECTION;
-      this.createCollection({ properties: this.getCreateFieldValues() });
-      this.hideEditor();
+      const { id, description, title } = this.getCreateFieldValues();
+      const geo = webMercatorUtils.webMercatorToGeographic(
+        this.selectedGraphic.geometry
+      );
+      const collection = {
+        type: "Collection",
+        stac_version: "1.0.0",
+        stac_extensions: [],
+        id: id,
+        title: title,
+        description: description,
+        keywords: [],
+        license: "Apache-2.0",
+        providers: [],
+        extent: {
+          spatial: {
+            bbox: [[-95, 30, -94, 30.06]],
+            geometry: {
+              type: "Polygon",
+              coordinates: geo.rings,
+            },
+          },
+          temporal: {
+            interval: [["1900-01-01T00:00:00Z", "2099-12-31T23:59:59Z"]],
+          },
+        },
+        summaries: {
+          datetime: {
+            min: "1900-01-01T00:00:00Z",
+            max: "2099-12-31T23:59:59Z",
+          },
+        },
+        links: [],
+        assets: {},
+        item_assets: {},
+      };
+
+      this.createCollection(collection).then((response) => {
+        this.rerenderCollectionsList();
+        this.resetSketch();
+        this.hideEditor();
+      });
     },
 
-    createCollection: function (collection = {}) {
-      console.log("Creating Collection", collection);
-      this.collections.push(collection);
-      this.renderCollectionList(this.collections);
-      console.log("selected graphic", this.selectedGraphic);
+    createCollection: async function (collection) {
+      if (!collection) {
+        return console.error("collection object required to create");
+      }
+      try {
+        console.log("Creating Collection", collection);
+        let url = `${this.getStacBaseUrl()}/collections`;
+        var client = new AppClient();
+        url = client.appendAccessToken(url);
+        const response = await fetch(url, {
+          method: "POST",
+          body: JSON.stringify(collection),
+        });
+        const result = await response.json();
+        return {
+          response: result,
+          id: collection.id,
+        };
+      } catch (e) {
+        console.error(e);
+        return null;
+      }
     },
 
     handleUpdateCollection: function (id, properties) {
@@ -571,7 +648,6 @@ define([
       );
 
       collectionDescriptionInput.addEventListener("input", (e) => {
-        console.log(e);
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
           collectionTitleInput.value
@@ -579,7 +655,6 @@ define([
       });
 
       collectionIdInput.addEventListener("input", (e) => {
-        console.log(e);
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
           collectionTitleInput.value
@@ -587,7 +662,6 @@ define([
       });
 
       collectionTitleInput.addEventListener("input", (e) => {
-        console.log(e);
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
           collectionTitleInput.value
@@ -608,6 +682,7 @@ define([
       const sketchGraphicsLayer = new GraphicsLayer({
         title: "sketch",
       });
+      this.sketchGraphicsLayer = sketchGraphicsLayer;
 
       view.map.layers.add(sketchGraphicsLayer);
 
@@ -637,29 +712,24 @@ define([
       this.sketchVM = sketchVM;
 
       this.drawPolygonButton.onclick = (e) => {
-        console.log(e);
         sketchVM.create("polygon");
         this.drawPolygonButton.classList.add("sketch-active-tool");
       };
 
       this.drawCircleButton.onclick = (e) => {
-        console.log(e);
         sketchVM.create("circle");
         this.drawCircleButton.classList.add("sketch-active-tool");
       };
 
       this.undoButton.onclick = (e) => {
-        console.log(e);
         sketchVM.undo();
       };
 
       this.redoButton.onclick = (e) => {
-        console.log(e);
         sketchVM.redo();
       };
 
       this.deletePolygonButton.onclick = (e) => {
-        console.log(e);
         sketchGraphicsLayer.removeAll();
         this.selectedGraphic = null;
       };
