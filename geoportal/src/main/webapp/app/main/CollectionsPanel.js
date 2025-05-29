@@ -561,10 +561,54 @@ define([
       if (this.appActionState === this.actions.CREATE_COLLECTION) {
         this.renderCreateCollectionEditor();
       } else if (this.appActionState === this.actions.UPDATE_COLLECTION) {
+        this.initializeUpdateWorkflow(
+          this.view,
+          this.selectedCollection,
+          this.selectedCollection.graphic
+        );
         this.renderUpdateCollectionEditor(this.selectedCollection.properties);
       }
       this.leftPanelEditorView.style.display = "flex";
       this.leftPanelListView.style.display = "none";
+    },
+
+    initializeUpdateWorkflow: function (view, feature, graphic) {
+      if (!feature || !view) {
+        console.error("missing arguments");
+        return;
+      }
+
+      if (graphic) {
+        this.hideAllGraphicsLayers(view);
+        const tempGraphic = graphic.clone();
+        this.sketchGraphicsLayer.add(tempGraphic);
+        this.sketchVM.update(tempGraphic);
+      }
+    },
+
+    hideAllGraphicsLayers: function (view) {
+      view.map.layers.items.forEach((layer) => {
+        if (layer.type === "graphics" && layer.title !== "sketch") {
+          layer.visible = false;
+        }
+      });
+    },
+
+    showAllGraphicsLayers: function (view) {
+      view.map.layers.items.forEach((layer) => {
+        view.map.layers.items.forEach((layer) => {
+          if (layer.type === "graphics" && layer.title !== "sketch") {
+            layer.visible = true;
+          }
+        });
+      });
+    },
+
+    handleCancelUpdate: function () {
+      if (this.selectedCollection.graphic) {
+        this.sketchGraphicsLayer.removeAll();
+      }
+      this.showAllGraphicsLayers(this.view);
     },
 
     updateCollectionInfoBox: function (properties, isZoomEnabled) {
@@ -632,6 +676,9 @@ define([
         this.hideEditor();
       });
       this.editorSecondary.addEventListener("click", () => {
+        if (this.appActionState === this.actions.UPDATE_COLLECTION) {
+          this.handleCancelUpdate();
+        }
         this.hideEditor();
       });
 
