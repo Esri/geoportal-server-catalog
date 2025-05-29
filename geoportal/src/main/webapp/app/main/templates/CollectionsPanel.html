@@ -251,6 +251,12 @@
       </div>
     </div>
   </div>
+  <div class="loader-container hidden" data-dojo-attach-point="loaderContainer">
+    <div class="loader-content">
+      <span class="loader"></span>
+      Loading...
+    </div>
+  </div>
   <style>
     .container-stac-admin {
       display: flex;
@@ -612,6 +618,48 @@
     #modal-close-button {
       width: 15px;
       cursor: pointer;
+    }
+
+    /* loader */
+    .loader-container {
+      background-color: rgb(0, 0, 0, 0.2);
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loader-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+    }
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #fff;
+      border-bottom-color: #0066ff;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
     }
 
     /* sketch */

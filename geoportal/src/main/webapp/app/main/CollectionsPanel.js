@@ -77,6 +77,7 @@ define([
     mapWasInitialized: false,
     view: null,
     sketchVM: null,
+    isLoading: false,
 
     actions: {
       DELETE_COLLECTION: "DELETE_COLLECTION",
@@ -128,6 +129,17 @@ define([
       this.initializeSketchViewModel(view);
 
       this.handleGetCollections(view);
+    },
+
+    updateIsLoading: function (value) {
+      this._setIsLoading(value);
+      value === true
+        ? this.loaderContainer.classList.remove("hidden")
+        : this.loaderContainer.classList.add("hidden");
+    },
+
+    _setIsLoading: function (value) {
+      this.isLoading = value;
     },
 
     renderCollectionGraphics: async function (collections, view) {
@@ -247,12 +259,17 @@ define([
     },
 
     rerenderCollectionsList: function () {
+      this.updateIsLoading(true);
       this.removeAllCollectionGraphicsLayers(this.view);
-      setTimeout(() => this.handleGetCollections(this.view), 3000);
+      setTimeout(async () => {
+        await this.handleGetCollections(this.view);
+        this.updateIsLoading(false);
+      }, 3000);
     },
 
     handleDeleteCollections: function () {
       this.appActionState = this.actions.DELETE_COLLECTION;
+      this.updateIsLoading(true);
 
       // loop through and delete every collection selected
       const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
@@ -260,11 +277,15 @@ define([
         this.deleteCollection(collection.id)
       );
 
-      Promise.all(allDeletePromises).then((results) => {
-        // API takes some time to delete
-        this.rerenderCollectionsList();
-        this.handleDeleteCollectionEnabled();
-      });
+      Promise.all(allDeletePromises)
+        .then((results) => {
+          // API takes some time to delete
+          this.rerenderCollectionsList();
+          this.handleDeleteCollectionEnabled();
+        })
+        .catch((e) => {
+          console.error(e);
+        });
       this.hideModal();
     },
 
@@ -295,6 +316,7 @@ define([
 
     handleCreateCollection: function () {
       this.appActionState = this.actions.CREATE_COLLECTION;
+      this.updateIsLoading(true);
       const { id, description, title } = this.getCreateFieldValues();
       const geo = this.selectedGraphic?.geometry
         ? webMercatorUtils.webMercatorToGeographic(
