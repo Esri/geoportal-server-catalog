@@ -274,7 +274,9 @@ define([
       }
       try {
         console.log("Deleting Collection", id);
-        let url = `${this.getStacBaseUrl()}/collections/${id}`;
+        let url = `${this.getStacBaseUrl()}/collections/${this.replaceSpaceWithPlus(
+          id
+        )}`;
         var client = new AppClient();
         url = client.appendAccessToken(url);
         const response = await fetch(url, {
@@ -294,9 +296,11 @@ define([
     handleCreateCollection: function () {
       this.appActionState = this.actions.CREATE_COLLECTION;
       const { id, description, title } = this.getCreateFieldValues();
-      const geo = webMercatorUtils.webMercatorToGeographic(
-        this.selectedGraphic.geometry
-      );
+      const geo = this.selectedGraphic.geometry
+        ? webMercatorUtils.webMercatorToGeographic(
+            this.selectedGraphic.geometry
+          )
+        : null;
       const collection = {
         type: "Collection",
         stac_version: "1.0.0",
@@ -739,6 +743,10 @@ define([
       return (
         value === null || value === undefined || value.toString().trim() === ""
       );
+    },
+
+    replaceSpaceWithPlus: function (str) {
+      return str.replace(/ /g, "+");
     },
 
     readConfig: function () {
