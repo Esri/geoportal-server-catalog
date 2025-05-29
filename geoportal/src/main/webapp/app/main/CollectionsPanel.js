@@ -291,6 +291,7 @@ define([
         .then((results) => {
           // API takes some time to delete
           this.rerenderCollectionsList();
+          this.collectionIdsToBeDeleted = [];
           this.handleDeleteCollectionEnabled();
         })
         .catch((e) => {
