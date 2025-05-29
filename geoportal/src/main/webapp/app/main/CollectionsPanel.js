@@ -913,9 +913,6 @@ define([
       return dfd;
     },
 
-    addToMap: function (params) {
-      this.addLayer(params, this.view);
-    },
     //Opening map panel
     ensureMap: function (urlParams) {
       this.urlParams = urlParams;
@@ -932,6 +929,7 @@ define([
         this.loadMapPanel();
       }
     },
+
     loadMapPanel: function () {
       var mapProps = AppContext.appConfig.searchMap || {};
       if (mapProps) mapProps = lang.clone(mapProps);
@@ -961,18 +959,6 @@ define([
       }
       view.when(
         lang.hitch(this, function () {
-          var localGeoportalUrl = this._createLocalCatalogUrl();
-          if (localGeoportalUrl) {
-            var target;
-            for (var i = 0; i < this.config.targets.length; i++) {
-              target = this.config.targets[i];
-              if (target.type === "geoportal" && !target.url) {
-                this.config.targets[i].url = localGeoportalUrl;
-                break;
-              }
-            }
-          }
-
           let searchWidget = new SearchWidget({
             view: view,
           });
@@ -990,7 +976,6 @@ define([
 
           let layerList = new LayerList({
             view: view,
-            listItemCreatedFunction: defineActions,
           });
           let layerListExpand = new Expand({
             expandIcon: "layers",
@@ -1003,32 +988,6 @@ define([
             index: 2,
           });
 
-          async function defineActions(event) {
-            const item = event.item;
-
-            await item.layer.when();
-            // An array of objects defining actions to place in the LayerList.By making this array two-dimensional, you can separate similar
-            // actions into separate groups with a breaking line.
-            item.actionsSections = [
-              [
-                {
-                  title: "Go to full extent",
-                  icon: "zoom-out-fixed",
-                  id: "full-extent",
-                },
-              ],
-              [
-                {
-                  title: "Remove",
-                  icon: "minus-circle",
-                  id: "remove-layer",
-                },
-              ],
-            ];
-          }
-          layerList.on("trigger-action", (event) => {
-            this.executeLayerlistActions(event);
-          });
           let homeWidget = new Home({
             view: view,
           });
@@ -1053,44 +1012,6 @@ define([
             position: "top-left",
             index: 1,
           });
-
-          let legend = new Legend({
-            view: view,
-          });
-          let legendExpand = new Expand({
-            expandIcon: "legend",
-            expandTooltip: "Legend",
-            view: view,
-            content: legend,
-          });
-          view.ui.add(legendExpand, {
-            position: "top-left",
-            index: 3,
-          });
-
-          reactiveUtils.on(
-            () => view.popup,
-            "trigger-action",
-            (event) => {
-              if (event.action.id === "view-attribute-table") {
-                this.openAttrTable(view.popup.selectedFeature);
-              }
-            }
-          );
-          reactiveUtils.watch(
-            () => view.popup.viewModel?.active,
-            () => {
-              selectedFeature = view.popup.selectedFeature;
-              if (selectedFeature !== null && view.popup.visible !== false) {
-                if (this.featureTable) {
-                  this.featureTable.highlightIds.removeAll();
-                  this.featureTable.highlightIds.add(
-                    view.popup.selectedFeature.attributes.OBJECTID
-                  );
-                }
-              }
-            }
-          );
           this.view = view;
         })
       );
@@ -1103,139 +1024,6 @@ define([
       }
 
       this.handleMapReady(view);
-    },
-
-    executeLayerlistActions: function (event) {
-      if (
-        event.action &&
-        event.action.id === "full-extent" &&
-        event.item &&
-        event.item.layer
-      ) {
-        this.view.goTo(event.item.layer.fullExtent);
-      }
-      if (event.action && event.action.id === "remove-layer") {
-        const layerToRemove = this.view.map.findLayerById(event.item.layer.id);
-        this.view.map.layers.remove(layerToRemove);
-      }
-    },
-
-    openAttrTable: function (selectedFeature) {
-      console.log("selected feature " + selectedFeature.attributes.OBJECTID);
-      let id = selectedFeature.attributes.OBJECTID;
-      //Below can be used to show only selected record
-      //    	var featureLayer = new FeatureLayer({url:selectedFeature.sourceLayer.url,
-      //    			definitionExpression: "OBJECTID = "+id});
-      var serviceUrl = selectedFeature.sourceLayer.url;
-      if (
-        (this.urlParams && this.urlParams.type == "WFS") ||
-        serviceUrl.indexOf("WFSServer") > -1
-      ) {
-        var layerToAdd = new WFSLayer({ url: serviceUrl });
-      } else {
-        var layerToAdd = new FeatureLayer(serviceUrl);
-      }
-
-      var tableContainer = document.getElementById("tableContainer");
-
-      if (this.featureTable) {
-        try {
-          this.featureTable.destroy();
-        } catch (error) {
-          console.error(error);
-        }
-        tableContainer.innerHTML = "";
-      }
-      var container = document.createElement("div");
-
-      tableContainer.appendChild(container);
-
-      let table = (this.featureTable = new FeatureTable({
-        returnGeometryEnabled: true,
-        view: this.view,
-        layer: layerToAdd,
-        container: container,
-        visible: true,
-        columnReorderingEnabled: true,
-        highlightEnabled: true,
-        highlightIds: [id],
-        visibleElements: {
-          // Autocast to VisibleElements
-          menuItems: {
-            clearSelection: true,
-            refreshData: true,
-            toggleColumns: true,
-            selectedRecordsShowAllToggle: true,
-          },
-        },
-        menuConfig: {
-          items: [
-            {
-              label: "Close",
-              icon: "x-circle",
-              clickFunction: () => {
-                this.featureTable.visible = false;
-              },
-            },
-          ],
-        },
-      }));
-    },
-    _createLocalCatalogUrl: function () {
-      if (window && window.top && window.top.geoportalServiceInfo) {
-        var loc = window.top.location;
-        var gpt = window.top.geoportalServiceInfo;
-        var url =
-          loc.protocol +
-          "//" +
-          loc.host +
-          loc.pathname +
-          "elastic/" +
-          gpt.metadataIndexName +
-          "/_search";
-
-        if (
-          AppContext.appConfig.system.secureCatalogApp ||
-          AppContext.geoportal.supportsApprovalStatus ||
-          AppContext.geoportal.supportsGroupBasedAccess
-        ) {
-          var client = new AppClient();
-          url = client.appendAccessToken(url);
-        }
-        return url;
-      }
-      return null;
-    },
-
-    addLayer: function (params, view) {
-      // console.warn("AddToMap.addLayer...",type,url);
-      var url = params.url;
-      var type = params.type;
-      var dfd = new Deferred();
-      this.urlParams = params;
-
-      var processor = new LayerProcessor();
-      processor
-        .addLayer(view, type, url)
-        .then(function (result) {
-          if (result) {
-            dfd.resolve(result);
-          } else {
-            dfd.reject("Failed");
-            console.warn("AddToMap failed for", url);
-          }
-        })
-        .catch(function (error) {
-          dfd.reject(error);
-          if (typeof error === "string" && error === "Unsupported") {
-            console.warn("AddToMap: Unsupported type", type, url);
-          } else {
-            console.warn("AddToMap failed for", url);
-            console.warn(error);
-          }
-          //TODO add popup alert("Add to Map failed");
-        });
-      return dfd;
     },
   });
 
