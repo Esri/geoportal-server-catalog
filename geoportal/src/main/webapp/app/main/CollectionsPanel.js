@@ -161,7 +161,6 @@ define([
     renderCollectionGraphics: async function (collections, view) {
       const fillSymbol = this.COLLECTION_SYM;
 
-      let lastGraphic = null;
       collections.forEach((collection, index) => {
         if (collection.geometry) {
           const graphic = new Graphic({
@@ -172,7 +171,6 @@ define([
             },
           });
           collection.graphic = graphic;
-          lastGraphic = graphic;
           const graphicsLayer = new GraphicsLayer({
             title: collection.properties.id,
           });
@@ -417,6 +415,7 @@ define([
     handleReadCollection: function (id) {
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
+      this.selectedGraphic = this.selectedCollection.graphic;
       this.handleUpdateButtonEnabled();
       if (this.selectedCollection) {
         this.updateCollectionInfoBox(
