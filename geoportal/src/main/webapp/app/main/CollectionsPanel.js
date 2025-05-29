@@ -86,6 +86,22 @@ define([
       READ_COLLECTION: "READ_COLLECTION",
       NONE: "NONE",
     },
+    POLYGON_SYM: {
+      type: "simple-fill",
+      color: [255, 165, 0, 0.3],
+      outline: {
+        color: "red",
+        width: 3,
+      },
+    },
+    COLLECTION_SYM: {
+      type: "simple-fill",
+      color: [255, 165, 0, 0.3],
+      outline: {
+        color: [255, 165, 0],
+        width: 2,
+      },
+    },
 
     appActionState: "NONE",
     collections: [],
@@ -143,14 +159,7 @@ define([
     },
 
     renderCollectionGraphics: async function (collections, view) {
-      const fillSymbol = {
-        type: "simple-fill", // autocasts as new SimpleFillSymbol()
-        color: [255, 165, 0, 0.3],
-        outline: {
-          color: [255, 165, 0],
-          width: 2,
-        },
-      };
+      const fillSymbol = this.COLLECTION_SYM;
 
       let lastGraphic = null;
       collections.forEach((collection, index) => {
@@ -581,6 +590,7 @@ define([
       if (graphic) {
         this.hideAllGraphicsLayers(view);
         const tempGraphic = graphic.clone();
+        tempGraphic.symbol = this.POLYGON_SYM;
         this.sketchGraphicsLayer.add(tempGraphic);
         this.sketchVM.update(tempGraphic);
       }
@@ -749,15 +759,6 @@ define([
     },
 
     initializeSketchViewModel: function (view) {
-      const polygonSymbol = {
-        type: "simple-fill",
-        color: "#f2bc94",
-        outline: {
-          color: "#722620",
-          width: 3,
-        },
-      };
-
       const sketchGraphicsLayer = new GraphicsLayer({
         title: "sketch",
       });
@@ -767,7 +768,7 @@ define([
 
       const sketchVM = new SketchViewModel({
         view: view,
-        polygonSymbol: polygonSymbol,
+        polygonSymbol: this.POLYGON_SYM,
         layer: sketchGraphicsLayer,
       });
 
