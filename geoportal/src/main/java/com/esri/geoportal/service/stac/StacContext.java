@@ -28,6 +28,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -187,7 +190,7 @@ public class StacContext {
         break;
         
       case "geometry_source_matches":
-        passes = true;       
+        passes = false;       
         JSONObject existingItem = StacHelper.getSTACItemById(collectionId, itemId);
         
         if (existingItem == null) {
@@ -234,7 +237,7 @@ public class StacContext {
                     }
 
                   } else {
-                    passes = passes && true;
+                    passes = true;
                   }
 
               } 
@@ -244,7 +247,27 @@ public class StacContext {
         message = passes ? "Geometry source validation: OK!" : message;          
         
         break;
-        
+      case "match_expression":
+    	  passes = false;
+    	  String field ="";
+		  String matchExpressionRule = ruleElements[1];
+		  String[] matchFldVal = matchExpressionRule.split(":");
+		  if(matchFldVal.length == 2)
+		  {
+			  field = matchFldVal[0];
+			  String regEx = matchFldVal[1];			  
+			  if(!regEx.isBlank() && !field.isBlank())
+			  {
+				  Pattern pattern = Pattern.compile(regEx);				  
+				  Matcher matcher = pattern.matcher(item.getAsString(field));
+				  if(matcher.matches())
+				  {
+					  passes = true;					  
+				  }
+			  }
+		  }
+		  message = passes ? "Match expression ok for "+field : "Match expression failed for "+field;
+	      break;
       default:
         LOGGER.debug("Unsupported validation rule: " + validationRule);
         passes = false;
@@ -252,7 +275,6 @@ public class StacContext {
         
         break;
     }
-
     response.put("passes", passes);
     response.put("message", message);
 
