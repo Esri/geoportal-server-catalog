@@ -97,9 +97,10 @@
           <beans:value>unique|properties.fieldname</beans:value>
           <beans:value>intersects_collection</beans:value>          
           <beans:value>unique|properties.xom:edp_equip_id</beans:value>
-	   	  <beans:value>intersects_collection</beans:value>
-	   	  <beans:value>geometry_source_matches</beans:value>
+	  <beans:value>intersects_collection</beans:value>
+	  <beans:value>geometry_source_matches</beans:value>
           <beans:value>match_expression |id:^[A-Za-z0-9_]+$</beans:value>
+	      
           Below configuration uses environment variables for the rules
         <beans:value>${gpt_stacValidationRule1}</beans:value>
         <beans:value>${gpt_stacValidationRule2}</beans:value>-->
