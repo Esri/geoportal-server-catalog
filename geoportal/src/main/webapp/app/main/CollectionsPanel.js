@@ -294,9 +294,27 @@ define([
 
       Promise.all(allDeletePromises)
         .then((results) => {
+          let successDeleteIds = [];
+          let failedDeleteIds = [];
+
+          results.forEach((r) => {
+            if (r.response.code === "200") {
+              successDeleteIds.push(r.id);
+            } else {
+              failedDeleteIds.push(r.id);
+            }
+          });
+
+          if (failedDeleteIds.length === results.length) {
+            throw new Error(failedDeleteIds.join(", "));
+          }
           this.showAlert(
             "Successfully deleted collections",
-            `Deleted ${this.collectionIdsToBeDeleted}`,
+            `Deleted: ${successDeleteIds.join(", ")}. ${
+              failedDeleteIds.length > 0
+                ? `Failed to delete: ${failedDeleteIds.join(", ")}`
+                : ""
+            }`,
             "green"
           );
           this.rerenderCollectionsList();
@@ -305,11 +323,7 @@ define([
           this.handleUpdateButtonEnabled();
         })
         .catch((e) => {
-          this.showAlert(
-            "Error deleting collections",
-            `Error deleting: ${this.collectionIdsToBeDeleted}`,
-            "red"
-          );
+          this.showAlert("Error deleting collections", `${e}`, "red");
           console.error(e);
         });
       this.hideModal();
