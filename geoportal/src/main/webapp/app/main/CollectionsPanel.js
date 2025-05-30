@@ -133,9 +133,12 @@ define([
 
     updateIsLoading: function (value) {
       this._setIsLoading(value);
-      value === true
-        ? this.loaderContainer.classList.remove("hidden")
-        : this.loaderContainer.classList.add("hidden");
+      if (value === true) {
+        this.hideAlert();
+        this.loaderContainer.classList.remove("hidden");
+      } else {
+        this.loaderContainer.classList.add("hidden");
+      }
     },
 
     _setIsLoading: function (value) {
