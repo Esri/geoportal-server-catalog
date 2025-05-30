@@ -735,7 +735,7 @@ public class StacHelper {
 		
 		if (requestPayload.containsKey("id") && !isCollectionIdCharValid(requestPayload.getAsString("id"))) {
 			      
-			errorMsg = errorMsg+" id can only contain characters (a-zA-Z0-9_-).";
+			errorMsg = errorMsg+" id can only contain characters (a-zA-Z0-9:_-).";
 		}
     
 		if (!requestPayload.containsKey("description") || 
@@ -789,7 +789,7 @@ public class StacHelper {
 	}
 
 	private static boolean isCollectionIdCharValid(String id) {
-		String regEx = "^[A-Za-z0-9_-]+$"; 
+		String regEx = "^[A-Za-z0-9:_-]+$"; 
 		Pattern pattern = Pattern.compile(regEx);
 		Matcher matcher = pattern.matcher(id);
 		if (matcher.matches()) {

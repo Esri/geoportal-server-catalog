@@ -251,7 +251,7 @@ public class StacContext {
     	  passes = false;
     	  String field ="";
 		  String matchExpressionRule = ruleElements[1];
-		  String[] matchFldVal = matchExpressionRule.split(":");
+		  String[] matchFldVal = matchExpressionRule.split(",");
 		  if(matchFldVal.length == 2)
 		  {
 			  field = matchFldVal[0];
