@@ -294,13 +294,22 @@ define([
 
       Promise.all(allDeletePromises)
         .then((results) => {
-          // API takes some time to delete
+          this.showAlert(
+            "Successfully deleted collections",
+            `Deleted ${this.collectionIdsToBeDeleted}`,
+            "green"
+          );
           this.rerenderCollectionsList();
           this.collectionIdsToBeDeleted = [];
           this.handleDeleteCollectionEnabled();
           this.handleUpdateButtonEnabled();
         })
         .catch((e) => {
+          this.showAlert(
+            "Error deleting collections",
+            `Error deleting: ${this.collectionIdsToBeDeleted}`,
+            "red"
+          );
           console.error(e);
         });
       this.hideModal();
@@ -327,11 +336,11 @@ define([
         };
       } catch (e) {
         console.error(e);
-        return null;
+        throw new Error(`Error deleting: ${collection.id}`);
       }
     },
 
-    handleCreateCollection: function () {
+    handleCreateCollection: async function () {
       this.appActionState = this.actions.CREATE_COLLECTION;
       this.updateIsLoading(true);
       this.sketchVM.complete();
@@ -381,11 +390,24 @@ define([
         item_assets: {},
       };
 
-      this.createCollection(collection).then((response) => {
-        this.rerenderCollectionsList();
-        this.resetSketch();
-        this.hideEditor();
-      });
+      try {
+        await this.createCollection(collection);
+        this.showAlert(
+          "Successfully created collection",
+          `Created ${collection.id}`,
+          "green"
+        );
+      } catch (e) {
+        this.showAlert(
+          "Error creating collection",
+          `Error creating: ${collection.id}`,
+          "red"
+        );
+      }
+
+      this.rerenderCollectionsList();
+      this.resetSketch();
+      this.hideEditor();
     },
 
     createCollection: async function (collection) {
@@ -408,7 +430,7 @@ define([
         };
       } catch (e) {
         console.error(e);
-        return null;
+        throw new Error(`Error creating collection ${collection.id}`);
       }
     },
 
@@ -440,7 +462,21 @@ define([
         coordinates: tempGeometry?.rings,
       };
 
-      await this.updateCollection(collection);
+      try {
+        await this.updateCollection(collection);
+        this.showAlert(
+          "Successfully updated collection",
+          `Updating ${collection.id}`,
+          "green"
+        );
+      } catch (e) {
+        this.showAlert(
+          "Error updating collection",
+          `Error updating: ${collection.id}`,
+          "red"
+        );
+      }
+
       this.rerenderCollectionsList(this.collections);
       this.showAllGraphicsLayers(this.view);
       this.sketchGraphicsLayer.removeAll();
@@ -467,6 +503,7 @@ define([
           id: collection.id,
         };
       } catch (e) {
+        throw new Error(`Unable to update collection ${collection.id}`);
         console.error(e);
       }
     },
@@ -582,6 +619,17 @@ define([
       this.modalContainerCollectionsList.innerHTML = selectedCollections
         .map((c) => c.title)
         .join(", ");
+    },
+
+    hideAlert: function () {
+      this.alertContainer.classList.add("hidden");
+    },
+
+    showAlert: function (title = "", message = "", color = "blue") {
+      this.alertContainer.classList.remove("hidden");
+      this.alertTitle.innerHTML = title;
+      this.alertMessage.innerHTML = title;
+      this.alertColor.style.backgroundColor = color;
     },
 
     hideEditor: function () {
@@ -771,6 +819,11 @@ define([
         if (this.appActionState === this.actions.DELETE_COLLECTION) {
           this.handleDeleteCollections();
         }
+      });
+
+      // Alert Events
+      this.alertContainer.addEventListener("click", () => {
+        this.alertContainer.classList.add("hidden");
       });
 
       // List Filtering

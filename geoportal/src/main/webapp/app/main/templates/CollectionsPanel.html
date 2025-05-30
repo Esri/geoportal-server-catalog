@@ -257,6 +257,19 @@
       Loading...
     </div>
   </div>
+  <div class="alert-container hidden" data-dojo-attach-point="alertContainer">
+    <div id="alert-color" data-dojo-attach-point="alertColor"></div>
+    <div class="alert-content">
+      <div id="alert-header">
+        <h4 id="alert-title" data-dojo-attach-point="alertTitle">
+          Alert Title
+        </h4>
+      </div>
+      <p id="alert-message" data-dojo-attach-point="alertMessage">
+        Alert Message
+      </p>
+    </div>
+  </div>
   <style>
     .container-stac-admin {
       display: flex;
@@ -665,6 +678,53 @@
     /* sketch */
     .sketch-active-tool {
       background-color: #0066ff;
+    }
+
+    /* alert */
+    .alert-container {
+      position: absolute;
+      bottom: 75px;
+      right: 25px;
+      height: 100px;
+      width: 500px;
+      background-color: white;
+      z-index: 99;
+      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.062);
+      display: flex;
+      transition: all 0.5s ease-out;
+    }
+
+    .alert-container:hover {
+      background-color: #e9e9e9;
+      cursor: pointer;
+    }
+
+    #alert-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    #alert-title {
+      font-size: 20px;
+    }
+
+    #alert-message {
+      font-size: 15px;
+    }
+
+    #alert-color {
+      background-color: green;
+      height: 100%;
+      width: 15px;
+    }
+
+    .alert-content {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      width: 100%;
     }
 
     .required {
