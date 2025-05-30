@@ -884,6 +884,7 @@ define([
       });
 
       collectionIdInput.addEventListener("input", (e) => {
+        collectionIdInput.value = collectionIdInput.value.replace(/\s/g, "");
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
           collectionTitleInput.value
