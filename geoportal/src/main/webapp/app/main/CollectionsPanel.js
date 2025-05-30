@@ -277,7 +277,7 @@ define([
       setTimeout(async () => {
         await this.handleGetCollections(this.view);
         this.updateIsLoading(false);
-      }, 3000);
+      }, 1500);
     },
 
     handleDeleteCollections: function () {
@@ -327,6 +327,7 @@ define([
         })
         .catch((e) => {
           this.showAlert("Error deleting collections", `${e}`, "red");
+          this.updateIsLoading(false);
           console.error(e);
         });
       this.hideModal();
@@ -418,6 +419,7 @@ define([
           "green"
         );
       } catch (e) {
+        this.updateIsLoading(false);
         this.showAlert("Error creating collection", `${e}`, "red");
       }
 
@@ -489,6 +491,7 @@ define([
           "green"
         );
       } catch (e) {
+        this.updateIsLoading(false);
         this.showAlert("Error updating collection", `${e}`, "red");
       }
 
@@ -644,7 +647,7 @@ define([
       title = "",
       message = "",
       color = "green",
-      delay = 3000
+      delay = 1500
     ) {
       this.alertTitle.innerHTML = title;
       this.alertMessage.innerHTML = message;
@@ -884,7 +887,11 @@ define([
       });
 
       collectionIdInput.addEventListener("input", (e) => {
-        collectionIdInput.value = collectionIdInput.value.replace(/\s/g, "");
+        collectionIdInput.value = collectionIdInput.value.replace(
+          /[^a-zA-Z0-9]/g,
+          ""
+        );
+        // this.value = this.value.
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
           collectionTitleInput.value
