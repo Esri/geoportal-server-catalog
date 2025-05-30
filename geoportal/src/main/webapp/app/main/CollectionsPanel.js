@@ -361,7 +361,7 @@ define([
         type: "Collection",
         stac_version: "1.0.0",
         stac_extensions: [],
-        id: id,
+        id: this.removeAllSpaces(id),
         title: title,
         description: description,
         keywords: [],
@@ -391,18 +391,17 @@ define([
       };
 
       try {
-        await this.createCollection(collection);
+        const result = await this.createCollection(collection);
+        if (result.response.code !== "201") {
+          throw new Error(result.response.description);
+        }
         this.showAlert(
           "Successfully created collection",
           `Created ${collection.id}`,
           "green"
         );
       } catch (e) {
-        this.showAlert(
-          "Error creating collection",
-          `Error creating: ${collection.id}`,
-          "red"
-        );
+        this.showAlert("Error creating collection", `${e}`, "red");
       }
 
       this.rerenderCollectionsList();
@@ -444,7 +443,7 @@ define([
 
       // replace properties with new properties
       const { title: newTitle, description: newDescription } = properties;
-      collection.id = this.replaceSpaceWithPlus(collection.id);
+      collection.id = this.removeAllSpaces(collection.id);
       collection.title = newTitle;
       collection.description = newDescription;
       let tempGeometry = null;
@@ -947,6 +946,10 @@ define([
 
     replaceSpaceWithPlus: function (str) {
       return str.replace(/ /g, "+");
+    },
+
+    removeAllSpaces: function (str) {
+      return str.replace(/ /g, "");
     },
 
     readConfig: function () {
