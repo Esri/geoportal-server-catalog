@@ -624,11 +624,18 @@ define([
       this.alertContainer.classList.add("hidden");
     },
 
-    showAlert: function (title = "", message = "", color = "blue") {
-      this.alertContainer.classList.remove("hidden");
+    showAlert: function (
+      title = "",
+      message = "",
+      color = "green",
+      delay = 3000
+    ) {
       this.alertTitle.innerHTML = title;
-      this.alertMessage.innerHTML = title;
+      this.alertMessage.innerHTML = message;
       this.alertColor.style.backgroundColor = color;
+      setTimeout(() => {
+        this.alertContainer.classList.remove("hidden");
+      }, delay);
     },
 
     hideEditor: function () {
