@@ -24,6 +24,8 @@ import com.esri.geoportal.service.stac.Collection;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -730,9 +732,15 @@ public class StacHelper {
        (requestPayload.containsKey("id") && requestPayload.get("id").toString().isBlank()))	{
 			errorMsg = errorMsg+" id is mandatory.";
 		}
+		
+		if (requestPayload.containsKey("id") && !isCollectionIdCharValid(requestPayload.getAsString("id"))) {
+			      
+			errorMsg = errorMsg+" id can only contain characters (a-zA-Z0-9_-).";
+		}
     
 		if (!requestPayload.containsKey("description") || 
-       (requestPayload.containsKey("description") && requestPayload.get("description").toString().isBlank()))	{
+       (requestPayload.containsKey("description") && requestPayload.get("description").toString().isBlank())) 
+		{
 			errorMsg = errorMsg+" description is mandatory.";
 		}
     
@@ -749,9 +757,10 @@ public class StacHelper {
 			errorMsg = errorMsg+" extent is mandatory.";
 		}
     
-		if (errorMsg.length()>0) {
-			response.setCode(StacItemValidationResponse.BAD_REQUEST);
-			response.setMessage(errorMsg);
+    
+	if (errorMsg.length()>0) {
+		response.setCode(StacItemValidationResponse.BAD_REQUEST);
+		response.setMessage(errorMsg);
 
     } else {
 			String id = requestPayload.get("id").toString();
@@ -778,6 +787,17 @@ public class StacHelper {
     
 		return response;
 	}
+
+	private static boolean isCollectionIdCharValid(String id) {
+		String regEx = "^[A-Za-z0-9_-]+$"; 
+		Pattern pattern = Pattern.compile(regEx);
+		Matcher matcher = pattern.matcher(id);
+		if (matcher.matches()) {
+			return true;
+		}
+		return false;
+	}
+
 
 	public static JSONObject getCollectionWithId(String id) throws Exception {
 		String response = "";		
