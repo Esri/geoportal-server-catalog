@@ -462,18 +462,17 @@ define([
       };
 
       try {
-        await this.updateCollection(collection);
+        const result = await this.updateCollection(collection);
+        if (result.response.code !== "200") {
+          throw new Error(result.response.description);
+        }
         this.showAlert(
           "Successfully updated collection",
           `Updating ${collection.id}`,
           "green"
         );
       } catch (e) {
-        this.showAlert(
-          "Error updating collection",
-          `Error updating: ${collection.id}`,
-          "red"
-        );
+        this.showAlert("Error updating collection", `${e}`, "red");
       }
 
       this.rerenderCollectionsList(this.collections);
