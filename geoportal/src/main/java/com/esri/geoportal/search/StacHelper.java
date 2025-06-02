@@ -789,7 +789,7 @@ public class StacHelper {
 	}
 
 	private static boolean isCollectionIdCharValid(String id) {
-		String regEx = "^[A-Za-z0-9:_-]+$"; 
+		String regEx = "^[A-Za-z0-9_-]+$"; 
 		Pattern pattern = Pattern.compile(regEx);
 		Matcher matcher = pattern.matcher(id);
 		if (matcher.matches()) {
