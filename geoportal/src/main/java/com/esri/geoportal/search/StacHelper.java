@@ -1,5 +1,6 @@
 package com.esri.geoportal.search;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -21,6 +22,7 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.StacContext;
 import com.esri.geoportal.service.stac.Asset;
 import com.esri.geoportal.service.stac.Collection;
+import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import java.util.logging.Level;
@@ -31,6 +33,7 @@ import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 
 
 public class StacHelper {
@@ -537,11 +540,12 @@ public class StacHelper {
 	}
 
 
-	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) {
+	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) throws IOException, ParseException {
 		String date = DateUtil.nowAsString();
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
 		StacContext sc = StacContext.getInstance();
 		GeoportalContext gc = GeoportalContext.getInstance();
+		GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
 		// Add feature
 		if (!forUpdate) {
 			// populate STAC item field (collection) with collectionID from URI
@@ -551,10 +555,12 @@ public class StacHelper {
 			prop.put(FieldNames.FIELD_STAC_CREATED, date);
 			prop.put(FieldNames.FIELD_STAC_UPDATED, date);
 			
-			//Check for geom_wkt field, if exists, iterate over all geometries and fill update_date
+			//Check for geom_wkt field 
 			if(prop.containsKey(gc.getGeomWKTField()))
 			{
 				JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
+				
+				//iterate over all geometries and fill update_date
 				for (Map.Entry<String, Object> entry : wktGeom.entrySet()) {
 					String geomObjKey = entry.getKey();
 					JSONObject geomObj = (JSONObject) wktGeom.get(geomObjKey);
@@ -562,9 +568,22 @@ public class StacHelper {
 					{
 						geomObj.put("update_date",date);	
 					}
-				}			
-			}
-			
+				}
+				
+				boolean addPoint = checkToBeAdded(wktGeom,"point");
+				boolean addFootprint = checkToBeAdded(wktGeom,"polygon");
+				//if polyhedral exists but point and polygon missing, generate 
+				if(addPoint){
+						//generate point
+						JSONObject pointWKTObj = geometryClient.getPointFromPolyhedralWKT((JSONObject) wktGeom.get("polyhedral"));
+						wktGeom.put("point",pointWKTObj);					
+				}
+				if(addFootprint){
+						//generate polygon footprint
+						JSONObject polygonWKTObj = geometryClient.getPolyhedralFootprint((JSONObject) wktGeom.get("polyhedral"));
+						wktGeom.put("polygon",polygonWKTObj);
+				}
+			}			
 			requestPayload.put("properties", prop);
 
 			// Add Geoportal attributes sys_created_dt, sys_modified_dt,
@@ -666,6 +685,44 @@ public class StacHelper {
 
 		return requestPayload;
 	}
+
+	private static boolean checkToBeAdded(JSONObject wktGeom, String type) {
+		boolean toBeAdded = false;
+		if(type.contentEquals("point") && wktGeom.containsKey("polyhedral"))
+		{
+			if(!wktGeom.containsKey("point"))
+			{
+				toBeAdded = true;
+			}
+			else if(wktGeom.containsKey("point"))
+			{
+				JSONObject pointObj = (JSONObject) wktGeom.get("point");
+				if(pointObj == null || (pointObj!=null && 
+						(pointObj.get("wkt")== null || (pointObj.get("wkt")!=null && pointObj.getAsString("wkt").isBlank()))))
+				{
+					toBeAdded = true;
+				}					
+			}
+		}
+		if(type.contentEquals("polygon") && wktGeom.containsKey("polyhedral"))
+		{
+			if(!wktGeom.containsKey("polygon"))
+			{
+				toBeAdded = true;
+			}
+			else if(wktGeom.containsKey("polygon"))
+			{
+				JSONObject polygonObj = (JSONObject) wktGeom.get("polygon");
+				if(polygonObj == null || (polygonObj!=null && 
+						(polygonObj.get("wkt")== null || (polygonObj.get("wkt")!=null && polygonObj.getAsString("wkt").isBlank()))))
+				{
+					toBeAdded = true;
+				}					
+			}
+		}
+		return toBeAdded;
+	}
+
 
 	public static StacItemValidationResponse validateStacItemForUpdate(JSONObject requestPayload, 
 		String collectionId, String featureId, boolean validateAllFields) throws Exception {
