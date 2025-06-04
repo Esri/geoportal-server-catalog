@@ -1762,7 +1762,7 @@ public class STACService extends Application {
 			
 			JSONArray bboxArr = featureContext.read("$.featurePropPath.bbox");
 			//No valid bbox in feature
-			if(bboxArr.get(1).toString().contains("$"))
+			if(bboxArr == null ||(bboxArr!=null && bboxArr.size()>1 && bboxArr.get(1).toString().contains("$")))
 			{
 				featureContext.delete("$.featurePropPath.bbox");
 			}
