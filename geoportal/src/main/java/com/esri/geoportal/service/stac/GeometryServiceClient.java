@@ -1082,7 +1082,7 @@ public class GeometryServiceClient {
 			}			
 		 }
 		  inputGeomStr = inputGeomStr+"]";
-		  if(inputGeomStr.length() < 2)		//Means no points added	 
+		  if(inputGeomStr.length() < 3)		//Means no points added	 
 		  {
 			  return polygonWKTObj;
 		  }
@@ -1122,8 +1122,7 @@ public class GeometryServiceClient {
 	 * @return
 	 */
   public JSONObject getPointFromPolyhedralWKT(JSONObject polyhedralGeomWKTObj)
-  {	
-	 	
+  {	 	
 		JSONObject pointWktObj = new JSONObject();
 		double x = 0.0;
 		double y = 0.0;
@@ -1145,43 +1144,48 @@ public class GeometryServiceClient {
 				numberOfVertex ++;
 			}
 		}
-		// Get average and create POINT
-		double avjX = x / numberOfVertex;
-		double avjY = y / numberOfVertex;
-		double avjZ = z / numberOfVertex;
+		if(numberOfVertex >0)
+		{
+			// Get average and create POINT
+			double avjX = x / numberOfVertex;
+			double avjY = y / numberOfVertex;
+			double avjZ = z / numberOfVertex;
 
-		pointWktObj.put("wkt", "POINT (" + avjX + " " + avjY + " " + avjZ + ")");
-		pointWktObj.put("geometry_source", polyhedralGeomWKTObj.getAsString("geometry_source"));
-		pointWktObj.put("update_date", DateUtil.nowAsString());		
-
+			pointWktObj.put("wkt", "POINT (" + avjX + " " + avjY + " " + avjZ + ")");
+			pointWktObj.put("geometry_source", polyhedralGeomWKTObj.getAsString("geometry_source"));
+			pointWktObj.put("update_date", DateUtil.nowAsString());	
+		}
 		return pointWktObj;
   }
   
-  private ArrayList<String[]> getPolyhedralVerticesArr(JSONObject polyhedralGeomWKTObj) {
-	  
-	 // JSONObject polyhedralObj = (JSONObject) polyhedralGeomWKTObj.get("polyhedral");
-	  String wkt = polyhedralGeomWKTObj.getAsString("wkt");
-	  String patch = wkt.trim().substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
-	  String patches = patch.replace("((", "");
-	  String regex = "[))]";
-	  String[] polygonArr = patches.split(regex);
+  private ArrayList<String[]> getPolyhedralVerticesArr(JSONObject polyhedralGeomWKTObj) {	  
+	 
 	  ArrayList<String[]> verticesArrList = new ArrayList<>();
 	  
-	  String verticesBeforeTrim, vertices="";String[] verticesArr = null;
-	  //Count the number of vertices and get sum of x,y and z
-	  for(int i=0; i<polygonArr.length;i++)
+	  String wkt = polyhedralGeomWKTObj.getAsString("wkt");	
+	  if(wkt !=null && !wkt.isBlank() &&  wkt.indexOf("PATCHES")>-1)
 	  {
-		  verticesBeforeTrim = polygonArr[i];
-		  vertices = verticesBeforeTrim.replace(", ",",");
-		  verticesArr = vertices.split(",");
+		  String patch = wkt.trim().substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+		  String patches = patch.replace("((", "");
+		  String regex = "[))]";
+		  String[] polygonArr = patches.split(regex);
 		  
-		  for(int j=0;j<verticesArr.length;j++)
-    	  {
-			  String[] vertexArr = verticesArr[j].split(" ");
-			  verticesArrList.add(vertexArr);
-    	  }
+		  
+		  String verticesBeforeTrim, vertices="";String[] verticesArr = null;
+		  //Count the number of vertices and get sum of x,y and z
+		  for(int i=0; i<polygonArr.length;i++)
+		  {
+			  verticesBeforeTrim = polygonArr[i];
+			  vertices = verticesBeforeTrim.replace(", ",",");
+			  verticesArr = vertices.split(",");
+			  
+			  for(int j=0;j<verticesArr.length;j++)
+	    	  {
+				  String[] vertexArr = verticesArr[j].split(" ");
+				  verticesArrList.add(vertexArr);
+	    	  }
+		  } 
 	  }
-	
 	  return verticesArrList;		  
 	  
   	}
