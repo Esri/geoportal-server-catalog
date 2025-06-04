@@ -1252,7 +1252,7 @@ public class STACService extends Application {
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,false);
       
 			if (validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
-				JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,false);
+				JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,true);
 				
 				String id = updatedPayload.get("id").toString();	
 				String itemJsonString = updatedPayload.toString();	

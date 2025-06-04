@@ -546,129 +546,146 @@ public class StacHelper {
 		StacContext sc = StacContext.getInstance();
 		GeoportalContext gc = GeoportalContext.getInstance();
 		GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
-		// Add feature
-		if (!forUpdate) {
-			// populate STAC item field (collection) with collectionID from URI
-			requestPayload.put("collection", collectionId);
+		// Populate few fields for Add/Update feature
+		
+		// populate STAC item field (collection) with collectionID from URI
+		requestPayload.put("collection", collectionId);
 
-			// Add attributes in properties
-			prop.put(FieldNames.FIELD_STAC_CREATED, date);
-			prop.put(FieldNames.FIELD_STAC_UPDATED, date);
+		// Add attributes in properties
+		if(!forUpdate)
+			prop.put(FieldNames.FIELD_STAC_CREATED, date); //Created in case of Add item
+		prop.put(FieldNames.FIELD_STAC_UPDATED, date);
+		
+		//Check for geom_wkt field 
+		if(prop.containsKey(gc.getGeomWKTField()))
+		{
+			JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
 			
-			//Check for geom_wkt field 
-			if(prop.containsKey(gc.getGeomWKTField()))
-			{
-				JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
-				
-				//iterate over all geometries and fill update_date
-				for (Map.Entry<String, Object> entry : wktGeom.entrySet()) {
-					String geomObjKey = entry.getKey();
-					JSONObject geomObj = (JSONObject) wktGeom.get(geomObjKey);
-					if(!geomObj.containsKey("update_date"))
-					{
-						geomObj.put("update_date",date);	
-					}
+			//iterate over all geometries and fill update_date
+			for (Map.Entry<String, Object> entry : wktGeom.entrySet()) {
+				String geomObjKey = entry.getKey();
+				JSONObject geomObj = (JSONObject) wktGeom.get(geomObjKey);
+				if(!geomObj.containsKey("update_date"))
+				{
+					geomObj.put("update_date",date);	
 				}
-				
-				boolean addPoint = checkToBeAdded(wktGeom,"point");
-				boolean addFootprint = checkToBeAdded(wktGeom,"polygon");
-				//if polyhedral exists but point and polygon missing, generate 
-				if(addPoint){
-						//generate point
-						JSONObject pointWKTObj = geometryClient.getPointFromPolyhedralWKT((JSONObject) wktGeom.get("polyhedral"));
-						wktGeom.put("point",pointWKTObj);					
-				}
-				if(addFootprint){
-						//generate polygon footprint
-						JSONObject polygonWKTObj = geometryClient.getPolyhedralFootprint((JSONObject) wktGeom.get("polyhedral"));
-						wktGeom.put("polygon",polygonWKTObj);
-				}
-			}			
-			requestPayload.put("properties", prop);
+			}
+			
+			boolean addPoint = checkToBeAdded(wktGeom,"point");
+			boolean addFootprint = checkToBeAdded(wktGeom,"polygon");
+			//if polyhedral exists but point and polygon missing, generate 
+			//TODO only in Add feature or update too?
+			if(addPoint && !forUpdate){
+					//generate point
+					JSONObject pointWKTObj = geometryClient.getPointFromPolyhedralWKT((JSONObject) wktGeom.get("polyhedral"));
+					wktGeom.put("point",pointWKTObj);					
+			}
+			if(addFootprint && !forUpdate){
+					//generate polygon footprint
+					JSONObject polygonWKTObj = geometryClient.getPolyhedralFootprint((JSONObject) wktGeom.get("polyhedral"));
+					wktGeom.put("polygon",polygonWKTObj);
+			}
+		}			
+		requestPayload.put("properties", prop);
 
-			// Add Geoportal attributes sys_created_dt, sys_modified_dt,
-			// sys_collections_s,sys_access_s
-			// sys_approval_status_s,title and url_granule_s
-			JSONArray collArr = new JSONArray();
-			collArr.add(collectionId);
-
+		// Add Geoportal attributes sys_created_dt, sys_modified_dt,
+		// sys_collections_s,sys_access_s
+		// sys_approval_status_s,title and url_granule_s
+		JSONArray collArr = new JSONArray();
+		collArr.add(collectionId);
+		if(!forUpdate)
 			requestPayload.put(FieldNames.FIELD_SYS_CREATED, date);
-			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
-			requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS, collArr);
-			requestPayload.put(FieldNames.FIELD_TITLE, requestPayload.get("id"));
+		
+		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
+		requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS, collArr);
+		requestPayload.put(FieldNames.FIELD_TITLE, requestPayload.get("id"));
 
-			// Add url_granule_s from asset with role thumbnail
-			if (requestPayload.containsKey(FieldNames.FIELD_ASSETS)) {
-				JSONObject assetsObj = (JSONObject) requestPayload.get(FieldNames.FIELD_ASSETS);
+		// Add url_granule_s from asset with role thumbnail
+		if (requestPayload.containsKey(FieldNames.FIELD_ASSETS)) {
+			JSONObject assetsObj = (JSONObject) requestPayload.get(FieldNames.FIELD_ASSETS);
 
-				if (assetsObj.keySet().contains(FieldNames.FIELD_THUMBNAIL)) {
-					JSONObject thumbnailObj = (JSONObject) assetsObj.get(FieldNames.FIELD_THUMBNAIL);
-					if (thumbnailObj.get("href") != null) {
-						requestPayload.put(FieldNames.FIELD_URL_GRANULE_S, thumbnailObj.get("href").toString());
-					}
+			if (assetsObj.keySet().contains(FieldNames.FIELD_THUMBNAIL)) {
+				JSONObject thumbnailObj = (JSONObject) assetsObj.get(FieldNames.FIELD_THUMBNAIL);
+				if (thumbnailObj.get("href") != null) {
+					requestPayload.put(FieldNames.FIELD_URL_GRANULE_S, thumbnailObj.get("href").toString());
 				}
 			}
-
-			// if envelope_geo and shape_geo not present in request, add from bbox and
-			// geometry respectively,
-			if (!requestPayload.containsKey(FieldNames.FIELD_SHAPE_GEO)
-					&& requestPayload.containsKey(FieldNames.FIELD_GEOMETRY)) {
-				requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
-			}
-
-			if (!requestPayload.containsKey(FieldNames.FIELD_ENVELOPE_GEO)
-					&& requestPayload.containsKey(FieldNames.FIELD_BBOX)) {
-				JSONArray bbox = (JSONArray) requestPayload.get(FieldNames.FIELD_BBOX);
-				JSONArray envelopeGeoArr = new JSONArray();
-				JSONObject envelopeGeo = new JSONObject();
-
-				if (bbox != null && bbox.size() == 4) {
-					double coords[] = { -180.0, -90.0, 180.0, 90.0 };
-
-					coords[0] = Double.parseDouble(bbox.get(0).toString());
-					coords[1] = Double.parseDouble(bbox.get(1).toString());
-					coords[2] = Double.parseDouble(bbox.get(2).toString());
-					coords[3] = Double.parseDouble(bbox.get(3).toString());
-
-					JSONArray coordinateArr1 = new JSONArray();
-					coordinateArr1.add(0, coords[0]);
-					coordinateArr1.add(1, coords[3]);
-
-					JSONArray coordinateArr2 = new JSONArray();
-					coordinateArr2.add(0, coords[2]);
-					coordinateArr2.add(1, coords[1]);
-
-					JSONArray coordinateArr = new JSONArray();
-					coordinateArr.add(0, coordinateArr1);
-					coordinateArr.add(1, coordinateArr2);
-
-					envelopeGeo.put("coordinates", coordinateArr);
-					envelopeGeo.put("type", "envelope");
-					envelopeGeo.put("ignore_malformed", "true");
-					envelopeGeoArr.add(0, envelopeGeo);
-
-					requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
-				}
-			}
-			
-			if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null
-					&& gc.getDefaultAccessLevel().length() > 0) {
-				requestPayload.put(FieldNames.FIELD_SYS_ACCESS, gc.getDefaultAccessLevel());
-			}
-			if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null
-					&& gc.getDefaultApprovalStatus().length() > 0) {
-				requestPayload.put(FieldNames.FIELD_SYS_APPROVAL_STATUS, gc.getDefaultApprovalStatus());
-			}
-
-			requestPayload.put(FieldNames.FIELD_SYS_OWNER, null);
-			requestPayload.put(FieldNames.FIELD_SYS_OWNER_TXT, null);
 		}
 
-		// Update Feature
-		else {
-			requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
+		// if envelope_geo and shape_geo not present in request, add from bbox and
+		// geometry respectively,
+		if (!requestPayload.containsKey(FieldNames.FIELD_SHAPE_GEO)
+				&& requestPayload.containsKey(FieldNames.FIELD_GEOMETRY)) {
+			requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
+		}
 
-			prop.put(FieldNames.FIELD_STAC_UPDATED, date);
+		if (!requestPayload.containsKey(FieldNames.FIELD_ENVELOPE_GEO)
+				&& requestPayload.containsKey(FieldNames.FIELD_BBOX)) {
+			JSONArray bbox = (JSONArray) requestPayload.get(FieldNames.FIELD_BBOX);
+			JSONArray envelopeGeoArr = new JSONArray();
+			JSONObject envelopeGeo = new JSONObject();
+
+			if (bbox != null && bbox.size() == 4) {
+				double coords[] = { -180.0, -90.0, 180.0, 90.0 };
+
+				coords[0] = Double.parseDouble(bbox.get(0).toString());
+				coords[1] = Double.parseDouble(bbox.get(1).toString());
+				coords[2] = Double.parseDouble(bbox.get(2).toString());
+				coords[3] = Double.parseDouble(bbox.get(3).toString());
+
+				JSONArray coordinateArr1 = new JSONArray();
+				coordinateArr1.add(0, coords[0]);
+				coordinateArr1.add(1, coords[3]);
+
+				JSONArray coordinateArr2 = new JSONArray();
+				coordinateArr2.add(0, coords[2]);
+				coordinateArr2.add(1, coords[1]);
+
+				JSONArray coordinateArr = new JSONArray();
+				coordinateArr.add(0, coordinateArr1);
+				coordinateArr.add(1, coordinateArr2);
+
+				envelopeGeo.put("coordinates", coordinateArr);
+				envelopeGeo.put("type", "envelope");
+				envelopeGeo.put("ignore_malformed", "true");
+				envelopeGeoArr.add(0, envelopeGeo);
+
+				requestPayload.put(FieldNames.FIELD_ENVELOPE_GEO, envelopeGeoArr);
+			}
+		}
+		
+		if (gc.getSupportsGroupBasedAccess() && gc.getDefaultAccessLevel() != null
+				&& gc.getDefaultAccessLevel().length() > 0) {
+			requestPayload.put(FieldNames.FIELD_SYS_ACCESS, gc.getDefaultAccessLevel());
+		}
+		if (gc.getSupportsApprovalStatus() && gc.getDefaultApprovalStatus() != null
+				&& gc.getDefaultApprovalStatus().length() > 0) {
+			requestPayload.put(FieldNames.FIELD_SYS_APPROVAL_STATUS, gc.getDefaultApprovalStatus());
+		}
+
+		requestPayload.put(FieldNames.FIELD_SYS_OWNER, null);
+		requestPayload.put(FieldNames.FIELD_SYS_OWNER_TXT, null);
+		
+
+		// Update Feature
+		if(forUpdate) {
+			//requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
+			//prop.put(FieldNames.FIELD_STAC_UPDATED, date);
+			
+			//if geomWKTField contains polyhedral, make sure that source of POINT and Polygon also matches with Polyhedral, 
+			//otherwise do not update point and polygon(remove from requestPayload)
+			ArrayList<String> geomToBeRemoved = checkGeomWKTToBeremoved(prop,gc);
+			if(geomToBeRemoved!=null && geomToBeRemoved.size()>0) {
+				JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
+				if(geomToBeRemoved.contains("point"))
+					wktGeom.remove("point");
+				if(geomToBeRemoved.contains("polygon"))
+					wktGeom.remove("polygon");
+			}
+			
+			//TODO
+			//Should existing point and polygon to be preserved? Till now update is never merging existing properties?
+			//if Point and Polygon does not exist, do we need to add like AddItem? Same can be followed if source does not match?
 			requestPayload.put("properties", prop);
 		}
 
@@ -684,6 +701,46 @@ public class StacHelper {
 		}
 
 		return requestPayload;
+	}
+
+	private static ArrayList<String> checkGeomWKTToBeremoved(JSONObject prop, GeoportalContext gc) {
+		ArrayList<String> toBeRemoved = new ArrayList<>();
+		String polyhedralSource ="";
+		//If point or polygon geometry_source does not match Polyhedral geom source, remove point and polygon from update payload
+		if(prop.containsKey(gc.getGeomWKTField()))
+		{
+			JSONObject wktGeom = (JSONObject) prop.get(gc.getGeomWKTField());
+			if(wktGeom.containsKey("polyhedral"))
+			{
+				JSONObject polyhedralObj = (JSONObject) wktGeom.get("polyhedral");	
+				if(polyhedralObj.get("geometry_source")!=null && !polyhedralObj.getAsString("geometry_source").isBlank()) {
+					polyhedralSource = polyhedralObj.getAsString("geometry_source");
+				}
+				if(wktGeom.containsKey("point"))
+				{
+					JSONObject pointObj = (JSONObject) wktGeom.get("point");
+					if(pointObj != null && pointObj.get("geometry_source")!= null && !pointObj.getAsString("geometry_source").isBlank())
+					{
+						if(!polyhedralSource.equalsIgnoreCase(pointObj.getAsString("geometry_source")))
+						{
+							toBeRemoved.add("point");
+						}
+					}					
+				}
+				if(wktGeom.containsKey("polygon"))
+				{
+					JSONObject polygonObj = (JSONObject) wktGeom.get("polygon");
+					if(polygonObj != null && polygonObj.get("geometry_source")!= null && !polygonObj.getAsString("geometry_source").isBlank())
+					{
+						if(!polyhedralSource.equalsIgnoreCase(polygonObj.getAsString("geometry_source")))
+						{
+							toBeRemoved.add("polygon");
+						}
+					}					
+				}
+			}
+		}
+		return toBeRemoved;		
 	}
 
 	private static boolean checkToBeAdded(JSONObject wktGeom, String type) {

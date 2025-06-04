@@ -216,18 +216,22 @@ public class StacContext {
                   if (existingGeometryWKT.containsKey(geometryType)) {
                     JSONObject existingGeometry = (JSONObject) existingGeometryWKT.get(geometryType);
                     JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);
+                    //if newGeomWKT contains, polyhedral, do not validate source of point and polygon, only fail if polyhedral source does not match
+                    if((newGeometryWKT.containsKey("polyhedral") && (geometryType.equalsIgnoreCase("point") || geometryType.equalsIgnoreCase("polygon"))))
+                    {
+                    	continue;
+                    }
 
                     String existingGeometrySource = null;
                     String newGeometrySource = null;
-
+                    
                     if (newGeometry.containsKey("geometry_source")) {
                       newGeometrySource = newGeometry.getAsString("geometry_source");
                     }
                     if (newGeometry.containsKey("geometry_source")) {
                       existingGeometrySource = existingGeometry.getAsString("geometry_source");
                     }
-
-                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {
+                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {                    	
                       passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
                     }
                     

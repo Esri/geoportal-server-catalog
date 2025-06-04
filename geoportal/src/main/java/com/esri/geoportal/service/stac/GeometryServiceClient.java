@@ -643,7 +643,7 @@ public class GeometryServiceClient {
                                                .replace("(", "[")
                                                .replace(")", "]")
                                                .replace(", ", "],[")
-                                               .replace(",", "],[")
+                                              // .replace(",", "],[")
                                                .replace(" ", ",");
             geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [ {";
 
@@ -1106,7 +1106,7 @@ public class GeometryServiceClient {
              JSONArray geomArr = new JSONArray();
              geomArr.add(polyGeom);
              String polygonWkt = getWKTGeometry("POLYGON", geomArr);
-             polygonWKTObj.put("wkt", "POLYGON ("+polygonWkt+")");
+             polygonWKTObj.put("wkt", polygonWkt);
              polygonWKTObj.put("geometry_source", polyhedralGeomWKTObj.getAsString("geometry_source"));
              polygonWKTObj.put("update_date", DateUtil.nowAsString());            
            }           
@@ -1150,7 +1150,7 @@ public class GeometryServiceClient {
 		double avjY = y / numberOfVertex;
 		double avjZ = z / numberOfVertex;
 
-		pointWktObj.put("wkt", "POINT (" + avjX + "," + avjY + "," + avjZ + ")");
+		pointWktObj.put("wkt", "POINT (" + avjX + " " + avjY + " " + avjZ + ")");
 		pointWktObj.put("geometry_source", polyhedralGeomWKTObj.getAsString("geometry_source"));
 		pointWktObj.put("update_date", DateUtil.nowAsString());		
 
