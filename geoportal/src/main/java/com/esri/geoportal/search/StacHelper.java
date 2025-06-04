@@ -49,10 +49,10 @@ public class StacHelper {
 	public static StacItemValidationResponse validateStacItem(JSONObject requestPayload,String collectionId, boolean validateAllFields) throws Exception {	
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		//Validate https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md#item-fields
-    response = validateFields(requestPayload,collectionId, validateAllFields,false);
+		response = validateId(requestPayload,collectionId);
 		if(response.getCode() == null)
 		{
-			response = validateId(requestPayload,collectionId);
+			response = validateFields(requestPayload,collectionId, validateAllFields,false);
 			if(response.getCode() == null)
 			{
 				response.setCode(StacItemValidationResponse.ITEM_VALID);

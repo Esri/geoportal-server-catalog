@@ -190,7 +190,7 @@ public class StacContext {
         break;
         
       case "geometry_source_matches":
-        passes = false;       
+        passes = true;       
         JSONObject existingItem = StacHelper.getSTACItemById(collectionId, itemId);
         
         if (existingItem == null) {
