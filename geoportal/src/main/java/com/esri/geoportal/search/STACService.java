@@ -1157,41 +1157,46 @@ public class STACService extends Application {
     JSONObject updatedItem = null;
         
 		try {
-      // get existing item
-      JSONObject existingItem = StacHelper.getSTACItemById(collectionId, featureId);
-      String existingItemJSON = existingItem.toString();
-      
-      // if payload has geomCRSField and geomWKT field, project 
-      // from internal CRS (EPSG:4326) to geomCRSField value
-      if (requestPayload.containsKey("properties")) {
-        JSONObject properties = (JSONObject) requestPayload.get("properties");
-        
-        if (properties.containsKey(gc.getGeomWKTField()) 
-            && properties.containsKey(gc.getGeomCRSField())) {
-          
-          // the PATCH body includes geometries, reproject if needed
-
-          String patchCRS = properties.getAsString(gc.getGeomCRSField());
-          
-          // Only project if the submitted CRS is not the same as the internal CRS
-          if (!patchCRS.equalsIgnoreCase(INTERNAL_CRS)) {
-            Collection collection = new Collection(collectionId);
-
-            // project existing item from internal CRS to CRS submitted in the PATCH
-            existingItem = projectItemGeometries(collection, 
-                                                 existingItemJSON, 
-                                                 INTERNAL_CRS.replace("EPSG:", ""),
-                                                 patchCRS);            
-          }
-        }
-
-        // merge JSON from existing item with requestPayload
-        updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
-        responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
-      }
-       responseJSON = generateResponse("200", responseObject.toString(), detailErrArray);
-
-      
+	      // get existing item
+	      JSONObject existingItem = StacHelper.getSTACItemById(collectionId, featureId);
+	      if(existingItem == null)
+	      {
+	    	  status = Response.Status.NOT_FOUND;
+	    	  responseJSON = generateResponse("404", "Item not found",null);
+	      }
+	      else {
+	    	  String existingItemJSON = existingItem.toString();
+	          
+	          // if payload has geomCRSField and geomWKT field, project 
+	          // from internal CRS (EPSG:4326) to geomCRSField value
+	          if (requestPayload.containsKey("properties")) {
+	            JSONObject properties = (JSONObject) requestPayload.get("properties");
+	            
+	            if (properties.containsKey(gc.getGeomWKTField()) 
+	                && properties.containsKey(gc.getGeomCRSField())) {
+	              
+	              // the PATCH body includes geometries, reproject if needed
+	
+	              String patchCRS = properties.getAsString(gc.getGeomCRSField());
+	              
+	              // Only project if the submitted CRS is not the same as the internal CRS
+	              if (!patchCRS.equalsIgnoreCase(INTERNAL_CRS)) {
+	                Collection collection = new Collection(collectionId);
+	
+	                // project existing item from internal CRS to CRS submitted in the PATCH
+	                existingItem = projectItemGeometries(collection, 
+	                                                     existingItemJSON, 
+	                                                     INTERNAL_CRS.replace("EPSG:", ""),
+	                                                     patchCRS);            
+	              }
+	            }
+	
+	            // merge JSON from existing item with requestPayload
+	            updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
+	            responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
+	          }
+	           responseJSON = generateResponse("200", responseObject.toString(), detailErrArray); 
+	      }
       
 		} catch(Exception ex) {
 			LOGGER.error("Error in patching STAC Item: " + ex.getMessage());
