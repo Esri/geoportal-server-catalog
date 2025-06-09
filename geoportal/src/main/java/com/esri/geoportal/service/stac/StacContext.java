@@ -21,6 +21,7 @@ import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.search.StacHelper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -190,7 +191,11 @@ public class StacContext {
         break;
         
       case "geometry_source_matches":
-        passes = true;       
+        passes = true;
+        if(itemId == null)// it will fail for id is mandatory
+        {
+        	break;
+        }
         JSONObject existingItem = StacHelper.getSTACItemById(collectionId, itemId);
         
         if (existingItem == null) {
@@ -243,7 +248,6 @@ public class StacContext {
                   } else {
                     passes = true;
                   }
-
               } 
           }
         }
@@ -260,7 +264,7 @@ public class StacContext {
 		  {
 			  field = matchFldVal[0];
 			  String regEx = matchFldVal[1];			  
-			  if(!regEx.isBlank() && !field.isBlank())
+			  if(!regEx.isBlank() && !field.isBlank() && item.getAsString(field)!=null)
 			  {
 				  Pattern pattern = Pattern.compile(regEx);				  
 				  Matcher matcher = pattern.matcher(item.getAsString(field));
@@ -271,6 +275,33 @@ public class StacContext {
 			  }
 		  }
 		  message = passes ? "Match expression ok for "+field : "Match expression failed for "+field;
+	      break;
+      case "mandatory_fields":
+    	  passes = false;    	 
+		  String fieldString = ruleElements[1];
+		  String[] fields = fieldString.split(",");
+		  String fldName ="";		  
+		  String failedFldVal="";
+		  DocumentContext itemCtx = JsonPath.parse(item);
+		  for(int i=0;i<fields.length;i++)
+		  {
+			  fldName = fields[i].trim();
+			  try {
+				  itemCtx.read("$."+fldName);
+			  }
+			 catch(PathNotFoundException ex) {
+				 if(failedFldVal.length() > 1)					 
+					 failedFldVal = failedFldVal+", "+fldName;
+				 else
+					 failedFldVal = fldName;
+			 }			  
+		  }
+		  if(failedFldVal.length() <1)
+		  {
+			  passes = true; 
+		  }	 
+		 
+		  message = passes ? "Mandatory field validation ok for "+fields : "Mandatory field validation failed for "+failedFldVal;
 	      break;
       default:
         LOGGER.debug("Unsupported validation rule: " + validationRule);

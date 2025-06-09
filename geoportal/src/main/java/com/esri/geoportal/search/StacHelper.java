@@ -439,21 +439,23 @@ public class StacHelper {
 		String errorMsg;
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		
-		//Validate if id exists	
-		String id =  requestPayload.get("id").toString();
-		String itemRes = getItemWithItemId(collectionId, id);
-		DocumentContext elasticResContext = JsonPath.parse(itemRes);
+		//Validate if id exists			
+		if(requestPayload.get("id") !=null && !requestPayload.get("id").toString().isBlank())
+		{
+			String id = requestPayload.get("id").toString();
+			String itemRes = getItemWithItemId(collectionId, id);
+			DocumentContext elasticResContext = JsonPath.parse(itemRes);
 
-		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
-		if (items != null && !items.isEmpty()) {
-			errorMsg = "stac item with id '"+id+"' already exists.";
-			response.setCode(StacItemValidationResponse.ID_EXISTS);
-			response.setMessage(errorMsg);
+			net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+			if (items != null && !items.isEmpty()) {
+				errorMsg = "stac item with id '"+id+"' already exists.";
+				response.setCode(StacItemValidationResponse.ID_EXISTS);
+				response.setMessage(errorMsg);
+			}		
 		}		
 		return response;
 	}
-
-  
+ 
 	// https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md
 	private static StacItemValidationResponse validateFields(JSONObject requestPayload,String collectionId, boolean validateAllFields,
 			boolean forUpdate) {
@@ -472,7 +474,7 @@ public class StacHelper {
           && requestPayload.get("id").toString().isBlank())) {
 
         GeoportalContext gc = GeoportalContext.getInstance();
-        if (!"true".equals(gc.isCanStacAutogenerateId())) {
+        if (!gc.isCanStacAutogenerateId()) {
           errorMsg = errorMsg+" id is mandatory and should not be empty.";
         }
       }
@@ -495,20 +497,20 @@ public class StacHelper {
       if(!requestPayload.containsKey("properties")) {
         errorMsg = errorMsg+" properties is mandatory.";
       }
-
-      if(requestPayload.containsKey("properties")) {
-        JSONObject prop = (JSONObject) requestPayload.get("properties");
-
-        if(!prop.containsKey("datetime")) {
-          errorMsg = errorMsg+" datetime is mandatory.";
-
-        } else if(prop.containsKey("datetime") && prop.get("datetime") == null) {
-
-          if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime")) {
-            errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
-          }
-        }
-      }
+      //https://github.com/EsriPS/exxonmobil-gsdb/issues/6 datetime validation moved to Validator TODO remove code 
+//      if(requestPayload.containsKey("properties")) {
+//        JSONObject prop = (JSONObject) requestPayload.get("properties");
+//
+//        if(!prop.containsKey("datetime")) {
+//          errorMsg = errorMsg+" datetime is mandatory.";
+//
+//        } else if(prop.containsKey("datetime") && prop.get("datetime") == null) {
+//
+//          if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime")) {
+//            errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
+//          }
+//        }
+//      }
 
       if(!requestPayload.containsKey("assets")) {
         errorMsg = errorMsg + " assets is mandatory.";

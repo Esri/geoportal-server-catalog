@@ -70,6 +70,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private boolean validateStacFields = false;
   private String canStacAutogenerateId = "false";
   private String canStacGeomTransform = "false";
+  private boolean canStacAutogenerateBbox = false;
   private String geometryService = "";
   private String geomWKTField = "";
   private String geomCRSField = "";
@@ -236,10 +237,19 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
       
   // Support for autogenerating item id
 	public boolean isCanStacAutogenerateId() {
-    return "true".equals(this.canStacAutogenerateId);
+		return "true".equals(this.canStacAutogenerateId);
 	}
 	public void setCanStacAutogenerateId(String canStacAutogenerateId) {
-    this.canStacAutogenerateId = canStacAutogenerateId;
+		this.canStacAutogenerateId = canStacAutogenerateId;
+	}
+	
+ // Support for autogenerating bbox from geomtery
+	public boolean isCanStacAutogenerateBbox() {
+		return this.canStacAutogenerateBbox;
+	}
+
+	public void setCanStacAutogenerateBbox(boolean canStacAutogenerateBbox) {
+		this.canStacAutogenerateBbox = canStacAutogenerateBbox;
 	}
         
   // Support for transforming the CRS of STAC geometries
