@@ -552,10 +552,13 @@ public class StacHelper {
 		
 		// populate STAC item field (collection) with collectionID from URI
 		requestPayload.put("collection", collectionId);
-
-		// Add attributes in properties
+		
+		//Add item
 		if(!forUpdate)
+		{
 			prop.put(FieldNames.FIELD_STAC_CREATED, date); //Created in case of Add item
+			requestPayload.put(FieldNames.FIELD_SYS_CREATED, date);
+		}
 		prop.put(FieldNames.FIELD_STAC_UPDATED, date);
 		
 		//Check for geom_wkt field 
@@ -575,14 +578,13 @@ public class StacHelper {
 			
 			boolean addPoint = checkToBeAdded(wktGeom,"point");
 			boolean addFootprint = checkToBeAdded(wktGeom,"polygon");
-			//if polyhedral exists but point and polygon missing, generate 
-			//TODO only in Add feature or update too?
-			if(addPoint && !forUpdate){
+			//if polyhedral exists but point and polygon missing, generate and add in geomWKT (both in case of Add and Update item)			
+			if(addPoint){
 					//generate point
 					JSONObject pointWKTObj = geometryClient.getPointFromPolyhedralWKT((JSONObject) wktGeom.get("polyhedral"));
 					wktGeom.put("point",pointWKTObj);					
 			}
-			if(addFootprint && !forUpdate){
+			if(addFootprint){
 					//generate polygon footprint
 					JSONObject polygonWKTObj = geometryClient.getPolyhedralFootprint((JSONObject) wktGeom.get("polyhedral"));
 					wktGeom.put("polygon",polygonWKTObj);
@@ -595,8 +597,6 @@ public class StacHelper {
 		// sys_approval_status_s,title and url_granule_s
 		JSONArray collArr = new JSONArray();
 		collArr.add(collectionId);
-		if(!forUpdate)
-			requestPayload.put(FieldNames.FIELD_SYS_CREATED, date);
 		
 		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
 		requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS, collArr);
@@ -670,30 +670,12 @@ public class StacHelper {
 		
 
 		// Update Feature
-		if(forUpdate) {
-			//requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
-			//prop.put(FieldNames.FIELD_STAC_UPDATED, date);
-			
-			//if geomWKTField contains polyhedral, make sure that source of POINT and Polygon also matches with Polyhedral, 
-			//otherwise do not update point and polygon(remove from requestPayload)
-			ArrayList<String> geomToBeRemoved = checkGeomWKTToBeremoved(prop,gc);
-			if(geomToBeRemoved!=null && geomToBeRemoved.size()>0) {
-				JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
-				if(geomToBeRemoved.contains("point"))
-					wktGeom.remove("point");
-				if(geomToBeRemoved.contains("polygon"))
-					wktGeom.remove("polygon");
-			}
-			
-			//TODO
-			//Should existing point and polygon to be preserved? Till now update is never merging existing properties?
-			//if Point and Polygon does not exist, do we need to add like AddItem? Same can be followed if source does not match?
-			requestPayload.put("properties", prop);
+		if(forUpdate) {	
+			//Update Item specific things can be put here
 		}
 
 		// in either add/update map STAC fields from app-context fieldMappings to index
-		// fields
-		
+		// fields		
 		for (Map.Entry<String, String> entry : sc.getFieldMappings().entrySet()) {
 			String stacField = entry.getKey();
 			if (prop.containsKey(stacField)) {
