@@ -192,7 +192,7 @@ public class StacContext {
         
       case "geometry_source_matches":
         passes = true;
-        if(itemId == null)// it will fail for id is mandatory
+        if(itemId == null) //Validation error will be thrown as ID is mandatory from StacHelper.validateFields
         {
         	break;
         }
@@ -204,8 +204,8 @@ public class StacContext {
           
         } else {          
           // this is an existing item, check the geometry source
-          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, "gsdb:geometry_wkt");
-          JSONObject newGeometryWKT = (JSONObject) getProperty(item, "gsdb:geometry_wkt");
+          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, gc.getGeomWKTField());
+          JSONObject newGeometryWKT = (JSONObject) getProperty(item, gc.getGeomWKTField());
 
           // loop over keys in newGeometryWKT
           //   if the key exists in existingGeometryWKT 

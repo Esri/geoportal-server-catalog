@@ -2293,7 +2293,7 @@ public class STACService extends Application {
                   JSONObject geometryToUpdate = (JSONObject) geometry_wkt_in.get(geometryType);
                   geometryToUpdate.put("wkt", wktGeometry);
 
-                  properties.put("gsdb:crs", outCRS);
+                  properties.put(gc.getGeomCRSField(), outCRS);
                 }
               } catch (ParseException ex) {
                 LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
