@@ -1085,26 +1085,107 @@ public class StacHelper {
   }
   
   
-  public static JSONObject mergeJSON(JSONObject source, JSONObject updates) {
-    JSONObject result = source;
-    
-    for (String key: updates.keySet()) {
-            Object value = updates.get(key);
-            if (!result.containsKey(key)) {
-                // new value for "key":
-                result.put(key, value);
-            } else {
-                // existing value for "key" - recursively deep merge:
-                if (value instanceof JSONObject) {
-                    JSONObject valueSource = (JSONObject) source.get(key);
-                    JSONObject updatesValue = (JSONObject) updates.get(key);
-                    JSONObject mergedSub = mergeJSON(valueSource, updatesValue);
-                    result.put(key, mergedSub);
-                } else {
-                    result.put(key, value);
-                }
-            }
-    }
-    return result;
-  }
+	  public static JSONObject mergeJSON(JSONObject source, JSONObject updates) {
+	    JSONObject result = source;
+	    
+	    for (String key: updates.keySet()) {
+	            Object value = updates.get(key);
+	            if (!result.containsKey(key)) {
+	                // new value for "key":
+	                result.put(key, value);
+	            } else {
+	                // existing value for "key" - recursively deep merge:
+	                if (value instanceof JSONObject) {
+	                    JSONObject valueSource = (JSONObject) source.get(key);
+	                    JSONObject updatesValue = (JSONObject) updates.get(key);
+	                    JSONObject mergedSub = mergeJSON(valueSource, updatesValue);
+	                    result.put(key, mergedSub);
+	                } else {
+	                    result.put(key, value);
+	                }
+	            }
+	    }
+	    return result;
+	  }
+	  
+	  public static JSONArray generateBbox(JSONObject reqPayload)
+	  {
+		  JSONArray bbox = null;		  
+		  
+		  List<String> geometryTypes = Arrays.asList("POINT", "MULTIPOINT", "LINESTRING","MULTILINESTRING", "POLYGON","MULTIPOLYGON");
+		  if(reqPayload.containsKey("geometry"))
+		  {
+			  double minLat = Double.MAX_VALUE, maxLat = Double.MIN_VALUE;
+		      double minLng = Double.MAX_VALUE, maxLng = Double.MIN_VALUE;
+		      
+			  JSONObject geometry = (JSONObject) reqPayload.get("geometry");
+			  String type = geometry.getAsString("type");
+			  type = type.toUpperCase();
+			  if(geometryTypes.contains(type))
+			  {
+				  JSONArray coordinates = (JSONArray) geometry.get("coordinates"); 
+				  if (type.equals("POINT")) {	                    
+	                    double lng = (double) coordinates.get(0);
+	                    double lat = (double) coordinates.get(1);
+	                    minLat = Math.min(minLat, lat);
+	                    maxLat = Math.max(maxLat, lat);
+	                    minLng = Math.min(minLng, lng);
+	                    maxLng = Math.max(maxLng, lng);
+	                } else if (type.equals("LINESTRING") || type.equals("MULTIPOINT")) {	                    
+	                    for (int i = 0; i < coordinates.size(); i++) {
+	                        JSONArray coord = (JSONArray) coordinates.get(i);
+	                        double lng = (double) coord.get(0);
+		                    double lat = (double) coord.get(1);
+	                        minLat = Math.min(minLat, lat);
+	                        maxLat = Math.max(maxLat, lat);
+	                        minLng = Math.min(minLng, lng);
+	                        maxLng = Math.max(maxLng, lng);
+	                    }
+	                }
+	                else if (type.equals("POLYGON") || type.equals("MULTILINESTRING")) {	                   
+	                    for (int i = 0; i < coordinates.size(); i++) {
+	                        JSONArray ring = (JSONArray) coordinates.get(i);
+	                        for (int j = 0; j < ring.size(); j++) {
+	                            JSONArray coord = (JSONArray) ring.get(j);
+	                            double lng = (double) coord.get(0);
+	    	                    double lat = (double) coord.get(1);
+	                            minLat = Math.min(minLat, lat);
+	                            maxLat = Math.max(maxLat, lat);
+	                            minLng = Math.min(minLng, lng);
+	                            maxLng = Math.max(maxLng, lng);
+	                        }
+	                    }
+	                }
+	                else if (type.equals("MULTIPOLYGON")){	                  
+	                    for (int i = 0; i < coordinates.size(); i++) {
+	                         JSONArray polygon = (JSONArray) coordinates.get(i);
+	                        for (int j = 0; j < polygon.size(); j++) {
+	                            JSONArray ring = (JSONArray) polygon.get(j);
+	                            for (int k=0; k<ring.size(); k++){
+	                                JSONArray coord = (JSONArray) ring.get(k);
+	                                double lng = (double) coord.get(0);
+		    	                    double lat = (double) coord.get(1);
+	                                minLat = Math.min(minLat, lat);
+	                                maxLat = Math.max(maxLat, lat);
+	                                minLng = Math.min(minLng, lng);
+	                                maxLng = Math.max(maxLng, lng);
+	                            }
+	                        }
+	                    }
+	               }				  
+				  bbox =  new JSONArray();
+				  bbox.add(0,minLng);
+				  bbox.add(1,minLat);
+				  bbox.add(2,maxLng);
+				  bbox.add(3,maxLat);
+			  }
+			  else
+			  {
+				 LOGGER.debug("Unsupported geomtery type to generate bbox: "+type);
+			  }
+		  }
+		  return bbox;
+	  }
+
+
 }
