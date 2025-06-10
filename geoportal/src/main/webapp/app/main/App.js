@@ -25,12 +25,13 @@ define(["dojo/_base/declare",
         "app/main/SearchPanel",
         "app/main/MapPanel",
         "app/main/APIPanel",
+        "app/main/CollectionsPanel",
         "app/main/CartPanel",
         "app/main/AboutPanel",
         "app/content/MetadataEditor",
         "app/content/UploadMetadata"],
 function(declare, lang, array, topic, appTopics, router, Templated, template, i18n, util, 
-    SearchPanel, MapPanel, APIPanel, CartPanel, AboutPanel,
+    SearchPanel, MapPanel, APIPanel, CollectionsPanel, CartPanel, AboutPanel,
     MetadataEditor, UploadMetadata) {
 
   var oThisClass = declare([Templated], {
@@ -44,6 +45,8 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       this.updateUI();
       
       var ignoreMapPanelActivated = false;
+      var ignoreCollectionPanelActivated = false;
+
       
       router.register("searchPanel", lang.hitch(this, function(evt){ 
         $("a[href='#searchPanel']").tab("show");
@@ -62,6 +65,13 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       
       router.register("cartPanel", lang.hitch(this, function(evt){ 
         $("a[href='#cartPanel']").tab("show");
+      }));
+
+      router.register("collectionsPanel", lang.hitch(this, function(evt){ 
+        if (!ignoreCollectionPanelActivated && !this.collectionsPanel.mapWasInitialized) {
+          this.collectionsPanel.ensureMap();
+        }
+        $("a[href='#collectionsPanel']").tab("show");
       }));
       
       router.register("aboutPanel", lang.hitch(this, function(evt){ 
@@ -89,6 +99,9 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }));
       $("a[href='#apiPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
         router.go("apiPanel");
+      }));
+      $("a[href='#collectionsPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
+        router.go("collectionsPanel");
       }));
       $("a[href='#cartPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
         router.go("cartPanel");
@@ -232,7 +245,9 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("AdminPanel")<0) {
           this.adminOptionsBtnNode.style.display = "none";
       }
-      
+      if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("CollectionsPanel")<0) {
+          this.collectionsPanelBtnNode.style.display = "none";
+      }
       
       
     },

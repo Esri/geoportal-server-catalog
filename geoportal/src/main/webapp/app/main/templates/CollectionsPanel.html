@@ -1,0 +1,763 @@
+<div class="container-stac-admin">
+  <!-- TODO: separate styles to stylesheet -->
+
+  <div id="left-panel">
+    <div id="list-view" data-dojo-attach-point="leftPanelListView">
+      <div class="collections-section">
+        <div class="collections-header">
+          <p style="font-weight: bold; font-size: 18px; margin: 0 15px 0 0">
+            Collections
+          </p>
+          <div style="display: flex; align-items: center">
+            <button
+              class="collections-action"
+              data-dojo-attach-point="newCollectionButton"
+            >
+              New
+            </button>
+            <button
+              class="collections-action collections-action-delete disabled"
+              data-dojo-attach-point="deleteCollectionButton"
+              disabled
+            >
+              Delete
+            </button>
+          </div>
+        </div>
+        <div class="search-input-container">
+          <input
+            type="text"
+            class="search-input"
+            placeholder="Search..."
+            data-dojo-attach-point="collectionSearchInput"
+          />
+          <div style="position: absolute; top: 3px; left: 12px; width: 20px">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+              <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+              <path
+                fill="darkgray"
+                d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+              />
+            </svg>
+          </div>
+        </div>
+        <div class="container-collections-list">
+          <div
+            data-dojo-attach-point="collectionsList"
+            class="collections-list"
+          ></div>
+        </div>
+      </div>
+      <div class="info-section" style="display: flex; flex-direction: column">
+        <div
+          class="info-section-tabs"
+          style="
+            display: flex;
+            flex-direction: row;
+            width: 100%;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+          "
+        >
+          <div
+            class="info-collections-tab"
+            style="flex: 1 1 0; padding: 10px 0; color: #0066ff"
+          >
+            Collection
+          </div>
+          <div
+            class="info-items-tab"
+            style="
+              flex: 1 1 0;
+              padding: 10px 0;
+              background-color: #e6e6e6;
+              border-bottom: 1px solid #cecece;
+              border-left: 1px solid #cecece;
+              align-self: stretch;
+            "
+          ></div>
+        </div>
+        <div class="info-body">
+          <div class="info-body-header">
+            <p class="info-body-title" data-dojo-attach-point="infoTableTitle">
+              Collection Info
+            </p>
+            <div class="info-action-container">
+              <button
+                data-dojo-attach-point="zoomCollectionButton"
+                class="info-actions info-actions-zoom disabled"
+                disabled
+              >
+                Zoom
+              </button>
+              <button
+                data-dojo-attach-point="editCollectionButton"
+                class="info-actions info-actions-edit disabled"
+                disabled
+              >
+                Update
+              </button>
+            </div>
+          </div>
+          <div class="info-table-wrapper">
+            <table class="info-table">
+              <tbody data-dojo-attach-point="infoTableBody"></tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div id="editor-view" data-dojo-attach-point="leftPanelEditorView">
+      <div class="editor-section">
+        <div class="editor-section-body">
+          <p
+            data-dojo-attach-point="collectionEditorTitle"
+            class="editor-title"
+          >
+            Create New Collection
+          </p>
+          <div class="fields-list">
+            <label class="editor-label">Geometry:</label>
+            <div class="editor-draw-tools">
+              <button
+                class="editor-draw-tool draw-tool-polygon"
+                data-dojo-attach-point="drawPolygonButton"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M20 3.456L12 9.28V9H9v.433l-5-3.31V4H1v3h1v13H1v3h3v-1h16v1h3v-3h-1V4h1V1h-3zM10 10h1v1h-1zM2 5h1v1H2zm0 17v-1h1v1zm20 0h-1v-1h1zm-1-2h-1v1H4v-1H3V7h.512L9 10.632V12h3v-1.483L20.952 4H21zm1-18v1h-1V2z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </button>
+              <button
+                class="editor-draw-tool"
+                data-dojo-attach-point="drawCircleButton"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M12.5 2.2a10.3 10.3 0 1 0 10.3 10.3A10.299 10.299 0 0 0 12.5 2.2zm0 19.6a9.3 9.3 0 1 1 9.3-9.3 9.31 9.31 0 0 1-9.3 9.3z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </button>
+              <button
+                class="editor-draw-tool"
+                data-dojo-attach-point="undoButton"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+                  <path
+                    d="M21 10v7a3.003 3.003 0 0 1-3 3h-6v-1h6a2.003 2.003 0 0 0 2-2v-7a2.003 2.003 0 0 0-2-2H5.707l2.646 2.646-.707.707L3.793 7.5l3.853-3.854.707.707L5.707 7H18a3.003 3.003 0 0 1 3 3z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </button>
+              <button class="editor-draw-tool">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  data-dojo-attach-point="redoButton"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M6 19h6v1H6a3.003 3.003 0 0 1-3-3v-7a3.003 3.003 0 0 1 3-3h12.293l-2.647-2.646.707-.707L20.207 7.5l-3.854 3.854-.707-.707L18.293 8H6a2.003 2.003 0 0 0-2 2v7a2.003 2.003 0 0 0 2 2z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </button>
+              <button class="editor-draw-tool">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  data-dojo-attach-point="deletePolygonButton"
+                  viewBox="0 0 24 24"
+                >
+                  <path
+                    d="M22.577 11.732L11.812 2.279A1.095 1.095 0 0 0 11.08 2a.964.964 0 0 0-.318.05L.115 5.02.076 6.082c-.05 1.38.882 3.505 1.33 4.683a.986.986 0 0 0 .23.36l10.458 10.56a1.07 1.07 0 0 0 .759.315 1.089 1.089 0 0 0 .403-.078l10.075-4.05c1.408-.559.259-3.548-.426-5.3zM11.03 3.012l.121.018 10.091 8.861-7.997 3a2.045 2.045 0 0 1-2.155-.468L2.157 5.489zm11.91 13.952l-10.057 4.03-.03.006a.067.067 0 0 1-.048-.02L2.347 10.422l-.225-.571a12.076 12.076 0 0 1-1.047-3.733l.01-.286 9.298 9.298a3.041 3.041 0 0 0 3.213.696l8.292-3.11.086.22c1.117 2.859 1.141 3.768.965 4.028z"
+                  />
+                  <path fill="none" d="M0 0h24v24H0z" />
+                </svg>
+              </button>
+            </div>
+            <div data-dojo-attach-point="editorInputForm"></div>
+          </div>
+        </div>
+        <div class="editor-actions-section">
+          <button
+            class="editor-button"
+            id="editor-secondary"
+            data-dojo-attach-point="editorSecondary"
+          >
+            Cancel
+          </button>
+          <button
+            class="editor-button disabled-button"
+            id="editor-primary"
+            data-dojo-attach-point="editorPrimaryButton"
+            disabled
+          >
+            Create Collection
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div id="mapViewContainerCollections">
+    <div
+      class="g-mapframe-container-norm"
+      id="mapNode"
+      data-dojo-attach-point="mapNode"
+    ></div>
+    <!-- <div id="tableContainer" class="tableContainer"></div> -->
+  </div>
+  <div id="container-confirm-modal" data-dojo-attach-point="modalContainer">
+    <div id="confirm-modal">
+      <div id="confirm-modal-header" class="confirm-modal-section">
+        <p>Delete Collection?</p>
+        <div id="modal-close-button">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
+            <path
+              d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"
+            />
+          </svg>
+        </div>
+      </div>
+      <div id="confirm-modal-body" class="confirm-modal-section">
+        <p>
+          Are you sure you would like to delete
+          <span
+            data-dojo-attach-point="modalContainerCollectionsListLength"
+          ></span>
+          collection(s)? This action is irreversible.
+        </p>
+        <div data-dojo-attach-point="modalContainerCollectionsList"></div>
+      </div>
+
+      <div id="confirm-modal-footer" class="confirm-modal-section">
+        <button
+          id="confirm-modal-secondary"
+          class="confirm-modal-button"
+          data-dojo-attach-point="modalSecondaryButton"
+        >
+          Cancel
+        </button>
+        <button
+          id="confirm-modal-primary"
+          class="confirm-modal-button"
+          data-dojo-attach-point="modalPrimaryButton"
+        >
+          Delete
+        </button>
+      </div>
+    </div>
+  </div>
+  <div class="loader-container hidden" data-dojo-attach-point="loaderContainer">
+    <div class="loader-content">
+      <span class="loader"></span>
+      Loading...
+    </div>
+  </div>
+  <div class="alert-container hidden" data-dojo-attach-point="alertContainer">
+    <div id="alert-color" data-dojo-attach-point="alertColor"></div>
+    <div class="alert-content">
+      <div id="alert-header">
+        <h4 id="alert-title" data-dojo-attach-point="alertTitle">
+          Alert Title
+        </h4>
+      </div>
+      <p id="alert-message" data-dojo-attach-point="alertMessage">
+        Alert Message
+      </p>
+    </div>
+  </div>
+  <style>
+    .container-stac-admin {
+      display: flex;
+      width: 100%;
+    }
+
+    #list-view {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+    }
+
+    #editor-view {
+      height: 100%;
+      width: 100%;
+      display: flex;
+      display: none;
+      flex-direction: column;
+    }
+
+    #left-panel {
+      width: 400px;
+      padding: 10px 10px 0 10px;
+    }
+
+    .collections-section {
+      background-color: white;
+      width: 100%;
+      flex-grow: 1;
+      margin-bottom: 10px;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .collections-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin: 0 0 10px 0;
+    }
+
+    .search-input {
+      width: 100%;
+      border: 1px solid #e6e6e6;
+      background-color: #f7f7f7fa;
+      height: 35px;
+      padding: 0 0 0 40px;
+      font-size: 14px;
+    }
+
+    .search-input-container {
+      position: relative;
+      margin: 0 0 10px 0;
+    }
+
+    .container-collections-list {
+      flex: 1 1 0;
+      display: flex;
+      overflow: hidden;
+    }
+
+    .collections-list {
+      flex: 1 1 0;
+      overflow-y: scroll;
+    }
+
+    .collections-action {
+      color: #0066ff;
+      margin: 0 15px 0 0;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+      border: none;
+      background-color: white;
+    }
+
+    .collections-action:hover {
+      text-decoration: underline;
+    }
+
+    .collections-action-delete {
+      color: rgb(219, 38, 38);
+      cursor: pointer;
+      padding: 0;
+      margin: 0;
+      font-size: 14px;
+    }
+
+    .list-item:last-child {
+      border-bottom: 1px solid rgb(206, 206, 206);
+    }
+
+    .list-item {
+      font-size: 14px;
+      padding: 6px 3px;
+      border-left: 1px solid rgb(206, 206, 206);
+      border-top: 1px solid rgb(206, 206, 206);
+      border-right: 1px solid rgb(206, 206, 206);
+      display: flex;
+      justify-content: space-between;
+    }
+
+    .list-item-checkbox {
+      margin: 0 10px 0 10px;
+      cursor: pointer;
+    }
+
+    .item-info-button {
+      width: 20px;
+      margin-right: 5px;
+      cursor: pointer;
+    }
+
+    .info-section {
+      background-color: white;
+      width: 100%;
+      margin-bottom: 10px;
+      flex-grow: 1;
+    }
+
+    .info-collections-tab {
+      cursor: pointer;
+    }
+
+    .info-collections-tab:hover {
+      text-decoration: underline;
+    }
+
+    .info-body {
+      height: 100%;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-body-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .info-action-container {
+      display: flex;
+    }
+
+    .info-actions {
+      color: #0066ff;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+      border: none;
+      background-color: white;
+    }
+
+    .info-actions-zoom {
+      margin-right: 15px;
+    }
+
+    .info-actions:hover {
+      text-decoration: underline;
+    }
+
+    .info-body-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .info-table-wrapper {
+      overflow-y: scroll;
+      flex: 1 1 0;
+    }
+
+    .info-table {
+      width: 100%;
+      font-size: 14px;
+    }
+
+    .info-table td {
+      padding: 5px 10px;
+    }
+
+    .info-table td:first-child {
+      border-right: 1px solid #dddddd;
+    }
+
+    .info-table tr:nth-child(2n) {
+      background-color: #ededed;
+    }
+
+    .editor-section {
+      background-color: white;
+      width: 100%;
+      flex-grow: 1;
+      padding: 10px;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .editor-section-body {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+    }
+
+    .fields-list {
+      display: flex;
+      flex-direction: column;
+      flex: 1 1 0;
+      overflow-y: scroll;
+    }
+
+    .editor-actions-section {
+      display: flex;
+      flex: 0 0 50px;
+      justify-content: space-between;
+    }
+
+    .editor-title {
+      font-weight: bold;
+      font-size: 18px;
+    }
+
+    .editor-draw-tools {
+      display: flex;
+    }
+
+    .editor-draw-tool {
+      width: 35px;
+      padding: 4px 6px;
+      border: 1px solid #b6b6b6;
+      cursor: pointer;
+    }
+
+    .editor-draw-tool:hover {
+      background-color: rgb(212, 212, 212);
+    }
+
+    .editor-label {
+      margin-top: 15px;
+      font-size: 14px;
+    }
+
+    .editor-input {
+      width: 100%;
+      border: 1px solid #e6e6e6;
+      background-color: #f7f7f7fa;
+      height: 35px;
+      font-size: 14px;
+      padding-left: 10px;
+    }
+
+    .editor-button {
+      margin: 40px 0 0 0;
+      border: none;
+      background-color: #1653ad;
+      color: white;
+      border-radius: 5px;
+      height: 40px;
+      width: 47%;
+    }
+
+    #editor-secondary {
+      background-color: white;
+      color: #1653ad;
+      border: 1px solid #1653ad;
+    }
+
+    #mapViewContainerCollections {
+      display: flex;
+      flex-grow: 1;
+    }
+
+    .g-mapframe-container-norm {
+      position: initial;
+      top: 48px;
+      left: 0;
+      bottom: 4px;
+      right: 0;
+      display: flex;
+      flex-grow: 1;
+      border: none;
+    }
+
+    .g-mapframe-container-norm > iframe {
+      width: 100%;
+      border: none;
+    }
+
+    #container-confirm-modal {
+      width: 100%;
+      height: 100%;
+      background-color: rgb(0, 0, 0, 0.2);
+      position: absolute;
+      z-index: 10;
+      top: 0;
+      left: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #confirm-modal {
+      width: 700px;
+      height: 250px;
+      background-color: white;
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+    }
+
+    .confirm-modal-section {
+      padding: 10px;
+    }
+
+    #confirm-modal-header {
+      flex: 0 0 50px;
+      font-size: 20px;
+      font-weight: bold;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    #confirm-modal-header > p {
+      margin: 0;
+      padding: 0;
+    }
+
+    #confirm-modal-body {
+      flex: 1 1 auto;
+    }
+
+    #confirm-modal-footer {
+      flex: 0 0 50px;
+      display: flex;
+      justify-content: flex-end;
+    }
+
+    .confirm-modal-button {
+      border: none;
+      padding: 5px;
+      margin-left: 10px;
+      min-width: 100px;
+      border-radius: 5px;
+    }
+
+    #confirm-modal-secondary {
+      background-color: white;
+      border: 1px solid rgb(0, 102, 255);
+      color: rgb(0, 102, 255);
+    }
+
+    #confirm-modal-primary {
+      background-color: rgb(240, 27, 27);
+      color: white;
+    }
+
+    #modal-close-button {
+      width: 15px;
+      cursor: pointer;
+    }
+
+    /* loader */
+    .loader-container {
+      background-color: rgb(0, 0, 0, 0.2);
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 100%;
+      color: white;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .loader-content {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      text-align: center;
+      flex-direction: column;
+    }
+
+    .loader {
+      width: 48px;
+      height: 48px;
+      border: 5px solid #fff;
+      border-bottom-color: #0066ff;
+      border-radius: 50%;
+      display: inline-block;
+      box-sizing: border-box;
+      animation: rotation 1s linear infinite;
+    }
+
+    @keyframes rotation {
+      0% {
+        transform: rotate(0deg);
+      }
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+
+    /* sketch */
+    .sketch-active-tool {
+      background-color: #0066ff;
+    }
+
+    /* alert */
+    .alert-container {
+      position: absolute;
+      bottom: 75px;
+      right: 25px;
+      height: 100px;
+      width: 500px;
+      background-color: white;
+      z-index: 99;
+      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.062);
+      display: flex;
+      transition: all 0.5s ease-out;
+    }
+
+    .alert-container:hover {
+      background-color: #e9e9e9;
+      cursor: pointer;
+    }
+
+    #alert-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      width: 100%;
+    }
+
+    #alert-title {
+      font-size: 20px;
+    }
+
+    #alert-message {
+      font-size: 15px;
+    }
+
+    #alert-color {
+      background-color: green;
+      height: 100%;
+      width: 15px;
+    }
+
+    .alert-content {
+      display: flex;
+      flex-direction: column;
+      padding: 10px;
+      width: 100%;
+    }
+
+    .required {
+      color: red;
+    }
+
+    .truncate-text {
+      display: inline-block;
+      max-width: 300px; /* adjust to your needs */
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .hidden {
+      display: none;
+    }
+
+    .disabled {
+      color: gray;
+      cursor: not-allowed;
+      text-decoration: none;
+    }
+
+    .disabled:hover {
+      text-decoration: none;
+    }
+
+    .disabled-button {
+      color: white;
+      cursor: not-allowed;
+      text-decoration: none;
+      background-color: gray;
+    }
+  </style>
+</div>

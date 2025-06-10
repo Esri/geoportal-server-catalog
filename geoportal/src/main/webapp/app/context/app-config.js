@@ -4,7 +4,7 @@ define([],function(){var obj={
   system: {
     searchLimit: 10000,
     secureCatalogApp:false,
-    showTabs:"MapPanel,AdminPanel,AboutPanel,ApiPanel"
+    showTabs:"MapPanel,AdminPanel,AboutPanel,ApiPanel,CollectionsPanel"
   },
 
   edit: {
