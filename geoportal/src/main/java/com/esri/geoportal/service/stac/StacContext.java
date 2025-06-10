@@ -220,13 +220,8 @@ public class StacContext {
               { 
                   if (existingGeometryWKT.containsKey(geometryType)) {
                     JSONObject existingGeometry = (JSONObject) existingGeometryWKT.get(geometryType);
-                    JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);
-                    //if newGeomWKT contains, polyhedral, do not validate source of point and polygon, only fail if polyhedral source does not match
-                    if((newGeometryWKT.containsKey("polyhedral") && (geometryType.equalsIgnoreCase("point") || geometryType.equalsIgnoreCase("polygon"))))
-                    {
-                    	continue;
-                    }
-
+                    JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);                    
+                   
                     String existingGeometrySource = null;
                     String newGeometrySource = null;
                     
@@ -236,12 +231,22 @@ public class StacContext {
                     if (newGeometry.containsKey("geometry_source")) {
                       existingGeometrySource = existingGeometry.getAsString("geometry_source");
                     }
-                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {                    	
-                      passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {
+	                   //if newGeomWKT contains polyhedral and (point or polygon), geometry source for point and polygon can be changed from gsdb to new one otherwise should be same.
+	                    if((newGeometryWKT.containsKey("polyhedral") && (geometryType.equalsIgnoreCase("point") || geometryType.equalsIgnoreCase("polygon"))))
+	                    {
+	                    	if(!existingGeometrySource.equalsIgnoreCase("gsdb")) //if existing source for point and polygon is 'gsdb'; new source can be anything
+	                    	{
+	                    		passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+	                    	}
+	                    }
+	                    else {
+	                    	passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+	                    }
                     }
                     
                     if (!passes) {
-                      message = "Geometry source validation failed: submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
+                      message = geometryType+"- submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
                       break;
                     }
 

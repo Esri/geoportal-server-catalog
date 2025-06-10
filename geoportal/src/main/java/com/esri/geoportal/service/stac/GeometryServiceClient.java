@@ -63,6 +63,9 @@ public class GeometryServiceClient {
     private Map<String, String> geometryTypes = new HashMap<>();
     private Map<String, String> wktTypes = new HashMap<>();
     
+    //Geometry source for generated geometries (point and polygon from polyhedral surface)
+    private String geomSourceSystem ="gsdb";
+    
 
     /**
      * Logger.
@@ -1107,7 +1110,7 @@ public class GeometryServiceClient {
              geomArr.add(polyGeom);
              String polygonWkt = getWKTGeometry("POLYGON", geomArr);
              polygonWKTObj.put("wkt", polygonWkt);
-             polygonWKTObj.put("geometry_source", polyhedralGeomWKTObj.getAsString("geometry_source"));
+             polygonWKTObj.put("geometry_source", geomSourceSystem);
              polygonWKTObj.put("update_date", DateUtil.nowAsString());            
            }           
          }
@@ -1152,7 +1155,7 @@ public class GeometryServiceClient {
 			double avjZ = z / numberOfVertex;
 
 			pointWktObj.put("wkt", "POINT (" + avjX + " " + avjY + " " + avjZ + ")");
-			pointWktObj.put("geometry_source", polyhedralGeomWKTObj.getAsString("geometry_source"));
+			pointWktObj.put("geometry_source", geomSourceSystem);
 			pointWktObj.put("update_date", DateUtil.nowAsString());	
 		}
 		return pointWktObj;
