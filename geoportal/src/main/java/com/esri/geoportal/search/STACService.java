@@ -1166,6 +1166,11 @@ public class STACService extends Application {
 	      }
 	      else {
 	    	  String existingItemJSON = existingItem.toString();
+	    	  
+	    	// Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7, Auto generate bbox if not available in request
+		      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {		    	  
+		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+		      }
 	          
 	          // if payload has geomCRSField and geomWKT field, project 
 	          // from internal CRS (EPSG:4326) to geomCRSField value
@@ -1250,9 +1255,14 @@ public class STACService extends Application {
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		JSONArray detailErrArray = new JSONArray();
     
-		try {			
+		try {
+			  // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+		      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {
+		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+		      }
+			
 	      // 574
-	      JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
+			JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
 			
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,false);
       
@@ -1368,6 +1378,10 @@ public class STACService extends Application {
           requestPayload.put("id", id);
         }
       }
+      // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {    	 
+    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+        }
       
       // issue 574 - project payload if submitted with geometries not in 4326
       JSONObject projectedPayload = requestPayload;

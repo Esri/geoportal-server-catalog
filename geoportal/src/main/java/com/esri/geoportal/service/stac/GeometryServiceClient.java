@@ -1036,11 +1036,9 @@ public class GeometryServiceClient {
           {
         	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");
         	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
-        	          + "\"geometries\": [{\"paths\":"+polylineArr+"}]}";
-        	         
+        	          + "\"geometries\": [{\"paths\":"+polylineArr+"}]}";        	         
           }
-        }        
-
+        }
         break;
         
       default:
@@ -1192,5 +1190,6 @@ public class GeometryServiceClient {
 	  return verticesArrList;		  
 	  
   	}
+	  
            
 }
