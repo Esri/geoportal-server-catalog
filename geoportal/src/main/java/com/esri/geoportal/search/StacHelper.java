@@ -492,11 +492,10 @@ public class StacHelper {
       if(requestPayload.containsKey("shape_geo")) {
         if(requestPayload.get("shape_geo") != null && (!requestPayload.containsKey("envelope_geo")))
         errorMsg = errorMsg+" envelope_geo is mandatory if shape_geo is not null.";
-      }
-
-      if(!requestPayload.containsKey("properties")) {
-        errorMsg = errorMsg+" properties is mandatory.";
-      }
+      } 
+      if(!requestPayload.containsKey("assets")) {
+          errorMsg = errorMsg + " assets is mandatory.";
+        }
       //https://github.com/EsriPS/exxonmobil-gsdb/issues/6 datetime validation moved to Validator TODO remove code 
 //      if(requestPayload.containsKey("properties")) {
 //        JSONObject prop = (JSONObject) requestPayload.get("properties");
@@ -511,28 +510,29 @@ public class StacHelper {
 //          }
 //        }
 //      }
-
-      if(!requestPayload.containsKey("assets")) {
-        errorMsg = errorMsg + " assets is mandatory.";
+    } 
+    	if(!requestPayload.containsKey("properties")) {
+    		errorMsg = errorMsg+" properties is mandatory.";
       }
-    }    
-
-    // always validate the configure validation rules
-  	StacContext sc = StacContext.getInstance();
-    for (String validationRule : sc.getValidationRules()) {
-      LOGGER.debug("Validation rule: " + validationRule);
-      try {
-        JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId,forUpdate);
-        if (!validationResult.getAsString("passes").equals("true")) {
-          errorMsg = errorMsg + " Failed validation rule ";
-          errorMsg = errorMsg + validationRule + ": ";
-          errorMsg = errorMsg + validationResult.getAsString("message");
-        }
-      } catch (Exception ex) {
-        errorMsg = errorMsg + Level.SEVERE + " - StacItemValidationResponse: " +  ex.getMessage();
-      }
-    }
     
+    	//Always validate the configured validation rules, (not validating configured rules unless properties present in item, avoiding several NullpointerException)
+	    if(requestPayload.containsKey("properties"))
+		{
+	    	StacContext sc = StacContext.getInstance();
+	        for (String validationRule : sc.getValidationRules()) {
+	          LOGGER.debug("Validation rule: " + validationRule);
+	          try {
+	            JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId,forUpdate);
+	            if (!validationResult.getAsString("passes").equals("true")) {
+	              errorMsg = errorMsg + " Failed validation rule ";
+	              errorMsg = errorMsg + validationRule + ": ";
+	              errorMsg = errorMsg + validationResult.getAsString("message");
+	            }
+	          } catch (Exception ex) {
+	            errorMsg = errorMsg + Level.SEVERE + " - StacItemValidationResponse: " +  ex.getMessage();
+	          }
+	        }
+		}
 		if(errorMsg.length()>0) {
 			response.setCode(StacItemValidationResponse.BAD_REQUEST);
 			response.setMessage(errorMsg);
