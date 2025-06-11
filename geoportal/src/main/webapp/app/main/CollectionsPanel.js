@@ -1015,6 +1015,10 @@ define([
       return str.replace(/ /g, "");
     },
 
+    removeSpecialCharacters: function (str) {
+      return str.replace(/[^a-zA-Z0-9_-]/g, "");
+    },
+
     readConfig: function () {
       dfd = new Deferred();
       fetch("app/gs/config/geoportal-search.json")
