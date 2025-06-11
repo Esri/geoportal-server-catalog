@@ -63,6 +63,7 @@ import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.jayway.jsonpath.DocumentContext;
@@ -1166,6 +1167,11 @@ public class STACService extends Application {
 	      }
 	      else {
 	    	  String existingItemJSON = existingItem.toString();
+	    	  
+	    	// Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7, Auto generate bbox if not available in request
+		      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {		    	  
+		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+		      }
 	          
 	          // if payload has geomCRSField and geomWKT field, project 
 	          // from internal CRS (EPSG:4326) to geomCRSField value
@@ -1190,11 +1196,17 @@ public class STACService extends Application {
 	                                                     patchCRS);            
 	              }
 	            }
-	
-	            // merge JSON from existing item with requestPayload
-	            updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
-	            responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
 	          }
+	          // merge JSON from existing item with requestPayload
+	            updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
+	            //If request payload contains geometry, remove existing shape_geo and envelope_geo from mergedJSON
+	            //shape_geo and envelope_geo will be set again in pre-publish
+	            if (requestPayload.containsKey("geometry"))
+        		{
+	            	 updatedItem.remove(FieldNames.FIELD_SHAPE_GEO);
+	            	updatedItem.remove(FieldNames.FIELD_ENVELOPE_GEO);
+        		}
+	            responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
 	           responseJSON = generateResponse("200", responseObject.toString(), detailErrArray); 
 	      }
       
@@ -1250,11 +1262,16 @@ public class STACService extends Application {
 		Status status = Response.Status.INTERNAL_SERVER_ERROR;
 		JSONArray detailErrArray = new JSONArray();
     
-		try {			
-	      // 574
-	      JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
+		try {
+			  // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+		      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {
+		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+		      }
 			
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,false);
+	      // 574
+			JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
+			
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,gc.isValidateStacFields());
       
 			if (validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
 				JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,true);
@@ -1368,6 +1385,10 @@ public class STACService extends Application {
           requestPayload.put("id", id);
         }
       }
+      // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {    	 
+    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+        }
       
       // issue 574 - project payload if submitted with geometries not in 4326
       JSONObject projectedPayload = requestPayload;
@@ -2293,7 +2314,7 @@ public class STACService extends Application {
                   JSONObject geometryToUpdate = (JSONObject) geometry_wkt_in.get(geometryType);
                   geometryToUpdate.put("wkt", wktGeometry);
 
-                  properties.put("gsdb:crs", outCRS);
+                  properties.put(gc.getGeomCRSField(), outCRS);
                 }
               } catch (ParseException ex) {
                 LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
@@ -2431,8 +2452,9 @@ public class STACService extends Application {
     String inCRSField = gc.getGeomCRSField();
     JSONObject responseJSONObject = item;
           
-    if (!inCRSField.isEmpty()) {
-      JSONObject prop = (JSONObject) item.get("properties");
+    if (!inCRSField.isEmpty() && item.containsKey("properties")) {
+    	
+      JSONObject prop = (JSONObject) item.get("properties");     
 
       // if there is the gsdb:crs field see if projection is needed
       if (prop.containsKey(inCRSField)) {

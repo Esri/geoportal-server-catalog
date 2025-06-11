@@ -21,6 +21,7 @@ import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.search.StacHelper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
 import java.util.HashMap;
 import java.util.HashSet;
@@ -190,7 +191,11 @@ public class StacContext {
         break;
         
       case "geometry_source_matches":
-        passes = true;       
+        passes = true;
+        if(itemId == null) //Validation error will be thrown as ID is mandatory from StacHelper.validateFields
+        {
+        	break;
+        }
         JSONObject existingItem = StacHelper.getSTACItemById(collectionId, itemId);
         
         if (existingItem == null) {
@@ -199,8 +204,8 @@ public class StacContext {
           
         } else {          
           // this is an existing item, check the geometry source
-          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, "gsdb:geometry_wkt");
-          JSONObject newGeometryWKT = (JSONObject) getProperty(item, "gsdb:geometry_wkt");
+          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, gc.getGeomWKTField());
+          JSONObject newGeometryWKT = (JSONObject) getProperty(item, gc.getGeomWKTField());
 
           // loop over keys in newGeometryWKT
           //   if the key exists in existingGeometryWKT 
@@ -215,13 +220,8 @@ public class StacContext {
               { 
                   if (existingGeometryWKT.containsKey(geometryType)) {
                     JSONObject existingGeometry = (JSONObject) existingGeometryWKT.get(geometryType);
-                    JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);
-                    //if newGeomWKT contains, polyhedral, do not validate source of point and polygon, only fail if polyhedral source does not match
-                    if((newGeometryWKT.containsKey("polyhedral") && (geometryType.equalsIgnoreCase("point") || geometryType.equalsIgnoreCase("polygon"))))
-                    {
-                    	continue;
-                    }
-
+                    JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);                    
+                   
                     String existingGeometrySource = null;
                     String newGeometrySource = null;
                     
@@ -231,19 +231,28 @@ public class StacContext {
                     if (newGeometry.containsKey("geometry_source")) {
                       existingGeometrySource = existingGeometry.getAsString("geometry_source");
                     }
-                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {                    	
-                      passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {
+	                   //if newGeomWKT contains polyhedral and (point or polygon), geometry source for point and polygon can be changed from gsdb to new one otherwise should be same.
+	                    if((newGeometryWKT.containsKey("polyhedral") && (geometryType.equalsIgnoreCase("point") || geometryType.equalsIgnoreCase("polygon"))))
+	                    {
+	                    	if(!existingGeometrySource.equalsIgnoreCase("gsdb")) //if existing source for point and polygon is 'gsdb'; new source can be anything
+	                    	{
+	                    		passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+	                    	}
+	                    }
+	                    else {
+	                    	passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+	                    }
                     }
                     
                     if (!passes) {
-                      message = "Geometry source validation failed: submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
+                      message = geometryType+"- submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
                       break;
                     }
 
                   } else {
                     passes = true;
                   }
-
               } 
           }
         }
@@ -260,7 +269,7 @@ public class StacContext {
 		  {
 			  field = matchFldVal[0];
 			  String regEx = matchFldVal[1];			  
-			  if(!regEx.isBlank() && !field.isBlank())
+			  if(!regEx.isBlank() && !field.isBlank() && item.getAsString(field)!=null)
 			  {
 				  Pattern pattern = Pattern.compile(regEx);				  
 				  Matcher matcher = pattern.matcher(item.getAsString(field));
@@ -271,6 +280,33 @@ public class StacContext {
 			  }
 		  }
 		  message = passes ? "Match expression ok for "+field : "Match expression failed for "+field;
+	      break;
+      case "mandatory_fields":
+    	  passes = false;    	 
+		  String fieldString = ruleElements[1];
+		  String[] fields = fieldString.split(",");
+		  String fldName ="";		  
+		  String failedFldVal="";
+		  DocumentContext itemCtx = JsonPath.parse(item);
+		  for(int i=0;i<fields.length;i++)
+		  {
+			  fldName = fields[i].trim();
+			  try {
+				  itemCtx.read("$."+fldName);
+			  }
+			 catch(PathNotFoundException ex) {
+				 if(failedFldVal.length() > 1)					 
+					 failedFldVal = failedFldVal+", "+fldName;
+				 else
+					 failedFldVal = fldName;
+			 }			  
+		  }
+		  if(failedFldVal.length() <1)
+		  {
+			  passes = true; 
+		  }	 
+		 
+		  message = passes ? "Mandatory field validation ok for "+fields : "Mandatory field validation failed for "+failedFldVal;
 	      break;
       default:
         LOGGER.debug("Unsupported validation rule: " + validationRule);

@@ -22,6 +22,7 @@ on:
       tags:
         description: 'Test scenario tags'
 
+<<<<<<< HEAD
 env:
   PROJECT_LOCATION: geoportal
   ELASTIC_BEANSTALK_NAME: geoportal-host
@@ -69,6 +70,49 @@ jobs:
       uses: actions/upload-artifact@v4
       with:
         name: geoportal-artifacts-Esri
+=======
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17.0.2+8'
+        distribution: 'adopt'
+        cache: maven
+    - name: Build with Maven
+      run: mvn -B package --file ${{env.PROJECT_LOCATION}}/pom.xml
+    - name: Checkout tools repo
+      uses: actions/checkout@v4
+      with:
+        repository: EsriPS/exxonmobil-gsdb
+        token: ${{ secrets.RB_PAT }}
+        path: exxonmobil-gsdb
+
+    - name: Extract ${{env.PROJECT_LOCATION}}/target/geoportal.war
+      run: 7z x ${{env.PROJECT_LOCATION}}/target/geoportal.war -ogeoportal_war
+
+    - name: List directory content
+      shell: cmd
+      run: for /D %%Y in (*) do echo %%Y
+
+    - name: Copy config files
+      run: |
+        Copy-Item -Path "exxonmobil-gsdb\geoportal server\WEB-INF\classes\config\*" -Destination "geoportal_war\WEB-INF\classes\config" -Recurse -Force
+        Copy-Item -Path "exxonmobil-gsdb\geoportal server\WEB-INF\classes\service\config\*" -Destination "geoportal_war\WEB-INF\classes\service\config" -Recurse -Force
+
+    - name: Archive geoportal_war to geoportal.war
+      run: 7z a ${{github.run_id}}-geoportal.war .\geoportal_war\*
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: geoportal-artifacts
+>>>>>>> refs/remotes/origin/stac-admin-panel
         path: ${{github.run_id}}-geoportal.war
 
   deploy:
