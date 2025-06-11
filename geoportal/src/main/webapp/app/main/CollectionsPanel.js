@@ -375,6 +375,21 @@ define([
           : this.selectedGraphic.geometry;
       }
 
+      let bbox =
+        tempGeometry?.extent?.xmin != null &&
+        tempGeometry?.extent?.ymin != null &&
+        tempGeometry?.extent?.xmax != null &&
+        tempGeometry?.extent?.ymax != null
+          ? [
+              [
+                tempGeometry?.extent.xmin,
+                tempGeometry?.extent.ymin,
+                tempGeometry?.extent.xmax,
+                tempGeometry?.extent.ymax,
+              ],
+            ]
+          : [];
+
       const collection = {
         type: "Collection",
         stac_version: "1.0.0",
@@ -387,7 +402,7 @@ define([
         providers: [],
         extent: {
           spatial: {
-            bbox: [],
+            bbox: bbox,
             geometry: {
               type: "Polygon",
               coordinates: tempGeometry?.rings,
@@ -479,6 +494,23 @@ define([
         type: "Polygon",
         coordinates: tempGeometry?.rings,
       };
+
+      let bbox =
+        tempGeometry?.extent?.xmin != null &&
+        tempGeometry?.extent?.ymin != null &&
+        tempGeometry?.extent?.xmax != null &&
+        tempGeometry?.extent?.ymax != null
+          ? [
+              [
+                tempGeometry?.extent.xmin,
+                tempGeometry?.extent.ymin,
+                tempGeometry?.extent.xmax,
+                tempGeometry?.extent.ymax,
+              ],
+            ]
+          : [];
+
+      collection.extent.spatial.bbox = bbox;
 
       try {
         const result = await this.updateCollection(collection);
