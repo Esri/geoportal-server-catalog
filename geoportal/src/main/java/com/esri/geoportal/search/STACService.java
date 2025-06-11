@@ -1271,7 +1271,7 @@ public class STACService extends Application {
 	      // 574
 			JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
 			
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,false);
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,gc.isValidateStacFields());
       
 			if (validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
 				JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,true);
@@ -2452,8 +2452,9 @@ public class STACService extends Application {
     String inCRSField = gc.getGeomCRSField();
     JSONObject responseJSONObject = item;
           
-    if (!inCRSField.isEmpty()) {
-      JSONObject prop = (JSONObject) item.get("properties");
+    if (!inCRSField.isEmpty() && item.containsKey("properties")) {
+    	
+      JSONObject prop = (JSONObject) item.get("properties");     
 
       // if there is the gsdb:crs field see if projection is needed
       if (prop.containsKey(inCRSField)) {
