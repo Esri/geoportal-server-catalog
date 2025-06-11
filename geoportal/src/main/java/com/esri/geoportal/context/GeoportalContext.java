@@ -74,8 +74,10 @@ public class GeoportalContext implements ApplicationContextAware {
   private String geometryService = "";
   private String geomWKTField = "";
   private String geomCRSField = "";
+  private double stacBboxSize = 0.00001;
 
-  public HashMap<String, ArrayList<Group>> getUserGroupMap() {
+
+public HashMap<String, ArrayList<Group>> getUserGroupMap() {
 	return userGroupMap;
 }
 
@@ -288,6 +290,15 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
 	}
 	public void setGeomCRSField(String geomCRSField) {
 		this.geomCRSField = geomCRSField;
+	}
+	
+	//This is used to calculate bbox for a StacItem with point if canStacAutogenerateBbox=true
+	public double getStacBboxSize() {
+		return stacBboxSize;
+	}
+
+	public void setStacBboxSize(double stacBboxSize) {
+		this.stacBboxSize = stacBboxSize;
 	}
 
   
