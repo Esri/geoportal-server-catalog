@@ -63,6 +63,7 @@ import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.jayway.jsonpath.DocumentContext;
@@ -1198,6 +1199,13 @@ public class STACService extends Application {
 	          }
 	          // merge JSON from existing item with requestPayload
 	            updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
+	            //If request payload contains geometry, remove existing shape_geo and envelope_geo from mergedJSON
+	            //shape_geo and envelope_geo will be set again in pre-publish
+	            if (requestPayload.containsKey("geometry"))
+        		{
+	            	 updatedItem.remove(FieldNames.FIELD_SHAPE_GEO);
+	            	updatedItem.remove(FieldNames.FIELD_ENVELOPE_GEO);
+        		}
 	            responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
 	           responseJSON = generateResponse("200", responseObject.toString(), detailErrArray); 
 	      }
