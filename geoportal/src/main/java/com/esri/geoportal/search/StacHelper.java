@@ -1124,13 +1124,18 @@ public class StacHelper {
 			  if(geometryTypes.contains(type))
 			  {
 				  JSONArray coordinates = (JSONArray) geometry.get("coordinates"); 
-				  if (type.equals("POINT")) {	                    
-	                    double lng = (double) coordinates.get(0);
-	                    double lat = (double) coordinates.get(1);
-	                    minLat = Math.min(minLat, lat);
-	                    maxLat = Math.max(maxLat, lat);
-	                    minLng = Math.min(minLng, lng);
-	                    maxLng = Math.max(maxLng, lng);
+				  if (type.equals("POINT")) {
+					  	GeoportalContext gc = GeoportalContext.getInstance();
+					  	double bboxSize = gc.getStacBboxSize();				  	
+					  	double x = (double) coordinates.get(0);
+		                double y = (double) coordinates.get(1);
+		                
+		                minLng = x-(bboxSize/2);
+		                maxLng = x +(bboxSize/2);		                		
+					  
+	                    minLat = y-(bboxSize/2);
+	                    maxLat =  y+(bboxSize/2);                    
+	                   
 	                } else if (type.equals("LINESTRING") || type.equals("MULTIPOINT")) {	                    
 	                    for (int i = 0; i < coordinates.size(); i++) {
 	                        JSONArray coord = (JSONArray) coordinates.get(i);
