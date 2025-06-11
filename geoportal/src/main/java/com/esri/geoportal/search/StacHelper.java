@@ -439,21 +439,23 @@ public class StacHelper {
 		String errorMsg;
 		StacItemValidationResponse response = new StacItemValidationResponse();
 		
-		//Validate if id exists	
-		String id =  requestPayload.get("id").toString();
-		String itemRes = getItemWithItemId(collectionId, id);
-		DocumentContext elasticResContext = JsonPath.parse(itemRes);
+		//Validate if id exists			
+		if(requestPayload.get("id") !=null && !requestPayload.get("id").toString().isBlank())
+		{
+			String id = requestPayload.get("id").toString();
+			String itemRes = getItemWithItemId(collectionId, id);
+			DocumentContext elasticResContext = JsonPath.parse(itemRes);
 
-		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
-		if (items != null && !items.isEmpty()) {
-			errorMsg = "stac item with id '"+id+"' already exists.";
-			response.setCode(StacItemValidationResponse.ID_EXISTS);
-			response.setMessage(errorMsg);
+			net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+			if (items != null && !items.isEmpty()) {
+				errorMsg = "stac item with id '"+id+"' already exists.";
+				response.setCode(StacItemValidationResponse.ID_EXISTS);
+				response.setMessage(errorMsg);
+			}		
 		}		
 		return response;
 	}
-
-  
+ 
 	// https://github.com/radiantearth/stac-spec/blob/master/item-spec/item-spec.md
 	private static StacItemValidationResponse validateFields(JSONObject requestPayload,String collectionId, boolean validateAllFields,
 			boolean forUpdate) {
@@ -472,7 +474,7 @@ public class StacHelper {
           && requestPayload.get("id").toString().isBlank())) {
 
         GeoportalContext gc = GeoportalContext.getInstance();
-        if (!"true".equals(gc.isCanStacAutogenerateId())) {
+        if (!gc.isCanStacAutogenerateId()) {
           errorMsg = errorMsg+" id is mandatory and should not be empty.";
         }
       }
@@ -490,47 +492,47 @@ public class StacHelper {
       if(requestPayload.containsKey("shape_geo")) {
         if(requestPayload.get("shape_geo") != null && (!requestPayload.containsKey("envelope_geo")))
         errorMsg = errorMsg+" envelope_geo is mandatory if shape_geo is not null.";
-      }
-
-      if(!requestPayload.containsKey("properties")) {
-        errorMsg = errorMsg+" properties is mandatory.";
-      }
-
-      if(requestPayload.containsKey("properties")) {
-        JSONObject prop = (JSONObject) requestPayload.get("properties");
-
-        if(!prop.containsKey("datetime")) {
-          errorMsg = errorMsg+" datetime is mandatory.";
-
-        } else if(prop.containsKey("datetime") && prop.get("datetime") == null) {
-
-          if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime")) {
-            errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
-          }
-        }
-      }
-
+      } 
       if(!requestPayload.containsKey("assets")) {
-        errorMsg = errorMsg + " assets is mandatory.";
-      }
-    }    
-
-    // always validate the configure validation rules
-  	StacContext sc = StacContext.getInstance();
-    for (String validationRule : sc.getValidationRules()) {
-      LOGGER.debug("Validation rule: " + validationRule);
-      try {
-        JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId,forUpdate);
-        if (!validationResult.getAsString("passes").equals("true")) {
-          errorMsg = errorMsg + " Failed validation rule ";
-          errorMsg = errorMsg + validationRule + ": ";
-          errorMsg = errorMsg + validationResult.getAsString("message");
+          errorMsg = errorMsg + " assets is mandatory.";
         }
-      } catch (Exception ex) {
-        errorMsg = errorMsg + Level.SEVERE + " - StacItemValidationResponse: " +  ex.getMessage();
+      //https://github.com/EsriPS/exxonmobil-gsdb/issues/6 datetime validation moved to Validator TODO remove code 
+//      if(requestPayload.containsKey("properties")) {
+//        JSONObject prop = (JSONObject) requestPayload.get("properties");
+//
+//        if(!prop.containsKey("datetime")) {
+//          errorMsg = errorMsg+" datetime is mandatory.";
+//
+//        } else if(prop.containsKey("datetime") && prop.get("datetime") == null) {
+//
+//          if(!prop.containsKey("start_datetime") || !prop.containsKey("end_datetime")) {
+//            errorMsg = errorMsg+" start_datetime and end_datetime is mandatory if datetime is null.";
+//          }
+//        }
+//      }
+    } 
+    	if(!requestPayload.containsKey("properties")) {
+    		errorMsg = errorMsg+" properties is mandatory.";
       }
-    }
     
+    	//Always validate the configured validation rules, (not validating configured rules unless properties present in item, avoiding several NullpointerException)
+	    if(requestPayload.containsKey("properties"))
+		{
+	    	StacContext sc = StacContext.getInstance();
+	        for (String validationRule : sc.getValidationRules()) {
+	          LOGGER.debug("Validation rule: " + validationRule);
+	          try {
+	            JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId,forUpdate);
+	            if (!validationResult.getAsString("passes").equals("true")) {
+	              errorMsg = errorMsg + " Failed validation rule ";
+	              errorMsg = errorMsg + validationRule + ": ";
+	              errorMsg = errorMsg + validationResult.getAsString("message");
+	            }
+	          } catch (Exception ex) {
+	            errorMsg = errorMsg + Level.SEVERE + " - StacItemValidationResponse: " +  ex.getMessage();
+	          }
+	        }
+		}
 		if(errorMsg.length()>0) {
 			response.setCode(StacItemValidationResponse.BAD_REQUEST);
 			response.setMessage(errorMsg);
@@ -550,10 +552,13 @@ public class StacHelper {
 		
 		// populate STAC item field (collection) with collectionID from URI
 		requestPayload.put("collection", collectionId);
-
-		// Add attributes in properties
+		
+		//Add item
 		if(!forUpdate)
+		{
 			prop.put(FieldNames.FIELD_STAC_CREATED, date); //Created in case of Add item
+			requestPayload.put(FieldNames.FIELD_SYS_CREATED, date);
+		}
 		prop.put(FieldNames.FIELD_STAC_UPDATED, date);
 		
 		//Check for geom_wkt field 
@@ -573,14 +578,13 @@ public class StacHelper {
 			
 			boolean addPoint = checkToBeAdded(wktGeom,"point");
 			boolean addFootprint = checkToBeAdded(wktGeom,"polygon");
-			//if polyhedral exists but point and polygon missing, generate 
-			//TODO only in Add feature or update too?
-			if(addPoint && !forUpdate){
+			//if polyhedral exists but point and polygon missing, generate and add in geomWKT (both in case of Add and Update item)			
+			if(addPoint){
 					//generate point
 					JSONObject pointWKTObj = geometryClient.getPointFromPolyhedralWKT((JSONObject) wktGeom.get("polyhedral"));
 					wktGeom.put("point",pointWKTObj);					
 			}
-			if(addFootprint && !forUpdate){
+			if(addFootprint){
 					//generate polygon footprint
 					JSONObject polygonWKTObj = geometryClient.getPolyhedralFootprint((JSONObject) wktGeom.get("polyhedral"));
 					wktGeom.put("polygon",polygonWKTObj);
@@ -593,8 +597,6 @@ public class StacHelper {
 		// sys_approval_status_s,title and url_granule_s
 		JSONArray collArr = new JSONArray();
 		collArr.add(collectionId);
-		if(!forUpdate)
-			requestPayload.put(FieldNames.FIELD_SYS_CREATED, date);
 		
 		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
 		requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS, collArr);
@@ -668,30 +670,12 @@ public class StacHelper {
 		
 
 		// Update Feature
-		if(forUpdate) {
-			//requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
-			//prop.put(FieldNames.FIELD_STAC_UPDATED, date);
-			
-			//if geomWKTField contains polyhedral, make sure that source of POINT and Polygon also matches with Polyhedral, 
-			//otherwise do not update point and polygon(remove from requestPayload)
-			ArrayList<String> geomToBeRemoved = checkGeomWKTToBeremoved(prop,gc);
-			if(geomToBeRemoved!=null && geomToBeRemoved.size()>0) {
-				JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
-				if(geomToBeRemoved.contains("point"))
-					wktGeom.remove("point");
-				if(geomToBeRemoved.contains("polygon"))
-					wktGeom.remove("polygon");
-			}
-			
-			//TODO
-			//Should existing point and polygon to be preserved? Till now update is never merging existing properties?
-			//if Point and Polygon does not exist, do we need to add like AddItem? Same can be followed if source does not match?
-			requestPayload.put("properties", prop);
+		if(forUpdate) {	
+			//Update Item specific things can be put here
 		}
 
 		// in either add/update map STAC fields from app-context fieldMappings to index
-		// fields
-		
+		// fields		
 		for (Map.Entry<String, String> entry : sc.getFieldMappings().entrySet()) {
 			String stacField = entry.getKey();
 			if (prop.containsKey(stacField)) {
@@ -1101,26 +1085,112 @@ public class StacHelper {
   }
   
   
-  public static JSONObject mergeJSON(JSONObject source, JSONObject updates) {
-    JSONObject result = source;
-    
-    for (String key: updates.keySet()) {
-            Object value = updates.get(key);
-            if (!result.containsKey(key)) {
-                // new value for "key":
-                result.put(key, value);
-            } else {
-                // existing value for "key" - recursively deep merge:
-                if (value instanceof JSONObject) {
-                    JSONObject valueSource = (JSONObject) source.get(key);
-                    JSONObject updatesValue = (JSONObject) updates.get(key);
-                    JSONObject mergedSub = mergeJSON(valueSource, updatesValue);
-                    result.put(key, mergedSub);
-                } else {
-                    result.put(key, value);
-                }
-            }
-    }
-    return result;
-  }
+	  public static JSONObject mergeJSON(JSONObject source, JSONObject updates) {
+	    JSONObject result = source;
+	    
+	    for (String key: updates.keySet()) {
+	            Object value = updates.get(key);
+	            if (!result.containsKey(key)) {
+	                // new value for "key":
+	                result.put(key, value);
+	            } else {
+	                // existing value for "key" - recursively deep merge:
+	                if (value instanceof JSONObject) {
+	                    JSONObject valueSource = (JSONObject) source.get(key);
+	                    JSONObject updatesValue = (JSONObject) updates.get(key);
+	                    JSONObject mergedSub = mergeJSON(valueSource, updatesValue);
+	                    result.put(key, mergedSub);
+	                } else {
+	                    result.put(key, value);
+	                }
+	            }
+	    }
+	    return result;
+	  }
+	  
+	  public static JSONArray generateBbox(JSONObject reqPayload)
+	  {
+		  JSONArray bbox = null;		  
+		  
+		  List<String> geometryTypes = Arrays.asList("POINT", "MULTIPOINT", "LINESTRING","MULTILINESTRING", "POLYGON","MULTIPOLYGON");
+		  if(reqPayload.containsKey("geometry"))
+		  {
+			  double minLat = Double.MAX_VALUE, maxLat = Double.MIN_VALUE;
+		      double minLng = Double.MAX_VALUE, maxLng = Double.MIN_VALUE;
+		      
+			  JSONObject geometry = (JSONObject) reqPayload.get("geometry");
+			  String type = geometry.getAsString("type");
+			  type = type.toUpperCase();
+			  if(geometryTypes.contains(type))
+			  {
+				  JSONArray coordinates = (JSONArray) geometry.get("coordinates"); 
+				  if (type.equals("POINT")) {
+					  	GeoportalContext gc = GeoportalContext.getInstance();
+					  	double bboxSize = gc.getStacBboxSize();				  	
+					  	double x = (double) coordinates.get(0);
+		                double y = (double) coordinates.get(1);
+		                
+		                minLng = x-(bboxSize/2);
+		                maxLng = x +(bboxSize/2);		                		
+					  
+	                    minLat = y-(bboxSize/2);
+	                    maxLat =  y+(bboxSize/2);                    
+	                   
+	                } else if (type.equals("LINESTRING") || type.equals("MULTIPOINT")) {	                    
+	                    for (int i = 0; i < coordinates.size(); i++) {
+	                        JSONArray coord = (JSONArray) coordinates.get(i);
+	                        double lng = (double) coord.get(0);
+		                    double lat = (double) coord.get(1);
+	                        minLat = Math.min(minLat, lat);
+	                        maxLat = Math.max(maxLat, lat);
+	                        minLng = Math.min(minLng, lng);
+	                        maxLng = Math.max(maxLng, lng);
+	                    }
+	                }
+	                else if (type.equals("POLYGON") || type.equals("MULTILINESTRING")) {	                   
+	                    for (int i = 0; i < coordinates.size(); i++) {
+	                        JSONArray ring = (JSONArray) coordinates.get(i);
+	                        for (int j = 0; j < ring.size(); j++) {
+	                            JSONArray coord = (JSONArray) ring.get(j);
+	                            double lng = (double) coord.get(0);
+	    	                    double lat = (double) coord.get(1);
+	                            minLat = Math.min(minLat, lat);
+	                            maxLat = Math.max(maxLat, lat);
+	                            minLng = Math.min(minLng, lng);
+	                            maxLng = Math.max(maxLng, lng);
+	                        }
+	                    }
+	                }
+	                else if (type.equals("MULTIPOLYGON")){	                  
+	                    for (int i = 0; i < coordinates.size(); i++) {
+	                         JSONArray polygon = (JSONArray) coordinates.get(i);
+	                        for (int j = 0; j < polygon.size(); j++) {
+	                            JSONArray ring = (JSONArray) polygon.get(j);
+	                            for (int k=0; k<ring.size(); k++){
+	                                JSONArray coord = (JSONArray) ring.get(k);
+	                                double lng = (double) coord.get(0);
+		    	                    double lat = (double) coord.get(1);
+	                                minLat = Math.min(minLat, lat);
+	                                maxLat = Math.max(maxLat, lat);
+	                                minLng = Math.min(minLng, lng);
+	                                maxLng = Math.max(maxLng, lng);
+	                            }
+	                        }
+	                    }
+	               }				  
+				  bbox =  new JSONArray();
+				  bbox.add(0,minLng);
+				  bbox.add(1,minLat);
+				  bbox.add(2,maxLng);
+				  bbox.add(3,maxLat);
+			  }
+			  else
+			  {
+				 LOGGER.debug("Unsupported geomtery type to generate bbox: "+type);
+			  }
+		  }
+		  return bbox;
+	  }
+
+
 }

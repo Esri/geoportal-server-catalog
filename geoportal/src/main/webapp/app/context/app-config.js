@@ -3,7 +3,8 @@ define([],function(){var obj={
 
   system: {
     searchLimit: 10000,
-    secureCatalogApp:false
+    secureCatalogApp:false,
+    showTabs:"MapPanel,AdminPanel,AboutPanel,ApiPanel,CollectionsPanel"
   },
 
   edit: {
