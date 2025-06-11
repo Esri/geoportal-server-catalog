@@ -1195,11 +1195,10 @@ public class STACService extends Application {
 	                                                     patchCRS);            
 	              }
 	            }
-	
-	            // merge JSON from existing item with requestPayload
+	          }
+	          // merge JSON from existing item with requestPayload
 	            updatedItem = StacHelper.mergeJSON(existingItem, requestPayload);
 	            responseObject = updateFeature(updatedItem, collectionId, featureId, hsr, async);
-	          }
 	           responseJSON = generateResponse("200", responseObject.toString(), detailErrArray); 
 	      }
       
