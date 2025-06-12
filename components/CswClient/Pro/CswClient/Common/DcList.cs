@@ -45,7 +45,9 @@ namespace com.esri.gpt.csw
         private static String THUMBNAIL_FGDC = "urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Thumbnail";
         private static String THUMBNAIL_ISO = "http://www.isotc211.org/2005/gmd/MD_BrowseGraphic/filename";
         private static String METADATA_DOCUMENT = "urn:x-esri:specification:ServiceType:ArcIMS:Metadata:Document";
+        private static String MAPSERVER = "MapServer";
         private static String WFS = "WFS";
+        private static String WMS = "WMS";
 
         #endregion
         #region Constructors
@@ -77,8 +79,14 @@ namespace com.esri.gpt.csw
                 case Scheme.SERVER:
                     name = DcList.SERVER;
                     break;
+                case Scheme.MAPSERVER:
+                    name = DcList.MAPSERVER;
+                    break;
                 case Scheme.WFS:
                     name = DcList.WFS;
+                    break;
+                case Scheme.WMS:
+                    name = DcList.WMS;
                     break;
             }
 
@@ -116,10 +124,11 @@ namespace com.esri.gpt.csw
             /** The iso thumbnail scheme **/
             THUMBNAIL_ISO,
 
-
             /** The Metadata document scheme. */
             METADATA_DOCUMENT,
-            WFS
+            WFS,
+            WMS,
+            MAPSERVER
         }
         #endregion
         #region "StaticMethods"

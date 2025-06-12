@@ -316,11 +316,11 @@ public class OGCRecordsService extends Application {
 	
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit,
 			String datetime,String title, String provider,String querydsl) {
-		int numberMatched;
 		net.minidev.json.JSONArray items = null;
 	
-		String numberReturned = "";
-		String itemFileString = "";		
+		int numberMatched = -1;
+		int numberReturned = -1;
+		String itemFileString;		
 		String finalResponse = "";
 		String search_after="";
 		String filePath = "service/config/ogcrecords-items.json";
@@ -341,8 +341,7 @@ public class OGCRecordsService extends Application {
 			//numberReturned = String.valueOf(items.size());
 
 			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
-			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
-			
+			resourceFilecontext.set("$.response.numberMatched", numberMatched > -1 ? numberMatched: null);
 			
 			JSONArray jsonArray = new JSONArray();
 			
@@ -362,9 +361,9 @@ public class OGCRecordsService extends Application {
 					}		
 				}						
 			}	
-			numberReturned = String.valueOf(jsonArray.size());
+			numberReturned = jsonArray.size(); //String.valueOf(jsonArray.size());
 			resourceFilecontext.set("$.response.features", jsonArray);	
-			resourceFilecontext.set("$.response.numberReturned", "" + numberReturned);			
+			resourceFilecontext.set("$.response.numberReturned", numberReturned > -1 ? numberReturned: null);			
 			
 			JsonObject obj =(JsonObject) JsonUtil.toJsonStructure(resourceFilecontext.jsonString()); 
 			JsonObject resObj =  obj.getJsonObject("response");
@@ -372,9 +371,7 @@ public class OGCRecordsService extends Application {
 			finalResponse = resObj.toString();
 			// Prepare urlparam for next page 	
 			
-			String urlparam="";
-			
-			urlparam = "limit=" + limit + (search_after != null ? "&search_after=" + search_after : "");
+			String urlparam = "limit=" + limit + (search_after != null ? "&search_after=" + search_after : "");
 			if(querydsl != null)
 			{		
 				querydsl = URLEncoder.encode(querydsl,StandardCharsets.UTF_8.toString());
@@ -411,12 +408,17 @@ public class OGCRecordsService extends Application {
 			val = featureContext.read("$.featurePropPath.collection");
 			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
 	
-			//Links
+			//Links - optional
 			val = featureContext.read("$.featurePropPath.links[0].href");
-			featureContext.set("$.featurePropPath.links[0].href", searchItemCtx.read(val));
+      try {
+        featureContext.set("$.featurePropPath.links[0].href", searchItemCtx.read(val));
+      } catch (Exception ex) {
+        String links[] = {};
+        featureContext.set("$.featurePropPath.links[0].href", links);
+      }
 	
 			val = featureContext.read("$.featurePropPath.links[0].title");
-			featureContext.set("$.featurePropPath.links[0].title", searchItemCtx.read(val));
+      featureContext.set("$.featurePropPath.links[0].title", searchItemCtx.read(val));
 			
 			//add bbox, geometry
 			val = featureContext.read("$.featurePropPath.bbox");
@@ -440,9 +442,14 @@ public class OGCRecordsService extends Application {
 			arr.add(ymax);
 			featureContext.set("$.featurePropPath.bbox", arr);					
 			
+      // optional
 			val = featureContext.read("$.featurePropPath.geometry");
-			featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
-			
+      try {
+  			featureContext.set("$.featurePropPath.geometry", searchItemCtx.read(val));
+      } catch (Exception ex) {
+        featureContext.set("$.featurePropPath.geometry", null);
+      }
+				
 			//Iterate properties, skip property if it is not available
 			for (String propKey : propObjKeys) {
 				try {
