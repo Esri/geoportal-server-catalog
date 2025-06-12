@@ -18,13 +18,17 @@ G.evaluators.iso = {
   version: "iso.v1",
 
   evaluate: function(task) {
-    this.evalBase(task);
-    this.evalService(task);
-    this.evalSpatial(task);
-    this.evalTemporal(task);
-    this.evalInspire(task);
-    this.evalOther(task);
-    this.evalLinks(task);
+    try {
+      this.evalBase(task);
+      this.evalService(task);
+      this.evalSpatial(task);
+      this.evalTemporal(task);
+      this.evalInspire(task);
+      this.evalOther(task);
+      this.evalLinks(task);
+    } catch(exception) {
+      print("EvaluatorFor_ISO Exception: " + exception);
+    }
   },
 
   evalBase: function(task) {

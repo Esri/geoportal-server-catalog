@@ -1,5 +1,6 @@
-﻿<ArcGIS defaultAssembly="CswClient.dll" defaultNamespace="GeoportalSearch" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
-  <AddInInfo id="{1bc1d59e-5375-428e-8098-eaf0fe41383f}" version="1.0" desktopVersion="2.6.24783">
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ArcGIS defaultAssembly="CswClient.dll" defaultNamespace="GeoportalSearch" xmlns="http://schemas.esri.com/DADF/Registry" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://schemas.esri.com/DADF/Registry file:///C:/Program%20Files/ArcGIS/Pro/bin/ArcGIS.Desktop.Framework.xsd">
+  <AddInInfo id="{1bc1d59e-5375-428e-8098-eaf0fe41383f}" version="1.0" desktopVersion="3.4.55405">
     <Name>GeoportalSearch</Name>
     <Description>CswClient description</Description>
     <Image>Images\AddinDesktop32.png</Image>
