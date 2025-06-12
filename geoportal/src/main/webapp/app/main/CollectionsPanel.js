@@ -221,7 +221,7 @@ define([
     getAllCollections: async function (f = "geojson") {
       let collections = [];
       try {
-        let url = `${this.getStacBaseUrl()}/collections?f=${f}`;
+        let url = `${this.getStacBaseUrl()}/collections?limit=10000&f=${f}`;
         if (AppContext.appConfig.system.secureCatalogApp) {
           var client = new AppClient();
           url = client.appendAccessToken(url);

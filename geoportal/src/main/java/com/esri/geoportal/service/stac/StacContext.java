@@ -21,15 +21,17 @@ import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.search.StacHelper;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.PathNotFoundException;
 
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.parser.JSONParser;
@@ -49,14 +51,15 @@ public class StacContext {
   private static final Logger LOGGER = LoggerFactory.getLogger(StacContext.class);
   private static StacContext SINGLETON = null;
   private final GeoportalContext gc = GeoportalContext.getInstance();
-  private final JSONParser jsonParser = new JSONParser();
+  private final JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
   private final GeometryServiceClient gsc = gc.getGeometryServiceClient();
 
   private List<String> validationRules;
   private Map<String, String> fieldMappings = new HashMap<>();
-  
-  
-  /**
+
+  private String statusFld = "gsdb:status";
+
+/**
    * Get the single instance.
    * @return the instance
    */
@@ -122,19 +125,29 @@ public class StacContext {
       LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
       throw ex;
     }    
-  }  
+  } 
+  
+	
+	public String getStatusFld() {
+		return statusFld;
+	}
+
+	public void setStatusFld(String statusFld) {
+		this.statusFld = statusFld;
+	}
   
   /* ========== Validation Rule functions here ========== */
   
-  public JSONObject passesValidation(String validationRule, JSONObject item, String collectionId) throws Exception {
+  public JSONObject passesValidation(String validationRule, JSONObject item, String collectionId,boolean forUpdate) throws Exception {
     boolean passes;
-    String message;
+    String message = "";
     JSONObject response = new JSONObject();    
     boolean ukFieldExists = false;
     JSONObject properties = (JSONObject) item.get("properties");
     String[] ruleElements = validationRule.split("\\|");
     String ruleType = ruleElements[0];
     String key;
+    String itemId = item.getAsString("id");
     
     switch (ruleType) {    
       case "unique":
@@ -142,7 +155,6 @@ public class StacContext {
         String[] uniqueKeyFields = key.split(",");
         String value;  
         String searchQry="";
-        message = "";
         String filterClause="";
         int cnt =1;
         for (String ukField: uniqueKeyFields) { 
@@ -165,9 +177,9 @@ public class StacContext {
           searchQry = StacHelper.prepareFilter(filterClause);
         }
           
-        ukFieldExists = indexHasValue(collectionId, searchQry);
+        ukFieldExists = indexHasValue(collectionId, searchQry,forUpdate,itemId);
         passes = !ukFieldExists;
-        message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + message;          
+        message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + key;          
         
         break;
         
@@ -178,6 +190,124 @@ public class StacContext {
 
         break;
         
+      case "geometry_source_matches":
+        passes = true;
+        if(itemId == null) //Validation error will be thrown as ID is mandatory from StacHelper.validateFields
+        {
+        	break;
+        }
+        JSONObject existingItem = StacHelper.getSTACItemById(collectionId, itemId);
+        
+        if (existingItem == null) {
+          // this is a new item
+          passes = true;
+          
+        } else {          
+          // this is an existing item, check the geometry source
+          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, gc.getGeomWKTField());
+          JSONObject newGeometryWKT = (JSONObject) getProperty(item, gc.getGeomWKTField());
+
+          // loop over keys in newGeometryWKT
+          //   if the key exists in existingGeometryWKT 
+          //     if the new geometry source equals the existing geometry source
+          //       the new geometry is allowed
+          //     else
+          //       the new geometry is NOT allowed, stop testing, rule failed
+          //   else next, this new geometry is allowed
+          if(existingGeometryWKT!=null && newGeometryWKT!=null)
+          {
+              for (String geometryType: newGeometryWKT.keySet())
+              { 
+                  if (existingGeometryWKT.containsKey(geometryType)) {
+                    JSONObject existingGeometry = (JSONObject) existingGeometryWKT.get(geometryType);
+                    JSONObject newGeometry = (JSONObject) newGeometryWKT.get(geometryType);                    
+                   
+                    String existingGeometrySource = null;
+                    String newGeometrySource = null;
+                    
+                    if (newGeometry.containsKey("geometry_source")) {
+                      newGeometrySource = newGeometry.getAsString("geometry_source");
+                    }
+                    if (newGeometry.containsKey("geometry_source")) {
+                      existingGeometrySource = existingGeometry.getAsString("geometry_source");
+                    }
+                    if ((existingGeometrySource != null) && (newGeometrySource != null)) {
+	                   //if newGeomWKT contains polyhedral and (point or polygon), geometry source for point and polygon can be changed from gsdb to new one otherwise should be same.
+	                    if((newGeometryWKT.containsKey("polyhedral") && (geometryType.equalsIgnoreCase("point") || geometryType.equalsIgnoreCase("polygon"))))
+	                    {
+	                    	if(!existingGeometrySource.equalsIgnoreCase("gsdb")) //if existing source for point and polygon is 'gsdb'; new source can be anything
+	                    	{
+	                    		passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+	                    	}
+	                    }
+	                    else {
+	                    	passes = passes && newGeometrySource.equalsIgnoreCase(existingGeometrySource);
+	                    }
+                    }
+                    
+                    if (!passes) {
+                      message = geometryType+"- submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
+                      break;
+                    }
+
+                  } else {
+                    passes = true;
+                  }
+              } 
+          }
+        }
+
+        message = passes ? "Geometry source validation: OK!" : message;          
+        
+        break;
+      case "match_expression":
+    	  passes = false;
+    	  String field ="";
+		  String matchExpressionRule = ruleElements[1];
+		  String[] matchFldVal = matchExpressionRule.split(",");
+		  if(matchFldVal.length == 2)
+		  {
+			  field = matchFldVal[0];
+			  String regEx = matchFldVal[1];			  
+			  if(!regEx.isBlank() && !field.isBlank() && item.getAsString(field)!=null)
+			  {
+				  Pattern pattern = Pattern.compile(regEx);				  
+				  Matcher matcher = pattern.matcher(item.getAsString(field));
+				  if(matcher.matches())
+				  {
+					  passes = true;					  
+				  }
+			  }
+		  }
+		  message = passes ? "Match expression ok for "+field : "Match expression failed for "+field;
+	      break;
+      case "mandatory_fields":
+    	  passes = false;    	 
+		  String fieldString = ruleElements[1];
+		  String[] fields = fieldString.split(",");
+		  String fldName ="";		  
+		  String failedFldVal="";
+		  DocumentContext itemCtx = JsonPath.parse(item);
+		  for(int i=0;i<fields.length;i++)
+		  {
+			  fldName = fields[i].trim();
+			  try {
+				  itemCtx.read("$."+fldName);
+			  }
+			 catch(PathNotFoundException ex) {
+				 if(failedFldVal.length() > 1)					 
+					 failedFldVal = failedFldVal+", "+fldName;
+				 else
+					 failedFldVal = fldName;
+			 }			  
+		  }
+		  if(failedFldVal.length() <1)
+		  {
+			  passes = true; 
+		  }	 
+		 
+		  message = passes ? "Mandatory field validation ok for "+fields : "Mandatory field validation failed for "+failedFldVal;
+	      break;
       default:
         LOGGER.debug("Unsupported validation rule: " + validationRule);
         passes = false;
@@ -185,22 +315,43 @@ public class StacContext {
         
         break;
     }
-
     response.put("passes", passes);
     response.put("message", message);
 
     return response;
   }
   
+  
+  /**
+   * Get geometry wkt object
+   * @param theItem the STAC item for which to get the geometry WKT field
+   * @param theProperty the STAC property to get
+   */
+  private JSONObject getProperty(JSONObject theItem, String theProperty) {
+      JSONObject thePropertyValue = null;
+      if (theItem != null) {
+        if (theItem.containsKey("properties")) {
+          JSONObject existingProperties = (JSONObject) theItem.get("properties");
+
+          if (existingProperties.containsKey(theProperty)) {
+            thePropertyValue = (JSONObject) existingProperties.get(theProperty);
+          }
+        }
+      }
+      
+      return thePropertyValue;
+  }
     
   /** 
    * Sets validation rules
    * @param collectionId collection to check for uniqueness of field
    * @param key name of the field to check for uniqueness on 
    * @param value value to check for
+   * @param forUpdate if rqeuest is for item update
+   * @param itemId 
    * @return true if and only if the index already has an item with this value for this field
    */
-  private boolean indexHasValue(String collectionId, String filterQry) throws Exception {
+  private boolean indexHasValue(String collectionId, String filterQry,boolean forUpdate, String itemId) throws Exception {
     LOGGER.debug("Testing if the index has an entry with filter " + filterQry);
     String searchResponse = "";	
     boolean valueExists = false;
@@ -219,7 +370,18 @@ public class StacContext {
 			
 			if(items != null && items.size()>0)
 			{
-				valueExists= true;
+				if(!forUpdate)
+					valueExists= true;
+				else
+				{//if it is update request, and unique key is for same item, it is not issue
+					HashMap<String, JSONObject> itemMap =  (HashMap<String, JSONObject>) items.get(0);
+					JSONObject item = new JSONObject(itemMap.get("_source"));
+					String id = item.getAsString("id");
+					if(!id.contentEquals(itemId))
+					{
+						valueExists= true;
+					}
+				}
 			}
     	}    		
 		return valueExists;
@@ -323,4 +485,6 @@ public class StacContext {
       return intersects;
     }
   }
+
+
 }
