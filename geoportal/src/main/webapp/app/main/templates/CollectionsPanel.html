@@ -618,7 +618,7 @@
     }
 
     #confirm-modal-secondary {
-      background-color: white;
+      background-color: transparent;
       border: 1px solid rgb(0, 102, 255);
       color: rgb(0, 102, 255);
     }
@@ -631,6 +631,49 @@
     #modal-close-button {
       width: 15px;
       cursor: pointer;
+    }
+
+    /* assets */
+    #asset-editor-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .asset-container {
+      display: flex;
+      flex-direction: column;
+      margin-top: 10px;
+    }
+
+    .add-asset-container {
+      display: flex;
+      justify-content: space-between;
+      margin-top: 15px;
+    }
+
+    .add-asset-button {
+      border: none;
+      padding: 5px;
+      width: 150px;
+      border-radius: 5px;
+      background-color: #1653ad;
+      color: white;
+      align-self: flex-end;
+      height: 40px;
+    }
+
+    .remove-asset-button {
+      margin: 10px 0;
+      align-self: flex-end;
+      width: 125px;
+      border-radius: 5px;
+      border: 1px solid rgb(240, 27, 27);
+      color: rgb(240, 27, 27);
+      background-color: transparent;
+    }
+
+    #initial-asset-key {
+      width: 100%;
     }
 
     /* loader */
