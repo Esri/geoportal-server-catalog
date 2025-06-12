@@ -1169,9 +1169,10 @@ public class STACService extends Application {
 	    	  String existingItemJSON = existingItem.toString();
 	    	  
 	    	// Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7, Auto generate bbox if not available in request
-		      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {		    	  
-		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
-		      }
+	          if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
+	        		  !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {   	 
+	        	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+	            }
 	          
 	          // if payload has geomCRSField and geomWKT field, project 
 	          // from internal CRS (EPSG:4326) to geomCRSField value
@@ -1264,7 +1265,8 @@ public class STACService extends Application {
     
 		try {
 			  // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
-		      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {
+		      if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
+		    		  !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {
 		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
 		      }
 			
@@ -1386,7 +1388,8 @@ public class STACService extends Application {
         }
       }
       // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
-      if (requestPayload.containsKey("geometry") && !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {    	 
+      if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
+    		  !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {   	 
     	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
         }
       
