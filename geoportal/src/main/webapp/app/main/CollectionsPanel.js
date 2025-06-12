@@ -86,6 +86,15 @@ define([
         width: 2,
       },
     },
+    DEFAULT_ASSET: {
+      roles: [
+        "Local CRS", // FIXED VALUE
+      ],
+      href: "",
+      title: "",
+      type: "text/plain", // FIXED VALUE
+      "esri:wkt": "",
+    },
 
     appActionState: "NONE",
     collections: [],
@@ -93,6 +102,7 @@ define([
     collectionIdsToBeDeleted: [],
     selectedGraphic: null,
     sketchGraphicsLayer: null,
+    collectionAssets: {},
 
     sampleCollection: [
       {
@@ -110,6 +120,25 @@ define([
         return stacBaseUrl;
       }
       return null;
+    },
+
+    setCollectionAssets: function (value) {
+      this.collectionAssets = value;
+    },
+
+    clearCollectionAssets: function () {
+      this.setCollectionAssets({});
+      return this.collectionAssets;
+    },
+
+    deleteCollectionAsset: function (key) {
+      delete this.collectionAssets[key];
+      return this.collectionAssets;
+    },
+
+    addNewCollectionAsset: function (key, properties) {
+      this.collectionAssets[key] = properties;
+      return this.collectionAssets;
     },
 
     postCreate: function () {
@@ -149,7 +178,10 @@ define([
       const fillSymbol = this.COLLECTION_SYM;
 
       collections.forEach((collection, index) => {
-        if (collection.geometry) {
+        if (
+          collection?.geometry &&
+          collection.geometry.coordinates?.length > 0
+        ) {
           const graphic = new Graphic({
             symbol: fillSymbol,
             geometry: {
@@ -363,7 +395,7 @@ define([
       this.updateIsLoading(true);
       this.sketchVM.complete();
 
-      const { id, description, title } = this.getCreateFieldValues();
+      const { id, description, title, assets } = this.getCreateFieldValues();
       let tempGeometry = null;
 
       if (this.selectedGraphic?.geometry) {
@@ -419,7 +451,7 @@ define([
           },
         },
         links: [],
-        assets: {},
+        assets: assets,
         item_assets: {},
       };
 
@@ -438,6 +470,7 @@ define([
         this.showAlert("Error creating collection", `${e}`, "red");
       }
 
+      this.clearCollectionAssets();
       this.rerenderCollectionsList();
       this.resetSketch();
       this.hideEditor();
@@ -476,10 +509,15 @@ define([
       let collection = await this.getCollectionById(id);
 
       // replace properties with new properties
-      const { title: newTitle, description: newDescription } = properties;
+      const {
+        title: newTitle,
+        description: newDescription,
+        assets: newAssets,
+      } = properties;
       collection.id = this.removeAllSpaces(collection.id);
       collection.title = newTitle;
       collection.description = newDescription;
+      collection.assets = newAssets;
       let tempGeometry = null;
 
       if (this.selectedGraphic?.geometry) {
@@ -531,6 +569,7 @@ define([
       this.showAllGraphicsLayers(this.view);
       this.sketchGraphicsLayer.removeAll();
       this.handleReadCollection(id);
+      this.clearCollectionAssets();
       this.hideEditor();
     },
 
@@ -636,8 +675,12 @@ define([
       }
     },
 
-    handleEditorPrimaryButtonEnabled: function (id, title) {
-      if (!this.isBlank(id) && !this.isBlank(title)) {
+    handleEditorPrimaryButtonEnabled: function (id, title, description) {
+      if (
+        !this.isBlank(id) &&
+        !this.isBlank(title) &&
+        !this.isBlank(description)
+      ) {
         this.editorPrimaryButton.disabled = false;
         this.editorPrimaryButton.classList.remove("disabled-button");
       } else {
@@ -695,6 +738,146 @@ define([
       this.leftPanelListView.style.display = "flex";
     },
 
+    handleAssetFieldInput: function (key, field, value) {
+      this.collectionAssets[key][field] = value;
+    },
+
+    hasDuplicateAssetKey: function (key) {
+      if (key && this.collectionAssets && this.collectionAssets[key]) {
+        return true;
+      } else {
+        return false;
+      }
+    },
+
+    validateCollectionAssets: function (assets) {
+      // If main object is empty, return false
+      if (Object.keys(assets).length === 0) {
+        return false;
+      }
+
+      for (const asset of Object.values(assets)) {
+        const title = asset.title?.trim();
+        const id = asset.id?.trim();
+
+        if (!title && !id) {
+          return true;
+        }
+      }
+
+      return false;
+    },
+
+    isBlank: function (value) {
+      return !value || /^\s*$/.test(value);
+    },
+
+    createAssetNode: function (key, title = "", href = "", wkt = "") {
+      const id = Date.now();
+      const assetNode = document.createElement("div");
+      assetNode.classList.add("asset-container");
+      assetNode.id = `asset-${id}`;
+      assetNode.innerHTML = `
+              <hr />
+              <label class="editor-label">Asset key <span class="required">*</span>:</label>
+              <input id="asset-key-input-${id}" class="editor-input" type="text" placeholder="value..." value="${key}" disabled/>
+              
+              <label class="editor-label">title <span class="required">*</span>:</label>
+              <input id="asset-title-input-${id}" class="editor-input" type="text" placeholder="value..." value="${title}"/>
+
+              <label class="editor-label">href:</label>
+              <input id="asset-href-input-${id}" class="editor-input" type="text" placeholder="value..." value="${href}"/>
+
+              <label class="editor-label">esri:wkt:</label>
+              <input id="asset-wkt-input-${id}" class="editor-input" type="text" placeholder="value..." value="${wkt}"/>
+              `;
+
+      const assetTitleInput = assetNode.querySelector(
+        `#asset-title-input-${id}`
+      );
+      const assetHrefInput = assetNode.querySelector(`#asset-href-input-${id}`);
+      const assetWktInput = assetNode.querySelector(`#asset-wkt-input-${id}`);
+
+      assetTitleInput.oninput = (e) =>
+        this.handleAssetFieldInput(key, "title", e.target.value);
+      assetHrefInput.oninput = (e) =>
+        this.handleAssetFieldInput(key, "href", e.target.value);
+      assetWktInput.oninput = (e) =>
+        this.handleAssetFieldInput(key, "esri:wkt", e.target.value);
+
+      const removeAssetButton = document.createElement("button");
+      removeAssetButton.classList.add("remove-asset-button");
+      removeAssetButton.innerText = "Remove Asset";
+      removeAssetButton.onclick = () => {
+        this.deleteCollectionAsset(key);
+        assetNode.remove();
+      };
+      assetNode.appendChild(removeAssetButton);
+      return assetNode;
+    },
+
+    createAssetEditorNode: function () {
+      let assetEditorNode = document.createElement("div");
+      assetEditorNode.id = "asset-editor-container";
+
+      const addAssetContainer = document.createElement("div");
+      addAssetContainer.classList.add("add-asset-container");
+
+      const addAssetButton = document.createElement("button");
+      addAssetButton.classList.add("add-asset-button");
+      addAssetButton.innerHTML = "Add Asset +";
+      addAssetButton.classList.add("disabled-button");
+      addAssetButton.disabled = true;
+
+      const initialAssetKeyInput = document.createElement("input");
+      initialAssetKeyInput.type = "text";
+      initialAssetKeyInput.placeholder = "Unique Asset Key...";
+      initialAssetKeyInput.id = "initial-asset-key";
+      initialAssetKeyInput.oninput = (e) => {
+        const value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, "");
+        initialAssetKeyInput.value = value;
+        if (!this.isBlank(value) && !this.hasDuplicateAssetKey(value)) {
+          addAssetButton.disabled = false;
+          addAssetButton.classList.remove("disabled-button");
+        } else {
+          addAssetButton.disabled = true;
+          addAssetButton.classList.add("disabled-button");
+        }
+      };
+
+      addAssetButton.onclick = () => {
+        addAssetButton.disabled = true;
+        addAssetButton.classList.add("disabled-button");
+
+        const editorNode = document.querySelector("#asset-editor-container");
+        const assetKey = initialAssetKeyInput.value;
+        this.addNewCollectionAsset(assetKey, { ...this.DEFAULT_ASSET });
+        const assetNode = this.createAssetNode(assetKey);
+        initialAssetKeyInput.value = "";
+        editorNode.appendChild(assetNode);
+      };
+
+      addAssetContainer.appendChild(initialAssetKeyInput);
+      addAssetContainer.appendChild(addAssetButton);
+      assetEditorNode.appendChild(addAssetContainer);
+      return assetEditorNode;
+    },
+
+    renderUpdateAssetEditor: function (assets) {
+      const assetEditorNode = this.createAssetEditorNode();
+      this.editorInputForm.appendChild(assetEditorNode);
+
+      Object.entries(assets).forEach(([key, value]) => {
+        const assetNode = this.createAssetNode(
+          key,
+          value.title,
+          value.href,
+          value["esri:wkt"]
+        );
+        this.editorInputForm.appendChild(assetNode);
+      });
+    },
+
     renderUpdateCollectionEditor: function (properties) {
       this.collectionEditorTitle.innerHTML = "Update Collection";
       this.editorPrimaryButton.innerHTML = "Update Collection";
@@ -705,10 +888,11 @@ define([
           <label class="editor-label">title <span class="required">*</span>:</label>
           <input id="collection-title-input" class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
 
-          <label class="editor-label">description:</label>
+          <label class="editor-label">description <span class="required">*</span>:</label>
           <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
       `;
       this.editorInputForm.innerHTML = collectionInputs;
+      this.renderUpdateAssetEditor(this.collectionAssets);
       this.initializeCollectionFormListeners();
     },
 
@@ -722,10 +906,12 @@ define([
       <label class="editor-label">title <span class="required">*</span>:</label>
       <input id="collection-title-input" class="editor-input" type="text" placeholder="value..."/>
 
-      <label class="editor-label">description:</label>
+      <label class="editor-label">description <span class="required">*</span>:</label>
       <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
   `;
       this.editorInputForm.innerHTML = collectionInputs;
+      const assetEditorNode = this.createAssetEditorNode();
+      this.editorInputForm.appendChild(assetEditorNode);
       this.initializeCollectionFormListeners();
     },
 
@@ -738,17 +924,22 @@ define([
           this.selectedCollection,
           this.selectedCollection.graphic
         );
-        this.renderUpdateCollectionEditor(this.selectedCollection.properties);
       }
       this.leftPanelEditorView.style.display = "flex";
       this.leftPanelListView.style.display = "none";
     },
 
-    initializeUpdateWorkflow: function (view, feature, graphic) {
+    initializeUpdateWorkflow: async function (view, feature, graphic) {
       if (!feature || !view) {
         console.error("missing arguments");
         return;
       }
+
+      const collection = await this.getCollectionById(
+        this.selectedCollection.properties.id
+      );
+      this.setCollectionAssets(collection.assets ? collection.assets : {});
+      this.renderUpdateCollectionEditor(this.selectedCollection.properties);
 
       if (graphic) {
         this.hideAllGraphicsLayers(view);
@@ -782,10 +973,12 @@ define([
         this.sketchGraphicsLayer.removeAll();
       }
       this.showAllGraphicsLayers(this.view);
+      this.clearCollectionAssets();
     },
 
     handleCancelCreateCollection: function () {
       this.sketchGraphicsLayer.removeAll();
+      this.clearCollectionAssets();
     },
 
     updateCollectionInfoBox: function (properties, isZoomEnabled) {
@@ -814,6 +1007,7 @@ define([
         description: document.getElementById("collection-description-input")
           .value,
         title: document.getElementById("collection-title-input").value,
+        assets: this.collectionAssets,
       };
     },
 
@@ -823,6 +1017,7 @@ define([
         description: document.getElementById("collection-description-input")
           .value,
         title: document.getElementById("collection-title-input").value,
+        assets: this.collectionAssets,
       };
     },
 
@@ -908,32 +1103,34 @@ define([
 
       this.handleEditorPrimaryButtonEnabled(
         collectionIdInput.value,
-        collectionTitleInput.value
+        collectionTitleInput.value,
+        collectionDescriptionInput.value
       );
 
       collectionDescriptionInput.addEventListener("input", (e) => {
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
-          collectionTitleInput.value
+          collectionTitleInput.value,
+          collectionDescriptionInput.value
         );
       });
 
       collectionIdInput.addEventListener("input", (e) => {
-        collectionIdInput.value = collectionIdInput.value.replace(
-          /[^a-zA-Z0-9]/g,
-          ""
+        collectionIdInput.value = this.removeSpecialCharacters(
+          collectionIdInput.value
         );
-        // this.value = this.value.
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
-          collectionTitleInput.value
+          collectionTitleInput.value,
+          collectionDescriptionInput.value
         );
       });
 
       collectionTitleInput.addEventListener("input", (e) => {
         this.handleEditorPrimaryButtonEnabled(
           collectionIdInput.value,
-          collectionTitleInput.value
+          collectionTitleInput.value,
+          collectionDescriptionInput.value
         );
       });
     },
