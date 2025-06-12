@@ -362,14 +362,14 @@
           <execution>
             <phase>test</phase>
             <configuration>
-              <tasks>
+              <target>
                 <!--<echo>Ant copy ${project.build.directory}/geoportal.jar to ${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar</echo>-->
                 <copy overwrite="true" file="${project.build.directory}/geoportal.jar" 
                   tofile="${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar" />
               <!--   <copy toDir="${project.build.directory}/geoportal/viewer/widgets/GeoportalSearch/gs">
                   <fileset dir="../geoportal-search/src/main/resources/gs"/>
                 </copy>--> 
-              </tasks>
+              </target>
             </configuration>
             <goals>
               <goal>run</goal>

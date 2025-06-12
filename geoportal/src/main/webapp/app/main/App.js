@@ -232,6 +232,22 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       } else {
         this.cartPanelBtnNode.style.display = "none";
       }
+      //appConfig.system.showTabs does not exist, all tabs will be shown
+      if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("AboutPanel")<0) {
+          this.aboutPanelBtnNode.style.display = "none";
+      }
+      if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("MapPanel")<0) {
+          this.mapPanelBtnNode.style.display = "none";
+      }
+      if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("ApiPanel")<0) {
+          this.apiPanelBtnNode.style.display = "none";
+      }
+      if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("AdminPanel")<0) {
+          this.adminOptionsBtnNode.style.display = "none";
+      }
+      if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("CollectionsPanel")<0) {
+          this.collectionsPanelBtnNode.style.display = "none";
+      }
       
       
     },
