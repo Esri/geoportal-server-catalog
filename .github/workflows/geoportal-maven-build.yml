@@ -60,8 +60,8 @@ jobs:
 
     - name: Copy config files ESRI
       run: |
-        Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\WEB-INF\classes\config\*" -Destination "geoportal_war\WEB-INF\classes\config" -Recurse -Force
-        Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\WEB-INF\classes\service\config\*" -Destination "geoportal_war\WEB-INF\classes\service\config" -Recurse -Force
+        Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\*" -Destination "geoportal_war" -Recurse -Force
+        #Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\WEB-INF\classes\service\config\*" -Destination "geoportal_war\WEB-INF\classes\service\config" -Recurse -Force
 
     - name: Archive geoportal_war to geoportal.war
       run: 7z a -tzip ${{github.run_id}}-geoportal.war .\geoportal_war\*
