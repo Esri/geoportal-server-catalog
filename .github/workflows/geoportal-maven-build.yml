@@ -22,11 +22,13 @@ on:
       tags:
         description: 'Test scenario tags'
 
-<<<<<<< HEAD
 env:
   PROJECT_LOCATION: geoportal
   ELASTIC_BEANSTALK_NAME: geoportal-host
   ELASTIC_BEANSTALK_ENV_NAME: Geoportal-host-env
+  GEOPORTAL_REPO: Esri/geoportal-server-catalog
+  GEOPORTAL_REPO_BRANCH: JS4_Stac
+  CONFIG_FILE_ROOT: exxonmobil-gsd/geoportal server/Esri
 
 jobs:
   build:
@@ -60,7 +62,7 @@ jobs:
 
     - name: Copy config files ESRI
       run: |
-        Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\*" -Destination "geoportal_war" -Recurse -Force
+        Copy-Item -Path "${{env.CONFIG_FILE_ROOT}}\*" -Destination "geoportal_war" -Recurse -Force
         #Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\WEB-INF\classes\service\config\*" -Destination "geoportal_war\WEB-INF\classes\service\config" -Recurse -Force
 
     - name: Archive geoportal_war to geoportal.war
