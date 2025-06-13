@@ -592,8 +592,8 @@ define([
           id: collection.id,
         };
       } catch (e) {
-        throw new Error(`Unable to update collection ${collection.id}`);
         console.error(e);
+        throw new Error(`Unable to update collection ${collection.id}`);
       }
     },
 
