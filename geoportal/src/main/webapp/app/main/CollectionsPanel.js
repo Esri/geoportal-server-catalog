@@ -778,20 +778,71 @@ define([
       const assetNode = document.createElement("div");
       assetNode.classList.add("asset-container");
       assetNode.id = `asset-${id}`;
-      assetNode.innerHTML = `
-              <hr />
-              <label class="editor-label">Asset key <span class="required">*</span>:</label>
-              <input id="asset-key-input-${id}" class="editor-input" type="text" placeholder="value..." value="${key}" disabled/>
-              
-              <label class="editor-label">title <span class="required">*</span>:</label>
-              <input id="asset-title-input-${id}" class="editor-input" type="text" placeholder="value..." value="${title}"/>
 
-              <label class="editor-label">href:</label>
-              <input id="asset-href-input-${id}" class="editor-input" type="text" placeholder="value..." value="${href}"/>
+      // <hr />
+      const hr = document.createElement("hr");
+      assetNode.appendChild(hr);
 
-              <label class="editor-label">esri:wkt:</label>
-              <input id="asset-wkt-input-${id}" class="editor-input" type="text" placeholder="value..." value="${wkt}"/>
-              `;
+      // <label class="editor-label">Asset key <span class="required">*</span>:</label>
+      const labelKey = document.createElement("label");
+      labelKey.className = "editor-label";
+      labelKey.innerHTML = 'Asset key <span class="required">*</span>:';
+      assetNode.appendChild(labelKey);
+
+      // <input id="asset-key-input-${id}" ... disabled />
+      const inputKey = document.createElement("input");
+      inputKey.id = `asset-key-input-${id}`;
+      inputKey.className = "editor-input";
+      inputKey.type = "text";
+      inputKey.placeholder = "value...";
+      inputKey.value = key;
+      inputKey.disabled = true;
+      assetNode.appendChild(inputKey);
+
+      // <label class="editor-label">title <span class="required">*</span>:</label>
+      const labelTitle = document.createElement("label");
+      labelTitle.className = "editor-label";
+      labelTitle.innerHTML = 'title <span class="required">*</span>:';
+      assetNode.appendChild(labelTitle);
+
+      // <input id="asset-title-input-${id}" ... />
+      const inputTitle = document.createElement("input");
+      inputTitle.id = `asset-title-input-${id}`;
+      inputTitle.className = "editor-input";
+      inputTitle.type = "text";
+      inputTitle.placeholder = "value...";
+      inputTitle.value = title;
+      assetNode.appendChild(inputTitle);
+
+      // <label class="editor-label">href:</label>
+      const labelHref = document.createElement("label");
+      labelHref.className = "editor-label";
+      labelHref.innerText = "href:";
+      assetNode.appendChild(labelHref);
+
+      // <input id="asset-href-input-${id}" ... />
+      const inputHref = document.createElement("input");
+      inputHref.id = `asset-href-input-${id}`;
+      inputHref.className = "editor-input";
+      inputHref.type = "text";
+      inputHref.placeholder = "value...";
+      inputHref.value = href;
+      assetNode.appendChild(inputHref);
+
+      // <label class="editor-label">esri:wkt:</label>
+      const labelWkt = document.createElement("label");
+      labelWkt.className = "editor-label";
+      labelWkt.innerText = "esri:wkt:";
+      assetNode.appendChild(labelWkt);
+
+      // <input id="asset-wkt-input-${id}" ... />
+      const inputWkt = document.createElement("input");
+      inputWkt.id = `asset-wkt-input-${id}`;
+      inputWkt.className = "editor-input";
+      inputWkt.type = "text";
+      inputWkt.placeholder = "value...";
+      inputWkt.value = wkt;
+      assetNode.appendChild(inputWkt);
 
       const assetTitleInput = assetNode.querySelector(
         `#asset-title-input-${id}`
@@ -882,17 +933,56 @@ define([
     renderUpdateCollectionEditor: function (properties) {
       this.collectionEditorTitle.innerHTML = "Update Collection";
       this.editorPrimaryButton.innerHTML = "Update Collection";
-      let collectionInputs = `
-          <label class="editor-label">id:</label>
-          <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."value="${properties.id}" disabled />
+      this.editorInputForm.innerHTML = "";
 
-          <label class="editor-label">title <span class="required">*</span>:</label>
-          <input id="collection-title-input" class="editor-input" type="text" placeholder="value..." value="${properties.title}"/>
+      // <label class="editor-label">id:</label>
+      const labelId = document.createElement("label");
+      labelId.className = "editor-label";
+      labelId.innerText = "id:";
+      this.editorInputForm.appendChild(labelId);
 
-          <label class="editor-label">description <span class="required">*</span>:</label>
-          <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value...">${properties.description}</textArea>
-      `;
-      this.editorInputForm.innerHTML = collectionInputs;
+      // <input id="collection-id-input" ... disabled />
+      const inputId = document.createElement("input");
+      inputId.id = "collection-id-input";
+      inputId.className = "editor-input";
+      inputId.type = "text";
+      inputId.placeholder = "value...";
+      inputId.value = properties.id;
+      inputId.disabled = true;
+      this.editorInputForm.appendChild(inputId);
+
+      // <label class="editor-label">title <span class="required">*</span>:</label>
+      const labelTitle = document.createElement("label");
+      labelTitle.className = "editor-label";
+      labelTitle.innerHTML = 'title <span class="required">*</span>:';
+      this.editorInputForm.appendChild(labelTitle);
+
+      // <input id="collection-title-input" ... />
+      const inputTitle = document.createElement("input");
+      inputTitle.id = "collection-title-input";
+      inputTitle.className = "editor-input";
+      inputTitle.type = "text";
+      inputTitle.placeholder = "value...";
+      inputTitle.value = properties.title;
+      this.editorInputForm.appendChild(inputTitle);
+
+      // <label class="editor-label">description <span class="required">*</span>:</label>
+      const labelDescription = document.createElement("label");
+      labelDescription.className = "editor-label";
+      labelDescription.innerHTML =
+        'description <span class="required">*</span>:';
+      this.editorInputForm.appendChild(labelDescription);
+
+      // <textarea id="collection-description-input" ...>
+      const textareaDescription = document.createElement("textarea");
+      textareaDescription.id = "collection-description-input";
+      textareaDescription.className = "editor-input";
+      textareaDescription.style.height = "100px";
+      textareaDescription.rows = 5;
+      textareaDescription.placeholder = "value...";
+      textareaDescription.textContent = properties.description;
+      this.editorInputForm.appendChild(textareaDescription);
+
       this.renderUpdateAssetEditor(this.collectionAssets);
       this.initializeCollectionFormListeners();
     },
