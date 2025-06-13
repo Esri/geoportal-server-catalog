@@ -611,9 +611,13 @@ define([
       }
     },
 
-    handleZoomTo: function (feature) {
+    handleZoomTo: async function (feature) {
       if (feature) {
-        this.view.goTo(feature);
+        try {
+          await this.view.goTo(feature);
+        } catch (e) {
+          console.error("goTo failed", e);
+        }
       }
     },
 
