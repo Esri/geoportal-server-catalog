@@ -524,8 +524,6 @@ public class StacHelper {
 	          try {
 	            JSONObject validationResult = (JSONObject) sc.passesValidation(validationRule, requestPayload,collectionId,forUpdate);
 	            if (!validationResult.getAsString("passes").equals("true")) {
-	              errorMsg = errorMsg + " Failed validation rule ";
-	              errorMsg = errorMsg + validationRule + ": ";
 	              errorMsg = errorMsg + validationResult.getAsString("message");
 	            }
 	          } catch (Exception ex) {

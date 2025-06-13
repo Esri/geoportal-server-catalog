@@ -1319,8 +1319,20 @@ public class STACService extends Application {
         
 			} else {
 				//response json will contain details about validation error like required fields
+				String existingIDForUniqueKey = "", descMsg = validationStatus.getMessage();
 				status = Response.Status.BAD_REQUEST;
-				responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+				JSONObject resObj = new JSONObject();
+				String desc = validationStatus.getMessage();
+				if (desc.indexOf("existingId:{") > -1) {
+					existingIDForUniqueKey = parseExistingId(desc);
+					descMsg = cleanDesc(desc, existingIDForUniqueKey);
+				}
+				resObj.put("message", descMsg);
+				if (existingIDForUniqueKey.length() > 0) {
+					resObj.put("existing_item_id", existingIDForUniqueKey);
+				}			
+				resObj.put("code", "400");
+				responseJSON = resObj.toString();
 			}	
       
 		} catch(Exception ex) {
@@ -1453,9 +1465,21 @@ public class STACService extends Application {
       //Bad request, missing field or any field is invalid
       else
       {
-              //response json will contain details about validation error like required fields
-              status = Response.Status.BAD_REQUEST;				
-              responseJSON = generateResponse("400", validationStatus.getMessage(),null);
+          //response json will contain details about validation error like required fields
+			String existingIDForUniqueKey = "", descMsg = validationStatus.getMessage();
+			status = Response.Status.BAD_REQUEST;
+			JSONObject resObj = new JSONObject();
+			String desc = validationStatus.getMessage();
+			if (desc.indexOf("existingId:{") > -1) {
+				existingIDForUniqueKey = parseExistingId(desc);
+				descMsg = cleanDesc(desc, existingIDForUniqueKey);
+			}
+			resObj.put("message", descMsg);
+			if (existingIDForUniqueKey.length() > 0) {
+				resObj.put("existing_item_id", existingIDForUniqueKey);
+			}			
+			resObj.put("code", "400");
+			responseJSON = resObj.toString();
       }		
     }
     catch(Exception ex)
@@ -1532,20 +1556,7 @@ public class STACService extends Application {
 					 if(res.getStatus() == Response.Status.CREATED.getStatusCode())
 					 {
 						 createdMsgObj = new JSONObject();
-						 createdMsgObj.put("id", feature.getAsString("id"));
-						 JSONObject prop = (JSONObject) feature.get("properties");
-						 if(prop!=null)
-						 {
-							 //Exxon specific
-							 if(prop.getAsString("xom:source_system")!=null)
-							 {
-								 createdMsgObj.put("xom:source_system", prop.getAsString("xom:source_system")); 
-							 }						 
-							 if(prop.getAsString("xom:source_key_id")!=null)
-							 {
-								 createdMsgObj.put("xom:source_key_id", prop.getAsString("xom:source_key_id")); 
-							 } 
-						 }
+						 createdMsgObj.put("id", feature.getAsString("id"));					 
 						 
 						 createdMsgObj.put("status", "created");
 						 createdMsgArr.add(createdMsgObj);
@@ -1556,9 +1567,26 @@ public class STACService extends Application {
 						 errorMsgObj = new JSONObject();
 						 errorObj = (JSONObject)JSONValue.parse(res.getEntity().toString());						 
 						 
-						 errorMsgObj.put("id", feature.getAsString("id"));
-						 errorMsgObj.put("error",errorObj.get("description"));
+						 errorMsgObj.put("id", feature.getAsString("id"));						 
 						 
+						 String desc = (String) errorObj.get("message");
+						 errorMsgObj.put("message",desc);
+						 
+						//Exxon specific, in case of unique key error, add additional info
+						 String existingIDForUniqueKey = (String) errorObj.get("existing_item_id");						
+						 JSONObject prop = (JSONObject) feature.get("properties");
+						 if(prop!=null && existingIDForUniqueKey!=null && existingIDForUniqueKey.length() >0)
+						 {							 
+							 if(prop.getAsString("xom:source_system")!=null)
+							 {
+								 errorMsgObj.put("xom:source_system", prop.getAsString("xom:source_system")); 
+							 }						 
+							 if(prop.getAsString("xom:source_key_id")!=null)
+							 {
+								 errorMsgObj.put("xom:source_key_id", prop.getAsString("xom:source_key_id")); 
+							 }
+							 errorMsgObj.put("existing_item_id", existingIDForUniqueKey);
+						 }						 
 						 errorMsgArr.add(errorMsgObj);
 						 //At least one item failed so response code would be 400
 						 status = Response.Status.BAD_REQUEST;
@@ -1596,6 +1624,31 @@ public class STACService extends Application {
 	}
 
   
+	private String cleanDesc(String desc, String existingIDForUniqueKey) {
+		int index = desc.indexOf("existingId:{");
+		if(index > -1)
+		{
+			String descFirstPart = desc.substring(0,index);
+			index  = index+12+existingIDForUniqueKey.length()+1;
+			String descSecondPart = desc.substring(index);
+			desc = descFirstPart+descSecondPart;
+		}
+		return desc;
+	}
+
+	private String parseExistingId(String desc) {
+		String existingId = "";
+		int index = desc.indexOf("existingId:{");
+		if(index >-1)
+		{
+			existingId = desc.substring(index+12);
+			index = existingId.indexOf("}");
+			if(index > -1 )
+				existingId = existingId.substring(0,index);
+		}
+		return existingId;
+	}
+
 	private String generateFeatureCollectionRes(String code, JSONObject statusObj) {		
 		JSONObject resObj = new JSONObject();
 		resObj.put("code", code);
@@ -1606,7 +1659,7 @@ public class STACService extends Application {
 	private String generateResponse(String code, String description, JSONArray detailMsgArr) {
 		JSONObject resObj = new JSONObject();
 		resObj.put("code", code);
-		resObj.put("description", description);
+		resObj.put("message", description);
 		
 		if(detailMsgArr != null && !detailMsgArr.isEmpty())
 			resObj.put("detail",detailMsgArr);

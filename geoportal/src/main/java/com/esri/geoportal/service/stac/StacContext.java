@@ -139,10 +139,10 @@ public class StacContext {
   /* ========== Validation Rule functions here ========== */
   
   public JSONObject passesValidation(String validationRule, JSONObject item, String collectionId,boolean forUpdate) throws Exception {
-    boolean passes;
+    boolean passes=false;
     String message = "";
     JSONObject response = new JSONObject();    
-    boolean ukFieldExists = false;
+    String existingID = "";
     JSONObject properties = (JSONObject) item.get("properties");
     String[] ruleElements = validationRule.split("\\|");
     String ruleType = ruleElements[0];
@@ -177,9 +177,12 @@ public class StacContext {
           searchQry = StacHelper.prepareFilter(filterClause);
         }
           
-        ukFieldExists = indexHasValue(collectionId, searchQry,forUpdate,itemId);
-        passes = !ukFieldExists;
-        message = passes ? "Unique key validation on (" + key + "): OK!" : "Unique key violation for: " + key;          
+        existingID = indexHasValue(collectionId, searchQry,forUpdate,itemId);
+        if(existingID.length() <1)
+        {
+        	passes = true;
+        }
+        message = passes ? "Unique key validation on (" + key + "): OK!" : "The combination of this key- "+key+ " already exists in the system. existingId:{"+existingID+"} ";          
         
         break;
         
@@ -246,7 +249,7 @@ public class StacContext {
                     }
                     
                     if (!passes) {
-                      message = geometryType+"- submitted source: " + newGeometrySource + ", existing source: " + existingGeometrySource;
+                      message = geometryType+"- submitted geomtery source: " + newGeometrySource + "does not match existing source: " + existingGeometrySource;
                       break;
                     }
 
@@ -351,10 +354,10 @@ public class StacContext {
    * @param itemId 
    * @return true if and only if the index already has an item with this value for this field
    */
-  private boolean indexHasValue(String collectionId, String filterQry,boolean forUpdate, String itemId) throws Exception {
+  private String indexHasValue(String collectionId, String filterQry,boolean forUpdate, String itemId) throws Exception {
     LOGGER.debug("Testing if the index has an entry with filter " + filterQry);
     String searchResponse = "";	
-    boolean valueExists = false;
+    String existingID = "";
     try {
 		ElasticClient client = ElasticClient.newClient();
 		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
@@ -366,30 +369,30 @@ public class StacContext {
     	    searchResponse = client.sendPost(url, queryStr, "application/json");    	    	
     	    	
 	    	DocumentContext elasticResContext = JsonPath.parse(searchResponse);
-			net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");		
+			net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");	
 			
 			if(items != null && items.size()>0)
-			{
+			{			
+				HashMap<String, JSONObject> itemMap =  (HashMap<String, JSONObject>) items.get(0);
+				JSONObject item = new JSONObject(itemMap.get("_source"));
+				String id = item.getAsString("id");
 				if(!forUpdate)
-					valueExists= true;
-				else
-				{//if it is update request, and unique key is for same item, it is not issue
-					HashMap<String, JSONObject> itemMap =  (HashMap<String, JSONObject>) items.get(0);
-					JSONObject item = new JSONObject(itemMap.get("_source"));
-					String id = item.getAsString("id");
-					if(!id.contentEquals(itemId))
-					{
-						valueExists= true;
-					}
+				{
+					existingID = id;
+				}
+				//if it is update request, and unique key is for same item, it is not issue
+				if (forUpdate && !id.contentEquals(itemId))
+				{
+					existingID = id;
 				}
 			}
-    	}    		
-		return valueExists;
-      
+		}
+ 
     } catch (Exception ex) {
       LOGGER.error(StacContext.class.getName() + ": " + ex.getMessage());
       throw ex;
     }
+    return existingID;
   }
   
   
