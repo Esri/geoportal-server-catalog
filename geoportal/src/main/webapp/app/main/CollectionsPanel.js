@@ -597,16 +597,24 @@ define([
       }
     },
 
-    handleReadCollection: function (id) {
+    handleReadCollection: async function (id) {
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
       this.selectedGraphic = this.selectedCollection.graphic;
       this.handleUpdateButtonEnabled();
       if (this.selectedCollection) {
-        this.updateCollectionInfoBox(
-          this.selectedCollection.properties,
-          this.selectedCollection.graphic
+        const collection = await this.getCollectionById(
+          this.selectedCollection.properties.id
         );
+        console.log(collection);
+        const properties = {
+          id: collection.id,
+          title: collection.title,
+          description: collection.description,
+          assets: JSON.stringify(collection.assets),
+        };
+
+        this.updateCollectionInfoBox(properties);
         this.handleZoomTo(this.selectedCollection.graphic);
       }
     },
@@ -1085,12 +1093,12 @@ define([
       this.clearCollectionAssets();
     },
 
-    updateCollectionInfoBox: function (properties, isZoomEnabled) {
+    updateCollectionInfoBox: function (properties) {
       let tableRows = Object.entries(properties).map(([key, value]) => {
         return `    
                 <tr>
-                  <td>${key}</td>
-                  <td>${value}</td>
+                  <td class="info-table-key">${key}</td>
+                  <td class="info-table-value">${value}</td>
                 </tr>`;
       });
       this.infoTableTitle.innerHTML = properties.title;
