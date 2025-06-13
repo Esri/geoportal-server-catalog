@@ -740,6 +740,7 @@ define([
 
     handleAssetFieldInput: function (key, field, value) {
       this.collectionAssets[key][field] = value;
+      console.log(this.collectionAssets);
     },
 
     hasDuplicateAssetKey: function (key) {
@@ -750,7 +751,7 @@ define([
       }
     },
 
-    validateCollectionAssets: function (assets) {
+    isCollectionAssetsObjValid: function (assets) {
       // If main object is empty, return false
       if (Object.keys(assets).length === 0) {
         return false;
@@ -760,8 +761,8 @@ define([
         const title = asset.title?.trim();
         const id = asset.id?.trim();
 
-        if (!title && !id) {
-          return true;
+        if (!title || !id) {
+          return false;
         }
       }
 
@@ -917,7 +918,7 @@ define([
 
     showEditor: function () {
       if (this.appActionState === this.actions.CREATE_COLLECTION) {
-        this.renderCreateCollectionEditor();
+        this.initializeCreateWorkflow(this.view);
       } else if (this.appActionState === this.actions.UPDATE_COLLECTION) {
         this.initializeUpdateWorkflow(
           this.view,
@@ -927,6 +928,15 @@ define([
       }
       this.leftPanelEditorView.style.display = "flex";
       this.leftPanelListView.style.display = "none";
+    },
+
+    initializeCreateWorkflow: async function (view) {
+      if (!view) {
+        console.error("missing arguments");
+        return;
+      }
+      this.selectedGraphic = null;
+      this.renderCreateCollectionEditor();
     },
 
     initializeUpdateWorkflow: async function (view, feature, graphic) {
