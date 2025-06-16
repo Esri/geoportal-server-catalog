@@ -42,6 +42,11 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
     postCreate: function() {
       this.inherited(arguments);
       var self = this;
+      //#606 Show signin for Catalog app on load
+      if(AppContext.appConfig.system.secureCatalogApp)
+      {
+    	  AppContext.appUser.showSignIn();
+      }
       this.updateUI();
       
       var ignoreMapPanelActivated = false;
@@ -79,11 +84,7 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       }));
       
       router.startup();
-      //#606 Show signin for Catalog app on load
-      if(AppContext.appConfig.system.secureCatalogApp)
-      {
-    	  AppContext.appUser.showSignIn();
-      }
+     
     	  
       if (!location.hash || location.hash.length==0) {
         this.setHash("searchPanel");
