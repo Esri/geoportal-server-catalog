@@ -19,6 +19,7 @@ define([
   "dojo/text!./templates/CollectionsPanel.html",
   "dojo/i18n!../gs/widget/nls/strings",
   "dojo/Deferred",
+  "dojo/topic",
   "esri4/Map",
   "esri4/views/MapView",
   "esri4/layers/TileLayer",
@@ -33,6 +34,7 @@ define([
   "esri4/widgets/BasemapGallery",
   "esri4/geometry/support/webMercatorUtils",
   "app/context/AppClient",
+  "app/context/app-topics"
 ], function (
   declare,
   lang,
@@ -40,6 +42,7 @@ define([
   template,
   i18n,
   Deferred,
+  topic,
   Map,
   MapView,
   TileLayer,
@@ -53,7 +56,7 @@ define([
   Expand,
   BasemapGallery,
   webMercatorUtils,
-  AppClient
+  AppClient,appTopics
 ) {
   var oThisClass = declare([Templated], {
     i18n: i18n,
@@ -144,13 +147,16 @@ define([
     postCreate: function () {
       this.inherited(arguments);
       this.readConfig();
+      topic.subscribe(appTopics.SignedIn,lang.hitch(this,function(params){
+    	  this.handleGetCollections();
+        }));
     },
 
     handleGetCollections: async function (view) {
       console.log("handleGetCollections");
       this.collections = await this.getAllCollections();
       this.renderCollectionsList(this.collections);
-      this.renderCollectionGraphics(this.collections, view);
+      this.renderCollectionGraphics(this.collections, view? view: this.view);
     },
 
     handleMapReady: function (view) {
@@ -218,21 +224,27 @@ define([
       return collection;
     },
 
-    getAllCollections: async function (f = "geojson") {
-      let collections = [];
-      try {
-        let url = `${this.getStacBaseUrl()}/collections?limit=10000&f=${f}`;
-        if (AppContext.appConfig.system.secureCatalogApp) {
-          var client = new AppClient();
-          url = client.appendAccessToken(url);
+    getAllCollections: async function (f = "geojson")
+    {
+        let collections = [];
+        try {
+          let url = `${this.getStacBaseUrl()}/collections?limit=10000&f=${f}`;
+          if (AppContext.appConfig.system.secureCatalogApp)
+          {
+          	var client = new AppClient();
+            	var accessToken = client.getAccessToken();
+            	if(accessToken && accessToken.length >0)
+        		{
+            		url = client.appendAccessToken(url);
+            		const response = await fetch(url);
+                  const result = await response.json();
+                  collections = result.features;
+        		}	
+          }
+        } catch (e) {
+      	  collections = this.sampleCollection;
         }
-        const response = await fetch(url);
-        const result = await response.json();
-        collections = result.features;
-      } catch (e) {
-        collections = this.sampleCollection;
-      }
-      return collections;
+        return collections;
     },
 
     renderCollectionsList: function (collections = []) {
@@ -1454,6 +1466,7 @@ define([
       }
 
       this.handleMapReady(view);
+      this.view = view;
     },
   });
 
