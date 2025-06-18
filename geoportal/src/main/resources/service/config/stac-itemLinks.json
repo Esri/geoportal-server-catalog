@@ -44,7 +44,7 @@
                 "rel": "next",
                 "type": "application/geo+json",
                 "title": "Next page of results",
-                "href": "{url}/search?{urlparam}",
+                "href": "{url}/search{urlparam}",
                 "method":"POST",
                 "body":"{body}",
                 "merge":false,

@@ -1774,12 +1774,18 @@ public class STACService extends Application {
 					encodedIntersect = URLEncoder.encode(intersects, StandardCharsets.UTF_8.toString());
 				}
 			}
-			String urlparam;
+			String urlparam = "";
 			if (requestType.equalsIgnoreCase("searchPost")) {
-				// In post request, other parameters will be part of request body
-				urlparam = (search_after != null ? "search_after=" + search_after : "");
+				JSONObject bodyObj =new JSONObject();
+				// In post request, search_after will be part of request body				
+				if (body != null) 
+				{
+					bodyObj = (JSONObject) JSONValue.parse(body);
+					if(search_after != null && search_after.length()>0)
+						bodyObj.appendField("search_after", search_after);
+				}					
 				if(nextLink)
-					linksContext.set("$.searchItem.links[1].body",(body != null ? JSONValue.parse(body) : ""));
+					linksContext.set("$.searchItem.links[1].body",(body != null ? bodyObj : ""));
 
 			} else {
 				if(nextLink)
@@ -1789,7 +1795,7 @@ public class STACService extends Application {
 					linksContext.delete("$.searchItem.links[1].merge");
 				}				
 				
-				urlparam = "limit=" + limit + (bbox != null ? "&bbox=" + bbox : "")
+				urlparam = "?limit=" + limit + (bbox != null ? "&bbox=" + bbox : "")
 						+ (datetime != null ? "&datetime=" + datetime : "")
 						+ (search_after != null ? "&search_after=" + search_after : "")
 						+ (encodedIntersect != null ? "&intersects=" + encodedIntersect : "")
@@ -1806,7 +1812,6 @@ public class STACService extends Application {
 			JsonObject resObj = obj.getJsonObject("response");
 
 			finalResponse = resObj.toString();
-
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
 			
 			if(requestType.equals("metadataItems")) // These are for links href for collection
