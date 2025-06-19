@@ -58,6 +58,16 @@ public class StacContext {
   private Map<String, String> fieldMappings = new HashMap<>();
 
   private String statusFld = "gsdb:status";
+  private int numStacFeaturesAddItem = 100; 
+  private boolean validateStacFields = false;
+  private String canStacAutogenerateId = "false";
+  private String canStacGeomTransform = "false";
+  private boolean canStacAutogenerateBbox = false;
+  private double stacBboxSize = 0.00001;
+  
+  private String geomWKTField = "";
+  private String geomCRSField = "";
+  
 
 /**
    * Get the single instance.
@@ -135,6 +145,76 @@ public class StacContext {
 	public void setStatusFld(String statusFld) {
 		this.statusFld = statusFld;
 	}
+	//Number of Stac features allowed in POST request
+	public int getNumStacFeaturesAddItem() {
+		return numStacFeaturesAddItem;
+	}
+
+	public void setNumStacFeaturesAddItem(int numStacFeaturesAddItem) {
+		this.numStacFeaturesAddItem = numStacFeaturesAddItem;
+	}
+        
+	 //Validate Stac fields in Stac Feature in POST request
+	public boolean isValidateStacFields() {
+		return this.validateStacFields;
+	}
+
+	public void setValidateStacFields(boolean validateStacFields) {
+		this.validateStacFields = validateStacFields;
+	}
+      
+  // Support for autogenerating item id
+	public boolean isCanStacAutogenerateId() {
+		return "true".equals(this.canStacAutogenerateId);
+	}
+	public void setCanStacAutogenerateId(String canStacAutogenerateId) {
+		this.canStacAutogenerateId = canStacAutogenerateId;
+	}
+	
+ // Support for autogenerating bbox from geomtery
+	public boolean isCanStacAutogenerateBbox() {
+		return this.canStacAutogenerateBbox;
+	}
+
+	public void setCanStacAutogenerateBbox(boolean canStacAutogenerateBbox) {
+		this.canStacAutogenerateBbox = canStacAutogenerateBbox;
+	}
+        
+  // Support for transforming the CRS of STAC geometries
+	public String isCanStacGeomTransform() {
+		return this.canStacGeomTransform;
+	}
+	public void setCanStacGeomTransform(String canStacGeomTransform) {
+		this.canStacGeomTransform = canStacGeomTransform;
+	}
+	
+  // If this is set, the field in the STAC item properties holds
+  // a dictionary of WKT geometries to be reprojected as well
+	public String getGeomWKTField() {
+    return this.geomWKTField;
+	}
+	public void setGeomWKTField(String geomWKTField) {
+		this.geomWKTField = geomWKTField;
+	}
+
+	        
+	  // If this is set, the field in the STAC item properties holds
+	  // CRS of its geometries
+		public String getGeomCRSField() {
+	    return this.geomCRSField;
+		}
+		public void setGeomCRSField(String geomCRSField) {
+			this.geomCRSField = geomCRSField;
+		}
+		
+		//This is used to calculate bbox for a StacItem with point if canStacAutogenerateBbox=true
+		public double getStacBboxSize() {
+			return stacBboxSize;
+		}
+
+		public void setStacBboxSize(double stacBboxSize) {
+			this.stacBboxSize = stacBboxSize;
+		}
   
   /* ========== Validation Rule functions here ========== */
   
@@ -210,8 +290,8 @@ public class StacContext {
           
         } else {          
           // this is an existing item, check the geometry source
-          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, gc.getGeomWKTField());
-          JSONObject newGeometryWKT = (JSONObject) getProperty(item, gc.getGeomWKTField());
+          JSONObject existingGeometryWKT = (JSONObject) getProperty(existingItem, this.getGeomWKTField());
+          JSONObject newGeometryWKT = (JSONObject) getProperty(item, this.getGeomWKTField());
 
           // loop over keys in newGeometryWKT
           //   if the key exists in existingGeometryWKT 
@@ -442,8 +522,8 @@ public class StacContext {
       }
 
       // see if the item properties include the geomWKTField (see app-context.xml)
-      if (properties.containsKey(gc.getGeomWKTField())) {
-        JSONObject geometry_wkt_in = (JSONObject) properties.get(gc.getGeomWKTField());
+      if (properties.containsKey(this.getGeomWKTField())) {
+        JSONObject geometry_wkt_in = (JSONObject) properties.get(this.getGeomWKTField());
         String[] geometryTypes = { "point", "linestring", "multilinestring", "polygon", "polyhedral"};
         for (String geometryType: geometryTypes) {
           if (geometry_wkt_in.containsKey(geometryType)) {
