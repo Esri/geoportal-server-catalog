@@ -120,7 +120,9 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
       this._renderFootprint(item);
       
       this._renderItemLinks(hit._id,item);
-      this._renderLinksDropdown(item,links);
+      //https://github.com/EsriPS/exxonmobil-gsdb/issues/15
+      if(AppContext.appConfig.searchResults.showLinks && links.length >0)
+    	  this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
       this._renderAddToMap(item,links);
       this._renderAddToCart(item);
