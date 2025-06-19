@@ -66,6 +66,7 @@ import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
+import com.esri.geoportal.service.stac.StacContext;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
@@ -92,6 +93,7 @@ public class STACService extends Application {
 	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);
 	private final ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 	private final GeoportalContext gc = GeoportalContext.getInstance();
+	private final StacContext sc = StacContext.getInstance();
 	private final ElasticClient client = ElasticClient.newClient();
   private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
 
@@ -204,7 +206,7 @@ public class STACService extends Application {
         // if reprojecting STAC geometries is supported and a
         // geometry service has been configured, try projecting 
         // from internal CRS (4326) to requested outCRS
-        if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+        if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
           LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
           // get the features from the response
@@ -399,7 +401,7 @@ public class STACService extends Application {
           // if reprojecting STAC geometries is supported and a
           // geometry service has been configured, try projecting 
           // from internal CRS (4326) to requested outCRS
-          if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+          if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
             LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
             Collection theCollection = new Collection(collectionObj);
             List<String> availableCRS = theCollection.getAvailableCRS();
@@ -478,7 +480,7 @@ public class STACService extends Application {
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
       // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+      if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
         LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
         // get the collection metadata
@@ -548,7 +550,7 @@ public class STACService extends Application {
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
       // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+      if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
         LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
          // get the collection metadata
@@ -808,7 +810,7 @@ public class STACService extends Application {
 
 				// if re-projecting STAC geometries is supported and a 
 				// geometry service has been configured, try projecting from internal CRS (4326) to requested outCRS
-				if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+				if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
 				LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 				
 				JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
@@ -960,7 +962,7 @@ public class STACService extends Application {
 		      // if re-projecting STAC geometries is supported and a
 		      // geometry service has been configured, try projecting 
 		      // from internal CRS (4326) to requested outCRS
-			      if ((outCRS != null) && ("true".equals(gc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+			      if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
 				        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 				
 				        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
@@ -1170,7 +1172,7 @@ public class STACService extends Application {
 	    	  
 	    	// Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7, Auto generate bbox if not available in request
 	          if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
-	        		  !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {   	 
+	        		  !requestPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
 	        	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
 	            }
 	          
@@ -1179,12 +1181,12 @@ public class STACService extends Application {
 	          if (requestPayload.containsKey("properties")) {
 	            JSONObject properties = (JSONObject) requestPayload.get("properties");
 	            
-	            if (properties.containsKey(gc.getGeomWKTField()) 
-	                && properties.containsKey(gc.getGeomCRSField())) {
+	            if (properties.containsKey(sc.getGeomWKTField()) 
+	                && properties.containsKey(sc.getGeomCRSField())) {
 	              
 	              // the PATCH body includes geometries, reproject if needed
 	
-	              String patchCRS = properties.getAsString(gc.getGeomCRSField());
+	              String patchCRS = properties.getAsString(sc.getGeomCRSField());
 	              
 	              // Only project if the submitted CRS is not the same as the internal CRS
 	              if (!patchCRS.equalsIgnoreCase(INTERNAL_CRS)) {
@@ -1266,14 +1268,14 @@ public class STACService extends Application {
 		try {
 			  // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
 		      if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
-		    		  !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {
+		    		  !requestPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {
 		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
 		      }
 			
 	      // 574
 			JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
 			
-			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,gc.isValidateStacFields());
+			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,sc.isValidateStacFields());
       
 			if (validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
 				JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,true);
@@ -1390,7 +1392,7 @@ public class STACService extends Application {
       if (id.length()<1) {
         // issue 572 - generate unique item id if configured to do so
         // do this before validating the STAC item
-        if (gc.isCanStacAutogenerateId()) {
+        if (sc.isCanStacAutogenerateId()) {
           // generate a UUID to be used as id
           UUID guid = UUID.randomUUID();
           id = guid.toString();
@@ -1401,7 +1403,7 @@ public class STACService extends Application {
       }
       // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
       if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
-    		  !requestPayload.containsKey("bbox") && gc.isCanStacAutogenerateBbox()) {   	 
+    		  !requestPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
     	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
         }
       
@@ -1413,7 +1415,7 @@ public class STACService extends Application {
         LOGGER.error("Error parsing incoming item: " + e.getMessage());
       }
       
-      StacItemValidationResponse validationStatus = StacHelper.validateStacItem(projectedPayload,collectionId,gc.isValidateStacFields());
+      StacItemValidationResponse validationStatus = StacHelper.validateStacItem(projectedPayload,collectionId,sc.isValidateStacFields());
       
       if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
         JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,false);
@@ -1531,9 +1533,9 @@ public class STACService extends Application {
 				 //For synchronous request, limit number of features in feature collection
 				 if(!async)
 				 {
-					 if(features.size() >gc.getNumStacFeaturesAddItem())
+					 if(features.size() >sc.getNumStacFeaturesAddItem())
 					 {
-						 responseJSON = generateResponse("400","Number of Features {"+features.size()+"} in FeatureCollection are more than allowed limit {"+gc.getNumStacFeaturesAddItem()+"} in Synchronous request. For large FeatureCollection include paramter async=true.",null);
+						 responseJSON = generateResponse("400","Number of Features {"+features.size()+"} in FeatureCollection are more than allowed limit {"+sc.getNumStacFeaturesAddItem()+"} in Synchronous request. For large FeatureCollection include paramter async=true.",null);
 						 status = Response.Status.BAD_REQUEST;
 						 return Response.status(status)
 				                   .header("Content-Type", "application/json")
@@ -2327,7 +2329,7 @@ public class STACService extends Application {
     }
 
     // get the xom:geometry_wkt dictionary
-    String geomWKTField = gc.getGeomWKTField();
+    String geomWKTField = sc.getGeomWKTField();
     JSONObject properties = (JSONObject) responseObject.get("properties");
     JSONObject geometry_wkt_in = (JSONObject) properties.get(geomWKTField);
     List<String> geometryTypes = new ArrayList<>();
@@ -2375,7 +2377,7 @@ public class STACService extends Application {
                   JSONObject geometryToUpdate = (JSONObject) geometry_wkt_in.get(geometryType);
                   geometryToUpdate.put("wkt", wktGeometry);
 
-                  properties.put(gc.getGeomCRSField(), outCRS);
+                  properties.put(sc.getGeomCRSField(), outCRS);
                 }
               } catch (ParseException ex) {
                 LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
@@ -2510,7 +2512,7 @@ public class STACService extends Application {
   
   private JSONObject projectIncomingItem(JSONObject item, String collectionId) throws ParseException {
     // 574 project geometries from submitted to native (4326) CRS if possible
-    String inCRSField = gc.getGeomCRSField();
+    String inCRSField = sc.getGeomCRSField();
     JSONObject responseJSONObject = item;
           
     if (!inCRSField.isEmpty() && item.containsKey("properties")) {

@@ -66,15 +66,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private boolean supportsCollections = false;
   // HashMap stores userName and List of User Groups in ArcGISAuthentication
   private HashMap<String,ArrayList<Group>> userGroupMap = new HashMap<>(); 
-  private int numStacFeaturesAddItem = 100; 
-  private boolean validateStacFields = false;
-  private String canStacAutogenerateId = "false";
-  private String canStacGeomTransform = "false";
-  private boolean canStacAutogenerateBbox = false;
-  private String geometryService = "";
-  private String geomWKTField = "";
-  private String geomCRSField = "";
-  private double stacBboxSize = 0.00001;
+  private String geometryService = ""; 
 
 
 public HashMap<String, ArrayList<Group>> getUserGroupMap() {
@@ -218,89 +210,15 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
   public void setSupportsCollections(boolean supportsCollections) {
     this.supportsCollections = supportsCollections;
   }
-  
-  //Number of Stac features allowed in POST request
-	public int getNumStacFeaturesAddItem() {
-		return numStacFeaturesAddItem;
-	}
-
-	public void setNumStacFeaturesAddItem(int numStacFeaturesAddItem) {
-		this.numStacFeaturesAddItem = numStacFeaturesAddItem;
-	}
-        
-	 //Validate Stac fields in Stac Feature in POST request
-	public boolean isValidateStacFields() {
-		return this.validateStacFields;
-	}
-
-	public void setValidateStacFields(boolean validateStacFields) {
-		this.validateStacFields = validateStacFields;
-	}
-      
-  // Support for autogenerating item id
-	public boolean isCanStacAutogenerateId() {
-		return "true".equals(this.canStacAutogenerateId);
-	}
-	public void setCanStacAutogenerateId(String canStacAutogenerateId) {
-		this.canStacAutogenerateId = canStacAutogenerateId;
-	}
-	
- // Support for autogenerating bbox from geomtery
-	public boolean isCanStacAutogenerateBbox() {
-		return this.canStacAutogenerateBbox;
-	}
-
-	public void setCanStacAutogenerateBbox(boolean canStacAutogenerateBbox) {
-		this.canStacAutogenerateBbox = canStacAutogenerateBbox;
-	}
-        
-  // Support for transforming the CRS of STAC geometries
-	public String isCanStacGeomTransform() {
-    return this.canStacGeomTransform;
-	}
-	public void setCanStacGeomTransform(String canStacGeomTransform) {
-    this.canStacGeomTransform = canStacGeomTransform;
-	}
-
   // The ArcGIS Geometry service used to reproject STAC geometries
 	public String getGeometryService() {
-    return this.geometryService;
+		return this.geometryService;
 	}
 	public void setGeometryService(String geometryService) {
 		this.geometryService = geometryService;
-    this.geometryServiceClient = new GeometryServiceClient(geometryService);
+		this.geometryServiceClient = new GeometryServiceClient(geometryService);
 
 	}
-
-        
-  // If this is set, the field in the STAC item properties holds
-  // a dictionary of WKT geometries to be reprojected as well
-	public String getGeomWKTField() {
-    return this.geomWKTField;
-	}
-	public void setGeomWKTField(String geomWKTField) {
-		this.geomWKTField = geomWKTField;
-	}
-
-        
-  // If this is set, the field in the STAC item properties holds
-  // CRS of its geometries
-	public String getGeomCRSField() {
-    return this.geomCRSField;
-	}
-	public void setGeomCRSField(String geomCRSField) {
-		this.geomCRSField = geomCRSField;
-	}
-	
-	//This is used to calculate bbox for a StacItem with point if canStacAutogenerateBbox=true
-	public double getStacBboxSize() {
-		return stacBboxSize;
-	}
-
-	public void setStacBboxSize(double stacBboxSize) {
-		this.stacBboxSize = stacBboxSize;
-	}
-
   
   /** Methods =============================================================== */
 

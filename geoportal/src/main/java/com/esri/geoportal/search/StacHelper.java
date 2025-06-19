@@ -473,8 +473,8 @@ public class StacHelper {
           (requestPayload.containsKey("id") 
           && requestPayload.get("id").toString().isBlank())) {
 
-        GeoportalContext gc = GeoportalContext.getInstance();
-        if (!gc.isCanStacAutogenerateId()) {
+        StacContext sc = StacContext.getInstance();
+        if (!sc.isCanStacAutogenerateId()) {
           errorMsg = errorMsg+" id is mandatory and should not be empty.";
         }
       }
@@ -543,8 +543,8 @@ public class StacHelper {
 	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) throws IOException, ParseException {
 		String date = DateUtil.nowAsString();
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
-		StacContext sc = StacContext.getInstance();
 		GeoportalContext gc = GeoportalContext.getInstance();
+		StacContext sc = StacContext.getInstance();
 		GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
 		// Populate few fields for Add/Update feature
 		
@@ -560,9 +560,9 @@ public class StacHelper {
 		prop.put(FieldNames.FIELD_STAC_UPDATED, date);
 		
 		//Check for geom_wkt field 
-		if(prop.containsKey(gc.getGeomWKTField()))
+		if(prop.containsKey(sc.getGeomWKTField()))
 		{
-			JSONObject wktGeom = (JSONObject)prop.get(gc.getGeomWKTField());
+			JSONObject wktGeom = (JSONObject)prop.get(sc.getGeomWKTField());
 			
 			//iterate over all geometries and fill update_date
 			for (Map.Entry<String, Object> entry : wktGeom.entrySet()) {
@@ -685,13 +685,13 @@ public class StacHelper {
 		return requestPayload;
 	}
 
-	private static ArrayList<String> checkGeomWKTToBeremoved(JSONObject prop, GeoportalContext gc) {
+	private static ArrayList<String> checkGeomWKTToBeremoved(JSONObject prop, StacContext sc) {
 		ArrayList<String> toBeRemoved = new ArrayList<>();
 		String polyhedralSource ="";
 		//If point or polygon geometry_source does not match Polyhedral geom source, remove point and polygon from update payload
-		if(prop.containsKey(gc.getGeomWKTField()))
+		if(prop.containsKey(sc.getGeomWKTField()))
 		{
-			JSONObject wktGeom = (JSONObject) prop.get(gc.getGeomWKTField());
+			JSONObject wktGeom = (JSONObject) prop.get(sc.getGeomWKTField());
 			if(wktGeom.containsKey("polyhedral"))
 			{
 				JSONObject polyhedralObj = (JSONObject) wktGeom.get("polyhedral");	
@@ -1123,8 +1123,8 @@ public class StacHelper {
 			  {
 				  JSONArray coordinates = (JSONArray) geometry.get("coordinates"); 
 				  if (type.equals("POINT")) {
-					  	GeoportalContext gc = GeoportalContext.getInstance();
-					  	double bboxSize = gc.getStacBboxSize();				  	
+					  	StacContext sc = StacContext.getInstance();
+					  	double bboxSize = sc.getStacBboxSize();				  	
 					  	double x = (double) coordinates.get(0);
 		                double y = (double) coordinates.get(1);
 		                
