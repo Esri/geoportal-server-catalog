@@ -146,12 +146,15 @@ public class StacContext {
     JSONObject properties = (JSONObject) item.get("properties");
     String[] ruleElements = validationRule.split("\\|");
     String ruleType = ruleElements[0];
+    if(!ruleType.isBlank())
+    	ruleType = ruleType.trim();
     String key;
     String itemId = item.getAsString("id");
     
     switch (ruleType) {    
       case "unique":
         key = ruleElements[1];
+        key = key.trim();
         String[] uniqueKeyFields = key.split(",");
         String value;  
         String searchQry="";
@@ -267,6 +270,7 @@ public class StacContext {
     	  passes = false;
     	  String field ="";
 		  String matchExpressionRule = ruleElements[1];
+		  matchExpressionRule = matchExpressionRule.trim();
 		  String[] matchFldVal = matchExpressionRule.split(",");
 		  if(matchFldVal.length == 2)
 		  {
@@ -287,6 +291,7 @@ public class StacContext {
       case "mandatory_fields":
     	  passes = false;    	 
 		  String fieldString = ruleElements[1];
+		  fieldString = fieldString.trim();
 		  String[] fields = fieldString.split(",");
 		  String fldName ="";		  
 		  String failedFldVal="";
