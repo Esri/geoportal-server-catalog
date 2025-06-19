@@ -22,15 +22,7 @@
     <beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
     <beans:property name="parseGml" value="false" />
     <beans:property name="supportsCollections" value="true" />
-    <beans:property name="numStacFeaturesAddItem" value="500" />
-    <beans:property name="validateStacFields" value="${gpt_validateStacFields:true}" />
-    <beans:property name="canStacAutogenerateId" value="${gpt_canStacAutogenerateId:true}" />
-    <beans:property name="canStacGeomTransform" value="${gpt_canStacGeomTransform:false}" />
-    <beans:property name="canStacAutogenerateBbox" value="${gpt_canStacAutogenerateBbox:true}" />
-    <beans:property name="stacBboxSize" value="${gpt_stacBboxSize:0.00001}" />
     <beans:property name="geometryService" value="${gpt_geometryService:}" />
-    <beans:property name="geomWKTField" value="${gpt_geomWKTField:}" />
-    <beans:property name="geomCRSField" value="${gpt_geomCRSField:}" />
   </beans:bean>
   
   <!-- the tokens like ${es_cluster:elasticsearch} ${gpt_indexName:metadata}
@@ -84,7 +76,15 @@
   </beans:bean>
             
   <beans:bean id="stacContext" class="com.esri.geoportal.service.stac.StacContext">    
-    <beans:property name="statusFld" value="gsdb:status"/>  
+    <beans:property name="statusFld" value="gsdb:status"/> 
+    <beans:property name="numStacFeaturesAddItem" value="500" />
+    <beans:property name="validateStacFields" value="${gpt_validateStacFields:true}" />
+    <beans:property name="canStacAutogenerateId" value="${gpt_canStacAutogenerateId:true}" />
+    <beans:property name="canStacGeomTransform" value="${gpt_canStacGeomTransform:false}" />
+    <beans:property name="canStacAutogenerateBbox" value="${gpt_canStacAutogenerateBbox:true}" />
+    <beans:property name="stacBboxSize" value="${gpt_stacBboxSize:0.00001}" />    
+    <beans:property name="geomWKTField" value="${gpt_geomWKTField:}" />
+    <beans:property name="geomCRSField" value="${gpt_geomCRSField:}" /> 
     <beans:property name="validationRules">
       <beans:list>
         <!-- 
