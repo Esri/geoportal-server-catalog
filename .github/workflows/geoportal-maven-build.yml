@@ -63,14 +63,25 @@ jobs:
         Copy-Item -Path "${{env.CONFIG_FILE_ROOT}}\*" -Destination "geoportal_war" -Recurse -Force
         #Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\WEB-INF\classes\service\config\*" -Destination "geoportal_war\WEB-INF\classes\service\config" -Recurse -Force
 
-    - name: Archive geoportal_war to geoportal.war
-      run: 7z a -tzip ${{github.run_id}}-geoportal.war .\geoportal_war\*
+    - name: Archive geoportal_war to geoportal.zip
+      #run: 7z a -tzip ${{github.run_id}}-geoportal.war .\geoportal_war\*
+      run: 7z a -tzip geoportal.zip .\geoportal_war\*
 
     - name: Upload Artifacts
       uses: actions/upload-artifact@v4
       with:
-        name: geoportal-artifacts-Esri
-        path: ${{github.run_id}}-geoportal.war
+        name: geoportal-war
+        path: .\geoportal_war\*
+        #path: ${{github.run_id}}-geoportal.zip
+
+    - name: Create or update release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: latest
+        name: Latest Release
+        draft: false
+        prerelease: false
+        files: geoportal.zip
 
   deploy:
 
