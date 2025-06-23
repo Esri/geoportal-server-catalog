@@ -310,21 +310,24 @@ public class STACService extends Application {
 				//response json will contain details about validation error like required fields
 				status = Response.Status.BAD_REQUEST;
 				responseJSON = generateResponse(validationStatus.getCode(), validationStatus.getMessage(),null);
-			}	
+			}
+			JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+			if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("created"))
+			{					
+				status = Response.Status.CREATED;
 			
+				if(sc.getDelayResponse()>0)
+				{
+					TimeUnit.MILLISECONDS.sleep(sc.getDelayResponse());
+				}
+				responseJSON = generateResponse("201", "Stac Collection has been added successfully.",null);
+			}			
 		} catch (Exception e) {
 			LOGGER.error("Error in adding collections " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500", "Stac collection could not be added.",detailErrArray);
-		}
-		JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
-		if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("created"))
-		{					
-			status = Response.Status.CREATED;
-			responseJSON = generateResponse("201", "Stac Collection has been added successfully.",null);				
-		}
-			
+		}			
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
 	}
 		
@@ -350,21 +353,23 @@ public class STACService extends Application {
 				//response json will contain details about validation error like required fields
 				status = Response.Status.BAD_REQUEST;
 				responseJSON = generateResponse(validationStatus.getCode(), validationStatus.getMessage(),null);
-			}	
-			
+			}
+			JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
+			if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
+			{					
+				status = Response.Status.OK;
+				responseJSON = generateResponse("200", "Stac Collection has been updated successfully.",null);
+				if(sc.getDelayResponse()>0)
+				{
+					TimeUnit.MILLISECONDS.sleep(sc.getDelayResponse());
+				}
+			}
 		} catch (Exception e) {
 			LOGGER.error("Error in adding collections " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500", "Stac collection could not be added.",detailErrArray);
-		}
-		JSONObject responseObj = (JSONObject) JSONValue.parse(responseJSON);
-		if(responseObj.containsKey("result") && responseObj.get("result").toString().contentEquals("updated"))
-		{					
-			status = Response.Status.OK;
-			responseJSON = generateResponse("200", "Stac Collection has been updated successfully.",null);				
-		}
-			
+		}			
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
 	}
 
@@ -655,7 +660,11 @@ public class STACService extends Application {
 			} else
 			{
 				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,null,true);
-				responseJSON = resObj.toString();				
+				responseJSON = resObj.toString();
+				if(sc.getDelayResponse()>0)
+				{
+					TimeUnit.MILLISECONDS.sleep(sc.getDelayResponse());
+				}
 			}
 
 		} catch (InvalidParameterException e) {
@@ -1452,7 +1461,7 @@ public class STACService extends Application {
                          .entity(responseJSON).build();				
         }
         //Some error in creating item
-        else {
+        else { 
           detailErrArray.add(elasticResObj);
           responseJSON = generateResponse("500","Stac Item could not be added." ,detailErrArray);
           LOGGER.info("Stac item with id "+id+" could not be created. ");
@@ -2053,8 +2062,11 @@ public class STACService extends Application {
 	}
 
 	
-	public String getBaseUrl(HttpServletRequest hsr) {
-
+	public String getBaseUrl(HttpServletRequest hsr) {		
+		if(sc.getStacUrl()!=null && !sc.getStacUrl().isBlank())
+		{
+			return sc.getStacUrl();
+		}
 		StringBuffer requestURL = hsr.getRequestURL();
 		String ctxPath = hsr.getContextPath();
 		String urlScheme = hsr.getScheme();
