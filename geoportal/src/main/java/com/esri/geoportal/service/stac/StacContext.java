@@ -67,6 +67,9 @@ public class StacContext {
   
   private String geomWKTField = "";
   private String geomCRSField = "";
+
+  private int delayResponse; // Delay in milliseconds before sending final response from Stac Service
+  private String stacUrl; //Alternate url for Stac Service (if it is different than standard url)
   
 
 /**
@@ -198,23 +201,44 @@ public class StacContext {
 	}
 
 	        
-	  // If this is set, the field in the STAC item properties holds
-	  // CRS of its geometries
-		public String getGeomCRSField() {
-	    return this.geomCRSField;
-		}
-		public void setGeomCRSField(String geomCRSField) {
-			this.geomCRSField = geomCRSField;
-		}
-		
-		//This is used to calculate bbox for a StacItem with point if canStacAutogenerateBbox=true
-		public double getStacBboxSize() {
-			return stacBboxSize;
-		}
+	// If this is set, the field in the STAC item properties holds
+	// CRS of its geometries
+	public String getGeomCRSField() {
+		return this.geomCRSField;
+	}
 
-		public void setStacBboxSize(double stacBboxSize) {
-			this.stacBboxSize = stacBboxSize;
-		}
+	public void setGeomCRSField(String geomCRSField) {
+		this.geomCRSField = geomCRSField;
+	}
+
+	// This is used to calculate bbox for a StacItem with point if
+	// canStacAutogenerateBbox=true
+	public double getStacBboxSize() {
+		return stacBboxSize;
+	}
+
+	public void setStacBboxSize(double stacBboxSize) {
+		this.stacBboxSize = stacBboxSize;
+	}
+
+	//Opensearch returns Create/update/delete success response before it is complete.So StacService can add some delay if needed.
+	public int getDelayResponse() {
+		return delayResponse;
+	}
+
+	public void setDelayResponse(int delayResponse) {
+		this.delayResponse = delayResponse;
+	}
+
+	//Some instances require an alternate URL(Route) configuration for Stac service
+	public String getStacUrl() {
+		return stacUrl;
+	}
+
+	public void setStacUrl(String stacUrl) {
+		this.stacUrl = stacUrl;
+	}
+
   
   /* ========== Validation Rule functions here ========== */
   
