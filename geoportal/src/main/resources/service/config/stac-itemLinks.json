@@ -12,7 +12,7 @@
                 "rel": "next",
                 "type": "application/geo+json",
                 "title": "Next page of results",
-                "href": "{url}/collections/{collectionId}/items?{urlparam}",
+                "href": "{url}/collections/{collectionId}/items{urlparam}",
                 "hreflang": "en-US"
             },
             {
