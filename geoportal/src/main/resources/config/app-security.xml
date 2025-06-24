@@ -45,43 +45,37 @@
     <security:custom-filter ref="oauthResourceFilter" before="PRE_AUTH_FILTER" />
     <security:intercept-url pattern="/" access="hasRole('ADMIN')" />
 	  
-	  <!-- deny CsW and ogcrecords service-->
-    <security:intercept-url pattern="/csw/**" access="denyAll" />
-    <security:intercept-url pattern="/ogcrecords/**" access="denyAll"/>
-	  
     <!-- /stac - the stac catalog -->
-    <security:intercept-url pattern="/stac" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/stac/conformance" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/stac/api" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/stac/collections/**" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/stac/search" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/stac/search" method="POST" access="hasRole('ADMIN')" />     
+    <security:intercept-url pattern="/stac/conformance" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/stac/api" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/stac/collections/**" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/stac/search" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/stac/search" method="POST" access="permitAll" />     
     <security:intercept-url pattern="/stac/collections/**" method="POST" access="hasRole('ADMIN')" />
     <security:intercept-url pattern="/stac/collections/**" method="PUT" access="hasRole('ADMIN')" />
     <security:intercept-url pattern="/stac/collections/**" method="DELETE" access="hasRole('ADMIN')" />
     
     <!-- /rest/metadata/ - the metadata catalog -->
     <security:intercept-url pattern="/rest/metadata/bulk/**" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/rest/metadata/item/*" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/rest/metadata/item/*/html" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/rest/metadata/item/*/xml" method="GET" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/rest/metadata/item/*" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/item/*/html" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/item/*/xml" method="GET" access="permitAll" />
     <security:intercept-url pattern="/rest/metadata/item/*/owner/*" method="PUT" access="hasRole('ADMIN')" />
     <security:intercept-url pattern="/rest/metadata/realias" access="hasRole('ADMIN')" />
     <security:intercept-url pattern="/rest/metadata/reindex" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/rest/metadata/search" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/rest/metadata/transform" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/rest/metadata/validate" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/rest/metadata/**" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/rest/metadata/search" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/transform" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/validate" access="permitAll" />
+    <security:intercept-url pattern="/rest/metadata/**" access="hasRole('PUBLISHER')" />
     
     <!-- /elastic/ - proxied to the Elasticsearch cluster -->
-    <security:intercept-url pattern="/elastic1/stac/collections" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/elastic/gsdb_metadata/_count/**" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/elastic/gsdb_metadata/*/_count/**" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/elastic/gsdb_metadata/_search/**" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/elastic/gsdb_metadata/*/_search/**" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/elastic/gsdb_metadata/_mappings/**" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/elastic/gsdb_metadata/*/_mappings/**" method="GET" access="hasRole('ADMIN')" />
-    <security:intercept-url pattern="/elastic/_search/scroll/**" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/elastic/metadata/_count/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_count/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/_search/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_search/**" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/_mappings/**" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/elastic/metadata/*/_mappings/**" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/elastic/_search/scroll/**" access="permitAll" />
     <security:intercept-url pattern="/elastic/**" access="hasRole('ADMIN')" />
     
     <!-- /harvester/ - proxied to the Harvester -->
