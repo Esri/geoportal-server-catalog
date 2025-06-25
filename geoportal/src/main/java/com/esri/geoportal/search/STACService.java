@@ -1278,16 +1278,15 @@ public class STACService extends Application {
 			
 			// issue https://github.com/EsriPS/exxonmobil-gsdb/issues/28, Always replace the id from path param as that is accurate one
 			requestPayload.put("id", featureId);		
-			requestPayload.put("collection", collectionId);		
-			
-			  // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
-		      if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
-		    		  !requestPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {
-		    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
-		      }
-			
+			requestPayload.put("collection", collectionId);					 
 	      // 574
 			JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
+			
+		 // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+	      if (projectedPayload.containsKey("geometry") && projectedPayload.get("geometry")!=null &&
+	    		  !projectedPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {
+	    	  projectedPayload.put("bbox",StacHelper.generateBbox(projectedPayload));
+	      }
 			
 			StacItemValidationResponse validationStatus = StacHelper.validateStacItemForUpdate(projectedPayload,collectionId,featureId,sc.isValidateStacFields());
       
@@ -1325,9 +1324,9 @@ public class STACService extends Application {
 							.entity(responseJSON).build();				
 				}
 				//Some error in creating item
-        else {
-					LOGGER.info("Stac item with id " + id + " could not be updated. ");
-				}
+				else {
+						LOGGER.info("Stac item with id " + id + " could not be updated. ");
+					}
         
 			} else if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_NOT_FOUND)) {
 				status = Response.Status.NOT_FOUND;
@@ -1360,7 +1359,7 @@ public class STACService extends Application {
 		//For asynchronous request, log this response message
 	  if(async) {
 			 LOGGER.info("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON);
-    }
+	  }
     
 		return Response.status(status)
 				.header("Content-Type", "application/json")
@@ -1426,7 +1425,7 @@ public class STACService extends Application {
    // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
       if (projectedPayload.containsKey("geometry") && projectedPayload.get("geometry")!=null &&
     		  !projectedPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
-    	  projectedPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+    	  projectedPayload.put("bbox",StacHelper.generateBbox(projectedPayload));
         }
       
       StacItemValidationResponse validationStatus = StacHelper.validateStacItem(projectedPayload,collectionId,sc.isValidateStacFields());
@@ -1457,7 +1456,8 @@ public class STACService extends Application {
             String filePath = "service/config/stac-item.json";
             String itemFileString = this.readResourceFile(filePath, hsr);
 
-            //Before searching newly added item, sleep for 1 second, otherwise record is not found
+            //Before searching newly added item, sleep for 1 second, otherwise record is not found, 
+            //AWS opensearch serverless is not returning item in 1 sec so skipping returning full item 
             if(!ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
             {
             	TimeUnit.SECONDS.sleep(1);
