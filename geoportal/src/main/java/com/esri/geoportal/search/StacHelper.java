@@ -1058,11 +1058,13 @@ public class StacHelper {
   /*
    * Project an Individual item
    *
+   * @param collectionObj - the collection to which the item belongs
    * @param outCRS - the requested CRS
+   * @param outVCRS - the requested vertical CRS
    *
    * @returns - either the EPSG code, or the WKT definition of the CRS from the collection
   */
-  public static String getRequestedCRS(JSONObject collectionObj, String outCRS) {
+  public static String getRequestedCRS(JSONObject collectionObj, String outCRS, String outVCRS) {
     
       // if not EPSG:nnnnn get the esri WKT representation of the CRS and reproject
       // else use just the EPSG code
@@ -1075,7 +1077,10 @@ public class StacHelper {
          requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
 
       } else {
-          requestedCRS = outCRS.replace("EPSG:", "");
+          // construct: {"wkid": 0000, "vcsWkid": 000000 }
+          String wkid = outCRS.replace("EPSG:", "");
+          String vcsWkid = outVCRS.replace("EPSG:", "");
+          requestedCRS = "{\"wkid\": " + wkid + ", \"vcsWkid\": " + vcsWkid + " }";
       }
       LOGGER.debug("requestedCRS = " + requestedCRS);
 

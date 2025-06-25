@@ -98,6 +98,7 @@ public class STACService extends Application {
   private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
 
   private final String INTERNAL_CRS = "EPSG:4326";
+  private final String INTERNAL_VCRS = "EPSG:115807";
   
 	
 	@Override
@@ -503,7 +504,8 @@ public class STACService extends Application {
           // each feature is a STAC item that needs projecting
           for (int i=0; i<features.size(); i++) {
             JSONObject theFeature = (JSONObject) features.get(i);
-            JSONObject responseJSONObject = projectItemGeometries(collection, theFeature.toString(), "4326", outCRS);
+            String outVCRS = ""; // TODO - ISSUE 26
+            JSONObject responseJSONObject = projectItemGeometries(collection, theFeature.toString(), "4326", outCRS, outVCRS);
             features.set(i, responseJSONObject);
           }
           
@@ -564,8 +566,8 @@ public class STACService extends Application {
          // check if outCRS is known for this collection
          List<String> availableCRS = collection.getAvailableCRS();
          if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
-
-           JSONObject responseJSONObject = projectItemGeometries(collection, responseJSON, "4326", outCRS);
+           String outVCRS = INTERNAL_VCRS;
+           JSONObject responseJSONObject = projectItemGeometries(collection, responseJSON, "4326", outCRS, outVCRS);
            responseJSON = responseJSONObject.toString();
          }
 
@@ -1196,6 +1198,7 @@ public class STACService extends Application {
 	              // the PATCH body includes geometries, reproject if needed
 	
 	              String patchCRS = properties.getAsString(sc.getGeomCRSField());
+                String outVCRS = ""; // TODO ISSUE 26
 	              
 	              // Only project if the submitted CRS is not the same as the internal CRS
 	              if (!patchCRS.equalsIgnoreCase(INTERNAL_CRS)) {
@@ -1205,7 +1208,8 @@ public class STACService extends Application {
 	                existingItem = projectItemGeometries(collection, 
 	                                                     existingItemJSON, 
 	                                                     INTERNAL_CRS.replace("EPSG:", ""),
-	                                                     patchCRS);            
+	                                                     patchCRS,
+                                                       outVCRS);            
 	              }
 	            }
 	          }
@@ -2233,12 +2237,15 @@ public class STACService extends Application {
   private JSONObject projectItemGeometries(Collection collection, 
                                            String responseJSON, 
                                            String sourceCRS,
-                                           String outCRS) throws ParseException {
+                                           String outCRS,
+                                           String outVCRS) throws ParseException {
 
-    String requestedCRS = StacHelper.getRequestedCRS(collection, outCRS);
+    String requestedCRS = StacHelper.getRequestedCRS(collection.getBody(), outCRS, outVCRS);
 
     String[] geometryFields = {"geometry", "bbox", "envelope_geo", "shape_geo"};
     Boolean sourceCRSisEPSG = sourceCRS.toUpperCase().startsWith("EPSG:") || sourceCRS.matches("-?\\d+(\\.\\d+)?");
+    String sourceCRS_wkid = sourceCRSisEPSG ? outCRS.toUpperCase().replace("EPSG:", "") : "";
+    String sourceCRS_vcsWkid = "115807";
     Boolean requestedCRSisEPSG = outCRS.toUpperCase().startsWith("EPSG:") || outCRS.matches("-?\\d+(\\.\\d+)?");
     
     // use the STAC item JSON string as JSON object
@@ -2372,11 +2379,11 @@ public class STACService extends Application {
           Boolean hasZ = wkt.contains("Z");
           if (hasZ) {
             if (sourceCRSisEPSG) {                    
-              sourceCRS = "{\"wkid\": " + sourceCRS + ", \"vcsWkid\": 115807 }";              
+              sourceCRS = "{\"wkid\": " + sourceCRS_wkid + ", \"vcsWkid\": " + sourceCRS_vcsWkid + "}";              
             }
-            if (requestedCRSisEPSG) {                    
-              requestedCRS = "{\"wkid\": " + requestedCRS + ", \"vcsWkid\": 115807 }";              
-            }
+            //if (requestedCRSisEPSG) {                    
+            //  requestedCRS = "{\"wkid\": " + requestedCRS + ", \"vcsWkid\": " + sourceCRS_vcsWkid + "}";              
+            //}
           }
           
           if (!arcgisGeometry.isEmpty()) {
@@ -2429,7 +2436,9 @@ public class STACService extends Application {
     JSONParser jsonParser = new JSONParser();
     JSONObject theCollection = (JSONObject) jsonParser.parse(theCollectionJSON);
     
-    String requestedCRS = StacHelper.getRequestedCRS(theCollection, outCRS);
+    Collection collectionObj = new Collection(theCollection);
+    
+    String requestedCRS = StacHelper.getRequestedCRS(collectionObj, outCRS);
 
     String[] geometryFields = {"geometry", "bbox"};
 
@@ -2522,8 +2531,8 @@ public class STACService extends Application {
       // check if outCRS is known for this collection
       List<String> availableCRS = collection.getAvailableCRS();
       if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
-
-        JSONObject responseJSONObject = (JSONObject) projectItemGeometries(collection, theFeature.toString(), inCRS, outCRS);
+        String outVCRS = ""; // TODO - issue 26
+        JSONObject responseJSONObject = (JSONObject) projectItemGeometries(collection, theFeature.toString(), inCRS, outCRS, outVCRS);
         features.set(i, responseJSONObject);
       }
 
@@ -2557,7 +2566,7 @@ public class STACService extends Application {
           if ((availableCRS.contains(inCRS)) || (inCRS.startsWith("EPSG:"))) {
             String requestedCRS = StacHelper.getRequestedCRS(collection, inCRS);
             //responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, INTERNAL_CRS);
-            responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, "{\"wkid\": 4326, \"vcsWkid\": 115807 }");
+            responseJSONObject = projectItemGeometries(collection, item.toString(), requestedCRS, INTERNAL_CRS, INTERNAL_VCRS); //"{\"wkid\": 4326, \"vcsWkid\": 115807 }");
           }
         }
       }
