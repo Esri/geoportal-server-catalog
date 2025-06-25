@@ -1122,7 +1122,7 @@ public class StacHelper {
 			  if(geometryTypes.contains(type))
 			  {
 				  JSONArray coordinates = (JSONArray) geometry.get("coordinates"); 
-				  if (type.equals("POINT")) {
+				  if (coordinates!=null && type.equals("POINT")) {
 					  	StacContext sc = StacContext.getInstance();
 					  	double bboxSize = sc.getStacBboxSize();				  	
 					  	double x = (double) coordinates.get(0);
@@ -1134,7 +1134,7 @@ public class StacHelper {
 	                    minLat = y-(bboxSize/2);
 	                    maxLat =  y+(bboxSize/2);                    
 	                   
-	                } else if (type.equals("LINESTRING") || type.equals("MULTIPOINT")) {	                    
+	                } else if (coordinates!=null && (type.equals("LINESTRING") || type.equals("MULTIPOINT"))) {	                    
 	                    for (int i = 0; i < coordinates.size(); i++) {
 	                        JSONArray coord = (JSONArray) coordinates.get(i);
 	                        double lng = (double) coord.get(0);
@@ -1145,7 +1145,7 @@ public class StacHelper {
 	                        maxLng = Math.max(maxLng, lng);
 	                    }
 	                }
-	                else if (type.equals("POLYGON") || type.equals("MULTILINESTRING")) {	                   
+	                else if (coordinates!=null && (type.equals("POLYGON") || type.equals("MULTILINESTRING"))) {	                   
 	                    for (int i = 0; i < coordinates.size(); i++) {
 	                        JSONArray ring = (JSONArray) coordinates.get(i);
 	                        for (int j = 0; j < ring.size(); j++) {
@@ -1159,7 +1159,7 @@ public class StacHelper {
 	                        }
 	                    }
 	                }
-	                else if (type.equals("MULTIPOLYGON")){	                  
+	                else if (coordinates!=null && type.equals("MULTIPOLYGON")){	                  
 	                    for (int i = 0; i < coordinates.size(); i++) {
 	                         JSONArray polygon = (JSONArray) coordinates.get(i);
 	                        for (int j = 0; j < polygon.size(); j++) {
