@@ -1054,7 +1054,7 @@ public class STACService extends Application {
 	@Produces("application/json")
 	@Path("/collections/{collectionId}/items/{featureId}")
 	@Consumes({ MediaType.APPLICATION_JSON, MediaType.TEXT_PLAIN, MediaType.WILDCARD })
-	public Response updateItems(@Context HttpServletRequest hsr,
+	public Response updateItem(@Context HttpServletRequest hsr,
                               @PathParam("collectionId") String collectionId, 
                               @PathParam("featureId") String featureId,
                               @RequestBody String body, 
@@ -1275,6 +1275,11 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
     
 		try {
+			
+			// issue https://github.com/EsriPS/exxonmobil-gsdb/issues/28, Always replace the id from path param as that is accurate one
+			requestPayload.put("id", featureId);		
+			requestPayload.put("collection", collectionId);		
+			
 			  // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
 		      if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
 		    		  !requestPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {
@@ -1410,12 +1415,6 @@ public class STACService extends Application {
           requestPayload.put("id", id);
         }
       }
-      // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
-      if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
-    		  !requestPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
-    	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
-        }
-      
       // issue 574 - project payload if submitted with geometries not in 4326
       JSONObject projectedPayload = requestPayload;
       try {
@@ -1423,6 +1422,12 @@ public class STACService extends Application {
       } catch (ParseException e) {
         LOGGER.error("Error parsing incoming item: " + e.getMessage());
       }
+      
+   // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+      if (projectedPayload.containsKey("geometry") && projectedPayload.get("geometry")!=null &&
+    		  !projectedPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
+    	  projectedPayload.put("bbox",StacHelper.generateBbox(requestPayload));
+        }
       
       StacItemValidationResponse validationStatus = StacHelper.validateStacItem(projectedPayload,collectionId,sc.isValidateStacFields());
       
@@ -1437,8 +1442,14 @@ public class STACService extends Application {
         JSONObject elasticResObj = (JSONObject) JSONValue.parse(elasticResJson);
         
         if(elasticResObj.containsKey("result") && elasticResObj.get("result").toString().contentEquals("created")) {					
-          status = Response.Status.CREATED;				
-          responseJSON = generateResponse("201","Stac Item added.",null);
+          status = Response.Status.CREATED;
+          
+          JSONObject resObj = new JSONObject();
+          resObj.put("code", "201");
+          resObj.put("message", "Stac item added successfully");
+          resObj.put("id", id);
+          responseJSON = resObj.toString();
+          
           String itemUrlGeoportal = "";
 
           //if sync request for Feature, create Stac feature for response 
