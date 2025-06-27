@@ -2240,6 +2240,7 @@ public class STACService extends Application {
                                            String outCRS,
                                            String outVCRS) throws ParseException {
 
+   // String requestedCRS = StacHelper.getRequestedCRS(collection, outCRS, outVCRS);
     String requestedCRS = StacHelper.getRequestedCRS(collection.getBody(), outCRS, outVCRS);
 
     String[] geometryFields = {"geometry", "bbox", "envelope_geo", "shape_geo"};
@@ -2253,14 +2254,14 @@ public class STACService extends Application {
     JSONObject responseObject = (JSONObject) jsonParser.parse(responseJSON);
     
     // Loop over all geometry fields
-    for (String thisGeometryField: geometryFields) {
-      
-      if (responseObject.containsKey(thisGeometryField)) {
+    
+    for (String thisGeometryField: geometryFields) {      
+      if (responseObject.containsKey(thisGeometryField)) {  	  
 
         // get the item geometry
-        String geometries = geometryClient.getItemGeometry(responseObject, thisGeometryField);
+        String itemGeometry = geometryClient.getItemGeometry(responseObject, thisGeometryField);
 
-        if ((geometries != null) && (!geometries.isEmpty())) {
+        if ((itemGeometry != null) && (!itemGeometry.isEmpty())) {
           // project the geometry
           String geometryResponse = "";
 
@@ -2274,7 +2275,7 @@ public class STACService extends Application {
           }
 
           try {
-              geometryResponse = geometryClient.doProjection(geometries, sourceCRS, requestedCRS, false);
+              geometryResponse = geometryClient.doProjection(itemGeometry, sourceCRS, requestedCRS, false);
           } catch (IOException ex) {
               java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
           }
@@ -2286,67 +2287,90 @@ public class STACService extends Application {
             try {
               JSONObject geometryResponseObject = (JSONObject) jsonParser.parse(geometryResponse);
               JSONArray projectedGeometries = (JSONArray) geometryResponseObject.get("geometries");             
-
-              switch (thisGeometryField) {
-                case "geometry":
-                case "shape_geo":
-                  JSONObject rings = (JSONObject) projectedGeometries.get(0);
-                  JSONArray theRings = (JSONArray) rings.get("rings");
-                  JSONObject newGeometry = new JSONObject();
-                  newGeometry.put("type", "Polygon");
-                  newGeometry.put("coordinates", theRings);
-
-                  responseObject.put(thisGeometryField, newGeometry);
-
-                  break;
-
-                case "bbox":
-                  JSONObject bbox = (JSONObject) projectedGeometries.get(0);
-                  JSONArray projectedBbox = new JSONArray();
-                  
-                  projectedBbox.add(bbox.get("xmin"));
-                  projectedBbox.add(bbox.get("ymin"));
-                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
-                    projectedBbox.add(bbox.get("zmin"));
-                  }
-                  
-                  projectedBbox.add(bbox.get("xmax"));
-                  projectedBbox.add(bbox.get("ymax"));
-                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
-                    projectedBbox.add(bbox.get("zmax"));
-                  }
-
-                  responseObject.put("bbox", projectedBbox);
-
-                  break;
-
-                case "envelope_geo":
-                  JSONObject envelope = (JSONObject) projectedGeometries.get(0);
-                  JSONArray upperLeft = new JSONArray();
-                  JSONArray lowerRight = new JSONArray();
-                  upperLeft.add(envelope.get("xmin"));
-                  upperLeft.add(envelope.get("ymax"));
-                  lowerRight.add(envelope.get("xmax"));
-                  lowerRight.add(envelope.get("ymin"));
-
-                  JSONArray projectedEnvelope = new JSONArray();
-                  projectedEnvelope.add(upperLeft);
-                  projectedEnvelope.add(lowerRight);
-
-                  JSONObject newEnvelopeGeometry = new JSONObject();
-                  newEnvelopeGeometry.put("type", "Envelope");
-                  newEnvelopeGeometry.put("coordinates", projectedEnvelope);
-
-                  JSONArray newEnvelopeGeometries = new JSONArray();
-                  newEnvelopeGeometries.add(newEnvelopeGeometry);
-
-                  responseObject.put("envelope_geo", newEnvelopeGeometries);
-
-                  break;
-
-                default:
-                  LOGGER.error("Unsupported geometry field: " + thisGeometryField);
-              }
+              outer:
+	              switch (thisGeometryField) {
+	                case "geometry":
+	                case "shape_geo":
+	                 JSONObject geomObj = (JSONObject) responseObject.get(thisGeometryField);
+	                  String geomType = geomObj.getAsString("type");
+	                               
+	                  JSONObject newGeometry = new JSONObject();
+	                  JSONObject projectedGeom = (JSONObject) projectedGeometries.get(0);
+	                  
+	                  switch(geomType.toUpperCase()) {
+	                  	case "POINT":
+		              		 newGeometry.put("type", geomType);
+		              		 JSONArray jsonArray = new JSONArray();
+			              	jsonArray.add(projectedGeom.get("x"));
+			              	jsonArray.add(projectedGeom.get("y"));
+			              	if(projectedGeom.containsKey("z") && projectedGeom.get("z")!=null)
+			              		jsonArray.add(projectedGeom.get("z"));
+			              	
+		                     newGeometry.put("coordinates", jsonArray);
+		                     responseObject.put(thisGeometryField, newGeometry);
+	                  		break outer;
+	                  	case "POLYGON":                  		
+	                         JSONArray theRings = (JSONArray) projectedGeom.get("rings");                         
+	                         newGeometry.put("type", geomType);
+	                         newGeometry.put("coordinates", theRings);
+	                         responseObject.put(thisGeometryField, newGeometry);
+	                         break outer;
+	                  	case "MULTILINESTRING":                 		 
+	                        JSONArray thePaths = (JSONArray) projectedGeom.get("paths");                        
+	                        newGeometry.put("type", geomType);
+	                        newGeometry.put("coordinates", thePaths);
+	                        responseObject.put(thisGeometryField, newGeometry);
+	                        break outer;
+	                  	 default:
+	                         LOGGER.error("Unsupported geometry type for projection: " + geomType);
+	                  }
+	                case "bbox":
+	                  JSONObject bbox = (JSONObject) projectedGeometries.get(0);
+	                  JSONArray projectedBbox = new JSONArray();
+	                  
+	                  projectedBbox.add(bbox.get("xmin"));
+	                  projectedBbox.add(bbox.get("ymin"));
+	                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
+	                    projectedBbox.add(bbox.get("zmin"));
+	                  }
+	                  
+	                  projectedBbox.add(bbox.get("xmax"));
+	                  projectedBbox.add(bbox.get("ymax"));
+	                  if (bbox.containsKey("zmin") && bbox.containsKey("zmax")) {
+	                    projectedBbox.add(bbox.get("zmax"));
+	                  }
+	
+	                  responseObject.put("bbox", projectedBbox);
+	
+	                  break;
+	
+	                case "envelope_geo":
+	                  JSONObject envelope = (JSONObject) projectedGeometries.get(0);
+	                  JSONArray upperLeft = new JSONArray();
+	                  JSONArray lowerRight = new JSONArray();
+	                  upperLeft.add(envelope.get("xmin"));
+	                  upperLeft.add(envelope.get("ymax"));
+	                  lowerRight.add(envelope.get("xmax"));
+	                  lowerRight.add(envelope.get("ymin"));
+	
+	                  JSONArray projectedEnvelope = new JSONArray();
+	                  projectedEnvelope.add(upperLeft);
+	                  projectedEnvelope.add(lowerRight);
+	
+	                  JSONObject newEnvelopeGeometry = new JSONObject();
+	                  newEnvelopeGeometry.put("type", "Envelope");
+	                  newEnvelopeGeometry.put("coordinates", projectedEnvelope);
+	
+	                  JSONArray newEnvelopeGeometries = new JSONArray();
+	                  newEnvelopeGeometries.add(newEnvelopeGeometry);
+	
+	                  responseObject.put("envelope_geo", newEnvelopeGeometries);
+	
+	                  break;
+	
+	                default:
+	                  LOGGER.error("Unsupported geometry field: " + thisGeometryField);
+	              }
 
             } catch (ParseException ex) {
               LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
