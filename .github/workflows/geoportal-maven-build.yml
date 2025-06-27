@@ -26,7 +26,7 @@ env:
   PROJECT_LOCATION: geoportal
   #ELASTIC_BEANSTALK_NAME: geoportal-host
   #ELASTIC_BEANSTALK_ENV_NAME: Geoportal-host-env
-  #CONFIG_FILE_ROOT: exxonmobil-gsdb\geoportal server\Esri
+  #CONFIG_FILE_ROOT: 
 
 jobs:
   build:
