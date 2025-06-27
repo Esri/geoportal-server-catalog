@@ -60,11 +60,11 @@ jobs:
     # - name: Archive geoportal_war to geoportal.war
     #   run: 7z a ${{github.run_id}}-geoportal.war .\geoportal_war\*
 
-    - name: Upload Artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: geoportal-artifacts
-        path: ${{github.run_id}}-geoportal.war
+    # - name: Upload Artifacts
+    #   uses: actions/upload-artifact@v4
+    #   with:
+    #     name: geoportal-artifacts
+    #     path: ${{github.run_id}}-geoportal.war
 
   # deploy:
 
