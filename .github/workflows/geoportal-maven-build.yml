@@ -50,7 +50,7 @@ jobs:
       #with:
         #repository: 
         #token: ${{ secrets.RB_PAT }}
-        #path: exxonmobil-gsdb
+        #path: 
 
     - name: Extract ${{env.PROJECT_LOCATION}}/target/geoportal.war
       run: 7z x ${{env.PROJECT_LOCATION}}/target/geoportal.war -ogeoportal_war
