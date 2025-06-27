@@ -670,8 +670,17 @@ public class GeometryServiceClient {
               ((6 51 1, 6 51 0, 6 50 0, 6 50 1, 6 51 1))
               )
             */
-            
-            String patches = wkt.trim().substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+        	  wkt = wkt.trim();
+        	  String patches=""; 
+            if(wkt.indexOf("PATCHES")>-1)
+            {
+            	 patches = wkt.substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+            }
+            else
+            {
+            	patches = wkt.substring(wkt.indexOf("POLYHEDRALSURFACE Z (") + 21, wkt.length()-1).trim();
+            }
+           
             String regex = "[))]";
             String[] polygons = patches.split(regex);
             hasZ = true;  // polyhedral always has Z
@@ -910,7 +919,8 @@ public class GeometryServiceClient {
             */
             
             // start wkt, polyhedralsurface always has Z
-            wkt = "POLYHEDRALSURFACE Z ( PATCHES ";
+            //wkt = "POLYHEDRALSURFACE Z ( PATCHES ";
+            wkt = "POLYHEDRALSURFACE Z (";
             
             /* 
               the polyhedral geometry is stored in the ArcGIS JSON as
@@ -1026,10 +1036,16 @@ public class GeometryServiceClient {
           }
           else if(geometryType.equalsIgnoreCase("Point"))
           {
+        	  String coordinateStr ="";
         	  JSONArray pointArr =(JSONArray) geometry.get("coordinates");
+        	  if(pointArr.size()==2)
+        		  coordinateStr = "{ \"x\": " + pointArr.get(0) + ",\"y\":" + pointArr.get(1)+"}";
+        	  if(pointArr.size()==3)
+        		  coordinateStr = "{ \"x\": " + pointArr.get(0) + ",\"y\":" + pointArr.get(1)+",\"z\":" + pointArr.get(2)+"}";
+        	  
         	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
         	          + "\"geometries\": [ "
-        	          + "{ \"x\": " + pointArr.get(0) + ",\"y\":" + pointArr.get(1)+"}"
+        	          + coordinateStr
         	          + "]}";
           }
           else if(geometryType.equalsIgnoreCase("MultilineString"))
@@ -1164,9 +1180,17 @@ public class GeometryServiceClient {
 	  ArrayList<String[]> verticesArrList = new ArrayList<>();
 	  
 	  String wkt = polyhedralGeomWKTObj.getAsString("wkt");	
-	  if(wkt !=null && !wkt.isBlank() &&  wkt.indexOf("PATCHES")>-1)
-	  {
-		  String patch = wkt.trim().substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+	  String patch =""; 
+	  if(wkt !=null && !wkt.isBlank()) {
+		  wkt = wkt.trim();
+		  if(wkt.indexOf("PATCHES")>-1)
+          {
+          	 patch = wkt.substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+          }
+          else
+          {
+          	patch = wkt.substring(wkt.indexOf("POLYHEDRALSURFACE Z (") + 21, wkt.length()-1).trim();
+          }
 		  String patches = patch.replace("((", "");
 		  String regex = "[))]";
 		  String[] polygonArr = patches.split(regex);
