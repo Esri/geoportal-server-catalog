@@ -6,7 +6,7 @@
 # separate terms of service, privacy policy, and support
 # documentation.
 
-name: Java CI with Maven
+name: Geoportal Build with Artifact
 
 on:
   push:
@@ -24,9 +24,9 @@ on:
 
 env:
   PROJECT_LOCATION: geoportal
-  ELASTIC_BEANSTALK_NAME: geoportal-host
-  ELASTIC_BEANSTALK_ENV_NAME: Geoportal-host-env
-  CONFIG_FILE_ROOT: exxonmobil-gsdb\geoportal server\Esri
+  #ELASTIC_BEANSTALK_NAME: geoportal-host
+  #ELASTIC_BEANSTALK_ENV_NAME: Geoportal-host-env
+  #CONFIG_FILE_ROOT: exxonmobil-gsdb\geoportal server\Esri
 
 jobs:
   build:
@@ -43,24 +43,25 @@ jobs:
         cache: maven
     - name: Build with Maven
       run: mvn -B package --file ${{env.PROJECT_LOCATION}}/pom.xml
+      
     # Get config files
-    - name: Checkout tools repo
-      uses: actions/checkout@v4
-      with:
-        repository: EsriPS/exxonmobil-gsdb
-        token: ${{ secrets.RB_PAT }}
-        path: exxonmobil-gsdb
+    #- name: Checkout tools repo
+      #uses: actions/checkout@v4
+      #with:
+        #repository: EsriPS/exxonmobil-gsdb
+        #token: ${{ secrets.RB_PAT }}
+        #path: exxonmobil-gsdb
 
     - name: Extract ${{env.PROJECT_LOCATION}}/target/geoportal.war
       run: 7z x ${{env.PROJECT_LOCATION}}/target/geoportal.war -ogeoportal_war
 
-    - name: List directory content
-      shell: cmd
-      run: for /D %%Y in (*) do echo %%Y
+    #- name: List directory content
+      #shell: cmd
+      #run: for /D %%Y in (*) do echo %%Y
 
-    - name: Copy config files ESRI
-      run: |
-        Copy-Item -Path "${{env.CONFIG_FILE_ROOT}}\*" -Destination "geoportal_war" -Recurse -Force
+    #- name: Copy config files ESRI
+      #run: |
+        #Copy-Item -Path "${{env.CONFIG_FILE_ROOT}}\*" -Destination "geoportal_war" -Recurse -Force
         #Copy-Item -Path "exxonmobil-gsdb\geoportal server\Esri\WEB-INF\classes\service\config\*" -Destination "geoportal_war\WEB-INF\classes\service\config" -Recurse -Force
 
     - name: Archive geoportal_war to geoportal.zip
@@ -74,28 +75,28 @@ jobs:
         path: .\geoportal_war\*
         #path: ${{github.run_id}}-geoportal.zip
 
-    - name: Create or update release
-      uses: softprops/action-gh-release@v1
-      with:
-        tag_name: latest
-        name: Latest Release
-        draft: false
-        prerelease: false
-        files: geoportal.zip
+    #- name: Create or update release
+      #uses: softprops/action-gh-release@v1
+      #with:
+        #tag_name: latest
+        #name: Latest Release
+        #draft: false
+        #prerelease: false
+        #files: geoportal.zip
 
-  deploy:
+  #deploy:
 
-    runs-on: ubuntu-latest
-    needs: build
+    #runs-on: ubuntu-latest
+    #needs: build
 
-    steps:
-    - uses: actions/download-artifact@v4.1.7
-    - name: Configure AWS Credentials
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        aws-region: us-east-1
-        aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-        aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #steps:
+    #- uses: actions/download-artifact@v4.1.7
+    #- name: Configure AWS Credentials
+      #uses: aws-actions/configure-aws-credentials@v4
+      #with:
+        #aws-region: us-east-1
+        #aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
     #- name: Deploy
       #run: |
         #aws s3 cp "geoportal-artifacts/${{github.run_id}}-geoportal.war" s3://elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}/artifact/geoportal/
