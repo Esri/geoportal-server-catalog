@@ -1,0 +1,104 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+
+name: Geoportal Daily Build
+
+on:
+  push:
+    branches: [ "Master" ]
+  pull_request:
+    branches: [ "Master" ]
+  workflow_dispatch:
+    inputs:
+      logLevel:
+        description: 'Log level'
+        required: true
+        default: 'warning'
+      tags:
+        description: 'Test scenario tags'
+
+env:
+  PROJECT_LOCATION: geoportal
+  #ELASTIC_BEANSTALK_NAME: geoportal-host
+  #ELASTIC_BEANSTALK_ENV_NAME: Geoportal-host-env
+  #CONFIG_FILE_ROOT: exxonmobil-gsdb\geoportal server\Esri
+
+jobs:
+  build:
+
+    runs-on: windows-latest
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Set up JDK 17
+      uses: actions/setup-java@v4
+      with:
+        java-version: '17.0.2+8'
+        distribution: 'adopt'
+        cache: maven
+    - name: Build with Maven
+      run: mvn -B package --file ${{env.PROJECT_LOCATION}}/pom.xml
+      
+    # Get config files
+    #- name: Checkout tools repo
+      #uses: actions/checkout@v4
+      #with:
+        #repository: EsriPS/exxonmobil-gsdb
+        #token: ${{ secrets.RB_PAT }}
+        #path: exxonmobil-gsdb
+
+    - name: Extract ${{env.PROJECT_LOCATION}}/target/geoportal.war
+      run: 7z x ${{env.PROJECT_LOCATION}}/target/geoportal.war -ogeoportal_war
+
+    #- name: List directory content
+      #shell: cmd
+      #run: for /D %%Y in (*) do echo %%Y
+
+    #- name: Copy config files ESRI
+      #run: |
+        #Copy-Item -Path "${{env.CONFIG_FILE_ROOT}}\*" -Destination "geoportal_war" -Recurse -Force
+
+    #- name: Archive geoportal_war to geoportal.zip
+      #run: 7z a -tzip ${{github.run_id}}-geoportal.war .\geoportal_war\*
+      #run: 7z a -tzip geoportal.zip .\geoportal_war\*
+
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: geoportal-war
+        path: .\geoportal_war\*
+        #path: ${{github.run_id}}-geoportal.zip
+
+    - name: Create or update release
+      uses: softprops/action-gh-release@v1
+      with:
+        tag_name: latest
+        name: Latest Release
+        draft: false
+        prerelease: false
+        files: geoportal.zip
+
+  #deploy:
+
+    #runs-on: ubuntu-latest
+    #needs: build
+
+    #steps:
+    #- uses: actions/download-artifact@v4.1.7
+    #- name: Configure AWS Credentials
+      #uses: aws-actions/configure-aws-credentials@v4
+      #with:
+        #aws-region: us-east-1
+        #aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        #aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+    #- name: Deploy
+      #run: |
+        #aws s3 cp "geoportal-artifacts/${{github.run_id}}-geoportal.war" s3://elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}/artifact/geoportal/
+        #aws elasticbeanstalk create-application-version --application-name $ELASTIC_BEANSTALK_NAME --version-label ${{github.run_id}} --description ${{github.run_id}}-geoportal --source-bundle S3Bucket="elasticbeanstalk-us-east-1-${{ secrets.AWS_ACCOUNT_ID }}",S3Key="artifact/geoportal/${{github.run_id}}-geoportal.war"
+        #aws elasticbeanstalk update-environment --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME --version-label ${{github.run_id}}
+        #aws elasticbeanstalk wait environment-updated --application-name $ELASTIC_BEANSTALK_NAME --environment-name $ELASTIC_BEANSTALK_ENV_NAME
