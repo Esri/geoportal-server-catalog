@@ -48,7 +48,7 @@ jobs:
     #- name: Checkout tools repo
       #uses: actions/checkout@v4
       #with:
-        #repository: EsriPS/exxonmobil-gsdb
+        #repository: 
         #token: ${{ secrets.RB_PAT }}
         #path: exxonmobil-gsdb
 
