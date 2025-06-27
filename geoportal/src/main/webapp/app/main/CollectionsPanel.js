@@ -33,7 +33,7 @@ define([
   "esri4/widgets/Expand",
   "esri4/widgets/BasemapGallery",
   "esri4/geometry/support/webMercatorUtils",
-  "app/context/AppClient",
+  "app/context/AppClient",  
   "app/context/app-topics"
 ], function (
   declare,
@@ -148,8 +148,9 @@ define([
       this.inherited(arguments);
       this.readConfig();
       topic.subscribe(appTopics.SignedIn,lang.hitch(this,function(params){
-    	  this.handleGetCollections();
-        }));
+    	  this.handleGetCollections();  
+    	  this.updateUI();
+      }));
     },
 
     handleGetCollections: async function (view) {
@@ -162,7 +163,7 @@ define([
     handleMapReady: function (view) {
       this.initializeListeners();
       this.initializeSketchViewModel(view);
-
+      this.updateUI();
       this.handleGetCollections(view);
     },
 
@@ -175,6 +176,15 @@ define([
         this.loaderContainer.classList.add("hidden");
       }
     },
+    
+   updateUI: function() {
+	   var isAdmin = AppContext.appUser.isAdmin();       
+       $("button[data-role='admin']").each(function(i,nd) {
+         if (isAdmin) nd.style.display = "";
+         else nd.style.display = "none";
+       });	  
+    
+   },
 
     _setIsLoading: function (value) {
       this.isLoading = value;
@@ -236,11 +246,11 @@ define([
             	if(accessToken && accessToken.length >0)
         		{
             		url = client.appendAccessToken(url);
-            		const response = await fetch(url);
-                  const result = await response.json();
-                  collections = result.features;
         		}	
           }
+          const response = await fetch(url);
+          const result = await response.json();
+          collections = result.features;
         } catch (e) {
       	  collections = this.sampleCollection;
         }
