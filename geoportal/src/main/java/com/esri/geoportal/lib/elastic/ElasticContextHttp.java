@@ -259,8 +259,10 @@ public class ElasticContextHttp extends ElasticContext {
     	String[] nodeNames = this.nodesToArray();
         if ((nodeNames == null) || (nodeNames.length == 0)) {
         	LOGGER.warn("Configuration warning: Elasticsearch - no nodes defined.");
+        	return;
         }    	
-    } else if (wasStarted) {
+    } 
+    if (wasStarted) {
       LOGGER.warn("Configuration warning: ElasticContextHttp has already been started.");
     } else {      
       if (this.getAutoCreateIndex()) {
