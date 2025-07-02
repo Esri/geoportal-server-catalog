@@ -1064,24 +1064,24 @@ public class StacHelper {
    *
    * @returns - either the EPSG code, or the WKT definition of the CRS from the collection
   */
-  public static String getRequestedCRS(JSONObject collectionObj, String outCRS, String outVCRS) {    
+  public static String getRequestedCRS(Collection collectionObj, String outCRS, String outVCRS) {    
       // if not EPSG:nnnnn get the esri WKT representation of the CRS and reproject
       // else use just the EPSG code
       String requestedCRS;      
       if (!outCRS.startsWith("EPSG:")) {
     	 
-//    	  Asset theAsset = collection.getAsset(outCRS);
-//          if (theAsset != null) {
-//           String wkt = theAsset.getEsriWKT();
-//           requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
-//          } else {
-//            requestedCRS = outCRS;
-//          }
+    	  Asset theAsset = collectionObj.getAsset(outCRS);
+          if (theAsset != null) {
+           String wkt = theAsset.getEsriWKT();
+           requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
+          } else {
+            requestedCRS = outCRS;
+          }
     	  //TODO Marten : Below code was givng me error so I used above (commented now) 
-         JSONObject theAssets = (JSONObject) collectionObj.get("assets");
-         JSONObject theCRS = (JSONObject) theAssets.get(outCRS);
-         String wkt = theCRS.getAsString("esri:wkt");
-         requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
+//         JSONObject theAssets = (JSONObject) collectionObj.get("assets");
+//         JSONObject theCRS = (JSONObject) theAssets.get(outCRS);
+//         String wkt = theCRS.getAsString("esri:wkt");
+//         requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
 
       } else {
           // construct: {"wkid": 0000, "vcsWkid": 000000 }

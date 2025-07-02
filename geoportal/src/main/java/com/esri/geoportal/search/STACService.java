@@ -494,7 +494,7 @@ public class STACService extends Application {
 
         // check if outCRS is known for this collection
         List<String> availableCRS = collection.getAvailableCRS();
-        if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
+        if ((availableCRS !=null && availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
 
           // get the features from the response
           JSONParser jsonParser = new JSONParser();
@@ -552,31 +552,31 @@ public class STACService extends Application {
 			if (responseJSON.contains("Record not found")) {
 				status = Response.Status.NOT_FOUND;
 			}
+			else {
+			      // if reprojecting STAC geometries is supported and a
+			      // geometry service has been configured, try projecting 
+			      // from internal CRS (4326) to requested outCRS
+			      if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+			        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+
+			         // get the collection metadata
+			         Collection collection = new Collection(collectionId);
+
+			         // check if outCRS is known for this collection
+			         List<String> availableCRS = collection.getAvailableCRS();
+			         if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
+			           String outVCRS = INTERNAL_VCRS;
+			           JSONObject responseJSONObject = projectItemGeometries(collection, responseJSON, "4326", outCRS, outVCRS);
+			           responseJSON = responseJSONObject.toString();
+			         }
+
+			         // done
+			         LOGGER.debug("Project response -> " + responseJSON);
+			      } else {
+			          LOGGER.warn("WARNING - outCRS " + outCRS + " is not known for collection " + collectionId +". Outputting tag in native CRS.");
+			      }
+			}
 			System.out.println(responseJSON);
-
-      // if reprojecting STAC geometries is supported and a
-      // geometry service has been configured, try projecting 
-      // from internal CRS (4326) to requested outCRS
-      if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-
-         // get the collection metadata
-         Collection collection = new Collection(collectionId);
-
-         // check if outCRS is known for this collection
-         List<String> availableCRS = collection.getAvailableCRS();
-         if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
-           String outVCRS = INTERNAL_VCRS;
-           JSONObject responseJSONObject = projectItemGeometries(collection, responseJSON, "4326", outCRS, outVCRS);
-           responseJSON = responseJSONObject.toString();
-         }
-
-         // done
-         LOGGER.debug("Project response -> " + responseJSON);
-      } else {
-          LOGGER.warn("WARNING - outCRS " + outCRS + " is not known for collection " + collectionId +". Outputting tag in native CRS.");
-      }
-
 		} catch (InvalidParameterException e) {
 			status = Response.Status.BAD_REQUEST;
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
@@ -822,13 +822,13 @@ public class STACService extends Application {
 				// if re-projecting STAC geometries is supported and a 
 				// geometry service has been configured, try projecting from internal CRS (4326) to requested outCRS
 				if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-				LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-				
-				JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
-				responseJSON = projectedResponseObj.toString();        
-				
-				// done
-				LOGGER.debug("Projected response -> " + responseJSON);
+					LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+					
+					JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
+					responseJSON = projectedResponseObj.toString();        
+					
+					// done
+					LOGGER.debug("Projected response -> " + responseJSON);
 				} 
 			}
 
@@ -2241,11 +2241,11 @@ public class STACService extends Application {
                                            String outVCRS) throws ParseException {
 
    // String requestedCRS = StacHelper.getRequestedCRS(collection, outCRS, outVCRS);
-    String requestedCRS = StacHelper.getRequestedCRS(collection.getBody(), outCRS, outVCRS);
+    String requestedCRS = StacHelper.getRequestedCRS(collection, outCRS, outVCRS);
 
     String[] geometryFields = {"geometry", "bbox", "envelope_geo", "shape_geo"};
     Boolean sourceCRSisEPSG = sourceCRS.toUpperCase().startsWith("EPSG:") || sourceCRS.matches("-?\\d+(\\.\\d+)?");
-    String sourceCRS_wkid = sourceCRSisEPSG ? outCRS.toUpperCase().replace("EPSG:", "") : "";
+    String sourceCRS_wkid = sourceCRSisEPSG ? sourceCRS.toUpperCase().replace("EPSG:", "") : "";
     String sourceCRS_vcsWkid = "115807";
     Boolean requestedCRSisEPSG = outCRS.toUpperCase().startsWith("EPSG:") || outCRS.matches("-?\\d+(\\.\\d+)?");
     
@@ -2273,7 +2273,7 @@ public class STACService extends Application {
             requestedCRS = requestedCRS.replace("EPSG:", "");
             requestedCRSisEPSG = true;
           }
-
+          
           try {
               geometryResponse = geometryClient.doProjection(itemGeometry, sourceCRS, requestedCRS, false);
           } catch (IOException ex) {
@@ -2559,7 +2559,6 @@ public class STACService extends Application {
         JSONObject responseJSONObject = (JSONObject) projectItemGeometries(collection, theFeature.toString(), inCRS, outCRS, outVCRS);
         features.set(i, responseJSONObject);
       }
-
     }
     
     return responseObject;
