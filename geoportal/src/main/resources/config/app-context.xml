@@ -76,7 +76,7 @@
   </beans:bean>
             
   <beans:bean id="stacContext" class="com.esri.geoportal.service.stac.StacContext">    
-    <beans:property name="statusFld" value="gsdb:status"/> 
+    <!--  <beans:property name="statusFld" value="status"/> -->
     <beans:property name="numStacFeaturesAddItem" value="500" />
     <beans:property name="validateStacFields" value="${gpt_validateStacFields:true}" />
     <beans:property name="canStacAutogenerateId" value="${gpt_canStacAutogenerateId:true}" />
