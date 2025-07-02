@@ -57,7 +57,7 @@ public class StacContext {
   private List<String> validationRules;
   private Map<String, String> fieldMappings = new HashMap<>();
 
-  private String statusFld = "gsdb:status";
+  private String statusFld = "";
   private int numStacFeaturesAddItem = 100; 
   private boolean validateStacFields = false;
   private String canStacAutogenerateId = "false";
