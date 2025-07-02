@@ -1022,16 +1022,26 @@ public class GeometryServiceClient {
       case "shape_geo":
         if(item.containsKey(geometryField) && item.get(geometryField) != null){
           JSONObject geometry = new JSONObject((Map<String, ?>) item.get(geometryField));
-          LOGGER.debug("geometry = " + geometry.toString()); 
-
-          String coordinates = geometry.getAsString("coordinates");
+          LOGGER.debug("geometry = " + geometry.toString());          
           
           String geometryType = geometry.getAsString("type");
           if(geometryType.equalsIgnoreCase("Polygon"))
           {
+        	  boolean hasZ = false;
+              String coordinates = geometry.getAsString("coordinates");
+              //Check if it has z value
+              JSONArray coordArr =(JSONArray) geometry.get("coordinates");
+              if(coordArr.size()>0)
+              {
+            	 JSONArray pointCoord=  (JSONArray)coordArr.get(0);
+            	 if(pointCoord!= null && pointCoord.size()>2)
+            	 {
+            		 hasZ = true;
+            	 }
+              }
         	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
         	          + "\"geometries\": [ "
-        	          + "{ \"rings\": " + coordinates + "}"
+        	          + "{"+(hasZ? "\"hasZ\":true, ":"")+" \"rings\": " + coordinates + "}"
         	          + "]}";
           }
           else if(geometryType.equalsIgnoreCase("Point"))
