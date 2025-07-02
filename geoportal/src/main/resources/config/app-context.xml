@@ -8,8 +8,7 @@
 
   <context:property-placeholder/>
   <context:annotation-config />
-
-  <beans:import resource="app-security.xml" />
+	
   <beans:import resource="app-factory.xml" />
   <beans:import resource="app-dcat.xml" />
   
@@ -132,7 +131,9 @@
       </beans:list>
     </beans:property>
   </beans:bean>  
-  
+    <!--  This should always be imported after GeoportalContext and ElasticContext loaded -->
+  <beans:import resource="app-security.xml" />
+	
   <beans:bean id="harvesterContext" class="com.esri.geoportal.lib.harvester.HarvesterContext">
     <beans:property name="nodes">
       <!-- The list of host names within the Harvester cluster, one value element per host -->
