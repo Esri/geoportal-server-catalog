@@ -2395,53 +2395,83 @@ public class STACService extends Application {
     for (String geometryType: geometryTypes) {
       if (null != geometry_wkt_in) {
         if (geometry_wkt_in.containsKey(geometryType)) {
-          String arcgisGeometry = geometryClient.getArcGISGeometry(geometryType.toUpperCase(), geometry_wkt_in);
-          
-          JSONObject geometry = (JSONObject) geometry_wkt_in.get(geometryType.toLowerCase());
-          String wkt = geometry.getAsString("wkt");
-
-          Boolean hasZ = wkt.contains("Z");
-          if (hasZ) {
-            if (sourceCRSisEPSG) {                    
-              sourceCRS = "{\"wkid\": " + sourceCRS_wkid + ", \"vcsWkid\": " + sourceCRS_vcsWkid + "}";              
-            }
-            //if (requestedCRSisEPSG) {                    
-            //  requestedCRS = "{\"wkid\": " + requestedCRS + ", \"vcsWkid\": " + sourceCRS_vcsWkid + "}";              
-            //}
-          }
-          
-          if (!arcgisGeometry.isEmpty()) {
-            // project the geometry
+        	JSONObject geometry = (JSONObject) geometry_wkt_in.get(geometryType.toLowerCase());
+        	JSONArray projectedGeometries = new JSONArray();
+            String wkt = geometry.getAsString("wkt");
+            Boolean hasZ = wkt.contains("Z");
             String geometryResponse = "";
-            try {
-              geometryResponse = geometryClient.doProjection(arcgisGeometry, sourceCRS, requestedCRS, hasZ);
-            } catch (IOException ex) {
-              LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
-            }
-
-            // if projection was successful save the updated WKT and set gsdb:crs property
-            if (!geometryResponse.isBlank()) {
-              // get projected geometries as JSON object
-              try {
-                JSONObject geometryResponseObject = (JSONObject) jsonParser.parse(geometryResponse);
-                if (geometryResponseObject.containsKey("geometries")) {
-                  JSONArray projectedGeometries = (JSONArray) geometryResponseObject.get("geometries");
-
-                  String wktGeometry = geometryClient.getWKTGeometry(geometryType.toUpperCase(), projectedGeometries);
-                  JSONObject geometryToUpdate = (JSONObject) geometry_wkt_in.get(geometryType);
-                  geometryToUpdate.put("wkt", wktGeometry);
-
-                  properties.put(sc.getGeomCRSField(), outCRS);
-                }
-              } catch (ParseException ex) {
-                LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
+            if (hasZ) {
+              if (sourceCRSisEPSG) {                    
+                sourceCRS = "{\"wkid\": " + sourceCRS_wkid + ", \"vcsWkid\": " + sourceCRS_vcsWkid + "}";              
               }
+              //if (requestedCRSisEPSG) {                    
+              //  requestedCRS = "{\"wkid\": " + requestedCRS + ", \"vcsWkid\": " + sourceCRS_vcsWkid + "}";              
+              //}
             }
+        	//Handle polyhedral
+        	if(geometryType.equalsIgnoreCase("polyhedral"))
+        	{
+				// ArrayList of points geometry for each polygon
+				JSONArray projectedGeometry = null;
+				ArrayList<String> arcgisGeometryList = geometryClient.getArcGISGeometryForPolyhedral(geometry_wkt_in);
+				
+				for (String arcgisGeometry : arcgisGeometryList) {
+					try {
+						geometryResponse = geometryClient.doProjection(arcgisGeometry, sourceCRS, requestedCRS,
+								hasZ);
+						if (!geometryResponse.isBlank()) {
+							// get projected geometries as JSON object
+	
+							JSONObject geometryResponseObject = (JSONObject) jsonParser.parse(geometryResponse);
+							if (geometryResponseObject.containsKey("geometries")) {
+								projectedGeometry = (JSONArray) geometryResponseObject.get("geometries");
+							}
+						}
+						if (projectedGeometry != null) {
+							projectedGeometries.add(projectedGeometry);
+						}
+	
+					} catch (IOException ex) {
+						LOGGER.error(STACService.class.getName() + ": " + ex.toString());
+					}
+				}
+        	}
+        	else
+        	{
+                String arcgisGeometry = geometryClient.getArcGISGeometry(geometryType.toUpperCase(), geometry_wkt_in); 
+                
+                if (!arcgisGeometry.isEmpty()) {	
+                  // project the geometry
+                  
+                  try {
+                    geometryResponse = geometryClient.doProjection(arcgisGeometry, sourceCRS, requestedCRS, hasZ);
+                  } catch (IOException ex) {
+                    LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
+                  }
+                  if (!geometryResponse.isBlank()) {
+                      // get projected geometries as JSON object
+                      try {
+                        JSONObject geometryResponseObject = (JSONObject) jsonParser.parse(geometryResponse);
+                        if (geometryResponseObject.containsKey("geometries")) {
+                          projectedGeometries = (JSONArray) geometryResponseObject.get("geometries");
+                        }
+                      }catch (ParseException ex) {
+                            LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
+                      }
+                  }
+                }
+        	}
+
+          // if projection was successful save the updated WKT and set gsdb:crs property
+            String wktGeometry = geometryClient.getWKTGeometry(geometryType.toUpperCase(), projectedGeometries);
+            JSONObject geometryToUpdate = (JSONObject) geometry_wkt_in.get(geometryType);
+            geometryToUpdate.put("wkt", wktGeometry);
+
+            properties.put(sc.getGeomCRSField(), outCRS);
+            }
+           
           }
         }
-      }
-    }
-
     return responseObject;
   }
 
