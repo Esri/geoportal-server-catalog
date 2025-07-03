@@ -11,11 +11,13 @@ import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonArrayBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.GeoportalContext;
-import static com.esri.geoportal.context.GeoportalContext.LOGGER;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
@@ -37,7 +39,7 @@ import net.minidev.json.parser.ParseException;
 
 
 public class StacHelper {
-	
+	private static final Logger LOGGER = LoggerFactory.getLogger(StacHelper.class);
 	
 	/** Validates single STAC feature for required fields and duplicate id in collection
 	 * @param requestPayload
@@ -1120,85 +1122,90 @@ public class StacHelper {
 	  
 	  public static JSONArray generateBbox(JSONObject reqPayload)
 	  {
-		  JSONArray bbox = null;		  
-		  
-		  List<String> geometryTypes = Arrays.asList("POINT", "MULTIPOINT", "LINESTRING","MULTILINESTRING", "POLYGON","MULTIPOLYGON");
-		  if(reqPayload.containsKey("geometry"))
-		  {
-			  double minLat = Double.MAX_VALUE, maxLat = Double.MIN_VALUE;
-		      double minLng = Double.MAX_VALUE, maxLng = Double.MIN_VALUE;
-		      
-			  JSONObject geometry = (JSONObject) reqPayload.get("geometry");
-			  String type = geometry.getAsString("type");
-			  type = type.toUpperCase();
-			  if(geometryTypes.contains(type))
+		  JSONArray bbox = null;
+		  try {
+			  List<String> geometryTypes = Arrays.asList("POINT", "MULTIPOINT", "LINESTRING","MULTILINESTRING", "POLYGON","MULTIPOLYGON");
+			  if(reqPayload.containsKey("geometry"))
 			  {
-				  JSONArray coordinates = (JSONArray) geometry.get("coordinates"); 
-				  if (coordinates!=null && type.equals("POINT")) {
-					  	StacContext sc = StacContext.getInstance();
-					  	double bboxSize = sc.getStacBboxSize();				  	
-					  	double x = (double) coordinates.get(0);
-		                double y = (double) coordinates.get(1);
-		                
-		                minLng = x-(bboxSize/2);
-		                maxLng = x +(bboxSize/2);		                		
-					  
-	                    minLat = y-(bboxSize/2);
-	                    maxLat =  y+(bboxSize/2);                    
-	                   
-	                } else if (coordinates!=null && (type.equals("LINESTRING") || type.equals("MULTIPOINT"))) {	                    
-	                    for (int i = 0; i < coordinates.size(); i++) {
-	                        JSONArray coord = (JSONArray) coordinates.get(i);
-	                        double lng = (double) coord.get(0);
-		                    double lat = (double) coord.get(1);
-	                        minLat = Math.min(minLat, lat);
-	                        maxLat = Math.max(maxLat, lat);
-	                        minLng = Math.min(minLng, lng);
-	                        maxLng = Math.max(maxLng, lng);
-	                    }
-	                }
-	                else if (coordinates!=null && (type.equals("POLYGON") || type.equals("MULTILINESTRING"))) {	                   
-	                    for (int i = 0; i < coordinates.size(); i++) {
-	                        JSONArray ring = (JSONArray) coordinates.get(i);
-	                        for (int j = 0; j < ring.size(); j++) {
-	                            JSONArray coord = (JSONArray) ring.get(j);
-	                            double lng = (double) coord.get(0);
-	    	                    double lat = (double) coord.get(1);
-	                            minLat = Math.min(minLat, lat);
-	                            maxLat = Math.max(maxLat, lat);
-	                            minLng = Math.min(minLng, lng);
-	                            maxLng = Math.max(maxLng, lng);
-	                        }
-	                    }
-	                }
-	                else if (coordinates!=null && type.equals("MULTIPOLYGON")){	                  
-	                    for (int i = 0; i < coordinates.size(); i++) {
-	                         JSONArray polygon = (JSONArray) coordinates.get(i);
-	                        for (int j = 0; j < polygon.size(); j++) {
-	                            JSONArray ring = (JSONArray) polygon.get(j);
-	                            for (int k=0; k<ring.size(); k++){
-	                                JSONArray coord = (JSONArray) ring.get(k);
-	                                double lng = (double) coord.get(0);
+				  double minLat = Double.MAX_VALUE, maxLat = Double.MIN_VALUE;
+			      double minLng = Double.MAX_VALUE, maxLng = Double.MIN_VALUE;
+			      
+				  JSONObject geometry = (JSONObject) reqPayload.get("geometry");
+				  String type = geometry.getAsString("type");
+				  type = type.toUpperCase();
+				  if(geometryTypes.contains(type))
+				  {
+					  JSONArray coordinates = (JSONArray) geometry.get("coordinates"); 
+					  if (coordinates!=null && type.equals("POINT")) {
+						  	StacContext sc = StacContext.getInstance();
+						  	double bboxSize = sc.getStacBboxSize();				  	
+						  	double x = (double) coordinates.get(0);
+			                double y = (double) coordinates.get(1);
+			                
+			                minLng = x-(bboxSize/2);
+			                maxLng = x +(bboxSize/2);		                		
+						  
+		                    minLat = y-(bboxSize/2);
+		                    maxLat =  y+(bboxSize/2);                    
+		                   
+		                } else if (coordinates!=null && (type.equals("LINESTRING") || type.equals("MULTIPOINT"))) {	                    
+		                    for (int i = 0; i < coordinates.size(); i++) {
+		                        JSONArray coord = (JSONArray) coordinates.get(i);
+		                        double lng = (double) coord.get(0);
+			                    double lat = (double) coord.get(1);
+		                        minLat = Math.min(minLat, lat);
+		                        maxLat = Math.max(maxLat, lat);
+		                        minLng = Math.min(minLng, lng);
+		                        maxLng = Math.max(maxLng, lng);
+		                    }
+		                }
+		                else if (coordinates!=null && (type.equals("POLYGON") || type.equals("MULTILINESTRING"))) {	                   
+		                    for (int i = 0; i < coordinates.size(); i++) {
+		                        JSONArray ring = (JSONArray) coordinates.get(i);
+		                        for (int j = 0; j < ring.size(); j++) {
+		                            JSONArray coord = (JSONArray) ring.get(j);
+		                            double lng = (double) coord.get(0);
 		    	                    double lat = (double) coord.get(1);
-	                                minLat = Math.min(minLat, lat);
-	                                maxLat = Math.max(maxLat, lat);
-	                                minLng = Math.min(minLng, lng);
-	                                maxLng = Math.max(maxLng, lng);
-	                            }
-	                        }
-	                    }
-	               }				  
-				  bbox =  new JSONArray();
-				  bbox.add(0,minLng);
-				  bbox.add(1,minLat);
-				  bbox.add(2,maxLng);
-				  bbox.add(3,maxLat);
+		                            minLat = Math.min(minLat, lat);
+		                            maxLat = Math.max(maxLat, lat);
+		                            minLng = Math.min(minLng, lng);
+		                            maxLng = Math.max(maxLng, lng);
+		                        }
+		                    }
+		                }
+		                else if (coordinates!=null && type.equals("MULTIPOLYGON")){	                  
+		                    for (int i = 0; i < coordinates.size(); i++) {
+		                         JSONArray polygon = (JSONArray) coordinates.get(i);
+		                        for (int j = 0; j < polygon.size(); j++) {
+		                            JSONArray ring = (JSONArray) polygon.get(j);
+		                            for (int k=0; k<ring.size(); k++){
+		                                JSONArray coord = (JSONArray) ring.get(k);
+		                                double lng = (double) coord.get(0);
+			    	                    double lat = (double) coord.get(1);
+		                                minLat = Math.min(minLat, lat);
+		                                maxLat = Math.max(maxLat, lat);
+		                                minLng = Math.min(minLng, lng);
+		                                maxLng = Math.max(maxLng, lng);
+		                            }
+		                        }
+		                    }
+		               }				  
+					  bbox =  new JSONArray();
+					  bbox.add(0,minLng);
+					  bbox.add(1,minLat);
+					  bbox.add(2,maxLng);
+					  bbox.add(3,maxLat);
+				  }
+				  else
+				  {
+					 LOGGER.debug("Unsupported geomtery type to generate bbox: "+type);
+				  }
 			  }
-			  else
-			  {
-				 LOGGER.debug("Unsupported geomtery type to generate bbox: "+type);
-			  }
+		  }catch(Exception ex)
+		  {
+			  LOGGER.error("bbox could not be generated "+ex.getMessage());
 		  }
+		  
 		  return bbox;
 	  }
 

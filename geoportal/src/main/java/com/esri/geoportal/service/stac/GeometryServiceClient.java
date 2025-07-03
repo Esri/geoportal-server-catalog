@@ -109,6 +109,7 @@ public class GeometryServiceClient {
         this.wktTypes.put("MULTILINESTRING", "esriGeometryPolyline");
         this.wktTypes.put("POLYGON", "esriGeometryPolygon");
         this.wktTypes.put("MULTIPOLYGON", "esriGeometryPolygon");
+        //this.wktTypes.put("POLYHEDRAL", "esriGeometryPoint");
         this.wktTypes.put("POLYHEDRAL", "esriGeometryPolygon");        
     }
 
@@ -659,7 +660,7 @@ public class GeometryServiceClient {
             
             break;
             
-          case "POLYHEDRAL":
+          case "POLYHEDRAL":        	
             /*
               POLYHEDRALSURFACE Z ( PATCHES
               ((5 50 0, 6 50 0, 6 51 0, 5 51 0, 5 50 0)),
@@ -898,19 +899,13 @@ public class GeometryServiceClient {
 
             break;
             
-          case "POLYHEDRAL":
-            /*
-              FROM:
-              {
-                "geometryType": "esriGeometryPolygon", 
-                "geometries": [
-                  {"hasZ": true, "rings": [[[ 5, 50, 0], [ 6, 50, 0], [ 6, 51, 0], [ 5, 51, 0], [ 5, 50, 0]]]}, 
-                  ...
-                  {"hasZ": true, "rings": [[ [ 6, 51, 1], [ 6, 51, 0], [ 6, 50, 0], [ 6, 50, 1], [ 6, 51, 1]]]}
-                ]
-              }
-
-              TO: 
+          case "POLYHEDRAL":        	  
+        	  //From JSONArray of point geometries; One point geometry array is one face of polyhedral 
+        	  
+     /* From [
+[{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466044172279,"y":30.070112205772554,"z":8.248000020980836},{"x":-94.08466049705821,"y":30.070114954929413,"z":8.248000020980836},{"x":-94.08466365780316,"y":30.07011490679985,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":7.248000020980835}],
+[{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466044172279,"y":30.070112205772554,"z":8.248000020980836},{"x":-94.08466049705821,"y":30.070114954929413,"z":8.248000020980836},{"x":-94.08466365780316,"y":30.07011490679985,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":7.248000020980835}]
+]       TO: 
               POLYHEDRALSURFACE Z ( 
                 PATCHES ((5 50 0, 6 50 0, 6 51 0, 5 51 0, 5 50 0)),
                         ...
@@ -918,33 +913,25 @@ public class GeometryServiceClient {
               )
             */
             
-            // start wkt, polyhedralsurface always has Z
-            //wkt = "POLYHEDRALSURFACE Z ( PATCHES ";
+            // start wkt, polyhedralsurface always has Z           
             wkt = "POLYHEDRALSURFACE Z (";
-            
-            /* 
-              the polyhedral geometry is stored in the ArcGIS JSON as
-              a list of polygons. every face of the polyhedral is stored
-              as a polygon with 1 ring
-            */
             for (int i=0; i<arcgisGeometries.size(); i++) {
-              JSONObject face = (JSONObject) arcgisGeometries.get(i);
-              JSONArray edges = (JSONArray) face.get("rings");
-              if (!edges.isEmpty()) {
-                JSONArray firstEdge = (JSONArray) edges.get(0);
-
-                wkt += firstEdge.toString()
-                                .replace(",", " ")
-                                .replace("] [", ", ")
-                                .replace("[", "(")
-                                .replace("]", ")");
-              }
+            	JSONArray face = (JSONArray) arcgisGeometries.get(i);
+            	wkt+= "((";
+            	 for (int j=0; j<face.size(); j++) {            		 
+            		 JSONObject pointObj = (JSONObject) face.get(j);
+            		 if(j == face.size()-1)
+            			 wkt+= pointObj.getAsString("x")+" "+pointObj.getAsString("y")+" "+pointObj.getAsString("z");
+            		 else
+            			 wkt+= pointObj.getAsString("x")+" "+pointObj.getAsString("y")+" "+pointObj.getAsString("z")+", ";
+            	 }
+            	 if(i == arcgisGeometries.size()-1)
+            		 wkt+= "))";
+            	 else
+            		 wkt+= ")), "; 
             }
-            wkt = wkt.replace("))((", ")), ((");
-            
             // finish wkt
-            wkt += " )";
-            
+            wkt += ")";            
             break;
             
           default:
@@ -1224,6 +1211,55 @@ public class GeometryServiceClient {
 	  return verticesArrList;		  
 	  
   	}
-	  
+
+	public ArrayList<String> getArcGISGeometryForPolyhedral(JSONObject wktGeometry) {
+		ArrayList<String> pointGeomList= new ArrayList<>();
+		  String arcgisGeometryType = "esriGeometryPoint";
+	      String pointGeometries = "";
+	      
+	      JSONObject geometry = (JSONObject) wktGeometry.get("polyhedral");
+	      String wkt = geometry.getAsString("wkt");
+			wkt = wkt.trim();
+			String patches=""; 
+		  if(wkt.indexOf("PATCHES")>-1)
+		  {
+		  	 patches = wkt.substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+		  }
+		  else
+		  {
+		  	patches = wkt.substring(wkt.indexOf("POLYHEDRALSURFACE Z (") + 21, wkt.length()-1).trim();
+		  }
+		 
+		  String regex = "[))]";
+		  String[] polygons = patches.split(regex);
+		  
+		  // now build ArcGIS geometry as point geometries array
+		  for (String polygon : polygons) {
+		    if (!polygon.isEmpty()) {
+		      // start polygon json
+		      pointGeometries += "{";	        
+		
+		      String polyCoordinateString = polygon.replace(", ((","").replace("((","");
+		      String[] polyCoordinates = polyCoordinateString.split(",");	
+		      //Create point geom for each polygon point 
+		      pointGeometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [";
+		      for(int i=0; i<polyCoordinates.length;i++)
+		      {
+		    	  String polyCoordXyz = polyCoordinates[i].trim();
+			      String[] polyCoordXYZArr = polyCoordXyz.split(" ");
+			      if(i==polyCoordinates.length-1)
+			    	  pointGeometries += "{\"hasZ\":true,\"x\":"+polyCoordXYZArr[0]+",\"y\":"+polyCoordXYZArr[1]+",\"z\":"+polyCoordXYZArr[2]+"}";
+			      else
+			      {
+			    	  pointGeometries += "{\"hasZ\":true,\"x\":"+polyCoordXYZArr[0]+",\"y\":"+polyCoordXYZArr[1]+",\"z\":"+polyCoordXYZArr[2]+"},"; 
+			      }
+		      }
+		      pointGeometries += " ]}";
+		      pointGeomList.add(pointGeometries);
+		    }
+		  }
+		  return pointGeomList;
+	}
+	
            
 }
