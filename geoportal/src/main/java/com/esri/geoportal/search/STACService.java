@@ -261,9 +261,18 @@ public class STACService extends Application {
 
             geojsonCollection.put("properties", collectionProperties);
             JSONObject extent = new JSONObject((Map<String, ?>) thisCollection.get("extent"));
-            JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
-            geojsonCollection.put("bbox", spatial.get("bbox"));
-            geojsonCollection.put("geometry", spatial.get("geometry"));
+            if (extent != null && extent.size() > 0) {
+              JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
+              
+              if (spatial != null) {
+                if (spatial.containsKey("bbox")) { 
+                  geojsonCollection.put("bbox", spatial.get("bbox"));
+                }
+                if (spatial.containsKey("geometry")) {
+                  geojsonCollection.put("geometry", spatial.get("geometry"));                
+                }
+              }            
+            }
             
             geojsonCollectionsList.add(geojsonCollection);
           }
