@@ -638,7 +638,6 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in deleting items from collection"+ e.getCause());
-			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500",
@@ -683,7 +682,6 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in deleting items from collection"+ e.getCause());
-			e.printStackTrace();
 			detailErrArray.add(e.getMessage());
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500",
@@ -736,7 +734,6 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in deleting item with item id: " + id + " " + e.getCause());
-			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500","STAC API: Feature could not be deleted.",detailErrArray);
@@ -847,8 +844,7 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in getting items " + e.getCause());
-			e.printStackTrace();
+			LOGGER.error("Error in getting items " + e.getCause());			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500",
@@ -998,7 +994,6 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
-			e.printStackTrace();
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500",
@@ -1522,7 +1517,6 @@ public class STACService extends Application {
             LOGGER.error("Error in adding Stac Item " + ex.getCause());
             detailErrArray.add(ex.getMessage());
             responseJSON = generateResponse("500","Stac Item could not be added.",detailErrArray);
-            ex.printStackTrace();
     }
     //For asynchronous request, log this response message
      if(async && reqType.equals("Feature"))
@@ -1855,8 +1849,7 @@ public class STACService extends Application {
 			}
 			
 		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("Stac response could not be preapred. " + e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("Stac response could not be preapred. " + e.getMessage());			
 		}
 		return finalResponse;
 	}

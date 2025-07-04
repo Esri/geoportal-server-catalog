@@ -39,6 +39,9 @@ import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.ResponseBuilder;
 import javax.ws.rs.core.Response.Status;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 
@@ -49,7 +52,7 @@ public class SearchRequest {
   
   /** The script engines. */
   private static Map<String,ScriptEngine> ENGINES = Collections.synchronizedMap(new HashMap<String,ScriptEngine>());
-  
+  private static final Logger LOGGER = LoggerFactory.getLogger(SearchRequest.class);
   /** Instance variables. */
   public Object appUser;
   private AsyncResponse asyncResponse;
@@ -211,7 +214,7 @@ public class SearchRequest {
     	      
       }
     } catch (Throwable t) {
-      t.printStackTrace();
+    	LOGGER.error(t.getMessage());
     }
     try {
       JsonObjectBuilder access = Json.createObjectBuilder();
@@ -237,7 +240,7 @@ public class SearchRequest {
       }
       elastic.add("access",access);
     } catch (Throwable t) {
-      t.printStackTrace();
+      LOGGER.error(t.getMessage());
     }
     if ((node != null) && (node.length() > 0)) {
       String idxName = ec.getIndexName();          
@@ -320,7 +323,7 @@ public class SearchRequest {
       Invocable invocable = (Invocable)engine;
       invocable.invokeFunction("execute",this,sRequestInfo,sSelfInfo);
     } catch (Throwable t) {
-      t.printStackTrace();
+    	LOGGER.error(t.getMessage());
       String msg = "{\"error\": \"Error processing request.\"}";
       putResponse(500,MediaType.APPLICATION_JSON,msg,null);
     }
