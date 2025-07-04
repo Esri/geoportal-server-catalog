@@ -48,9 +48,15 @@ jobs:
     #- name: Checkout tools repo
       #uses: actions/checkout@v4
       #with:
+<<<<<<< HEAD
         #repository: EsriPS/exxonmobil-gsdb
         #token: ${{ secrets.RB_PAT }}
         #path: exxonmobil-gsdb
+=======
+        #repository: 
+        #token: ${{ secrets.RB_PAT }}
+        #path: 
+>>>>>>> refs/remotes/origin/master
 
     - name: Extract ${{env.PROJECT_LOCATION}}/target/geoportal.war
       run: 7z x ${{env.PROJECT_LOCATION}}/target/geoportal.war -ogeoportal_war
