@@ -1079,12 +1079,6 @@ public class StacHelper {
           } else {
             requestedCRS = outCRS;
           }
-    	  //TODO Marten : Below code was givng me error so I used above (commented now) 
-//         JSONObject theAssets = (JSONObject) collectionObj.get("assets");
-//         JSONObject theCRS = (JSONObject) theAssets.get(outCRS);
-//         String wkt = theCRS.getAsString("esri:wkt");
-//         requestedCRS = "{\"wkt\": \"" + wkt.replace("\"", "\\\"") + "\"}";
-
       } else {
           // construct: {"wkid": 0000, "vcsWkid": 000000 }
           String wkid = outCRS.replace("EPSG:", "");
