@@ -108,8 +108,7 @@ public class GeometryServiceClient {
         this.wktTypes.put("LINESTRING", "esriGeometryPolyline");
         this.wktTypes.put("MULTILINESTRING", "esriGeometryPolyline");
         this.wktTypes.put("POLYGON", "esriGeometryPolygon");
-        this.wktTypes.put("MULTIPOLYGON", "esriGeometryPolygon");
-        //this.wktTypes.put("POLYHEDRAL", "esriGeometryPoint");
+        this.wktTypes.put("MULTIPOLYGON", "esriGeometryPolygon");        
         this.wktTypes.put("POLYHEDRAL", "esriGeometryPolygon");        
     }
 
@@ -811,7 +810,9 @@ public class GeometryServiceClient {
                              .replace(",", " ")
                              .replace("] [", ", ")
                              .replace("[", "(")
-                             .replace("]", ")");
+                             .replace("]", ")")
+              				 .replace("(((","(")
+              				.replace(")))",")");
             }            
             break;
             
@@ -944,7 +945,7 @@ public class GeometryServiceClient {
 
   
   /*
-   * Get the geometry from the field
+   * Get the ArcGIS geometry from the  field(geoJSON geometry)
    *
    * @param item - JSON Object of the item
    * @param geometryField - the field to get the geometry from
@@ -1046,10 +1047,36 @@ public class GeometryServiceClient {
         	          + "]}";
           }
           else if(geometryType.equalsIgnoreCase("MultilineString"))
-          {
-        	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");
-        	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
-        	          + "\"geometries\": [{\"paths\":"+polylineArr+"}]}";        	         
+          {        	 
+        	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");        	  
+        	  if(polylineArr.size()>0)
+        	  {
+        		  JSONArray polyLine = (JSONArray) polylineArr.get(0);
+        		  if(polyLine.size()>0)
+        		  {
+        			  JSONArray polyLinePoints = (JSONArray) polyLine.get(0);
+        			  if(polyLinePoints.size()==2)            	  
+            			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+                	          + "\"geometries\": [{\"paths\":"+polylineArr+"}]}"; 
+            		  if(polyLinePoints.size()==3)
+            			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+                    	          + "\"geometries\": [{\"hasZ\":true,\"paths\":"+polylineArr+"}]}"; 
+        		  }
+        	  }         	         
+          }
+          else if(geometryType.equalsIgnoreCase("LineString"))
+          {        	 
+        	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");        	  
+        	  if(polylineArr.size()>0)
+        	  {
+	    		  JSONArray polyLine = (JSONArray) polylineArr.get(0);        		  
+    			  if(polyLine.size()==2)            	  
+        			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+            	          + "\"geometries\": [{\"paths\":["+polylineArr+"]}]}"; 
+        		  if(polyLine.size()==3)
+        			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+                	          + "\"geometries\": [{\"hasZ\":true,\"paths\":["+polylineArr+"]}]}"; 
+        	  }         	         
           }
         }
         break;
