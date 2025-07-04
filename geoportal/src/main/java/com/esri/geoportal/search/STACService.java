@@ -530,7 +530,7 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting items " + e.getCause());
-			e.printStackTrace();
+			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500",
@@ -591,7 +591,7 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
 			LOGGER.error("Error in getting item with item id: " + id + " " + e.getCause());
-			e.printStackTrace();
+			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500",
@@ -2324,12 +2324,19 @@ public class STACService extends Application {
 	                         newGeometry.put("coordinates", theRings);
 	                         responseObject.put(thisGeometryField, newGeometry);
 	                         break outer;
-	                  	case "MULTILINESTRING":                 		 
-	                        JSONArray thePaths = (JSONArray) projectedGeom.get("paths");                        
+	                  	case "MULTILINESTRING": 
+	                  		JSONArray thePaths = (JSONArray) projectedGeom.get("paths");                        
 	                        newGeometry.put("type", geomType);
 	                        newGeometry.put("coordinates", thePaths);
 	                        responseObject.put(thisGeometryField, newGeometry);
 	                        break outer;
+	                  	case "LINESTRING":
+	                        JSONArray paths = (JSONArray) projectedGeom.get("paths");                        
+	                        newGeometry.put("type", geomType);
+	                        newGeometry.put("coordinates", paths.get(0));
+	                        responseObject.put(thisGeometryField, newGeometry);
+	                        break outer;
+	                	
 	                  	 default:
 	                         LOGGER.error("Unsupported geometry type for projection: " + geomType);
 	                  }
