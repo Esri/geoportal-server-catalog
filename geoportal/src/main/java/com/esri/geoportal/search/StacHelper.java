@@ -978,7 +978,7 @@ public class StacHelper {
 			}
 		}catch(Exception e)
 		{
-			e.printStackTrace();
+			LOGGER.error(e.getMessage());
 			resObj.put("code", "500");
 			resObj.put("description", "Stac features could not be deleted from collection. "+e.getCause());
 			return resObj;
@@ -1016,7 +1016,7 @@ public class StacHelper {
 					resObj.put("code", "200");
 					resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+". Collection is deleted.");
 				}catch (Exception e) {					
-					e.printStackTrace();
+					LOGGER.error(e.getMessage());
 					resObj.put("code", "500");
 					resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+" but collection could not be deleted."+e.getCause());
 				}

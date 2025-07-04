@@ -69,7 +69,7 @@ import net.minidev.json.JSONObject;
 public class OGCRecordsService extends Application {
 
 	/** Logger. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(STACService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(OGCRecordsService.class);
 
 	@Override
 	public Set<Class<?>> getClasses() {
@@ -227,8 +227,7 @@ public class OGCRecordsService extends Application {
 			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime,title,provider,querydsl);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in getting items " + e.getCause());
-			e.printStackTrace();
+			LOGGER.error("Error in getting items " + e.getMessage());			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "OGCRecords API Collection metadata items response could not be generated.");
 			
@@ -264,8 +263,8 @@ public class OGCRecordsService extends Application {
 			responseJSON = this.prepareSingleItemResponse(response, hsr);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in getting item with item id: "+id+" " + e.getCause());
-			e.printStackTrace();
+			LOGGER.error("Error in getting item with item id: "+id+" " + e.getMessage());
+			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "OGCRecords API Collection metadata item response could not be generated.");
 
@@ -307,8 +306,7 @@ public class OGCRecordsService extends Application {
 			}
 			
 		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("ogcrecords response could not be preapred. "+e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("ogcrecords response could not be preapred. "+e.getMessage());			
 		}
 		return finalResponse;
 	}
@@ -386,8 +384,7 @@ public class OGCRecordsService extends Application {
 			
 			finalResponse = finalResponse.replaceAll("\\{urlparam\\}", urlparam);
 		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("ogcrecords response could not be preapred. "+e.getMessage());
-			e.printStackTrace();
+			LOGGER.error("ogcrecords response could not be preapred. "+e.getMessage());			
 		}
 		return finalResponse;
 	}

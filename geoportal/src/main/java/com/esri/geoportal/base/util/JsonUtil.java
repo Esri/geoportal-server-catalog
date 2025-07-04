@@ -33,16 +33,19 @@ import javax.json.JsonReader;
 import javax.json.JsonString;
 import javax.json.JsonStructure;
 import javax.json.JsonValue;
+import javax.json.JsonValue.ValueType;
 import javax.json.JsonWriter;
 import javax.json.JsonWriterFactory;
-import javax.json.JsonValue.ValueType;
 import javax.json.stream.JsonGenerator;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 /**
  * JSON utilities.
  */
 public class JsonUtil {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(JsonUtil.class);
   /**
    * Adds an error to an object.
    * @param jso the parent
@@ -240,7 +243,7 @@ public class JsonUtil {
       try {
         if (writer != null) writer.close();
       } catch (Throwable t) {
-        t.printStackTrace(System.err);
+    	  LOGGER.error(t.getMessage());
       }
     }
     return result.toString().trim();

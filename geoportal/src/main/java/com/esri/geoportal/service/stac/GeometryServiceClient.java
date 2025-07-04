@@ -218,14 +218,14 @@ public class GeometryServiceClient {
                     wr.close();
                 }
             } catch (Exception ef) {
-                ef.printStackTrace();
+            	LOGGER.error("Send request: "+ef.getMessage());               
             }
             try {
                 if (br != null) {
                     br.close();
                 }
             } catch (Exception ef) {
-                ef.printStackTrace();
+            	LOGGER.error("Send request: "+ef.getMessage());
             }
         }
         //System.err.println("result:\r\n"+result);

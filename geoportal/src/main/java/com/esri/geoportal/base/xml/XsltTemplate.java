@@ -190,8 +190,7 @@ public class XsltTemplate {
     }
     /*
     for (Exception e: exceptions) {
-      // TODO:logging??
-      //e.printStackTrace();
+      // TODO:logging??      
       //LOGGER.log(Level.SEVERE,"Error while making template from " + path, e);
     }
     */
