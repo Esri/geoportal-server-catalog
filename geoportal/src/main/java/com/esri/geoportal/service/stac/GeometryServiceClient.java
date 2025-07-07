@@ -16,6 +16,7 @@ package com.esri.geoportal.service.stac;
 
 import java.io.BufferedReader;
 import java.io.DataOutputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
@@ -24,23 +25,26 @@ import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
 import java.security.SecureRandom;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
 import javax.net.ssl.SSLContext;
 
-import net.minidev.json.JSONObject;
-
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.http.MockTrustManager;
-import java.io.IOException;
-import java.util.Map;
-import java.util.Map.Entry;
+
 import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.parser.JSONParser;
+import net.minidev.json.parser.ParseException;
 
 /**
  * An HTTP client for Geometry service.
@@ -53,12 +57,14 @@ public class GeometryServiceClient {
     private String baseUrl;
     private String projectUrl;
     private String intersectUrl;
-    private String basicCredentials;
-    private boolean useHttps;
+    private String convexHullURL;
 
     // Create a HashMap of geojson and WKT to arcgis geometry types
     private Map<String, String> geometryTypes = new HashMap<>();
     private Map<String, String> wktTypes = new HashMap<>();
+    
+    //Geometry source for generated geometries (point and polygon from polyhedral surface)
+    private String geomSourceSystem ="gsdb";
     
 
     /**
@@ -85,6 +91,7 @@ public class GeometryServiceClient {
         this.baseUrl = baseUrl;
         this.projectUrl = baseUrl + "/project";
         this.intersectUrl = baseUrl + "/intersect";
+        this.convexHullURL = baseUrl + "/convexHull";
 
         // Add key-value pairs, GeoJSON as keys, ArcGIS types as values
         this.geometryTypes.put("Point", "esriGeometryPoint");
@@ -101,7 +108,7 @@ public class GeometryServiceClient {
         this.wktTypes.put("LINESTRING", "esriGeometryPolyline");
         this.wktTypes.put("MULTILINESTRING", "esriGeometryPolyline");
         this.wktTypes.put("POLYGON", "esriGeometryPolygon");
-        this.wktTypes.put("MULTIPOLYGON", "esriGeometryPolygon");
+        this.wktTypes.put("MULTIPOLYGON", "esriGeometryPolygon");        
         this.wktTypes.put("POLYHEDRAL", "esriGeometryPolygon");        
     }
 
@@ -211,14 +218,14 @@ public class GeometryServiceClient {
                     wr.close();
                 }
             } catch (Exception ef) {
-                ef.printStackTrace();
+            	LOGGER.error("Send request: "+ef.getMessage());               
             }
             try {
                 if (br != null) {
                     br.close();
                 }
             } catch (Exception ef) {
-                ef.printStackTrace();
+            	LOGGER.error("Send request: "+ef.getMessage());
             }
         }
         //System.err.println("result:\r\n"+result);
@@ -247,6 +254,47 @@ public class GeometryServiceClient {
      */
     public String sendPost(String url, String data, String dataContentType) throws Exception {
         return send("POST", url, data, dataContentType);
+    }
+    
+    /**
+     * Returns convex Hall Polygon
+     *
+     * @param geometryOne
+     * @param geometryTwo
+     * @return true if and only if the geometries intersect
+     * @throws IOException if an issue occurs in communicating with the geometry service
+     */
+    public String getConvexHull(String geometry) throws IOException {
+        String formData = "sr=4326";
+        formData += "&geometries=" + URLEncoder.encode(geometry, "UTF-8");        
+        formData += "&f=json";
+
+        URL obj = new URL(this.convexHullURL);
+        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        
+        LOGGER.debug("com.esri.geoportal.service.stac - convexHull: formData = " + formData);     
+
+        // Set the request method to POST
+        con.setRequestMethod("POST");
+        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
+        con.setRequestProperty("Content-Length", Integer.toString(formData.getBytes().length));
+        con.setDoOutput(true);
+
+        // Send the form data
+        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
+        wr.writeBytes(formData);
+        wr.flush();
+        wr.close();
+        
+        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
+        String inputLine;
+        StringBuilder response = new StringBuilder();
+
+        while ((inputLine = in.readLine()) != null) {
+            response.append(inputLine);
+        }
+        in.close();
+        return response.toString();
     }
     
     
@@ -307,13 +355,13 @@ public class GeometryServiceClient {
      * @return the projected geometries
      * @throws IOException if an issue occurs in communicating with the geometry service
      */
-    public String doProjection(String geometries, String inCRS, String outCRS) throws IOException {
+    public String doProjection(String geometries, String inCRS, String outCRS, Boolean vertical) throws IOException {
         String formData = "inSr=" + inCRS;
         formData += "&outSR=" + outCRS;
         formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
         formData += "&transformation=";
         formData += "&transformForward=true";
-        formData += "&vertical=true";
+        formData += "&vertical=" + vertical.toString();
         formData += "&f=json";
 
         URL obj = new URL(this.projectUrl);
@@ -536,7 +584,7 @@ public class GeometryServiceClient {
             }
             
             // add the paths to the geometry
-            geometries += "\"paths\": [[";
+            geometries += "\"paths\": [";
 			
             String[] wktPathML = wktCoordinates.split("\\),[ ]*\\(");
             boolean firstPath = true;
@@ -598,6 +646,7 @@ public class GeometryServiceClient {
                                                .replace("(", "[")
                                                .replace(")", "]")
                                                .replace(", ", "],[")
+                                              // .replace(",", "],[")
                                                .replace(" ", ",");
             geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [ {";
 
@@ -610,7 +659,7 @@ public class GeometryServiceClient {
             
             break;
             
-          case "POLYHEDRAL":
+          case "POLYHEDRAL":        	
             /*
               POLYHEDRALSURFACE Z ( PATCHES
               ((5 50 0, 6 50 0, 6 51 0, 5 51 0, 5 50 0)),
@@ -621,10 +670,20 @@ public class GeometryServiceClient {
               ((6 51 1, 6 51 0, 6 50 0, 6 50 1, 6 51 1))
               )
             */
-            
-            String patches = wkt.trim().substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+        	  wkt = wkt.trim();
+        	  String patches=""; 
+            if(wkt.indexOf("PATCHES")>-1)
+            {
+            	 patches = wkt.substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+            }
+            else
+            {
+            	patches = wkt.substring(wkt.indexOf("POLYHEDRALSURFACE Z (") + 21, wkt.length()-1).trim();
+            }
+           
             String regex = "[))]";
             String[] polygons = patches.split(regex);
+            hasZ = true;  // polyhedral always has Z
             
             // now build ArcGIS geometry as list of polygon geometries
             geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [";
@@ -751,7 +810,9 @@ public class GeometryServiceClient {
                              .replace(",", " ")
                              .replace("] [", ", ")
                              .replace("[", "(")
-                             .replace("]", ")");
+                             .replace("]", ")")
+              				 .replace("(((","(")
+              				.replace(")))",")");
             }            
             break;
             
@@ -816,7 +877,11 @@ public class GeometryServiceClient {
             */
             arcgisGeometry = (JSONObject) arcgisGeometries.get(0);
             String polyHasZ = arcgisGeometry.getAsString("hasZ");
-            hasZ = polyHasZ.equalsIgnoreCase("true");
+            if (polyHasZ != null && !polyHasZ.isEmpty()) {
+              hasZ = polyHasZ.equalsIgnoreCase("true");
+            } else {
+              hasZ = false;
+            }
             JSONArray rings = (JSONArray) arcgisGeometry.get("rings");
 
             if (!rings.isEmpty()) {
@@ -835,19 +900,13 @@ public class GeometryServiceClient {
 
             break;
             
-          case "POLYHEDRAL":
-            /*
-              FROM:
-              {
-                "geometryType": "esriGeometryPolygon", 
-                "geometries": [
-                  {"hasZ": true, "rings": [[[ 5, 50, 0], [ 6, 50, 0], [ 6, 51, 0], [ 5, 51, 0], [ 5, 50, 0]]]}, 
-                  ...
-                  {"hasZ": true, "rings": [[ [ 6, 51, 1], [ 6, 51, 0], [ 6, 50, 0], [ 6, 50, 1], [ 6, 51, 1]]]}
-                ]
-              }
-
-              TO: 
+          case "POLYHEDRAL":        	  
+        	  //From JSONArray of point geometries; One point geometry array is one face of polyhedral 
+        	  
+     /* From [
+[{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466044172279,"y":30.070112205772554,"z":8.248000020980836},{"x":-94.08466049705821,"y":30.070114954929413,"z":8.248000020980836},{"x":-94.08466365780316,"y":30.07011490679985,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":7.248000020980835}],
+[{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466044172279,"y":30.070112205772554,"z":8.248000020980836},{"x":-94.08466049705821,"y":30.070114954929413,"z":8.248000020980836},{"x":-94.08466365780316,"y":30.07011490679985,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":8.248000020980836},{"x":-94.08466360246766,"y":30.070112157642993,"z":7.248000020980835}]
+]       TO: 
               POLYHEDRALSURFACE Z ( 
                 PATCHES ((5 50 0, 6 50 0, 6 51 0, 5 51 0, 5 50 0)),
                         ...
@@ -855,32 +914,25 @@ public class GeometryServiceClient {
               )
             */
             
-            // start wkt, polyhedralsurface always has Z
-            wkt = "POLYHEDRALSURFACE Z ( PATCHES ";
-            
-            /* 
-              the polyhedral geometry is stored in the ArcGIS JSON as
-              a list of polygons. every face of the polyhedral is stored
-              as a polygon with 1 ring
-            */
+            // start wkt, polyhedralsurface always has Z           
+            wkt = "POLYHEDRALSURFACE Z (";
             for (int i=0; i<arcgisGeometries.size(); i++) {
-              JSONObject face = (JSONObject) arcgisGeometries.get(i);
-              JSONArray edges = (JSONArray) face.get("rings");
-              if (!edges.isEmpty()) {
-                JSONArray firstEdge = (JSONArray) edges.get(0);
-
-                wkt += firstEdge.toString()
-                                .replace(",", " ")
-                                .replace("] [", ", ")
-                                .replace("[", "(")
-                                .replace("]", ")");
-              }
+            	JSONArray face = (JSONArray) arcgisGeometries.get(i);
+            	wkt+= "((";
+            	 for (int j=0; j<face.size(); j++) {            		 
+            		 JSONObject pointObj = (JSONObject) face.get(j);
+            		 if(j == face.size()-1)
+            			 wkt+= pointObj.getAsString("x")+" "+pointObj.getAsString("y")+" "+pointObj.getAsString("z");
+            		 else
+            			 wkt+= pointObj.getAsString("x")+" "+pointObj.getAsString("y")+" "+pointObj.getAsString("z")+", ";
+            	 }
+            	 if(i == arcgisGeometries.size()-1)
+            		 wkt+= "))";
+            	 else
+            		 wkt+= ")), "; 
             }
-            wkt = wkt.replace("))((", ")), ((");
-            
             // finish wkt
-            wkt += " )";
-            
+            wkt += ")";            
             break;
             
           default:
@@ -893,7 +945,7 @@ public class GeometryServiceClient {
 
   
   /*
-   * Get the geometry from the field
+   * Get the ArcGIS geometry from the  field(geoJSON geometry)
    *
    * @param item - JSON Object of the item
    * @param geometryField - the field to get the geometry from
@@ -958,35 +1010,75 @@ public class GeometryServiceClient {
       case "shape_geo":
         if(item.containsKey(geometryField) && item.get(geometryField) != null){
           JSONObject geometry = new JSONObject((Map<String, ?>) item.get(geometryField));
-          LOGGER.debug("geometry = " + geometry.toString()); 
-
-          String coordinates = geometry.getAsString("coordinates");
+          LOGGER.debug("geometry = " + geometry.toString());          
           
           String geometryType = geometry.getAsString("type");
           if(geometryType.equalsIgnoreCase("Polygon"))
           {
+        	  boolean hasZ = false;
+              String coordinates = geometry.getAsString("coordinates");
+              //Check if it has z value
+              JSONArray coordArr =(JSONArray) geometry.get("coordinates");
+              if(coordArr.size()>0)
+              {
+            	 JSONArray pointCoord=  (JSONArray)coordArr.get(0);
+            	 if(pointCoord!= null && pointCoord.size()>2)
+            	 {
+            		 hasZ = true;
+            	 }
+              }
         	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
         	          + "\"geometries\": [ "
-        	          + "{ \"rings\": " + coordinates + "}"
+        	          + "{"+(hasZ? "\"hasZ\":true, ":"")+" \"rings\": " + coordinates + "}"
         	          + "]}";
           }
           else if(geometryType.equalsIgnoreCase("Point"))
           {
+        	  String coordinateStr ="";
         	  JSONArray pointArr =(JSONArray) geometry.get("coordinates");
+        	  if(pointArr.size()==2)
+        		  coordinateStr = "{ \"x\": " + pointArr.get(0) + ",\"y\":" + pointArr.get(1)+"}";
+        	  if(pointArr.size()==3)
+        		  coordinateStr = "{ \"x\": " + pointArr.get(0) + ",\"y\":" + pointArr.get(1)+",\"z\":" + pointArr.get(2)+"}";
+        	  
         	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
         	          + "\"geometries\": [ "
-        	          + "{ \"x\": " + pointArr.get(0) + ",\"y\":" + pointArr.get(1)+"}"
+        	          + coordinateStr
         	          + "]}";
           }
           else if(geometryType.equalsIgnoreCase("MultilineString"))
-          {
-        	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");
-        	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
-        	          + "\"geometries\": [{\"paths\":"+polylineArr+"}]}";
-        	         
+          {        	 
+        	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");        	  
+        	  if(polylineArr.size()>0)
+        	  {
+        		  JSONArray polyLine = (JSONArray) polylineArr.get(0);
+        		  if(polyLine.size()>0)
+        		  {
+        			  JSONArray polyLinePoints = (JSONArray) polyLine.get(0);
+        			  if(polyLinePoints.size()==2)            	  
+            			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+                	          + "\"geometries\": [{\"paths\":"+polylineArr+"}]}"; 
+            		  if(polyLinePoints.size()==3)
+            			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+                    	          + "\"geometries\": [{\"hasZ\":true,\"paths\":"+polylineArr+"}]}"; 
+        		  }
+        	  }         	         
           }
-        }        
-
+          else if(geometryType.equalsIgnoreCase("LineString"))
+          {        	 
+        	  JSONArray polylineArr =(JSONArray) geometry.get("coordinates");        	  
+        	  if(polylineArr.size()>0)
+        	  {
+	    		  JSONArray polyLine = (JSONArray) polylineArr.get(0);        		  
+    			  if(polyLine.size()==2)            	  
+        			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+            	          + "\"geometries\": [{\"paths\":["+polylineArr+"]}]}"; 
+        		  if(polyLine.size()==3)
+        			  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
+                	          + "\"geometries\": [{\"hasZ\":true,\"paths\":["+polylineArr+"]}]}"; 
+        	  }         	         
+          }
+        }
         break;
         
       default:
@@ -995,5 +1087,206 @@ public class GeometryServiceClient {
     }
 
     return geometries;
-  }    
+  } 
+  	
+	 /**Returns polyhedral footprint
+	 * Taking every (x,y,z) point from the polyhedral, remove the z everywhere, leaving a list of (x,y) points. 
+	 * Create a convex hull around those points
+	 * @param polyhedralGeomWKTObj
+	 * @return
+	 * @throws IOException
+	 * @throws ParseException
+	 */
+	public JSONObject getPolyhedralFootprint(JSONObject polyhedralGeomWKTObj) throws IOException, ParseException
+	  { 
+		  JSONObject polygonWKTObj = new JSONObject();		  
+		  ArrayList<String[]> verticesArrList = getPolyhedralVerticesArr(polyhedralGeomWKTObj);
+		  double[] point = new double[2];
+		  ArrayList<double[]> pointList = new ArrayList<>();
+		  String[] xyArr = null;
+		  String inputGeomStr = "[";
+		  for (int j = 0; j < verticesArrList.size(); j++) {
+			xyArr = verticesArrList.get(j);	
+			if(xyArr.length>1)
+			{
+				//Get all the points
+				point [0] = Double.parseDouble(xyArr[0]); //x 
+				point [1] = Double.parseDouble(xyArr[1]); //y	
+				if(j==0)
+				{
+					inputGeomStr = inputGeomStr+ Arrays.toString(point);
+				}
+				else {
+					inputGeomStr = inputGeomStr +","+ Arrays.toString(point);
+					pointList.add(point);
+				}				
+			}			
+		 }
+		  inputGeomStr = inputGeomStr+"]";
+		  if(inputGeomStr.length() < 3)		//Means no points added	 
+		  {
+			  return polygonWKTObj;
+		  }
+
+		 String geometryType = "esriGeometryMultipoint";
+       
+       	 String inputGeometry = "{\"geometryType\": \"" + geometryType + "\", "
+       	          + "\"geometries\": [ "
+       	          + "{\"points\":"+ inputGeomStr+","       	       
+       	          +"\"spatialReference\": { \"wkid\": 4326 }}"
+       	          + "]}";
+       	 
+         String geometryResponse = getConvexHull(inputGeometry);
+         JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+         if (!geometryResponse.isBlank()) {
+             // get geometries as JSON object
+            
+           JSONObject geometryResponseObject = (JSONObject) jsonParser.parse(geometryResponse);
+           if (geometryResponseObject.containsKey("geometry")) {
+             JSONObject polyGeom = (JSONObject) geometryResponseObject.get("geometry");
+             JSONArray geomArr = new JSONArray();
+             geomArr.add(polyGeom);
+             String polygonWkt = getWKTGeometry("POLYGON", geomArr);
+             polygonWKTObj.put("wkt", polygonWkt);
+             polygonWKTObj.put("geometry_source", geomSourceSystem);
+             polygonWKTObj.put("update_date", DateUtil.nowAsString());            
+           }           
+         }
+		 return polygonWKTObj;
+	  }
+  
+  
+  	/**
+	 * Returns POINT wkt from a polyhedral wkt:
+	 * (re)generate a point geometry from the submitted polyhedral by averaging the x, y, and z coordinates 
+	 * @param polyhedralGeomWKTObj 
+	 * @return
+	 */
+  public JSONObject getPointFromPolyhedralWKT(JSONObject polyhedralGeomWKTObj)
+  {	 	
+		JSONObject pointWktObj = new JSONObject();
+		double x = 0.0;
+		double y = 0.0;
+		double z = 0.0;
+		ArrayList<String[]> verticesArrList = getPolyhedralVerticesArr(polyhedralGeomWKTObj);
+		
+		int numberOfVertex=0;
+		for (int j = 0; j < verticesArrList.size(); j++) {			
+			String[] xyzArr = verticesArrList.get(j);
+			if (xyzArr.length == 3) {
+				if (xyzArr[0] != null && !xyzArr[0].isBlank())
+					x = x + Double.parseDouble(xyzArr[0]);
+
+				if (xyzArr[1] != null && !xyzArr[1].isBlank())
+					y = y + Double.parseDouble(xyzArr[1]);
+
+				if (xyzArr[2] != null && !xyzArr[2].isBlank())
+					z = z + Double.parseDouble(xyzArr[2]);
+				numberOfVertex ++;
+			}
+		}
+		if(numberOfVertex >0)
+		{
+			// Get average and create POINT
+			double avjX = x / numberOfVertex;
+			double avjY = y / numberOfVertex;
+			double avjZ = z / numberOfVertex;
+
+			pointWktObj.put("wkt", "POINT (" + avjX + " " + avjY + " " + avjZ + ")");
+			pointWktObj.put("geometry_source", geomSourceSystem);
+			pointWktObj.put("update_date", DateUtil.nowAsString());	
+		}
+		return pointWktObj;
+  }
+  
+  private ArrayList<String[]> getPolyhedralVerticesArr(JSONObject polyhedralGeomWKTObj) {	  
+	 
+	  ArrayList<String[]> verticesArrList = new ArrayList<>();
+	  
+	  String wkt = polyhedralGeomWKTObj.getAsString("wkt");	
+	  String patch =""; 
+	  if(wkt !=null && !wkt.isBlank()) {
+		  wkt = wkt.trim();
+		  if(wkt.indexOf("PATCHES")>-1)
+          {
+          	 patch = wkt.substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+          }
+          else
+          {
+          	patch = wkt.substring(wkt.indexOf("POLYHEDRALSURFACE Z (") + 21, wkt.length()-1).trim();
+          }
+		  String patches = patch.replace("((", "");
+		  String regex = "[))]";
+		  String[] polygonArr = patches.split(regex);
+		  
+		  
+		  String verticesBeforeTrim, vertices="";String[] verticesArr = null;
+		  //Count the number of vertices and get sum of x,y and z
+		  for(int i=0; i<polygonArr.length;i++)
+		  {
+			  verticesBeforeTrim = polygonArr[i];
+			  vertices = verticesBeforeTrim.replace(", ",",");
+			  verticesArr = vertices.split(",");
+			  
+			  for(int j=0;j<verticesArr.length;j++)
+	    	  {
+				  String[] vertexArr = verticesArr[j].split(" ");
+				  verticesArrList.add(vertexArr);
+	    	  }
+		  } 
+	  }
+	  return verticesArrList;		  
+	  
+  	}
+
+	public ArrayList<String> getArcGISGeometryForPolyhedral(JSONObject wktGeometry) {
+		ArrayList<String> pointGeomList= new ArrayList<>();
+		  String arcgisGeometryType = "esriGeometryPoint";
+	      String pointGeometries = "";
+	      
+	      JSONObject geometry = (JSONObject) wktGeometry.get("polyhedral");
+	      String wkt = geometry.getAsString("wkt");
+			wkt = wkt.trim();
+			String patches=""; 
+		  if(wkt.indexOf("PATCHES")>-1)
+		  {
+		  	 patches = wkt.substring(wkt.indexOf("PATCHES") + 7, wkt.length()-1).trim();
+		  }
+		  else
+		  {
+		  	patches = wkt.substring(wkt.indexOf("POLYHEDRALSURFACE Z (") + 21, wkt.length()-1).trim();
+		  }
+		 
+		  String regex = "[))]";
+		  String[] polygons = patches.split(regex);
+		  
+		  // now build ArcGIS geometry as point geometries array
+		  for (String polygon : polygons) {
+		    if (!polygon.isEmpty()) {
+		      // start polygon json
+		      pointGeometries += "{";	        
+		
+		      String polyCoordinateString = polygon.replace(", ((","").replace("((","");
+		      String[] polyCoordinates = polyCoordinateString.split(",");	
+		      //Create point geom for each polygon point 
+		      pointGeometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [";
+		      for(int i=0; i<polyCoordinates.length;i++)
+		      {
+		    	  String polyCoordXyz = polyCoordinates[i].trim();
+			      String[] polyCoordXYZArr = polyCoordXyz.split(" ");
+			      if(i==polyCoordinates.length-1)
+			    	  pointGeometries += "{\"hasZ\":true,\"x\":"+polyCoordXYZArr[0]+",\"y\":"+polyCoordXYZArr[1]+",\"z\":"+polyCoordXYZArr[2]+"}";
+			      else
+			      {
+			    	  pointGeometries += "{\"hasZ\":true,\"x\":"+polyCoordXYZArr[0]+",\"y\":"+polyCoordXYZArr[1]+",\"z\":"+polyCoordXYZArr[2]+"},"; 
+			      }
+		      }
+		      pointGeometries += " ]}";
+		      pointGeomList.add(pointGeometries);
+		    }
+		  }
+		  return pointGeomList;
+	}
+	
+           
 }

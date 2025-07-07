@@ -193,7 +193,7 @@ public class BulkRequest extends AppRequest {
               logFeedback(tStart,count.get(),scroller.getTotalHits(),last);
             }
           } catch (Exception e) {
-            e.printStackTrace();
+        	  LOGGER.error(e.getMessage());
           }
         }
         public boolean isLast() {

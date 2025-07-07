@@ -26,15 +26,21 @@
         </a>
       </li>
 
-      <li class="nav-item" role="presentation">
+      <li class="nav-item" role="presentation" data-dojo-attach-point="mapPanelBtnNode">
         <a class="nav-link" id="map-tab"  href="#mapPanel" data-bs-toggle="tab" role="tab" aria-controls="mapPanel">
           ${i18n.nav.map}
         </a>
       </li>
 
-      <li class="nav-item">
+      <li class="nav-item" data-dojo-attach-point="apiPanelBtnNode">
         <a class="nav-link" id="api-tab"  href="#apiPanel" data-bs-toggle="tab" role="tab" aria-controls="apiPanel">
           ${i18n.nav.api}
+        </a>
+      </li>
+
+      <li class="nav-item" data-dojo-attach-point="collectionsPanelBtnNode">
+      	<a class="nav-link" id="collections-tab" data-bs-target="#collectionsPanel" href="#collectionsPanel" data-bs-toggle="tab" role="tab" aria-controls="collectionsPanel">
+          Collections
         </a>
       </li>
       
@@ -87,7 +93,7 @@
         --></ul>
       </li>
 
-      <li class="nav-item">
+      <li class="nav-item" data-dojo-attach-point="aboutPanelBtnNode">
       	<a class="nav-link" id="about-tab" data-bs-target="#aboutPanel" href="#aboutPanel" data-bs-toggle="tab" role="tab" aria-controls="aboutPanel">
            ${i18n.nav.about}
         </a>
@@ -172,6 +178,12 @@
       <div
         data-dojo-type="app/main/APIPanel"
         data-dojo-attach-point="apiPanel"
+      ></div>
+    </div>
+    <div id="collectionsPanel" role="tabpanel" class="tab-pane fade">
+      <div
+        data-dojo-type="app/main/CollectionsPanel"
+        data-dojo-attach-point="collectionsPanel"
       ></div>
     </div>
     <div id="cartPanel" role="tabpanel" class="tab-pane fade">
