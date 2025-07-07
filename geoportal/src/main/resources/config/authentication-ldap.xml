@@ -5,12 +5,22 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
     http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-5.8.xsd">
-	
-  <security:ldap-server 
-    id="ldapServer"
-    url="${ldap_url:ldap://gptsrv08r2:10389}"
-    manager-dn="${ldap_manager_dn:uid=admin, ou=system}"
-    manager-password="${ldap_manager_password:secret}" />
+  
+   <beans:bean id="ldapServer" class="org.springframework.ldap.core.support.LdapContextSource">
+   	<beans:property name="url" value="ldap://gptelastic:10389"></beans:property>
+   	<beans:property name="userDn" value="uid=admin, ou=system"></beans:property>
+   	<beans:property name="password">
+	   	 <beans:bean id="Decrypt" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
+            <beans:property name="targetClass" value="com.esri.geoportal.lib.security.EncryptDecrypt" />
+            <beans:property name="staticMethod" value="com.esri.geoportal.lib.security.EncryptDecrypt.decryptLdapPass" />
+            <beans:property name="arguments">
+              <beans:list>
+                <beans:value>${ldap_manager_password}</beans:value>
+              </beans:list>
+             </beans:property>
+          </beans:bean>
+      </beans:property>	   	
+   </beans:bean>
 	
   <security:authentication-manager id="authenticationManager" alias="authenticationManager">
     <security:ldap-authentication-provider 

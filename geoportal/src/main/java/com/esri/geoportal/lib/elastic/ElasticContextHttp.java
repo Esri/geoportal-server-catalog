@@ -254,13 +254,17 @@ public class ElasticContextHttp extends ElasticContext {
   @Override
   public void startup() {
     LOGGER.info("Starting up ElasticContextHttp...");
-    String[] nodeNames = this.nodesToArray();
+    if(!getAwsOpenSearchType().equals("serverless")) //Nodenames are not used in case of AWS opensearch serverless, only ALB endpoint
+    {
+    	String[] nodeNames = this.nodesToArray();
         if ((nodeNames == null) || (nodeNames.length == 0)) {
-      LOGGER.warn("Configuration warning: Elasticsearch - no nodes defined.");
-    } else if (wasStarted) {
+        	LOGGER.warn("Configuration warning: Elasticsearch - no nodes defined.");
+        	return;
+        }    	
+    } 
+    if (wasStarted) {
       LOGGER.warn("Configuration warning: ElasticContextHttp has already been started.");
-    } else {
-      
+    } else {      
       if (this.getAutoCreateIndex()) {
         String indexName = getItemIndexName();
         String collectionIndexName = getCollectionIndexName();

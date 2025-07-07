@@ -20,13 +20,18 @@ import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonObjectBuilder;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.search.StacHelper;
 
 /**
  * Scroll through a collection of documents using PIT search
  */
 public class PITSearchScroller extends BaseScroller{  
+	private static final Logger LOGGER = LoggerFactory.getLogger(PITSearchScroller.class);
  
   /**
    * Pagination with PIT and search_after
@@ -126,7 +131,7 @@ public class PITSearchScroller extends BaseScroller{
           client.send("DELETE",client.getBaseUrl()+"/_search/point_in_time",request.build().toString(),contentType);
         }
       } catch (Throwable t) {
-        t.printStackTrace();
+    	  LOGGER.error(t.getMessage());
       }
      
     }

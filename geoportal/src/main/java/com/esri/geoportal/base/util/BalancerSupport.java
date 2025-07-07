@@ -22,6 +22,9 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import javax.servlet.http.HttpServletRequest;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 
@@ -36,7 +39,8 @@ public class BalancerSupport {
   private List<BalancerNode> balancerNodes = new ArrayList<>();
   private boolean is7Plus;
   private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
-
+  private static final Logger LOGGER = LoggerFactory.getLogger(BalancerSupport.class);
+  
   public boolean getIs7Plus() {
     return is7Plus;
   }
@@ -125,7 +129,7 @@ public class BalancerSupport {
       String uri = URI.create(target.toString()).normalize().toString();
       return uri;
     } catch (Exception e) {
-      e.printStackTrace();
+    	LOGGER.error(e.getMessage());
     }
     return null;
   }

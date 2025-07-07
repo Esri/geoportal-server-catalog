@@ -101,11 +101,34 @@ function(declare, lang, Deferred, dojoRequest) {
     },
 
     pingGeoportal: function(accessToken) {
+     var dfd = new Deferred();
       var url = this.getRestUri()+"/geoportal";
       var info = {handleAs:"json"};
       if (!accessToken) accessToken = this.getAccessToken();
       if (accessToken) info.query = {access_token:encodeURIComponent(accessToken)};
-      return dojoRequest.get(url,info);
+      if(AppContext.appConfig.system.secureCatalogApp)
+      {
+    	  if(accessToken)
+		  {
+    		  dojoRequest.get(url,info).then(function(geoportalInfo){
+    			  dfd.resolve(geoportalInfo);
+    		  }).catch(function(error){
+    			  dfd.reject(error);
+    		  });
+		  }
+    	  else //this function will again be invoked after signin
+		  {
+    		  dfd.resolve(); 
+		  }
+      }else
+	  {
+    	  dojoRequest.get(url,info).then(function(geoportalInfo){
+			  dfd.resolve(geoportalInfo);
+		  }).catch(function(error){
+			  dfd.reject(error);
+		  });
+	  }
+      return dfd;
     },
     
     readMetadata: function(itemId) {

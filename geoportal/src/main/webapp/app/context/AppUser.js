@@ -145,7 +145,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
                 };
                 self.preserveTokenInfo(cValue, new Date(Date.now() + oauthToken.expires_in * 1000));
               }
-              
+              AppContext.geoportal = info;
               topic.publish(appTopics.SignedIn,{geoportalUser:info.user});
               dfd.resolve();
             } else {

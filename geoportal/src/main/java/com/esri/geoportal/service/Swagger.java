@@ -14,6 +14,7 @@
  */
 package com.esri.geoportal.service;
 import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.search.StacHelper;
 
 import java.io.File;
 import java.nio.file.Files;
@@ -29,6 +30,9 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 /**
  * Swagger API configuration and redirect.
  * <p>
@@ -38,7 +42,7 @@ import javax.ws.rs.core.Response;
 @ApplicationPath("swagger")
 @Path("swagger.json")
 public class Swagger extends Application {
-
+	private static final Logger LOGGER = LoggerFactory.getLogger(Swagger.class);
   @Override
   public Set<Class<?>> getClasses() {
     Set<Class<?>> resources = new HashSet<Class<?>>();
@@ -61,7 +65,7 @@ public class Swagger extends Application {
       v = v.replaceAll("\\$\\{contextPath}",contextPath);
       return Response.ok(v).type(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8")).build();
     } catch(Exception ex) {
-      ex.printStackTrace();
+    	LOGGER.error(ex.getMessage());
       return (new AppResponse()).buildException(ex,pretty);
     }
   }

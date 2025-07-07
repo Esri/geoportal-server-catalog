@@ -8,7 +8,7 @@
     http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-5.8.xsd
     http://www.springframework.org/schema/security/oauth2 https://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd"> 
      
-  
+  <beans:bean id="noopPasswordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder"/>
   <!-- variables =============================================================================== -->  
 	<beans:bean id="jwtSigningKey" class="java.lang.String">
 	  <beans:constructor-arg value="jwtSigningKey"/>
@@ -19,7 +19,7 @@
   
   <!-- OAuth2 clients ========================================================================== -->
   <oauth:client-details-service id="oauthClientDetails">
-    <oauth:client client-id="geoportal-client" 
+    <oauth:client client-id="geoportal-client"
       authorized-grant-types="password" authorities="ROLE_CLIENT" scope="read,write" />
     <!-- <oauth:client client-id="geoportal-client" authorized-grant-types="password,refresh_token"
       authorities="ROLE_CLIENT, ROLE_TRUSTED_CLIENT" scope="read,write,trust" /> -->
@@ -49,7 +49,9 @@
   </oauth:authorization-server>
   <oauth:resource-server id="oauthResourceFilter" token-services-ref="oauthTokenServices" />
   <security:authentication-manager id="oauthClientAuthenticationManager">
-    <security:authentication-provider user-service-ref="oauthClientDetailsUserService" />
+    <security:authentication-provider user-service-ref="oauthClientDetailsUserService" >   
+    	<security:password-encoder ref="noopPasswordEncoder"/>
+    </security:authentication-provider>
   </security:authentication-manager>
   <beans:bean id="oauthClientDetailsUserService" class="org.springframework.security.oauth2.provider.client.ClientDetailsUserDetailsService">
     <beans:constructor-arg ref="oauthClientDetails" />

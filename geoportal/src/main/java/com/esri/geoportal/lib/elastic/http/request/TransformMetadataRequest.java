@@ -25,12 +25,16 @@ import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.http.util.ItemUtil;
 import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
+import com.esri.geoportal.search.StacHelper;
 
 import java.io.FileNotFoundException;
 
 import javax.json.JsonObject;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -43,6 +47,7 @@ public class TransformMetadataRequest extends BulkEditRequest {
   private String id;
   private String xml;
   private String xslt;
+  private static final Logger LOGGER = LoggerFactory.getLogger(TransformMetadataRequest.class);
     
   /** Constructor. */
   public TransformMetadataRequest() {
@@ -114,7 +119,7 @@ public class TransformMetadataRequest extends BulkEditRequest {
           try {
             xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_XML);
           } catch (Exception e) {
-            e.printStackTrace();
+        	  LOGGER.error(e.getMessage());
           }
         }
         if (xml == null || xml.length() == 0) {
@@ -123,7 +128,7 @@ public class TransformMetadataRequest extends BulkEditRequest {
           try {
             key = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_METADATATYPE);
           } catch (Exception e) {
-            e.printStackTrace();
+        	  LOGGER.error(e.getMessage());
           }
           if (key == null || key.length() == 0) {
             err = "Empty item "+FieldNames.FIELD_SYS_METADATATYPE;
