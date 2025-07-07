@@ -58,5 +58,5 @@ jobs:
         name: Latest Release
         draft: false
         prerelease: false
-        files: geoportal.zip
+        files: geoportal.war
   
