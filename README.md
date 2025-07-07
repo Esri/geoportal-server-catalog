@@ -2,16 +2,18 @@
 
 [![apache licensed](https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square)](https://raw.githubusercontent.com/Esri/geoportal-server-catalog/master/LICENSE.txt)
 
-Esri Geoportal Server v2 is Esri's free and open source metadata catalog and search application, based on elasticsearch. 
+It's July 8, 2025, which means: **Geoportal Server 3.0.1 is now available!**
 
-Esri Geoportal Server v2 now provides the catalog and harvesting capabilities as separate modules. Separate modules are useful when users need the catalog capabilities without needing metadata harvesting, or possibly even metadata editing.
+Esri Geoportal Server is Esri's free and open source metadata catalog and search application, based on elasticsearch. 
+
+Esri Geoportal Server provides the catalog and harvesting capabilities as separate modules. Separate modules are useful when users need the catalog capabilities without needing metadata harvesting, or possibly even metadata editing.
 
 This repository contains the capability of **Geoportal Server Catalog**, while it's sibling **[Geoportal Server Harvester](https://github.com/ArcGIS/geoportal-server-harvester)** is managed in a separate repository.
 
 
 ## Releases and Downloads
-- 3.0.1 - ALMOST HERE! See [What's New](https://github.com/Esri/geoportal-server-catalog/wiki/What's-new-in-Geoportal-Server-3.0.1!)!
-- **2.7.2.1 - LATEST** - released, November 22, 2024.
+- **3.0.1 - LATEST** - released, July 8, 2025!! See [What's New](https://github.com/Esri/geoportal-server-catalog/wiki/What's-new-in-Geoportal-Server-3.0.1!)!
+- 2.7.2.1 - released, November 22, 2024.
 - 2.7.2 - released, October 4, 2024.
 - 2.7.1 - released, December 21, 2023.
 - 2.7.0-patch1 - released Sep 11, 2023.
