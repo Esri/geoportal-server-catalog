@@ -1,0 +1,28 @@
+name: 'Dependency Review'
+# This trigger will cause the action to run on any PR between any two branches.
+# This is the default state in order to provide the earliest possible awareness to developers of new issues they may introduce.
+on: [pull_request]
+
+permissions:
+  contents: read
+  # Necessary for summary of evaluation in PR.
+  pull-requests: write
+
+jobs:
+  dependency-review:
+    # You may want to add additional labels to this runner if you only want it to run on certain runners.
+    runs-on: [ubuntu-latest]
+    steps:
+      - name: 'Checkout Repository'
+      # This tag may need to be updated in the future if github releases new versions.
+        uses: actions/checkout@v4
+      - name: 'Dependency Review'
+      # This tag may need to be updated in the future if github releases new versions.
+        uses: actions/dependency-review-action@v4
+        with:
+          # This argument should supply the standard configuration file.
+          # This tag may need to be updated in the future if a new major version comes out.
+          config-file: 'ArcGIS/standard-dependency-review-configuration/dependency-review-config.yml@v1'
+          # You only need this if the repo containing the config file is not publicly accessible.
+          # This currently includes all GHES repos.
+          external-repo-token: ${{ secrets.SSP_DEPENDENCY_REVIEW_ACCESS_TOKEN }}
