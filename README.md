@@ -2,7 +2,8 @@
 
 [![apache licensed](https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square)](https://raw.githubusercontent.com/Esri/geoportal-server-catalog/master/LICENSE.txt)
 
-It's July 8, 2025, which means: **Geoportal Server 3.0.1 is now available!**
+It's July 8, 2025, which means: 
+> ## Geoportal Server 3.0.1 is now available!
 
 Esri Geoportal Server is Esri's free and open source metadata catalog and search application, based on elasticsearch. 
 
