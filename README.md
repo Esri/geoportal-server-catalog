@@ -28,16 +28,16 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 ## Features
 * **Metadata editor** - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE 2.0.1 (Data), INSPIRE 2.0.1 (Service), GEMINI (Data), GEMINI (Service)
 * **Faceted Search** - Configure different facets to allow your user to filter from the hay stack to the needle
-* **Scalability** - Thank you elasticsearch for providing multi-node configuration support
+* **Scalability** - You can run the index of metadata in Elasticsearch and OpenSearch locally, in a cluster, as well as using cloud native platform services
 * **OGC CSW 3.0.0 and CSW 2.0.2** - Standards compliant catalog service interface, includes CSW2 requirements for INSPIRE Discovery Service
 * **Spatio-Temporal Asset Catalog API** - As of Geoportal 2.7.2, it may be used to build a scalable Spatio-Temporal Asset Catalog (STAC) 
 * **Many metadata formats** - Extend the configuration with your favorite XML format
-* **Built-in Viewer** - Use the app we include or build one using Web AppBuilder and hook it up!
+* **Built-in Viewer** - Geoportal Server now includes a built-in viewer using ArcGIS API for JavaScript 4.x
 * **No more database** - Yes that's a feature!
 
 ## Requirements
 
-* Elasticsearch 7.x or higher, or OpenSearch 2.12
+* Elasticsearch 8.x or higher, or OpenSearch 2.14
 * Tomcat 9.x
 
 ## Installation
