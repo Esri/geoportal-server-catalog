@@ -6,3 +6,4 @@ name: "CodeQL Configuration For JS/Python Components of geoportal-server-catalog
 paths-ignore:
   - geoportal/src/main/webapp/viewer
   - components/GeoportalSearch/WebAppBuilder
+  - geoportal/src/main/webapp/api
