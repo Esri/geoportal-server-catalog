@@ -106,7 +106,7 @@ public class OGCRecordsService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in api " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			response = this.generateResponse("500", "OGCRecords API response could not be generated.");
+			response = this.generateResponse("500", "OGCRecords API response could not be generated. ");
 		}
 		return Response.status(status).entity(response).build();
 	}
