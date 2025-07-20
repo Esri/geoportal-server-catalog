@@ -1418,12 +1418,12 @@ namespace GeoportalSearch
                                         // CswClient client = new CswClient();
                                         AddAGSService(_mapServerUrl);
                                     }
-                                    else
-                                    {
-                                        _mapServerUrl = _mapServerUrl + "?f=lyr";
-                                        CswClient client = new CswClient();
-                                        AddAGSService(client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, ""));
-                                    }
+                                    //else
+                                    //{
+                                    //    _mapServerUrl = _mapServerUrl + "?f=lyr";
+                                    //    CswClient client = new CswClient();
+                                    //    AddAGSService(client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, ""));
+                                    //}
                                 }
                             }
                         }

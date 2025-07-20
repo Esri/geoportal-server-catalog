@@ -173,7 +173,7 @@ namespace com.esri.gpt.csw
                 else
                 {
                     retryAttempt = true;
-                    throw ua;
+                    throw;
                 }
 
             }
@@ -192,10 +192,11 @@ namespace com.esri.gpt.csw
                     if (statusCode == HttpStatusCode.BadRequest)
                     {
                         retryAttempt = false;
-                        throw we;
+                        throw;
                     }
                 }
-                    if (retryAttempt)
+
+                if (retryAttempt)
                 {
                     PromptCredentials pc = new PromptCredentials();
                     pc.ShowDialog();
@@ -214,7 +215,7 @@ namespace com.esri.gpt.csw
                 else
                 {
                     retryAttempt = true;
-                    throw we;
+                    throw;
                 }
 
             }
@@ -225,55 +226,55 @@ namespace com.esri.gpt.csw
 
             Stream responseStream = response.GetResponseStream();            
 
-            if (method.Equals("DOWNLOAD"))
-            {
-                FileStream file = null;
+            //if (method.Equals("DOWNLOAD"))
+            //{
+            //    FileStream file = null;
 
-                string fileName = response.GetResponseHeader("Content-Disposition");
+            //    string fileName = response.GetResponseHeader("Content-Disposition");
 
-                string[] s = null;
-                if (fileName.ToLower().EndsWith(".tif"))
-                {
-                    s = URL.Split(new String[] { "coverage=" }, 100, StringSplitOptions.RemoveEmptyEntries);
-                    s[1] = s[1].Trim() + ".tif";
-                }
-                else
-                {
-                    s = fileName.Split('=');
-                    s[1] = s[1].Replace('\\', ' ');
-                    s[1] = s[1].Replace('"', ' ');
-                    s[1] = s[1].Trim();
-                }
+            //    string[] s = null;
+            //    if (fileName.ToLower().EndsWith(".tif"))
+            //    {
+            //        s = URL.Split(new String[] { "coverage=" }, 100, StringSplitOptions.RemoveEmptyEntries);
+            //        s[1] = s[1].Trim() + ".tif";
+            //    }
+            //    else
+            //    {
+            //        s = fileName.Split('=');
+            //        s[1] = s[1].Replace('\\', ' ');
+            //        s[1] = s[1].Replace('"', ' ');
+            //        s[1] = s[1].Trim();
+            //    }
 
-                try
-                {
-                    downloadFileName = System.IO.Path.Combine(Utils.GetSpecialFolderPath(SpecialFolder.ConfigurationFiles), s[1]);
-                    System.IO.File.Delete(downloadFileName);
-                    file = System.IO.File.Create(downloadFileName);                    
-                    // Buffer to read 10K bytes in chunk:
-                    byte[] buffer = new Byte[10000];
-                    int length = 10000;
-                    int offset = 0;
-                    while (length > 0)
-                    {
-                        length = responseStream.Read(buffer, 0, length);
-                        offset += length;
-                        file.Write(buffer, 0, length);
-                    }
-                }
-                catch (Exception e)
-                {}
-                finally
-                {
-                    if(file != null)
-                        file.Close();
-                    if(responseStream != null)
-                        responseStream.Close();
-                    retryAttempt = true;
-                }
+            //    try
+            //    {
+            //        downloadFileName = System.IO.Path.Combine(Utils.GetSpecialFolderPath(SpecialFolder.ConfigurationFiles), s[1]);
+            //        System.IO.File.Delete(downloadFileName);
+            //        file = System.IO.File.Create(downloadFileName);                    
+            //        // Buffer to read 10K bytes in chunk:
+            //        byte[] buffer = new Byte[10000];
+            //        int length = 10000;
+            //        int offset = 0;
+            //        while (length > 0)
+            //        {
+            //            length = responseStream.Read(buffer, 0, length);
+            //            offset += length;
+            //            file.Write(buffer, 0, length);
+            //        }
+            //    }
+            //    catch (Exception e)
+            //    {}
+            //    finally
+            //    {
+            //        if(file != null)
+            //            file.Close();
+            //        if(responseStream != null)
+            //            responseStream.Close();
+            //        retryAttempt = true;
+            //    }
                 
-                return downloadFileName;
-            }
+            //    return downloadFileName;
+            //}
 
             StreamReader reader = new StreamReader(responseStream);
             responseText = reader.ReadToEnd();
