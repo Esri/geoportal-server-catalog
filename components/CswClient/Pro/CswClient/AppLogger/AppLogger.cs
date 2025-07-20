@@ -19,6 +19,7 @@ using System.IO;
 using System.Collections;
 using System.Windows;
 using com.esri.gpt.csw;
+using System.Web;
 // using System.Windows.Forms;
 
 
@@ -195,7 +196,8 @@ namespace com.esri.gpt.logger
             fileStream = fileInfo.Open(System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
             sr = new System.IO.StreamWriter(fileStream);
           }
-          sr.WriteLine(logMessage);
+            string safeString = HttpUtility.HtmlEncode(logMessage);
+            sr.WriteLine(safeString);
         }            
       } 
       finally

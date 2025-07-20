@@ -438,7 +438,7 @@ namespace com.esri.gpt.csw
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
         }
 
@@ -566,7 +566,7 @@ namespace com.esri.gpt.csw
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
             //return recordslist;
 
@@ -805,7 +805,7 @@ namespace com.esri.gpt.csw
             }
             catch (Exception e)
             {
-                throw e;
+                throw;
             }
 
             return writer.ToString();
