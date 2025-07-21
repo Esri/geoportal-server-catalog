@@ -15,9 +15,37 @@
     <springsecurity.version>5.8.7</springsecurity.version>
     <jackson.version>2.12.7.1</jackson.version>
   </properties>
-
 	
   <dependencies>
+  	<dependency>
+      <groupId>org.owasp.esapi</groupId>
+      <artifactId>esapi</artifactId>
+      <version>2.6.0.0</version>
+      <scope>compile</scope>
+      <exclusions>
+        <exclusion>
+          <artifactId>bsh</artifactId>
+          <groupId>org.apache-extras.beanshell</groupId>
+        </exclusion>
+        <exclusion>
+          <artifactId>xom</artifactId>
+          <groupId>xom</groupId>
+        </exclusion>
+        <exclusion>                  
+           <groupId>log4j</groupId>
+           <artifactId>log4j</artifactId>
+       </exclusion>
+       <exclusion> 
+         <groupId>commons-fileupload</groupId>
+   		 <artifactId>commons-fileupload</artifactId>
+   		</exclusion>
+   		<exclusion> 
+         <groupId>xml-apis</groupId>
+   		 <artifactId>xml-apis</artifactId>
+   		</exclusion>    
+      </exclusions>
+      <optional>false</optional>
+    </dependency>
   	<dependency>
 	    <groupId>software.amazon.awssdk</groupId>
 	    <artifactId>apache-client</artifactId>
