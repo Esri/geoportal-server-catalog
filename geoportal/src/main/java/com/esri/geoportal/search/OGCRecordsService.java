@@ -47,6 +47,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.owasp.esapi.ESAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -263,7 +264,7 @@ public class OGCRecordsService extends Application {
 			responseJSON = this.prepareSingleItemResponse(response, hsr);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in getting item with item id: "+id+" " + e.getMessage());
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting item with item id: "+id+" " + e.getMessage()));
 			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "OGCRecords API Collection metadata item response could not be generated.");

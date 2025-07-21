@@ -55,6 +55,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.owasp.esapi.ESAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -441,7 +442,7 @@ public class STACService extends Application {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error in getting collection: {} {}",collectionId,e);
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting collection: "+collectionId+" "+e));
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated. "+e.getMessage(),detailErrArray);
@@ -592,7 +593,7 @@ public class STACService extends Application {
 			status = Response.Status.BAD_REQUEST;
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
-			LOGGER.error("Error in getting item with item id: " + id + " " + e.getCause());
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting item with item id: " + id + " " + e.getCause()));
 			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
@@ -735,7 +736,7 @@ public class STACService extends Application {
 			status = Response.Status.BAD_REQUEST;
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
-			LOGGER.error("Error in deleting item with item id: " + id + " " + e.getCause());
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in deleting item with item id: " + id + " " + e.getCause()));
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500","STAC API: Feature could not be deleted.",detailErrArray);
@@ -1391,9 +1392,8 @@ public class STACService extends Application {
     
 		//For asynchronous request, log this response message
 	  if(async) {
-			 LOGGER.info("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON);
-	  }
-    
+			 LOGGER.info(ESAPI.encoder().encodeForHTML("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON));
+	  }    
 		return Response.status(status)
 				.header("Content-Type", "application/json")
 				.entity(responseJSON).build();		
@@ -1412,7 +1412,7 @@ public class STACService extends Application {
                      .header("Content-Type", "application/json")
                      .entity(responseJSON).build();
       
-    } else {    	
+    } else {
       return executeAddFeature(requestPayload, collectionId,hsr,async,"Feature");
     }
 	}	
@@ -1554,7 +1554,7 @@ public class STACService extends Application {
     //For asynchronous request, log this response message
      if(async && reqType.equals("Feature"))
      {
-             LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+             LOGGER.info(ESAPI.encoder().encodeForHTML("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON));
      }
     return Response.status(status)
                     .header("Content-Type", "application/json")
@@ -1677,7 +1677,7 @@ public class STACService extends Application {
     
 		//For asynchronous request, log this response message
 	    if(async) {
-	      LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+	      LOGGER.info(ESAPI.encoder().encodeForHTML("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON));
 	    }
     
 		return Response.status(status)
