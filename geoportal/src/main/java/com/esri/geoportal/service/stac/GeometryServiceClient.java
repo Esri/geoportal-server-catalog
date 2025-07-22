@@ -24,7 +24,6 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.security.SecureRandom;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -32,14 +31,12 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.http.MockTrustManager;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -142,119 +139,110 @@ public class GeometryServiceClient {
      * @return the response
      * @throws Exception if an exception occurs
      */
-    public String send(String method, String url, String data, String dataContentType) throws Exception {
-        String result = null;
-        BufferedReader br = null;
-        DataOutputStream wr = null;
-        StringWriter sw = new StringWriter();
-        String charset = "UTF-8";
-        URLConnection con;
-        URL u = new java.net.URL(url);
-        try {
-            SSLContext ssl_ctx = SSLContext.getInstance("TLS");
-            //Using a mock trust manager and not validating certificate
-            MockTrustManager mockTrustMgr = new MockTrustManager();
-
-            ssl_ctx.init(null, // key manager
-                    mockTrustMgr.getTrustManager(),// trust manager
-                    new SecureRandom()); // random number generator
-            HttpsURLConnection.setDefaultSSLSocketFactory(ssl_ctx.getSocketFactory());
-
-            HttpsURLConnection.setFollowRedirects(true);
-            con = (HttpsURLConnection) u.openConnection();
-            ((HttpsURLConnection) con).setRequestMethod(method);
-            ((HttpsURLConnection) con).setInstanceFollowRedirects(true);
-
-            if (data != null && data.length() > 0) {
-                //System.err.println("sendData="+data);
-                con.setDoOutput(true);
-                byte[] bytes = data.getBytes("UTF-8");
-                if (dataContentType != null && dataContentType.length() > 0) {
-                    con.setRequestProperty("Content-Type", dataContentType);
-                }
-                con.setRequestProperty("charset", "UTF-8");
-                con.setRequestProperty("Content-Length", "" + bytes.length);
-                wr = new DataOutputStream(con.getOutputStream());
-                wr.write(bytes);
-            }
-            String contentType = con.getContentType();
-            if (contentType != null) {
-                String[] a = contentType.split(";");
-                for (String v : a) {
-                    v = v.trim();
-                    if (v.toLowerCase().startsWith("charset=")) {
-                        String cs = v.substring("charset=".length()).trim();
-                        if (cs.length() > 0) {
-                            charset = cs;
-                            break;
-                        }
-                    }
-                }
-            }
-            int code = ((HttpURLConnection) con).getResponseCode();
-
-            //In case of error, Read error stream
-            if (code >= 400) {
-                LOGGER.debug("Error code received : " + code);
-                if (((HttpURLConnection) con).getErrorStream() != null) {
-                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(), charset));
-                } else if (((HttpURLConnection) con).getInputStream() != null) {
-                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getInputStream(), charset));
-                }
-            } else {
-                br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
-            }
-
-            int nRead = 0;
-            char[] buffer = new char[4096];
-            while ((nRead = br.read(buffer, 0, 4096)) >= 0) {
-                sw.write(buffer, 0, nRead);
-            }
-            result = sw.toString();
-
-        } finally {
-            try {
-                if (wr != null) {
-                    wr.close();
-                }
-            } catch (Exception ef) {
-            	LOGGER.error("Send request: "+ef.getMessage());               
-            }
-            try {
-                if (br != null) {
-                    br.close();
-                }
-            } catch (Exception ef) {
-            	LOGGER.error("Send request: "+ef.getMessage());
-            }
-        }
-        //System.err.println("result:\r\n"+result);
-        return result;
-    }
-
-    /**
-     * Send a GET request.
-     *
-     * @param url the URL
-     * @return the response
-     * @throws Exception if an exception occurs
-     */
-    public String sendGet(String url) throws Exception {
-        return send("GET", url, null, null);
-    }
-
-    /**
-     * Send a POST request.
-     *
-     * @param url the URL
-     * @param data the entity data
-     * @param dataContentType data the entity data content type
-     * @return the response
-     * @throws Exception if an exception occurs
-     */
-    public String sendPost(String url, String data, String dataContentType) throws Exception {
-        return send("POST", url, data, dataContentType);
-    }
+//    public String send(String method, String url, String data, String dataContentType) throws Exception {
+//        String result = null;
+//        BufferedReader br = null;
+//        DataOutputStream wr = null;
+//        StringWriter sw = new StringWriter();
+//        String charset = "UTF-8";
+//        URLConnection con;
+//        URL u = new java.net.URL(url);
+//        try { 
+//            HttpsURLConnection.setFollowRedirects(true);
+//            con = (HttpsURLConnection) u.openConnection();
+//            ((HttpsURLConnection) con).setRequestMethod(method);
+//            ((HttpsURLConnection) con).setInstanceFollowRedirects(true);
+//
+//            if (data != null && data.length() > 0) {
+//                //System.err.println("sendData="+data);
+//                con.setDoOutput(true);
+//                byte[] bytes = data.getBytes("UTF-8");
+//                if (dataContentType != null && dataContentType.length() > 0) {
+//                    con.setRequestProperty("Content-Type", dataContentType);
+//                }
+//                con.setRequestProperty("charset", "UTF-8");
+//                con.setRequestProperty("Content-Length", "" + bytes.length);
+//                wr = new DataOutputStream(con.getOutputStream());
+//                wr.write(bytes);
+//            }
+//            String contentType = con.getContentType();
+//            if (contentType != null) {
+//                String[] a = contentType.split(";");
+//                for (String v : a) {
+//                    v = v.trim();
+//                    if (v.toLowerCase().startsWith("charset=")) {
+//                        String cs = v.substring("charset=".length()).trim();
+//                        if (cs.length() > 0) {
+//                            charset = cs;
+//                            break;
+//                        }
+//                    }
+//                }
+//            }
+//            int code = ((HttpURLConnection) con).getResponseCode();
+//
+//            //In case of error, Read error stream
+//            if (code >= 400) {
+//                LOGGER.debug("Error code received : " + code);
+//                if (((HttpURLConnection) con).getErrorStream() != null) {
+//                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(), charset));
+//                } else if (((HttpURLConnection) con).getInputStream() != null) {
+//                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getInputStream(), charset));
+//                }
+//            } else {
+//                br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
+//            }
+//
+//            int nRead = 0;
+//            char[] buffer = new char[4096];
+//            while ((nRead = br.read(buffer, 0, 4096)) >= 0) {
+//                sw.write(buffer, 0, nRead);
+//            }
+//            result = sw.toString();
+//
+//        } finally {
+//            try {
+//                if (wr != null) {
+//                    wr.close();
+//                }
+//            } catch (Exception ef) {
+//            	LOGGER.error("Send request: "+ef.getMessage());               
+//            }
+//            try {
+//                if (br != null) {
+//                    br.close();
+//                }
+//            } catch (Exception ef) {
+//            	LOGGER.error("Send request: "+ef.getMessage());
+//            }
+//        }
+//        //System.err.println("result:\r\n"+result);
+//        return result;
+//    }
+//
+//    /**
+//     * Send a GET request.
+//     *
+//     * @param url the URL
+//     * @return the response
+//     * @throws Exception if an exception occurs
+//     */
+//    public String sendGet(String url) throws Exception {
+//        return send("GET", url, null, null);
+//    }
+//
+//    /**
+//     * Send a POST request.
+//     *
+//     * @param url the URL
+//     * @param data the entity data
+//     * @param dataContentType data the entity data content type
+//     * @return the response
+//     * @throws Exception if an exception occurs
+//     */
+//    public String sendPost(String url, String data, String dataContentType) throws Exception {
+//        return send("POST", url, data, dataContentType);
+//    }
     
     /**
      * Returns convex Hall Polygon
