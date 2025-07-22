@@ -23,10 +23,8 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.net.URLConnection;
 import java.net.URLEncoder;
-import java.security.SecureRandom;
 
 import javax.net.ssl.HttpsURLConnection;
-import javax.net.ssl.SSLContext;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -192,15 +190,6 @@ public class ElasticClient {
     URL u = new java.net.URL(url);
     try {      
       if(useHttps) {
-          SSLContext ssl_ctx = SSLContext.getInstance("TLS");
-          //Using a mock trust manager and not validating certificate
-          MockTrustManager mockTrustMgr = new MockTrustManager();
-
-          ssl_ctx.init(null,                // key manager
-                       mockTrustMgr.getTrustManager(),// trust manager
-                       new SecureRandom()); // random number generator
-          HttpsURLConnection.setDefaultSSLSocketFactory(ssl_ctx.getSocketFactory());
-
           HttpsURLConnection.setFollowRedirects(true);
           con = (HttpsURLConnection)u.openConnection();
           ((HttpsURLConnection) con).setRequestMethod(method);
