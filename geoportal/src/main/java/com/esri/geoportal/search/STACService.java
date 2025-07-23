@@ -2311,7 +2311,7 @@ public class STACService extends Application {
           
           try {
               geometryResponse = geometryClient.doProjection(itemGeometry, sourceCRS, requestedCRS, false);
-          } catch (IOException ex) {
+          } catch (Exception ex) {
               java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
           }
 
@@ -2473,7 +2473,7 @@ public class STACService extends Application {
 							projectedGeometries.add(projectedGeometry);
 						}
 	
-					} catch (IOException ex) {
+					} catch (Exception ex) {
 						LOGGER.error(STACService.class.getName() + ": " + ex.toString());
 					}
 				}
@@ -2487,7 +2487,7 @@ public class STACService extends Application {
                   
                   try {
                     geometryResponse = geometryClient.doProjection(arcgisGeometry, sourceCRS, requestedCRS, hasZ);
-                  } catch (IOException ex) {
+                  } catch (Exception ex) {
                     LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
                   }
                   if (!geometryResponse.isBlank()) {
@@ -2552,7 +2552,7 @@ public class STACService extends Application {
       String geometryResponse = "";
       try {
           geometryResponse = geometryClient.doProjection(geometries, inCRS, requestedCRS, false);
-      } catch (IOException ex) {
+      } catch (Exception ex) {
           java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
       }
 
