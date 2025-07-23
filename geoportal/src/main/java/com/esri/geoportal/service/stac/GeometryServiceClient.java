@@ -139,110 +139,118 @@ public class GeometryServiceClient {
      * @return the response
      * @throws Exception if an exception occurs
      */
-//    public String send(String method, String url, String data, String dataContentType) throws Exception {
-//        String result = null;
-//        BufferedReader br = null;
-//        DataOutputStream wr = null;
-//        StringWriter sw = new StringWriter();
-//        String charset = "UTF-8";
-//        URLConnection con;
-//        URL u = new java.net.URL(url);
-//        try { 
-//            HttpsURLConnection.setFollowRedirects(true);
-//            con = (HttpsURLConnection) u.openConnection();
-//            ((HttpsURLConnection) con).setRequestMethod(method);
-//            ((HttpsURLConnection) con).setInstanceFollowRedirects(true);
-//
-//            if (data != null && data.length() > 0) {
-//                //System.err.println("sendData="+data);
-//                con.setDoOutput(true);
-//                byte[] bytes = data.getBytes("UTF-8");
-//                if (dataContentType != null && dataContentType.length() > 0) {
-//                    con.setRequestProperty("Content-Type", dataContentType);
-//                }
-//                con.setRequestProperty("charset", "UTF-8");
-//                con.setRequestProperty("Content-Length", "" + bytes.length);
-//                wr = new DataOutputStream(con.getOutputStream());
-//                wr.write(bytes);
-//            }
-//            String contentType = con.getContentType();
-//            if (contentType != null) {
-//                String[] a = contentType.split(";");
-//                for (String v : a) {
-//                    v = v.trim();
-//                    if (v.toLowerCase().startsWith("charset=")) {
-//                        String cs = v.substring("charset=".length()).trim();
-//                        if (cs.length() > 0) {
-//                            charset = cs;
-//                            break;
-//                        }
-//                    }
-//                }
-//            }
-//            int code = ((HttpURLConnection) con).getResponseCode();
-//
-//            //In case of error, Read error stream
-//            if (code >= 400) {
-//                LOGGER.debug("Error code received : " + code);
-//                if (((HttpURLConnection) con).getErrorStream() != null) {
-//                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(), charset));
-//                } else if (((HttpURLConnection) con).getInputStream() != null) {
-//                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getInputStream(), charset));
-//                }
-//            } else {
-//                br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
-//            }
-//
-//            int nRead = 0;
-//            char[] buffer = new char[4096];
-//            while ((nRead = br.read(buffer, 0, 4096)) >= 0) {
-//                sw.write(buffer, 0, nRead);
-//            }
-//            result = sw.toString();
-//
-//        } finally {
-//            try {
-//                if (wr != null) {
-//                    wr.close();
-//                }
-//            } catch (Exception ef) {
-//            	LOGGER.error("Send request: "+ef.getMessage());               
-//            }
-//            try {
-//                if (br != null) {
-//                    br.close();
-//                }
-//            } catch (Exception ef) {
-//            	LOGGER.error("Send request: "+ef.getMessage());
-//            }
-//        }
-//        //System.err.println("result:\r\n"+result);
-//        return result;
-//    }
-//
-//    /**
-//     * Send a GET request.
-//     *
-//     * @param url the URL
-//     * @return the response
-//     * @throws Exception if an exception occurs
-//     */
-//    public String sendGet(String url) throws Exception {
-//        return send("GET", url, null, null);
-//    }
-//
-//    /**
-//     * Send a POST request.
-//     *
-//     * @param url the URL
-//     * @param data the entity data
-//     * @param dataContentType data the entity data content type
-//     * @return the response
-//     * @throws Exception if an exception occurs
-//     */
-//    public String sendPost(String url, String data, String dataContentType) throws Exception {
-//        return send("POST", url, data, dataContentType);
-//    }
+    public String send(String method, String url, String data, String dataContentType) throws Exception {
+        String result = null;
+        BufferedReader br = null;
+        DataOutputStream wr = null;
+        StringWriter sw = new StringWriter();
+        String charset = "UTF-8";
+        URLConnection con;
+        URL u = new java.net.URL(url);
+        try {
+        	if(url.contains("https")) {
+                HttpsURLConnection.setFollowRedirects(true);
+                con = (HttpsURLConnection)u.openConnection();
+                ((HttpsURLConnection) con).setRequestMethod(method);
+                ((HttpsURLConnection) con).setInstanceFollowRedirects(true);
+
+              } else {
+                HttpURLConnection.setFollowRedirects(true);
+                con = (HttpURLConnection)u.openConnection();
+                ((HttpURLConnection) con).setRequestMethod(method);
+                ((HttpURLConnection) con).setInstanceFollowRedirects(true);
+             }
+
+            if (data != null && data.length() > 0) {
+                //System.err.println("sendData="+data);
+                con.setDoOutput(true);
+                byte[] bytes = data.getBytes("UTF-8");
+                if (dataContentType != null && dataContentType.length() > 0) {
+                    con.setRequestProperty("Content-Type", dataContentType);
+                }
+                con.setRequestProperty("charset", "UTF-8");
+                con.setRequestProperty("Content-Length", "" + bytes.length);
+                wr = new DataOutputStream(con.getOutputStream());
+                wr.write(bytes);
+            }
+            String contentType = con.getContentType();
+            if (contentType != null) {
+                String[] a = contentType.split(";");
+                for (String v : a) {
+                    v = v.trim();
+                    if (v.toLowerCase().startsWith("charset=")) {
+                        String cs = v.substring("charset=".length()).trim();
+                        if (cs.length() > 0) {
+                            charset = cs;
+                            break;
+                        }
+                    }
+                }
+            }
+            int code = ((HttpURLConnection) con).getResponseCode();
+
+            //In case of error, Read error stream
+            if (code >= 400) {
+                LOGGER.debug("Error code received : " + code);
+                if (((HttpURLConnection) con).getErrorStream() != null) {
+                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getErrorStream(), charset));
+                } else if (((HttpURLConnection) con).getInputStream() != null) {
+                    br = new BufferedReader(new InputStreamReader(((HttpURLConnection) con).getInputStream(), charset));
+                }
+            } else {
+                br = new BufferedReader(new InputStreamReader(con.getInputStream(), charset));
+            }
+
+            int nRead = 0;
+            char[] buffer = new char[4096];
+            while ((nRead = br.read(buffer, 0, 4096)) >= 0) {
+                sw.write(buffer, 0, nRead);
+            }
+            result = sw.toString();
+
+        } finally {
+            try {
+                if (wr != null) {
+                    wr.close();
+                }
+            } catch (Exception ef) {
+            	LOGGER.error("Send request: "+ef.getMessage());               
+            }
+            try {
+                if (br != null) {
+                    br.close();
+                }
+            } catch (Exception ef) {
+            	LOGGER.error("Send request: "+ef.getMessage());
+            }
+        }
+        //System.err.println("result:\r\n"+result);
+        return result;
+    }
+
+    /**
+     * Send a GET request.
+     *
+     * @param url the URL
+     * @return the response
+     * @throws Exception if an exception occurs
+     */
+    public String sendGet(String url) throws Exception {
+        return send("GET", url, null, null);
+    }
+
+    /**
+     * Send a POST request.
+     *
+     * @param url the URL
+     * @param data the entity data
+     * @param dataContentType data the entity data content type
+     * @return the response
+     * @throws Exception if an exception occurs
+     */
+    public String sendPost(String url, String data, String dataContentType) throws Exception {
+        return send("POST", url, data, dataContentType);
+    }
     
     /**
      * Returns convex Hall Polygon
@@ -252,37 +260,13 @@ public class GeometryServiceClient {
      * @return true if and only if the geometries intersect
      * @throws IOException if an issue occurs in communicating with the geometry service
      */
-    public String getConvexHull(String geometry) throws IOException {
+    public String getConvexHull(String geometry) throws Exception {
         String formData = "sr=4326";
         formData += "&geometries=" + URLEncoder.encode(geometry, "UTF-8");        
         formData += "&f=json";
-
-        URL obj = new URL(this.convexHullURL);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        LOGGER.debug("com.esri.geoportal.service.stac - getConvexHull: formData = " + formData); 
+        return sendPost(this.convexHullURL, formData, null);        
         
-        LOGGER.debug("com.esri.geoportal.service.stac - convexHull: formData = " + formData);     
-
-        // Set the request method to POST
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        con.setRequestProperty("Content-Length", Integer.toString(formData.getBytes().length));
-        con.setDoOutput(true);
-
-        // Send the form data
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(formData);
-        wr.flush();
-        wr.close();
-        
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-        return response.toString();
     }
     
     
@@ -294,43 +278,15 @@ public class GeometryServiceClient {
      * @return true if and only if the geometries intersect
      * @throws IOException if an issue occurs in communicating with the geometry service
      */
-    public String doIntersect(String geometryOne, String geometryTwo) throws IOException {
+    public String doIntersect(String geometryOne, String geometryTwo) throws Exception {
         String formData = "sr=4326";
         formData += "&geometries=" + URLEncoder.encode(geometryOne, "UTF-8");
         formData += "&geometry=" + URLEncoder.encode(geometryTwo, "UTF-8");
         formData += "&f=json";
-
-        URL obj = new URL(this.intersectUrl);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
+        LOGGER.debug("com.esri.geoportal.service.stac - doIntersect: formData = " + formData); 
+        return sendPost(this.intersectUrl, formData, null);   
         
-        LOGGER.debug("com.esri.geoportal.service.stac - doIntersect: formData = " + formData);     
-
-        // Set the request method to POST
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        con.setRequestProperty("Content-Length", Integer.toString(formData.getBytes().length));
-        con.setDoOutput(true);
-
-        // Send the form data
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(formData);
-        wr.flush();
-        wr.close();
-
-        // Read the response
-        int responseCode = con.getResponseCode();
-        System.out.println("Response Code : " + responseCode);
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        return response.toString();
+        
     }
 
 
@@ -341,9 +297,9 @@ public class GeometryServiceClient {
      * @param inCRS the CRS the data is in
      * @param outCRS the CRS the data should be projected to
      * @return the projected geometries
-     * @throws IOException if an issue occurs in communicating with the geometry service
+     * @throws Exception 
      */
-    public String doProjection(String geometries, String inCRS, String outCRS, Boolean vertical) throws IOException {
+    public String doProjection(String geometries, String inCRS, String outCRS, Boolean vertical) throws Exception {
         String formData = "inSr=" + inCRS;
         formData += "&outSR=" + outCRS;
         formData += "&geometries=" + URLEncoder.encode(geometries, "UTF-8");
@@ -351,36 +307,8 @@ public class GeometryServiceClient {
         formData += "&transformForward=true";
         formData += "&vertical=" + vertical.toString();
         formData += "&f=json";
-
-        URL obj = new URL(this.projectUrl);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-
-        // Set the request method to POST
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/x-www-form-urlencoded");
-        con.setRequestProperty("Content-Length", Integer.toString(formData.getBytes().length));
-        con.setDoOutput(true);
-
-        // Send the form data
-        DataOutputStream wr = new DataOutputStream(con.getOutputStream());
-        wr.writeBytes(formData);
-        wr.flush();
-        wr.close();
-
-        // Read the response
-        int responseCode = con.getResponseCode();
-        System.out.println("Response Code : " + responseCode);
-
-        BufferedReader in = new BufferedReader(new InputStreamReader(con.getInputStream()));
-        String inputLine;
-        StringBuilder response = new StringBuilder();
-
-        while ((inputLine = in.readLine()) != null) {
-            response.append(inputLine);
-        }
-        in.close();
-
-        return response.toString();
+        LOGGER.debug("com.esri.geoportal.service.stac - doProjection: formData = " + formData); 
+        return sendPost(this.projectUrl, formData, null);
     }
 
     
@@ -1085,7 +1013,7 @@ public class GeometryServiceClient {
 	 * @throws IOException
 	 * @throws ParseException
 	 */
-	public JSONObject getPolyhedralFootprint(JSONObject polyhedralGeomWKTObj) throws IOException, ParseException
+	public JSONObject getPolyhedralFootprint(JSONObject polyhedralGeomWKTObj) throws Exception
 	  { 
 		  JSONObject polygonWKTObj = new JSONObject();		  
 		  ArrayList<String[]> verticesArrList = getPolyhedralVerticesArr(polyhedralGeomWKTObj);

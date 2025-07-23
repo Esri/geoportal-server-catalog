@@ -542,7 +542,7 @@ public class StacHelper {
 	}
 
 
-	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) throws IOException, ParseException {
+	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) throws Exception {
 		String date = DateUtil.nowAsString();
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
 		GeoportalContext gc = GeoportalContext.getInstance();
