@@ -139,6 +139,7 @@ namespace com.esri.gpt.csw
         }
 
         private void writeLogMessage(String logMessage){
+
                 Utils.logger.writeLog(logMessage);
         }
 

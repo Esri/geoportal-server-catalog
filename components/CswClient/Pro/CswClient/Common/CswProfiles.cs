@@ -113,7 +113,7 @@ namespace com.esri.gpt.csw {
             catch (Exception ex)
             {
                Console.WriteLine(ex.Message);
-                throw ex;
+                throw;
             }
 
         }

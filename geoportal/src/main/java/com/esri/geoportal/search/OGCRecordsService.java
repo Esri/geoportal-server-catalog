@@ -58,6 +58,8 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -339,7 +341,9 @@ public class OGCRecordsService extends Application {
 			items = elasticResContext.read("$.hits.hits");
 			//numberReturned = String.valueOf(items.size());
 
-			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
+      Format formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+      String timestamp = formatter.format(new Date());
+			resourceFilecontext.set("$.response.timestamp", timestamp).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", numberMatched > -1 ? numberMatched: null);
 			
 			JSONArray jsonArray = new JSONArray();

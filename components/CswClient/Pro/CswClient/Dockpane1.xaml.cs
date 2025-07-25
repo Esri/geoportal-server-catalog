@@ -452,7 +452,7 @@ namespace GeoportalSearch
             }
             catch (Exception ex)
             {
-                throw new Exception(StringResources.LoadProfilesFailed + "\r\n" + ex.Message, ex);
+                throw new Exception(StringResources.LoadProfilesFailed, ex);
             }
 
             // load CSW Catalogs
@@ -479,7 +479,7 @@ namespace GeoportalSearch
             }
             catch (Exception ex)
             {
-                throw new Exception(StringResources.LoadCatalogsFailed + "\r\n" + ex.Message, ex);
+                throw new Exception(StringResources.LoadCatalogsFailed, ex);
             }
 
             return true;
@@ -557,7 +557,7 @@ namespace GeoportalSearch
                     // exit if still not connected
                     if (!catalog.IsConnected())
                     {
-                        ShowErrorMessageBox(StringResources.ConnectToCatalogFailed + "\r\n" + errMsg);
+                        ShowErrorMessageBox(StringResources.ConnectToCatalogFailed);
                         return null;
                     }
                 }
@@ -577,8 +577,6 @@ namespace GeoportalSearch
                 {
                     ShowDetailedErrorMessageBox(StringResources.RetrieveMetadataFromCatalogFailed, _searchRequest.GetResponse().ResponseXML);
                     System.Diagnostics.Trace.WriteLine(StringResources.RetrieveMetadataFromCatalogFailed);
-                    System.Diagnostics.Trace.WriteLine(ex.Message);
-                    System.Diagnostics.Trace.WriteLine(_searchRequest.GetResponse().ResponseXML);
                     return null;
                 }
 
@@ -592,7 +590,7 @@ namespace GeoportalSearch
                     try { xmlDoc.LoadXml(recordMetadata.FullMetadata); }
                     catch (XmlException xmlEx)
                     {
-                        ShowDetailedErrorMessageBox(StringResources.LoadMetadataFailed + "\r\n" + xmlEx.Message,
+                        ShowDetailedErrorMessageBox(StringResources.LoadMetadataFailed,
                                                     recordMetadata.FullMetadata);
                         return null;
                     }
@@ -606,7 +604,7 @@ namespace GeoportalSearch
             }
             catch (Exception ex)
             {
-                ShowErrorMessageBox(StringResources.RetrieveMetadataFromCatalogFailed + "\r\n" + ex.Message);
+                ShowErrorMessageBox(StringResources.RetrieveMetadataFromCatalogFailed);
                 return null;
             }
         }
@@ -716,7 +714,7 @@ namespace GeoportalSearch
                     // exit if still not connected
                     if (!catalog.IsConnected())
                     {
-                        ShowErrorMessageBox(StringResources.ConnectToCatalogFailed + "\r\n" + errMsg);
+                        ShowErrorMessageBox(StringResources.ConnectToCatalogFailed);
                     }
                 }
 
@@ -877,7 +875,7 @@ namespace GeoportalSearch
 
                                 try
                                 {
-                                    String filePath = client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, "");
+                                    String filePath = client.SubmitHttpRequest("GET", _mapServerUrl, "");
                                     AddAGSService(filePath);
 
                                 }
@@ -1415,14 +1413,13 @@ namespace GeoportalSearch
                                     var lastPartOfUrl = urlparts[urlparts.Length - 1];
                                     if (lastPartOfUrl.Length > 0 && IsNumeric(lastPartOfUrl))
                                     {
-                                        // CswClient client = new CswClient();
                                         AddAGSService(_mapServerUrl);
                                     }
                                     else
                                     {
                                         _mapServerUrl = _mapServerUrl + "?f=lyr";
                                         CswClient client = new CswClient();
-                                        AddAGSService(client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, ""));
+                                        AddAGSService(client.SubmitHttpRequest("GET", _mapServerUrl, ""));
                                     }
                                 }
                             }
@@ -1472,7 +1469,6 @@ namespace GeoportalSearch
                     }
                     else if (serviceType.Equals("wcs"))
                     {
-                        // MapServiceInfo msi = new MapServiceInfo();
                         String[] s = _mapServerUrl.Trim().Split('?');
 
                         _mapServerUrl = s[0] + "?request=GetCapabilities&service=WCS";
@@ -1502,7 +1498,7 @@ namespace GeoportalSearch
 
                                         try
                                         {
-                                            String filePath = client.SubmitHttpRequest("DOWNLOAD", _mapServerUrl, "");
+                                            String filePath = client.SubmitHttpRequest("GET", _mapServerUrl, "");
                                             AddAGSService(filePath);
                                         }
                                         catch (Exception ee)
@@ -1512,7 +1508,6 @@ namespace GeoportalSearch
                                         }
                                     }
                                 }
-
                             }
                         }
                         else
@@ -1555,12 +1550,12 @@ namespace GeoportalSearch
 
                 //zoom to extent of the footprint
                 List<MapPoint> points = new List<MapPoint>
-          {
-            MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Maxy),
-            MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Maxy),
-            MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Miny),
-            MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Miny)
-          };
+                {
+                MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Maxy),
+                MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Maxy),
+                MapPointBuilder.CreateMapPoint(newExtent.Maxx, newExtent.Miny),
+                MapPointBuilder.CreateMapPoint(newExtent.Minx, newExtent.Miny)
+                };
                 Polygon polygon = PolygonBuilder.CreatePolygon(points, SpatialReferences.WGS84);
 
                 mapView.ZoomTo(polygon);
@@ -1737,9 +1732,8 @@ namespace GeoportalSearch
             if (e.WidthChanged)
             {
                 int delta = (int)(e.NewSize.Width - e.PreviousSize.Width);
-                dockPanel.Width = e.NewSize.Width; // this.dockPanel.Width + delta;
+                dockPanel.Width = e.NewSize.Width;
                 tabControl.Width = e.NewSize.Width;
-                //this.gridControl.Width = this.gridControl.ActualWidth + delta;
             }
         }
     }

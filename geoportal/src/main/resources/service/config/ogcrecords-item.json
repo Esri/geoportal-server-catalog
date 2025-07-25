@@ -13,7 +13,8 @@
 	},
 	"links": [  
     {
-      "href": "$._source.links_s",
+      "href": "$._source.links_s[0]",
+      "rel": "describes",
       "title":"$._source.title"
     },
     {
