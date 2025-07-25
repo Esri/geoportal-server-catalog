@@ -384,7 +384,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
 
 
       this.map = null;
-      var map = new Map({basemap:"streets"});
+      var map = new Map({basemap:mapProps.basemap});
       this.view = new MapView({
       	  container:this.mapNode,
       	  map: map, 
@@ -547,7 +547,10 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
 
     processResults: function(searchResponse) {
       const process = async () => {  
-    	if(this.view) await this.view.when();
+    	  if(this.view){
+    		  await reactiveUtils.whenOnce(() => this.view.ready);
+    		  //await this.view.when();
+    	  }
      
       this._clearTmpHandles();
       if (this._highlighted) this._highlighted.visible = false;
