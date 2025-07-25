@@ -346,7 +346,7 @@ namespace com.esri.gpt.csw
         {
             try
             {
-                FeatureCollection featureCollection = JsonConvert.DeserializeObject<FeatureCollection>(responsestring);
+                FeatureCollection featureCollection = (FeatureCollection) JsonConvert.DeserializeObject(responsestring, typeof(FeatureCollection));
                 StringWriter writer = new StringWriter();
 
                 foreach (Feature feature in featureCollection.features)
@@ -356,33 +356,21 @@ namespace com.esri.gpt.csw
                     record.Title = feature.properties.title;
                     record.Abstract = feature.properties.description;
                     String lowercorner = "";
-                    if (this.SupportSpatialBoundary)
-                    {
-                        lowercorner = feature.properties.extent.spatial.bbox[0][0] + " " + feature.properties.extent.spatial.bbox[0][1];
-                    }
                     String uppercorner = "";
                     if (this.SupportSpatialBoundary)
                     {
-                        uppercorner = feature.properties.extent.spatial.bbox[0][2] + " " + feature.properties.extent.spatial.bbox[0][3];
+                        if (feature.properties.extent != null && feature.properties.extent.spatial != null && feature.properties.extent.spatial.bbox != null)
+                        {
+                            lowercorner = feature.properties.extent.spatial.bbox[0] + " " + feature.properties.extent.spatial.bbox[1];
+                            uppercorner = feature.properties.extent.spatial.bbox[2] + " " + feature.properties.extent.spatial.bbox[3];
+                        }
                     }
                     if ((lowercorner.Length > 0 && uppercorner.Length > 0))
                     {
-                        //Boolean parseFlag = false;
-                        //CultureInfo cultureInfo = new CultureInfo("en-us");
-                        //double pareseResult = 0.0;
-                        //parseFlag = Double.TryParse(lowercorner.Substring(0, lowercorner.IndexOf(' ')), NumberStyles.Number, cultureInfo, out pareseResult);
-                        record.BoundingBox.Minx = feature.properties.extent.spatial.bbox[0][0];
-                        //parseFlag = Double.TryParse(lowercorner.Substring(lowercorner.IndexOf(' ') + 1), NumberStyles.Number, cultureInfo, out pareseResult);
-                        record.BoundingBox.Miny = feature.properties.extent.spatial.bbox[0][1];
-                        //parseFlag = Double.TryParse(uppercorner.Substring(0, uppercorner.IndexOf(' ')), NumberStyles.Number, cultureInfo, out pareseResult);
-                        record.BoundingBox.Maxx = feature.properties.extent.spatial.bbox[0][2];
-                        //parseFlag = Double.TryParse(uppercorner.Substring(uppercorner.IndexOf(' ') + 1), NumberStyles.Number, cultureInfo, out pareseResult);
-                        record.BoundingBox.Maxy = feature.properties.extent.spatial.bbox[0][3];
-                        //if (parseFlag == false)
-                        //{
-                        //    throw new Exception("Number format error");
-                        //}
-
+                        record.BoundingBox.Minx = feature.properties.extent.spatial.bbox[0];
+                        record.BoundingBox.Miny = feature.properties.extent.spatial.bbox[1];
+                        record.BoundingBox.Maxx = feature.properties.extent.spatial.bbox[2];
+                        record.BoundingBox.Maxy = feature.properties.extent.spatial.bbox[3];
                     }
                     else
                     {
@@ -398,29 +386,17 @@ namespace com.esri.gpt.csw
                     string mapServerURL = "";
                     string serviceName = "";
 
-                    // look through associations for wms/wfs
-                    // wms is preferred. if one is found, exit the search
-                    // if wfs is found, make note of it, but keep searching
-                    foreach (Link association in feature.properties.associations) {
-                        if (association.type != null)
+                    // the links entry with rel=describes is the link to the resource we're looking for
+                    foreach (Link link in feature.Links)
+                    {
+                        if (link.rel != null && link.rel.ToLower().Equals("describes"))
                         {
-                            if (association.type != null && association.type.ToLower().Contains("wms"))
-                            {
-                                isLiveDataOrMap = true;
-                                serviceType = "wms";
-                                mapServerURL = association.href;
-                                serviceName = association.title;
+                            isLiveDataOrMap = true;
+                            mapServerURL = link.href;
+                            serviceName = link.title;
+                            serviceType = getServiceType(mapServerURL);
 
-                                break;
-                            }
-
-                            if (association.type.ToLower().Contains("wfs"))
-                            {
-                                isLiveDataOrMap = true;
-                                serviceType = "wfs";
-                                mapServerURL = association.href;
-                                serviceName = association.title;
-                            }
+                            break;
                         }
                     }
 

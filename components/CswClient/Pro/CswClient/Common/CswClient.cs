@@ -83,28 +83,21 @@ namespace com.esri.gpt.csw
 
             ClientCertRequest.handleClientCert(request, URL);
 
-            if (method.Equals("GET"))
+            if (method.Equals("GET") || method.Equals("DOWNLOAD"))
             {
                 request.Method = "GET";
                 uri = new Uri(URL + "?" + postdata);
             }
+            else if (method.Equals("SOAP"))
+            {
+                request.Method = "POST";
+                request.Headers.Add("SOAPAction: Some-URI");
+                request.ContentType = "text/xml; charset=UTF-8";
+            }
             else
             {
-                if (method.Equals("SOAP"))
-                {
-                    request.Method = "POST";
-                    request.Headers.Add("SOAPAction: Some-URI");
-                    request.ContentType = "text/xml; charset=UTF-8";
-                }
-                else if (method.Equals("DOWNLOAD"))
-                {
-                    request.Method = "GET";
-                }
-                else
-                {
-                    request.ContentType = "text/xml; charset=UTF-8";
-                    request.Method = method;
-                }
+                request.ContentType = "text/xml; charset=UTF-8";
+                request.Method = method;
             }
 
 
@@ -146,14 +139,6 @@ namespace com.esri.gpt.csw
             }
             catch (UnauthorizedAccessException ua)
             {
-                /*if (ua is CryptographicException)
-                {
-                    // handle client certificate
-                    ClientCertRequest.handleClientCert(request, URL);
-                    response = (HttpWebResponse)request.GetResponse();
-                    retryAttempt = false;
-                }*/
-
                 if (retryAttempt)
                 {
                     PromptCredentials pc = new PromptCredentials();
@@ -179,13 +164,6 @@ namespace com.esri.gpt.csw
             }
                 catch (WebException we)
             {
-                /* if (we is CryptographicException)
-                 {
-                     // handle client certificate
-                     ClientCertRequest.handleClientCert(request, URL);
-                     response = (HttpWebResponse)request.GetResponse();
-                     retryAttempt = false;
-                 }*/
                 if (we.Status == WebExceptionStatus.ProtocolError)
                 {
                     HttpStatusCode statusCode = ((HttpWebResponse)we.Response).StatusCode;
@@ -225,57 +203,6 @@ namespace com.esri.gpt.csw
             }
 
             Stream responseStream = response.GetResponseStream();            
-
-            //if (method.Equals("DOWNLOAD"))
-            //{
-            //    FileStream file = null;
-
-            //    string fileName = response.GetResponseHeader("Content-Disposition");
-
-            //    string[] s = null;
-            //    if (fileName.ToLower().EndsWith(".tif"))
-            //    {
-            //        s = URL.Split(new String[] { "coverage=" }, 100, StringSplitOptions.RemoveEmptyEntries);
-            //        s[1] = s[1].Trim() + ".tif";
-            //    }
-            //    else
-            //    {
-            //        s = fileName.Split('=');
-            //        s[1] = s[1].Replace('\\', ' ');
-            //        s[1] = s[1].Replace('"', ' ');
-            //        s[1] = s[1].Trim();
-            //    }
-
-            //    try
-            //    {
-            //        downloadFileName = System.IO.Path.Combine(Utils.GetSpecialFolderPath(SpecialFolder.ConfigurationFiles), s[1]);
-            //        System.IO.File.Delete(downloadFileName);
-            //        file = System.IO.File.Create(downloadFileName);                    
-            //        // Buffer to read 10K bytes in chunk:
-            //        byte[] buffer = new Byte[10000];
-            //        int length = 10000;
-            //        int offset = 0;
-            //        while (length > 0)
-            //        {
-            //            length = responseStream.Read(buffer, 0, length);
-            //            offset += length;
-            //            file.Write(buffer, 0, length);
-            //        }
-            //    }
-            //    catch (Exception e)
-            //    {}
-            //    finally
-            //    {
-            //        if(file != null)
-            //            file.Close();
-            //        if(responseStream != null)
-            //            responseStream.Close();
-            //        retryAttempt = true;
-            //    }
-                
-            //    return downloadFileName;
-            //}
-
             StreamReader reader = new StreamReader(responseStream);
             responseText = reader.ReadToEnd();
 
