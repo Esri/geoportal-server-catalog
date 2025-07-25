@@ -20,193 +20,153 @@ using System.Collections;
 using System.Windows;
 using com.esri.gpt.csw;
 using System.Web;
-// using System.Windows.Forms;
+using System.Security;
 
 
 namespace com.esri.gpt.logger
 {
-  /// <summary>
-  /// Log application message to log file
-  /// </summary>
-  public class AppLogger
-  {
     /// <summary>
-    /// instance variable
+    /// Log application message to log file
     /// </summary>
-    private string logFolder = null;
-    private bool debug = false;
-    private int maxFileSize = -1;
-    private string dataFolder = null;
-    private string xsltPath = null;
-    #region Properties
-    /// <summary>
-    /// DataFolder variable
-    /// </summary>
-    public string DataFolder
+    public class AppLogger
     {
-        get
+        /// <summary>
+        /// instance variable
+        /// </summary>
+        private string logFolder = null;
+        private bool debug = false;
+        private int maxFileSize = -1;
+        private string dataFolder = null;
+        private string xsltPath = null;
+        #region Properties
+        /// <summary>
+        /// DataFolder variable
+        /// </summary>
+        public string DataFolder
         {
-          return dataFolder;
+            get
+            {
+                return dataFolder;
+            }
+            set
+            {
+                dataFolder = value;
+            }
         }
-        set
+        /// <summary>
+        /// XsltPath
+        /// </summary>
+        public string XsltPath
         {
-          dataFolder = value;
+            get
+            {
+                return xsltPath;
+            }
+            set
+            {
+                xsltPath = value;
+            }
         }
-    }
-    /// <summary>
-    /// XsltPath
-    /// </summary>
-    public string XsltPath
-    {
-      get
-      {
-        return xsltPath;
-      }
-      set
-      {
-        xsltPath = value;
-      }
-    }
-    #endregion
-    /// <summary>
-    /// Constructor
-    /// </summary>
-    /// <param name="configName">configuration file name</param>
-    public AppLogger(String configName)
-    {
-      String[] fStream = null;
-      String p = "";
-      try
-      {
-        try
+        #endregion
+        /// <summary>
+        /// Constructor
+        /// </summary>
+        /// <param name="configName">configuration file name</param>
+        public AppLogger(String configName)
         {
-          p = configName + ".properties";
-          // File.ReadAllLines(System.Environment.CurrentDirectory + "/" + configName + ".properties");
-          // fStream = File.ReadAllLines("C:/geoportalserver/CswClient.properties"); 
-          var propertiesFile = Utils.GetSpecialFolderPath(SpecialFolder.ExecutingAssembly) + "\\Config\\CswClient.properties";
-          Console.WriteLine("propertiesFile = " + propertiesFile);
-          fStream = File.ReadAllLines(propertiesFile); 
-        }
-        catch (IOException io)
-        {
-          try
-          {
-            fStream = File.ReadAllLines(configName + ".properties");
-          }
-          catch (IOException ioe)
-          {
-            p = System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/ESRI/arcgis explorer/AddIns/Cache/CSWSearchDockWindow/" + configName + ".properties";
+            String[] fStream = null;
+            String p = "";
             try
-            {                           
-              fStream = File.ReadAllLines(p);
-            }
-            catch (IOException iex)
             {
-              try
-              {
-                String cmdLine = System.Environment.CommandLine;                                
-                int idx = cmdLine.IndexOf("Bin");
-                if(idx == -1){
-                  idx = cmdLine.IndexOf("bin");
+                try
+                {
+                    p = configName + ".properties";
+                    var propertiesFile = Utils.GetSpecialFolderPath(SpecialFolder.ExecutingAssembly) + "\\Config\\CswClient.properties";
+                    Console.WriteLine("propertiesFile = " + propertiesFile);
+                    fStream = File.ReadAllLines(propertiesFile);
                 }
-                if(idx > -1){
-                  cmdLine = cmdLine.Substring(0,idx+3) + "/";
-                  cmdLine = cmdLine.Replace("\"", "");
+                catch (IOException io)
+                {
+                    try
+                    {
+                        fStream = File.ReadAllLines(configName + ".properties");
+                    }
+                    catch (IOException ioe)
+                    {
+                        MessageBox.Show("Could not find " + configName + ".properties file at path " + p, "File Not Found Error",
+                                            MessageBoxButton.OK, MessageBoxImage.Exclamation);
+                    }
                 }
-                p = cmdLine + configName + ".properties";
-                fStream = File.ReadAllLines(p);
-              }
-              catch (Exception ex)
-              {
-                MessageBox.Show("Could not find " + configName + ".properties file at path " + p, "File Not Found Error",
-                                MessageBoxButton.OK, MessageBoxImage.Exclamation);
-              }
+                if (fStream != null && fStream.Length > 0)
+                {
+                    String logFilePath = fStream[0];
+                    String maxSize = fStream[1];
+                    String debugFlag = fStream[2];
+                    if (logFilePath != null)
+                    {
+                        logFolder = logFilePath.Substring(logFilePath.IndexOf("=") + 1).Replace("..", ""); // don't allow relative paths
+                    }
+                    if (maxSize != null)
+                    {
+                        maxFileSize = int.Parse(maxSize.Substring(maxSize.IndexOf("=") + 1));
+                    }
+                    if (debugFlag != null && debugFlag.Trim().Equals("debug=on", StringComparison.CurrentCultureIgnoreCase))
+                    {
+                        debug = true;
+                    }
+                    if (configName.Trim().Equals("cswclient", StringComparison.InvariantCultureIgnoreCase))
+                    {
+                        // MH - modified to include profiles in the addin itself
+                        dataFolder = Utils.GetSpecialFolderPath(SpecialFolder.ExecutingAssembly) + "/Config/profiles";
+                    }
+                }
             }
-          }
+            finally
+            {
+            }
         }
-        if (fStream != null && fStream.Length >0)
-        {
-          String logFilePath = fStream[0];
-          String maxSize = fStream[1];
-          String debugFlag = fStream[2];
-          if (logFilePath != null)
-          {
-            logFolder = logFilePath.Substring(logFilePath.IndexOf("=") + 1);
-          }
-          if (maxSize != null)
-          {
-            maxFileSize = int.Parse(maxSize.Substring(maxSize.IndexOf("=") + 1));
-          }
-          if (debugFlag != null && debugFlag.Trim().Equals("debug=on", StringComparison.CurrentCultureIgnoreCase))
-          {
-            debug = true;
-          }
-          if (configName.Trim().Equals("cswclient", StringComparison.InvariantCultureIgnoreCase))
-          {
-            // MH - modified to include profiles in the addin itself
-            //dataFolder = fStream[3];
-            //if (dataFolder != null)
-            //{
-            //  dataFolder = dataFolder.Substring(dataFolder.IndexOf("=") + 1);
-            //}
-            dataFolder = Utils.GetSpecialFolderPath(SpecialFolder.ExecutingAssembly) + "/Config/profiles";
-          }
-        }
-      }
-      catch (Exception ioe)
-      {
-        try
-        {
-          File.WriteAllText(System.Environment.CurrentDirectory + "/AppLoggerError.log", ioe.StackTrace + "******** \n" + configName + "\n cur user application data dir : " + System.Environment.GetFolderPath(System.Environment.SpecialFolder.ApplicationData) + "/ESRI/arcgis explorer/AddIns/Cache/CSWSearchDockWindow" + " \n cur dir " + System.Environment.CurrentDirectory);                  
-        }
-        catch (Exception ioe2)
-        { }
-      }
-      finally
-      {            
-      }
-    }
 
-    /// <summary>
-    /// Writes log message
-    /// </summary>
-    /// <param name="logMessage">message to log</param>
-    public void writeLog(String logMessage)
-    {
-      System.IO.FileStream fileStream = null;
-      System.IO.StreamWriter sr = null;
-      try
-      {
-        if (debug)
-        {                    
-          System.IO.FileInfo fileInfo = new System.IO.FileInfo(logFolder);
-          if (fileInfo.Exists && (fileInfo.Length + logMessage.Length) <= maxFileSize)
-          {
-            sr = fileInfo.AppendText();
-          }
-          else
-          {
-            if (fileInfo.Exists)
+        /// <summary>
+        /// Writes log message
+        /// </summary>
+        /// <param name="logMessage">message to log</param>
+        public void writeLog(String logMessage)
+        {
+            System.IO.FileStream fileStream = null;
+            System.IO.StreamWriter sr = null;
+            try
             {
-              DateTime dt = DateTime.Now;
-              fileInfo.CopyTo(logFolder + "_" + dt.Hour + "_" + dt.Minute + "_" + dt.Second, true);
-              fileStream = fileInfo.Open(FileMode.Truncate);
-              fileStream.Close();
+                String sanitizedFolder = logFolder.Replace("..", "");
+                if (debug)
+                {
+                    System.IO.FileInfo fileInfo = new System.IO.FileInfo(sanitizedFolder);
+                    if (fileInfo.Exists && (fileInfo.Length + logMessage.Length) <= maxFileSize)
+                    {
+                        sr = fileInfo.AppendText();
+                    }
+                    else
+                    {
+                        if (fileInfo.Exists)
+                        {
+                            DateTime dt = DateTime.Now;
+                            fileInfo.CopyTo(sanitizedFolder + "_" + dt.Hour + "_" + dt.Minute + "_" + dt.Second, true);
+                            fileStream = fileInfo.Open(FileMode.Truncate);
+                            fileStream.Close();
+                        }
+                        fileStream = fileInfo.Open(System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
+                        sr = new System.IO.StreamWriter(fileStream);
+                    }
+                    string safeString = SecurityElement.Escape(logMessage);
+                    sr.WriteLine(safeString);
+                }
             }
-            fileStream = fileInfo.Open(System.IO.FileMode.OpenOrCreate, System.IO.FileAccess.Write);
-            sr = new System.IO.StreamWriter(fileStream);
-          }
-            string safeString = HttpUtility.HtmlEncode(logMessage);
-            sr.WriteLine(safeString);
-        }            
-      } 
-      finally
-      {
-        if (sr != null)
-            sr.Close();
-        if (fileStream != null)
-            fileStream.Close();
-      }
+            finally
+            {
+                if (sr != null)
+                    sr.Close();
+                if (fileStream != null)
+                    fileStream.Close();
+            }
+        }
     }
-  }
 }
