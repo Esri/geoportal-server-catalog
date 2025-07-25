@@ -42,7 +42,7 @@ define([],function(){var obj={
     showDate: true,
     showOwner: true,
     showThumbnails: true,
-    showFootprint: true,
+    showFootprint: false,
     showAccess: true,
     showApprovalStatus: true,
     defaultSort: {"title.keyword": {"order" : "asc" ,"unmapped_type": "keyword"}},   
@@ -50,8 +50,7 @@ define([],function(){var obj={
     showLinks: true,
     showCustomLinks: true,
     showOpenSearchLinks: true,
-    showTotalCountInHierarchy: true,
-    showShoppingCart: false
+    showTotalCountInHierarchy: true
   },
 
   statusChecker: {
