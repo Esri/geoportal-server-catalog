@@ -3,13 +3,13 @@
 # NOAA and NCEI cannot provide any warranty as to the accuracy, reliability, or completeness of the tool.
 # The user is responsible for the results of any application of this tool for other than its intended purpose.
 # Any questions, please contact NCEI.info@noaa.gov".
-
 import pycurl
 import urlparse
 import urllib
 import os
 import sys
-  
+
+
 # Put basic authentication credentials in this file in the form username:password.
 credFile = '.gptauth'
    
@@ -89,13 +89,14 @@ c.setopt(c.URL, urlparse.urlunparse(u))
 
 # Iterate over input files.
 for fname in sys.argv[1:]:
-  f = open(fname, 'r')
-  fsize = os.fstat(f.fileno()).st_size
-  c.setopt(pycurl.INFILESIZE, fsize)
-  c.setopt(pycurl.INFILE, f)
-  c.perform()
-  status = str(c.getinfo(pycurl.HTTP_CODE))
-  log.write('%s %s\n' % (status, fname))
-  f.close()
+  if str(fname).endswith("xml"):
+    f = open(fname, 'r')
+    fsize = os.fstat(f.fileno()).st_size
+    c.setopt(pycurl.INFILESIZE, fsize)
+    c.setopt(pycurl.INFILE, f)
+    c.perform()
+    status = str(c.getinfo(pycurl.HTTP_CODE))
+    log.write('%s %s\n' % (status, fname))
+    f.close()
 
 log.close()
