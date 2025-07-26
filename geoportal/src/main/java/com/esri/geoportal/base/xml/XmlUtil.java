@@ -170,22 +170,19 @@ public class XmlUtil {
    */
   public static void transform(javax.xml.transform.Source source,
       javax.xml.transform.Result result, boolean indent) throws TransformerException {
+    
     TransformerFactory factory = TransformerFactory.newInstance();
- /* have and issue with the default transformer.
-    https://stackoverflow.com/questions/45152707/transformerfactory-and-xalan-dependency-conflict
-    and
-    https://docs.oracle.com/javase/tutorial/jaxp/properties/usingProps.html
-     */
-    try {
-      factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
-    } catch (IllegalArgumentException e) {
-      //jaxp 1.5 feature not supported
-    }
-    factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
+    factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
+    factory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    
+    //factory.setFeature("http://javax.xml.XMLConstants/feature/secure-processing",true);
     //factory.setFeature("http://apache.org/xml/features/disallow-doctype-decl",true); 
+    
     Transformer transformer = factory.newTransformer();
     transformer.setOutputProperty(OutputKeys.ENCODING,DEFAULT_ENCODING);
     transformer.setOutputProperty(OutputKeys.METHOD,"xml");
+    
     if (indent) {
       transformer.setOutputProperty(OutputKeys.INDENT,"yes");
       transformer.setOutputProperty("{http://xml.apache.org/xslt}indent-amount","2");
