@@ -326,7 +326,7 @@
       "021": "Sensor Series",
       "022": "Production Series",
       "023": "Transfer Series",
-      "024": "Other Series"
+      "024": "Other Series",
 	  "map": "Map",
 	  "mapDocument": "mapDocument",
 	  "layer": "Layer"
