@@ -59,6 +59,7 @@ public class ResourcePath {
       }
     }
     */
+    validatePath(path);
     if (url == null) {
       url = Thread.currentThread().getContextClassLoader().getResource(path);
     }
@@ -66,6 +67,20 @@ public class ResourcePath {
       throw new IOException("Unable to create resource URL for path: "+path);
     }
     return url;
+  }
+  
+  /**
+   * Validates the resource path to ensure it is safe.
+   * @param path the path to validate
+   * @throws IOException if the path is invalid
+   */
+  private void validatePath(String path) throws IOException {
+    if (path == null || path.isEmpty()) {
+      throw new IOException("Path cannot be null or empty.");
+    }
+    if (path.contains("..") || path.contains("/") || path.contains("\\")) {
+      throw new IOException("Invalid path: " + path);
+    }
   }
 
 }
