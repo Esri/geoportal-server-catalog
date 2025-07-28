@@ -107,6 +107,18 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
       }));
     },
 
+    destroy: function() {
+        try {
+        	this.destroyFootprint();
+        } catch(ex) {}
+        this.inherited(arguments);
+    },
+    
+    destroyFootprint:function()
+    {
+    	if(this.view) this.view.destroy();   		
+    	this.footprintNode.innerHTML = "";
+    },    	
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id;
@@ -651,7 +663,8 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
 
     _renderFootprint: function(item) {
       var show = AppContext.appConfig.searchResults.showFootprint;
-      var footprintNode = this.footprintNode;
+      var footprintNode = this.footprintNode;    
+      
       if (show && item.shape_geo && item.shape_geo.coordinates) {
         var extent = null;
 
@@ -685,7 +698,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         }
         
         var mapOptions = {
-          basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
+          basemap: "gray",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
           //center: [item.envelope_cen_pt.lon, item.envelope_cen_pt.lat],
           //TODO 
 //          isClickRecenter: false,
@@ -730,7 +743,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         var graphic = new Graphic(footprint);
         gl.add(graphic);
         
-        const view = new MapView({
+        var view = this.view = new MapView({
         	  container:this.footprintNode,
         	  map: map,        	 
         	  extent: extent
@@ -738,10 +751,11 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         view.ui.remove("attribution");     
         // TODO  zoom inside map view top left, not working
       //  view.ui.move("zoom", "top-left");
-      
+        
       } else {
         footprintNode.style.display = "none";
       }
+      
     },
 
     _uniqueLinks: function(item) {

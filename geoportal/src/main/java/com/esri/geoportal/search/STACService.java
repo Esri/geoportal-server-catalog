@@ -629,7 +629,6 @@ public class STACService extends Application {
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
 			} 
-			
 			else
 			{
 				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,idList,deleteCollection);
