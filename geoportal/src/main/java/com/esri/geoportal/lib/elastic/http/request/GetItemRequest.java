@@ -168,8 +168,7 @@ public class GetItemRequest extends BulkEditRequest {
    */
   public void writeOk(AppResponse response, String json) {
 	 String encodedJson = StringEscapeUtils.escapeJson(json);
-	 response.setEntity(encodedJson);
-    response.setEntity(json);
+	 response.setEntity(encodedJson);    
     response.setMediaType(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8"));
     response.setStatus(Response.Status.OK);
   }
