@@ -23,6 +23,8 @@ import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 import java.io.FileNotFoundException;
 import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
+import org.apache.commons.text.StringEscapeUtils;
+
 
 /**
  * Get an item.
@@ -165,6 +167,8 @@ public class GetItemRequest extends BulkEditRequest {
    * @param json the item json
    */
   public void writeOk(AppResponse response, String json) {
+	 String encodedJson = StringEscapeUtils.escapeJson(json);
+	 response.setEntity(encodedJson);
     response.setEntity(json);
     response.setMediaType(MediaType.APPLICATION_JSON_TYPE.withCharset("UTF-8"));
     response.setStatus(Response.Status.OK);
