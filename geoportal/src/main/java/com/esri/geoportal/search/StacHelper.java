@@ -957,20 +957,10 @@ public class StacHelper {
 				}
 			}
 			else
-			{
-				if(idList.length()>1000)
-				{
-					resObj.put("code", "400");
-					resObj.put("description", "ids length can not be more than 1000. ");
-					return resObj;
-					
-				}else
-				{
-					List <String>idInputList =  Arrays.asList(idList.split("\\s*,\\s*"));
-					idArrList = idInputList;
-				}				
+			{				
+				String [] idArr = idList.split(",");
+				idArrList = Arrays.asList(idArr);								
 			}
-			
 			total = idArrList.size();
 			for(int i = 0; i<idArrList.size();i++)
 			{
