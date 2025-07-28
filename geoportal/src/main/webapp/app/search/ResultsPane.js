@@ -27,8 +27,9 @@ define(["dojo/_base/declare",
         "app/search/DropPane",
         "app/search/Paging",
         "dojox/widget/Standby",
+        "dijit/registry",
         "app/etc/util"],
-    function (declare, lang, array, aspect, domConstruct, query, on, domClass, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby, Util) {
+    function (declare, lang, array, aspect, domConstruct, query, on, domClass, template, i18n, SearchComponent, ItemCard, DropPane, Paging, Standby, registry,Util) {
 
         var oThisClass = declare([SearchComponent], {
 
@@ -115,6 +116,8 @@ define(["dojo/_base/declare",
                 });
                 array.forEach(rm, function (child) {
                     this.itemsNode.removeChild(child);
+                    var d = registry.byNode(child);  
+                    if(d) d.destroy();
                 }, this);
             },
 
