@@ -629,7 +629,9 @@ public class STACService extends Application {
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
 			} 
-			
+			else if (idList.length() > 1000) {
+				responseJSON = this.generateResponse("400", "ids length can not be more than 1000.",null);
+			}
 			else
 			{
 				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,idList,deleteCollection);
