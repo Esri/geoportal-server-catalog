@@ -248,7 +248,7 @@ public class XsltTemplate {
     TransformerFactory factory = TransformerFactory.newInstance();
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_DTD, "");
     factory.setAttribute(XMLConstants.ACCESS_EXTERNAL_STYLESHEET, "");
-    factory.setAttribute(XMLConstants.FEATURE_SECURE_PROCESSING, true);
+    factory.setFeature(XMLConstants.FEATURE_SECURE_PROCESSING, true);
     
     Transformer transformer = factory.newTransformer(); //getTemplates().newTransformer();
     if (mapParams != null) {
