@@ -248,7 +248,7 @@ define([
               let itemId = url.substring(idIndex + 4);
               var portalBaseUrl;
               let domain = util.getDomainFromUrl(url);
-              if (domain.endsWith("arcgis.com")) {
+              if (domain.endsWith(".arcgis.com")) {
                 itemInfoUrl = "https://www.arcgis.com/sharing/rest/content/items/" + itemId;
               } else {
                 //On Premise Portal
