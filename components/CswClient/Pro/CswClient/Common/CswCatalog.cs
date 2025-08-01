@@ -18,6 +18,7 @@ using System.Text;
 using System.Xml;
 using System.Xml.Xsl;
 using System.Xml.XPath;
+using System.Web;
 
 
 namespace com.esri.gpt.csw { /// <summary>
@@ -172,12 +173,14 @@ namespace com.esri.gpt.csw { /// <summary>
                 try {
                     CswClient client = new CswClient();
                     Utils.logger.writeLog("GetCapabilities url : " + capabilitiesurl);
+                    string safeString = HttpUtility.HtmlEncode(capabilitiesurl);
                     string response = client.SubmitHttpRequest("GET", capabilitiesurl, "");
-                    Utils.logger.writeLog("GetCapabilities response : " + response);
+                    string safeXml = System.Security.SecurityElement.Escape(response);
+                    Utils.logger.writeLog("GetCapabilities response : " + safeXml);
                     //Console.WriteLine()
-                    
 
-                    XmlDocument xmlDoc = new XmlDocument();
+
+                XmlDocument xmlDoc = new XmlDocument();
                     if (response == null)
                         return null ;
                     xmlDoc.LoadXml(response); 
@@ -197,8 +200,9 @@ namespace com.esri.gpt.csw { /// <summary>
                         return null;
                 }
                 catch (Exception ex) {
-                    Utils.logger.writeLog(ex.StackTrace);
-                    throw ex;
+                    string safeString = System.Security.SecurityElement.Escape(ex.StackTrace);
+                    Utils.logger.writeLog(safeString);
+                    throw;
                 }
             }
 
@@ -297,7 +301,8 @@ namespace com.esri.gpt.csw { /// <summary>
                     return true;
                 }
                 catch (Exception e) {
-                    Utils.logger.writeLog(e.StackTrace);
+                    string safeString = HttpUtility.HtmlEncode(e.StackTrace);
+                    Utils.logger.writeLog(safeString);
                     return false;
                 }
                 
@@ -328,12 +333,14 @@ namespace com.esri.gpt.csw { /// <summary>
                     ParseCapabilities(capabilitesxml);
                     sb.AppendLine(DateTime.Now + " Parsed GetCapabilitiesResponse xml...");                
                     isConnect = true;
-                    Utils.logger.writeLog(sb.ToString());
+                string safeXml = System.Security.SecurityElement.Escape(sb.ToString());
+                Utils.logger.writeLog(safeXml);
                     return true;
                 }
                 else {
                     sb.AppendLine(DateTime.Now + " Failed to connect to GetCapabilities endpoint.");
-                    Utils.logger.writeLog(sb.ToString());
+                string safeXml = System.Security.SecurityElement.Escape(sb.ToString());
+                    Utils.logger.writeLog(safeXml);
                     isConnect = false;
                     return false;
                 }           
