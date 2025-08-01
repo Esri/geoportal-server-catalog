@@ -17,6 +17,12 @@ function evaluateSuppliedJson(mdoc) {
   print("JsonEvaluator::evaluateSuppliedJson");
   var item = JSON.parse(mdoc.getSuppliedJson());
   
+  if (!item.title) {
+    if (item.id) {
+      item.title = item.id;
+    }
+  }
+  
   if (item.metadataURL && item.metadataURL.length > 0) {
       item.full_metadata = getFullMetadata(item);  
   }
