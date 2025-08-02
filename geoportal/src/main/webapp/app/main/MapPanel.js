@@ -109,7 +109,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 	    if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
 	      v = null;
 	    }	    
-	    var map = new Map({basemap:"streets"});
+	    var map = new Map({basemap:mapProps.basemap});
 	    
 		const view = new MapView({
 	  	  container: this.mapNode,

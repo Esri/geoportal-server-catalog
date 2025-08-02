@@ -97,7 +97,7 @@ namespace com.esri.gpt.csw {
            }
            catch (Exception ex)
            {
-               throw ex;
+               throw;
            }
 
        }
@@ -167,7 +167,7 @@ namespace com.esri.gpt.csw {
                 updatetoFile(filename); 
             }
             catch (Exception e) {
-                throw e;
+                throw;
             }
 
         }
@@ -187,7 +187,7 @@ namespace com.esri.gpt.csw {
                 updatetoFile(filename);
             }
             catch (Exception ex) {
-                throw ex;
+                throw;
             }
         }
 
@@ -214,7 +214,7 @@ namespace com.esri.gpt.csw {
                updatetoFile(filename);
            }
            catch (Exception ex) {
-               throw ex;
+               throw;
            }
        }
 
@@ -249,7 +249,7 @@ namespace com.esri.gpt.csw {
                }
            }
            catch (Exception ex) {
-               throw ex;
+               throw;
            }
 
        }

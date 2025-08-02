@@ -541,8 +541,13 @@ public class ElasticContext {
    */
   public String getNextNode() {
     String[] list = nodesToArray();
-    int index = (int)(balanceCounter.getAndIncrement() % list.length);
-    return list[index];
+    if (list.length > 0) {
+      int index = (int)(balanceCounter.getAndIncrement() % list.length);
+      return list[index];
+    } else {
+      LOGGER.error("No search index nodes found. Check app-context.xml");
+      return null;
+    }
   }
   
   /**

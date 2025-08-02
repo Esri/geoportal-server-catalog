@@ -10,7 +10,7 @@ import javax.crypto.Cipher;
 import javax.crypto.IllegalBlockSizeException;
 import javax.crypto.NoSuchPaddingException;
 import javax.crypto.SecretKey;
-import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
 import org.slf4j.Logger;
@@ -21,34 +21,22 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 
 public class EncryptDecrypt {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EncryptDecrypt.class);
-	public static String encrypt(String algorithm, String input, SecretKey key, IvParameterSpec iv)
-			throws NoSuchPaddingException, NoSuchAlgorithmException, InvalidAlgorithmParameterException,
-			InvalidKeyException, BadPaddingException, IllegalBlockSizeException {
-
-		Cipher cipher = Cipher.getInstance(algorithm);
-		cipher.init(Cipher.ENCRYPT_MODE, key, iv);
-		byte[] cipherText = cipher.doFinal(input.getBytes());
-		return Base64.getEncoder().encodeToString(cipherText);
-	}
-
-
 
 	public static String decrypt(String encryptedText,String base64Key, String base64Iv) throws NoSuchAlgorithmException, NoSuchPaddingException, IllegalBlockSizeException, BadPaddingException, InvalidKeyException, InvalidAlgorithmParameterException
 	{		
-		String algorithm = "AES/CBC/PKCS5Padding";	 
+		String algorithm = "AES/GCM/NoPadding";	 
         
         byte[] decodedKey = Base64.getDecoder().decode(base64Key);
         byte[] decodedIv = Base64.getDecoder().decode(base64Iv);
         
         SecretKey key = new SecretKeySpec(decodedKey, 0, decodedKey.length, "AES");
-        IvParameterSpec ivParameterSpec = new IvParameterSpec(decodedIv);
+        GCMParameterSpec ivParameterSpec = new GCMParameterSpec(128,decodedIv);
         
         Cipher cipher = Cipher.getInstance(algorithm);
         cipher.init(Cipher.DECRYPT_MODE, key, ivParameterSpec);
         byte[] decryptedData = cipher.doFinal(Base64.getDecoder().decode(encryptedText));
         
         return new String(decryptedData);
-		
 	}
 	
 	public static String decryptLdapPass(String inputText)

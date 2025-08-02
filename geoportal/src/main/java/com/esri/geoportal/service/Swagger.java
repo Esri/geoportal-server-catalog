@@ -14,8 +14,9 @@
  */
 package com.esri.geoportal.service;
 import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.search.StacHelper;
 
+
+import org.apache.commons.text.StringEscapeUtils;
 import java.io.File;
 import java.nio.file.Files;
 import java.util.HashSet;
@@ -59,6 +60,7 @@ public class Swagger extends Application {
       if (contextPath == null || contextPath.length() == 0) {
         contextPath = "/";
       }
+      contextPath = StringEscapeUtils.escapeJson(contextPath);
       ClassLoader classLoader = this.getClass().getClassLoader();
       File file = new File(classLoader.getResource(fileName).getFile());
       String v = new String(Files.readAllBytes(file.toPath()),"UTF-8");
