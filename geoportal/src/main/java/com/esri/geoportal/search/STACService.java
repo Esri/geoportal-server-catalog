@@ -32,6 +32,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -53,6 +55,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.owasp.esapi.ESAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -439,7 +442,7 @@ public class STACService extends Application {
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("Error in getting collection: {} {}",collectionId,e);
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting collection: "+collectionId+" "+e));
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated. "+e.getMessage(),detailErrArray);
@@ -590,7 +593,7 @@ public class STACService extends Application {
 			status = Response.Status.BAD_REQUEST;
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
-			LOGGER.error("Error in getting item with item id: " + id + " " + e.getCause());
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting item with item id: " + id + " " + e.getCause()));
 			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
@@ -626,7 +629,6 @@ public class STACService extends Application {
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
 			} 
-			
 			else
 			{
 				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,idList,deleteCollection);
@@ -733,7 +735,7 @@ public class STACService extends Application {
 			status = Response.Status.BAD_REQUEST;
 			responseJSON = this.generateResponse("400", "Parameter " + e.getParameterName() + ": " + e.getMessage(),null);
 		} catch (Exception e) {
-			LOGGER.error("Error in deleting item with item id: " + id + " " + e.getCause());
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in deleting item with item id: " + id + " " + e.getCause()));
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
 			responseJSON = this.generateResponse("500","STAC API: Feature could not be deleted.",detailErrArray);
@@ -1022,8 +1024,12 @@ public class STACService extends Application {
 			@RequestBody String body, @QueryParam("async") boolean async)throws Exception {
     String responseJSON;		
     Status status;
-
-    if(gc.getSupportsCollections() && !validCollection(collectionId)) {
+    if(!isValidCollectionId(collectionId))
+	{
+		status = Response.Status.BAD_REQUEST;			
+		responseJSON = this.generateResponse("400","Collection id can contain (A-Za-z0-9_-) and length should be less than 25.",null);		
+	}	
+    else if(gc.getSupportsCollections() && !validCollection(collectionId)) {
         status = Response.Status.BAD_REQUEST;
         String baseUrl = this.getBaseUrl(hsr);
         responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
@@ -1068,8 +1074,12 @@ public class STACService extends Application {
     
 		String responseJSON;	
 		Status status;		
-		
-		if(gc.getSupportsCollections() && !validCollection(collectionId)) 
+		if(!isValidCollectionId(collectionId))
+		{
+			status = Response.Status.BAD_REQUEST;			
+			responseJSON = this.generateResponse("400","Collection id can contain (A-Za-z0-9_-) and length should be less than 25.",null);		
+		}		
+		else if(gc.getSupportsCollections() && !validCollection(collectionId)) 
 		{	
 			status = Response.Status.BAD_REQUEST;
 			String baseUrl = this.getBaseUrl(hsr);
@@ -1094,6 +1104,21 @@ public class STACService extends Application {
 	}
   
   
+	private boolean isValidCollectionId(String collectionId) {
+		boolean valid = false;
+		if(collectionId!=null && !collectionId.isBlank() && collectionId.length()<=25)
+		{
+			String regEx = "^[A-Za-z0-9_-]+$";
+			Pattern pattern = Pattern.compile(regEx);				  
+			Matcher matcher = pattern.matcher(collectionId);
+			if(matcher.matches())
+			{
+				valid = true;					  
+			}
+		}		
+		return valid;
+	}
+
 	/**
 	 * STAC Transaction - Update Feature https://github.com/stac-api-extensions/transaction?tab=readme-ov-file#put
 	 * @param hsr
@@ -1366,9 +1391,8 @@ public class STACService extends Application {
     
 		//For asynchronous request, log this response message
 	  if(async) {
-			 LOGGER.info("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON);
-	  }
-    
+			 LOGGER.info(ESAPI.encoder().encodeForHTML("request: /collections/"+collectionId+"/items/"+featureId+"; method:PUT; response: \n"+responseJSON));
+	  }    
 		return Response.status(status)
 				.header("Content-Type", "application/json")
 				.entity(responseJSON).build();		
@@ -1403,125 +1427,133 @@ public class STACService extends Application {
     Status status = Response.Status.INTERNAL_SERVER_ERROR;
     JSONArray detailErrArray = new JSONArray();
     String elasticResJson;    
-
-    try {
-      String id = "";
-      if (requestPayload.containsKey("id")) {
-        id = requestPayload.getAsString("id");
-      }
-
-      if (id.length()<1) {
-        // issue 572 - generate unique item id if configured to do so
-        // do this before validating the STAC item
-        if (sc.isCanStacAutogenerateId()) {
-          // generate a UUID to be used as id
-          UUID guid = UUID.randomUUID();
-          id = guid.toString();
-
-          // save the id to the payload
-          requestPayload.put("id", id);
-        }
-      }
-      // issue 574 - project payload if submitted with geometries not in 4326
-      JSONObject projectedPayload = requestPayload;
-      try {
-        projectedPayload = projectIncomingItem(requestPayload,collectionId);
-      } catch (ParseException e) {
-        LOGGER.error("Error parsing incoming item: " + e.getMessage());
-      }
-      
-   // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
-      if (projectedPayload.containsKey("geometry") && projectedPayload.get("geometry")!=null &&
-    		  !projectedPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
-    	  projectedPayload.put("bbox",StacHelper.generateBbox(projectedPayload));
-        }
-      
-      StacItemValidationResponse validationStatus = StacHelper.validateStacItem(projectedPayload,collectionId,sc.isValidateStacFields());
-      
-      if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
-        JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,false);
-
-        String itemJsonString = updatedPayload.toString();		
-        
-        String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
-
-        elasticResJson = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
-        JSONObject elasticResObj = (JSONObject) JSONValue.parse(elasticResJson);
-        
-        if(elasticResObj.containsKey("result") && elasticResObj.get("result").toString().contentEquals("created")) {					
-          status = Response.Status.CREATED;
-          
-          JSONObject resObj = new JSONObject();
-          resObj.put("code", "201");
-          resObj.put("message", "Stac item added successfully");
-          resObj.put("id", id);
-          responseJSON = resObj.toString();
-          
-          String itemUrlGeoportal = "";
-
-          //if sync request for Feature, create Stac feature for response 
-          if(reqType.equals("Feature") && !async) {
-            String filePath = "service/config/stac-item.json";
-            String itemFileString = this.readResourceFile(filePath, hsr);
-
-            //Before searching newly added item, sleep for 1 second, otherwise record is not found, 
-            //AWS opensearch serverless is not returning item in 1 sec so skipping returning full item 
-            if(!ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
-            {
-            	TimeUnit.SECONDS.sleep(1);
-            	String itemRes = StacHelper.getItemWithItemId(collectionId, id);
-                responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
-                itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
-            }             
-          }
-          return Response.status(status)
-                         .header("Content-Type", "application/json")
-                         .header("location",itemUrlGeoportal)
-                         .entity(responseJSON).build();				
-        }
-        //Some error in creating item
-        else { 
-          detailErrArray.add(elasticResObj);
-          responseJSON = generateResponse("500","Stac Item could not be added." ,detailErrArray);
-          LOGGER.info("Stac item with id "+id+" could not be created. ");
-        }
-      }		
-
-      else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
-      {
-              responseJSON = generateResponse("409", "Item with this id already exists in collection.",null);
-              status = Response.Status.CONFLICT;
-      }
-      //Bad request, missing field or any field is invalid
-      else
-      {
-          //response json will contain details about validation error like required fields
-			String existingIDForUniqueKey = "", descMsg = validationStatus.getMessage();
-			status = Response.Status.BAD_REQUEST;
-			JSONObject resObj = new JSONObject();
-			String desc = validationStatus.getMessage();
-			if (desc.indexOf("existingId:{") > -1) {
-				existingIDForUniqueKey = parseExistingId(desc);
-				descMsg = cleanDesc(desc, existingIDForUniqueKey);
-			}
-			resObj.put("message", descMsg);
-			if (existingIDForUniqueKey.length() > 0) {
-				resObj.put("existing_item_id", existingIDForUniqueKey);
-			}			
-			resObj.put("code", "400");
-			responseJSON = resObj.toString();
-      }		
-    }
-    catch(Exception ex)
+    if(!isValidCollectionId(collectionId))
+	{
+		status = Response.Status.BAD_REQUEST;			
+		responseJSON = this.generateResponse("400","Collection id can contain (A-Za-z0-9_-) and length should be less than 25.",null);		
+	}
+    else
     {
-            LOGGER.error("Error in adding Stac Item " + ex.getCause());
-            detailErrArray.add(ex.getMessage());
-            responseJSON = generateResponse("500","Stac Item could not be added.",detailErrArray);
+        try {
+            String id = "";
+            if (requestPayload.containsKey("id")) {
+              id = requestPayload.getAsString("id");
+            }
+
+            if (id.length()<1) {
+              // issue 572 - generate unique item id if configured to do so
+              // do this before validating the STAC item
+              if (sc.isCanStacAutogenerateId()) {
+                // generate a UUID to be used as id
+                UUID guid = UUID.randomUUID();
+                id = guid.toString();
+
+                // save the id to the payload
+                requestPayload.put("id", id);
+              }
+            }
+            // issue 574 - project payload if submitted with geometries not in 4326
+            JSONObject projectedPayload = requestPayload;
+            try {
+              projectedPayload = projectIncomingItem(requestPayload,collectionId);
+            } catch (ParseException e) {
+              LOGGER.error("Error parsing incoming item: " + e.getMessage());
+            }
+            
+         // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+            if (projectedPayload.containsKey("geometry") && projectedPayload.get("geometry")!=null &&
+          		  !projectedPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
+          	  projectedPayload.put("bbox",StacHelper.generateBbox(projectedPayload));
+              }
+            
+            StacItemValidationResponse validationStatus = StacHelper.validateStacItem(projectedPayload,collectionId,sc.isValidateStacFields());
+            
+            if(validationStatus.getCode().equals(StacItemValidationResponse.ITEM_VALID)) {
+              JSONObject updatedPayload = StacHelper.prePublish(projectedPayload,collectionId,false);
+
+              String itemJsonString = updatedPayload.toString();		
+              
+              String itemUrlElastic = client.getItemUrl(ec.getIndexName(),ec.getActualItemIndexType(), id);
+
+              elasticResJson = client.sendPut(itemUrlElastic, itemJsonString, "application/json");
+              JSONObject elasticResObj = (JSONObject) JSONValue.parse(elasticResJson);
+              
+              if(elasticResObj.containsKey("result") && elasticResObj.get("result").toString().contentEquals("created")) {					
+                status = Response.Status.CREATED;
+                
+                JSONObject resObj = new JSONObject();
+                resObj.put("code", "201");
+                resObj.put("message", "Stac item added successfully");
+                resObj.put("id", id);
+                responseJSON = resObj.toString();
+                
+                String itemUrlGeoportal = "";
+
+                //if sync request for Feature, create Stac feature for response 
+                if(reqType.equals("Feature") && !async) {
+                  String filePath = "service/config/stac-item.json";
+                  String itemFileString = this.readResourceFile(filePath, hsr);
+
+                  //Before searching newly added item, sleep for 1 second, otherwise record is not found, 
+                  //AWS opensearch serverless is not returning item in 1 sec so skipping returning full item 
+                  if(!ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
+                  {
+                  	TimeUnit.SECONDS.sleep(1);
+                  	String itemRes = StacHelper.getItemWithItemId(collectionId, id);
+                      responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
+                      itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+                  }             
+                }
+                return Response.status(status)
+                               .header("Content-Type", "application/json")
+                               .header("location",itemUrlGeoportal)
+                               .entity(responseJSON).build();				
+              }
+              //Some error in creating item
+              else { 
+                detailErrArray.add(elasticResObj);
+                responseJSON = generateResponse("500","Stac Item could not be added." ,detailErrArray);
+                LOGGER.info("Stac item with id "+id+" could not be created. ");
+              }
+            }		
+
+            else if (validationStatus.getCode().equals(StacItemValidationResponse.ID_EXISTS))
+            {
+                    responseJSON = generateResponse("409", "Item with this id already exists in collection.",null);
+                    status = Response.Status.CONFLICT;
+            }
+            //Bad request, missing field or any field is invalid
+            else
+            {
+                //response json will contain details about validation error like required fields
+      			String existingIDForUniqueKey = "", descMsg = validationStatus.getMessage();
+      			status = Response.Status.BAD_REQUEST;
+      			JSONObject resObj = new JSONObject();
+      			String desc = validationStatus.getMessage();
+      			if (desc.indexOf("existingId:{") > -1) {
+      				existingIDForUniqueKey = parseExistingId(desc);
+      				descMsg = cleanDesc(desc, existingIDForUniqueKey);
+      			}
+      			resObj.put("message", descMsg);
+      			if (existingIDForUniqueKey.length() > 0) {
+      				resObj.put("existing_item_id", existingIDForUniqueKey);
+      			}			
+      			resObj.put("code", "400");
+      			responseJSON = resObj.toString();
+            }		
+          }
+          catch(Exception ex)
+          {
+                  LOGGER.error("Error in adding Stac Item " + ex.getCause());
+                  detailErrArray.add(ex.getMessage());
+                  responseJSON = generateResponse("500","Stac Item could not be added.",detailErrArray);
+          }
     }
+
     //For asynchronous request, log this response message
      if(async && reqType.equals("Feature"))
      {
-             LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+             LOGGER.info(ESAPI.encoder().encodeForHTML("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON));
      }
     return Response.status(status)
                     .header("Content-Type", "application/json")
@@ -1644,7 +1676,7 @@ public class STACService extends Application {
     
 		//For asynchronous request, log this response message
 	    if(async) {
-	      LOGGER.info("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON);
+	      LOGGER.info(ESAPI.encoder().encodeForHTML("request: /collections/"+collectionId+"/items; method:POST; response: \n"+responseJSON));
 	    }
     
 		return Response.status(status)
@@ -2278,7 +2310,7 @@ public class STACService extends Application {
           
           try {
               geometryResponse = geometryClient.doProjection(itemGeometry, sourceCRS, requestedCRS, false);
-          } catch (IOException ex) {
+          } catch (Exception ex) {
               java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
           }
 
@@ -2440,7 +2472,7 @@ public class STACService extends Application {
 							projectedGeometries.add(projectedGeometry);
 						}
 	
-					} catch (IOException ex) {
+					} catch (Exception ex) {
 						LOGGER.error(STACService.class.getName() + ": " + ex.toString());
 					}
 				}
@@ -2454,7 +2486,7 @@ public class STACService extends Application {
                   
                   try {
                     geometryResponse = geometryClient.doProjection(arcgisGeometry, sourceCRS, requestedCRS, hasZ);
-                  } catch (IOException ex) {
+                  } catch (Exception ex) {
                     LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
                   }
                   if (!geometryResponse.isBlank()) {
@@ -2519,7 +2551,7 @@ public class STACService extends Application {
       String geometryResponse = "";
       try {
           geometryResponse = geometryClient.doProjection(geometries, inCRS, requestedCRS, false);
-      } catch (IOException ex) {
+      } catch (Exception ex) {
           java.util.logging.Logger.getLogger(STACService.class.getName()).log(Level.SEVERE, null, ex);
       }
 

@@ -542,7 +542,7 @@ public class StacHelper {
 	}
 
 
-	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) throws IOException, ParseException {
+	public static JSONObject prePublish(JSONObject requestPayload, String collectionId, boolean forUpdate) throws Exception {
 		String date = DateUtil.nowAsString();
 		JSONObject prop = (JSONObject) requestPayload.get("properties");
 		GeoportalContext gc = GeoportalContext.getInstance();
@@ -957,9 +957,9 @@ public class StacHelper {
 				}
 			}
 			else
-			{
-				List <String>idInputList =  Arrays.asList(idList.split("\\s*,\\s*"));
-				idArrList = idInputList;
+			{				
+				String [] idArr = idList.split(",");
+				idArrList = Arrays.asList(idArr);								
 			}
 			total = idArrList.size();
 			for(int i = 0; i<idArrList.size();i++)

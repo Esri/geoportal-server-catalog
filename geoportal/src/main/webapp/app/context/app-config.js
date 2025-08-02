@@ -50,8 +50,7 @@ define([],function(){var obj={
     showLinks: true,
     showCustomLinks: true,
     showOpenSearchLinks: true,
-    showTotalCountInHierarchy: true,
-    showShoppingCart: false
+    showTotalCountInHierarchy: true
   },
 
   statusChecker: {

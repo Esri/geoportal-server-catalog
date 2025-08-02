@@ -107,6 +107,18 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
       }));
     },
 
+    destroy: function() {
+        try {
+        	this.destroyFootprint();
+        } catch(ex) {}
+        this.inherited(arguments);
+    },
+    
+    destroyFootprint:function()
+    {
+    	if(this.view) this.view.destroy();   		
+    	this.footprintNode.innerHTML = "";
+    },    	
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id;
@@ -124,8 +136,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
       if(AppContext.appConfig.searchResults.showLinks && links.length >0)
     	  this._renderLinksDropdown(item,links);
       this._renderOptionsDropdown(hit._id,item);
-      this._renderAddToMap(item,links);
-      this._renderAddToCart(item);
+      this._renderAddToMap(item,links);     
       this._renderServiceStatus(item);
       this._renderUrlLinks(item);
       this._renderId(item);
@@ -279,23 +290,6 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
           return true;
         }
       }));
-    },
-
-    _renderAddToCart: function(item) {
-      var show = AppContext.appConfig.searchResults.showShoppingCart;
-      if (show) {
-        var actionsNode = this.actionsNode;
-
-        domConstruct.create("a",{
-          href: "javascript:void(0)",
-          innerHTML: "Add to Cart",
-          title: "Add to Cart",
-          "aria-label": "Add to Cart",
-          onclick: function() {
-            topic.publish(appTopics.AddToCartClicked,item);
-          }
-        },actionsNode);
-      }
     },
 
     _renderItemLinks: function(itemId,item) {
@@ -669,7 +663,8 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
 
     _renderFootprint: function(item) {
       var show = AppContext.appConfig.searchResults.showFootprint;
-      var footprintNode = this.footprintNode;
+      var footprintNode = this.footprintNode;    
+      
       if (show && item.shape_geo && item.shape_geo.coordinates) {
         var extent = null;
 
@@ -703,7 +698,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         }
         
         var mapOptions = {
-          basemap: "topo",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
+          basemap: "gray",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
           //center: [item.envelope_cen_pt.lon, item.envelope_cen_pt.lat],
           //TODO 
 //          isClickRecenter: false,
@@ -748,7 +743,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         var graphic = new Graphic(footprint);
         gl.add(graphic);
         
-        const view = new MapView({
+        var view = this.view = new MapView({
         	  container:this.footprintNode,
         	  map: map,        	 
         	  extent: extent
@@ -756,10 +751,11 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         view.ui.remove("attribution");     
         // TODO  zoom inside map view top left, not working
       //  view.ui.move("zoom", "top-left");
-      
+        
       } else {
         footprintNode.style.display = "none";
       }
+      
     },
 
     _uniqueLinks: function(item) {

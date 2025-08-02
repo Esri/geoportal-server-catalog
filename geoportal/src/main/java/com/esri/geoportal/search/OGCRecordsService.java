@@ -47,6 +47,7 @@ import javax.ws.rs.core.MediaType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status;
 
+import org.owasp.esapi.ESAPI;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,6 +58,8 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import java.text.Format;
+import java.text.SimpleDateFormat;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -106,7 +109,7 @@ public class OGCRecordsService extends Application {
 		} catch (Exception e) {
 			LOGGER.error("Error in api " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
-			response = this.generateResponse("500", "OGCRecords API response could not be generated.");
+			response = this.generateResponse("500", "OGCRecords API response could not be generated. ");
 		}
 		return Response.status(status).entity(response).build();
 	}
@@ -263,7 +266,7 @@ public class OGCRecordsService extends Application {
 			responseJSON = this.prepareSingleItemResponse(response, hsr);
 
 		} catch (Exception e) {
-			LOGGER.error("Error in getting item with item id: "+id+" " + e.getMessage());
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting item with item id: "+id+" " + e.getMessage()));
 			
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			responseJSON = this.generateResponse("500", "OGCRecords API Collection metadata item response could not be generated.");
@@ -338,7 +341,9 @@ public class OGCRecordsService extends Application {
 			items = elasticResContext.read("$.hits.hits");
 			//numberReturned = String.valueOf(items.size());
 
-			resourceFilecontext.set("$.response.timestamp", new Date().toString()).jsonString();
+      Format formatter = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss");
+      String timestamp = formatter.format(new Date());
+			resourceFilecontext.set("$.response.timestamp", timestamp).jsonString();
 			resourceFilecontext.set("$.response.numberMatched", numberMatched > -1 ? numberMatched: null);
 			
 			JSONArray jsonArray = new JSONArray();

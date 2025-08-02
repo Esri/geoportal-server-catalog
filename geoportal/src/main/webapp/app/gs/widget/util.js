@@ -151,8 +151,17 @@ function(array, DjUrl, domGeometry, domStyle, win, esriConfig, esriRequest) {
       if (html) {
         nd.innerHTML = html;
       }
+    },
+    
+    getDomainFromUrl: function (url_string) {
+      try {
+        const url = new URL(url_string);
+        return url.hostname;
+      } catch (error) {
+        console.error("Invalid URL:", error);
+        return null; // Or handle the error as appropriate for your application
+      }
     }
-
   };
 
   return _def;
