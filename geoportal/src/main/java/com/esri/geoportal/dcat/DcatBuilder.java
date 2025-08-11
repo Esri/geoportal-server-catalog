@@ -14,6 +14,8 @@
  */
 package com.esri.geoportal.dcat;
 
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -129,21 +131,30 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
   private String getSelfInfo() {
     JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
+    GeoportalContext gc = com.esri.geoportal.context.GeoportalContext.getInstance();
+    ElasticContext ec = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext();
     String node = null;
     String scheme = "http://";
     int port = 9200;
     try {
-      node = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getNextNode();
-      port = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getHttpPort();
-      if (com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUseHttps()) {
+    
+	if (ec.getUseHttps()) {
         scheme = "https://";
       }
-      String username = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getUsername();
-      String password = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getPassword();
-      if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-        elastic.add("username",username);
-        elastic.add("password",password);
-      }
+	 if(ec.getAwsOpenSearchType().equals("serverless"))
+     {
+   	  	elastic.add("searchUrl",ec.getAwsALBEndpoint()+"/"+ec.getIndexName()+"/_search"); 
+     }
+	 else {
+    	 node = ec.getNextNode();
+         port = ec.getHttpPort();
+         String username = ec.getUsername();
+         String password = ec.getPassword();
+         if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+           elastic.add("username",username);
+           elastic.add("password",password);
+         }
+     }
     } catch (Throwable t) {
       LOGGER.warn(String.format("Warning getting self info."), t);
     }
@@ -171,16 +182,18 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
       LOGGER.warn(String.format("Warning getting self info."), t);
     }
     if ((node != null) && (node.length() > 0)) {
-      String idxName = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getIndexName();
-      String itmType = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext().getItemIndexType();    
-    //  String url = scheme+node+":"+port+"/"+idxName+"/"+itmType+"/_search";
-      
+      String idxName = ec.getIndexName();      
       //For elastic 7.9.3 +
       String url = scheme+node+":"+port+"/"+idxName+"/_search";
       elastic.add("searchUrl",url);
-      info.add("elastic",elastic);
-      return info.build().toString();
     }
+      
+      if(ec.getAwsOpenSearchType().equals("serverless") || ((node != null) && (node.length() > 0)))
+      {
+      	info.add("elastic",elastic);
+         return info.build().toString();
+      }   
+    
     return null;
   }
   
