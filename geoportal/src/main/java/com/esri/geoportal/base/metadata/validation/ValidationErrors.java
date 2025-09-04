@@ -14,9 +14,9 @@
  */
 package com.esri.geoportal.base.metadata.validation;
 import java.util.ArrayList;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * A list of validation errors.
@@ -49,4 +49,3 @@ public class ValidationErrors extends ArrayList<ValidationError> {
   }
     
 }
-

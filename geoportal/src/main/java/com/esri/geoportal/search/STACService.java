@@ -35,25 +35,25 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.owasp.esapi.ESAPI;
 import org.slf4j.Logger;
@@ -1863,7 +1863,7 @@ public class STACService extends Application {
 						+ (ids != null ? "&ids=" + ids : "")
 						+((requestType.startsWith("search")) && collectionId != null ? "&collections=" + collectionId : "");
 			}
-			if (requestType.startsWith("metadataItems"))
+			if (requestType.startsWith("metadataItems")) // These are for links href for collection
 				resourceFilecontext.set("$.response.links", linksContext.read("$.metadataItem.links"));
 
 			if (requestType.startsWith("search"))
@@ -2393,25 +2393,25 @@ public class STACService extends Application {
 	                  upperLeft.add(envelope.get("ymax"));
 	                  lowerRight.add(envelope.get("xmax"));
 	                  lowerRight.add(envelope.get("ymin"));
-	
+
 	                  JSONArray projectedEnvelope = new JSONArray();
 	                  projectedEnvelope.add(upperLeft);
 	                  projectedEnvelope.add(lowerRight);
-	
+
 	                  JSONObject newEnvelopeGeometry = new JSONObject();
 	                  newEnvelopeGeometry.put("type", "Envelope");
 	                  newEnvelopeGeometry.put("coordinates", projectedEnvelope);
-	
+
 	                  JSONArray newEnvelopeGeometries = new JSONArray();
 	                  newEnvelopeGeometries.add(newEnvelopeGeometry);
-	
+
 	                  responseObject.put("envelope_geo", newEnvelopeGeometries);
-	
+
 	                  break;
 	
 	                default:
 	                  LOGGER.error("Unsupported geometry field: " + thisGeometryField);
-	              }
+	          }
 
             } catch (ParseException ex) {
               LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
@@ -2436,7 +2436,7 @@ public class STACService extends Application {
     for (String geometryType: geometryTypes) {
       if (null != geometry_wkt_in) {
         if (geometry_wkt_in.containsKey(geometryType)) {
-        	JSONObject geometry = (JSONObject) geometry_wkt_in.get(geometryType.toLowerCase());
+        	JSONObject geometry = (JSONObject) geometry_wkt_in.get(geometryType);
         	JSONArray projectedGeometries = new JSONArray();
             String wkt = geometry.getAsString("wkt");
             Boolean hasZ = wkt.contains("Z");
@@ -2584,12 +2584,38 @@ public class STACService extends Application {
               projectedBbox.add(newBbox.get("ymax"));
               JSONArray firstBbox = new JSONArray();
               firstBbox.add(projectedBbox);
+
+              // set the new bbox
               bbox.set(0, firstBbox);
 
               break;
 
-            default:
-              LOGGER.error("Unsupported geometry field: " + thisGeometryField);
+            case "envelope_geo":
+              JSONObject envelope = (JSONObject) projectedGeometries.get(0);
+              JSONArray upperLeft = new JSONArray();
+              JSONArray lowerRight = new JSONArray();
+              upperLeft.add(envelope.get("xmin"));
+              upperLeft.add(envelope.get("ymax"));
+              lowerRight.add(envelope.get("xmax"));
+              lowerRight.add(envelope.get("ymin"));
+
+              JSONArray projectedEnvelope = new JSONArray();
+              projectedEnvelope.add(upperLeft);
+              projectedEnvelope.add(lowerRight);
+
+              JSONObject newEnvelopeGeometry = new JSONObject();
+              newEnvelopeGeometry.put("type", "Envelope");
+              newEnvelopeGeometry.put("coordinates", projectedEnvelope);
+
+              JSONArray newEnvelopeGeometries = new JSONArray();
+              newEnvelopeGeometries.add(newEnvelopeGeometry);
+
+              responseObject.put("envelope_geo", newEnvelopeGeometries);
+
+              break;
+	
+                default:
+                  LOGGER.error("Unsupported geometry field: " + thisGeometryField);
           }
           
           responseObject.put("outCRS", outCRS);

@@ -21,12 +21,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.SecurityContext;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 
 import com.esri.geoportal.base.security.Group;
 
@@ -96,7 +96,6 @@ public class AppUser {
   private void init(HttpServletRequest request) {
     init(null,false,false);
     if (request == null) return;
-    
     Principal p = request.getUserPrincipal();
     if (p == null) return;
     groups = new ArrayList<Group>();
@@ -108,8 +107,6 @@ public class AppUser {
     } else {
       isAnonymous = true;
     }
-    //System.err.println("username: "+username+", isAdmin="+isAdmin);
-    
     String pfx = "ROLE_";
     String[] gtpRoles = {"ADMIN","PUBLISHER","USER"};
     List<String> gptRoleList = Arrays.asList(gtpRoles);
@@ -117,8 +114,8 @@ public class AppUser {
     if (p instanceof UsernamePasswordAuthenticationToken) {
       UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken)p;
       if (auth.isAuthenticated()) authorities = auth.getAuthorities();
-    } else if (p instanceof OAuth2Authentication) {
-      OAuth2Authentication auth = (OAuth2Authentication)p;
+    } else if (p instanceof OAuth2AuthenticationToken) {
+      OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken)p;
       if (auth.isAuthenticated()) authorities = auth.getAuthorities();
     }
     if (authorities != null) {
@@ -131,7 +128,6 @@ public class AppUser {
             if (name != null) {
               if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
               if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
-                //System.err.println("authority: "+name);
                 groups.add(new Group(name));
               }
             }
@@ -139,15 +135,12 @@ public class AppUser {
         }          
       }
     }
-    
-    //check username in GeoportalContext.getUserGroupMap. if it exists(in case of ArcGIS Authentication Provider), add those groups as well
     GeoportalContext gc = GeoportalContext.getInstance();
     HashMap<String,ArrayList<Group>> userGroupMap = gc.getUserGroupMap();
     if(userGroupMap.containsKey(username))
     {
-    	groups.addAll(userGroupMap.get(username));
+      groups.addAll(userGroupMap.get(username));
     }
-    	
   }
   
   /**

@@ -13,6 +13,14 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicLong;
+import java.util.function.Consumer;
+
+import org.opensearch.search.SearchHit;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.base.metadata.MetadataDocument;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.Val;
@@ -26,18 +34,8 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.ItemIO;
 import com.esri.geoportal.lib.elastic.util.Scroller;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-
-import org.opensearch.action.get.GetRequestBuilder;
-import org.opensearch.action.get.GetResponse;
-import org.opensearch.search.SearchHit;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Re-index content.

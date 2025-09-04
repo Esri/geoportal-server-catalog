@@ -13,6 +13,9 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.http.util;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.base.metadata.MetadataDocument;
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
@@ -21,16 +24,12 @@ import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.MurmurUtil;
-import com.esri.geoportal.search.StacHelper;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonValue;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonValue;
 
 /**
  * Item utilities.

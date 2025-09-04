@@ -14,8 +14,8 @@
  */
 package com.esri.geoportal.base.metadata.validation;
 import com.esri.geoportal.base.util.JsonUtil;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * An exception encountered while validating metadata.

@@ -25,8 +25,8 @@ import com.esri.geoportal.lib.elastic.util.Scroller;
 
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 import org.opensearch.action.bulk.BulkRequestBuilder;
 import org.opensearch.search.SearchHit;
 import org.slf4j.Logger;

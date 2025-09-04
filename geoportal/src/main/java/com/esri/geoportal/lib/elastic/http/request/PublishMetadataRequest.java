@@ -15,10 +15,10 @@
 package com.esri.geoportal.lib.elastic.http.request;
 import java.io.FileNotFoundException;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.stream.JsonParsingException;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.stream.JsonParsingException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -108,7 +108,7 @@ public class PublishMetadataRequest extends BulkEditRequest {
         try {
           jso = (JsonObject)JsonUtil.toJsonStructure(content);
         } catch (JsonParsingException jpe) {
-          throw new UsageException("javax.json.stream.JsonParsingException: Invalid JSON",jpe);
+          throw new UsageException("jakarta.json.stream.JsonParsingException: Invalid JSON",jpe);
         }
         if (jso != null) {
           json = JsonUtil.toJson(jso,false);

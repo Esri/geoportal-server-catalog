@@ -13,26 +13,11 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
-import com.carrotsearch.hppc.cursors.ObjectObjectCursor;
-import com.esri.geoportal.base.util.exception.UsageException;
-import com.esri.geoportal.context.AppRequest;
-import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.util.AccessUtil;
-
-import java.util.Iterator;
-import java.util.List;
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-
-//import org.opensearch.action.admin.indices.alias.IndicesAliasesRequestBuilder;
-//import org.opensearch.client.AdminClient;
-//import org.opensearch.cluster.metadata.AliasMetaData;
-import org.opensearch.common.collect.ImmutableOpenMap;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.context.AppRequest;
+import com.esri.geoportal.context.AppResponse;
 
 /**
  * Reset the index alias.

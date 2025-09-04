@@ -19,12 +19,13 @@ import com.esri.geoportal.context.GeoportalContext;
 
 import java.io.UnsupportedEncodingException;
 
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.proxy.BalancerServlet;
+import org.eclipse.jetty.client.HttpClientTransport;
+import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.ee10.proxy.BalancerServlet;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -46,7 +47,7 @@ public class ElasticProxy extends BalancerServlet {
   protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
     super.copyRequestHeaders(clientRequest, proxyRequest);
     if (this._authString != null) {
-      proxyRequest.header("Authorization",this._authString);
+    	proxyRequest.headers(h -> h.put("Authorization", this._authString));
     }
   }
 
@@ -107,12 +108,12 @@ public class ElasticProxy extends BalancerServlet {
   
   @Override
   protected HttpClient newHttpClient() {
-    SslContextFactory factory = null;
+    SslContextFactory.Client factory = null;
     if (this._useHttps) {
-      factory = new SslContextFactory();
+      factory = new SslContextFactory.Client();
       factory.setTrustAll(true);
     }
-    HttpClient client = factory!=null? new HttpClient(factory): new HttpClient();
+    HttpClient client = factory!=null? new HttpClient((HttpClientTransport) factory): new HttpClient();
     if (proxyBufferSize!=null) {
       LOGGER.debug(String.format("Buffer size for HTTP client for ElasticProxi set to: %s bytes", proxyBufferSize));
       client.setRequestBufferSize(proxyBufferSize);
@@ -131,4 +132,3 @@ public class ElasticProxy extends BalancerServlet {
   }
   
 }
-

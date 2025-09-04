@@ -13,12 +13,7 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
-import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.lib.elastic.util.FieldNames;
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
 
 /**
  * Set the owner for one or more items.

@@ -13,24 +13,13 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.util;
-import com.esri.geoportal.base.security.Group;
-import com.esri.geoportal.context.AppUser;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
 
-import org.opensearch.action.get.GetRequestBuilder;
-import org.opensearch.action.get.GetResponse;
-import org.opensearch.action.search.SearchRequestBuilder;
-//import org.opensearch.client.transport.TransportClient;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.security.access.AccessDeniedException;
+
+import com.esri.geoportal.context.AppUser;
 
 /**
  * Access utilities.
