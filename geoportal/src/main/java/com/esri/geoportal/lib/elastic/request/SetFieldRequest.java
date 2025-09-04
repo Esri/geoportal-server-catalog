@@ -18,10 +18,10 @@ import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Set a field value for one or more items.

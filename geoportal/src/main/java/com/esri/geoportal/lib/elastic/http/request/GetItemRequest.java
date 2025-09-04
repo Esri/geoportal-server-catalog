@@ -21,8 +21,8 @@ import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 
 import java.io.FileNotFoundException;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
 import org.apache.commons.text.StringEscapeUtils;
 
 

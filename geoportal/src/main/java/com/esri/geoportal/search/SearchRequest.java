@@ -24,20 +24,20 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -194,7 +194,9 @@ public class SearchRequest {
     String node = null;
     String scheme = "http://";
     int port = 9200;
-    try {     
+    try {
+      node = ec.getNextNode();
+      port = ec.getHttpPort();
       if (ec.getUseHttps()) {
         scheme = "https://";
         elastic.add("useHttps",true);
@@ -202,22 +204,14 @@ public class SearchRequest {
       else
       {
     	  elastic.add("useHttps",false);
-      }
-      if(ec.getAwsOpenSearchType().equals("serverless"))
-      {
-    	  elastic.add("searchUrl",ec.getAwsALBEndpoint()+"/"+ec.getIndexName()+"/_search"); 
-      }
-      else
-      {
-    	  node = ec.getNextNode();
-          port = ec.getHttpPort();
-    	  String username = ec.getUsername();
-          String password = ec.getPassword();
-    	  if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-    	        elastic.add("username",username);
-    	        elastic.add("password",password);
-        	      
-          } 
+      }      
+     
+	  String username = ec.getUsername();
+      String password = ec.getPassword();
+	  if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+	        elastic.add("username",username);
+	        elastic.add("password",password);
+    	      
       }
     } catch (Throwable t) {
     	LOGGER.error(t.getMessage());
@@ -252,11 +246,8 @@ public class SearchRequest {
       String idxName = ec.getIndexName();          
       String url = scheme+node+":"+port+"/"+idxName+"/_search";
       elastic.add("searchUrl",url);
-    }     
-    if(ec.getAwsOpenSearchType().equals("serverless") || ((node != null) && (node.length() > 0)))
-    {
-    	info.add("elastic",elastic);
-        return info;
+      info.add("elastic",elastic);
+      return info;
     }
     return null;
   }

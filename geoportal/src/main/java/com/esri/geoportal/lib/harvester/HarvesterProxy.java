@@ -14,24 +14,25 @@
  */
 package com.esri.geoportal.lib.harvester;
 
-import com.esri.geoportal.base.util.BalancerSupport;
-import com.esri.geoportal.context.GeoportalContext;
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-import org.eclipse.jetty.proxy.BalancerServlet;
+import org.eclipse.jetty.ee10.proxy.ProxyServlet;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.base.util.BalancerSupport;
+import com.esri.geoportal.context.GeoportalContext;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * Harvester proxy.
  */
-public class HarvesterProxy extends BalancerServlet {
+public class HarvesterProxy extends ProxyServlet {
   private static final Logger LOGGER = LoggerFactory.getLogger(HarvesterProxy.class);
   private BalancerSupport balancerSupport = new BalancerSupport();
 
-  @Override
   public void init() throws ServletException {
-    super.init();
+   // super.init();
     GeoportalContext gc = GeoportalContext.getInstance();
     if (gc!=null) {
       HarvesterContext hc = gc.getHarvesterContext();
@@ -48,7 +49,6 @@ public class HarvesterProxy extends BalancerServlet {
     }
   }
 
-  @Override
   protected String rewriteTarget(HttpServletRequest clientRequest) {
     return balancerSupport.rewriteTarget(clientRequest);
   }

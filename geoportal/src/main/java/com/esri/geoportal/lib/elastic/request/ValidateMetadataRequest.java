@@ -13,8 +13,8 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 import com.esri.geoportal.base.metadata.MetadataDocument;
 import com.esri.geoportal.base.metadata.validation.ValidationException;

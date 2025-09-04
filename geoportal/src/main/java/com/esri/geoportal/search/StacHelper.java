@@ -7,9 +7,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonArrayBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -938,7 +938,6 @@ public class StacHelper {
 		boolean deleteById = false;
 		int deletedSuccess = 0;		
 		int total = 0; 
-		
 		try {
 			url =  client.getTypeUrlForSearch(ec.getIndexName());
 

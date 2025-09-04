@@ -17,9 +17,9 @@ import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.lib.elastic.request.GetItemRequest;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 import org.opensearch.action.get.GetResponse;
 /**

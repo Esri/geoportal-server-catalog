@@ -1,65 +1,85 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
-  <modelVersion>4.0.0</modelVersion>
-  <groupId>com.esri.geoportal</groupId>
-  <artifactId>geoportal</artifactId>
-  <packaging>war</packaging>   
-  <version>3.0.0</version>
-  <name>GeoportalServer</name>
-  <url>http://maven.apache.org</url>
-  
-  <properties>
-    <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-    <log4j.version>2.17.1</log4j.version>
-    <springframework.version>5.3.39</springframework.version>
-    <springsecurity.version>5.8.15</springsecurity.version>
-    <jackson.version>2.19.2</jackson.version>
-  </properties>
-	
-  <dependencies>
-  	<dependency>
-      <groupId>org.owasp.esapi</groupId>
-      <artifactId>esapi</artifactId>
-      <version>2.7.0.0</version>
-      <scope>compile</scope>
-      <exclusions>
-        <exclusion>
-          <artifactId>bsh</artifactId>
-          <groupId>org.apache-extras.beanshell</groupId>
-        </exclusion>
-        <exclusion>
-          <artifactId>xom</artifactId>
-          <groupId>xom</groupId>
-        </exclusion>
-        <exclusion>                  
-           <groupId>log4j</groupId>
-           <artifactId>log4j</artifactId>
-       </exclusion>
-       <exclusion> 
-         <groupId>commons-fileupload</groupId>
-   		 <artifactId>commons-fileupload</artifactId>
-   		</exclusion>
-   		<exclusion> 
-         <groupId>xml-apis</groupId>
-   		 <artifactId>xml-apis</artifactId>
-   		</exclusion>    
-      </exclusions>
-      <optional>false</optional>
-    </dependency>
-  	<dependency>
-	    <groupId>software.amazon.awssdk</groupId>
-	    <artifactId>apache-client</artifactId>
-	    <version>2.31.4</version>	    
-	</dependency>
-    <!-- servlet api -->
-    <dependency>
-      <groupId>javax.servlet</groupId>
-      <artifactId>javax.servlet-api</artifactId>
-      <version>4.0.1</version>
-      <scope>provided</scope>
-    </dependency>
-  
-    <!-- log4j / jcl / slf4j -->    
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
+	<modelVersion>4.0.0</modelVersion>
+	<groupId>com.esri.geoportal</groupId>
+	<artifactId>geoportal</artifactId>
+	<packaging>war</packaging>
+	<version>3.0.2</version>
+	<name>GeoportalServer</name>
+	<url>http://maven.apache.org</url>
+
+	<properties>
+
+		<springframework.version>7.0.0-M8</springframework.version>
+		<springsecurity.version>7.0.0-M2</springsecurity.version>
+
+		<maven.compiler.target>21</maven.compiler.target>
+		<maven.compiler.source>21</maven.compiler.source>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<log4j.version>2.17.1</log4j.version>
+		<jackson.version>2.19.2</jackson.version>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>org.owasp.esapi</groupId>
+			<artifactId>esapi</artifactId>
+			<version>2.7.0.0</version>
+			<scope>compile</scope>
+			<exclusions>
+				<exclusion>
+					<artifactId>bsh</artifactId>
+					<groupId>org.apache-extras.beanshell</groupId>
+				</exclusion>
+				<exclusion>
+					<artifactId>xom</artifactId>
+					<groupId>xom</groupId>
+				</exclusion>
+				<exclusion>
+					<groupId>log4j</groupId>
+					<artifactId>log4j</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>commons-fileupload</groupId>
+					<artifactId>commons-fileupload</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>xml-apis</groupId>
+					<artifactId>xml-apis</artifactId>
+				</exclusion>
+			</exclusions>
+			<optional>false</optional>
+		</dependency>
+
+		<!-- servlet api -->
+		<dependency>
+			<groupId>jakarta.servlet</groupId>
+			<artifactId>jakarta.servlet-api</artifactId>
+			<version>6.0.0</version>
+			<scope>provided</scope>
+			<optional>false</optional>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/jakarta.json/jakarta.json-api -->
+		<dependency>
+			<groupId>jakarta.json</groupId>
+			<artifactId>jakarta.json-api</artifactId>
+			<version>2.1.3</version>
+		</dependency>
+
+
+		<!--
+		https://mvnrepository.com/artifact/jakarta.platform/jakarta.jakartaee-web-api -->
+		<dependency>
+			<groupId>jakarta.platform</groupId>
+			<artifactId>jakarta.jakartaee-web-api</artifactId>
+			<version>11.0.0</version>
+			<scope>provided</scope>
+		</dependency>
+
+		<!-- log4j / jcl / slf4j -->
+
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-api</artifactId>
@@ -70,361 +90,393 @@
 			<artifactId>log4j-core</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
-    <dependency>
-      <groupId>org.apache.logging.log4j</groupId>
-      <artifactId>log4j-jcl</artifactId>
-      <version>${log4j.version}</version>
-    </dependency>
+		<dependency>
+			<groupId>org.apache.logging.log4j</groupId>
+			<artifactId>log4j-jcl</artifactId>
+			<version>${log4j.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>org.apache.logging.log4j</groupId>
 			<artifactId>log4j-slf4j-impl</artifactId>
 			<version>${log4j.version}</version>
 		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
-    <dependency>
-        <groupId>org.slf4j</groupId>
-        <artifactId>slf4j-api</artifactId>
-        <version>1.7.32</version>
-    </dependency>
-  
-    <!-- json -->
-    <dependency>
-      <groupId>org.glassfish</groupId>
-      <artifactId>javax.json</artifactId>
-      <version>1.1.4</version>
-    </dependency>
-    
-    <!-- jax-rs, jersey -->
-    <dependency>
-      <groupId>javax.ws.rs</groupId>
-      <artifactId>javax.ws.rs-api</artifactId>
-      <version>2.1.1</version>
-    </dependency>
-    <dependency>
-      <groupId>org.glassfish.jersey.containers</groupId>
-      <!-- if your container implements Servlet API older than 3.0, use "jersey-container-servlet-core" -->
-      <artifactId>jersey-container-servlet</artifactId>
-      <version>2.34</version>
-    </dependency> 
-    <dependency>
-      <groupId>org.glassfish.jersey.inject</groupId>
-      <artifactId>jersey-hk2</artifactId>
-      <version>2.34</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-json-jackson -->
-	<dependency>
-	    <groupId>org.glassfish.jersey.media</groupId>
-	    <artifactId>jersey-media-json-jackson</artifactId>
-	    <version>2.34</version>
-	</dependency>    
+		<!-- https://mvnrepository.com/artifact/org.slf4j/slf4j-api -->
+		<dependency>
+			<groupId>org.slf4j</groupId>
+			<artifactId>slf4j-api</artifactId>
+			<version>1.7.32</version>
+		</dependency>
 
-    <!-- Jetty servlet proxy -->
-    <dependency>
-      <groupId>org.eclipse.jetty</groupId>
-      <artifactId>jetty-proxy</artifactId>
-      <version>9.4.31.v20200723</version>
-    </dependency>
-    
-    <dependency>
-        <groupId>org.opensearch.client</groupId>
-        <artifactId>opensearch-rest-high-level-client</artifactId>
-        <version>2.1.0</version>
-    </dependency>
-   
-    
-    <!-- Spring -->
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-core</artifactId>
-      <version>${springframework.version}</version>
-      <exclusions>
-        <exclusion>
-          <groupId>commons-logging</groupId>
-          <artifactId>commons-logging</artifactId>
-        </exclusion>
-      </exclusions>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-web</artifactId>
-      <version>${springframework.version}</version>
-    </dependency> 
-    <dependency>
-      <groupId>org.springframework</groupId>
-      <artifactId>spring-webmvc</artifactId>
-      <version>${springframework.version}</version>
-    </dependency>
- 
-    <!-- Spring Security -->
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-web</artifactId>
-      <version>${springsecurity.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-config</artifactId>
-      <version>${springsecurity.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-ldap</artifactId>
-      <version>${springsecurity.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security.oauth</groupId>
-      <artifactId>spring-security-oauth2</artifactId>
-      <version>2.5.2.RELEASE</version>
-    </dependency>
-    <dependency>
-      <groupId>org.springframework.security</groupId>
-      <artifactId>spring-security-jwt</artifactId>
-      <version>1.1.1.RELEASE</version>
-    </dependency>
-    
-    <!-- for spring mvc -->
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-core</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-annotations</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
-    <dependency>
-      <groupId>com.fasterxml.jackson.core</groupId>
-      <artifactId>jackson-databind</artifactId>
-      <version>${jackson.version}</version>
-    </dependency>
+		<!-- json -->
+		<dependency>
+			<groupId>org.glassfish</groupId>
+			<artifactId>javax.json</artifactId>
+			<version>1.1.4</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
-    <dependency>
-      <groupId>commons-cli</groupId>
-      <artifactId>commons-cli</artifactId>
-      <version>1.4</version>
-    </dependency>
+		<!-- jax-rs, jersey -->
+		<!-- https://mvnrepository.com/artifact/jakarta.ws.rs/jakarta.ws.rs-api -->
+		<dependency>
+			<groupId>jakarta.ws.rs</groupId>
+			<artifactId>jakarta.ws.rs-api</artifactId>
+			<version>4.0.0</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.containers</groupId>
+			<!-- if your container implements Servlet API older than 3.0, use
+			"jersey-container-servlet-core" -->
+			<artifactId>jersey-container-servlet</artifactId>
+			<version>2.34</version>
+		</dependency>
+		<dependency>
+			<groupId>org.glassfish.jersey.inject</groupId>
+			<artifactId>jersey-hk2</artifactId>
+			<version>2.34</version>
+		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/org.glassfish.jersey.media/jersey-media-json-jackson -->
+		<dependency>
+			<groupId>org.glassfish.jersey.media</groupId>
+			<artifactId>jersey-media-json-jackson</artifactId>
+			<version>2.34</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
-    <dependency>
-      <groupId>org.apache.commons</groupId>
-      <artifactId>commons-text</artifactId>
-      <version>1.10.0</version>
-    </dependency>
-    
-    <!-- https://mvnrepository.com/artifact/net.sourceforge.saxon/saxon License MPL
+
+		<!--
+		https://mvnrepository.com/artifact/org.eclipse.jetty.ee10/jetty-ee10-servlet -->
+		<dependency>
+			<groupId>org.eclipse.jetty.ee10</groupId>
+			<artifactId>jetty-ee10-servlet</artifactId>
+			<version>12.1.0</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.eclipse.jetty</groupId>
+			<artifactId>jetty-client</artifactId>
+			<version>12.1.0</version> <!-- or latest -->
+		</dependency>
+		<dependency>
+		    <groupId>org.eclipse.jetty.ee10</groupId>
+		    <artifactId>jetty-ee10-proxy</artifactId>
+		    <version>12.1.0</version> 
+		    <exclusions>
+                <exclusion>
+                    <groupId>org.eclipse.jetty</groupId>
+                    <artifactId>jetty-client</artifactId>
+                </exclusion>
+            </exclusions>
+		</dependency>
+
+		<dependency>
+			<groupId>org.opensearch.client</groupId>
+			<artifactId>opensearch-rest-high-level-client</artifactId>
+			<version>2.1.0</version>
+		</dependency>
+
+		<!-- Spring -->
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-core</artifactId>
+			<version>${springframework.version}</version>
+			<exclusions>
+				<exclusion>
+					<groupId>commons-logging</groupId>
+					<artifactId>commons-logging</artifactId>
+				</exclusion>
+			</exclusions>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-web</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-webmvc</artifactId>
+			<version>${springframework.version}</version>
+		</dependency>
+
+		<!-- Spring Security -->
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-web</artifactId>
+			<version>${springsecurity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-config</artifactId>
+			<version>${springsecurity.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-ldap</artifactId>
+			<version>${springsecurity.version}</version>
+		</dependency>
+
+<!-- https://mvnrepository.com/artifact/org.springframework.security.oauth/spring-security-oauth2 -->
+		<dependency>
+		    <groupId>org.springframework.security.oauth</groupId>
+		    <artifactId>spring-security-oauth2</artifactId>
+		    <version>2.5.2.RELEASE</version>
+		</dependency>
+		<dependency>
+    <groupId>org.springframework.security</groupId>
+    <artifactId>spring-security-oauth2-client</artifactId>
+    <version>5.7.3</version>
+</dependency>
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-jwt</artifactId>
+			<version>1.1.1.RELEASE</version>
+		</dependency>
+
+		<!-- for spring mvc -->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-core</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-annotations</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${jackson.version}</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
+		<dependency>
+			<groupId>commons-cli</groupId>
+			<artifactId>commons-cli</artifactId>
+			<version>1.10.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.apache.commons/commons-text -->
+		<dependency>
+			<groupId>org.apache.commons</groupId>
+			<artifactId>commons-text</artifactId>
+			<version>1.14.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/net.sourceforge.saxon/saxon
+		License MPL
          If you have a bug in a transform, try enabling this library
          mvn clean package
     -->
-    <!--    <dependency>
+		<!--    <dependency>
              <groupId>net.sourceforge.saxon</groupId>
              <artifactId>saxon</artifactId>
              <version>9.1.0.8</version>
            </dependency>
     -->
 
-    <!-- Dependencies required for JAVA 11/13 runtime environment -->
-    <dependency>
-        <groupId>jakarta.annotation</groupId>
-        <artifactId>jakarta.annotation-api</artifactId>
-        <version>1.3.5</version>
-    </dependency>
-    <dependency>
-        <groupId>javax.xml.bind</groupId>
-        <artifactId>jaxb-api</artifactId>
-        <version>2.3.1</version>
-    </dependency>
-    <dependency>
-        <groupId>org.glassfish.jaxb</groupId>
-        <artifactId>jaxb-runtime</artifactId>
-        <version>2.3.3</version>
-    </dependency>
-   
-    <dependency>
-      <groupId>commons-io</groupId>
-      <artifactId>commons-io</artifactId>
-      <version>2.14.0</version>
-    </dependency>
-    
-    <!-- Nashorn JavaScript engine  -->
-    <dependency>
-      <groupId>org.openjdk.nashorn</groupId>
-      <artifactId>nashorn-core</artifactId>
-      <version>15.3</version>
-    </dependency>
+		<!-- Dependencies required for JAVA 11/13 runtime environment -->
+		<dependency>
+			<groupId>jakarta.annotation</groupId>
+			<artifactId>jakarta.annotation-api</artifactId>
+			<version>1.3.5</version>
+		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
+		<dependency>
+			<groupId>jakarta.xml.bind</groupId>
+			<artifactId>jakarta.xml.bind-api</artifactId>
+			<version>4.0.2</version>
+		</dependency>
+		<!--
+		https://mvnrepository.com/artifact/org.apache.httpcomponents/httpasyncclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpasyncclient</artifactId>
+			<version>4.1.5</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/org.glassfish.jaxb/jaxb-runtime -->
+		<dependency>
+			<groupId>org.glassfish.jaxb</groupId>
+			<artifactId>jaxb-runtime</artifactId>
+			<version>4.0.5</version>
+		</dependency>
 
-    <!-- individual updates --> 
-    <!-- https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram -->
-    <dependency>
-      <groupId>org.hdrhistogram</groupId>
-      <artifactId>HdrHistogram</artifactId>
-      <version>2.1.12</version>
-    </dependency>
- 
-    <!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
-    <dependency>
-      <groupId>org.javassist</groupId>
-      <artifactId>javassist</artifactId>
-      <version>3.28.0-GA</version>
-    </dependency>
-  
-	<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
-	<dependency>
-	    <groupId>org.bouncycastle</groupId>
-	    <artifactId>bcprov-jdk18on</artifactId>
-	    <version>1.81</version>
-	</dependency>
+		<dependency>
+			<groupId>commons-io</groupId>
+			<artifactId>commons-io</artifactId>
+			<version>2.14.0</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-all</artifactId>
-      <version>4.1.70.Final</version>
-    </dependency>
+		<!-- Nashorn JavaScript engine  -->
+		<dependency>
+			<groupId>org.openjdk.nashorn</groupId>
+			<artifactId>nashorn-core</artifactId>
+			<version>15.7</version>
+		</dependency>
 
-	<!-- https://mvnrepository.com/artifact/io.netty/netty-common -->
-	<dependency>
-	    <groupId>io.netty</groupId>
-	    <artifactId>netty-common</artifactId>
-	    <version>4.2.3.Final</version>
-	</dependency>
+		<!-- individual updates -->
+		<!-- https://mvnrepository.com/artifact/org.hdrhistogram/HdrHistogram -->
+		<dependency>
+			<groupId>org.hdrhistogram</groupId>
+			<artifactId>HdrHistogram</artifactId>
+			<version>2.1.12</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/io.netty/netty-codec-http -->
-    <dependency>
-      <groupId>io.netty</groupId>
-      <artifactId>netty-codec-http</artifactId>
-      <version>4.1.108.Final</version>
-    </dependency>
+		<!-- https://mvnrepository.com/artifact/org.javassist/javassist -->
+		<dependency>
+			<groupId>org.javassist</groupId>
+			<artifactId>javassist</artifactId>
+			<version>3.30.2-GA</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcomponents-client -->
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpcomponents-client</artifactId>
-      <version>4.5.13</version>
-      <type>pom</type>
-    </dependency>
+		<!-- https://mvnrepository.com/artifact/org.bouncycastle/bcprov-jdk18on -->
+		<dependency>
+			<groupId>org.bouncycastle</groupId>
+			<artifactId>bcprov-jdk18on</artifactId>
+			<version>1.81</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
-    <dependency>
-      <groupId>org.yaml</groupId>
-      <artifactId>snakeyaml</artifactId>
-      <version>2.0</version>
-    </dependency>
+		<!-- https://mvnrepository.com/artifact/io.netty/netty-all -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-all</artifactId>
+			<version>4.1.70.Final</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
-    <dependency>
-      <groupId>com.google.guava</groupId>
-      <artifactId>guava</artifactId>
-      <version>32.0.0-jre</version>
-    </dependency>
+		<!-- https://mvnrepository.com/artifact/io.netty/netty-common -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-common</artifactId>
+			<version>4.2.3.Final</version>
+		</dependency>
 
-    <!-- https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
-    <dependency>
-      <groupId>org.apache.httpcomponents</groupId>
-      <artifactId>httpclient</artifactId>
-      <version>4.5.13</version>
-    </dependency>
-    <!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
-	<dependency>
-	    <groupId>com.jayway.jsonpath</groupId>
-	    <artifactId>json-path</artifactId>
-	    <version>2.9.0</version>
-	</dependency>
-	<!-- https://mvnrepository.com/artifact/net.minidev/json-smart -->
-	<dependency>
-	    <groupId>net.minidev</groupId>
-	    <artifactId>json-smart</artifactId>
-	    <version>2.5.2</version>
-	</dependency>
-</dependencies>
-  
-  <build>
-    <finalName>geoportal</finalName>
-    <!-- <sourceDirectory>src</sourceDirectory> -->
+		<!-- https://mvnrepository.com/artifact/io.netty/netty-codec-http -->
+		<dependency>
+			<groupId>io.netty</groupId>
+			<artifactId>netty-codec-http</artifactId>
+			<version>4.1.108.Final</version>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/org.apache.httpcomponents/httpcomponents-client -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpcomponents-client</artifactId>
+			<version>4.5.14</version>
+			<type>pom</type>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/org.yaml/snakeyaml -->
+		<dependency>
+			<groupId>org.yaml</groupId>
+			<artifactId>snakeyaml</artifactId>
+			<version>2.0</version>
+		</dependency>
+
+		<!-- https://mvnrepository.com/artifact/com.google.guava/guava -->
+		<dependency>
+			<groupId>com.google.guava</groupId>
+			<artifactId>guava</artifactId>
+			<version>32.0.0-jre</version>
+		</dependency>
+
+		<!--
+		https://mvnrepository.com/artifact/org.apache.httpcomponents/httpclient -->
+		<dependency>
+			<groupId>org.apache.httpcomponents</groupId>
+			<artifactId>httpclient</artifactId>
+			<version>4.5.13</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/com.jayway.jsonpath/json-path -->
+		<dependency>
+			<groupId>com.jayway.jsonpath</groupId>
+			<artifactId>json-path</artifactId>
+			<version>2.9.0</version>
+		</dependency>
+		<!-- https://mvnrepository.com/artifact/net.minidev/json-smart -->
+		<dependency>
+			<groupId>net.minidev</groupId>
+			<artifactId>json-smart</artifactId>
+			<version>2.5.2</version>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<finalName>geoportal</finalName>
+		<!-- <sourceDirectory>src</sourceDirectory> -->
 		<resources>
-      <resource>
-        <directory>src/main/resources</directory>
-      </resource>
-		  <resource>
-		    <directory>../geoportal-search/src/main/resources</directory>
-		    <includes>
-		      <include>gs/**</include>
-		    </includes>
-		  </resource>
+			<resource>
+				<directory>src/main/resources</directory>
+			</resource>
+			<resource>
+				<directory>../geoportal-search/src/main/resources</directory>
+				<includes>
+					<include>gs/**</include>
+				</includes>
+			</resource>
 		</resources>
-    <plugins>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-compiler-plugin</artifactId>
-        <version>3.8.1</version>
-        <configuration>
-          <source>11</source>
-          <target>11</target>
-        </configuration>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-jar-plugin</artifactId>
-        <version>3.1.2</version>
-        <configuration>
-          <includes>
-            <include>com/**</include>
-          </includes>
-        </configuration>
-        <executions>
-          <execution>
-            <id>geoportal-jar</id>
-            <phase>compile</phase>
-            <goals>
-              <goal>jar</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>
-      <plugin>
-        <groupId>org.apache.maven.plugins</groupId>
-        <artifactId>maven-antrun-plugin</artifactId>
-        <version>1.8</version>
-        <executions>
-          <execution>
-            <phase>test</phase>
-            <configuration>
-              <target>
-                <!--<echo>Ant copy ${project.build.directory}/geoportal.jar to ${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar</echo>-->
-                <copy overwrite="true" file="${project.build.directory}/geoportal.jar" 
-                  tofile="${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar" />
-              <!--   <copy toDir="${project.build.directory}/geoportal/viewer/widgets/GeoportalSearch/gs">
-                  <fileset dir="../geoportal-search/src/main/resources/gs"/>
-                </copy>--> 
-              </target>
-            </configuration>
-            <goals>
-              <goal>run</goal>
-            </goals>
-          </execution>
-        </executions>
-      </plugin>   
-      <plugin>
-        <artifactId>maven-war-plugin</artifactId>
-        <version>3.2.3</version>
-        <configuration>
-          <warSourceDirectory>src/main/webapp</warSourceDirectory>
-          <failOnMissingWebXml>false</failOnMissingWebXml>
-          <packagingExcludes>WEB-INF/classes/com/**</packagingExcludes>
-          <packagingExcludes>WEB-INF/lib/snakeyaml-1.32.jar</packagingExcludes>
-          <!-- 
-          <webResources>
-            <resource>
-              <directory>../geoportal-search/src/main/resources</directory>
-              <include>gs/**</include>
-            </resource>
-          </webResources>
-          -->
-        </configuration>
-      </plugin>
-    </plugins>
-  </build>
-  
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.14.0</version>
+				<configuration>
+					<source>${maven.compiler.source}</source>
+					<target>${maven.compiler.target}</target>
+				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-jar-plugin</artifactId>
+				<version>3.4.2</version>
+				<configuration>
+					<includes>
+						<include>com/**</include>
+					</includes>
+				</configuration>
+				<executions>
+					<execution>
+						<id>geoportal-jar</id>
+						<phase>compile</phase>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-antrun-plugin</artifactId>
+				<version>1.8</version>
+				<executions>
+					<execution>
+						<phase>test</phase>
+						<configuration>
+							<target>
+								<!--<echo>Ant copy ${project.build.directory}/geoportal.jar to ${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar</echo>-->
+								<copy overwrite="true"
+									file="${project.build.directory}/geoportal.jar"
+									tofile="${project.build.directory}/geoportal/WEB-INF/lib/geoportal.jar" />
+							</target>
+						</configuration>
+						<goals>
+							<goal>run</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<artifactId>maven-war-plugin</artifactId>
+				<version>3.4.0</version>
+				<configuration>
+					<warSourceDirectory>src/main/webapp</warSourceDirectory>
+					<failOnMissingWebXml>false</failOnMissingWebXml>
+					<packagingExcludes>WEB-INF/classes/com/**</packagingExcludes>
+					<packagingExcludes>WEB-INF/lib/snakeyaml-1.32.jar</packagingExcludes>
+
+				</configuration>
+			</plugin>
+		</plugins>
+	</build>
+
 </project>

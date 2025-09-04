@@ -16,7 +16,7 @@ package com.esri.geoportal.lib.elastic.kvp;
 import com.esri.geoportal.base.metadata.MetadataDocument;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 
-import javax.json.JsonObjectBuilder;
+import jakarta.json.JsonObjectBuilder;
 import org.opensearch.action.delete.DeleteResponse;
 import org.opensearch.action.index.IndexResponse;
 
