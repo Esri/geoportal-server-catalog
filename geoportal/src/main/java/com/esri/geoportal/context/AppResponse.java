@@ -135,8 +135,8 @@ public class AppResponse {
     } else if (t instanceof UnrecognizedTypeException) {
       status = Response.Status.BAD_REQUEST;
       LOGGER.trace("Exception",t);
-    } else if (t instanceof ValidationException) {
-      json = ((ValidationException)t).toJson(pretty);
+    } else if (t instanceof ValidationException exception) {
+      json = exception.toJson(pretty);
       status = Response.Status.BAD_REQUEST;
       LOGGER.trace("Exception",t);
     } else if (t instanceof TransformerException) {

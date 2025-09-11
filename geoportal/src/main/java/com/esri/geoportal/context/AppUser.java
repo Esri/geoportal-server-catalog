@@ -111,11 +111,9 @@ public class AppUser {
     String[] gtpRoles = {"ADMIN","PUBLISHER","USER"};
     List<String> gptRoleList = Arrays.asList(gtpRoles);
     Collection<GrantedAuthority> authorities = null;
-    if (p instanceof UsernamePasswordAuthenticationToken) {
-      UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken)p;
+    if (p instanceof UsernamePasswordAuthenticationToken auth) {
       if (auth.isAuthenticated()) authorities = auth.getAuthorities();
-    } else if (p instanceof OAuth2AuthenticationToken) {
-      OAuth2AuthenticationToken auth = (OAuth2AuthenticationToken)p;
+    } else if (p instanceof OAuth2AuthenticationToken auth) {
       if (auth.isAuthenticated()) authorities = auth.getAuthorities();
     }
     if (authorities != null) {

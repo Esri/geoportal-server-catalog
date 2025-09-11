@@ -17,6 +17,7 @@ import com.esri.geoportal.base.util.BalancerSupport;
 import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
 import com.esri.geoportal.context.GeoportalContext;
 
+import java.io.Serial;
 import java.io.UnsupportedEncodingException;
 
 import jakarta.servlet.ServletException;
@@ -37,6 +38,7 @@ public class ElasticProxy extends BalancerServlet {
 
   /** Properties */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxy.class);
+  @Serial
   private static final long serialVersionUID = 1L;
   private final BalancerSupport balancerSupport = new BalancerSupport();
   private String _authString = null;
@@ -115,7 +117,7 @@ public class ElasticProxy extends BalancerServlet {
     }
     HttpClient client = factory!=null? new HttpClient((HttpClientTransport) factory): new HttpClient();
     if (proxyBufferSize!=null) {
-      LOGGER.debug(String.format("Buffer size for HTTP client for ElasticProxi set to: %s bytes", proxyBufferSize));
+      LOGGER.debug("Buffer size for HTTP client for ElasticProxi set to: %s bytes".formatted(proxyBufferSize));
       client.setRequestBufferSize(proxyBufferSize);
     }
 //    org.eclipse.jetty.client.HttpProxy proxy = new org.eclipse.jetty.client.HttpProxy("localhost",8888);

@@ -65,12 +65,12 @@ public class DcatController extends DcatContext {
    */
   public void init() {
     if (runAt!=null) {
-      LOGGER.info(String.format("DCAT cache build task to run at %s.", runAt));
+      LOGGER.info("DCAT cache build task to run at %s.".formatted(runAt));
       try {
         final HoursMinutes hm = HoursMinutes.parse(runAt);
         startExecutionAt(hm);
       } catch (IllegalArgumentException ex) {
-        LOGGER.error(String.format("DCAT cache build task to run at %s failed.", runAt), ex);
+        LOGGER.error("DCAT cache build task to run at %s failed.".formatted(runAt), ex);
       }
     }
   }
@@ -95,7 +95,7 @@ public class DcatController extends DcatContext {
         dcatBuilder.build(this);
         dcatCache.purgeOutdatedFiles();
       } catch (Exception ex) {
-        LOGGER.error(String.format("DCAT error creating cache!"), ex);
+        LOGGER.error("DCAT error creating cache!".formatted(), ex);
       }
       
       exitRunning();
@@ -113,7 +113,7 @@ public class DcatController extends DcatContext {
     
     long delay = hm.tillNextRun().getSeconds();
     executorService.schedule(taskWrapper, delay, TimeUnit.SECONDS);
-    LOGGER.info(String.format("DCAT cache build task scheduled to run in %d seconds.", delay));
+    LOGGER.info("DCAT cache build task scheduled to run in %d seconds.".formatted(delay));
   }
 
   private static final class HoursMinutes {
@@ -142,24 +142,24 @@ public class DcatController extends DcatContext {
 
     public static HoursMinutes parse(String strHM) {
       if (strHM == null) {
-        throw new IllegalArgumentException(String.format("Null hours:minutes"));
+        throw new IllegalArgumentException("Null hours:minutes".formatted());
       }
 
       String[] hm = strHM.split(":");
       if (hm == null || hm.length != 2) {
-        throw new IllegalArgumentException(String.format("Invalid hours:minutes (%s)", strHM));
+        throw new IllegalArgumentException("Invalid hours:minutes (%s)".formatted(strHM));
       }
 
       try {
         return new HoursMinutes(Integer.parseInt(hm[0]), Integer.parseInt(hm[1]));
       } catch (NumberFormatException ex) {
-        throw new IllegalArgumentException(String.format("Invalid hours:minutes (%s)", strHM), ex);
+        throw new IllegalArgumentException("Invalid hours:minutes (%s)".formatted(strHM), ex);
       }
     }
 
     @Override
     public String toString() {
-      return String.format("%d:%d", targetHour, targetMin);
+      return "%d:%d".formatted(targetHour, targetMin);
     }
   }
 }

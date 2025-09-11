@@ -18,7 +18,7 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
@@ -104,7 +104,7 @@ public class SearchRequest {
       if (engine == null) {
         URL url = Thread.currentThread().getContextClassLoader().getResource(javascriptFile);
         URI uri = url.toURI();
-        String script = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");
+        String script = new String(Files.readAllBytes(Path.of(uri)),"UTF-8");
         ScriptEngineManager engineManager = new ScriptEngineManager();
         engine = engineManager.getEngineByName("nashorn");
         engine.eval(script);

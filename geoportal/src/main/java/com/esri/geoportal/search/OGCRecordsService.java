@@ -20,7 +20,6 @@ import java.net.URISyntaxException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
@@ -652,7 +651,7 @@ public class OGCRecordsService extends Application {
 	private String readResourceFile(String path, HttpServletRequest hsr) throws IOException, URISyntaxException {
 		ResourcePath rp = new ResourcePath();
 		URI uri = rp.makeUrl(path).toURI();
-		String filedataString = new String(Files.readAllBytes(Paths.get(uri)), "UTF-8");
+		String filedataString = new String(Files.readAllBytes(java.nio.file.Path.of(uri)), "UTF-8");
 
 		if (filedataString != null)
 			filedataString = filedataString.trim();

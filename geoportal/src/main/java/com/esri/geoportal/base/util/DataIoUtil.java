@@ -33,7 +33,7 @@ public class DataIoUtil {
    */
   public static Boolean readBoolean(DataInput in) throws IOException {
     if (readNullFlag(in)) return null;
-    return new Boolean(in.readBoolean());
+    return Boolean.valueOf(in.readBoolean());
   }
   /**
    * Writes a Boolean value.
@@ -55,7 +55,7 @@ public class DataIoUtil {
    */
   public static Byte readByte(DataInput in) throws IOException {
     if (readNullFlag(in)) return null;
-    return new Byte(in.readByte());
+    return Byte.valueOf(in.readByte());
   }
   /**
    * Writes a Byte value.
@@ -128,7 +128,7 @@ public class DataIoUtil {
    */
   public static Double readDouble(DataInput in) throws IOException {
     if (readNullFlag(in)) return null;
-    return new Double(in.readDouble());
+    return Double.valueOf(in.readDouble());
   }
   /**
    * Writes a Double value.
@@ -150,7 +150,7 @@ public class DataIoUtil {
    */
   public static Float readFloat(DataInput in) throws IOException {
     if (readNullFlag(in)) return null;
-    return new Float(in.readFloat());
+    return Float.valueOf(in.readFloat());
   }
   /**
    * Writes a Float value.
@@ -172,7 +172,7 @@ public class DataIoUtil {
    */
   public static Integer readInteger(DataInput in) throws IOException {
     if (readNullFlag(in)) return null;
-    return new Integer(in.readInt());
+    return Integer.valueOf(in.readInt());
   }
   /**
    * Writes a Integer value.
@@ -194,7 +194,7 @@ public class DataIoUtil {
    */
   public static Long readLong(DataInput in) throws IOException {
     if (readNullFlag(in)) return null;
-    return new Long(in.readLong());
+    return Long.valueOf(in.readLong());
   }
   /**
    * Writes a Long value.
