@@ -139,10 +139,10 @@ public class DateUtil {
                 dateTime[0] = date;
                 break;
               case 6:
-                dateTime[0] = String.format("%s-%s", date.substring(0, 4), date.substring(4));
+                dateTime[0] = "%s-%s".formatted(date.substring(0, 4), date.substring(4));
                 break;
               case 8:
-                dateTime[0] = String.format("%s-%s-%s", date.substring(0, 4), date.substring(4, 6), date.substring(6));
+                dateTime[0] = "%s-%s-%s".formatted(date.substring(0, 4), date.substring(4, 6), date.substring(6));
                 break;
             }
             text = Arrays.stream(dateTime).collect(Collectors.joining("T"));

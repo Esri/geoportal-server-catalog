@@ -91,8 +91,8 @@ public class Evaluator {
     ScriptEngine engine = this.getCachedEngine();
     Invocable invocable = (Invocable)engine;
     Object result = invocable.invokeFunction("getDetailsXslt",key);
-    if (result != null && result instanceof String) {
-      return (String)result;
+    if (result != null && result instanceof String string) {
+      return string;
     }
     return null;
   }

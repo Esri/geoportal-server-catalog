@@ -19,7 +19,7 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
@@ -208,7 +208,7 @@ public class JsonUtil {
       throws IOException, URISyntaxException {
     ResourcePath rp = new ResourcePath();
     URI uri = rp.makeUrl(path).toURI();
-    String s = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");
+    String s = new String(Files.readAllBytes(Path.of(uri)),"UTF-8");
     //System.err.println(path+":"+s);
     if (s != null) s = s.trim();
     if (s != null) return toJsonStructure(s);
