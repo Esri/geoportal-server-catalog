@@ -12,7 +12,7 @@
 	<properties>
 
 		<springframework.version>7.0.0-M8</springframework.version>
-		<springsecurity.version>7.0.0-M8</springsecurity.version>
+		<springsecurity.version>7.0.0-M2</springsecurity.version>
 
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.source>21</maven.compiler.source>

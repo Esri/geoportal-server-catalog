@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic;
-import com.esri.geoportal.base.util.BalancerSupport;
-import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
-import com.esri.geoportal.context.GeoportalContext;
 
-import java.io.Serial;
 import java.io.UnsupportedEncodingException;
 
-import jakarta.servlet.ServletException;
-import jakarta.servlet.http.HttpServletRequest;
-
 import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.HttpClientTransport;
 import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.ee10.proxy.BalancerServlet;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.base.util.BalancerSupport;
+import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
+import com.esri.geoportal.context.GeoportalContext;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
 
 /**
  * A proxy to Elasticsearch.
@@ -38,7 +37,7 @@ public class ElasticProxy extends BalancerServlet {
 
   /** Properties */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxy.class);
-  @Serial
+
   private static final long serialVersionUID = 1L;
   private final BalancerSupport balancerSupport = new BalancerSupport();
   private String _authString = null;
@@ -109,13 +108,16 @@ public class ElasticProxy extends BalancerServlet {
   }
   
   @Override
-  protected HttpClient newHttpClient() {
-    SslContextFactory.Client factory = null;
-    if (this._useHttps) {
-      factory = new SslContextFactory.Client();
-      factory.setTrustAll(true);
-    }
-    HttpClient client = factory!=null? new HttpClient((HttpClientTransport) factory): new HttpClient();
+  protected HttpClient newHttpClient() {                                                                                                            SslContextFactory.Client factory = null;
+    
+    HttpClient client = new HttpClient();
+    if (this._useHttps) {    	
+        factory = new SslContextFactory.Client();
+        factory.setTrustAll(true);
+        client.setSslContextFactory(factory);
+      }
+    
+
     if (proxyBufferSize!=null) {
       LOGGER.debug("Buffer size for HTTP client for ElasticProxi set to: %s bytes".formatted(proxyBufferSize));
       client.setRequestBufferSize(proxyBufferSize);
