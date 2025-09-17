@@ -18,6 +18,7 @@ import java.nio.file.DirectoryIteratorException;
 import java.nio.file.DirectoryStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.HashMap;
@@ -27,12 +28,13 @@ import java.util.function.Consumer;
 
 import jakarta.json.JsonObject;
 import jakarta.json.JsonObjectBuilder;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.CredentialsStore;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.core5.http.impl.nio.client.HttpAsyncClientBuilder;
+
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.opensearch.action.admin.indices.delete.DeleteIndexRequest;
 import org.opensearch.action.delete.DeleteRequest;
 import org.opensearch.action.get.GetRequest;
@@ -130,13 +132,13 @@ public class Test {
   {
      //Establish credentials to use basic authentication.
     //Only for demo purposes. Don't specify your credentials in code.
-    final CredentialsStore credentialsProvider = new BasicCredentialsProvider();
+    final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
-    credentialsProvider.setCredentials(new AuthScope(null, -1),
-      new UsernamePasswordCredentials("admin", "admin".toCharArray()));
+    credentialsProvider.setCredentials(AuthScope.ANY,
+      new UsernamePasswordCredentials("admin", "admin"));
 
     //Create a client.
-    RestClientBuilder builder = RestClient.builder(new HttpHost("http", "localhost", 9200))
+    RestClientBuilder builder = RestClient.builder(new HttpHost("localhost", 9200, "http"))
       .setHttpClientConfigCallback((HttpAsyncClientBuilder httpClientBuilder) -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
       //Create a non-default index with custom settings and mappings.
       try (RestHighLevelClient client = new RestHighLevelClient(builder)) {
@@ -205,7 +207,7 @@ public class Test {
     String id = null;
     id = "88887777";
     String p = "C:/Projects/metadata/elastic/doc1.json";
-    String json =  new String(Files.readAllBytes(Path.of(p)),"UTF-8");
+    String json =  new String(Files.readAllBytes(Paths.get(p)),"UTF-8");
     //json = null;
     String xml = XmlUtil.readFile("C:/Projects/metadata/elastic/iso19115-urban-1.xml");
     
@@ -355,7 +357,7 @@ public class Test {
   public static void testPython() throws Exception {
     String cmd = "C:/Python27/ArcGIS10.2/python.exe C:/Projects/nodc/elastic/Publish2REST-urban.PY";
     String out = " > C:\\logs\\python.txt 2>&1";
-    Path dir = Path.of("C:/Projects/nodc/elastic/metadata/collections");
+    Path dir = Paths.get("C:/Projects/nodc/elastic/metadata/collections");
     List<String> result = new ArrayList<>();
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{xml}")) {
       for (Path entry: stream) {
@@ -364,7 +366,7 @@ public class Test {
     } catch (DirectoryIteratorException ex) {
       throw ex.getCause();
     }
-    dir = Path.of("C:/Projects/nodc/elastic/metadata/granules");
+    dir = Paths.get("C:/Projects/nodc/elastic/metadata/granules");
     try (DirectoryStream<Path> stream = Files.newDirectoryStream(dir, "*.{xml}")) {
       for (Path entry: stream) {
         result.add(entry.toString());
@@ -731,7 +733,7 @@ public class Test {
             String id = hit.getId();
             String xml = (String)hit.getSourceAsMap().get("sys_clob");
             //System.err.println(id);
-            Path p = Path.of(dir+id.replace("/xml","")+".xml");
+            Path p = Paths.get(dir+id.replace("/xml","")+".xml");
             Files.write(p,xml.getBytes("UTF-8"));
           } catch (Exception e) {
             e.printStackTrace();
@@ -748,7 +750,7 @@ public class Test {
     String url = "http://localhost:8080/geoportal/rest/metadata/item?async=true";
     url = "http://gptdb1:8080/geoportal/rest/metadata/item?async=true";
     int count = 0;
-    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Path.of(dir))) {
+    try (DirectoryStream<Path> directoryStream = Files.newDirectoryStream(Paths.get(dir))) {
       for (Path path: directoryStream) {
         count++;
         //if (count > 5) break;

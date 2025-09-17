@@ -20,12 +20,13 @@ import java.util.concurrent.atomic.AtomicLong;
 
 import jakarta.annotation.PostConstruct;
 import jakarta.annotation.PreDestroy;
-import org.apache.hc.client5.http.impl.auth.BasicCredentialsProvider;
-import org.apache.hc.core5.http.HttpHost;
-import org.apache.hc.client5.http.auth.AuthScope;
-import org.apache.hc.client5.http.auth.CredentialsStore;
-import org.apache.hc.client5.http.auth.UsernamePasswordCredentials;
-import org.apache.hc.core5.http.impl.nio.client.HttpAsyncClientBuilder;
+
+import org.apache.http.HttpHost;
+import org.apache.http.auth.AuthScope;
+import org.apache.http.auth.UsernamePasswordCredentials;
+import org.apache.http.client.CredentialsProvider;
+import org.apache.http.impl.client.BasicCredentialsProvider;
+import org.apache.http.impl.nio.client.HttpAsyncClientBuilder;
 import org.opensearch.client.RestHighLevelClient;
 //import org.opensearch.transport.client.PreBuiltTransportClient;
 //import org.opensearch.xpack.client.PreBuiltXPackTransportClient;
@@ -312,13 +313,13 @@ public class ElasticContext {
   
   public RestHighLevelClient openSearchRestClient()
   {
-      final CredentialsStore credentialsProvider = new BasicCredentialsProvider();
+      final CredentialsProvider credentialsProvider = new BasicCredentialsProvider();
 
-    credentialsProvider.setCredentials(new AuthScope(null, -1),
-      new UsernamePasswordCredentials("","".toCharArray()));
+    credentialsProvider.setCredentials(AuthScope.ANY,
+      new UsernamePasswordCredentials("",""));
 
     //Create a client.
-    org.opensearch.client.RestClientBuilder builder = org.opensearch.client.RestClient.builder(new HttpHost("http", "localhost", 9200))
+    org.opensearch.client.RestClientBuilder builder = org.opensearch.client.RestClient.builder(new HttpHost("localhost", 9200, "http"))
       .setHttpClientConfigCallback((HttpAsyncClientBuilder httpClientBuilder) -> httpClientBuilder.setDefaultCredentialsProvider(credentialsProvider));
       
       RestHighLevelClient client = new RestHighLevelClient(builder);
