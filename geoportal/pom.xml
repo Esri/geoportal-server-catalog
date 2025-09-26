@@ -11,8 +11,8 @@
 
 	<properties>
 
-		<springframework.version>7.0.0-M8</springframework.version>
-		<springsecurity.version>7.0.0-M2</springsecurity.version>
+		<springframework.version>6.2.11</springframework.version>
+		<springsecurity.version>6.5.5</springsecurity.version>
 
 		<maven.compiler.target>21</maven.compiler.target>
 		<maven.compiler.source>21</maven.compiler.source>
@@ -22,6 +22,7 @@
 	</properties>
 
 	<dependencies>
+
 		<dependency>
 			<groupId>org.owasp.esapi</groupId>
 			<artifactId>esapi</artifactId>
@@ -157,15 +158,15 @@
 			<version>12.1.0</version> <!-- or latest -->
 		</dependency>
 		<dependency>
-		    <groupId>org.eclipse.jetty.ee10</groupId>
-		    <artifactId>jetty-ee10-proxy</artifactId>
-		    <version>12.1.0</version> 
-		    <exclusions>
-                <exclusion>
-                    <groupId>org.eclipse.jetty</groupId>
-                    <artifactId>jetty-client</artifactId>
-                </exclusion>
-            </exclusions>
+			<groupId>org.eclipse.jetty.ee10</groupId>
+			<artifactId>jetty-ee10-proxy</artifactId>
+			<version>12.1.0</version>
+			<exclusions>
+				<exclusion>
+					<groupId>org.eclipse.jetty</groupId>
+					<artifactId>jetty-client</artifactId>
+				</exclusion>
+			</exclusions>
 		</dependency>
 
 		<dependency>
@@ -208,28 +209,43 @@
 			<artifactId>spring-security-config</artifactId>
 			<version>${springsecurity.version}</version>
 		</dependency>
+
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-ldap</artifactId>
 			<version>${springsecurity.version}</version>
 		</dependency>
-
-<!-- https://mvnrepository.com/artifact/org.springframework.security.oauth/spring-security-oauth2 -->
+		<!--
+		https://mvnrepository.com/artifact/org.springframework.security/spring-security-oauth2-authorization-server -->
 		<dependency>
-		    <groupId>org.springframework.security.oauth</groupId>
-		    <artifactId>spring-security-oauth2</artifactId>
-		    <version>2.5.2.RELEASE</version>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-authorization-server</artifactId>
+			<version>1.5.2</version>
+		</dependency>
+		
+		<dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-client</artifactId>
+			<version>${springsecurity.version}</version>
+		</dependency>
+		
+		<!-- old ones
+		https://mvnrepository.com/artifact/org.springframework.security.oauth/spring-security-oauth2 
+		<dependency>
+			<groupId>org.springframework.security.oauth</groupId>
+			<artifactId>spring-security-oauth2</artifactId>
+			<version>2.5.2.RELEASE</version>
 		</dependency>
 		<dependency>
-    <groupId>org.springframework.security</groupId>
-    <artifactId>spring-security-oauth2-client</artifactId>
-    <version>6.2.8</version>
-</dependency>
+			<groupId>org.springframework.security</groupId>
+			<artifactId>spring-security-oauth2-client</artifactId>
+			<version>6.2.8</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.security</groupId>
 			<artifactId>spring-security-jwt</artifactId>
 			<version>1.1.1.RELEASE</version>
-		</dependency>
+		</dependency>-->
 
 		<!-- for spring mvc -->
 		<dependency>
@@ -279,7 +295,7 @@
 			<groupId>jakarta.annotation</groupId>
 			<artifactId>jakarta.annotation-api</artifactId>
 			<version>2.1.1</version>
-   <scope>provided</scope>
+			<scope>provided</scope>
 		</dependency>
 		<!--
 		https://mvnrepository.com/artifact/jakarta.xml.bind/jakarta.xml.bind-api -->
@@ -409,30 +425,31 @@
 			</resource>
 		</resources>
 		<plugins>
-		<plugin>
-        <groupId>org.openrewrite.maven</groupId>
-        <artifactId>rewrite-maven-plugin</artifactId>
-        <version>6.18.0</version>
-        <configuration>
-          <exportDatatables>true</exportDatatables>
-          <activeRecipes>
-            <recipe>org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5</recipe>
-          </activeRecipes>
-        </configuration>
-        <dependencies>
-          <dependency>
-            <groupId>org.openrewrite.recipe</groupId>
-            <artifactId>rewrite-spring</artifactId>
-            <version>6.14.0</version>
-          </dependency>
-        </dependencies>
-      </plugin>
+			<plugin>
+				<groupId>org.openrewrite.maven</groupId>
+				<artifactId>rewrite-maven-plugin</artifactId>
+				<version>6.18.0</version>
+				<configuration>
+					<exportDatatables>true</exportDatatables>
+					<activeRecipes>
+						<recipe>
+							org.openrewrite.java.spring.boot3.UpgradeSpringBoot_3_5</recipe>
+					</activeRecipes>
+				</configuration>
+				<dependencies>
+					<dependency>
+						<groupId>org.openrewrite.recipe</groupId>
+						<artifactId>rewrite-spring</artifactId>
+						<version>6.14.0</version>
+					</dependency>
+				</dependencies>
+			</plugin>
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-compiler-plugin</artifactId>
 				<version>3.14.0</version>
 				<configuration>
-     <release>17</release>
+					<release>17</release>
 				</configuration>
 			</plugin>
 			<plugin>
@@ -486,7 +503,7 @@
 
 				</configuration>
 			</plugin>
-			
+
 		</plugins>
 	</build>
 
