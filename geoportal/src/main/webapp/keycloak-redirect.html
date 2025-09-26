@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>KeyCloak Login Callback</title>
+    <script>
+        (function() {
+            const params = new URLSearchParams(window.location.search.slice(1));
+            const accessToken = params.get("at");
+            if (!accessToken) {
+                alert("KeyCloak login failed: missing access token");
+            } else {
+                document.cookie = "GPT_access_token=" + accessToken +
+                                  "; path=/; SameSite=Lax; Secure";
+            }
+            window.location.href = "/catalog/index.html";
+        })();
+    </script>
+</head>
+<body>
+    Logging in...
+</body>
+</html>

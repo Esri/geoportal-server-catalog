@@ -7,6 +7,7 @@ define(["dojo/_base/declare",
         "app/context/AppClient",
         "app/main/App"],
 function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
+  const GPT_ACCESS_TOKEN_COOKIE_NAME = "GPT_access_token";
 
   var oThisClass = declare(null, {
 
@@ -14,8 +15,11 @@ function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
       lang.mixin(this,args);
     },
 
-    startupApp: function() {
+    // retry: falsy unless calling reentrantly after a 401
+    startupApp: function(retry) {
       
+      const self = this;
+
       var showApp = function() {
         var app = new App({},"app");
         app.startup();
@@ -28,29 +32,39 @@ function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
         }).play();
       };
       
-      var showErr = function(err) {
+      var showErr = function(_) {
         domConstruct.empty("app-loading-node");
         domConstruct.create("h3",{
           "class": "text-center g-error",
           innerHTML: "Error loading page"
         },"app-loading-node");
       };
-      
+
       var client = new AppClient();
-      client.pingGeoportal().then(function(geoportal){
+      const match = document.cookie.match(new RegExp('(^| )' + GPT_ACCESS_TOKEN_COOKIE_NAME + '=([^;]+)'));
+      const tokenData = match ? match[2] : null;
+      
+      client.pingGeoportal(tokenData).then(function(geoportal){
         //console.warn("geoportal",geoportal);
         if (!geoportal) geoportal = {};
         if (window) window.geoportalServiceInfo = geoportal; // to use for child iframes
-        AppContext.geoportal = geoportal;      
+        AppContext.geoportal = geoportal;
+        AppContext.appUser.geoportalUser = geoportal.user;
         AppContext.appUser.whenAppStarted().then(function(){
           showApp();
-        }).otherwise(function(err){
+        }).otherwise(function(_){
           showApp();
         });
       }).otherwise(function(err){
-        showErr(err);
-        console.error("Unable to connect to server.");
-        console.error(err);   
+        if(!retry && err && err.response && err.response.status === 401) {
+          console.warn("Token invalid/expired, deleting cookie and retrying");
+          document.cookie = GPT_ACCESS_TOKEN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+          self.startupApp(true);
+        } else {
+          showErr(err);
+          console.error("Unable to connect to server.");
+          console.error(err);
+        }
       });
     }
 
