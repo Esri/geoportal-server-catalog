@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans 
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:security="http://www.springframework.org/schema/security"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="
+        http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+        http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-5.8.xsd">
+
+  <security:authentication-manager id="authenticationManager" alias="authenticationManager">
+    <security:authentication-provider ref="keycloakAuthProvider"/>
+  </security:authentication-manager>
+
+  <beans:bean id="keycloakConfig" class="com.esri.geoportal.base.security.KeycloakConfig">
+    <beans:property name="keycloakTokenUrl" value="${keycloakTokenUrl:http://keycloak-keycloak-1:8080/realms/geoportal/protocol/openid-connect/token}"/>
+    <!-- Provide this if you want Keycloak to provide the authentication dialog instead of the catalog client. -->
+    <beans:property name="keycloakAuthUrl" value="${keycloakAuthUrl:http://localhost:8081/realms/geoportal/protocol/openid-connect/auth}"/>
+    <beans:property name="clientId" value="${clientId:the-client-id-from-keycloak}"/>
+    <beans:property name="clientSecret" value="${clientSecret:the-secret-from-keycloak}"/>
+    <beans:property name="redirectUrl" value="${redirectUrl:http://localhost:8080/catalog/keycloak-callback}"/>
+    <beans:property name="jwtSigningKey" value="${jwtSigningKey:MACSigner-requires-a-256-bit-key-so-give-it-one}"/>
+  </beans:bean>
+
+  <beans:bean id="keycloakAuthProvider" class="com.esri.geoportal.base.security.KeycloakAuthenticationProvider">
+    <beans:property name="keycloakConfig" ref="keycloakConfig"/>
+  </beans:bean>
+
+  <beans:bean id="keycloakCallbackServlet" class="com.esri.geoportal.base.security.KeycloakCallbackServlet">
+  </beans:bean>
+
+  <beans:bean id="noopPasswordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder"/>
+
+</beans:beans>

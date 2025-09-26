@@ -12,7 +12,8 @@ define(["dojo/_base/declare",
         ], 
 function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn, 
     esriId, OAuthInfo, Portal) {
-  var KEEP_SIGNED_IN_COOKIE_NAME = "GPT_keep_signed_in";
+  const GPT_ACCESS_TOKEN_COOKIE_NAME = "GPT_access_token";
+  const KEEP_SIGNED_IN_COOKIE_NAME = "GPT_keep_signed_in";
 	
   var oThisClass = declare(null, {
 
@@ -113,7 +114,13 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     
     showSignIn: function() {
       var ctx = window.AppContext;
-      if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
+      if (ctx.geoportal && ctx.geoportal.keycloakAuth && ctx.geoportal.keycloakAuth.url) {
+        window.location.href = ctx.geoportal.keycloakAuth.url +
+            "?client_id=" + ctx.geoportal.keycloakAuth.client_id +
+            "&response_type=code" +
+            "&scope=openid" +
+            "&redirect_uri=" + encodeURIComponent(ctx.geoportal.keycloakAuth.redirect_uri);
+      } else if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
         this._showAgsOAuthSignIn(ctx.geoportal.arcgisOAuth);
       } else {
         (new SignIn()).show();
@@ -125,7 +132,9 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       if (info) {
         this.appToken = info.oauthToken;
         this.geoportalUser = info.user;
-        topic.publish(appTopics.SignedIn,{geoportalUser:info.user});
+      }
+      if (this.geoportalUser) {
+        topic.publish(appTopics.SignedIn,{geoportalUser:this.geoportalUser});
       }
     },
 
@@ -244,6 +253,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       var domain = "domain=" + location.hostname;
       var path = "path=/" + location.pathname.replaceAll(/^\/+|\/+$/gi,"");
       document.cookie = KEEP_SIGNED_IN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; " + domain + "; " + path;
+      document.cookie = GPT_ACCESS_TOKEN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
     },
 
     retrieveTokenInfo: function() {
