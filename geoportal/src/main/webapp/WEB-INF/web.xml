@@ -9,8 +9,8 @@
   <listener>
     <listener-class>org.springframework.web.context.ContextLoaderListener</listener-class>
   </listener>
- <!--  
-  <filter>
+ 
+    <filter>
     <filter-name>springSecurityFilterChain</filter-name>
     <filter-class>org.springframework.web.filter.DelegatingFilterProxy</filter-class>
     <async-supported>true</async-supported>
@@ -20,7 +20,7 @@
     <url-pattern>/*</url-pattern>
     <dispatcher>ERROR</dispatcher>
     <dispatcher>REQUEST</dispatcher>
-  </filter-mapping>--> 
+  </filter-mapping> 
   
 	<filter>
 		<filter-name>ElasticProxyFilter</filter-name>
