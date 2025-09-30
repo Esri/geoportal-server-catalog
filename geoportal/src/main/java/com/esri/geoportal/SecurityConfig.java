@@ -50,13 +50,11 @@ public class SecurityConfig {
 
 		http.securityMatcher(authorizationServerConfigurer.getEndpointsMatcher()).with(authorizationServerConfigurer,
 				(authorizationServer) -> authorizationServer.oidc(Customizer.withDefaults()) // Enable OpenID Connect
-																								// 1.0
-		).authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
-				// Redirect to the login page when not authenticated from the
-				// authorization endpoint
-				.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
-						new LoginUrlAuthenticationEntryPoint("/login"),
-						new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
+		)
+		.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
+		.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
+			new LoginUrlAuthenticationEntryPoint("/login"),
+			new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 
 		return http.build();
 	}
@@ -64,7 +62,15 @@ public class SecurityConfig {
 	@Bean
 	@Order(2)
 	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-		http.authorizeHttpRequests(authorize -> authorize.requestMatchers("/elastic/metadata/_count/**").permitAll()
+		http
+			.csrf(csrf -> csrf.disable()) // Disable CSRF protection
+			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Allow framing from same origin
+			.authorizeHttpRequests(authorize -> authorize
+				// Only permit static resources and public endpoints
+				.requestMatchers("/index.html", "/standalone-metadata-editor.html", "/geoportal", "/oauth-callback.html", "/login", "/oauth2/**").permitAll()
+
+				.requestMatchers("/lib/**","/app/**","/api/**","/custom/**","/images/**","/rest/**").permitAll()
+				.requestMatchers("/elastic/metadata/_count/**").permitAll()
 				.requestMatchers("/elastic/metadata/*/_count/**").permitAll()
 				.requestMatchers("/elastic/metadata/_search/**").permitAll()
 				.requestMatchers("/elastic/metadata/*/_search/**").permitAll()
@@ -72,15 +78,15 @@ public class SecurityConfig {
 				.requestMatchers("/elastic/metadata/*/_mappings/**").permitAll()
 				.requestMatchers("/elastic/_search/scroll/**").permitAll()
 				.requestMatchers(HttpMethod.GET, "/stac/collections/**").permitAll()
-				//.requestMatchers(HttpMethod.GET, "/stac/api/**").hasAuthority("SCOPE_api.read").anyRequest()
-				.requestMatchers(HttpMethod.GET, "/stac/api/**").hasAnyAuthority("SCOPE_api.read", "ROLE_ADMIN").anyRequest()
-				//TODO Make this external configurable for all the URLs as per app-security.xml
-				
-				.authenticated() // All requests require authentication
-
-		).oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
-		 .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication; useful for Postman testing
-		// with default settings
+				.requestMatchers(HttpMethod.GET, "/stac/api/**").hasAnyAuthority("SCOPE_api.read", "ROLE_ADMIN")
+				.anyRequest().authenticated() // All other requests require authentication
+			)
+			.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
+				new LoginUrlAuthenticationEntryPoint("/login"),
+				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
+			.formLogin(Customizer.withDefaults())
+			.oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+			 .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication; useful for Postman testing
 		return http.build();
 	}
 
@@ -92,12 +98,14 @@ public class SecurityConfig {
 	public InMemoryRegisteredClientRepository registeredClientRepository() {
 
 		// 1. Catalog Client (Authorization Code + PKCE)
-		RegisteredClient uiAppClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("spa-client")
-				// No client secret for SPA (public client)
+		RegisteredClient uiAppClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("geoportal-client")
+				// No client secret for SPA (geoportal client)
 				.clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
 				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				.redirectUri("http://localhost:8080/callback") // SPA redirect
+				//.redirectUri("http://localhost:8080/geoportal/callback") // SPA redirect
+				.redirectUri("http://localhost:8080/geoportal/callback.html") // Allow HTML callback
+				//.redirectUri("http://localhost:8080/geoportal") // Allow SPA root as callback
 				.scope("openid").scope("profile").scope("api.read").build();
 
 		// 2. API Client (Read + Write)
