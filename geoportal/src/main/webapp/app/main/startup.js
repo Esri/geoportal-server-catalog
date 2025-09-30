@@ -5,6 +5,7 @@ require(["app","dojo/i18n!app/nls/resources"],function(app,i18n) {
     require(["dojo/ready","esri4/config","app/context/AppContext","app/context/AppStarter"],
     function(ready,esriConfig,AppContext,AppStarter) {
       window.AppContext = new AppContext();
+      window.AppContext.appUser.initOAuthListener();
       ready(function() {       
         esriConfig.request.proxyUrl = "viewer/proxy.jsp";
         (new AppStarter()).startupApp();

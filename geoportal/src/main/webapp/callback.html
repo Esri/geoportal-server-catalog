@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+  <head>
+  <script src="./lib/init.js"></script> 
+   <script src="https://js.arcgis.com/3.36/"></script> 
+    <script>
+      // Parse code from URL and alert it
+      window.onload = function() {      
+        
+        require(["app/context/AppUser"], function(AppUser) {
+          try {
+        	  var urlParams = new URLSearchParams(window.location.search);
+              var code = urlParams.get('code');
+                 	
+            (new AppUser()).handleOAuthCallback(code);
+           
+          } catch (e) {
+            alert("Error in AppUser: " + e);
+            console.error("Error in AppUser:", e);
+          }
+        }, function(err) {
+          alert("Require error: " + err);
+          console.error("Require error:", err);
+        });
+      };
+    </script>
+  </head>
+  <body></body>
+</html>

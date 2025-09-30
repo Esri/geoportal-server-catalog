@@ -116,9 +116,121 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
         this._showAgsOAuthSignIn(ctx.geoportal.arcgisOAuth);
       } else {
-        (new SignIn()).show();
+        // (new SignIn()).show();
+		//TODO above remove old sign in method
+		
+        // Open OAuth popup
+        this.openOAuthPopup();
       }
     },
+
+    openOAuthPopup: function() {
+      // Get current app context URL
+      var currentUrl = window.location.origin + window.location.pathname;
+      
+      const redirectUri = currentUrl.replace(/\/[^\/]*$/, '/callback.html');
+      const clientId = 'geoportal-client';    
+      const authServer = currentUrl.replace(/\/[^\/]*$/, '/oauth2'); // Spring Auth Server base
+      const authorizeEndpoint = `${authServer}/authorize`;
+	  
+      const codeVerifier = generateCodeVerifier();
+      // Persist codeVerifier for popup
+      localStorage.setItem('pkce_code_verifier', codeVerifier);
+      generateCodeChallenge(codeVerifier).then(function(codeChallenge) {
+        const authUrl = `${authorizeEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=openid&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+        window.oauthPopup = window.open(authUrl, '_blank', 'width=600,height=500');
+      });
+
+      function generateCodeVerifier() {
+        const array = new Uint8Array(32);
+        window.crypto.getRandomValues(array);
+        return btoa(String.fromCharCode(...array)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      async function generateCodeChallenge(verifier) {
+        const data = new TextEncoder().encode(verifier);
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return btoa(String.fromCharCode(...new Uint8Array(digest)))
+          .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+    },
+
+    // Listen for messages from the popup
+	  initOAuthListener: function() {
+		  window.addEventListener('message', function(event) {
+			  alert("message received " + JSON.stringify(event.data));
+			  // Ensure the message is from the expected origin
+			  if (event.origin !== window.location.origin) return;
+			  if (event.data && event.data.token) {
+				  const oauthToken = event.data.token.access_token ? event.data.token : null;
+				  if (!oauthToken) return;
+
+				  // Process the received token
+				  var self = AppContext.appUser, dfd = new Deferred(), client = new AppClient();
+				  var k = true; // Always keep signed in when using OAuth
+
+				  // Validate token by pinging Geoportal
+				  client.pingGeoportal(oauthToken).then(function(info) {
+					  if (info && info.user) {
+						  self.appToken = oauthToken;
+						  self.geoportalUser = info.user;
+
+						  if (k) {
+							  var cValue = {
+								  token: oauthToken,
+								  user: info.user
+							  };
+							  self.preserveTokenInfo(cValue, new Date(Date.now() + oauthToken.expires_in * 1000));
+						  }
+						  AppContext.geoportal = info;
+						  topic.publish(appTopics.SignedIn, { geoportalUser: info.user });
+						  dfd.resolve();
+					  } else {
+						  dfd.reject(i18n.general.error);
+					  }
+				  }).catch(function(error) {
+					  console.warn(error);
+					  dfd.reject(i18n.general.error);
+				  });
+			  }
+		  });
+	  },
+
+    // In the popup window, after redirect, send tokens back to opener
+    handleOAuthCallback: async function(code) {      
+   
+      if (code && window.opener) {
+        
+        // Exchange authorization code for tokens
+        const clientId = 'geoportal-client';
+        const redirectUri = 'http://localhost:8080/geoportal/callback.html'; // Updated to match registered URI
+        const tokenEndpoint = 'http://localhost:8080/geoportal/oauth2/token';
+        // Retrieve codeVerifier from localStorage
+        const codeVerifier = localStorage.getItem('pkce_code_verifier') || '';
+        const body = new URLSearchParams({
+          grant_type: 'authorization_code',
+          code,
+          redirect_uri: redirectUri,
+          client_id: clientId,
+          code_verifier: codeVerifier
+        });
+        const response = await fetch(tokenEndpoint, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body
+        });
+        const oauthToken = await response.json();
+        alert("tokens: " + JSON.stringify(oauthToken));
+		if(oauthToken && oauthToken.access_token) {
+			window.opener.postMessage({ token: oauthToken }, window.location.origin);
+			        window.close();
+			}
+        
+      }
+      console.log("handleOAuthCallback finished");
+    },
+	
+	
     
     checkStoredToken: function() {
       var info = this.retrieveTokenInfo();
@@ -129,7 +241,8 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       }
     },
 
-    signIn: function(u,p,k) {
+	//TODO remove Old sign in method
+    /*signIn: function(u,p,k) {
       var self = this, dfd = new Deferred(), client = new AppClient();
       client.generateToken(u,p).then(function(oauthToken){
         if (oauthToken && oauthToken.access_token) {
@@ -167,7 +280,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         dfd.reject(msg);
       });
       return dfd;
-    },
+    },*/
     
     signOut: function() {
       this.deleteTokenInfo();
