@@ -6,12 +6,12 @@
 	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
 	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
     http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-5.8.xsd
-    http://www.springframework.org/schema/security/oauth2 https://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd"> 
+    http://www.springframework.org/schema/security/oauth2 https://www.springframework.org/schema/security/spring-security-oauth2-2.0.xsd">
      
   <beans:bean id="noopPasswordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder"/>
   <!-- variables =============================================================================== -->  
 	<beans:bean id="jwtSigningKey" class="java.lang.String">
-	  <beans:constructor-arg value="jwtSigningKey"/>
+	  <beans:constructor-arg value="${jwtSigningKey:jwtSigningKey}"/>
 	</beans:bean>
   <beans:bean id="jwtAccessTokenValiditySeconds" class="java.lang.String">
     <beans:constructor-arg value="7200"/>
