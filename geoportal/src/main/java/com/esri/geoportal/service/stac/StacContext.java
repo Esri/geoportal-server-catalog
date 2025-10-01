@@ -254,6 +254,8 @@ public class StacContext {
     	ruleType = ruleType.trim();
     String key;
     String itemId = item.getAsString("id");
+    Map<String, String> fieldMappings = this.fieldMappings;
+    
     
     switch (ruleType) {    
       case "unique":
@@ -264,8 +266,20 @@ public class StacContext {
         String searchQry="";
         String filterClause="";
         int cnt =1;
+        
         for (String ukField: uniqueKeyFields) { 
+          
+          // issue 31 - look for mapped field names and search on those instead
+          String mappedField;
+          if (fieldMappings.containsKey(ukField.replace("properties.", ""))) {
+            mappedField = fieldMappings.get(ukField.replace("properties.", ""));
+          } else {
+            mappedField = ukField;
+          }
         	
+          // as we're looking at other existing records, we need to get the value
+          // from this item's unmapped fields, but then search using the 
+          // mapped fields
           if (ukField.contains("properties.")) {
             value = properties.getAsString(ukField.replace("properties.", ""));
           } else {
@@ -274,11 +288,11 @@ public class StacContext {
           //Prepare filter clause fldName=fldValue AND fldName=fldValue ex:xom:source_key_id=testpolygon1 AND xom:source_system=testitem
           if(cnt ==1)
           {
-        	  filterClause = ukField+"="+ value; 
+        	  filterClause = mappedField+"="+ value; 
           }
           else
           {
-        	  filterClause = filterClause+" AND " + ukField+"="+ value;
+        	  filterClause = filterClause+" AND " + mappedField+"="+ value;
           }
           cnt++;
           searchQry = StacHelper.prepareFilter(filterClause);
