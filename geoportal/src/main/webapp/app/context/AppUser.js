@@ -14,7 +14,8 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     esriId, OAuthInfo, Portal) {
   const GPT_ACCESS_TOKEN_COOKIE_NAME = "GPT_access_token";
   const KEEP_SIGNED_IN_COOKIE_NAME = "GPT_keep_signed_in";
-	
+  const ID_TOKEN_COOKIE_NAME = "GPT_id_token";
+
   var oThisClass = declare(null, {
 
     appToken: null,
@@ -179,9 +180,20 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     },
     
     signOut: function() {
+      const match = document.cookie.match(new RegExp('(^| )' + ID_TOKEN_COOKIE_NAME + '=([^;]+)'));
+      const idTokenHint = match ? match[2] : null;
       this.deleteTokenInfo();
       esriId.destroyCredentials();
-      window.location.reload();
+      var ctx = window.AppContext;
+      if (ctx.geoportal && ctx.geoportal.keycloakAuth && ctx.geoportal.keycloakAuth.url) {
+        var keycloakLogout = ctx.geoportal.keycloakAuth.url.replace("/auth", "/logout") +
+          "?post_logout_redirect_uri=" + encodeURIComponent(window.location.origin + "/catalog") +
+          "&id_token_hint=" + idTokenHint +
+          "&client_id=" + ctx.geoportal.keycloakAuth.client_id;
+        window.location.href = keycloakLogout;
+      } else {
+        window.location.reload();
+      }
     },
     
     whenAppStarted: function() {
@@ -252,8 +264,8 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     deleteTokenInfo: function() {
       var domain = "domain=" + location.hostname;
       var path = "path=/" + location.pathname.replaceAll(/^\/+|\/+$/gi,"");
-      document.cookie = KEEP_SIGNED_IN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; " + domain + "; " + path;
-      document.cookie = GPT_ACCESS_TOKEN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
+      document.cookie = GPT_ACCESS_TOKEN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; " + domain + "; " + path;
+      document.cookie = ID_TOKEN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; " + domain + "; " + path;
     },
 
     retrieveTokenInfo: function() {

@@ -50,6 +50,7 @@ function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
         if (window) window.geoportalServiceInfo = geoportal; // to use for child iframes
         AppContext.geoportal = geoportal;
         AppContext.appUser.geoportalUser = geoportal.user;
+        AppContext.appUser.appToken = {"access_token": tokenData};
         AppContext.appUser.whenAppStarted().then(function(){
           showApp();
         }).otherwise(function(_){
@@ -58,8 +59,8 @@ function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
       }).otherwise(function(err){
         if(!retry && err && err.response && err.response.status === 401) {
           console.warn("Token invalid/expired, deleting cookie and retrying");
-          document.cookie = GPT_ACCESS_TOKEN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/";
-          self.startupApp(true);
+          const domain = "domain=" + location.hostname;
+          document.cookie = GPT_ACCESS_TOKEN_COOKIE_NAME + "=; expires=Thu, 01 Jan 1970 00:00:00 UTC; " + domain + "; path=/catalog";          self.startupApp(true);
         } else {
           showErr(err);
           console.error("Unable to connect to server.");

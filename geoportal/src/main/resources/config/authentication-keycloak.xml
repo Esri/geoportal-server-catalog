@@ -7,9 +7,14 @@
         http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
         http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security-5.8.xsd">
 
-  <security:authentication-manager id="authenticationManager" alias="authenticationManager">
-    <security:authentication-provider ref="keycloakAuthProvider"/>
+  <security:http pattern="/keycloak-callback" security="none"/>
+
+  <security:authentication-manager id="authenticationManager">
   </security:authentication-manager>
+
+  <security:user-service id="hardcodedUserService">
+    <security:user name="jyutzler" password="{noop}unused" authorities="ROLE_ADMIN,ROLE_PUBLISHER" />
+  </security:user-service>
 
   <beans:bean id="keycloakConfig" class="com.esri.geoportal.base.security.KeycloakConfig">
     <beans:property name="keycloakTokenUrl" value="${keycloakTokenUrl:http://keycloak-keycloak-1:8080/realms/geoportal/protocol/openid-connect/token}"/>
@@ -19,15 +24,8 @@
     <beans:property name="clientSecret" value="${clientSecret:the-secret-from-keycloak}"/>
     <beans:property name="redirectUrl" value="${redirectUrl:http://localhost:8080/catalog/keycloak-callback}"/>
     <beans:property name="jwtSigningKey" value="${jwtSigningKey:MACSigner-requires-a-256-bit-key-so-give-it-one}"/>
+    <!-- The presence or absence of this property dictates 
+    whether authorization comes from Keycloak or the hardcodedUserService bean above -->
+    <beans:property name="userDetailsService" ref="hardcodedUserService"/>
   </beans:bean>
-
-  <beans:bean id="keycloakAuthProvider" class="com.esri.geoportal.base.security.KeycloakAuthenticationProvider">
-    <beans:property name="keycloakConfig" ref="keycloakConfig"/>
-  </beans:bean>
-
-  <beans:bean id="keycloakCallbackServlet" class="com.esri.geoportal.base.security.KeycloakCallbackServlet">
-  </beans:bean>
-
-  <beans:bean id="noopPasswordEncoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder"/>
-
 </beans:beans>

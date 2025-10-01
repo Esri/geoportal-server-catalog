@@ -1,13 +1,16 @@
 package com.esri.geoportal.base.security;
 
+import org.springframework.security.core.userdetails.UserDetailsService;
+
 public class KeycloakConfig {
     private String keycloakTokenUrl;
     private String keycloakAuthUrl;
     private String clientId;
     private String clientSecret;
     private String redirectUrl;
-    private String rolePrefix;
     private String jwtSigningKey;
+    private UserDetailsService userDetailsService;
+ 
     public String getKeycloakTokenUrl() {
         return keycloakTokenUrl;
     }
@@ -43,5 +46,11 @@ public class KeycloakConfig {
     }
     public void setJwtSigningKey(String jwtSigningKey) {
         this.jwtSigningKey = jwtSigningKey;
+    }
+    public UserDetailsService getUserDetailsService() {
+        return userDetailsService;
+    }
+    public void setUserDetailsService(UserDetailsService userDetailsService) {
+        this.userDetailsService = userDetailsService;
     }
 }
