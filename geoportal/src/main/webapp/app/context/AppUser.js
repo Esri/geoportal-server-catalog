@@ -113,15 +113,15 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     
     showSignIn: function() {
       var ctx = window.AppContext;
-      if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
+      /*if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
         this._showAgsOAuthSignIn(ctx.geoportal.arcgisOAuth);
-      } else {
+      } else {*/
         // (new SignIn()).show();
 		//TODO above remove old sign in method
 		
         // Open OAuth popup
         this.openOAuthPopup();
-      }
+     // }
     },
 
     openOAuthPopup: function() {
@@ -158,7 +158,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     // Listen for messages from the popup
 	  initOAuthListener: function() {
 		  window.addEventListener('message', function(event) {
-			  alert("message received " + JSON.stringify(event.data));
+			 
 			  // Ensure the message is from the expected origin
 			  if (event.origin !== window.location.origin) return;
 			  if (event.data && event.data.token) {
@@ -220,7 +220,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
           body
         });
         const oauthToken = await response.json();
-        alert("tokens: " + JSON.stringify(oauthToken));
+       // alert("tokens: " + JSON.stringify(oauthToken));
 		if(oauthToken && oauthToken.access_token) {
 			window.opener.postMessage({ token: oauthToken }, window.location.origin);
 			        window.close();
@@ -242,9 +242,9 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     },
 
 	//TODO remove Old sign in method
-    /*signIn: function(u,p,k) {
+    signIn: function(u,p,k) {
       var self = this, dfd = new Deferred(), client = new AppClient();
-      client.generateToken(u,p).then(function(oauthToken){
+      client.generateJwtToken(u,p).then(function(oauthToken){
         if (oauthToken && oauthToken.access_token) {
           client.pingGeoportal(oauthToken.access_token).then(function(info){
             if (info && info.user) {
@@ -280,7 +280,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         dfd.reject(msg);
       });
       return dfd;
-    },*/
+    },
     
     signOut: function() {
       this.deleteTokenInfo();

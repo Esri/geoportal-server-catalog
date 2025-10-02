@@ -87,7 +87,7 @@ function(declare, lang, Deferred, dojoRequest) {
       return dojoRequest.del(url,info);
     },
     
-    generateToken: function(username,password) {
+    generateJwtToken: function(username,password) {
       // TODO needs to be https
       var url = this.getBaseUri()+"/oauth/token";
       var content = {
