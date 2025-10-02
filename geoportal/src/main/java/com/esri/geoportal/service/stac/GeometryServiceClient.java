@@ -542,8 +542,10 @@ public class GeometryServiceClient {
             break;
             
           case "POLYGON":
+          case "MULTIPOLYGON":
             /*
               POLYGON Z ((35 10 0, 45 45 10, 15 40 20, 10 20 30, 35 10 0))
+              MULTIPOLYGON Z ( ((35 10 0, 45 45 10, 15 40 20, 10 20 30, 35 10 0)), ((...)) )
             */
             
             /*
@@ -571,7 +573,18 @@ public class GeometryServiceClient {
               geometries += "\"hasZ\": true, ";
             }
             
-            geometries += "\"rings\": [" + coordinates + "]}]}";
+            boolean isMultiPolygon = wkt.toUpperCase().indexOf("MULTIPOLYGON") > -1;
+            
+            // MULTIPOLYGON already includes the extra brackets, don't add them again
+            geometries += "\"rings\": ";
+            if (!isMultiPolygon) {
+              geometries += "[ ";
+            }
+            geometries += coordinates;
+            if (!isMultiPolygon) {
+              geometries += " ]";
+            }
+            geometries +=  "}]}";
             
             break;
             
@@ -933,15 +946,24 @@ public class GeometryServiceClient {
           {
         	  boolean hasZ = false;
               String coordinates = geometry.getAsString("coordinates");
-              //Check if it has z value
+              
+              // Check if it has z value
               JSONArray coordArr =(JSONArray) geometry.get("coordinates");
-              if(coordArr.size()>0)
-              {
-            	 JSONArray pointCoord=  (JSONArray)coordArr.get(0);
-            	 if(pointCoord!= null && pointCoord.size()>2)
-            	 {
-            		 hasZ = true;
-            	 }
+              
+              if(coordArr.size()>0) {
+
+                // get first ring in possibly multipart polygon
+                JSONArray firstRing = (JSONArray)coordArr.get(0);
+                
+                if (firstRing != null && firstRing.size() > 0) {
+
+                  // get first point in this first ring
+                  JSONArray pointCoord = (JSONArray)firstRing.get(0);
+                  
+                  if(pointCoord!= null && pointCoord.size()>2) {
+                    hasZ = true;
+                  }
+                }
               }
         	  geometries = "{\"geometryType\": \"" + this.getArcGISGeometryType(geometryType) + "\", "
         	          + "\"geometries\": [ "
