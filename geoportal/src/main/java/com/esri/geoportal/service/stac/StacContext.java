@@ -254,7 +254,6 @@ public class StacContext {
     	ruleType = ruleType.trim();
     String key;
     String itemId = item.getAsString("id");
-    Map<String, String> fieldMappings = this.fieldMappings;
     
     
     switch (ruleType) {    
@@ -271,8 +270,9 @@ public class StacContext {
           
           // issue 31 - look for mapped field names and search on those instead
           String mappedField;
-          if (fieldMappings.containsKey(ukField.replace("properties.", ""))) {
-            mappedField = fieldMappings.get(ukField.replace("properties.", ""));
+          String property = ukField.replace("properties.", "");
+          if (this.fieldMappings.containsKey(property)) {
+            mappedField = this.fieldMappings.get(property);
           } else {
             mappedField = ukField;
           }
@@ -381,59 +381,61 @@ public class StacContext {
           }
         }
 
-        message = passes ? "Geometry source validation: OK!" : message;          
-        
+        message = passes ? "Geometry source validation: OK!" : message;
         break;
+        
       case "match_expression":
     	  passes = false;
     	  String field ="";
-		  String matchExpressionRule = ruleElements[1];
-		  matchExpressionRule = matchExpressionRule.trim();
-		  String[] matchFldVal = matchExpressionRule.split(",");
-		  if(matchFldVal.length == 2)
-		  {
-			  field = matchFldVal[0];
-			  String regEx = matchFldVal[1];			  
-			  if(!regEx.isBlank() && !field.isBlank() && item.getAsString(field)!=null)
-			  {
-				  Pattern pattern = Pattern.compile(regEx);				  
-				  Matcher matcher = pattern.matcher(item.getAsString(field));
-				  if(matcher.matches())
-				  {
-					  passes = true;					  
-				  }
-			  }
-		  }
-		  message = passes ? "Match expression ok for "+field : "Match expression failed for "+field;
+        String matchExpressionRule = ruleElements[1];
+        matchExpressionRule = matchExpressionRule.trim();
+        String[] matchFldVal = matchExpressionRule.split(",");
+        if(matchFldVal.length == 2)
+        {
+          field = matchFldVal[0];
+          String regEx = matchFldVal[1];			  
+          if(!regEx.isBlank() && !field.isBlank() && item.getAsString(field)!=null)
+          {
+            Pattern pattern = Pattern.compile(regEx);				  
+            Matcher matcher = pattern.matcher(item.getAsString(field));
+            if(matcher.matches())
+            {
+              passes = true;					  
+            }
+          }
+        }
+        message = passes ? "Match expression ok for "+field : "Match expression failed for "+field;
 	      break;
+        
       case "mandatory_fields":
     	  passes = false;    	 
-		  String fieldString = ruleElements[1];
-		  fieldString = fieldString.trim();
-		  String[] fields = fieldString.split(",");
-		  String fldName ="";		  
-		  String failedFldVal="";
-		  DocumentContext itemCtx = JsonPath.parse(item);
-		  for(int i=0;i<fields.length;i++)
-		  {
-			  fldName = fields[i].trim();
-			  try {
-				  itemCtx.read("$."+fldName);
-			  }
-			 catch(PathNotFoundException ex) {
-				 if(failedFldVal.length() > 1)					 
-					 failedFldVal = failedFldVal+", "+fldName;
-				 else
-					 failedFldVal = fldName;
-			 }			  
-		  }
-		  if(failedFldVal.length() <1)
-		  {
-			  passes = true; 
-		  }	 
-		 
-		  message = passes ? "Mandatory field validation ok for "+fields : "Mandatory field validation failed for "+failedFldVal;
+        String fieldString = ruleElements[1];
+        fieldString = fieldString.trim();
+        String[] fields = fieldString.split(",");
+        String fldName ="";		  
+        String failedFldVal="";
+        DocumentContext itemCtx = JsonPath.parse(item);
+        for(int i=0;i<fields.length;i++)
+        {
+          fldName = fields[i].trim();
+          try {
+            itemCtx.read("$."+fldName);
+          }
+         catch(PathNotFoundException ex) {
+           if(failedFldVal.length() > 1)					 
+             failedFldVal = failedFldVal+", "+fldName;
+           else
+             failedFldVal = fldName;
+         }			  
+        }
+        if(failedFldVal.length() <1)
+        {
+          passes = true; 
+        }	 
+
+        message = passes ? "Mandatory field validation ok for "+fields : "Mandatory field validation failed for "+failedFldVal;
 	      break;
+
       default:
         LOGGER.debug("Unsupported validation rule: " + validationRule);
         passes = false;
