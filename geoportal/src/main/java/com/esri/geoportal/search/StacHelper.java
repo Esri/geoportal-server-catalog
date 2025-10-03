@@ -234,10 +234,23 @@ public class StacHelper {
 
 		}
 		if (queryMap.containsKey("datetime")) {
-			String dateTimeQry = prepareDateTime(queryMap.get("datetime"));
+			String dateTimeQry = prepareDateTimeFld(FieldNames.FIELD_SYS_MODIFIED,queryMap.get("datetime"));
 			if (dateTimeQry.length() > 0)
 				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
 		}
+		
+		if (queryMap.containsKey("updated")) {
+			String dateTimeQry = prepareDateTimeFld(FieldNames.FIELD_SYS_MODIFIED,queryMap.get("updated"));
+			if (dateTimeQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
+		}
+		
+		if (queryMap.containsKey("created")) {
+			String dateTimeQry = prepareDateTimeFld(FieldNames.FIELD_SYS_CREATED,queryMap.get("created"));
+			if (dateTimeQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
+		}
+		
 		if (queryMap.containsKey("ids")) {
 			String idsQry = prepareIds(queryMap.get("ids"));
 			System.out.println("ids " + idsQry);
@@ -324,9 +337,8 @@ public class StacHelper {
 	}
 
 
-	private static String prepareDateTime(String datetime) {
-		String query = "";
-		String dateTimeFld = FieldNames.FIELD_SYS_MODIFIED;
+	private static String prepareDateTimeFld(String datetimeFldName, String dateTimeFldVal) {
+		String query = "";		
 		
 		String dateTimeFldQuery = "";
 		// Find from and to dates
@@ -338,9 +350,9 @@ public class StacHelper {
 		// A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
 		// Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
 
-		String fromField = datetime;
+		String fromField = dateTimeFldVal;
 		String toField = "";
-		List<String> dateFlds = Arrays.asList(datetime.split("/"));
+		List<String> dateFlds = Arrays.asList(dateTimeFldVal.split("/"));
 
 		if (dateFlds.size() > 1) {
 			fromField = dateFlds.get(0);
@@ -354,10 +366,12 @@ public class StacHelper {
 			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\",\"lte\":\"" + toField + "\"}";
 		}
 
-		query = "{\"range\": {\"" + dateTimeFld + "\":" + dateTimeFldQuery + "}}";
+		query = "{\"range\": {\"" + datetimeFldName + "\":" + dateTimeFldQuery + "}}";
 
 		return query;
 	}
+	
+	
 
 	private static String prepareBbox(String bboxString) {
 		String field = "envelope_geo";

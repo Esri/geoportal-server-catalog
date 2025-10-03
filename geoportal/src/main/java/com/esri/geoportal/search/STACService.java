@@ -752,7 +752,7 @@ public class STACService extends Application {
 	@Path("/search")
 	public Response search(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
-			@QueryParam("datetime") String datetime, @QueryParam("ids") String idList,
+			@QueryParam("datetime") String datetime, @QueryParam("updated") String updated, @QueryParam("created") String created, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
 			@QueryParam("outCRS") String outCRS, @QueryParam("status") String itemStatus,@QueryParam("filter") String filter)
 			throws UnsupportedEncodingException {
@@ -772,6 +772,14 @@ public class STACService extends Application {
 				queryMap.put("bbox", bbox);
 			if (datetime != null && datetime.length() > 0)
 				queryMap.put("datetime", datetime);
+			
+			https://github.com/EsriPS/exxonmobil-gsdb/issues/30
+			if (updated != null && updated.length() > 0)
+				queryMap.put("updated", updated);
+			
+			if (created != null && created.length() > 0)
+				queryMap.put("created", created);
+			
 			//GeoportalContext gc = GeoportalContext.getInstance();
 			if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
 				listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
@@ -869,6 +877,8 @@ public class STACService extends Application {
 
 		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit") : 0);
 		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime") : null);
+		String updated = (requestPayload.containsKey("updated") ? requestPayload.getString("updated") : null);
+		String created = (requestPayload.containsKey("created") ? requestPayload.getString("created") : null);
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox") : null);
 		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
 		String outCRS = (requestPayload.containsKey("outCRS") ? requestPayload.getString("outCRS") : null);
@@ -907,6 +917,14 @@ public class STACService extends Application {
 
 			if (datetime != null && datetime.length() > 0) {
 				queryMap.put("datetime", datetime);
+			}
+			https://github.com/EsriPS/exxonmobil-gsdb/issues/30
+			if (updated != null && updated.length() > 0) {
+				queryMap.put("updated", updated);
+			}
+			
+			if (created != null && created.length() > 0) {
+				queryMap.put("created", created);
 			}
 
 			if (idArr != null && !idArr.isEmpty()) {
