@@ -269,11 +269,12 @@ public class ElasticClient {
 
     } finally {
       try {if (wr != null) wr.close();} catch(Exception ef) {
-    	  LOGGER.error(ef.getMessage());
+    	  LOGGER.error("ElasticClient.send -> " +ef.getMessage());
     	  }
       try {if (br != null) br.close();} catch(Exception ef) {LOGGER.error(ef.getMessage());}
     }
     //System.err.println("result:\r\n"+result);
+    LOGGER.debug("ElasticClient.send -> " + result);
     return result;
   }  
  
