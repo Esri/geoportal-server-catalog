@@ -573,7 +573,7 @@ public class GeometryServiceClient {
               geometries += "\"hasZ\": true, ";
             }
             
-            boolean isMultiPolygon = wkt.toUpperCase().indexOf("MULTIPOLYGON") > -1;
+            boolean isMultiPolygon = wkt.toUpperCase().contains("MULTIPOLYGON");
             
             // MULTIPOLYGON already includes the extra brackets, don't add them again
             geometries += "\"rings\": ";

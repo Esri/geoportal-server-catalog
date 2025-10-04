@@ -815,6 +815,7 @@ public class STACService extends Application {
 				response = client.sendPost(url, query, "application/json");
 			} else {
 				response = client.sendGet(url);
+        LOGGER.info("search response = " + response);
 			}
 			if(response.contains("error"))
 			{
