@@ -188,6 +188,9 @@ public class ElasticClient {
     String charset = "UTF-8";
     URLConnection con = null;
     URL u = new java.net.URL(url);
+    
+    LOGGER.debug("ElasticClient.send url -> " + url);
+    LOGGER.debug("ElasticClient.send data -> " + data);
     try {      
       if(useHttps) {
           HttpsURLConnection.setFollowRedirects(true);
