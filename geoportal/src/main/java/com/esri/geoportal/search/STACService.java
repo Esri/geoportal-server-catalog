@@ -1503,29 +1503,27 @@ public class STACService extends Application {
                 resObj.put("code", "201");
                 resObj.put("message", "Stac item added successfully");
                 resObj.put("id", id);
-                responseJSON = resObj.toString();
-                
+                responseJSON = resObj.toString();                
                 String itemUrlGeoportal = "";
 
-                //if sync request for Feature, create Stac feature for response 
-                if(reqType.equals("Feature") && !async) {
-                  String filePath = "service/config/stac-item.json";
-                  String itemFileString = this.readResourceFile(filePath, hsr);
-
+                //if sync request for Feature or FeatureCollection, create Stac feature for response 
+                if(!async) { 
+                	
                   //Before searching newly added item, sleep for 1 second, otherwise record is not found, 
-                  //AWS opensearch serverless is not returning item in 1 sec so skipping returning full item 
-                  if(!ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
+                  //AWS opensearch serverless is not returning item in 1 sec so will return request item.json as response
+                  if(reqType.equalsIgnoreCase("Feature") && !ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
                   {
+                	itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+                	String filePath = "service/config/stac-item.json";
+                    String itemFileString = this.readResourceFile(filePath, hsr);
                   	TimeUnit.SECONDS.sleep(1);
                   	String itemRes = StacHelper.getItemWithItemId(collectionId, id);
-                      responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
-                      itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+                    responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);                    
                   }
                   //In case of AWS opensearch serverless, just return the request JSON (It will not have item links)
                   else
                   {
-                	  responseJSON = itemJsonString;
-                	  itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+                	  responseJSON = itemJsonString;                	  
                   }
                 }
                 return Response.status(status)
@@ -1630,6 +1628,7 @@ public class STACService extends Application {
 				 JSONArray errorMsgArr = new JSONArray();
 				 JSONObject errorMsgObj;
 				 JSONObject createdMsgObj;
+				 
 				 JSONObject errorObj;
 				 JSONObject statusObj = new JSONObject();
 				 
@@ -1641,7 +1640,9 @@ public class STACService extends Application {
 					 if(res.getStatus() == Response.Status.CREATED.getStatusCode())
 					 {
 						 createdMsgObj = new JSONObject();
-						 createdMsgObj.put("id", feature.getAsString("id"));					 
+						 createdMsgObj.put("id", feature.getAsString("id"));
+						 JSONObject createdFeatureObj = (JSONObject)JSONValue.parse(res.getEntity().toString());
+						 createdMsgObj.put("feature", createdFeatureObj);
 						 
 						 createdMsgObj.put("status", "created");
 						 createdMsgArr.add(createdMsgObj);
