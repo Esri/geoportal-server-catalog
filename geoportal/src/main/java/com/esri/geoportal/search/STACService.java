@@ -1060,7 +1060,7 @@ public class STACService extends Application {
         if(type.equalsIgnoreCase("Feature")) {
                 return addFeature(requestPayload,collectionId,hsr,async);
         } else if(type.equalsIgnoreCase("FeatureCollection")) {
-                return addFeatureCollection(requestPayload,collectionId, async);
+                return addFeatureCollection(requestPayload,collectionId, async,hsr);
         } else {
                 status = Response.Status.BAD_REQUEST;
                 responseJSON = this.generateResponse("400","type should be Feature or FeatureCollection.",null);			
@@ -1508,12 +1508,12 @@ public class STACService extends Application {
 
                 //if sync request for Feature or FeatureCollection, create Stac feature for response 
                 if(!async) { 
-                	
+                	if(hsr!=null)
+                		itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
                   //Before searching newly added item, sleep for 1 second, otherwise record is not found, 
                   //AWS opensearch serverless is not returning item in 1 sec so will return request item.json as response
-                  if(reqType.equalsIgnoreCase("Feature") && !ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
-                  {
-                	itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+                  if(!ec.getAwsOpenSearchType().equalsIgnoreCase("serverless"))
+                  {                	
                 	String filePath = "service/config/stac-item.json";
                     String itemFileString = this.readResourceFile(filePath, hsr);
                   	TimeUnit.SECONDS.sleep(1);
@@ -1582,11 +1582,11 @@ public class STACService extends Application {
                     .entity(responseJSON).build();
 	}
 	
-	private Response addFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {		
+	private Response addFeatureCollection(JSONObject requestPayload, String collectionId,boolean async,HttpServletRequest hsr) {		
 		if(async)
 		{
 			 new Thread(() -> {
-			        this.exeFeatureCollection(requestPayload, collectionId,async);
+			        this.exeFeatureCollection(requestPayload, collectionId,async,hsr);
 			      }).start();
 			      String responseJSON = generateResponse("202", "FeatureCollection creation has been started.",null);
 			      return Response.status(Status.ACCEPTED)
@@ -1595,12 +1595,12 @@ public class STACService extends Application {
 		}
 		else
 		{
-			return exeFeatureCollection(requestPayload, collectionId,async);
+			return exeFeatureCollection(requestPayload, collectionId,async,hsr);
 		}
 	}
   
   
-	private Response exeFeatureCollection(JSONObject requestPayload, String collectionId,boolean async) {
+	private Response exeFeatureCollection(JSONObject requestPayload, String collectionId,boolean async,HttpServletRequest hsr) {
 		
 		// Add invalid features in error response	
 		String responseJSON = generateResponse("201","FeatureCollection created successfully.",null);
@@ -1635,7 +1635,7 @@ public class STACService extends Application {
 				 for(int i =0;i<features.size() ;i++)
 				 {
 					 JSONObject feature = (JSONObject) features.get(i);
-					 Response res = executeAddFeature(feature, collectionId, null, false,"FeatureCollection");
+					 Response res = executeAddFeature(feature, collectionId, hsr, false,"FeatureCollection");
 					 
 					 if(res.getStatus() == Response.Status.CREATED.getStatusCode())
 					 {
