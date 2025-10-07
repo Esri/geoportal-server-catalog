@@ -1520,7 +1520,13 @@ public class STACService extends Application {
                   	String itemRes = StacHelper.getItemWithItemId(collectionId, id);
                       responseJSON = prepareResponseSingleItem(itemRes, itemFileString, collectionId);
                       itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
-                  }             
+                  }
+                  //In case of AWS opensearch serverless, just return the request JSON (It will not have item links)
+                  else
+                  {
+                	  responseJSON = itemJsonString;
+                	  itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
+                  }
                 }
                 return Response.status(status)
                                .header("Content-Type", "application/json")
