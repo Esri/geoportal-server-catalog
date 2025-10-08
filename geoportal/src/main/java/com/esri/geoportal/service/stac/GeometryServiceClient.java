@@ -910,29 +910,31 @@ public class GeometryServiceClient {
         
       case "bbox":
         JSONArray bbox = (JSONArray) item.get(geometryField);
-        
-        LOGGER.debug("geometry = " + bbox.toString()); 
+        if(bbox!=null)
+        {
+        	 LOGGER.debug("geometry = " + bbox.toString()); 
 
-        geometries = "{\"geometryType\": \"esriGeometryEnvelope\", \"geometries\": [{";
-        
-        if (bbox.size() == 4) {
-          geometries = geometries + "\"xmin\": " + bbox.get(0) + ", "
-                                  + "\"ymin\": " + bbox.get(1) + ", "
-                                  + "\"xmax\": " + bbox.get(2) + ", "
-                                  + "\"ymax\": " + bbox.get(3) + "}]}";
-          
-        } else if (bbox.size() == 6) {
-          geometries = geometries + "\"xmin\": " + bbox.get(0) + ", "
-                                  + "\"ymin\": " + bbox.get(1) + ", "
-                                  + "\"zmin\": " + bbox.get(3) + ", "
-                                  + "\"xmax\": " + bbox.get(3) + ", "
-                                  + "\"ymax\": " + bbox.get(4) + ", "
-                                  + "\"zmax\": " + bbox.get(5) + "}]}";
-          
-        } else {
-          LOGGER.error("BBOX is of wrong dimensions: " + bbox.size());
-          geometries = null;
-        }
+             geometries = "{\"geometryType\": \"esriGeometryEnvelope\", \"geometries\": [{";
+             
+             if (bbox.size() == 4) {
+               geometries = geometries + "\"xmin\": " + bbox.get(0) + ", "
+                                       + "\"ymin\": " + bbox.get(1) + ", "
+                                       + "\"xmax\": " + bbox.get(2) + ", "
+                                       + "\"ymax\": " + bbox.get(3) + "}]}";
+               
+             } else if (bbox.size() == 6) {
+               geometries = geometries + "\"xmin\": " + bbox.get(0) + ", "
+                                       + "\"ymin\": " + bbox.get(1) + ", "
+                                       + "\"zmin\": " + bbox.get(3) + ", "
+                                       + "\"xmax\": " + bbox.get(3) + ", "
+                                       + "\"ymax\": " + bbox.get(4) + ", "
+                                       + "\"zmax\": " + bbox.get(5) + "}]}";
+               
+             } else {
+               LOGGER.error("BBOX is of wrong dimensions: " + bbox.size());
+               geometries = null;
+             }
+        }       
         break;
 
       case "geometry":
