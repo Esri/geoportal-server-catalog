@@ -214,7 +214,7 @@ public class STACService extends Application {
           LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
           // get the features from the response
-          JSONParser jsonParser = new JSONParser();
+          JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
           JSONArray responseObject = (JSONArray) jsonParser.parse(collectionsArray.toString());
 
           // each feature is a STAC item that needs projecting
@@ -509,7 +509,7 @@ public class STACService extends Application {
         if ((availableCRS !=null && availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
 
           // get the features from the response
-          JSONParser jsonParser = new JSONParser();
+          JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
           JSONObject responseObject = (JSONObject) jsonParser.parse(responseJSON);
           JSONArray features = (JSONArray) responseObject.get("features");
 
@@ -773,7 +773,7 @@ public class STACService extends Application {
 			if (datetime != null && datetime.length() > 0)
 				queryMap.put("datetime", datetime);
 			
-			https://github.com/EsriPS/exxonmobil-gsdb/issues/30
+			//https://github.com/EsriPS/exxonmobil-gsdb/issues/30
 			if (updated != null && updated.length() > 0)
 				queryMap.put("updated", updated);
 			
@@ -918,7 +918,7 @@ public class STACService extends Application {
 			if (datetime != null && datetime.length() > 0) {
 				queryMap.put("datetime", datetime);
 			}
-			https://github.com/EsriPS/exxonmobil-gsdb/issues/30
+			//https://github.com/EsriPS/exxonmobil-gsdb/issues/30
 			if (updated != null && updated.length() > 0) {
 				queryMap.put("updated", updated);
 			}
@@ -1364,13 +1364,9 @@ public class STACService extends Application {
 					// if sync request for Feature, create STAC feature for response
 					if (!async) {
 						itemUrlGeoportal = this.getBaseUrl(hsr) + "/collections/" + collectionId + "/items/" + id;
-						// Send final request item as response. Re-project request item to inCRS if
-						// inCRS is not 4326
 						
-						if (!incomingCRS.isBlank() && !incomingCRS.equalsIgnoreCase(INTERNAL_CRS))
-							responseJSON = projectItemRes(itemJsonString, incomingCRS, collectionId);
-						else
-							responseJSON = itemJsonString;
+						//Send final request item as response; re-project if inCRS is not 4326, remove geoportal internal fields
+	                	responseJSON = prepareResForAddUpdateItem(incomingCRS,itemJsonString,collectionId);       
 
 					}
 					return Response.status(status).header("Content-Type", "application/json")
@@ -1513,13 +1509,9 @@ public class STACService extends Application {
                 if(!async) { 
                 	if(hsr!=null)
                 		itemUrlGeoportal = this.getBaseUrl(hsr)+"/collections/"+collectionId+"/items/"+id;
-                 
-                	  //Send final request item as response. Re-project request item to inCRS if inCRS is not 4326
-                	  if(!incomingCRS.isBlank() && !incomingCRS.equalsIgnoreCase(INTERNAL_CRS))
-                		  responseJSON = projectItemRes(itemJsonString,incomingCRS,collectionId); 
-                	  else
-                		  responseJSON = itemJsonString;
-                  
+                	
+                	//Send final request item as response; re-project if inCRS is not 4326, remove geoportal internal fields
+                	responseJSON = prepareResForAddUpdateItem(incomingCRS,itemJsonString,collectionId);                  
                 }
                 return Response.status(status)
                                .header("Content-Type", "application/json")
@@ -1577,6 +1569,37 @@ public class STACService extends Application {
                     .entity(responseJSON).build();
 	}
 	
+	private String prepareResForAddUpdateItem(String incomingCRS, String itemJsonString, String collectionId) throws ParseException {
+		
+		JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+		JSONObject itemObject = (JSONObject) jsonParser.parse(itemJsonString);
+		
+		String [] geoportalInternalFlds = {FieldNames.FIELD_ENVELOPE_GEO,FieldNames.FIELD_SHAPE_GEO,FieldNames.FIELD_SYS_ACCESS,
+				FieldNames.FIELD_SYS_ACCESS_GROUPS,FieldNames.FIELD_SYS_APPROVAL_STATUS,FieldNames.FIELD_SYS_COLLECTIONS,
+				FieldNames.FIELD_SYS_CREATED,FieldNames.FIELD_SYS_MODIFIED,FieldNames.FIELD_TITLE,
+				FieldNames.FIELD_SYS_OWNER,FieldNames.FIELD_SYS_OWNER_TXT};
+		//Remove geoportal internal fields
+		for (String geoportalFld: geoportalInternalFlds) { 
+			if(itemObject.containsKey(geoportalFld)) {
+				itemObject.remove(geoportalFld);
+			}
+		}
+		//Remove fieldMappings added to enable geoportal search on these fields
+		for (Map.Entry<String, String> entry : sc.getFieldMappings().entrySet()) {
+			String stacField = entry.getValue();
+			if (itemObject.containsKey(stacField)) {
+				itemObject.remove(stacField);
+			}
+		}
+	  String responseJSON = itemObject.toString();	  
+	  
+	  // Re-project request item to inCRS if inCRS is not 4326
+  	  if(!incomingCRS.isBlank() && !incomingCRS.equalsIgnoreCase(INTERNAL_CRS))
+  		  responseJSON = projectItemRes(itemObject.toString(),incomingCRS,collectionId);   	 
+  	  
+  	  return responseJSON;
+	}
+
 	private String getIncomingCRS(JSONObject item) {
 		String localCRS = "";
 		String inCRSField = sc.getGeomCRSField();
@@ -2320,7 +2343,7 @@ public class STACService extends Application {
     Boolean requestedCRSisEPSG = outCRS.toUpperCase().startsWith("EPSG:") || outCRS.matches("-?\\d+(\\.\\d+)?");
     
     // use the STAC item JSON string as JSON object
-    JSONParser jsonParser = new JSONParser();
+    JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
     JSONObject responseObject = (JSONObject) jsonParser.parse(responseJSON);
     
     // Loop over all geometry fields
@@ -2564,7 +2587,7 @@ public class STACService extends Application {
                                                  String inCRS, 
                                                  String outCRS) throws ParseException {
 
-    JSONParser jsonParser = new JSONParser();
+    JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
     JSONObject theCollection = (JSONObject) jsonParser.parse(theCollectionJSON);
     
     Collection collectionObj = new Collection(theCollection);
@@ -2663,7 +2686,7 @@ public class STACService extends Application {
 	          String outCRS )throws ParseException{	    
 	    
 	    // get the features from the response
-	    JSONParser jsonParser = new JSONParser();
+	    JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
 	    JSONObject responseObject = (JSONObject) jsonParser.parse(responseJSON);
 	    JSONArray features = (JSONArray) responseObject.get("features");
 
