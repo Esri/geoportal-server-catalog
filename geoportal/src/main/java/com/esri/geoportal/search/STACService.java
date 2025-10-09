@@ -773,7 +773,7 @@ public class STACService extends Application {
 			if (datetime != null && datetime.length() > 0)
 				queryMap.put("datetime", datetime);
 			
-			//https://github.com/EsriPS/exxonmobil-gsdb/issues/30
+			// allow search on both created and updated fields
 			if (updated != null && updated.length() > 0)
 				queryMap.put("updated", updated);
 			
@@ -918,7 +918,7 @@ public class STACService extends Application {
 			if (datetime != null && datetime.length() > 0) {
 				queryMap.put("datetime", datetime);
 			}
-			//https://github.com/EsriPS/exxonmobil-gsdb/issues/30
+			
 			if (updated != null && updated.length() > 0) {
 				queryMap.put("updated", updated);
 			}
@@ -1228,7 +1228,7 @@ public class STACService extends Application {
 	      else {
 	    	  String existingItemJSON = existingItem.toString();
 	    	  
-	    	// Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7, Auto generate bbox if not available in request
+	    	  // Auto generate bbox if not available in request
 	          if (requestPayload.containsKey("geometry") && requestPayload.get("geometry")!=null &&
 	        		  !requestPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
 	        	  requestPayload.put("bbox",StacHelper.generateBbox(requestPayload));
@@ -1327,7 +1327,7 @@ public class STACService extends Application {
     
 		try {
 			
-			// issue https://github.com/EsriPS/exxonmobil-gsdb/issues/28, Always replace the id from path param as that is accurate one
+			// Always replace the id from path param as that is accurate one
 			requestPayload.put("id", featureId);		
 			requestPayload.put("collection", collectionId);		
 			
@@ -1336,7 +1336,7 @@ public class STACService extends Application {
 	      // 574
 			JSONObject projectedPayload = projectIncomingItem(requestPayload,collectionId);
 			
-		 // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+		 // Auto generate bbox if not available in request
 	      if (projectedPayload.containsKey("geometry") && projectedPayload.get("geometry")!=null &&
 	    		  !projectedPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {
 	    	  projectedPayload.put("bbox",StacHelper.generateBbox(projectedPayload));
@@ -1477,7 +1477,7 @@ public class STACService extends Application {
                  LOGGER.error("Error parsing incoming item: " + e.getMessage());
                }
             
-         // Issue https://github.com/EsriPS/exxonmobil-gsdb/issues/7 , Auto generate bbox if not available in request
+            // Auto generate bbox if not available in request
             if (projectedPayload.containsKey("geometry") && projectedPayload.get("geometry")!=null &&
           		  !projectedPayload.containsKey("bbox") && sc.isCanStacAutogenerateBbox()) {   	 
           	  projectedPayload.put("bbox",StacHelper.generateBbox(projectedPayload));
@@ -1692,7 +1692,7 @@ public class STACService extends Application {
 						 String desc = (String) errorObj.get("message");
 						 errorMsgObj.put("message",desc);
 						 
-						//Exxon specific, in case of unique key error, add additional info
+						 // in case of unique key error, add additional info
 						 String existingIDForUniqueKey = (String) errorObj.get("existing_item_id");						
 						 JSONObject prop = (JSONObject) feature.get("properties");
 						 if(prop!=null && existingIDForUniqueKey!=null && existingIDForUniqueKey.length() >0)
