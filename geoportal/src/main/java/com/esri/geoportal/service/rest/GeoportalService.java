@@ -15,6 +15,7 @@
 package com.esri.geoportal.service.rest;
 import com.esri.geoportal.base.security.ArcGISAuthenticationProvider;
 import com.esri.geoportal.base.security.Group;
+import com.esri.geoportal.base.security.KeycloakConfig;
 import com.esri.geoportal.context.AppRequest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
@@ -109,7 +110,17 @@ public class GeoportalService {
           jso.add("createAccountUrl",ap.getCreateAccountUrl());
         }
       }
-      
+
+      KeycloakConfig config = gc.getBeanIfDeclared("keycloakConfig", 
+          KeycloakConfig.class, null);
+      if (config != null && config.getKeycloakAuthUrl() != null && !config.getKeycloakAuthUrl().isEmpty()) {
+        jso.add("keycloakAuth", Json.createObjectBuilder()
+          .add("url", config.getKeycloakAuthUrl())
+          .add("client_id", config.getClientId())
+          .add("redirect_uri", config.getRedirectUrl())
+        );
+      }
+
       response.writeOkJson(request,jso);
       return response.build();      
     } catch (Throwable t) {
