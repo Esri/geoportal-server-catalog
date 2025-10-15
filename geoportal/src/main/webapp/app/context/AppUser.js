@@ -87,41 +87,88 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         
     _showAgsOAuthSignIn: function(oauth) {
       var self = this, portalUrl = oauth.portalUrl+"/sharing";
+	   var dfd = new Deferred(), client = new AppClient();
       //arcgisUtils.arcgisUrl = portalUrl;  // PortalImplementation
       esriId.getCredential(portalUrl,{oAuthPopupConfirmation:false})
-      .then(function(Credential){
-        var portal = new Portal({
-            authMode: "immediate"
-        });      
-        portal.url = oauth.portalUrl;
-        
-        portal.load().then(() => {        	
-        	 self.arcgisPortalUser = portal.user;
-             var u = portal.user.username;
-             var p = "__rtkn__:"+portal.credential.token;
-             self.signIn(u,p).then(function(){
-             }).catch(function(error){
-               // TODO handle 
-               console.warn("Error occurred while signing in:",error);
-             });
+      .then((Credential) => {
+          var portal = new Portal({
+              authMode: "immediate"
           });
-        })
+          portal.url = oauth.portalUrl;
+          portal.load().then(() => {
+              self.arcgisPortalUser = portal.user;
+              //var u = portal.user.username;
+              var arcgisToken =  portal.credential.token;
+              self.getJWTToken(arcgisToken).then(function(jwtToken) {
+                  if (jwtToken && jwtToken.access_token) {
+						var oauthToken = jwtToken;
+                      // Validate token by pinging Geoportal
+                      client.pingGeoportal(oauthToken.access_token).then(function(info) {
+                          if (info && info.user) {
+                              self.appToken = oauthToken;
+                              self.geoportalUser = info.user;
+
+                              var cValue = {
+                                  token: oauthToken,
+                                  user: info.user
+                              };
+                              self.preserveTokenInfo(cValue, new Date(Date.now() + oauthToken.expires_in * 1000));
+
+                              AppContext.geoportal = info;
+                              topic.publish(appTopics.SignedIn, { geoportalUser: info.user });
+                              dfd.resolve();
+                          } else {
+                              dfd.reject(i18n.general.error);
+                          }
+                      }).catch(function(error) {
+                          console.warn(error);
+                          dfd.reject(i18n.general.error);
+                      });
+                  } else {
+                      dfd.reject(i18n.login.invalidCredentials);
+                  }
+              }).catch(function(error) {
+                  // TODO handle 
+                  console.warn("Error occurred while signing in ArcGIS:", error);
+              });
+          });
+      })
         .catch(function(error) {          
         	console.warn("Error occurred while signing in:",error);
         });     
     },
     
+	getJWTToken:function(arcGisToken) {
+        var dfd = new Deferred(), client = new AppClient();
+        client.generateArcGISJwtToken(arcGisToken).then(function(oauthToken){
+          if (oauthToken && oauthToken.access_token) {			
+              dfd.resolve(oauthToken);			  
+          } else {
+            dfd.reject(i18n.login.invalidCredentials);
+          }
+        }).catch(function(error){
+          var msg = i18n.general.error;
+          if (error) {
+            if (error.status === 400) msg = i18n.login.invalidCredentials;
+            else console.warn(error);
+          }
+          dfd.reject(msg);
+        });
+        return dfd;
+    },
+	
+	
     showSignIn: function() {
       var ctx = window.AppContext;
-      /*if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
+      if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
         this._showAgsOAuthSignIn(ctx.geoportal.arcgisOAuth);
-      } else {*/
+      } else {
         // (new SignIn()).show();
 		//TODO above remove old sign in method
 		
         // Open OAuth popup
         this.openOAuthPopup();
-     // }
+     }
     },
 
     openOAuthPopup: function() {
@@ -129,7 +176,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       var currentUrl = window.location.origin + window.location.pathname;
       
       const redirectUri = currentUrl.replace(/\/[^\/]*$/, '/callback.html');
-      const clientId = 'geoportal-client';    
+      const clientId = 'geoportal-simple-client';    
       const authServer = currentUrl.replace(/\/[^\/]*$/, '/oauth2'); // Spring Auth Server base
       const authorizeEndpoint = `${authServer}/authorize`;
 	  
@@ -202,7 +249,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       if (code && window.opener) {
         
         // Exchange authorization code for tokens
-        const clientId = 'geoportal-client';
+        const clientId = 'geoportal-simple-client';
         const redirectUri = 'http://localhost:8080/geoportal/callback.html'; // Updated to match registered URI
         const tokenEndpoint = 'http://localhost:8080/geoportal/oauth2/token';
         // Retrieve codeVerifier from localStorage
@@ -228,8 +275,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         
       }
       console.log("handleOAuthCallback finished");
-    },
-	
+    },	
 	
     
     checkStoredToken: function() {
@@ -242,7 +288,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     },
 
 	//TODO remove Old sign in method
-    signIn: function(u,p,k) {
+    /*signIn: function(u,p,k) {
       var self = this, dfd = new Deferred(), client = new AppClient();
       client.generateJwtToken(u,p).then(function(oauthToken){
         if (oauthToken && oauthToken.access_token) {
@@ -280,7 +326,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         dfd.reject(msg);
       });
       return dfd;
-    },
+    },*/
     
     signOut: function() {
       this.deleteTokenInfo();
