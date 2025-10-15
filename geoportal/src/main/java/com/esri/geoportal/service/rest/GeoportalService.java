@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 package com.esri.geoportal.service.rest;
-import com.esri.geoportal.base.security.ArcGISAuthenticationProvider;
+
+import com.esri.geoportal.base.security.ArcgisAuthService;
 import com.esri.geoportal.base.security.Group;
 import com.esri.geoportal.context.AppRequest;
 import com.esri.geoportal.context.AppResponse;
@@ -42,7 +43,7 @@ public class GeoportalService {
   @GET
   public Response getSelf(
       @Context SecurityContext sc,
-      @Context HttpServletRequest hsr,
+      @Context HttpServletRequest hsr,@QueryParam("access_token") String jwtToken,
       @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(hsr,sc);
     return self(user,pretty);
@@ -95,8 +96,8 @@ public class GeoportalService {
         jso.add("user",jsoUser);
       }
       
-      ArcGISAuthenticationProvider ap = gc.getBeanIfDeclared("arcgisAuthenticationProvider",
-          ArcGISAuthenticationProvider.class,null);
+      ArcgisAuthService ap = gc.getBeanIfDeclared("arcgisAuthService",
+    		  ArcgisAuthService.class,null);
       if (ap != null) {
         jso.add("arcgisOAuth",Json.createObjectBuilder()
           .add("appId",ap.getAppId())

@@ -21,15 +21,21 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
+import org.springframework.security.oauth2.jwt.JwtEncoder;
+import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.authorization.client.InMemoryRegisteredClientRepository;
 import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.util.matcher.MediaTypeRequestMatcher;
 
+import com.esri.geoportal.security.JwtAuthenticationFilter;
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
@@ -61,13 +67,14 @@ public class SecurityConfig {
 
 	@Bean
 	@Order(2)
-	public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+	public SecurityFilterChain securityFilterChain(HttpSecurity http, JwtAuthenticationFilter jwtAuthenticationFilter) throws Exception {
 		http
 			.csrf(csrf -> csrf.disable()) // Disable CSRF protection
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Allow framing from same origin
 			.authorizeHttpRequests(authorize -> authorize
 				// Only permit static resources and public endpoints
-				.requestMatchers("/index.html", "/standalone-metadata-editor.html", "/geoportal", "/oauth-callback.html", "/login", "/oauth2/**").permitAll()
+				.requestMatchers("/index.html", "/standalone-metadata-editor.html", "/geoportal", "/oauth-callback.html", 
+						"/login", "/oauth2/**","/auth/arcgis").permitAll()
 
 				.requestMatchers("/lib/**","/app/**","/api/**","/custom/**","/images/**","/rest/**").permitAll()
 				.requestMatchers("/elastic/metadata/_count/**").permitAll()
@@ -85,7 +92,13 @@ public class SecurityConfig {
 				new LoginUrlAuthenticationEntryPoint("/login"),
 				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
 			.formLogin(Customizer.withDefaults())
-			.oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
+			.oauth2ResourceServer(oauth2 -> 
+	            oauth2.jwt(jwt -> {
+	                jwt.decoder(jwtDecoder(jwkSource()));
+	                jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
+            })
+        )
 			 .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication; useful for Postman testing
 		return http.build();
 	}
@@ -97,15 +110,14 @@ public class SecurityConfig {
 	@Bean
 	public InMemoryRegisteredClientRepository registeredClientRepository() {
 
-		// 1. Catalog Client (Authorization Code + PKCE)
-		RegisteredClient uiAppClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("geoportal-client")
+		// 1. Catalog Client (Authorization Code + PKCE) Simple Authentication
+		RegisteredClient uiAppClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId("geoportal-simple-client")
 				// No client secret for SPA (geoportal client)
 				.clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
 				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
-				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
-				//.redirectUri("http://localhost:8080/geoportal/callback") // SPA redirect
+				.authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)				
 				.redirectUri("http://localhost:8080/geoportal/callback.html") // Allow HTML callback
-				//.redirectUri("http://localhost:8080/geoportal") // Allow SPA root as callback
+				
 				.scope("openid").scope("profile").scope("api.read").build();
 
 		// 2. API Client (Read + Write)
@@ -131,27 +143,6 @@ public class SecurityConfig {
 		return new InMemoryRegisteredClientRepository(uiAppClient, apiClientRW, apiClientRead);
 	}
 
-//	@Bean 
-//	public RegisteredClientRepository registeredClientRepository() {
-//		RegisteredClient oidcClient = RegisteredClient.withId(UUID.randomUUID().toString())
-//				.clientId("oidc-client")
-//				.clientSecret("{noop}secret")
-//				.clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
-//				.authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE) //for Catalog App
-//				.authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS) //for API access
-//				.redirectUri("http://localhost:8080/login/oauth2/code/oidc-client")
-//				.postLogoutRedirectUri("http://localhost:8080/")
-//				.scope(OidcScopes.OPENID)
-//				.scope(OidcScopes.PROFILE)
-////				.clientSettings(ClientSettings.builder()
-////		                .requireProofKey(true)  // enforce PKCE
-////		                .requireAuthorizationConsent(true)
-////		                .build())
-//				.clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build())
-//				.build();
-//
-//		return new InMemoryRegisteredClientRepository(oidcClient);
-//	}
 
 	@Bean
 	public JWKSource<SecurityContext> jwkSource() {
@@ -180,6 +171,21 @@ public class SecurityConfig {
 	public JwtDecoder jwtDecoder(JWKSource<SecurityContext> jwkSource) {		
 		return OAuth2AuthorizationServerConfiguration.jwtDecoder(jwkSource);
 	}
+	@Bean
+    public JwtEncoder jwtEncoder(JWKSource<SecurityContext> jwkSource) {
+        return new NimbusJwtEncoder(jwkSource);
+    }
+	@Bean
+	public JwtAuthenticationConverter jwtAuthenticationConverter() {
+	    JwtGrantedAuthoritiesConverter grantedAuthoritiesConverter = new JwtGrantedAuthoritiesConverter();
+	    grantedAuthoritiesConverter.setAuthoritiesClaimName("authorities");
+	    grantedAuthoritiesConverter.setAuthorityPrefix(""); // Optional: remove "ROLE_" prefix if already present
+	
+	    JwtAuthenticationConverter authenticationConverter = new JwtAuthenticationConverter();
+	    authenticationConverter.setJwtGrantedAuthoritiesConverter(grantedAuthoritiesConverter);
+	    return authenticationConverter;
+	}
+
 
 	@Bean
 	public AuthorizationServerSettings authorizationServerSettings() {
@@ -189,6 +195,11 @@ public class SecurityConfig {
 	@Bean
 	public org.springframework.web.servlet.handler.HandlerMappingIntrospector mvcHandlerMappingIntrospector() {
 		return new org.springframework.web.servlet.handler.HandlerMappingIntrospector();
+	}
+
+	@Bean
+	public JwtAuthenticationFilter jwtAuthenticationFilter(JwtDecoder jwtDecoder) {
+	    return new JwtAuthenticationFilter(jwtDecoder);
 	}
 
 }

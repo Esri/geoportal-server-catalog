@@ -35,6 +35,14 @@ function(declare, lang, Deferred, dojoRequest) {
       if (tkn && tkn.access_token) return tkn.access_token;
       return null;
     },
+	
+	generateArcGISJwtToken: function(token) {     
+      var url = this.getBaseUri()+"/auth/arcgis";
+	  var content = {arcgis_token: token};
+	  var info = {handleAs:"json",data:content,headers:{Accept:"application/json"}};
+     
+      return dojoRequest.post(url,info);
+    },
     
     getBaseUri: function() {
       return ".";
@@ -87,7 +95,7 @@ function(declare, lang, Deferred, dojoRequest) {
       return dojoRequest.del(url,info);
     },
     
-    generateJwtToken: function(username,password) {
+/*    generateJwtToken: function(username,password) {
       // TODO needs to be https
       var url = this.getBaseUri()+"/oauth/token";
       var content = {
@@ -98,13 +106,15 @@ function(declare, lang, Deferred, dojoRequest) {
       };
       var info = {handleAs:"json",data:content,headers:{Accept:"application/json"}};
       return dojoRequest.post(url,info);
-    },
+    },*/
 
     pingGeoportal: function(accessToken) {
      var dfd = new Deferred();
       var url = this.getRestUri()+"/geoportal";
       var info = {handleAs:"json"};
-      if (!accessToken) accessToken = this.getAccessToken();
+      if (!accessToken) storedToken = this.getAccessToken();
+	  if(storedToken && storedToken.access_token) accessToken = storedToken.access_token;
+	  
       if (accessToken) info.query = {access_token:encodeURIComponent(accessToken)};
       if(AppContext.appConfig.system.secureCatalogApp)
       {
