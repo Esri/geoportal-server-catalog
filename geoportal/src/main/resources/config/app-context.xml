@@ -137,8 +137,9 @@
       </beans:list>
     </beans:property>
   </beans:bean>  
-    <!--  This should always be imported after GeoportalContext and ElasticContext loaded -->
-  <beans:import resource="app-security.xml" />
+    <!--  This should always be imported after GeoportalContext and ElasticContext loaded 
+  <beans:import resource="app-security.xml" />-->
+  <beans:import resource="authentication-arcgis.xml" />
 	
   <beans:bean id="harvesterContext" class="com.esri.geoportal.lib.harvester.HarvesterContext">
     <beans:property name="nodes">
