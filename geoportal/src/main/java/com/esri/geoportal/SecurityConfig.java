@@ -45,7 +45,7 @@ import com.nimbusds.jose.proc.SecurityContext;
 @Configuration
 @EnableWebSecurity
 
-@ImportResource("classpath:config/authentication-simple.xml")
+//@ImportResource("classpath:config/authentication-ldap.xml")
 public class SecurityConfig {
 
 	@Bean

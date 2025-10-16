@@ -162,10 +162,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       var ctx = window.AppContext;
       if (ctx.geoportal && ctx.geoportal.arcgisOAuth && ctx.geoportal.arcgisOAuth.appId) {
         this._showAgsOAuthSignIn(ctx.geoportal.arcgisOAuth);
-      } else {
-        // (new SignIn()).show();
-		//TODO above remove old sign in method
-		
+      } else {       	
         // Open OAuth popup
         this.openOAuthPopup();
      }
@@ -209,7 +206,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 			  // Ensure the message is from the expected origin
 			  if (event.origin !== window.location.origin) return;
 			  if (event.data && event.data.token) {
-				  const oauthToken = event.data.token.access_token ? event.data.token : null;
+				  const oauthToken = event.data.token.access_token ? event.data.token.access_token : null;
 				  if (!oauthToken) return;
 
 				  // Process the received token
@@ -286,47 +283,6 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         topic.publish(appTopics.SignedIn,{geoportalUser:info.user});
       }
     },
-
-	//TODO remove Old sign in method
-    /*signIn: function(u,p,k) {
-      var self = this, dfd = new Deferred(), client = new AppClient();
-      client.generateJwtToken(u,p).then(function(oauthToken){
-        if (oauthToken && oauthToken.access_token) {
-          client.pingGeoportal(oauthToken.access_token).then(function(info){
-            if (info && info.user) {
-              self.appToken = oauthToken;
-              self.geoportalUser = info.user;
-              
-              if (k) {
-                var cValue = {
-                  token: oauthToken,
-                  user: info.user
-                };
-                self.preserveTokenInfo(cValue, new Date(Date.now() + oauthToken.expires_in * 1000));
-              }
-              AppContext.geoportal = info;
-              topic.publish(appTopics.SignedIn,{geoportalUser:info.user});
-              dfd.resolve();
-            } else {
-              dfd.reject(i18n.general.error);
-            } 
-          }).catch(function(error){
-            console.warn(error);
-            dfd.reject(i18n.general.error);
-          });
-        } else {
-          dfd.reject(i18n.login.invalidCredentials);
-        }
-      }).catch(function(error){
-        var msg = i18n.general.error;
-        if (error) {
-          if (error.status === 400) msg = i18n.login.invalidCredentials;
-          else console.warn(error);
-        }
-        dfd.reject(msg);
-      });
-      return dfd;
-    },*/
     
     signOut: function() {
       this.deleteTokenInfo();
