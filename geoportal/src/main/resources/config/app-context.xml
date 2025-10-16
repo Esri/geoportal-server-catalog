@@ -154,8 +154,8 @@
   
   <!--  This should always be imported after GeoportalContext and ElasticContext loaded -->
   <!-- Uncomment only one of below to enable Simple Auth or LDAP Auth. To enable ArcGIS Portal Auth,argisAuthEnabled=true in arcgisAuthService   -->
-  <!--  	<beans:import resource="authentication-ldap.xml" />-->
-   <!--   <beans:import resource="authentication-simple.xml" />-->
+    <!---->	<beans:import resource="authentication-ldap.xml" />-->
+      <beans:import resource="authentication-simple.xml" />
 	
 	
   <beans:bean id="harvesterContext" class="com.esri.geoportal.lib.harvester.HarvesterContext">
