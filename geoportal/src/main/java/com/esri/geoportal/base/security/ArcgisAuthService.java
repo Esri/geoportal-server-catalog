@@ -44,7 +44,14 @@ public class ArcgisAuthService {
 	  private String geoportalPublishersGroupId;  
 	  private String rolePrefix;
 	  private boolean showMyProfileLink = false;
+	  private boolean argisAuthEnabled = false;
 
+	  public boolean isArgisAuthEnabled() {
+		return argisAuthEnabled;
+	}
+	  public void setArgisAuthEnabled(boolean argisAuthEnabled) {
+		  this.argisAuthEnabled = argisAuthEnabled;
+	  }
 	  /** True if all authenticated users should have a Publisher role. */
 	  public boolean getAllUsersCanPublish() {
 	    return allUsersCanPublish;

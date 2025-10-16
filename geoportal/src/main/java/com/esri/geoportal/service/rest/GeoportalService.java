@@ -98,7 +98,7 @@ public class GeoportalService {
       
       ArcgisAuthService ap = gc.getBeanIfDeclared("arcgisAuthService",
     		  ArcgisAuthService.class,null);
-      if (ap != null) {
+      if (ap != null && ap.isArgisAuthEnabled()) {
         jso.add("arcgisOAuth",Json.createObjectBuilder()
           .add("appId",ap.getAppId())
           .add("portalUrl",ap.getPortalUrl())
