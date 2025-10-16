@@ -94,20 +94,7 @@ function(declare, lang, Deferred, dojoRequest) {
       var info = {handleAs:"json"};
       return dojoRequest.del(url,info);
     },
-    
-/*    generateJwtToken: function(username,password) {
-      // TODO needs to be https
-      var url = this.getBaseUri()+"/oauth/token";
-      var content = {
-        grant_type: "password",
-        client_id: "geoportal-client",
-        username: username,
-        password: password
-      };
-      var info = {handleAs:"json",data:content,headers:{Accept:"application/json"}};
-      return dojoRequest.post(url,info);
-    },*/
-
+	
     pingGeoportal: function(accessToken) {
      var dfd = new Deferred();
       var url = this.getRestUri()+"/geoportal";
