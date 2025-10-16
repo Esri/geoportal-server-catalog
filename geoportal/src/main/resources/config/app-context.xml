@@ -136,15 +136,27 @@
 	-->
       </beans:list>
     </beans:property>
-  </beans:bean>  
-    <!--  TODO remove importing app-security.xml
-    <beans:import resource="app-security.xml" />-->
-    
-    <!--  This should always be imported after GeoportalContext and ElasticContext loaded  -->
- 
-  <beans:import resource="authentication-arcgis.xml" />
-  <!-- <beans:import resource="authentication-ldap.xml" />
-   <beans:import resource="authentication-simple.xml" />-->
+  </beans:bean> 
+   
+  <!-- ArcGIS Portal Authentication Service, if Portal Authentication is not used, argisAuthEnabled=false. To enable, set argisAuthEnabled=true and configure appId and authorizeURL -->
+  <beans:bean id="arcgisAuthService" class="com.esri.geoportal.base.security.ArcgisAuthService">
+  	<beans:property name="argisAuthEnabled" value="false"/>
+    <beans:property name="appId" value="${arcgis_appid:6iJ2pLIj9UwcSdfA}"/>
+    <beans:property name="authorizeUrl" value="${arcgis_authorizeUrl:https://www.arcgis.com/sharing/rest/oauth2/authorize}"/>
+    <beans:property name="createAccountUrl" value="${arcgis_createAccountUrl:https://www.arcgis.com/home/createaccount.html}"/>
+    <beans:property name="expirationMinutes" value="120" />
+    <beans:property name="geoportalAdministratorsGroupId" value="" />
+    <beans:property name="geoportalPublishersGroupId" value="" />
+    <beans:property name="allUsersCanPublish" value="true" />
+    <beans:property name="rolePrefix" value="ROLE_" />
+    <beans:property name="showMyProfileLink" value="${arcgis_showMyProfileLink:true}" />
+  </beans:bean>
+  
+  <!--  This should always be imported after GeoportalContext and ElasticContext loaded -->
+  <!-- Uncomment only one of below to enable Simple Auth or LDAP Auth. To enable ArcGIS Portal Auth,argisAuthEnabled=true in arcgisAuthService   -->
+  <!--  	<beans:import resource="authentication-ldap.xml" />-->
+   <!--   <beans:import resource="authentication-simple.xml" />-->
+	
 	
   <beans:bean id="harvesterContext" class="com.esri.geoportal.lib.harvester.HarvesterContext">
     <beans:property name="nodes">
