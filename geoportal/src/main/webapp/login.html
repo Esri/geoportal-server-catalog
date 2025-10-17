@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Geoportal Login</title>
+    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dijit/themes/claro/claro.css">
+    <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dojo/dojo.js"></script>
+    <style>
+        html, body {
+            margin: 0;
+            padding: 0;
+            overflow: hidden; /* Remove vertical scrollbar */
+        }
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #eef;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        #loginForm {
+            width: 400px;            
+            height: auto;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.2);
+            padding: 30px 50px;
+            box-sizing: border-box;
+        }
+        .form-field {
+            margin-bottom: 15px;
+        }
+        .spacer {
+            height: 20px;
+        }
+         
+    </style>
+</head>
+<body class="claro">
+    <form id="loginForm" method="post">
+        <h2>Sign In</h2>
+        <div class="form-field">
+            <label for="username">Username:</label>
+            <input id="username" name="username" data-dojo-type="dijit/form/TextBox" required />
+        </div>
+        <div class="form-field">
+            <label for="password">Password:</label>
+            <input id="password" name="password" type="password" data-dojo-type="dijit/form/TextBox" required />
+        </div>
+        <div class="spacer"></div>
+        <div class="spacer"></div>
+        <div class="form-field">
+            <button data-dojo-type="dijit/form/Button" type="submit">Sign In</button>
+            <button data-dojo-type="dijit/form/Button" onclick="window.close()" style="margin-left: 10px;">Cancel</button>
+        </div>
+    </form>
+
+    <script>
+        // Dynamically set the form action based on the current context path
+        (function() {
+            var pathParts = window.location.pathname.split('/');
+            var contextPath = pathParts.length > 1 ? '/' + pathParts[1] : '';
+            var loginUrl = contextPath + '/login';
+            document.getElementById('loginForm').setAttribute('action', loginUrl);
+        })();
+    </script>
+</body>
+</html>

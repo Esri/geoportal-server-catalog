@@ -182,7 +182,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       localStorage.setItem('pkce_code_verifier', codeVerifier);
       generateCodeChallenge(codeVerifier).then(function(codeChallenge) {
         const authUrl = `${authorizeEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=openid&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-        window.oauthPopup = window.open(authUrl, '_blank', 'width=600,height=500');
+        window.oauthPopup = window.open(authUrl, '_blank', 'width=600,height=350');
       });
 
       function generateCodeVerifier() {

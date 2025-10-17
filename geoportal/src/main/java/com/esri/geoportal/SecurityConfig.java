@@ -8,7 +8,6 @@ import java.util.UUID;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
-import org.springframework.context.annotation.ImportResource;
 import org.springframework.core.annotation.Order;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
@@ -16,8 +15,6 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
@@ -59,7 +56,7 @@ public class SecurityConfig {
 		)
 		.authorizeHttpRequests((authorize) -> authorize.anyRequest().authenticated())
 		.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
-			new LoginUrlAuthenticationEntryPoint("/login"),
+			new LoginUrlAuthenticationEntryPoint("/login.html"),
 			new MediaTypeRequestMatcher(MediaType.TEXT_HTML)));
 
 		return http.build();
@@ -73,7 +70,7 @@ public class SecurityConfig {
 			.headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Allow framing from same origin
 			.authorizeHttpRequests(authorize -> authorize
 				// Only permit static resources and public endpoints
-				.requestMatchers("/index.html", "/standalone-metadata-editor.html", "/geoportal", "/oauth-callback.html", 
+				.requestMatchers("/index.html", "/login.html","/standalone-metadata-editor.html", "/geoportal", "/oauth-callback.html", 
 						"/login", "/oauth2/**","/auth/arcgis").permitAll()
 
 				.requestMatchers("/lib/**","/app/**","/api/**","/custom/**","/images/**","/rest/**").permitAll()
@@ -89,9 +86,16 @@ public class SecurityConfig {
 				.anyRequest().authenticated() // All other requests require authentication
 			)
 			.exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
-				new LoginUrlAuthenticationEntryPoint("/login"),
+				new LoginUrlAuthenticationEntryPoint("/login.html"),
 				new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
-			.formLogin(Customizer.withDefaults())
+
+			.formLogin(form -> form
+                .loginPage("/login.html") // Point to static HTML
+                .loginProcessingUrl("/login") // Form submits here
+                .permitAll())
+
+
+			//.formLogin(Customizer.withDefaults())
 			.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
 			.oauth2ResourceServer(oauth2 -> 
 	            oauth2.jwt(jwt -> {
