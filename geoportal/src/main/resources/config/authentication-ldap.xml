@@ -7,7 +7,7 @@
     http://www.springframework.org/schema/security https://www.springframework.org/schema/security/spring-security.xsd">
   
    <beans:bean id="ldapServer" class="org.springframework.ldap.core.support.LdapContextSource">
-   	<beans:property name="url" value="ldap://gptelastic:10389"></beans:property>
+   	<beans:property name="url" value="${gpt_ldap_url}"></beans:property>
    	<beans:property name="userDn" value="uid=admin, ou=system"></beans:property>
    	<beans:property name="password">
 	   	 <beans:bean id="Decrypt" class="org.springframework.beans.factory.config.MethodInvokingFactoryBean">
@@ -15,7 +15,7 @@
             <beans:property name="staticMethod" value="com.esri.geoportal.lib.security.EncryptDecrypt.decryptLdapPass" />
             <beans:property name="arguments">
               <beans:list>
-                <beans:value>${ldap_manager_password}</beans:value>
+                <beans:value>${gpt_ldap_manager_password}</beans:value>
               </beans:list>
              </beans:property>
           </beans:bean>
