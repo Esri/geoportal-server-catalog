@@ -1242,8 +1242,8 @@ public class StacHelper {
 			  List<String> geometryTypes = Arrays.asList("POINT", "MULTIPOINT", "LINESTRING","MULTILINESTRING", "POLYGON","MULTIPOLYGON");
 			  if(reqPayload.containsKey("geometry"))
 			  {
-				  double minLat = Double.MAX_VALUE, maxLat = Double.MIN_VALUE;
-			      double minLng = Double.MAX_VALUE, maxLng = Double.MIN_VALUE;
+				  double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
+			      double minLng = Double.MAX_VALUE, maxLng = -Double.MAX_VALUE;
 			      
 				  JSONObject geometry = (JSONObject) reqPayload.get("geometry");
 				  String type = geometry.getAsString("type");
