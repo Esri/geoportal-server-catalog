@@ -343,7 +343,9 @@ define({
         disapproved: "Disapproved",
         incomplete: "Incomplete",
         posted: "Posted",
-        draft: "Draft"
+        draft: "Draft",
+        active: "Active",
+        inactive: "Inactive"
       },
       setCollections: {
         caption: "Set Collections",
