@@ -196,7 +196,7 @@ public class STACService extends Application {
 				// Geoportal not configured for collections
 				// STAC will only have 1 STAC collection 'metadata'
 				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
-				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", "metadata");
+				finalresponse = responseJSON.replaceAll("\\{collectionId\\}", "metadata");
         
 			} else {
 				// Geoportal configured for collections
