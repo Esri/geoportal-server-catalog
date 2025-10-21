@@ -294,7 +294,7 @@ public class STACService extends Application {
 			LOGGER.error("Error in collections " + e);
 			status = Response.Status.INTERNAL_SERVER_ERROR;
 			detailErrArray.add(e.getMessage());
-			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",detailErrArray);
+			finalresponse = this.generateResponse("500", "STAC API collection response could not be generated.",detailErrArray);
 		}
 		return Response.status(status).entity(finalresponse).build();
 	} 
