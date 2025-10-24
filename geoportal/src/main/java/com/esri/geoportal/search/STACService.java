@@ -188,106 +188,108 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
     
     // 616 return up to 10,000 collections, not full pagination yet
-    limit = setLimit(limit);
-		
-		try {			
+		limit = setLimit(limit);
+
+		try {
 			// 518 updates
 			if (!gc.getSupportsCollections()) {
 				// Geoportal not configured for collections
 				// STAC will only have 1 STAC collection 'metadata'
 				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
 				finalresponse = responseJSON.replaceAll("\\{collectionId\\}", "metadata");
-        
+
 			} else {
 				// Geoportal configured for collections
 				// STAC will have collection for each Geoportal collection
 				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
-				
+
 				JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
 				// Get list of collections
 				JSONArray collectionsArray = StacHelper.getCollectionList(limit);
-        
-        // if reprojecting STAC geometries is supported and a
-        // geometry service has been configured, try projecting 
-        // from internal CRS (4326) to requested outCRS
-        if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-          LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
-          // get the features from the response
-          JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
-          JSONArray responseObject = (JSONArray) jsonParser.parse(collectionsArray.toString());
+				// if reprojecting STAC geometries is supported and a
+				// geometry service has been configured, try projecting
+				// from internal CRS (4326) to requested outCRS
+				if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform()))
+						&& (!gc.getGeometryService().isEmpty())) {
+					LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
 
-          // each feature is a STAC item that needs projecting
-          for (int i=0; i<responseObject.size(); i++) {
-            JSONObject collectionObj = (JSONObject) responseObject.get(i);
+					// get the features from the response
+					JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+					JSONArray responseObject = (JSONArray) jsonParser.parse(collectionsArray.toString());
 
-            // get the collection metadata
-            Collection theCollection = new Collection(collectionObj);
-            List<String> availableCRS = theCollection.getAvailableCRS();
+					// each feature is a STAC item that needs projecting
+					for (int i = 0; i < responseObject.size(); i++) {
+						JSONObject collectionObj = (JSONObject) responseObject.get(i);
 
-            if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
-              JSONObject responseJSONObject = projectCollectionGeometries(collectionObj.toString(), "4326", outCRS);
-              collectionsArray.set(i, responseJSONObject);
-            }
-            else {
-              // set internal CRS EPSG:4326 as default for output
-              collectionObj.put("outCRS", INTERNAL_CRS);
-              collectionsArray.set(i, collectionObj);
+						// get the collection metadata
+						Collection theCollection = new Collection(collectionObj);
+						List<String> availableCRS = theCollection.getAvailableCRS();
 
-              LOGGER.warn("Requested CRS (" + outCRS + ") not available for collection " 
-                      + collectionObj.getAsString("id") 
-                      + ". Output provided in native CRS.");          
-            }
-          }
-        }
+						if ((availableCRS.contains(outCRS)) || (outCRS.startsWith("EPSG:"))) {
+							JSONObject responseJSONObject = projectCollectionGeometries(collectionObj.toString(),
+									"4326", outCRS);
+							collectionsArray.set(i, responseJSONObject);
+						} else {
+							// set internal CRS EPSG:4326 as default for output
+							collectionObj.put("outCRS", INTERNAL_CRS);
+							collectionsArray.set(i, collectionObj);
+
+							LOGGER.warn("Requested CRS (" + outCRS + ") not available for collection "
+									+ collectionObj.getAsString("id") + ". Output provided in native CRS.");
+						}
+					}
+				}
 
 				stacCollections.put("collections", collectionsArray);
-        
-        // final output formatting
-        if ((f != null) && "geojson".equals(f)) {
-          // if f=geojson, output the list of collections as a type GeoJSON FeatureCollection vs STAC Collection
-       
-          JSONObject geojsonCollections = new JSONObject();
-          geojsonCollections.put("type", "FeatureCollection");
-          geojsonCollections.put("features", stacCollections.get("collections"));
-          JSONArray geojsonCollectionsList = new JSONArray();
-          
-          for (int i=0; i<collectionsArray.size(); i++) {
-            JSONObject collectionProperties = new JSONObject();
-            JSONObject geojsonCollection = new JSONObject();
-            net.minidev.json.JSONObject thisCollection = new JSONObject((Map<String, ?>) collectionsArray.get(i));
-            geojsonCollection.put("type", "Feature");
-            collectionProperties.put("objectid", i);
-            collectionProperties.put("id", thisCollection.getAsString("id"));
-            collectionProperties.put("title", thisCollection.getAsString("title"));
-            collectionProperties.put("description", thisCollection.getAsString("description"));
 
-            geojsonCollection.put("properties", collectionProperties);
-            JSONObject extent = new JSONObject((Map<String, ?>) thisCollection.get("extent"));
-            if (extent != null && extent.size() > 0) {
-              JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
-              
-              if (spatial != null) {
-                if (spatial.containsKey("bbox")) { 
-                  geojsonCollection.put("bbox", spatial.get("bbox"));
-                }
-                if (spatial.containsKey("geometry")) {
-                  geojsonCollection.put("geometry", spatial.get("geometry"));                
-                }
-              }            
-            }
-            
-            geojsonCollectionsList.add(geojsonCollection);
-          }
-          geojsonCollections.put("features", geojsonCollectionsList);
-          
-          finalresponse = geojsonCollections.toString();
-        } else {
-          // respond in STAC JSON
-          finalresponse = stacCollections.toString();
-        }
-          
-				finalresponse =  finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
+				// final output formatting
+				if ((f != null) && "geojson".equals(f)) {
+					// if f=geojson, output the list of collections as a type GeoJSON
+					// FeatureCollection vs STAC Collection
+
+					JSONObject geojsonCollections = new JSONObject();
+					geojsonCollections.put("type", "FeatureCollection");
+					geojsonCollections.put("features", stacCollections.get("collections"));
+					JSONArray geojsonCollectionsList = new JSONArray();
+
+					for (int i = 0; i < collectionsArray.size(); i++) {
+						JSONObject collectionProperties = new JSONObject();
+						JSONObject geojsonCollection = new JSONObject();
+						net.minidev.json.JSONObject thisCollection = new JSONObject(
+								(Map<String, ?>) collectionsArray.get(i));
+						geojsonCollection.put("type", "Feature");
+						collectionProperties.put("objectid", i);
+						collectionProperties.put("id", thisCollection.getAsString("id"));
+						collectionProperties.put("title", thisCollection.getAsString("title"));
+						collectionProperties.put("description", thisCollection.getAsString("description"));
+
+						geojsonCollection.put("properties", collectionProperties);
+						JSONObject extent = new JSONObject((Map<String, ?>) thisCollection.get("extent"));
+						if (extent != null && extent.size() > 0) {
+							JSONObject spatial = new JSONObject((Map<String, ?>) extent.get("spatial"));
+
+							if (spatial != null) {
+								if (spatial.containsKey("bbox")) {
+									geojsonCollection.put("bbox", spatial.get("bbox"));
+								}
+								if (spatial.containsKey("geometry")) {
+									geojsonCollection.put("geometry", spatial.get("geometry"));
+								}
+							}
+						}
+
+						geojsonCollectionsList.add(geojsonCollection);
+					}
+					geojsonCollections.put("features", geojsonCollectionsList);
+
+					finalresponse = geojsonCollections.toString();
+				} else {
+					// respond in STAC JSON
+					finalresponse = stacCollections.toString();
+				}
+
+				finalresponse = finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 			}
 
 		} catch (Exception e) {
