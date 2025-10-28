@@ -431,6 +431,12 @@ public class GeometryServiceClient {
            
             geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [ { ";
             
+            //https://github.com/EsriPS/exxonmobil-gsdb/issues/36 check if there are 3 coordinates
+            if(!hasZ && points.length==3)
+            {
+            	hasZ = true;
+            }
+            
             // if point has Z coordinate, set it so in the output
             if (hasZ) {
               geometries += "\"hasZ\": true, ";
