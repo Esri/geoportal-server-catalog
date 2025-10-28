@@ -219,7 +219,8 @@
     },
 
     sendHttpRequest: function(url, data, dataContentType, options) {
-    	print("url",url);
+     // print("url",url);
+     // print("data",data);
       var result = null;
       var br = null, br2 = null, wr = null;
       var sw = new java.io.StringWriter();

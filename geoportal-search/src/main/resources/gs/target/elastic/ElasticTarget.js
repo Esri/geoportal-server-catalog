@@ -357,57 +357,26 @@
     }},
 
     prepareSort: {writable:true,value:function(task,targetRequest) {
-      var sortables = this.schema.sortables;
-      if (!sortables) return;
+        var sortables = this.schema.sortables;
+        if (!sortables) return;    
 
-      var getField = function(v) {
-        v = v.toLowerCase();
-        for (var k in sortables) {
-          if (sortables.hasOwnProperty(k)) {
-            if (v === k.toLowerCase()) {
-              return sortables[k];
-            }
-          }
+        var sort = [], sortOptions = task.request.getSortOptions();
+        //print("sortOptions",sortOptions);
+        if (Array.isArray(sortOptions)) {    	 
+        	sortOptions.forEach(function(sortOption){
+          	//print("sortOption ",sortOption);
+  			 
+	  		try {
+	  			sort = JSON.parse(sortOption);			 
+	  		} catch (e) {
+	  			sort = sortOption;
+	  		}
+        	});
         }
-        return null;
-      };
-
-      var sort = [], sortOptions = task.request.getSortOptions();
-      if (Array.isArray(sortOptions)) {
-        sortOptions.forEach(function(sortOption){
-          var field = getField(sortOption.field);
-          if (typeof field === "string" && field.length > 0) {
-            var option = {};
-            if (sortOption.order === "asc") {
-				if(field ==='title')
-				{
-					option['title.keyword']={"order": "asc", "unmapped_type": "String"}
-				}
-				else{
-					option[field] = "asc";
-				}
-					
-              
-            } else if (sortOption.order === "desc") {
-				if(field ==='title')
-				{
-					option['title.keyword']={"order": "desc", "unmapped_type": "String"}
-				}
-				else{
-					option[field] = "desc";
-				}				
-              
-            } else {
-              option = field;
-            }
-            sort = option;
-          }
-        });
-      }
-      if (sort) {
-        targetRequest.searchCriteria["sort"] = sort;
-      }
-    }},
+        if (sort) {
+          targetRequest.searchCriteria["sort"] = sort;
+        }
+      }},
 
     prepareTimePeriod: {writable:true,value:function(task,targetRequest) {
       var period = task.request.getTimePeriod();
