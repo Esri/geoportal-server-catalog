@@ -1304,7 +1304,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "the time period for the resource (time=start/end) (ISO 8601)",
+            "description": "sort field, to sort on text field, suffix .keyword for example title.keyword",
             "required": false,
             "type": "string"
           },
