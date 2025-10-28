@@ -83,9 +83,11 @@ define(["dojo/_base/declare",
               postData = postData? postData: {};
               
               if (!searchResponse.hasScorable && typeof searchResponse.urlParams.sort === "undefined") {
-                searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
+                  searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
               }
-              
+              if (searchResponse.urlParams && searchResponse.urlParams.sort !== "undefined" && typeof searchResponse.urlParams.sort === "object") {
+            	  searchResponse.urlParams.sort = JSON.stringify(searchResponse.urlParams.sort);
+              }
               var openSearchUrlParams = lang.mixin({}, searchResponse.urlParams)
               openSearchUrlParams.from = searchResponse.urlParams.from? searchResponse.urlParams.from+1: 1
               
