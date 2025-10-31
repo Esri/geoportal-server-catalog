@@ -21,9 +21,11 @@ import java.util.stream.Collectors;
 
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
     private final JwtDecoder jwtDecoder;
+    private final ConfigProperties securityProperties;
 
-    public JwtAuthenticationFilter(JwtDecoder jwtDecoder) {
+    public JwtAuthenticationFilter(JwtDecoder jwtDecoder,ConfigProperties securityProperties) {
         this.jwtDecoder = jwtDecoder;
+		this.securityProperties = securityProperties;
     }
 
     @Override
