@@ -10,7 +10,7 @@
   <context:annotation-config />
 
   <!-- load SecurityConfig -->
-  <context:component-scan base-package="com.esri.geoportal" />	
+  <context:component-scan base-package="com.esri.geoportal.security" />	
   	
   <beans:import resource="app-factory.xml" />
   <beans:import resource="app-dcat.xml" />
