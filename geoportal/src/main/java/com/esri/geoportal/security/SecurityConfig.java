@@ -5,6 +5,7 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
@@ -20,6 +21,7 @@ import org.springframework.http.MediaType;
 import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
@@ -43,18 +45,21 @@ import com.nimbusds.jose.jwk.RSAKey;
 import com.nimbusds.jose.jwk.source.ImmutableJWKSet;
 import com.nimbusds.jose.jwk.source.JWKSource;
 import com.nimbusds.jose.proc.SecurityContext;
-import org.springframework.security.core.GrantedAuthority;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
-    // Use SecurityProperties component to hold configuration loaded from security-config.properties
-    private final ConfigProperties securityProperties;
+    // Use SecurityProperties component to hold configuration loaded from config.properties
+    private final ConfigProperties configProperties;
+    
+    @Autowired
+    private SecurityEndPointProp securityEndPointProp;
 
-    public SecurityConfig(ConfigProperties securityProperties) {
-        this.securityProperties = securityProperties;
+    public SecurityConfig(ConfigProperties securityProperties) {    	
+        this.configProperties = securityProperties;
     }
+   
     
     @Bean
     @Order(1)
@@ -79,23 +84,57 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable()) // Disable CSRF protection
             .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin())) // Allow framing from same origin
-            .authorizeHttpRequests(authorize -> authorize
-                // Only permit static resources and public endpoints
-                .requestMatchers("/index.html", "/login.html","/standalone-metadata-editor.html", "/geoportal", "/oauth-callback.html", 
-                        "/login", "/oauth2/**","/auth/arcgis").permitAll()
+            .authorizeHttpRequests(authorize -> {
+                // Apply configured public endpoints (permitAll)
+                for (String pattern : configProperties.getPublicEndpointsList()) {
+                    authorize.requestMatchers(pattern).permitAll();
+                }
 
-                .requestMatchers("/lib/**","/app/**","/api/**","/custom/**","/images/**","/rest/**").permitAll()
-                .requestMatchers("/elastic/metadata/_count/**").permitAll()
-                .requestMatchers("/elastic/metadata/*/_count/**").permitAll()
-                .requestMatchers("/elastic/metadata/_search/**").permitAll()
-                .requestMatchers("/elastic/metadata/*/_search/**").permitAll()
-                .requestMatchers("/elastic/metadata/_mappings/**").permitAll()
-                .requestMatchers("/elastic/metadata/*/_mappings/**").permitAll()
-                .requestMatchers("/elastic/_search/scroll/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/stac/collections/**").permitAll()
-                .requestMatchers(HttpMethod.GET, "/stac/api/**").hasAnyAuthority("SCOPE_api.read", "ROLE_ADMIN")
-                .anyRequest().authenticated() // All other requests require authentication
-            )
+                // Apply secured endpoint rules (indexed or CSV) if present
+                for (EndpointSecurityConfig rule : securityEndPointProp.getSecuredEndpoints()) {
+                    String pattern = rule.getPattern();
+                    String method= rule.getMethod();
+                    String roles = rule.getRoles();
+                   
+                    roles = (roles == null) ? "" : roles.trim();
+
+                    // If roles indicate permitAll or authenticated
+                    boolean isPermitAll = "permitAll".equalsIgnoreCase(roles);
+                    boolean isAuthenticated = "authenticated".equalsIgnoreCase(roles);
+
+                    if (method == null || method.trim().isEmpty()) {
+                        if (isPermitAll) {
+                            authorize.requestMatchers(pattern).permitAll();
+                        } else if (isAuthenticated) {
+                            authorize.requestMatchers(pattern).authenticated();
+                        } else if (!roles.isEmpty()) {
+                            String[] auths = splitCsv(roles);
+                            authorize.requestMatchers(pattern).hasAnyAuthority(auths);
+                        }
+                    } else {
+                        String[] methods = splitCsv(method);
+                        for (String m : methods) {
+                            HttpMethod httpMethod;
+                            try {
+                                httpMethod = HttpMethod.valueOf(m.trim().toUpperCase());
+                            } catch (IllegalArgumentException ex) {
+                                // skip invalid method
+                                continue;
+                            }
+                            if (isPermitAll) {
+                                authorize.requestMatchers(httpMethod, pattern).permitAll();
+                            } else if (isAuthenticated) {
+                                authorize.requestMatchers(httpMethod, pattern).authenticated();
+                            } else if (!roles.isEmpty()) {
+                                String[] auths = splitCsv(roles);
+                                authorize.requestMatchers(httpMethod, pattern).hasAnyAuthority(auths);
+                            }
+                        }
+                    }
+                }
+                // All other requests require authentication
+                authorize.anyRequest().authenticated();
+            })
             .exceptionHandling((exceptions) -> exceptions.defaultAuthenticationEntryPointFor(
                 new LoginUrlAuthenticationEntryPoint("/login.html"),
                 new MediaTypeRequestMatcher(MediaType.TEXT_HTML)))
@@ -113,13 +152,19 @@ public class SecurityConfig {
                     jwt.jwtAuthenticationConverter(jwtAuthenticationConverter());
             })
         )
-             .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication; useful for Postman testing
-
-        if (securityProperties.isEnableJwtFilter()) {
-            http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
-        }
-
+         .httpBasic(Customizer.withDefaults()); // Enable HTTP Basic authentication; useful for Postman testing
+       
+        //Add JWT Authentication Filter
+         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
+        
         return http.build();
+    }
+
+    private String[] splitCsv(String csv) {
+        return Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toArray(String[]::new);
     }
 
     public BCryptPasswordEncoder bcryptPassEncoder() {
@@ -130,18 +175,18 @@ public class SecurityConfig {
     public InMemoryRegisteredClientRepository registeredClientRepository() {
 
         // 1. Catalog Client (Authorization Code + PKCE) Simple Authentication
-        RegisteredClient uiAppClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(securityProperties.getUiClientId())
+        RegisteredClient uiAppClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(configProperties.getUiClientId())
                 // No client secret for SPA (geoportal client)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.NONE)
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)                
-                .redirectUri(securityProperties.getUiRedirectUri()) // Allow HTML callback
+                .redirectUri(configProperties.getUiRedirectUri()) // Allow HTML callback
                 
                 .scope("openid").scope("profile").scope("api.read").build();
 
         // 2. API Client (Read + Write)
-        RegisteredClient apiClientRW = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(securityProperties.getApiAdminClientId())
-                .clientSecret(securityProperties.getApiAdminClientSecret()) // confidential client
+        RegisteredClient apiClientRW = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(configProperties.getApiAdminClientId())
+                .clientSecret(configProperties.getApiAdminClientSecret()) // confidential client
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
@@ -149,8 +194,8 @@ public class SecurityConfig {
                 .build();
 
         // 3. API Client (Read Only)
-        RegisteredClient apiClientRead = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(securityProperties.getApiReadClientId())
-                .clientSecret(securityProperties.getApiReadClientSecret()) // confidential
+        RegisteredClient apiClientRead = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(configProperties.getApiReadClientId())
+                .clientSecret(configProperties.getApiReadClientSecret()) // confidential
                                                 
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
@@ -224,7 +269,7 @@ public class SecurityConfig {
 
     @Bean
     public AuthorizationServerSettings authorizationServerSettings() {
-        return AuthorizationServerSettings.builder().issuer(securityProperties.getIssuer()).build();
+        return AuthorizationServerSettings.builder().issuer(configProperties.getIssuer()).build();
     }
 
     @Bean
@@ -234,7 +279,7 @@ public class SecurityConfig {
 
     @Bean
     public JwtAuthenticationFilter jwtAuthenticationFilter(JwtDecoder jwtDecoder) {
-        return new JwtAuthenticationFilter(jwtDecoder,securityProperties);
+        return new JwtAuthenticationFilter(jwtDecoder,configProperties);
     }
 
 }
