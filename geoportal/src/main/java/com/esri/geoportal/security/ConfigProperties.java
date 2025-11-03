@@ -1,5 +1,9 @@
 package com.esri.geoportal.security;
 
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -33,8 +37,8 @@ public class ConfigProperties {
     @Value("${security.api.read.clientSecret}")
     private String apiReadClientSecret;
 
-    @Value("${security.enableJwtFilter}")
-    private boolean enableJwtFilter;
+    @Value("${security.public-endpoints:}")
+    private String publicEndpoints;
 
     @jakarta.annotation.PostConstruct
     private void validate() {
@@ -82,7 +86,18 @@ public class ConfigProperties {
         return apiReadClientSecret;
     }
 
-    public boolean isEnableJwtFilter() {
-        return enableJwtFilter;
+    public List<String> getPublicEndpointsList() {
+        List<String> publicEndpointsList = splitAndTrim(publicEndpoints);
+        return publicEndpointsList;       
     }
+    
+    private List<String> splitAndTrim(String csv) {
+        if (csv == null || csv.trim().isEmpty()) return List.of();
+        return Arrays.stream(csv.split(","))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+    }
+    
+    
 }
