@@ -1,6 +1,7 @@
 package com.esri.geoportal.search;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -234,10 +235,23 @@ public class StacHelper {
 
 		}
 		if (queryMap.containsKey("datetime")) {
-			String dateTimeQry = prepareDateTime(queryMap.get("datetime"));
+			String dateTimeQry = prepareDateTimeFld(FieldNames.FIELD_SYS_MODIFIED,queryMap.get("datetime"));
 			if (dateTimeQry.length() > 0)
 				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
 		}
+		
+		if (queryMap.containsKey("updated")) {
+			String dateTimeQry = prepareDateTimeFld(FieldNames.FIELD_SYS_MODIFIED,queryMap.get("updated"));
+			if (dateTimeQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
+		}
+		
+		if (queryMap.containsKey("created")) {
+			String dateTimeQry = prepareDateTimeFld(FieldNames.FIELD_SYS_CREATED,queryMap.get("created"));
+			if (dateTimeQry.length() > 0)
+				builder.add(JsonUtil.toJsonStructure(dateTimeQry));
+		}
+		
 		if (queryMap.containsKey("ids")) {
 			String idsQry = prepareIds(queryMap.get("ids"));
 			System.out.println("ids " + idsQry);
@@ -324,9 +338,8 @@ public class StacHelper {
 	}
 
 
-	private static String prepareDateTime(String datetime) {
-		String query = "";
-		String dateTimeFld = FieldNames.FIELD_SYS_MODIFIED;
+	private static String prepareDateTimeFld(String datetimeFldName, String dateTimeFldVal) {
+		String query = "";		
 		
 		String dateTimeFldQuery = "";
 		// Find from and to dates
@@ -338,9 +351,9 @@ public class StacHelper {
 		// A closed interval: "2018-02-12T00:00:00Z/2018-03-18T12:31:12Z"
 		// Open intervals: "2018-02-12T00:00:00Z/.." or "../2018-03-18T12:31:12Z"
 
-		String fromField = datetime;
+		String fromField = dateTimeFldVal;
 		String toField = "";
-		List<String> dateFlds = Arrays.asList(datetime.split("/"));
+		List<String> dateFlds = Arrays.asList(dateTimeFldVal.split("/"));
 
 		if (dateFlds.size() > 1) {
 			fromField = dateFlds.get(0);
@@ -354,10 +367,12 @@ public class StacHelper {
 			dateTimeFldQuery = "{\"gte\": \"" + fromField + "\",\"lte\":\"" + toField + "\"}";
 		}
 
-		query = "{\"range\": {\"" + dateTimeFld + "\":" + dateTimeFldQuery + "}}";
+		query = "{\"range\": {\"" + datetimeFldName + "\":" + dateTimeFldQuery + "}}";
 
 		return query;
 	}
+	
+	
 
 	private static String prepareBbox(String bboxString) {
 		String field = "envelope_geo";
@@ -618,7 +633,8 @@ public class StacHelper {
 		// geometry respectively,
 		if (!requestPayload.containsKey(FieldNames.FIELD_SHAPE_GEO)
 				&& requestPayload.containsKey(FieldNames.FIELD_GEOMETRY)) {
-			requestPayload.put(FieldNames.FIELD_SHAPE_GEO, requestPayload.get(FieldNames.FIELD_GEOMETRY));
+			JSONObject twoDGeoJson = extract2DGeoJson((JSONObject)requestPayload.get(FieldNames.FIELD_GEOMETRY));
+			requestPayload.put(FieldNames.FIELD_SHAPE_GEO, twoDGeoJson);
 		}
 
 		if (!requestPayload.containsKey(FieldNames.FIELD_ENVELOPE_GEO)
@@ -686,6 +702,111 @@ public class StacHelper {
 
 		return requestPayload;
 	}
+
+	private static JSONObject extract2DGeoJson(JSONObject geometry) {		
+        String type = geometry.getAsString("type");
+        type = type.toUpperCase();
+        JSONArray coordinates = (JSONArray) geometry.get("coordinates");
+        JSONObject modifiedObj = new JSONObject();
+        try {
+        	switch (type) {
+    		case "POINT":
+    			modifiedObj.put("type", "Point");
+    			modifiedObj.put("coordinates", extract2DPoint(coordinates));
+    			break;
+    		case "LINESTRING":
+    			modifiedObj.put("type", "LineString");
+    			modifiedObj.put("coordinates", extract2DLine(coordinates));
+    			break;
+    		case "POLYGON":
+    			modifiedObj.put("type", "Polygon");
+    			modifiedObj.put("coordinates", extract2DPolygon(coordinates));
+    			break;
+    		case "MULTIPOLYGON":
+    			modifiedObj.put("type", "MultiPolygon");
+    			modifiedObj.put("coordinates", extarct2DMultiPolygon(coordinates));
+    			break;
+    		case "MULTILINESTRING":
+    			modifiedObj.put("type", "MultiLineString");
+    			modifiedObj.put("coordinates", extarct2DMultiLineString(coordinates));
+    			break;
+    		default:
+    			//Return same as input geomtery
+    			modifiedObj = geometry;
+    			break;
+    		}
+        }
+		catch(Exception ex)
+        {
+			//If it is not able to extract 2D geoJSON, just save 3D.
+			LOGGER.info("Could not extract 2D geoJSON "+geometry.toString());
+			modifiedObj = geometry;
+        }
+		return modifiedObj;
+	}
+	
+	private static double toDouble(Object value) {
+	    if (value instanceof BigDecimal) {
+	        return ((BigDecimal) value).doubleValue();
+	    } else if (value instanceof Double) {
+	        return (Double) value;
+	    } else if (value instanceof Number) {
+	        return ((Number) value).doubleValue(); // covers Integer, Long, etc.
+	    } else {
+	        throw new IllegalArgumentException("Unsupported number type: " + value.getClass());
+	    }
+	}
+
+    private static List<List<List<Double>>> extarct2DMultiLineString(JSONArray coords) {
+        List<List<List<Double>>> extracted2D = new ArrayList<>();
+        for (Object lineObj : coords) {
+            JSONArray line = (JSONArray) lineObj;
+            extracted2D.add(extract2DLine(line));
+        }
+        return extracted2D;
+    }
+
+    private static List<List<List<List<Double>>>> extarct2DMultiPolygon(JSONArray coords) {
+        List<List<List<List<Double>>>> extracted2D = new ArrayList<>();
+        for (Object polygonObj : coords) {
+            JSONArray polygon = (JSONArray) polygonObj;
+            extracted2D.add(extract2DPolygon(polygon));
+        }
+        return extracted2D;
+    }
+
+    private static List<Double> extract2DPoint(JSONArray coords) {
+		return List.of(toDouble(coords.get(0)), toDouble(coords.get(1)));
+    }
+
+    private static List<List<Double>> extract2DLine(JSONArray coords) {
+        List<List<Double>> extracted2D = new ArrayList<>();
+
+		for (Object pointObj : coords) {
+			JSONArray point = (JSONArray) pointObj;
+			extracted2D
+					.add(List.of(toDouble(point.get(0)), toDouble(point.get(1))));
+		}
+        return extracted2D;
+    }
+
+	private static List<List<List<Double>>> extract2DPolygon(JSONArray coords) {
+		List<List<List<Double>>> extracted2D = new ArrayList<>();
+		for (Object ringObj : coords) {
+		        JSONArray ring = (JSONArray) ringObj;
+		        List<List<Double>> projectedRing = new ArrayList<>();
+		        for (Object pointObj : ring) {
+		            JSONArray point = (JSONArray) pointObj;
+		            projectedRing.add(List.of(
+		                toDouble(point.get(0)),
+		                toDouble(point.get(1))
+		            ));
+		        }
+		        extracted2D.add(projectedRing);
+		    }
+		return extracted2D;
+	}
+
 
 	private static ArrayList<String> checkGeomWKTToBeremoved(JSONObject prop, StacContext sc) {
 		ArrayList<String> toBeRemoved = new ArrayList<>();
@@ -1120,8 +1241,8 @@ public class StacHelper {
 			  List<String> geometryTypes = Arrays.asList("POINT", "MULTIPOINT", "LINESTRING","MULTILINESTRING", "POLYGON","MULTIPOLYGON");
 			  if(reqPayload.containsKey("geometry"))
 			  {
-				  double minLat = Double.MAX_VALUE, maxLat = Double.MIN_VALUE;
-			      double minLng = Double.MAX_VALUE, maxLng = Double.MIN_VALUE;
+				  double minLat = Double.MAX_VALUE, maxLat = -Double.MAX_VALUE;
+			      double minLng = Double.MAX_VALUE, maxLng = -Double.MAX_VALUE;
 			      
 				  JSONObject geometry = (JSONObject) reqPayload.get("geometry");
 				  String type = geometry.getAsString("type");

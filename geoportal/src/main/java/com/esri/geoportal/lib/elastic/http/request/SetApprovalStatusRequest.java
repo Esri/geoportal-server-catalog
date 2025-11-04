@@ -59,8 +59,9 @@ public class SetApprovalStatusRequest extends BulkEditRequest {
     status = status.toLowerCase();
     if (!status.equals("approved") && !status.equals("reviewed") &&
         !status.equals("disapproved") && !status.equals("incomplete") && 
-        !status.equals("posted") && !status.equals("draft")) {
-      String msg = "approvalStatus must be approved, reviewed, disapproved, incomplete, posted or draft";
+        !status.equals("posted") && !status.equals("draft") && 
+        !status.equals("active") && !status.equals("inactive")){
+      String msg = "approvalStatus must be approved, reviewed, disapproved, incomplete, posted, draft, active or inactive";
       response.writeBadRequest(this,JsonUtil.newErrorResponse(msg,getPretty()));
       return response;
     }

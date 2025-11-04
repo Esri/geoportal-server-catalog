@@ -2,7 +2,7 @@
   "swagger": "2.0",
   "info": {
     "description": "https://github.com/Esri/geoportal-server-catalog",
-    "version": "3.0.1",
+    "version": "3.0.2",
     "title": "Esri Geoportal Server",
     "contact": {
       "name": "portal@esri.com"
@@ -1304,7 +1304,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "the time period for the resource (time=start/end) (ISO 8601)",
+            "description": "sort field, to sort on text field, suffix .keyword for example title.keyword",
             "required": false,
             "type": "string"
           },
@@ -1429,7 +1429,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "the time period for the resource (time=start/end) (ISO 8601)",
+            "description": "sort field, to sort on text field, suffix .keyword for example title.keyword",
             "required": false,
             "type": "string"
           },
