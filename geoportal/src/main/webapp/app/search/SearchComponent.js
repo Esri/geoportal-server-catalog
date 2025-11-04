@@ -122,7 +122,15 @@ function(declare, lang, array, topic, appTopics, Templated, util) {
     },
     
     search: function() {
-      history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPanel");
+    	if(location.pathname.includes("index.html"))
+    		{
+    		history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "#searchPanel");
+    		}
+    	else
+    		{
+    		 history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPanel");
+    		}
+     
       if (this.searchPane) this.searchPane.search();
     },
     
