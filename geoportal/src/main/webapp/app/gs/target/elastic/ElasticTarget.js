@@ -359,7 +359,7 @@
     prepareSort: {writable:true,value:function(task,targetRequest) {
       var sortables = this.schema.sortables;
       if (!sortables) return;
-
+      
       var getField = function(v) {
         v = v.toLowerCase();
         for (var k in sortables) {
@@ -381,7 +381,7 @@
             if (sortOption.order === "asc") {
 				if(field ==='title')
 				{
-					option['title.keyword']={"order": "asc", "unmapped_type": "String"}
+					option['title.keyword']={"order": "asc", "unmapped_type": "keyword"}
 				}
 				else{
 					option[field] = "asc";
@@ -391,7 +391,7 @@
             } else if (sortOption.order === "desc") {
 				if(field ==='title')
 				{
-					option['title.keyword']={"order": "desc", "unmapped_type": "String"}
+					option['title.keyword']={"order": "desc", "unmapped_type": "keyword"}
 				}
 				else{
 					option[field] = "desc";
