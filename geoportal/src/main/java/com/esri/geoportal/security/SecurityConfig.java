@@ -4,6 +4,7 @@ import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,6 +34,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configuration.OAuth2AuthorizationServerConfiguration;
 import org.springframework.security.oauth2.server.authorization.config.annotation.web.configurers.OAuth2AuthorizationServerConfigurer;
 import org.springframework.security.oauth2.server.authorization.settings.AuthorizationServerSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
@@ -174,6 +176,11 @@ public class SecurityConfig {
     @Bean
     public InMemoryRegisteredClientRepository registeredClientRepository() {
 
+		TokenSettings tokenSettings = TokenSettings.builder()
+		    .accessTokenTimeToLive(Duration.ofMinutes(120)) // Set to 5 hours
+		    .build();
+
+    	
         // 1. Catalog Client (Authorization Code + PKCE) Simple Authentication
         RegisteredClient uiAppClient = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(configProperties.getUiClientId())
                 // No client secret for SPA (geoportal client)
@@ -181,8 +188,8 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)                
                 .redirectUri(configProperties.getUiRedirectUri()) // Allow HTML callback
-                
-                .scope("openid").scope("profile").scope("api.read").build();
+                .tokenSettings(tokenSettings)
+                .scope("api.read").build();
 
         // 2. API Client (Read + Write)
         RegisteredClient apiClientRW = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(configProperties.getApiAdminClientId())
@@ -190,6 +197,7 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .tokenSettings(tokenSettings)
                 .scope("api.read").scope("api.write")
                 .build();
 
@@ -200,6 +208,7 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_POST)
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                .tokenSettings(tokenSettings)
                 .scope("api.read")
                 .build();
 
