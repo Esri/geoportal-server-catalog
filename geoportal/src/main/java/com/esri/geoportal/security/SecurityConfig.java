@@ -189,7 +189,7 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)                
                 .redirectUri(configProperties.getUiRedirectUri()) // Allow HTML callback
                 .tokenSettings(tokenSettings)
-                .scope("api.read").build();
+                .scope("openid").scope("profile").scope("api.read").build();
 
         // 2. API Client (Read + Write)
         RegisteredClient apiClientRW = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(configProperties.getApiAdminClientId())
