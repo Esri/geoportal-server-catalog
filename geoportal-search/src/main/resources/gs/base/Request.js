@@ -73,9 +73,12 @@
 	  }
       if (values === null || values.length === 0) {
         values = this.getParameterValues("sortBy");
+        //print("sortBy ",values);
       }
       if (values !== null && values.length === 1) {
         values = values[0].split(",");
+        //print("sortBy 1 ",values);
+        return values; //Dcat request
       } else if (values === null || values.length === 0) {
         var fields = this.getParameterValues("sortField");
         if (fields !== null && fields.length === 1) {
