@@ -14,11 +14,6 @@
  */
 package com.esri.geoportal.dcat;
 
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -29,16 +24,23 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import jakarta.json.Json;
-import jakarta.json.JsonArrayBuilder;
-import jakarta.json.JsonObjectBuilder;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * DCAT builder.
