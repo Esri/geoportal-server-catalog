@@ -187,16 +187,14 @@ public class SearchRequest {
   
   /** Get the Elasticsearch info for this Geoportal */
   private JsonObjectBuilder getSelfInfo() {
-    JsonObjectBuilder info = Json.createObjectBuilder();
+	JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
     GeoportalContext gc = com.esri.geoportal.context.GeoportalContext.getInstance();
     ElasticContext ec = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext();
     String node = null;
     String scheme = "http://";
     int port = 9200;
-    try {
-      node = ec.getNextNode();
-      port = ec.getHttpPort();
+  try {     
       if (ec.getUseHttps()) {
         scheme = "https://";
         elastic.add("useHttps",true);
@@ -204,14 +202,22 @@ public class SearchRequest {
       else
       {
     	  elastic.add("useHttps",false);
-      }      
-     
-	  String username = ec.getUsername();
-      String password = ec.getPassword();
-	  if (username != null && username.length() > 0 && password != null && password.length() > 0) {
-	        elastic.add("username",username);
-	        elastic.add("password",password);
-    	      
+      }
+      if(ec.getAwsOpenSearchType().equals("serverless"))
+      {
+    	  elastic.add("searchUrl",ec.getAwsALBEndpoint()+"/"+ec.getIndexName()+"/_search"); 
+      }
+      else
+      {
+    	  node = ec.getNextNode();
+          port = ec.getHttpPort();
+    	  String username = ec.getUsername();
+          String password = ec.getPassword();
+    	  if (username != null && username.length() > 0 && password != null && password.length() > 0) {
+    	        elastic.add("username",username);
+    	        elastic.add("password",password);
+        	      
+          } 
       }
     } catch (Throwable t) {
     	LOGGER.error(t.getMessage());
@@ -246,11 +252,15 @@ public class SearchRequest {
       String idxName = ec.getIndexName();          
       String url = scheme+node+":"+port+"/"+idxName+"/_search";
       elastic.add("searchUrl",url);
-      info.add("elastic",elastic);
-      return info;
+    }     
+    if(ec.getAwsOpenSearchType().equals("serverless") || ((node != null) && (node.length() > 0)))
+    {
+    	info.add("elastic",elastic);
+        return info;
     }
     return null;
   }
+  
   
   /** Get the task options. */
   private JsonObjectBuilder getTaskOptions(HttpServletRequest hsr) {
