@@ -161,22 +161,7 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
     try {
       JsonObjectBuilder access = Json.createObjectBuilder();
       access.add("supportsApprovalStatus",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsApprovalStatus());
-      access.add("supportsGroupBasedAccess",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess());    
-      com.esri.geoportal.context.AppUser user = null;
-      if (user != null && user.getUsername() != null) {
-        access.add("username",user.getUsername());
-        access.add("isAdmin",user.isAdmin());
-        if (com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()) {
-          JsonArrayBuilder jsaGroups = Json.createArrayBuilder();
-          List<com.esri.geoportal.base.security.Group> groups = user.getGroups();
-          if (groups != null) {
-            for (com.esri.geoportal.base.security.Group group: groups) {
-              jsaGroups.add(group.id);
-            }         
-          }
-          access.add("groups",jsaGroups);
-        }
-      }
+      access.add("supportsGroupBasedAccess",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()); 
       elastic.add("access",access);
     } catch (Throwable t) {
       LOGGER.warn("Warning getting self info.".formatted(), t);
