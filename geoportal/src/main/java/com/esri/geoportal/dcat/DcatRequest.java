@@ -126,10 +126,9 @@ public abstract class DcatRequest {
       parameterMap.put("size", Integer.toString(PAGE_SIZE));
       parameterMap.put("baseUrl",this.baseUrl);
       
-//      ArrayNode sortNode = MAPPER.createArrayNode();
-//      sortNode.add("_id:asc");
-      //Fixed #653
-      parameterMap.put("sortBy", "{\"_id\":{\"order\" : \"asc\"}}");
+      ArrayNode sortNode = MAPPER.createArrayNode();
+      sortNode.add("_id:asc");
+      parameterMap.set("sortBy", sortNode);
       
       if (searchAfter!=null) {
         parameterMap.put("search_after", searchAfter);
