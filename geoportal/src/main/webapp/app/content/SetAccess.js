@@ -60,7 +60,7 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
       },li,"last");
       var chk = domConstruct.create("input",{
         type: "checkbox",
-        value: group.id,
+        value: group.name,
         onchange: function() {
           self.updateCount();
         }
@@ -89,7 +89,8 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
       
       var orgId = null;
       if (AppContext.appUser && AppContext.appUser.arcgisPortalUser && AppContext.appUser.arcgisPortalUser.orgId) {
-        orgId = AppContext.appUser.arcgisPortalUser.orgId;
+        //orgId = AppContext.appUser.arcgisPortalUser.orgId;
+        orgId = "My Organization";
       }
       
       var itemGroups = this.item["sys_access_groups_s"];
@@ -98,10 +99,10 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
         groups = groups.slice(0); // shallow clone
         groups.sort(function(groupA,groupB){ 
           try {
-            if (groupA.id===orgId) {
+            if (groupA.name===orgId) {
               return -1;
             }
-            if (groupB.id===orgId) {
+            if (groupB.name===orgId) {
               return 1;
             }
             var a = groupA.name.toLowerCase();
@@ -115,10 +116,10 @@ function(declare, lang, array, domConstruct, topic, appTopics, BulkEdit,
       array.forEach(groups,function(group){
         var checked = false;
         if (lang.isArray(itemGroups)) {
-          checked = array.some(itemGroups,function(groupId){
-            return (group.id === groupId);
+          checked = array.some(itemGroups,function(groupName){
+            return (group.name === groupName);
           });
-        } else if (group.id === itemGroups) {
+        } else if (group.name === itemGroups) {
           checked = true;
         }
         self.addGroup(group,checked);
