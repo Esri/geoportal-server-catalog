@@ -63,22 +63,15 @@
 
     getSortOptions: {writable:true,value:function() {
       // &sortField=title,modified&sortOrder=desc,asc // Portal syntax
-      // &sort={"title.keyword":{"order":"asc","unmapped_type":"keyword"}} // Elasticsearch syntax
+      // &sort=title:desc&sort=modified:asc // Elasticsearch syntax
       // &sortBy=title:D,modified:A // CSW syntax
       var idx, sortField, sortOrder, sortOptions = null;
       var values = this.getParameterValues("sort");
-      if(values!== null)
-	  {
-    	  return values; //For ElasticSearch, it will be handled in ElasticTarget
-	  }
       if (values === null || values.length === 0) {
         values = this.getParameterValues("sortBy");
-        //print("sortBy ",values);
       }
       if (values !== null && values.length === 1) {
         values = values[0].split(",");
-        //print("sortBy 1 ",values);
-        return values; //Dcat request
       } else if (values === null || values.length === 0) {
         var fields = this.getParameterValues("sortField");
         if (fields !== null && fields.length === 1) {
