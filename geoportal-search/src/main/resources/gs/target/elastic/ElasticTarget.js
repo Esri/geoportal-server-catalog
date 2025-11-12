@@ -373,21 +373,21 @@
       };
 
       var sort = [], sortOptions = task.request.getSortOptions();
-      print("ElasticTarget sortOptions ",JSON.stringify(sortOptions));
+      //print("ElasticTarget sortOptions ",JSON.stringify(sortOptions));
       if (Array.isArray(sortOptions)) {
         sortOptions.forEach(function(sortOption){
           var field = getField(sortOption.field);
-          print("sort field ",field);
+          //print("sort field ",field);
           if (typeof field === "string" && field.length > 0) {
             var option = {};
             if (sortOption.order === "asc") {
 				if(field ==='title')
 				{
-					print("sort field title asc");
+					//print("sort field title asc");
 					option['title.keyword']={"order": "asc", "unmapped_type": "keyword"}
 				}
 				else{
-					print("sort field not title");
+					//print("sort field not title");
 					option[field] = "asc";
 				}
 					
@@ -395,11 +395,11 @@
             } else if (sortOption.order === "desc") {
 				if(field ==='title')
 				{
-					print("sort field title desc");
+					//print("sort field title desc");
 					option['title.keyword']={"order": "desc", "unmapped_type": "keyword"}
 				}
 				else{
-					print("sort field not title desc");
+					//print("sort field not title desc");
 					option[field] = "desc";
 				}				
               
@@ -412,7 +412,7 @@
       }
       if (sort) {
         targetRequest.searchCriteria["sort"] = sort;
-        console.log("final sort ", JSON.stringify(targetRequest.searchCriteria["sort"]));
+        //console.log("final sort ", JSON.stringify(targetRequest.searchCriteria["sort"]));
       }
     }},
 
