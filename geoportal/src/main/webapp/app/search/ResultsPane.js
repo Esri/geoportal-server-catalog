@@ -134,16 +134,21 @@ define(["dojo/_base/declare",
                   this.sortField = Util.getRequestParam("sort").split(":")[0];
                   this.sortDir = Util.getRequestParam("sort").split(":")[1];
                 }
-                if (this.sortField !== null && this.sortDir !== null) {
-                	if(this.sortDir == 'asc')
-                		{
-                			params.urlParams.sort = this.sortField;
-                		}
+                if (this.sortField && this.sortDir) {
+                	if(typeof this.sortField== "object" && "title.keyword" in this.sortField && this.sortDir == 'asc') 
+            		{
+                		params.urlParams.sort = this.sortField;
+            		}
+                	else if(typeof this.sortField== "object" && "title.keyword" in this.sortField && this.sortDir == 'desc')
+            		{
+                		params.urlParams.sort = AppContext.appConfig.searchResults.sortDesc;
+            		}
                 	else
-                		{
-                			params.urlParams.sort = AppContext.appConfig.searchResults.sortDesc;
-                		}
-                    
+            		{
+                		var sortObj ={};
+                    	sortObj[this.sortField] = this.sortDir;
+                        params.urlParams.sort = sortObj;
+            		}                	
                 }
                 this.statusNode.show();
             },

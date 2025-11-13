@@ -1304,7 +1304,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "sort field, to sort on text field, suffix .keyword for example title.keyword",
+            "description": "sortField:order; title:sort",
             "required": false,
             "type": "string"
           },
@@ -1429,7 +1429,7 @@
           {
             "name": "sort",
             "in": "query",
-            "description": "sort field, to sort on text field, suffix .keyword for example title.keyword",
+            "description": "sortField:order; title:sort",
             "required": false,
             "type": "string"
           },

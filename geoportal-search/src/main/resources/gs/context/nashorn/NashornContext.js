@@ -219,8 +219,7 @@
     },
 
     sendHttpRequest: function(url, data, dataContentType, options) {
-     // print("url",url);
-     // print("data",data);
+    	print("url",url);
       var result = null;
       var br = null, br2 = null, wr = null;
       var sw = new java.io.StringWriter();
@@ -230,7 +229,7 @@
         var u = new java.net.URL(url);
  
 		var client = com.esri.geoportal.lib.elastic.http.ElasticClient.newClient();;
-        //print(u);
+        print("data ",data);
         if(options && options.useHttps)
         	{        	
         	 var ssl_ctx = javax.net.ssl.SSLContext.getInstance("TLS");
