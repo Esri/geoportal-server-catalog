@@ -5,7 +5,7 @@
 	<groupId>com.esri.geoportal</groupId>
 	<artifactId>geoportal</artifactId>
 	<packaging>war</packaging>
-	<version>3.0.2</version>
+	<version>4.0.0</version>
 	<name>GeoportalServer</name>
 	<url>http://maven.apache.org</url>
 
