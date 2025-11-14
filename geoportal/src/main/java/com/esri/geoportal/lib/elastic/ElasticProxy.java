@@ -19,7 +19,9 @@ import java.io.UnsupportedEncodingException;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.ee10.proxy.BalancerServlet;
+import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.client.transport.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -29,6 +31,7 @@ import com.esri.geoportal.context.GeoportalContext;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A proxy to Elasticsearch.
@@ -134,5 +137,45 @@ public class ElasticProxy extends BalancerServlet {
     LOGGER.debug("ProxyTo: "+uri);
     return uri;
   }
+  
+
+  	@Override
+    protected void sendProxyRequest(HttpServletRequest clientRequest, HttpServletResponse proxyResponse, Request proxyRequest) {
+  		//Below code customizes headers sent to Elasticsearch. Default ones are not working with AWS ALB used in case of AWS opensearch serverless.
+		// Remove problematic headers
+		proxyRequest.headers(headers -> headers.remove("Forwarded")); // AWS ALB doesn't like this
+		proxyRequest.headers(headers -> headers.remove("Via")); // We'll add a proper one later 
+
+		// Remove duplicate Content-Type and Content-Length and add only one
+		if (proxyRequest.headers(headers -> headers.contains("Content-Type")) != null) {
+			String contentType = proxyRequest.getHeaders().get("Content-Type");
+			proxyRequest.headers(headers -> headers.remove("Content-Type"));
+			proxyRequest.headers(headers -> headers.put(HttpHeader.CONTENT_TYPE, contentType));
+		}
+		if (proxyRequest.headers(headers -> headers.contains("Content-Length")) != null) {
+			String contentLength = proxyRequest.getHeaders().get("Content-Length");
+			proxyRequest.headers(headers -> headers.remove("Content-Length"));
+			proxyRequest.headers(headers -> headers.put(HttpHeader.CONTENT_LENGTH, contentLength));
+		}
+
+		// add proper Via header
+		String host = clientRequest.getHeader("Host");
+
+		proxyRequest.headers(headers -> headers.put("Via", "http/1.1 " + clientRequest.getServerName()));
+		proxyRequest.headers(headers -> headers.put("X-Forwarded-For", clientRequest.getRemoteAddr()));
+		proxyRequest.headers(headers -> headers.put("X-Forwarded-Proto", clientRequest.getScheme()));
+
+		if (host != null) {
+			proxyRequest.headers(headers -> headers.put("X-Forwarded-Host", host));
+		}
+		// Log final request for debugging
+//		System.out.println("Final Proxy Request:");
+//		System.out.println("Method: " + proxyRequest.getMethod());
+//		System.out.println("URI: " + proxyRequest.getURI());
+//		proxyRequest.getHeaders().forEach(field -> System.out.println(field.getName() + ": " + field.getValue()));
+
+		super.sendProxyRequest(clientRequest, proxyResponse, proxyRequest);
+    }
+
   
 }
