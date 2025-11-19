@@ -876,7 +876,9 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;
 		JSONArray detailErrArray = new JSONArray();
 		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
-
+    boolean hasSearchAfterRequestParameter = (search_after != null && !search_after.isEmpty());
+    String requestType = (hasSearchAfterRequestParameter ? "searchPostSARP" : "searchPost");
+    
 		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit") : 0);
 		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime") : null);
 		String updated = (requestPayload.containsKey("updated") ? requestPayload.getString("updated") : null);
@@ -972,14 +974,15 @@ public class STACService extends Application {
 		        queryMap.put("filterClause", filterClause); //filterQry);
 		    }
       
-		 //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
-	       if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
-	       {
+		  //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
+      if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
+      {
 			  status = Response.Status.BAD_REQUEST;    				
 			  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
 			  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	    		  
-	       }
+      }
+      
 			//Adding one extra so that next page can be figured out
 			url = url + "/_search?size=" + (limit+1);
 			query = StacHelper.prepareSearchQuery(queryMap, search_after);
@@ -996,20 +999,20 @@ public class STACService extends Application {
 			}
 			else {
 				responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
-						(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""),body);
+						(intersects != null ? intersects.toString() : ""), requestType, (collectionArr != null ? collectionArr.toString() : ""),body);
 	      
 		      // if re-projecting STAC geometries is supported and a
 		      // geometry service has been configured, try projecting 
 		      // from internal CRS (4326) to requested outCRS
-			      if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-				        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-				
-				        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
-				        responseJSON = projectedResponseObj.toString();             
-				        
-				        // done
-				        LOGGER.debug("Project response -> " + responseJSON);
-			      }
+          if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+              LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+
+              JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
+              responseJSON = projectedResponseObj.toString();             
+
+              // done
+              LOGGER.debug("Project response -> " + responseJSON);
+          }
 			}
       
 		} catch (InvalidParameterException e) {
@@ -1898,7 +1901,23 @@ public class STACService extends Application {
 				}
 			}
 			String urlparam = "";
-			if (requestType.equalsIgnoreCase("searchPost")) {
+			if (requestType.equalsIgnoreCase("searchPostSARP")) {
+        // POST request but with search_after as a request parameter
+        urlparam = (search_after != null ? "?search_after=" + search_after : "");        
+				JSONObject bodyObj =new JSONObject();
+				// In post request, search_after will be part of request body				
+				if (body != null) 
+				{
+					bodyObj = (JSONObject) JSONValue.parse(body);
+					//if(search_after != null && search_after.length()>0)
+					//	bodyObj.appendField("search_after", search_after);
+				}					
+				if(nextLink)
+					linksContext.set("$.searchItem.links[1].body",(body != null ? bodyObj : ""));
+        
+      } else if (requestType.equalsIgnoreCase("searchPost")) {
+        // POST request with all parameters in the request body
+
 				JSONObject bodyObj =new JSONObject();
 				// In post request, search_after will be part of request body				
 				if (body != null) 
@@ -1911,6 +1930,7 @@ public class STACService extends Application {
 					linksContext.set("$.searchItem.links[1].body",(body != null ? bodyObj : ""));
 
 			} else {
+        // GET request, set everything as request parameters
 				if(nextLink)
 				{
 					linksContext.delete("$.searchItem.links[1].body");
