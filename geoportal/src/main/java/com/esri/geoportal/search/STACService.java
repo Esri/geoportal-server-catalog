@@ -884,7 +884,8 @@ public class STACService extends Application {
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox") : null);
 		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
 		String outCRS = (requestPayload.containsKey("outCRS") ? requestPayload.getString("outCRS") : null);
-		
+		search_after = (requestPayload.containsKey("search_after") ? requestPayload.getString("search_after") : search_after);
+				
 		JsonArray collectionArr = (requestPayload.containsKey("collections")
 				? requestPayload.getJsonArray("collections")
 				: null);
