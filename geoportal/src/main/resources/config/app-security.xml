@@ -48,6 +48,7 @@
     <!-- /stac - the stac catalog -->
     <security:intercept-url pattern="/stac/conformance" method="GET" access="permitAll" />
     <security:intercept-url pattern="/stac/api" method="GET" access="permitAll" />
+    <security:intercept-url pattern="/stac/collections" method="GET" access="permitAll" />
     <security:intercept-url pattern="/stac/collections/**" method="GET" access="permitAll" />
     <security:intercept-url pattern="/stac/search" method="GET" access="permitAll" />
     <security:intercept-url pattern="/stac/search" method="POST" access="permitAll" />     
