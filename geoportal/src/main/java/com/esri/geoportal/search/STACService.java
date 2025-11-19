@@ -1917,14 +1917,15 @@ public class STACService extends Application {
         
       } else if (requestType.equalsIgnoreCase("searchPost")) {
         // POST request with all parameters in the request body
-
+        urlparam = (search_after != null ? "?search_after=" + search_after : "");        
+				
 				JSONObject bodyObj =new JSONObject();
 				// In post request, search_after will be part of request body				
 				if (body != null) 
 				{
 					bodyObj = (JSONObject) JSONValue.parse(body);
-					if(search_after != null && search_after.length()>0)
-						bodyObj.appendField("search_after", search_after);
+					//if(search_after != null && search_after.length()>0)
+					//	bodyObj.appendField("search_after", search_after);
 				}					
 				if(nextLink)
 					linksContext.set("$.searchItem.links[1].body",(body != null ? bodyObj : ""));
