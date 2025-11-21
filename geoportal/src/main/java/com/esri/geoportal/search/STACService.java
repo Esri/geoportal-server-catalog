@@ -876,9 +876,7 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;
 		JSONArray detailErrArray = new JSONArray();
 		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
-    boolean hasSearchAfterRequestParameter = (search_after != null && !search_after.isEmpty());
-    String requestType = (hasSearchAfterRequestParameter ? "searchPostSARP" : "searchPost");
-    
+
 		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit") : 0);
 		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime") : null);
 		String updated = (requestPayload.containsKey("updated") ? requestPayload.getString("updated") : null);
@@ -999,7 +997,7 @@ public class STACService extends Application {
 			}
 			else {
 				responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, ids,
-						(intersects != null ? intersects.toString() : ""), requestType, (collectionArr != null ? collectionArr.toString() : ""),body);
+						(intersects != null ? intersects.toString() : ""), "searchPost", (collectionArr != null ? collectionArr.toString() : ""),body);
 	      
 		      // if re-projecting STAC geometries is supported and a
 		      // geometry service has been configured, try projecting 
@@ -1901,37 +1899,16 @@ public class STACService extends Application {
 				}
 			}
 			String urlparam = "";
-			if (requestType.equalsIgnoreCase("searchPostSARP")) {
-        // POST request but with search_after as a request parameter
-        urlparam = (search_after != null ? "?search_after=" + search_after : "");        
-				JSONObject bodyObj =new JSONObject();
-				// In post request, search_after will be part of request body				
-				if (body != null) 
-				{
-					bodyObj = (JSONObject) JSONValue.parse(body);
-					//if(search_after != null && search_after.length()>0)
-					//	bodyObj.appendField("search_after", search_after);
-				}					
-				if(nextLink)
-					linksContext.set("$.searchItem.links[1].body",(body != null ? bodyObj : ""));
-        
-      } else if (requestType.equalsIgnoreCase("searchPost")) {
-        // POST request with all parameters in the request body
-        urlparam = (search_after != null ? "?search_after=" + search_after : "");        
+			if (requestType.equalsIgnoreCase("searchPost")) {
+				// Add search_after in urlparam
+				urlparam = (search_after != null ? "?search_after=" + search_after : "");        
 				
-				JSONObject bodyObj =new JSONObject();
-				// In post request, search_after will be part of request body				
-				if (body != null) 
-				{
-					bodyObj = (JSONObject) JSONValue.parse(body);
-					//if(search_after != null && search_after.length()>0)
-					//	bodyObj.appendField("search_after", search_after);
-				}					
+				JSONObject bodyObj =new JSONObject();								
 				if(nextLink)
 					linksContext.set("$.searchItem.links[1].body",(body != null ? bodyObj : ""));
 
 			} else {
-        // GET request, set everything as request parameters
+				// GET request, set everything as request parameters
 				if(nextLink)
 				{
 					linksContext.delete("$.searchItem.links[1].body");
