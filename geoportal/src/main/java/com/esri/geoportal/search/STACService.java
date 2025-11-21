@@ -495,7 +495,8 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, null, null, "metadataItems", collectionId,null);      
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, null, null, "metadataItems", collectionId,null,
+					null,null,outCRS, null, null);      
 
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
@@ -835,7 +836,7 @@ public class STACService extends Application {
 			{
 				responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, 
                         idList, intersects, "search", 
-                        listOfCollections,null);
+                        listOfCollections,null, updated, created, outCRS, itemStatus, filter);
 
 				// if re-projecting STAC geometries is supported and a 
 				// geometry service has been configured, try projecting from internal CRS (4326) to requested outCRS
@@ -1821,9 +1822,16 @@ public class STACService extends Application {
 		finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
 		return finalResponse;
 	}
+	
+	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit, String datetime,
+			String ids, String intersects, String requestType, String collectionId, String body ) {
+			return this.prepareResponse(searchRes, hsr, bbox, limit, datetime, ids, intersects, requestType, collectionId, body, 
+					null, null, null, null, null);
+	}
 
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit, String datetime,
-			String ids, String intersects, String requestType, String collectionId, String body) {
+			String ids, String intersects, String requestType, String collectionId, String body,
+			String updated,String created,String outCrs,String status,String filter) {
 		
 		int numberMatched;		
 		net.minidev.json.JSONArray items;
@@ -1921,6 +1929,11 @@ public class STACService extends Application {
 						+ (search_after != null ? "&search_after=" + search_after : "")
 						+ (encodedIntersect != null ? "&intersects=" + encodedIntersect : "")
 						+ (ids != null ? "&ids=" + ids : "")
+						+ (updated != null ? "&updated=" + updated : "")
+						+ (created != null ? "&created=" + created : "")
+						+ (outCrs != null ? "&outCRS=" + outCrs : "")
+						+ (status != null ? "&status=" + status : "")
+						+ (filter != null ? "&filter=" + filter : "")
 						+((requestType.startsWith("search")) && collectionId != null ? "&collections=" + collectionId : "");
 			}
 			if (requestType.startsWith("metadataItems"))
