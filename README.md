@@ -23,7 +23,7 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 
 ## Can't Wait to Get Started?
 - Try the [sandbox site](https://gpt.geocloud.com/geoportal3) and learn what the new Geoportal Server 3.0.1 is all about!
-- A different configuration that contains several 100,000 images as its [catalog](https://geoss.esri.com/imagecatalog)
+- A different configuration that contains several 100,000 images as its [catalog](https://gpt.geocloud.com/imagecatalog/)
 
 ## Features
 * **Metadata editor** - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE 2.0.1 (Data), INSPIRE 2.0.1 (Service), GEMINI (Data), GEMINI (Service)
