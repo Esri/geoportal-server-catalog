@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -70,8 +72,10 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -1975,7 +1979,8 @@ public class STACService extends Application {
 			featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
 
 			val = featureContext.read("$.featurePropPath.collection");
-			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
+			String collectionId = searchItemCtx.read(val).toString();
+			featureContext.set("$.featurePropPath.collection", collectionId);
 
 			// add bbox, geometry
 			this.setBbox(searchItemCtx, featureContext);
@@ -2039,26 +2044,69 @@ public class STACService extends Application {
 				LOGGER.trace("No assets ($._source.assets) in this Stac record with id: " + recordId);
 
 			}
-
-			// Iterate properties, skip property if it is not available			
+			
+			//#680 
+			//fill item with collection properties when not available in item, item property overrides default set in collection	
+			Set<String> collectionPropKeySet = null;
+			JSONObject collectionPropObj = null;
+			ArrayList <String> propToBeAddedFromCollectionList = new ArrayList<String>();
+				  
+			    Collection collection = new Collection(collectionId);
+			    if(collection.getProperties() != null)
+			    {
+			    	collectionPropObj = collection.getProperties();
+				    if (collectionPropObj != null) {
+				        collectionPropKeySet =  collectionPropObj.keySet(); 
+				        //Create a combined set of property keys from item and collection
+				        Set<String> combinedPropSet = Stream.concat(propObjKeys.stream(), collectionPropKeySet.stream())
+			                     .collect(Collectors.toSet()); 
+						 propObjKeys = combinedPropSet;
+				    }	
+			 }			
+			
+			// Iterate properties, skip property if it is not available in item and collection			
 			for (String propKey : propObjKeys) {
 				try {
-					propKeyVal = String.valueOf(propObj.get(propKey));
-					// If it is a json path, set values from search result
-					if (propKeyVal.startsWith("$")) {
-						if (searchItemCtx.read(propKeyVal) != null) {
-							featureContext.set("$.featurePropPath.properties." + propKey,
-									searchItemCtx.read(propKeyVal));
+					//it is item prop, try to fill from searched item
+					if(propObj.containsKey(propKey))
+					{
+						propKeyVal = String.valueOf(propObj.get(propKey));
+						// If it is a json path, set values from search result
+						if (propKeyVal.startsWith("$")) {
+							if (searchItemCtx.read(propKeyVal) != null) {
+								featureContext.set("$.featurePropPath.properties." + propKey,
+										searchItemCtx.read(propKeyVal));
+							}
 						}
 					}
+					//Not an Item prop, Collection prop
+					else
+					{
+						propToBeAddedFromCollectionList.add(propKey);
+					}
+					
 				} catch (Exception e) {
-					// If json path not found or error in any property, remove this property in the
-					// end.
-					// if removed here, concurrentModificationException
-					propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
-					LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
+					//item did not have this data, so check if it is available in collection prop. This will be added later from collection
+					if(collectionPropObj != null && collectionPropObj.containsKey(propKey))
+					{
+						propToBeAddedFromCollectionList.add(propKey);
+					}
+					// If json path not found in searchItemCtx.read(propKeyVal) or error in any property, remove this property in the
+					// end. if removed here, concurrentModificationException
+					else 	
+					{
+						propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
+						LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
+					}
 				}
 			}
+			//Read updated item property object again and add keys from collection
+			HashMap<String, String> updatedPropObj = featureContext.read("$.featurePropPath.properties");
+			for(String prop: propToBeAddedFromCollectionList)
+			{
+				updatedPropObj.put(prop, collectionPropObj.getAsString(prop));
+			}
+			featureContext.set("$.featurePropPath.properties",updatedPropObj);
 
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
