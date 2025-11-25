@@ -115,6 +115,9 @@ define([
           "A port city in the Netherlands known for modern architecture.",
       },
     ],
+    interval:null,
+    progress: 0,
+    updateDelay: 9,
 
     getStacBaseUrl: function () {
       if (window && window.top && window.top.geoportalServiceInfo) {
@@ -336,11 +339,20 @@ define([
 
     handleDeleteCollections: function () {
       this.appActionState = this.actions.DELETE_COLLECTION;
-      this.updateIsLoading(true);
       const that = this;
-
-      // loop through and delete every collection selected
+      
       const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
+      var progressSec = this.updateDelay;
+      if(collectionsToBeDeleted.length > 1)
+	  {
+    	  progressSec = 5 * collectionsToBeDeleted.length + this.updateDelay;
+	  }
+      const updateUIdelay = progressSec - 1 ;
+   // Show progress bar overlay
+      this.progressContainer.classList.remove("hidden");
+      this.startProgress(progressSec); // Fill progress bar
+      
+      // loop through and delete every collection selected      
       const allDeletePromises = collectionsToBeDeleted.map((collection) => {
         if (collection.id === that.selectedCollection?.properties?.id) {
           this.emptyCollectionInfoBox();
@@ -353,7 +365,7 @@ define([
         .then((results) => {
           let successDeleteIds = [];
           let failedDeleteIds = [];
-
+          this.opSuccess = true;
           results.forEach((r) => {
             if (r.response.code === "200") {
               successDeleteIds.push(r.id);
@@ -363,25 +375,34 @@ define([
           });
 
           if (failedDeleteIds.length === results.length) {
+        	this.opSuccess = false;
             throw new Error(failedDeleteIds.join(", "));
-          }
-          this.showAlert(
-            "Successfully deleted collections",
-            `Deleted: ${successDeleteIds.join(", ")}. ${
-              failedDeleteIds.length > 0
-                ? `Failed to delete: ${failedDeleteIds.join(", ")}`
-                : ""
-            }`,
-            "green"
-          );
-          this.rerenderCollectionsList();
-          this.collectionIdsToBeDeleted = [];
-          this.handleDeleteCollectionEnabled();
-          this.handleUpdateButtonEnabled();
-        })
+          } 
+          setTimeout(() => {    
+        	  if(this.opSuccess)
+    		  {
+        		  this.rerenderCollectionsList();
+                  this.collectionIdsToBeDeleted = [];
+                  this.handleDeleteCollectionEnabled();
+                  this.handleUpdateButtonEnabled();
+                  this.endProgressBar();
+                  this.showAlert(
+                          "Successfully deleted collections",
+                          `Deleted: ${successDeleteIds.join(", ")}. ${
+                            failedDeleteIds.length > 0
+                              ? `Failed to delete: ${failedDeleteIds.join(", ")}`
+                              : ""
+                          }`,
+                          "green"
+                   );
+    		  }
+                
+              }, updateUIdelay * 1000); // delay so that AWS serverless is returns refreshed data
+            })
         .catch((e) => {
           this.showAlert("Error deleting collections", `${e}`, "red");
-          this.updateIsLoading(false);
+          this.opSuccess = false;
+          this.endProgressBar();
           console.error(e);
         });
       this.hideModal();
@@ -413,90 +434,104 @@ define([
     },
 
     handleCreateCollection: async function () {
-      this.appActionState = this.actions.CREATE_COLLECTION;
-      this.updateIsLoading(true);
-      this.sketchVM.complete();
+        this.appActionState = this.actions.CREATE_COLLECTION;       
+     // Show progress bar overlay
+        this.progressContainer.classList.remove("hidden");
+        this.startProgress(this.updateDelay); // Fill over delay seconds
+        this.sketchVM.complete();
 
-      const { id, description, title, assets } = this.getCreateFieldValues();
-      let tempGeometry = null;
+        const { id, description, title, assets } = this.getCreateFieldValues();
+        let tempGeometry = null;
 
-      if (this.selectedGraphic?.geometry) {
-        tempGeometry = this.selectedGraphic?.geometry.spatialReference
-          .isWebMercator
-          ? webMercatorUtils.webMercatorToGeographic(
-              this.selectedGraphic.geometry
-            )
-          : this.selectedGraphic.geometry;
-      }
+        if (this.selectedGraphic?.geometry) {
+          tempGeometry = this.selectedGraphic?.geometry.spatialReference
+            .isWebMercator
+            ? webMercatorUtils.webMercatorToGeographic(
+                this.selectedGraphic.geometry
+              )
+            : this.selectedGraphic.geometry;
+        }
 
-      let bbox =
-        tempGeometry?.extent?.xmin != null &&
-        tempGeometry?.extent?.ymin != null &&
-        tempGeometry?.extent?.xmax != null &&
-        tempGeometry?.extent?.ymax != null
-          ? [
-              [
-                tempGeometry?.extent.xmin,
-                tempGeometry?.extent.ymin,
-                tempGeometry?.extent.xmax,
-                tempGeometry?.extent.ymax,
-              ],
-            ]
-          : [];
+        let bbox =
+          tempGeometry?.extent?.xmin != null &&
+          tempGeometry?.extent?.ymin != null &&
+          tempGeometry?.extent?.xmax != null &&
+          tempGeometry?.extent?.ymax != null
+            ? [
+                [
+                  tempGeometry?.extent.xmin,
+                  tempGeometry?.extent.ymin,
+                  tempGeometry?.extent.xmax,
+                  tempGeometry?.extent.ymax,
+                ],
+              ]
+            : [];
 
-      const collection = {
-        type: "Collection",
-        stac_version: "1.0.0",
-        stac_extensions: [],
-        id: this.removeAllSpaces(id),
-        title: title,
-        description: description,
-        keywords: [],
-        license: "Apache-2.0",
-        providers: [],
-        extent: {
-          spatial: {
-            bbox: bbox,
-            geometry: {
-              type: "Polygon",
-              coordinates: tempGeometry?.rings,
+        const collection = {
+          type: "Collection",
+          stac_version: "1.0.0",
+          stac_extensions: [],
+          id: this.removeAllSpaces(id),
+          title: title,
+          description: description,
+          keywords: [],
+          license: "Apache-2.0",
+          providers: [],
+          extent: {
+            spatial: {
+              bbox: bbox,
+              geometry: {
+                type: "Polygon",
+                coordinates: tempGeometry?.rings,
+              },
+            },
+            temporal: {
+              interval: [["1900-01-01T00:00:00Z", "2099-12-31T23:59:59Z"]],
             },
           },
-          temporal: {
-            interval: [["1900-01-01T00:00:00Z", "2099-12-31T23:59:59Z"]],
+          summaries: {
+            datetime: {
+              min: "1900-01-01T00:00:00Z",
+              max: "2099-12-31T23:59:59Z",
+            },
           },
-        },
-        summaries: {
-          datetime: {
-            min: "1900-01-01T00:00:00Z",
-            max: "2099-12-31T23:59:59Z",
-          },
-        },
-        links: [],
-        assets: assets,
-        item_assets: {},
-      };
+          links: [],
+          assets: assets,
+          item_assets: {},
+        };
 
-      try {
-        const result = await this.createCollection(collection);
-        if (result.response.code !== "201") {
-          throw new Error(result.response.description);
+        try {
+          const result = await this.createCollection(collection);
+          if (result.response.code !== "201") {
+        	this.opSuccess = false;
+            throw new Error(result.response.message);
+          }
+          else{
+        	  this.opSuccess = true;
+          }
+          
+        } catch (e) {
+          this.endProgressBar();
+          this.showAlert("Error creating collection", `${e}`, "red");
+          this.opSuccess = false;
         }
-        this.showAlert(
-          "Successfully created collection",
-          `Created ${collection.id}`,
-          "green"
-        );
-      } catch (e) {
-        this.updateIsLoading(false);
-        this.showAlert("Error creating collection", `${e}`, "red");
-      }
-
-      this.clearCollectionAssets();
-      this.rerenderCollectionsList();
-      this.resetSketch();
-      this.hideEditor();
-    },
+        setTimeout(() => {
+        	if(this.opSuccess)
+        	{
+        		this.clearCollectionAssets();
+    	        this.rerenderCollectionsList();
+    	        this.resetSketch();
+    	        this.hideEditor();
+    	        this.endProgressBar();
+    	        this.showAlert(
+    	                "Successfully created collection",
+    	                `Created ${collection.id}`,
+    	                "green"
+    	              );
+        	}	    	
+        }, 8000); // Wait for 8 seconds before re-render i.e. 1 second less than progressbar, AWS serverless usually updated in 6-7 sec 
+        
+      },
 
     createCollection: async function (collection) {
       if (!collection) {
@@ -521,6 +556,40 @@ define([
         throw new Error(`Error creating collection ${collection.id}`);
       }
     },
+    
+    startProgress: function(seconds) {
+        const progressBar = document.getElementById('progressBar');
+        const message = document.getElementById('message');
+        this.progress = 0;
+
+        // Clear any previous interval
+        if (this.interval) clearInterval(this.interval);
+
+        message.textContent = "In Progress...";
+        const intervalTime = (seconds * 1000) / 100; // Spread updates evenly
+
+        this.interval = setInterval(() => {
+        	this.progress += 1;
+          progressBar.style.width = this.progress + '%';
+
+          if (this.progress >= 100) {
+            clearInterval(this.interval);
+            message.textContent = "Completed!";
+            this.progressContainer.classList.add("hidden");
+          }
+        }, intervalTime);
+      },
+
+    endProgressBar: function () {
+        const progressBar = document.getElementById('progressBar');
+        const message = document.getElementById('message');
+
+        if (this.interval) clearInterval(this.interval); // Stop ongoing progress
+        this.progress = 100;
+        progressBar.style.width = '100%';
+       // message.textContent = "Completed!";
+        this.progressContainer.classList.add("hidden");
+      },
 
     handleUpdateCollection: async function (id, properties) {
       this.appActionState = this.actions.UPDATE_COLLECTION;
@@ -575,7 +644,7 @@ define([
       try {
         const result = await this.updateCollection(collection);
         if (result.response.code !== "200") {
-          throw new Error(result.response.description);
+          throw new Error(result.response.message);
         }
         this.showAlert(
           "Successfully updated collection",
