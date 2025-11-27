@@ -72,10 +72,8 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
-import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -178,6 +176,26 @@ public class STACService extends Application {
 		return Response.status(status).entity(responseJSON).build();
 	}
 
+	@GET
+	@Path("/queryables")
+	@Produces("application/vnd.oai.openapi+json;version=3.0")
+	public Response getQueryables(@Context HttpServletRequest hsr) {
+		String responseJSON;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		try {
+			responseJSON = this.readResourceFile("service/config/stac-queryables.json", hsr);
+			responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
+
+		} catch (Exception e) {
+			LOGGER.error("Error in api " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API queryables response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
+  
 	@GET
 	@Path("/collections")
 	@Produces(MediaType.APPLICATION_JSON)
@@ -457,6 +475,27 @@ public class STACService extends Application {
 		return Response.status(status).entity(responseJSON).build();
 	}
 
+
+	@GET
+	@Path("/collections/{collectionId}/queryables")
+	@Produces("application/vnd.oai.openapi+json;version=3.0")
+	public Response getCollectionQueryables(@Context HttpServletRequest hsr) {
+		String responseJSON;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		try {
+			responseJSON = this.readResourceFile("service/config/stac-queryables.json", hsr);
+			responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
+
+		} catch (Exception e) {
+			LOGGER.error("Error in api " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API queryables response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
+    
   
 	@GET
 	@Produces("application/geo+json")
@@ -882,7 +921,8 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
 		JsonObject requestPayload = (JsonObject) JsonUtil.toJsonStructure(body);
 
-		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit") : 0);
+		int limit = (requestPayload.containsKey("limit") ? requestPayload.getInt("limit") : -1);
+    limit = ((limit < 0 &&requestPayload.containsKey("max_items"))? requestPayload.getInt("max_items") : 10);
 		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime") : null);
 		String updated = (requestPayload.containsKey("updated") ? requestPayload.getString("updated") : null);
 		String created = (requestPayload.containsKey("created") ? requestPayload.getString("created") : null);

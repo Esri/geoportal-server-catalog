@@ -1,0 +1,76 @@
+{
+  "$id": "{url}/queryables",
+  "type": "object",
+  "title": "STAC Queryables.",
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "properties": {
+    "id": {
+      "type": "string",
+      "title": "Item ID",
+      "description": "Item identifier"
+    },
+    "datetime": {
+      "type": "string",
+      "title": "Acquired",
+      "format": "date-time",
+      "pattern": "(\\+00:00|Z)$",
+      "description": "Datetime"
+    },
+    "eo:sun_azimuth": {
+      "type": "number"
+    },
+    "eo:sun_elevation": {
+      "type": "number"
+    },
+    "eo:cloud_cover": {
+      "type": "number"
+    },
+    "eo:row": {
+      "type": "number"
+    },
+    "eo:column": {
+      "type": "number"
+    },
+    "eo:platform": {
+      "type": "string"
+    },
+    "eo:epsg": {
+      "type": [
+        "integer",
+        "null"
+      ],
+      "title": "EPSG code"
+    },
+    "sentinel:utm_zone": {
+      "type": "string"
+    },
+    "xom:tagnumber": {
+      "type": "string"
+    },
+    "xom:sitename": {
+      "type": "string"
+    },
+    "xom:source_key_id": {
+      "type": "string"
+    },
+    "xom:source_system": {
+      "type": "string"
+    },
+    "xom:consuming_app_proj_name": {
+      "type": "string"
+    },
+    "gsdb:crs": {
+      "type": "string"
+    },
+    "gsdb:unit_of_measument": {
+      "type": "string"
+    },
+    "gsdb:geometry_wkt": {
+      "type": "string"
+    },
+    "gsdb:status": {
+      "type": "string"
+    },
+    "additionalProperties": true
+  }
+}
