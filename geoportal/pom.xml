@@ -338,6 +338,11 @@
 	    <artifactId>json-smart</artifactId>
 	    <version>2.5.2</version>
 	</dependency>
+	<dependency>
+        <groupId>org.antlr</groupId>
+        <artifactId>antlr4-runtime</artifactId>
+        <version>4.13.1</version>
+    </dependency>
 </dependencies>
   
   <build>

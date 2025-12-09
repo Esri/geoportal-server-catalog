@@ -19,6 +19,7 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.search.StacHelper;
+import com.esri.geoportal.service.stac.filter.StacFilterLang;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 import com.jayway.jsonpath.PathNotFoundException;
@@ -295,7 +296,7 @@ public class StacContext {
         	  filterClause = filterClause+" AND " + mappedField+"="+ value;
           }
           cnt++;
-          searchQry = StacHelper.prepareFilter(filterClause);
+          searchQry = StacHelper.prepareFilter(filterClause,StacFilterLang.CQL2TEXT);
         }
           
         existingID = indexHasValue(collectionId, searchQry,forUpdate,itemId);
