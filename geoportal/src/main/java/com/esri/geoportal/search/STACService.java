@@ -72,10 +72,8 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
-import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -761,7 +759,8 @@ public class STACService extends Application {
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("updated") String updated, @QueryParam("created") String created, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
-			@QueryParam("outCRS") String outCRS, @QueryParam("status") String itemStatus,@QueryParam("filter") String filter)
+			@QueryParam("outCRS") String outCRS, @QueryParam("status") String itemStatus,@QueryParam("filter") String filter,
+			@QueryParam("filter-lang") String filterLang)
 			throws UnsupportedEncodingException {
 		String responseJSON;
 		String response;
@@ -808,7 +807,15 @@ public class STACService extends Application {
 	       // issue 573
 	       if (filter != null && filter.length() > 0) {
 	         queryMap.put("filterClause", filter);
+	       //#684 filter extension, For GET, default is cql2-text
+	         String searchfilterLang = "cql2-text";
+		       if (filterLang != null && filterLang.length() > 0) {
+		    	   searchfilterLang = filterLang; 
+		       }
+			   queryMap.put("filterLang", searchfilterLang);
+			    
 	       }
+	       
 	     //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
 	       if ((outCRS != null) &&  listOfCollections!=null && listOfCollections.length()>0)
 	       {
@@ -900,9 +907,9 @@ public class STACService extends Application {
 				: null);
 		String itemStatus = (requestPayload.containsKey("status") ? requestPayload.getString("status"): null);
 	    String filterClause = (requestPayload.containsKey("filter") 
-	        ? requestPayload.getString("filter")
+	        ? requestPayload.getJsonObject("filter").toString()
 					: null);
-
+	    
 		//TODO Handle merge=true in Search Pagination
 		String query;
 		String bbox = "";
@@ -972,9 +979,17 @@ public class STACService extends Application {
 				queryMap.put("status", itemStatus);
 
 			// issue 573
-			if (filterClause != null && filterClause.length() > 0) {
-		        //String filterQry = StacHelper.prepareFilter(filterClause);
+			if (filterClause != null && filterClause.length() > 0) {		        
 		        queryMap.put("filterClause", filterClause); //filterQry);
+		        //#684 filter extension, For POST, only cql2-json
+			    String searchfilterLang = "cql2-json";
+			    queryMap.put("filterLang", searchfilterLang);
+		    	String filterLang = (requestPayload.containsKey("filter-lang") ? requestPayload.getString("filter-lang"): null);
+		       if (filterLang != null && filterLang.length() > 0 && !filterLang.equalsIgnoreCase(searchfilterLang)) {
+		    	   status = Response.Status.BAD_REQUEST;    				
+		    	   responseJSON = this.generateResponse("400", "The only supported filter-lang for a search POST request is cql2-json.",null);
+				   return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+			    }
 		    }
       
 		  //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
