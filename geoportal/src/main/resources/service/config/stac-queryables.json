@@ -1,0 +1,38 @@
+{
+  "$schema" : "https://json-schema.org/draft/2019-09/schema",
+  "id" : "Geoportal",
+  "type" : "object",
+  "title" : "Queryables for Geoportal STAC API",
+  "description" : "Queryable names Geoportal STAC API Item Search filter.",
+  "properties" : {
+    "id" : {
+      "description" : "ID",
+      "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json#/id"
+    },
+    "collection" : {
+      "description" : "Collection",
+      "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json#/collection"
+    },
+    "geometry" : {
+      "description" : "Geometry",
+      "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json#/geometry"
+    },
+    "datetime" : {
+      "description" : "Datetime",
+      "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/datetime.json#/properties/datetime"
+    },
+    "gsdb:status" : {
+      "description" : "gsdb status",
+      "$ref": ""
+    },
+    "xom:edp_equip_id" : {
+      "description" : "edp_equip_id",
+      "$ref": ""
+    },
+     "xom:source_system" : {
+      "description" : "source_system",
+      "$ref": ""
+    }
+  },
+  "additionalProperties": true
+}
