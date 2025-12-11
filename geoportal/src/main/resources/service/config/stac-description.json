@@ -1,52 +1,66 @@
 {
-  "type": "Catalog",
-  "stac_version": "1.0.0",
-  "id": "Geoportal",
-  "title": "Geoportal Server",
-  "description": "Landing page for Geoportal Server STAC Records API.",
-  "conformsTo": [
-      "https://api.stacspec.org/v1.0.0/core", 
-      "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",    
-      "https://api.stacspec.org/v1.0.0/collections",
-      "https://api.stacspec.org/v1.0.0/ogcapi-features",      
-      "http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson",
-       "https://api.stacspec.org/v1.0.0/item-search"
-      ],
-  "links": [
-     {
-      "href": "{url}",
-      "rel": "self",
-      "type": "application/json",
-      "title": "This STAC API - Records landing page as JSON"
-    },
-    {
-      "href": "{url}",
-      "rel": "root",
-      "type": "application/json",
-      "title": "This STAC API - Records landing page as JSON"
-    },
-    {
-      "href": "{url}/api",
-      "rel": "service-desc",
-      "type": "application/vnd.oai.openapi+json;version=3.0",
-      "title": "The API definition (OpenAPI document)"
-    },
-    {
-      "href": "{url}/conformance",
-      "rel": "conformance",
-      "title": "The STAC API conformance classes supported"
-    },
-    {
-      "href": "{url}/collections",
-      "rel": "data",
-      "title": "The set of available collections"
-    },
-     {
-      "href": "{url}/search",
-      "rel": "search",
-      "type": "application/geo+json",
-      "title": "Search the collections"
-    }
-  ]
+	"type": "Catalog",
+	"stac_version": "1.0.0",
+	"id": "Geoportal",
+	"title": "Geoportal Server",
+	"description": "Landing page for Geoportal Server STAC Records API.",
+	"conformsTo": [
+		"https://api.stacspec.org/v1.0.0/core",
+		"http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/core",
+		"https://api.stacspec.org/v1.0.0/collections",
+		"https://api.stacspec.org/v1.0.0/ogcapi-features",
+		"http://www.opengis.net/spec/ogcapi-features-1/1.0/conf/geojson",
+		"https://api.stacspec.org/v1.0.0/item-search"
+		"https://api.stacspec.org/v1.0.0/item-search#filter"
+		"http://www.opengis.net/spec/ogcapi-features-3/1.0/conf/filter",
+		"http://www.opengis.net/spec/ogcapi-features-3/1.0/conf/features-filter",
+		"http://www.opengis.net/spec/cql2/1.0/conf/cql2-text",
+		"http://www.opengis.net/spec/cql2/1.0/conf/cql2-json",
+		"http://www.opengis.net/spec/cql2/1.0/conf/basic-cql2",
+		"http://www.opengis.net/spec/cql2/1.0/conf/basic-spatial-functions",
+		"http://www.opengis.net/spec/cql2/1.0/conf/advanced-comparison-operators"
+	],
+	"links": [
+		{
+			"href": "{url}",
+			"rel": "self",
+			"type": "application/json",
+			"title": "This STAC API - Records landing page as JSON"
+		},
+		{
+			"href": "{url}",
+			"rel": "root",
+			"type": "application/json",
+			"title": "This STAC API - Records landing page as JSON"
+		},
+		{
+			"href": "{url}/api",
+			"rel": "service-desc",
+			"type": "application/vnd.oai.openapi+json;version=3.0",
+			"title": "The API definition (OpenAPI document)"
+		},
+		{
+			"href": "{url}/conformance",
+			"rel": "conformance",
+			"title": "The STAC API conformance classes supported"
+		},
+		{
+			"href": "{url}/collections",
+			"rel": "data",
+			"title": "The set of available collections"
+		},
+		{
+			"href": "{url}/search",
+			"rel": "search",
+			"type": "application/geo+json",
+			"title": "Search the collections"
+		},
+		{
+			"title": "Queryables",
+			"href": "{url}/queryables",
+			"rel": "http://www.opengis.net/def/rel/ogc/1.0/queryables",
+			"type": "application/schema+json"
+		}
+	]
 }
 

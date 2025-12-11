@@ -175,6 +175,25 @@ public class STACService extends Application {
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
+	
+	@GET
+	@Path("/queryables")
+	@Produces("application/json")
+	public Response getQueryable(@Context HttpServletRequest hsr) {
+		String responseJSON;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		try {
+			responseJSON = this.readResourceFile("service/config/stac-queryable.json", hsr);
+
+		} catch (Exception e) {
+			LOGGER.error("Error in api " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
 
 	@GET
 	@Path("/collections")

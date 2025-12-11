@@ -455,6 +455,7 @@ public class StacHelper {
 			{
 				filterQryOpenSearch = filterQryOpenSearch.replace(fldKey, fieldMapping.get(fldKey));
 			}
+			filterQryOpenSearch = filterQryOpenSearch.replace("geometry", "shape_geo");
 		} catch (Exception ex) {
 			LOGGER.info("Filter clause could not be converted to opensearch qry: " + filterClause, ex);
 		}
