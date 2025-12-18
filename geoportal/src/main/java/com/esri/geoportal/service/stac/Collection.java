@@ -14,7 +14,9 @@ import org.slf4j.LoggerFactory;
 public class Collection {
     private JSONObject body = null;
     private JSONObject geometry = null;
-    private String collectionId = null;
+    private JSONObject properties = null;    
+
+	private String collectionId = null;
     private String title = null;
     private Map<String, Asset> assets = new HashMap<>();
     private List<String> availableCRS = null;
@@ -25,8 +27,7 @@ public class Collection {
     // Constructor
     public Collection() {
         
-    }
-    
+    }    
     
     // Constructor with collection JSON Object
     public Collection(JSONObject collectionObj) {
@@ -39,12 +40,17 @@ public class Collection {
 
             JSONObject theAssets = this.getJSONObject(collectionObj.get("assets"));
             this.availableCRS = new ArrayList<>(theAssets.keySet());
-
+            
             theAssets.keySet().forEach((String key) -> {
                 Asset thisAsset = new Asset(this.getJSONObject(theAssets.get(key)));
                 this.addAsset(key, thisAsset);
                 LOGGER.debug(key + ": esri_wkt = " + thisAsset.getEsriWKT());
             });
+            if(collectionObj.containsKey("properties"))
+            {
+            	this.properties = this.getJSONObject(collectionObj.get("properties"));
+            }
+            
         } catch (Exception ex) {
             LOGGER.error("Error in creating collection " + collectionId + ": " + ex);
         }				
@@ -68,6 +74,10 @@ public class Collection {
                 this.addAsset(key, thisAsset);
                 LOGGER.debug(key + ": esri_wkt = " + thisAsset.getEsriWKT());
             });
+            if(this.body.containsKey("properties"))
+            {
+            	this.properties = this.getJSONObject(this.body.get("properties"));
+            }
         } catch (Exception ex) {
             LOGGER.error("Error in creating collection " + collectionId + ": " + ex);
         }				
@@ -81,7 +91,6 @@ public class Collection {
     public void setBody(JSONObject body) {
         this.body = body;
     }
-
     
     // get/set geometry
     public JSONObject getGeometry() {
@@ -141,4 +150,12 @@ public class Collection {
     private JSONObject getJSONObject(Object x) {
         return new JSONObject((Map<String, ?>) x); 
     }
+    
+    public JSONObject getProperties() {
+		return properties;
+	}
+
+	public void setProperties(JSONObject properties) {
+		this.properties = properties;
+	}
 }

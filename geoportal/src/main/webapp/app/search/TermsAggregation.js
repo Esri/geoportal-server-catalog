@@ -105,7 +105,7 @@ function(declare, lang, array, domConstruct, template, i18n, SearchComponent,
       if (this.field === "sys_access_groups_s" && typeof name === "string" &&
           AppContext.geoportal.supportsGroupBasedAccess) {
         array.some(AppContext.appUser.getGroups(),function(group){
-          if (group.id === name) {
+          if (group.name === name) {
             name = group.name;
             return true;
           }
