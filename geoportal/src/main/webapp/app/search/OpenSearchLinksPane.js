@@ -83,11 +83,15 @@ define(["dojo/_base/declare",
               postData = postData? postData: {};
               
               if (!searchResponse.hasScorable && typeof searchResponse.urlParams.sort === "undefined") {
-                  searchResponse.urlParams.sort = AppContext.appConfig.searchResults.defaultSort;
+                  var sortObj = AppContext.appConfig.searchResults.defaultSort;
               }
               if (searchResponse.urlParams && searchResponse.urlParams.sort !== "undefined" && typeof searchResponse.urlParams.sort === "object") {
-            	  searchResponse.urlParams.sort = JSON.stringify(searchResponse.urlParams.sort);
+            	  sortObj = searchResponse.urlParams.sort;
               }
+              //672 nashorn search expects sort as string param like "_id:asc" i.e. "field:order" so convert object to
+              var sortParam = this.convertSortObjectToString(sortObj);
+              
+              searchResponse.urlParams.sort = sortParam;
               var openSearchUrlParams = lang.mixin({}, searchResponse.urlParams)
               openSearchUrlParams.from = searchResponse.urlParams.from? searchResponse.urlParams.from+1: 1
               
@@ -102,8 +106,23 @@ define(["dojo/_base/declare",
               
               // 0-base index
               this._createWebLink("WEB", i18n.search.links.web, "web", searchResponse.urlParams, postData);
-            }
+            },
+            
 
+            convertSortObjectToString:function(sortObj) {
+            	if (!sortObj || typeof sortObj !== "object") return "";
+
+            	  return Object.keys(sortObj)
+            	    .map(key => {
+            	      const cleanKey = key.replace(".keyword", "");
+            	      const value = sortObj[key];
+
+            	      // If value is an object with 'order', use that; otherwise assume it's a string
+            	      const order = typeof value === "object" && value.order ? value.order : value;
+            	      return `${cleanKey}: ${order}`;
+            	    })
+            	    .join(", ");
+            }
         });
 
         return oThisClass;

@@ -29,7 +29,7 @@ import com.esri.geoportal.lib.elastic.http.request.SetApprovalStatusRequest;
 import com.esri.geoportal.lib.elastic.http.request.SetFieldRequest;
 import com.esri.geoportal.lib.elastic.http.request.SetOwnerRequest;
 import com.esri.geoportal.lib.elastic.http.request.TransformMetadataRequest;
-//import com.esri.geoportal.lib.elastic.http.request.ValidateMetadataRequest;
+import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
 import com.esri.geoportal.search.SearchRequest;
 
 import javax.servlet.http.HttpServletRequest;
@@ -370,16 +370,16 @@ public class MetadataService {
   }
   */
   
-//  @POST 
-//  @Path("/validate")
-//  public Response validateUsingPost(
-//      String xml,
-//      @Context SecurityContext sc,
-//      @Context HttpServletRequest hsr,
-//      @QueryParam("pretty") boolean pretty) {
-//    AppUser user = new AppUser(hsr,sc);
-//    return this.validateMetadata(user,pretty,xml);
-//  }
+  @POST 
+  @Path("/validate")
+  public Response validateUsingPost(
+      String xml,
+      @Context SecurityContext sc,
+      @Context HttpServletRequest hsr,
+      @QueryParam("pretty") boolean pretty) {
+    AppUser user = new AppUser(hsr,sc);
+    return this.validateMetadata(user,pretty,xml);
+  }
   
   /*
   @PUT 
@@ -581,18 +581,18 @@ public class MetadataService {
    * @param xml the metadata
    * @return the response
    */
-//  protected Response validateMetadata(AppUser user, boolean pretty, String xml) {
-//    try {
-//      ValidateMetadataRequest request = GeoportalContext.getInstance().getBean(
-//          "request.ValidateMetadataRequest",ValidateMetadataRequest.class);
-//      request.init(user,pretty);
-//      request.init(xml);
-//      AppResponse response = request.execute();
-//      return response.build();
-//    } catch (Throwable t) {
-//      return this.writeException(t,pretty);
-//    }
-//  }
+  protected Response validateMetadata(AppUser user, boolean pretty, String xml) {
+    try {
+      ValidateMetadataRequest request = GeoportalContext.getInstance().getBean(
+          "request.ValidateMetadataRequest",ValidateMetadataRequest.class);
+      request.init(user,pretty);
+      request.init(xml);
+      AppResponse response = request.execute();
+      return response.build();
+    } catch (Throwable t) {
+      return this.writeException(t,pretty);
+    }
+  }
   
   /**
    * Write a deprecated response.

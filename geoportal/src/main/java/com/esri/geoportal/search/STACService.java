@@ -34,6 +34,8 @@ import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.json.JsonArray;
 import javax.json.JsonObject;
@@ -70,8 +72,10 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -495,7 +499,8 @@ public class STACService extends Application {
 			else
 				response = client.sendGet(url);
 
-			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, null, null, "metadataItems", collectionId,null);      
+			responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, null, null, "metadataItems", collectionId,null,
+					null,null,outCRS, null, null);      
 
       // if reprojecting STAC geometries is supported and a
       // geometry service has been configured, try projecting 
@@ -835,7 +840,7 @@ public class STACService extends Application {
 			{
 				responseJSON = this.prepareResponse(response, hsr, bbox, limit, datetime, 
                         idList, intersects, "search", 
-                        listOfCollections,null);
+                        listOfCollections,null, updated, created, outCRS, itemStatus, filter);
 
 				// if re-projecting STAC geometries is supported and a 
 				// geometry service has been configured, try projecting from internal CRS (4326) to requested outCRS
@@ -884,7 +889,8 @@ public class STACService extends Application {
 		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox") : null);
 		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
 		String outCRS = (requestPayload.containsKey("outCRS") ? requestPayload.getString("outCRS") : null);
-		
+		search_after = (requestPayload.containsKey("search_after") ? requestPayload.getString("search_after") : search_after);
+				
 		JsonArray collectionArr = (requestPayload.containsKey("collections")
 				? requestPayload.getJsonArray("collections")
 				: null);
@@ -971,14 +977,15 @@ public class STACService extends Application {
 		        queryMap.put("filterClause", filterClause); //filterQry);
 		    }
       
-		 //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
-	       if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
-	       {
+		  //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
+      if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
+      {
 			  status = Response.Status.BAD_REQUEST;    				
 			  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
 			  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 	    		  
-	       }
+      }
+      
 			//Adding one extra so that next page can be figured out
 			url = url + "/_search?size=" + (limit+1);
 			query = StacHelper.prepareSearchQuery(queryMap, search_after);
@@ -1000,15 +1007,15 @@ public class STACService extends Application {
 		      // if re-projecting STAC geometries is supported and a
 		      // geometry service has been configured, try projecting 
 		      // from internal CRS (4326) to requested outCRS
-			      if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
-				        LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
-				
-				        JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
-				        responseJSON = projectedResponseObj.toString();             
-				        
-				        // done
-				        LOGGER.debug("Project response -> " + responseJSON);
-			      }
+          if ((outCRS != null) && ("true".equals(sc.isCanStacGeomTransform())) && (!gc.getGeometryService().isEmpty())) {
+              LOGGER.debug("outCRS = " + outCRS + " - " + gc.getGeometryService());
+
+              JSONObject projectedResponseObj = projectSearchResults(responseJSON, "4326", outCRS);
+              responseJSON = projectedResponseObj.toString();             
+
+              // done
+              LOGGER.debug("Project response -> " + responseJSON);
+          }
 			}
       
 		} catch (InvalidParameterException e) {
@@ -1819,9 +1826,16 @@ public class STACService extends Application {
 		finalResponse = finalResponse.replaceAll("\\{collectionId\\}", collectionId);
 		return finalResponse;
 	}
+	
+	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit, String datetime,
+			String ids, String intersects, String requestType, String collectionId, String body ) {
+			return this.prepareResponse(searchRes, hsr, bbox, limit, datetime, ids, intersects, requestType, collectionId, body, 
+					null, null, null, null, null);
+	}
 
 	private String prepareResponse(String searchRes, HttpServletRequest hsr, String bbox, int limit, String datetime,
-			String ids, String intersects, String requestType, String collectionId, String body) {
+			String ids, String intersects, String requestType, String collectionId, String body,
+			String updated,String created,String outCrs,String status,String filter) {
 		
 		int numberMatched;		
 		net.minidev.json.JSONArray items;
@@ -1898,18 +1912,15 @@ public class STACService extends Application {
 			}
 			String urlparam = "";
 			if (requestType.equalsIgnoreCase("searchPost")) {
-				JSONObject bodyObj =new JSONObject();
-				// In post request, search_after will be part of request body				
-				if (body != null) 
-				{
-					bodyObj = (JSONObject) JSONValue.parse(body);
-					if(search_after != null && search_after.length()>0)
-						bodyObj.appendField("search_after", search_after);
-				}					
+				// Add search_after in urlparam
+				urlparam = (search_after != null ? "?search_after=" + search_after : "");        
+				
+				JSONObject bodyObj =new JSONObject();								
 				if(nextLink)
 					linksContext.set("$.searchItem.links[1].body",(body != null ? bodyObj : ""));
 
 			} else {
+				// GET request, set everything as request parameters
 				if(nextLink)
 				{
 					linksContext.delete("$.searchItem.links[1].body");
@@ -1922,6 +1933,11 @@ public class STACService extends Application {
 						+ (search_after != null ? "&search_after=" + search_after : "")
 						+ (encodedIntersect != null ? "&intersects=" + encodedIntersect : "")
 						+ (ids != null ? "&ids=" + ids : "")
+						+ (updated != null ? "&updated=" + updated : "")
+						+ (created != null ? "&created=" + created : "")
+						+ (outCrs != null ? "&outCRS=" + outCrs : "")
+						+ (status != null ? "&status=" + status : "")
+						+ (filter != null ? "&filter=" + filter : "")
 						+((requestType.startsWith("search")) && collectionId != null ? "&collections=" + collectionId : "");
 			}
 			if (requestType.startsWith("metadataItems"))
@@ -1963,7 +1979,8 @@ public class STACService extends Application {
 			featureContext.set("$.featurePropPath.id", searchItemCtx.read(val));
 
 			val = featureContext.read("$.featurePropPath.collection");
-			featureContext.set("$.featurePropPath.collection", searchItemCtx.read(val));
+			String collectionId = searchItemCtx.read(val).toString();
+			featureContext.set("$.featurePropPath.collection", collectionId);
 
 			// add bbox, geometry
 			this.setBbox(searchItemCtx, featureContext);
@@ -2027,26 +2044,69 @@ public class STACService extends Application {
 				LOGGER.trace("No assets ($._source.assets) in this Stac record with id: " + recordId);
 
 			}
-
-			// Iterate properties, skip property if it is not available			
+			
+			//#680 
+			//fill item with collection properties when not available in item, item property overrides default set in collection	
+			Set<String> collectionPropKeySet = null;
+			JSONObject collectionPropObj = null;
+			ArrayList <String> propToBeAddedFromCollectionList = new ArrayList<String>();
+				  
+			    Collection collection = new Collection(collectionId);
+			    if(collection.getProperties() != null)
+			    {
+			    	collectionPropObj = collection.getProperties();
+				    if (collectionPropObj != null) {
+				        collectionPropKeySet =  collectionPropObj.keySet(); 
+				        //Create a combined set of property keys from item and collection
+				        Set<String> combinedPropSet = Stream.concat(propObjKeys.stream(), collectionPropKeySet.stream())
+			                     .collect(Collectors.toSet()); 
+						 propObjKeys = combinedPropSet;
+				    }	
+			 }			
+			
+			// Iterate properties, skip property if it is not available in item and collection			
 			for (String propKey : propObjKeys) {
 				try {
-					propKeyVal = String.valueOf(propObj.get(propKey));
-					// If it is a json path, set values from search result
-					if (propKeyVal.startsWith("$")) {
-						if (searchItemCtx.read(propKeyVal) != null) {
-							featureContext.set("$.featurePropPath.properties." + propKey,
-									searchItemCtx.read(propKeyVal));
+					//it is item prop, try to fill from searched item
+					if(propObj.containsKey(propKey))
+					{
+						propKeyVal = String.valueOf(propObj.get(propKey));
+						// If it is a json path, set values from search result
+						if (propKeyVal.startsWith("$")) {
+							if (searchItemCtx.read(propKeyVal) != null) {
+								featureContext.set("$.featurePropPath.properties." + propKey,
+										searchItemCtx.read(propKeyVal));
+							}
 						}
 					}
+					//Not an Item prop, Collection prop
+					else
+					{
+						propToBeAddedFromCollectionList.add(propKey);
+					}
+					
 				} catch (Exception e) {
-					// If json path not found or error in any property, remove this property in the
-					// end.
-					// if removed here, concurrentModificationException
-					propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
-					LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
+					//item did not have this data, so check if it is available in collection prop. This will be added later from collection
+					if(collectionPropObj != null && collectionPropObj.containsKey(propKey))
+					{
+						propToBeAddedFromCollectionList.add(propKey);
+					}
+					// If json path not found in searchItemCtx.read(propKeyVal) or error in any property, remove this property in the
+					// end. if removed here, concurrentModificationException
+					else 	
+					{
+						propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
+						LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
+					}
 				}
 			}
+			//Read updated item property object again and add keys from collection
+			HashMap<String, String> updatedPropObj = featureContext.read("$.featurePropPath.properties");
+			for(String prop: propToBeAddedFromCollectionList)
+			{
+				updatedPropObj.put(prop, collectionPropObj.getAsString(prop));
+			}
+			featureContext.set("$.featurePropPath.properties",updatedPropObj);
 
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
