@@ -26,7 +26,11 @@ public class CqlToOpenSearchConverter {
 
     public String convertCqlToDsl(String cqlQuery) throws Exception {
         // --- Lex & Parse ---
-        CharStream input = CharStreams.fromString(cqlQuery);
+        
+    // Normalize TIMESTAMP('...') to plain ISO string literal before lexing
+    String normalized = normalizeTimestampFunctions(cqlQuery);
+    CharStream input = CharStreams.fromString(normalized);
+
         CQL2Lexer lexer = new CQL2Lexer(input);
         CommonTokenStream tokens = new CommonTokenStream(lexer);
         CQL2Parser parser = new CQL2Parser(tokens);
@@ -44,12 +48,22 @@ public class CqlToOpenSearchConverter {
         return mapper.writerWithDefaultPrettyPrinter().writeValueAsString(dslQuery);
     }
 
-    /**
-     * If the top-level query is only a bool.should (no must or must_not),
-     * set minimum_should_match = 1 for sensible semantics.
-     */
-    @SuppressWarnings("unchecked")
-    private void ensureMinimumShouldMatch(Map<String, Object> q) {
+    private String normalizeTimestampFunctions(String q) {
+  if (q == null) return null;
+  java.util.regex.Pattern pTs =
+      java.util.regex.Pattern.compile("(?i)\\bTIMESTAMP\\s*\\(\\s*'([^']+)'\\s*\\)");
+  java.util.regex.Matcher mTs = pTs.matcher(q);
+  String out = mTs.replaceAll("'$1'");
+
+  // Optional: DATE('YYYY-MM-DD') -> 'YYYY-MM-DD'
+  java.util.regex.Pattern pDate =
+      java.util.regex.Pattern.compile("(?i)\\bDATE\\s*\\(\\s*'([^']+)'\\s*\\)");
+  java.util.regex.Matcher mDate = pDate.matcher(out);
+  out = mDate.replaceAll("'$1'");
+  return out;
+}
+
+private void ensureMinimumShouldMatch(Map<String, Object> q) {
         if (q == null) return;
         Object boolObj = q.get("bool");
         if (!(boolObj instanceof Map)) return;
@@ -252,13 +266,13 @@ public class CqlToOpenSearchConverter {
             if ("=".equals(op)) {
                 return matchQuery(field, value);
             } else if (">".equals(op)) {
-                return rangeQuery(field, "gt", toNumber(value));
+                return rangeQuery(field, "gt", isIsoInstant(value) ? String.valueOf(value) : toNumber(value));
             } else if ("<".equals(op)) {
-                return rangeQuery(field, "lt", toNumber(value));
+                return rangeQuery(field, "lt", isIsoInstant(value) ? String.valueOf(value) : toNumber(value));
             } else if (">=".equals(op)) {
-                return rangeQuery(field, "gte", toNumber(value));
+                return rangeQuery(field, "gte", isIsoInstant(value) ? String.valueOf(value) : toNumber(value));
             } else if ("<=".equals(op)) {
-                return rangeQuery(field, "lte", toNumber(value));
+                return rangeQuery(field, "lte", isIsoInstant(value) ? String.valueOf(value) : toNumber(value));
             } else if ("!=".equals(op)) {
                 // represent as must_not term
                 Map<String, Object> neq = termQuery(field, value);
@@ -284,8 +298,8 @@ public class CqlToOpenSearchConverter {
             Object lower = extractLiteralOrIdentifierValue(evalValueExpr(ctx.valueExpr(1)));
             Object upper = extractLiteralOrIdentifierValue(evalValueExpr(ctx.valueExpr(2)));
             Map<String, Object> rangeComp = new LinkedHashMap<>();
-            rangeComp.put("gte", toNumber(lower));
-            rangeComp.put("lte", toNumber(upper));
+            rangeComp.put("gte", isIsoInstant(lower) ? String.valueOf(lower) : toNumber(lower));
+            rangeComp.put("lte", isIsoInstant(upper) ? String.valueOf(upper) : toNumber(upper));
             Map<String, Object> inner = new LinkedHashMap<>();
             inner.put(field, rangeComp);
             Map<String, Object> wrapper = new LinkedHashMap<>();
@@ -333,6 +347,17 @@ public class CqlToOpenSearchConverter {
         }
 
         private Map<String, Object> evalArithmetic(CQL2Parser.ArithmeticExprContext ctx) {
+    // NEW: handle TIMESTAMP('...') function by reading raw text
+    {
+      String raw = ctx.getText();
+      String ts = parseTimestampFunction(raw);
+      if (ts != null) {
+        Map<String, Object> m = new LinkedHashMap<>();
+        m.put("literal", ts);
+        return m;
+      }
+    }
+
             // Array literal
             if (ctx.arrayExpr() != null) {
                 List<Object> elements = new ArrayList<>();
@@ -386,7 +411,7 @@ public class CqlToOpenSearchConverter {
         }
 
         private Object literalToJava(CQL2Parser.LiteralContext lit) {
-            if (lit.STRING() != null) return stripQuotes(lit.STRING().getText());
+            if (lit.STRING() != null) { String raw = lit.getText(); String ts = parseTimestampFunction(raw); if (ts != null) return ts; return stripQuotes(lit.STRING().getText()); }
             if (lit.NUMBER() != null) {
                 String t = lit.NUMBER().getText();
                 if (t.contains(".")) return Double.parseDouble(t);
@@ -418,6 +443,35 @@ public class CqlToOpenSearchConverter {
                 throw new IllegalArgumentException("Expected numeric value, got: " + v);
             }
         }
+
+     // NEW: datetime detection (ISO-8601). Accepts 'Z' and offset timestamps.
+     private boolean isIsoInstant(Object v) {
+       if (v == null) return false;
+       String s = String.valueOf(v);
+       try {
+         java.time.OffsetDateTime.parse(s);
+         return true;
+       } catch (Exception e) {
+         try {
+           java.time.Instant.parse(s);
+           return true;
+         } catch (Exception ex) {
+           return false;
+         }
+       }
+     }
+
+     // NEW: parse TIMESTAMP('...') literal text to ISO string
+     private String parseTimestampFunction(String t) {
+       if (t == null) return null;
+       java.util.regex.Pattern p = java.util.regex.Pattern.compile(
+           "^\\s*TIMESTAMP\\s*\\(\\s*'([^']+)'\\s*\\)\\s*$",
+           java.util.regex.Pattern.CASE_INSENSITIVE);
+       java.util.regex.Matcher m = p.matcher(t);
+       if (m.find()) return m.group(1);
+       return null;
+     }
+
     }
 
     // ----------------------------
@@ -433,7 +487,8 @@ public class CqlToOpenSearchConverter {
             "age BETWEEN 18 AND 30 AND status IS NOT NULL",
             "T_INTERSECTS(location, 'POLYGON((77 28, 78 28, 78 29, 77 29, 77 28))')",
             "S_INTERSECTS(geom, 'LINESTRING(0 0, 1 1)')",
-            "temperature >= 10 AND temperature <= 20"        );
+            "temperature >= 10 AND temperature <= 20",
+            "datetime >=TIMESTAMP('2021-04-08T04:39:23Z')");
 
         for (String cql : tests) {
             System.out.println("CQL: " + cql);
