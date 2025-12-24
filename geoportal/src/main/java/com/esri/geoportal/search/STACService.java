@@ -184,7 +184,7 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;
 		JSONArray detailErrArray = new JSONArray();
 		try {
-			responseJSON = this.readResourceFile("service/config/stac-queryable.json", hsr);
+			responseJSON = this.readResourceFile("service/config/stac-queryables.json", hsr);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in api " + e);
