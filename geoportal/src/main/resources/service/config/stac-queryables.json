@@ -21,16 +21,192 @@
       "description" : "Datetime",
       "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/datetime.json#/properties/datetime"
     },
-    "gsdb:status" : {
-      "description" : "gsdb status",
+    "eo:sun_azimuth": {
+      "description": "eo:sun_azimuth",
       "$ref": ""
     },
-    "xom:edp_equip_id" : {
-      "description" : "edp_equip_id",
+    "eo:sun_elevation": {
+      "description": "eo:sun_elevation",
       "$ref": ""
     },
-     "xom:source_system" : {
-      "description" : "source_system",
+    "eo:cloud_cover": {
+      "description": "eo:cloud_cover",
+      "$ref": ""
+    },
+    "eo:row": {
+      "description": "eo:row",
+      "$ref": ""
+    },
+    "eo:column": {
+      "description": "eo:column",
+      "$ref": ""
+    },
+    "eo:platform": {
+      "description": "eo:platform",
+      "$ref": ""
+    },
+    "eo:epsg": {
+      "description": "eo:epsg",
+      "$ref": ""
+    },
+    "sentinel:utm_zone": {
+      "description": "sentinel:utm_zone",
+      "$ref": ""
+    },
+    "sentinel:latitude_band": {
+      "description": "sentinel:latitude_band",
+      "$ref": ""
+    },
+    "sentinel:grid_square": {
+      "description": "sentinel:grid_square",
+      "$ref": ""
+    },
+    "sentinel:sequence": {
+      "description": "sentinel:sequence",
+      "$ref": ""
+    },
+    "sentinel:product_id": {
+      "description": "sentinel:product_id",
+      "$ref": ""
+    },
+    "HorizontalFieldOfView": {
+      "description": "HorizontalFieldOfView",
+      "$ref": ""
+    },
+    "OrientedImageryType": {
+      "description": "OrientedImageryType",
+      "$ref": ""
+    },
+    "CameraRoll": {
+      "description": "CameraRoll",
+      "$ref": ""
+    },
+    "Name": {
+      "description": "Name",
+      "$ref": ""
+    },
+    "CameraPitch": {
+      "description": "CameraPitch",
+      "$ref": ""
+    },
+    "CameraHeading": {
+      "description": "CameraHeading",
+      "$ref": ""
+    },
+    "AcquisitionDate": {
+      "description": "AcquisitionDate",
+      "$ref": ""
+    },
+    "VerticalFieldOfView": {
+      "description": "VerticalFieldOfView",
+      "$ref": ""
+    },
+    "ImagePath": {
+      "description": "ImagePath",
+      "$ref": ""
+    },
+    "FarDistance": {
+      "description": "FarDistance",
+      "$ref": ""
+    },
+    "NearDistance": {
+      "description": "NearDistance",
+      "$ref": ""
+    },
+    "LocationHierarchy": {
+      "description": "LocationHierarchy",
+      "$ref": ""
+    },
+    "oi:maximum_distance": {
+      "description": "oi:maximum_distance",
+      "$ref": ""
+    },
+    "oi:coverage_percent": {
+      "description": "oi:coverage_percent",
+      "$ref": ""
+    },
+    "oi:camera_heading": {
+      "description": "oi:camera_heading",
+      "$ref": ""
+    },
+    "oi:camera_height": {
+      "description": "oi:camera_height",
+      "$ref": ""
+    },
+    "oi:camera_pitch": {
+      "description": "oi:camera_pitch",
+      "$ref": ""
+    },
+    "oi:camera_roll": {
+      "description": "oi:camera_roll",
+      "$ref": ""
+    },
+    "oi:image_rotation": {
+      "description": "oi:image_rotation",
+      "$ref": ""
+    },
+    "oi:near_distance": {
+      "description": "oi:near_distance",
+      "$ref": ""
+    },
+    "oi:far_distance": {
+      "description": "oi:far_distance",
+      "$ref": ""
+    },
+    "oi:horizontal_field_of_view": {
+      "description": "oi:horizontal_field_of_view",
+      "$ref": ""
+    },
+    "oi:vertical_field_of_view": {
+      "description": "oi:vertical_field_of_view",
+      "$ref": ""
+    },
+    "oi:orientation_accuracy": {
+      "description": "oi:orientation_accuracy",
+      "$ref": ""
+    },
+    "oi:oriented_imagery_type": {
+      "description": "oi:oriented_imagery_type",
+      "$ref": ""
+    },
+    "video:shape": {
+      "description": "video:shape",
+      "$ref": ""
+    },
+    "video:frame_rate": {
+      "description": "video:frame_rate",
+      "$ref": ""
+    },
+    "video:frame_count": {
+      "description": "video:frame_count",
+      "$ref": ""
+    },
+    "video:codec_name": {
+      "description": "video:codec_name",
+      "$ref": ""
+    },
+    "video:constant_scene": {
+      "description": "video:constant_scene",
+      "$ref": ""
+    },
+    "video:letterbox": {
+      "description": "video:letterbox",
+      "$ref": ""
+    },
+    "video:sensor_name": {
+      "description": "video:sensor_name",
+      "$ref": ""
+    },
+    "video:miis_core_id": {
+      "description": "video:miis_core_id",
+      "$ref": ""
+    },
+    "pc:count": {
+      "description": "pc:count",
+      "$ref": ""
+    },
+    "pc:type": {
+      "description": "pc:type",
       "$ref": ""
     }
   },
