@@ -1,86 +1,103 @@
 {
-    "response": {
-        "type": "FeatureCollection",
-        "timestamp":"{currenttime}",
-        "numberMatched": "{numberMatched}",
-        "numberReturned": "{numberReturned}",	      
-        "features": "{features}",	   
-        "links": "service/config/stac-itemLinks.json"
+  "response": {
+    "type": "FeatureCollection",
+    "timestamp": "{currenttime}",
+    "numberMatched": "{numberMatched}",
+    "numberReturned": "{numberReturned}",	      
+    "features": "{features}",	   
+    "links": "service/config/stac-itemLinks.json"
+  },
+  "featurePropPath": {
+    "type": "Feature",	
+    "id": "$._source.id",
+    "collection": "$._source.src_collections_s[0]",		
+    "stac_version": "1.0.0",
+    "stac_extensions": [
+      "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
+      "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
+      "https://stac-extensions.github.io/video/v1.0.0/schema.json"
+    ],
+    "bbox": ["$._source.envelope_geo", "$._source.bbox"],	
+    "geometry": ["$._source.shape_geo", "$._source.geometry"],				
+    "properties": {
+      "updated": "$._source.sys_modified_dt",
+      "datetime": "$._source.sys_modified_dt",
+
+      "eo:sun_azimuth": "$._source.properties._SunAzimuth_l",
+      "eo:sun_elevation": "$._source.properties._SunZenith_l",
+      "eo:cloud_cover": "$._source.properties._CloudCover_l",
+      "eo:row": "$._source.properties._row_l",
+      "eo:column": "$._source.properties.column_l",
+      "eo:platform": "$._source.properties.src_harvested_dataset_s",
+      "eo:epsg": 4326,
+
+      "sentinel:utm_zone": "$._source.properties.sentinel_utm_zone",
+      "sentinel:latitude_band": "$._source.properties.sentinel_latitude_band",
+      "sentinel:grid_square": "$._source.properties.sentinel_grid_square",
+      "sentinel:sequence": "$._source.properties.sentinel_sequence",
+      "sentinel:product_id": "$._source.properties.sentinel_product_id",
+
+      "AcquisitionDate": "$._source.properties.AcquisitionDate_dt",
+      "CameraHeading": "$._source.properties.CameraHeading_d",
+      "CameraPitch": "$._source.properties.CameraPitch_d",
+      "CameraRoll": "$._source.properties.CameraRoll_d",
+      "FarDistance": "$._source.properties.FarDistance_d",
+      "HorizontalFieldOfView": "$._source.properties.HorizontalFieldOfView_d",
+      "ImagePath": "$._source.properties.ImagePath",
+      "LocationHierarchy": "$._source.properties.location_hierarchy_cat",
+      "Name": "$._source.properties.Name",
+      "NearDistance": "$._source.properties.NearDistance_d",
+      "OrientedImageryType": "$._source.properties.OrientedImageryType_s",
+      "VerticalFieldOfView": "$._source.properties.VerticalFieldOfView_d",
+
+      "oi:maximum_distance": "$._source.properties.oi:maximum_distance",
+      "oi:coverage_percent": "$._source.properties.oi:coverage_percent",
+      "oi:camera_heading": "$._source.properties.oi:camera_heading",
+      "oi:camera_height": "$._source.properties.oi:camera_height",
+      "oi:camera_pitch": "$._source.properties.oi:camera_pitch",
+      "oi:camera_roll": "$._source.properties.oi:camera_roll",
+      "oi:image_rotation": "$._source.properties.oi:image_rotation",
+      "oi:near_distance": "$._source.properties.oi:near_distance",
+      "oi:far_distance": "$._source.properties.oi:far_distance",
+      "oi:horizontal_field_of_view": "$._source.properties.oi:horizontal_field_of_view",
+      "oi:vertical_field_of_view": "$._source.properties.oi:vertical_field_of_view",		
+      "oi:orientation_accuracy": "$._source.properties.orientation_accuracy",
+      "oi:oriented_imagery_type": "$._source.properties.oi:oriented_imagery_type",
+
+      "video:shape": "$._source.properties.video:shape",
+      "video:frame_rate": "$._source.properties.video:frame_rate",
+      "video:frame_count": "$._source.properties.video:frame_count",
+      "video:codec_name": "$._source.properties.video:codec_name",
+      "video:constant_scene": "$._source.properties.video:constant_scene",
+      "video:letterbox": "$._source.properties.video:letterbox",
+      "video:sensor_name": "$._source.properties.video:sensor_name",
+      "video:miis_core_id": "$._source.properties.video:miis_core_id",
+
+      "pc:count": "$._source.properties.pc:count",
+      "pc:type": "$._source.properties.pc:type"
     },
-    "featurePropPath": {
-        "type":"Feature",	
-        "id": "$._source.id",
-        "collection": "$._source.src_collections_s[0]",		
-        "stac_version":"1.0.0",
-        "stac_extensions":[],
-        "bbox": ["$._source.envelope_geo","$._source.bbox"],	
-        "geometry": ["$._source.shape_geo",	"$._source.geometry"],				
-        "properties": {
-            "eo:sun_azimuth": "$._source.properties._SunAzimuth_l",
-            "eo:sun_elevation": "$._source.properties._SunZenith_l",
-            "eo:cloud_cover": "$._source.properties._CloudCover_l",
-            "eo:row": "$._source.properties._row_l",
-            "eo:column": "$._source.properties.column_l",
-            "eo:platform": "$._source.properties.src_harvested_dataset_s",
-            "eo:epsg": 4326,
-            "sentinel:utm_zone": "$._source.properties.sentinel_utm_zone",
-            "sentinel:latitude_band": "$._source.properties.sentinel_latitude_band",
-            "sentinel:grid_square": "$._source.properties.sentinel_grid_square",
-            "sentinel:sequence": "$._source.properties.sentinel_sequence",
-            "sentinel:product_id": "$._source.properties.sentinel_product_id",		
-            "updated":"$._source.sys_modified_dt",
-            "datetime":"$._source.sys_modified_dt"
-        },
-        "links": [
-            {
-                "rel": "self",
-                "href": "{url}/collections/{itemCollectionId}/items/{itemId}",
-                "type": "application/geo+json"
-            },
-            {
-                "rel": "root",
-                "href": "{url}",
-                "type": "application/json"
-            },
-            {
-                "rel": "parent",
-                "href": "{url}/collections/{itemCollectionId}",
-                "type": "application/json"
-            },
-            {
-                "rel": "collection",
-                "href": "{url}/collections/{itemCollectionId}",
-                "type": "application/json"
-            }
-        ],
-	"assets": {
-            "thumbnail": {
-                "href": "$._source.thumbnail_s",
-                "title": "Thumbnail",
-                "description":"An asset that represents a thumbnail of the Item",
-                "type": "image/jpeg",
-                "roles": [
-                    "thumbnail"
-                ]
-            },
-             "json-metadata": {
-                "href": "$._source.links_s[0]",
-                "title": "Extended Metadata",
-                "description":"A metadata sidecar file describing the data in this Item, for example the Landsat-8 MTL file.",
-                "type": "application/json",
-                "roles": [
-                    "metadata"
-                ]
-            },
-            "visual": {
-                "href": "",
-                "title": "3-Band Visual",
-                "type": "image/tiff; application=geotiff; profile=cloud-optimized",
-                "description":"An asset that is a full resolution version of the data, processed for visual use",
-                "roles": [
-                    "visual"
-                ]
-	    }
-        }
-    }
+    "assets": {},
+    "links": [
+      {
+        "rel": "self",
+        "href": "{url}/collections/{itemCollectionId}/items/{itemId}",
+        "type": "application/geo+json"
+      },
+      {
+        "rel": "root",
+        "href": "{url}",
+        "type": "application/json"
+      },
+      {
+        "rel": "parent",
+        "href": "{url}/collections/{itemCollectionId}",
+        "type": "application/json"
+      },
+      {
+        "rel": "collection",
+        "href": "{url}/collections/{itemCollectionId}",
+        "type": "application/json"
+      }
+    ]
+  }
 }
