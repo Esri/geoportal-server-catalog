@@ -187,7 +187,13 @@ public class Cql2JsonToOpenSearchConverter {
         } 
         Map<String,Object> exists = existsQuery(field); 
         return not ? exists : boolQuery(null, null, Collections.singletonList(exists)); 
-      } 
+      }
+      case "t_intersects": case "s_intersects": {
+        String field = asFieldFromArg(args.get(0)); 
+        Object wkt = extractValueFromArg(args.get(1)); 
+        String wktValue = wkt == null ? null : String.valueOf(wkt); 
+        return geoShapeIntersectsQuery(field, wktValue); 
+      }
       default: 
         throw new IllegalArgumentException("Unsupported op in op-node: " + op + " -> " + node); 
     } 
