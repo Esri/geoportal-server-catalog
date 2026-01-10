@@ -49,6 +49,12 @@
 			"rel": "data",
 			"title": "The set of available collections"
 		},
+    {
+      "title": "queryables",
+      "href": "{url}/queryables",
+      "rel": "http://www.opengis.net/def/rel/ogc/1.0/queryables",
+      "type": "application/schema+json"
+    },
 		{
 			"href": "{url}/search",
 			"rel": "search",

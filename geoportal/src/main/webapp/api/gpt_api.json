@@ -62,6 +62,26 @@
         }
       }
     },
+    "/stac/queryables": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Provides information on STAC API queryables for use with the filter clause",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "stacQueryables",
+        "parameters": [				
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
     "/stac/collections": {
       "get": {
         "tags": [
@@ -323,6 +343,26 @@
             "type": "boolean",
             "default": "true or false"
           }
+        ],
+        "responses": {
+          "default": {
+            "description": "successful operation"
+          }
+        }
+      }
+    },
+    "/stac/collections/{collectionId}/queryables": {
+      "get": {
+        "tags": [
+          "STAC"
+        ],
+        "summary": "Provides information on STAC API queryables for use with the filter clause on this specific collection",
+        "description": "",
+        "produces": [
+          "application/json"
+        ],
+        "operationId": "stacQueryables",
+        "parameters": [				
         ],
         "responses": {
           "default": {
