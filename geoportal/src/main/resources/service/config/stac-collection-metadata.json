@@ -52,6 +52,12 @@
       "href": "{url}/collections",
       "hreflang": "en-US"
     },
+		{
+			"title": "queryables",
+			"href": "{url}/collections/{collectionId}/queryables",
+			"rel": "http://www.opengis.net/def/rel/ogc/1.0/queryables",
+			"type": "application/schema+json"
+		},
     {
       "rel": "items",
       "type": "application/geo+json",

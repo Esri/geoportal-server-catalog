@@ -17,37 +17,47 @@
       "description" : "Geometry",
       "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/item.json#/geometry"
     },
-    "datetime" : {
-      "description" : "Datetime",
-      "$ref": "https://schemas.stacspec.org/v1.0.0/item-spec/json-schema/datetime.json#/properties/datetime"
+    "datetime": {
+      "type": "string",
+      "title": "Acquired",
+      "format": "date-time",
+      "pattern": "(\\+00:00|Z)$",
+      "description": "Datetime"
     },
+    "view:sun_azimuth": {
+      "type": "number",
+      "title": "Sun Azimuth",
+      "maximum": 360,
+      "minimum": 0
+    },    
     "eo:sun_azimuth": {
       "description": "eo:sun_azimuth",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:sun_azimuth",
+      "collections": ["sentinel"]
     },
     "eo:sun_elevation": {
       "description": "eo:sun_elevation",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:sun_elevation"
     },
     "eo:cloud_cover": {
       "description": "eo:cloud_cover",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:cloud_cover"
+    },
+    "eo:snow_cover": {
+      "description": "eo:cloud_cover",
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:snow_cover"
     },
     "eo:row": {
       "description": "eo:row",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:row"
     },
     "eo:column": {
       "description": "eo:column",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:column"
     },
     "eo:platform": {
       "description": "eo:platform",
-      "$ref": ""
-    },
-    "eo:epsg": {
-      "description": "eo:epsg",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:platform"
     },
     "sentinel:utm_zone": {
       "description": "sentinel:utm_zone",
@@ -91,7 +101,8 @@
     },
     "CameraHeading": {
       "description": "CameraHeading",
-      "$ref": ""
+      "$ref": "",
+      "collections": ["WP_OrthoProducts", "panoramas"]
     },
     "AcquisitionDate": {
       "description": "AcquisitionDate",
@@ -171,43 +182,47 @@
     },
     "video:shape": {
       "description": "video:shape",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:shape"
     },
     "video:frame_rate": {
       "description": "video:frame_rate",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:frame_rate"
     },
     "video:frame_count": {
       "description": "video:frame_count",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:frame_count"
     },
     "video:codec_name": {
       "description": "video:codec_name",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:codec_name"
     },
     "video:constant_scene": {
       "description": "video:constant_scene",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:constant_scene"
     },
     "video:letterbox": {
       "description": "video:letterbox",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:letterbox"
     },
     "video:sensor_name": {
       "description": "video:sensor_name",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:sensor_name"
     },
     "video:miis_core_id": {
       "description": "video:miis_core_id",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:miis_core_id"
     },
     "pc:count": {
       "description": "pc:count",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json#/definitions/pc:count"
+    },
+    "pc:type": {
+      "description": "pc:density",
+      "$ref": "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json#/definitions/pc:density"
     },
     "pc:type": {
       "description": "pc:type",
-      "$ref": ""
+      "$ref": "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json#/definitions/pc:type"
     }
   },
   "additionalProperties": true

@@ -178,7 +178,7 @@ public class STACService extends Application {
 	
 	@GET
 	@Path("/queryables")
-	@Produces("application/json")
+	@Produces("application/schema+json")
 	public Response getQueryable(@Context HttpServletRequest hsr) {
 		String responseJSON;
 		Status status = Response.Status.OK;
@@ -461,6 +461,18 @@ public class STACService extends Application {
             LOGGER.warn("WARNING - outCRS " + outCRS + " is not known for collection " + collectionId +". Outputting tag in native CRS.");
           }
           
+          // get links to include
+          String collectionMetadata = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
+          JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+          JSONObject collectionMetadataObject = (JSONObject) jsonParser.parse(collectionMetadata);
+          JSONArray collectionLinks = (JSONArray) collectionMetadataObject.get("links");
+
+          // update the links key with the template content
+          JSONObject draftResponseObject = (JSONObject) jsonParser.parse(responseJSON);
+          draftResponseObject.put("links", collectionLinks);
+          responseJSON = draftResponseObject.toJSONString();
+          
+					responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
 					responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 				}
 			}
@@ -475,9 +487,32 @@ public class STACService extends Application {
 	}
 
   
+  @GET
+	@Path("/collections/{collectionId}/queryables")
+	@Produces("application/schema+json")
+  public Response getCollectionQueryables(
+          @Context HttpServletRequest hsr, 
+          @PathParam("collectionId") String collectionId) throws UnsupportedEncodingException {
+
+		String responseJSON;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		try {
+			responseJSON = this.readResourceFile("service/config/stac-queryables.json", hsr);
+
+		} catch (Exception e) {
+			LOGGER.error("Error in api " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(responseJSON).build();
+  }
+  
+  
 	@GET
-	@Produces("application/geo+json")
 	@Path("/collections/{collectionId}/items")
+	@Produces("application/geo+json")
 	public Response getItems(@Context HttpServletRequest hsr, 
           @PathParam("collectionId") String collectionId,
           @QueryParam("limit") int limit, 
@@ -2068,8 +2103,9 @@ public class STACService extends Application {
 					Set<String> stacRecAssetObjKeys = stacRecAssetObj.keySet();
 
 					for (String stacRecAssetObjKey : stacRecAssetObjKeys) {
+            String assetPath = "$._source.assets['" + stacRecAssetObjKey + "']";
 						assetsObj.put(stacRecAssetObjKey,
-								searchItemCtx.read("$._source.assets." + stacRecAssetObjKey, JSONObject.class));
+								searchItemCtx.read(assetPath, JSONObject.class));
 					}
 					featureContext.set("$.featurePropPath.assets", assetsObj);
 				}
