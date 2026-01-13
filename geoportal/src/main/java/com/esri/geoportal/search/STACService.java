@@ -963,7 +963,9 @@ public class STACService extends Application {
 	    String filterClause = (requestPayload.containsKey("filter") 
 	        ? requestPayload.getJsonObject("filter").toString()
 					: null);
-	    
+	  filterClause = ((filterClause == null && requestPayload.containsKey("query")) 
+	        ? requestPayload.getJsonObject("query").toString()
+					: null);
 		//TODO Handle merge=true in Search Pagination
 		String query;
 		String bbox = "";
