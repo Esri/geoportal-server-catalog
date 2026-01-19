@@ -313,16 +313,19 @@ public class StacHelper {
 
 
   private static String prepareQueryExtension(String queryJson) {
-	  String queryOpenSearchTxt ="";
+	  String queryOpenSearch ="";
 	  try {
 		  CqlQueryToOpenSearchConverter converter = new CqlQueryToOpenSearchConverter(false, ".keyword");
-		  queryOpenSearchTxt = converter.convert(queryJson);        
+		  queryOpenSearch = converter.convert(queryJson); 
+		  
+		//Replace fields with field mappings
+		  queryOpenSearch = replaceFldWithFldMapping(queryOpenSearch);
 	  }
 	 catch(Exception ex)
 	  {
 		 LOGGER.info("query extension input could not be converted to open search query",ex);
 	  }
-	  return queryOpenSearchTxt;
+	  return queryOpenSearch;
 	}
 
 
@@ -467,24 +470,33 @@ private static String prepareStatus(String status) {
 			{
 				CqlTextToOpenSearchConverter converter = new CqlTextToOpenSearchConverter();
 				filterQryOpenSearch = converter.convertCqlToDsl(filterClause);
-			}
+			}			
 			//Replace fields with field mappings
-			StacContext sc = StacContext.getInstance();
-			Map<String, String> fieldMapping = sc.getFieldMappings();
-			for(String fldKey:fieldMapping.keySet())
-			{
-				filterQryOpenSearch = filterQryOpenSearch.replace(fldKey, fieldMapping.get(fldKey));
-			}
-			filterQryOpenSearch = filterQryOpenSearch.replace("geometry", "shape_geo");
-			filterQryOpenSearch = filterQryOpenSearch.replace("datetime", FieldNames.FIELD_SYS_MODIFIED);
-			filterQryOpenSearch = filterQryOpenSearch.replace("updated", FieldNames.FIELD_SYS_MODIFIED);
-			filterQryOpenSearch = filterQryOpenSearch.replace("created", FieldNames.FIELD_SYS_CREATED);
+			filterQryOpenSearch = replaceFldWithFldMapping(filterQryOpenSearch);
+			
 		} catch (Exception ex) {
 			LOGGER.info("Filter clause could not be converted to opensearch qry: " + filterClause, ex);
 		}
 		return filterQryOpenSearch;
 	}  
   
+	private static String replaceFldWithFldMapping(String filterQryOpenSearch) {
+		
+		StacContext sc = StacContext.getInstance();
+		Map<String, String> fieldMapping = sc.getFieldMappings();
+		for(String fldKey:fieldMapping.keySet())
+		{
+			filterQryOpenSearch = filterQryOpenSearch.replace(fldKey, fieldMapping.get(fldKey));
+		}
+		filterQryOpenSearch = filterQryOpenSearch.replace("geometry", "shape_geo");
+		filterQryOpenSearch = filterQryOpenSearch.replace("datetime", FieldNames.FIELD_SYS_MODIFIED);
+		filterQryOpenSearch = filterQryOpenSearch.replace("updated", FieldNames.FIELD_SYS_MODIFIED);
+		filterQryOpenSearch = filterQryOpenSearch.replace("created", FieldNames.FIELD_SYS_CREATED);
+		
+		return filterQryOpenSearch;
+	}
+
+
 	private static StacItemValidationResponse validateId(JSONObject requestPayload,String collectionId) throws Exception {
 		String errorMsg;
 		StacItemValidationResponse response = new StacItemValidationResponse();
