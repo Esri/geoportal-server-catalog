@@ -519,7 +519,8 @@ public class STACService extends Application {
           @QueryParam("bbox") String bbox, 
           @QueryParam("datetime") String datetime,
           @QueryParam("search_after") String search_after,
-          @QueryParam("outCRS") String outCRS) throws UnsupportedEncodingException {
+          @QueryParam("outCRS") String outCRS,
+          @QueryParam("query") String queryJson) throws UnsupportedEncodingException {
     
 		String responseJSON;
 		String response;
@@ -542,7 +543,10 @@ public class STACService extends Application {
 			if (gc.getSupportsCollections()) {
 				queryMap.put("collections", collectionId);
 			}
-
+			
+			if (queryJson != null && queryJson.length() > 0)
+				queryMap.put("queryJson", queryJson);
+			
 			url = url + "/_search?size=" + limit;
 			query = StacHelper.prepareSearchQuery(queryMap, search_after);
 
@@ -814,7 +818,7 @@ public class STACService extends Application {
 			@QueryParam("datetime") String datetime, @QueryParam("updated") String updated, @QueryParam("created") String created, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
 			@QueryParam("outCRS") String outCRS, @QueryParam("status") String itemStatus,@QueryParam("filter") String filter,
-			@QueryParam("filter-lang") String filterLang)
+			@QueryParam("filter-lang") String filterLang, @QueryParam("query") String queryJson)
 			throws UnsupportedEncodingException {
 		String responseJSON;
 		String response;
@@ -839,6 +843,9 @@ public class STACService extends Application {
 			
 			if (created != null && created.length() > 0)
 				queryMap.put("created", created);
+			
+			if (created != null && created.length() > 0)
+			queryMap.put("created", created);
 			
 			//GeoportalContext gc = GeoportalContext.getInstance();
 			if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
@@ -866,9 +873,12 @@ public class STACService extends Application {
 		       if (filterLang != null && filterLang.length() > 0) {
 		    	   searchfilterLang = filterLang; 
 		       }
-			   queryMap.put("filterLang", searchfilterLang);
-			    
+			   queryMap.put("filterLang", searchfilterLang);			    
 	       }
+	       
+	       //#691,query extension https://github.com/stac-api-extensions/query
+	       if (queryJson != null && queryJson.length() > 0)
+				queryMap.put("queryJson", queryJson);
 	       
 	     //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
 	       if ((outCRS != null) &&  listOfCollections!=null && listOfCollections.length()>0)
@@ -951,6 +961,7 @@ public class STACService extends Application {
 		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
 		String outCRS = (requestPayload.containsKey("outCRS") ? requestPayload.getString("outCRS") : null);
 		search_after = (requestPayload.containsKey("search_after") ? requestPayload.getString("search_after") : search_after);
+		JsonObject queryJson = (requestPayload.containsKey("query") ? requestPayload.getJsonObject("query") : null);
 				
 		JsonArray collectionArr = (requestPayload.containsKey("collections")
 				? requestPayload.getJsonArray("collections")
@@ -963,9 +974,7 @@ public class STACService extends Application {
 	    String filterClause = (requestPayload.containsKey("filter") 
 	        ? requestPayload.getJsonObject("filter").toString()
 					: null);
-	  filterClause = ((filterClause == null && requestPayload.containsKey("query")) 
-	        ? requestPayload.getJsonObject("query").toString()
-					: null);
+	  
 		//TODO Handle merge=true in Search Pagination
 		String query;
 		String bbox = "";
@@ -1047,15 +1056,18 @@ public class STACService extends Application {
 				   return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
 			    }
 		    }
+			//#691,query extension https://github.com/stac-api-extensions/query
+		       if (queryJson != null && !queryJson.isEmpty())
+					queryMap.put("queryJson", queryJson.toString());
       
 		  //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
-      if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
-      {
-			  status = Response.Status.BAD_REQUEST;    				
-			  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
-			  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
-	    		  
-      }
+	      if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
+	      {
+				  status = Response.Status.BAD_REQUEST;    				
+				  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
+				  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+		    		  
+	      }
       
 			//Adding one extra so that next page can be figured out
 			url = url + "/_search?size=" + (limit+1);
