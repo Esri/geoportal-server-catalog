@@ -20,7 +20,7 @@ import java.util.stream.Collectors;
  *  - Arrays: [1,2,3]
  *  - Spatial: T_INTERSECTS(field, 'WKT'), S_INTERSECTS(field, 'WKT') -> geo_shape (relation: intersects)
  */
-public class CqlToOpenSearchConverter {
+public class CqlTextToOpenSearchConverter {
 
     private static final ObjectMapper mapper = new ObjectMapper();
 
@@ -478,7 +478,7 @@ private void ensureMinimumShouldMatch(Map<String, Object> q) {
     // Quick manual tests
     // ----------------------------
     public static void main(String[] args) throws Exception {
-        CqlToOpenSearchConverter converter = new CqlToOpenSearchConverter();
+        CqlTextToOpenSearchConverter converter = new CqlTextToOpenSearchConverter();
 
         List<String> tests = Arrays.asList(
             "xom:source_system = 'Marten' AND gsdb:status='active'",            

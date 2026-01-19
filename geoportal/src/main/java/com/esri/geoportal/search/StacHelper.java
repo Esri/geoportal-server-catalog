@@ -29,8 +29,10 @@ import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
 import com.esri.geoportal.service.stac.filter.Cql2JsonToOpenSearchConverter;
-import com.esri.geoportal.service.stac.filter.CqlToOpenSearchConverter;
+import com.esri.geoportal.service.stac.filter.CqlQueryToOpenSearchConverter;
+import com.esri.geoportal.service.stac.filter.CqlTextToOpenSearchConverter;
 import com.esri.geoportal.service.stac.filter.StacFilterLang;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
@@ -288,6 +290,10 @@ public class StacHelper {
 			 
 			builder.add(JsonUtil.toJsonStructure(filterQry));
 		}
+		if (queryMap.containsKey("queryJson")) {			
+			String queryExt = prepareQueryExtension(queryMap.get("queryJson"));
+			builder.add(JsonUtil.toJsonStructure(queryExt));
+		}
 
 		JsonArray filter = builder.build();
 
@@ -306,7 +312,21 @@ public class StacHelper {
 	}
 
 
-  private static String prepareStatus(String status) {
+  private static String prepareQueryExtension(String queryJson) {
+	  String queryOpenSearchTxt ="";
+	  try {
+		  CqlQueryToOpenSearchConverter converter = new CqlQueryToOpenSearchConverter(false, ".keyword");
+		  queryOpenSearchTxt = converter.convert(queryJson);        
+	  }
+	 catch(Exception ex)
+	  {
+		 LOGGER.info("query extension input could not be converted to open search query",ex);
+	  }
+	  return queryOpenSearchTxt;
+	}
+
+
+private static String prepareStatus(String status) {
 	  	StacContext sc = StacContext.getInstance();
 		return prepareFilter(sc.getStatusFld()+"="+status,StacFilterLang.CQL2TEXT);
 		
@@ -445,7 +465,7 @@ public class StacHelper {
 			//Default is cql2-text
 			else
 			{
-				CqlToOpenSearchConverter converter = new CqlToOpenSearchConverter();
+				CqlTextToOpenSearchConverter converter = new CqlTextToOpenSearchConverter();
 				filterQryOpenSearch = converter.convertCqlToDsl(filterClause);
 			}
 			//Replace fields with field mappings
