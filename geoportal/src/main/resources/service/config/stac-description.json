@@ -18,7 +18,9 @@
 		"http://www.opengis.net/spec/cql2/1.0/conf/cql2-json",
 		"http://www.opengis.net/spec/cql2/1.0/conf/basic-cql2",
 		"http://www.opengis.net/spec/cql2/1.0/conf/basic-spatial-functions",
-		"http://www.opengis.net/spec/cql2/1.0/conf/advanced-comparison-operators"
+		"http://www.opengis.net/spec/cql2/1.0/conf/advanced-comparison-operators",
+		"https://api.stacspec.org/v1.0.0/item-search#query",
+		"https://api.stacspec.org/v1.0.0/ogcapi-features#query"
 	],
 	"links": [
 		{
