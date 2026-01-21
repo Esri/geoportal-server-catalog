@@ -13,23 +13,22 @@
  * limitations under the License.
  */
 package com.esri.geoportal.context;
-import com.esri.geoportal.base.security.Group;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.harvester.HarvesterContext;
-import com.esri.geoportal.service.stac.GeometryServiceClient;
-import com.esri.geoportal.service.stac.StacContext;
+import java.util.ArrayList;
+import java.util.HashMap;
 
+import javax.annotation.PreDestroy;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationContextAware;
 import org.springframework.context.annotation.Configuration;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-
-import javax.annotation.PreDestroy;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.esri.geoportal.base.security.Group;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.service.stac.GeometryServiceClient;
+import com.esri.geoportal.service.stac.StacContext;
 
 /**
  * The Geoportal application context.
@@ -56,7 +55,7 @@ public class GeoportalContext implements ApplicationContextAware {
   private String defaultAccessLevel;
   private String defaultApprovalStatus;
   private ElasticContext elasticContext;
-  private HarvesterContext harvesterContext;
+
   private StacContext stacContext;
   private GeometryServiceClient geometryServiceClient;
   private boolean supportsApprovalStatus = false;
@@ -140,22 +139,6 @@ public void setUserGroupMap(HashMap<String, ArrayList<Group>> userGroupMap) {
   public void setElasticContext(ElasticContext elasticContext) {
     this.elasticContext = elasticContext;
   }
-
-  /**
-   * Gets harvester context.
-   * @return harvester context
-   */
-  public HarvesterContext getHarvesterContext() {
-    return harvesterContext;
-  }
-  /**
-   * Sets harvester context.
-   * @param harvesterContext harvester context 
-   */
-  public void setHarvesterContext(HarvesterContext harvesterContext) {
-    this.harvesterContext = harvesterContext;
-  }
-
   /**
    * Gets STAC context.
    * @return STAC context
