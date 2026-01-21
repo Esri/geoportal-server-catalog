@@ -1,12 +1,14 @@
 package com.esri.geoportal.search;
 
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -22,21 +24,22 @@ import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
-import com.esri.geoportal.service.stac.StacContext;
 import com.esri.geoportal.service.stac.Asset;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
+import com.esri.geoportal.service.stac.StacContext;
+import com.esri.geoportal.service.stac.filter.Cql2JsonToOpenSearchConverter;
+import com.esri.geoportal.service.stac.filter.CqlQueryToOpenSearchConverter;
+import com.esri.geoportal.service.stac.filter.CqlTextToOpenSearchConverter;
+import com.esri.geoportal.service.stac.filter.StacFilterLang;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import java.util.logging.Level;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
 import net.minidev.json.parser.JSONParser;
-import net.minidev.json.parser.ParseException;
 
 
 public class StacHelper {
@@ -276,9 +279,20 @@ public class StacHelper {
 			builder.add(JsonUtil.toJsonStructure(statusQry));
 		}
     
-		if (queryMap.containsKey("filterClause")) {			
-			String filterQry = prepareFilter(queryMap.get("filterClause"));
+		if (queryMap.containsKey("filterClause")) {	
+			String filterQry="";
+			StacFilterLang filterLang = StacFilterLang.CQL2TEXT;
+			if(queryMap.containsKey("filterLang"))
+			{
+				filterLang = StacFilterLang.fromValue(queryMap.get("filterLang"));
+				filterQry = prepareFilter(queryMap.get("filterClause"),filterLang);
+			}		
+			 
 			builder.add(JsonUtil.toJsonStructure(filterQry));
+		}
+		if (queryMap.containsKey("queryJson")) {			
+			String queryExt = prepareQueryExtension(queryMap.get("queryJson"));
+			builder.add(JsonUtil.toJsonStructure(queryExt));
 		}
 
 		JsonArray filter = builder.build();
@@ -298,9 +312,26 @@ public class StacHelper {
 	}
 
 
-  private static String prepareStatus(String status) {
+  private static String prepareQueryExtension(String queryJson) {
+	  String queryOpenSearch ="";
+	  try {
+		  CqlQueryToOpenSearchConverter converter = new CqlQueryToOpenSearchConverter(false, ".keyword");
+		  queryOpenSearch = converter.convert(queryJson); 
+		  
+		//Replace fields with field mappings
+		  queryOpenSearch = replaceFldWithFldMapping(queryOpenSearch);
+	  }
+	 catch(Exception ex)
+	  {
+		 LOGGER.info("query extension input could not be converted to open search query",ex);
+	  }
+	  return queryOpenSearch;
+	}
+
+
+private static String prepareStatus(String status) {
 	  	StacContext sc = StacContext.getInstance();
-		return prepareFilter(sc.getStatusFld()+"="+status);
+		return prepareFilter(sc.getStatusFld()+"="+status,StacFilterLang.CQL2TEXT);
 		
 	}
 
@@ -419,38 +450,52 @@ public class StacHelper {
 		collectionQryBuf.append("]}}");
 		return collectionQryBuf.toString();
 	}
-  
-  public static String prepareFilter(String filterClause) {
-    String filterField;
-    String filterValue;
-    StacContext sc = StacContext.getInstance();
-    Map<String, String> fieldMapping = sc.getFieldMappings();
-    
-		String[] clauseList = filterClause.split("AND");
-		//{"bool":{"must":[{"match":{"clause_field1":"clause_value1"}},{"match":{"clause_field2":"clause_value2"}}]}}
-		
-		StringBuilder filterQryBuf = new StringBuilder("{\"bool\":{\"must\":[");
-		int i=0;
-		for (String clause : clauseList) {
-      filterField = clause.split("=")[0].trim();
-      // replace filterField with mapped index field if the filterField is mapped
-      if (fieldMapping.containsKey(filterField)) {
-        filterField = fieldMapping.get(filterField);
-      }
-      filterValue = clause.split("=")[1].trim();
-			if(i>0) {
-        filterQryBuf.append(",");
-      }
-      filterQryBuf.append("{\"match\": {\"")
-                  .append(filterField)
-                  .append("\": \"")
-                  .append(filterValue)
-                  .append("\"}}");	
-			i++;
+	
+	/**
+	 * @param filterClause
+	 * @param filterLang cql2-json or cql2-text (GET requests should be cql2-text and POST search will be cql2-json)
+	 * @return
+	 */
+	//Issue #684 supports filter extension https://github.com/stac-api-extensions/filter
+	public static String prepareFilter(String filterClause, StacFilterLang filterLang) {
+		String filterQryOpenSearch = "";
+		try {
+			if(filterLang.equals(StacFilterLang.CQL2JSON))
+			{
+				Cql2JsonToOpenSearchConverter converter = new Cql2JsonToOpenSearchConverter();
+				filterQryOpenSearch = converter.convertJsonAstToDsl(filterClause);
+			}
+			//Default is cql2-text
+			else
+			{
+				CqlTextToOpenSearchConverter converter = new CqlTextToOpenSearchConverter();
+				filterQryOpenSearch = converter.convertCqlToDsl(filterClause);
+			}			
+			//Replace fields with field mappings
+			filterQryOpenSearch = replaceFldWithFldMapping(filterQryOpenSearch);
+			
+		} catch (Exception ex) {
+			LOGGER.info("Filter clause could not be converted to opensearch qry: " + filterClause, ex);
 		}
-		filterQryBuf.append("]}}");
-		return filterQryBuf.toString();    
-  }
+		return filterQryOpenSearch;
+	}  
+  
+	private static String replaceFldWithFldMapping(String filterQryOpenSearch) {
+		
+		StacContext sc = StacContext.getInstance();
+		Map<String, String> fieldMapping = sc.getFieldMappings();
+		for(String fldKey:fieldMapping.keySet())
+		{
+			filterQryOpenSearch = filterQryOpenSearch.replace(fldKey, fieldMapping.get(fldKey));
+		}
+		filterQryOpenSearch = filterQryOpenSearch.replace("geometry", "shape_geo");
+		filterQryOpenSearch = filterQryOpenSearch.replace("datetime", FieldNames.FIELD_SYS_MODIFIED);
+		filterQryOpenSearch = filterQryOpenSearch.replace("updated", FieldNames.FIELD_SYS_MODIFIED);
+		filterQryOpenSearch = filterQryOpenSearch.replace("created", FieldNames.FIELD_SYS_CREATED);
+		
+		return filterQryOpenSearch;
+	}
+
 
 	private static StacItemValidationResponse validateId(JSONObject requestPayload,String collectionId) throws Exception {
 		String errorMsg;

@@ -16,8 +16,7 @@
   <beans:import resource="app-dcat.xml" />
   
   <beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
-    <beans:property name="elasticContext" ref="elasticContext" />
-    <beans:property name="harvesterContext" ref="harvesterContext" />
+    <beans:property name="elasticContext" ref="elasticContext" />   
     <beans:property name="supportsApprovalStatus" value="false" />
     <beans:property name="defaultApprovalStatus" value="" /> <!-- optional - approved|reviewed|disapproved|incomplete|posted|draft -->
     <beans:property name="supportsGroupBasedAccess" value="false" />
@@ -53,7 +52,6 @@
     <beans:property name="encryptPassword" value="false" />
 
     <!-- If encryptPassword =true, Uncomment below and configure the keys -->
-    <!-- 
     <beans:property name="base64Key" value="${gpt_base64Key}" />
     <beans:property name="base64Iv" value="${gpt_base64Iv}" /> 
     -->
@@ -134,6 +132,23 @@
 	<!--
         <beans:value>prefix:stac_property=index_field_suffix</beans:value>
 	-->
+        <beans:value>eo:sun_azimuth=_SunAzimuth_l</beans:value>
+        <beans:value>eo:sun_elevation=_SunZenith_l</beans:value>
+        <beans:value>eo:cloud_cover=_CloudCover_l</beans:value>
+        <beans:value>eo:row=_row_l</beans:value>
+        <beans:value>eo:column=column_l</beans:value>
+        <beans:value>eo:platform=src_harvested_dataset_s</beans:value>
+
+        <beans:value>AcquisitionDate=properties.AcquisitionDate_dt</beans:value>
+        <beans:value>CameraHeading=properties.CameraHeading_d</beans:value>
+        <beans:value>CameraPitch=properties.CameraPitch_d</beans:value>
+        <beans:value>CameraRoll=properties.CameraRoll_d</beans:value>
+        <beans:value>FarDistance=properties.FarDistance_d</beans:value>
+        <beans:value>HorizontalFieldOfView=properties.HorizontalFieldOfView_d</beans:value>
+        <beans:value>LocationHierarchy=properties.location_hierarchy_cat</beans:value>
+        <beans:value>NearDistance=properties.NearDistance_d</beans:value>
+        <beans:value>OrientedImageryType=properties.OrientedImageryType_s</beans:value>
+        <beans:value>VerticalFieldOfView=properties.VerticalFieldOfView_d</beans:value>
       </beans:list>
     </beans:property>
   </beans:bean> 
@@ -154,16 +169,7 @@
   
   <!--  This should always be imported after GeoportalContext and ElasticContext loaded -->
   <!-- Uncomment only one of below to enable Simple Auth or LDAP Auth. To enable ArcGIS Portal Auth,argisAuthEnabled=true in arcgisAuthService   -->
-    <!---->	<beans:import resource="authentication-ldap.xml" />-->
+    <!---	<beans:import resource="authentication-ldap.xml" />-->
       <beans:import resource="authentication-simple.xml" />
 	
-	
-  <beans:bean id="harvesterContext" class="com.esri.geoportal.lib.harvester.HarvesterContext">
-    <beans:property name="nodes">
-      <!-- The list of host names within the Harvester cluster, one value element per host -->
-      <beans:list>
-        <beans:value>${harvester_node:}</beans:value>
-      </beans:list>
-    </beans:property>
-  </beans:bean>	
 </beans:beans>

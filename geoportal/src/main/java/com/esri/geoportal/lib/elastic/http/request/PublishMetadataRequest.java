@@ -176,7 +176,7 @@ public class PublishMetadataRequest extends BulkEditRequest {
    * @param response the response
    * @param mdoc the metadata document
    */
-  @SuppressWarnings("unused")
+
   protected void prePublish(ElasticContext ec, AccessUtil au, AppResponse response, MetadataDocument mdoc) 
       throws Exception {
     mdoc.setRequiresXmlWrite(true);
