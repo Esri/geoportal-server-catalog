@@ -77,10 +77,8 @@
     <security:intercept-url pattern="/elastic/metadata/_mappings/**" method="GET" access="permitAll" />
     <security:intercept-url pattern="/elastic/metadata/*/_mappings/**" method="GET" access="permitAll" />
     <security:intercept-url pattern="/elastic/_search/scroll/**" access="permitAll" />
-    <security:intercept-url pattern="/elastic/**" access="hasRole('ADMIN')" />
-    
-    <!-- /harvester/ - proxied to the Harvester -->
-    <security:intercept-url pattern="/harvester/**" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/elastic/**" access="hasRole('ADMIN')" />   
+   
     
   </security:http>
 
