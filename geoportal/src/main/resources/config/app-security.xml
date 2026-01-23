@@ -43,7 +43,7 @@
     <security:csrf disabled="true"/>
     <security:http-basic />
     <security:custom-filter ref="oauthResourceFilter" before="PRE_AUTH_FILTER" />
-    <security:intercept-url pattern="/" access="hasRole('ADMIN')" />
+    <security:intercept-url pattern="/" access="permitAll" />
 	  
     <!-- /stac - the stac catalog -->
     <security:intercept-url pattern="/stac/conformance" method="GET" access="permitAll" />
