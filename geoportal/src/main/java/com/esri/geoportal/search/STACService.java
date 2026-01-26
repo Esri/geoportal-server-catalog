@@ -72,10 +72,8 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
-import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -168,6 +166,25 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
 		try {
 			responseJSON = this.readResourceFile("service/config/stac-api.json", hsr);
+
+		} catch (Exception e) {
+			LOGGER.error("Error in api " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(responseJSON).build();
+	}
+	
+	@GET
+	@Path("/queryables")
+	@Produces("application/schema+json")
+	public Response getQueryable(@Context HttpServletRequest hsr) {
+		String responseJSON;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		try {
+			responseJSON = this.readResourceFile("service/config/stac-queryables.json", hsr);
 
 		} catch (Exception e) {
 			LOGGER.error("Error in api " + e);
@@ -444,6 +461,18 @@ public class STACService extends Application {
             LOGGER.warn("WARNING - outCRS " + outCRS + " is not known for collection " + collectionId +". Outputting tag in native CRS.");
           }
           
+          // get links to include
+          String collectionMetadata = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);
+          JSONParser jsonParser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+          JSONObject collectionMetadataObject = (JSONObject) jsonParser.parse(collectionMetadata);
+          JSONArray collectionLinks = (JSONArray) collectionMetadataObject.get("links");
+
+          // update the links key with the template content
+          JSONObject draftResponseObject = (JSONObject) jsonParser.parse(responseJSON);
+          draftResponseObject.put("links", collectionLinks);
+          responseJSON = draftResponseObject.toJSONString();
+          
+					responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
 					responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
 				}
 			}
@@ -458,16 +487,40 @@ public class STACService extends Application {
 	}
 
   
+  @GET
+	@Path("/collections/{collectionId}/queryables")
+	@Produces("application/schema+json")
+  public Response getCollectionQueryables(
+          @Context HttpServletRequest hsr, 
+          @PathParam("collectionId") String collectionId) throws UnsupportedEncodingException {
+
+		String responseJSON;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		try {
+			responseJSON = this.readResourceFile("service/config/stac-queryables.json", hsr);
+
+		} catch (Exception e) {
+			LOGGER.error("Error in api " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API api response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(responseJSON).build();
+  }
+  
+  
 	@GET
-	@Produces("application/geo+json")
 	@Path("/collections/{collectionId}/items")
+	@Produces("application/geo+json")
 	public Response getItems(@Context HttpServletRequest hsr, 
           @PathParam("collectionId") String collectionId,
           @QueryParam("limit") int limit, 
           @QueryParam("bbox") String bbox, 
           @QueryParam("datetime") String datetime,
           @QueryParam("search_after") String search_after,
-          @QueryParam("outCRS") String outCRS) throws UnsupportedEncodingException {
+          @QueryParam("outCRS") String outCRS,
+          @QueryParam("query") String queryJson) throws UnsupportedEncodingException {
     
 		String responseJSON;
 		String response;
@@ -490,7 +543,10 @@ public class STACService extends Application {
 			if (gc.getSupportsCollections()) {
 				queryMap.put("collections", collectionId);
 			}
-
+			
+			if (queryJson != null && queryJson.length() > 0)
+				queryMap.put("queryJson", queryJson);
+			
 			url = url + "/_search?size=" + limit;
 			query = StacHelper.prepareSearchQuery(queryMap, search_after);
 
@@ -761,7 +817,8 @@ public class STACService extends Application {
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("updated") String updated, @QueryParam("created") String created, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
-			@QueryParam("outCRS") String outCRS, @QueryParam("status") String itemStatus,@QueryParam("filter") String filter)
+			@QueryParam("outCRS") String outCRS, @QueryParam("status") String itemStatus,@QueryParam("filter") String filter,
+			@QueryParam("filter-lang") String filterLang, @QueryParam("query") String queryJson)
 			throws UnsupportedEncodingException {
 		String responseJSON;
 		String response;
@@ -787,6 +844,9 @@ public class STACService extends Application {
 			if (created != null && created.length() > 0)
 				queryMap.put("created", created);
 			
+			if (created != null && created.length() > 0)
+			queryMap.put("created", created);
+			
 			//GeoportalContext gc = GeoportalContext.getInstance();
 			if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
 				listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
@@ -808,7 +868,18 @@ public class STACService extends Application {
 	       // issue 573
 	       if (filter != null && filter.length() > 0) {
 	         queryMap.put("filterClause", filter);
+	       //#684 filter extension, For GET, default is cql2-text
+	         String searchfilterLang = "cql2-text";
+		       if (filterLang != null && filterLang.length() > 0) {
+		    	   searchfilterLang = filterLang; 
+		       }
+			   queryMap.put("filterLang", searchfilterLang);			    
 	       }
+	       
+	       //#691,query extension https://github.com/stac-api-extensions/query
+	       if (queryJson != null && queryJson.length() > 0)
+				queryMap.put("queryJson", queryJson);
+	       
 	     //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
 	       if ((outCRS != null) &&  listOfCollections!=null && listOfCollections.length()>0)
 	       {
@@ -890,6 +961,7 @@ public class STACService extends Application {
 		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
 		String outCRS = (requestPayload.containsKey("outCRS") ? requestPayload.getString("outCRS") : null);
 		search_after = (requestPayload.containsKey("search_after") ? requestPayload.getString("search_after") : search_after);
+		JsonObject queryJson = (requestPayload.containsKey("query") ? requestPayload.getJsonObject("query") : null);
 				
 		JsonArray collectionArr = (requestPayload.containsKey("collections")
 				? requestPayload.getJsonArray("collections")
@@ -900,9 +972,9 @@ public class STACService extends Application {
 				: null);
 		String itemStatus = (requestPayload.containsKey("status") ? requestPayload.getString("status"): null);
 	    String filterClause = (requestPayload.containsKey("filter") 
-	        ? requestPayload.getString("filter")
+	        ? requestPayload.getJsonObject("filter").toString()
 					: null);
-
+	  
 		//TODO Handle merge=true in Search Pagination
 		String query;
 		String bbox = "";
@@ -972,19 +1044,30 @@ public class STACService extends Application {
 				queryMap.put("status", itemStatus);
 
 			// issue 573
-			if (filterClause != null && filterClause.length() > 0) {
-		        //String filterQry = StacHelper.prepareFilter(filterClause);
+			if (filterClause != null && filterClause.length() > 0) {		        
 		        queryMap.put("filterClause", filterClause); //filterQry);
+		        //#684 filter extension, For POST, only cql2-json
+			    String searchfilterLang = "cql2-json";
+			    queryMap.put("filterLang", searchfilterLang);
+		    	String filterLang = (requestPayload.containsKey("filter-lang") ? requestPayload.getString("filter-lang"): null);
+		       if (filterLang != null && filterLang.length() > 0 && !filterLang.equalsIgnoreCase(searchfilterLang)) {
+		    	   status = Response.Status.BAD_REQUEST;    				
+		    	   responseJSON = this.generateResponse("400", "The only supported filter-lang for a search POST request is cql2-json.",null);
+				   return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+			    }
 		    }
+			//#691,query extension https://github.com/stac-api-extensions/query
+		       if (queryJson != null && !queryJson.isEmpty())
+					queryMap.put("queryJson", queryJson.toString());
       
 		  //Search request with outCRS is valid, if only one collection in collections param, otherwise 400
-      if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
-      {
-			  status = Response.Status.BAD_REQUEST;    				
-			  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
-			  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
-	    		  
-      }
+	      if ((outCRS != null) &&  collectionArr!=null && collectionArr.size()>1)
+	      {
+				  status = Response.Status.BAD_REQUEST;    				
+				  responseJSON = this.generateResponse("400", "Only one collection can be included in search param if search param includes outCRS ",null);
+				  return Response.status(status).header("Content-Type", "application/geo+json").entity(responseJSON).build();
+		    		  
+	      }
       
 			//Adding one extra so that next page can be figured out
 			url = url + "/_search?size=" + (limit+1);
@@ -2034,8 +2117,9 @@ public class STACService extends Application {
 					Set<String> stacRecAssetObjKeys = stacRecAssetObj.keySet();
 
 					for (String stacRecAssetObjKey : stacRecAssetObjKeys) {
+            String assetPath = "$._source.assets['" + stacRecAssetObjKey + "']";
 						assetsObj.put(stacRecAssetObjKey,
-								searchItemCtx.read("$._source.assets." + stacRecAssetObjKey, JSONObject.class));
+								searchItemCtx.read(assetPath, JSONObject.class));
 					}
 					featureContext.set("$.featurePropPath.assets", assetsObj);
 				}

@@ -131,6 +131,23 @@
 	<!--
         <beans:value>prefix:stac_property=index_field_suffix</beans:value>
 	-->
+        <beans:value>eo:sun_azimuth=_SunAzimuth_l</beans:value>
+        <beans:value>eo:sun_elevation=_SunZenith_l</beans:value>
+        <beans:value>eo:cloud_cover=_CloudCover_l</beans:value>
+        <beans:value>eo:row=_row_l</beans:value>
+        <beans:value>eo:column=column_l</beans:value>
+        <beans:value>eo:platform=src_harvested_dataset_s</beans:value>
+
+        <beans:value>AcquisitionDate=properties.AcquisitionDate_dt</beans:value>
+        <beans:value>CameraHeading=properties.CameraHeading_d</beans:value>
+        <beans:value>CameraPitch=properties.CameraPitch_d</beans:value>
+        <beans:value>CameraRoll=properties.CameraRoll_d</beans:value>
+        <beans:value>FarDistance=properties.FarDistance_d</beans:value>
+        <beans:value>HorizontalFieldOfView=properties.HorizontalFieldOfView_d</beans:value>
+        <beans:value>LocationHierarchy=properties.location_hierarchy_cat</beans:value>
+        <beans:value>NearDistance=properties.NearDistance_d</beans:value>
+        <beans:value>OrientedImageryType=properties.OrientedImageryType_s</beans:value>
+        <beans:value>VerticalFieldOfView=properties.VerticalFieldOfView_d</beans:value>
       </beans:list>
     </beans:property>
   </beans:bean>  

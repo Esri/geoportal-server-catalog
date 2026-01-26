@@ -1,18 +1,4 @@
 {
-	"links": [
-		{
-			"rel": "root",
-			"type": "application/json",
-			"title": "This document as JSON",
-			"href": "{url}"
-		},
-		{
-			"rel": "self",
-			"type": "application/json",
-			"title": "This document as JSON",
-			"href": "{url}/collections"
-		}
-	],
 	"collections": [
 		{
 			"stac_version": "1.0.0",
@@ -59,27 +45,27 @@
 					"title": "Original Metadata",
 					"description": "The original metadata file"
 				}
-			},
-			"links": [
-				{
-					"rel": "self",
-					"type": "application/json",
-					"title": "Link to the Metadata collection",
-					"href": "{url}/collections/{collectionId}"
-				},				
-				{
-					"rel": "parent",
-					"type": "application/json",
-					"title": "Link to all collections",
-					"href": "{url}/collections/"
-				},
-				{
-					"rel": "root",
-					"type": "application/json",
-					"title": "Link to STAC entry point",
-					"href": "{url}"
-				}
-			]
-		}
-	]
+			}
+    }
+  ],
+  "links": [
+    {
+      "rel": "self",
+      "type": "application/json",
+      "title": "Link to the Metadata collection",
+      "href": "{url}/collections"
+    },
+    {
+      "rel": "root",
+      "type": "application/json",
+      "title": "Link to STAC entry point",
+      "href": "{url}"
+    },
+    {
+      "rel": "parent",
+      "type": "application/json",
+      "title": "Link to STAC entry point",
+      "href": "{url}"
+    }
+  ]
 }
