@@ -25,7 +25,7 @@
     task: {writable: true, value: null},
     xmlInfo: {writable: true, value: null},
 
-    parseBody: {writable:true,value:function(cswProvider,task) {
+    parseBody: {writable:true,value:function(cswProvider,task) {	
       this.ids = [];
       this.cswProvider = cswProvider;
       this.task = task;
@@ -129,7 +129,7 @@
       this.q += "("+qToAppend+")";
     }},
 
-    _getPropertyLiteral: {writable:true,value:function(nodeInfo,ignoreValidation) {
+    _getPropertyLiteral: {writable:true,value:function(nodeInfo,ignoreValidation) {	
       var v;
       this.xmlInfo.forEachChild(nodeInfo.node,function(childInfo){
         if (childInfo.localName === "Literal") {
@@ -152,9 +152,14 @@
 
     _getPropertyName: {writable:true,value:function(nodeInfo,ignoreValidation) {
       // dc:type - liveData, Format - content type, Subject - theme
-      var queryables = ["anytext","id","title","apiso:language"];
+      var queryables = ["anytext","id","title","apiso:language","topiccategory","apiso:subject","apiso:type","apiso:dataorganizationname"];
+	 // console.log("queryables "+queryables);
       var realQueryables = {
-        "apiso:Language": "apiso_Language_s"
+        "apiso:Language": "apiso_Language_s",
+		"topicCategory":"apiso_TopicCategory_s",
+		"apiso:Subject":"apiso_Subject_txt",
+		"apiso:Type":"apiso_Type_s",
+		"apiso:DataOrganizationName":"apiso_OrganizationName_txt"
       }
       var anytextAliases = ["","anytext","csw:anytext","format","subject"];  // #582
       if (!ignoreValidation) anytextAliases.push("dc:type");
@@ -175,6 +180,7 @@
       if (typeof name !== "string") name = "";
       name = name.trim();
       lc = name.toLowerCase();
+	  //console.log("lc "+lc);
       msg = locator+" is required for "+nodeInfo.localName;
       if (anytextAliases.indexOf(lc) !== -1) {
         return "";
@@ -260,7 +266,7 @@
       }
     }},
 
-    _parseFilter: {writable:true,value:function(filterNode) {
+    _parseFilter: {writable:true,value:function(filterNode) {	
       if (!filterNode) return;
       this._parseFilterClause(filterNode);
       if (typeof this.q === "string" && this.q.length > 0) {
