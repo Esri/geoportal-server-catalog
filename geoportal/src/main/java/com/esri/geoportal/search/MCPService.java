@@ -15,6 +15,8 @@
 
 package com.esri.geoportal.search;
 
+import com.esri.geoportal.service.stac.StacContext;
+
 import java.util.*;
 import javax.servlet.http.HttpServletRequest;
 import javax.ws.rs.*;
@@ -37,7 +39,8 @@ import javax.ws.rs.client.Entity;
 public class MCPService extends Application {
 
   private static final Logger LOGGER = LoggerFactory.getLogger(MCPService.class);
-
+  private final StacContext sc = StacContext.getInstance();
+	
   // Minimal allowlist. Make configurable in your app config.
   private static final Set<String> ALLOWED_ORIGINS = new HashSet<>(Arrays.asList(
       // e.g. "https://your-host", "http://localhost:3000"
@@ -56,7 +59,8 @@ public class MCPService extends Application {
     // Minimal GET support per Streamable HTTP requirements.
     JSONObject ok = new JSONObject();
     ok.put("status", "ok");
-    ok.put("endpoint", req.getRequestURL().toString());
+    ok.put("endpoint", sc.getStacUrl().replaceAll("/+$", "") + "/mcp");  // req.getRequestURL().toString());
+    ok.put("protocolVersion", "2024-11-05");
     return Response.ok(ok.toJSONString()).build();
   }
 
@@ -121,6 +125,7 @@ public class MCPService extends Application {
 
     result.put("serverInfo", serverInfo);
     result.put("capabilities", capabilities);
+    result.put("protocolVersion", "2024-11-05");
 
     return jsonRpcResult(id, result);
   }
@@ -160,6 +165,7 @@ public class MCPService extends Application {
     JSONObject result = new JSONObject();
     result.put("tools", tools);
     result.put("nextCursor", null);
+    result.put("protocolVersion", "2024-11-05");
 
     return jsonRpcResult(id, result);
   }
@@ -277,6 +283,7 @@ public class MCPService extends Application {
     content.add(chunk);
     result.put("content", content);
     result.put("isError", false);
+    result.put("protocolVersion", "2024-11-05");
     return jsonRpcResult(id, result);
   }
 
