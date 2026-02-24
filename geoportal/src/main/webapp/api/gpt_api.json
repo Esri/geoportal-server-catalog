@@ -48,7 +48,7 @@
 					"AUTHENTICATION"
 				],
 				"summary": "Generates geoportal JWT token",
-				"description": "Generates geoportal JWT token for API access using client_credentials. Append generated access_token with each subsequent request to geoportal server.",
+				"description": "Generates a GeoPortal JWT token for API access using the client_credentials OAuth 2.0 grant type. Append generated access_token with each subsequent request to geoportal server.",
 				"produces": [
 					"application/json"
 				],
