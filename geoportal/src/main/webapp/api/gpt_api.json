@@ -15,16 +15,24 @@
   "basePath": "/geoportal",
   "tags": [
     {
-      "name": "STAC"
+      "name": "STAC",
+      "description": "Spatio-Temporal Asset Catalog (STAC) API endpoints"
     },
     {
-      "name": "OGCRECORDS"
+      "name": "OGCRECORDS",
+      "description": "OGC Records API endpoints"
     },
     {
-      "name": "CSW"
+      "name": "CSW",
+      "description": "OGC Catalog Service for the Web (CSW) API endpoints"
     },
     {
-      "name": "REST"
+      "name": "REST",
+      "description": "Geoportal Server REST API endpoints"
+    },
+    {
+      "name": "MCP",
+      "description": "Model Context Protocol endpoint (JSON-RPC over HTTP; optional SSE)"
     }
   ],
   "paths": {
@@ -587,7 +595,7 @@
             "in": "query",
             "description": "Comma separated list of Item ids to return.",
             "required": false,
-            "type": "Comma separated list of Item ids to return",
+            "type": "string",
             "default": "LC80100252015082LGN00,LC80100252014287LGN00"
           },
           {
@@ -740,7 +748,7 @@
             "in": "query",
             "description": "Features matching the supplied query (JSON Elasticsearch Query DSL).Other querables are ignored.",
             "required": false,           
-            "type": "Json string",
+            "type": "string",
             "default": "{\"query\":{\"bool\": {\"must\":[{\"match\":{\"sys_owner_s\":\"admin\"}}]}}}"
           },
           {
@@ -748,7 +756,7 @@
             "in": "query",
             "description": "Only features that have a geometry that intersects the bounding box are selected.",
             "required": false,
-            "type": "ArrayofNumbers",
+            "type": "string",
             "default": "-171.791110603,18.91619,-66.96466,71.3577635769"
           },
           {
@@ -756,7 +764,7 @@
             "in": "query",
             "description": "Only features with title are selected",
             "required": false,
-            "type": "String",
+            "type": "string",
             "default": "SampleFeatureService"
           },
           {
@@ -764,7 +772,7 @@
             "in": "query",
             "description": "Only features owned by this provider will be selected",
             "required": false,
-            "type": "String",
+            "type": "string",
             "default": "admin"
           },
           {
@@ -772,7 +780,7 @@
             "in": "query",
             "description": "Either a date-time or an interval, open or closed. Date and time expressions adhere to RFC 3339. Open intervals are expressed using double-dots.",
             "required": false,
-            "type": "String",
+            "type": "string",
             "default": "2023-06-12T23:20:50Z/.."
           }
         ],
@@ -2129,7 +2137,118 @@
           }
         }
       }
+    },
+    "/mcp": {
+      "post": {
+        "tags": ["MCP"],
+        "summary": "Send a single MCP JSON-RPC message",
+        "description": "Send exactly one JSON-RPC 2.0 request to the MCP endpoint. The client should include an Accept header listing both application/json and text/event-stream. The server responds with a single JSON-RPC message (application/json or application/geojson). Sending messages to the MCP server is currently not supported.",
+        "operationId": "postMcp",
+        "consumes": [
+          "application/json"
+        ],
+        "produces": [
+          "application/json",
+          "application/geojson",
+          "text/event-stream"
+        ],
+        "parameters": [
+          {
+            "name": "body",
+            "in": "body",
+            "description": "Send exactly one JSON-RPC 2.0 request to the MCP endpoint.",
+            "required": true,
+            "schema": {
+              "$ref": "#/definitions/JsonRpcMessage"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "JSON-RPC response (non-streaming) for JSON-RPC requests.",
+            "headers": {
+              "Mcp-Session-Id": {
+                "type": "string",
+                "description": "MCP session identifier"
+              }
+            },
+            "schema": {
+              "$ref": "#/definitions/JsonRpcMessage"
+            },
+            "examples": {
+              "application/json": {
+                "jsonrpc": "2.0",
+                "id": "10",
+                "result": {
+                  "nextCursor": null,
+                  "protocolVersion": "2024-11-05",
+                  "tools": [
+                    {
+                      "name": "stac_search",
+                      "description": "Search STAC items (maps to /stac/search).",
+                      "inputSchema": {
+                        "type": "object",
+                        "properties": {
+                          "datetime": { "type": "string" },
+                          "collections": { "type": "array", "items": { "type": "string" } },
+                          "intersects": { "type": "object" },
+                          "outCRS": { "type": "string" },
+                          "bbox": { "type": "string" },
+                          "limit": { "type": "integer" },
+                          "ids": { "type": "array", "items": { "type": "string" } }
+                        }
+                      }
+                    }
+                  ]
+                }
+              },
+              "text/event-stream": "event: message\ndata: {\"jsonrpc\":\"2.0\",\"id\":\"10\",\"result\":{\"nextCursor\":null,\"protocolVersion\":\"2024-11-05\",\"tools\":[{\"name\":\"stac_search\",\"description\":\"Search STAC items (maps to /stac/search).\"}]}}\n\n"
+            }
+          },
+          "202": {
+            "description": "Accepted. Used when the POST body is a JSON-RPC notification or a JSON-RPC response that does not require an HTTP response body."
+          },
+          "400": {
+            "description": "Bad Request (invalid JSON-RPC, missing required headers, unsupported protocol version, etc.)",
+            "schema": {
+              "$ref": "#/definitions/JsonRpcErrorEnvelope"
+            }
+          },
+          "401": {
+            "description": "Unauthorized (if authentication is required)"
+          },
+          "404": {
+            "description": "Not Found (e.g., session not found/expired when session IDs are used)"
+          },
+          "405": {
+            "description": "Method Not Allowed"
+          }
+        }
+      },
+      "get": {
+        "tags": ["MCP"],
+        "summary": "Hello MCP!",
+        "description": "Provide basic availability check and information about the MCP endpoint.",
+        "operationId": "getMcpStream",
+        "produces": [
+          "text/event-stream"
+        ],
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "SSE stream established",
+            "schema": {
+              "type": "string"
+            },
+            "examples": {
+              "text/event-stream": "event: message\ndata: {\"jsonrpc\":\"2.0\",\"method\":\"notifications/message\",\"params\":{\"level\":\"info\",\"message\":\"stream opened\"}}\n\n"
+            }
+          }          
+        }
+      }
+
     }
+    
   },
   "definitions": {
     "STACSearchRequest": {
@@ -2319,6 +2438,78 @@
           }
         }
       }
+    },
+    
+      "JsonRpcRequest": {
+        "type": "object",
+        "required": ["jsonrpc", "id", "method"],
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0" },
+          "id": {
+            "description": "Client-generated correlation id",
+            "type": "string"
+          },
+          "method": { "type": "string" },
+          "params": { "type": "object", "additionalProperties": true }
+        },
+        "additionalProperties": false
+      },
+      "JsonRpcNotification": {
+        "type": "object",
+        "required": ["jsonrpc", "method"],
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0" },
+          "method": { "type": "string" },
+          "params": { "type": "object", "additionalProperties": true }
+        },
+        "additionalProperties": false
+      },
+      "JsonRpcResponse": {
+        "type": "object",
+        "required": ["jsonrpc", "id"],
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0" },
+          "id": {
+            "type": "string"
+          },
+          "result": { "description": "Successful result", "type": "object", "additionalProperties": true },
+          "error": { "$ref": "#/definitions/JsonRpcError"}
+        },
+        "additionalProperties": false
+      },
+      "JsonRpcErrorEnvelope": {
+        "type": "object",
+        "required": ["jsonrpc", "error"],
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0" },
+          "id": {
+            "description": "May be absent for errors not tied to a request id (use string form for numeric idst)",
+            "type": "string"
+          },
+          "error": { "$ref": "#/definitions/JsonRpcError" }
+        },
+        "additionalProperties": false
+      },
+      "JsonRpcError": {
+        "type": "object",
+        "required": ["code", "message"],
+        "properties": {
+          "code": { "type": "integer" },
+          "message": { "type": "string" }
+        },
+        "additionalProperties": true
+      },
+      "JsonRpcMessage": {
+        "type": "object",
+        "properties": {
+          "jsonrpc": { "type": "string", "default": "2.0" },
+          "id": { "type": "string" },
+          "method": { "type": "string" },
+          "params": { "type": "object", "additionalProperties": true },
+          "result": { "type": "object", "additionalProperties": true },
+          "error": { "$ref": "#/definitions/JsonRpcError" }
+        },
+        "additionalProperties": true
+      }
     }
   }
-}
