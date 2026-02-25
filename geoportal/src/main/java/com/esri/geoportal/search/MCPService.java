@@ -61,7 +61,9 @@ public class MCPService extends Application {
     ok.put("status", "ok");
     ok.put("endpoint", sc.getStacUrl().replaceAll("/+$", "") + "/mcp");  // req.getRequestURL().toString());
     ok.put("protocolVersion", "2024-11-05");
-    return Response.ok(ok.toJSONString()).build();
+
+    return Response.ok(ok).build();
+
   }
 
   @POST
@@ -164,7 +166,7 @@ public class MCPService extends Application {
 
     JSONObject result = new JSONObject();
     result.put("tools", tools);
-    result.put("nextCursor", null);
+    result.put("nextCursor", "");
     result.put("protocolVersion", "2024-11-05");
 
     return jsonRpcResult(id, result);
