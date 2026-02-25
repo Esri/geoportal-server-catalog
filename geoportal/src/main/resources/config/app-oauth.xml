@@ -23,13 +23,13 @@
       authorized-grant-types="password" authorities="ROLE_CLIENT" scope="read,write" />      
   <!-- Define an environment variable for secrets using either {bcrypt}<bcrypt_hashed_secret> for a bcrypt‑hashed value or {noop}<plaintext_secret> for a plain‑text value.  -->
  <oauth:client client-id="user"
-                secret="${gpt_api_user_secret}"
+                secret="${gpt_api_user_secret:}"
                 authorized-grant-types="client_credentials"
                 scope="read"
                 authorities="ROLE_USER" />
   
   <oauth:client client-id="admin"
-                secret="${gpt_api_admin_secret}"
+                secret="${gpt_api_admin_secret:}"
                 authorized-grant-types="client_credentials"
                 scope="read,write"
                 authorities="ROLE_ADMIN" />
