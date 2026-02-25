@@ -21,15 +21,15 @@
   <oauth:client-details-service id="oauthClientDetails">
     <oauth:client client-id="geoportal-client" secret="{noop}"
       authorized-grant-types="password" authorities="ROLE_CLIENT" scope="read,write" />      
-  <!-- Add secret as {bcrypt}<bcrypt_hashed_secret> or {noop}<plaintextsecret>  -->
+  <!-- Define an environment variable for secrets using either {bcrypt}<bcrypt_hashed_secret> for a bcrypt‑hashed value or {noop}<plaintext_secret> for a plain‑text value.  -->
  <oauth:client client-id="user"
-                secret=""
+                secret="${gpt_api_user_secret}"
                 authorized-grant-types="client_credentials"
                 scope="read"
                 authorities="ROLE_USER" />
   
   <oauth:client client-id="admin"
-                secret=""
+                secret="${gpt_api_admin_secret}"
                 authorized-grant-types="client_credentials"
                 scope="read,write"
                 authorities="ROLE_ADMIN" />
