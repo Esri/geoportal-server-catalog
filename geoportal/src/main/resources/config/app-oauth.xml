@@ -21,15 +21,15 @@
   <oauth:client-details-service id="oauthClientDetails">
     <oauth:client client-id="geoportal-client" secret="{noop}"
       authorized-grant-types="password" authorities="ROLE_CLIENT" scope="read,write" />      
-    
+  <!-- Add secret as {bcrypt}<bcrypt_hashed_secret> or {noop}<plaintextsecret>  -->
  <oauth:client client-id="user"
-                secret="{bcrypt}$2a$12$MZ.rTHwQaJH2UcvtKJyO5ewPxPv2QGTR4WTXlsRj2CCUqtbMeyhCO"
+                secret=""
                 authorized-grant-types="client_credentials"
                 scope="read"
                 authorities="ROLE_USER" />
   
   <oauth:client client-id="admin"
-                secret="{bcrypt}$2a$12$td99FHa4zQbWVUwJwJ9k1ea9CR4oPTUKCQgacLwjefCFxxil0jZ9."
+                secret=""
                 authorized-grant-types="client_credentials"
                 scope="read,write"
                 authorities="ROLE_ADMIN" />
