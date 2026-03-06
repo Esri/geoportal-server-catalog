@@ -21,7 +21,15 @@
     "eo:column": "$._source.properties.column_l",
     "eo:platform": "$._source.properties.src_harvested_dataset_s",
     "eo:epsg": 4326,
-    
+    "eo:bands":"$._source.properties.eo:bands",
+        
+    "proj:epsg":"$._source.properties.proj:epsg",
+    "proj:projjson":"$._source.properties.proj:projjson",
+    "proj:transform":"$._source.properties.proj:transform",
+    "proj:geometry":"$._source.properties.proj:geometry",
+    "proj:shape":"$._source.properties.proj:shape",
+    "proj:bbox":"$._source.properties.proj:bbox",
+        
     "sentinel:utm_zone": "$._source.properties.sentinel_utm_zone",
     "sentinel:latitude_band": "$._source.properties.sentinel_latitude_band",
     "sentinel:grid_square": "$._source.properties.sentinel_grid_square",
