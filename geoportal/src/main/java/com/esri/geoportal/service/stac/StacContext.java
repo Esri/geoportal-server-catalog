@@ -266,6 +266,7 @@ public class StacContext {
         String searchQry="";
         String filterClause="";
         int cnt =1;
+        boolean keyValueIsNull = false;
         
         for (String ukField: uniqueKeyFields) { 
           
@@ -286,6 +287,12 @@ public class StacContext {
           } else {
             value = properties.getAsString(ukField);
           }
+          if(value == null || value.isBlank() || value.equals("null"))
+          {
+        	  message ="Value for the key: "+key+" is null. ";
+        	  keyValueIsNull = true;
+              break;
+          }
           //Prepare filter clause fldName=fldValue AND fldName=fldValue ex:xom:source_key_id=testpolygon1 AND xom:source_system=testitem
           if(cnt ==1)
           {
@@ -298,14 +305,15 @@ public class StacContext {
           cnt++;
           searchQry = StacHelper.prepareFilter(filterClause,StacFilterLang.CQL2TEXT);
         }
-          
-        existingID = indexHasValue(collectionId, searchQry,forUpdate,itemId);
-        if(existingID.length() <1)
+        if(!keyValueIsNull)  
         {
-        	passes = true;
-        }
-        message = passes ? "Unique key validation on (" + key + "): OK!" : "The combination of this key- "+key+ " already exists in the system. existingId:{"+existingID+"} ";          
-        
+        	existingID = indexHasValue(collectionId, searchQry,forUpdate,itemId);
+            if(existingID.length() <1)
+            {
+            	passes = true;
+            }
+            message = passes ? "Unique key validation on (" + key + "): OK!" : "The combination of this key- "+key+ " already exists in the system. existingId:{"+existingID+"} ";          
+        }        
         break;
         
       case "intersects_collection":

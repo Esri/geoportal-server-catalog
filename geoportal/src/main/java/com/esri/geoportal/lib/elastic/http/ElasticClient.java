@@ -187,7 +187,8 @@ public class ElasticClient {
     StringWriter sw = new StringWriter();	   
     String charset = "UTF-8";
     URLConnection con = null;
-    URL u = new java.net.URL(url);
+    URL u = new java.net.URL(url);   
+    LOGGER.trace("url = "+url);
     try {      
       if(useHttps) {
           HttpsURLConnection.setFollowRedirects(true);
@@ -205,8 +206,8 @@ public class ElasticClient {
             con.setRequestProperty("Authorization",basicCredentials);
           }
       
-	      if (data != null && data.length() > 0) {
-	        //System.err.println("sendData="+data);
+	      if (data != null && data.length() > 0) {	       
+	        LOGGER.trace("sendData= "+data);
 	        con.setDoOutput(true);
 	        byte[] bytes = data.getBytes("UTF-8");
 	        if (dataContentType != null && dataContentType.length() > 0) {

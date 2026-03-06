@@ -2164,6 +2164,10 @@ public class STACService extends Application {
 							if (searchItemCtx.read(propKeyVal) != null) {
 								featureContext.set("$.featurePropPath.properties." + propKey,
 										searchItemCtx.read(propKeyVal));
+							}else //#688
+							{
+								featureContext.set("$.featurePropPath.properties." + propKey,
+										"null");
 							}
 						}
 					}
