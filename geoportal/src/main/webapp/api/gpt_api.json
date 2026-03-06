@@ -14,16 +14,18 @@
 	},
 	"basePath": "/geoportal",
 	"securityDefinitions": {
-	"BearerAuth": {
-	      "type": "apiKey",
-	      "in": "header",
-	      "name": "Authorization",
-	      "description": "Enter your bearer token as: Bearer <token>"
-	    }
-	  },
-	  "security": [
-	    { "BearerAuth": [] }
-	  ],
+		"BearerAuth": {
+			"type": "apiKey",
+			"in": "header",
+			"name": "Authorization",
+			"description": "Enter your bearer token as: Bearer <token>"
+		}
+	},
+	"security": [
+		{
+			"BearerAuth": []
+		}
+	],
 	"tags": [
 		{
 			"name": "AUTHENTICATION"
@@ -39,6 +41,10 @@
 		},
 		{
 			"name": "REST"
+		},
+		{
+			"name": "MCP",
+			"description": "Model Context Protocol endpoint (JSON-RPC over HTTP; optional SSE)"
 		}
 	],
 	"paths": {
@@ -48,7 +54,7 @@
 					"AUTHENTICATION"
 				],
 				"summary": "Generates geoportal JWT token",
-				"description": "Generates a GeoPortal JWT token for API access using the client_credentials OAuth 2.0 grant type. Append generated access_token with each subsequent request to geoportal server.",
+				"description": "Generates a GeoPortal JWT token for API access using the OAuth 2.0 client_credentials grant type. Append generated access_token with each subsequent request to geoportal server.",
 				"produces": [
 					"application/json"
 				],
@@ -862,7 +868,6 @@
 				}
 			}
 		},
-		
 		"/rest/geoportal": {
 			"get": {
 				"tags": [
@@ -2134,219 +2139,352 @@
 					}
 				}
 			}
-		}
-	},
-	"definitions": {
-		"STACSearchRequest": {
-			"type": "object",
-			"properties": {
-				"bbox": {
-					"type": "array",
-					"items": {
-						"type": "number"
+		},
+		"/mcp": {
+			"post": {
+				"tags": [
+					"MCP"
+				],
+				"summary": "Send a single MCP JSON-RPC message",
+				"description": "Send exactly one JSON-RPC 2.0 request to the MCP endpoint. The client should include an Accept header listing both application/json and text/event-stream. The server responds with a single JSON-RPC message (application/json or application/geojson). Sending messages to the MCP server is currently not supported.",
+				"operationId": "postMcp",
+				"consumes": [
+					"application/json"
+				],
+				"produces": [
+					"application/json",
+					"application/geojson",
+					"text/event-stream"
+				],
+				"parameters": [
+					{
+						"name": "body",
+						"in": "body",
+						"description": "Send exactly one JSON-RPC 2.0 request to the MCP endpoint.",
+						"required": true,
+						"schema": {
+							"$ref": "#/definitions/JsonRpcMessage"
+						}
+					}
+				],
+				"responses": {
+					"200": {
+						"description": "JSON-RPC response (non-streaming) for JSON-RPC requests.",
+						"headers": {
+							"Mcp-Session-Id": {
+								"type": "string",
+								"description": "MCP session identifier"
+							}
+						},
+						"schema": {
+							"$ref": "#/definitions/JsonRpcMessage"
+						},
+						"examples": {
+							"application/json": {
+								"jsonrpc": "2.0",
+								"id": "10",
+								"result": {
+									"nextCursor": null,
+									"protocolVersion": "2024-11-05",
+									"tools": [
+										{
+											"name": "stac_search",
+											"description": "Search STAC items (maps to /stac/search).",
+											"inputSchema": {
+												"type": "object",
+												"properties": {
+													"datetime": {
+														"type": "string"
+													},
+													"collections": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														}
+													},
+													"intersects": {
+														"type": "object"
+													},
+													"outCRS": {
+														"type": "string"
+													},
+													"bbox": {
+														"type": "string"
+													},
+													"limit": {
+														"type": "integer"
+													},
+													"ids": {
+														"type": "array",
+														"items": {
+															"type": "string"
+														}
+													}
+												}
+											}
+										}
+									]
+								}
+							},
+							"text/event-stream": "event: message\ndata: {\"jsonrpc\":\"2.0\",\"id\":\"10\",\"result\":{\"nextCursor\":null,\"protocolVersion\":\"2024-11-05\",\"tools\":[{\"name\":\"stac_search\",\"description\":\"Search STAC items (maps to /stac/search).\"}]}}\n\n"
+						}
 					},
-					"default": [
-						-180,
-						-90,
-						180,
-						90
-					]
+					"202": {
+						"description": "Accepted. Used when the POST body is a JSON-RPC notification or a JSON-RPC response that does not require an HTTP response body."
+					},
+					"400": {
+						"description": "Bad Request (invalid JSON-RPC, missing required headers, unsupported protocol version, etc.)",
+						"schema": {
+							"$ref": "#/definitions/JsonRpcErrorEnvelope"
+						}
+					},
+					"401": {
+						"description": "Unauthorized (if authentication is required)"
+					},
+					"404": {
+						"description": "Not Found (e.g., session not found/expired when session IDs are used)"
+					},
+					"405": {
+						"description": "Method Not Allowed"
+					}
+				}
+			},
+			"get": {
+				"tags": [
+					"MCP"
+				],
+				"summary": "Hello MCP!",
+				"description": "Provide basic availability check and information about the MCP endpoint.",
+				"operationId": "getMcpStream",
+				"produces": [
+					"text/event-stream"
+				],
+				"parameters": [],
+				"responses": {
+					"200": {
+						"description": "SSE stream established",
+						"schema": {
+							"type": "string"
+						},
+						"examples": {
+							"text/event-stream": "event: message\ndata: {\"jsonrpc\":\"2.0\",\"method\":\"notifications/message\",\"params\":{\"level\":\"info\",\"message\":\"stream opened\"}}\n\n"
+						}
+					}
 				}
 			}
 		},
-		"GetRecords": {
-			"type": "object",
-			"xml": {
-				"namespace": "http://www.opengis.net/cat/csw/2.0.2",
-				"prefix": "csw"
+		"definitions": {
+			"STACSearchRequest": {
+				"type": "object",
+				"properties": {
+					"bbox": {
+						"type": "array",
+						"items": {
+							"type": "number"
+						},
+						"default": [
+							-180,
+							-90,
+							180,
+							90
+						]
+					}
+				}
 			},
-			"properties": {
-				"version": {
-					"type": "string",
-					"enum": [
-						"2.0.2"
-					],
-					"xml": {
-						"attribute": true
-					}
+			"GetRecords": {
+				"type": "object",
+				"xml": {
+					"namespace": "http://www.opengis.net/cat/csw/2.0.2",
+					"prefix": "csw"
 				},
-				"service": {
-					"type": "string",
-					"enum": [
-						"CSW"
-					],
-					"xml": {
-						"attribute": true
-					}
-				},
-				"resultType": {
-					"type": "string",
-					"enum": [
-						"results",
-						"hits"
-					],
-					"xml": {
-						"attribute": true
-					}
-				},
-				"startPosition": {
-					"type": "integer",
-					"enum": [
-						1
-					],
-					"xml": {
-						"attribute": true
-					}
-				},
-				"maxRecords": {
-					"type": "integer",
-					"enum": [
-						10
-					],
-					"xml": {
-						"attribute": true
-					}
-				},
-				"xmlns:ogc": {
-					"type": "string",
-					"enum": [
-						"http://www.opengis.net/ogc"
-					],
-					"xml": {
-						"attribute": true
-					}
-				},
-				"xmlns:gml": {
-					"type": "string",
-					"enum": [
-						"http://www.opengis.net/gml"
-					],
-					"xml": {
-						"attribute": true
-					}
-				},
-				"csw:Query": {
-					"type": "object",
-					"properties": {
-						"typeNames": {
-							"type": "string",
-							"enum": [
-								"csw:Record"
-							],
-							"xml": {
-								"attribute": true
-							}
-						},
-						"csw:ElementSetName": {
-							"type": "string",
-							"enum": [
-								"brief",
-								"summary",
-								"full"
-							]
-						},
-						"csw:Constraint": {
-							"type": "object",
-							"properties": {
-								"version": {
-									"type": "string",
-									"enum": [
-										"1.1.0"
-									],
-									"xml": {
-										"attribute": true
-									}
-								},
-								"ogc:Filter": {
-									"type": "object",
-									"properties": {
-										"ogc:And": {
-											"type": "object",
-											"properties": {
-												"ogc:PropertyIsLike": {
-													"type": "object",
-													"properties": {
-														"wildCard": {
-															"type": "string",
-															"enum": [
-																"*"
-															],
-															"xml": {
-																"attribute": true
+				"properties": {
+					"version": {
+						"type": "string",
+						"enum": [
+							"2.0.2"
+						],
+						"xml": {
+							"attribute": true
+						}
+					},
+					"service": {
+						"type": "string",
+						"enum": [
+							"CSW"
+						],
+						"xml": {
+							"attribute": true
+						}
+					},
+					"resultType": {
+						"type": "string",
+						"enum": [
+							"results",
+							"hits"
+						],
+						"xml": {
+							"attribute": true
+						}
+					},
+					"startPosition": {
+						"type": "integer",
+						"enum": [
+							1
+						],
+						"xml": {
+							"attribute": true
+						}
+					},
+					"maxRecords": {
+						"type": "integer",
+						"enum": [
+							10
+						],
+						"xml": {
+							"attribute": true
+						}
+					},
+					"xmlns:ogc": {
+						"type": "string",
+						"enum": [
+							"http://www.opengis.net/ogc"
+						],
+						"xml": {
+							"attribute": true
+						}
+					},
+					"xmlns:gml": {
+						"type": "string",
+						"enum": [
+							"http://www.opengis.net/gml"
+						],
+						"xml": {
+							"attribute": true
+						}
+					},
+					"csw:Query": {
+						"type": "object",
+						"properties": {
+							"typeNames": {
+								"type": "string",
+								"enum": [
+									"csw:Record"
+								],
+								"xml": {
+									"attribute": true
+								}
+							},
+							"csw:ElementSetName": {
+								"type": "string",
+								"enum": [
+									"brief",
+									"summary",
+									"full"
+								]
+							},
+							"csw:Constraint": {
+								"type": "object",
+								"properties": {
+									"version": {
+										"type": "string",
+										"enum": [
+											"1.1.0"
+										],
+										"xml": {
+											"attribute": true
+										}
+									},
+									"ogc:Filter": {
+										"type": "object",
+										"properties": {
+											"ogc:And": {
+												"type": "object",
+												"properties": {
+													"ogc:PropertyIsLike": {
+														"type": "object",
+														"properties": {
+															"wildCard": {
+																"type": "string",
+																"enum": [
+																	"*"
+																],
+																"xml": {
+																	"attribute": true
+																}
+															},
+															"escape": {
+																"type": "string",
+																"enum": [
+																	"\\"
+																],
+																"xml": {
+																	"attribute": true
+																}
+															},
+															"singleChar": {
+																"type": "string",
+																"enum": [
+																	"?"
+																],
+																"xml": {
+																	"attribute": true
+																}
+															},
+															"ogc:PropertyName": {
+																"type": "string",
+																"enum": [
+																	"AnyText"
+																]
+															},
+															"ogc:Literal": {
+																"type": "string",
+																"enum": [
+																	"data"
+																]
 															}
-														},
-														"escape": {
-															"type": "string",
-															"enum": [
-																"\\"
-															],
-															"xml": {
-																"attribute": true
-															}
-														},
-														"singleChar": {
-															"type": "string",
-															"enum": [
-																"?"
-															],
-															"xml": {
-																"attribute": true
-															}
-														},
-														"ogc:PropertyName": {
-															"type": "string",
-															"enum": [
-																"AnyText"
-															]
-														},
-														"ogc:Literal": {
-															"type": "string",
-															"enum": [
-																"data"
-															]
 														}
-													}
-												},
-												"ogc:PropertyIsEqualTo": {
-													"type": "object",
-													"properties": {
-														"ogc:PropertyName": {
-															"type": "string",
-															"enum": [
-																"dc:type"
-															]
-														},
-														"ogc:Literal": {
-															"type": "string",
-															"enum": [
-																"liveData"
-															]
+													},
+													"ogc:PropertyIsEqualTo": {
+														"type": "object",
+														"properties": {
+															"ogc:PropertyName": {
+																"type": "string",
+																"enum": [
+																	"dc:type"
+																]
+															},
+															"ogc:Literal": {
+																"type": "string",
+																"enum": [
+																	"liveData"
+																]
+															}
 														}
-													}
-												},
-												"ogc:BBOX": {
-													"type": "object",
-													"properties": {
-														"ogc:PropertyName": {
-															"type": "string",
-															"enum": [
-																"ows:BoundingBox"
-															]
-														},
-														"gml:Envelope": {
-															"type": "object",
-															"properties": {
-																"gml:lowerCorner": {
-																	"type": "string",
-																	"enum": [
-																		"-180 -90"
-																	]
-																},
-																"gml:upperCorner": {
-																	"type": "string",
-																	"enum": [
-																		"180 90"
-																	]
+													},
+													"ogc:BBOX": {
+														"type": "object",
+														"properties": {
+															"ogc:PropertyName": {
+																"type": "string",
+																"enum": [
+																	"ows:BoundingBox"
+																]
+															},
+															"gml:Envelope": {
+																"type": "object",
+																"properties": {
+																	"gml:lowerCorner": {
+																		"type": "string",
+																		"enum": [
+																			"-180 -90"
+																		]
+																	},
+																	"gml:upperCorner": {
+																		"type": "string",
+																		"enum": [
+																			"180 90"
+																		]
+																	}
 																}
 															}
 														}
@@ -2360,6 +2498,142 @@
 						}
 					}
 				}
+			},
+			"JsonRpcRequest": {
+				"type": "object",
+				"required": [
+					"jsonrpc",
+					"id",
+					"method"
+				],
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"default": "2.0"
+					},
+					"id": {
+						"description": "Client-generated correlation id",
+						"type": "string"
+					},
+					"method": {
+						"type": "string"
+					},
+					"params": {
+						"type": "object",
+						"additionalProperties": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"JsonRpcNotification": {
+				"type": "object",
+				"required": [
+					"jsonrpc",
+					"method"
+				],
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"default": "2.0"
+					},
+					"method": {
+						"type": "string"
+					},
+					"params": {
+						"type": "object",
+						"additionalProperties": true
+					}
+				},
+				"additionalProperties": false
+			},
+			"JsonRpcResponse": {
+				"type": "object",
+				"required": [
+					"jsonrpc",
+					"id"
+				],
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"default": "2.0"
+					},
+					"id": {
+						"type": "string"
+					},
+					"result": {
+						"description": "Successful result",
+						"type": "object",
+						"additionalProperties": true
+					},
+					"error": {
+						"$ref": "#/definitions/JsonRpcError"
+					}
+				},
+				"additionalProperties": false
+			},
+			"JsonRpcErrorEnvelope": {
+				"type": "object",
+				"required": [
+					"jsonrpc",
+					"error"
+				],
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"default": "2.0"
+					},
+					"id": {
+						"description": "May be absent for errors not tied to a request id (use string form for numeric idst)",
+						"type": "string"
+					},
+					"error": {
+						"$ref": "#/definitions/JsonRpcError"
+					}
+				},
+				"additionalProperties": false
+			},
+			"JsonRpcError": {
+				"type": "object",
+				"required": [
+					"code",
+					"message"
+				],
+				"properties": {
+					"code": {
+						"type": "integer"
+					},
+					"message": {
+						"type": "string"
+					}
+				},
+				"additionalProperties": true
+			},
+			"JsonRpcMessage": {
+				"type": "object",
+				"properties": {
+					"jsonrpc": {
+						"type": "string",
+						"default": "2.0"
+					},
+					"id": {
+						"type": "string"
+					},
+					"method": {
+						"type": "string"
+					},
+					"params": {
+						"type": "object",
+						"additionalProperties": true
+					},
+					"result": {
+						"type": "object",
+						"additionalProperties": true
+					},
+					"error": {
+						"$ref": "#/definitions/JsonRpcError"
+					}
+				},
+				"additionalProperties": true
 			}
 		}
 	}
