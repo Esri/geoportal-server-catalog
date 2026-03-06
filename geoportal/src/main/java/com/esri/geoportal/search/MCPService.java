@@ -234,18 +234,30 @@ public class MCPService extends Application {
 
   private String stacBaseUrl(HttpServletRequest req) {
     // Mirrors STACService.getBaseUrl(), but returns the /stac base.
-    StringBuffer requestURL = req.getRequestURL();
     String ctxPath = req.getContextPath();
-    String baseUrl;
 
-    if (ctxPath != null && ctxPath.length() > 0) {
-      baseUrl = requestURL.substring(0, requestURL.indexOf(ctxPath) + ctxPath.length());
-    } else {
-      baseUrl = req.getScheme() + "://" + req.getServerName();
-      int port = req.getServerPort();
-      if (port != 80 && port != 443) baseUrl += ":" + port;
+    // Build base URL from trusted server attributes instead of the raw request URL
+    String scheme = req.getScheme();
+    String host = req.getServerName();
+    int port = req.getServerPort();
+
+    StringBuilder baseUrl = new StringBuilder();
+    baseUrl.append(scheme).append("://").append(host);
+
+    boolean isDefaultPort = ("http".equalsIgnoreCase(scheme) && port == 80)
+        || ("https".equalsIgnoreCase(scheme) && port == 443);
+    if (!isDefaultPort && port > 0) {
+      baseUrl.append(":").append(port);
     }
-    return baseUrl + "/stac";
+
+    if (ctxPath != null && !ctxPath.isEmpty()) {
+      if (!ctxPath.startsWith("/")) {
+        baseUrl.append("/");
+      }
+      baseUrl.append(ctxPath);
+    }
+
+    return baseUrl.append("/stac").toString();
   }
 
   private String urlEncode(String s) {
