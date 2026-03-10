@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -2160,6 +2161,7 @@ public class STACService extends Application {
 			//#680 
 			//fill item with collection properties when not available in item, item property overrides default set in collection	
 			Set<String> collectionPropKeySet = null;
+			Set<Entry<String, Object>> collectionPropEntrySet = null;
 			JSONObject collectionPropObj = null;
 			ArrayList <String> propToBeAddedFromCollectionList = new ArrayList<String>();
 				  
@@ -2169,6 +2171,7 @@ public class STACService extends Application {
 			    	collectionPropObj = collection.getProperties();
 				    if (collectionPropObj != null) {
 				        collectionPropKeySet =  collectionPropObj.keySet(); 
+				        
 				        //Create a combined set of property keys from item and collection
 				        Set<String> combinedPropSet = Stream.concat(propObjKeys.stream(), collectionPropKeySet.stream())
 			                     .collect(Collectors.toSet()); 
@@ -2222,6 +2225,17 @@ public class STACService extends Application {
 			{
 				updatedPropObj.put(prop, collectionPropObj.getAsString(prop));
 			}
+			//finally iterate over search item properties and add those which are not in feature properties, this is to add any additional property from search item which are not in feature template
+			HashMap<String, Object> searchItemPropObj = searchItemCtx.read("$._source.properties");
+			Set<String> searchItemPropKeySet = searchItemPropObj.keySet();
+			for(String prop: searchItemPropKeySet)
+			{
+				if(!updatedPropObj.containsKey(prop))
+				{
+					updatedPropObj.put(prop, searchItemPropObj.get(prop)!=null? searchItemPropObj.get(prop).toString():null);
+				}
+			}
+			
 			featureContext.set("$.featurePropPath.properties",updatedPropObj);
 
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
