@@ -75,8 +75,10 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -103,10 +105,13 @@ public class STACService extends Application {
 	private final GeoportalContext gc = GeoportalContext.getInstance();
 	private final StacContext sc = StacContext.getInstance();
 	private final ElasticClient client = ElasticClient.newClient();
-  private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
+	private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
 
   private final String INTERNAL_CRS = "EPSG:4326";
   private final String INTERNAL_VCRS = "EPSG:115807";
+  Configuration conf = Configuration.builder()
+          .options(Option.DEFAULT_PATH_LEAF_TO_NULL)
+          .build();
   
 	
 	@Override
@@ -620,7 +625,7 @@ public class STACService extends Application {
 		String response;
 		Status status = Response.Status.OK;
 		JSONArray detailErrArray = new JSONArray();
-		String filePath = "service/config/stac-item.json";
+		String filePath = "service/config/stac-items.json";
 		
 		try {
 			response = StacHelper.getItemWithItemId(collectionId, id);
@@ -1891,8 +1896,8 @@ public class STACService extends Application {
 
 		DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
-		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
-		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
+		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);		
+		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.getJsonObject("featurePropPath").toString() + "}";
 
 		items = elasticResContext.read("$.hits.hits");
 
@@ -1905,7 +1910,26 @@ public class STACService extends Application {
 			JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString());
 			JsonObject resObj = obj.getJsonObject("featurePropPath");
 
-			finalResponse = resObj.toString();
+	        DocumentContext ctx = JsonPath.using(conf).parse(resObj.toString());
+
+	       //Find links->rel=parent], add /items in href        
+	        List<Map<String, Object>> links = ctx.read("$.links");
+
+	        for (Map<String, Object> link : links) {
+	            Object rel = link.get("rel");
+	            if ("parent".equals(rel)) {
+	                Object href = link.get("href");
+	                if (href != null) {
+	                    String s = href.toString();
+	                    if (!s.endsWith("/items")) {
+	                        link.put("href", s + "/items");
+	                    }
+	                }
+	            }
+	        }
+	        ctx.set("$.links", links);
+
+	        finalResponse = ctx.jsonString();
 		} else {
 			finalResponse = this.generateResponse("404", "Record not found.",null);
 
@@ -2233,7 +2257,7 @@ public class STACService extends Application {
 			if(assetObj instanceof JSONObject)
 			{
 				JSONObject assetJSONObj = (JSONObject)assetObj;
-				if(assetJSONObj.getAsString("href").contains("$."))// Still JSON path from stac-item.json
+				if(assetJSONObj.getAsString("href").contains("$."))// Still JSON path from stac-items.json
 					featureContext.delete(assetToRemove);
 			}
 			else
