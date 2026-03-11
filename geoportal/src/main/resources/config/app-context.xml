@@ -51,10 +51,10 @@
     <beans:property name="useHttps" value="false" />
     <beans:property name="encryptPassword" value="false" />
 
-    <!-- If encryptPassword =true, Uncomment below and configure the keys -->
+    <!-- If encryptPassword =true, Uncomment below and configure the keys 
     <beans:property name="base64Key" value="${gpt_base64Key}" />
-    <beans:property name="base64Iv" value="${gpt_base64Iv}" /> 
-    -->
+    <beans:property name="base64Iv" value="${gpt_base64Iv}" /> -->
+    
    
     <beans:property name="username" value="" />
     <beans:property name="password" value="" />
