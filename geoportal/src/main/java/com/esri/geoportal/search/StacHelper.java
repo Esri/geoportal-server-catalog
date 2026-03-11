@@ -4,8 +4,10 @@ import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -32,7 +34,6 @@ import com.esri.geoportal.service.stac.filter.Cql2JsonToOpenSearchConverter;
 import com.esri.geoportal.service.stac.filter.CqlQueryToOpenSearchConverter;
 import com.esri.geoportal.service.stac.filter.CqlTextToOpenSearchConverter;
 import com.esri.geoportal.service.stac.filter.StacFilterLang;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
@@ -1249,7 +1250,12 @@ private static String prepareStatus(String status) {
           // construct: {"wkid": 0000, "vcsWkid": 000000 }
           String wkid = outCRS.replace("EPSG:", "");
           String vcsWkid = outVCRS.replace("EPSG:", "");
-          requestedCRS = "{\"wkid\": " + wkid + ", \"vcsWkid\": " + vcsWkid + " }";
+          if(vcsWkid.equals("0") || vcsWkid.isBlank())
+		  {
+			  requestedCRS = "{\"wkid\": " + wkid + "}";
+		  }
+		  else
+			  requestedCRS = "{\"wkid\": " + wkid + ", \"vcsWkid\": " + vcsWkid + " }";
       }
       LOGGER.debug("requestedCRS = " + requestedCRS);
 
@@ -1368,6 +1374,79 @@ private static String prepareStatus(String status) {
 		  
 		  return bbox;
 	  }
+	  
+
+/**
+     * Scans stacItem.properties and adds extension URLs into stacItem.stac_extensions
+     * if any of the configured property names for that extension are present.
+     *
+     * @param stacItem  STAC Item as json-smart JSONObject
+     * @param aliasCfg  Alias-indexed config (Option B): { "<alias>": { "url": "...", "properties": [...] }, ... }
+     * @return the same stacItem instance, mutated
+     */
+    public static JSONArray addExtensionsFromProperties(HashMap<String, String> finalPropObj, JSONObject aliasCfg) {
+    	JSONArray stacExtensions = new JSONArray();
+        if (finalPropObj == null || finalPropObj == null) return stacExtensions;
+
+       
+        // Build a set of keys present in stacItem.properties for fast lookup
+        Set<String> presentKeys = new HashSet<>(finalPropObj.keySet());
+        
+        // For each alias -> config
+        for (Map.Entry<String, Object> e : aliasCfg.entrySet()) {
+            Object cfgObj = e.getValue();
+            if (!(cfgObj instanceof JSONObject)) continue;
+
+            JSONObject cfg = (JSONObject) cfgObj;
+            String url = asString(cfg.get("url"));
+            Object propListObj = cfg.get("properties");
+
+            if (url == null || url.isBlank() || !(propListObj instanceof JSONArray)) {
+                continue;
+            }
+
+            JSONArray propNames = (JSONArray) propListObj;
+
+            // If any configured property for this extension exists in stacItem.properties, add the URL
+            boolean found = false;
+            for (Object p : propNames) {
+                String propName = asString(p);
+                if (propName != null && presentKeys.contains(propName)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
+                addUnique(stacExtensions, url);
+            }
+        }
+        return stacExtensions;
+    }
+    
+    private static JSONArray getOrCreateArray(JSONObject obj, String key) {
+        Object v = obj.get(key);
+        if (v instanceof JSONArray) {
+            return (JSONArray) v;
+        }
+        JSONArray arr = new JSONArray();
+        obj.put(key, arr);
+        return arr;
+    }
+
+    private static void addUnique(JSONArray arr, String value) {
+        for (Object o : arr) {
+            if (value.equals(String.valueOf(o))) {
+                return; // already present
+            }
+        }
+        arr.add(value);
+    }
+
+    private static String asString(Object o) {
+        return (o == null) ? null : o.toString();
+    }
+
 
 
 }
