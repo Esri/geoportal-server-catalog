@@ -1,0 +1,92 @@
+{
+  "eo": {
+    "url": "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
+    "properties": [
+      "eo:cloud_cover",
+      "eo:snow_cover",      
+      "eo:common_name",
+      "eo:center_wavelength",
+      "eo:full_width_half_max",
+      "eo:solar_illumination",
+	  "eo:epsg"
+    ]
+  },
+  "video": {
+    "url": "https://stac-extensions.github.io/video/v1.0.0/schema.json",
+    "properties": [
+      "video:shape",
+      "video:frame_rate",
+      "video:frame_count",
+      "video:codec_name",
+      "video:constant_scene",
+      "video:letterbox",
+      "video:sensor_name",
+      "video:miis_core_id"
+    ]
+  },
+  "sar": {
+    "url": "https://stac-extensions.github.io/sar/v1.3.0/schema.json",
+    "properties": [
+      "sar:polarizations",
+      "sar:instrument_mode",
+      "sar:frequency_band",
+      "sar:center_frequency",
+      "sar:resolution_range",
+      "sar:resolution_azimuth",
+      "sar:pixel_spacing_range",
+      "sar:pixel_spacing_azimuth"
+    ]
+  },
+  "pointcloud": {
+    "url": "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
+    "properties": [
+      "pc:count",
+      "pc:type",
+      "pc:schemas",
+      "pc:density",
+      "pc:statistics"
+    ],
+
+    "_notes": {
+      "schema_object_fields": [
+        "name",
+        "size",
+        "type"
+      ],
+      "stats_object_fields": [
+        "name",
+        "position",
+        "average",
+        "count",
+        "maximum",
+        "minimum",
+        "stddev",
+        "variance"
+      ]
+    }
+  },
+  "processing": {
+    "url": "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
+    "properties": [
+      "processing:expression",
+      "processing:lineage",
+      "processing:level",
+      "processing:facility",
+      "processing:datetime",
+      "processing:version",
+      "processing:software"
+    ]
+  },
+  "view": {
+    "url": "https://stac-extensions.github.io/view/v1.1.0/schema.json",
+    "properties": [
+      "view:off_nadir",
+      "view:incidence_angle",
+      "view:azimuth",
+      "view:sun_azimuth",
+      "view:sun_elevation",
+      "view:moon_azimuth",
+      "view:moon_elevation"
+    ]
+  }
+}

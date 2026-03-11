@@ -113,6 +113,7 @@ public class STACService extends Application {
   Configuration conf = Configuration.builder()
           .options(Option.DEFAULT_PATH_LEAF_TO_NULL)
           .build();
+  private static JSONObject propExtensionObj = loadExtensionProperties();
   
 	
 	@Override
@@ -120,6 +121,21 @@ public class STACService extends Application {
 		Set<Class<?>> resources = new HashSet<>();
 		resources.add(STACService.class);
 		return resources;
+	}
+
+  private static JSONObject loadExtensionProperties() {
+		//read stac-extension-prop.json file which has properties for STAC extensions and load it in a JSONObject
+		JSONObject propExtensionObj = new JSONObject();		
+		try {
+			ResourcePath rp = new ResourcePath();
+			URI uri = rp.makeUrl("service/config/stac-extension-prop.json").toURI();
+			String propExtensionStr = new String(Files.readAllBytes(Paths.get(uri)), "UTF-8");
+			
+			propExtensionObj = (JSONObject) JSONValue.parse(propExtensionStr);
+		} catch (Exception e) {
+			LOGGER.error("Error reading stac-extension-prop.json file: " + e.getMessage());
+		}
+		return propExtensionObj;
 	}
 
   /**
@@ -2237,7 +2253,7 @@ public class STACService extends Application {
 			}
 			
 			featureContext.set("$.featurePropPath.properties",updatedPropObj);
-
+			
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
 			
@@ -2279,6 +2295,12 @@ public class STACService extends Application {
 				featureContext.delete(assetToRemove);
 			}			
 		}
+		HashMap<String, String> finalPropObj =featureContext.read("$.featurePropPath.properties"); // read again to make sure all changes are applied before adding stac_extension based on properties
+		
+		//Determine stac_extensions to be added in feature based on properties in item, for example if eo:bands properties are available, add "eo" in stac_extension
+		JSONArray stacExtenions = StacHelper.addExtensionsFromProperties(finalPropObj,propExtensionObj);
+		featureContext.set("$.featurePropPath.stac_extensions", stacExtenions);
+		
 		return featureValid;
 	}
 
