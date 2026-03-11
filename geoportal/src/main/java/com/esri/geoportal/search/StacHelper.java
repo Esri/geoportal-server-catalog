@@ -1250,7 +1250,12 @@ private static String prepareStatus(String status) {
           // construct: {"wkid": 0000, "vcsWkid": 000000 }
           String wkid = outCRS.replace("EPSG:", "");
           String vcsWkid = outVCRS.replace("EPSG:", "");
-          requestedCRS = "{\"wkid\": " + wkid + ", \"vcsWkid\": " + vcsWkid + " }";
+          if(vcsWkid.equals("0") || vcsWkid.isBlank())
+		  {
+			  requestedCRS = "{\"wkid\": " + wkid + "}";
+		  }
+		  else
+			  requestedCRS = "{\"wkid\": " + wkid + ", \"vcsWkid\": " + vcsWkid + " }";
       }
       LOGGER.debug("requestedCRS = " + requestedCRS);
 
