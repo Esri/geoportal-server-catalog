@@ -127,7 +127,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
         	  postData.sort = this.defaultSort;
         }
       }
-      if (!params.hasScorable && params.urlParams.sort) {
+      if (params.urlParams.sort) {
           	  if (postData === null) postData = {};
           	  postData.sort = params.urlParams.sort;
       }
