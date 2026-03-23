@@ -91,7 +91,6 @@ public class SecurityConfig {
                 for (String pattern : configProperties.getPublicEndpointsList()) {
                     authorize.requestMatchers(pattern).permitAll();
                 }
-
                 // Apply secured endpoint rules (indexed or CSV) if present
                 for (EndpointSecurityConfig rule : securityEndPointProp.getSecuredEndpoints()) {
                     String pattern = rule.getPattern();

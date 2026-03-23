@@ -36,8 +36,11 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import jakarta.json.Json;
 import jakarta.json.JsonArray;
 import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.ApplicationPath;
 import jakarta.ws.rs.Consumes;
@@ -939,7 +942,8 @@ public class STACService extends Application {
 		String datetime = (requestPayload.containsKey("datetime") ? requestPayload.getString("datetime") : null);
 		String updated = (requestPayload.containsKey("updated") ? requestPayload.getString("updated") : null);
 		String created = (requestPayload.containsKey("created") ? requestPayload.getString("created") : null);
-		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox") : null);
+//		JsonArray bboxJsonArr = (requestPayload.containsKey("bbox") ? requestPayload.getJsonArray("bbox") : null);
+    JsonArray bboxJsonArr = parseBboxToJsonArray(requestPayload, "bbox");
 		JsonArray idArr = (requestPayload.containsKey("ids") ? requestPayload.getJsonArray("ids") : null);
 		String outCRS = (requestPayload.containsKey("outCRS") ? requestPayload.getString("outCRS") : null);
 		search_after = (requestPayload.containsKey("search_after") ? requestPayload.getString("search_after") : search_after);
@@ -2142,6 +2146,10 @@ public class STACService extends Application {
 							if (searchItemCtx.read(propKeyVal) != null) {
 								featureContext.set("$.featurePropPath.properties." + propKey,
 										searchItemCtx.read(propKeyVal));
+							}else //#688
+							{
+								featureContext.set("$.featurePropPath.properties." + propKey,
+										"null");
 							}
 						}
 					}
@@ -2898,4 +2906,61 @@ public class STACService extends Application {
     
     return responseJSONObject;
   }
+
+
+  // ...
+
+  private JsonArray parseBboxToJsonArray(JsonObject obj, String key) {
+    if (obj == null || key == null || !obj.containsKey(key)) return null;
+
+    JsonValue v = obj.get(key);
+    if (v == null) return null;
+
+    switch (v.getValueType()) {
+      case ARRAY:
+        // bbox already provided as JSON array
+        return obj.getJsonArray(key);
+
+      case STRING:
+        // bbox provided as comma-separated string
+        String s = ((JsonString) v).getString();
+        if (s == null) return null;
+
+        String cleaned = s.trim();
+        if (cleaned.isEmpty()) return null;
+
+        // allow brackets optionally: "[a,b,c,d]"
+        if (cleaned.startsWith("[") && cleaned.endsWith("]")) {
+          cleaned = cleaned.substring(1, cleaned.length() - 1).trim();
+        }
+
+        String[] parts = cleaned.split("\\s*,\\s*");
+        if (parts.length != 4 && parts.length != 6) {
+          // STAC bbox must be 4 or 6 numbers (2D or 3D)
+          throw new IllegalArgumentException("bbox must have 4 or 6 comma-separated numbers");
+        }
+
+        jakarta.json.JsonArrayBuilder ab = Json.createArrayBuilder();
+        for (String p : parts) {
+          if (p == null || p.trim().isEmpty()) {
+            throw new IllegalArgumentException("bbox contains an empty coordinate");
+          }
+          try {
+            ab.add(Double.parseDouble(p.trim()));
+          } catch (NumberFormatException nfe) {
+            throw new IllegalArgumentException("bbox contains a non-numeric coordinate: " + p, nfe);
+          }
+        }
+        return ab.build();
+
+      case NUMBER:
+      case OBJECT:
+      case TRUE:
+      case FALSE:
+      case NULL:
+      default:
+        // unsupported bbox type
+        throw new IllegalArgumentException("bbox must be a JSON array of numbers or a comma-separated string");
+    }
+  }  
 }
