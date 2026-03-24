@@ -242,13 +242,21 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 
     // In the popup window, after redirect, send tokens back to opener
     handleOAuthCallback: async function(code) {      
-   
-      if (code && window.opener) {
-        
+		const ORIGIN = window.location.origin || (window.location.protocol + '//' + window.location.host);
+	
+		 function getContextPath() {
+		    const parts = window.location.pathname.split('/').filter(Boolean);
+		    // If this page is at /<context>/file.html, the first segment is the WAR context.
+		    return parts.length > 0 ? '/' + parts[0] : '';
+		  }
+	
+		  const CONTEXT = getContextPath();              // e.g., "/geoportal-harvester-war" or ""
+		  const BASE    = ORIGIN + CONTEXT;
+      if (code && window.opener) {        
         // Exchange authorization code for tokens
         const clientId = 'geoportal-simple-client';
-        const redirectUri = 'http://localhost:8080/geoportal/callback.html'; // Updated to match registered URI
-        const tokenEndpoint = 'http://localhost:8080/geoportal/oauth2/token';
+        const redirectUri = BASE+'/callback.html'; // Updated to match registered URI
+        const tokenEndpoint = BASE+'/oauth2/token';
         // Retrieve codeVerifier from localStorage
         const codeVerifier = localStorage.getItem('pkce_code_verifier') || '';
         const body = new URLSearchParams({
