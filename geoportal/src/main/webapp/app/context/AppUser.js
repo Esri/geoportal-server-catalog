@@ -180,9 +180,12 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       const codeVerifier = generateCodeVerifier();
       // Persist codeVerifier for popup
       localStorage.setItem('pkce_code_verifier', codeVerifier);
+	  const w = 520, h = 320;
+      const y = window.top.outerHeight / 2 + window.top.screenY - (h / 1.5);
+      const x = window.top.outerWidth  / 2 + window.top.screenX - (w / 2);
       generateCodeChallenge(codeVerifier).then(function(codeChallenge) {
         const authUrl = `${authorizeEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=openid&code_challenge=${codeChallenge}&code_challenge_method=S256`;
-        window.oauthPopup = window.open(authUrl, '_blank', 'width=600,height=350');
+        window.oauthPopup = window.open(authUrl, '_blank', `width=${w},height=${h},left=${x},top=${y},resizable,scrollbars`);
       });
 
       function generateCodeVerifier() {
