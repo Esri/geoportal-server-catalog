@@ -1,77 +1,88 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <meta charset="UTF-8">
-    <title>Geoportal Login</title>
-    <link rel="stylesheet" href="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dijit/themes/claro/claro.css">
-    <script src="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dojo/dojo.js"></script>
-    <style>
-        html, body {
-            margin: 0;
-            padding: 0;
-            overflow: hidden; /* Remove vertical scrollbar */
-        }
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #eef;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        #loginForm {
-            width: 400px;            
-            height: auto;
-            background-color: #fff;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.2);
-            padding: 30px 50px;
-            box-sizing: border-box;
-        }
-        .form-field {
-            margin-bottom: 15px;
-        }
-        .spacer {
-            height: 20px;
-        }
-         
-    </style>
-</head>
-<body class="claro">
-    <form id="loginForm" method="post">
-        <h2>Sign In</h2>       
-        <div class="form-field">
-            <label for="username">Username:</label>
-            <input id="username" name="username" data-dojo-type="dijit/form/TextBox" required />
-        </div>
-        <div class="form-field">
-            <label for="password">Password:</label>
-            <input id="password" name="password" type="password" data-dojo-type="dijit/form/TextBox" required />
-        </div>
-        <div class="spacer"></div>
-         <div id="errorMessage" style="display:none;color:red;font-size:14px">Invalid username or password.</div>
-        <div class="spacer"></div>
-        <div class="form-field" style="display: flex; gap: 20px;">
-            <button data-dojo-type="dijit/form/Button" type="submit">Sign In</button>
-            <button data-dojo-type="dijit/form/Button" onclick="window.close()" >Cancel</button>
-        </div>
-    </form>
+<meta charset="UTF-8">
+<title>Geoportal Login</title>
+<link rel="stylesheet"
+	href="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dijit/themes/claro/claro.css">
+<script
+	src="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dojo/dojo.js"></script>
+<style>
+body {
+	font-family: system-ui, sans-serif;
+	background: #f7f7f9;
+	margin: 0;
+	margin: 0;
+	padding: 0;
+	overflow: hidden; /* Remove vertical scrollbar */
+}
 
-    <script>
-        
-        (function() {
-        	  // Show error message if ?error is present in the URL
-            const params = new URLSearchParams(window.location.search);
-            if (params.has("error")) {
-                   document.getElementById("errorMessage").style.display = "block";
-                }
-            
-         // Dynamically set the form action based on the current context path
-            var pathParts = window.location.pathname.split('/');
-            var contextPath = pathParts.length > 1 ? '/' + pathParts[1] : '';
-            var loginUrl = contextPath + '/login';
-            document.getElementById('loginForm').setAttribute('action', loginUrl);
-        })();
-    </script>
+.wrap {
+	max-width:420px; margin:8vh auto; background:#fff; border-radius:12px;
+            box-shadow:0 8px 24px rgba(0,0,0,.08); padding:2rem; }
+
+label {
+	display: block;
+	font-size: .9rem;
+	color: #333;
+	margin: .5rem 0 .25rem;
+}
+
+input {
+	width: 100%;
+	padding: .65rem .75rem;
+	border: 1px solid #ccc;
+	border-radius: 8px;
+}
+
+.btn {
+	display: block;
+	width: 100%;
+	padding: .75rem 1rem;
+	border-radius: 8px;
+	font-weight: 600;
+	cursor: pointer;
+	margin: .75rem 0;
+	border: 1px solid #0854c7;
+	background: #0854c7;
+	color: #fff;
+}
+h1 { margin:0 0 1rem; font-size:1.25rem; }
+
+</style>
+</head>
+<body>
+	<div class="wrap">
+	<h1>Sign In</h1>
+		<form id="loginForm" method="post">		
+			<label for="username">Username:</label> <input id="username"
+				name="username" data-dojo-type="dijit/form/TextBox" required /> <label
+				for="password">Password:</label> <input id="password"
+				name="password" type="password" data-dojo-type="dijit/form/TextBox"
+				required />
+
+			<button class="btn" type="submit">Sign in</button>
+
+			<div id="errorMessage" style="display: none; color: red; font-size: 14px">Invalid username or password.</div>
+
+		</form>
+	</div>
+
+	<script>
+		(function() {
+			// Show error message if ?error is present in the URL
+			const params = new URLSearchParams(window.location.search);
+			if (params.has("error")) {
+				document.getElementById("errorMessage").style.display = "block";
+			}
+
+			// Dynamically set the form action based on the current context path
+			var pathParts = window.location.pathname.split('/');
+			var contextPath = pathParts.length > 1 ? '/' + pathParts[1] : '';
+			var loginUrl = contextPath + '/login';
+			document.getElementById('loginForm').setAttribute('action',
+					loginUrl);
+		})();
+	</script>
 </body>
 </html>
