@@ -3,86 +3,103 @@
 <head>
 <meta charset="UTF-8">
 <title>Geoportal Login</title>
-<link rel="stylesheet"
-	href="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dijit/themes/claro/claro.css">
-<script
-	src="https://ajax.googleapis.com/ajax/libs/dojo/1.16.3/dojo/dojo.js"></script>
+
 <style>
 body {
-	font-family: system-ui, sans-serif;
-	background: #f7f7f9;
-	margin: 0;
-	margin: 0;
-	padding: 0;
-	overflow: hidden; /* Remove vertical scrollbar */
+    font-family: system-ui, sans-serif;
+    background: #f7f7f9;
+    margin: 0;
+    padding: 0;
+    overflow: hidden;
 }
-
 .wrap {
-	max-width:420px; margin:8vh auto; background:#fff; border-radius:12px;
-            box-shadow:0 8px 24px rgba(0,0,0,.08); padding:2rem; }
-
+    max-width: 420px;
+    margin: 8vh auto;
+    background: #fff;
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    padding: 2rem;
+}
 label {
-	display: block;
-	font-size: .9rem;
-	color: #333;
-	margin: .5rem 0 .25rem;
+    display: block;
+    font-size: .9rem;
+    color: #333;
+    margin: .5rem 0 .25rem;
 }
-
 input {
-	width: 100%;
-	padding: .65rem .75rem;
-	border: 1px solid #ccc;
-	border-radius: 8px;
+    width: 100%;
+    padding: .65rem .75rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
 }
-
 .btn {
-	display: block;
-	width: 100%;
-	padding: .75rem 1rem;
-	border-radius: 8px;
-	font-weight: 600;
-	cursor: pointer;
-	margin: .75rem 0;
-	border: 1px solid #0854c7;
-	background: #0854c7;
-	color: #fff;
+    display: block;
+    width: 100%;
+    padding: .75rem 1rem;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    margin: .75rem 0;
+    border: 1px solid #0854c7;
+    background: #0854c7;
+    color: #fff;
 }
-h1 { margin:0 0 1rem; font-size:1.25rem; }
-
+h1 {
+    margin: 0 0 1rem;
+    font-size: 1.25rem;
+}
 </style>
+
+<!-- IMPORTANT: load init.js BEFORE dojo.js -->
+<script src="./lib/init.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/dojo/1.10.4/dojo/dojo.js"></script>
+
 </head>
 <body>
-	<div class="wrap">
-	<h1>Sign In</h1>
-		<form id="loginForm" method="post">		
-			<label for="username">Username:</label> <input id="username"
-				name="username" data-dojo-type="dijit/form/TextBox" required /> <label
-				for="password">Password:</label> <input id="password"
-				name="password" type="password" data-dojo-type="dijit/form/TextBox"
-				required />
 
-			<button class="btn" type="submit">Sign in</button>
+<div class="wrap">
+    <h1 id="lblTitle">Sign In</h1>
 
-			<div id="errorMessage" style="display: none; color: red; font-size: 14px">Invalid username or password.</div>
+    <form id="loginForm" method="post">
+        <label id="lblUsername" for="username">Username:</label>
+        <input id="username" name="username" data-dojo-type="dijit/form/TextBox" required>
 
-		</form>
-	</div>
+        <label id="lblPassword" for="password">Password:</label>
+        <input id="password" name="password" type="password" data-dojo-type="dijit/form/TextBox" required>
 
-	<script>
-		(function() {
-			// Show error message if ?error is present in the URL
-			const params = new URLSearchParams(window.location.search);
-			if (params.has("error")) {
-				document.getElementById("errorMessage").style.display = "block";
-			}
+        <button id="btnLogin" class="btn" type="submit">Sign in</button>
 
-			// Dynamically set the form action based on the current context path
-			var pathParts = window.location.pathname.split('/');
-			var contextPath = pathParts.length > 1 ? '/' + pathParts[1] : '';
-			var loginUrl = contextPath + '/login';
-			document.getElementById('loginForm').setAttribute('action',
-					loginUrl);
-		})();
-	</script>
+        <div id="errorMessage" style="display:none; color:red; font-size:14px">
+            Invalid username or password.
+        </div>
+    </form>
+</div>
+<script>
+require([
+    "dojo/i18n!app/nls/resources",
+    "dojo/dom",
+    "dojo/domReady!"
+], function (i18n, dom) {
+    dom.byId("lblTitle").innerHTML     = i18n.login.caption;
+    dom.byId("lblUsername").innerHTML  = i18n.login.username;
+    dom.byId("lblPassword").innerHTML  = i18n.login.password;
+    dom.byId("btnLogin").innerHTML     = i18n.login.label;
+});
+</script>
+
+<script>
+// Error message handling + dynamic form action
+(function() {
+    const params = new URLSearchParams(window.location.search);
+    if (params.has("error")) {
+        document.getElementById("errorMessage").style.display = "block";
+    }
+    var pathParts = window.location.pathname.split('/');
+    var contextPath = pathParts.length > 1 ? '/' + pathParts[1] : '';
+    var loginUrl = contextPath + '/login';
+    document.getElementById('loginForm').setAttribute('action', loginUrl);
+})();
+</script>
+
 </body>
 </html>
