@@ -2,16 +2,16 @@
   <div class="form-group" data-dojo-attach-point="itemTitleNode"></div>
   <nav class="navbar">
     <ul class="nav nav-tabs">
-      <li class="nav-item active">
+      <li class="nav-item active" id="setFieldTabTags">
         <a class="nav-link" href="#${id}_tagsPanel" data-toggle="tab">${i18n.content.setField.tags.caption}</a>
       </li>
-      <li class="nav-item">
+      <li class="nav-item" id="setFieldTabAdvanced">
         <a class="nav-link" href="#${id}_advancedPanel" data-toggle="tab">${i18n.content.setField.advanced.caption}</a>
       </li>
     </ul>
   </nav>
   <div class="tab-content">
-	  <div id="${id}_tagsPanel" role="tabpanel" class="tab-pane fade in active"
+	  <div id="${id}_tagsPanel" role="tabpanel" class="tab-pane fade show active"
 	    data-dojo-attach-point="tagsPanel">
 	    <div class="form-group form-group-sm">
 	      <div>
@@ -24,7 +24,7 @@
 	      </div>
 	    </div>
 	  </div>
-	  <div id="${id}_advancedPanel" role="tabpanel" class="tab-pane fade in" 
+	  <div id="${id}_advancedPanel" role="tabpanel" class="tab-pane fade show" 
 	    data-dojo-attach-point="advancedPanel">
 		  <p data-dojo-attach-point="advancedPromptNode" style="font-style: italic;">
 		    <b>Experimental</b>

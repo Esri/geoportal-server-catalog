@@ -36,6 +36,10 @@ function(declare, lang, array, domClass, topic, appTopics, BulkEdit,
     postCreate: function() {
       this.inherited(arguments);
       //this.advancedPromptNode.innerHTML = i18n.content.setField.advanced.prompt;
+      // Wire up click handlers
+      this.domNode.querySelectorAll('li[id^="setFieldTab"]').forEach(btn => {
+        btn.addEventListener('click', () => this.showTab(btn.id));
+      });
     },
     
     init: function() {
@@ -56,6 +60,8 @@ function(declare, lang, array, domClass, topic, appTopics, BulkEdit,
         });
       }
       if (typeof value === "string") this.tagsValueInput.value = value;
+      
+
     },
     
     makeRequestParams: function() {
@@ -97,9 +103,48 @@ function(declare, lang, array, domClass, topic, appTopics, BulkEdit,
       params.urlParams.value = value;
       this.applyTo.appendUrlParams(params);
       return params;
+    },
+
+
+    showTab: function (targetSelector) {
+      // Deactivate all links
+      this.domNode.querySelectorAll('.tab-pane').forEach(btn => {
+        btn.classList.remove('active');
+        btn.setAttribute('aria-selected', 'false');
+      });
+
+      // Hide all panes
+      this.domNode.querySelectorAll('.tab-pane').forEach(pane => {
+        pane.classList.remove('active', 'show'); // Bootstrap 4/5 visibility classes
+        pane.setAttribute('hidden', 'true');
+      });
+
+      // Activate the target pane
+      var targetTab = "_tagsPanel";
+      if (targetSelector.toLowerCase().includes('advanced')) {
+        targetTab = "_advancedPanel";
+      }
+      const activeBtn = this.domNode.querySelector('li[id$='+targetSelector+']');
+      if (activeBtn) {
+        activeBtn.classList.add('active');
+        activeBtn.setAttribute('aria-selected', 'true');
+      }
+
+      // Show the pane
+      const pane = this.domNode.querySelector('div[id$='+targetTab+']');
+      if (pane) {
+        pane.removeAttribute('hidden');
+        pane.classList.add('active');
+
+        // If using fade animation, add "show" on next frame for a smooth transition
+        if (pane.classList.contains('fade')) {
+          requestAnimationFrame(() => pane.classList.add('show'));
+        } else {
+          pane.classList.add('show');
+        }
+      }
     }
-
   });
-
+   
   return oThisClass;
 });
