@@ -77,10 +77,10 @@
 					{
 						"name": "scope",
 						"in": "query",
-						"description": "Scope for token. read | write",
+						"description": "Scope for token. api.read | api.write",
 						"required": true,
 						"type": "string",
-						"default": "write"
+						"default": "api.write"
 					},
 					{
 						"name": "grant_type",
