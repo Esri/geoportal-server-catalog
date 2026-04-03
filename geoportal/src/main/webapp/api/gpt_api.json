@@ -2,7 +2,7 @@
 	"swagger": "2.0",
 	"info": {
 		"description": "https://github.com/Esri/geoportal-server-catalog",
-		"version": "3.0.2",
+		"version": "4.0.0",
 		"title": "Esri Geoportal Server",
 		"contact": {
 			"name": "portal@esri.com"
@@ -48,7 +48,7 @@
 		}
 	],
 	"paths": {
-		"/oauth/token": {
+		"/oauth2/token": {
 			"post": {
 				"tags": [
 					"AUTHENTICATION"
@@ -62,29 +62,29 @@
 				"parameters": [
 					{
 						"name": "client_id",
-						"in": "query",
+						"in": "formData",
 						"description": "Client id",
 						"required": true,
 						"type": "string"
 					},
 					{
 						"name": "client_secret",
-						"in": "query",
+						"in": "formData",
 						"description": "client_secret",
 						"required": true,
 						"type": "string"
 					},
 					{
 						"name": "scope",
-						"in": "query",
-						"description": "Scope for token. read | write",
+						"in": "formData",
+						"description": "Scope for token. api.read | api.write",
 						"required": true,
 						"type": "string",
-						"default": "write"
+						"default": "api.write"
 					},
 					{
 						"name": "grant_type",
-						"in": "query",
+						"in": "formData",
 						"description": "Grant type for token. This will always be client_credentials",
 						"required": true,
 						"type": "string",
