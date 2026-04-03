@@ -188,7 +188,7 @@ public class SecurityConfig {
                 .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)                
                 .redirectUri(configProperties.getUiRedirectUri()) // Allow HTML callback
                 .tokenSettings(tokenSettings)
-                .scope("openid").scope("profile").scope("api.read").build();
+                .scope("openid").scope("profile").scope("api.read").scope("read").build();
 
         // 2. API Client (Read + Write)
         RegisteredClient apiClientRW = RegisteredClient.withId(UUID.randomUUID().toString()).clientId(configProperties.getApiAdminClientId())
@@ -197,7 +197,7 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .tokenSettings(tokenSettings)
-                .scope("api.read").scope("api.write")
+                .scope("api.read").scope("api.write").scope("write").scope("read")
                 .build();
 
         // 3. API Client (Read Only)
@@ -208,7 +208,7 @@ public class SecurityConfig {
                 .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                 .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                 .tokenSettings(tokenSettings)
-                .scope("api.read")
+                .scope("api.read").scope("read")
                 .build();
 
         return new InMemoryRegisteredClientRepository(uiAppClient, apiClientRW, apiClientRead);
