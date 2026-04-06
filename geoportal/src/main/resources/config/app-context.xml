@@ -155,7 +155,7 @@
    
   <!-- ArcGIS Portal Authentication Service, if Portal Authentication is not used, argisAuthEnabled=false. To enable, set argisAuthEnabled=true and configure appId and authorizeURL -->
   <beans:bean id="arcgisAuthService" class="com.esri.geoportal.base.security.ArcgisAuthService">
-  	<beans:property name="argisAuthEnabled" value="false"/>
+  	<beans:property name="argisAuthEnabled" value="${arcgis_auth_enabled:false}"/>
     <beans:property name="appId" value="${arcgis_appid:6iJ2pLIj9UwcSdfA}"/>
     <beans:property name="authorizeUrl" value="${arcgis_authorizeUrl:https://www.arcgis.com/sharing/rest/oauth2/authorize}"/>
     <beans:property name="createAccountUrl" value="${arcgis_createAccountUrl:https://www.arcgis.com/home/createaccount.html}"/>
