@@ -25,13 +25,13 @@
  <oauth:client client-id="${GPT_API_READ_CLIENTID:user}"
                 secret="${GPT_API_READ_CLIENTSECRET:}"
                 authorized-grant-types="client_credentials"
-                scope="api.read"
+                scope="api.read,read"
                 authorities="ROLE_USER" />
   
   <oauth:client client-id="${GPT_API_ADMIN_CLIENTID:admin}"
                 secret="${GPT_API_ADMIN_CLIENTSECRET:}"
                 authorized-grant-types="client_credentials"
-                scope="api.read,api.write"
+                scope="api.read,api.write,read,write"
                 authorities="ROLE_ADMIN" />
     
   <!-- More client-credentials can be created by copying above block <oauth:client> --> 
