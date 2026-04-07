@@ -28,6 +28,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -75,8 +76,10 @@ import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.service.stac.Collection;
 import com.esri.geoportal.service.stac.GeometryServiceClient;
 import com.esri.geoportal.service.stac.StacContext;
+import com.jayway.jsonpath.Configuration;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
@@ -103,10 +106,14 @@ public class STACService extends Application {
 	private final GeoportalContext gc = GeoportalContext.getInstance();
 	private final StacContext sc = StacContext.getInstance();
 	private final ElasticClient client = ElasticClient.newClient();
-  private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
+	private final GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
 
   private final String INTERNAL_CRS = "EPSG:4326";
   private final String INTERNAL_VCRS = "EPSG:115807";
+  Configuration conf = Configuration.builder()
+          .options(Option.DEFAULT_PATH_LEAF_TO_NULL)
+          .build();
+  private static JSONObject propExtensionObj = loadExtensionProperties();
   
 	
 	@Override
@@ -114,6 +121,21 @@ public class STACService extends Application {
 		Set<Class<?>> resources = new HashSet<>();
 		resources.add(STACService.class);
 		return resources;
+	}
+
+  private static JSONObject loadExtensionProperties() {
+		//read stac-extension-prop.json file which has properties for STAC extensions and load it in a JSONObject
+		JSONObject propExtensionObj = new JSONObject();		
+		try {
+			ResourcePath rp = new ResourcePath();
+			URI uri = rp.makeUrl("service/config/stac-extension-prop.json").toURI();
+			String propExtensionStr = new String(Files.readAllBytes(Paths.get(uri)), "UTF-8");
+			
+			propExtensionObj = (JSONObject) JSONValue.parse(propExtensionStr);
+		} catch (Exception e) {
+			LOGGER.error("Error reading stac-extension-prop.json file: " + e.getMessage());
+		}
+		return propExtensionObj;
 	}
 
   /**
@@ -620,7 +642,7 @@ public class STACService extends Application {
 		String response;
 		Status status = Response.Status.OK;
 		JSONArray detailErrArray = new JSONArray();
-		String filePath = "service/config/stac-item.json";
+		String filePath = "service/config/stac-items.json";
 		
 		try {
 			response = StacHelper.getItemWithItemId(collectionId, id);
@@ -1891,8 +1913,8 @@ public class STACService extends Application {
 
 		DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
-		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
-		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
+		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);		
+		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.getJsonObject("featurePropPath").toString() + "}";
 
 		items = elasticResContext.read("$.hits.hits");
 
@@ -1905,7 +1927,26 @@ public class STACService extends Application {
 			JsonObject obj = (JsonObject) JsonUtil.toJsonStructure(featureContext.jsonString());
 			JsonObject resObj = obj.getJsonObject("featurePropPath");
 
-			finalResponse = resObj.toString();
+	        DocumentContext ctx = JsonPath.using(conf).parse(resObj.toString());
+
+	       //Find links->rel=parent], add /items in href        
+	        List<Map<String, Object>> links = ctx.read("$.links");
+
+	        for (Map<String, Object> link : links) {
+	            Object rel = link.get("rel");
+	            if ("parent".equals(rel)) {
+	                Object href = link.get("href");
+	                if (href != null) {
+	                    String s = href.toString();
+	                    if (!s.endsWith("/items")) {
+	                        link.put("href", s + "/items");
+	                    }
+	                }
+	            }
+	        }
+	        ctx.set("$.links", links);
+
+	        finalResponse = ctx.jsonString();
 		} else {
 			finalResponse = this.generateResponse("404", "Record not found.",null);
 
@@ -2136,6 +2177,7 @@ public class STACService extends Application {
 			//#680 
 			//fill item with collection properties when not available in item, item property overrides default set in collection	
 			Set<String> collectionPropKeySet = null;
+			Set<Entry<String, Object>> collectionPropEntrySet = null;
 			JSONObject collectionPropObj = null;
 			ArrayList <String> propToBeAddedFromCollectionList = new ArrayList<String>();
 				  
@@ -2145,6 +2187,7 @@ public class STACService extends Application {
 			    	collectionPropObj = collection.getProperties();
 				    if (collectionPropObj != null) {
 				        collectionPropKeySet =  collectionPropObj.keySet(); 
+				        
 				        //Create a combined set of property keys from item and collection
 				        Set<String> combinedPropSet = Stream.concat(propObjKeys.stream(), collectionPropKeySet.stream())
 			                     .collect(Collectors.toSet()); 
@@ -2198,8 +2241,19 @@ public class STACService extends Application {
 			{
 				updatedPropObj.put(prop, collectionPropObj.getAsString(prop));
 			}
+			//finally iterate over search item properties and add those which are not in feature properties, this is to add any additional property from search item which are not in feature template
+			HashMap<String, Object> searchItemPropObj = searchItemCtx.read("$._source.properties");
+			Set<String> searchItemPropKeySet = searchItemPropObj.keySet();
+			for(String prop: searchItemPropKeySet)
+			{
+				if(!updatedPropObj.containsKey(prop))
+				{
+					updatedPropObj.put(prop, searchItemPropObj.get(prop)!=null? searchItemPropObj.get(prop).toString():null);
+				}
+			}
+			
 			featureContext.set("$.featurePropPath.properties",updatedPropObj);
-
+			
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
 			
@@ -2233,7 +2287,7 @@ public class STACService extends Application {
 			if(assetObj instanceof JSONObject)
 			{
 				JSONObject assetJSONObj = (JSONObject)assetObj;
-				if(assetJSONObj.getAsString("href").contains("$."))// Still JSON path from stac-item.json
+				if(assetJSONObj.getAsString("href").contains("$."))// Still JSON path from stac-items.json
 					featureContext.delete(assetToRemove);
 			}
 			else
@@ -2241,6 +2295,12 @@ public class STACService extends Application {
 				featureContext.delete(assetToRemove);
 			}			
 		}
+		HashMap<String, String> finalPropObj =featureContext.read("$.featurePropPath.properties"); // read again to make sure all changes are applied before adding stac_extension based on properties
+		
+		//Determine stac_extensions to be added in feature based on properties in item, for example if eo:bands properties are available, add "eo" in stac_extension
+		JSONArray stacExtenions = StacHelper.addExtensionsFromProperties(finalPropObj,propExtensionObj);
+		featureContext.set("$.featurePropPath.stac_extensions", stacExtenions);
+		
 		return featureValid;
 	}
 
