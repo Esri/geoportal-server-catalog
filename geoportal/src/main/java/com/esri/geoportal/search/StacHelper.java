@@ -656,8 +656,16 @@ private static String prepareStatus(String status) {
 		// Add Geoportal attributes sys_created_dt, sys_modified_dt,
 		// sys_collections_s,sys_access_s
 		// sys_approval_status_s,title and url_granule_s
+		
+		//#710 Get collection title and use that src_collection_s field instead of collectionId
 		JSONArray collArr = new JSONArray();
-		collArr.add(collectionId);
+		JSONObject collection = getCollectionWithId(collectionId);
+		if(collection != null && collection.containsKey("title"))
+		{
+			collArr.add(collection.get("title").toString());
+		}
+		else
+			collArr.add(collectionId);
 		
 		requestPayload.put(FieldNames.FIELD_SYS_MODIFIED, date);
 		requestPayload.put(FieldNames.FIELD_SYS_COLLECTIONS, collArr);
