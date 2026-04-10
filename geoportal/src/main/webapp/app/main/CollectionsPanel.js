@@ -702,6 +702,7 @@ define([
 	  container.style.alignItems = "center";
 	  container.style.gap = "6px";
 	  container.style.padding = "6px";
+	  container.style.width = "350px";      
 
 	  const prevBtn = document.createElement("button");
 	  prevBtn.className = "esri-button esri-button--secondary";
@@ -829,7 +830,7 @@ define([
 				window.loadRasterAsset = async function (href) {
 				  // Remove previous raster (if any)
 				  if (rasterLayer) {
-					view.map.remove(rasterLayer);
+					this.view.map.remove(rasterLayer);
 					rasterLayer.destroy();
 					rasterLayer = null;
 				  }
@@ -931,8 +932,6 @@ define([
 			    }
 			  });
 	  }
-	  
-		
 	},
 	
 
