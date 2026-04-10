@@ -127,7 +127,7 @@ define([
     getStacBaseUrl: function () {
       if (window && window.top && window.top.geoportalServiceInfo) {
         var loc = window.top.location;
-        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;
+        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;		
         return stacBaseUrl;
       }
       return null;
@@ -656,7 +656,8 @@ define([
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
       this.selectedGraphic = this.selectedCollection.graphic;
-      this.handleUpdateButtonEnabled();
+      this.handleUpdateButtonEnabled();  
+	   
       if (this.selectedCollection) {
         const collection = await this.getCollectionById(
           this.selectedCollection.properties.id
@@ -1440,7 +1441,7 @@ define([
       let tableRows = [];
       this.infoTableTitle.innerHTML = "Collection Info";
       this.infoTableBody.innerHTML = tableRows.join("");
-      this.handleZoomCollectionEnabled();
+      this.clickEnabled();
     },
 
     getUpdateFieldValues: function () {
