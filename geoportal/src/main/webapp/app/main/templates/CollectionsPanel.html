@@ -84,6 +84,13 @@
               Collection Info
             </p>
             <div class="info-action-container">
+            <button 
+                data-dojo-attach-point="viewItemsButton"
+                class="info-actions info-actions-viewItem disabled"
+                disabled
+              >
+                View Items
+              </button>
               <button
                 data-dojo-attach-point="zoomCollectionButton"
                 class="info-actions info-actions-zoom disabled"
@@ -427,6 +434,10 @@
     }
 
     .info-actions-zoom {
+      margin-right: 15px;
+    }
+    
+    .info-actions-viewItem {
       margin-right: 15px;
     }
 
