@@ -533,9 +533,11 @@ define([
 	clearMapView:function() {
       if(this.pager) {		
 		  this.view.ui.remove(this.pager.container);
-		  this.pager = null;
-		
+		  this.pager = null;		
         }
+		this.currentIndex = -1;
+        this.pageHistory = [];
+        this.nextUrl = null;  
         
         if(this.geoJSONLayer) {
             this.view.map.remove(this.geoJSONLayer);
@@ -741,29 +743,34 @@ define([
 	  view.ui.add(container, "bottom-right");
 	  const pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo };
 	  
-	  pager.nextBtn.onclick = () => {
+	  pager.nextBtn.onclick = async () => {
 	  	    if (this.nextUrl) {
-	  	      this.loadSTAC(this.nextUrl,this.pageSize);
+				this.updateIsLoading(true);
+	  	      await this.loadSTAC(this.nextUrl,this.pageSize);
+			  this.updateIsLoading(false);
 	  	    }
 	  	  };
 
-	  	  pager.prevBtn.onclick = () => {
+	  	  pager.prevBtn.onclick = async () => {
 	  	    if (this.currentIndex > 0) {
+				this.updateIsLoading(true);
 	  	      this.currentIndex--;
 	  	      const url = this.pageHistory[this.currentIndex];
-	  	      this.loadSTAC(url, true);
+	  	      await this.loadSTAC(url, true);
+			  this.updateIsLoading(false);
 	  	    }
 	  	  };
 	  	  
 	    //Page size dropdown handler
-	        pager.pageSizeSelect.onchange = () => {
+	        pager.pageSizeSelect.onchange = async () => {
 	          this.pageSize = parseInt(pager.pageSizeSelect.value, 10);
-
+			  this.updateIsLoading(true);
 	          // reset paging
 	          this.pageHistory = [];
 	          this.currentIndex = -1;
 	          this.nextUrl = null;
-	          this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
+	          await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
+			  this.updateIsLoading(false);
 	        };
 		this.pager = pager;
 	},
@@ -778,9 +785,7 @@ define([
 	  if(stac && stac.features && stac.features.length < 1) {
 			this.showAlert("No items found", `No items found for this collection.`, "orange");
              this.clearMapView();
-			 this.currentIndex =  0;
-             this.pageHistory = [];
-             this.nextUrl = null;      
+			     
              return;
 		}
 	  else{
@@ -806,9 +811,15 @@ define([
 			    this.pageHistory.push(url);
 			    this.currentIndex++;
 			  }
-
-			  this.pager.prevBtn.disabled = this.currentIndex <= 0;
-			  this.pager.nextBtn.disabled = !this.nextUrl;
+			  let preBtnDisabled = this.currentIndex <= 0;
+              let nextBtnDisabled = !this.nextUrl;
+			  
+			  this.pager.prevBtn.disabled = preBtnDisabled;
+			  this.pager.prevBtn.classList.toggle("disabled", preBtnDisabled);
+              
+              this.pager.nextBtn.disabled = nextBtnDisabled;
+              this.pager.nextBtn.classList.toggle("disabled", nextBtnDisabled);			
+			
 			  this.pager.pageInfo.textContent = `Page ${this.currentIndex + 1}`;
 
 			  if (this.geoJSONLayer) {
@@ -936,7 +947,6 @@ define([
 			  });
 	  }
 	},
-	
 
     handleZoomTo: async function (feature) {
       if (feature) {
