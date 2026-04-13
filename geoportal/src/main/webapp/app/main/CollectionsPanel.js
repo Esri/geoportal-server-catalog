@@ -777,8 +777,11 @@ define([
 	  let stac = await response.json();
 	  if(stac && stac.features && stac.features.length < 1) {
 			this.showAlert("No items found", `No items found for this collection.`, "orange");
-             this.clearMapView();         
-              return;
+             this.clearMapView();
+			 this.currentIndex =  0;
+             this.pageHistory = [];
+             this.nextUrl = null;      
+             return;
 		}
 	  else{
 		this.addPaginationToMapView(this.view);
