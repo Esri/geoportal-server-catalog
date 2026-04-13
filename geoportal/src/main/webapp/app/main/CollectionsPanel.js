@@ -801,7 +801,7 @@ define([
 				   _assets: JSON.stringify(feature.assets || {})
 				};
 				  return feature;
-				});
+				});//Geojson layer only load _source.properties, so we need to stringify assets,id and collection into properties and store to use in popup later
 				
 
 			  this.nextUrl = stac.links?.find(l => l.rel === "next")?.href || null;
@@ -870,7 +870,7 @@ define([
 			    console.log("Property list:", fieldNames);
 
 				this.geoJSONLayer.popupTemplate = {
-				  title: "STAC Item",
+				  title: "{id}",
 				  outFields: ["*"],
 				  content: [
 					{
@@ -919,11 +919,11 @@ define([
 						  html += `<li>`;
 
 						  if (isRaster) {
-							html += `
+							/*html += `
 							  <a href="javascript:void(0)"
 								 onclick="loadRasterAsset('${asset.href}')">
 								🗺️ View Raster (${asset.title || key})
-							  </a>`;
+							  </a>`;*/
 						  } else {
 							html += `
 							  <a href="${asset.href}" target="_blank">
