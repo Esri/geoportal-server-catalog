@@ -679,16 +679,18 @@ define([
 	
 	handleViewItems: async function (collectionId) {
       if (collectionId) {
-        try {	
-		
-		// get items by collection id
-        if (AppContext.appConfig.system.secureCatalogApp) {
-          var client = new AppClient();
-          url = client.appendAccessToken(url);
-        }
-		this.selectedCollectionId = collectionId;  			 
-		    
-       	this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
+        try {
+	         this.updateIsLoading(true);	
+			
+			// get items by collection id
+	        if (AppContext.appConfig.system.secureCatalogApp) {
+	          var client = new AppClient();
+	          url = client.appendAccessToken(url);
+	        }
+			this.selectedCollectionId = collectionId;  			 
+			    
+	       	await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
+			this.updateIsLoading(false);
         } catch (e) {
           console.error("goTo failed", e);
         }
@@ -704,7 +706,7 @@ define([
 	  container.style.alignItems = "center";
 	  container.style.gap = "6px";
 	  container.style.padding = "6px";
-	  container.style.width = "350px";      
+	  container.style.width = "400px";      
 
 	  const prevBtn = document.createElement("button");
 	  prevBtn.className = "esri-button esri-button--secondary";
@@ -739,31 +741,47 @@ define([
 	      pageSizeSelect.appendChild(opt);
 	    });
 
-	  container.append(label, pageSizeSelect,prevBtn, pageInfo, nextBtn);
+		const noOfItems = document.createElement("span");
+		noOfItems.style.fontWeight = "bold";
+		noOfItems.style.minWidth = "60px";
+		noOfItems.style.textAlign = "center";
+		noOfItems.innerText = "0 Items";
+			
+	  container.append(noOfItems,label, pageSizeSelect,prevBtn, pageInfo, nextBtn);
 	  view.ui.add(container, "bottom-right");
-	  const pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo };
+	  this.pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo,noOfItems };
 	  
-	  pager.nextBtn.onclick = async () => {
+	  this.pager.nextBtn.onclick = async () => {
 	  	    if (this.nextUrl) {
 				this.updateIsLoading(true);
-	  	      await this.loadSTAC(this.nextUrl,this.pageSize);
+			if(this.currentIndex > 0) {
+                  this.pager.prevBtn.disabled = false;
+                  this.pager.prevBtn.classList.toggle("disabled",false);
+              }
+	  	      await this.loadSTAC(this.nextUrl);
 			  this.updateIsLoading(false);
 	  	    }
 	  	  };
 
-	  	  pager.prevBtn.onclick = async () => {
+	  this.pager.prevBtn.onclick = async () => {
+		console.log("Prev clicked, index =", this.currentIndex);
 	  	    if (this.currentIndex > 0) {
 				this.updateIsLoading(true);
 	  	      this.currentIndex--;
 	  	      const url = this.pageHistory[this.currentIndex];
-	  	      await this.loadSTAC(url, true);
+			  //If goingback to first page, disable prev button since we don't have previous url for first page
+			 if(this.currentIndex === 0) {
+                  this.pager.prevBtn.disabled = true;
+                  this.pager.prevBtn.classList.toggle("disabled",true);
+              }
+	  	      await this.loadSTAC(url,true);
 			  this.updateIsLoading(false);
 	  	    }
 	  	  };
 	  	  
 	    //Page size dropdown handler
-	        pager.pageSizeSelect.onchange = async () => {
-	          this.pageSize = parseInt(pager.pageSizeSelect.value, 10);
+	      this.pager.pageSizeSelect.onchange = async () => {
+	          this.pageSize = parseInt(this.pager.pageSizeSelect.value, 10);
 			  this.updateIsLoading(true);
 	          // reset paging
 	          this.pageHistory = [];
@@ -771,15 +789,14 @@ define([
 	          this.nextUrl = null;
 	          await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
 			  this.updateIsLoading(false);
-	        };
-		this.pager = pager;
+	        };		
 	},
 	
 	 buildSearchUrl:function(collectionId,limit) {
 		return `${this.getStacBaseUrl()}/collections/${collectionId}/items?limit=${limit}&f=geojson`		
 	  },
 
-	 loadSTAC: async function (url) {
+	 loadSTAC: async function (url,fromHistory = false) {
 	  const response = await fetch(url);
 	  let stac = await response.json();
 	  if(stac && stac.features && stac.features.length < 1) {
@@ -806,7 +823,7 @@ define([
 
 			  this.nextUrl = stac.links?.find(l => l.rel === "next")?.href || null;
 
-			  if (!this.fromHistory) {
+			  if (!fromHistory) {
 			    this.pageHistory = this.pageHistory.slice(0, this.currentIndex + 1);
 			    this.pageHistory.push(url);
 			    this.currentIndex++;
@@ -821,6 +838,7 @@ define([
               this.pager.nextBtn.classList.toggle("disabled", nextBtnDisabled);			
 			
 			  this.pager.pageInfo.textContent = `Page ${this.currentIndex + 1}`;
+			  this.pager.noOfItems.textContent = `${stac.numberMatched} Items`;
 
 			  if (this.geoJSONLayer) {
 			    this.view.map.remove(this.geoJSONLayer);
@@ -919,11 +937,11 @@ define([
 						  html += `<li>`;
 
 						  if (isRaster) {
-							/*html += `
+							html += `
 							  <a href="javascript:void(0)"
 								 onclick="loadRasterAsset('${asset.href}')">
 								🗺️ View Raster (${asset.title || key})
-							  </a>`;*/
+							  </a>`;
 						  } else {
 							html += `
 							  <a href="${asset.href}" target="_blank">
@@ -950,6 +968,7 @@ define([
 
     handleZoomTo: async function (feature) {
       if (feature) {
+		this.clearMapView();
         try {
           await this.view.goTo(feature);
         } catch (e) {
