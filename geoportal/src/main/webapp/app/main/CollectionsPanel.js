@@ -216,6 +216,7 @@ define([
           collection.graphic = graphic;
           const graphicsLayer = new GraphicsLayer({
             title: collection.properties.id,
+			visible: false
           });
           graphicsLayer.add(graphic);
           view.map.layers.add(graphicsLayer);
@@ -673,7 +674,21 @@ define([
         };
 
         this.updateCollectionInfoBox(properties);
+		//Turn off all collection layers first
+        this.view.map.layers.forEach(layer => {
+            if(layer.title) {
+                layer.visible = false;
+            }
+        });
+		//Turn on the layer of the selected collection	
+        this.view.map.layers.forEach(layer => {
+            if(layer.title === this.selectedCollection.properties.id) {
+                layer.visible = true;
+            }
+        });
+		
         this.handleZoomTo(this.selectedCollection.graphic);
+		
       }
     },
 	
@@ -1709,8 +1724,7 @@ define([
     },
 
     //Opening map panel
-    ensureMap: function (urlParams) {
-      this.urlParams = urlParams;
+    ensureMap: function () {      
       if (!this.config) {
         this.readConfig()
           .then(() => {
@@ -1812,12 +1826,12 @@ define([
         })
       );
 
-      if (!this.mapWasInitialized) {
+      /*if (!this.mapWasInitialized) {
         this.mapWasInitialized = true;
         if (this.urlParams) {
           this.addLayer(this.urlParams, view);
         }
-      }
+      }*/
 
       this.handleMapReady(view);
       this.view = view;
