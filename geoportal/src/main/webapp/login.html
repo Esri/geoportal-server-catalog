@@ -95,8 +95,15 @@ require([
         document.getElementById("errorMessage").style.display = "block";
     }
     var pathParts = window.location.pathname.split('/');
-    var contextPath = pathParts.length > 1 ? '/' + pathParts[1] : '';
-    var loginUrl = contextPath + '/login';
+    //deployed at root context, pathParts[1] is login.html
+    if (pathParts[1].indexOf('login.html') !== -1) {
+    	var contextPath = '';
+    }else
+    {
+    	contextPath = pathParts.length > 1 ? '/' + pathParts[1] : '';
+	}
+    
+    var loginUrl = contextPath + '/login';   
     document.getElementById('loginForm').setAttribute('action', loginUrl);
 })();
 </script>
