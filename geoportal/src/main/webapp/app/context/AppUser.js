@@ -250,11 +250,13 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 		 function getContextPath() {
 		    const parts = window.location.pathname.split('/').filter(Boolean);
 		    // If this page is at /<context>/file.html, the first segment is the WAR context.
-		    return parts.length > 0 ? '/' + parts[0] : '';
+			// If deployed at root like in Beanstalk /file.html then context is (empty string).			
+		    return parts.length > 1 ? '/' + parts[0] : '';
 		  }
 	
-		  const CONTEXT = getContextPath();              // e.g., "/geoportal-harvester-war" or ""
+		  const CONTEXT = getContextPath(); 
 		  const BASE    = ORIGIN + CONTEXT;
+		 
       if (code && window.opener) {        
         // Exchange authorization code for tokens
         const clientId = 'geoportal-simple-client';
