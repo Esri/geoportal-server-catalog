@@ -114,11 +114,19 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         this.inherited(arguments);
     },
     
-    destroyFootprint:function()
-    {
-    	if(this.view) this.view.destroy();   		
-    	this.footprintNode.innerHTML = "";
-    },    	
+	destroyFootprint: function () {
+	  if (this.view) {
+	    this.view.container = null;   
+	    this.view.destroy();
+	    this.view = null;
+	  }  
+
+	  requestAnimationFrame(() => {
+	    if (this.footprintNode) {
+	      this.footprintNode.innerHTML = "";
+	    }
+	  });
+	},   	
     render: function(hit) {
       var item = this.item = hit._source;
       item._id = hit._id;
