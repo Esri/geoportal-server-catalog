@@ -533,7 +533,7 @@ public class STACService extends Application {
 			if (queryJson != null && queryJson.length() > 0)
 				queryMap.put("queryJson", queryJson);
 			
-			url = url + "/_search?size=" + limit;
+			url = url + "/_search?size=" + (limit+1); //Adding one extra so that next page can be figured out
 			query = StacHelper.prepareSearchQuery(queryMap, search_after);
 
 			if (query.length() > 0)
@@ -1941,9 +1941,13 @@ public class STACService extends Application {
 			resourceFilecontext.set("$.response.numberMatched", "" + numberMatched);
 			
 			//No link for next page
-			if(!nextLink)
+			if(!nextLink && requestType.startsWith("search"))
 			{
 				linksContext.delete("$.searchItem.links[1]");
+			}
+			if(!nextLink && requestType.startsWith("metadataItems"))
+			{
+				linksContext.delete("$.metadataItem.links[1]");
 			}
 			JSONArray jsonArray = new JSONArray();
 
