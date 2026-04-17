@@ -34,7 +34,8 @@ define([
   "esri4/widgets/BasemapGallery",
   "esri4/geometry/support/webMercatorUtils",
   "app/context/AppClient",  
-  "app/context/app-topics"
+  "app/context/app-topics",
+  "esri4/layers/GeoJSONLayer"
 ], function (
   declare,
   lang,
@@ -56,7 +57,7 @@ define([
   Expand,
   BasemapGallery,
   webMercatorUtils,
-  AppClient,appTopics
+  AppClient,appTopics,GeoJSONLayer
 ) {
   var oThisClass = declare([Templated], {
     i18n: i18n,
@@ -115,11 +116,18 @@ define([
           "A port city in the Netherlands known for modern architecture.",
       },
     ],
+	
+	 pageSize: 10,
+	 geoJSONLayer:null,
+	 nextUrl: null,
+	 pageHistory : [],
+	 currentIndex: -1,
+	
 
     getStacBaseUrl: function () {
       if (window && window.top && window.top.geoportalServiceInfo) {
         var loc = window.top.location;
-        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;
+        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;		
         return stacBaseUrl;
       }
       return null;
@@ -208,6 +216,7 @@ define([
           collection.graphic = graphic;
           const graphicsLayer = new GraphicsLayer({
             title: collection.properties.id,
+			visible: false
           });
           graphicsLayer.add(graphic);
           view.map.layers.add(graphicsLayer);
@@ -521,6 +530,33 @@ define([
         throw new Error(`Error creating collection ${collection.id}`);
       }
     },
+	
+	clearMapView:function() {
+      if(this.pager) {		
+		  this.view.ui.remove(this.pager.container);
+		  this.pager = null;		
+        }
+		this.currentIndex = -1;
+        this.pageHistory = [];
+        this.nextUrl = null;  
+        
+        if(this.geoJSONLayer) {
+            this.view.map.remove(this.geoJSONLayer);
+            this.geoJSONLayer.destroy();
+            this.geoJSONLayer = null;
+        }
+        
+         let rasterLayer = this.view.map.layers.find(layer => layer.type === "imagery");
+         if(rasterLayer) {
+             this.view.map.remove(rasterLayer);
+             rasterLayer.destroy();
+         }
+		 this.view.goTo({
+            zoom:this.mapProps.zoom,
+            center:this.mapProps.center
+        });
+          
+    },
 
     handleUpdateCollection: async function (id, properties) {
       this.appActionState = this.actions.UPDATE_COLLECTION;
@@ -623,7 +659,8 @@ define([
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
       this.selectedGraphic = this.selectedCollection.graphic;
-      this.handleUpdateButtonEnabled();
+      this.handleUpdateButtonEnabled();  
+	   
       if (this.selectedCollection) {
         const collection = await this.getCollectionById(
           this.selectedCollection.properties.id
@@ -637,12 +674,316 @@ define([
         };
 
         this.updateCollectionInfoBox(properties);
+		//Turn off all collection layers first
+        this.view.map.layers.forEach(layer => {
+            if(layer.title) {
+                layer.visible = false;
+            }
+        });
+		//Turn on the layer of the selected collection	
+        this.view.map.layers.forEach(layer => {
+            if(layer.title === this.selectedCollection.properties.id) {
+                layer.visible = true;
+            }
+        });
+		
         this.handleZoomTo(this.selectedCollection.graphic);
+		
       }
     },
+	
+	handleViewItems: async function (collectionId) {
+      if (collectionId) {
+        try {
+	         this.updateIsLoading(true);	
+			
+			// get items by collection id
+	        if (AppContext.appConfig.system.secureCatalogApp) {
+	          var client = new AppClient();
+	          url = client.appendAccessToken(url);
+	        }
+			this.selectedCollectionId = collectionId;  			 
+			    
+	       	await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
+			this.updateIsLoading(false);
+        } catch (e) {
+          console.error("goTo failed", e);
+        }
+      }
+    },
+	
+	addPaginationToMapView: function (view) {
+	  if(this.pager) return ;
+	  
+	  const container = document.createElement("div");
+	  container.className = "esri-widget";
+	  container.style.display = "flex";
+	  container.style.alignItems = "center";
+	  container.style.gap = "6px";
+	  container.style.padding = "6px";
+	  container.style.width = "400px";      
+
+	  const prevBtn = document.createElement("button");
+	  prevBtn.className = "esri-button esri-button--secondary";
+	  prevBtn.innerHTML = "← Prev";
+	  prevBtn.disabled = true;
+
+	  const pageInfo = document.createElement("span");
+	  pageInfo.style.fontWeight = "bold";
+	  pageInfo.style.minWidth = "60px";
+	  pageInfo.style.textAlign = "center";
+	  pageInfo.innerText = "Page 1";
+
+	  const nextBtn = document.createElement("button");
+	  nextBtn.className = "esri-button esri-button--secondary";
+	  nextBtn.innerHTML = "Next →";
+	  nextBtn.disabled = true;
+
+	    const label = document.createElement("label");
+	    label.innerText = "Page size:";
+	    label.style.fontWeight = "bold";
+
+	    const pageSizeSelect = document.createElement("select");
+	    pageSizeSelect.className = "esri-select";
+
+	    [5, 10, 25, 50].forEach(size => {
+	      const opt = document.createElement("option");
+	      opt.value = size;
+	      opt.textContent = size;
+	      if (size === this.pageSize) {
+	        opt.selected = true;
+	      }
+	      pageSizeSelect.appendChild(opt);
+	    });
+
+		const noOfItems = document.createElement("span");
+		noOfItems.style.fontWeight = "bold";
+		noOfItems.style.minWidth = "60px";
+		noOfItems.style.textAlign = "center";
+		noOfItems.innerText = "0 Items";
+			
+	  container.append(noOfItems,label, pageSizeSelect,prevBtn, pageInfo, nextBtn);
+	  view.ui.add(container, "bottom-right");
+	  this.pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo,noOfItems };
+	  
+	  this.pager.nextBtn.onclick = async () => {
+	  	    if (this.nextUrl) {
+				this.updateIsLoading(true);
+			if(this.currentIndex > 0) {
+                  this.pager.prevBtn.disabled = false;
+                  this.pager.prevBtn.classList.toggle("disabled",false);
+              }
+	  	      await this.loadSTAC(this.nextUrl);
+			  this.updateIsLoading(false);
+	  	    }
+	  	  };
+
+	  this.pager.prevBtn.onclick = async () => {
+		console.log("Prev clicked, index =", this.currentIndex);
+	  	    if (this.currentIndex > 0) {
+				this.updateIsLoading(true);
+	  	      this.currentIndex--;
+	  	      const url = this.pageHistory[this.currentIndex];
+			  //If goingback to first page, disable prev button since we don't have previous url for first page
+			 if(this.currentIndex === 0) {
+                  this.pager.prevBtn.disabled = true;
+                  this.pager.prevBtn.classList.toggle("disabled",true);
+              }
+	  	      await this.loadSTAC(url,true);
+			  this.updateIsLoading(false);
+	  	    }
+	  	  };
+	  	  
+	    //Page size dropdown handler
+	      this.pager.pageSizeSelect.onchange = async () => {
+	          this.pageSize = parseInt(this.pager.pageSizeSelect.value, 10);
+			  this.updateIsLoading(true);
+	          // reset paging
+	          this.pageHistory = [];
+	          this.currentIndex = -1;
+	          this.nextUrl = null;
+	          await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
+			  this.updateIsLoading(false);
+	        };		
+	},
+	
+	 buildSearchUrl:function(collectionId,limit) {
+		return `${this.getStacBaseUrl()}/collections/${collectionId}/items?limit=${limit}&f=geojson`		
+	  },
+
+	 loadSTAC: async function (url,fromHistory = false) {
+	  const response = await fetch(url);
+	  let stac = await response.json();
+	  if(stac && stac.features && stac.features.length < 1) {
+			this.showAlert("No items found", `No items found for this collection.`, "orange");
+             this.clearMapView();
+			     
+             return;
+		}
+	  else{
+		this.addPaginationToMapView(this.view);
+		
+		stac.features = stac.features.map(feature => {
+				  feature.properties = {
+				  id: feature.id,
+				  collection: feature.collection,
+				  stac_version: feature.stac_version,
+				  ...(feature.properties || {}),	  
+				 // store full assets object
+				   _assets: JSON.stringify(feature.assets || {})
+				};
+				  return feature;
+				});//Geojson layer only load _source.properties, so we need to stringify assets,id and collection into properties and store to use in popup later
+				
+
+			  this.nextUrl = stac.links?.find(l => l.rel === "next")?.href || null;
+
+			  if (!fromHistory) {
+			    this.pageHistory = this.pageHistory.slice(0, this.currentIndex + 1);
+			    this.pageHistory.push(url);
+			    this.currentIndex++;
+			  }
+			  let preBtnDisabled = this.currentIndex <= 0;
+              let nextBtnDisabled = !this.nextUrl;
+			  
+			  this.pager.prevBtn.disabled = preBtnDisabled;
+			  this.pager.prevBtn.classList.toggle("disabled", preBtnDisabled);
+              
+              this.pager.nextBtn.disabled = nextBtnDisabled;
+              this.pager.nextBtn.classList.toggle("disabled", nextBtnDisabled);			
+			
+			  this.pager.pageInfo.textContent = `Page ${this.currentIndex + 1}`;
+			  this.pager.noOfItems.textContent = `${stac.numberMatched} Items`;
+
+			  if (this.geoJSONLayer) {
+			    this.view.map.remove(this.geoJSONLayer);
+			    this.geoJSONLayer.destroy();
+			  }
+
+
+				// create a new blob from geojson featurecollection
+				const blob = new Blob([JSON.stringify(stac)], {
+				  type: "application/json"
+				});
+
+				// URL reference to the blob
+			  const blobUrl = URL.createObjectURL(blob);
+			  this.geoJSONLayer = new GeoJSONLayer({url:blobUrl});
+			  this.view.map.add(this.geoJSONLayer);
+			  
+			  let rasterLayer = null;
+
+				//--------------------raster layer
+				window.loadRasterAsset = async function (href) {
+				  // Remove previous raster (if any)
+				  if (rasterLayer) {
+					this.view.map.remove(rasterLayer);
+					rasterLayer.destroy();
+					rasterLayer = null;
+				  }
+
+				  rasterLayer = new esri.layers.ImageryLayer({
+					url: href
+				  });
+
+				  this.view.map.add(rasterLayer);
+
+				  try {
+					await rasterLayer.load();
+					if (rasterLayer.fullExtent) {
+					  this.view.goTo(rasterLayer.fullExtent.expand(1.2));
+					}
+				  } catch (err) {
+					console.error("Failed to load raster asset", err);
+				  }
+				};
+			//-------------------------------------------------------
+			  this.geoJSONLayer.load().then(() => {
+			    const fieldNames = this.geoJSONLayer.fields.map(field => field.name);
+			    console.log("Property list:", fieldNames);
+
+				this.geoJSONLayer.popupTemplate = {
+				  title: "{id}",
+				  outFields: ["*"],
+				  content: [
+					{
+					  type: "fields",
+					  fieldInfos: fieldNames.map(name => ({
+						fieldName: name,
+						label: name.replace(/_/g, " ").toUpperCase()
+					  }))
+					},
+					{
+					  type: "custom",
+					  creator: function (event) {
+						const attrs = event.graphic.attributes;
+
+						if (!attrs.F_assets) {
+						  return "No assets available";
+						}
+
+						let assets;
+						try {
+						  assets = JSON.parse(attrs.F_assets);
+						} catch {
+						  return "Assets could not be parsed";
+						}
+
+						let html = `<div style="font-size:13px">`;
+
+						// Thumbnail
+						if (assets.thumbnail?.href) {
+						  html += `
+							<div style="margin:8px 0">
+							  <img src="${assets.thumbnail.href}"
+								   style="max-width:100%; border:1px solid #ccc" />
+							</div>`;
+						}
+
+						html += `<b>Assets</b><ul style="padding-left:16px">`;
+
+						Object.entries(assets).forEach(([key, asset]) => {
+						  if (!asset?.href) return;
+
+						  const isRaster =
+							asset.type?.includes("geotiff") ||
+							asset.href.toLowerCase().endsWith(".tif");
+
+						  html += `<li>`;
+
+						  if (isRaster) {
+							html += `
+							  <a href="javascript:void(0)"
+								 onclick="loadRasterAsset('${asset.href}')">
+								🗺️ View Raster (${asset.title || key})
+							  </a>`;
+						  } else {
+							html += `
+							  <a href="${asset.href}" target="_blank">
+								📄 ${asset.title || key}
+							  </a>`;
+						  }
+
+						  html += `</li>`;
+						});
+
+						html += `</ul></div>`;
+						return html;
+					  }
+					}
+				  ]
+				};
+
+			    if (this.geoJSONLayer.fullExtent) {
+			      this.view.goTo(this.geoJSONLayer.fullExtent.expand(1.2));
+			    }
+			  });
+	  }
+	},
 
     handleZoomTo: async function (feature) {
       if (feature) {
+		this.clearMapView();
         try {
           await this.view.goTo(feature);
         } catch (e) {
@@ -653,6 +994,7 @@ define([
 
     readCollection: function (id = 0) {
       console.log("Reading Collection", id);
+	  this.clearMapView();
       const collectionResult = this.collections.find(
         (c) => String(c.properties.id) === String(id)
       );
@@ -708,6 +1050,16 @@ define([
         this.zoomCollectionButton.classList.add("disabled");
       }
     },
+	
+	handleViewItemsEnabled: function () {
+	      if (this.selectedCollection.graphic) {
+	        this.viewItemsButton.disabled = false;
+	        this.viewItemsButton.classList.remove("disabled");
+	      } else {
+	        this.viewItemsButton.disabled = true;
+	        this.viewItemsButton.classList.add("disabled");
+	      }
+	},
 
     handleEditorPrimaryButtonEnabled: function (id, title, description) {
       if (
@@ -1059,6 +1411,7 @@ define([
         console.error("missing arguments");
         return;
       }
+	  this.clearMapView();	  
       this.selectedGraphic = null;
       this.renderCreateCollectionEditor();
     },
@@ -1126,13 +1479,15 @@ define([
       this.infoTableTitle.innerHTML = properties.title;
       this.infoTableBody.innerHTML = tableRows.join("");
       this.handleZoomCollectionEnabled();
+	  
+	  this.handleViewItemsEnabled();
     },
 
     emptyCollectionInfoBox: function () {
       let tableRows = [];
       this.infoTableTitle.innerHTML = "Collection Info";
       this.infoTableBody.innerHTML = tableRows.join("");
-      this.handleZoomCollectionEnabled();
+      this.clickEnabled();
     },
 
     getUpdateFieldValues: function () {
@@ -1174,6 +1529,9 @@ define([
       this.zoomCollectionButton.addEventListener("click", () => {
         this.handleZoomTo(this.selectedCollection.graphic);
       });
+	  this.viewItemsButton.addEventListener("click", () => {			
+	      this.handleViewItems(this.selectedCollection.properties.id);
+	   });
 
       // Editor Events
       this.editorPrimaryButton.addEventListener("click", () => {
@@ -1366,8 +1724,7 @@ define([
     },
 
     //Opening map panel
-    ensureMap: function (urlParams) {
-      this.urlParams = urlParams;
+    ensureMap: function () {      
       if (!this.config) {
         this.readConfig()
           .then(() => {
@@ -1390,6 +1747,7 @@ define([
       if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
         v = null;
       }
+	  this.mapProps = mapProps;
       var map = new Map({ basemap: "streets-night-vector" });
 
       const view = new MapView({
@@ -1398,7 +1756,7 @@ define([
         center: mapProps.center,
         zoom: mapProps.zoom,
       });
-
+	  
       if (typeof v === "string" && v.length > 0) {
         v = util.checkMixedContent(v);
         var basemap;
@@ -1468,12 +1826,12 @@ define([
         })
       );
 
-      if (!this.mapWasInitialized) {
+      /*if (!this.mapWasInitialized) {
         this.mapWasInitialized = true;
         if (this.urlParams) {
           this.addLayer(this.urlParams, view);
         }
-      }
+      }*/
 
       this.handleMapReady(view);
       this.view = view;
