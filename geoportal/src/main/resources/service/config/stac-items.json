@@ -10,7 +10,7 @@
   "featurePropPath": {
     "type": "Feature",	
     "id": "$._source.id",
-    "collection": "$._source.src_collections_s[0]",		
+    "collection": "$._source.collection",		
     "stac_version": "1.0.0",
     "stac_extensions": [
       "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
