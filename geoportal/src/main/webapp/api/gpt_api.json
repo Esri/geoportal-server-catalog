@@ -138,7 +138,7 @@
 				"summary": "Provides information on STAC API queryables for use with the filter clause",
 				"description": "",
 				"produces": [
-					"application/json"
+					"application/schema+json"
 				],
 				"operationId": "stacQueryables",
 				"parameters": [],
