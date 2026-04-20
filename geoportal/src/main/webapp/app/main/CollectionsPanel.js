@@ -156,7 +156,7 @@ define([
       this.inherited(arguments);
       this.readConfig();
       topic.subscribe(appTopics.SignedIn,lang.hitch(this,function(params){
-    	  this.handleGetCollections();  
+    	 // this.handleGetCollections();  
     	  this.updateUI();
       }));
     },
@@ -216,8 +216,9 @@ define([
           collection.graphic = graphic;
           const graphicsLayer = new GraphicsLayer({
             title: collection.properties.id,
-			visible: false
+			visible: ((collection.properties.id === this.selectedCollection?.properties?.id) ? true : false) // only show the layer of selected collection
           });
+		  
           graphicsLayer.add(graphic);
           view.map.layers.add(graphicsLayer);
         }
