@@ -231,7 +231,9 @@ public class StacHelper {
 	public static String prepareSearchQuery(Map<String, String> queryMap, String searchAfter) {
 		String queryStr = "";
 		JsonArrayBuilder builder = Json.createArrayBuilder();
-
+//Always add that field stac_version exists, so that it will not return any non-STAC items in search results, even if non-STAC items are indexed in the same index without stac_version field.
+		builder.add(JsonUtil.toJsonStructure("{\"exists\": {\"field\": \"stac_version\"}}"));
+		
 		if (queryMap.containsKey("bbox")) {
 			String bboxQry = prepareBbox((String) queryMap.get("bbox"));
 			if (bboxQry.length() > 0)
