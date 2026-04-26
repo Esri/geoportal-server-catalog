@@ -237,15 +237,6 @@ public class STACService extends Application {
 		limit = setLimit(limit);
 
 		try {
-			// 518 updates
-			if (!gc.getSupportsCollections()) {
-				// Geoportal not configured for collections
-				// STAC will only have 1 STAC collection 'metadata'
-				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
-				finalresponse = responseJSON.replaceAll("\\{collectionId\\}", "metadata");
-
-			} else {
-				// Geoportal configured for collections
 				// STAC will have collection for each Geoportal collection
 				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
 
@@ -334,9 +325,8 @@ public class STACService extends Application {
 					// respond in STAC JSON
 					finalresponse = stacCollections.toString();
 				}
-
 				finalresponse = finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
-			}
+			
 
 		} catch (Exception e) {
 			LOGGER.error("Error in collections " + e);
@@ -447,21 +437,15 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
 		
 		try {			
-			if (!gc.getSupportsCollections()) 
-			{	
-				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);			
-				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
+
+			JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
+			if (collectionObj == null || collectionObj.isEmpty()) // #518 
+			{
+				status = Response.Status.NOT_FOUND;
 			}
 			else
 			{
-				JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
-				if (collectionObj == null || collectionObj.isEmpty()) // #518 || !collectionId.equals("metadata"))
-				{
-					status = Response.Status.NOT_FOUND;
-				}
-				else
-				{
-          responseJSON = collectionObj.toString();
+				responseJSON = collectionObj.toString();
 
           // #574 project collection geometry to outCRS if provided and valid
           // if reprojecting STAC geometries is supported and a
@@ -499,8 +483,8 @@ public class STACService extends Application {
           
 					responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
 					responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
-				}
 			}
+			
 		} catch (Exception e) {
 			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting collection: "+collectionId+" "+e));
 			status = Response.Status.INTERNAL_SERVER_ERROR;
@@ -565,9 +549,9 @@ public class STACService extends Application {
 				queryMap.put("datetime", datetime);
       @SuppressWarnings("LocalVariableHidesMemberVariable")
 			GeoportalContext gc = GeoportalContext.getInstance();
-			if (gc.getSupportsCollections()) {
-				queryMap.put("collections", collectionId);
-			}
+			
+			queryMap.put("collections", collectionId);
+			
 			
 			if (queryJson != null && queryJson.length() > 0)
 				queryMap.put("queryJson", queryJson);
@@ -838,7 +822,7 @@ public class STACService extends Application {
 	@GET
 	@Produces("application/geo+json")
 	@Path("/search")
-	public Response search(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
+	public Response fs(@Context HttpServletRequest hsr, @QueryParam("limit") int limit,
 			@QueryParam("bbox") String bbox, @QueryParam("intersects") String intersects,
 			@QueryParam("datetime") String datetime, @QueryParam("updated") String updated, @QueryParam("created") String created, @QueryParam("ids") String idList,
 			@QueryParam("collections") String collections, @QueryParam("search_after") String searchAfter,
@@ -872,8 +856,7 @@ public class STACService extends Application {
 			if (created != null && created.length() > 0)
 			queryMap.put("created", created);
 			
-			//GeoportalContext gc = GeoportalContext.getInstance();
-			if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
+			if (collections != null && !collections.isEmpty()) {
 				listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
 				queryMap.put("collections", listOfCollections);
 			}
@@ -1049,7 +1032,7 @@ public class STACService extends Application {
 			}
 					
 			String listOfCollections = "";
-			if ((gc.getSupportsCollections() && collectionArr != null && !collectionArr.isEmpty())) {
+			if (collectionArr != null && !collectionArr.isEmpty()) {
 				for(int i=0;i<collectionArr.size();i++)
 				{
 					if(i==0)
@@ -1165,7 +1148,7 @@ public class STACService extends Application {
 		status = Response.Status.BAD_REQUEST;			
 		responseJSON = this.generateResponse("400","Collection id can contain (A-Za-z0-9_-) and length should be less than 25.",null);		
 	}	
-    else if(gc.getSupportsCollections() && !validCollection(collectionId)) {
+    else if(!validCollection(collectionId)) {
         status = Response.Status.BAD_REQUEST;
         String baseUrl = this.getBaseUrl(hsr);
         responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
@@ -1215,7 +1198,7 @@ public class STACService extends Application {
 			status = Response.Status.BAD_REQUEST;			
 			responseJSON = this.generateResponse("400","Collection id can contain (A-Za-z0-9_-) and length should be less than 25.",null);		
 		}		
-		else if(gc.getSupportsCollections() && !validCollection(collectionId)) 
+		else if(!validCollection(collectionId)) 
 		{	
 			status = Response.Status.BAD_REQUEST;
 			String baseUrl = this.getBaseUrl(hsr);
@@ -1277,7 +1260,7 @@ public class STACService extends Application {
 		String responseJSON;	
 		Status status;		
 		
-		if(gc.getSupportsCollections() && !validCollection(collectionId)) {	
+		if(!validCollection(collectionId)) {	
 			status = Response.Status.BAD_REQUEST;
 			String baseUrl = this.getBaseUrl(hsr);
 			responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
