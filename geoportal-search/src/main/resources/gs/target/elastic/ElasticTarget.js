@@ -293,9 +293,9 @@
 				  normalizedService = String(service[0]).trim();
 			  }
 			  else {
-				  normalizedService = String(service).trim();
-			  }
-
+				if(service)
+				  	normalizedService = String(service).trim();
+			  }			  
 			  var allowFileIdRaw = task.request.parameterMap.allowFileId;
 
 			  var allowFileId =
@@ -535,7 +535,7 @@
           };
         }
         if (task.verbose) console.log("sending url:",url,", postdata:",data);
-         console.log("sending url:",url,", postdata:",data);
+        // console.log("sending url:",url,", postdata:",data);
         return task.context.sendHttpRequest(task,url,data,dataContentType,options);
 
       }).then(function(result){
