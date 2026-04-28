@@ -299,10 +299,10 @@
 			  var allowFileIdRaw = task.request.parameterMap.allowFileId;
 
 			  var allowFileId =
-			    allowFileIdRaw === true ||
-			    String(Array.isArray(allowFileIdRaw) ? allowFileIdRaw[0] : allowFileIdRaw)
-			      .toLowerCase() === 'true';
-
+				  allowFileIdRaw === true ||
+				  allowFileIdRaw === 'true' ||
+				  allowFileIdRaw === 'TRUE' ||
+				  (Array.isArray(allowFileIdRaw) && allowFileIdRaw[0] === 'true');
 			  if (normalizedService === 'CSW' && allowFileId && Array.isArray(ids) && ids.length > 0) {
 				  var field = "fileid.keyword";
 				  var idTerm = {};
