@@ -24,20 +24,20 @@ import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 /**
  * Search request (geoportal-search based).

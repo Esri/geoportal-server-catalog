@@ -21,20 +21,21 @@ import java.util.Collection;
 import java.util.Enumeration;
 import java.util.Locale;
 import java.util.Map;
-import javax.servlet.AsyncContext;
-import javax.servlet.DispatcherType;
-import javax.servlet.RequestDispatcher;
-import javax.servlet.ServletContext;
-import javax.servlet.ServletException;
-import javax.servlet.ServletInputStream;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.servlet.http.HttpSession;
-import javax.servlet.http.HttpUpgradeHandler;
-import javax.servlet.http.Part;
+import jakarta.servlet.AsyncContext;
+import jakarta.servlet.DispatcherType;
+import jakarta.servlet.RequestDispatcher;
+import jakarta.servlet.ServletConnection;
+import jakarta.servlet.ServletContext;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletInputStream;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.Cookie;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpUpgradeHandler;
+import jakarta.servlet.http.Part;
 
 /**
  * Provides a basic implementation for an HttpServletRequest.
@@ -111,5 +112,20 @@ public class HttpServletRequestImpl implements HttpServletRequest {
   public Collection<Part>   getParts() throws IOException, ServletException {return null;}
   public Part               getPart(String name) throws IOException, ServletException { return null; }
   public <T extends HttpUpgradeHandler> T upgrade(Class<T> handlerClass) throws IOException, ServletException {return null;}
+  @Override
+  public String getRequestId() {
+	// TODO Auto-generated method stub
+	return null;
+  }
+  @Override
+  public String getProtocolRequestId() {
+	// TODO Auto-generated method stub
+	return null;
+  }
+  @Override
+  public ServletConnection getServletConnection() {
+	// TODO Auto-generated method stub
+	return null;
+  }
   
 }

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.Hashtable;
 import java.util.Map;
-import javax.servlet.http.HttpSession;
+import jakarta.servlet.http.HttpSession;
 
 /**
  * Provides an implementation facade for an HttpServletRequest.
