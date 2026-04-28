@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans:beans 
-      xmlns:beans="http://www.springframework.org/schema/beans"
-  xmlns:context="http://www.springframework.org/schema/context"
-  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-  xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
-    http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+    xmlns:beans="http://www.springframework.org/schema/beans"
+    xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+                        http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
 
   <context:property-placeholder/>
   <context:annotation-config />
-
+	
   <beans:import resource="app-factory.xml" />
   <beans:import resource="app-dcat.xml" />
   
@@ -20,7 +20,7 @@
     <beans:property name="supportsGroupBasedAccess" value="false" />
     <beans:property name="defaultAccessLevel" value="" /> <!-- optional - public|private -->
     <beans:property name="parseGml" value="false" />
-    <beans:property name="supportsCollections" value="true" /> 
+    <beans:property name="supportsCollections" value="true" />
     <beans:property name="geometryService" value="${gpt_geometryService:}" />
   </beans:bean>
   
@@ -41,22 +41,22 @@
     <beans:property name="allowFileId" value="false" />
     <beans:property name="mappingsFile" value="${gpt_mappingsFile:config/elastic-mappings.json}" />
     <beans:property name="mappingsFile7" value="${gpt_mappingsFile:config/elastic-mappings-7.json}" />
-    <beans:property name="httpPort" value="443" />		
-	<beans:property name="transportPort" value="9300" />  
-	<beans:property name="proxyBufferSize" value="8192" />		
-
+    <beans:property name="httpPort" value="9200" />		
+    <beans:property name="transportPort" value="9300" />  
+    <beans:property name="proxyBufferSize" value="8192" />		
           	
     <!-- Uncomment and complete the following if you want to use secured index -->
- 
-    <beans:property name="useHttps" value="true" />
+    <beans:property name="useHttps" value="false" />
     <beans:property name="encryptPassword" value="false" />
 
-    <!-- If encryptPassword =true, Uncomment below and configure the keys
-    <beans:property name="base64Key" value="" />
-    <beans:property name="base64Iv" value="" />  -->
-	<beans:property name="username" value="admin" />
-	<beans:property name="password" value="#S$%geoportal12#" />
-    
+    <!-- If encryptPassword =true, Uncomment below and configure the keys -->
+    <!-- 
+    <beans:property name="base64Key" value="${gpt_base64Key}" />
+    <beans:property name="base64Iv" value="${gpt_base64Iv}" /> 
+    -->
+   
+    <beans:property name="username" value="" />
+    <beans:property name="password" value="" />
     
     <beans:property name="engineType" value="${gpt_engineType:opensearch}"/> <!-- null | opensearch | elasticsearch -->		
     <beans:property name="awsOpenSearchType" value="${gpt_awsOpenSearchType:}"/> <!-- null for all other types of Opensearch | serverless | managed -->
@@ -69,47 +69,47 @@
     <beans:property name="nodes">
       <!-- The list of host names within the Elasticsearch cluster, one value element per host -->
       <beans:list>
-        <beans:value>${es_node:search-geoportal-opensearch3-thtxstr7olb5ub3zju357ttrga.aos.us-east-1.on.aws}</beans:value>
+        <beans:value>${es_node:}</beans:value>
       </beans:list>
     </beans:property>
   </beans:bean>
             
-  <beans:bean id="stacContext" class="com.esri.geoportal.service.stac.StacContext">  	
-  	<!--<beans:property name="statusFld" value="status"/>-->
-  	<beans:property name="numStacFeaturesAddItem" value="500" />
+  <beans:bean id="stacContext" class="com.esri.geoportal.service.stac.StacContext">    
+    <!--  <beans:property name="statusFld" value="status"/> -->
+    <beans:property name="numStacFeaturesAddItem" value="500" />
     <beans:property name="validateStacFields" value="${gpt_validateStacFields:true}" />
     <beans:property name="canStacAutogenerateId" value="${gpt_canStacAutogenerateId:true}" />
-    <beans:property name="canStacGeomTransform" value="${gpt_canStacGeomTransform:true}" />
+    <beans:property name="canStacGeomTransform" value="${gpt_canStacGeomTransform:false}" />
     <beans:property name="canStacAutogenerateBbox" value="${gpt_canStacAutogenerateBbox:true}" />
-    <beans:property name="stacBboxSize" value="${gpt_stacBboxSize:0.000001}" />    
+    <beans:property name="stacBboxSize" value="${gpt_stacBboxSize:0.00001}" />    
     <beans:property name="geomWKTField" value="${gpt_geomWKTField:}" />
-    <beans:property name="geomCRSField" value="${gpt_geomCRSField:}" />  
- <!--   <beans:property name="delayResponse" value="1000" />
-    <beans:property name="stacUrl" value="" />		-->
+    <beans:property name="geomCRSField" value="${gpt_geomCRSField:}" /> 
+    <!-- 
+    <beans:property name="delayResponse" value="1000" />
+    <beans:property name="stacUrl" value="" /> 
+    -->
     <beans:property name="validationRules">
       <beans:list>
         <!-- 
           rule definition string:
-          rule_type ::= <type_unique> | <type_intersects_collection>
-          type_unique ::= 'unique | ' <field_name>
+          rule_type ::= <type_unique> | <type_intersects_collection> | <type_match_expression> | <type_mandatory_fields>
+          type_unique ::= 'unique | ' <field1_name>,<field2_name>,...,<fieldN_name>
           type_intersects_collection ::= 'intersects_collection'
           type_geometry_source_matches ::= 'geometry_source_matches'
           type_match_expression ::= match_expression | <field_name>,<reg_expression>
-          type_mandatory_fields ::= mandatory_fields | <field_name1>,<field_name2>
+      	  type_mandatory_fields ::= mandatory_fields | <field_name1>,<field_name2>
           
           examples:
           <beans:value>unique|properties.fieldname</beans:value>
-          <beans:value>intersects_collection</beans:value>	   	 
-	   	  <beans:value>geometry_source_matches</beans:value>
-          <beans:value>match_expression|id,^[A-Za-z0-9_-]+$</beans:value>
-          <beans:value>mandatory_fields|properties.datetime,assets</beans:value>
-
-          Below configuration uses environment variables for the rules
-           
-	   	<beans:value>intersects_collection</beans:value>
-	   	<beans:value>geometry_source_matches</beans:value>
-	   	<beans:value>match_expression|id,^[A-Za-z0-9_-]+$</beans:value>	     -->   
-        
+          <beans:value>intersects_collection</beans:value> 
+          <beans:value>geometry_source_matches</beans:value>
+         	<beans:value>match_expression |id,^[A-Za-z0-9_-]+$</beans:value>
+          <beans:value>mandatory_fields|properties.datetime</beans:value>   
+          
+          Below configuration uses environment variables for the rules	      
+          <beans:value>${gpt_stacValidationRule1}</beans:value>
+          <beans:value>${gpt_stacValidationRule2}</beans:value>
+        -->
       </beans:list> 
     </beans:property>
     <beans:property name="fieldMappings">
@@ -127,11 +127,31 @@
           _d ::= double field
           _dt ::= date field: e.g. 2025-01-16T11:35:56.732Z
           _cat ::= hierarchical category field: e.g. continent > country > state/province > county/municipality > city > neighborhood ...          
-        -->       
+        -->
+	<!--
+        <beans:value>prefix:stac_property=index_field_suffix</beans:value>
+	-->
+        <beans:value>eo:sun_azimuth=_SunAzimuth_l</beans:value>
+        <beans:value>eo:sun_elevation=_SunZenith_l</beans:value>
+        <beans:value>eo:cloud_cover=_CloudCover_l</beans:value>
+        <beans:value>eo:row=_row_l</beans:value>
+        <beans:value>eo:column=column_l</beans:value>
+        <beans:value>eo:platform=src_harvested_dataset_s</beans:value>
+
+        <beans:value>AcquisitionDate=properties.AcquisitionDate_dt</beans:value>
+        <beans:value>CameraHeading=properties.CameraHeading_d</beans:value>
+        <beans:value>CameraPitch=properties.CameraPitch_d</beans:value>
+        <beans:value>CameraRoll=properties.CameraRoll_d</beans:value>
+        <beans:value>FarDistance=properties.FarDistance_d</beans:value>
+        <beans:value>HorizontalFieldOfView=properties.HorizontalFieldOfView_d</beans:value>
+        <beans:value>LocationHierarchy=properties.location_hierarchy_cat</beans:value>
+        <beans:value>NearDistance=properties.NearDistance_d</beans:value>
+        <beans:value>OrientedImageryType=properties.OrientedImageryType_s</beans:value>
+        <beans:value>VerticalFieldOfView=properties.VerticalFieldOfView_d</beans:value>
       </beans:list>
     </beans:property>
   </beans:bean>  
-      <!--  This should always be imported after GeoportalContext and ElasticContext loaded -->
+    <!--  This should always be imported after GeoportalContext and ElasticContext loaded -->
   <beans:import resource="app-security.xml" />
 	
   <beans:bean id="harvesterContext" class="com.esri.geoportal.lib.harvester.HarvesterContext">
