@@ -227,8 +227,6 @@
       var con = null, buffer, nRead;
       try {
         var u = new java.net.URL(url);
- 
-		var client = com.esri.geoportal.lib.elastic.http.ElasticClient.newClient();;
         //print("data ",data);
         if(options && options.useHttps)
         	{        	
