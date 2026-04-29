@@ -234,6 +234,10 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
     
     // 616 return up to 10,000 collections, not full pagination yet
+		//if no limit provided (limit is less than or equal to 0), set it to 10,000 (max limit for collections)
+		if(limit <= 0) {
+			limit = 10000;
+		}
 		limit = setLimit(limit);
 
 		try {
