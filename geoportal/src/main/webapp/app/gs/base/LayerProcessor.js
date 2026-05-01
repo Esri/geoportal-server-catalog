@@ -53,7 +53,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       lang.mixin(this,args);
     },
   
-    addLayer: function(view,type,url) {
+    addLayer: function(mapView,type,url,sceneView) {
       var dfd = new Deferred();
       if (typeof type !== "string" || type.length === 0 ||
           typeof url !== "string" || url.length === 0) {
@@ -80,7 +80,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
             if (info && info.data && info.data.type && typeof info.data.type === "string" && info.data.type === "Feature Layer") {
               layer = new FeatureLayer(url,{id:id,outFields:["*"]});
               layer.load();
-              self.waitThenAdd(dfd,view,type,layer);
+              self.waitThenAdd(dfd,mapView,type,layer,sceneView);
             } else {              
               if (lc.indexOf("/featureserver") > 0) {
                 var dfds = [];
@@ -96,7 +96,8 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
                   lyrs.reverse();
                   array.forEach(lyrs,function(lyr){
                     self.setPopupTemplate(lyr);
-                    view.map.add(lyr);
+                    mapView.map.add(lyr);
+					sceneView && sceneView.map.add(lyr);
                   });
                   dfd.resolve(lyrs);
                 }).catch(function(error){
@@ -110,7 +111,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
                   layer = new MapImageLayer(url,{id:id});
                 }
                 layer.load();
-                self.waitThenAdd(dfd,view,type,layer);
+                self.waitThenAdd(dfd,mapView,type,layer);
               } 
             }
           }).catch(function(error){
@@ -120,14 +121,14 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
         } else if (lc.indexOf("/imageserver") > 0) { 
           layer = new ImageryLayer(url,{id:id});
           layer.load();
-          this.waitThenAdd(dfd,view,type,layer);
+          this.waitThenAdd(dfd,mapView,type,layer);
           
         } else if (lc.indexOf("/vectortileserver") > 0 || 
             lc.indexOf("/resources/styles/root.json") > 0) {          
             this.checkVectorTileUrl(url,{}).then(function(vturl){
               layer = new VectorTileLayer(vturl,{id:id});
               layer.load();
-              self.waitThenAdd(dfd,view,type,layer);
+              self.waitThenAdd(dfd,mapView,type,layer);
             }).catch(function(error){
               dfd.reject(error);
             });
@@ -138,7 +139,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
             purgeOptions: {displayCount: 10000}
           });
           layer.load();
-          this.waitThenAdd(dfd,view,type,layer);
+          this.waitThenAdd(dfd,mapView,type,layer);
   
         } else {
           dfd.reject("Unsupported");
@@ -146,37 +147,37 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       } else if (type === "WMS") {
         layer = new WMSLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,view,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer);
       } else if (type === "WMTS") {       
         layer = new WMTSLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,view,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer);
       } else if (type === "WFS") {       
         var options = {id:id,url:url,};
         layer = new WFSLayer(options);
         layer.load();
-        this.waitThenAdd(dfd,view,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer);
       } else if (type === "KML") {
         layer = new KMLLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,view,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer);
       } else if (type === "GeoRSS") {
         layer = new GeoRSSLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,view,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer);
       } else if (type === "CSV") {
         layer = new CSVLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,view,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer);
       }else if (type === "ImageryTileLayer") {
           layer = new ImageryTileLayer(url,{id:id});
           layer.load();
-          this.waitThenAdd(dfd,view,type,layer);
+          this.waitThenAdd(dfd,mapView,type,layer);
       }else if (type === "OGCFeatureServer") {
-    	this.addOGCFeatureLayer(url,view);       
+    	this.addOGCFeatureLayer(url,mapView);       
       }
       else if (type === "GroupLayer") {
-    	  layerUtil.addGroupLayer(url,null,null,view,null);       
+    	  layerUtil.addGroupLayer(url,null,null,mapView,null);       
         }
       else {
         dfd.reject("Unsupported");
@@ -346,17 +347,21 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
          return dfd;
     },
     
-    waitThenAdd: function(dfd,view,type,layer) {      
+    waitThenAdd: function(dfd,mapView,type,layer,sceneView) {      
       var self = this;
       this.waitForLayer(layer).then(function(lyr){
        
-        var templates = null;
         if (type === "WMS") {
           self.setWMSVisibleLayers(lyr);
         }
         self.setPopupTemplate(lyr);
-        view.map.add(layer);
-        dfd.resolve(lyr);
+        mapView.map.add(layer);        
+        if (sceneView) {
+          // Create a clone of the layer for SceneView to avoid render conflicts
+          var clonedLayer = lyr.clone();
+          sceneView.map.add(clonedLayer);
+        }
+		dfd.resolve(lyr);
       }).catch(function(error){
         //console.warn("waitThenAdd.error",error);
         dfd.reject(error);

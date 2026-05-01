@@ -25,6 +25,7 @@ define(["dojo/_base/declare",
         "dojo/Deferred",
         "esri4/Map",
         "esri4/views/MapView",
+		"esri4/views/SceneView",
         "esri4/layers/TileLayer",
         "esri4/layers/MapImageLayer",
         "esri4/layers/FeatureLayer",
@@ -48,7 +49,7 @@ define(["dojo/_base/declare",
         "app/context/AppClient"], 
 function(declare, lang, Templated, template, i18n, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
-		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
+		Map,MapView,SceneView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
 		Legend,Locate,Home,SwitchInput,Graphic,Expand,BasemapGallery,reactiveUtils,ButtonMenuItem,ButtonMenu,
 		SearchPane,WidgetContext,LayerProcessor,AppClient) {
 
@@ -81,7 +82,12 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     },
     
     addToMap: function(params) {    	
-    	this.addLayer(params,this.view);
+    	this.addLayer(params,this.mapView,this.sceneView).then(result=>{
+    		console.log("Layer added to map",result);    		
+    	})
+    	.catch(error=>{
+    		console.error("Error adding layer to map",error);
+    	});
     },
   //Opening map panel
     ensureMap: function(urlParams) {
@@ -110,14 +116,22 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 	      v = null;
 	    }	    
 	    var map = new Map({basemap:mapProps.basemap});
+		var map3D = new Map({basemap:mapProps.threeDBasemap, ground:"world-elevation"});
 	    
-		const view = new MapView({
+		const mapView = new MapView({
 	  	  container: this.mapNode,
 	  	  map: map, 
 	  	  center: mapProps.center,
 	  	  zoom: mapProps.zoom      	  
 	  	});
 		
+		const sceneView = new SceneView({
+		        container: null,
+		        map: map3D,
+				center: mapProps.center,
+				zoom: mapProps.zoom
+		 });
+		 
 		
 	 if (typeof v === "string" && v.length > 0) {
 	        v =  util.checkMixedContent(v);
@@ -129,7 +143,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
         }
         map.add(basemap);
       }	   
-      view.when(lang.hitch(this,function() {  
+      mapView.when(lang.hitch(this,function() {  
     	  var localGeoportalUrl = this._createLocalCatalogUrl();
 	   	   if (localGeoportalUrl) {
 			   var target;
@@ -145,7 +159,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     	//Add geoportal search widget
   		var widgetContext = new WidgetContext({
               i18n: i18n,
-              view: view,
+              view: mapView,
               proxyUrl: esriConfig.defaults.io.proxyUrl,
               wabWidget: this,
               widgetConfig: this.config
@@ -163,43 +177,46 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
             let gpSearchExpand = new Expand({
    	    	 expandIcon: "query",  
    	    	 expandTooltip: "Geoportal Search", 
-   	    	 view: view,
+   	    	 view: mapView,
    	    	 content: gpSearchWidget
       	     });
-      	     view.ui.add(gpSearchExpand, {
+      	     mapView.ui.add(gpSearchExpand, {
     		  position: "top-left",
     		  index: 0
     		});
       	   let searchWidget = new SearchWidget({
-    		  view: view
+    		  view: mapView
     		});
 
     	  let searchWidgetExpand = new Expand({
     	    	 expandIcon: "search",  
     	    	 expandTooltip: "Find Address or Place", 
-    	    	 view: view,
+    	    	 view: mapView,
     	    	 content: searchWidget
        	     });
-       	     view.ui.add(searchWidgetExpand, {
+       	     mapView.ui.add(searchWidgetExpand, {
     		  position: "top-left",
     		  index: 1
     		});
     	  
     	  let layerList = new LayerList({
-    		  view: view
+    		  view: mapView
     		  ,listItemCreatedFunction: defineActions
     		});
     		let layerListExpand = new Expand({
    	    	 expandIcon: "layers",  
    	    	 expandTooltip: "Map Layers", 
-   	    	 view: view,
+   	    	 view: mapView,
    	    	 content: layerList
       	     });
-      	     view.ui.add(layerListExpand, {
+      	     mapView.ui.add(layerListExpand, {
     		  position: "top-left",
     		  index: 2
     		});
-      	    
+    	    
+    		// Store reference to layerList for later use
+    		this.layerList = layerList;
+    	    
       	   async function defineActions(event) {
       		  const item = event.item;
 
@@ -225,74 +242,154 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 	       		this.executeLayerlistActions(event);
 	       	 });
     		let homeWidget = new Home({
-    			  view: view
+    			  view: mapView
     			});
 
 			// adds the home widget to the top left corner of the MapView
-			view.ui.add(homeWidget, {
+			mapView.ui.add(homeWidget, {
 	    		  position: "top-left",
 	    		  index: 4
 	    		});   	 
 			
 			let basemapWidget = new BasemapGallery({
-  			  view: view
+  			  view: mapView
   			});
 			let basemapExpand = new Expand({
    	    	 expandIcon: "basemap",  
    	    	 expandTooltip: "Basemap", 
-   	    	 view: view,
+   	    	 view: mapView,
    	    	 content: basemapWidget
       	     });
 			// adds the basemap widget to the top right corner of the MapView
-			view.ui.add(basemapExpand, {
+			mapView.ui.add(basemapExpand, {
 	    		  position: "top-right",
 	    		  index: 1
 	    		});  
    	     	
     		let legend = new Legend({
-    			  view: view
+    			  view: mapView
     		}); 
     		let legendExpand = new Expand({
     	    	 expandIcon: "legend",  
     	    	 expandTooltip: "Legend", 
-    	    	 view: view,
+    	    	 view: mapView,
     	    	 content: legend
        	     });
-       	     view.ui.add(legendExpand, {
+       	     mapView.ui.add(legendExpand, {
     		  position: "top-left",
     		  index: 3
-    		});
+    		});		
+			
+			// --- Create and add the switch button as a proper Esri widget ---
+            const switchBtnContainer = document.createElement("div");
+            switchBtnContainer.className = "esri-widget esri-component";
+            switchBtnContainer.style.margin = "8px";
+            switchBtnContainer.style.boxShadow = "0 1px 2px rgba(0,0,0,0.15)";
+            
+            let switchBtn = document.createElement("button");
+            switchBtn.id = "switch-btn";
+            switchBtn.innerHTML = "3D";
+            switchBtn.className = "esri-button";
+            switchBtn.title = "Switch between 2D and 3D views";
+            switchBtnContainer.appendChild(switchBtn);
+            
+            // Add to mapView UI initially
+            mapView.ui.add(switchBtnContainer, {
+				position: "top-right",
+				    		  index: 0
+            });
+            
+            // --- Switch logic ---
+            switchBtn.addEventListener("click", () => {
+                if (this.activeView === mapView) {
+                    this.activeView = sceneView;
+                    sceneView.container = this.mapNode;
+                    mapView.container = null;
+                    // Remove from mapView UI, add to sceneView UI
+                    mapView.ui.remove(switchBtnContainer);
+                    sceneView.ui.add(switchBtnContainer, {
+                        position: "top-right",
+                        index: 0
+                    });
+                    switchBtn.innerHTML = "2D";
+                } else {
+                    this.activeView = mapView;
+                    mapView.container = this.mapNode;
+                    sceneView.container = null;
+                    // Remove from sceneView UI, add to mapView UI
+                    sceneView.ui.remove(switchBtnContainer);
+                    mapView.ui.add(switchBtnContainer, {
+                        position: "top-right",
+                        index: 0
+                    });
+                    switchBtn.innerHTML = "3D";
+                    // Force MapView to refresh layers after re-attachment
+                    mapView.map.layers.forEach(layer => {
+                        if (layer.visible !== undefined) {
+                            const wasVisible = layer.visible;
+                            layer.visible = false;
+                            layer.visible = wasVisible;
+                        }
+                    });
+                }
+            });
+            
+         var selectedFeature;
 	     
-	     reactiveUtils.on(()=>view.popup, "trigger-action", (event)=>{	    	 
+	     reactiveUtils.on(()=>mapView.popup, "trigger-action", (event)=>{	    	 
 	    	  if(event.action.id === "view-attribute-table"){	    	   
-	    		  this.openAttrTable(view.popup.selectedFeature);
+	    		  this.openAttrTable(mapView.popup.selectedFeature);
 	    	  }
 	    	});
+		reactiveUtils.on(()=>sceneView.popup, "trigger-action", (event)=>{	    	 
+		    	  if(event.action.id === "view-attribute-table"){	    	   
+		    		  this.openAttrTable(sceneView.popup.selectedFeature);
+		    	  }
+		    	});
 	     reactiveUtils.watch(
-             () => view.popup.viewModel?.active,
+             () => mapView.popup.viewModel?.active,
              () => {
-               selectedFeature = view.popup.selectedFeature;
-               if (selectedFeature !== null && view.popup.visible !== false) {
+               selectedFeature = mapView.popup.selectedFeature;
+               if (selectedFeature !== null && mapView.popup.visible !== false) {
             	   if(this.featureTable)
             		   {
             		   this.featureTable.highlightIds.removeAll();
-            		   this.featureTable.highlightIds.add(view.popup.selectedFeature.attributes.OBJECTID);
+            		   this.featureTable.highlightIds.add(mapView.popup.selectedFeature.attributes.OBJECTID);
   	                 	
             		   }
                  
                }
              }
 	      );
-	     this.view = view;
+		  
+		  reactiveUtils.watch(
+		      () => sceneView.popup.viewModel?.active,
+		      () => {
+		        selectedFeature = sceneView.popup.selectedFeature;
+		        if (selectedFeature !== null && sceneView.popup.visible !== false) {
+		     	   if(this.featureTable)
+		     		   {
+		     		   this.featureTable.highlightIds.removeAll();
+		     		   this.featureTable.highlightIds.add(sceneView.popup.selectedFeature.attributes.OBJECTID);
+		                	
+		     		   }
+		          
+		        }
+		      }
+		   );
+		   this.mapView = mapView;
+           this.sceneView = sceneView;
+	       this.activeView = mapView;
+	       
+	       // Add initial layer after both views are ready and assigned
+	       if (!this.mapWasInitialized) {
+	         this.mapWasInitialized = true;
+	         if (this.urlParams) {
+	           this.addLayer(this.urlParams,this.mapView,this.sceneView);
+	         }
+	       }
+		 
       }));  
-
-   
-      if (!this.mapWasInitialized) {
-        this.mapWasInitialized = true;
-        if (this.urlParams) {
-        	this.addLayer(this.urlParams,view);
-        }
-      }
     },
     
     executeLayerlistActions:function(event)
@@ -300,12 +397,12 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     	if(event.action && event.action.id === 'full-extent' &&
     			event.item && event.item.layer) 
 		{
-    		this.view.goTo(event.item.layer.fullExtent);
+    		this.activeView.goTo(event.item.layer.fullExtent);
 		}
     	if(event.action && event.action.id === 'remove-layer') 
 		{
-    		const layerToRemove = this.view.map.findLayerById(event.item.layer.id);
-    		this.view.map.layers.remove(layerToRemove);
+    		const layerToRemove = this.activeView.map.findLayerById(event.item.layer.id);
+    		this.activeView.map.layers.remove(layerToRemove);
 		}		
     },
 
@@ -388,7 +485,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
         return null;
       },
       
-      addLayer: function(params,view){
+      addLayer: function(params,mapView,sceneView) {
           // console.warn("AddToMap.addLayer...",type,url);     
     	  var url = params.url;
     	  var type = params.type;    	  
@@ -396,7 +493,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
           this.urlParams = params;
         
           var processor = new LayerProcessor();
-          processor.addLayer(view,type,url).then(function(result){
+          processor.addLayer(mapView,type,url,sceneView).then(function(result){
             if (result) {
               dfd.resolve(result);
             } else {
