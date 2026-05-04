@@ -17,6 +17,7 @@ define(["dojo/_base/declare",
         "app/common/Templated",
         "dojo/text!./templates/MapPanel.html",
         "dojo/i18n!../gs/widget/nls/strings",
+		"dojo/i18n!../nls/resources",
         "dojo/sniff",
         "dojo/dom-style",
         "dojo/dom-geometry",
@@ -47,7 +48,7 @@ define(["dojo/_base/declare",
         "../gs/widget/WidgetContext",
         "../gs/base/LayerProcessor",
         "app/context/AppClient"], 
-function(declare, lang, Templated, template, i18n, has, domStyle, 
+function(declare, lang, Templated, template, i18n,i18resources, has, domStyle, 
 		domGeometry,domConstruct,array,Deferred,
 		Map,MapView,SceneView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
 		Legend,Locate,Home,SwitchInput,Graphic,Expand,BasemapGallery,reactiveUtils,ButtonMenuItem,ButtonMenu,
@@ -56,6 +57,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
   var oThisClass = declare([Templated], {
 
     i18n: i18n,
+	i18resources: i18resources,	
     templateString: template,
     
     mapWasInitialized: false,
@@ -226,12 +228,12 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
       		    item.actionsSections = [
       		      [
       		        {
-      		          title: "Go to full extent",
+      		          title: i18resources.mapViewer.layerListFullExtent,
       		          icon: "zoom-out-fixed",
       		          id: "full-extent"
       		        }],
       		        [{
-      		          title: "Remove",
+      		          title: i18resources.mapViewer.layerListRemove,
       		          icon: "minus-circle",
       		          id: "remove-layer"
       		        }
@@ -283,12 +285,11 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
 			// --- Create and add the switch button as a proper Esri widget ---
             const switchBtnContainer = document.createElement("div");
             switchBtnContainer.className = "esri-widget esri-component";
-            switchBtnContainer.style.margin = "8px";
             switchBtnContainer.style.boxShadow = "0 1px 2px rgba(0,0,0,0.15)";
             
             let switchBtn = document.createElement("button");
             switchBtn.id = "switch-btn";
-            switchBtn.innerHTML = "3D";
+            switchBtn.innerHTML = i18resources.mapViewer.toggleView3d;
             switchBtn.className = "esri-button";
             switchBtn.title = "Switch between 2D and 3D views";
             switchBtnContainer.appendChild(switchBtn);
@@ -311,7 +312,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
                         position: "top-right",
                         index: 0
                     });
-                    switchBtn.innerHTML = "2D";
+                    switchBtn.innerHTML = i18resources.mapViewer.toggleView2d;
                 } else {
                     this.activeView = mapView;
                     mapView.container = this.mapNode;
@@ -322,7 +323,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
                         position: "top-right",
                         index: 0
                     });
-                    switchBtn.innerHTML = "3D";
+                    switchBtn.innerHTML = i18resources.mapViewer.toggleView3d;
                     // Force MapView to refresh layers after re-attachment
                     mapView.map.layers.forEach(layer => {
                         if (layer.visible !== undefined) {

@@ -35,17 +35,14 @@ define([
   "esri4/layers/WMSLayer",
   "esri4/layers/WMTSLayer",
   "esri4/layers/OGCFeatureLayer",
-  "esri4/layers/GroupLayer",
- // "esri4/layers/WMTSLayerInfo",
-  "esri4/PopupTemplate",
   "esri4/core/reactiveUtils",
   "../widget/util",
   "../widget/layers/layerUtil"],
 function(declare, lang, array, Deferred, all, i18n, esriRequest,
 		MapImageLayer, ImageryLayer, TileLayer, CSVLayer, 
   FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, 
-  ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, OGCFeatureLayer,GroupLayer,
-  /*WMTSLayerInfo,*/ PopupTemplate,reactiveUtils,util,layerUtil){
+  ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, OGCFeatureLayer,
+  reactiveUtils,util,layerUtil){
   
   return declare(null, {
     
@@ -83,11 +80,16 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
               self.waitThenAdd(dfd,mapView,type,layer,sceneView);
             } else {              
               if (lc.indexOf("/featureserver") > 0) {
-                var dfds = [];
+                var dfds = [];  var sceneDfds = [];
                 array.forEach(info.data.layers,function(li){
                   var lid = util.generateId();
                   var lyr = new FeatureLayer(url+"/"+li.id,{id:lid,outFields:["*"]});
                   lyr.load();
+				  
+				  var sceneLayer = layerUtil.cloneLayer(lyr);
+                  sceneLayer.id = util.generateId();
+                  sceneLayer.load();
+				  sceneDfds.push(self.waitForLayer(sceneLayer));
                   dfds.push(self.waitForLayer(lyr));
                 });
                 all(dfds).then(function(results){
@@ -96,10 +98,26 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
                   lyrs.reverse();
                   array.forEach(lyrs,function(lyr){
                     self.setPopupTemplate(lyr);
-                    mapView.map.add(lyr);
-					sceneView && sceneView.map.add(lyr);
+                    mapView.map.add(lyr);					
                   });
-                  dfd.resolve(lyrs);
+                  if (sceneView) {
+                    all(sceneDfds).then(function(sceneResults){
+                      var sceneLyrs = [];
+                      array.forEach(sceneResults,function(lyr){sceneLyrs.push(lyr);});
+                      sceneLyrs.reverse();
+                      array.forEach(sceneLyrs,function(lyr){
+                        self.setPopupTemplate(lyr);
+                        sceneView.map.add(lyr);					
+                      });
+					  dfd.resolve([lyrs,sceneLyrs]);
+                    }).catch(function(error){
+					   dfd.resolve(lyrs);
+                      console.warn("Error loading feature layers in scene view",error);
+                    });
+                  }
+				  else {
+					dfd.resolve(lyrs);
+					}                 
                 }).catch(function(error){
                   dfd.reject(error);
                 });
@@ -111,7 +129,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
                   layer = new MapImageLayer(url,{id:id});
                 }
                 layer.load();
-                self.waitThenAdd(dfd,mapView,type,layer);
+                self.waitThenAdd(dfd,mapView,type,layer,sceneView);
               } 
             }
           }).catch(function(error){
@@ -121,14 +139,14 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
         } else if (lc.indexOf("/imageserver") > 0) { 
           layer = new ImageryLayer(url,{id:id});
           layer.load();
-          this.waitThenAdd(dfd,mapView,type,layer);
+          this.waitThenAdd(dfd,mapView,type,layer,sceneView);
           
         } else if (lc.indexOf("/vectortileserver") > 0 || 
             lc.indexOf("/resources/styles/root.json") > 0) {          
             this.checkVectorTileUrl(url,{}).then(function(vturl){
               layer = new VectorTileLayer(vturl,{id:id});
               layer.load();
-              self.waitThenAdd(dfd,mapView,type,layer);
+              self.waitThenAdd(dfd,mapView,type,layer,sceneView);
             }).catch(function(error){
               dfd.reject(error);
             });
@@ -139,7 +157,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
             purgeOptions: {displayCount: 10000}
           });
           layer.load();
-          this.waitThenAdd(dfd,mapView,type,layer);
+          this.waitThenAdd(dfd,mapView,type,layer,sceneView);
   
         } else {
           dfd.reject("Unsupported");
@@ -147,11 +165,11 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       } else if (type === "WMS") {
         layer = new WMSLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,mapView,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer,sceneView);
       } else if (type === "WMTS") {       
         layer = new WMTSLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,mapView,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer,sceneView);
       } else if (type === "WFS") {       
         var options = {id:id,url:url,};
         layer = new WFSLayer(options);
@@ -160,7 +178,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       } else if (type === "KML") {
         layer = new KMLLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,mapView,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer,sceneView);
       } else if (type === "GeoRSS") {
         layer = new GeoRSSLayer(url,{id:id});
         layer.load();
@@ -172,9 +190,13 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       }else if (type === "ImageryTileLayer") {
           layer = new ImageryTileLayer(url,{id:id});
           layer.load();
-          this.waitThenAdd(dfd,mapView,type,layer);
+          this.waitThenAdd(dfd,mapView,type,layer,sceneView);
       }else if (type === "OGCFeatureServer") {
-    	this.addOGCFeatureLayer(url,mapView);       
+    	this.addOGCFeatureLayer(url,mapView,sceneView).then(function(featureLayers){
+    		dfd.resolve(featureLayers);
+    	}).catch(function(error){
+    		dfd.reject(error);
+    	});
       }
       else if (type === "GroupLayer") {
     	  layerUtil.addGroupLayer(url,null,null,mapView,null);       
@@ -185,9 +207,9 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       return dfd;
     },  
     
-    addOGCFeatureLayer:function(serviceUrl,view)
+    addOGCFeatureLayer:function(serviceUrl,mapView,sceneView)
     {
-        var self = this, layerDfds = [];
+        var self = this, layerDfds = []; sceneViewLayerDfds = [];
         var dfd = new Deferred();
         //Read collections 
         var collectionUrl = serviceUrl+"/collections";
@@ -216,6 +238,13 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
   		                });
   		                layer.load();
   		                layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
+						
+						if(sceneView) {
+	                        var clonedLayer = layerUtil.cloneLayer(layer);
+							clonedLayer.id = util.generateId();
+							clonedLayer.load();
+							sceneViewLayerDfds.push(layerUtil.waitForLayer(self.i18n,clonedLayer));	                       
+	                    }  
   	            });
       		  	}else {    	            
       	            console.warn("No OGC feature layers...");
@@ -223,10 +252,25 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       		  all(layerDfds).then(function(featureLayers){
       			  array.forEach(featureLayers, function(layer) {
       				self.setPopupTemplate(layer);
-      				view.map.add(layer);         		        
+      				mapView.map.add(layer); 
+					  		        
       			  }); 
       			  dfd.resolve(featureLayers);
-      		  });
+      		  });			  
+			
+              if(sceneView) {
+                  all(sceneViewLayerDfds).then(function(featureLayers){
+       			  	array.forEach(featureLayers, function(layer) {
+       				self.setPopupTemplate(layer);
+       				sceneView.map.add(layer); 
+  				  		        
+       			  }); 
+                 dfd.resolve(featureLayers);
+               }).catch(function(error){
+            	  console.warn("Error loading OGC feature layers in scene view",error);
+            	  dfd.reject(error);
+               });
+              }
       	  }
         }).catch(function(error) {
             console.error(error);
@@ -347,27 +391,40 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
          return dfd;
     },
     
-    waitThenAdd: function(dfd,mapView,type,layer,sceneView) {      
-      var self = this;
-      this.waitForLayer(layer).then(function(lyr){
-       
-        if (type === "WMS") {
-          self.setWMSVisibleLayers(lyr);
-        }
-        self.setPopupTemplate(lyr);
-        mapView.map.add(layer);        
-        if (sceneView) {
-          // Create a clone of the layer for SceneView to avoid render conflicts
-          var clonedLayer = lyr.clone();
-          sceneView.map.add(clonedLayer);
-        }
-		dfd.resolve(lyr);
-      }).catch(function(error){
-        //console.warn("waitThenAdd.error",error);
-        dfd.reject(error);
-      });
-    }
-    
+	  waitThenAdd: function(dfd, mapView, type, layer, sceneView) {
+		  var self = this;
+		  this.waitForLayer(layer).then(function(lyr) {
+			  if (type === "WMS") {
+				  self.setWMSVisibleLayers(layer);
+			  }
+			  self.setPopupTemplate(layer);
+			  mapView.map.add(layer);
+			  if (sceneView) {
+				  // Create a clone of the layer for SceneView to avoid render conflicts
+				  var clonedLayer = layerUtil.cloneLayer(layer);
+				  clonedLayer.id = util.generateId();
+				  clonedLayer.load();
+				  self.waitForLayer(clonedLayer).then(function(clonedlyr) {
+					  if (type === "WMS") {
+						  self.setWMSVisibleLayers(clonedlyr);
+					  }
+					  self.setPopupTemplate(clonedlyr);
+					  sceneView.map.add(clonedlyr);
+					  dfd.resolve([lyr, clonedlyr]);
+				  }).catch(function(error) {
+					  dfd.reject(error);
+					  console.warn("waitForLayer error for cloned layer", error);
+				  });
+			  }
+			  else {
+				  dfd.resolve(lyr);
+			  }
+		  }).catch(function(error) {
+			  //console.warn("waitThenAdd.error",error);
+			  dfd.reject(error);
+		  });
+	  }
+
   });
   
 });
