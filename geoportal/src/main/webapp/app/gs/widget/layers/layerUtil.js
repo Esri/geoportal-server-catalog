@@ -328,9 +328,11 @@ define(["dojo/_base/array",
               {
                 let idIndex = itemUrl.indexOf("?id=");
                 let itemId = itemUrl.substring(idIndex + 4);
-
-                let domain = util.getDomainFromUrl(serviceUrl);
-                if (domain.endsWith(".arcgis.com")) {
+				
+				//TODO Below change was for Codeql fix but it broke the functionality , fix later
+                //let domain = util.getDomainFromUrl(serviceUrl);
+               // if (domain.endsWith(".arcgis.com")) {
+				if(itemUrl.indexOf(".arcgis.com")>-1){
                   itemInfoUrl = "https://www.arcgis.com/sharing/rest/content/items/" + itemId;
                 }//On Premise Portal
                 else {
@@ -340,7 +342,7 @@ define(["dojo/_base/array",
                 }
                 var readItemJson = util.readItemJsonData(itemInfoUrl);
                 readItemJson.then(function (itemDataObj) {
-                  dfd = self.addGroupLayerToMap(itemId, itemDataObj.data, mapView, null, portalBaseUrl);
+                  dfd = self.addGroupLayerToMap(itemId, itemDataObj.data, mapView, null, portalBaseUrl,sceneView);
                   dfd.then(function (result) {
                     dfd.resolve(result);
                   })
@@ -352,7 +354,7 @@ define(["dojo/_base/array",
               return dfd.promise;
             },
 			
-			addGroupLayerToMap: function(itemId, itemData, mapView, referenceId, portalBaseUrl) {
+			addGroupLayerToMap: function(itemId, itemData, mapView, referenceId, portalBaseUrl,sceneView) {
 				var self = this;
 				let arcGisPortal;
 				if (portalBaseUrl) {
@@ -383,7 +385,7 @@ define(["dojo/_base/array",
 					if (sceneView) {
 						var sceneGroupLayer = self.cloneLayer(groupLayer);
 						sceneGroupLayer.load();
-						elf.waitForLayer(self.i18n, groupLayer).then(function(sceneLayer) {
+						self.waitForLayer(self.i18n, sceneGroupLayer).then(function(sceneLayer) {
 							self.setGroupLayerPopupTemplate(sceneLayer, itemData);
 							self.addMapLayer(sceneView, sceneLayer, null, referenceId);
 							dfd.resolve([layer, sceneLayer]);
@@ -421,24 +423,50 @@ define(["dojo/_base/array",
 
 		  // 2️⃣ Handle GroupLayer (recursive)
 		  if (layer.type === "group") {
+		    var self = this;
 		    return new GroupLayer({
 		      title: layer.title,
 		      visible: layer.visible,
 		      visibilityMode: layer.visibilityMode,
 		      opacity: layer.opacity,
-		      layers: layer.layers.map(safeCloneLayer)
+		      layers: layer.layers.map(function(lyr) { return self.cloneLayer(lyr); })
 		    });
 		  }
 
-		  // 3️⃣ FeatureLayer & OGCFeatureLayer (true 3D aware)
-		  if (layer instanceof FeatureLayer || layer instanceof OGCFeatureLayer) {
-		    return new layer.constructor({
+		  // 3️⃣ FeatureLayer (true 3D aware)
+		  if (layer instanceof FeatureLayer) {
+		    return new FeatureLayer({
 		      url: layer.url,
 		      title: layer.title,
 		      visible: layer.visible,
 		      opacity: layer.opacity,
 		      renderer: layer.renderer?.clone?.(),
 		      popupTemplate: layer.popupTemplate?.clone?.(),
+		      labelingInfo: layer.labelingInfo,
+		      definitionExpression: layer.definitionExpression,
+		      elevationInfo: layer.elevationInfo
+		    });
+		  }
+
+		  // 3️⃣b OGCFeatureLayer - requires collectionId
+		  if (layer instanceof OGCFeatureLayer) {
+		    var clonedRenderer = null;
+		    if (layer.renderer && typeof layer.renderer.clone === "function") {
+		      clonedRenderer = layer.renderer.clone();
+		    }
+		    var clonedPopupTemplate = null;
+		    if (layer.popupTemplate && typeof layer.popupTemplate.clone === "function") {
+		      clonedPopupTemplate = layer.popupTemplate.clone();
+		    }
+		    return new OGCFeatureLayer({
+		      url: layer.url,
+		      collectionId: layer.collectionId,
+		      title: layer.title,
+		      visible: layer.visible,
+		      opacity: layer.opacity,
+		      legendEnabled: layer.legendEnabled !== false,
+		      renderer: clonedRenderer,
+		      popupTemplate: clonedPopupTemplate,
 		      labelingInfo: layer.labelingInfo,
 		      definitionExpression: layer.definitionExpression,
 		      elevationInfo: layer.elevationInfo
