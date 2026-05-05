@@ -84,12 +84,7 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
     },
     
     addToMap: function(params) {    	
-    	this.addLayer(params,this.mapView,this.sceneView).then(result=>{
-    		console.log("Layer added to map",result);    		
-    	})
-    	.catch(error=>{
-    		console.error("Error adding layer to map",error);
-    	});
+    	this.addLayer(params,this.mapView,this.sceneView);
     },
   //Opening map panel
     ensureMap: function(urlParams) {
@@ -492,9 +487,28 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
     		// Use the layer directly from the event item - it's already the correct layer
     		// from the LayerList's associated view/map
     		const layerToRemove = event.item.layer;
-    		// Get the map from the layer's parent or use activeView
-    		if (this.activeView && this.activeView.map) {
-    			this.activeView.map.layers.remove(layerToRemove);
+    		
+    		// Find and remove matching layers from both views by URL or title
+    		// since layers are cloned with different IDs for each view
+    		var layerUrl = layerToRemove.url;
+    		var layerTitle = layerToRemove.title;
+    		
+    		// Remove from mapView
+    		var mapLayerToRemove = this.mapView.map.layers.find(function(lyr) {
+    			return (layerUrl && lyr.url === layerUrl) || 
+    			       (layerTitle && lyr.title === layerTitle);
+    		});
+    		if (mapLayerToRemove) {
+    			this.mapView.map.layers.remove(mapLayerToRemove);
+    		}
+    		
+    		// Remove from sceneView
+    		var sceneLayerToRemove = this.sceneView.map.layers.find(function(lyr) {
+    			return (layerUrl && lyr.url === layerUrl) || 
+    			       (layerTitle && lyr.title === layerTitle);
+    		});
+    		if (sceneLayerToRemove) {
+    			this.sceneView.map.layers.remove(sceneLayerToRemove);
     		}
 		}		
     },
