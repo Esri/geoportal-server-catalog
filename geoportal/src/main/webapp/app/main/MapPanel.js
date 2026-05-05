@@ -186,6 +186,24 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
     		  position: "top-left",
     		  index: 0
     		});
+			
+		    let gpSearchWidgetScene = new SearchPane({
+                i18n: widgetContext.i18n,
+                widgetContext: widgetContext
+                },node.cloneNode());
+                gpSearchWidgetScene.startup();
+                
+                let gpSearchExpandScene = new Expand({
+        	    	 expandIcon: "query",  
+        	    	 expandTooltip: "Geoportal Search", 
+        	    	 view: sceneView,
+        	    	 content: gpSearchWidgetScene
+            	     });
+		sceneView.ui.add(gpSearchExpandScene, {
+		    		  position: "top-left",
+		    		  index: 0
+		    		});
+			
       	   let searchWidget = new SearchWidget({
     		  view: mapView
     		});
@@ -200,11 +218,28 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
     		  position: "top-left",
     		  index: 1
     		});
+			
+			let searchWidgetScene = new SearchWidget({
+			   		  view: sceneView
+			   		});
+
+			   	  let searchWidgetSceneExpand = new Expand({
+			   	    	 expandIcon: "search",  
+			   	    	 expandTooltip: "Find Address or Place", 
+			   	    	 view: sceneView,
+			   	    	 content: searchWidgetScene
+			      	     });
+			
+			sceneView.ui.add(searchWidgetSceneExpand, {
+						    		  position: "top-left",
+						    		  index: 0
+						    		});
     	  
     	  let layerList = new LayerList({
     		  view: mapView
     		  ,listItemCreatedFunction: defineActions
     		});
+			
     		let layerListExpand = new Expand({
    	    	 expandIcon: "layers",  
    	    	 expandTooltip: "Map Layers", 
@@ -215,9 +250,27 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
     		  position: "top-left",
     		  index: 2
     		});
-    	    
+			
+			
+			let layerListScene = new LayerList({
+    		  view: sceneView
+    		  ,listItemCreatedFunction: defineActions
+    		});
+			
+    		let layerListSceneExpand = new Expand({
+   	    	 expandIcon: "layers",  
+   	    	 expandTooltip: "Map Layers", 
+   	    	 view: sceneView,
+   	    	 content: layerListScene
+      	     });
+      	     sceneView.ui.add(layerListSceneExpand, {
+    		  position: "top-left",
+    		  index: 2
+    		});
+    
     		// Store reference to layerList for later use
     		this.layerList = layerList;
+			this.layerListScene = layerListScene;
     	    
       	   async function defineActions(event) {
       		  const item = event.item;
@@ -240,9 +293,12 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
       		      ]
       		    ];
       		  } 
-	      	 layerList.on("trigger-action", (event) => {
+	      	 layerList.on("trigger-action", lang.hitch(this, function(event) {
 	       		this.executeLayerlistActions(event);
-	       	 });
+	       	 }));
+			 layerListScene.on("trigger-action", lang.hitch(this, function(event) {
+	       		this.executeLayerlistActions(event);
+	       	 }));
     		let homeWidget = new Home({
     			  view: mapView
     			});
@@ -267,6 +323,21 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
 	    		  position: "top-right",
 	    		  index: 1
 	    		});  
+				
+			let basemapWidgetscene = new BasemapGallery({
+                  view: sceneView
+                });
+            let basemapExpandScene = new Expand({
+        	 expandIcon: "basemap",  
+        	 expandTooltip: "Basemap", 
+        	 view: sceneView,
+        	 content: basemapWidgetscene
+         });
+            // adds the basemap widget to the top right corner of the SceneView
+            sceneView.ui.add(basemapExpandScene, {
+        		  position: "top-right",
+        		  index: 1
+        		});	
    	     	
     		let legend = new Legend({
     			  view: mapView
@@ -280,7 +351,22 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
        	     mapView.ui.add(legendExpand, {
     		  position: "top-left",
     		  index: 3
-    		});		
+    		});	
+			
+			
+			let legendScene = new Legend({
+    			  view: sceneView
+    		}); 
+    		let legendSceneExpand = new Expand({
+    	    	 expandIcon: "legend",  
+    	    	 expandTooltip: "Legend", 
+    	    	 view: sceneView,
+    	    	 content: legendScene
+       	     });
+       	     sceneView.ui.add(legendSceneExpand, {
+    		  position: "top-left",
+    		  index: 3
+    		});
 			
 			// --- Create and add the switch button as a proper Esri widget ---
             const switchBtnContainer = document.createElement("div");
@@ -400,10 +486,16 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
 		{
     		this.activeView.goTo(event.item.layer.fullExtent);
 		}
-    	if(event.action && event.action.id === 'remove-layer') 
+    	if(event.action && event.action.id === 'remove-layer' &&
+    			event.item && event.item.layer) 
 		{
-    		const layerToRemove = this.activeView.map.findLayerById(event.item.layer.id);
-    		this.activeView.map.layers.remove(layerToRemove);
+    		// Use the layer directly from the event item - it's already the correct layer
+    		// from the LayerList's associated view/map
+    		const layerToRemove = event.item.layer;
+    		// Get the map from the layer's parent or use activeView
+    		if (this.activeView && this.activeView.map) {
+    			this.activeView.map.layers.remove(layerToRemove);
+    		}
 		}		
     },
 
