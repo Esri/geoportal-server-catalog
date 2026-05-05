@@ -199,7 +199,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
     	});
       }
       else if (type === "GroupLayer") {
-    	  layerUtil.addGroupLayer(url,null,null,mapView,null);       
+    	  layerUtil.addGroupLayer(url,null,null,mapView,null,sceneView);       
         }
       else {
         dfd.reject("Unsupported");
@@ -209,7 +209,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
     
     addOGCFeatureLayer:function(serviceUrl,mapView,sceneView)
     {
-        var self = this, layerDfds = []; sceneViewLayerDfds = [];
+        var self = this, layerDfds = [];
         var dfd = new Deferred();
         //Read collections 
         var collectionUrl = serviceUrl+"/collections";
@@ -225,52 +225,58 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       			  collection = collectionList[i];
       			  if(collection.id)
   				  {
-      				  list.push(collection.id);
+      				  list.push({id: collection.id, title: collection.title || collection.id});
   				  }
   			  }      		  
       		  if (list.length > 0) {	
-      	            array.forEach(list, function(collectionId)
+      	            array.forEach(list, function(collectionInfo)
       	            {	             
   		                var layer = new OGCFeatureLayer({
   		                  url:serviceUrl,
   		                  id: util.generateId(),
-  		                  collectionId:collectionId
+  		                  collectionId: collectionInfo.id,
+  		                  title: collectionInfo.title,
+  		                  legendEnabled: true
   		                });
   		                layer.load();
-  		                layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
-						
-						if(sceneView) {
-	                        var clonedLayer = layerUtil.cloneLayer(layer);
-							clonedLayer.id = util.generateId();
-							clonedLayer.load();
-							sceneViewLayerDfds.push(layerUtil.waitForLayer(self.i18n,clonedLayer));	                       
-	                    }  
+  		                layerDfds.push(self.waitForLayer(layer));
   	            });
       		  	}else {    	            
       	            console.warn("No OGC feature layers...");
       	        }
       		  all(layerDfds).then(function(featureLayers){
+      			  var sceneViewLayerDfds = [];
       			  array.forEach(featureLayers, function(layer) {
       				self.setPopupTemplate(layer);
-      				mapView.map.add(layer); 
-					  		        
-      			  }); 
-      			  dfd.resolve(featureLayers);
-      		  });			  
-			
-              if(sceneView) {
-                  all(sceneViewLayerDfds).then(function(featureLayers){
-       			  	array.forEach(featureLayers, function(layer) {
-       				self.setPopupTemplate(layer);
-       				sceneView.map.add(layer); 
-  				  		        
-       			  }); 
-                 dfd.resolve(featureLayers);
-               }).catch(function(error){
-            	  console.warn("Error loading OGC feature layers in scene view",error);
-            	  dfd.reject(error);
-               });
-              }
+      				mapView.map.add(layer);
+      				
+      				// Clone layer AFTER it's loaded so renderer is available
+      				if(sceneView) {
+      				    var clonedLayer = layerUtil.cloneLayer(layer);
+      				    clonedLayer.id = util.generateId();
+      				    clonedLayer.load();
+      				    sceneViewLayerDfds.push(self.waitForLayer(clonedLayer));
+      				}
+      			  });
+      			  
+      			  if(sceneView && sceneViewLayerDfds.length > 0) {
+      			      all(sceneViewLayerDfds).then(function(clonedFeatureLayers){
+      			          array.forEach(clonedFeatureLayers, function(clonedLayer) {
+      			              self.setPopupTemplate(clonedLayer);
+      			              sceneView.map.add(clonedLayer);
+      			          });
+      			          dfd.resolve([featureLayers, clonedFeatureLayers]);
+      			      }).catch(function(error){
+      			          console.warn("Error loading OGC feature layers in scene view", error);
+      			          dfd.resolve([featureLayers, []]);
+      			      });
+      			  } else {
+      			      dfd.resolve(featureLayers);
+      			  }
+      		  }).catch(function(error){
+      		      console.warn("Error loading OGC feature layers", error);
+      		      dfd.reject(error);
+      		  });
       	  }
         }).catch(function(error) {
             console.error(error);
