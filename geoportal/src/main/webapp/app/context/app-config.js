@@ -29,7 +29,7 @@ define([],function(){var obj={
 
   searchMap: {
     basemap: "streets",
-	threeDBasemap: "streets",
+	threeDBasemap: "streets-vector",
     basemapUrl: "",
     isTiled: false,
     autoResize: true,

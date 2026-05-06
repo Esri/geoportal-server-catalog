@@ -294,7 +294,17 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
 			 layerListScene.on("trigger-action", lang.hitch(this, function(event) {
 	       		this.executeLayerlistActions(event);
 	       	 }));
-    		let homeWidget = new Home({
+    		let homeWidgetScene = new Home({
+    			  view: sceneView
+    			});
+
+			// adds the home widget to the top left corner of the SceneView
+			sceneView.ui.add(homeWidgetScene, {
+	    		  position: "top-left",
+	    		  index: 4
+	    		}); 
+				
+			let homeWidget = new Home({
     			  view: mapView
     			});
 
@@ -302,8 +312,8 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
 			mapView.ui.add(homeWidget, {
 	    		  position: "top-left",
 	    		  index: 4
-	    		});   	 
-			
+	    		});  	 
+		
 			let basemapWidget = new BasemapGallery({
   			  view: mapView
   			});
@@ -479,7 +489,19 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
     	if(event.action && event.action.id === 'full-extent' &&
     			event.item && event.item.layer) 
 		{
-    		this.activeView.goTo(event.item.layer.fullExtent);
+			if(this.activeView.type === "2d")
+             {
+                 // For 2D MapView, use the fullExtent directly from the layer
+                 this.activeView.goTo(event.item.layer.fullExtent);
+             }
+            else if(this.activeView.type === "3d")
+            {
+				this.activeView.goTo({
+				      target: event.item.layer.fullExtent,
+				      tilt: 65
+				    });
+            }           
+			
 		}
     	if(event.action && event.action.id === 'remove-layer' &&
     			event.item && event.item.layer) 
