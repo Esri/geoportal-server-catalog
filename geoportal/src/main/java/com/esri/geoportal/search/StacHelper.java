@@ -439,15 +439,15 @@ private static String prepareStatus(String status) {
 
 	private static String prepareCollection(String collections) {
 		String[] collectionList = collections.split(",");
-		//{"bool":{"should":[{"match":{"src_collections_s":"metadata"}},{"match":{"src_collections_s":"north_america"}}]}}
+		//{"bool":{"should":[{"match":{"src_collections_s":"metadata"}},{"match":{"collection":"north_america"}}]}}
 		
 		StringBuffer collectionQryBuf = new StringBuffer("{\"bool\":{\"should\":[");
 		int i=0;
 		for (String collectionId : collectionList) {
 			if(i ==0)
-				collectionQryBuf.append("{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");	
+				collectionQryBuf.append("{\"match\": {\"collection\": \"" + collectionId + "\"}}");	
 			else
-				collectionQryBuf.append(",{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");
+				collectionQryBuf.append(",{\"match\": {\"collection\": \"" + collectionId + "\"}}");
 			i++;
 		}
 		collectionQryBuf.append("]}}");
