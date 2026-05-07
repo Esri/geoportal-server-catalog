@@ -58,6 +58,7 @@ public class SearchRequest {
   private AsyncResponse asyncResponse;
   private String javascriptFile = "gs/context/nashorn/execute.js";
   private Response response;
+  private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 
   /** Constructor. */
   public SearchRequest() {}
@@ -189,8 +190,7 @@ public class SearchRequest {
   private JsonObjectBuilder getSelfInfo() {
 	JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
-    GeoportalContext gc = com.esri.geoportal.context.GeoportalContext.getInstance();
-    ElasticContext ec = com.esri.geoportal.context.GeoportalContext.getInstance().getElasticContext();
+    GeoportalContext gc = com.esri.geoportal.context.GeoportalContext.getInstance();    
     String node = null;
     String scheme = "http://";
     int port = 9200;
@@ -315,11 +315,15 @@ public class SearchRequest {
       else info.add("requestBody",body);
       info.add("baseUrl",this.getBaseUrl(hsr));
       info.add("headerMap",this.getHeaderMap(hsr));
+      JsonObjectBuilder parameterMap =null;
       if (requestParams != null) {
-        info.add("parameterMap",this.getParameterMap(requestParams));
+    	  parameterMap = this.getParameterMap(requestParams);
       } else {
-        info.add("parameterMap",this.getParameterMap(hsr));
+    	  parameterMap = this.getParameterMap(hsr);
       }
+      parameterMap.add("allowFileId",ec.getAllowFileId());
+      
+      info.add("parameterMap",parameterMap);
       info.add("taskOptions",this.getTaskOptions(hsr));
       String sRequestInfo = info.build().toString();
       

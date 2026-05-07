@@ -327,12 +327,18 @@ define(["dojo/_base/array",
               if (!itemData)
               {
                 let idIndex = itemUrl.indexOf("?id=");
-                let itemId = itemUrl.substring(idIndex + 4);
+                let itemId = itemUrl.substring(idIndex + 4);				
 				
-				//TODO Below change was for Codeql fix but it broke the functionality , fix later
-                //let domain = util.getDomainFromUrl(serviceUrl);
-               // if (domain.endsWith(".arcgis.com")) {
-				if(itemUrl.indexOf(".arcgis.com")>-1){
+				let parsedUrl;
+                 let hostName = "";
+                 try {
+                   parsedUrl = new URL(itemUrl);
+                   hostName = (parsedUrl.hostname || "").toLowerCase();
+                 } catch (e) {
+                   parsedUrl = null;
+                 }
+				 if (hostName === "arcgis.com" || hostName.endsWith(".arcgis.com")) {
+
                   itemInfoUrl = "https://www.arcgis.com/sharing/rest/content/items/" + itemId;
                 }//On Premise Portal
                 else {
