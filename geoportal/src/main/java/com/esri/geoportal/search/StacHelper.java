@@ -445,9 +445,9 @@ private static String prepareStatus(String status) {
 		int i=0;
 		for (String collectionId : collectionList) {
 			if(i ==0)
-				collectionQryBuf.append("{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");	
+				collectionQryBuf.append("{\"match\": {\"collection\": \"" + collectionId + "\"}}");	
 			else
-				collectionQryBuf.append(",{\"match\": {\"src_collections_s\": \"" + collectionId + "\"}}");
+				collectionQryBuf.append(",{\"match\": {\"collection\": \"" + collectionId + "\"}}");
 			i++;
 		}
 		collectionQryBuf.append("]}}");
