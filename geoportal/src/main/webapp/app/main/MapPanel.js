@@ -18,11 +18,7 @@ define(["dojo/_base/declare",
         "dojo/text!./templates/MapPanel.html",
         "dojo/i18n!../gs/widget/nls/strings",
 		"dojo/i18n!../nls/resources",
-        "dojo/sniff",
-        "dojo/dom-style",
-        "dojo/dom-geometry",
         "dojo/dom-construct",
-        "dojo/_base/array",
         "dojo/Deferred",
         "esri4/Map",
         "esri4/views/MapView",
@@ -35,24 +31,18 @@ define(["dojo/_base/declare",
         "esri4/widgets/LayerList",
         "esri4/widgets/FeatureTable",
         "esri4/widgets/Legend",
-        "esri4/widgets/Locate",
-        "esri4/widgets/Home",  
-        "esri4/form/elements/inputs/SwitchInput",
-        "esri4/Graphic",
+        "esri4/widgets/Home",
         "esri4/widgets/Expand",
         "esri4/widgets/BasemapGallery",
         "esri4/core/reactiveUtils",
-        "esri4/widgets/FeatureTable/Grid/support/ButtonMenuItem",
-        "esri4/widgets/FeatureTable/Grid/support/ButtonMenu",
         "../gs/widget/SearchPane",
         "../gs/widget/WidgetContext",
         "../gs/base/LayerProcessor",
         "app/context/AppClient"], 
-function(declare, lang, Templated, template, i18n,i18resources, has, domStyle, 
-		domGeometry,domConstruct,array,Deferred,
-		Map,MapView,SceneView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
-		Legend,Locate,Home,SwitchInput,Graphic,Expand,BasemapGallery,reactiveUtils,ButtonMenuItem,ButtonMenu,
-		SearchPane,WidgetContext,LayerProcessor,AppClient) {
+function(declare, lang, Templated, template, i18n, i18resources, domConstruct, Deferred,
+		Map, MapView, SceneView, TileLayer, MapImageLayer, FeatureLayer, WFSLayer, SearchWidget, LayerList, FeatureTable,
+		Legend, Home, Expand, BasemapGallery, reactiveUtils,
+		SearchPane, WidgetContext, LayerProcessor, AppClient) {
 
   var oThisClass = declare([Templated], {
 
@@ -224,9 +214,22 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
      * Sets up the Geoportal search widget for both views.
      */
     _setupGeoportalSearchWidget: function(mapView, sceneView) {
-      var widgetContext = new WidgetContext({
+      // Create shared WidgetContext that knows about both views
+      // For MapView widget: primary=mapView, secondary=sceneView
+      var widgetContextMapView = new WidgetContext({
         i18n: i18n,
         view: mapView,
+        secondaryView: sceneView,
+        proxyUrl: esriConfig.defaults.io.proxyUrl,
+        wabWidget: this,
+        widgetConfig: this.config
+      });
+      
+      // For SceneView widget: primary=sceneView, secondary=mapView
+      var widgetContextSceneView = new WidgetContext({
+        i18n: i18n,
+        view: sceneView,
+        secondaryView: mapView,
         proxyUrl: esriConfig.defaults.io.proxyUrl,
         wabWidget: this,
         widgetConfig: this.config
@@ -239,8 +242,8 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
       
       // MapView geoportal search
       var gpSearchWidget = new SearchPane({
-        i18n: widgetContext.i18n,
-        widgetContext: widgetContext
+        i18n: widgetContextMapView.i18n,
+        widgetContext: widgetContextMapView
       }, node);
       gpSearchWidget.startup();
       
@@ -252,11 +255,16 @@ function(declare, lang, Templated, template, i18n,i18resources, has, domStyle,
       });
       mapView.ui.add(gpSearchExpand, {position: "top-left", index: 0});
       
-      // SceneView geoportal search
+      // SceneView geoportal search - use separate WidgetContext with sceneView
+      var nodeScene = domConstruct.create("div", {
+        width: "500px",
+        height: "500px"
+      });
+      
       var gpSearchWidgetScene = new SearchPane({
-        i18n: widgetContext.i18n,
-        widgetContext: widgetContext
-      }, node.cloneNode());
+        i18n: widgetContextSceneView.i18n,
+        widgetContext: widgetContextSceneView
+      }, nodeScene);
       gpSearchWidgetScene.startup();
       
       var gpSearchExpandScene = new Expand({
