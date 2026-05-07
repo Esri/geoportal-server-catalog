@@ -169,7 +169,8 @@
           }
         }
       }
-      
+      //print("ElasticTarget prepare "+JSON.stringify(task.request));
+	  
       this.prepareRequiredFilter(task,targetRequest);
       this.prepareQ(task,targetRequest);
       this.prepareFilter(task,targetRequest);
@@ -282,17 +283,44 @@
         }});
       }
     }},
+	
+	  prepareIds: {
+		  writable: true, value: function(task, targetRequest) {
+			  var ids = task.request.getIds();
+			  var service = task.request.parameterMap.service;
+			  var normalizedService = "";
+			  if (Array.isArray(service)) {
+				  normalizedService = String(service[0]).trim();
+			  }
+			  else {
+				if(service)
+				  	normalizedService = String(service).trim();
+			  }			  
 
-    prepareIds: {writable:true,value:function(task,targetRequest) {
-      var ids = task.request.getIds();
-      if (Array.isArray(ids) && ids.length > 0) {
-        targetRequest.musts.push({"terms":{"_id":ids}});
-      }
-    }},
+			  var allowFileIdRaw = task.request.parameterMap.allowFileId;
+
+			  var allowFileId =
+			    allowFileIdRaw === true ||
+			    String(Array.isArray(allowFileIdRaw) ? allowFileIdRaw[0] : allowFileIdRaw)
+			      .toLowerCase() === 'true';
+
+			  if (normalizedService === 'CSW' && allowFileId && Array.isArray(ids) && ids.length > 0) {
+				  var field = "fileid.keyword";
+				  var idTerm = {};
+				  idTerm[field] = ids[0];
+				  targetRequest.musts.push({ term: idTerm });
+
+			  } else if (Array.isArray(ids) && ids.length > 0) {
+				  targetRequest.musts.push({ "terms": { "_id": ids } });
+			  }
+		  }
+	  },
 
     //OGC Record API support
     preparePathParameterId: {writable:true,value:function(task,targetRequest) {
+	
       var recId = task.request.getPathParameterValue('recordid');
+	  print(" preparePathParameterId ids "+recId);
       if (recId) {
         targetRequest.musts.push({"terms":{"_id": [recId]}});
         // targetRequest.musts.push({"match":{"_id": {"query": recId}}});
