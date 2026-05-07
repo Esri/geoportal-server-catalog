@@ -100,11 +100,22 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
       var dfd, item = null, itemData = null;
       if (typeInfo && typeInfo.serviceType) {
         if (this.canRemove) {
-          var mapView = this.resultsPane.getView();
-          var lyrs = layerUtil.findLayersAdded(mapView,referenceId).layers;
-          array.forEach(lyrs,function(lyr) {            
-        	  mapView.map.layers.remove(lyr);        	  
+          // Remove from primary view
+          var primaryView = widgetContext.getView();
+          var lyrs = layerUtil.findLayersAdded(primaryView, referenceId).layers;
+          array.forEach(lyrs, function(lyr) {            
+            primaryView.map.layers.remove(lyr);        	  
           });
+          
+          // Remove from secondary view if it exists
+          var secondaryView = widgetContext.getSecondaryView();
+          if (secondaryView) {
+            var secondaryLyrs = layerUtil.findLayersAdded(secondaryView, referenceId).layers;
+            array.forEach(secondaryLyrs, function(lyr) {            
+              secondaryView.map.layers.remove(lyr);        	  
+            });
+          }
+          
           this.canRemove = false;
           util.setNodeText(self.messageNode,"");
           util.setNodeText(self.addButton,self.i18n.search.item.actions.add);

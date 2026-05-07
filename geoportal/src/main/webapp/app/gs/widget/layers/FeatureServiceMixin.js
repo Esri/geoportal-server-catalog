@@ -18,18 +18,14 @@ define(["dojo/_base/declare",
   "dojo/Deferred",
   "./layerUtil",
   "../util",
-  "esri4/core/lang",
-  "esri4/PopupTemplate",
-  "esri4/layers/FeatureLayer",
-  "esri4/geometry/support/jsonUtils"],
-function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate,
-  FeatureLayer, jsonRendererUtils) {
+  "esri4/layers/FeatureLayer","esri4/geometry/support/jsonUtils"],
+function(declare, array, all, Deferred, layerUtil, util, FeatureLayer, jsonRendererUtils) {
 
   var _def = declare(null, {
 
     addFeatureService: function(serviceUrl,item,itemData) {
       var self = this, dfd = new Deferred();
-      var layerIds = null, layerDfds = [], featureLayers = [];
+      var layerDfds = [], featureLayers = [];
 
       util.readRestInfo(serviceUrl).then(function(result) {
         //console.warn("addFeatureService.serviceInfo",response);
@@ -57,15 +53,12 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
           }
           if (list.length > 0) {
             array.forEach(list, function(lyr) {
-              var bAdd = true;
-              if (bAdd) {
-                var layer = new FeatureLayer(serviceUrl + "/" + lyr.id, {
-                  id: util.generateId(),
-                  outFields: ["*"]
-                });
-                layer.load();
-                layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
-              }
+              var layer = new FeatureLayer(serviceUrl + "/" + lyr.id, {
+                id: util.generateId(),
+                outFields: ["*"]
+              });
+              layer.load();
+              layerDfds.push(layerUtil.waitForLayer(self.i18n,layer));
             });
           } else {
             // TODO popup a message here?
@@ -114,19 +107,18 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
     	  	return featureLayer;
     	  }
       
-      var dlPattern = this.i18n.search.featureLayerTitlePattern;
       var opLayer = null;
-      var itemData = itemDataObj.data;
+      var itemData = itemDataObj && itemDataObj.data ? itemDataObj.data : null;
       
       if (itemData && itemData.layers && (itemData.layers.length > 0)) {
         array.some(itemData.layers, function(info) {
-          var layerDefinition, jsonRenderer, renderer, isCustomTemplate = false;
-          var popInfo, jsonPopInfo, layerPopupTemplate;
+          var layerDefinition, renderer, jsonRenderer, isCustomTemplate = false;
+          var popInfo, layerPopupTemplate;
           if (info.id === featureLayer.layerId) {
             //console.warn("layerInfo",info);
             if (info.popupInfo) {
               popInfo = info.popupInfo;              
-              layerPopupTemplate = layerUtil.newPopupTemplate(popInfo,info.title);
+              layerPopupTemplate = layerUtil.newPopupTemplate(popInfo, info.title);
               featureLayer.popupTemplate = layerPopupTemplate;
               isCustomTemplate = true;
             }
@@ -135,7 +127,7 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
               featureLayer.labelIsVisible = info.labelIsVisible;
             }
             if (info.refreshInterval) {
-              featureLayerrefreshInterval = info.refreshInterval;
+              featureLayer.refreshInterval = info.refreshInterval;
             }
            
             layerDefinition = info.layerDefinition;
@@ -147,27 +139,31 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
                 featureLayer.displayField = layerDefinition.displayField;
               }
               
-            if (layerDefinition.drawingInfo && layerDefinition.drawingInfo.renderer) {
-              jsonRenderer = JSON.parse(
-                JSON.stringify(layerDefinition.drawingInfo.renderer)
-              );
-              featureLayer.renderer = renderer;
-            }
+              if (layerDefinition.drawingInfo && layerDefinition.drawingInfo.renderer) {
+                jsonRenderer = JSON.parse(
+                  JSON.stringify(layerDefinition.drawingInfo.renderer)
+                );
+                renderer = jsonRendererUtils.fromJson(jsonRenderer);
+                if (jsonRenderer.type && (jsonRenderer.type === "classBreaks")) {
+                  renderer.isMaxInclusive = true;
+                }
+                featureLayer.renderer = renderer;
+              }
               
               if (layerDefinition.minScale) {
                 featureLayer.minScale = layerDefinition.minScale;
               }
-              if (layerDefinition.maxScale){
+              if (layerDefinition.maxScale) {
                 featureLayer.maxScale = layerDefinition.maxScale;
               }
-              if (layerDefinition.visible) {
+              if (layerDefinition.visible !== undefined) {
                 if (layerDefinition.visible === false) {
-                  featureLayer.visibile = false; // TODO?
+                  featureLayer.visible = false;
                 }
               }
             }
             if (!isCustomTemplate) {
-              self._setFeatureLayerPopupTemplate(featureLayer,info.popupInfo);
+              self._setFeatureLayerPopupTemplate(featureLayer, info.popupInfo);
             }
             opLayer = {
               url: featureLayer.url,
@@ -178,18 +174,19 @@ function(declare, array, all, Deferred, layerUtil, util, esriLang, PopupTemplate
             return true;
           }
         });
-        return opLayer;
-
-      } else {
+      }
+      
+      if (!opLayer) {
         opLayer = {
           url: featureLayer.url,
           id: featureLayer.id,
           itemId: item.id,
           title: item.title
         };
-        self._setFeatureLayerPopupTemplate(featureLayer,null,opLayer.title);
-        return opLayer;
+        self._setFeatureLayerPopupTemplate(featureLayer, null, opLayer.title);
       }
+      
+      return opLayer;
     },
 
     _setFeatureLayerPopupTemplate: function(featureLayer,popupTemplate,title) {
