@@ -154,28 +154,31 @@ function(declare, localRequire, lang, array, win, domClass, on,
         parameterMap: parameterMap
       };
       var result, searchResponse;
-      var processor = this._proc = gs.Object.create(gs.context.browser.WebProcessor).mixin({
-        newConfig: function() {
-          var config = gs.Object.create(gs.config.Config);
-          config.proxyUrl = self.widgetContext.proxyUrl;
-          return config;
-        }
-      });
-      processor.execute(requestInfo,function(status,mediaType,entity,headers){
-        if (processor === self._proc) {
-          //console.log(status,mediaType,"\r\n",entity);
-          self.informExternal(entity);
-          try {
-            result = JSON.parse(entity);
-            searchResponse = self.targetOptions.getPrimarySearchResponse(result,task);
-            self.processResults(searchResponse,task);
-          } catch(ex) {
-            // TODO handle errors
-            console.error(ex);
-          }
-          self.toggleLoading(false);
-        }
-      });
+	  if(gs.context.browser.WebProcessor) {
+		var processor = this._proc = gs.Object.create(gs.context.browser.WebProcessor).mixin({
+		  newConfig: function() {
+		    var config = gs.Object.create(gs.config.Config);
+		    config.proxyUrl = self.widgetContext.proxyUrl;
+		    return config;
+		  }
+		});
+		processor.execute(requestInfo,function(status,mediaType,entity,headers){
+		  if (processor === self._proc) {
+		    //console.log(status,mediaType,"\r\n",entity);
+		    self.informExternal(entity);
+		    try {
+		      result = JSON.parse(entity);
+		      searchResponse = self.targetOptions.getPrimarySearchResponse(result,task);
+		      self.processResults(searchResponse,task);
+		    } catch(ex) {
+		      // TODO handle errors
+		      console.error(ex);
+		    }
+		    self.toggleLoading(false);
+		  }
+		});
+	  }
+
     },
 
     showSettings: function() {
