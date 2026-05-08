@@ -213,9 +213,7 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
     /**
      * Sets up the Geoportal search widget for both views.
      */
-    _setupGeoportalSearchWidget: function(mapView, sceneView) {
-      // Create shared WidgetContext that knows about both views
-      // For MapView widget: primary=mapView, secondary=sceneView
+    _setupGeoportalSearchWidget: function(mapView, sceneView) {    
       var widgetContextMapView = new WidgetContext({
         i18n: i18n,
         view: mapView,
