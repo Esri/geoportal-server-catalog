@@ -14,9 +14,10 @@
  */
 define(["dojo/_base/declare",
   "./SearchComponent",
+  "esri4/geometry/support/webMercatorUtils",
   "dojo/text!./templates/BBoxOption.html",
   "dijit/form/CheckBox"],
-function(declare, SearchComponent, template) {
+function(declare, SearchComponent,webMercatorUtils, template) {
 
   var _def = declare([SearchComponent], {
 
@@ -34,8 +35,16 @@ function(declare, SearchComponent, template) {
 
     getBBox: function() {
       var ext = this.searchPane.widgetContext.getGeographicExtent();
-      if (ext) {
-        return ext.xmin + "," + ext.ymin + "," + ext.xmax + "," + ext.ymax;
+	  
+	  if(ext && ext.spatialReference.wkid === 102100) {
+        // we need to project the extent to WGS84                
+        var wgs84Extent =  webMercatorUtils.webMercatorToGeographic(ext);
+      }
+	  else {
+        wgs84Extent = ext;
+      }
+      if (wgs84Extent) {
+        return wgs84Extent.xmin + "," + wgs84Extent.ymin + "," + wgs84Extent.xmax + "," + wgs84Extent.ymax;
       }
       return null;
     },
