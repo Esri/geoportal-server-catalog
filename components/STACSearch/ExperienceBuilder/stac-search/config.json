@@ -1,0 +1,7 @@
+{
+  "widgetTitle": "STAC Search",
+  "stacApiUrls": ["https://stac.sdm.geocloud.com/stac", "https://gpt.geocloud.com/geoportal/stac", "https://earth-search.aws.element84.com/v1"],
+  "defaultCollections": "sentinel-2-l2a",
+  "defaultLimit": 25,
+  "useCurrentExtent": true
+}
