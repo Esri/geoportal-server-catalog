@@ -872,32 +872,7 @@ define([
 			  this.geoJSONLayer = new GeoJSONLayer({url:blobUrl});
 			  this.view.map.add(this.geoJSONLayer);
 			  
-			  let rasterLayer = null;
-
-				//--------------------raster layer
-				window.loadRasterAsset = async function (href) {
-				  // Remove previous raster (if any)
-				  if (rasterLayer) {
-					this.view.map.remove(rasterLayer);
-					rasterLayer.destroy();
-					rasterLayer = null;
-				  }
-
-				  rasterLayer = new esri.layers.ImageryLayer({
-					url: href
-				  });
-
-				  this.view.map.add(rasterLayer);
-
-				  try {
-					await rasterLayer.load();
-					if (rasterLayer.fullExtent) {
-					  this.view.goTo(rasterLayer.fullExtent.expand(1.2));
-					}
-				  } catch (err) {
-					console.error("Failed to load raster asset", err);
-				  }
-				};
+			
 			//-------------------------------------------------------
 			  this.geoJSONLayer.load().then(() => {
 			    const fieldNames = this.geoJSONLayer.fields.map(field => field.name);
@@ -946,27 +921,13 @@ define([
 						Object.entries(assets).forEach(([key, asset]) => {
 						  if (!asset?.href) return;
 
-						  const isRaster =
-							asset.type?.includes("geotiff") ||
-							asset.href.toLowerCase().endsWith(".tif");
-
-						  html += `<li>`;
-
-						  if (isRaster) {
-							html += `
-							  <a href="javascript:void(0)"
-								 onclick="loadRasterAsset('${asset.href}')">
-								🗺️ View Raster (${asset.title || key})
-							  </a>`;
-						  } else {
-							html += `
-							  <a href="${asset.href}" target="_blank">
-								📄 ${asset.title || key}
-							  </a>`;
-						  }
-
-						  html += `</li>`;
+						  html += `<li>
+						    <a href="${asset.href}" target="_blank">
+						      📄 ${asset.title || key}
+						    </a>
+						  </li>`;
 						});
+
 
 						html += `</ul></div>`;
 						return html;
