@@ -252,8 +252,15 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       				
       				// Clone layer AFTER it's loaded so renderer is available
       				if(sceneView) {
-      				    var clonedLayer = layerUtil.cloneLayer(layer);
-      				    clonedLayer.id = util.generateId();
+						var clonedLayer = new OGCFeatureLayer({
+						    url: layer.url,
+						    collectionId: layer.collectionId,
+						    id: util.generateId(),
+						    elevationInfo: { mode: "on-the-ground" },
+						    renderer: layer.renderer ? layer.renderer.clone() : null
+						});
+						
+      				   
       				    clonedLayer.load();
       				    sceneViewLayerDfds.push(self.waitForLayer(clonedLayer));
       				}
