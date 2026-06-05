@@ -82,13 +82,14 @@ define([
         width: 3,
       },
     },
-    COLLECTION_SYM: {
-      type: "simple-fill",
-      color: [255, 165, 0, 0.3],
-      outline: {
-        color: [255, 165, 0],
-        width: 2,
-      },
+    COLLECTION_SYM: {		
+		type: "simple-fill", 
+	  	color: [0, 0, 0, 0], // Transparent fill (RGBA)
+	  	outline: {
+		    type: "simple-line",
+		    color: [255, 165, 0], // outline
+		    width: 2 // Outline thickness in points	
+		}     
     },
     DEFAULT_ASSET: {
       roles: [
@@ -703,7 +704,13 @@ define([
 	          var client = new AppClient();
 	          url = client.appendAccessToken(url);
 	        }
-			this.selectedCollectionId = collectionId;  			 
+			this.selectedCollectionId = collectionId;
+			//Turn off the layer of the selected collection	
+	        this.view.map.layers.forEach(layer => {
+	            if(layer.title === this.selectedCollection.properties.id) {
+	                layer.visible = false;
+	            }
+	        });  			 
 			    
 	       	await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
 			this.updateIsLoading(false);
@@ -943,9 +950,17 @@ define([
 	  }
 	},
 
-    handleZoomTo: async function (feature) {
+    handleZoomTo: async function (feature,selectedId) {
       if (feature) {
 		this.clearMapView();
+		//Turn on the layer of the selected collection
+		if(selectedId) {	
+	        this.view.map.layers.forEach(layer => {
+	            if(layer.title === selectedId) {
+	                layer.visible = true;
+	            }
+	        });
+		}
         try {
           await this.view.goTo(feature);
         } catch (e) {
@@ -1489,7 +1504,7 @@ define([
         this.showEditor();
       });
       this.zoomCollectionButton.addEventListener("click", () => {
-        this.handleZoomTo(this.selectedCollection.graphic);
+        this.handleZoomTo(this.selectedCollection.graphic,this.selectedCollection.properties.id);
       });
 	  this.viewItemsButton.addEventListener("click", () => {			
 	      this.handleViewItems(this.selectedCollection.properties.id);
