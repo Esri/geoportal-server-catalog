@@ -70,6 +70,7 @@ function(declare, lang, util,VectorTileLayer) {
       };
       
       var lc, type = null;
+	  const lower = lc.toLowerCase();
       if (typeof url === "string" && 
           (url.indexOf("http://") === 0 || url.indexOf("https://") === 0)) {
         lc = url.toLowerCase();
@@ -122,9 +123,9 @@ function(declare, lang, util,VectorTileLayer) {
             type = "GeoRSS";
           } else if (endsWith(lc,".zip")) { 
             type = "Shapefile";
-          } else if (endsWith(lc, ".tiff")) {
-            type = "ImageryTileLayer";  
-          } else if (lc.indexOf("ogcfeatureserver")>-1) {
+          }else if ((lower.endsWith(".tiff")) || (lower.endsWith(".tif"))) {
+			  type = "ImageryTileLayer";
+		  }else if (lc.indexOf("ogcfeatureserver")>-1) {
             type = "OGCFeatureServer";  
           }
           //Portal item type
