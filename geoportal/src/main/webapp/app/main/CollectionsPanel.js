@@ -123,12 +123,14 @@ define([
 	 nextUrl: null,
 	 pageHistory : [],
 	 currentIndex: -1,
-	
+	 filterByExtent: false,
 
     getStacBaseUrl: function () {
+		
       if (window && window.top && window.top.geoportalServiceInfo) {
         var loc = window.top.location;
-        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;		
+        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;	
+		stacBaseUrl = "https://stac.sdm.geocloud.com/stac";	
         return stacBaseUrl;
       }
       return null;
@@ -540,7 +542,8 @@ define([
         }
 		this.currentIndex = -1;
         this.pageHistory = [];
-        this.nextUrl = null;  
+        this.nextUrl = null;
+  
         
         if(this.geoJSONLayer) {
             this.view.map.remove(this.geoJSONLayer);
@@ -553,10 +556,12 @@ define([
              this.view.map.remove(rasterLayer);
              rasterLayer.destroy();
          }
-		 this.view.goTo({
-            zoom:this.mapProps.zoom,
-            center:this.mapProps.center
-        });
+		 if(!this.filterByExtent) {
+			this.view.goTo({
+	            zoom:this.mapProps.zoom,
+	            center:this.mapProps.center
+	        });
+         }	 
           
     },
 
@@ -710,7 +715,12 @@ define([
 	            if(layer.title === this.selectedCollection.properties.id) {
 	                layer.visible = false;
 	            }
-	        });  			 
+	        }); 
+			//unCheck filter by extent when view items, and reset to default value
+            this.filterByExtent = false;
+            if(this.pager && this.pager.filterExtentCheckbox) {
+                this.pager.filterExtentCheckbox.checked = false;
+            } 			 
 			    
 	       	await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
 			this.updateIsLoading(false);
@@ -729,7 +739,7 @@ define([
 	  container.style.alignItems = "center";
 	  container.style.gap = "6px";
 	  container.style.padding = "6px";
-	  container.style.width = "400px";      
+	  container.style.width = "500px";      
 
 	  const prevBtn = document.createElement("button");
 	  prevBtn.className = "esri-button esri-button--secondary";
@@ -769,10 +779,30 @@ define([
 		noOfItems.style.minWidth = "60px";
 		noOfItems.style.textAlign = "center";
 		noOfItems.innerText = "0 Items";
+
+		// Filter by extent checkbox
+		const filterExtentContainer = document.createElement("div");
+		filterExtentContainer.style.display = "flex";
+		filterExtentContainer.style.alignItems = "center";
+		filterExtentContainer.style.gap = "4px";
+
+		const filterExtentCheckbox = document.createElement("input");
+		filterExtentCheckbox.type = "checkbox";
+		filterExtentCheckbox.id = "filter-by-extent-checkbox";
+		filterExtentCheckbox.checked = this.filterByExtent;
+
+		const filterExtentLabel = document.createElement("label");
+		filterExtentLabel.htmlFor = "filter-by-extent-checkbox";
+		filterExtentLabel.innerText = "Filter by extent";
+		filterExtentLabel.style.fontWeight = "bold";
+		filterExtentLabel.style.whiteSpace = "nowrap";
+
+		filterExtentContainer.appendChild(filterExtentCheckbox);
+		filterExtentContainer.appendChild(filterExtentLabel);
 			
-	  container.append(noOfItems,label, pageSizeSelect,prevBtn, pageInfo, nextBtn);
+	  container.append(noOfItems, label, pageSizeSelect, filterExtentContainer, prevBtn, pageInfo, nextBtn);
 	  view.ui.add(container, "bottom-right");
-	  this.pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo,noOfItems };
+	  this.pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo, noOfItems, filterExtentCheckbox };
 	  
 	  this.pager.nextBtn.onclick = async () => {
 	  	    if (this.nextUrl) {
@@ -812,14 +842,83 @@ define([
 	          this.nextUrl = null;
 	          await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
 			  this.updateIsLoading(false);
-	        };		
+	        };
+
+		// Filter by extent checkbox handler
+		this.pager.filterExtentCheckbox.onchange = async () => {
+			this.filterByExtent = this.pager.filterExtentCheckbox.checked;
+			this.updateIsLoading(true);
+			// reset paging and reload from page 1
+			this.pageHistory = [];
+			this.currentIndex = -1;
+			this.nextUrl = null;
+			await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
+			this.updateIsLoading(false);
+		};
+
+		// Add extent change watcher for filter by extent
+		this.setupExtentChangeWatcher(view);
+	},
+
+	// Debounce timer for extent change
+	extentChangeTimeout: null,
+	extentWatchHandle: null,
+	isLoadingSTAC: false, // Flag to prevent extent watcher from triggering during STAC load
+
+	setupExtentChangeWatcher: function(view) {
+		// Remove existing watcher if any
+		if (this.extentWatchHandle) {
+			this.extentWatchHandle.remove();
+			this.extentWatchHandle = null;
+		}
+
+		// Watch for extent changes (pan/zoom)
+		this.extentWatchHandle = view.watch("stationary", async (isStationary) => {
+			// Only trigger when view becomes stationary (finished panning/zooming)
+			// and not during programmatic STAC loading
+			if (isStationary && this.filterByExtent && this.selectedCollectionId && !this.isLoadingSTAC) {
+				// Clear any pending timeout
+				if (this.extentChangeTimeout) {
+					clearTimeout(this.extentChangeTimeout);
+				}
+
+				// Debounce the search to avoid too many requests
+				this.extentChangeTimeout = setTimeout(async () => {
+					this.isLoadingSTAC = true; // Set flag before loading
+					this.updateIsLoading(true);
+					// Reset paging and reload from page 1
+					this.pageHistory = [];
+					this.currentIndex = -1;
+					this.nextUrl = null;
+					await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
+					this.updateIsLoading(false);
+					// Reset flag after a short delay to allow view.goTo to complete
+					setTimeout(() => {
+						this.isLoadingSTAC = false;
+					}, 500);
+				}, 300); // 300ms debounce delay
+			}
+		});
 	},
 	
-	 buildSearchUrl:function(collectionId,limit) {
-		return `${this.getStacBaseUrl()}/collections/${collectionId}/items?limit=${limit}&f=geojson`		
+	 buildSearchUrl: function(collectionId, limit) {
+		let url = `${this.getStacBaseUrl()}/collections/${collectionId}/items?limit=${limit}&f=geojson`;
+		
+		// Add bbox parameter if filter by extent is enabled
+		if (this.filterByExtent && this.view && this.view.extent) {
+			let extent = this.view.extent;
+			// Convert to geographic coordinates if in Web Mercator
+			if (extent.spatialReference.isWebMercator) {
+				extent = webMercatorUtils.webMercatorToGeographic(extent);
+			}
+			const bbox = `${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}`;
+			url += `&bbox=${bbox}`;
+		}
+		
+		return url;
 	  },
 
-	 loadSTAC: async function (url,fromHistory = false) {
+    loadSTAC: async function (url,fromHistory = false) {
 	  const response = await fetch(url);
 	  let stac = await response.json();
 	  if(stac && stac.features && stac.features.length < 1) {
@@ -943,7 +1042,9 @@ define([
 				  ]
 				};
 
-			    if (this.geoJSONLayer.fullExtent) {
+				// Only zoom to extent if filterByExtent is NOT enabled
+				// When filtering by extent, we want to keep the current view
+			    if (this.geoJSONLayer.fullExtent && !this.filterByExtent) {
 			      this.view.goTo(this.geoJSONLayer.fullExtent.expand(1.2));
 			    }
 			  });
