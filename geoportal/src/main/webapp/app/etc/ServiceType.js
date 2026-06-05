@@ -69,8 +69,7 @@ function(declare, lang, util,VectorTileLayer) {
         return (v.indexOf(sfx,(v.length-sfx.length)) !== -1);
       };
       
-      var lc, type = null;
-	  const lower = lc.toLowerCase();
+      var lc, type = null;	  
       if (typeof url === "string" && 
           (url.indexOf("http://") === 0 || url.indexOf("https://") === 0)) {
         lc = url.toLowerCase();
@@ -123,7 +122,7 @@ function(declare, lang, util,VectorTileLayer) {
             type = "GeoRSS";
           } else if (endsWith(lc,".zip")) { 
             type = "Shapefile";
-          }else if ((lower.endsWith(".tiff")) || (lower.endsWith(".tif"))) {
+          }else if ((lc.endsWith(".tiff")) || (lc.endsWith(".tif"))) {
 			  type = "ImageryTileLayer";
 		  }else if (lc.indexOf("ogcfeatureserver")>-1) {
             type = "OGCFeatureServer";  
