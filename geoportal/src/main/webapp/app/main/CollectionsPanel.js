@@ -129,8 +129,7 @@ define([
 		
       if (window && window.top && window.top.geoportalServiceInfo) {
         var loc = window.top.location;
-        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;	
-		stacBaseUrl = "https://stac.sdm.geocloud.com/stac";	
+        var stacBaseUrl = `${loc.protocol}//${loc.host}${loc.pathname}stac`;			
         return stacBaseUrl;
       }
       return null;
@@ -716,11 +715,8 @@ define([
 	                layer.visible = false;
 	            }
 	        }); 
-			//unCheck filter by extent when view items, and reset to default value
-            this.filterByExtent = false;
-            if(this.pager && this.pager.filterExtentCheckbox) {
-                this.pager.filterExtentCheckbox.checked = false;
-            } 			 
+			this.filterByExtent = false;
+			this.clearMapView();
 			    
 	       	await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
 			this.updateIsLoading(false);
