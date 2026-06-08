@@ -35,10 +35,10 @@ function(declare, SearchComponent,webMercatorUtils, template) {
 
     getBBox: function() {
       var ext = this.searchPane.widgetContext.getGeographicExtent();
-	  
+	  var wgs84Extent="";
 	  if(ext && ext.spatialReference.wkid === 102100) {
         // we need to project the extent to WGS84                
-        var wgs84Extent =  webMercatorUtils.webMercatorToGeographic(ext);
+        wgs84Extent =  webMercatorUtils.webMercatorToGeographic(ext);
       }
 	  else {
         wgs84Extent = ext;

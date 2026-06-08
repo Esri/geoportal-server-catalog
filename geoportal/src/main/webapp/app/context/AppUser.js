@@ -209,15 +209,16 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 			  // Ensure the message is from the expected origin
 			  if (event.origin !== window.location.origin) return;
 			  if (event.data && event.data.token) {
-				  const oauthToken = event.data.token.access_token ? event.data.token.access_token : null;
-				  if (!oauthToken) return;
+				const oauthToken = event.data.token;
+			    const accessToken = oauthToken && oauthToken.access_token ? oauthToken.access_token : null;
+			    if (!accessToken) return;
 
 				  // Process the received token
 				  var self = AppContext.appUser, dfd = new Deferred(), client = new AppClient();
 				  var k = true; // Always keep signed in when using OAuth
 
 				  // Validate token by pinging Geoportal
-				  client.pingGeoportal(oauthToken).then(function(info) {
+				  client.pingGeoportal(accessToken).then(function(info) {
 					  if (info && info.user) {
 						  self.appToken = oauthToken;
 						  self.geoportalUser = info.user;
