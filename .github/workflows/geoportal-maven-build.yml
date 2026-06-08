@@ -27,25 +27,39 @@ env:
 
 jobs:
   build:
-
     runs-on: windows-latest
 
     steps:
     - uses: actions/checkout@v4
+
     - name: Set up JDK 25
       uses: actions/setup-java@v4
       with:
         java-version: '25'
         distribution: 'temurin'
         cache: maven
+
+    - name: Set up Maven 3.9.9
+      uses: stCarolas/setup-maven@v5
+      with:
+        maven-version: 3.9.9
+
+    - name: Verify Java and Maven
+      shell: pwsh
+      run: |
+        java -version
+        mvn -version
+
     - name: Build with Maven
-      run: mvn -B package --file ${{env.PROJECT_LOCATION}}/pom.xml
-      
-    - name: Extract ${{env.PROJECT_LOCATION}}/target/geoportal.war
-      run: 7z x ${{env.PROJECT_LOCATION}}/target/geoportal.war -ogeoportal_war
-        
+      shell: pwsh
+      run: mvn -B package --file "${{ env.PROJECT_LOCATION }}/pom.xml"
+
+    - name: Extract ${{ env.PROJECT_LOCATION }}/target/geoportal.war
+      shell: pwsh
+      run: 7z x "${{ env.PROJECT_LOCATION }}/target/geoportal.war" -ogeoportal_war
+
     - name: Archive geoportal_war to geoportal.zip
-      #run: 7z a -tzip ${{github.run_id}}-geoportal.war .\geoportal_war\*
+      shell: pwsh
       run: 7z a -tzip geoportal.zip .\geoportal_war\*
 
     - name: Upload Artifacts
@@ -53,4 +67,3 @@ jobs:
       with:
         name: geoportal-war
         path: .\geoportal_war\*
-        #path: ${{github.run_id}}-geoportal.zip
