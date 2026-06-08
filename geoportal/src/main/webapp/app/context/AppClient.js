@@ -99,6 +99,7 @@ function(declare, lang, Deferred, dojoRequest) {
      var dfd = new Deferred();
       var url = this.getRestUri()+"/geoportal";
       var info = {handleAs:"json"};
+	  var storedToken="";
       if (!accessToken) storedToken = this.getAccessToken();
 	  if(storedToken && storedToken.access_token) accessToken = storedToken.access_token;
 	  
