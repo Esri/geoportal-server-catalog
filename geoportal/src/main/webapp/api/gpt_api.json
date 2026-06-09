@@ -426,10 +426,18 @@
 				"summary": "Provides information on STAC API queryables for use with the filter clause on this specific collection",
 				"description": "",
 				"produces": [
-					"application/json"
+					"application/schema+json"
 				],
 				"operationId": "stacQueryables",
-				"parameters": [],
+				"parameters": [
+									{
+										"name": "collectionId",
+										"in": "path",
+										"description": "Collection id",
+										"required": true,
+										"type": "string",
+										"default": "metadata"
+									}],
 				"responses": {
 					"default": {
 						"description": "successful operation"
@@ -2257,6 +2265,8 @@
 				"description": "Provide basic availability check and information about the MCP endpoint.",
 				"operationId": "getMcpStream",
 				"produces": [
+					"application/json",
+					"application/geojson",
 					"text/event-stream"
 				],
 				"parameters": [],
