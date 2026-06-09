@@ -11,8 +11,8 @@
 
 	<properties>
 
-		<springframework.version>6.2.11</springframework.version>
-		<springsecurity.version>6.5.5</springsecurity.version>
+		<springframework.version>6.2.18</springframework.version>
+		<springsecurity.version>6.5.10</springsecurity.version>
 
 		<maven.compiler.target>25</maven.compiler.target>
 		<maven.compiler.source>25</maven.compiler.source>
