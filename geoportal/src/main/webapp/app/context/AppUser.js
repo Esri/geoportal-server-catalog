@@ -297,11 +297,70 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         topic.publish(appTopics.SignedIn,{geoportalUser:info.user});
       }
     },
+
+    _getContextBaseUrl: function() {
+      var parts = window.location.pathname.split('/').filter(Boolean);
+      var contextPath = '';
+      if (parts.length > 0) {
+        // If first segment is not a file name, treat it as the webapp context path.
+        var first = parts[0];
+        if (first.indexOf('.') === -1) {
+          contextPath = '/' + first;
+        }
+      }
+      return window.location.origin + contextPath;
+    },
+
+    _readCookie: function(name) {
+      var key = name + '=';
+      var cookies = document.cookie ? document.cookie.split(';') : [];
+      for (var i = 0; i < cookies.length; i++) {
+        var c = cookies[i].trim();
+        if (c.indexOf(key) === 0) {
+          return decodeURIComponent(c.substring(key.length));
+        }
+      }
+      return null;
+    },
+
+    _logoutFromSpringAuthServer: function() {
+      var logoutUrl = this._getContextBaseUrl() + '/logout';
+      var csrfToken = this._readCookie('XSRF-TOKEN');
+      var headers = {
+        'Content-Type': 'application/x-www-form-urlencoded'
+      };
+      var body = '';
+
+      if (csrfToken && csrfToken.length > 0) {
+        headers['X-XSRF-TOKEN'] = csrfToken;
+        body = '_csrf=' + encodeURIComponent(csrfToken);
+      }
+
+      return fetch(logoutUrl, {
+        method: 'POST',
+        credentials: 'same-origin',
+        headers: headers,
+        body: body
+      });
+    },
     
     signOut: function() {
-      this.deleteTokenInfo();
-      esriId.destroyCredentials();
-      window.location.reload();
+      var self = this;
+      var finalizeSignOut = function() {
+        self.deleteTokenInfo();
+        esriId.destroyCredentials();
+        window.location.reload();
+      };
+
+      this._logoutFromSpringAuthServer()
+      .then(function() {
+        finalizeSignOut();
+      })
+      .catch(function(error) {
+        // Keep local sign-out resilient even if server logout fails.
+        console.warn('Server logout failed:', error);
+        finalizeSignOut();
+      });
     },
     
     whenAppStarted: function() {
