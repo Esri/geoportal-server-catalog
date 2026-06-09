@@ -15,8 +15,7 @@
 define(["dojo/_base/array",
   "dojo/Deferred",
   "dojo/_base/lang",
-  "dojo/promise/all",
-  "dojo/Deferred",
+  "dojo/promise/all", 
   "../util",
   "esri4/PopupTemplate",
   "esri4/core/reactiveUtils",
@@ -35,7 +34,7 @@ define(["dojo/_base/array",
     "esri4/layers/WMTSLayer",
     "esri4/layers/OGCFeatureLayer"
     ],
-        function (array, Deferred, lang, all, Deferred, util, PopupTemplate,
+        function (array, Deferred, lang, all, util, PopupTemplate,
                 reactiveUtils, GroupLayer, Portal, PortalItem, MapImageLayer, ImageryLayer, TileLayer, CSVLayer, 
 			  FeatureLayer,  KMLLayer,  VectorTileLayer, 
 			  ImageryTileLayer, WMSLayer, WMTSLayer, OGCFeatureLayer) {
