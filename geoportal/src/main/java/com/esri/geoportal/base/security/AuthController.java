@@ -44,7 +44,7 @@ public class AuthController {
         response.put("access_token", jwtToken.getTokenValue());
         response.put("scope", jwtToken.getClaims().get("scope"));
         response.put("authorities", roles);
-        response.put("expires_in", jwtToken.getExpiresAt() != null ? jwtToken.getExpiresAt().toString() : null);  
+        response.put("expires_in", jwtToken.getExpiresAt() != null ? Math.max(0L, java.time.Duration.between(java.time.Instant.now(), jwtToken.getExpiresAt()).getSeconds()) : null);        
 
         return ResponseEntity.ok(response);
 
