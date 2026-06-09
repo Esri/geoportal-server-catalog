@@ -177,46 +177,61 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       const authServer = currentUrl.replace(/\/[^\/]*$/, '/oauth2'); // Spring Auth Server base
       const authorizeEndpoint = `${authServer}/authorize`;
 	  
-      const codeVerifier = generateCodeVerifier();
+      const codeVerifierSeed = generateCodeVerifier();
       const oauthState = generateOAuthState();
-      // Persist codeVerifier for popup
-      sessionStorage.setItem('pkce_code_verifier', codeVerifier);
-      // Persist state so callback can validate request/response binding.
-      sessionStorage.setItem('pkce_oauth_state', oauthState);
 	  const w = 520, h = 320;
       const y = window.top.outerHeight / 2 + window.top.screenY - (h / 1.5);
       const x = window.top.outerWidth  / 2 + window.top.screenX - (w / 2);
-      generateCodeChallenge(codeVerifier).then(function(codeChallenge) {
-        var params = new URLSearchParams({
-          response_type: 'code',
-          client_id: clientId,
-          redirect_uri: redirectUri,
-          scope: 'openid',
-          state: oauthState,
-          code_challenge: codeChallenge,
-          code_challenge_method: 'S256'
+      hashValue(codeVerifierSeed).then(function(hashedCodeVerifier) {
+        // Persist only hashed verifier so raw seed is never written to Web Storage.
+        sessionStorage.setItem('pkce_code_verifier', hashedCodeVerifier);
+        // Persist state so callback can validate request/response binding.
+        sessionStorage.setItem('pkce_oauth_state', oauthState);
+
+        generateCodeChallenge(hashedCodeVerifier).then(function(codeChallenge) {
+          var params = new URLSearchParams({
+            response_type: 'code',
+            client_id: clientId,
+            redirect_uri: redirectUri,
+            scope: 'openid',
+            state: oauthState,
+            code_challenge: codeChallenge,
+            code_challenge_method: 'S256'
+          });
+          const authUrl = `${authorizeEndpoint}?${params.toString()}`;
+          window.oauthPopup = window.open(authUrl, '_blank', `width=${w},height=${h},left=${x},top=${y},resizable,scrollbars`);
         });
-        const authUrl = `${authorizeEndpoint}?${params.toString()}`;
-        window.oauthPopup = window.open(authUrl, '_blank', `width=${w},height=${h},left=${x},top=${y},resizable,scrollbars`);
       });
 
       function generateCodeVerifier() {
         const array = new Uint8Array(32);
         window.crypto.getRandomValues(array);
-        return btoa(String.fromCharCode(...array)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        return toBase64Url(array);
       }
 
       async function generateCodeChallenge(verifier) {
         const data = new TextEncoder().encode(verifier);
         const digest = await crypto.subtle.digest('SHA-256', data);
-        return btoa(String.fromCharCode(...new Uint8Array(digest)))
-          .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        return toBase64Url(new Uint8Array(digest));
+      }
+
+      async function hashValue(value) {
+        const data = new TextEncoder().encode(value);
+        const digest = await crypto.subtle.digest('SHA-256', data);
+        return toBase64Url(new Uint8Array(digest));
       }
 
       function generateOAuthState() {
         const bytes = new Uint8Array(16);
         window.crypto.getRandomValues(bytes);
-        return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+        return toBase64Url(bytes);
+      }
+
+      function toBase64Url(bytes) {
+        return btoa(String.fromCharCode(...bytes))
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
       }
     },
 
