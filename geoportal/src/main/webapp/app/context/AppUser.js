@@ -180,9 +180,9 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       const codeVerifier = generateCodeVerifier();
       const oauthState = generateOAuthState();
       // Persist codeVerifier for popup
-      localStorage.setItem('pkce_code_verifier', codeVerifier);
+      sessionStorage.setItem('pkce_code_verifier', codeVerifier);
       // Persist state so callback can validate request/response binding.
-      localStorage.setItem('pkce_oauth_state', oauthState);
+      sessionStorage.setItem('pkce_oauth_state', oauthState);
 	  const w = 520, h = 320;
       const y = window.top.outerHeight / 2 + window.top.screenY - (h / 1.5);
       const x = window.top.outerWidth  / 2 + window.top.screenX - (w / 2);
@@ -226,96 +226,102 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 			 
 			  // Ensure the message is from the expected origin
 			  if (event.origin !== window.location.origin) return;
-			  if (event.data && event.data.token) {
-				const oauthToken = event.data.token;
-			    const accessToken = oauthToken && oauthToken.access_token ? oauthToken.access_token : null;
-			    if (!accessToken) return;
+        if (event.data && event.data.oauthResponse) {
+        var payload = event.data.oauthResponse;
+        var code = payload.code;
+        var state = payload.state;
+        if (!code || !state) return;
 
-				  // Process the received token
-				  var self = AppContext.appUser, dfd = new Deferred(), client = new AppClient();
-				  var k = true; // Always keep signed in when using OAuth
+        var expectedState = sessionStorage.getItem('pkce_oauth_state') || '';
+        if (!expectedState || state !== expectedState) {
+          console.warn('OAuth state validation failed. Rejecting callback.');
+          sessionStorage.removeItem('pkce_oauth_state');
+          sessionStorage.removeItem('pkce_code_verifier');
+          return;
+        }
 
-				  // Validate token by pinging Geoportal
-				  client.pingGeoportal(accessToken).then(function(info) {
-					  if (info && info.user) {
-						  self.appToken = oauthToken;
-						  self.geoportalUser = info.user;
+        // Single-use state and verifier.
+        sessionStorage.removeItem('pkce_oauth_state');
+        var codeVerifier = sessionStorage.getItem('pkce_code_verifier') || '';
+        sessionStorage.removeItem('pkce_code_verifier');
+        if (!codeVerifier) {
+          console.warn('Missing PKCE code verifier. Rejecting callback.');
+          return;
+        }
 
-						  if (k) {
-							  var cValue = {
-								  token: oauthToken,
-								  user: info.user
-							  };
-							  self.preserveTokenInfo(cValue, new Date(Date.now() + oauthToken.expires_in * 1000));
-						  }
-						  AppContext.geoportal = info;
-						  topic.publish(appTopics.SignedIn, { geoportalUser: info.user });
-						  dfd.resolve();
-					  } else {
-						  dfd.reject(i18n.general.error);
-					  }
-				  }).catch(function(error) {
-					  console.warn(error);
-					  dfd.reject(i18n.general.error);
-				  });
-			  }
-		  });
-	  },
-
-    // In the popup window, after redirect, send tokens back to opener
-    handleOAuthCallback: async function(code, state) {      
-		const ORIGIN = window.location.origin || (window.location.protocol + '//' + window.location.host);
-	
-		 function getContextPath() {
-		    const parts = window.location.pathname.split('/').filter(Boolean);
-		    // If this page is at /<context>/file.html, the first segment is the WAR context.
-			// If deployed at root like in Beanstalk /file.html then context is (empty string).			
-		    return parts.length > 1 ? '/' + parts[0] : '';
-		  }
-	
-		  const CONTEXT = getContextPath(); 
-		  const BASE    = ORIGIN + CONTEXT;
-
-      if (!state) {
-        state = (new URLSearchParams(window.location.search)).get('state');
-      }
-
-      const storedState = localStorage.getItem('pkce_oauth_state') || '';
-      if (!state || !storedState || state !== storedState) {
-        console.warn('OAuth state validation failed. Rejecting callback.');
-        return;
-      }
-
-      // State is single-use; clear it once validated.
-      localStorage.removeItem('pkce_oauth_state');
-		 
-      if (code && window.opener) {        
-        // Exchange authorization code for tokens
-        const clientId = 'geoportal-simple-client';
-        const redirectUri = BASE+'/callback.html'; // Updated to match registered URI
-        const tokenEndpoint = BASE+'/oauth2/token';
-        // Retrieve codeVerifier from localStorage
-        const codeVerifier = localStorage.getItem('pkce_code_verifier') || '';
-        const body = new URLSearchParams({
+        var appUser = AppContext.appUser;
+        var baseUrl = appUser._getContextBaseUrl();
+        var tokenEndpoint = baseUrl + '/oauth2/token';
+        var redirectUri = baseUrl + '/callback.html';
+        var body = new URLSearchParams({
           grant_type: 'authorization_code',
-          code,
+          code: code,
           redirect_uri: redirectUri,
-          client_id: clientId,
+          client_id: 'geoportal-simple-client',
           code_verifier: codeVerifier
         });
-        const response = await fetch(tokenEndpoint, {
+
+        fetch(tokenEndpoint, {
           method: 'POST',
           headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body
+          body: body
+        })
+        .then(function(response) { return response.json(); })
+        .then(function(oauthToken) {
+          if (oauthToken && oauthToken.access_token) {
+          appUser._finalizeOAuthSignIn(oauthToken);
+          } else {
+          console.warn('OAuth token exchange failed.');
+          }
+        })
+        .catch(function(error) {
+          console.warn('OAuth token exchange error:', error);
         });
-        const oauthToken = await response.json();
-        localStorage.removeItem('pkce_code_verifier');
-       // alert("tokens: " + JSON.stringify(oauthToken));
-		if(oauthToken && oauthToken.access_token) {
-			window.opener.postMessage({ token: oauthToken }, window.location.origin);
-			        window.close();
-			}
-        
+        } else if (event.data && event.data.token) {
+        const oauthToken = event.data.token;
+        AppContext.appUser._finalizeOAuthSignIn(oauthToken);
+        }
+      });
+    },
+
+  _finalizeOAuthSignIn: function(oauthToken) {
+    const accessToken = oauthToken && oauthToken.access_token ? oauthToken.access_token : null;
+    if (!accessToken) return;
+
+    var self = AppContext.appUser, client = new AppClient();
+    var k = true; // Always keep signed in when using OAuth
+
+    client.pingGeoportal(accessToken).then(function(info) {
+    if (info && info.user) {
+      self.appToken = oauthToken;
+      self.geoportalUser = info.user;
+
+      if (k) {
+      var cValue = {
+        token: oauthToken,
+        user: info.user
+      };
+      self.preserveTokenInfo(cValue, new Date(Date.now() + oauthToken.expires_in * 1000));
+      }
+      AppContext.geoportal = info;
+      topic.publish(appTopics.SignedIn, { geoportalUser: info.user });
+    } else {
+      console.warn(i18n.general.error);
+    }
+    }).catch(function(error) {
+    console.warn(error);
+    });
+  },
+
+    // In the popup window, after redirect, send code/state back to opener
+    handleOAuthCallback: async function(code, state) {      
+      if (!state) state = (new URLSearchParams(window.location.search)).get('state');
+
+      if (code && state && window.opener) {
+		window.opener.postMessage({ oauthResponse: { code: code, state: state } }, window.location.origin);
+		window.close();
+      } else {
+		console.warn('OAuth callback is missing required parameters.');
       }
       console.log("handleOAuthCallback finished");
     },	
