@@ -20,6 +20,9 @@ public class JwtService {
 	
 	@Autowired
     private JwtDecoder jwtDecoder;
+	
+	@Autowired
+	private com.esri.geoportal.security.ConfigProperties configProperties;
 
     public Jwt decodeToken(String token) {
         return jwtDecoder.decode(token);
@@ -29,11 +32,11 @@ public class JwtService {
         
     	
     	JwtClaimsSet claims = JwtClaimsSet.builder()
-                .issuer("self")
+    			.issuer(configProperties.getIssuer())
                 .issuedAt(new Date().toInstant())
                 .expiresAt(new Date().toInstant().plus(1, ChronoUnit.HOURS)) // Example: token valid for 1 hour
                 .subject(username)
-                .claim("scope", "api.read")
+                .claim("scope", "api.read api.write read write") // Example: include scopes/permissions
                 .claim("authorities", roles)// Include roles/authorities
                 .build();
     	
