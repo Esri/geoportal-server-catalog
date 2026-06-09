@@ -86,10 +86,14 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
                   var lyr = new FeatureLayer(url+"/"+li.id,{id:lid,outFields:["*"]});
                   lyr.load();
 				  
-				  var sceneLayer = layerUtil.cloneLayer(lyr);
-                  sceneLayer.id = util.generateId();
-                  sceneLayer.load();
-				  sceneDfds.push(self.waitForLayer(sceneLayer));
+				  if (sceneView) {
+	  					var sceneLayer = layerUtil.cloneLayer(lyr);
+	  					if (sceneLayer) {
+	  					  sceneLayer.id = util.generateId();
+	  					  sceneLayer.load();
+	  					  sceneDfds.push(self.waitForLayer(sceneLayer));
+	  					}
+	  				  }
                   dfds.push(self.waitForLayer(lyr));
                 });
                 all(dfds).then(function(results){
