@@ -11,8 +11,9 @@
           try {
         	  var urlParams = new URLSearchParams(window.location.search);
               var code = urlParams.get('code');
+              var state = urlParams.get('state');
                  	
-            (new AppUser()).handleOAuthCallback(code);
+            (new AppUser()).handleOAuthCallback(code, state);
            
           } catch (e) {
             alert("Error in AppUser: " + e);

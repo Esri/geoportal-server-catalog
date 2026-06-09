@@ -178,13 +178,25 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       const authorizeEndpoint = `${authServer}/authorize`;
 	  
       const codeVerifier = generateCodeVerifier();
+      const oauthState = generateOAuthState();
       // Persist codeVerifier for popup
       localStorage.setItem('pkce_code_verifier', codeVerifier);
+      // Persist state so callback can validate request/response binding.
+      localStorage.setItem('pkce_oauth_state', oauthState);
 	  const w = 520, h = 320;
       const y = window.top.outerHeight / 2 + window.top.screenY - (h / 1.5);
       const x = window.top.outerWidth  / 2 + window.top.screenX - (w / 2);
       generateCodeChallenge(codeVerifier).then(function(codeChallenge) {
-        const authUrl = `${authorizeEndpoint}?response_type=code&client_id=${clientId}&redirect_uri=${redirectUri}&scope=openid&code_challenge=${codeChallenge}&code_challenge_method=S256`;
+        var params = new URLSearchParams({
+          response_type: 'code',
+          client_id: clientId,
+          redirect_uri: redirectUri,
+          scope: 'openid',
+          state: oauthState,
+          code_challenge: codeChallenge,
+          code_challenge_method: 'S256'
+        });
+        const authUrl = `${authorizeEndpoint}?${params.toString()}`;
         window.oauthPopup = window.open(authUrl, '_blank', `width=${w},height=${h},left=${x},top=${y},resizable,scrollbars`);
       });
 
@@ -199,6 +211,12 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         const digest = await crypto.subtle.digest('SHA-256', data);
         return btoa(String.fromCharCode(...new Uint8Array(digest)))
           .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
+      }
+
+      function generateOAuthState() {
+        const bytes = new Uint8Array(16);
+        window.crypto.getRandomValues(bytes);
+        return btoa(String.fromCharCode(...bytes)).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
       }
     },
 
@@ -245,7 +263,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 	  },
 
     // In the popup window, after redirect, send tokens back to opener
-    handleOAuthCallback: async function(code) {      
+    handleOAuthCallback: async function(code, state) {      
 		const ORIGIN = window.location.origin || (window.location.protocol + '//' + window.location.host);
 	
 		 function getContextPath() {
@@ -257,6 +275,19 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 	
 		  const CONTEXT = getContextPath(); 
 		  const BASE    = ORIGIN + CONTEXT;
+
+      if (!state) {
+        state = (new URLSearchParams(window.location.search)).get('state');
+      }
+
+      const storedState = localStorage.getItem('pkce_oauth_state') || '';
+      if (!state || !storedState || state !== storedState) {
+        console.warn('OAuth state validation failed. Rejecting callback.');
+        return;
+      }
+
+      // State is single-use; clear it once validated.
+      localStorage.removeItem('pkce_oauth_state');
 		 
       if (code && window.opener) {        
         // Exchange authorization code for tokens
@@ -278,6 +309,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
           body
         });
         const oauthToken = await response.json();
+        localStorage.removeItem('pkce_code_verifier');
        // alert("tokens: " + JSON.stringify(oauthToken));
 		if(oauthToken && oauthToken.access_token) {
 			window.opener.postMessage({ token: oauthToken }, window.location.origin);
