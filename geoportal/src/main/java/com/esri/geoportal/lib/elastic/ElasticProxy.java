@@ -147,12 +147,12 @@ public class ElasticProxy extends BalancerServlet {
 		proxyRequest.headers(headers -> headers.remove("Via")); // We'll add a proper one later 
 
 		// Remove duplicate Content-Type and Content-Length and add only one
-		if (proxyRequest.headers(headers -> headers.contains("Content-Type")) != null) {
+		if (proxyRequest.getHeaders().contains(HttpHeader.CONTENT_TYPE))  {
 			String contentType = proxyRequest.getHeaders().get("Content-Type");
 			proxyRequest.headers(headers -> headers.remove("Content-Type"));
 			proxyRequest.headers(headers -> headers.put(HttpHeader.CONTENT_TYPE, contentType));
 		}
-		if (proxyRequest.headers(headers -> headers.contains("Content-Length")) != null) {
+		if (proxyRequest.getHeaders().contains(HttpHeader.CONTENT_LENGTH)) {
 			String contentLength = proxyRequest.getHeaders().get("Content-Length");
 			proxyRequest.headers(headers -> headers.remove("Content-Length"));
 			proxyRequest.headers(headers -> headers.put(HttpHeader.CONTENT_LENGTH, contentLength));
