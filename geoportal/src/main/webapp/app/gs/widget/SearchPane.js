@@ -177,6 +177,9 @@ function(declare, localRequire, lang, array, win, domClass, on,
 		    self.toggleLoading(false);
 		  }
 		});
+	  }else{
+		console.error("Search is unavailable: gs.context.browser.WebProcessor is not defined.");
+		self.toggleLoading(false);
 	  }
 
     },
