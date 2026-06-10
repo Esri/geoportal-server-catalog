@@ -169,6 +169,7 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
     },
 
     openOAuthPopup: function() {
+      var self = this;
       // Get current app context URL
       var currentUrl = window.location.origin + window.location.pathname;
       
@@ -182,11 +183,17 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 	  const w = 520, h = 320;
       const y = window.top.outerHeight / 2 + window.top.screenY - (h / 1.5);
       const x = window.top.outerWidth  / 2 + window.top.screenX - (w / 2);
-      hashValue(codeVerifierSeed).then(function(hashedCodeVerifier) {
+      Promise.all([
+        self._hashBase64Url(codeVerifierSeed),
+        self._hashBase64Url(oauthState)
+      ]).then(function(values) {
+        var hashedCodeVerifier = values[0];
+        var hashedOAuthState = values[1];
+
         // Persist only hashed verifier so raw seed is never written to Web Storage.
         sessionStorage.setItem('pkce_code_verifier', hashedCodeVerifier);
-        // Persist state so callback can validate request/response binding.
-        sessionStorage.setItem('pkce_oauth_state', oauthState);
+        // Persist only hashed state so plaintext state is not written to Web Storage.
+        sessionStorage.setItem('pkce_oauth_state', hashedOAuthState);
 
         generateCodeChallenge(hashedCodeVerifier).then(function(codeChallenge) {
           var params = new URLSearchParams({
@@ -201,6 +208,8 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
           const authUrl = `${authorizeEndpoint}?${params.toString()}`;
           window.oauthPopup = window.open(authUrl, '_blank', `width=${w},height=${h},left=${x},top=${y},resizable,scrollbars`);
         });
+      }).catch(function(error) {
+        console.warn('Failed to prepare OAuth PKCE request.', error);
       });
 
       function generateCodeVerifier() {
@@ -211,12 +220,6 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 
       async function generateCodeChallenge(verifier) {
         const data = new TextEncoder().encode(verifier);
-        const digest = await crypto.subtle.digest('SHA-256', data);
-        return toBase64Url(new Uint8Array(digest));
-      }
-
-      async function hashValue(value) {
-        const data = new TextEncoder().encode(value);
         const digest = await crypto.subtle.digest('SHA-256', data);
         return toBase64Url(new Uint8Array(digest));
       }
@@ -247,55 +250,78 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
         var state = payload.state;
         if (!code || !state) return;
 
-        var expectedState = sessionStorage.getItem('pkce_oauth_state') || '';
-        if (!expectedState || state !== expectedState) {
-          console.warn('OAuth state validation failed. Rejecting callback.');
+        var appUser = AppContext.appUser;
+        var expectedStateHash = sessionStorage.getItem('pkce_oauth_state') || '';
+        if (!expectedStateHash) {
+          console.warn('Missing stored OAuth state. Rejecting callback.');
           sessionStorage.removeItem('pkce_oauth_state');
           sessionStorage.removeItem('pkce_code_verifier');
           return;
         }
 
-        // Single-use state and verifier.
-        sessionStorage.removeItem('pkce_oauth_state');
-        var codeVerifier = sessionStorage.getItem('pkce_code_verifier') || '';
-        sessionStorage.removeItem('pkce_code_verifier');
-        if (!codeVerifier) {
-          console.warn('Missing PKCE code verifier. Rejecting callback.');
-          return;
-        }
-
-        var appUser = AppContext.appUser;
-        var baseUrl = appUser._getContextBaseUrl();
-        var tokenEndpoint = baseUrl + '/oauth2/token';
-        var redirectUri = baseUrl + '/callback.html';
-        var body = new URLSearchParams({
-          grant_type: 'authorization_code',
-          code: code,
-          redirect_uri: redirectUri,
-          client_id: 'geoportal-simple-client',
-          code_verifier: codeVerifier
-        });
-
-        fetch(tokenEndpoint, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: body
-        })
-        .then(function(response) { return response.json(); })
-        .then(function(oauthToken) {
-          if (oauthToken && oauthToken.access_token) {
-          appUser._finalizeOAuthSignIn(oauthToken);
-          } else {
-          console.warn('OAuth token exchange failed.');
+        appUser._hashBase64Url(state).then(function(receivedStateHash) {
+          if (receivedStateHash !== expectedStateHash) {
+            console.warn('OAuth state validation failed. Rejecting callback.');
+            sessionStorage.removeItem('pkce_oauth_state');
+            sessionStorage.removeItem('pkce_code_verifier');
+            return;
           }
-        })
-        .catch(function(error) {
-          console.warn('OAuth token exchange error:', error);
+
+          // Single-use state and verifier.
+          sessionStorage.removeItem('pkce_oauth_state');
+          var codeVerifier = sessionStorage.getItem('pkce_code_verifier') || '';
+          sessionStorage.removeItem('pkce_code_verifier');
+          if (!codeVerifier) {
+            console.warn('Missing PKCE code verifier. Rejecting callback.');
+            return;
+          }
+
+          var baseUrl = appUser._getContextBaseUrl();
+          var tokenEndpoint = baseUrl + '/oauth2/token';
+          var redirectUri = baseUrl + '/callback.html';
+          var body = new URLSearchParams({
+            grant_type: 'authorization_code',
+            code: code,
+            redirect_uri: redirectUri,
+            client_id: 'geoportal-simple-client',
+            code_verifier: codeVerifier
+          });
+
+          fetch(tokenEndpoint, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: body
+          })
+          .then(function(response) { return response.json(); })
+          .then(function(oauthToken) {
+            if (oauthToken && oauthToken.access_token) {
+              appUser._finalizeOAuthSignIn(oauthToken);
+            } else {
+              console.warn('OAuth token exchange failed.');
+            }
+          })
+          .catch(function(error) {
+            console.warn('OAuth token exchange error:', error);
+          });
+        }).catch(function(error) {
+          console.warn('Failed to validate OAuth state hash.', error);
+          sessionStorage.removeItem('pkce_oauth_state');
+          sessionStorage.removeItem('pkce_code_verifier');
         });
         } else if (event.data && event.data.token) {
         const oauthToken = event.data.token;
         AppContext.appUser._finalizeOAuthSignIn(oauthToken);
         }
+      });
+    },
+
+    _hashBase64Url: function(value) {
+      const data = new TextEncoder().encode(value || '');
+      return crypto.subtle.digest('SHA-256', data).then(function(digest) {
+        return btoa(String.fromCharCode(...new Uint8Array(digest)))
+          .replace(/\+/g, '-')
+          .replace(/\//g, '_')
+          .replace(/=+$/, '');
       });
     },
 
