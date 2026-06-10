@@ -1,17 +1,23 @@
 package com.esri.geoportal.security;
 
+import java.security.KeyFactory;
 import java.security.KeyPair;
 import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
+import java.security.spec.PKCS8EncodedKeySpec;
+import java.security.spec.X509EncodedKeySpec;
 import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.UUID;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -54,6 +60,8 @@ import com.nimbusds.jose.proc.SecurityContext;
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
+
+    private static final Logger LOG = LoggerFactory.getLogger(SecurityConfig.class);
 
     // Use SecurityProperties component to hold configuration loaded from config.properties
     private final ConfigProperties configProperties;
@@ -241,13 +249,70 @@ public class SecurityConfig {
 
     @Bean
     public JWKSource<SecurityContext> jwkSource() {
-        KeyPair keyPair = generateRsaKey();
-        RSAPublicKey publicKey = (RSAPublicKey) keyPair.getPublic();
-        RSAPrivateKey privateKey = (RSAPrivateKey) keyPair.getPrivate();
-        RSAKey rsaKey = new RSAKey.Builder(publicKey).privateKey(privateKey).keyID(UUID.randomUUID().toString())
+        RSAPublicKey publicKey;
+        RSAPrivateKey privateKey;
+        String keyId;
+
+        if (configProperties.hasExternalRsaKeys()) {
+            // Load RSA keys from environment/config (required for load-balanced deployments)
+            LOG.info("Loading RSA keys from configuration (load-balancer safe mode)");
+            try {
+                publicKey = loadPublicKeyFromBase64(configProperties.getRsaPublicKeyBase64());
+                privateKey = loadPrivateKeyFromBase64(configProperties.getRsaPrivateKeyBase64());
+                // Use configured key ID or generate a fixed one from key material
+                String configuredKeyId = configProperties.getRsaKeyId();
+                keyId = (configuredKeyId != null && !configuredKeyId.trim().isEmpty()) 
+                        ? configuredKeyId.trim() 
+                        : UUID.nameUUIDFromBytes(publicKey.getEncoded()).toString();
+            } catch (Exception ex) {
+                throw new IllegalStateException("Failed to load RSA keys from configuration. " +
+                        "Ensure security.jwt.rsa.publicKey and security.jwt.rsa.privateKey are valid Base64-encoded keys.", ex);
+            }
+        } else {
+            // Generate RSA keys dynamically (development mode only - NOT suitable for load balancers)
+            LOG.warn("RSA keys not configured - generating dynamically. " +
+                    "This is NOT suitable for load-balanced deployments. " +
+                    "Set security.jwt.rsa.publicKey and security.jwt.rsa.privateKey for production.");
+            KeyPair keyPair = generateRsaKey();
+            publicKey = (RSAPublicKey) keyPair.getPublic();
+            privateKey = (RSAPrivateKey) keyPair.getPrivate();
+            keyId = UUID.randomUUID().toString();
+        }
+
+        RSAKey rsaKey = new RSAKey.Builder(publicKey)
+                .privateKey(privateKey)
+                .keyID(keyId)
                 .build();
         JWKSet jwkSet = new JWKSet(rsaKey);
         return new ImmutableJWKSet<>(jwkSet);
+    }
+
+    /**
+     * Load RSA public key from Base64-encoded X.509 format.
+     * The value should be the raw Base64 content (no PEM headers/footers).
+     */
+    private RSAPublicKey loadPublicKeyFromBase64(String base64Key) throws Exception {
+        String cleanedKey = base64Key.replaceAll("\\s+", "")
+                .replace("-----BEGIN PUBLIC KEY-----", "")
+                .replace("-----END PUBLIC KEY-----", "");
+        byte[] keyBytes = Base64.getDecoder().decode(cleanedKey);
+        X509EncodedKeySpec keySpec = new X509EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return (RSAPublicKey) keyFactory.generatePublic(keySpec);
+    }
+
+    /**
+     * Load RSA private key from Base64-encoded PKCS#8 format.
+     * The value should be the raw Base64 content (no PEM headers/footers).
+     */
+    private RSAPrivateKey loadPrivateKeyFromBase64(String base64Key) throws Exception {
+        String cleanedKey = base64Key.replaceAll("\\s+", "")
+                .replace("-----BEGIN PRIVATE KEY-----", "")
+                .replace("-----END PRIVATE KEY-----", "");
+        byte[] keyBytes = Base64.getDecoder().decode(cleanedKey);
+        PKCS8EncodedKeySpec keySpec = new PKCS8EncodedKeySpec(keyBytes);
+        KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+        return (RSAPrivateKey) keyFactory.generatePrivate(keySpec);
     }
 
     private static KeyPair generateRsaKey() {

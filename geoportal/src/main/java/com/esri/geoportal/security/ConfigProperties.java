@@ -37,6 +37,19 @@ public class ConfigProperties {
     @Value("${security.api.read.clientSecret}")
     private String apiReadClientSecret;
 
+    // RSA key configuration for JWT signing (Base64-encoded PKCS#8 format)
+    // Required for load-balanced / multi-instance deployments
+    // If not set, keys will be generated dynamically (dev mode only)
+    @Value("${security.jwt.rsa.publicKey:}")
+    private String rsaPublicKeyBase64;
+
+    @Value("${security.jwt.rsa.privateKey:}")
+    private String rsaPrivateKeyBase64;
+
+    // Fixed key ID for consistent JWK across instances (optional but recommended)
+    @Value("${security.jwt.rsa.keyId:}")
+    private String rsaKeyId;
+
     @Value("${security.public-endpoints:}")
     private String publicEndpoints;
 
@@ -84,6 +97,28 @@ public class ConfigProperties {
 
     public String getApiReadClientSecret() {
         return apiReadClientSecret;
+    }
+
+    public String getRsaPublicKeyBase64() {
+        return rsaPublicKeyBase64;
+    }
+
+    public String getRsaPrivateKeyBase64() {
+        return rsaPrivateKeyBase64;
+    }
+
+    public String getRsaKeyId() {
+        return rsaKeyId;
+    }
+
+    /**
+     * Check if external RSA keys are configured via environment/config.
+     * When true, keys will be loaded from Base64 config instead of generated dynamically.
+     * Required for load-balanced / multi-instance deployments.
+     */
+    public boolean hasExternalRsaKeys() {
+        return rsaPublicKeyBase64 != null && !rsaPublicKeyBase64.trim().isEmpty()
+                && rsaPrivateKeyBase64 != null && !rsaPrivateKeyBase64.trim().isEmpty();
     }
 
     public List<String> getPublicEndpointsList() {
