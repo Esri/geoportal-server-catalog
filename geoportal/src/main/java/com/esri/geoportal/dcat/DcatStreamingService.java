@@ -18,13 +18,12 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.Date;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.http.HttpServletResponse;
 import org.apache.commons.io.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**
@@ -32,12 +31,14 @@ import org.springframework.web.bind.annotation.RestController;
  */
 @RestController
 public class DcatStreamingService {
-  private static final String EMPTY_DCAT_RESPONSE = "{\n" +
-    "  \"conformsTo\": \"https://project-open-data.cio.gov/v1.1/schema\",\n" +
-    "  \"@note\": \"DCAT file is not ready yet! Started process generating DCAT. Please, try again later.\",\n" +
-    "  \"dataset\": [\n" +
-    "  ]\n" +
-    "}";
+  private static final String EMPTY_DCAT_RESPONSE = """
+    {
+      "conformsTo": "https://project-open-data.cio.gov/v1.1/schema",
+      "@note": "DCAT file is not ready yet! Started process generating DCAT. Please, try again later.",
+      "dataset": [
+      ]
+    }\
+    """;
   
   @Autowired
   private DcatCache dcatCache;
@@ -45,7 +46,7 @@ public class DcatStreamingService {
   @Autowired
   private DcatController dcatController;
   
-  @RequestMapping(path = "/dcat.json", produces = "application/json", method = RequestMethod.GET)
+  @GetMapping(path = "/dcat.json", produces = "application/json")
   public ResponseEntity<Void> dcat(HttpServletResponse response) {
     try (OutputStream outStream = response.getOutputStream()) {
       Date lastModified = dcatCache.getLastModified();

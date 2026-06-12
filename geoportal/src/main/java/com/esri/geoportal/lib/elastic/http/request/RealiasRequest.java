@@ -13,9 +13,13 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.http.request;
+import java.io.FileNotFoundException;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.base.util.exception.UsageException;
-import com.esri.geoportal.context.AppRequest;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
@@ -23,15 +27,10 @@ import com.esri.geoportal.lib.elastic.http.ElasticClient;
 import com.esri.geoportal.lib.elastic.http.util.AccessUtil;
 import com.esri.geoportal.lib.elastic.request.BulkEditRequest;
 
-import java.io.FileNotFoundException;
-
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Reset the index alias.

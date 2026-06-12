@@ -8,7 +8,7 @@
     http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
 	  http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd">
  
-  <context:component-scan base-package="com.esri.geoportal.dcat" />
+  <context:component-scan base-package="com.esri.geoportal.dcat,com.esri.geoportal.base.security" />
   <mvc:annotation-driven />
   <mvc:default-servlet-handler />
     

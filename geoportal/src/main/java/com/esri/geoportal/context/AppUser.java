@@ -21,12 +21,13 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.core.SecurityContext;
 
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.oauth2.provider.OAuth2Authentication;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
 
 import com.esri.geoportal.base.security.Group;
 
@@ -96,8 +97,8 @@ public class AppUser {
   private void init(HttpServletRequest request) {
     init(null,false,false);
     if (request == null) return;
-    
     Principal p = request.getUserPrincipal();
+   
     if (p == null) return;
     groups = new ArrayList<Group>();
     username = p.getName();
@@ -108,18 +109,17 @@ public class AppUser {
     } else {
       isAnonymous = true;
     }
-    //System.err.println("username: "+username+", isAdmin="+isAdmin);
-    
     String pfx = "ROLE_";
     String[] gtpRoles = {"ADMIN","PUBLISHER","USER"};
     List<String> gptRoleList = Arrays.asList(gtpRoles);
     Collection<GrantedAuthority> authorities = null;
-    if (p instanceof UsernamePasswordAuthenticationToken) {
-      UsernamePasswordAuthenticationToken auth = (UsernamePasswordAuthenticationToken)p;
+    if (p instanceof UsernamePasswordAuthenticationToken auth) {
       if (auth.isAuthenticated()) authorities = auth.getAuthorities();
-    } else if (p instanceof OAuth2Authentication) {
-      OAuth2Authentication auth = (OAuth2Authentication)p;
+    } else if (p instanceof OAuth2AuthenticationToken auth) {
       if (auth.isAuthenticated()) authorities = auth.getAuthorities();
+    }//client_credentials authentication does not have a user principal but is authenticated and has roles.
+    else if (p instanceof JwtAuthenticationToken auth) {
+        if (auth.isAuthenticated()) authorities = auth.getAuthorities();      
     }
     if (authorities != null) {
       Iterator<GrantedAuthority> iterator = authorities.iterator();
@@ -130,24 +130,28 @@ public class AppUser {
             String name = authority.getAuthority();
             if (name != null) {
               if (name.indexOf(pfx) == 0) name = name.substring(pfx.length());
-              if (gptRoleList.indexOf(name.toUpperCase()) == -1) {
-                //System.err.println("authority: "+name);
-                groups.add(new Group(name));
+              //if authorities have scope SCOPE_api.write then set user as Admin and Publisher
+              if (name.equalsIgnoreCase("SCOPE_api.write")) {
+					isAdmin = true;
+					isPublisher = true;					
+              }else
+              {
+            	  if (gptRoleList.indexOf(name.toUpperCase()) == -1) {            	  
+                      groups.add(new Group(name));
+                    } 
               }
+             
             }
           }
         }          
       }
     }
-    
-    //check username in GeoportalContext.getUserGroupMap. if it exists(in case of ArcGIS Authentication Provider), add those groups as well
     GeoportalContext gc = GeoportalContext.getInstance();
     HashMap<String,ArrayList<Group>> userGroupMap = gc.getUserGroupMap();
     if(userGroupMap.containsKey(username))
     {
-    	groups.addAll(userGroupMap.get(username));
+      groups.addAll(userGroupMap.get(username));
     }
-    	
   }
   
   /**

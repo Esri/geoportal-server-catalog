@@ -19,24 +19,24 @@ import java.io.StringWriter;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 
-import javax.json.Json;
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.JsonReader;
-import javax.json.JsonString;
-import javax.json.JsonStructure;
-import javax.json.JsonValue;
-import javax.json.JsonValue.ValueType;
-import javax.json.JsonWriter;
-import javax.json.JsonWriterFactory;
-import javax.json.stream.JsonGenerator;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.json.JsonReader;
+import jakarta.json.JsonString;
+import jakarta.json.JsonStructure;
+import jakarta.json.JsonValue;
+import jakarta.json.JsonValue.ValueType;
+import jakarta.json.JsonWriter;
+import jakarta.json.JsonWriterFactory;
+import jakarta.json.stream.JsonGenerator;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -208,7 +208,7 @@ public class JsonUtil {
       throws IOException, URISyntaxException {
     ResourcePath rp = new ResourcePath();
     URI uri = rp.makeUrl(path).toURI();
-    String s = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");
+    String s = new String(Files.readAllBytes(Path.of(uri)),"UTF-8");
     //System.err.println(path+":"+s);
     if (s != null) s = s.trim();
     if (s != null) return toJsonStructure(s);

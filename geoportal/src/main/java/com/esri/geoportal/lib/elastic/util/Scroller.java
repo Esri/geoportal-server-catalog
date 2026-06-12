@@ -13,21 +13,12 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.util;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-
 import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
-import org.opensearch.action.search.SearchRequestBuilder;
-import org.opensearch.action.search.SearchResponse;
-import org.opensearch.action.search.SearchScrollRequestBuilder;
-//import org.opensearch.client.transport.TransportClient;
-import org.opensearch.common.unit.TimeValue;
 import org.opensearch.index.query.QueryBuilder;
 import org.opensearch.index.query.QueryBuilders;
 import org.opensearch.search.SearchHit;
-import org.opensearch.search.sort.SortBuilders;
 
 /**
  * Scroll through a collection of documents.

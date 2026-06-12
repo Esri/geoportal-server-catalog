@@ -13,7 +13,7 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.http.util;
-import javax.json.JsonObject;
+import jakarta.json.JsonObject;
 
 /**
  * A search hit.

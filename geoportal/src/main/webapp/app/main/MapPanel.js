@@ -17,14 +17,12 @@ define(["dojo/_base/declare",
         "app/common/Templated",
         "dojo/text!./templates/MapPanel.html",
         "dojo/i18n!../gs/widget/nls/strings",
-        "dojo/sniff",
-        "dojo/dom-style",
-        "dojo/dom-geometry",
+		"dojo/i18n!../nls/resources",
         "dojo/dom-construct",
-        "dojo/_base/array",
         "dojo/Deferred",
         "esri4/Map",
         "esri4/views/MapView",
+		"esri4/views/SceneView",
         "esri4/layers/TileLayer",
         "esri4/layers/MapImageLayer",
         "esri4/layers/FeatureLayer",
@@ -33,28 +31,23 @@ define(["dojo/_base/declare",
         "esri4/widgets/LayerList",
         "esri4/widgets/FeatureTable",
         "esri4/widgets/Legend",
-        "esri4/widgets/Locate",
-        "esri4/widgets/Home",  
-        "esri4/form/elements/inputs/SwitchInput",
-        "esri4/Graphic",
+        "esri4/widgets/Home",
         "esri4/widgets/Expand",
         "esri4/widgets/BasemapGallery",
         "esri4/core/reactiveUtils",
-        "esri4/widgets/FeatureTable/Grid/support/ButtonMenuItem",
-        "esri4/widgets/FeatureTable/Grid/support/ButtonMenu",
         "../gs/widget/SearchPane",
         "../gs/widget/WidgetContext",
         "../gs/base/LayerProcessor",
         "app/context/AppClient"], 
-function(declare, lang, Templated, template, i18n, has, domStyle, 
-		domGeometry,domConstruct,array,Deferred,
-		Map,MapView,TileLayer, MapImageLayer,FeatureLayer,WFSLayer,SearchWidget,LayerList,FeatureTable,
-		Legend,Locate,Home,SwitchInput,Graphic,Expand,BasemapGallery,reactiveUtils,ButtonMenuItem,ButtonMenu,
-		SearchPane,WidgetContext,LayerProcessor,AppClient) {
+function(declare, lang, Templated, template, i18n, i18resources, domConstruct, Deferred,
+		Map, MapView, SceneView, TileLayer, MapImageLayer, FeatureLayer, WFSLayer, SearchWidget, LayerList, FeatureTable,
+		Legend, Home, Expand, BasemapGallery, reactiveUtils,
+		SearchPane, WidgetContext, LayerProcessor, AppClient) {
 
   var oThisClass = declare([Templated], {
 
     i18n: i18n,
+	i18resources: i18resources,	
     templateString: template,
     
     mapWasInitialized: false,
@@ -81,9 +74,10 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     },
     
     addToMap: function(params) {    	
-    	this.addLayer(params,this.view);
+    	this.addLayer(params,this.mapView,this.sceneView);
     },
-  //Opening map panel
+    
+    //Opening map panel
     ensureMap: function(urlParams) {
     	this.urlParams = urlParams;
     	if(!this.config)
@@ -101,26 +95,82 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     		this.loadMapPanel();
     	}
     },
-    loadMapPanel:function(){
-		var mapProps = AppContext.appConfig.searchMap || {};
-	    if (mapProps) mapProps = lang.clone(mapProps);
-	    var v = mapProps.basemapUrl;
-	    delete mapProps.basemapUrl;
-	    if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
-	      v = null;
-	    }	    
-	    var map = new Map({basemap:mapProps.basemap});
-	    
-		const view = new MapView({
-	  	  container: this.mapNode,
-	  	  map: map, 
-	  	  center: mapProps.center,
-	  	  zoom: mapProps.zoom      	  
-	  	});
-		
-		
-	 if (typeof v === "string" && v.length > 0) {
-	        v =  util.checkMixedContent(v);
+    
+    /**
+     * Main entry point to load the map panel.
+     * Creates maps and views, then initializes all widgets once the map is ready.
+     */
+    loadMapPanel: function() {
+      var mapProps = this._getMapProperties();
+      var views = this._createMapsAndViews(mapProps);
+      var mapView = views.mapView;
+      var sceneView = views.sceneView;
+      
+      // Add custom basemap layer if specified
+      this._addCustomBasemapLayer(views.map, mapProps);
+      
+      // Initialize widgets and setup when map view is ready
+      mapView.when(lang.hitch(this, function() {
+        this._initializeLocalCatalogUrl();
+        this._setupAllWidgets(mapView, sceneView);
+        this._setupPopupWatchers(mapView, sceneView);
+        this._finalizeMapSetup(mapView, sceneView);
+      }));
+    },
+    
+    /**
+     * Gets and clones map properties from app configuration.
+     */
+    _getMapProperties: function() {
+      var mapProps = AppContext.appConfig.searchMap || {};
+      if (mapProps) mapProps = lang.clone(mapProps);
+      return mapProps;
+    },
+    
+    /**
+     * Creates Map and SceneView objects with the given properties.
+     */
+    _createMapsAndViews: function(mapProps) {
+      var basemapUrl = mapProps.basemapUrl;
+      delete mapProps.basemapUrl;
+      if (typeof mapProps.basemap === "string" && mapProps.basemap.length > 0) {
+        basemapUrl = null;
+      }
+      
+      var map = new Map({basemap: mapProps.basemap});
+      var map3D = new Map({basemap: mapProps.threeDBasemap, ground: "world-elevation"});
+      
+      var mapView = new MapView({
+        container: this.mapNode,
+        map: map,
+        center: mapProps.center,
+        zoom: mapProps.zoom
+      });
+      
+      var sceneView = new SceneView({
+        container: null,
+        map: map3D,
+        center: mapProps.center,
+        zoom: mapProps.zoom
+      });
+      
+      return {
+        map: map,
+        map3D: map3D,
+        mapView: mapView,
+        sceneView: sceneView,
+        basemapUrl: basemapUrl,
+        isTiled: mapProps.isTiled
+      };
+    },
+    
+    /**
+     * Adds custom basemap layer if a URL is specified.
+     */
+    _addCustomBasemapLayer: function(map, mapProps) {
+      var v = mapProps.basemapUrl;
+      if (typeof v === "string" && v.length > 0) {
+        v = util.checkMixedContent(v);
         var basemap;
         if (!mapProps.isTiled) {
           basemap = new MapImageLayer(v);
@@ -128,169 +178,398 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
           basemap = new TileLayer(v);
         }
         map.add(basemap);
-      }	   
-      view.when(lang.hitch(this,function() {  
-    	  var localGeoportalUrl = this._createLocalCatalogUrl();
-	   	   if (localGeoportalUrl) {
-			   var target;
-			   for(var i=0;i<this.config.targets.length;i++)
-			   {
-				   target = this.config.targets[i];		   
-				   if (target.type === "geoportal" && !target.url) {
-				         this.config.targets[i].url = localGeoportalUrl;
-				         break;
-				   }
-			   }
-	   	   }
-    	//Add geoportal search widget
-  		var widgetContext = new WidgetContext({
-              i18n: i18n,
-              view: view,
-              proxyUrl: esriConfig.defaults.io.proxyUrl,
-              wabWidget: this,
-              widgetConfig: this.config
-            });
-	  		let node = domConstruct.create("div",{
-	  			width: "500px",
-	  			height: "500px"
-	  		});
-            var gpSearchWidget = new SearchPane({
-              i18n: widgetContext.i18n,
-              widgetContext: widgetContext
-            },node);
-            gpSearchWidget.startup();
-            
-            let gpSearchExpand = new Expand({
-   	    	 expandIcon: "query",  
-   	    	 expandTooltip: "Geoportal Search", 
-   	    	 view: view,
-   	    	 content: gpSearchWidget
-      	     });
-      	     view.ui.add(gpSearchExpand, {
-    		  position: "top-left",
-    		  index: 0
-    		});
-      	   let searchWidget = new SearchWidget({
-    		  view: view
-    		});
-
-    	  let searchWidgetExpand = new Expand({
-    	    	 expandIcon: "search",  
-    	    	 expandTooltip: "Find Address or Place", 
-    	    	 view: view,
-    	    	 content: searchWidget
-       	     });
-       	     view.ui.add(searchWidgetExpand, {
-    		  position: "top-left",
-    		  index: 1
-    		});
-    	  
-    	  let layerList = new LayerList({
-    		  view: view
-    		  ,listItemCreatedFunction: defineActions
-    		});
-    		let layerListExpand = new Expand({
-   	    	 expandIcon: "layers",  
-   	    	 expandTooltip: "Map Layers", 
-   	    	 view: view,
-   	    	 content: layerList
-      	     });
-      	     view.ui.add(layerListExpand, {
-    		  position: "top-left",
-    		  index: 2
-    		});
-      	    
-      	   async function defineActions(event) {
-      		  const item = event.item;
-
-      		  await item.layer.when();      		 
-      		    // An array of objects defining actions to place in the LayerList.By making this array two-dimensional, you can separate similar
-      		    // actions into separate groups with a breaking line.
-      		    item.actionsSections = [
-      		      [
-      		        {
-      		          title: "Go to full extent",
-      		          icon: "zoom-out-fixed",
-      		          id: "full-extent"
-      		        }],
-      		        [{
-      		          title: "Remove",
-      		          icon: "minus-circle",
-      		          id: "remove-layer"
-      		        }
-      		      ]
-      		    ];
-      		  } 
-	      	 layerList.on("trigger-action", (event) => {
-	       		this.executeLayerlistActions(event);
-	       	 });
-    		let homeWidget = new Home({
-    			  view: view
-    			});
-
-			// adds the home widget to the top left corner of the MapView
-			view.ui.add(homeWidget, {
-	    		  position: "top-left",
-	    		  index: 4
-	    		});   	 
-			
-			let basemapWidget = new BasemapGallery({
-  			  view: view
-  			});
-			let basemapExpand = new Expand({
-   	    	 expandIcon: "basemap",  
-   	    	 expandTooltip: "Basemap", 
-   	    	 view: view,
-   	    	 content: basemapWidget
-      	     });
-			// adds the basemap widget to the top right corner of the MapView
-			view.ui.add(basemapExpand, {
-	    		  position: "top-right",
-	    		  index: 1
-	    		});  
-   	     	
-    		let legend = new Legend({
-    			  view: view
-    		}); 
-    		let legendExpand = new Expand({
-    	    	 expandIcon: "legend",  
-    	    	 expandTooltip: "Legend", 
-    	    	 view: view,
-    	    	 content: legend
-       	     });
-       	     view.ui.add(legendExpand, {
-    		  position: "top-left",
-    		  index: 3
-    		});
-	     
-	     reactiveUtils.on(()=>view.popup, "trigger-action", (event)=>{	    	 
-	    	  if(event.action.id === "view-attribute-table"){	    	   
-	    		  this.openAttrTable(view.popup.selectedFeature);
-	    	  }
-	    	});
-	     reactiveUtils.watch(
-             () => view.popup.viewModel?.active,
-             () => {
-               selectedFeature = view.popup.selectedFeature;
-               if (selectedFeature !== null && view.popup.visible !== false) {
-            	   if(this.featureTable)
-            		   {
-            		   this.featureTable.highlightIds.removeAll();
-            		   this.featureTable.highlightIds.add(view.popup.selectedFeature.attributes.OBJECTID);
-  	                 	
-            		   }
-                 
-               }
-             }
-	      );
-	     this.view = view;
-      }));  
-
-   
+      }
+    },
+    
+    /**
+     * Initializes the local catalog URL in the config targets.
+     */
+    _initializeLocalCatalogUrl: function() {
+      var localGeoportalUrl = this._createLocalCatalogUrl();
+      if (localGeoportalUrl) {
+        for (var i = 0; i < this.config.targets.length; i++) {
+          var target = this.config.targets[i];
+          if (target.type === "geoportal" && !target.url) {
+            this.config.targets[i].url = localGeoportalUrl;
+            break;
+          }
+        }
+      }
+    },
+    
+    /**
+     * Sets up all map widgets for both map and scene views.
+     */
+    _setupAllWidgets: function(mapView, sceneView) {
+      this._setupGeoportalSearchWidget(mapView, sceneView);
+      this._setupSearchWidget(mapView, sceneView);
+      this._setupLayerList(mapView, sceneView);
+      this._setupHomeWidget(mapView, sceneView);
+      this._setupBasemapGallery(mapView, sceneView);
+      this._setupLegend(mapView, sceneView);
+      this._setupViewSwitcher(mapView, sceneView);
+    },
+    
+    /**
+     * Sets up the Geoportal search widget for both views.
+     */
+    _setupGeoportalSearchWidget: function(mapView, sceneView) {    
+      var widgetContextMapView = new WidgetContext({
+        i18n: i18n,
+        view: mapView,
+        secondaryView: sceneView,
+        proxyUrl: esriConfig.defaults.io.proxyUrl,
+        wabWidget: this,
+        widgetConfig: this.config
+      });
+      
+      // For SceneView widget: primary=sceneView, secondary=mapView
+      var widgetContextSceneView = new WidgetContext({
+        i18n: i18n,
+        view: sceneView,
+        secondaryView: mapView,
+        proxyUrl: esriConfig.defaults.io.proxyUrl,
+        wabWidget: this,
+        widgetConfig: this.config
+      });
+      
+      var node = domConstruct.create("div", {
+        width: "500px",
+        height: "500px"
+      });
+      
+      // MapView geoportal search
+      var gpSearchWidget = new SearchPane({
+        i18n: widgetContextMapView.i18n,
+        widgetContext: widgetContextMapView
+      }, node);
+      gpSearchWidget.startup();
+      
+      var gpSearchExpand = new Expand({
+        expandIcon: "query",
+        expandTooltip: "Geoportal Search",
+        view: mapView,
+        content: gpSearchWidget
+      });
+      mapView.ui.add(gpSearchExpand, {position: "top-left", index: 0});
+      
+      // SceneView geoportal search - use separate WidgetContext with sceneView
+      var nodeScene = domConstruct.create("div", {
+        width: "500px",
+        height: "500px"
+      });
+      
+      var gpSearchWidgetScene = new SearchPane({
+        i18n: widgetContextSceneView.i18n,
+        widgetContext: widgetContextSceneView
+      }, nodeScene);
+      gpSearchWidgetScene.startup();
+      
+      var gpSearchExpandScene = new Expand({
+        expandIcon: "query",
+        expandTooltip: "Geoportal Search",
+        view: sceneView,
+        content: gpSearchWidgetScene
+      });
+      sceneView.ui.add(gpSearchExpandScene, {position: "top-left", index: 0});
+    },
+    
+    /**
+     * Sets up the address/place search widget for both views.
+     */
+    _setupSearchWidget: function(mapView, sceneView) {
+      // MapView search
+      var searchWidget = new SearchWidget({view: mapView});
+      var searchWidgetExpand = new Expand({
+        expandIcon: "search",
+        expandTooltip: "Find Address or Place",
+        view: mapView,
+        content: searchWidget
+      });
+      mapView.ui.add(searchWidgetExpand, {position: "top-left", index: 1});
+      
+      // SceneView search
+      var searchWidgetScene = new SearchWidget({view: sceneView});
+      var searchWidgetSceneExpand = new Expand({
+        expandIcon: "search",
+        expandTooltip: "Find Address or Place",
+        view: sceneView,
+        content: searchWidgetScene
+      });
+      sceneView.ui.add(searchWidgetSceneExpand, {position: "top-left", index: 0});
+    },
+    
+    /**
+     * Sets up the layer list widget for both views.
+     */
+    _setupLayerList: function(mapView, sceneView) {
+      var self = this;
+      
+      // Define actions for layer list items
+      async function defineActions(event) {
+        var item = event.item;
+        await item.layer.when();
+        item.actionsSections = [
+          [{
+            title: i18resources.mapViewer.layerListFullExtent,
+            icon: "zoom-out-fixed",
+            id: "full-extent"
+          }],
+          [{
+            title: i18resources.mapViewer.layerListRemove,
+            icon: "minus-circle",
+            id: "remove-layer"
+          }]
+        ];
+      }
+      
+      // MapView layer list
+      var layerList = new LayerList({
+        view: mapView,
+        listItemCreatedFunction: defineActions
+      });
+      var layerListExpand = new Expand({
+        expandIcon: "layers",
+        expandTooltip: "Map Layers",
+        view: mapView,
+        content: layerList
+      });
+      mapView.ui.add(layerListExpand, {position: "top-left", index: 2});
+      
+      // SceneView layer list
+      var layerListScene = new LayerList({
+        view: sceneView,
+        listItemCreatedFunction: defineActions
+      });
+      var layerListSceneExpand = new Expand({
+        expandIcon: "layers",
+        expandTooltip: "Map Layers",
+        view: sceneView,
+        content: layerListScene
+      });
+      sceneView.ui.add(layerListSceneExpand, {position: "top-left", index: 2});
+      
+      // Store references and setup action handlers
+      this.layerList = layerList;
+      this.layerListScene = layerListScene;
+      
+      layerList.on("trigger-action", lang.hitch(this, function(event) {
+        this.executeLayerlistActions(event);
+      }));
+      layerListScene.on("trigger-action", lang.hitch(this, function(event) {
+        this.executeLayerlistActions(event);
+      }));
+    },
+    
+    /**
+     * Sets up the home widget for both views.
+     */
+    _setupHomeWidget: function(mapView, sceneView) {
+      // MapView home
+      var homeWidget = new Home({view: mapView});
+      mapView.ui.add(homeWidget, {position: "top-left", index: 4});
+      
+      // SceneView home
+      var homeWidgetScene = new Home({view: sceneView});
+      sceneView.ui.add(homeWidgetScene, {position: "top-left", index: 4});
+    },
+    
+    /**
+     * Sets up the basemap gallery widget for both views.
+     */
+    _setupBasemapGallery: function(mapView, sceneView) {
+      // MapView basemap gallery
+      var basemapWidget = new BasemapGallery({view: mapView});
+      var basemapExpand = new Expand({
+        expandIcon: "basemap",
+        expandTooltip: "Basemap",
+        view: mapView,
+        content: basemapWidget
+      });
+      mapView.ui.add(basemapExpand, {position: "top-right", index: 1});
+      
+      // SceneView basemap gallery
+      var basemapWidgetScene = new BasemapGallery({view: sceneView});
+      var basemapExpandScene = new Expand({
+        expandIcon: "basemap",
+        expandTooltip: "Basemap",
+        view: sceneView,
+        content: basemapWidgetScene
+      });
+      sceneView.ui.add(basemapExpandScene, {position: "top-right", index: 1});
+    },
+    
+    /**
+     * Sets up the legend widget for both views.
+     */
+    _setupLegend: function(mapView, sceneView) {
+      // MapView legend
+      var legend = new Legend({view: mapView});
+      var legendExpand = new Expand({
+        expandIcon: "legend",
+        expandTooltip: "Legend",
+        view: mapView,
+        content: legend
+      });
+      mapView.ui.add(legendExpand, {position: "top-left", index: 3});
+      
+      // SceneView legend
+      var legendScene = new Legend({view: sceneView});
+      var legendSceneExpand = new Expand({
+        expandIcon: "legend",
+        expandTooltip: "Legend",
+        view: sceneView,
+        content: legendScene
+      });
+      sceneView.ui.add(legendSceneExpand, {position: "top-left", index: 3});
+    },
+    
+    /**
+     * Sets up the 2D/3D view switcher button.
+     */
+    _setupViewSwitcher: function(mapView, sceneView) {
+      var self = this;
+      
+      // Create switch button container
+      var switchBtnContainer = document.createElement("div");
+      switchBtnContainer.className = "esri-widget esri-component";
+      switchBtnContainer.style.boxShadow = "0 1px 2px rgba(0,0,0,0.15)";
+      
+      var switchBtn = document.createElement("button");
+      switchBtn.id = "switch-btn";
+      switchBtn.innerHTML = i18resources.mapViewer.toggleView3d;
+      switchBtn.className = "esri-button";
+      switchBtn.title = "Switch between 2D and 3D views";
+      switchBtnContainer.appendChild(switchBtn);
+      
+      // Add to mapView UI initially
+      mapView.ui.add(switchBtnContainer, {position: "top-right", index: 0});
+      
+      // Switch logic
+      switchBtn.addEventListener("click", function() {
+        if (self.activeView === mapView) {
+          self._switchToSceneView(mapView, sceneView, switchBtnContainer, switchBtn);
+        } else {
+          self._switchToMapView(mapView, sceneView, switchBtnContainer, switchBtn);
+        }
+      });
+    },
+    
+    /**
+     * Switches from 2D MapView to 3D SceneView.
+     */
+    _switchToSceneView: function(mapView, sceneView, switchBtnContainer, switchBtn) {
+      var self = this;
+      
+      // Save current 2D view state before switching
+      var viewpoint = mapView.viewpoint.clone();
+      
+      this.activeView = sceneView;
+      sceneView.container = this.mapNode;
+      mapView.container = null;
+      mapView.ui.remove(switchBtnContainer);
+      sceneView.ui.add(switchBtnContainer, {position: "top-right", index: 0});
+      switchBtn.innerHTML = i18resources.mapViewer.toggleView2d;
+      
+      // Apply the saved viewpoint to the 3D view
+      sceneView.goTo(viewpoint).catch(function(error) {
+        console.warn("Could not sync viewpoint to 3D view:", error);
+      });
+    },
+    
+    /**
+     * Switches from 3D SceneView to 2D MapView.
+     */
+    _switchToMapView: function(mapView, sceneView, switchBtnContainer, switchBtn) {
+      var self = this;
+      
+      // Save current 3D view state before switching
+      var viewpoint = sceneView.viewpoint.clone();
+      
+      this.activeView = mapView;
+      mapView.container = this.mapNode;
+      sceneView.container = null;
+      sceneView.ui.remove(switchBtnContainer);
+      mapView.ui.add(switchBtnContainer, {position: "top-right", index: 0});
+      switchBtn.innerHTML = i18resources.mapViewer.toggleView3d;
+      
+      // Apply the saved viewpoint to the 2D view
+      mapView.goTo(viewpoint).then(function() {
+        // Force MapView to refresh layers after re-attachment and viewpoint sync
+        mapView.map.layers.forEach(function(layer) {
+          if (layer.visible !== undefined) {
+            var wasVisible = layer.visible;
+            layer.visible = false;
+            layer.visible = wasVisible;
+          }
+        });
+      }).catch(function(error) {
+        console.warn("Could not sync viewpoint to 2D view:", error);
+      });
+    },
+    
+    /**
+     * Sets up popup watchers for feature table integration.
+     */
+    _setupPopupWatchers: function(mapView, sceneView) {
+      var self = this;
+      
+      // MapView popup action handler
+      reactiveUtils.on(function() { return mapView.popup; }, "trigger-action", function(event) {
+        if (event.action.id === "view-attribute-table") {
+          self.openAttrTable(mapView.popup.selectedFeature);
+        }
+      });
+      
+      // SceneView popup action handler
+      reactiveUtils.on(function() { return sceneView.popup; }, "trigger-action", function(event) {
+        if (event.action.id === "view-attribute-table") {
+          self.openAttrTable(sceneView.popup.selectedFeature);
+        }
+      });
+      
+      // MapView popup selection watcher
+      reactiveUtils.watch(
+        function() { return mapView.popup.viewModel?.active; },
+        function() {
+          var selectedFeature = mapView.popup.selectedFeature;
+          if (selectedFeature !== null && mapView.popup.visible !== false) {
+            if (self.featureTable) {
+              self.featureTable.highlightIds.removeAll();
+              self.featureTable.highlightIds.add(mapView.popup.selectedFeature.attributes.OBJECTID);
+            }
+          }
+        }
+      );
+      
+      // SceneView popup selection watcher
+      reactiveUtils.watch(
+        function() { return sceneView.popup.viewModel?.active; },
+        function() {
+          var selectedFeature = sceneView.popup.selectedFeature;
+          if (selectedFeature !== null && sceneView.popup.visible !== false) {
+            if (self.featureTable) {
+              self.featureTable.highlightIds.removeAll();
+              self.featureTable.highlightIds.add(sceneView.popup.selectedFeature.attributes.OBJECTID);
+            }
+          }
+        }
+      );
+    },
+    
+    /**
+     * Finalizes map setup by storing references and adding initial layer.
+     */
+    _finalizeMapSetup: function(mapView, sceneView) {
+      this.mapView = mapView;
+      this.sceneView = sceneView;
+      this.activeView = mapView;
+      
+      // Add initial layer after both views are ready and assigned
       if (!this.mapWasInitialized) {
         this.mapWasInitialized = true;
         if (this.urlParams) {
-        	this.addLayer(this.urlParams,view);
+          this.addLayer(this.urlParams, this.mapView, this.sceneView);
         }
       }
     },
@@ -300,12 +579,49 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
     	if(event.action && event.action.id === 'full-extent' &&
     			event.item && event.item.layer) 
 		{
-    		this.view.goTo(event.item.layer.fullExtent);
+			if(this.activeView.type === "2d")
+             {
+                 // For 2D MapView, use the fullExtent directly from the layer
+                 this.activeView.goTo(event.item.layer.fullExtent);
+             }
+            else if(this.activeView.type === "3d")
+            {
+				this.activeView.goTo({
+				      target: event.item.layer.fullExtent,
+				      tilt: 65
+				    });
+            }           
+			
 		}
-    	if(event.action && event.action.id === 'remove-layer') 
+    	if(event.action && event.action.id === 'remove-layer' &&
+    			event.item && event.item.layer) 
 		{
-    		const layerToRemove = this.view.map.findLayerById(event.item.layer.id);
-    		this.view.map.layers.remove(layerToRemove);
+    		// Use the layer directly from the event item - it's already the correct layer
+    		// from the LayerList's associated view/map
+    		const layerToRemove = event.item.layer;
+    		
+    		// Find and remove matching layers from both views by URL or title
+    		// since layers are cloned with different IDs for each view
+    		var layerUrl = layerToRemove.url;
+    		var layerTitle = layerToRemove.title;
+    		
+    		// Remove from mapView
+    		var mapLayerToRemove = this.mapView.map.layers.find(function(lyr) {
+    			return (layerUrl && lyr.url === layerUrl) || 
+    			       (layerTitle && lyr.title === layerTitle);
+    		});
+    		if (mapLayerToRemove) {
+    			this.mapView.map.layers.remove(mapLayerToRemove);
+    		}
+    		
+    		// Remove from sceneView
+    		var sceneLayerToRemove = this.sceneView.map.layers.find(function(lyr) {
+    			return (layerUrl && lyr.url === layerUrl) || 
+    			       (layerTitle && lyr.title === layerTitle);
+    		});
+    		if (sceneLayerToRemove) {
+    			this.sceneView.map.layers.remove(sceneLayerToRemove);
+    		}
 		}		
     },
 
@@ -388,7 +704,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
         return null;
       },
       
-      addLayer: function(params,view){
+      addLayer: function(params,mapView,sceneView) {
           // console.warn("AddToMap.addLayer...",type,url);     
     	  var url = params.url;
     	  var type = params.type;    	  
@@ -396,7 +712,7 @@ function(declare, lang, Templated, template, i18n, has, domStyle,
           this.urlParams = params;
         
           var processor = new LayerProcessor();
-          processor.addLayer(view,type,url).then(function(result){
+          processor.addLayer(mapView,type,url,sceneView).then(function(result){
             if (result) {
               dfd.resolve(result);
             } else {

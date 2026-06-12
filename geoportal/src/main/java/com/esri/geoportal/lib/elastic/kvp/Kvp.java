@@ -13,24 +13,18 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.kvp;
+import org.opensearch.action.delete.DeleteResponse;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.util.FieldNames;
 import com.esri.geoportal.lib.elastic.util.MurmurUtil;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-
-import org.opensearch.action.DocWriteResponse.Result;
-import org.opensearch.action.delete.DeleteResponse;
-import org.opensearch.action.get.GetRequestBuilder;
-import org.opensearch.action.get.GetResponse;
-// import org.opensearch.index.get.GetField;
-import org.opensearch.common.document.DocumentField;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.json.Json;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Key-value pair.

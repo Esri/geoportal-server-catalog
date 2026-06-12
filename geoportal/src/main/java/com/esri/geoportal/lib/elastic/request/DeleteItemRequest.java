@@ -15,16 +15,6 @@
 package com.esri.geoportal.lib.elastic.request;
 import com.esri.geoportal.context.AppRequest;
 import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.util.AccessUtil;
-import com.esri.geoportal.lib.elastic.util.ItemIO;
-
-import javax.json.Json;
-import javax.json.JsonObjectBuilder;
-
-import org.opensearch.action.DocWriteResponse.Result;
-import org.opensearch.action.delete.DeleteResponse;
 
 /**
  * Delete an item.

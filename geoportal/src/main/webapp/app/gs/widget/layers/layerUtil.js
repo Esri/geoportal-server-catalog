@@ -15,16 +15,29 @@
 define(["dojo/_base/array",
   "dojo/Deferred",
   "dojo/_base/lang",
-  "dojo/promise/all",
-  "dojo/Deferred",
+  "dojo/promise/all", 
   "../util",
   "esri4/PopupTemplate",
   "esri4/core/reactiveUtils",
   "esri4/layers/GroupLayer",
   "esri4/portal/Portal",
-  "esri4/portal/PortalItem"],
-        function (array, Deferred, lang, all, Deferred, util, PopupTemplate,
-                reactiveUtils, GroupLayer, Portal, PortalItem) {
+  "esri4/portal/PortalItem",
+  "esri4/layers/MapImageLayer",
+    "esri4/layers/ImageryLayer",
+    "esri4/layers/TileLayer",
+    "esri4/layers/CSVLayer",
+    "esri4/layers/FeatureLayer",   
+    "esri4/layers/KMLLayer",    
+    "esri4/layers/VectorTileLayer",
+    "esri4/layers/ImageryTileLayer",   
+    "esri4/layers/WMSLayer",
+    "esri4/layers/WMTSLayer",
+    "esri4/layers/OGCFeatureLayer"
+    ],
+        function (array, Deferred, lang, all, util, PopupTemplate,
+                reactiveUtils, GroupLayer, Portal, PortalItem, MapImageLayer, ImageryLayer, TileLayer, CSVLayer, 
+			  FeatureLayer,  KMLLayer,  VectorTileLayer, 
+			  ImageryTileLayer, WMSLayer, WMTSLayer, OGCFeatureLayer) {
           var _def = {
 
             addMapLayer: function (view, layer, item, referenceId) {
@@ -303,7 +316,7 @@ define(["dojo/_base/array",
               }
             },
 
-            addGroupLayer: function (itemUrl, itemId, itemDataObj, view, referenceId) {
+            addGroupLayer: function (itemUrl, itemId, itemDataObj, mapView, referenceId,sceneView) {
               var itemData;
               var dfd = new Deferred();
               var self = this;
@@ -324,6 +337,7 @@ define(["dojo/_base/array",
                    parsedUrl = null;
                  }
 				 if (hostName === "arcgis.com" || hostName.endsWith(".arcgis.com")) {
+
                   itemInfoUrl = "https://www.arcgis.com/sharing/rest/content/items/" + itemId;
                 }//On Premise Portal
                 else {
@@ -333,53 +347,201 @@ define(["dojo/_base/array",
                 }
                 var readItemJson = util.readItemJsonData(itemInfoUrl);
                 readItemJson.then(function (itemDataObj) {
-                  dfd = self.addGroupLayerToMap(itemId, itemDataObj.data, view, null, portalBaseUrl);
+                  dfd = self.addGroupLayerToMap(itemId, itemDataObj.data, mapView, null, portalBaseUrl,sceneView);
                   dfd.then(function (result) {
                     dfd.resolve(result);
                   })
                 });
               } else if (itemData && itemData.layers)
               {
-                dfd = self.addGroupLayerToMap(itemId, itemData, view, referenceId);
+                dfd = self.addGroupLayerToMap(itemId, itemData, mapView, referenceId);
               }
               return dfd.promise;
             },
-            addGroupLayerToMap: function (itemId, itemData, view, referenceId, portalBaseUrl)
-            {
-              var self = this;
-              let arcGisPortal;
-              if (portalBaseUrl)
-              {
-                arcGisPortal = new Portal({
-                  url: portalBaseUrl
-                });
-              } else
-              {
-                arcGisPortal = new Portal({
-                  url: "https://www.arcgis.com"
-                });
-              }
-              let item = new PortalItem({
-                id: itemId,
-                portal: arcGisPortal // This loads the item
-              });
+			
+			addGroupLayerToMap: function(itemId, itemData, mapView, referenceId, portalBaseUrl,sceneView) {
+				var self = this;
+				let arcGisPortal;
+				if (portalBaseUrl) {
+					arcGisPortal = new Portal({
+						url: portalBaseUrl
+					});
+				} else {
+					arcGisPortal = new Portal({
+						url: "https://www.arcgis.com"
+					});
+				}
+				let item = new PortalItem({
+					id: itemId,
+					portal: arcGisPortal // This loads the item
+				});
 
-              var groupLayer = new GroupLayer({
-                title: itemData.title,
-                portalItem: item
+				var groupLayer = new GroupLayer({
+					title: itemData.title,
+					portalItem: item
 
-              });
-              groupLayer.load();
-              var dfd = self.waitForLayer(self.i18n, groupLayer);
-              dfd.then(function (layer) {
-                self.setGroupLayerPopupTemplate(layer, itemData);
-                self.addMapLayer(view, layer, null, referenceId);
-                dfd.resolve(layer);
-              });
-              return dfd;
-            }
-          };
+				});
+				groupLayer.load();
+				var dfd = self.waitForLayer(self.i18n, groupLayer);
+				dfd.then(function(layer) {
+					self.setGroupLayerPopupTemplate(layer, itemData);
+					self.addMapLayer(mapView, layer, null, referenceId);
+					//sceneView, clone layer and add to scene if sceneView is passed in
+					if (sceneView) {
+						var sceneGroupLayer = self.cloneLayer(groupLayer);
+						sceneGroupLayer.load();
+						self.waitForLayer(self.i18n, sceneGroupLayer).then(function(sceneLayer) {
+							self.setGroupLayerPopupTemplate(sceneLayer, itemData);
+							self.addMapLayer(sceneView, sceneLayer, null, referenceId);
+							dfd.resolve([layer, sceneLayer]);
+						}).catch(function(ex) {
+							console.warn("Error loading group layer for scene view.");
+							console.error(ex);
+							dfd.resolve([layer, null]);
+						});
+					} else {
+						dfd.resolve([layer, null]);
 
-          return _def;
+					}
 
-        });
+				});
+				return dfd;
+			},
+			
+			
+		/**
+		 * Safely clones an ArcGIS layer.
+		 * - Uses clone() if available
+		 * - Otherwise re-creates the layer using its constructor and key properties
+		 */
+		cloneLayer: function (layer) {
+		  if (!layer) return null;
+
+		  // 1️⃣ Prefer native clone() if exposed
+		  if (typeof layer.clone === "function") {
+		    try {
+		      return layer.clone();
+		    } catch (e) {
+		      console.warn("clone() failed, falling back to manual clone:", e);
+		    }
+		  }
+
+		  // 2️⃣ Handle GroupLayer (recursive)
+		  if (layer.type === "group") {
+		    var self = this;
+		    return new GroupLayer({
+		      title: layer.title,
+		      visible: layer.visible,
+		      visibilityMode: layer.visibilityMode,
+		      opacity: layer.opacity,
+		      layers: layer.layers.map(function(lyr) { return self.cloneLayer(lyr); })
+		    });
+		  }
+
+		  // 3️⃣ FeatureLayer (true 3D aware)
+		  if (layer instanceof FeatureLayer) {
+		    return new FeatureLayer({
+		      url: layer.url,
+		      title: layer.title,
+		      visible: layer.visible,
+		      opacity: layer.opacity,
+		      renderer: layer.renderer?.clone?.(),
+		      popupTemplate: layer.popupTemplate?.clone?.(),
+		      labelingInfo: layer.labelingInfo,
+		      definitionExpression: layer.definitionExpression,
+		      elevationInfo: layer.elevationInfo
+		    });
+		  }
+
+		  // 3️⃣b OGCFeatureLayer - requires collectionId
+		  if (layer instanceof OGCFeatureLayer) {
+		    var clonedRenderer = null;
+		    if (layer.renderer && typeof layer.renderer.clone === "function") {
+		      clonedRenderer = layer.renderer.clone();
+		    }
+		    var clonedPopupTemplate = null;
+		    if (layer.popupTemplate && typeof layer.popupTemplate.clone === "function") {
+		      clonedPopupTemplate = layer.popupTemplate.clone();
+		    }
+		    return new OGCFeatureLayer({
+		      url: layer.url,
+		      collectionId: layer.collectionId,
+		      title: layer.title,
+		      visible: layer.visible,
+		      opacity: layer.opacity,
+		      legendEnabled: layer.legendEnabled !== false,
+		      renderer: clonedRenderer,
+		      popupTemplate: clonedPopupTemplate,
+		      labelingInfo: layer.labelingInfo,
+		      definitionExpression: layer.definitionExpression,
+		      elevationInfo: layer.elevationInfo
+		    });
+		  }
+
+		  // 4️⃣ Map / Tile / VectorTile layers
+		  if (
+		    layer instanceof MapImageLayer ||
+		    layer instanceof TileLayer ||
+		    layer instanceof VectorTileLayer
+		  ) {
+		    return new layer.constructor({
+		      url: layer.url,
+		      title: layer.title,
+		      visible: layer.visible,
+		      opacity: layer.opacity
+		    });
+		  }
+
+		  // 5️⃣ Imagery layers
+		  if (
+		    layer instanceof ImageryLayer ||
+		    layer instanceof ImageryTileLayer
+		  ) {
+		    return new layer.constructor({
+		      url: layer.url,
+		      title: layer.title,
+		      visible: layer.visible,
+		      opacity: layer.opacity,
+		      renderingRule: layer.renderingRule,
+		      mosaicRule: layer.mosaicRule
+		    });
+		  }
+
+		  // 6️⃣ WMS / WMTS
+		  if (layer instanceof WMSLayer || layer instanceof WMTSLayer) {
+		    return new layer.constructor({
+		      url: layer.url,
+		      title: layer.title,
+		      visible: layer.visible,
+		      opacity: layer.opacity,
+		      sublayers: layer.sublayers?.map(sl => sl.toJSON())
+		    });
+		  }
+
+		  // 7️⃣ KML
+		  if (layer instanceof KMLLayer) {
+		    return new KMLLayer({
+		      url: layer.url,
+		      title: layer.title,
+		      visible: layer.visible
+		    });
+		  }
+
+		  // 8️⃣ Final fallback (minimal but safe)
+		  if (layer.url && layer.constructor) {
+		    return new layer.constructor({
+		      url: layer.url,
+		      title: layer.title,
+		      visible: layer.visible,
+		      opacity: layer.opacity
+		    });
+		  }
+
+		  console.warn("Unsupported layer type for cloning:", layer);
+		  return null;
+		}
+		};
+
+		return _def;
+
+	});

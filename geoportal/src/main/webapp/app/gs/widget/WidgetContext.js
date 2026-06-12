@@ -14,14 +14,16 @@
  */
 define(["dojo/_base/declare",
   "dojo/_base/lang",
+  "dojo/Deferred",
+  "dojo/promise/all",
   "./layers/LayerLoader"],
-function(declare, lang, LayerLoader) {
+function(declare, lang, Deferred, all, LayerLoader) {
 
   var _def = declare([], {
 
     i18n: null,
-    //map: null,
     view: null,
+    secondaryView: null,  // The other view (sceneView if view is mapView, or vice versa)
     proxyUrl: null,
     supportsRemove: true,
     widgetConfig: null,
@@ -32,23 +34,77 @@ function(declare, lang, LayerLoader) {
     },
 
     addItem: function(serviceType,serviceUrl,item,itemUrl,referenceId) {
+      var self = this;
+      var dfd = new Deferred();
+      
+      // Create layer loader for primary view
       var layerLoader = new LayerLoader({
         i18n: this.i18n,
-        //map: this.getMap(),
         view: this.getView(),
         referenceId: referenceId
       });
-      return layerLoader.addItem(serviceType,serviceUrl,item,itemUrl);
+      
+      // Add to primary view first
+      layerLoader.addItem(serviceType,serviceUrl,item,itemUrl).then(function(result) {
+        // If we have a secondary view, add to it as well
+        if (self.secondaryView) {
+          var secondaryLoader = new LayerLoader({
+            i18n: self.i18n,
+            view: self.secondaryView,
+            referenceId: referenceId
+          });
+          secondaryLoader.addItem(serviceType,serviceUrl,item,itemUrl).then(function() {
+            dfd.resolve(result);
+          }).catch(function(error) {
+            console.warn("Failed to add layer to secondary view:", error);
+            // Still resolve since primary succeeded
+            dfd.resolve(result);
+          });
+        } else {
+          dfd.resolve(result);
+        }
+      }).catch(function(error) {
+        dfd.reject(error);
+      });
+      
+      return dfd;
     },
 
     addLayer: function(serviceType,serviceUrl,referenceId) {
+      var self = this;
+      var dfd = new Deferred();
+      
+      // Create layer loader for primary view
       var layerLoader = new LayerLoader({
         i18n: this.i18n,
-        //map: this.getMap(),
         view: this.getView(),
         referenceId: referenceId
       });
-      return layerLoader.addLayer(serviceType,serviceUrl);
+      
+      // Add to primary view first
+      layerLoader.addLayer(serviceType,serviceUrl).then(function(result) {
+        // If we have a secondary view, add to it as well
+        if (self.secondaryView) {
+          var secondaryLoader = new LayerLoader({
+            i18n: self.i18n,
+            view: self.secondaryView,
+            referenceId: referenceId
+          });
+          secondaryLoader.addLayer(serviceType,serviceUrl).then(function() {
+            dfd.resolve(result);
+          }).catch(function(error) {
+            console.warn("Failed to add layer to secondary view:", error);
+            // Still resolve since primary succeeded
+            dfd.resolve(result);
+          });
+        } else {
+          dfd.resolve(result);
+        }
+      }).catch(function(error) {
+        dfd.reject(error);
+      });
+      
+      return dfd;
     },
 
     getGeographicExtent: function() {
@@ -57,14 +113,13 @@ function(declare, lang, LayerLoader) {
       }
     },
 
-//    getMap: function() {
-//      return this.map;
-//    },
-    
     getView: function() {
-        return this.view;
-      },
-
+      return this.view;
+    },
+    
+    getSecondaryView: function() {
+      return this.secondaryView;
+    },
 
     showError: function(title,error) {
       console.warn("wro/Context.showError",title,error);
