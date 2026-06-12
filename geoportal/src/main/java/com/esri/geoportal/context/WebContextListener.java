@@ -13,9 +13,9 @@
  * limitations under the License.
  */
 package com.esri.geoportal.context;
-import javax.servlet.annotation.WebListener;
-import javax.servlet.ServletContextEvent;
-import javax.servlet.ServletContextListener;
+import jakarta.servlet.annotation.WebListener;
+import jakarta.servlet.ServletContextEvent;
+import jakarta.servlet.ServletContextListener;
 
 /**
  * Application level ServletContextListener.

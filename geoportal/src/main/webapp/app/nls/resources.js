@@ -391,6 +391,15 @@ define({
       "copyright": "© Geoportal",
       "quickLink1": "Quick Link 1",
       "quickLink2": "Quick Link 2"
-    }
+    },
+	
+	mapViewer:{
+		toggleView3d:"3D",
+		toggleView2d:"2D",
+		layerListRemove:"Remove",
+		layerListFullExtent:"Full Extent"
+       
+	}
+	
   }
 });

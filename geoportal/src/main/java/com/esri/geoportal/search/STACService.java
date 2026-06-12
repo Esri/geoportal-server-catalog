@@ -38,28 +38,28 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.json.JsonArray;
-import javax.json.JsonObject;
-import javax.json.Json;
-import javax.json.JsonString;
-import javax.json.JsonValue;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.ApplicationPath;
-import javax.ws.rs.Consumes;
-import javax.ws.rs.DELETE;
-import javax.ws.rs.GET;
-import javax.ws.rs.PATCH;
-import javax.ws.rs.POST;
-import javax.ws.rs.PUT;
-import javax.ws.rs.Path;
-import javax.ws.rs.PathParam;
-import javax.ws.rs.Produces;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Application;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.Status;
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonObject;
+import jakarta.json.JsonString;
+import jakarta.json.JsonValue;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.ApplicationPath;
+import jakarta.ws.rs.Consumes;
+import jakarta.ws.rs.DELETE;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.PATCH;
+import jakarta.ws.rs.POST;
+import jakarta.ws.rs.PUT;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Application;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.owasp.esapi.ESAPI;
 import org.slf4j.Logger;
@@ -241,15 +241,6 @@ public class STACService extends Application {
 		limit = setLimit(limit);
 
 		try {
-			// 518 updates
-			if (!gc.getSupportsCollections()) {
-				// Geoportal not configured for collections
-				// STAC will only have 1 STAC collection 'metadata'
-				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
-				finalresponse = responseJSON.replaceAll("\\{collectionId\\}", "metadata");
-
-			} else {
-				// Geoportal configured for collections
 				// STAC will have collection for each Geoportal collection
 				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
 
@@ -340,7 +331,7 @@ public class STACService extends Application {
 				}
 
 				finalresponse = finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
-			}
+			
 
 		} catch (Exception e) {
 			LOGGER.error("Error in collections " + e);
@@ -451,21 +442,15 @@ public class STACService extends Application {
 		JSONArray detailErrArray = new JSONArray();
 		
 		try {			
-			if (!gc.getSupportsCollections()) 
-			{	
-				responseJSON = this.readResourceFile("service/config/stac-collection-metadata.json", hsr);			
-				responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
+
+			JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
+			if (collectionObj == null || collectionObj.isEmpty()) // #518 
+			{
+				status = Response.Status.NOT_FOUND;
 			}
 			else
 			{
-				JSONObject collectionObj = StacHelper.getCollectionWithId(collectionId);
-				if (collectionObj == null || collectionObj.isEmpty()) // #518 || !collectionId.equals("metadata"))
-				{
-					status = Response.Status.NOT_FOUND;
-				}
-				else
-				{
-          responseJSON = collectionObj.toString();
+				responseJSON = collectionObj.toString();
 
           // #574 project collection geometry to outCRS if provided and valid
           // if reprojecting STAC geometries is supported and a
@@ -503,8 +488,8 @@ public class STACService extends Application {
           
 					responseJSON = responseJSON.replaceAll("\\{collectionId\\}", collectionId);
 					responseJSON = responseJSON.replaceAll("\\{url\\}", this.getBaseUrl(hsr));
-				}
 			}
+			
 		} catch (Exception e) {
 			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting collection: "+collectionId+" "+e));
 			status = Response.Status.INTERNAL_SERVER_ERROR;
@@ -569,9 +554,9 @@ public class STACService extends Application {
 				queryMap.put("datetime", datetime);
       @SuppressWarnings("LocalVariableHidesMemberVariable")
 			GeoportalContext gc = GeoportalContext.getInstance();
-			if (gc.getSupportsCollections()) {
-				queryMap.put("collections", collectionId);
-			}
+			
+			queryMap.put("collections", collectionId);
+			
 			
 			if (queryJson != null && queryJson.length() > 0)
 				queryMap.put("queryJson", queryJson);
@@ -876,8 +861,7 @@ public class STACService extends Application {
 			if (created != null && created.length() > 0)
 			queryMap.put("created", created);
 			
-			//GeoportalContext gc = GeoportalContext.getInstance();
-			if ((gc.getSupportsCollections() && collections != null && !collections.isEmpty())) {
+			if (collections != null && !collections.isEmpty()) {
 				listOfCollections = collections.replace("[", "").replace("]", "").replace("\"", "");
 				queryMap.put("collections", listOfCollections);
 			}
@@ -1053,7 +1037,7 @@ public class STACService extends Application {
 			}
 					
 			String listOfCollections = "";
-			if ((gc.getSupportsCollections() && collectionArr != null && !collectionArr.isEmpty())) {
+			if (collectionArr != null && !collectionArr.isEmpty()) {
 				for(int i=0;i<collectionArr.size();i++)
 				{
 					if(i==0)
@@ -1169,7 +1153,7 @@ public class STACService extends Application {
 		status = Response.Status.BAD_REQUEST;			
 		responseJSON = this.generateResponse("400","Collection id can contain (A-Za-z0-9_-) and length should be less than 25.",null);		
 	}	
-    else if(gc.getSupportsCollections() && !validCollection(collectionId)) {
+    else if(!validCollection(collectionId)) {
         status = Response.Status.BAD_REQUEST;
         String baseUrl = this.getBaseUrl(hsr);
         responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
@@ -1219,7 +1203,7 @@ public class STACService extends Application {
 			status = Response.Status.BAD_REQUEST;			
 			responseJSON = this.generateResponse("400","Collection id can contain (A-Za-z0-9_-) and length should be less than 25.",null);		
 		}		
-		else if(gc.getSupportsCollections() && !validCollection(collectionId)) 
+		else if(!validCollection(collectionId)) 
 		{	
 			status = Response.Status.BAD_REQUEST;
 			String baseUrl = this.getBaseUrl(hsr);
@@ -1281,7 +1265,7 @@ public class STACService extends Application {
 		String responseJSON;	
 		Status status;		
 		
-		if(gc.getSupportsCollections() && !validCollection(collectionId)) {	
+		if(!validCollection(collectionId)) {	
 			status = Response.Status.BAD_REQUEST;
 			String baseUrl = this.getBaseUrl(hsr);
 			responseJSON = this.generateResponse("400","Collection does not exist. Please add collection by sending POST request "+baseUrl+"/collections",null);		
@@ -1917,8 +1901,8 @@ public class STACService extends Application {
 
 		DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
-		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);		
-		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.getJsonObject("featurePropPath").toString() + "}";
+		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
+		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
 
 		items = elasticResContext.read("$.hits.hits");
 
@@ -2076,7 +2060,7 @@ public class STACService extends Application {
 						+ (filter != null ? "&filter=" + filter : "")
 						+((requestType.startsWith("search")) && collectionId != null ? "&collections=" + collectionId : "");
 			}
-			if (requestType.startsWith("metadataItems"))
+			if (requestType.startsWith("metadataItems")) // These are for links href for collection
 				resourceFilecontext.set("$.response.links", linksContext.read("$.metadataItem.links"));
 
 			if (requestType.startsWith("search"))
@@ -2685,14 +2669,14 @@ public class STACService extends Application {
 	
 	                  JSONArray newEnvelopeGeometries = new JSONArray();
 	                  newEnvelopeGeometries.add(newEnvelopeGeometry);
-	
+
 	                  responseObject.put("envelope_geo", newEnvelopeGeometries);
-	
+
 	                  break;
 	
 	                default:
 	                  LOGGER.error("Unsupported geometry field: " + thisGeometryField);
-	              }
+	          }
 
             } catch (ParseException ex) {
               LOGGER.error(STACService.class.getName()+ ": " + ex.toString());
@@ -3001,7 +2985,7 @@ public class STACService extends Application {
           throw new IllegalArgumentException("bbox must have 4 or 6 comma-separated numbers");
         }
 
-        javax.json.JsonArrayBuilder ab = Json.createArrayBuilder();
+        jakarta.json.JsonArrayBuilder ab = Json.createArrayBuilder();
         for (String p : parts) {
           if (p == null || p.trim().isEmpty()) {
             throw new IllegalArgumentException("bbox contains an empty coordinate");

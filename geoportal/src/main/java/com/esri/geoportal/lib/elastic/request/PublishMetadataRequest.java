@@ -13,38 +13,19 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
-import com.esri.geoportal.base.metadata.MetadataDocument;
-import com.esri.geoportal.base.metadata.UnrecognizedTypeException;
-import com.esri.geoportal.base.util.DateUtil;
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.util.UuidUtil;
-import com.esri.geoportal.base.util.Val;
-import com.esri.geoportal.base.util.exception.UsageException;
-import com.esri.geoportal.base.xml.XmlUtil;
-import com.esri.geoportal.context.AppRequest;
-import com.esri.geoportal.context.AppResponse;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.util.AccessUtil;
-import com.esri.geoportal.lib.elastic.util.FieldNames;
-import com.esri.geoportal.lib.elastic.util.ItemIO;
-import com.esri.geoportal.lib.elastic.util.MurmurUtil;
-
 import java.util.Map;
 
-import javax.json.Json;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
-import javax.json.stream.JsonParsingException;
-
-import org.opensearch.action.get.GetResponse;
-import org.opensearch.action.search.SearchRequestBuilder;
-//import org.opensearch.client.transport.TransportClient;
-import org.opensearch.index.query.QueryBuilders;
-import org.opensearch.search.SearchHit;
-import org.opensearch.search.SearchHits;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.base.metadata.MetadataDocument;
+import com.esri.geoportal.context.AppRequest;
+import com.esri.geoportal.context.AppResponse;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.util.AccessUtil;
+
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * Publish metadata.
@@ -113,7 +94,7 @@ public class PublishMetadataRequest extends AppRequest {
 //        try {
 //          jso = (JsonObject)JsonUtil.toJsonStructure(content);
 //        } catch (JsonParsingException jpe) {
-//          throw new UsageException("javax.json.stream.JsonParsingException: Invalid JSON",jpe);
+//          throw new UsageException("jakarta.json.stream.JsonParsingException: Invalid JSON",jpe);
 //        }
 //        if (jso != null) {
 //          json = JsonUtil.toJson(jso,false);

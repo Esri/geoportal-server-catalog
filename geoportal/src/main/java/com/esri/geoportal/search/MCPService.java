@@ -18,18 +18,18 @@ package com.esri.geoportal.search;
 import com.esri.geoportal.service.stac.StacContext;
 
 import java.util.*;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.*;
-import javax.ws.rs.core.*;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.*;
 import net.minidev.json.*;
 import net.minidev.json.parser.JSONParser;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.ws.rs.client.Client;
-import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Entity;
+import jakarta.ws.rs.client.Client;
+import jakarta.ws.rs.client.ClientBuilder;
+import jakarta.ws.rs.client.Entity;
 
 /**
  * Minimal MCP (Model Context Protocol) adapter for the STAC API.

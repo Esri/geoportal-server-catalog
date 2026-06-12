@@ -79,11 +79,11 @@ public abstract class DcatRequest {
    * @param headers headers
    */
   public void putResponse(int status, String mediaType, String entity, Map<String,String> headers) {
-    LOGGER.trace(String.format("Entity: %s", entity));
+    LOGGER.trace("Entity: %s".formatted(entity));
     try {
       JsonNode data = MAPPER.readTree(entity);
       if (data==null || !data.isObject())
-        throw new IOException(String.format("Response is not valid DCAT response."));
+        throw new IOException("Response is not valid DCAT response.".formatted());
       processData(data);
     } catch(Exception ex) {
       onEnd(false, ex);
@@ -170,7 +170,7 @@ public abstract class DcatRequest {
       
       dataCounter += dataset.size();
       if (dataCounter % Math.round(Math.pow(10,Math.floor(Math.log10(dataCounter)))) == 0)
-        LOGGER.info(String.format("Processed total of %d DCAT records", dataCounter));
+        LOGGER.info("Processed total of %d DCAT records".formatted(dataCounter));
       
       if (lastIdentifier!=null && dcatContext.isRunning()) {
         search(lastIdentifier);

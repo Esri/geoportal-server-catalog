@@ -226,7 +226,7 @@
       var sw2 = new java.io.StringWriter();
       var con = null, buffer, nRead;
       try {
-        var u = new java.net.URL(url);		
+        var u = new java.net.URL(url);
         //print("data ",data);
         if(options && options.useHttps)
         	{        	

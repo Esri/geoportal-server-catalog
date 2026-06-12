@@ -13,7 +13,8 @@
  * limitations under the License.
  */
 package com.esri.geoportal.service.rest;
-import com.esri.geoportal.base.security.ArcGISAuthenticationProvider;
+
+import com.esri.geoportal.base.security.ArcgisAuthService;
 import com.esri.geoportal.base.security.Group;
 import com.esri.geoportal.context.AppRequest;
 import com.esri.geoportal.context.AppResponse;
@@ -22,16 +23,16 @@ import com.esri.geoportal.context.GeoportalContext;
 
 import java.util.List;
 
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.QueryParam;
-import javax.ws.rs.core.Context;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.SecurityContext;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.QueryParam;
+import jakarta.ws.rs.core.Context;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.SecurityContext;
 
 /**
  * Handles /rest/geoportal requests.
@@ -42,7 +43,7 @@ public class GeoportalService {
   @GET
   public Response getSelf(
       @Context SecurityContext sc,
-      @Context HttpServletRequest hsr,
+      @Context HttpServletRequest hsr,@QueryParam("access_token") String jwtToken,
       @QueryParam("pretty") boolean pretty) {
     AppUser user = new AppUser(hsr,sc);
     return self(user,pretty);
@@ -95,9 +96,9 @@ public class GeoportalService {
         jso.add("user",jsoUser);
       }
       
-      ArcGISAuthenticationProvider ap = gc.getBeanIfDeclared("arcgisAuthenticationProvider",
-          ArcGISAuthenticationProvider.class,null);
-      if (ap != null) {
+      ArcgisAuthService ap = gc.getBeanIfDeclared("arcgisAuthService",
+    		  ArcgisAuthService.class,null);
+      if (ap != null && ap.isArgisAuthEnabled()) {
         jso.add("arcgisOAuth",Json.createObjectBuilder()
           .add("appId",ap.getAppId())
           .add("portalUrl",ap.getPortalUrl())

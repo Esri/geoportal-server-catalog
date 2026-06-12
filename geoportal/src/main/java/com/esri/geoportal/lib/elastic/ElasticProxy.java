@@ -13,21 +13,25 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic;
+
+import java.io.UnsupportedEncodingException;
+
+import org.eclipse.jetty.client.HttpClient;
+import org.eclipse.jetty.client.Request;
+import org.eclipse.jetty.ee10.proxy.BalancerServlet;
+import org.eclipse.jetty.http.HttpHeader;
+import org.eclipse.jetty.util.ssl.SslContextFactory;
+import org.eclipse.jetty.client.transport.HttpRequest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.esri.geoportal.base.util.BalancerSupport;
 import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
 import com.esri.geoportal.context.GeoportalContext;
 
-import java.io.UnsupportedEncodingException;
-
-import javax.servlet.ServletException;
-import javax.servlet.http.HttpServletRequest;
-
-import org.eclipse.jetty.client.HttpClient;
-import org.eclipse.jetty.client.api.Request;
-import org.eclipse.jetty.proxy.BalancerServlet;
-import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 /**
  * A proxy to Elasticsearch.
@@ -36,6 +40,7 @@ public class ElasticProxy extends BalancerServlet {
 
   /** Properties */
   private static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxy.class);
+
   private static final long serialVersionUID = 1L;
   private final BalancerSupport balancerSupport = new BalancerSupport();
   private String _authString = null;
@@ -46,7 +51,7 @@ public class ElasticProxy extends BalancerServlet {
   protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
     super.copyRequestHeaders(clientRequest, proxyRequest);
     if (this._authString != null) {
-      proxyRequest.header("Authorization",this._authString);
+    	proxyRequest.headers(h -> h.put("Authorization", this._authString));
     }
   }
 
@@ -106,15 +111,18 @@ public class ElasticProxy extends BalancerServlet {
   }
   
   @Override
-  protected HttpClient newHttpClient() {
-    SslContextFactory factory = null;
-    if (this._useHttps) {
-      factory = new SslContextFactory();
-      factory.setTrustAll(true);
-    }
-    HttpClient client = factory!=null? new HttpClient(factory): new HttpClient();
+  protected HttpClient newHttpClient() {                                                                                                            SslContextFactory.Client factory = null;
+    
+    HttpClient client = new HttpClient();
+    if (this._useHttps) {    	
+        factory = new SslContextFactory.Client();
+        factory.setTrustAll(true);
+        client.setSslContextFactory(factory);
+      }
+    
+
     if (proxyBufferSize!=null) {
-      LOGGER.debug(String.format("Buffer size for HTTP client for ElasticProxi set to: %s bytes", proxyBufferSize));
+      LOGGER.debug("Buffer size for HTTP client for ElasticProxi set to: %s bytes".formatted(proxyBufferSize));
       client.setRequestBufferSize(proxyBufferSize);
     }
 //    org.eclipse.jetty.client.HttpProxy proxy = new org.eclipse.jetty.client.HttpProxy("localhost",8888);
@@ -130,5 +138,44 @@ public class ElasticProxy extends BalancerServlet {
     return uri;
   }
   
-}
 
+  	@Override
+    protected void sendProxyRequest(HttpServletRequest clientRequest, HttpServletResponse proxyResponse, Request proxyRequest) {
+  		//Below code customizes headers sent to Elasticsearch. Default ones are not working with AWS ALB used in case of AWS opensearch serverless.
+		// Remove problematic headers
+		proxyRequest.headers(headers -> headers.remove("Forwarded")); // AWS ALB doesn't like this
+		proxyRequest.headers(headers -> headers.remove("Via")); // We'll add a proper one later 
+
+		// Remove duplicate Content-Type and Content-Length and add only one
+		if (proxyRequest.getHeaders().contains(HttpHeader.CONTENT_TYPE))  {
+			String contentType = proxyRequest.getHeaders().get("Content-Type");
+			proxyRequest.headers(headers -> headers.remove("Content-Type"));
+			proxyRequest.headers(headers -> headers.put(HttpHeader.CONTENT_TYPE, contentType));
+		}
+		if (proxyRequest.getHeaders().contains(HttpHeader.CONTENT_LENGTH)) {
+			String contentLength = proxyRequest.getHeaders().get("Content-Length");
+			proxyRequest.headers(headers -> headers.remove("Content-Length"));
+			proxyRequest.headers(headers -> headers.put(HttpHeader.CONTENT_LENGTH, contentLength));
+		}
+
+		// add proper Via header
+		String host = clientRequest.getHeader("Host");
+
+		proxyRequest.headers(headers -> headers.put("Via", "http/1.1 " + clientRequest.getServerName()));
+		proxyRequest.headers(headers -> headers.put("X-Forwarded-For", clientRequest.getRemoteAddr()));
+		proxyRequest.headers(headers -> headers.put("X-Forwarded-Proto", clientRequest.getScheme()));
+
+		if (host != null) {
+			proxyRequest.headers(headers -> headers.put("X-Forwarded-Host", host));
+		}
+		// Log final request for debugging
+//		System.out.println("Final Proxy Request:");
+//		System.out.println("Method: " + proxyRequest.getMethod());
+//		System.out.println("URI: " + proxyRequest.getURI());
+//		proxyRequest.getHeaders().forEach(field -> System.out.println(field.getName() + ": " + field.getValue()));
+
+		super.sendProxyRequest(clientRequest, proxyResponse, proxyRequest);
+    }
+
+  
+}

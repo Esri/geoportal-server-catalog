@@ -14,11 +14,6 @@
  */
 package com.esri.geoportal.dcat;
 
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
@@ -26,19 +21,26 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObjectBuilder;
+
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+
+import jakarta.json.Json;
+import jakarta.json.JsonObjectBuilder;
 
 /**
  * DCAT builder.
@@ -90,10 +92,10 @@ public class DcatBuilder {
    */
   public void build(DcatContext dcatContext) {
     try {
-      LOGGER.info(String.format("Starting building aggregated DCAT file..."));
+      LOGGER.info("Starting building aggregated DCAT file...".formatted());
       execute(dcatContext, getSelfInfo(), getCachedEngine(javascriptFile),getBaseUrl());
     } catch(Exception ex) {
-      LOGGER.error(String.format("Error building aggregated DCAT file!"), ex);
+      LOGGER.error("Error building aggregated DCAT file!".formatted(), ex);
     }
   }
   
@@ -118,7 +120,7 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
       if (engine == null) {
         URL url = Thread.currentThread().getContextClassLoader().getResource(javascriptFile);
         URI uri = url.toURI();
-        String script = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");
+        String script = new String(Files.readAllBytes(Path.of(uri)),"UTF-8");
         ScriptEngineManager engineManager = new ScriptEngineManager();
         engine = engineManager.getEngineByName("nashorn");
         engine.eval(script);
@@ -156,7 +158,7 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
          }
      }
     } catch (Throwable t) {
-      LOGGER.warn(String.format("Warning getting self info."), t);
+      LOGGER.warn("Warning getting self info.".formatted(), t);
     }
     try {
       JsonObjectBuilder access = Json.createObjectBuilder();
@@ -164,7 +166,7 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
       access.add("supportsGroupBasedAccess",com.esri.geoportal.context.GeoportalContext.getInstance().getSupportsGroupBasedAccess()); 
       elastic.add("access",access);
     } catch (Throwable t) {
-      LOGGER.warn(String.format("Warning getting self info."), t);
+      LOGGER.warn("Warning getting self info.".formatted(), t);
     }
     if ((node != null) && (node.length() > 0)) {
       String idxName = ec.getIndexName();      
@@ -201,10 +203,10 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
         prepareForWriting();
         
         writer.println("{");
-        writer.println(String.format("\"conformsTo\": \"%s\",", header.conformsTo));
-        writer.println(String.format("\"describedBy\": \"%s\",", header.describedBy));
-        writer.println(String.format("\"context\": \"%s\",", header.context));
-        writer.println(String.format("\"type\": \"%s\",", header.type));
+        writer.println("\"conformsTo\": \"%s\",".formatted(header.conformsTo));
+        writer.println("\"describedBy\": \"%s\",".formatted(header.describedBy));
+        writer.println("\"context\": \"%s\",".formatted(header.context));
+        writer.println("\"type\": \"%s\",".formatted(header.type));
         writer.println("\"dataset:\": [");
       }
       
@@ -225,11 +227,11 @@ private void execute(DcatContext dcatContext, String selfInfo, ScriptEngine engi
         writer.println("]");
         writer.println("}");
 
-        LOGGER.info(String.format("Completed building aggregated DCAT file :)"));
+        LOGGER.info("Completed building aggregated DCAT file :)".formatted());
         close();
       } else {
         if (exception!=null) {
-          LOGGER.error(String.format("Error building aggregated DCAT file!"), exception);
+          LOGGER.error("Error building aggregated DCAT file!".formatted(), exception);
         }
         abort();
       }

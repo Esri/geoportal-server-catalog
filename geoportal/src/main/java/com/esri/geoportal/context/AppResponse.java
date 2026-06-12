@@ -23,10 +23,10 @@ import com.esri.geoportal.base.util.exception.UsageException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import javax.json.JsonObjectBuilder;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
+import jakarta.json.JsonObjectBuilder;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
 import javax.xml.transform.TransformerException;
 
 import org.slf4j.Logger;
@@ -135,8 +135,8 @@ public class AppResponse {
     } else if (t instanceof UnrecognizedTypeException) {
       status = Response.Status.BAD_REQUEST;
       LOGGER.trace("Exception",t);
-    } else if (t instanceof ValidationException) {
-      json = ((ValidationException)t).toJson(pretty);
+    } else if (t instanceof ValidationException exception) {
+      json = exception.toJson(pretty);
       status = Response.Status.BAD_REQUEST;
       LOGGER.trace("Exception",t);
     } else if (t instanceof TransformerException) {

@@ -18,27 +18,26 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import javax.json.Json;
-import javax.json.JsonArrayBuilder;
-import javax.json.JsonObject;
-import javax.json.JsonObjectBuilder;
+import jakarta.json.Json;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.json.JsonObjectBuilder;
 import javax.script.Invocable;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
-import javax.servlet.http.HttpServletRequest;
-import javax.ws.rs.container.AsyncResponse;
-import javax.ws.rs.core.MediaType;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-import javax.ws.rs.core.Response.ResponseBuilder;
-import javax.ws.rs.core.Response.Status;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.ws.rs.container.AsyncResponse;
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
+import jakarta.ws.rs.core.Response.ResponseBuilder;
+import jakarta.ws.rs.core.Response.Status;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,7 +105,7 @@ public class SearchRequest {
       if (engine == null) {
         URL url = Thread.currentThread().getContextClassLoader().getResource(javascriptFile);
         URI uri = url.toURI();
-        String script = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");
+        String script = new String(Files.readAllBytes(Path.of(uri)),"UTF-8");
         ScriptEngineManager engineManager = new ScriptEngineManager();
         engine = engineManager.getEngineByName("nashorn");
         engine.eval(script);
@@ -189,13 +188,13 @@ public class SearchRequest {
   
   /** Get the Elasticsearch info for this Geoportal */
   private JsonObjectBuilder getSelfInfo() {
-    JsonObjectBuilder info = Json.createObjectBuilder();
+	JsonObjectBuilder info = Json.createObjectBuilder();
     JsonObjectBuilder elastic = Json.createObjectBuilder();
     GeoportalContext gc = com.esri.geoportal.context.GeoportalContext.getInstance();    
     String node = null;
     String scheme = "http://";
     int port = 9200;
-    try {     
+  try {     
       if (ec.getUseHttps()) {
         scheme = "https://";
         elastic.add("useHttps",true);
@@ -261,6 +260,7 @@ public class SearchRequest {
     }
     return null;
   }
+  
   
   /** Get the task options. */
   private JsonObjectBuilder getTaskOptions(HttpServletRequest hsr) {

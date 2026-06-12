@@ -18,7 +18,7 @@ import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.nio.file.Files;
-import java.nio.file.Paths;
+import java.nio.file.Path;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -52,7 +52,7 @@ public class ScriptEngines {
       if (engine == null) {
         ResourcePath rp = new ResourcePath();
         URI uri = rp.makeUrl(javascriptFile).toURI();
-        String script = new String(Files.readAllBytes(Paths.get(uri)),"UTF-8");
+        String script = new String(Files.readAllBytes(Path.of(uri)),"UTF-8");
         ScriptEngineManager engineManager = new ScriptEngineManager();
         engine = engineManager.getEngineByName("nashorn");
         engine.eval(script);

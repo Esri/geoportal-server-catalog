@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<web-app id="WebApp_ID" version="3.1" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://xmlns.jcp.org/xml/ns/javaee" xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/javaee http://xmlns.jcp.org/xml/ns/javaee/web-app_3_1.xsd">
+<web-app id="WebApp_ID" version="6.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="https://jakarta.ee/xml/ns/jakartaee" xsi:schemaLocation="https://jakarta.ee/xml/ns/jakartaee https://jakarta.ee/xml/ns/jakartaee/web-app_6_0.xsd">
   <display-name>geoportal</display-name>
   
   <context-param>
@@ -52,20 +52,6 @@
   <servlet-mapping>
     <servlet-name>ElasticProxy</servlet-name>
     <url-pattern>/elastic/*</url-pattern>
-  </servlet-mapping>
-
-  <servlet>
-    <servlet-name>HarvesterProxy</servlet-name>
-    <servlet-class>com.esri.geoportal.lib.harvester.HarvesterProxy</servlet-class>
-    <init-param>
-      <param-name>maxThreads</param-name>
-      <param-value>256</param-value>
-    </init-param>
-    <async-supported>true</async-supported>
-  </servlet>
-  <servlet-mapping>
-    <servlet-name>HarvesterProxy</servlet-name>
-    <url-pattern>/harvester/*</url-pattern>
   </servlet-mapping>
 
   <servlet>
