@@ -18,8 +18,8 @@ define(["dojo/_base/declare",
   "dojo/Deferred",
   "./layerUtil",
   "../util",
-  "esri4/layers/FeatureLayer","esri4/geometry/support/jsonUtils"],
-function(declare, array, all, Deferred, layerUtil, util, FeatureLayer, jsonRendererUtils) {
+  "esri4/layers/FeatureLayer"],
+function(declare, array, all, Deferred, layerUtil, util, FeatureLayer) {
 
   var _def = declare(null, {
 
@@ -142,12 +142,8 @@ function(declare, array, all, Deferred, layerUtil, util, FeatureLayer, jsonRende
               if (layerDefinition.drawingInfo && layerDefinition.drawingInfo.renderer) {
                 jsonRenderer = JSON.parse(
                   JSON.stringify(layerDefinition.drawingInfo.renderer)
-                );
-                renderer = jsonRendererUtils.fromJson(jsonRenderer);
-                if (jsonRenderer.type && (jsonRenderer.type === "classBreaks")) {
-                  renderer.isMaxInclusive = true;
-                }
-                featureLayer.renderer = renderer;
+                );                
+                featureLayer.renderer = jsonRenderer;
               }
               
               if (layerDefinition.minScale) {
