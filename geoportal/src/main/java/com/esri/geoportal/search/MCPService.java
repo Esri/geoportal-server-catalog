@@ -59,7 +59,7 @@ public class MCPService extends Application {
     // Minimal GET support per Streamable HTTP requirements.
     JSONObject ok = new JSONObject();
     ok.put("status", "ok");
-    ok.put("endpoint", sc.getStacUrl().replaceAll("/+$", "") + "/mcp");  // req.getRequestURL().toString());
+    ok.put("endpoint", sc.getStacUrl().replaceAll("/+$", "").replace("/stac", "") + "/mcp");  // req.getRequestURL().toString());
     ok.put("protocolVersion", "2024-11-05");
 
     return Response.ok(ok).build();
