@@ -142,7 +142,10 @@ function(declare, array, all, Deferred, layerUtil, util, FeatureLayer) {
               if (layerDefinition.drawingInfo && layerDefinition.drawingInfo.renderer) {
                 jsonRenderer = JSON.parse(
                   JSON.stringify(layerDefinition.drawingInfo.renderer)
-                );                
+                ); 
+				if (jsonRenderer.type && (jsonRenderer.type === "classBreaks")) {
+	                  jsonRenderer.isMaxInclusive = true;
+	                }               
                 featureLayer.renderer = jsonRenderer;
               }
               
