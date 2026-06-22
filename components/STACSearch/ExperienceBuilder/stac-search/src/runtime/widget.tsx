@@ -106,7 +106,7 @@ const style = css`
   }
 
   .request-summary {
-max-width: 200px;
+    max-width: 200px;
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: break-word;
