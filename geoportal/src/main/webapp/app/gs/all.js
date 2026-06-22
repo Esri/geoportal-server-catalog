@@ -36,7 +36,7 @@
   if (!gs.target.profiles) gs.target.profiles = {};
   if (!gs.writer) gs.writer = {};
 
-  var i, paths;
+  var i;
   var files = {
     common: [
       "base/core",
@@ -115,7 +115,11 @@
   gs.reqAll = function(localRequire, callback) {
     // for the Dojo based widget
     // these need to be loaded synchronously
-    paths = files.common.concat(files.browser);
+    var paths = files.common.concat(files.browser);
+    if (paths.length === 0) {
+      if (typeof callback === "function") callback();
+      return;
+    }
     var req = function() {
       var path = "../"+paths.shift();
       localRequire([path],function(){
