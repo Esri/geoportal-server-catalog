@@ -536,8 +536,11 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
           var selectedFeature = mapView.popup.selectedFeature;
           if (selectedFeature !== null && mapView.popup.visible !== false) {
             if (self.featureTable) {
+              var selectedId = self._extractObjectId(selectedFeature);
               self.featureTable.highlightIds.removeAll();
-              self.featureTable.highlightIds.add(mapView.popup.selectedFeature.attributes.OBJECTID);
+              if (selectedId !== null && selectedId !== undefined) {
+                self.featureTable.highlightIds.add(selectedId);
+              }
             }
           }
         }
@@ -550,8 +553,11 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
           var selectedFeature = sceneView.popup.selectedFeature;
           if (selectedFeature !== null && sceneView.popup.visible !== false) {
             if (self.featureTable) {
+              var selectedId = self._extractObjectId(selectedFeature);
               self.featureTable.highlightIds.removeAll();
-              self.featureTable.highlightIds.add(sceneView.popup.selectedFeature.attributes.OBJECTID);
+              if (selectedId !== null && selectedId !== undefined) {
+                self.featureTable.highlightIds.add(selectedId);
+              }
             }
           }
         }
@@ -626,72 +632,111 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
 		}		
     },
 
+    _extractObjectId:function(feature) {
+      if (!feature || !feature.attributes) {
+        return null;
+      }
+      if (feature.layer && feature.layer.objectIdField && feature.attributes[feature.layer.objectIdField] !== undefined) {
+        return feature.attributes[feature.layer.objectIdField];
+      }
+      if (feature.sourceLayer && feature.sourceLayer.objectIdField && feature.attributes[feature.sourceLayer.objectIdField] !== undefined) {
+        return feature.attributes[feature.sourceLayer.objectIdField];
+      }
+      if (feature.attributes.OBJECTID !== undefined) {
+        return feature.attributes.OBJECTID;
+      }
+      if (feature.attributes.__OBJECTID !== undefined) {
+        return feature.attributes.__OBJECTID;
+      }
+      return null;
+    },
+
+    _isCsvServiceUrl:function(url) {
+      if (typeof url !== "string" || !url) {
+        return false;
+      }
+      var lowerUrl = url.toLowerCase();
+      if (lowerUrl.indexOf("csvserver") > -1) {
+        return true;
+      }
+      var normalized = lowerUrl.split("?")[0].split("#")[0];
+      return normalized.endsWith(".csv");
+    },
+
     openAttrTable:function(selectedFeature)
-    {       	
-    	let id = selectedFeature?.attributes?.OBJECTID || selectedFeature?.attributes?.__OBJECTID;
-		console.log("selected feature "+id);
-    	//Below can be used to show only selected record
-//    	var featureLayer = new FeatureLayer({url:selectedFeature.sourceLayer.url,
-//    			definitionExpression: "OBJECTID = "+id});
-    	var serviceUrl = selectedFeature.sourceLayer.url;
-    	if(this.urlParams && this.urlParams.type == 'WFS' || serviceUrl.indexOf('WFSServer')>-1)
-    		{
-    		var layerToAdd = new WFSLayer({url:serviceUrl});
-    		}
-		else if(serviceUrl.endsWith('.csv') || serviceUrl.endsWith('.CSV') || serviceUrl.indexOf('CSVServer')>-1)
-			{
-				layerToAdd = new CSVLayer({url:serviceUrl});
-			}
-    	else
-    		{
-    		 layerToAdd = new FeatureLayer(serviceUrl);
-    		}
-    	
-    	var tableContainer = document.getElementById("tableContainer");
-    	
-    	if(this.featureTable)
-    		{
-    			try{
-    				this.featureTable.destroy();
-    			}catch(error)
-    			{
-    				console.error(error);
-    			}
-    			tableContainer.innerHTML = "";
-    		}
-    	var container = document.createElement("div");
-    	
-    	tableContainer.appendChild(container);    	
-    	
-		let table = this.featureTable = new FeatureTable({
-   		  returnGeometryEnabled: true,
-   		  view: this.view,
-   		  layer: layerToAdd,
-   		  container: container,
-   		  visible:true,
-   		  columnReorderingEnabled:true, 		  
- 		  highlightEnabled:true,
- 		  highlightIds:id?[id]:[],
-   		  visibleElements: {
-            // Autocast to VisibleElements
-            menuItems: {
-              clearSelection: true,
-              refreshData: true,
-              toggleColumns: true,
-              selectedRecordsShowAllToggle: true
-            }},
-   		  menuConfig:{
-			  items:[
-				  { 	
-					  label: "Close",   					 
-					  icon: "x-circle",
-					  clickFunction: ()=> {
-						  this.featureTable.visible =false;                     
-					  }
-				  }
-			  ]
-   		  }
-   		});    	
+    {
+      if (!selectedFeature || !selectedFeature.sourceLayer) {
+        console.warn("No feature selected for attribute table.");
+        return;
+      }
+
+      var id = this._extractObjectId(selectedFeature);
+      console.log("selected feature " + id);
+
+      var sourceLayer = selectedFeature.sourceLayer;
+      var serviceUrl = sourceLayer.url || "";
+      var layerToAdd;
+
+      if ((this.urlParams && this.urlParams.type === "WFS") || serviceUrl.indexOf("WFSServer") > -1) {
+        layerToAdd = new WFSLayer({url: serviceUrl});
+      } else if (this._isCsvServiceUrl(serviceUrl) || sourceLayer.type === "csv") {
+        // Reuse the active source layer for CSV to preserve parser/config state.
+        layerToAdd = sourceLayer;
+      } else {
+        layerToAdd = new FeatureLayer(serviceUrl);
+      }
+
+      var tableContainer = document.getElementById("tableContainer");
+      if (!tableContainer) {
+        console.warn("Attribute table container not found.");
+        return;
+      }
+
+      if(this.featureTable)
+      {
+        try{
+          this.featureTable.destroy();
+        }catch(error)
+        {
+          console.error(error);
+        }
+        tableContainer.innerHTML = "";
+      }
+      var container = document.createElement("div");
+
+      tableContainer.appendChild(container);
+
+      var highlightIds = (id !== null && id !== undefined) ? [id] : [];
+
+      this.featureTable = new FeatureTable({
+        returnGeometryEnabled: true,
+        view: this.activeView || this.mapView,
+        layer: layerToAdd,
+        container: container,
+        visible:true,
+        columnReorderingEnabled:true,
+        highlightEnabled:true,
+        highlightIds:highlightIds,
+        visibleElements: {
+          // Autocast to VisibleElements
+          menuItems: {
+            clearSelection: true,
+            refreshData: true,
+            toggleColumns: true,
+            selectedRecordsShowAllToggle: true
+          }},
+        menuConfig:{
+          items:[
+            {
+              label: "Close",
+              icon: "x-circle",
+              clickFunction: ()=> {
+                this.featureTable.visible =false;
+              }
+            }
+          ]
+        }
+      });
     },
     _createLocalCatalogUrl: function() {    
         if (window && window.top && window.top.geoportalServiceInfo) {
