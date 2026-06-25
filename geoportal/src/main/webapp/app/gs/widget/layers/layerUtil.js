@@ -536,6 +536,15 @@ define(["dojo/_base/array",
 		      opacity: layer.opacity
 		    });
 		  }
+		  
+		  // 9 CSV
+		  	  if (layer instanceof CSVLayer) {
+		  	    return new CSVLayer({
+		  	      url: layer.url,
+		  	      title: layer.title,
+		  	      visible: layer.visible
+		  	    });
+		  	  }
 
 		  console.warn("Unsupported layer type for cloning:", layer);
 		  return null;
