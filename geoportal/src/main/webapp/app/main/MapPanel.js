@@ -26,6 +26,7 @@ define(["dojo/_base/declare",
         "esri4/layers/TileLayer",
         "esri4/layers/MapImageLayer",
         "esri4/layers/FeatureLayer",
+		"esri4/layers/CSVLayer",
         "esri4/layers/WFSLayer",
         "esri4/widgets/Search",
         "esri4/widgets/LayerList",
@@ -40,7 +41,7 @@ define(["dojo/_base/declare",
         "../gs/base/LayerProcessor",
         "app/context/AppClient"], 
 function(declare, lang, Templated, template, i18n, i18resources, domConstruct, Deferred,
-		Map, MapView, SceneView, TileLayer, MapImageLayer, FeatureLayer, WFSLayer, SearchWidget, LayerList, FeatureTable,
+		Map, MapView, SceneView, TileLayer, MapImageLayer, FeatureLayer, CSVLayer,WFSLayer, SearchWidget, LayerList, FeatureTable,
 		Legend, Home, Expand, BasemapGallery, reactiveUtils,
 		SearchPane, WidgetContext, LayerProcessor, AppClient) {
 
@@ -626,9 +627,9 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
     },
 
     openAttrTable:function(selectedFeature)
-    {   
-    	console.log("selected feature "+selectedFeature.attributes.OBJECTID);
-    	let id = selectedFeature.attributes.OBJECTID;
+    {       	
+    	let id = selectedFeature.attributes.OBJECTID || selectedFeature.attributes.__OBJECTID;
+		console.log("selected feature "+id);
     	//Below can be used to show only selected record
 //    	var featureLayer = new FeatureLayer({url:selectedFeature.sourceLayer.url,
 //    			definitionExpression: "OBJECTID = "+id});
@@ -637,9 +638,13 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
     		{
     		var layerToAdd = new WFSLayer({url:serviceUrl});
     		}
+		else if(serviceUrl.endsWith('.csv') || serviceUrl.endsWith('.CSV') || serviceUrl.indexOf('CSVServer')>-1)
+			{
+				layerToAdd = new CSVLayer(serviceUrl);
+			}
     	else
     		{
-    		var layerToAdd = new FeatureLayer(serviceUrl);
+    		 layerToAdd = new FeatureLayer(serviceUrl);
     		}
     	
     	var tableContainer = document.getElementById("tableContainer");
@@ -666,7 +671,7 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
    		  visible:true,
    		  columnReorderingEnabled:true, 		  
  		  highlightEnabled:true,
- 		  highlightIds:[id],
+ 		  highlightIds:id?[id]:"",
    		  visibleElements: {
             // Autocast to VisibleElements
             menuItems: {

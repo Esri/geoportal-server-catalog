@@ -190,7 +190,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       } else if (type === "CSV") {
         layer = new CSVLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,mapView,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer,sceneView);
       }else if (type === "ImageryTileLayer") {
           layer = new ImageryTileLayer(url,{id:id});
           layer.load();
