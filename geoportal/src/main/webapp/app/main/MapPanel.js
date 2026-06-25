@@ -628,7 +628,7 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
 
     openAttrTable:function(selectedFeature)
     {       	
-    	let id = selectedFeature.attributes.OBJECTID || selectedFeature.attributes.__OBJECTID;
+    	let id = selectedFeature?.attributes?.OBJECTID || selectedFeature?.attributes?.__OBJECTID;
 		console.log("selected feature "+id);
     	//Below can be used to show only selected record
 //    	var featureLayer = new FeatureLayer({url:selectedFeature.sourceLayer.url,
@@ -640,7 +640,7 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
     		}
 		else if(serviceUrl.endsWith('.csv') || serviceUrl.endsWith('.CSV') || serviceUrl.indexOf('CSVServer')>-1)
 			{
-				layerToAdd = new CSVLayer(serviceUrl);
+				layerToAdd = new CSVLayer({url:serviceUrl});
 			}
     	else
     		{
@@ -671,7 +671,7 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
    		  visible:true,
    		  columnReorderingEnabled:true, 		  
  		  highlightEnabled:true,
- 		  highlightIds:id?[id]:"",
+ 		  highlightIds:id?[id]:[],
    		  visibleElements: {
             // Autocast to VisibleElements
             menuItems: {
