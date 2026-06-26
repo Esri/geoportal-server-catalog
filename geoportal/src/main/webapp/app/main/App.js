@@ -241,6 +241,9 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
       if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("CollectionsPanel")<0) {
           this.collectionsPanelBtnNode.style.display = "none";
       }
+	  if(AppContext.appConfig.system.showTabs && AppContext.appConfig.system.showTabs.indexOf("SearchPanel")<0) {
+	      this.searchPanelBtnNode.style.display = "none";
+	   }
       
       
     },
