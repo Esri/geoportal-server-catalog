@@ -81,8 +81,16 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
      
     	  
       if (!location.hash || location.hash.length==0) {
-        this.setHash("searchPanel");
-        router.go("searchPanel");
+		if(AppContext.appConfig.system.defaultTab && AppContext.appConfig.system.defaultTab.length>0) {
+			this.setHash(AppContext.appConfig.system.defaultTab);
+			router.go(AppContext.appConfig.system.defaultTab);
+		}
+		else
+		{
+			this.setHash("searchPanel");
+			router.go("searchPanel");
+		}
+        
       }
       
       $("a[href='#searchPanel']").on("shown.bs.tab",lang.hitch(this, function(e) {
