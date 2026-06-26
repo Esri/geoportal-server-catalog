@@ -27,17 +27,18 @@ define(["dojo/_base/declare",
   "./OGCFeatureLayerMixin",
   "./GroupLayerMixin",
   "./CSVServiceMixin",
+  "./ParquetLayerMixin",
   "./layerUtil",
   "../util"],
 function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
   KMLMixin, MapServiceMixin, VectorTileServiceMixin, WMSMixin,WFSMixin,
-  WMTSMixin,ImageryTileLayerMixin,OGCFeatureLayerMixin,GroupLayerMixin,CSVServiceMixin,
+  WMTSMixin,ImageryTileLayerMixin,OGCFeatureLayerMixin,GroupLayerMixin,CSVServiceMixin,ParquetLayerMixin,
   layerUtil, util) {
 
   var _def = declare([FeatureServiceMixin,ImageServiceMixin,KMLMixin,
                       MapServiceMixin,
                       VectorTileServiceMixin,WMSMixin,WFSMixin,WMTSMixin,
-                      ImageryTileLayerMixin,OGCFeatureLayerMixin,GroupLayerMixin,CSVServiceMixin], {
+                      ImageryTileLayerMixin,OGCFeatureLayerMixin,GroupLayerMixin,CSVServiceMixin,ParquetLayerMixin], {
 
     i18n: null,
     itemUrl: null,
@@ -90,8 +91,10 @@ function(declare, lang, Deferred, FeatureServiceMixin, ImageServiceMixin,
       }else if (serviceType === "OGC Feature Server") {
           return this.addOGCFeatureLayer(serviceUrl,item,itemData);
       }else if (serviceType === "Group Layer") {
-          return this.addGroupLayer(serviceUrl,item,itemData);
-      }
+          return this.addGroupLayer(serviceUrl,item,itemData);      
+	  }else if (serviceType === "Parquet") {
+	            return this.addParquetLayer(serviceUrl,item,itemData);
+	    }
       else {
         // TODO not supported message?
         var dfd = new Deferred();
