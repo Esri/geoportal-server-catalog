@@ -210,8 +210,8 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
         "imagerytilelayer": "Imagery Tile Layer",
         "ogcfeatureserver": "OGC Feature Server",
         "group layer":"Group Layer",
-        "grouplayer":"Group Layer"	
-        
+        "grouplayer":"Group Layer",
+		"parquet":"Parquet"
       };
 
       this.referenceId = response.sourceKey+"-refid-"+item.id;
@@ -302,6 +302,15 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
           this.addButton.removeAttribute("disabled");
         }
       }
+    // No Parquet support in SceneView, so disable the add button.
+      var currentView = (this.resultsPane && typeof this.resultsPane.getView === "function")
+        ? this.resultsPane.getView()
+        : null;
+      var isSceneView = !!(currentView && currentView.type === "3d");
+      if (isSceneView && typeInfo.type && typeInfo.type.toLowerCase() === "parquet") {
+      	typeInfo.canAdd = false;
+      	this.addButton.setAttribute("disabled","disabled");
+     }
       this.typeInfo = typeInfo;
     },
 
