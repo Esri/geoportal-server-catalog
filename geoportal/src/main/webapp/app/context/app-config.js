@@ -25,7 +25,8 @@ define([],function(){var obj={
   search: {
     allowSettings: true,
     useSimpleQueryString: false,
-    escapeFilter: false
+    escapeFilter: false,
+	footPrintServiceUrl: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/export"
   },
 
   searchMap: {
