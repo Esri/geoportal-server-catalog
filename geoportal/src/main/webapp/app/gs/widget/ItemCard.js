@@ -231,7 +231,7 @@ function(declare, array, lang,locale, domClass, _WidgetBase, _TemplatedMixin,
 	  {
     	  array.some(urlLinks, lang.hitch(this, function(u){
     	        var serviceType = new ServiceType();
-    	        serviceType.checkUrl(u);
+    	        serviceType.checkUrl(u,item);
     	        serviceType.title = item.title;    	        
     	        if (serviceType.isSet()) {
     	        	typeInfo.type = serviceType.type;

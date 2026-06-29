@@ -127,15 +127,17 @@ function(declare, lang, util,VectorTileLayer) {
 		  }else if (lc.indexOf("ogcfeatureserver")>-1) {
             type = "OGCFeatureServer";  
           }
+		  //Portal item type
+            else if ((item && item.type_s) || (item && item._source &&item._source.type_s)) {
+				var itemType = item.type_s || item._source &&item._source.type_s;
+          	  type = util.readItemServiceType(itemType);
+            }  
 		  //check for parquet file
 		  else if(this.isParquet(url)){
 			type = "Parquet";
 		 }
 		  
-          //Portal item type
-          else if (item && item.type_s) {
-        	  type = util.readItemServiceType(item.type_s);
-          }  
+          
         }
       }
 
