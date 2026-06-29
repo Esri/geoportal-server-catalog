@@ -31,6 +31,8 @@ define([
   "esri4/layers/VectorTileLayer",
   "esri4/layers/OGCFeatureLayer",
   "esri4/layers/GroupLayer",
+  "esri4/layers/CSVLayer",
+  "esri4/layers/ParquetLayer",
   "esri4/geometry/support/webMercatorUtils",
   "esri4/rest/geometryService",
   "esri4/rest/support/ProjectParameters",
@@ -43,7 +45,7 @@ define([
         function (lang, array, domConstruct, i18n, all,
                 esriRequest, Extent,
                 MapImageLayer, FeatureLayer, ImageryLayer, ImageryTileLayer, WMSLayer,
-                WFSLayer, KMLLayer, WMTSLayer, VectorTileLayer, OGCFeatureLayer, GroupLayer,
+                WFSLayer, KMLLayer, WMTSLayer, VectorTileLayer, OGCFeatureLayer, GroupLayer,CSVLayer, ParquetLayer,
                 webMercatorUtils, GeometryService, ProjectParameters, reactiveUtils, Portal, PortalItem,
                 util, layerUtil) {
 
@@ -80,6 +82,18 @@ define([
             }
           };
 
+          // Normalize Extent-like values without mutating Accessor internals.
+          var _toExtent = function (rawExtent) {
+            if (!rawExtent) return null;
+            if (typeof rawExtent.clone === "function") {
+              return rawExtent.clone();
+            }
+            if (typeof rawExtent.toJSON === "function") {
+              return new Extent(rawExtent.toJSON());
+            }
+            return new Extent(rawExtent);
+          };
+
           // layer factories each for each supported service type
           var _layerFactories = {
 
@@ -90,7 +104,7 @@ define([
                 domConstruct.destroy(view.errorNode);
                 if (layer.fullExtent)
                 {
-                  var extent = new Extent(layer.fullExtent);
+                  var extent = _toExtent(layer.fullExtent);
                   _setExtent(view, extent, layer.fullExtent);
                 }
               },
@@ -112,7 +126,7 @@ define([
                   reactiveUtils.when(() => layer.loaded === true, () => {
                     domConstruct.destroy(view.errorNode);
                     if (response.data.extent) {
-                      var extent = new Extent(response.data.extent);
+                      var extent = _toExtent(response.data.extent);
                       _setExtent(view, extent, response.data.extent);
                     }
                   });
@@ -141,7 +155,7 @@ define([
                         reactiveUtils.when(() => layer.loaded === true, () => {
                           domConstruct.destroy(view.errorNode);
                           if (response.data.fullExtent) {
-                            var extent = new Extent(response.data.fullExtent);
+                            var extent = _toExtent(response.data.fullExtent);
                             _setExtent(view, extent, response.data.fullExtent);
                           }
                         });
@@ -158,7 +172,7 @@ define([
                       reactiveUtils.when(() => layer.loaded === true, () => {
                         domConstruct.destroy(view.errorNode);
                         if (response.data.extent) {
-                          var extent = new Extent(response.data.extent);
+                          var extent = _toExtent(response.data.extent);
                           _setExtent(view, extent, response.data.extent);
                         }
                       });
@@ -185,7 +199,7 @@ define([
               reactiveUtils.when(() => layer.loaded === true, () => {
                 domConstruct.destroy(view.errorNode);
                 if (layer.fullExtent) {
-                  var extent = new Extent(layer.fullExtent);
+                  var extent = _toExtent(layer.fullExtent);
                   _setExtent(view, extent, layer.fullExtent);
                 }
               });
@@ -230,7 +244,7 @@ define([
                     array.forEach(featureLayers, function (layer) {
                       domConstruct.destroy(view.errorNode);
                       if (layer.fullExtent) {
-                        var extent = new Extent(layer.fullExtent);
+                        var extent = _toExtent(layer.fullExtent);
                         _setExtent(view, extent, layer.fullExtent);
                       }
                       view.map.add(layer);
@@ -298,7 +312,7 @@ define([
               reactiveUtils.when(() => layer.loaded === true, () => {
                 domConstruct.destroy(view.errorNode);
                 if (layer.fullExtent) {
-                  var extent = new Extent(layer.fullExtent);
+                  var extent = _toExtent(layer.fullExtent);
                   _setExtent(view, extent, layer.fullExtent);
                 }
               });
@@ -315,7 +329,7 @@ define([
               reactiveUtils.when(() => layer.loaded === true, () => {
                 domConstruct.destroy(view.errorNode);
                 if (layer.fullExtent) {
-                  var extent = new Extent(layer.fullExtent);
+                  var extent = _toExtent(layer.fullExtent);
                   _setExtent(view, extent, layer.fullExtent);
                 }
               });
@@ -332,7 +346,7 @@ define([
               reactiveUtils.when(() => layer.loaded === true, () => {
                 domConstruct.destroy(view.errorNode);
                 if (layer.fullExtent) {
-                  var extent = new Extent(layer.fullExtent);
+                  var extent = _toExtent(layer.fullExtent);
                   _setExtent(view, extent, layer.fullExtent);
                 }
               });
@@ -356,7 +370,7 @@ define([
                 }
                 if (layerExtent)
                 {
-                  var extent = new Extent(layerExtent);
+                  var extent = _toExtent(layerExtent);
                   _setExtent(view, extent, extent);
                 }
               });
@@ -374,7 +388,7 @@ define([
               reactiveUtils.when(() => layer.loaded === true, () => {
                 domConstruct.destroy(view.errorNode);
                 if (layer.fullExtent) {
-                  var extent = new Extent(layer.fullExtent);
+                  var extent = _toExtent(layer.fullExtent);
                   _setExtent(view, extent, layer.fullExtent);
                 }
               });
@@ -391,7 +405,7 @@ define([
               layer.load().then(() => {
                 domConstruct.destroy(view.errorNode);
                 if (!extentSet && layer.fullExtent) {
-                  var extent = new Extent(layer.fullExtent);
+                  var extent = _toExtent(layer.fullExtent);
                   _setExtent(view, extent, layer.fullExtent);
                   extentSet = true;
                 }
@@ -448,7 +462,44 @@ define([
                       }, function (error) {
                         _handleError(view, "Invalid response received from the server");
                       });
-            }
+                },
+				
+				"CSV": function (view, url) {	              
+	              var layer = new CSVLayer({url: url.split('?')[0]});
+	              var extentSet = false;
+	              reactiveUtils.when(() => layer.loadStatus === "failed", () => {
+	                _handleError(view, layer.loadError);
+	              });
+	              layer.load().then(() => {
+	                domConstruct.destroy(view.errorNode);
+	                if (!extentSet && layer.fullExtent) {
+                    var extent = _toExtent(layer.fullExtent);
+	                  _setExtent(view, extent, layer.fullExtent);
+	                  extentSet = true;
+	                }
+	              });
+	              view.map.add(layer);
+	            },
+				
+				"Parquet": function (view, url) {
+					var urlReq = url.split('?')[0];	
+					          
+	              var layer = new ParquetLayer({urls: [urlReq],spatialReference: { wkid: 4326 }});
+	              var extentSet = false;
+	              reactiveUtils.when(() => layer.loadStatus === "failed", () => {
+	                _handleError(view, layer.loadError);
+	              });
+	              layer.load().then(() => {
+	                domConstruct.destroy(view.errorNode);
+	                if (!extentSet && layer.fullExtent) {
+                    var extent = _toExtent(layer.fullExtent);
+                    _setExtent(view, extent, extent);
+	                  extentSet = true;
+	                }
+	              });
+	              view.map.add(layer);
+		         }
+				
           };
 
           _getType = function (serviceType) {
