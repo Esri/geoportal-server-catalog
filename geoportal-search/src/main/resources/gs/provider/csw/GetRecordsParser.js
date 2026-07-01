@@ -339,7 +339,36 @@
           } else if (ln === "Or") {
             self._throwUnsupportedOperator(childInfo);
           } else if (ln === "Not") {
-            self._throwUnsupportedOperator(childInfo);
+            var oldQ = self.q, oldIds = self.ids;
+            var oldModifiedFrom = self.modifiedFrom, oldModifiedTo = self.modifiedTo;
+            var negatedQ = null, negatedIds = [], negatedClauses = [];
+
+            self.q = null;
+            self.ids = [];
+            self._parseFilterClause(childInfo.node);
+            negatedQ = self.q;
+            negatedIds = self.ids;
+            var negatedModifiedFrom = self.modifiedFrom, negatedModifiedTo = self.modifiedTo;
+
+            self.q = oldQ;
+            self.ids = oldIds;
+            self.modifiedFrom = oldModifiedFrom;
+            self.modifiedTo = oldModifiedTo;
+
+            // Not over modified/date range is not currently representable by the target parameters.
+            if (negatedModifiedFrom !== oldModifiedFrom || negatedModifiedTo !== oldModifiedTo) {
+              self._throwUnsupportedOperator(childInfo);
+            }
+
+            if (typeof negatedQ === "string" && negatedQ.length > 0) {
+              negatedClauses.push("("+negatedQ+")");
+            }
+            if (Array.isArray(negatedIds) && negatedIds.length > 0) {
+              negatedClauses.push("(id:("+negatedIds.join(" OR ")+"))");
+            }
+            if (negatedClauses.length > 0) {
+              self._appendQ("NOT ("+negatedClauses.join(" AND ")+")");
+            }
 
           // property clauses
           } else if (ln === "PropertyIsBetween") {
@@ -371,7 +400,12 @@
             }
             self._appendQ(v);
           } else if (ln === "PropertyIsNotEqualTo") {
-            self._throwUnsupportedOperator(childInfo);
+            propName = self._getPropertyName(childInfo);
+            v = self._getPropertyLiteral(childInfo);
+            if (propName.length > 0 && propName.toLowerCase() !== "anytext") {
+              v = propName+":("+v+")";
+            }
+            self._appendQ("NOT ("+v+")");
           } else if (ln === "PropertyIsNull") {
             self._throwUnsupportedOperator(childInfo);
 
