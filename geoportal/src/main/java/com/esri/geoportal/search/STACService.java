@@ -124,7 +124,7 @@ public class STACService extends Application {
 	}
 
   private static JSONObject loadExtensionProperties() {
-		//read stac-extension-prop.json file which has properties for STAC extensions and load it in a JSONObject
+		//Read stac-extension-prop.json file which has properties for STAC extensions and load it in a JSONObject
 		JSONObject propExtensionObj = new JSONObject();		
 		try {
 			ResourcePath rp = new ResourcePath();
