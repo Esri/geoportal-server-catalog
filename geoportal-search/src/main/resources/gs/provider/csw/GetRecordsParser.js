@@ -284,9 +284,11 @@
       }
     }},
 
-    _parseFilterClause: {writable:true,value:function(node) {
+    _parseFilterClause: {writable:true,value:function(node, singleChildInfo) {
       var self = this, propName, literal, nodeInfo;
-      this.xmlInfo.forEachChild(node,function(childInfo){
+      
+      // Process either a single child (for Or branches) or all children of node
+      var processChild = function(childInfo) {
         if (childInfo.isElementNode) {
           var v, v2, ln = childInfo.localName;
           var peek = self._getPropertyName(childInfo,true);
@@ -337,9 +339,81 @@
           } else if (ln === "And") {
             self._parseFilterClause(childInfo.node);
           } else if (ln === "Or") {
-            self._throwUnsupportedOperator(childInfo);
+            // Evaluate each Or branch in isolation, then combine with OR
+            var oldQ = self.q, oldIds = self.ids;
+            var oldModifiedFrom = self.modifiedFrom, oldModifiedTo = self.modifiedTo;
+            var orClauses = [];
+
+            self.xmlInfo.forEachChild(childInfo.node, function(orChildInfo) {
+              if (!orChildInfo.isElementNode) return;
+
+              // Reset state for this branch
+              self.q = null;
+              self.ids = [];
+              self.modifiedFrom = oldModifiedFrom;
+              self.modifiedTo = oldModifiedTo;
+
+              // Parse the branch
+              self._parseFilterClause(orChildInfo.node ? orChildInfo.node : childInfo.node, orChildInfo);
+
+              // Collect branch results
+              var branchClauses = [];
+              if (typeof self.q === "string" && self.q.length > 0) {
+                branchClauses.push("(" + self.q + ")");
+              }
+              if (Array.isArray(self.ids) && self.ids.length > 0) {
+                branchClauses.push("(id:(" + self.ids.join(" OR ") + "))");
+              }
+              if (branchClauses.length > 0) {
+                orClauses.push("(" + branchClauses.join(" AND ") + ")");
+              }
+
+              // Check for unsupported side effects (modified date changes)
+              if (self.modifiedFrom !== oldModifiedFrom || self.modifiedTo !== oldModifiedTo) {
+                self._throwUnsupportedOperator(childInfo);
+              }
+            });
+
+            // Restore original state and append combined OR clause
+            self.q = oldQ;
+            self.ids = oldIds;
+            self.modifiedFrom = oldModifiedFrom;
+            self.modifiedTo = oldModifiedTo;
+
+            if (orClauses.length > 0) {
+              self._appendQ(orClauses.join(" OR "));
+            }
           } else if (ln === "Not") {
-            self._throwUnsupportedOperator(childInfo);
+            var oldQ = self.q, oldIds = self.ids;
+            var oldModifiedFrom = self.modifiedFrom, oldModifiedTo = self.modifiedTo;
+            var negatedQ = null, negatedIds = [], negatedClauses = [];
+
+            self.q = null;
+            self.ids = [];
+            self._parseFilterClause(childInfo.node);
+            negatedQ = self.q;
+            negatedIds = self.ids;
+            var negatedModifiedFrom = self.modifiedFrom, negatedModifiedTo = self.modifiedTo;
+
+            self.q = oldQ;
+            self.ids = oldIds;
+            self.modifiedFrom = oldModifiedFrom;
+            self.modifiedTo = oldModifiedTo;
+
+            // Not over modified/date range is not currently representable by the target parameters.
+            if (negatedModifiedFrom !== oldModifiedFrom || negatedModifiedTo !== oldModifiedTo) {
+              self._throwUnsupportedOperator(childInfo);
+            }
+
+            if (typeof negatedQ === "string" && negatedQ.length > 0) {
+              negatedClauses.push("("+negatedQ+")");
+            }
+            if (Array.isArray(negatedIds) && negatedIds.length > 0) {
+              negatedClauses.push("(id:("+negatedIds.join(" OR ")+"))");
+            }
+            if (negatedClauses.length > 0) {
+              self._appendQ("NOT ("+negatedClauses.join(" AND ")+")");
+            }
 
           // property clauses
           } else if (ln === "PropertyIsBetween") {
@@ -371,7 +445,12 @@
             }
             self._appendQ(v);
           } else if (ln === "PropertyIsNotEqualTo") {
-            self._throwUnsupportedOperator(childInfo);
+            propName = self._getPropertyName(childInfo);
+            v = self._getPropertyLiteral(childInfo);
+            if (propName.length > 0 && propName.toLowerCase() !== "anytext") {
+              v = propName+":("+v+")";
+            }
+            self._appendQ("NOT ("+v+")");
           } else if (ln === "PropertyIsNull") {
             self._throwUnsupportedOperator(childInfo);
 
@@ -404,7 +483,16 @@
             self._throwUnsupportedOperator(childInfo);
           }
         }
-      });
+      };
+      
+      // If singleChildInfo provided, process just that child; otherwise iterate all children
+      if (singleChildInfo) {
+        processChild(singleChildInfo);
+      } else {
+        this.xmlInfo.forEachChild(node, function(childInfo) {
+          processChild(childInfo);
+        });
+      }
     }},
 
     _parseSortBy: {writable:true,value:function(sortByNode) {

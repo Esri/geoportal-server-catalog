@@ -437,6 +437,15 @@ define(["dojo/_base/array",
 		      layers: layer.layers.map(function(lyr) { return self.cloneLayer(lyr); })
 		    });
 		  }
+		  
+		  //  CSV
+	  	  if (layer.url.endsWith(".csv")) {
+	  	    return new CSVLayer({
+	  	      url: layer.url,
+	  	      title: layer.title,
+	  	      visible: layer.visible
+	  	    });
+	  	  }
 
 		  // 3️⃣ FeatureLayer (true 3D aware)
 		  if (layer instanceof FeatureLayer) {
@@ -526,8 +535,9 @@ define(["dojo/_base/array",
 		      visible: layer.visible
 		    });
 		  }
+		  
 
-		  // 8️⃣ Final fallback (minimal but safe)
+		  // 9 Final fallback (minimal but safe)
 		  if (layer.url && layer.constructor) {
 		    return new layer.constructor({
 		      url: layer.url,
@@ -540,7 +550,7 @@ define(["dojo/_base/array",
 		  console.warn("Unsupported layer type for cloning:", layer);
 		  return null;
 		}
-		};
+	};
 
 		return _def;
 

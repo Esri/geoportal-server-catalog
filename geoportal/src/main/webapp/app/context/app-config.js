@@ -4,7 +4,8 @@ define([],function(){var obj={
   system: {
     searchLimit: 10000,
     secureCatalogApp:false,
-    showTabs:"MapPanel,AdminPanel,AboutPanel,ApiPanel,CollectionsPanel"
+    showTabs:"MapPanel,AdminPanel,AboutPanel,ApiPanel,CollectionsPanel,SearchPanel",//MapPanel,AdminPanel,AboutPanel,ApiPanel,CollectionsPanel,SearchPanel
+	defaultTab:"searchPanel" //searchPanel, mapPanel, apiPanel, collectionsPanel, aboutPanel
   },
 
   edit: {
@@ -24,7 +25,8 @@ define([],function(){var obj={
   search: {
     allowSettings: true,
     useSimpleQueryString: false,
-    escapeFilter: false
+    escapeFilter: false,
+	footPrintServiceUrl: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/export"
   },
 
   searchMap: {

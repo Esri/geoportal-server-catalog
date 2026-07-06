@@ -26,6 +26,7 @@ define(["dojo/_base/declare",
         "esri4/layers/TileLayer",
         "esri4/layers/MapImageLayer",
         "esri4/layers/FeatureLayer",
+		"esri4/layers/CSVLayer",
         "esri4/layers/WFSLayer",
         "esri4/widgets/Search",
         "esri4/widgets/LayerList",
@@ -40,7 +41,7 @@ define(["dojo/_base/declare",
         "../gs/base/LayerProcessor",
         "app/context/AppClient"], 
 function(declare, lang, Templated, template, i18n, i18resources, domConstruct, Deferred,
-		Map, MapView, SceneView, TileLayer, MapImageLayer, FeatureLayer, WFSLayer, SearchWidget, LayerList, FeatureTable,
+		Map, MapView, SceneView, TileLayer, MapImageLayer, FeatureLayer, CSVLayer,WFSLayer, SearchWidget, LayerList, FeatureTable,
 		Legend, Home, Expand, BasemapGallery, reactiveUtils,
 		SearchPane, WidgetContext, LayerProcessor, AppClient) {
 
@@ -535,8 +536,15 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
           var selectedFeature = mapView.popup.selectedFeature;
           if (selectedFeature !== null && mapView.popup.visible !== false) {
             if (self.featureTable) {
+              if (selectedFeature.sourceLayer && selectedFeature.sourceLayer.type === "parquet") {
+                return;
+              }
+              var selectedId = self._extractObjectId(selectedFeature);
+              if (selectedId === null || selectedId === undefined) {
+                return;
+              }
               self.featureTable.highlightIds.removeAll();
-              self.featureTable.highlightIds.add(mapView.popup.selectedFeature.attributes.OBJECTID);
+              self.featureTable.highlightIds.add(selectedId);
             }
           }
         }
@@ -549,8 +557,15 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
           var selectedFeature = sceneView.popup.selectedFeature;
           if (selectedFeature !== null && sceneView.popup.visible !== false) {
             if (self.featureTable) {
+              if (selectedFeature.sourceLayer && selectedFeature.sourceLayer.type === "parquet") {
+                return;
+              }
+              var selectedId = self._extractObjectId(selectedFeature);
+              if (selectedId === null || selectedId === undefined) {
+                return;
+              }
               self.featureTable.highlightIds.removeAll();
-              self.featureTable.highlightIds.add(sceneView.popup.selectedFeature.attributes.OBJECTID);
+              self.featureTable.highlightIds.add(selectedId);
             }
           }
         }
@@ -625,68 +640,127 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
 		}		
     },
 
+    _extractObjectId:function(feature) {
+      if (!feature || !feature.attributes) {
+        return null;
+      }
+      if (feature.layer && feature.layer.objectIdField && feature.attributes[feature.layer.objectIdField] !== undefined) {
+        return feature.attributes[feature.layer.objectIdField];
+      }
+      if (feature.sourceLayer && feature.sourceLayer.objectIdField && feature.attributes[feature.sourceLayer.objectIdField] !== undefined) {
+        return feature.attributes[feature.sourceLayer.objectIdField];
+      }
+      if (feature.attributes.OBJECTID !== undefined) {
+        return feature.attributes.OBJECTID;
+      }
+      if (feature.attributes.__OBJECTID !== undefined) {
+        return feature.attributes.__OBJECTID;
+      }
+      return null;
+    },
+
+    _isCsvServiceUrl:function(url) {
+      if (typeof url !== "string" || !url) {
+        return false;
+      }
+      var lowerUrl = url.toLowerCase();
+      if (lowerUrl.indexOf("csvserver") > -1) {
+        return true;
+      }
+      var normalized = lowerUrl.split("?")[0].split("#")[0];
+      return normalized.endsWith(".csv");
+    },
+
     openAttrTable:function(selectedFeature)
-    {   
-    	console.log("selected feature "+selectedFeature.attributes.OBJECTID);
-    	let id = selectedFeature.attributes.OBJECTID;
-    	//Below can be used to show only selected record
-//    	var featureLayer = new FeatureLayer({url:selectedFeature.sourceLayer.url,
-//    			definitionExpression: "OBJECTID = "+id});
-    	var serviceUrl = selectedFeature.sourceLayer.url;
-    	if(this.urlParams && this.urlParams.type == 'WFS' || serviceUrl.indexOf('WFSServer')>-1)
-    		{
-    		var layerToAdd = new WFSLayer({url:serviceUrl});
-    		}
-    	else
-    		{
-    		var layerToAdd = new FeatureLayer(serviceUrl);
-    		}
-    	
-    	var tableContainer = document.getElementById("tableContainer");
-    	
-    	if(this.featureTable)
-    		{
-    			try{
-    				this.featureTable.destroy();
-    			}catch(error)
-    			{
-    				console.error(error);
-    			}
-    			tableContainer.innerHTML = "";
-    		}
-    	var container = document.createElement("div");
-    	
-    	tableContainer.appendChild(container);    	
-    	
-		let table = this.featureTable = new FeatureTable({
-   		  returnGeometryEnabled: true,
-   		  view: this.view,
-   		  layer: layerToAdd,
-   		  container: container,
-   		  visible:true,
-   		  columnReorderingEnabled:true, 		  
- 		  highlightEnabled:true,
- 		  highlightIds:[id],
-   		  visibleElements: {
-            // Autocast to VisibleElements
-            menuItems: {
-              clearSelection: true,
-              refreshData: true,
-              toggleColumns: true,
-              selectedRecordsShowAllToggle: true
-            }},
-   		  menuConfig:{
-			  items:[
-				  { 	
-					  label: "Close",   					 
-					  icon: "x-circle",
-					  clickFunction: ()=> {
-						  this.featureTable.visible =false;                     
-					  }
-				  }
-			  ]
-   		  }
-   		});    	
+    {
+      if (!selectedFeature || !selectedFeature.sourceLayer) {
+        console.warn("No feature selected for attribute table.");
+        return;
+      }
+
+      var id = this._extractObjectId(selectedFeature);
+      console.log("selected feature " + id);
+
+      var sourceLayer = selectedFeature.sourceLayer;
+      var isParquetLayer = sourceLayer.type === "parquet";
+      var layerToAdd;
+
+      if (isParquetLayer) {
+        // Reuse ParquetLayer directly; it is not a FeatureLayer service endpoint.
+        layerToAdd = sourceLayer;
+      } else {
+        var serviceUrl = sourceLayer.url || "";
+        // Some layer types keep endpoint(s) in urls.items instead of url.
+        if ((typeof serviceUrl !== "string" || serviceUrl.length === 0) &&
+            sourceLayer.urls && sourceLayer.urls.items && sourceLayer.urls.items.length > 0) {
+          serviceUrl = sourceLayer.urls.items[0] || "";
+        }
+
+        if ((this.urlParams && this.urlParams.type === "WFS") ||
+            (typeof serviceUrl === "string" && serviceUrl.indexOf("WFSServer") > -1)) {
+          layerToAdd = new WFSLayer({url: serviceUrl});
+        } else if (this._isCsvServiceUrl(serviceUrl) || sourceLayer.type === "csv") {
+          // Reuse the active source layer for CSV to preserve parser/config state.
+          layerToAdd = sourceLayer;
+        } else {
+          layerToAdd = new FeatureLayer(serviceUrl);
+        }
+      }
+
+      var tableContainer = document.getElementById("tableContainer");
+      if (!tableContainer) {
+        console.warn("Attribute table container not found.");
+        return;
+      }
+
+      if(this.featureTable)
+      {
+        try{
+          this.featureTable.destroy();
+        }catch(error)
+        {
+          console.error(error);
+        }
+        tableContainer.innerHTML = "";
+      }
+      var container = document.createElement("div");
+
+      tableContainer.appendChild(container);
+
+      var featureTableProps = {
+        returnGeometryEnabled: true,
+        view: this.activeView || this.mapView,
+        layer: layerToAdd,
+        container: container,
+        visible:true,
+        columnReorderingEnabled:true,
+        visibleElements: {
+          // Autocast to VisibleElements
+          menuItems: {
+            clearSelection: true,
+            refreshData: true,
+            toggleColumns: true,
+            selectedRecordsShowAllToggle: true
+          }},
+        menuConfig:{
+          items:[
+            {
+              label: "Close",
+              icon: "x-circle",
+              clickFunction: ()=> {
+                this.featureTable.visible =false;
+              }
+            }
+          ]
+        }
+      };
+
+      if (!isParquetLayer) {
+        featureTableProps.highlightEnabled = true;
+        featureTableProps.highlightIds = (id !== null && id !== undefined) ? [id] : [];
+      }
+
+      this.featureTable = new FeatureTable(featureTableProps);
     },
     _createLocalCatalogUrl: function() {    
         if (window && window.top && window.top.geoportalServiceInfo) {
