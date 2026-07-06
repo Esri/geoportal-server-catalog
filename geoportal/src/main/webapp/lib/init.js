@@ -6,7 +6,7 @@
     packages: [
           {
               name: "esri4",
-              location: "https://js.arcgis.com/4.30/esri"
+              location: "https://js.arcgis.com/4.34/esri"
           },
           {
               name: 'app',

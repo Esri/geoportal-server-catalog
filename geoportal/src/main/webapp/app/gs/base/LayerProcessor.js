@@ -35,13 +35,14 @@ define([
   "esri4/layers/WMSLayer",
   "esri4/layers/WMTSLayer",
   "esri4/layers/OGCFeatureLayer",
+  "esri4/layers/ParquetLayer",
   "esri4/core/reactiveUtils",
   "../widget/util",
   "../widget/layers/layerUtil"],
 function(declare, lang, array, Deferred, all, i18n, esriRequest,
 		MapImageLayer, ImageryLayer, TileLayer, CSVLayer, 
   FeatureLayer, GeoRSSLayer, KMLLayer, StreamLayer, VectorTileLayer, 
-  ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, OGCFeatureLayer,
+  ImageryTileLayer,WFSLayer, WMSLayer, WMTSLayer, OGCFeatureLayer,ParquetLayer,
   reactiveUtils,util,layerUtil){
   
   return declare(null, {
@@ -190,7 +191,7 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       } else if (type === "CSV") {
         layer = new CSVLayer(url,{id:id});
         layer.load();
-        this.waitThenAdd(dfd,mapView,type,layer);
+        this.waitThenAdd(dfd,mapView,type,layer,sceneView);
       }else if (type === "ImageryTileLayer") {
           layer = new ImageryTileLayer(url,{id:id});
           layer.load();
@@ -204,7 +205,13 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       }
       else if (type === "GroupLayer") {
     	  layerUtil.addGroupLayer(url,null,null,mapView,null,sceneView);       
-        }
+      }
+		else if (type === "Parquet") {
+			layer = new ParquetLayer({ urls: [url],id:id,spatialReference: { wkid: 4326 }});			
+	        layer.load();
+	        this.waitThenAdd(dfd,mapView,type,layer);
+		    	      
+	}
       else {
         dfd.reject("Unsupported");
       }
@@ -349,7 +356,9 @@ function(declare, lang, array, Deferred, all, i18n, esriRequest,
       else if (dcl === "esri.layers.OGCFeatureLayer") {
     	  //attrTableNotallowed = true as FeatureTable not supported by OGCFeatureLayer
     	  layer.popupTemplate = this.newPopupTemplate(layer,true);
-      }
+  	}else if (dcl === "esri.layers.ParquetLayer") {  	  
+  	  layer.popupTemplate = this.newPopupTemplate(layer);
+    }
       
     },
     

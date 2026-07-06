@@ -127,17 +127,64 @@ function(declare, lang, util,VectorTileLayer) {
 		  }else if (lc.indexOf("ogcfeatureserver")>-1) {
             type = "OGCFeatureServer";  
           }
-          //Portal item type
-          else if (item && item.type_s) {
-        	  type = util.readItemServiceType(item.type_s);
-          }  
+		  //Portal item type
+            else if ((item && item.type_s) || (item && item._source &&item._source.type_s)) {
+				var itemType = item.type_s || item._source &&item._source.type_s;
+          	  type = util.readItemServiceType(itemType);
+            }  
+		  //check for parquet file
+		  else if(this.isParquet(url)){
+			type = "Parquet";
+		 }
+		  
+          
         }
       }
 
       this.type = type;
       this.url = url;
-    },  
-    
+    }, 
+
+  isParquet:async function (lc,url) {
+	if (typeof lc !== "string") {
+	      return false;
+	    }
+	    if (lc.indexOf("item.html") > -1) {
+	      return false;
+	    }
+	    if (lc.endsWith(".parquet") || lc.indexOf(".parquet?") > -1) {
+	      return true;
+	    }
+	    if (lc.endsWith(".gzip.parquet") || lc.indexOf(".gzip.parquet?") > -1) {
+	      return true;
+	    }	    
+	    
+	    // ArcGIS item detail pages are HTML and not parquet data endpoints.
+	    if (typeof url === "string" && url.toLowerCase().indexOf("item.html") > -1) {
+	      return false;
+	    }
+    try {
+      const res = await fetch(url, {
+        headers: { Range: "bytes=0-3" }
+      });
+      if (!res || !res.ok) {
+        return false;
+      }
+	
+      const buf = await res.arrayBuffer();
+      if (!buf || buf.byteLength < 4) {
+        return false;
+      }
+	
+      const bytes = new Uint8Array(buf, 0, 4);
+      const signature = String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]);
+      return signature === "PAR1";
+    } catch (ex) {
+      // Keep service detection flow alive when parquet probing fails.
+      return false;
+    }
+  },
+	
     isSet: function() {
       if (typeof this.type === "string" && this.type.length > 0) {
         if (typeof this.url === "string" && this.url.length > 0) {

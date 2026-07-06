@@ -671,101 +671,69 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
 
     _renderFootprint: function(item) {
       var show = AppContext.appConfig.searchResults.showFootprint;
-      var footprintNode = this.footprintNode;    
-      
-      if (show && item.shape_geo && item.shape_geo.coordinates) {
-        var extent = null;
+      var footprintNode = this.footprintNode;
 
-        var west = 180;
-        var east = -180;
-        var south = 90;
-        var north = -90;
-
-        
-        // try to find geometries to base a footprint on abd create an extent
-        
-        // 1 - use envelope_geo if present to get the extent
-        if (item.envelope_geo && Array.isArray(item.envelope_geo)) {
-          var west = item.envelope_geo[0].coordinates[0][0];
-          var south = item.envelope_geo[0].coordinates[0][1];
-          var east = item.envelope_geo[0].coordinates[1][0];
-          var north = item.envelope_geo[0].coordinates[1][1];
-          extent = new Extent({xmin:west, ymin:south, xmax:east, ymax:north, spatialReference:{wkid:4326}}); 
-        }
-        
-        // 2 - use shape_geo if present
-        if (item.shape_geo && item.shape_geo.coordinates && Array.isArray(item.shape_geo.coordinates)) {
-          for (var i=0; i<item.shape_geo.coordinates[0].length; i++) {
-            var coordinate = item.shape_geo.coordinates[0][i];
-            west = Math.min(west, coordinate[0]);
-            east = Math.max(east, coordinate[0]);
-            south = Math.min(south, coordinate[1]);
-            north = Math.max(north, coordinate[1]);
-          }
-          extent = new Extent({xmin:west-0.25, ymin:south-0.5, xmax:east+0.5, ymax:north+0.25, spatialReference:{wkid:4326}});
-        }
-        
-        var mapOptions = {
-          basemap: "gray",  //For full list of pre-defined basemaps, navigate to http://arcg.is/1JVo6Wd
-          //center: [item.envelope_cen_pt.lon, item.envelope_cen_pt.lat],
-          //TODO 
-//          isClickRecenter: false,
-//          isDoubleClickZoom: false,
-//          isKeyboardNavigation: false,
-//          isMapNavigation: true,
-//          isPan: true,
-//          isPinchZoom: false,
-//          isRubberbandZoom: false,
-//          isScrollWheel: false,
-//          slider: true,
-//          logo: false,
-//          showAttribution: false,
-//          nav: false,
-//          wrapAround180: true,
-//          extent: extent
-        };
-        //var map = new Map(this.footprintMap, mapOptions);
-
-        var map = new Map(mapOptions);
-
-        var gl = new GraphicsLayer({ id: "footprint" });
-        map.add(gl);
-        var polygon = {
-        	    type: "polygon", 
-        	    rings: item.shape_geo.coordinates
-        	  };
-        var footprint = {
-          "geometry":polygon, 
-          "spatialReference":{"wkid":4326}, 
-          "symbol":{
-            "color":[0,0,0,64],
-            "outline":{
-              "color":[0,0,0,255], 
-              "width":1,
-              "type":"simple-line",
-              "style":"solid"
-            }, 
-            "type":"simple-fill","style":"solid"
-          }
-        };
-        var graphic = new Graphic(footprint);
-        gl.add(graphic);
-        
-        var view = this.view = new MapView({
-        	  container:this.footprintNode,
-        	  map: map,        	 
-        	  extent: extent
-        	});     
-        view.ui.remove("attribution");     
-        // TODO  zoom inside map view top left, not working
-      //  view.ui.move("zoom", "top-left");
-        
-      } else {
-        footprintNode.style.display = "none";
+      if (!show || !footprintNode) {
+        if (footprintNode) footprintNode.style.display = "none";
+        return;
       }
-      
-    },
 
+      var west = 180;
+      var east = -180;
+      var south = 90;
+      var north = -90;
+      var hasBounds = false;
+
+      // Prefer envelope when available.
+      if (item.envelope_geo && Array.isArray(item.envelope_geo) && item.envelope_geo[0] && item.envelope_geo[0].coordinates) {
+        west = item.envelope_geo[0].coordinates[0][0];
+        south = item.envelope_geo[0].coordinates[0][1];
+        east = item.envelope_geo[0].coordinates[1][0];
+        north = item.envelope_geo[0].coordinates[1][1];
+        hasBounds = true;
+      }
+
+      // Fall back to bounds from shape coordinates.
+      if (!hasBounds && item.shape_geo && Array.isArray(item.shape_geo.coordinates) && Array.isArray(item.shape_geo.coordinates[0])) {
+        for (var i = 0; i < item.shape_geo.coordinates[0].length; i++) {
+          var coordinate = item.shape_geo.coordinates[0][i];
+          west = Math.min(west, coordinate[0]);
+          east = Math.max(east, coordinate[0]);
+          south = Math.min(south, coordinate[1]);
+          north = Math.max(north, coordinate[1]);
+        }
+        hasBounds = (west <= east && south <= north);
+      }
+
+      if (!hasBounds) {
+        footprintNode.style.display = "none";
+        return;
+      }
+
+      // Add a small buffer so the footprint area is not tightly clipped.
+      var paddedWest = west - 0.25;
+      var paddedSouth = south - 0.25;
+      var paddedEast = east + 0.25;
+      var paddedNorth = north + 0.25;
+	  var mapRequest = AppContext.appConfig.search.footPrintServiceUrl;
+	  if(!mapRequest||mapRequest.length===0) {
+      	var mapRequest = "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/export";
+	}
+      mapRequest += "?bbox=" + paddedWest + "," + paddedSouth + "," + paddedEast + "," + paddedNorth;
+      mapRequest += "&bboxSR=4326";
+      mapRequest += "&size=300,200";
+      mapRequest += "&format=png";
+      mapRequest += "&transparent=true";
+      mapRequest += "&f=image";
+
+      footprintNode.style.display = "";
+      footprintNode.innerHTML = "";
+      domConstruct.create("img", {
+        src: mapRequest,
+        alt: string.substitute(i18n.item.actions.titleFormat, {action: "Footprint", title: item.title})
+      }, footprintNode);
+    },
+	
     _uniqueLinks: function(item) {
       var links = [];
       if (typeof item.links_s === "string") {
