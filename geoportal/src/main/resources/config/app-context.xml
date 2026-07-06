@@ -16,6 +16,7 @@
   <beans:import resource="app-dcat.xml" />
   
   <beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
+    <beans:property name="version" value="4.0.0" />   
     <beans:property name="elasticContext" ref="elasticContext" />   
     <beans:property name="supportsApprovalStatus" value="false" />
     <beans:property name="defaultApprovalStatus" value="" /> <!-- optional - approved|reviewed|disapproved|incomplete|posted|draft -->
