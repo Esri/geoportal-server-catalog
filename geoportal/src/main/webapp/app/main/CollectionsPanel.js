@@ -355,8 +355,9 @@ define([
       const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
       const allDeletePromises = collectionsToBeDeleted.map((collection) => {
         if (collection.id === that.selectedCollection?.properties?.id) {
-          this.emptyCollectionInfoBox();
+          // Clear selection first, then empty info box to ensure UI state is consistent
           this.selectedCollection = null;
+          this.emptyCollectionInfoBox();
         }
         return this.deleteCollection(collection.id);
       });
@@ -1121,7 +1122,7 @@ define([
     },
 
     handleZoomCollectionEnabled: function () {
-      if (this.selectedCollection.graphic) {
+      if (this.selectedCollection && this.selectedCollection.graphic) {
         this.zoomCollectionButton.disabled = false;
         this.zoomCollectionButton.classList.remove("disabled");
       } else {
@@ -1572,6 +1573,7 @@ define([
       this.infoTableTitle.innerHTML = "Collection Info";
       this.infoTableBody.innerHTML = tableRows.join("");
       this.handleZoomCollectionEnabled();
+      this.handleViewItemsEnabled();
     },
 
     getUpdateFieldValues: function () {
