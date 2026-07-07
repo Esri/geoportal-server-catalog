@@ -428,6 +428,11 @@ define([
       this.appActionState = this.actions.CREATE_COLLECTION;
       this.updateIsLoading(true);
       this.sketchVM.complete();
+      
+      // Make sketch layer visible so user can see their drawing
+      if (this.sketchGraphicsLayer) {
+        this.sketchGraphicsLayer.visible = true;
+      }
 
       const { id, description, title, assets } = this.getCreateFieldValues();
       let tempGeometry = null;
@@ -1126,7 +1131,8 @@ define([
     },
 	
 	handleViewItemsEnabled: function () {
-	      if (this.selectedCollection.graphic) {
+	      // Enable View Items if a collection is selected, regardless of whether it has a bbox/graphic
+	      if (this.selectedCollection) {
 	        this.viewItemsButton.disabled = false;
 	        this.viewItemsButton.classList.remove("disabled");
 	      } else {
@@ -1487,6 +1493,10 @@ define([
       }
 	  this.clearMapView();	  
       this.selectedGraphic = null;
+      // Make sketch layer visible so user can see their drawing
+      if (this.sketchGraphicsLayer) {
+        this.sketchGraphicsLayer.visible = true;
+      }
       this.renderCreateCollectionEditor();
     },
 
@@ -1561,7 +1571,7 @@ define([
       let tableRows = [];
       this.infoTableTitle.innerHTML = "Collection Info";
       this.infoTableBody.innerHTML = tableRows.join("");
-      this.clickEnabled();
+      this.handleZoomCollectionEnabled();
     },
 
     getUpdateFieldValues: function () {
