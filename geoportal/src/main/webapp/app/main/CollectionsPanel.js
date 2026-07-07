@@ -355,8 +355,9 @@ define([
       const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
       const allDeletePromises = collectionsToBeDeleted.map((collection) => {
         if (collection.id === that.selectedCollection?.properties?.id) {
-          this.emptyCollectionInfoBox();
+          // Clear selection first, then empty info box to ensure UI state is consistent
           this.selectedCollection = null;
+          this.emptyCollectionInfoBox();
         }
         return this.deleteCollection(collection.id);
       });
@@ -428,6 +429,11 @@ define([
       this.appActionState = this.actions.CREATE_COLLECTION;
       this.updateIsLoading(true);
       this.sketchVM.complete();
+      
+      // Make sketch layer visible so user can see their drawing
+      if (this.sketchGraphicsLayer) {
+        this.sketchGraphicsLayer.visible = true;
+      }
 
       const { id, description, title, assets } = this.getCreateFieldValues();
       let tempGeometry = null;
@@ -1116,7 +1122,7 @@ define([
     },
 
     handleZoomCollectionEnabled: function () {
-      if (this.selectedCollection.graphic) {
+      if (this.selectedCollection && this.selectedCollection.graphic) {
         this.zoomCollectionButton.disabled = false;
         this.zoomCollectionButton.classList.remove("disabled");
       } else {
@@ -1126,7 +1132,8 @@ define([
     },
 	
 	handleViewItemsEnabled: function () {
-	      if (this.selectedCollection.graphic) {
+	      // Enable View Items if a collection is selected, regardless of whether it has a bbox/graphic
+	      if (this.selectedCollection) {
 	        this.viewItemsButton.disabled = false;
 	        this.viewItemsButton.classList.remove("disabled");
 	      } else {
@@ -1487,6 +1494,10 @@ define([
       }
 	  this.clearMapView();	  
       this.selectedGraphic = null;
+      // Make sketch layer visible so user can see their drawing
+      if (this.sketchGraphicsLayer) {
+        this.sketchGraphicsLayer.visible = true;
+      }
       this.renderCreateCollectionEditor();
     },
 
@@ -1561,7 +1572,8 @@ define([
       let tableRows = [];
       this.infoTableTitle.innerHTML = "Collection Info";
       this.infoTableBody.innerHTML = tableRows.join("");
-      this.clickEnabled();
+      this.handleZoomCollectionEnabled();
+      this.handleViewItemsEnabled();
     },
 
     getUpdateFieldValues: function () {
