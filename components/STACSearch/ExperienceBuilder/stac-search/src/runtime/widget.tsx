@@ -12,6 +12,7 @@ type StacFeature = {
   id?: string
   bbox?: number[]
   geometry?: Record<string, unknown>
+  sourceStacApi?: string
   properties?: {
     datetime?: string
     [key: string]: unknown
@@ -48,6 +49,9 @@ type StacCollection = {
 type StacCollectionsResponse = {
   collections?: StacCollection[]
 }
+
+const ANY_COLLECTION_VALUE = 'any'
+const ANY_STAC_API_VALUE = '__any_stac_api__'
 
 const style = css`
   height: 100%;
@@ -110,6 +114,18 @@ max-width: 200px;
     white-space: normal;
     overflow-wrap: anywhere;
     word-break: break-word;
+  }
+
+  .results-summary {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    align-items: center;
+  }
+
+  .results-summary-label {
+    color: var(--sys-color-text-secondary);
+    font-size: 0.875rem;
   }
 
   .results {
@@ -286,10 +302,13 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
   const layerRef = React.useRef<GeoJSONLayer | null>(null)
   const layerUrlRef = React.useRef<string | null>(null)
 
-  const [stacUrl, setStacUrl] = React.useState(
-    ((props.config.stacApiUrls as unknown as string[]) ?? [])[0] ?? ''
+  const configuredStacUrls = React.useMemo(
+    () => ((props.config.stacApiUrls as unknown as string[]) ?? []).map((url) => url.trim()).filter(Boolean),
+    [props.config.stacApiUrls]
   )
-  const [selectedCollection, setSelectedCollection] = React.useState((props.config.defaultCollections ?? '').split(',')[0]?.trim() ?? '')
+
+  const [stacUrl, setStacUrl] = React.useState(configuredStacUrls[0] ?? '')
+  const [selectedCollection, setSelectedCollection] = React.useState((props.config.defaultCollections ?? '').split(',')[0]?.trim() ?? ANY_COLLECTION_VALUE)
   const [collectionOptions, setCollectionOptions] = React.useState<Array<{ id: string, label: string }>>([])
   const [collectionsLoading, setCollectionsLoading] = React.useState(false)
   const [collectionsError, setCollectionsError] = React.useState('')
@@ -298,10 +317,32 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
   const [limit, setLimit] = React.useState(props.config.defaultLimit ?? 25)
   const [useCurrentExtent, setUseCurrentExtent] = React.useState(props.config.useCurrentExtent ?? true)
   const [results, setResults] = React.useState<StacFeature[]>([])
+  const [activeStacFilter, setActiveStacFilter] = React.useState('')
   const [error, setError] = React.useState('')
   const [loading, setLoading] = React.useState(false)
   const [lastRequestSummary, setLastRequestSummary] = React.useState('')
   const [addedCogIds, setAddedCogIds] = React.useState<Set<string>>(new Set())
+
+  const resultCountsByStac = React.useMemo(() => {
+    const counts = new Map<string, number>()
+
+    results.forEach((feature) => {
+      const source = feature.sourceStacApi ?? 'Unknown STAC API'
+      counts.set(source, (counts.get(source) ?? 0) + 1)
+    })
+
+    return Array.from(counts.entries())
+      .sort((a, b) => a[0].localeCompare(b[0]))
+      .map(([stacApi, count]) => ({ stacApi, count }))
+  }, [results])
+
+  const displayedResults = React.useMemo(() => {
+    if (!activeStacFilter) {
+      return results
+    }
+
+    return results.filter((feature) => (feature.sourceStacApi ?? 'Unknown STAC API') === activeStacFilter)
+  }, [activeStacFilter, results])
 
   const cleanupLayer = React.useCallback(() => {
     if (activeJimuMapView?.view?.map && layerRef.current) {
@@ -324,14 +365,18 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
 
   React.useEffect(() => {
     // Sync selected STAC URL when the configured list changes
-    const urls: string[] = (props.config.stacApiUrls as unknown as string[]) ?? []
     setStacUrl((prev) => {
-      if (urls.includes(prev)) {
+      if (prev === ANY_STAC_API_VALUE && configuredStacUrls.length > 0) {
         return prev
       }
-      return urls[0] ?? ''
+
+      if (configuredStacUrls.includes(prev)) {
+        return prev
+      }
+
+      return configuredStacUrls[0] ?? ''
     })
-  }, [props.config.stacApiUrls])
+  }, [configuredStacUrls])
 
   React.useEffect(() => {
     if (!activeJimuMapView?.view?.map || !layerRef.current) {
@@ -347,6 +392,19 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
   React.useEffect(() => {
     const loadCollections = async (): Promise<void> => {
       const baseUrl = (stacUrl ?? '').trim().replace(/\/$/, '')
+
+      if (stacUrl === ANY_STAC_API_VALUE) {
+        setCollectionOptions([
+          {
+            id: ANY_COLLECTION_VALUE,
+            label: 'any'
+          }
+        ])
+        setSelectedCollection(ANY_COLLECTION_VALUE)
+        setCollectionsLoading(false)
+        setCollectionsError('')
+        return
+      }
 
       if (!baseUrl) {
         setCollectionOptions([])
@@ -365,28 +423,37 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
         }
 
         const data = await response.json() as StacCollectionsResponse
-        const options = (data.collections ?? [])
+        const options = [
+          {
+            id: ANY_COLLECTION_VALUE,
+            label: 'any'
+          },
+          ...(data.collections ?? [])
           .filter((collection) => Boolean(collection.id))
           .map((collection) => ({
             id: collection.id as string,
             label: (collection.title?.trim() || collection.id) as string
           }))
+        ]
 
         setCollectionOptions(options)
 
-        if (options.length === 0) {
-          setSelectedCollection('')
-          return
-        }
-
         const hasCurrentSelection = options.some((option) => option.id === selectedCollection)
         if (!hasCurrentSelection) {
-          const defaultId = (props.config.defaultCollections ?? '').split(',')[0]?.trim() ?? ''
+          const defaultId = (props.config.defaultCollections ?? '').split(',')[0]?.trim() ?? ANY_COLLECTION_VALUE
           const defaultOption = options.find((option) => option.id === defaultId)
           setSelectedCollection(defaultOption?.id ?? options[0].id)
         }
       } catch (collectionsFetchError) {
-        setCollectionOptions([])
+        setCollectionOptions([
+          {
+            id: ANY_COLLECTION_VALUE,
+            label: 'any'
+          }
+        ])
+        if (!selectedCollection) {
+          setSelectedCollection(ANY_COLLECTION_VALUE)
+        }
         setCollectionsError(
           collectionsFetchError instanceof Error
             ? collectionsFetchError.message
@@ -419,6 +486,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
         title: feature.id,
         ...feature.properties,
         granule: getItemLink(feature) ?? 'No link available',
+        stac_api: feature.sourceStacApi ?? '',
         thumbnail_url: getThumbnailUrl(feature) ?? ''
       }
     }))
@@ -476,6 +544,13 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
     activeJimuMapView.view.map.add(layer)
   }, [activeJimuMapView, cleanupLayer])
 
+  React.useEffect(() => {
+    void updateResultLayer({
+      type: 'FeatureCollection',
+      features: displayedResults
+    })
+  }, [displayedResults, updateResultLayer])
+
   const addCogToMap = React.useCallback((feature: StacFeature) => {
     const cogUrl = getCogUrl(feature)
     const featureId = feature.id ?? cogUrl
@@ -504,9 +579,11 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
   }, [endDate, startDate])
 
   const search = React.useCallback(async () => {
-    const baseUrl = (stacUrl ?? '').trim().replace(/\/$/, '')
+    const selectedStacUrls = stacUrl === ANY_STAC_API_VALUE
+      ? configuredStacUrls.map((url) => url.replace(/\/$/, ''))
+      : [(stacUrl ?? '').trim().replace(/\/$/, '')].filter(Boolean)
 
-    if (!baseUrl) {
+    if (selectedStacUrls.length === 0) {
       setError('Set a STAC API URL in the widget settings before searching.')
       return
     }
@@ -515,7 +592,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
       limit: Math.max(1, Math.floor(limit || 1))
     }
 
-    if (selectedCollection) {
+    if (selectedCollection && selectedCollection !== ANY_COLLECTION_VALUE) {
       requestBody.collections = [selectedCollection]
     }
 
@@ -561,27 +638,72 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
     setError('')
 
     try {
-      const response = await fetch(`${baseUrl}/search`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json'
-        },
-        body: JSON.stringify(requestBody)
-      })
+      const performSearch = async (baseUrl: string): Promise<StacFeature[]> => {
+        const searchUrl = `${baseUrl}/search`
+        const fallbackSearchUrl = selectedCollection === ANY_COLLECTION_VALUE && !/\/stac$/i.test(baseUrl)
+          ? `${baseUrl}/stac/search`
+          : undefined
 
-      if (!response.ok) {
-        throw new Error(`STAC search failed with ${response.status} ${response.statusText}`)
+        let response = await fetch(searchUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify(requestBody)
+        })
+
+        if (!response.ok && fallbackSearchUrl && (response.status === 404 || response.status === 405)) {
+          response = await fetch(fallbackSearchUrl, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(requestBody)
+          })
+        }
+
+        if (!response.ok) {
+          throw new Error(`${baseUrl} returned ${response.status} ${response.statusText}`)
+        }
+
+        const data = await response.json() as StacFeatureCollection
+        const features = Array.isArray(data.features) ? data.features : []
+        return features.map((feature) => ({
+          ...feature,
+          sourceStacApi: baseUrl
+        }))
       }
 
-      const data = await response.json() as StacFeatureCollection
-      const features = Array.isArray(data.features) ? data.features : []
+      const searchRuns = await Promise.all(selectedStacUrls.map(async (baseUrl) => {
+        try {
+          return {
+            baseUrl,
+            features: await performSearch(baseUrl),
+            error: ''
+          }
+        } catch (runError) {
+          return {
+            baseUrl,
+            features: [] as StacFeature[],
+            error: runError instanceof Error ? runError.message : `Search failed for ${baseUrl}`
+          }
+        }
+      }))
+
+      const features = searchRuns.flatMap((run) => run.features)
+      const failedRuns = searchRuns.filter((run) => run.error)
+
+      if (features.length === 0) {
+        throw new Error(failedRuns[0]?.error || 'STAC search failed.')
+      }
+
+      if (failedRuns.length > 0) {
+        setError(`Some STAC APIs failed: ${failedRuns.map((run) => run.baseUrl).join(', ')}`)
+      }
 
       setResults(features)
-      setLastRequestSummary(JSON.stringify(requestBody))
-      await updateResultLayer({
-        type: 'FeatureCollection',
-        features
-      })
+      setActiveStacFilter('')
+      setLastRequestSummary(JSON.stringify({ ...requestBody, stacApis: selectedStacUrls }))
     } catch (searchError) {
       setResults([])
       cleanupLayer()
@@ -589,7 +711,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
     } finally {
       setLoading(false)
     }
-  }, [activeJimuMapView, buildDatetime, cleanupLayer, limit, stacUrl, selectedCollection, updateResultLayer, useCurrentExtent])
+  }, [activeJimuMapView, buildDatetime, cleanupLayer, configuredStacUrls, limit, stacUrl, selectedCollection, updateResultLayer, useCurrentExtent])
 
   const zoomToFeature = React.useCallback(async (feature: StacFeature) => {
     const extent = getFeatureExtent(feature)
@@ -615,13 +737,22 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
               <Label>STAC API URL</Label>
               <Select
                 value={stacUrl}
-                onChange={(event) => { setStacUrl(event.target.value) }}
-                disabled={((props.config.stacApiUrls as unknown as string[]) ?? []).length === 0}
+                onChange={(event) => {
+                  const nextStacUrl = event.target.value
+                  setStacUrl(nextStacUrl)
+                  if (nextStacUrl === ANY_STAC_API_VALUE) {
+                    setSelectedCollection(ANY_COLLECTION_VALUE)
+                  }
+                }}
+                disabled={configuredStacUrls.length === 0}
               >
-                {((props.config.stacApiUrls as unknown as string[]) ?? []).length === 0 && (
+                {configuredStacUrls.length === 0 && (
                   <option value=''>No URLs configured</option>
                 )}
-                {((props.config.stacApiUrls as unknown as string[]) ?? []).map((url) => (
+                {configuredStacUrls.length > 0 && (
+                  <option value={ANY_STAC_API_VALUE}>Any</option>
+                )}
+                {configuredStacUrls.map((url) => (
                   <option key={url} value={url}>{url}</option>
                 ))}
               </Select>
@@ -632,7 +763,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
               <Select
                 value={selectedCollection}
                 onChange={(event) => { setSelectedCollection(event.target.value) }}
-                disabled={collectionsLoading || collectionOptions.length === 0}
+                disabled={stacUrl === ANY_STAC_API_VALUE || collectionsLoading || collectionOptions.length === 0}
               >
                 {collectionOptions.length === 0 && (
                   <option value=''>No collections available</option>
@@ -690,6 +821,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
               <Button
                 onClick={() => {
                   setResults([])
+                  setActiveStacFilter('')
                   setError('')
                   setLastRequestSummary('')
                   cleanupLayer()
@@ -710,12 +842,33 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
           </div>
 
           <div className='results-section'>
+            {resultCountsByStac.length > 0 && (
+              <div className='results-summary'>
+                <span className='results-summary-label'>Results by STAC:</span>
+                {resultCountsByStac.map(({ stacApi, count }) => {
+                  const isActive = activeStacFilter === stacApi
+
+                  return (
+                    <Button
+                      key={stacApi}
+                      size='sm'
+                      type={isActive ? 'primary' : 'default'}
+                      onClick={() => {
+                        setActiveStacFilter((prev) => (prev === stacApi ? '' : stacApi))
+                      }}
+                    >
+                      {`${stacApi}: ${count}`}
+                    </Button>
+                  )
+                })}
+              </div>
+            )}
             <div className='results'>
-              {results.length === 0 && !loading && !error && (
+              {displayedResults.length === 0 && !loading && !error && (
                 <div className='empty-state'>Run a search to load STAC items and draw their footprints on the map.</div>
               )}
 
-              {results.map((feature, index) => {
+              {displayedResults.map((feature, index) => {
                 const itemLink = getItemLink(feature)
                 const title = feature.id || `Item ${index + 1}`
                 const cogUrl = getCogUrl(feature)
@@ -735,7 +888,7 @@ const Widget = (props: AllWidgetProps<IMConfig>) => {
                     )}
                     <div className='result-title'>{title}</div>
                     <div className='muted'>
-                      {(feature.collection ?? 'No collection')}
+                      {(feature.collection ?? 'No collection')} | {(feature.sourceStacApi ?? 'Unknown STAC API')}
                       {feature.properties?.datetime ? ` | ${feature.properties.datetime}` : ''}
                     </div>
                     <div className='actions'>
