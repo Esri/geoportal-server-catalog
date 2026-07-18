@@ -1,6 +1,29 @@
 {
   "widgetTitle": "STAC Search",
-  "stacApiUrls": ["https://stac.sdm.geocloud.com/stac", "https://gpt.geocloud.com/geoportal/stac", "https://earth-search.aws.element84.com/v1"],
+  "stacApiUrls": [
+    {
+      "url": "https://gpt.geocloud.com/geoportal/stac",
+      "label": "GeoCloud Geoportal",
+      "priority": 1
+    },
+    {
+      "url": "https://earth-search.aws.element84.com/v1",
+      "label": "Earth Search",
+      "priority": 2
+    },
+    {
+      "url": "https://planetarycomputer.microsoft.com/api/stac/v1/",
+      "label": "Microsoft Planetary Computer",
+      "priority": 2,
+      "requestParameters": ""
+    },
+    {
+      "url": "https://datacube.services.geo.ca/stac/api",
+      "label": "Canadian Geospatial Data",
+      "priority": 2,
+      "requestParameters": ""
+    }
+  ],
   "defaultCollections": "sentinel-2-l2a",
   "defaultLimit": 25,
   "useCurrentExtent": true
