@@ -10,4 +10,6 @@ Additionally, you can download the asset (again if allowed by the provider).
 
 When you search across all configured STACs, you will see filters above the results allowing you to switch between the items found in each of the STACs.
 
+Give it a try at: https://gpt.geocloud.com/stac_explorer/
+
 <img width="1912" height="913" alt="image" src="https://github.com/user-attachments/assets/4ec23c4d-483b-4466-8cc4-5cc9b99db2e1" />
