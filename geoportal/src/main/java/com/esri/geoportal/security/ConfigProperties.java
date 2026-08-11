@@ -67,7 +67,7 @@ public class ConfigProperties {
         if (missing.length() > 0) {
             // remove trailing comma+space
             String list = missing.substring(0, Math.max(0, missing.length() - 2));
-            throw new IllegalStateException("Missing required security properties: " + list + ". Provide them via environment variables or in config/config.properties.");
+            throw new IllegalStateException("Missing required security properties: " + list + ". Provide them via environment variables or in classpath:config/config.properties.");
         }
     }
 
