@@ -539,6 +539,147 @@ define([
         throw new Error(`Error creating collection ${collection.id}`);
       }
     },
+
+    // -----------------------------------------------------------------
+    // Export Collection
+    // -----------------------------------------------------------------
+    handleExportCollection: async function () {
+      if (!this.selectedCollection) {
+        return;
+      }
+      const id = this.selectedCollection.properties.id;
+      try {
+        this.updateIsLoading(true);
+        const collection = await this.getCollectionById(id);
+        if (!collection || collection === this.sampleCollection) {
+          throw new Error(`Unable to retrieve collection ${id}`);
+        }
+        const blob = new Blob([JSON.stringify(collection, null, 2)], {
+          type: "application/json",
+        });
+        const blobUrl = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = blobUrl;
+        link.download = `${id}.json`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        URL.revokeObjectURL(blobUrl);
+        this.updateIsLoading(false);
+        this.showAlert(
+          "Successfully exported collection",
+          `Exported ${id}.json`,
+          "green"
+        );
+      } catch (e) {
+        this.updateIsLoading(false);
+        console.error(e);
+        this.showAlert("Error exporting collection", `${e}`, "red");
+      }
+    },
+
+    // -----------------------------------------------------------------
+    // Import Collection
+    // -----------------------------------------------------------------
+    handleImportCollectionClick: function () {
+      // reset value so selecting the same file again still triggers change
+      this.importFileInput.value = "";
+      this.importFileInput.click();
+    },
+
+    handleImportFileSelected: function (e) {
+      const file = e.target.files && e.target.files[0];
+      if (!file) {
+        return;
+      }
+
+      // Only allow .json files, discard other extensions
+      const fileName = file.name || "";
+      const isJson =
+        fileName.toLowerCase().endsWith(".json") ||
+        file.type === "application/json";
+      if (!isJson) {
+        this.showAlert(
+          "Invalid file type",
+          `"${fileName}" is not a .json file. Please select a valid collection .json file.`,
+          "red"
+        );
+        this.importFileInput.value = "";
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = (event) => {
+        this.processImportedCollectionText(event.target.result);
+      };
+      reader.onerror = () => {
+        this.showAlert(
+          "Error reading file",
+          `Unable to read "${fileName}".`,
+          "red"
+        );
+      };
+      reader.readAsText(file);
+    },
+
+    processImportedCollectionText: async function (text) {
+      let collection = null;
+      try {
+        collection = JSON.parse(text);
+      } catch (e) {
+        this.showAlert(
+          "Invalid JSON",
+          "The selected file does not contain valid JSON.",
+          "red"
+        );
+        return;
+      }
+
+      if (!collection || typeof collection !== "object" || !collection.id) {
+        this.showAlert(
+          "Invalid Collection",
+          "The selected file does not appear to be a valid STAC collection (missing id).",
+          "red"
+        );
+        return;
+      }
+
+      // client-side duplicate id validation against currently loaded collections
+      const existing = (this.collections || []).some(
+        (c) => String(c.properties.id) === String(collection.id)
+      );
+      if (existing) {
+        this.showAlert(
+          "Duplicate Collection Id",
+          `A collection with id "${collection.id}" already exists. Please remove or rename it before importing.`,
+          "red"
+        );
+        return;
+      }
+
+      this.appActionState = this.actions.CREATE_COLLECTION;
+      this.updateIsLoading(true);
+      try {
+        const result = await this.createCollection(collection);
+        if (!result || !result.response || result.response.code !== "201") {
+          const description =
+            (result && result.response && (result.response.message || result.response.description)) ||
+            "Unknown error occurred while creating the collection.";
+          throw new Error(description);
+        } else {
+          this.showAlert(
+            "Successfully imported collection",
+            `Imported ${collection.id}`,
+            "green"
+          );
+          this.rerenderCollectionsList();
+        }
+      } catch (e) {
+        this.updateIsLoading(false);
+        console.error(e);
+        this.showAlert("Error importing collection", `${e.message || e}`, "red");
+      }
+    },
 	
 	clearMapView:function() {
       if(this.pager) {		
@@ -1130,6 +1271,16 @@ define([
         this.zoomCollectionButton.classList.add("disabled");
       }
     },
+
+    handleExportCollectionEnabled: function () {
+      if (this.selectedCollection) {
+        this.exportCollectionButton.disabled = false;
+        this.exportCollectionButton.classList.remove("disabled");
+      } else {
+        this.exportCollectionButton.disabled = true;
+        this.exportCollectionButton.classList.add("disabled");
+      }
+    },
 	
 	handleViewItemsEnabled: function () {
 	      // Enable View Items if a collection is selected, regardless of whether it has a bbox/graphic
@@ -1566,6 +1717,7 @@ define([
       this.handleZoomCollectionEnabled();
 	  
 	  this.handleViewItemsEnabled();
+      this.handleExportCollectionEnabled();
     },
 
     emptyCollectionInfoBox: function () {
@@ -1574,6 +1726,7 @@ define([
       this.infoTableBody.innerHTML = tableRows.join("");
       this.handleZoomCollectionEnabled();
       this.handleViewItemsEnabled();
+      this.handleExportCollectionEnabled();
     },
 
     getUpdateFieldValues: function () {
@@ -1618,6 +1771,15 @@ define([
 	  this.viewItemsButton.addEventListener("click", () => {			
 	      this.handleViewItems(this.selectedCollection.properties.id);
 	   });
+      this.exportCollectionButton.addEventListener("click", () => {
+        this.handleExportCollection();
+      });
+      this.importCollectionButton.addEventListener("click", () => {
+        this.handleImportCollectionClick();
+      });
+      this.importFileInput.addEventListener("change", (e) => {
+        this.handleImportFileSelected(e);
+      });
 
       // Editor Events
       this.editorPrimaryButton.addEventListener("click", () => {
