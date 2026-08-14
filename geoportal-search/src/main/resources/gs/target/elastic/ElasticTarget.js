@@ -544,10 +544,41 @@
         var response = JSON.parse(result);
         searchResult.jsonResponse = response;
         if (response && response.hits) {
-          searchResult.totalHits = response.hits.total? 
-                        response.hits.total.value && !isNaN(response.hits.total.value)? response.hits.total.value: response.hits.total: 
-                        0;
-          if (task.verbose) console.log("totalHits=",searchResult.totalHits);
+/*          var printNested = function(path,value) {
+            if (value === null || value === undefined) {
+              print(path + " = " + value);
+              return;
+            }
+            if (typeof value === "object") {
+              if (Array.isArray(value)) {
+                if (value.length === 0) print(path + " = []");
+                for (var i=0;i<value.length;i++) {
+                  printNested(path + "[" + i + "]",value[i]);
+                }
+                return;
+              }
+              var hasProps = false;
+              for (var k in value) {
+                if (Object.prototype.hasOwnProperty.call(value,k)) {
+                  hasProps = true;
+                  printNested(path + "." + k,value[k]);
+                }
+              }
+              if (!hasProps) print(path + " = {}");
+              return;
+            }
+            print(path + " = " + value);
+          };
+          printNested("response.hits",response.hits);*/
+
+          var total = response.hits.total;
+          if (typeof total === "number" && !isNaN(total)) {
+            searchResult.totalHits = total;			
+          } else if (total && typeof total === "object" && !isNaN(total.value)) {			
+            searchResult.totalHits = Number(total.value);
+          } else {			
+            searchResult.totalHits = 0;
+          }          
           
           var hits = response.hits.hits;
           if (Array.isArray(response.hits.hits)) {
