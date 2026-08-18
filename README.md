@@ -13,7 +13,8 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 
 
 ## Releases and Downloads
-- 3.1.0 - **LATEST** - released July 8, 2026. See [What's New](https://github.com/Esri/geoportal-server-catalog/wiki/What's-new-in-Geoportal-Server)!
+- 4.0.0 - **LATEST** released July 8, 2026. See [What's New](https://github.com/Esri/geoportal-server-catalog/wiki/What's-new-in-Geoportal-Server)!
+- 3.1.0 - released July 8, 2026. 
 - 3.1.0 - released May 18, 2026.
 - 3.0.2 - released, September 15, 2025.
 - 3.0.1 - released, July 8, 2025. 
