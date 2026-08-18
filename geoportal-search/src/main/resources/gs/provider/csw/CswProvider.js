@@ -108,7 +108,7 @@
         msg = "CSW: The service parameter is missing.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_MissingParameterValue,"service",msg);
-      } else if (!task.hasError && service !== null && service.toLowerCase() !== "csw") {
+      }else if (!task.hasError && service !== null && (typeof service !== "string" || service.toLowerCase() !== "csw")) {
         msg = "CSW: The service parameter must be CSW.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_InvalidParameterValue,"service",msg);
