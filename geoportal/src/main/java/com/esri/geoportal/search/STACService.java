@@ -1902,7 +1902,8 @@ public class STACService extends Application {
 		DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
 		JsonObject fileObj = (JsonObject) JsonUtil.toJsonStructure(itemFileString);
-		String featureTemplateStr = "{\"featurePropPath\":" + fileObj.toString() + "}";
+		String featureTemplateStr = fileObj.getJsonObject("featurePropPath").toString();
+		featureTemplateStr = "{\"featurePropPath\":" + featureTemplateStr + "}";
 
 		items = elasticResContext.read("$.hits.hits");
 
