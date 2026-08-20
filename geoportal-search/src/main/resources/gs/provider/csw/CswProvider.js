@@ -87,7 +87,8 @@
         }
       }
       
-      if (!service || !version || !request) {
+      // Treat as a base endpoint capabilities request only when no CSW KVPs are present.
+      if (!service && !version && !request) {
         return this.getCapabilities(task);
       }
       
@@ -107,7 +108,7 @@
         msg = "CSW: The service parameter is missing.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_MissingParameterValue,"service",msg);
-      } else if (ows === null && service.toLowerCase() !== "csw") {
+      }else if (!task.hasError && service !== null && (typeof service !== "string" || service.toLowerCase() !== "csw")) {
         msg = "CSW: The service parameter must be CSW.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_InvalidParameterValue,"service",msg);
@@ -204,13 +205,9 @@
       if (!hasAppXml && hasTextXml) {
         mime = "text/xml";
       } else if (!hasAppXml && !hasTextXml && hasOther) {
-        hasTextXml = true;
-        mime = "text/xml";
-        /*
         msg = "CSW: The acceptFormats parameter is invalid.";
         ows = gs.Object.create(gs.provider.csw.OwsException);
         ows.put(task,ows.OWSCODE_InvalidParameterValue,"acceptFormats",msg);
-        */
       }
 
       if (!task.hasError) {
