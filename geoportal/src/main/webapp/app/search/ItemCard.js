@@ -394,6 +394,10 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
           },dd);
           
           array.forEach(links, function(u){
+			if(!u)
+            {
+              return;
+            }
             var ddli = domConstruct.create("li",{},ddul);
             domConstruct.create("a",{
               "class": "small",
