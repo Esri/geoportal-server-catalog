@@ -1,0 +1,55 @@
+{
+	"@context": "{url}/context.jsonld",
+	"@id": "{url}",
+	"@type": "dcat:Catalog",
+	"id": "root",
+	"dct:title": "Geoportal Server DCAT Catalog",
+	"dct:description": "Landing page for the Geoportal Server DCAT3 API. Implements the W3C DCAT3 vocabulary (https://www.w3.org/TR/vocab-dcat-3/).",
+	"dct:conformsTo": "https://www.w3.org/TR/vocab-dcat-3/",
+	"dcat:dataset": "{url}/datasets",
+	"dcat:catalog": "{url}/catalogs",
+	"links": [
+		{
+			"href": "{url}",
+			"rel": "self",
+			"type": "application/ld+json",
+			"title": "This DCAT3 API - landing page"
+		},
+		{
+			"href": "{url}",
+			"rel": "root",
+			"type": "application/ld+json",
+			"title": "This DCAT3 API - landing page"
+		},
+		{
+			"href": "{url}/conformance",
+			"rel": "conformance",
+			"type": "application/json",
+			"title": "The DCAT3 API conformance classes supported"
+		},
+		{
+			"href": "{url}/context.jsonld",
+			"rel": "http://www.w3.org/ns/json-ld#context",
+			"type": "application/ld+json",
+			"title": "The JSON-LD @context used by this API"
+		},
+		{
+			"href": "{url}/catalogs",
+			"rel": "data",
+			"type": "application/ld+json",
+			"title": "The set of dcat:Catalog resources"
+		},
+		{
+			"href": "{url}/datasets",
+			"rel": "data",
+			"type": "application/ld+json",
+			"title": "Cross-catalog listing of all dcat:Dataset resources"
+		},
+		{
+			"href": "{url}/search",
+			"rel": "search",
+			"type": "application/ld+json",
+			"title": "Search dcat:Dataset resources across all catalogs"
+		}
+	]
+}

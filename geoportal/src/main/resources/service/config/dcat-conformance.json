@@ -1,0 +1,19 @@
+{
+	"links": [
+		{
+			"rel": "parent",
+			"href": "{url}",
+			"type": "application/ld+json",
+			"title": "Landing page of this DCAT3 API"
+		}
+	],
+	"conformsTo": [
+		"https://resources.data.gov/resources/dcat-us3/",
+		"https://resources.data.gov/standards/catalog/dcat-us-3/catalog/",
+		"https://resources.data.gov/standards/catalog/dcat-us-3/dataset/",
+		"https://resources.data.gov/standards/catalog/dcat-us-3/dataset-series/",
+		"https://resources.data.gov/standards/catalog/dcat-us-3/distribution/",
+		"https://resources.data.gov/standards/catalog/dcat-us-3/agents/",
+		"https://resources.data.gov/standards/catalog/dcat-us-3/temporal-spatial-metrics/"
+	]
+}
