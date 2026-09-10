@@ -384,7 +384,7 @@ public class Dcat3Helper {
     Dcat3Dataset ds = new Dcat3Dataset();
 
     ds.atId = itemUrl;
-    ds.identifier = itemUrl;
+    ds.identifier = id;
     ds.title = StringUtils.defaultIfBlank(mappedText(source, "dataset", "title", "title"), id);
     ds.description = StringUtils.defaultIfBlank(mappedText(source, "dataset", "description", "description"), ds.title);
     ds.landingPage = itemUrl + "/html";
@@ -431,13 +431,13 @@ public class Dcat3Helper {
   public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean resolveMemberCount) {
     String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
     String collectionId = StringUtils.defaultIfBlank(
-            mappedText(collection, "collection", "id", "id"),
-            mappedText(collection, "collection", "identifier", "identifier"));
+            mappedText(collection, "datasetSeries", "id", "id"),
+            mappedText(collection, "datasetSeries", "identifier", "identifier"));
     String seriesTitle = StringUtils.defaultIfBlank(
-            firstNonBlank(mappedText(collection, "collection", "title", "title"), mappedText(collection, "collection", "name", "name")),
+            firstNonBlank(mappedText(collection, "datasetSeries", "title", "title"), mappedText(collection, "datasetSeries", "name", "name")),
             StringUtils.defaultIfBlank(collectionId, "Dataset Series"));
     String seriesDescription = StringUtils.defaultIfBlank(
-            mappedText(collection, "collection", "description", "description"),
+            mappedText(collection, "datasetSeries", "description", "description"),
             "Geoportal collection '%s'.".formatted(StringUtils.defaultIfBlank(collectionId, seriesTitle)));
 
     Dcat3DatasetSeries series = new Dcat3DatasetSeries();
@@ -445,16 +445,16 @@ public class Dcat3Helper {
     series.title = seriesTitle;
     series.description = seriesDescription;
     series.issued = toIso(firstNonBlank(
-            mappedText(collection, "collection", "created", "created"),
-            mappedText(collection, "collection", "createdFallback", "sys_created_dt")));
+            mappedText(collection, "datasetSeries", "created", "created"),
+            mappedText(collection, "datasetSeries", "createdFallback", "sys_created_dt")));
     series.modified = StringUtils.defaultIfBlank(
-            toIso(firstNonBlank(mappedText(collection, "collection", "updated", "updated"),
-                    mappedText(collection, "collection", "updatedFallback", "sys_modified_dt"))), nowIso());
+            toIso(firstNonBlank(mappedText(collection, "datasetSeries", "updated", "updated"),
+                    mappedText(collection, "datasetSeries", "updatedFallback", "sys_modified_dt"))), nowIso());
     series.accrualPeriodicity = firstNonBlank(
-            mappedText(collection, "collection", "accrualPeriodicity", "accrualPeriodicity"),
+            mappedText(collection, "datasetSeries", "accrualPeriodicity", "accrualPeriodicity"),
             config.getAccrualPeriodicity());
-    series.addSpatial(toLocation(collection.path(sf("collection.envelope", "envelope_geo"))));
-    series.addTemporal(toPeriodOfTime(collection.path(sf("collection.timePeriod", "timeperiod_nst"))));
+    series.addSpatial(toLocation(collection.path(sf("datasetSeries.envelope", "envelope_geo"))));
+    series.addTemporal(toPeriodOfTime(collection.path(sf("datasetSeries.timePeriod", "timeperiod_nst"))));
 
     series.publisher = config.newPublisher();
     Dcat3ContactPoint contactPoint = config.newContactPoint();
@@ -465,12 +465,12 @@ public class Dcat3Helper {
       long count = countCollectionMembers(collectionId);
       boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < 1000;
       if (!memberIds.isEmpty()) {
-        series.first = toDatasetReference(root + "/rest/metadata/item/" + urlEncode(memberIds.get(0)));
+        series.first = toDatasetReference(root, memberIds.get(0));
         if (completeMemberList) {
           for (String memberId : memberIds) {
-            series.addSeriesMember(toDatasetReference(root + "/rest/metadata/item/" + urlEncode(memberId)));
+            series.addSeriesMember(toDatasetReference(root, memberId));
           }
-          series.last = toDatasetReference(root + "/rest/metadata/item/" + urlEncode(memberIds.get(memberIds.size() - 1)));
+          series.last = toDatasetReference(root, memberIds.get(memberIds.size() - 1));
         } else {
           LOGGER.debug("DCAT3: collection {} has more than {} members; omitting incomplete seriesMember list.", collectionId, memberIds.size());
         }
@@ -928,11 +928,11 @@ public class Dcat3Helper {
    * @param datasetId the dataset @id
    * @return the reference or null
    */
-  private static Dcat3Dataset toDatasetReference(String datasetId) {
-    if (StringUtils.isBlank(datasetId)) return null;
+  private static Dcat3Dataset toDatasetReference(String root, String datasetIdentifier) {
+    if (StringUtils.isBlank(root) || StringUtils.isBlank(datasetIdentifier)) return null;
     Dcat3Dataset dataset = new Dcat3Dataset();
-    dataset.atId = datasetId;
-    dataset.identifier = datasetId;
+    dataset.atId = root + "/rest/metadata/item/" + urlEncode(datasetIdentifier);
+    dataset.identifier = datasetIdentifier;
     return dataset;
   }
 }

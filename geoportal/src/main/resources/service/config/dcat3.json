@@ -3,15 +3,13 @@
     "query.sysAccess": "sys_access_s",
     "query.approvalStatus": "sys_approval_status_s",
     "query.collectionMembership": "src_collections_s",
-
-    "dataset.description": "description",
+   
     "dataset.keywords": "keywords_s",
+	"dataset.identifier:": "id",
     "dataset.theme": "itemType_s",
     "dataset.fileId": "fileid",
-    "dataset.created": "sys_cretaed_dt",
-    "dataset.createdFallback": "sys_created_dt",
-    "dataset.modified": "sys_modifeid_dt",
-    "dataset.modifiedFallback": "sys_modified_dt",
+    "dataset.created": "sys_created_dt",
+    "dataset.modified": "sys_modified_dt",    
     "dataset.rights": "rights_s",
     "dataset.envelope": "envelope_geo",
     "dataset.timePeriod": "timeperiod_nst",
@@ -21,18 +19,12 @@
     "dataset.resource.url": "url_s",
     "dataset.resource.urlType": "url_type_s",
 
-    "collection.id": "id",
-    "collection.identifier": "identifier",
-    "collection.title": "title",
-    "collection.name": "name",
-    "collection.description": "description",
-    "collection.created": "created",
-    "collection.createdFallback": "sys_created_dt",
-    "collection.updated": "updated",
-    "collection.updatedFallback": "sys_modified_dt",
-    "collection.accrualPeriodicity": "accrualPeriodicity",
-    "collection.envelope": "envelope_geo",
-    "collection.timePeriod": "timeperiod_nst"
+    "datasetSeries.id": "id", 
+	"datasetSeries.modified": "sys_modified_dt",    
+    "datasetSeries.created": "sys_created_dt", 
+    "datasetSeries.accrualPeriodicity": "accrualPeriodicity",
+    "datasetSeries.envelope": "envelope_geo",
+    "datasetSeries.timePeriod": "timeperiod_nst"
   },
   "classProperty": {
     "Dcat3Resource": [
@@ -90,8 +82,7 @@
       "spatial",
       "temporal",
       "theme",
-      "useRestriction",
-	  "test"
+      "useRestriction"
     ],
     "Dcat3Distribution": [
       "title",
