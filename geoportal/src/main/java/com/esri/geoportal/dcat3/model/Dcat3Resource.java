@@ -19,7 +19,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * Common base for every DCAT-US 3.0 cataloged resource
@@ -29,10 +28,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * and {@link Dcat3DataService}.</p>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"@id", "@type", "identifier", "title", "description",
-  "issued", "modified", "keyword", "theme", "language", "publisher",
-  "creator", "contactPoint", "landingPage", "license", "rights", "accessLevel",
-  "accessRights", "accessLevelComment", "bureauCode", "programCode"})
 public abstract class Dcat3Resource {
 
   /** JSON-LD node identifier (usually a dereferenceable URI). */

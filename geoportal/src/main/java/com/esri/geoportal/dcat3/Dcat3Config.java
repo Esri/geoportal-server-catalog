@@ -14,14 +14,21 @@
  */
 package com.esri.geoportal.dcat3;
 
+import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.dcat3.model.Dcat3Constants;
 import com.esri.geoportal.dcat3.model.Dcat3ContactPoint;
 import com.esri.geoportal.dcat3.model.Dcat3Organization;
+import com.fasterxml.jackson.databind.JsonNode;
 
 /**
  * DCAT-US 3.0 configuration.
@@ -31,6 +38,10 @@ import com.esri.geoportal.dcat3.model.Dcat3Organization;
  * derived from the metadata index.</p>
  */
 public class Dcat3Config {
+
+  private static final Logger LOGGER = LoggerFactory.getLogger(Dcat3Config.class);
+
+  private static final String DEFAULT_MAPPING_CONFIG_PATH = "service/config/dcat3.json";
 
   /* -------------------------------------------------------------- */
   /* Profile                                                        */
@@ -86,6 +97,77 @@ public class Dcat3Config {
   /** Pretty print the generated document. */
   private boolean prettyPrint = true;
 
+  /** Classpath resource with dcat3 field mappings and property order. */
+  private String mappingConfigPath = DEFAULT_MAPPING_CONFIG_PATH;
+
+  /** Configurable source-field aliases used by DCAT3 mapping code. */
+  private Map<String, String> sourceFieldMappings = new LinkedHashMap<>(Map.ofEntries(
+      Map.entry("query.sysAccess", "sys_access_s"),
+      Map.entry("query.approvalStatus", "sys_approval_status_s"),
+      Map.entry("query.collectionMembership", "src_collections_s"),
+      Map.entry("dataset.title", "title"),
+      Map.entry("dataset.description", "description"),
+      Map.entry("dataset.keywords", "keywords_s"),
+      Map.entry("dataset.theme", "itemType_s"),
+      Map.entry("dataset.fileId", "fileid"),
+      Map.entry("dataset.created", "sys_created_dt"),
+      Map.entry("dataset.createdFallback", "sys_created_dt"),
+      Map.entry("dataset.modified", "sys_modified_dt"),
+      Map.entry("dataset.modifiedFallback", "sys_modified_dt"),
+      Map.entry("dataset.rights", "rights_s"),
+      Map.entry("dataset.envelope", "envelope_geo"),
+      Map.entry("dataset.timePeriod", "timeperiod_nst"),
+      Map.entry("dataset.metadataType", "sys_metadatatype_s"),
+      Map.entry("dataset.thumbnail", "thumbnail_s"),
+      Map.entry("dataset.resources", "resources_nst"),
+      Map.entry("dataset.resource.url", "url_s"),
+      Map.entry("dataset.resource.urlType", "url_type_s"),
+      Map.entry("collection.id", "id"),
+      Map.entry("collection.identifier", "identifier"),
+      Map.entry("collection.title", "title"),
+      Map.entry("collection.name", "name"),
+      Map.entry("collection.description", "description"),
+      Map.entry("collection.created", "created"),
+      Map.entry("collection.createdFallback", "sys_created_dt"),
+      Map.entry("collection.updated", "updated"),
+      Map.entry("collection.updatedFallback", "sys_modified_dt"),
+      Map.entry("collection.accrualPeriodicity", "accrualPeriodicity"),
+      Map.entry("collection.envelope", "envelope_geo"),
+      Map.entry("collection.timePeriod", "timeperiod_nst")
+  ));
+
+  /** Configurable JSON class property ordering by model type. */
+  private Map<String, List<String>> classProperty = new LinkedHashMap<>(Map.ofEntries(
+      Map.entry("Dcat3Resource", List.of("@id", "@type", "identifier", "title", "description",
+          "issued", "modified", "keyword", "theme", "language", "publisher",
+          "creator", "contactPoint", "landingPage", "license", "rights", "accessLevel",
+          "accessRights", "accessLevelComment", "bureauCode", "programCode")),
+      Map.entry("Dcat3Catalog", List.of("dataset", "conformsTo", "homepage", "issued",
+          "language", "modified", "rights", "spatial", "themeTaxonomy")),
+      Map.entry("Dcat3Dataset", List.of("@id", "@type", "identifier", "title", "description",
+          "contactPoint", "accessRestriction", "cuiRestriction", "describedBy",
+          "distribution", "inventoried", "keyword", "landingPage", "license",
+          "modified", "publisher", "rights", "spatial", "temporal", "theme",
+          "useRestriction")),
+      Map.entry("Dcat3Distribution", List.of("title", "description", "accessURL", "accessRestriction",
+          "cuiRestriction", "describedBy", "format", "license", "modified",
+          "rights", "useRestriction")),
+      Map.entry("Dcat3DataService", List.of("@id", "@type", "identifier", "title", "description",
+          "endpointURL", "endpointDescription", "servesDataset", "conformsTo",
+          "format", "mediaType", "issued", "modified", "keyword", "theme", "language",
+          "publisher", "creator", "contactPoint", "landingPage", "license", "rights",
+          "accessRights", "accessLevel", "accessLevelComment", "bureauCode", "programCode")),
+      Map.entry("Dcat3DatasetSeries", List.of("@id", "@type", "title", "description", "issued",
+          "modified", "accrualPeriodicity", "publisher", "contactPoint", "spatial",
+          "temporal", "seriesMember", "first", "last")),
+      Map.entry("Dcat3Organization", List.of("@id", "@type", "name", "subOrganizationOf")),
+      Map.entry("Dcat3PeriodOfTime", List.of("@id", "@type", "startDate", "endDate"))
+  ));
+
+  public Dcat3Config() {
+    loadMappingConfig();
+  }
+
   /* -------------------------------------------------------------- */
   /* Derived helpers                                                */
   /* -------------------------------------------------------------- */
@@ -115,7 +197,7 @@ public class Dcat3Config {
    * @return e.g. <code>http://host/geoportal/dcat3</code>
    */
   public String getDcat3BaseUrl() {
-    return StringUtils.removeEnd(StringUtils.defaultString(baseUrl), "/") + "/dcat3";
+    return removeTrailingSlash(StringUtils.defaultString(baseUrl)) + "/dcat3";
   }
 
   /**
@@ -124,7 +206,7 @@ public class Dcat3Config {
    * @return the item URL
    */
   public String getItemUrl(String id) {
-    return StringUtils.removeEnd(StringUtils.defaultString(baseUrl), "/")
+    return removeTrailingSlash(StringUtils.defaultString(baseUrl))
             + "/rest/metadata/item/" + java.net.URLEncoder.encode(
                     StringUtils.defaultString(id), java.nio.charset.StandardCharsets.UTF_8);
   }
@@ -207,4 +289,97 @@ public class Dcat3Config {
 
   public boolean getPrettyPrint() { return prettyPrint; }
   public void setPrettyPrint(boolean prettyPrint) { this.prettyPrint = prettyPrint; }
+
+  public String getMappingConfigPath() { return mappingConfigPath; }
+  public void setMappingConfigPath(String mappingConfigPath) {
+    this.mappingConfigPath = StringUtils.defaultIfBlank(mappingConfigPath, DEFAULT_MAPPING_CONFIG_PATH);
+    loadMappingConfig();
+  }
+
+  public Map<String, String> getSourceFieldMappings() {
+    return sourceFieldMappings;
+  }
+
+  public void setSourceFieldMappings(Map<String, String> sourceFieldMappings) {
+    if (sourceFieldMappings == null || sourceFieldMappings.isEmpty()) return;
+    this.sourceFieldMappings = new LinkedHashMap<>(sourceFieldMappings);
+  }
+
+  public String getSourceField(String key, String fallback) {
+    String field = sourceFieldMappings != null ? sourceFieldMappings.get(key) : null;
+    return StringUtils.defaultIfBlank(field, fallback);
+  }
+
+  public String getSourceField(String key, String fieldName, String fallback) {
+    String field = sourceFieldMappings != null ? sourceFieldMappings.get(key) : null;
+    if (StringUtils.isNotBlank(field)) return field;
+    if (StringUtils.isNotBlank(fieldName)) return fieldName;
+    return fallback;
+  }
+
+  public Map<String, List<String>> getClassProperty() {
+    return classProperty;
+  }
+
+  public void setClassProperty(Map<String, List<String>> classProperty) {
+    if (classProperty == null || classProperty.isEmpty()) return;
+    LinkedHashMap<String, List<String>> copy = new LinkedHashMap<>();
+    for (Map.Entry<String, List<String>> e : classProperty.entrySet()) {
+      if (StringUtils.isBlank(e.getKey()) || e.getValue() == null) continue;
+      copy.put(e.getKey(), new ArrayList<>(e.getValue()));
+    }
+    if (!copy.isEmpty()) {
+      this.classProperty = copy;
+    }
+  }
+
+  public List<String> getClassProperty(String type) {
+    if (classProperty == null || StringUtils.isBlank(type)) return Collections.emptyList();
+    List<String> order = classProperty.get(type);
+    return order != null ? order : Collections.emptyList();
+  }
+
+  private void loadMappingConfig() {
+    try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(mappingConfigPath)) {
+      if (in == null) return;
+      JsonNode root = Dcat3Helper.MAPPER.readTree(in);
+      JsonNode mappings = root.path("sourceFieldMappings");
+      if (mappings.isObject()) {
+        LinkedHashMap<String, String> merged = new LinkedHashMap<>(this.sourceFieldMappings);
+        mappings.fields().forEachRemaining(e -> {
+          String k = StringUtils.trimToNull(e.getKey());
+          String v = StringUtils.trimToNull(e.getValue().asText(null));
+          if (k != null && v != null) merged.put(k, v);
+        });
+        this.sourceFieldMappings = merged;
+      }
+
+      JsonNode classPropertyNode = root.path("classProperty");
+      if (classPropertyNode.isObject()) {
+        LinkedHashMap<String, List<String>> merged = new LinkedHashMap<>(this.classProperty);
+        classPropertyNode.fields().forEachRemaining(e -> {
+          List<String> values = jsonList(e.getValue());
+          if (!values.isEmpty()) merged.put(e.getKey(), values);
+        });
+        this.classProperty = merged;
+      }
+    } catch (Exception ex) {
+      LOGGER.warn("DCAT3: unable to load mapping config from '{}'.", mappingConfigPath, ex);
+    }
+  }
+
+  private static List<String> jsonList(JsonNode node) {
+    List<String> values = new ArrayList<>();
+    if (node == null || !node.isArray()) return values;
+    for (JsonNode n : node) {
+      String value = StringUtils.trimToNull(n.asText(null));
+      if (value != null) values.add(value);
+    }
+    return values;
+  }
+
+  private static String removeTrailingSlash(String value) {
+    if (value == null) return null;
+    return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+  }
 }

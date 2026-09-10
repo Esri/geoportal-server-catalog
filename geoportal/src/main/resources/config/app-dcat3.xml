@@ -60,6 +60,7 @@
     <beans:property name="includeDataServices" value="${gpt_dcat3IncludeDataServices:true}"/>
     <beans:property name="publicRecordsOnly" value="${gpt_dcat3PublicRecordsOnly:true}"/>
     <beans:property name="prettyPrint" value="${gpt_dcat3PrettyPrint:true}"/>
+    <beans:property name="mappingConfigPath" value="${gpt_dcat3MappingConfigPath:service/config/dcat3.json}"/>
   </beans:bean>
 
   <beans:bean id="dcat3Builder" class="com.esri.geoportal.dcat3.Dcat3Builder">

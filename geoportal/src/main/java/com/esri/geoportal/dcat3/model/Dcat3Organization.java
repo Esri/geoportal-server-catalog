@@ -16,13 +16,11 @@ package com.esri.geoportal.dcat3.model;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * DCAT-US 3.0 publisher / creator (<code>org:Organization</code>).
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"@id", "@type", "name", "subOrganizationOf"})
 public class Dcat3Organization {
 
   /** JSON-LD node identifier. */

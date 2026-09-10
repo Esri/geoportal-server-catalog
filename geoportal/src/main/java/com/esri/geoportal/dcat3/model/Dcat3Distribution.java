@@ -17,7 +17,6 @@ package com.esri.geoportal.dcat3.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * DCAT-US 3.0 <code>dcat:Distribution</code>.
@@ -25,9 +24,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * <p>A specific representation of a dataset.</p>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"title", "description", "accessURL", "accessRestriction",
-  "cuiRestriction", "describedBy", "format", "license", "modified",
-  "rights", "useRestriction"})
 public class Dcat3Distribution {
 
   /** dct:title */

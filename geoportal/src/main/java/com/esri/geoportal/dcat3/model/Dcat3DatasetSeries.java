@@ -19,7 +19,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * DCAT-US 3.0 <code>dcat:DatasetSeries</code>.
@@ -33,9 +32,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @see <a href="https://resources.data.gov/standards/catalog/dcat-us-3/dataset-series/">DCAT-US 3.0 Dataset Series</a>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"@id", "@type", "title", "description", "issued",
-  "modified", "accrualPeriodicity", "publisher", "contactPoint", "spatial",
-  "temporal", "seriesMember", "first", "last"})
 public class Dcat3DatasetSeries {
 
   /** JSON-LD node identifier (recommended). */

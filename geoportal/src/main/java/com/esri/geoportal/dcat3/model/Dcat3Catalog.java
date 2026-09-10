@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * DCAT-US 3.0 <code>dcat:Catalog</code>.
@@ -27,8 +26,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * fields from the DCAT-US 3.0 catalog schema page.</p>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"dataset", "conformsTo", "homepage", "issued",
-  "language", "modified", "rights", "spatial", "themeTaxonomy"})
 public class Dcat3Catalog {
 
   /** dcat:dataset (mandatory). */

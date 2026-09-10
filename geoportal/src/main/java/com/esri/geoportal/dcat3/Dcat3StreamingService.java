@@ -34,7 +34,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.esri.geoportal.dcat3.model.Dcat3Catalog;
 import com.esri.geoportal.dcat3.model.Dcat3DataService;
 import com.esri.geoportal.dcat3.model.Dcat3Dataset;
 import com.esri.geoportal.dcat3.model.Dcat3DatasetSeries;
@@ -147,8 +146,8 @@ public class Dcat3StreamingService {
    * @return the <code>dcat:Catalog</code>
    */
   @GetMapping(path = "/dcat3/catalog.json", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Dcat3Catalog> catalog(HttpServletRequest request) {
-    return ResponseEntity.ok(helper().newCatalog(resolveBaseUrl(request)));
+  public ResponseEntity<?> catalog(HttpServletRequest request) {
+    return ResponseEntity.ok(ordered(helper().newCatalog(resolveBaseUrl(request))));
   }
 
   /**
@@ -165,7 +164,7 @@ public class Dcat3StreamingService {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }
       Dcat3Dataset ds = helper().toDataset(id, source, resolveBaseUrl(request));
-      return ResponseEntity.ok(ds);
+      return ResponseEntity.ok(ordered(ds));
     } catch (Exception ex) {
       return error("Error building dcat:Dataset for id '%s'.".formatted(id), ex);
     }
@@ -208,7 +207,7 @@ public class Dcat3StreamingService {
         searchAfter = lastId;
       }
 
-      return ResponseEntity.ok(datasets);
+      return ResponseEntity.ok(ordered(datasets));
     } catch (Exception ex) {
       return error("Error building the dcat:Dataset list.", ex);
     }
@@ -227,7 +226,7 @@ public class Dcat3StreamingService {
       List<Dcat3DatasetSeries> series = collections.stream()
               .map(c -> helper().toDatasetSeries(c, baseUrl, true))
               .toList();
-      return ResponseEntity.ok(series);
+      return ResponseEntity.ok(ordered(series));
     } catch (Exception ex) {
       return error("Error building the dcat:DatasetSeries list.", ex);
     }
@@ -251,7 +250,7 @@ public class Dcat3StreamingService {
       }
       String baseUrl = resolveBaseUrl(request);
       Dcat3DatasetSeries series = helper().toDatasetSeries(collection, baseUrl, members);
-      return ResponseEntity.ok(series);
+      return ResponseEntity.ok(ordered(series));
     } catch (Exception ex) {
       return error("Error building dcat:DatasetSeries for id '%s'.".formatted(id), ex);
     }
@@ -271,7 +270,7 @@ public class Dcat3StreamingService {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }
       List<Dcat3DataService> services = helper().toDataServices(id, source, resolveBaseUrl(request));
-      return ResponseEntity.ok(services);
+      return ResponseEntity.ok(ordered(services));
     } catch (Exception ex) {
       return error("Error building dcat:DataService entries for id '%s'.".formatted(id), ex);
     }
@@ -299,10 +298,10 @@ public class Dcat3StreamingService {
     String configured = dcat3Config.getBaseUrl();
     if (StringUtils.isNotBlank(configured)
             && !configured.startsWith("http://localhost:8080/geoportal")) {
-      return StringUtils.removeEnd(configured, "/");
+      return removeTrailingSlash(configured);
     }
     if (request == null) {
-      return StringUtils.removeEnd(StringUtils.defaultString(configured), "/");
+      return removeTrailingSlash(StringUtils.defaultString(configured));
     }
 
     String scheme = request.getScheme();
@@ -316,7 +315,7 @@ public class Dcat3StreamingService {
       sb.append(":").append(port);
     }
     sb.append(ctx);
-    return StringUtils.removeEnd(sb.toString(), "/");
+    return removeTrailingSlash(sb.toString());
   }
 
   private ResponseEntity<String> notFound(String message) {
@@ -334,5 +333,15 @@ public class Dcat3StreamingService {
 
   private static String escape(String value) {
     return StringUtils.defaultString(value).replace("\\", "\\\\").replace("\"", "\\\"");
+  }
+
+  private static String removeTrailingSlash(String value) {
+    if (value == null) return null;
+    return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+  }
+
+  private JsonNode ordered(Object value) {
+    JsonNode node = Dcat3Helper.MAPPER.valueToTree(value);
+    return Dcat3JsonOrder.order(node, dcat3Config);
   }
 }

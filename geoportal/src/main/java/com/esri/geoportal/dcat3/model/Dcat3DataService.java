@@ -18,7 +18,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * DCAT-US 3.0 <code>dcat:DataService</code>.
@@ -29,11 +28,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @see <a href="https://www.w3.org/TR/vocab-dcat-3/#Class:Data_Service">DCAT 3 Data Service</a>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"@id", "@type", "identifier", "title", "description",
-  "endpointURL", "endpointDescription", "servesDataset", "conformsTo",
-  "format", "mediaType", "issued", "modified", "keyword", "theme", "language",
-  "publisher", "creator", "contactPoint", "landingPage", "license", "rights",
-  "accessRights", "accessLevel", "accessLevelComment", "bureauCode", "programCode"})
 public class Dcat3DataService extends Dcat3Resource {
 
   /** dcat:endpointURL - the root location of the service. */

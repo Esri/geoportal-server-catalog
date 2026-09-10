@@ -25,12 +25,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.dcat3.model.Dcat3Catalog;
-import com.esri.geoportal.dcat3.model.Dcat3DataService;
 import com.esri.geoportal.dcat3.model.Dcat3Dataset;
 import com.esri.geoportal.dcat3.model.Dcat3DatasetSeries;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.node.ObjectNode;
 import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 /**
  * DCAT-US 3.0 builder.
@@ -173,7 +172,8 @@ public class Dcat3Builder {
     envelope.put("describedBy", config.getDescribedBy());
 
     String envelopeJson = jsonWriter.writeValueAsString(envelope).stripTrailing();
-    String catalogJson = jsonWriter.writeValueAsString(catalog).stripTrailing();
+    JsonNode orderedCatalog = Dcat3JsonOrder.order(Dcat3Helper.MAPPER.valueToTree(catalog), config);
+    String catalogJson = jsonWriter.writeValueAsString(orderedCatalog).stripTrailing();
 
     writer.print(envelopeJson.substring(0, envelopeJson.length() - 1));
     writer.print(",");
@@ -280,7 +280,8 @@ public class Dcat3Builder {
       writer.print(",");
     }
     writer.println();
-    writer.print(jsonWriter.writeValueAsString(resource));
+    JsonNode ordered = Dcat3JsonOrder.order(Dcat3Helper.MAPPER.valueToTree(resource), config);
+    writer.print(jsonWriter.writeValueAsString(ordered));
   }
 
   /* =================================================================== */

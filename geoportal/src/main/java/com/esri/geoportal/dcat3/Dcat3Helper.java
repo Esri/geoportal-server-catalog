@@ -19,8 +19,10 @@ import java.time.OffsetDateTime;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -79,16 +81,6 @@ public class Dcat3Helper {
     MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
   }
 
-  /** Index source fields required to build DCAT-US 3.0 resources. */
-  private static final String[] SOURCE_FIELDS = {
-    "title", "description", "keywords_s", "itemType_s", "fileid",
-    "sys_created_dt", "sys_modified_dt", "sys_owner_s", "sys_access_s",
-    "sys_approval_status_s", "sys_metadatatype_s", "src_collections_s",
-    "credits_s", "rights_s", "thumbnail_s", "resources_nst", "envelope_geo",
-    "timeperiod_nst", "apiso_Language_s", "apiso_ResourceLanguage_s",
-    "spatialRes_scale_i", "spatialRes_dist_d"
-  };
-
   private final Dcat3Config config;
 
   /**
@@ -132,7 +124,7 @@ public class Dcat3Helper {
     sort.addObject().put("_id", "asc");
 
     ArrayNode includes = query.putObject("_source").putArray("includes");
-    for (String f : SOURCE_FIELDS) {
+    for (String f : datasetSourceIncludes()) {
       includes.add(f);
     }
 
@@ -167,12 +159,12 @@ public class Dcat3Helper {
     try {
       if (gc.getSupportsGroupBasedAccess()) {
         ObjectNode term = MAPPER.createObjectNode();
-        term.putObject("term").put("sys_access_s", "public");
+        term.putObject("term").put(sf("query.sysAccess", "sys_access_s"), "public");
         must.add(term);
       }
       if (gc.getSupportsApprovalStatus()) {
         ObjectNode terms = MAPPER.createObjectNode();
-        ArrayNode values = terms.putObject("terms").putArray("sys_approval_status_s");
+        ArrayNode values = terms.putObject("terms").putArray(sf("query.approvalStatus", "sys_approval_status_s"));
         values.add("approved");
         values.add("reviewed");
         must.add(terms);
@@ -288,7 +280,7 @@ public class Dcat3Helper {
 
       ObjectNode query = MAPPER.createObjectNode();
       query.putObject("query").putObject("term")
-              .put("src_collections_s", collectionId);
+                .put(sf("query.collectionMembership", "src_collections_s"), collectionId);
 
       String response = client.sendPost(url, query.toString(), CONTENT_TYPE_JSON);
       JsonNode count = MAPPER.readTree(response).path("count");
@@ -322,7 +314,7 @@ public class Dcat3Helper {
       query.put("_source", false);
 
       ArrayNode must = MAPPER.createArrayNode();
-      must.addObject().putObject("term").put("src_collections_s", collectionId);
+      must.addObject().putObject("term").put(sf("query.collectionMembership", "src_collections_s"), collectionId);
       appendAccessFilters(must);
       query.putObject("query").putObject("bool").set("must", must);
 
@@ -386,34 +378,37 @@ public class Dcat3Helper {
    * @return the dataset
    */
   public Dcat3Dataset toDataset(String id, JsonNode source, String baseUrl) {
-    String root = StringUtils.removeEnd(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()), "/");
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
     String itemUrl = root + "/rest/metadata/item/" + urlEncode(id);
 
     Dcat3Dataset ds = new Dcat3Dataset();
 
     ds.atId = itemUrl;
     ds.identifier = itemUrl;
-    ds.title = StringUtils.defaultIfBlank(text(source, "title"), id);
-    ds.description = StringUtils.defaultIfBlank(text(source, "description"), ds.title);
+    ds.title = StringUtils.defaultIfBlank(mappedText(source, "dataset", "title", "title"), id);
+    ds.description = StringUtils.defaultIfBlank(mappedText(source, "dataset", "description", "description"), ds.title);
     ds.landingPage = itemUrl + "/html";
-    ds.modified = StringUtils.defaultIfBlank(toIso(text(source, "sys_modified_dt")), nowIso());
+    String modifiedValue = firstNonBlank(
+            mappedText(source, "dataset", "modified", "sys_modified_dt"),
+            mappedText(source, "dataset", "modifiedFallback", "sys_modified_dt"));
+    ds.modified = StringUtils.defaultIfBlank(toIso(modifiedValue), nowIso());
 
     Dcat3ContactPoint contactPoint = config.newContactPoint();
     if (contactPoint != null) ds.addContactPoint(contactPoint);
 
-    for (String kw : textList(source, "keywords_s")) {
+    for (String kw : mappedTextList(source, "dataset", "keywords", "keywords_s")) {
       ds.addKeyword(kw);
     }
-    ds.addTheme(text(source, "itemType_s"));
+    ds.addTheme(mappedText(source, "dataset", "theme", "itemType_s"));
 
-    Dcat3Location location = toLocation(source.path("envelope_geo"));
+    Dcat3Location location = toLocation(source.path(sf("dataset.envelope", "envelope_geo")));
     if (location != null) ds.addSpatial(location);
 
-    Dcat3PeriodOfTime temporal = toPeriodOfTime(source.path("timeperiod_nst"));
+    Dcat3PeriodOfTime temporal = toPeriodOfTime(source.path(sf("dataset.timePeriod", "timeperiod_nst")));
     if (temporal != null && !temporal.isEmpty()) ds.addTemporal(temporal);
 
     ds.publisher = config.newPublisher();
-    List<String> rights = textList(source, "rights_s");
+    List<String> rights = mappedTextList(source, "dataset", "rights", "rights_s");
     ds.rights = rights.isEmpty() ? config.getRights() : String.join("; ", rights);
     ds.license = config.getLicense();
 
@@ -434,25 +429,32 @@ public class Dcat3Helper {
    * @return the dataset series
    */
   public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean resolveMemberCount) {
-    String root = StringUtils.removeEnd(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()), "/");
-    String collectionId = StringUtils.defaultIfBlank(text(collection, "id"), text(collection, "identifier"));
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
+    String collectionId = StringUtils.defaultIfBlank(
+            mappedText(collection, "collection", "id", "id"),
+            mappedText(collection, "collection", "identifier", "identifier"));
     String seriesTitle = StringUtils.defaultIfBlank(
-            firstNonBlank(text(collection, "title"), text(collection, "name")),
+            firstNonBlank(mappedText(collection, "collection", "title", "title"), mappedText(collection, "collection", "name", "name")),
             StringUtils.defaultIfBlank(collectionId, "Dataset Series"));
     String seriesDescription = StringUtils.defaultIfBlank(
-            text(collection, "description"),
+            mappedText(collection, "collection", "description", "description"),
             "Geoportal collection '%s'.".formatted(StringUtils.defaultIfBlank(collectionId, seriesTitle)));
 
     Dcat3DatasetSeries series = new Dcat3DatasetSeries();
     series.atId = root + "/dcat3/datasetSeries/" + urlEncode(collectionId);
     series.title = seriesTitle;
     series.description = seriesDescription;
-    series.issued = toIso(firstNonBlank(text(collection, "created"), text(collection, "sys_created_dt")));
+    series.issued = toIso(firstNonBlank(
+            mappedText(collection, "collection", "created", "created"),
+            mappedText(collection, "collection", "createdFallback", "sys_created_dt")));
     series.modified = StringUtils.defaultIfBlank(
-            toIso(firstNonBlank(text(collection, "updated"), text(collection, "sys_modified_dt"))), nowIso());
-    series.accrualPeriodicity = firstNonBlank(text(collection, "accrualPeriodicity"), config.getAccrualPeriodicity());
-    series.addSpatial(toLocation(collection.path("envelope_geo")));
-    series.addTemporal(toPeriodOfTime(collection.path("timeperiod_nst")));
+            toIso(firstNonBlank(mappedText(collection, "collection", "updated", "updated"),
+                    mappedText(collection, "collection", "updatedFallback", "sys_modified_dt"))), nowIso());
+    series.accrualPeriodicity = firstNonBlank(
+            mappedText(collection, "collection", "accrualPeriodicity", "accrualPeriodicity"),
+            config.getAccrualPeriodicity());
+    series.addSpatial(toLocation(collection.path(sf("collection.envelope", "envelope_geo"))));
+    series.addTemporal(toPeriodOfTime(collection.path(sf("collection.timePeriod", "timeperiod_nst"))));
 
     series.publisher = config.newPublisher();
     Dcat3ContactPoint contactPoint = config.newContactPoint();
@@ -518,14 +520,14 @@ public class Dcat3Helper {
     List<Dcat3DataService> services = new ArrayList<>();
     if (!config.getIncludeDataServices()) return services;
 
-    String root = StringUtils.removeEnd(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()), "/");
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
     String datasetId = root + "/rest/metadata/item/" + urlEncode(id);
-    String title = StringUtils.defaultIfBlank(text(source, "title"), id);
+    String title = StringUtils.defaultIfBlank(mappedText(source, "dataset", "title", "title"), id);
 
     int index = 0;
-    for (JsonNode resource : arrayOf(source.path("resources_nst"))) {
-      String url = text(resource, "url_s");
-      String urlType = text(resource, "url_type_s");
+    for (JsonNode resource : arrayOf(source.path(sf("dataset.resources", "resources_nst")))) {
+      String url = text(resource, sf("dataset.resource.url", "url_s"));
+      String urlType = text(resource, sf("dataset.resource.urlType", "url_type_s"));
       if (StringUtils.isBlank(url) || !isHrefValid(url)) continue;
       if (!Dcat3Constants.isServiceType(urlType)) continue;
 
@@ -545,8 +547,14 @@ public class Dcat3Helper {
       svc.license = config.getLicense();
       svc.accessLevel = config.getAccessLevel();
       svc.landingPage = datasetId;
-      svc.modified = toIso(text(source, "sys_modified_dt"));
-      svc.issued = toIso(text(source, "sys_created_dt"));
+      String modifiedValue = firstNonBlank(
+              mappedText(source, "dataset", "modified", "sys_modified_dt"),
+              mappedText(source, "dataset", "modifiedFallback", "sys_modified_dt"));
+      String createdValue = firstNonBlank(
+              mappedText(source, "dataset", "created", "sys_created_dt"),
+              mappedText(source, "dataset", "createdFallback", "sys_created_dt"));
+      svc.modified = toIso(modifiedValue);
+      svc.issued = toIso(createdValue);
       services.add(svc);
     }
     return services;
@@ -575,7 +583,7 @@ public class Dcat3Helper {
     distributions.add(json);
     seen.add(itemUrl);
 
-    String metadataType = text(source, "sys_metadatatype_s");
+    String metadataType = text(source, sf("dataset.metadataType", "sys_metadatatype_s"));
     if (!"json".equalsIgnoreCase(StringUtils.defaultString(metadataType))) {
       Dcat3Distribution html = Dcat3Distribution.access(itemUrl + "/html", "HTML");
       html.title = "Metadata (HTML)";
@@ -589,7 +597,7 @@ public class Dcat3Helper {
     }
 
     // direct file
-    String fileid = text(source, "fileid");
+    String fileid = text(source, sf("dataset.fileId", "fileid"));
     if (isHrefValid(fileid) && !seen.contains(fileid)) {
       Dcat3Distribution file = Dcat3Distribution.download(fileid, "File");
       file.title = "Download";
@@ -599,22 +607,25 @@ public class Dcat3Helper {
     }
 
     // linked resources
-    for (JsonNode resource : arrayOf(source.path("resources_nst"))) {
-      String url = text(resource, "url_s");
-      String urlType = text(resource, "url_type_s");
+    for (JsonNode resource : arrayOf(source.path(sf("dataset.resources", "resources_nst")))) {
+      String url = text(resource, sf("dataset.resource.url", "url_s"));
+      String urlType = text(resource, sf("dataset.resource.urlType", "url_type_s"));
       if (!isHrefValid(url) || seen.contains(url)) continue;
       seen.add(url);
 
       Dcat3Distribution d = Dcat3Distribution.access(url, StringUtils.defaultIfBlank(urlType, "Web Resource"));
       d.title = StringUtils.defaultIfBlank(urlType, "Resource");
       d.description = d.title;
-      d.modified = toIso(text(source, "sys_modified_dt"));
+      String modifiedValue = firstNonBlank(
+              mappedText(source, "dataset", "modified", "sys_modified_dt"),
+              mappedText(source, "dataset", "modifiedFallback", "sys_modified_dt"));
+      d.modified = toIso(modifiedValue);
       d.license = config.getLicense();
       distributions.add(d);
     }
 
     // thumbnail
-    String thumbnail = text(source, "thumbnail_s");
+    String thumbnail = text(source, sf("dataset.thumbnail", "thumbnail_s"));
     if (isHrefValid(thumbnail) && !seen.contains(thumbnail)) {
       Dcat3Distribution thumb = Dcat3Distribution.access(thumbnail, "Thumbnail");
       thumb.title = "Thumbnail";
@@ -648,11 +659,53 @@ public class Dcat3Helper {
    * @return one of the <code>Dcat3Constants.ACCESS_LEVEL_*</code> values
    */
   private String resolveAccessLevel(JsonNode source) {
-    String access = text(source, "sys_access_s");
+    String access = text(source, sf("query.sysAccess", "sys_access_s"));
     if (StringUtils.isBlank(access)) return config.getAccessLevel();
     if ("public".equalsIgnoreCase(access)) return Dcat3Constants.ACCESS_LEVEL_PUBLIC;
     if ("private".equalsIgnoreCase(access)) return Dcat3Constants.ACCESS_LEVEL_NON_PUBLIC;
     return Dcat3Constants.ACCESS_LEVEL_RESTRICTED;
+  }
+
+  private String sf(String key, String fallback) {
+    return config.getSourceField(key, fallback);
+  }
+
+  private String sf(String key, String fieldName, String fallback) {
+    return config.getSourceField(key, fieldName, fallback);
+  }
+
+  private String mappedText(JsonNode source, String prefix, String fieldName, String fallback) {
+    return text(source, sf(prefix + "." + fieldName, fieldName, fallback));
+  }
+
+  private List<String> mappedTextList(JsonNode source, String prefix, String fieldName, String fallback) {
+    return textList(source, sf(prefix + "." + fieldName, fieldName, fallback));
+  }
+
+  private List<String> datasetSourceIncludes() {
+    LinkedHashSet<String> includes = new LinkedHashSet<>();
+
+    for (Map.Entry<String, String> e : config.getSourceFieldMappings().entrySet()) {
+      String key = StringUtils.defaultString(e.getKey());
+      String value = StringUtils.trimToNull(e.getValue());
+      if (value == null) continue;
+      if (key.startsWith("dataset.") || key.startsWith("query.")) {
+        includes.add(value);
+      }
+    }
+
+    for (String fieldName : config.getClassProperty("Dcat3Dataset")) {
+      String sourceField = StringUtils.trimToNull(sf("dataset." + fieldName, fieldName, fieldName));
+      if (sourceField != null && !sourceField.startsWith("@")) {
+        includes.add(sourceField);
+      }
+    }
+    return new ArrayList<>(includes);
+  }
+
+  private static String removeTrailingSlash(String value) {
+    if (value == null) return null;
+    return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
   }
 
   /**

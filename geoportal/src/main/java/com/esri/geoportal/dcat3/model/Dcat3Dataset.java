@@ -19,7 +19,6 @@ import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
 /**
  * DCAT-US 3.0 <code>dcat:Dataset</code>.
@@ -30,11 +29,6 @@ import com.fasterxml.jackson.annotation.JsonPropertyOrder;
  * @see <a href="https://resources.data.gov/standards/catalog/dcat-us-3/dataset/">DCAT-US 3.0</a>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-@JsonPropertyOrder({"@id", "@type", "identifier", "title", "description",
-  "contactPoint", "accessRestriction", "cuiRestriction", "describedBy",
-  "distribution", "inventoried", "keyword", "landingPage", "license",
-  "modified", "publisher", "rights", "spatial", "temporal", "theme",
-  "useRestriction"})
 public class Dcat3Dataset {
 
   /** JSON-LD node identifier. */
