@@ -18,6 +18,8 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZonedDateTime;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
@@ -49,6 +51,7 @@ public class Dcat3Controller extends Dcat3Context {
   private final String runAt;
   private final Dcat3Cache dcat3Cache;
   private final Dcat3Builder dcat3Builder;
+  private final Map<String, Dcat3Context> profileContexts = new ConcurrentHashMap<>();
 
   /**
    * Creates instance of the controller.
@@ -100,19 +103,25 @@ public class Dcat3Controller extends Dcat3Context {
    * @return <code>true</code> when the build was started by this call
    */
   public boolean generateDcat3() {
-    if (!enterRunning()) {
-      LOGGER.info("DCAT-US 3.0 cache build is already running.");
+    return generateDcat3(null);
+  }
+
+  public boolean generateDcat3(String profile) {
+    String resolvedProfile = dcat3Builder.getConfig().resolveProfile(profile);
+    Dcat3Context context = contextFor(resolvedProfile);
+    if (!context.enterRunning()) {
+      LOGGER.info("DCAT-US 3.0 cache build is already running for profile '{}'.", resolvedProfile);
       return false;
     }
 
     try {
-      LOGGER.info("DCAT-US 3.0 cache build started...");
-      dcat3Builder.build(this);
-      dcat3Cache.purgeOutdatedFiles();
+      LOGGER.info("DCAT-US 3.0 cache build started for profile '{}'...", resolvedProfile);
+      dcat3Builder.build(context, resolvedProfile);
+      dcat3Cache.purgeOutdatedFiles(resolvedProfile);
     } catch (Exception ex) {
-      LOGGER.error("DCAT-US 3.0 error creating cache!", ex);
+      LOGGER.error("DCAT-US 3.0 error creating cache for profile '{}'!", resolvedProfile, ex);
     } finally {
-      exitRunning();
+      context.exitRunning();
     }
     return true;
   }
@@ -122,13 +131,33 @@ public class Dcat3Controller extends Dcat3Context {
    * @return <code>true</code> when a build was scheduled
    */
   public boolean generateDcat3Async() {
-    if (isRunning()) return false;
+    return generateDcat3Async(null);
+  }
+
+  public boolean generateDcat3Async(String profile) {
+    String resolvedProfile = dcat3Builder.getConfig().resolveProfile(profile);
+    if (contextFor(resolvedProfile).isRunning()) return false;
     try {
-      EXECUTOR.submit(this::generateDcat3);
+      EXECUTOR.submit(() -> generateDcat3(resolvedProfile));
       return true;
     } catch (Exception ex) {
-      LOGGER.error("DCAT-US 3.0 unable to schedule cache build.", ex);
+      LOGGER.error("DCAT-US 3.0 unable to schedule cache build for profile '{}'.", resolvedProfile, ex);
       return false;
+    }
+  }
+
+  @Override
+  public synchronized boolean isRunning() {
+    for (Dcat3Context context : profileContexts.values()) {
+      if (context.isRunning()) return true;
+    }
+    return false;
+  }
+
+  @Override
+  public synchronized void abortRunning() {
+    for (Dcat3Context context : profileContexts.values()) {
+      context.abortRunning();
     }
   }
 
@@ -141,6 +170,11 @@ public class Dcat3Controller extends Dcat3Context {
     long delay = hm.tillNextRun().getSeconds();
     EXECUTOR.schedule(taskWrapper, delay, TimeUnit.SECONDS);
     LOGGER.info("DCAT-US 3.0 cache build task scheduled to run in {} seconds.", delay);
+  }
+
+  private Dcat3Context contextFor(String profile) {
+    String key = StringUtils.defaultIfBlank(dcat3Builder.getConfig().resolveProfile(profile), "default");
+    return profileContexts.computeIfAbsent(key, k -> new Dcat3Context());
   }
 
   /**

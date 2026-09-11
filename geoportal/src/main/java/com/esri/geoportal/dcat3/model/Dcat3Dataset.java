@@ -52,7 +52,7 @@ public class Dcat3Dataset {
   public List<Dcat3ContactPoint> contactPoint;
 
   /** List of access restrictions related to the dataset. */
-  public List<String> accessRestriction;
+  public List<Dcat3AccessRestriction> accessRestriction;
 
   /** Controlled Unclassified Information restriction. */
   public List<String> cuiRestriction;
@@ -70,7 +70,7 @@ public class Dcat3Dataset {
   public List<String> keyword;
 
   /** dcat:landingPage. */
-  public String landingPage;
+  public Dcat3NodeRef landingPage;
 
   /** dct:license. */
   public String license;

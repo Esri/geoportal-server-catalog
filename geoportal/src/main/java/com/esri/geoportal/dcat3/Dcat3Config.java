@@ -100,11 +100,16 @@ public class Dcat3Config {
   /** Classpath resource with dcat3 field mappings and property order. */
   private String mappingConfigPath = DEFAULT_MAPPING_CONFIG_PATH;
 
-  /** Configurable source-field aliases used by DCAT3 mapping code (JSON-driven). */
-  private Map<String, String> sourceFieldMappings = new LinkedHashMap<>();
+  /** Default profile name loaded from the JSON configuration. */
+  private String defaultProfile = "us";
 
-  /** Configurable JSON class property ordering by model type (JSON-driven). */
-  private Map<String, List<String>> classProperty = new LinkedHashMap<>();
+  /** Profile-specific mapping and ordering configuration loaded from JSON. */
+  private Map<String, ProfileDefinition> profiles = new LinkedHashMap<>();
+
+  private static final class ProfileDefinition {
+    private Map<String, String> sourceFieldMappings = new LinkedHashMap<>();
+    private Map<String, List<String>> classProperty = new LinkedHashMap<>();
+  }
 
   public Dcat3Config() {
     loadMappingConfig();
@@ -238,29 +243,50 @@ public class Dcat3Config {
     loadMappingConfig();
   }
 
+  public String getDefaultProfile() {
+    return resolveProfile(defaultProfile);
+  }
+
+  public void setDefaultProfile(String defaultProfile) {
+    this.defaultProfile = normalizeProfileName(defaultProfile);
+  }
+
   public Map<String, String> getSourceFieldMappings() {
-    return sourceFieldMappings;
+    return getProfileSourceFieldMappings(null);
   }
 
   public void setSourceFieldMappings(Map<String, String> sourceFieldMappings) {
     if (sourceFieldMappings == null || sourceFieldMappings.isEmpty()) return;
-    this.sourceFieldMappings = new LinkedHashMap<>(sourceFieldMappings);
+    getOrCreateProfile(defaultProfile).sourceFieldMappings = new LinkedHashMap<>(sourceFieldMappings);
+  }
+
+  public Map<String, String> getProfileSourceFieldMappings(String profile) {
+    ProfileDefinition definition = getProfileDefinition(profile);
+    return definition != null ? definition.sourceFieldMappings : Collections.emptyMap();
   }
 
   public String getSourceField(String key, String fallback) {
-    String field = sourceFieldMappings != null ? sourceFieldMappings.get(key) : null;
+    return getProfileSourceField(null, key, fallback);
+  }
+
+  public String getProfileSourceField(String profile, String key, String fallback) {
+    String field = getProfileSourceFieldMappings(profile).get(key);
     return StringUtils.defaultIfBlank(field, fallback);
   }
 
   public String getSourceField(String key, String fieldName, String fallback) {
-    String field = sourceFieldMappings != null ? sourceFieldMappings.get(key) : null;
+    return getProfileSourceField(null, key, fieldName, fallback);
+  }
+
+  public String getProfileSourceField(String profile, String key, String fieldName, String fallback) {
+    String field = getProfileSourceFieldMappings(profile).get(key);
     if (StringUtils.isNotBlank(field)) return field;
     if (StringUtils.isNotBlank(fieldName)) return fieldName;
     return fallback;
   }
 
   public Map<String, List<String>> getClassProperty() {
-    return classProperty;
+    return getClassPropertyMap(null);
   }
 
   public void setClassProperty(Map<String, List<String>> classProperty) {
@@ -271,43 +297,105 @@ public class Dcat3Config {
       copy.put(e.getKey(), new ArrayList<>(e.getValue()));
     }
     if (!copy.isEmpty()) {
-      this.classProperty = copy;
+      getOrCreateProfile(defaultProfile).classProperty = copy;
     }
   }
 
+  public Map<String, List<String>> getClassPropertyMap(String profile) {
+    ProfileDefinition definition = getProfileDefinition(profile);
+    return definition != null ? definition.classProperty : Collections.emptyMap();
+  }
+
   public List<String> getClassProperty(String type) {
-    if (classProperty == null || StringUtils.isBlank(type)) return Collections.emptyList();
-    List<String> order = classProperty.get(type);
+    return getClassProperty(null, type);
+  }
+
+  public List<String> getClassProperty(String profile, String type) {
+    if (StringUtils.isBlank(type)) return Collections.emptyList();
+    List<String> order = getClassPropertyMap(profile).get(type);
     return order != null ? order : Collections.emptyList();
+  }
+
+  public String resolveProfile(String profile) {
+    String requested = normalizeProfileName(profile);
+    if (requested != null && profiles.containsKey(requested)) return requested;
+
+    String fallback = normalizeProfileName(defaultProfile);
+    if (fallback != null && profiles.containsKey(fallback)) return fallback;
+
+    if (!profiles.isEmpty()) {
+      return profiles.keySet().iterator().next();
+    }
+    return StringUtils.defaultIfBlank(requested, fallback);
   }
 
   private void loadMappingConfig() {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(mappingConfigPath)) {
       if (in == null) return;
       JsonNode root = Dcat3Helper.MAPPER.readTree(in);
-      JsonNode mappings = root.path("sourceFieldMappings");
-      if (mappings.isObject()) {
-        LinkedHashMap<String, String> loaded = new LinkedHashMap<>();
-        mappings.fields().forEachRemaining(e -> {
-          String k = StringUtils.trimToNull(e.getKey());
-          String v = StringUtils.trimToNull(e.getValue().asText(null));
-          if (k != null && v != null) loaded.put(k, v);
-        });
-        this.sourceFieldMappings = loaded;
+      String configuredDefaultProfile = normalizeProfileName(root.path("defaultProfile").asText(null));
+      if (configuredDefaultProfile != null) {
+        this.defaultProfile = configuredDefaultProfile;
       }
 
-      JsonNode classPropertyNode = root.path("classProperty");
-      if (classPropertyNode.isObject()) {
-        LinkedHashMap<String, List<String>> loaded = new LinkedHashMap<>();
-        classPropertyNode.fields().forEachRemaining(e -> {
-          List<String> values = jsonList(e.getValue());
-          if (!values.isEmpty()) loaded.put(e.getKey(), values);
+      JsonNode profilesNode = root.path("profiles");
+      if (profilesNode.isObject()) {
+        LinkedHashMap<String, ProfileDefinition> loadedProfiles = new LinkedHashMap<>();
+        profilesNode.fields().forEachRemaining(e -> {
+          String profileName = normalizeProfileName(e.getKey());
+          if (profileName != null) {
+            loadedProfiles.put(profileName, readProfileDefinition(e.getValue()));
+          }
         });
-        this.classProperty = loaded;
+        this.profiles = loadedProfiles;
+      } else {
+        String profileName = StringUtils.defaultIfBlank(normalizeProfileName(defaultProfile), "us");
+        LinkedHashMap<String, ProfileDefinition> loadedProfiles = new LinkedHashMap<>();
+        loadedProfiles.put(profileName, readProfileDefinition(root));
+        this.profiles = loadedProfiles;
+      }
+
+      String resolvedDefault = resolveProfile(defaultProfile);
+      if (StringUtils.isNotBlank(resolvedDefault)) {
+        this.defaultProfile = resolvedDefault;
       }
     } catch (Exception ex) {
       LOGGER.warn("DCAT3: unable to load mapping config from '{}'.", mappingConfigPath, ex);
     }
+  }
+
+  private ProfileDefinition getOrCreateProfile(String profile) {
+    String key = StringUtils.defaultIfBlank(normalizeProfileName(profile), "default");
+    return profiles.computeIfAbsent(key, k -> new ProfileDefinition());
+  }
+
+  private ProfileDefinition getProfileDefinition(String profile) {
+    if (profiles == null || profiles.isEmpty()) return null;
+    String resolved = resolveProfile(profile);
+    return StringUtils.isNotBlank(resolved) ? profiles.get(resolved) : null;
+  }
+
+  private ProfileDefinition readProfileDefinition(JsonNode node) {
+    ProfileDefinition definition = new ProfileDefinition();
+    if (node == null || node.isMissingNode() || node.isNull()) return definition;
+
+    JsonNode mappings = node.path("sourceFieldMappings");
+    if (mappings.isObject()) {
+      mappings.fields().forEachRemaining(e -> {
+        String k = StringUtils.trimToNull(e.getKey());
+        String v = StringUtils.trimToNull(e.getValue().asText(null));
+        if (k != null && v != null) definition.sourceFieldMappings.put(k, v);
+      });
+    }
+
+    JsonNode classPropertyNode = node.path("classProperty");
+    if (classPropertyNode.isObject()) {
+      classPropertyNode.fields().forEachRemaining(e -> {
+        List<String> values = jsonList(e.getValue());
+        if (!values.isEmpty()) definition.classProperty.put(e.getKey(), values);
+      });
+    }
+    return definition;
   }
 
   private static List<String> jsonList(JsonNode node) {
@@ -323,5 +411,10 @@ public class Dcat3Config {
   private static String removeTrailingSlash(String value) {
     if (value == null) return null;
     return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+  }
+
+  private static String normalizeProfileName(String value) {
+    String normalized = StringUtils.trimToNull(value);
+    return normalized != null ? normalized.toLowerCase() : null;
   }
 }

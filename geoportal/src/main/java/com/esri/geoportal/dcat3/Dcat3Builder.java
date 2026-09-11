@@ -92,15 +92,20 @@ public class Dcat3Builder {
    * @param dcat3Context the build context
    */
   public void build(Dcat3Context dcat3Context) {
+    build(dcat3Context, null);
+  }
+
+  public void build(Dcat3Context dcat3Context, String profile) {
     long started = System.currentTimeMillis();
-    LOGGER.info("Starting building aggregated DCAT-US 3.0 file...");
+    String resolvedProfile = config.resolveProfile(profile);
+    LOGGER.info("Starting building aggregated DCAT-US 3.0 file for profile '{}'...", resolvedProfile);
 
     Dcat3CacheOutputStream outputStream = null;
     PrintWriter writer = null;
     boolean complete = false;
 
     try {
-      outputStream = dcat3Cache.createOutputCacheStream();
+      outputStream = dcat3Cache.createOutputCacheStream(resolvedProfile);
       writer = new PrintWriter(new OutputStreamWriter(outputStream, StandardCharsets.UTF_8));
 
       ObjectWriter jsonWriter = config.getPrettyPrint()
@@ -109,12 +114,12 @@ public class Dcat3Builder {
 
       String baseUrl = config.getBaseUrl();
 
-      writeCatalogHeader(writer, jsonWriter, baseUrl);
+      writeCatalogHeader(writer, jsonWriter, baseUrl, resolvedProfile);
       writer.println();
       writer.print("\"dataset\": [");
 
       long counter = 0;
-      counter += writeDatasets(writer, jsonWriter, dcat3Context, baseUrl, counter);
+      counter += writeDatasets(writer, jsonWriter, dcat3Context, baseUrl, counter, resolvedProfile);
 
       writer.println();
       writer.println("]");
@@ -126,8 +131,8 @@ public class Dcat3Builder {
       }
 
       complete = true;
-      LOGGER.info("Completed building aggregated DCAT-US 3.0 file: {} resources in {} ms.",
-              counter, System.currentTimeMillis() - started);
+      LOGGER.info("Completed building aggregated DCAT-US 3.0 file for profile '{}': {} resources in {} ms.",
+              resolvedProfile, counter, System.currentTimeMillis() - started);
     } catch (Exception ex) {
       LOGGER.error("Error building aggregated DCAT-US 3.0 file!", ex);
     } finally {
@@ -161,9 +166,9 @@ public class Dcat3Builder {
    * @param baseUrl the geoportal base URL
    * @throws IOException if serialization fails
    */
-  private void writeCatalogHeader(PrintWriter writer, ObjectWriter jsonWriter, String baseUrl)
+  private void writeCatalogHeader(PrintWriter writer, ObjectWriter jsonWriter, String baseUrl, String profile)
           throws IOException {
-    Dcat3Catalog catalog = helper.newCatalog(baseUrl);
+    Dcat3Catalog catalog = helper.newCatalog(baseUrl, profile);
     catalog.dataset = null;
 
     ObjectNode envelope = Dcat3Helper.MAPPER.createObjectNode();
@@ -172,7 +177,7 @@ public class Dcat3Builder {
     envelope.put("describedBy", config.getDescribedBy());
 
     String envelopeJson = jsonWriter.writeValueAsString(envelope).stripTrailing();
-    JsonNode orderedCatalog = Dcat3JsonOrder.order(Dcat3Helper.MAPPER.valueToTree(catalog), config);
+    JsonNode orderedCatalog = Dcat3JsonOrder.order(Dcat3Helper.MAPPER.valueToTree(catalog), config, profile);
     String catalogJson = jsonWriter.writeValueAsString(orderedCatalog).stripTrailing();
 
     writer.print(envelopeJson.substring(0, envelopeJson.length() - 1));
@@ -194,15 +199,15 @@ public class Dcat3Builder {
    * @throws IOException if serialization fails
    */
   private long writeDatasetSeries(PrintWriter writer, ObjectWriter jsonWriter,
-          Dcat3Context dcat3Context, String baseUrl, long alreadyWritten) throws IOException {
+          Dcat3Context dcat3Context, String baseUrl, long alreadyWritten, String profile) throws IOException {
     if (!config.getIncludeDatasetSeries()) return 0;
 
     long written = 0;
     List<JsonNode> collections = helper.searchCollections(10000);
     for (JsonNode collection : collections) {
       if (!dcat3Context.isRunning()) break;
-      Dcat3DatasetSeries series = helper.toDatasetSeries(collection, baseUrl, true);
-      writeEntry(writer, jsonWriter, series, alreadyWritten + written);
+      Dcat3DatasetSeries series = helper.toDatasetSeries(collection, baseUrl, true, profile);
+      writeEntry(writer, jsonWriter, series, alreadyWritten + written, profile);
       written++;
     }
 
@@ -225,13 +230,13 @@ public class Dcat3Builder {
    * @throws Exception if the search or serialization fails
    */
   private long writeDatasets(PrintWriter writer, ObjectWriter jsonWriter,
-          Dcat3Context dcat3Context, String baseUrl, long alreadyWritten) throws Exception {
+          Dcat3Context dcat3Context, String baseUrl, long alreadyWritten, String profile) throws Exception {
     long written = 0;
     long total = -1;
     String searchAfter = null;
 
     while (dcat3Context.isRunning()) {
-      JsonNode response = helper.searchDatasets(searchAfter, config.getPageSize());
+      JsonNode response = helper.searchDatasets(searchAfter, config.getPageSize(), profile);
       if (total < 0) {
         total = Dcat3Helper.getTotalHits(response);
       }
@@ -247,8 +252,8 @@ public class Dcat3Builder {
         if (StringUtils.isBlank(id)) continue;
         lastId = id;
 
-        Dcat3Dataset ds = helper.toDataset(id, hit.path("_source"), baseUrl);
-        writeEntry(writer, jsonWriter, ds, alreadyWritten + written);
+        Dcat3Dataset ds = helper.toDataset(id, hit.path("_source"), baseUrl, profile);
+        writeEntry(writer, jsonWriter, ds, alreadyWritten + written, profile);
         written++;
       }
 
@@ -274,13 +279,13 @@ public class Dcat3Builder {
    * @param index index of the entry within the array
    * @throws IOException if serialization fails
    */
-  private void writeEntry(PrintWriter writer, ObjectWriter jsonWriter, Object resource, long index)
+  private void writeEntry(PrintWriter writer, ObjectWriter jsonWriter, Object resource, long index, String profile)
           throws IOException {
     if (index > 0) {
       writer.print(",");
     }
     writer.println();
-    JsonNode ordered = Dcat3JsonOrder.order(Dcat3Helper.MAPPER.valueToTree(resource), config);
+    JsonNode ordered = Dcat3JsonOrder.order(Dcat3Helper.MAPPER.valueToTree(resource), config, profile);
     writer.print(jsonWriter.writeValueAsString(ordered));
   }
 
@@ -299,13 +304,17 @@ public class Dcat3Builder {
    * @throws Exception if the search fails
    */
   public Dcat3Catalog buildInMemory(String baseUrl, int maxDatasets) throws Exception {
-    Dcat3Catalog catalog = helper.newCatalog(baseUrl);
+    return buildInMemory(baseUrl, maxDatasets, null);
+  }
+
+  public Dcat3Catalog buildInMemory(String baseUrl, int maxDatasets, String profile) throws Exception {
+    Dcat3Catalog catalog = helper.newCatalog(baseUrl, profile);
 
     int written = 0;
     String searchAfter = null;
     while (written < maxDatasets) {
       int pageSize = Math.min(config.getPageSize(), maxDatasets - written);
-      JsonNode response = helper.searchDatasets(searchAfter, pageSize);
+      JsonNode response = helper.searchDatasets(searchAfter, pageSize, profile);
       JsonNode hits = response.path("hits").path("hits");
       if (!hits.isArray() || hits.isEmpty()) break;
 
@@ -314,7 +323,7 @@ public class Dcat3Builder {
         String id = hit.path("_id").asText(null);
         if (StringUtils.isBlank(id)) continue;
         lastId = id;
-        catalog.addDataset(helper.toDataset(id, hit.path("_source"), baseUrl));
+        catalog.addDataset(helper.toDataset(id, hit.path("_source"), baseUrl, profile));
         written++;
       }
       if (StringUtils.isBlank(lastId)) break;

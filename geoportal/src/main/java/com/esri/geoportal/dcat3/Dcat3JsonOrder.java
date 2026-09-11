@@ -34,11 +34,15 @@ public final class Dcat3JsonOrder {
   }
 
   public static JsonNode order(JsonNode node, Dcat3Config config) {
+    return order(node, config, null);
+  }
+
+  public static JsonNode order(JsonNode node, Dcat3Config config, String profile) {
     if (node == null || config == null) return node;
     if (node.isArray()) {
       ArrayNode array = Dcat3Helper.MAPPER.createArrayNode();
       for (JsonNode item : node) {
-        array.add(order(item, config));
+        array.add(order(item, config, profile));
       }
       return array;
     }
@@ -48,12 +52,12 @@ public final class Dcat3JsonOrder {
 
     ObjectNode src = (ObjectNode) node;
     ObjectNode ordered = Dcat3Helper.MAPPER.createObjectNode();
-    List<String> classPropertyOrder = config.getClassProperty(typeKey(src));
+    List<String> classPropertyOrder = config.getClassProperty(profile, typeKey(src));
 
     for (String name : classPropertyOrder) {
       JsonNode value = src.get(name);
       if (value != null) {
-        ordered.set(name, order(value, config));
+        ordered.set(name, order(value, config, profile));
       }
     }
 
@@ -61,7 +65,7 @@ public final class Dcat3JsonOrder {
     while (names.hasNext()) {
       String name = names.next();
       if (!ordered.has(name)) {
-        ordered.set(name, order(src.get(name), config));
+        ordered.set(name, order(src.get(name), config, profile));
       }
     }
     return ordered;
@@ -88,6 +92,6 @@ public final class Dcat3JsonOrder {
     for (String hint : resourceHints) {
       if (node.has(hint)) score++;
     }
-    return score >= 2 ? "Dcat3Resource" : StringUtils.EMPTY;
+    return score >= 2 ? "Dcat3DataService" : StringUtils.EMPTY;
   }
 }

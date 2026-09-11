@@ -101,12 +101,14 @@ public class Dcat3StreamingService {
    * @return the response entity
    */
   @GetMapping(path = "/dcat3.json", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<Void> dcat3(HttpServletResponse response) {
+  public ResponseEntity<Void> dcat3(@RequestParam(name = "profile", required = false) String profile,
+          HttpServletResponse response) {
     try (OutputStream outStream = response.getOutputStream()) {
-      Date lastModified = dcat3Cache.getLastModified();
+      String resolvedProfile = dcat3Config.resolveProfile(profile);
+      Date lastModified = dcat3Cache.getLastModified(resolvedProfile);
 
       if (lastModified != null) {
-        try (InputStream input = dcat3Cache.createInputCacheStream()) {
+        try (InputStream input = dcat3Cache.createInputCacheStream(resolvedProfile)) {
           IOUtils.copy(input, outStream);
         }
         outStream.flush();
@@ -117,7 +119,7 @@ public class Dcat3StreamingService {
               .formatted(dcat3Config.getContext(), dcat3Config.getConformsTo())
               .getBytes("UTF-8"));
       outStream.flush();
-      dcat3Controller.generateDcat3Async();
+      dcat3Controller.generateDcat3Async(resolvedProfile);
       return ResponseEntity.accepted().build();
     } catch (IOException ex) {
       LOGGER.error("Error streaming the DCAT-US 3.0 document.", ex);
@@ -130,8 +132,8 @@ public class Dcat3StreamingService {
    * @return a short status document
    */
   @GetMapping(path = "/dcat3/rebuild", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<String> rebuild() {
-    boolean started = dcat3Controller.generateDcat3Async();
+  public ResponseEntity<String> rebuild(@RequestParam(name = "profile", required = false) String profile) {
+    boolean started = dcat3Controller.generateDcat3Async(profile);
     String body = "{\"status\":\"%s\"}".formatted(started ? "started" : "already running");
     return ResponseEntity.status(started ? HttpStatus.ACCEPTED : HttpStatus.CONFLICT).body(body);
   }
@@ -146,8 +148,9 @@ public class Dcat3StreamingService {
    * @return the <code>dcat:Catalog</code>
    */
   @GetMapping(path = "/dcat3/catalog.json", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> catalog(HttpServletRequest request) {
-    return ResponseEntity.ok(ordered(helper().newCatalog(resolveBaseUrl(request))));
+  public ResponseEntity<?> catalog(@RequestParam(name = "profile", required = false) String profile,
+          HttpServletRequest request) {
+    return ResponseEntity.ok(ordered(helper().newCatalog(resolveBaseUrl(request), profile), profile));
   }
 
   /**
@@ -157,14 +160,16 @@ public class Dcat3StreamingService {
    * @return the dataset
    */
   @GetMapping(path = "/dcat3/dataset/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> dataset(@PathVariable("id") String id, HttpServletRequest request) {
+  public ResponseEntity<?> dataset(@PathVariable("id") String id,
+          @RequestParam(name = "profile", required = false) String profile,
+          HttpServletRequest request) {
     try {
       JsonNode source = helper().getItemById(id);
       if (source == null || source.isMissingNode()) {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }
-      Dcat3Dataset ds = helper().toDataset(id, source, resolveBaseUrl(request));
-      return ResponseEntity.ok(ordered(ds));
+      Dcat3Dataset ds = helper().toDataset(id, source, resolveBaseUrl(request), profile);
+      return ResponseEntity.ok(ordered(ds, profile));
     } catch (Exception ex) {
       return error("Error building dcat:Dataset for id '%s'.".formatted(id), ex);
     }
@@ -176,7 +181,8 @@ public class Dcat3StreamingService {
    * @return the dataset list
    */
   @GetMapping(path = "/dcat3/dataset", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> datasets(HttpServletRequest request) {
+  public ResponseEntity<?> datasets(@RequestParam(name = "profile", required = false) String profile,
+          HttpServletRequest request) {
     try {
       Dcat3Helper helper = helper();
       String baseUrl = resolveBaseUrl(request);
@@ -185,7 +191,7 @@ public class Dcat3StreamingService {
       List<Dcat3Dataset> datasets = new ArrayList<>();
 
       while (true) {
-        JsonNode response = helper.searchDatasets(searchAfter, pageSize);
+        JsonNode response = helper.searchDatasets(searchAfter, pageSize, profile);
         JsonNode hits = response.path("hits").path("hits");
         if (!hits.isArray() || hits.isEmpty()) {
           break;
@@ -198,7 +204,7 @@ public class Dcat3StreamingService {
             continue;
           }
           lastId = id;
-          datasets.add(helper.toDataset(id, hit.path("_source"), baseUrl));
+          datasets.add(helper.toDataset(id, hit.path("_source"), baseUrl, profile));
         }
 
         if (StringUtils.isBlank(lastId) || hits.size() < pageSize) {
@@ -207,7 +213,7 @@ public class Dcat3StreamingService {
         searchAfter = lastId;
       }
 
-      return ResponseEntity.ok(ordered(datasets));
+      return ResponseEntity.ok(ordered(datasets, profile));
     } catch (Exception ex) {
       return error("Error building the dcat:Dataset list.", ex);
     }
@@ -219,14 +225,15 @@ public class Dcat3StreamingService {
    * @return the dataset series list
    */
   @GetMapping(path = "/dcat3/datasetSeries", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> datasetSeries(HttpServletRequest request) {
+  public ResponseEntity<?> datasetSeries(@RequestParam(name = "profile", required = false) String profile,
+          HttpServletRequest request) {
     try {
       String baseUrl = resolveBaseUrl(request);
       List<JsonNode> collections = helper().searchCollections(10000);
       List<Dcat3DatasetSeries> series = collections.stream()
-              .map(c -> helper().toDatasetSeries(c, baseUrl, true))
+              .map(c -> helper().toDatasetSeries(c, baseUrl, true, profile))
               .toList();
-      return ResponseEntity.ok(ordered(series));
+      return ResponseEntity.ok(ordered(series, profile));
     } catch (Exception ex) {
       return error("Error building the dcat:DatasetSeries list.", ex);
     }
@@ -242,6 +249,7 @@ public class Dcat3StreamingService {
   @GetMapping(path = "/dcat3/datasetSeries/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> datasetSeries(@PathVariable("id") String id,
           @RequestParam(name = "members", required = false, defaultValue = "false") boolean members,
+          @RequestParam(name = "profile", required = false) String profile,
           HttpServletRequest request) {
     try {
       JsonNode collection = helper().getCollectionById(id);
@@ -249,8 +257,8 @@ public class Dcat3StreamingService {
         return notFound("No dataset series (collection) found with id '%s'.".formatted(id));
       }
       String baseUrl = resolveBaseUrl(request);
-      Dcat3DatasetSeries series = helper().toDatasetSeries(collection, baseUrl, members);
-      return ResponseEntity.ok(ordered(series));
+      Dcat3DatasetSeries series = helper().toDatasetSeries(collection, baseUrl, members, profile);
+      return ResponseEntity.ok(ordered(series, profile));
     } catch (Exception ex) {
       return error("Error building dcat:DatasetSeries for id '%s'.".formatted(id), ex);
     }
@@ -263,14 +271,16 @@ public class Dcat3StreamingService {
    * @return the data service list
    */
   @GetMapping(path = "/dcat3/dataService/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
-  public ResponseEntity<?> dataService(@PathVariable("id") String id, HttpServletRequest request) {
+  public ResponseEntity<?> dataService(@PathVariable("id") String id,
+          @RequestParam(name = "profile", required = false) String profile,
+          HttpServletRequest request) {
     try {
       JsonNode source = helper().getItemById(id);
       if (source == null || source.isMissingNode()) {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }
-      List<Dcat3DataService> services = helper().toDataServices(id, source, resolveBaseUrl(request));
-      return ResponseEntity.ok(ordered(services));
+      List<Dcat3DataService> services = helper().toDataServices(id, source, resolveBaseUrl(request), profile);
+      return ResponseEntity.ok(ordered(services, profile));
     } catch (Exception ex) {
       return error("Error building dcat:DataService entries for id '%s'.".formatted(id), ex);
     }
@@ -340,8 +350,8 @@ public class Dcat3StreamingService {
     return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
   }
 
-  private JsonNode ordered(Object value) {
+  private JsonNode ordered(Object value, String profile) {
     JsonNode node = Dcat3Helper.MAPPER.valueToTree(value);
-    return Dcat3JsonOrder.order(node, dcat3Config);
+    return Dcat3JsonOrder.order(node, dcat3Config, profile);
   }
 }

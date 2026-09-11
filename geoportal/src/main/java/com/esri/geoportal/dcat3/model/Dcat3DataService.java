@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * DCAT-US 3.0 <code>dcat:DataService</code>.
@@ -28,7 +29,72 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  * @see <a href="https://www.w3.org/TR/vocab-dcat-3/#Class:Data_Service">DCAT 3 Data Service</a>
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
-public class Dcat3DataService extends Dcat3Resource {
+public class Dcat3DataService {
+
+  /** JSON-LD node identifier (usually a dereferenceable URI). */
+  @JsonProperty("@id")
+  public String atId;
+
+  /** JSON-LD node type, one of the <code>Dcat3Constants.TYPE_*</code> values. */
+  @JsonProperty("@type")
+  public String atType = Dcat3Constants.TYPE_DATA_SERVICE;
+
+  /** dct:identifier */
+  public String identifier;
+
+  /** dct:title */
+  public String title;
+
+  /** dct:description */
+  public String description;
+
+  /** dct:issued (ISO-8601) */
+  public String issued;
+
+  /** dct:modified (ISO-8601) */
+  public String modified;
+
+  /** dcat:keyword */
+  public List<String> keyword;
+
+  /** dcat:theme */
+  public List<String> theme;
+
+  /** dct:language */
+  public List<String> language;
+
+  /** dct:publisher */
+  public Dcat3Organization publisher;
+
+  /** dct:creator */
+  public Dcat3Organization creator;
+
+  /** dcat:contactPoint */
+  public List<Dcat3ContactPoint> contactPoint;
+
+  /** dcat:landingPage */
+  public Dcat3NodeRef landingPage;
+
+  /** dct:license */
+  public String license;
+
+  /** dct:rights */
+  public String rights;
+
+  /** dct:accessRights. */
+  public String accessRights;
+
+  /** DCAT-US accessLevel: public | restricted public | non-public */
+  public String accessLevel;
+
+  /** DCAT-US accessLevelComment */
+  public String accessLevelComment;
+
+  /** DCAT-US bureauCode */
+  public List<String> bureauCode;
+
+  /** DCAT-US programCode */
+  public List<String> programCode;
 
   /** dcat:endpointURL - the root location of the service. */
   public String endpointURL;
@@ -50,6 +116,36 @@ public class Dcat3DataService extends Dcat3Resource {
 
   public Dcat3DataService() {
     this.atType = Dcat3Constants.TYPE_DATA_SERVICE;
+  }
+
+  /**
+   * Adds a keyword, avoiding duplicates and blanks.
+   * @param value keyword
+   */
+  public void addKeyword(String value) {
+    if (value == null || value.trim().isEmpty()) return;
+    if (keyword == null) keyword = new ArrayList<>();
+    if (!keyword.contains(value)) keyword.add(value);
+  }
+
+  /**
+   * Adds a theme, avoiding duplicates and blanks.
+   * @param value theme
+   */
+  public void addTheme(String value) {
+    if (value == null || value.trim().isEmpty()) return;
+    if (theme == null) theme = new ArrayList<>();
+    if (!theme.contains(value)) theme.add(value);
+  }
+
+  /**
+   * Adds a contact point, avoiding blanks.
+   * @param value contact point
+   */
+  public void addContactPoint(Dcat3ContactPoint value) {
+    if (value == null) return;
+    if (contactPoint == null) contactPoint = new ArrayList<>();
+    contactPoint.add(value);
   }
 
   /**

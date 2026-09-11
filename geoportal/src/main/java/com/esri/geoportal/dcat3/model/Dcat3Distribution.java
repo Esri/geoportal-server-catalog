@@ -36,7 +36,7 @@ public class Dcat3Distribution {
   public String accessURL;
 
   /** List of access restriction labels or URIs. */
-  public List<String> accessRestriction;
+  public List<Dcat3AccessRestriction> accessRestriction;
 
   /** dct:format - human readable format (e.g. Shapefile, WMS). */
   public String format;
@@ -72,6 +72,7 @@ public class Dcat3Distribution {
     Dcat3Distribution d = new Dcat3Distribution();
     d.accessURL = accessURL;
     d.format = format;
+    d.accessRestriction = List.of(Dcat3AccessRestriction.of("public"));
     return d;
   }
 
@@ -85,6 +86,7 @@ public class Dcat3Distribution {
     Dcat3Distribution d = new Dcat3Distribution();
     d.accessURL = accessURL;
     d.format = format;
+    d.accessRestriction = List.of(Dcat3AccessRestriction.of("public"));
     return d;
   }
 }
