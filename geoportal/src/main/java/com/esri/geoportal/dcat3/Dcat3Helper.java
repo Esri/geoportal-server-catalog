@@ -207,6 +207,58 @@ public class Dcat3Helper {
   }
 
   /**
+   * Executes a filtered metadata search page, honoring access filters while
+   * applying client-supplied query, paging and sort options.
+   */
+  public JsonNode searchDatasets(int from, int size, String sort, String esdsl, String profile) throws Exception {
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    ElasticClient client = ElasticClient.newClient();
+    String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
+
+    ObjectNode query = MAPPER.createObjectNode();
+    query.put("track_total_hits", true);
+    query.put("from", Math.max(0, from));
+    query.put("size", size > 0 ? size : config.getPageSize());
+
+    ArrayNode includes = query.putObject("_source").putArray("includes");
+    for (String f : datasetSourceIncludes(profile)) {
+      includes.add(f);
+    }
+
+    ArrayNode sortArray = query.putArray("sort");
+    appendSort(sortArray, sort);
+    if (sortArray.isEmpty()) {
+      sortArray.addObject().put("_id", "asc");
+    }
+
+    JsonNode clientQuery = parseClientQuery(esdsl);
+    ArrayNode accessMust = MAPPER.createArrayNode();
+    appendAccessFilters(accessMust, profile);
+
+    if (clientQuery != null && !clientQuery.isMissingNode() && !clientQuery.isNull()) {
+      if (!accessMust.isEmpty()) {
+        ArrayNode must = MAPPER.createArrayNode();
+        must.add(clientQuery.deepCopy());
+        for (JsonNode n : accessMust) {
+          must.add(n);
+        }
+        query.putObject("query").putObject("bool").set("must", must);
+      } else {
+        query.set("query", clientQuery.deepCopy());
+      }
+    } else if (!accessMust.isEmpty()) {
+      query.putObject("query").putObject("bool").set("must", accessMust);
+    } else {
+      query.putObject("query").putObject("match_all");
+    }
+
+    String queryString = query.toString();
+    LOGGER.trace("DCAT3 filtered search url={} query={}", url, queryString);
+    String response = client.sendPost(url, queryString, CONTENT_TYPE_JSON);
+    return MAPPER.readTree(response);
+  }
+
+  /**
    * Reads a single metadata item.
    * @param id the item id
    * @return the <code>_source</code> document or <code>null</code> when not found
@@ -730,6 +782,102 @@ public class Dcat3Helper {
 
   private String sourceField(String profile, String key, String fieldName, String fallback) {
     return config.getProfileSourceField(profile, key, fieldName, fallback);
+  }
+
+  private JsonNode parseClientQuery(String esdsl) {
+    if (StringUtils.isBlank(esdsl)) return null;
+    try {
+      JsonNode root = MAPPER.readTree(esdsl);
+      if (root == null || root.isNull() || root.isMissingNode()) return null;
+      JsonNode query = root.path("query");
+      if (!query.isMissingNode() && !query.isNull()) {
+        return query;
+      }
+      return root;
+    } catch (Exception ex) {
+      LOGGER.debug("DCAT3: invalid esdsl query, ignoring filter.", ex);
+      return null;
+    }
+  }
+
+  private void appendSort(ArrayNode sortArray, String sort) {
+    if (sortArray == null || StringUtils.isBlank(sort)) return;
+    String candidate = StringUtils.trimToEmpty(sort);
+
+    if (candidate.startsWith("{") || candidate.startsWith("[")) {
+      try {
+        JsonNode node = MAPPER.readTree(candidate);
+        appendSortNode(sortArray, node);
+        if (!sortArray.isEmpty()) {
+          return;
+        }
+      } catch (Exception ex) {
+        LOGGER.debug("DCAT3: invalid JSON sort, trying CSV syntax.", ex);
+      }
+    }
+
+    String[] specs = candidate.split(",");
+    for (String spec : specs) {
+      appendSortToken(sortArray, spec);
+    }
+  }
+
+  private void appendSortNode(ArrayNode sortArray, JsonNode node) {
+    if (sortArray == null || node == null || node.isNull() || node.isMissingNode()) return;
+
+    if (node.isArray()) {
+      for (JsonNode item : node) {
+        appendSortNode(sortArray, item);
+      }
+      return;
+    }
+
+    if (node.isObject()) {
+      Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+      while (fields.hasNext()) {
+        Map.Entry<String, JsonNode> entry = fields.next();
+        String field = StringUtils.trimToEmpty(entry.getKey());
+        if (field.isEmpty()) continue;
+
+        JsonNode value = entry.getValue();
+        String normalizedField = normalizeSortField(field);
+        if (value != null && value.isObject() && value.has("order")) {
+          sortArray.addObject().putObject(normalizedField)
+                  .put("order", normalizeSortOrder(value.path("order").asText(null)));
+        } else if (value != null && value.isTextual()) {
+          sortArray.addObject().putObject(normalizedField)
+                  .put("order", normalizeSortOrder(value.asText()));
+        } else {
+          sortArray.addObject().putObject(normalizedField).put("order", "asc");
+        }
+      }
+    }
+  }
+
+  private void appendSortToken(ArrayNode sortArray, String token) {
+    String spec = StringUtils.trimToEmpty(token);
+    if (spec.isEmpty()) return;
+
+    int sep = spec.indexOf(':');
+    String field = sep >= 0 ? spec.substring(0, sep) : spec;
+    String order = sep >= 0 ? spec.substring(sep + 1) : "asc";
+    field = StringUtils.trimToEmpty(field);
+    if (field.isEmpty()) return;
+
+    sortArray.addObject().putObject(normalizeSortField(field))
+            .put("order", normalizeSortOrder(order));
+  }
+
+  private String normalizeSortOrder(String order) {
+    return "desc".equalsIgnoreCase(StringUtils.trimToEmpty(order)) ? "desc" : "asc";
+  }
+
+  private String normalizeSortField(String field) {
+    String f = StringUtils.trimToEmpty(field);
+    if ("title".equals(f)) {
+      return "title.keyword";
+    }
+    return f;
   }
 
   private String mappedText(JsonNode source, String prefix, String fieldName, String fallback) {

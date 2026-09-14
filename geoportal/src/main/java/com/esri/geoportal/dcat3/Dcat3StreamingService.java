@@ -182,10 +182,35 @@ public class Dcat3StreamingService {
    */
   @GetMapping(path = "/dcat3/dataset", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> datasets(@RequestParam(name = "profile", required = false) String profile,
+          @RequestParam(name = "from", required = false) Integer from,
+          @RequestParam(name = "size", required = false) Integer size,
+          @RequestParam(name = "sort", required = false) String sort,
+          @RequestParam(name = "esdsl", required = false) String esdsl,
           HttpServletRequest request) {
     try {
       Dcat3Helper helper = helper();
       String baseUrl = resolveBaseUrl(request);
+
+      // If search params are supplied, return one filtered page matching UI search.
+      if (from != null || size != null || StringUtils.isNotBlank(sort) || StringUtils.isNotBlank(esdsl)) {
+        int requestedSize = size != null ? Math.max(1, size.intValue()) : Math.max(1, dcat3Config.getPageSize());
+        int requestedFrom = from != null ? Math.max(1, from.intValue()) : 1;
+        
+        JsonNode response = helper.searchDatasets(requestedFrom - 1, requestedSize, sort, esdsl, profile);
+        JsonNode hits = response.path("hits").path("hits");
+        List<Dcat3Dataset> datasets = new ArrayList<>();
+        if (hits.isArray()) {
+          for (JsonNode hit : hits) {
+            String id = hit.path("_id").asText(null);
+            if (StringUtils.isBlank(id)) {
+              continue;
+            }
+            datasets.add(helper.toDataset(id, hit.path("_source"), baseUrl, profile));
+          }
+        }
+        return ResponseEntity.ok(ordered(datasets, profile));
+      }
+
       int pageSize = Math.max(1, dcat3Config.getPageSize());
       String searchAfter = null;
       List<Dcat3Dataset> datasets = new ArrayList<>();
