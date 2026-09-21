@@ -17,9 +17,13 @@ package com.esri.geoportal.dcat3;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -53,7 +57,9 @@ import jakarta.servlet.http.HttpServletResponse;
  *       cache exists yet.</li>
  *   <li><code>GET /dcat3/catalog.json</code> - the catalog header only.</li>
  *   <li><code>GET /dcat3/dataset/{id}</code> - a single <code>dcat:Dataset</code>.</li>
- *   <li><code>GET /dcat3/dataset</code> - all <code>dcat:Dataset</code>.</li>
+ *   <li><code>GET /dcat3/dataset</code> - one page of <code>dcat:Dataset</code>,
+ *       paginated via {@code limit}/{@code searchAfter} (or {@code from}/{@code size}
+ *       when other search params are supplied), with an optional {@code next} link.</li>
  *   <li><code>GET /dcat3/datasetSeries</code> - all <code>dcat:DatasetSeries</code>.</li>
  *   <li><code>GET /dcat3/datasetSeries/{id}</code> - a single <code>dcat:DatasetSeries</code>.</li>
  *   <li><code>GET /dcat3/dataService/{id}</code> - the <code>dcat:DataService</code>
@@ -176,9 +182,13 @@ public class Dcat3StreamingService {
   }
 
   /**
-   * Returns all <code>dcat:Dataset</code> resources built live from the index.
+   * Returns all <code>dcat:Dataset</code> resources built live from the index, one
+   * page at a time. Pagination is cursor based using Elasticsearch's
+   * <code>search_after</code>: pass the {@code searchAfter} value returned in the
+   * response's <code>next</code> link to fetch the following page. The page size
+   * ({@code limit} / {@code size}) is capped at 10000.
    * @param request the servlet request
-   * @return the dataset list
+   * @return a page of the dataset list, with an optional {@code next} link
    */
   @GetMapping(path = "/dcat3/dataset", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> datasets(@RequestParam(name = "profile", required = false) String profile,
@@ -186,16 +196,20 @@ public class Dcat3StreamingService {
           @RequestParam(name = "size", required = false) Integer size,
           @RequestParam(name = "sort", required = false) String sort,
           @RequestParam(name = "esdsl", required = false) String esdsl,
+          @RequestParam(name = "limit", required = false) Integer limit,
+          @RequestParam(name = "searchAfter", required = false) String searchAfter,
           HttpServletRequest request) {
     try {
+      final int hardCap = 10000;
       Dcat3Helper helper = helper();
       String baseUrl = resolveBaseUrl(request);
 
       // If search params are supplied, return one filtered page matching UI search.
       if (from != null || size != null || StringUtils.isNotBlank(sort) || StringUtils.isNotBlank(esdsl)) {
-        int requestedSize = size != null ? Math.max(1, size.intValue()) : Math.max(1, dcat3Config.getPageSize());
+        int requestedSize = size != null ? Math.min(Math.max(1, size.intValue()), hardCap)
+                : Math.max(1, Math.min(dcat3Config.getPageSize(), hardCap));
         int requestedFrom = from != null ? Math.max(1, from.intValue()) : 1;
-        
+
         JsonNode response = helper.searchDatasets(requestedFrom - 1, requestedSize, sort, esdsl, profile);
         JsonNode hits = response.path("hits").path("hits");
         List<Dcat3Dataset> datasets = new ArrayList<>();
@@ -208,21 +222,23 @@ public class Dcat3StreamingService {
             datasets.add(helper.toDataset(id, hit.path("_source"), baseUrl, profile));
           }
         }
-        return ResponseEntity.ok(ordered(datasets, profile));
+
+        String next = null;
+        if (hits.isArray() && hits.size() >= requestedSize) {
+          next = buildDatasetsNextUrl(baseUrl, profile, requestedFrom + requestedSize, requestedSize, sort, esdsl, null, null);
+        }
+        return ResponseEntity.ok(datasetsPage(datasets, next, profile));
       }
 
-      int pageSize = Math.max(1, dcat3Config.getPageSize());
-      String searchAfter = null;
+      // Otherwise page through the full index using search_after.
+      int pageSize = limit != null && limit.intValue() > 0 ? Math.min(limit.intValue(), hardCap)
+              : Math.max(1, Math.min(dcat3Config.getPageSize(), hardCap));
+
+      JsonNode response = helper.searchDatasets(searchAfter, pageSize, profile);
+      JsonNode hits = response.path("hits").path("hits");
       List<Dcat3Dataset> datasets = new ArrayList<>();
-
-      while (true) {
-        JsonNode response = helper.searchDatasets(searchAfter, pageSize, profile);
-        JsonNode hits = response.path("hits").path("hits");
-        if (!hits.isArray() || hits.isEmpty()) {
-          break;
-        }
-
-        String lastId = null;
+      String lastId = null;
+      if (hits.isArray()) {
         for (JsonNode hit : hits) {
           String id = hit.path("_id").asText(null);
           if (StringUtils.isBlank(id)) {
@@ -231,14 +247,13 @@ public class Dcat3StreamingService {
           lastId = id;
           datasets.add(helper.toDataset(id, hit.path("_source"), baseUrl, profile));
         }
-
-        if (StringUtils.isBlank(lastId) || hits.size() < pageSize) {
-          break;
-        }
-        searchAfter = lastId;
       }
 
-      return ResponseEntity.ok(ordered(datasets, profile));
+      String next = null;
+      if (hits.isArray() && hits.size() >= pageSize && StringUtils.isNotBlank(lastId)) {
+        next = buildDatasetsNextUrl(baseUrl, profile, null, null, null, null, lastId, pageSize);
+      }
+      return ResponseEntity.ok(datasetsPage(datasets, next, profile));
     } catch (Exception ex) {
       return error("Error building the dcat:Dataset list.", ex);
     }
@@ -379,4 +394,73 @@ public class Dcat3StreamingService {
     JsonNode node = Dcat3Helper.MAPPER.valueToTree(value);
     return Dcat3JsonOrder.order(node, dcat3Config, profile);
   }
+
+  /**
+   * Wraps a page of datasets together with an optional {@code next} link.
+   * @param datasets the datasets of the current page
+   * @param next the URL of the next page, or {@code null} when there is none
+   * @param profile the active profile
+   * @return the ordered JSON page
+   */
+  private JsonNode datasetsPage(List<Dcat3Dataset> datasets, String next, String profile) {
+    Map<String, Object> page = new LinkedHashMap<>();
+    page.put("dataset", datasets);
+    if (StringUtils.isNotBlank(next)) {
+      page.put("next", next);
+    }
+    return ordered(page, profile);
+  }
+
+  /**
+   * Builds the {@code next} link for the <code>/dcat3/dataset</code> endpoint,
+   * preserving the parameters relevant to the current pagination mode.
+   * @param baseUrl the geoportal base URL
+   * @param profile the active profile, or {@code null}
+   * @param from the next {@code from} value (filtered/offset mode), or {@code null}
+   * @param size the {@code size} to reuse (filtered/offset mode), or {@code null}
+   * @param sort the {@code sort} to reuse (filtered/offset mode), or {@code null}
+   * @param esdsl the {@code esdsl} to reuse (filtered/offset mode), or {@code null}
+   * @param searchAfter the cursor id for the next page (search_after mode), or {@code null}
+   * @param limit the page size to reuse (search_after mode), or {@code null}
+   * @return the absolute next-page URL
+   */
+  private String buildDatasetsNextUrl(String baseUrl, String profile, Integer from, Integer size,
+          String sort, String esdsl, String searchAfter, Integer limit) {
+    StringBuilder sb = new StringBuilder(StringUtils.defaultString(baseUrl)).append("/dcat3/dataset");
+    Map<String, String> params = new LinkedHashMap<>();
+    if (StringUtils.isNotBlank(profile)) {
+      params.put("profile", profile);
+    }
+    if (from != null) {
+      params.put("from", String.valueOf(from));
+    }
+    if (size != null) {
+      params.put("size", String.valueOf(size));
+    }
+    if (StringUtils.isNotBlank(sort)) {
+      params.put("sort", sort);
+    }
+    if (StringUtils.isNotBlank(esdsl)) {
+      params.put("esdsl", esdsl);
+    }
+    if (StringUtils.isNotBlank(searchAfter)) {
+      params.put("searchAfter", searchAfter);
+    }
+    if (limit != null) {
+      params.put("limit", String.valueOf(limit));
+    }
+
+    boolean first = true;
+    for (Map.Entry<String, String> entry : params.entrySet()) {
+      sb.append(first ? '?' : '&');
+      first = false;
+      sb.append(entry.getKey()).append('=').append(urlEncode(entry.getValue()));
+    }
+    return sb.toString();
+  }
+
+  private static String urlEncode(String value) {
+    return URLEncoder.encode(value, StandardCharsets.UTF_8);
+  }
+
 }
