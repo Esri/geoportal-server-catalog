@@ -19,8 +19,7 @@
         "dataset.resource.url": "url_s",
         "dataset.resource.urlType": "url_type_s",
 
-        "datasetSeries.id": "id",
-        "datasetSeries.identifier": "identifier",       
+        "datasetSeries.id": "id",        
         "datasetSeries.name": "name",
         "datasetSeries.description": "description",
         "datasetSeries.created": "sys_created_dt",

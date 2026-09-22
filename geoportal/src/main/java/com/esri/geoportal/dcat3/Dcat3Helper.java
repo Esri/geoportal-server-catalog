@@ -122,12 +122,35 @@ public class Dcat3Helper {
   }
 
   public String prepareDatasetQuery(String searchAfter, int size, String profile) {
+    return prepareDatasetQuery(searchAfter, size, profile, false);
+  }
+
+  /**
+   * Builds the paged query used to walk the whole metadata index, optionally
+   * walking it backwards (used to implement a "previous page" link on top of
+   * <code>search_after</code>, which is otherwise forward-only).
+   *
+   * <p>When {@code backward} is <code>true</code> the sort direction on
+   * <code>_id</code> is reversed (<code>desc</code>) and <code>searchAfter</code>
+   * is interpreted as the <code>_id</code> of the first record of the page the
+   * caller wants to go back from. The resulting hits therefore come back in
+   * descending <code>_id</code> order and must be reversed by the caller to
+   * restore the natural ascending order.</p>
+   *
+   * @param searchAfter the <code>_id</code> boundary to search after (forward)
+   *                    or before (backward), or <code>null</code> for the first page
+   * @param size page size
+   * @param profile the active profile, or <code>null</code>
+   * @param backward when <code>true</code>, walks the index backwards
+   * @return the query as a JSON string
+   */
+  public String prepareDatasetQuery(String searchAfter, int size, String profile, boolean backward) {
     ObjectNode query = MAPPER.createObjectNode();
     query.put("track_total_hits", true);
     query.put("size", size > 0 ? size : config.getPageSize());
 
     ArrayNode sort = query.putArray("sort");
-    sort.addObject().put("_id", "asc");
+    sort.addObject().put("_id", backward ? "desc" : "asc");
 
     ArrayNode includes = query.putObject("_source").putArray("includes");
     for (String f : datasetSourceIncludes(profile)) {
@@ -150,6 +173,7 @@ public class Dcat3Helper {
     return query.toString();
   }
 
+
   /**
    * Appends the access / approval filters honoring the geoportal security
    * configuration, so that only publicly visible records end up in the
@@ -157,6 +181,7 @@ public class Dcat3Helper {
    * @param must the <code>bool.must</code> array to append to
    */
   private void appendAccessFilters(ArrayNode must) {
+
     appendAccessFilters(must, null);
   }
 
@@ -196,10 +221,26 @@ public class Dcat3Helper {
   }
 
   public JsonNode searchDatasets(String searchAfter, int size, String profile) throws Exception {
+    return searchDatasets(searchAfter, size, profile, false);
+  }
+
+  /**
+   * Executes one page of the metadata search, optionally walking the index
+   * backwards to support a "previous page" link (see
+   * {@link #prepareDatasetQuery(String, int, String, boolean)}).
+   * @param cursor the <code>_id</code> boundary (search_after / search_before)
+   * @param size page size
+   * @param profile the active profile, or <code>null</code>
+   * @param backward when <code>true</code>, walks the index backwards
+   * @return the parsed Elasticsearch / OpenSearch response; hits come back in
+   *         descending <code>_id</code> order when {@code backward} is <code>true</code>
+   * @throws Exception if the request fails
+   */
+  public JsonNode searchDatasets(String cursor, int size, String profile, boolean backward) throws Exception {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ElasticClient client = ElasticClient.newClient();
     String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
-    String query = prepareDatasetQuery(searchAfter, size, profile);
+    String query = prepareDatasetQuery(cursor, size, profile, backward);
 
     LOGGER.trace("DCAT3 search url={} query={}", url, query);
     String response = client.sendPost(url, query, CONTENT_TYPE_JSON);
