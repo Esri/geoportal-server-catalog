@@ -517,6 +517,7 @@ ObjectNode query = MAPPER.createObjectNode();
             text(source, sourceField(profile, "query.sysAccess", "sys_access_s")),
             "public");
     ds.accessRestriction = new ArrayList<>(List.of(Dcat3AccessRestriction.of(restrictionStatus)));
+    ds.accessLevel = resolveAccessLevel(source, profile);
     String modifiedValue = firstNonBlank(
             mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
             mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));

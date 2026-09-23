@@ -54,6 +54,9 @@ public class Dcat3Dataset {
   /** List of access restrictions related to the dataset. */
   public List<Dcat3AccessRestriction> accessRestriction;
 
+  /** dcat-us:accessLevel - public/restricted/non-public access level. */
+  public String accessLevel;
+
   /** Controlled Unclassified Information restriction. */
   public List<String> cuiRestriction;
 
