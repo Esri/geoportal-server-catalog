@@ -208,7 +208,12 @@ public class Dcat3Controller extends Dcat3Context {
         throw new IllegalArgumentException("Invalid hours:minutes (%s)".formatted(strHM));
       }
       try {
-        return new HoursMinutes(Integer.parseInt(hm[0].trim()), Integer.parseInt(hm[1].trim()));
+        int hours = Integer.parseInt(hm[0].trim());
+        int minutes = Integer.parseInt(hm[1].trim());
+        if (hours < 0 || hours > 23 || minutes < 0 || minutes > 59) {
+          throw new IllegalArgumentException("Invalid hours:minutes (%s)".formatted(strHM));
+        }
+        return new HoursMinutes(hours, minutes);
       } catch (NumberFormatException ex) {
         throw new IllegalArgumentException("Invalid hours:minutes (%s)".formatted(strHM), ex);
       }
