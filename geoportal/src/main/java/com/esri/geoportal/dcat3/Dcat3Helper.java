@@ -310,10 +310,12 @@ public class Dcat3Helper {
     ElasticClient client = ElasticClient.newClient();
     String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
 
-    ObjectNode query = MAPPER.createObjectNode();
+ObjectNode query = MAPPER.createObjectNode();
     query.put("size", 1);
-    ArrayNode ids = query.putObject("query").putObject("ids").putArray("values");
-    ids.add(id);
+    ArrayNode must = MAPPER.createArrayNode();
+    must.addObject().putObject("ids").putArray("values").add(id);
+    appendAccessFilters(must);
+    query.putObject("query").putObject("bool").set("must", must);
 
     String response = client.sendPost(url, query.toString(), CONTENT_TYPE_JSON);
     JsonNode hits = MAPPER.readTree(response).path("hits").path("hits");
