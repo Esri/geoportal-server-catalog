@@ -749,10 +749,20 @@ ObjectNode query = MAPPER.createObjectNode();
     }
 
     // linked resources
+    // NOTE: the serviceIndex counter below must stay aligned with the index
+    // assigned to the corresponding entry in toDataServices(), which walks the
+    // very same resources_nst array applying the same isHrefValid/isServiceType
+    // predicate (without deduping on url), so that accessService can reference
+    // the matching dcat:DataService @id (root/dcat3/dataService/{id}/{index}).
+    int serviceIndex = 0;
     for (JsonNode resource : arrayOf(source.path(sourceField(profile, "dataset.resources", "resources_nst")))) {
       String url = text(resource, sourceField(profile, "dataset.resource.url", "url_s"));
       String urlType = text(resource, sourceField(profile, "dataset.resource.urlType", "url_type_s"));
-      if (!isHrefValid(url) || seen.contains(url)) continue;
+      boolean isValidHref = isHrefValid(url);
+      boolean isService = isValidHref && Dcat3Constants.isServiceType(urlType);
+      String serviceRef = isService ? root + "/dcat3/dataService/" + urlEncode(id) + "/" + (serviceIndex++) : null;
+
+      if (!isValidHref || seen.contains(url)) continue;
       seen.add(url);
 
       Dcat3Distribution d = Dcat3Distribution.access(url, StringUtils.defaultIfBlank(urlType, "Web Resource"));
@@ -763,6 +773,7 @@ ObjectNode query = MAPPER.createObjectNode();
               mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
       d.modified = toIso(modifiedValue);
       d.license = config.getLicense();
+      d.accessService = serviceRef;
       distributions.add(d);
     }
 

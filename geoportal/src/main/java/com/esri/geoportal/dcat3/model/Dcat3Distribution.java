@@ -35,6 +35,9 @@ public class Dcat3Distribution {
   /** dcat:accessURL - a landing page / API root giving access to the distribution. */
   public String accessURL;
 
+  /** dcat:accessService - @id of the dcat:DataService that serves this distribution, when applicable. */
+  public String accessService;
+
   /** List of access restriction labels or URIs. */
   public List<Dcat3AccessRestriction> accessRestriction;
 
