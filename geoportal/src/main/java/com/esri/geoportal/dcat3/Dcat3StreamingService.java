@@ -464,7 +464,7 @@ public class Dcat3StreamingService {
   private static ResponseEntity<String> invalidProfileResponse() {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .contentType(MediaType.APPLICATION_JSON)
-            .body("{\"code\":400,\"description\":\"Unsupported profile specified. Valid profiles are \"US\" and \"World\" only.\"}");
+            .body("{\"code\":400,\"description\":\"Unsupported profile specified. Valid profiles are US and World only.\"}");
   }
 
   private ResponseEntity<String> error(String message, Exception ex) {
