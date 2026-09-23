@@ -38,6 +38,9 @@ public class Dcat3Distribution {
   /** dcat:accessURL - a landing page / API root giving access to the distribution. */
   public String accessURL;
 
+  /** dcat:downloadURL - a direct link to a downloadable file for the distribution. */
+  public String downloadURL;
+
   /** dcat:accessService - @id of the dcat:DataService that serves this distribution, when applicable. */
   public String accessService;
 
@@ -84,13 +87,13 @@ public class Dcat3Distribution {
 
   /**
    * Creates a file-access distribution.
-   * @param accessURL access URL
+   * @param downloadURL download URL
    * @param format format label
    * @return the distribution
    */
-  public static Dcat3Distribution download(String accessURL, String format) {
+  public static Dcat3Distribution download(String downloadURL, String format) {
     Dcat3Distribution d = new Dcat3Distribution();
-    d.accessURL = accessURL;
+    d.downloadURL = downloadURL;
     d.format = format;
     d.accessRestriction = List.of(Dcat3AccessRestriction.of("public"));
     return d;

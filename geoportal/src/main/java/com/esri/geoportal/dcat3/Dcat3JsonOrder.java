@@ -83,7 +83,7 @@ public final class Dcat3JsonOrder {
     if (node.has("dataset") || node.has("conformsTo") || node.has("themeTaxonomy")) {
       return "Dcat3Catalog";
     }
-    if (node.has("accessURL") && node.has("format")) {
+    if (node.has("format") && (node.has("accessURL") || node.has("downloadURL"))) {
       return "Dcat3Distribution";
     }
 

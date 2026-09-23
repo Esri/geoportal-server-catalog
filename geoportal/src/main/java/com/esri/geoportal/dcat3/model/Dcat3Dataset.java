@@ -108,7 +108,9 @@ public class Dcat3Dataset {
    */
   public void addDistribution(Dcat3Distribution dist) {
     if (dist == null) return;
-    if (dist.accessURL == null || dist.accessURL.isEmpty()) return;
+    boolean hasAccessURL = dist.accessURL != null && !dist.accessURL.isEmpty();
+    boolean hasDownloadURL = dist.downloadURL != null && !dist.downloadURL.isEmpty();
+    if (!hasAccessURL && !hasDownloadURL) return;
     if (distribution == null) distribution = new ArrayList<>();
     distribution.add(dist);
   }
