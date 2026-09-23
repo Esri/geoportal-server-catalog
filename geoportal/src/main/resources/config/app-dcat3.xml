@@ -70,7 +70,7 @@
   
 <beans:bean id="dcat3Cache" class="com.esri.geoportal.dcat3.Dcat3Cache" init-method="init">
     <!-- DCAT-US 3.0 cache folder, or empty for default: <USER_HOME>/dcat3/cache -->
-    <beans:constructor-arg value="${gpt_dcat3CacheFolder:c:/data/output}"/>
+    <beans:constructor-arg value="${gpt_dcat3CacheFolder:}"/>
   </beans:bean>
 
   <beans:bean id="dcat3Controller" class="com.esri.geoportal.dcat3.Dcat3Controller"
