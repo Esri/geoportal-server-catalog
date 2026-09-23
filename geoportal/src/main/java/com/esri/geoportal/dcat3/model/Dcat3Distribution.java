@@ -17,6 +17,7 @@ package com.esri.geoportal.dcat3.model;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * DCAT-US 3.0 <code>dcat:Distribution</code>.
@@ -25,6 +26,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
  */
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Dcat3Distribution {
+  @JsonProperty("@type")
+  public String atType = Dcat3Constants.TYPE_DISTRIBUTION;
 
   /** dct:title */
   public String title;
