@@ -335,6 +335,7 @@ public class Dcat3StreamingService {
     }
     try {
       String baseUrl = resolveBaseUrl(request);
+      List<JsonNode> collections = helper().searchCollections(10000);
       List<Dcat3DatasetSeries> series = collections.stream()
               .map(c -> helper().toDatasetSeries(c, baseUrl, false, profile))
               .toList();
