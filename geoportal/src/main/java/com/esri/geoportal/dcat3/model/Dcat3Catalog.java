@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
 /**
  * DCAT-US 3.0 <code>dcat:Catalog</code>.
@@ -28,11 +29,31 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 @JsonInclude(JsonInclude.Include.NON_EMPTY)
 public class Dcat3Catalog {
 
+  /** JSON-LD node identifier. */
+  @JsonProperty("@id")
+  public String atId;
+
+  /** JSON-LD node type. */
+  @JsonProperty("@type")
+  public String atType = Dcat3Constants.TYPE_CATALOG;
+
+  /** dct:identifier (recommended). */
+  public String identifier;
+
+  /** dct:title (recommended). */
+  public String title;
+
+  /** dct:description (recommended). */
+  public String description;
+
   /** dcat:dataset (mandatory). */
   public List<Dcat3Dataset> dataset;
 
   /** dct:conformsTo (recommended). */
   public List<String> conformsTo;
+
+  /** dcat:contactPoint (recommended). */
+  public Dcat3ContactPoint contactPoint;
 
   /** foaf:homepage (recommended). */
   public String homepage;
@@ -46,6 +67,9 @@ public class Dcat3Catalog {
   /** dct:modified (recommended). */
   public String modified;
 
+  /** dct:publisher (recommended). */
+  public Dcat3Organization publisher;
+
   /** dct:rights (recommended). */
   public String rights;
 
@@ -57,6 +81,7 @@ public class Dcat3Catalog {
 
   public Dcat3Catalog() {
   }
+
 
   /**
    * Adds a dataset to the catalog.

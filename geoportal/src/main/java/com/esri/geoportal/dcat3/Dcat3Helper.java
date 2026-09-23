@@ -478,13 +478,19 @@ ObjectNode query = MAPPER.createObjectNode();
   }
 
   public Dcat3Catalog newCatalog(String baseUrl, String profile) {
-    String root = StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl());
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
 
     Dcat3Catalog catalog = new Dcat3Catalog();
+    catalog.atId = StringUtils.defaultIfBlank(config.getDcat3BaseUrl(), root + "/dcat3");
+    catalog.identifier = StringUtils.defaultIfBlank(config.getCatalogIdentifier(), catalog.atId);
+    catalog.title = config.getCatalogTitle();
+    catalog.description = config.getCatalogDescription();
     catalog.homepage = StringUtils.defaultIfBlank(config.getHomepage(), root);
     catalog.issued = nowIso();
     catalog.modified = catalog.issued;
     catalog.rights = config.getRights();
+    catalog.publisher = config.newPublisher();
+    catalog.contactPoint = config.newContactPoint();
     catalog.addLanguage(config.getLanguage());
     catalog.addConformsTo(config.getConformsTo());
     return catalog;
