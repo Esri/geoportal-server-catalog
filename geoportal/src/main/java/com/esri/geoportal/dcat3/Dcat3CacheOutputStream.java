@@ -19,6 +19,10 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.file.AtomicMoveNotSupportedException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 
 /**
  * DCAT-US 3.0 cache output stream.
@@ -74,12 +78,19 @@ public class Dcat3CacheOutputStream extends OutputStream {
     if (aborted) return;
     fileOutputStream.close();
 
-    // make the temporary file permanent
+    // Make the temporary file permanent. The previous cache (if any) is only
+    // ever replaced by a successful move of the fully-written file, so a
+    // failed/partial move never leaves the cache without a servable document.
+    // ATOMIC_MOVE is preferred (single, indivisible rename); when the file
+    // system / provider can't guarantee atomicity across the source and
+    // target locations, fall back to a plain (still checked) move.
     String name = file.getName().replaceAll("\\.[^.]+$", Dcat3Cache.CACHE_EXTENSION);
-    File target = new File(file.getParentFile(), name);
-    if (target.exists()) {
-      target.delete();
+    Path source = file.toPath();
+    Path target = new File(file.getParentFile(), name).toPath();
+    try {
+      Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+    } catch (AtomicMoveNotSupportedException ex) {
+      Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
     }
-    file.renameTo(target);
   }
 }
