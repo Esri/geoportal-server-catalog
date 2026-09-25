@@ -14,6 +14,7 @@
   	
   <beans:import resource="app-factory.xml" />
   <beans:import resource="app-dcat.xml" />
+  <beans:import resource="app-dcat3.xml" />
   
   <beans:bean id="geoportalContext" class="com.esri.geoportal.context.GeoportalContext">
     <beans:property name="version" value="4.0.0" />   

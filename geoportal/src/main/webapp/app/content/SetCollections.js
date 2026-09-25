@@ -30,6 +30,7 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     okLabel: i18n.content.updateButton,
     
     _localValue: null,
+    _collectionOptionsLoaded: false,
 
     postCreate: function() {
       this.inherited(arguments);
@@ -43,16 +44,91 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
     
     init: function() {
       this.setNodeText(this.itemTitleNode,this.item.title);
-      var v = this.item["src_collections_s"];
-      if (typeof v === "string" && v.length > 0) {
-        $(this.collectionsValueInput).val(v);
-      } else if (Array.isArray(v)) {
-        $(this.collectionsValueInput).val(v.join(","));
-      }
+      this._setLoadingOption();
+      this._loadCollectionOptions();
       this.applyTo = new ApplyTo({
         item: this.item,
         itemCard: this.itemCard,
       },this.applyToNode);
+    },
+
+    _getCurrentCollectionValues: function() {
+      var v = this.item["src_collections_s"];
+      if (typeof v === "string" && v.length > 0) {
+        return v.split(",").map(function(value) {
+          return $.trim(value);
+        }).filter(function(value) {
+          return value.length > 0;
+        });
+      } else if (Array.isArray(v) && v.length > 0) {
+        return v.map(function(value) {
+          return typeof value === "string" ? $.trim(value) : "";
+        }).filter(function(value) {
+          return value.length > 0;
+        });
+      }
+      return [];
+    },
+
+    _setLoadingOption: function() {
+      var $input = $(this.collectionsValueInput);
+      $input.empty();
+      $input.append($("<option>", {
+        value: "",
+        text: i18n.general.working
+      }));
+      $input.val([]);
+      $input.prop("disabled", true);
+    },
+
+    _loadCollectionOptions: function() {
+      var self = this;
+      if (this._collectionOptionsLoaded) {
+        return;
+      }
+      $.getJSON("./stac/collections?limit=10000").done(function(response) {
+        self._populateCollectionOptions(response && response.collections ? response.collections : []);
+      }).fail(function(error) {
+        self._populateCollectionOptions([]);
+        self.handleError(i18n.general.error, error);
+      });
+    },
+
+    _populateCollectionOptions: function(collections) {
+      var currentValues = this._getCurrentCollectionValues();
+      var $input = $(this.collectionsValueInput);
+      var optionValues = {};
+
+      $input.empty();
+
+      if (!Array.isArray(collections)) {
+        collections = [];
+      }
+
+      collections.forEach(function(collection) {
+        if (!collection || typeof collection.id !== "string" || collection.id.length === 0) {
+          return;
+        }
+        optionValues[collection.id] = true;
+        $input.append($("<option>", {
+          value: collection.id,
+          text: collection.id
+        }));
+      });
+
+      currentValues.forEach(function(value) {
+        if (!optionValues[value]) {
+          optionValues[value] = true;
+          $input.append($("<option>", {
+            value: value,
+            text: value
+          }));
+        }
+      });
+
+      $input.val(currentValues);
+      $input.prop("disabled", false);
+      this._collectionOptionsLoaded = true;
     },
     
     makeRequestParams: function() {
@@ -60,12 +136,21 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
         action: "setCollections",
         urlParams: {}
       };
-      var status = $(this.collectionsValueInput).val();
-      if (typeof status !== "string" || status === "" || status === "none") {
+      var selectedValues = $(this.collectionsValueInput).val();
+      if (!Array.isArray(selectedValues) || selectedValues.length === 0) {
         this.collectionsValueInput.focus();
         return null;
       }
-      this._localValue = params.urlParams.collections = status;
+      selectedValues = selectedValues.map(function(value) {
+        return $.trim(value);
+      }).filter(function(value) {
+        return value.length > 0 && value !== "none";
+      });
+      if (selectedValues.length === 0) {
+        this.collectionsValueInput.focus();
+        return null;
+      }
+      this._localValue = params.urlParams.collections = selectedValues.join(",");
       this.applyTo.appendUrlParams(params);
       return params;
     }
