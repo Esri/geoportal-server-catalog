@@ -19,6 +19,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -208,9 +209,62 @@ public class Dcat3Builder {
 
     long written = 0;
     List<JsonNode> collections = helper.searchCollections(10000);
+
+    // Pre-fetch member counts and a top-N sample of member ids in a single
+    // aggregated request to avoid N+1 queries when resolving series members.
+    Map<String, Dcat3Helper.CollectionMembers> membersMap = java.util.Collections.emptyMap();
+    if (!collections.isEmpty()) {
+      List<String> collIds = new java.util.ArrayList<>();
+      for (JsonNode collection : collections) {
+        String cid = Dcat3Helper.text(collection, "id");
+        if (StringUtils.isNotBlank(cid)) collIds.add(cid);
+      }
+      if (!collIds.isEmpty()) {
+        membersMap = helper.fetchCollectionMembersAggregate(collIds, 1000, profile);
+      }
+    }
+
     for (JsonNode collection : collections) {
       if (!dcat3Context.isRunning()) break;
-      Dcat3DatasetSeries series = helper.toDatasetSeries(collection, baseUrl, true, profile);
+      String collectionId = Dcat3Helper.text(collection, "id");
+      Dcat3DatasetSeries series = helper.toDatasetSeries(collection, baseUrl, false, profile);
+
+      if (true) {
+        // Prefer aggregated results; fall back to individual calls when absent.
+        Dcat3Helper.CollectionMembers cm = membersMap.get(collectionId);
+        List<String> memberIds;
+        long count;
+        if (cm != null) {
+          memberIds = cm.ids;
+          count = cm.count;
+        } else {
+          memberIds = helper.searchCollectionMemberIds(collectionId, 1000, profile);
+          count = helper.countCollectionMembers(collectionId, profile);
+        }
+
+        boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < 1000;
+        if (!memberIds.isEmpty()) {
+          Dcat3Dataset firstRef = new Dcat3Dataset();
+          firstRef.atId = baseUrl + "/rest/metadata/item/" + Dcat3Helper.urlEncode(memberIds.get(0));
+          firstRef.identifier = memberIds.get(0);
+          series.first = firstRef;
+          if (completeMemberList) {
+            for (String memberId : memberIds) {
+              Dcat3Dataset ref = new Dcat3Dataset();
+              ref.atId = baseUrl + "/rest/metadata/item/" + Dcat3Helper.urlEncode(memberId);
+              ref.identifier = memberId;
+              series.addSeriesMember(ref);
+            }
+            Dcat3Dataset lastRef = new Dcat3Dataset();
+            lastRef.atId = baseUrl + "/rest/metadata/item/" + Dcat3Helper.urlEncode(memberIds.get(memberIds.size() - 1));
+            lastRef.identifier = memberIds.get(memberIds.size() - 1);
+            series.last = lastRef;
+          } else {
+            LOGGER.debug("DCAT3: collection {} has more than {} members; omitting incomplete seriesMember list.", collectionId, memberIds.size());
+          }
+        }
+      }
+
       writeEntry(writer, jsonWriter, series, alreadyWritten + written, profile);
       written++;
     }

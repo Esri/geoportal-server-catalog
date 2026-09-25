@@ -450,6 +450,91 @@ ObjectNode query = MAPPER.createObjectNode();
   }
 
   /**
+   * Holder for aggregated collection member information returned by
+   * {@link #fetchCollectionMembersAggregate}.
+   */
+  public static class CollectionMembers {
+    public long count = -1L;
+    public List<String> ids = new ArrayList<>();
+  }
+
+  /**
+   * Fetches member counts and a top-N sample of member ids for the provided
+   * collection identifiers using a single aggregated search request. This
+   * avoids performing a separate _count/_search per collection (N+1 problem)
+   * when building the aggregated DCAT document.
+   *
+   * @param collectionIds the collection ids to fetch information for
+   * @param topN maximum number of member ids to return per collection
+   * @param profile optional profile (may be null)
+   * @return map keyed by collection id of {@link CollectionMembers}
+   */
+  public Map<String, CollectionMembers> fetchCollectionMembersAggregate(List<String> collectionIds, int topN, String profile) {
+    Map<String, CollectionMembers> result = new java.util.HashMap<>();
+    if (collectionIds == null || collectionIds.isEmpty()) return result;
+    try {
+      ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+      ElasticClient client = ElasticClient.newClient();
+      String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
+
+      ObjectNode query = MAPPER.createObjectNode();
+      query.put("size", 0);
+
+      // Apply access filters at the top-level bool.must
+      ArrayNode must = MAPPER.createArrayNode();
+      appendAccessFilters(must, profile);
+      if (!must.isEmpty()) {
+        query.putObject("query").putObject("bool").set("must", must);
+      }
+
+      ObjectNode aggs = query.putObject("aggs");
+      ObjectNode collectionsAgg = aggs.putObject("collections");
+      ObjectNode terms = collectionsAgg.putObject("terms");
+      // Field name honoring profile mappings
+      terms.put("field", sourceField(profile, "query.collectionMembership", "src_collections_s"));
+      terms.put("size", Math.max(collectionIds.size(), 1000));
+      // Include only the requested collection ids to limit buckets
+      ArrayNode include = terms.putArray("include");
+      for (String cid : collectionIds) {
+        include.add(StringUtils.defaultString(cid));
+      }
+
+      // top_hits sub-aggregation to fetch member ids per bucket
+      ObjectNode topHits = collectionsAgg.putObject("aggs").putObject("top_members").putObject("top_hits");
+      topHits.put("_source", false);
+      topHits.put("size", topN > 0 ? topN : 1000);
+      // sort by _id asc to get stable ordering
+      ArrayNode sortArray = topHits.putArray("sort");
+      sortArray.addObject().putObject("_id").put("order", "asc");
+
+      String queryString = query.toString();
+      LOGGER.trace("DCAT3 collections aggregate url={} query={}", url, queryString);
+      String response = client.sendPost(url, queryString, CONTENT_TYPE_JSON);
+      JsonNode root = MAPPER.readTree(response);
+      JsonNode buckets = root.path("aggregations").path("collections").path("buckets");
+      if (buckets.isArray()) {
+        for (JsonNode bucket : buckets) {
+          String key = bucket.path("key").asText(null);
+          long docCount = bucket.path("doc_count").asLong(-1L);
+          CollectionMembers cm = new CollectionMembers();
+          cm.count = docCount;
+          JsonNode hits = bucket.path("top_members").path("hits").path("hits");
+          if (hits.isArray()) {
+            for (JsonNode h : hits) {
+              String id = h.path("_id").asText(null);
+              if (StringUtils.isNotBlank(id)) cm.ids.add(id);
+            }
+          }
+          result.put(key, cm);
+        }
+      }
+    } catch (Exception ex) {
+      LOGGER.debug("DCAT3: unable to aggregate collection members.", ex);
+    }
+    return result;
+  }
+
+  /**
    * Extracts the total hit count from a search response, supporting both the
    * pre-7.x (<code>total</code> as number) and 7.x+
    * (<code>total.value</code>) layouts.

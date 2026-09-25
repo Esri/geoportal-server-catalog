@@ -329,6 +329,7 @@ public class Dcat3StreamingService {
    */
   @GetMapping(path = "/dcat3/datasetSeries", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> datasetSeries(@RequestParam(name = "profile", required = false) String profile,
+          @RequestParam(name = "resolveMemberCount", required = false, defaultValue = "false") boolean resolveMemberCount,
           HttpServletRequest request) {
     if (!isValidProfile(profile)) {
       return invalidProfileResponse();
@@ -337,7 +338,7 @@ public class Dcat3StreamingService {
       String baseUrl = resolveBaseUrl(request);
       List<JsonNode> collections = helper().searchCollections(10000);
       List<Dcat3DatasetSeries> series = collections.stream()
-              .map(c -> helper().toDatasetSeries(c, baseUrl, false, profile))
+              .map(c -> helper().toDatasetSeries(c, baseUrl, resolveMemberCount, profile))
               .toList();
       return ResponseEntity.ok(ordered(series, profile));
     } catch (Exception ex) {

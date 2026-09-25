@@ -104,8 +104,11 @@
 				"summary": "List of dcat:DatasetSeries (live)",
 				"produces": ["application/json"],
 				"operationId": "dcat3DatasetSeries",
-				"parameters": [ { "name": "profile", "in": "query", "required": false, "type": "string" } ],
-				"responses": { "default": { "description": "successful operation" }}
+				"parameters": [
+					{ "name": "profile", "in": "query", "required": false, "type": "string" },
+					{ "name": "resolveMemberCount", "in": "query", "description": "When true, resolves member counts and (when possible) seriesMember lists for each series. Defaults to false.", "required": false, "type": "boolean", "default": false }
+				],
+				"responses": { "default": { "description": "successful operation" } }
 			}
 		},
 		"/dcat3/datasetSeries/{id}": {
