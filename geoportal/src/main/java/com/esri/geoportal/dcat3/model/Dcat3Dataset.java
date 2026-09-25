@@ -96,6 +96,9 @@ public class Dcat3Dataset {
   /** dcat:theme. */
   public List<String> theme;
 
+  /** dcat:inSeries - references to dataset series this dataset belongs to. */
+  public List<String> inSeries;
+
   /** List of use restrictions related to the dataset. */
   public List<String> useRestriction;
 
@@ -143,6 +146,16 @@ public class Dcat3Dataset {
     if (value == null || value.trim().isEmpty()) return;
     if (theme == null) theme = new ArrayList<>();
     if (!theme.contains(value)) theme.add(value);
+  }
+
+  /**
+   * Adds an inSeries reference (dataset series @id).
+   * @param value series @id
+   */
+  public void addInSeries(String value) {
+    if (value == null || value.trim().isEmpty()) return;
+    if (inSeries == null) inSeries = new ArrayList<>();
+    if (!inSeries.contains(value)) inSeries.add(value);
   }
 
   /**

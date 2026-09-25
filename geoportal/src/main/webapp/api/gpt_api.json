@@ -4,13 +4,8 @@
 		"description": "https://github.com/Esri/geoportal-server-catalog",
 		"version": "4.0.0",
 		"title": "Esri Geoportal Server",
-		"contact": {
-			"name": "portal@esri.com"
-		},
-		"license": {
-			"name": "Apache 2.0",
-			"url": "http://www.apache.org/licenses/LICENSE-2.0.html"
-		}
+		"contact": { "name": "portal@esri.com" },
+		"license": { "name": "Apache 2.0", "url": "http://www.apache.org/licenses/LICENSE-2.0.html" }
 	},
 	"basePath": "/geoportal",
 	"securityDefinitions": {
@@ -21,33 +16,123 @@
 			"description": "Enter your bearer token as: Bearer <token>"
 		}
 	},
-	"security": [
-		{
-			"BearerAuth": []
-		}
-	],
+	"security": [ { "BearerAuth": [] } ],
 	"tags": [
-		{
-			"name": "AUTHENTICATION"
-		},
-		{
-			"name": "STAC"
-		},
-		{
-			"name": "OGCRECORDS"
-		},
-		{
-			"name": "CSW"
-		},
-		{
-			"name": "REST"
-		},
-		{
-			"name": "MCP",
-			"description": "Model Context Protocol endpoint (JSON-RPC over HTTP; optional SSE)"
-		}
+		{ "name": "AUTHENTICATION" },
+		{ "name": "STAC" },
+		{ "name": "OGCRECORDS" },
+		{ "name": "CSW" },
+		{ "name": "REST" },
+		{ "name": "MCP", "description": "Model Context Protocol endpoint (JSON-RPC over HTTP; optional SSE)" },
+		{ "name": "DCAT3", "description": "DCAT-US 3.0 streaming endpoints" }
 	],
 	"paths": {
+		"/dcat3.json": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "Complete cached DCAT-US 3.0 catalog",
+				"description": "Streams the complete cached DCAT-US 3.0 catalog (triggers a background build when no cache exists).",
+				"produces": ["application/json"],
+				"operationId": "dcat3Cached",
+				"parameters": [
+					{
+						"name": "profile",
+						"in": "query",
+						"description": "Optional profile: us or world",
+						"required": false,
+						"type": "string"
+					}
+				],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+		"/dcat3/rebuild": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "Trigger DCAT3 rebuild",
+				"description": "Starts an asynchronous rebuild of the cached DCAT-US 3.0 catalog.",
+				"produces": ["application/json"],
+				"operationId": "dcat3Rebuild",
+				"parameters": [
+					{ "name": "profile", "in": "query", "description": "Optional profile: us or world", "required": false, "type": "string" }
+				],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+		"/dcat3/catalog.json": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "Catalog header (live)",
+				"description": "Returns the catalog header (no members).",
+				"produces": ["application/json"],
+				"operationId": "dcat3Catalog",
+				"parameters": [ { "name": "profile", "in": "query", "required": false, "type": "string" } ],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+		"/dcat3/dataset/{id}": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "Single dcat:Dataset (live)",
+				"description": "Returns a single dataset built live from the index.",
+				"produces": ["application/json"],
+				"operationId": "dcat3DatasetById",
+				"parameters": [
+					{ "name": "id", "in": "path", "required": true, "type": "string" },
+					{ "name": "profile", "in": "query", "required": false, "type": "string" }
+				],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+		"/dcat3/dataset": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "Paged list of dcat:Dataset (live)",
+				"description": "Returns one page of datasets. Supports cursor-based (limit) pagination.",
+				"produces": ["application/json"],
+				"operationId": "dcat3Datasets",
+				"parameters": [
+					{ "name": "profile", "in": "query", "required": false, "type": "string" },
+					{ "name": "limit", "in": "query", "required": false, "type": "integer" }					
+				],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+		"/dcat3/datasetSeries": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "List of dcat:DatasetSeries (live)",
+				"produces": ["application/json"],
+				"operationId": "dcat3DatasetSeries",
+				"parameters": [ { "name": "profile", "in": "query", "required": false, "type": "string" } ],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+		"/dcat3/datasetSeries/{id}": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "Single dcat:DatasetSeries (live)",
+				"produces": ["application/json"],
+				"operationId": "dcat3DatasetSeriesById",
+				"parameters": [
+					{ "name": "id", "in": "path", "required": true, "type": "string" },
+					{ "name": "members", "in": "query", "required": false, "type": "boolean", "default": false },
+					{ "name": "profile", "in": "query", "required": false, "type": "string" }
+				],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+		"/dcat3/dataService/{id}": {
+			"get": {
+				"tags": ["DCAT3"],
+				"summary": "dcat:DataService entries for an item",
+				"produces": ["application/json"],
+				"operationId": "dcat3DataServiceById",
+				"parameters": [ { "name": "id", "in": "path", "required": true, "type": "string" }, { "name": "profile", "in": "query", "required": false, "type": "string" } ],
+				"responses": { "default": { "description": "successful operation" }}
+			}
+		},
+
 		"/oauth2/token": {
 			"post": {
 				"tags": [

@@ -552,6 +552,15 @@ ObjectNode query = MAPPER.createObjectNode();
       ds.addDistribution(d);
     }
 
+    // Map collection membership (src_collections_s) to dcat:inSeries
+    List<String> collections = mappedTextList(source, profile, "query", "collectionMembership", "src_collections_s");
+    for (String collectionId : collections) {
+      if (StringUtils.isNotBlank(collectionId)) {
+        String seriesAtId = root + "/dcat3/datasetSeries/" + urlEncode(collectionId);
+        ds.addInSeries(seriesAtId);
+      }
+    }
+
     return ds;
   }
 
