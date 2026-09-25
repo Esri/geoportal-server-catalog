@@ -775,7 +775,7 @@ ObjectNode query = MAPPER.createObjectNode();
       String urlType = text(resource, sourceField(profile, "dataset.resource.urlType", "url_type_s"));
       boolean isValidHref = isHrefValid(url);
       boolean isService = isValidHref && Dcat3Constants.isServiceType(urlType);
-      String serviceRef = isService ? root + "/dcat3/dataService/" + urlEncode(id) + "/" + (serviceIndex++) : null;
+      String serviceRef = config.getIncludeDataServices() && isService ? root + "/dcat3/dataService/" + urlEncode(id) + "/" + (serviceIndex++) : null;
 
       if (!isValidHref || seen.contains(url)) continue;
       seen.add(url);
