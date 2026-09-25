@@ -195,6 +195,9 @@ public class Dcat3Cache {
   private static String sanitizeProfile(String profile) {
     String normalized = StringUtils.trimToNull(profile);
     if (normalized == null) return null;
-    return normalized.toLowerCase().replaceAll("[^a-z0-9_-]", "-");
+    normalized = normalized.toLowerCase();
+    if (normalized.contains("..") || normalized.contains("/") || normalized.contains("\\")) return null;
+    if (!normalized.matches("[a-z0-9_-]+")) return null;
+    return normalized;
   }
 }
