@@ -126,6 +126,9 @@ public class Dcat3Builder {
       writer.println("]");
       writer.println("}");
       writer.flush();
+      if (writer.checkError()) {
+        throw new IOException("Unable to write the DCAT-US 3.0 cache.");
+      }
 
       if (!dcat3Context.isRunning()) {
         throw new IOException("DCAT-US 3.0 build was aborted.");
