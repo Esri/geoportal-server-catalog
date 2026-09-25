@@ -45,6 +45,13 @@ public class Dcat3CacheOutputStream extends OutputStream {
   public Dcat3CacheOutputStream(File file) throws FileNotFoundException {
     this.file = file;
     this.file.getParentFile().mkdirs();
+    try {
+      Path parent = this.file.getParentFile().toPath().toRealPath();
+      Path source = this.file.toPath();
+      ensurePathWithinParent(parent, source);
+    } catch (IOException ex) {
+      throw new FileNotFoundException("Invalid cache output path: " + ex.getMessage());
+    }
     this.fileOutputStream = new FileOutputStream(file);
   }
 
@@ -87,10 +94,21 @@ public class Dcat3CacheOutputStream extends OutputStream {
     String name = file.getName().replaceAll("\\.[^.]+$", Dcat3Cache.CACHE_EXTENSION);
     Path source = file.toPath();
     Path target = new File(file.getParentFile(), name).toPath();
+    Path parent = file.getParentFile().toPath().toRealPath();
+    ensurePathWithinParent(parent, source);
+    ensurePathWithinParent(parent, target);
     try {
       Files.move(source, target, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
     } catch (AtomicMoveNotSupportedException ex) {
       Files.move(source, target, StandardCopyOption.REPLACE_EXISTING);
+    }
+  }
+
+  private static void ensurePathWithinParent(Path parent, Path child) throws IOException {
+    Path normalizedParent = parent.toAbsolutePath().normalize();
+    Path normalizedChild = child.toAbsolutePath().normalize();
+    if (!normalizedChild.startsWith(normalizedParent)) {
+      throw new IOException("Path escapes cache directory: " + child);
     }
   }
 }
