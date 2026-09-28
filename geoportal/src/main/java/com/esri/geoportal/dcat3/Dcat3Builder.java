@@ -128,7 +128,7 @@ public class Dcat3Builder {
       writer.println("],");
 
       writer.print("\"dataset\": [");
-      counter += writeDatasets(writer, jsonWriter, dcat3Context, baseUrl, counter, resolvedProfile);
+      counter += writeDatasets(writer, jsonWriter, dcat3Context, baseUrl, 0, resolvedProfile);
 
       writer.println();
       writer.println("]");
