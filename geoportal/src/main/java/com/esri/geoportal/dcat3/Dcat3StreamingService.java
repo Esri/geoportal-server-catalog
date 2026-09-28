@@ -85,8 +85,8 @@ public class Dcat3StreamingService {
       "conformsTo": "%s",
       "@type": "dcat:Catalog",
       "@note": "DCAT-US 3.0 document is not ready yet! The generation process has been started. Please try again later.",
-      "dataset": [
-      ]
+      "datasetSeries": [],
+      "dataset": []
     }""";
 
   /** The only accepted values for the {@code profile} request parameter (case-insensitive). Default is US. */
@@ -118,28 +118,30 @@ public class Dcat3StreamingService {
     if (!isValidProfile(profile)) {
       return invalidProfileResponse();
     }
-    try (OutputStream outStream = response.getOutputStream()) {
-      String resolvedProfile = dcat3Config.resolveProfile(profile);
-      Date lastModified = dcat3Cache.getLastModified(resolvedProfile);
+    String resolvedProfile = dcat3Config.resolveProfile(profile);
+    Date lastModified = dcat3Cache.getLastModified(resolvedProfile);
 
-      if (lastModified != null) {
-        try (InputStream input = dcat3Cache.createInputCacheStream(resolvedProfile)) {
-          IOUtils.copy(input, outStream);
-        }
+    // If a cached document exists, stream it directly to the servlet output.
+    if (lastModified != null) {
+      try (OutputStream outStream = response.getOutputStream();
+           InputStream input = dcat3Cache.createInputCacheStream(resolvedProfile)) {
+        IOUtils.copy(input, outStream);
         outStream.flush();
-        return ResponseEntity.ok().lastModified(lastModified.getTime()).build();
+      } catch (IOException ex) {
+        LOGGER.error("Error streaming the DCAT-US 3.0 document.", ex);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
       }
-
-      outStream.write(EMPTY_DCAT3_RESPONSE
-              .formatted(dcat3Config.getContext(), dcat3Config.getConformsTo())
-              .getBytes("UTF-8"));
-      outStream.flush();
-      dcat3Controller.generateDcat3Async(resolvedProfile);
-      return ResponseEntity.accepted().build();
-    } catch (IOException ex) {
-      LOGGER.error("Error streaming the DCAT-US 3.0 document.", ex);
-      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+      return ResponseEntity.ok().lastModified(lastModified.getTime()).build();
     }
+
+    // No cached document: do NOT touch the servlet output. Build the
+    // placeholder and return it via ResponseEntity so the correct status
+    // (202 Accepted or 409 Conflict) is reliably sent.
+    String placeholder = EMPTY_DCAT3_RESPONSE.formatted(dcat3Config.getContext(), dcat3Config.getConformsTo());
+    boolean started = dcat3Controller.generateDcat3Async(resolvedProfile);
+    return ResponseEntity.status(started ? HttpStatus.ACCEPTED : HttpStatus.CONFLICT)
+            .contentType(MediaType.APPLICATION_JSON)
+            .body(placeholder);
   }
 
   /**
