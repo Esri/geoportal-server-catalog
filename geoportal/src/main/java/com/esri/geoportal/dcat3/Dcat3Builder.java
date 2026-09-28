@@ -215,7 +215,7 @@ public class Dcat3Builder {
     if (!config.getIncludeDatasetSeries()) return 0;
 
     long written = 0;
-    List<JsonNode> collections = helper.searchCollections(10000);
+    List<JsonNode> collections = helper.searchCollections(10000, profile);
 
     // Pre-fetch member counts and a top-N sample of member ids in a single
     // aggregated request to avoid N+1 queries when resolving series members.

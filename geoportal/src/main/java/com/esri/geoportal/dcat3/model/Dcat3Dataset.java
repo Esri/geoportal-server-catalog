@@ -81,6 +81,9 @@ public class Dcat3Dataset {
   /** dct:modified (ISO-8601). */
   public String modified;
 
+  /** dct:issued (ISO-8601) - publication/creation date. */
+  public String issued;
+
   /** dct:publisher. */
   public Dcat3Organization publisher;
 

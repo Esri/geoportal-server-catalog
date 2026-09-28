@@ -331,6 +331,10 @@ ObjectNode query = MAPPER.createObjectNode();
    * @return list of collection <code>_source</code> documents (never <code>null</code>)
    */
   public List<JsonNode> searchCollections(int limit) {
+    return searchCollections(limit, null);
+  }
+
+  public List<JsonNode> searchCollections(int limit, String profile) {
     List<JsonNode> result = new ArrayList<>();
     try {
       GeoportalContext gc = GeoportalContext.getInstance();
@@ -341,10 +345,22 @@ ObjectNode query = MAPPER.createObjectNode();
       if (StringUtils.isBlank(collectionIndex)) return result;
 
       ElasticClient client = ElasticClient.newClient();
-      String url = client.getTypeUrlForSearch(collectionIndex) + "/_search?size=" + (limit > 0 ? limit : 10000);
-      String query = "{\"track_total_hits\":true,\"sort\":[{\"_id\":\"asc\"}]}";
+      String url = client.getTypeUrlForSearch(collectionIndex) + "/_search";
 
-      String response = client.sendPost(url, query, CONTENT_TYPE_JSON);
+      ObjectNode query = MAPPER.createObjectNode();
+      query.put("track_total_hits", true);
+      query.put("size", limit > 0 ? limit : 10000);
+      query.putArray("sort").addObject().put("_id", "asc");
+
+      ArrayNode must = MAPPER.createArrayNode();
+      appendAccessFilters(must, profile);
+      if (!must.isEmpty()) {
+        query.putObject("query").putObject("bool").set("must", must);
+      }
+
+      String queryString = query.toString();
+
+      String response = client.sendPost(url, queryString, CONTENT_TYPE_JSON);
       JsonNode hits = MAPPER.readTree(response).path("hits").path("hits");
       if (hits.isArray()) {
         for (JsonNode hit : hits) {
@@ -370,7 +386,11 @@ ObjectNode query = MAPPER.createObjectNode();
    * @return the collection <code>_source</code> or <code>null</code>
    */
   public JsonNode getCollectionById(String id) {
-    for (JsonNode c : searchCollections(10000)) {
+    return getCollectionById(id, null);
+  }
+
+  public JsonNode getCollectionById(String id, String profile) {
+    for (JsonNode c : searchCollections(10000, profile)) {
       if (id != null && id.equals(text(c, "id"))) return c;
     }
     return null;
@@ -609,6 +629,11 @@ ObjectNode query = MAPPER.createObjectNode();
             "public");
     ds.accessRestriction = new ArrayList<>(List.of(Dcat3AccessRestriction.of(restrictionStatus)));
     ds.accessLevel = resolveAccessLevel(source, profile);
+    String createdValue = firstNonBlank(
+            mappedText(source, profile, "dataset", "created", "sys_created_dt"),
+            mappedText(source, profile, "dataset", "createdFallback", "sys_created_dt"));
+    ds.issued = toIso(createdValue);
+
     String modifiedValue = firstNonBlank(
             mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
             mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
@@ -770,7 +795,11 @@ ObjectNode query = MAPPER.createObjectNode();
       if (!Dcat3Constants.isServiceType(urlType)) continue;
 
       Dcat3DataService svc = new Dcat3DataService();
-      svc.atId = root + "/dcat3/dataService/" + urlEncode(id) + "/" + (index++);
+      // Use the item-level dataService endpoint as the service identifier.
+      // The streaming service exposes /dcat3/dataService/{id} which returns
+      // all services for the item. Previously an index suffix was used which
+      // is not registered and results in 404 when dereferenced.
+      svc.atId = root + "/dcat3/dataService/" + urlEncode(id);
       svc.identifier = svc.atId;
       svc.title = "%s (%s)".formatted(title, urlType);
       svc.description = "%s endpoint published for '%s'.".formatted(urlType, title);
@@ -784,6 +813,14 @@ ObjectNode query = MAPPER.createObjectNode();
       svc.contactPoint = contactPoints(config.newContactPoint());
       svc.license = config.getLicense();
       svc.accessLevel = config.getAccessLevel();
+      // Populate bureauCode and programCode from configuration so emitted
+      // DataService entries include the configured profile codes.
+      if (config.getBureauCode() != null && !config.getBureauCode().isEmpty()) {
+        svc.bureauCode = new ArrayList<>(config.getBureauCode());
+      }
+      if (config.getProgramCode() != null && !config.getProgramCode().isEmpty()) {
+        svc.programCode = new ArrayList<>(config.getProgramCode());
+      }
       svc.landingPage = Dcat3NodeRef.document(datasetId, title + " Landing Page");
       String modifiedValue = firstNonBlank(
               mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
@@ -849,18 +886,19 @@ ObjectNode query = MAPPER.createObjectNode();
     }
 
     // linked resources
-    // NOTE: the serviceIndex counter below must stay aligned with the index
-    // assigned to the corresponding entry in toDataServices(), which walks the
-    // very same resources_nst array applying the same isHrefValid/isServiceType
-    // predicate (without deduping on url), so that accessService can reference
-    // the matching dcat:DataService @id (root/dcat3/dataService/{id}/{index}).
+    // NOTE: previously each emitted DataService used a per-item index and
+    // distributions referenced it (root/dcat3/dataService/{id}/{index}). The
+    // streaming endpoints only register /dcat3/dataService/{id}, so we now
+    // reference the item-level service list URI instead. The serviceIndex is
+    // retained only for internal ordering and not used in the URI.
     int serviceIndex = 0;
     for (JsonNode resource : arrayOf(source.path(sourceField(profile, "dataset.resources", "resources_nst")))) {
       String url = text(resource, sourceField(profile, "dataset.resource.url", "url_s"));
       String urlType = text(resource, sourceField(profile, "dataset.resource.urlType", "url_type_s"));
       boolean isValidHref = isHrefValid(url);
       boolean isService = isValidHref && Dcat3Constants.isServiceType(urlType);
-      String serviceRef = config.getIncludeDataServices() && isService ? root + "/dcat3/dataService/" + urlEncode(id) + "/" + (serviceIndex++) : null;
+      // Reference the item-level dataService URI (no per-service index).
+      String serviceRef = config.getIncludeDataServices() && isService ? root + "/dcat3/dataService/" + urlEncode(id) : null;
 
       if (!isValidHref || seen.contains(url)) continue;
       seen.add(url);

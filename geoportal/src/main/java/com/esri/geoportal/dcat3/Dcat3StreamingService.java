@@ -25,6 +25,7 @@ import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Iterator;
 import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
@@ -44,6 +45,7 @@ import com.esri.geoportal.dcat3.model.Dcat3DataService;
 import com.esri.geoportal.dcat3.model.Dcat3Dataset;
 import com.esri.geoportal.dcat3.model.Dcat3DatasetSeries;
 import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -173,7 +175,7 @@ public class Dcat3StreamingService {
     if (!isValidProfile(profile)) {
       return invalidProfileResponse();
     }
-    return ResponseEntity.ok(ordered(helper().newCatalog(resolveBaseUrl(request), profile), profile));
+    return ResponseEntity.ok(enveloped(helper().newCatalog(resolveBaseUrl(request), profile), profile));
   }
 
   /**
@@ -195,7 +197,7 @@ public class Dcat3StreamingService {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }
       Dcat3Dataset ds = helper().toDataset(id, source, resolveBaseUrl(request), profile);
-      return ResponseEntity.ok(ordered(ds, profile));
+      return ResponseEntity.ok(enveloped(ds, profile));
     } catch (Exception ex) {
       return error("Error building dcat:Dataset for id '%s'.".formatted(id), ex);
     }
@@ -338,11 +340,11 @@ public class Dcat3StreamingService {
     }
     try {
       String baseUrl = resolveBaseUrl(request);
-      List<JsonNode> collections = helper().searchCollections(10000);
+      List<JsonNode> collections = helper().searchCollections(10000, profile);
       List<Dcat3DatasetSeries> series = collections.stream()
               .map(c -> helper().toDatasetSeries(c, baseUrl, resolveMemberCount, profile))
               .toList();
-      return ResponseEntity.ok(ordered(series, profile));
+      return ResponseEntity.ok(enveloped(series, profile));
     } catch (Exception ex) {
       return error("Error building the dcat:DatasetSeries list.", ex);
     }
@@ -364,13 +366,13 @@ public class Dcat3StreamingService {
       return invalidProfileResponse();
     }
     try {
-      JsonNode collection = helper().getCollectionById(id);
+      JsonNode collection = helper().getCollectionById(id, profile);
       if (collection == null) {
         return notFound("No dataset series (collection) found with id '%s'.".formatted(id));
       }
       String baseUrl = resolveBaseUrl(request);
       Dcat3DatasetSeries series = helper().toDatasetSeries(collection, baseUrl, members, profile);
-      return ResponseEntity.ok(ordered(series, profile));
+      return ResponseEntity.ok(enveloped(series, profile));
     } catch (Exception ex) {
       return error("Error building dcat:DatasetSeries for id '%s'.".formatted(id), ex);
     }
@@ -395,7 +397,7 @@ public class Dcat3StreamingService {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }
       List<Dcat3DataService> services = helper().toDataServices(id, source, resolveBaseUrl(request), profile);
-      return ResponseEntity.ok(ordered(services, profile));
+      return ResponseEntity.ok(enveloped(services, profile));
     } catch (Exception ex) {
       return error("Error building dcat:DataService entries for id '%s'.".formatted(id), ex);
     }
@@ -492,6 +494,31 @@ public class Dcat3StreamingService {
   }
 
   /**
+   * Wraps a value with the JSON-LD envelope used in the cached catalog so
+   * live endpoints return a context and related top-level properties.
+   */
+  private JsonNode enveloped(Object value, String profile) {
+    ObjectNode envelope = Dcat3Helper.MAPPER.createObjectNode();
+    envelope.put("@context", dcat3Config.getContext());
+    envelope.put("conformsTo", dcat3Config.getConformsTo());
+    envelope.put("describedBy", dcat3Config.getDescribedBy());
+
+    JsonNode orderedValue = ordered(value, profile);
+    if (orderedValue != null && orderedValue.isObject()) {
+      ObjectNode obj = (ObjectNode) orderedValue;
+      Iterator<Map.Entry<String, JsonNode>> it = obj.fields();
+      while (it.hasNext()) {
+        Map.Entry<String, JsonNode> e = it.next();
+        envelope.set(e.getKey(), e.getValue());
+      }
+    } else {
+      // Non-object values get wrapped under "value" so clients still get the envelope
+      envelope.set("value", orderedValue);
+    }
+    return envelope;
+  }
+
+  /**
    * Wraps a page of datasets together with optional {@code next} / {@code previous} links.
    * @param datasets the datasets of the current page
    * @param next the URL of the next page, or {@code null} when there is none
@@ -508,7 +535,7 @@ public class Dcat3StreamingService {
     if (StringUtils.isNotBlank(previous)) {
       page.put("previous", previous);
     }
-    return ordered(page, profile);
+    return enveloped(page, profile);
   }
 
   /**
