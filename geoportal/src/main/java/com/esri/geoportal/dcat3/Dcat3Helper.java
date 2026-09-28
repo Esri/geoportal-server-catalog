@@ -855,8 +855,16 @@ ObjectNode query = MAPPER.createObjectNode();
     List<Dcat3Distribution> distributions = new ArrayList<>();
     List<String> seen = new ArrayList<>();
 
+    // Derive the item's access restriction (sys_access_s) so that every
+    // emitted distribution accurately reflects whether the underlying item
+    // is public, private, etc., instead of hard-coding "public". Items with
+    // no sys_access_s value are treated as public.
+    String accessRestriction = StringUtils.defaultIfBlank(
+            text(source, sourceField(profile, "query.sysAccess", "sys_access_s")),
+            "public");
+
     // metadata representations of the item itself
-    Dcat3Distribution json = Dcat3Distribution.access(itemUrl, "JSON");
+    Dcat3Distribution json = Dcat3Distribution.access(itemUrl, "JSON", accessRestriction);
     json.title = "Metadata (JSON)";
     json.description = "Metadata (JSON)";
     json.mediaType = Dcat3Constants.MEDIA_TYPE_JSON;
@@ -865,13 +873,13 @@ ObjectNode query = MAPPER.createObjectNode();
 
     String metadataType = text(source, sourceField(profile, "dataset.metadataType", "sys_metadatatype_s"));
     if (!"json".equalsIgnoreCase(StringUtils.defaultString(metadataType))) {
-      Dcat3Distribution html = Dcat3Distribution.access(itemUrl + "/html", "HTML");
+      Dcat3Distribution html = Dcat3Distribution.access(itemUrl + "/html", "HTML", accessRestriction);
       html.title = "Metadata (HTML)";
       html.description = "Metadata (HTML)";
       html.mediaType = Dcat3Constants.MEDIA_TYPE_HTML;
       distributions.add(html);
 
-      Dcat3Distribution xml = Dcat3Distribution.access(itemUrl + "/xml", "XML");
+      Dcat3Distribution xml = Dcat3Distribution.access(itemUrl + "/xml", "XML", accessRestriction);
       xml.title = "Metadata (XML)";
       xml.description = "Metadata (XML)";
       xml.mediaType = Dcat3Constants.MEDIA_TYPE_XML;
@@ -881,7 +889,7 @@ ObjectNode query = MAPPER.createObjectNode();
     // direct file
     String fileid = text(source, sourceField(profile, "dataset.fileId", "fileid"));
       if (isHrefValid(fileid) && !seen.contains(fileid)) {
-        Dcat3Distribution file = Dcat3Distribution.download(fileid, "File");
+        Dcat3Distribution file = Dcat3Distribution.download(fileid, "File", accessRestriction);
         file.title = "Download";
         file.description = "Download";
         String mt = inferMediaTypeFromUrl(fileid);
@@ -908,7 +916,7 @@ ObjectNode query = MAPPER.createObjectNode();
       if (!isValidHref || seen.contains(url)) continue;
       seen.add(url);
 
-      Dcat3Distribution d = Dcat3Distribution.access(url, StringUtils.defaultIfBlank(urlType, "Web Resource"));
+      Dcat3Distribution d = Dcat3Distribution.access(url, StringUtils.defaultIfBlank(urlType, "Web Resource"), accessRestriction);
       d.title = StringUtils.defaultIfBlank(urlType, "Resource");
       d.description = d.title;
       String modifiedValue = firstNonBlank(
@@ -926,7 +934,7 @@ ObjectNode query = MAPPER.createObjectNode();
     // thumbnail
     String thumbnail = text(source, sourceField(profile, "dataset.thumbnail", "thumbnail_s"));
     if (isHrefValid(thumbnail) && !seen.contains(thumbnail)) {
-      Dcat3Distribution thumb = Dcat3Distribution.access(thumbnail, "Thumbnail");
+      Dcat3Distribution thumb = Dcat3Distribution.access(thumbnail, "Thumbnail", accessRestriction);
       thumb.title = "Thumbnail";
       thumb.description = "Thumbnail";
       String thumbMt = inferMediaTypeFromUrl(thumbnail);

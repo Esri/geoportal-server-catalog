@@ -75,30 +75,60 @@ public class Dcat3Distribution {
   }
 
   /**
-   * Creates an access-url based distribution.
+   * Creates an access-url based distribution, defaulting the access
+   * restriction to <code>public</code>.
    * @param accessURL access URL
    * @param format format label
    * @return the distribution
    */
   public static Dcat3Distribution access(String accessURL, String format) {
+    return access(accessURL, format, "public");
+  }
+
+  /**
+   * Creates an access-url based distribution.
+   * @param accessURL access URL
+   * @param format format label
+   * @param accessRestriction the access restriction status of the parent item
+   *        (e.g. <code>public</code> / <code>private</code>); defaults to
+   *        <code>public</code> when blank
+   * @return the distribution
+   */
+  public static Dcat3Distribution access(String accessURL, String format, String accessRestriction) {
     Dcat3Distribution d = new Dcat3Distribution();
     d.accessURL = accessURL;
     d.format = format;
-    d.accessRestriction = List.of(Dcat3AccessRestriction.of("public"));
+    d.accessRestriction = List.of(Dcat3AccessRestriction.of(
+            accessRestriction == null || accessRestriction.trim().isEmpty() ? "public" : accessRestriction));
     return d;
+  }
+
+  /**
+   * Creates a file-access distribution, defaulting the access restriction to
+   * <code>public</code>.
+   * @param downloadURL download URL
+   * @param format format label
+   * @return the distribution
+   */
+  public static Dcat3Distribution download(String downloadURL, String format) {
+    return download(downloadURL, format, "public");
   }
 
   /**
    * Creates a file-access distribution.
    * @param downloadURL download URL
    * @param format format label
+   * @param accessRestriction the access restriction status of the parent item
+   *        (e.g. <code>public</code> / <code>private</code>); defaults to
+   *        <code>public</code> when blank
    * @return the distribution
    */
-  public static Dcat3Distribution download(String downloadURL, String format) {
+  public static Dcat3Distribution download(String downloadURL, String format, String accessRestriction) {
     Dcat3Distribution d = new Dcat3Distribution();
     d.downloadURL = downloadURL;
     d.format = format;
-    d.accessRestriction = List.of(Dcat3AccessRestriction.of("public"));
+    d.accessRestriction = List.of(Dcat3AccessRestriction.of(
+            accessRestriction == null || accessRestriction.trim().isEmpty() ? "public" : accessRestriction));
     return d;
   }
 }
