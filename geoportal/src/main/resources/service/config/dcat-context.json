@@ -104,7 +104,10 @@
 		"dcat:byteSize": { "@type": "xsd:decimal" },
 		"dcat:spatialResolutionInMeters": { "@type": "xsd:decimal" },
 		"dcat:temporalResolution": { "@type": "xsd:duration" },
-		"dcat:inSeries": { "@type": "@id" },
+		"inSeries": { "@id": "dcat:inSeries", "@type": "@id" },
+		"mediaType": "dcat:mediaType",
+		"format": { "@id": "dct:format", "@type": "@id" },
+		"dcat:inSeries": { "@type": "@id" }
 
 		"dct:title": "dct:title",
 		"dct:description": "dct:description",
