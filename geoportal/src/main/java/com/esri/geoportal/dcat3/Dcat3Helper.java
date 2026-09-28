@@ -193,20 +193,48 @@ public class Dcat3Helper {
 
     try {
       if (gc.getSupportsGroupBasedAccess()) {
-        ObjectNode term = MAPPER.createObjectNode();
-        term.putObject("term").put(sourceField(profile, "query.sysAccess", "sys_access_s"), "public");
-        must.add(term);
+        // A record is publicly visible when sys_access_s equals "public" OR
+        // the field is absent entirely (matches the legacy behavior in
+        // gs/context/nashorn/execute.js: "sys_access_s is missing || === public").
+        // A strict term match alone would incorrectly exclude every record
+        // that never had the field explicitly set to "public".
+        String accessField = sourceField(profile, "query.sysAccess", "sys_access_s");
+        must.add(publicOrMissingFilter(accessField, List.of("public")));
       }
       if (gc.getSupportsApprovalStatus()) {
-        ObjectNode terms = MAPPER.createObjectNode();
-        ArrayNode values = terms.putObject("terms").putArray(sourceField(profile, "query.approvalStatus", "sys_approval_status_s"));
-        values.add("approved");
-        values.add("reviewed");
-        must.add(terms);
+        // Same "value OR missing" semantics for approval status.
+        String approvalField = sourceField(profile, "query.approvalStatus", "sys_approval_status_s");
+        must.add(publicOrMissingFilter(approvalField, List.of("approved", "reviewed")));
       }
     } catch (Exception ex) {
       LOGGER.warn("DCAT3: unable to determine access filters.", ex);
     }
+  }
+
+  /**
+   * Builds a <code>bool.should</code> clause matching documents where
+   * <code>field</code> is one of <code>acceptedValues</code>, or where the
+   * field does not exist at all. This mirrors the legacy Nashorn access/
+   * approval filtering, which treats an absent field as implicitly public /
+   * approved rather than excluding the record.
+   * @param field the field to test
+   * @param acceptedValues the accepted values (matched via a <code>terms</code> query)
+   * @return the <code>bool</code> query node to add to an outer <code>must</code> array
+   */
+  private ObjectNode publicOrMissingFilter(String field, List<String> acceptedValues) {
+    ObjectNode outer = MAPPER.createObjectNode();
+    ObjectNode boolNode = outer.putObject("bool");
+    ArrayNode should = boolNode.putArray("should");
+
+    ArrayNode termsValues = should.addObject().putObject("terms").putArray(field);
+    for (String v : acceptedValues) {
+      termsValues.add(v);
+    }
+
+    should.addObject().putObject("bool").putObject("must_not").putObject("exists").put("field", field);
+
+    boolNode.put("minimum_should_match", 1);
+    return outer;
   }
 
   /**
@@ -352,11 +380,17 @@ ObjectNode query = MAPPER.createObjectNode();
       query.put("size", limit > 0 ? limit : 10000);
       query.putArray("sort").addObject().put("_id", "asc");
 
-      ArrayNode must = MAPPER.createArrayNode();
-      appendAccessFilters(must, profile);
-      if (!must.isEmpty()) {
-        query.putObject("query").putObject("bool").set("must", must);
-      }
+      // NOTE: intentionally not applying appendAccessFilters() here. The
+      // sys_access_s / sys_approval_status_s fields are dataset-level
+      // concerns and are generally not set on collection documents, so
+      // filtering the collections index on them would incorrectly exclude
+      // every collection (returning zero dcat:DatasetSeries) once
+      // supportsGroupBasedAccess/supportsApprovalStatus and publicRecordsOnly
+      // are enabled. Visibility of a series' members is instead enforced
+      // when resolving seriesMember via searchCollectionMemberIds /
+      // countCollectionMembers, which do apply the access filters against
+      // the metadata index.
+      query.putObject("query").putObject("match_all");
 
       String queryString = query.toString();
 
@@ -412,8 +446,11 @@ ObjectNode query = MAPPER.createObjectNode();
       String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_count";
 
       ObjectNode query = MAPPER.createObjectNode();
-      query.putObject("query").putObject("term")
+      ArrayNode must = MAPPER.createArrayNode();
+      must.addObject().putObject("term")
                 .put(sourceField(profile, "query.collectionMembership", "src_collections_s"), collectionId);
+      appendAccessFilters(must, profile);
+      query.putObject("query").putObject("bool").set("must", must);
 
       String response = client.sendPost(url, query.toString(), CONTENT_TYPE_JSON);
       JsonNode count = MAPPER.readTree(response).path("count");

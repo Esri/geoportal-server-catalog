@@ -119,7 +119,7 @@
 				"operationId": "dcat3DatasetSeriesById",
 				"parameters": [
 					{ "name": "id", "in": "path", "required": true, "type": "string" },
-					{ "name": "members", "in": "query", "required": false, "type": "boolean", "default": false },
+					{ "name": "resolveMemberCount", "in": "query", "required": false, "type": "boolean", "default": false },
 					{ "name": "profile", "in": "query", "required": false, "type": "string" }
 				],
 				"responses": { "default": { "description": "successful operation" }}

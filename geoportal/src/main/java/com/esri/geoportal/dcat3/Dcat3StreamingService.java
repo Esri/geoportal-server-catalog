@@ -354,12 +354,16 @@ public class Dcat3StreamingService {
    * Returns a single <code>dcat:DatasetSeries</code>.
    * @param id the dataseries(collection) id
    * @param members when <code>true</code> the member dataset identifiers are resolved
+   * @param resolveMemberCount alias of {@code members}, kept consistent with the
+   *        <code>/dcat3/datasetSeries</code> list endpoint; when <code>true</code>
+   *        the member dataset identifiers are resolved
    * @param request the servlet request
    * @return the dataset series
    */
   @GetMapping(path = "/dcat3/datasetSeries/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> datasetSeries(@PathVariable("id") String id,
           @RequestParam(name = "members", required = false, defaultValue = "false") boolean members,
+          @RequestParam(name = "resolveMemberCount", required = false, defaultValue = "false") boolean resolveMemberCount,
           @RequestParam(name = "profile", required = false) String profile,
           HttpServletRequest request) {
     if (!isValidProfile(profile)) {
@@ -371,7 +375,8 @@ public class Dcat3StreamingService {
         return notFound("No dataset series (collection) found with id '%s'.".formatted(id));
       }
       String baseUrl = resolveBaseUrl(request);
-      Dcat3DatasetSeries series = helper().toDatasetSeries(collection, baseUrl, members, profile);
+      boolean resolveMembers = members || resolveMemberCount;
+      Dcat3DatasetSeries series = helper().toDatasetSeries(collection, baseUrl, resolveMembers, profile);
       return ResponseEntity.ok(enveloped(series, profile));
     } catch (Exception ex) {
       return error("Error building dcat:DatasetSeries for id '%s'.".formatted(id), ex);
