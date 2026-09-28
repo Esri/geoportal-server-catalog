@@ -14,6 +14,8 @@
         "dataset.envelope": "envelope_geo",
         "dataset.timePeriod": "timeperiod_nst",
         "dataset.metadataType": "sys_metadatatype_s",
+        "dataset.fileId": "fileid",
+        "dataset.rights": "rights_s",
         "dataset.thumbnail": "thumbnail_s",
         "dataset.resources": "resources_nst",
         "dataset.resource.url": "url_s",

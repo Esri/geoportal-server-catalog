@@ -586,7 +586,7 @@ ObjectNode query = MAPPER.createObjectNode();
     String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
 
     Dcat3Catalog catalog = new Dcat3Catalog();
-    catalog.atId = root + "/dcat3";
+    catalog.atId = root + "/dcat3.json";
     catalog.identifier = StringUtils.defaultIfBlank(config.getCatalogIdentifier(), catalog.atId);
     catalog.title = config.getCatalogTitle();
     catalog.description = config.getCatalogDescription();
@@ -806,7 +806,7 @@ ObjectNode query = MAPPER.createObjectNode();
       svc.endpointURL = url;
       svc.endpointDescription = buildEndpointDescription(url, urlType);
       svc.format = urlType;
-      svc.mediaType = Dcat3Constants.MEDIA_TYPE_JSON;
+      svc.mediaType = mediaTypeOf(urlType);
       svc.addServesDataset(datasetId);
       svc.addConformsTo(conformanceClassOf(urlType));
       svc.publisher = config.newPublisher();
@@ -859,6 +859,7 @@ ObjectNode query = MAPPER.createObjectNode();
     Dcat3Distribution json = Dcat3Distribution.access(itemUrl, "JSON");
     json.title = "Metadata (JSON)";
     json.description = "Metadata (JSON)";
+    json.mediaType = Dcat3Constants.MEDIA_TYPE_JSON;
     distributions.add(json);
     seen.add(itemUrl);
 
@@ -867,23 +868,27 @@ ObjectNode query = MAPPER.createObjectNode();
       Dcat3Distribution html = Dcat3Distribution.access(itemUrl + "/html", "HTML");
       html.title = "Metadata (HTML)";
       html.description = "Metadata (HTML)";
+      html.mediaType = Dcat3Constants.MEDIA_TYPE_HTML;
       distributions.add(html);
 
       Dcat3Distribution xml = Dcat3Distribution.access(itemUrl + "/xml", "XML");
       xml.title = "Metadata (XML)";
       xml.description = "Metadata (XML)";
+      xml.mediaType = Dcat3Constants.MEDIA_TYPE_XML;
       distributions.add(xml);
     }
 
     // direct file
     String fileid = text(source, sourceField(profile, "dataset.fileId", "fileid"));
-    if (isHrefValid(fileid) && !seen.contains(fileid)) {
-      Dcat3Distribution file = Dcat3Distribution.download(fileid, "File");
-      file.title = "Download";
-      file.description = "Download";
-      distributions.add(file);
-      seen.add(fileid);
-    }
+      if (isHrefValid(fileid) && !seen.contains(fileid)) {
+        Dcat3Distribution file = Dcat3Distribution.download(fileid, "File");
+        file.title = "Download";
+        file.description = "Download";
+        String mt = inferMediaTypeFromUrl(fileid);
+        file.mediaType = mt != null ? mt : Dcat3Constants.MEDIA_TYPE_OCTET_STREAM;
+        distributions.add(file);
+        seen.add(fileid);
+      }
 
     // linked resources
     // NOTE: previously each emitted DataService used a per-item index and
@@ -910,6 +915,9 @@ ObjectNode query = MAPPER.createObjectNode();
               mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
               mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
       d.modified = toIso(modifiedValue);
+      // Prefer inferring media type from URL extension; fall back to type mapping
+      String inferred = inferMediaTypeFromUrl(url);
+      d.mediaType = inferred != null ? inferred : mediaTypeOf(urlType);
       d.license = config.getLicense();
       d.accessService = serviceRef;
       distributions.add(d);
@@ -921,6 +929,8 @@ ObjectNode query = MAPPER.createObjectNode();
       Dcat3Distribution thumb = Dcat3Distribution.access(thumbnail, "Thumbnail");
       thumb.title = "Thumbnail";
       thumb.description = "Thumbnail";
+      String thumbMt = inferMediaTypeFromUrl(thumbnail);
+      thumb.mediaType = thumbMt != null ? thumbMt : "image/png";
       distributions.add(thumb);
     }
 
@@ -1211,6 +1221,43 @@ ObjectNode query = MAPPER.createObjectNode();
         return Dcat3Constants.isServiceType(urlType)
                 ? Dcat3Constants.MEDIA_TYPE_JSON
                 : Dcat3Constants.MEDIA_TYPE_HTML;
+    }
+  }
+
+  /**
+   * Infers a media type from a resource URL by its file extension.
+   * Returns null when no reasonable inference can be made.
+   */
+  private static String inferMediaTypeFromUrl(String url) {
+    if (StringUtils.isBlank(url)) return null;
+    String lower = url.toLowerCase();
+    // Trim query and fragment
+    int q = lower.indexOf('?');
+    if (q >= 0) lower = lower.substring(0, q);
+    int f = lower.indexOf('#');
+    if (f >= 0) lower = lower.substring(0, f);
+    // Find extension
+    int dot = lower.lastIndexOf('.');
+    if (dot < 0 || dot == lower.length() - 1) return null;
+    String ext = lower.substring(dot + 1);
+    switch (ext) {
+      case "json": return "application/json";
+      case "geojson": return "application/geo+json";
+      case "xml": return "application/xml";
+      case "kml": return "application/vnd.google-earth.kml+xml";
+      case "kmz": return "application/vnd.google-earth.kmz";
+      case "zip": return "application/zip";
+      case "shp": return "application/zip"; // shapefiles usually in zip
+      case "csv": return "text/csv";
+      case "pdf": return "application/pdf";
+      case "png": return "image/png";
+      case "jpg":
+      case "jpeg": return "image/jpeg";
+      case "gif": return "image/gif";
+      case "html":
+      case "htm": return "text/html";
+      case "txt": return "text/plain";
+      default: return null;
     }
   }
 

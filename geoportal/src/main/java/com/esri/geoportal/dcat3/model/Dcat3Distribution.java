@@ -50,6 +50,9 @@ public class Dcat3Distribution {
   /** dct:format - human readable format (e.g. Shapefile, WMS). */
   public String format;
 
+  /** dcat:mediaType - IANA media type of the distribution (e.g. application/json). */
+  public String mediaType;
+
   /** DCAT-US describedBy - data dictionary URL. */
   public String describedBy;
 
