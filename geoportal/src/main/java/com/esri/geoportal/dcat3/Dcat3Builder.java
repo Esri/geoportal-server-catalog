@@ -117,10 +117,17 @@ public class Dcat3Builder {
 
       writeCatalogHeader(writer, jsonWriter, baseUrl, resolvedProfile);
       writer.println();
-      writer.print("\"dataset\": [");
 
+      // Stream datasetSeries into a distinct top-level property instead of
+      // mixing them into the "dataset" array. Emit an explicit (possibly
+      // empty) "datasetSeries" array, then the "dataset" array.
+      writer.print("\"datasetSeries\": [");
       long counter = 0;
       counter += writeDatasetSeries(writer, jsonWriter, dcat3Context, baseUrl, counter, resolvedProfile);
+      writer.println();
+      writer.println("],");
+
+      writer.print("\"dataset\": [");
       counter += writeDatasets(writer, jsonWriter, dcat3Context, baseUrl, counter, resolvedProfile);
 
       writer.println();
@@ -265,7 +272,7 @@ public class Dcat3Builder {
         }
       }
 
-      writeEntry(writer, jsonWriter, series, alreadyWritten + written, profile);
+      writeEntry(writer, jsonWriter, series, written, profile);
       written++;
     }
 
@@ -311,7 +318,7 @@ public class Dcat3Builder {
         lastId = id;
 
         Dcat3Dataset ds = helper.toDataset(id, hit.path("_source"), baseUrl, profile);
-        writeEntry(writer, jsonWriter, ds, alreadyWritten + written, profile);
+        writeEntry(writer, jsonWriter, ds, written, profile);
         written++;
       }
 
