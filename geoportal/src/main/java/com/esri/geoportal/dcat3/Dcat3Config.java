@@ -75,7 +75,6 @@ public class Dcat3Config {
   private String accessLevel = Dcat3Constants.ACCESS_LEVEL_PUBLIC;
   private List<String> bureauCode = new ArrayList<>(List.of("010:04"));
   private List<String> programCode = new ArrayList<>(List.of("010:000"));
-  private List<String> defaultKeywords = new ArrayList<>(List.of("metadata"));
   private String accrualPeriodicity;
 
   /* -------------------------------------------------------------- */
@@ -216,8 +215,7 @@ public class Dcat3Config {
   public List<String> getProgramCode() { return programCode; }
   public void setProgramCode(List<String> programCode) { this.programCode = programCode; }
 
-  public List<String> getDefaultKeywords() { return defaultKeywords; }
-  public void setDefaultKeywords(List<String> defaultKeywords) { this.defaultKeywords = defaultKeywords; }
+  
 
   public String getAccrualPeriodicity() { return accrualPeriodicity; }
   public void setAccrualPeriodicity(String accrualPeriodicity) { this.accrualPeriodicity = accrualPeriodicity; }

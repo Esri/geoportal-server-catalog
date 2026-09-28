@@ -48,11 +48,6 @@
         <beans:value>${gpt_dcat3ProgramCode:010:000}</beans:value>
       </beans:list>
     </beans:property>
-    <beans:property name="defaultKeywords">
-      <beans:list>
-        <beans:value>metadata</beans:value>
-      </beans:list>
-    </beans:property>
 
     <!-- Behavior -->
     <beans:property name="pageSize" value="${gpt_dcat3PageSize:100}"/>
