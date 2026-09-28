@@ -107,7 +107,7 @@
 		"inSeries": { "@id": "dcat:inSeries", "@type": "@id" },
 		"mediaType": "dcat:mediaType",
 		"format": { "@id": "dct:format", "@type": "@id" },
-		"dcat:inSeries": { "@type": "@id" }
+		"dcat:inSeries": { "@type": "@id" },
 
 		"dct:title": "dct:title",
 		"dct:description": "dct:description",
