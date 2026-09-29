@@ -55,8 +55,12 @@
     <beans:property name="includeDatasetSeries" value="${gpt_dcat3IncludeDatasetSeries:true}"/>
     <!-- Below prop allows dataServices ref to be included in dcat3.json or in any distribution-->
     <beans:property name="includeDataServices" value="${gpt_dcat3IncludeDataServices:true}"/>
-    <!-- Below prop allows all seriesMember to be included in /dataSeries if includeSeriesMember=true, be careful in setting true if large number of records exist -->
-    <beans:property name="allowSeriesMemInDatasetSeries" value="${gpt_dcat3AllowSeriesMemInDatasetSeries:false}"/>
+    <!-- Below prop controls the maximum number of dataset members resolved/emitted for a
+         dcat:DatasetSeries (dcat:first/dcat:last sample size and dcat:seriesMember completeness
+         threshold), used consistently by both the cached dcat3.json builder and the live
+         /dcat3/datasetSeries and /dcat3/datasetSeries/{id} endpoints when includeSeriesMember=true.
+         Be careful raising this value if collections may contain a very large number of records. -->
+    <beans:property name="maxSeriesMemberCnt" value="${gpt_dcat3MaxSeriesMemberCnt:1000}"/>
     <beans:property name="publicRecordsOnly" value="${gpt_dcat3PublicRecordsOnly:true}"/>
     <beans:property name="prettyPrint" value="${gpt_dcat3PrettyPrint:true}"/>
     <beans:property name="mappingConfigPath" value="${gpt_dcat3MappingConfigPath:service/config/dcat3.json}"/>

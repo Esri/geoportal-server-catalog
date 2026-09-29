@@ -39,6 +39,7 @@ import com.esri.geoportal.dcat3.model.Dcat3DatasetSeries;
 import com.esri.geoportal.dcat3.model.Dcat3Distribution;
 import com.esri.geoportal.dcat3.model.Dcat3NodeRef;
 import com.esri.geoportal.dcat3.model.Dcat3Location;
+import com.esri.geoportal.dcat3.model.Dcat3Organization;
 import com.esri.geoportal.dcat3.model.Dcat3PeriodOfTime;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.ElasticClient;
@@ -691,6 +692,17 @@ ObjectNode query = MAPPER.createObjectNode();
     if (temporal != null && !temporal.isEmpty()) ds.addTemporal(temporal);
 
     ds.publisher = config.newPublisher();
+
+    // dct:creator (sys_owner_s) - the item owner, modeled as an org:Organization
+    // consistent with dct:publisher / Dcat3DataService.creator.
+    String owner = mappedText(source, profile, "dataset", "creator", "sys_owner_s");
+    if (StringUtils.isNotBlank(owner)) {
+      ds.creator = new Dcat3Organization(owner);
+    }
+
+    // dct:provenance (credits_s) - free-text credits/history associated with the item.
+    ds.provenance = mappedText(source, profile, "dataset", "provenance", "credits_s");
+
     List<String> rights = mappedTextList(source, profile, "dataset", "rights", "rights_s");
     ds.rights = rights.isEmpty() ? config.getRights() : String.join("; ", rights);
     ds.license = config.getLicense();
@@ -718,16 +730,17 @@ ObjectNode query = MAPPER.createObjectNode();
    * @param baseUrl the geoportal base URL used to build absolute links
    * @param includeSeriesMember when <code>true</code> the number of members is
    *                           resolved through an extra <code>_count</code> call,
-   *                           and <code>dcat:first</code>/<code>dcat:last</code> are
-   *                           populated when possible. <code>dcat:seriesMember</code>
-   *                           is only populated when
-   *                           {@link Dcat3Config#getAllowSeriesMemInDatasetSeries()}
-   *                           is also <code>true</code>.
+   *                           and <code>dcat:first</code>/<code>dcat:last</code>/
+   *                           <code>dcat:seriesMember</code> are populated when
+   *                           the collection's true member count is within
+   *                           {@link Dcat3Config#getMaxSeriesMemberCnt()};
+   *                           otherwise only <code>dcat:first</code> is populated.
    * @return the dataset series
    */
   public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean includeSeriesMember) {
     return toDatasetSeries(collection, baseUrl, includeSeriesMember, null);
   }
+
 
   public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean includeSeriesMember, String profile) {
     String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
@@ -762,22 +775,21 @@ ObjectNode query = MAPPER.createObjectNode();
     if (contactPoint != null) series.addContactPoint(contactPoint);
 
     if (includeSeriesMember) {
-      List<String> memberIds = searchCollectionMemberIds(collectionId, 1000, profile);
+      int maxSeriesMemberCnt = config.getMaxSeriesMemberCnt();
+      List<String> memberIds = searchCollectionMemberIds(collectionId, maxSeriesMemberCnt, profile);
       long count = countCollectionMembers(collectionId, profile);
-      boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < 1000;
+      boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < maxSeriesMemberCnt;
       if (!memberIds.isEmpty()) {
         series.first = toDatasetReference(root, memberIds.get(0));
         if (completeMemberList) {
-          // dcat:seriesMember can be a very large array for collections with
-          // many members; only populate it when explicitly allowed via
-          // config (allowSeriesMemInDatasetSeries), regardless of
-          // includeSeriesMember. dcat:first / dcat:last are cheap (single
-          // references) and are always resolved when member resolution is
-          // requested.
-          if (config.getAllowSeriesMemInDatasetSeries()) {
-            for (String memberId : memberIds) {
-              series.addSeriesMember(toDatasetReference(root, memberId));
-            }
+          // dcat:seriesMember / dcat:last are only populated when the
+          // collection's true member count fits within
+          // config.maxSeriesMemberCnt (a complete list can be produced);
+          // otherwise they are omitted to avoid returning an incomplete,
+          // misleadingly-truncated list. dcat:first is always resolved when
+          // member resolution is requested.
+          for (String memberId : memberIds) {
+            series.addSeriesMember(toDatasetReference(root, memberId));
           }
           series.last = toDatasetReference(root, memberIds.get(memberIds.size() - 1));
         } else {

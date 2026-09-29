@@ -87,6 +87,12 @@ public class Dcat3Dataset {
   /** dct:publisher. */
   public Dcat3Organization publisher;
 
+  /** dct:creator - the entity (organization) primarily responsible for creating the dataset. */
+  public Dcat3Organization creator;
+
+  /** dct:provenance - free-text history / credits associated with the dataset. */
+  public String provenance;
+
   /** dct:rights. */
   public String rights;
 

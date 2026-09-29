@@ -216,6 +216,7 @@ public class Dcat3Builder {
 
     long written = 0;
     List<JsonNode> collections = helper.searchCollections(10000, profile);
+    int maxSeriesMemberCnt = config.getMaxSeriesMemberCnt();
 
     // Pre-fetch member counts and a top-N sample of member ids in a single
     // aggregated request to avoid N+1 queries when resolving series members.
@@ -227,7 +228,7 @@ public class Dcat3Builder {
         if (StringUtils.isNotBlank(cid)) collIds.add(cid);
       }
       if (!collIds.isEmpty()) {
-        membersMap = helper.fetchCollectionMembersAggregate(collIds, 1000, profile);
+        membersMap = helper.fetchCollectionMembersAggregate(collIds, maxSeriesMemberCnt, profile);
       }
     }
 
@@ -245,11 +246,11 @@ public class Dcat3Builder {
           memberIds = cm.ids;
           count = cm.count;
         } else {
-          memberIds = helper.searchCollectionMemberIds(collectionId, 1000, profile);
+          memberIds = helper.searchCollectionMemberIds(collectionId, maxSeriesMemberCnt, profile);
           count = helper.countCollectionMembers(collectionId, profile);
         }
 
-        boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < 1000;
+        boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < maxSeriesMemberCnt;
         if (!memberIds.isEmpty()) {
           Dcat3Dataset firstRef = new Dcat3Dataset();
           firstRef.atId = baseUrl + "/rest/metadata/item/" + Dcat3Helper.urlEncode(memberIds.get(0));
@@ -275,6 +276,7 @@ public class Dcat3Builder {
       writeEntry(writer, jsonWriter, series, written, profile);
       written++;
     }
+
 
     if (written > 0) {
       LOGGER.info("DCAT-US 3.0: wrote {} dcat:DatasetSeries entries.", written);

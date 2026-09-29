@@ -91,17 +91,26 @@ public class Dcat3Config {
   private boolean includeDataServices = true;
 
   /**
-   * Allows the (potentially large) <code>dcat:seriesMember</code> list to be
-   * populated on a <code>dcat:DatasetSeries</code> when member resolution is
-   * requested (<code>includeSeriesMember</code> / <code>members</code> query
-   * parameters on <code>/dcat3/datasetSeries</code> and
-   * <code>/dcat3/datasetSeries/{id}</code>). When <code>false</code> (the
-   * default), <code>dcat:first</code> / <code>dcat:last</code> may still be
-   * resolved, but <code>dcat:seriesMember</code> is always omitted,
-   * regardless of <code>includeSeriesMember</code>, to avoid returning very
-   * large arrays for collections with many members.
+   * Maximum number of member identifiers resolved/emitted for a single
+   * <code>dcat:DatasetSeries</code>. Used consistently everywhere member
+   * resolution happens:
+   * <ul>
+   *   <li>the cached document builder ({@code Dcat3Builder}), and</li>
+   *   <li>the live <code>/dcat3/datasetSeries</code> and
+   *       <code>/dcat3/datasetSeries/{id}</code> endpoints (via
+   *       {@code Dcat3Helper#toDatasetSeries}).</li>
+   * </ul>
+   * <p>Acts both as the sample size used to resolve <code>dcat:first</code>
+   * and as the completeness threshold for <code>dcat:seriesMember</code> /
+   * <code>dcat:last</code>: when a collection's true member count is within
+   * this limit, the full (complete) member list is resolved and
+   * <code>dcat:seriesMember</code> / <code>dcat:last</code> are populated;
+   * otherwise they are omitted (only <code>dcat:first</code> is populated)
+   * to avoid returning an incomplete, misleadingly-truncated list. Be
+   * careful raising this value when collections may contain a very large
+   * number of records.</p>
    */
-  private boolean allowSeriesMemInDatasetSeries = false;
+  private int maxSeriesMemberCnt = 1000;
 
   /** Emit only publicly accessible / approved records. */
   private boolean publicRecordsOnly = true;
@@ -242,8 +251,8 @@ public class Dcat3Config {
   public boolean getIncludeDataServices() { return includeDataServices; }
   public void setIncludeDataServices(boolean includeDataServices) { this.includeDataServices = includeDataServices; }
 
-  public boolean getAllowSeriesMemInDatasetSeries() { return allowSeriesMemInDatasetSeries; }
-  public void setAllowSeriesMemInDatasetSeries(boolean allowSeriesMemInDatasetSeries) { this.allowSeriesMemInDatasetSeries = allowSeriesMemInDatasetSeries; }
+  public int getMaxSeriesMemberCnt() { return maxSeriesMemberCnt; }
+  public void setMaxSeriesMemberCnt(int maxSeriesMemberCnt) { this.maxSeriesMemberCnt = maxSeriesMemberCnt > 0 ? maxSeriesMemberCnt : 1000; }
 
   public boolean getPublicRecordsOnly() { return publicRecordsOnly; }
   public void setPublicRecordsOnly(boolean publicRecordsOnly) { this.publicRecordsOnly = publicRecordsOnly; }
