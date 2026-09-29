@@ -192,7 +192,7 @@ public class Dcat3StreamingService {
       return invalidProfileResponse();
     }
     try {
-      JsonNode source = helper().getItemById(id);
+      JsonNode source = helper().getItemById(id, profile);
       if (source == null || source.isMissingNode()) {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }
@@ -397,7 +397,7 @@ public class Dcat3StreamingService {
       return invalidProfileResponse();
     }
     try {
-      JsonNode source = helper().getItemById(id);
+      JsonNode source = helper().getItemById(id, profile);
       if (source == null || source.isMissingNode()) {
         return notFound("No dataset found with id '%s'.".formatted(id));
       }

@@ -21,9 +21,10 @@ but has one **major architectural change**:
 
 | Class | Responsibility | DCAT-US 1.1 counterpart |
 |---|---|---|
-| `Dcat3Config` | Spring bean with all catalog-wide defaults (profile URIs, publisher, contact point, license, access level, bureau/program codes, page size, behavior flags). | *(hard-coded `DCAT_DEFAULTS` in `DcatWriter.js`)* |
+| `Dcat3Config` | Spring bean with all catalog-wide defaults (profile URIs, publisher, contact point, license, access level, bureau/program codes, page size, behavior flags) and the profile-driven field mapping / property ordering loaded from `service/config/dcat3.json` (see §6.1). | *(hard-coded `DCAT_DEFAULTS` in `DcatWriter.js`)* |
 | **`Dcat3Helper`** | **All OpenSearch/Elasticsearch access + mapping of `_source` → DCAT-US 3.0 objects.** | `DcatRequest` + `execute.js` + `DcatWriter.js` |
 | `Dcat3Builder` | Streams the aggregated catalog document into the cache. | `DcatBuilder` |
+| `Dcat3JsonOrder` | Reorders serialized JSON properties per the `classProperty` configuration in `service/config/dcat3.json` (see §6.1). | *(n/a)* |
 | `Dcat3Cache` | Cache folder management (`cache-*.dcat3`). | `DcatCache` |
 | `Dcat3CacheOutputStream` | `.temp` → `.dcat3` atomic rename. | `DcatCacheOutputStream` |
 | `Dcat3Context` | Run-state guard (single concurrent build, abortable). | `DcatContext` |
@@ -67,7 +68,7 @@ Key methods:
 |---|---|
 | `prepareDatasetQuery(searchAfter, size)` | Builds the paged query (`track_total_hits`, `sort:_id asc`, `_source.includes`, access filters, `search_after`). |
 | `searchDatasets(searchAfter, size)` | Executes one page against the metadata index. |
-| `getItemById(id)` | Single item lookup (`ids` query). |
+| `getItemById(id, profile)` | Single item lookup (`ids` query), applying the profile's access/approval field mappings. |
 | `searchCollections(limit)` | Reads the collections index → `dcat:DatasetSeries`. |
 | `searchCollectionMemberIds(collectionId, limit)` | Resolves `dcat:seriesMember`. |
 | `countCollectionMembers(collectionId)` | `_count` for the series member count. |
@@ -86,6 +87,9 @@ security settings:
 
 ## 3. Field mapping (geoportal index → DCAT-US 3.0)
 
+Field names below are the **defaults**; every one of them can be overridden
+per profile via `service/config/dcat3.json` (see §6.1).
+
 | Index field | DCAT-US 3.0 property |
 |---|---|
 | `_id` | `@id`, `identifier` (as `<base>/rest/metadata/item/<id>`) |
@@ -98,7 +102,7 @@ security settings:
 | `sys_owner_s` | `dct:creator` (`org:Organization`) |
 | `credits_s` | `dct:provenance` |
 | `rights_s` | `dct:rights` |
-| `sys_access_s` | `accessLevel` (`public` / `restricted public` / `non-public`) |
+| `sys_access_s` | `accessLevel` (`public` / `restricted public` / `non-public`); also used (together with `sys_approval_status_s`) as an access filter when `publicRecordsOnly=true` |
 | `src_collections_s` | `dcat:inSeries` → `dcat:DatasetSeries` |
 | `envelope_geo` | `dct:spatial` (`dcat:bbox` WKT + `locn:geometry` GeoJSON + `dcat:centroid`) |
 | `timeperiod_nst.begin_dt` / `end_dt` | `dct:temporal` (`dcat:startDate` / `dcat:endDate`) |
@@ -107,7 +111,7 @@ security settings:
 | `thumbnail_s` | `dcat:Distribution` (image/png) |
 | `resources_nst[].url_s` / `url_type_s` | `dcat:Distribution`; when the type is a service (`MapServer`, `WMS`, …) also a `dcat:DataService` attached as `dcat:accessService` |
 | *(item itself)* | `dcat:Distribution` for the JSON / HTML / XML metadata representations |
-| collections index | `dcat:DatasetSeries` |
+| collections index (`id`/`identifier`, `title`/`name`, `description`, `sys_created_dt`, `sys_modified_dt`, `accrualPeriodicity`, `envelope_geo`, `timeperiod_nst`) | `dcat:DatasetSeries` |
 
 Values that cannot be derived from the index (publisher, contact point,
 license, bureau/program codes …) come from `Dcat3Config`.
@@ -146,6 +150,9 @@ license, bureau/program codes …) come from `Dcat3Config`.
       "@type": "dcat:Dataset",
       "@id": "http://host/geoportal/rest/metadata/item/abc",
       "title": "...",
+      "publisher": { "@type": "org:Organization", "name": "..." },
+      "creator": { "@type": "org:Organization", "name": "..." },
+      "provenance": "...",
       "spatial": { "@type": "dct:Location", "bbox": "POLYGON((...))" },
       "temporal": { "@type": "dct:PeriodOfTime", "startDate": "...", "endDate": "..." },
       "inSeries": [".../dcat3/datasetSeries/myCollection"],
@@ -180,10 +187,27 @@ constant regardless of catalog size.
 | `GET` | `/dcat3.json` | Complete cached catalog. Returns `202` + placeholder and starts a background build when no cache exists. |
 | `GET` | `/dcat3/catalog.json` | Catalog header only (live). |
 | `GET` | `/dcat3/dataset/{id}` | Single `dcat:Dataset` (live). |
-| `GET` | `/dcat3/datasetSeries` | All `dcat:DatasetSeries` (live). |
-| `GET` | `/dcat3/datasetSeries/{id}?members=true` | Single `dcat:DatasetSeries`, optionally with `dcat:seriesMember`. |
+| `GET` | `/dcat3/dataset` | Paged list of `dcat:Dataset` (live). Either `search_after`/`search_before` deep-pagination (`limit`, `searchAfter`, `searchBefore`) or offset-style filtered search (`from`, `size`, `sort`, `esdsl`); returns `next`/`previous` links. |
+| `GET` | `/dcat3/datasetSeries` | All `dcat:DatasetSeries` (live). `includeSeriesMember=true` also resolves `dcat:first`/`dcat:last`/`dcat:seriesMember` for each series (subject to `maxSeriesMemberCnt`, see §6). |
+| `GET` | `/dcat3/datasetSeries/{id}` | Single `dcat:DatasetSeries`. `includeSeriesMember=true` (or its alias `members=true`) resolves `dcat:first`/`dcat:last`/`dcat:seriesMember` (subject to `maxSeriesMemberCnt`). |
 | `GET` | `/dcat3/dataService/{id}` | `dcat:DataService` entries of an item (live). |
 | `GET` | `/dcat3/rebuild` | Triggers a rebuild (**not** `permitAll` – requires authentication). |
+
+All endpoints accept an optional `profile` query parameter (`us` or `world`,
+case-insensitive; defaults to the configured default profile) selecting which
+`dcat3.json` mapping profile is applied (see §6.1). An unsupported value
+returns `400`.
+
+### `dcat:seriesMember` completeness
+
+`dcat:first` is always populated (a single, cheap reference) whenever member
+resolution is requested. `dcat:seriesMember` and `dcat:last` are only
+populated when the series' **true** member count fits within
+`maxSeriesMemberCnt` (a complete list can be produced); otherwise they are
+omitted entirely (never a silently truncated partial list) and a debug log
+entry is written. This applies identically to the cached `/dcat3.json`
+builder and to the live `/dcat3/datasetSeries` / `/dcat3/datasetSeries/{id}`
+endpoints.
 
 ---
 
@@ -201,21 +225,53 @@ All properties can be overridden with environment variables:
 | `gpt_dcat3CacheFolder` | `<USER_HOME>/dcat3/cache` |
 | `gpt_dcat3CatalogTitle` | `Geoportal Catalog` |
 | `gpt_dcat3CatalogDescription` | `DCAT-US 3.0 catalog generated by Esri Geoportal Server.` |
-| `gpt_dcat3PublisherName` | `Your Publisher` |
+| `gpt_dcat3CatalogIdentifier` | *(empty = falls back to the catalog `@id`)* |
+| `gpt_dcat3Homepage` | *(empty = falls back to `baseUrl`)* |
+| `gpt_dcat3Language` | `en-US` |
+| `gpt_dcat3PublisherName` / `gpt_dcat3PublisherId` | `Your Publisher` / *(empty)* |
 | `gpt_dcat3ContactName` / `gpt_dcat3ContactEmail` | `Your contact point` / `email@your.org` |
 | `gpt_dcat3License` | `http://www.usa.gov/publicdomain/label/1.0/` |
+| `gpt_dcat3Rights` | *(empty)* |
 | `gpt_dcat3AccessLevel` | `public` |
+| `gpt_dcat3AccrualPeriodicity` | *(empty)* |
 | `gpt_dcat3BureauCode` / `gpt_dcat3ProgramCode` | `010:04` / `010:000` |
 | `gpt_dcat3PageSize` | `100` |
-| `gpt_dcat3IncludeDatasetSeries` | `true` |
-| `gpt_dcat3IncludeDataServices` | `true` |
+| `gpt_dcat3IncludeDatasetSeries` | `true` — emits `dcat:DatasetSeries` in the cached `/dcat3.json` document |
+| `gpt_dcat3IncludeDataServices` | `true` — emits `dcat:DataService` entries / `dcat:accessService` references |
+| `gpt_dcat3MaxSeriesMemberCnt` | `1000` — maximum number of member ids resolved/emitted for a `dcat:DatasetSeries` (used as both the `dcat:first`/`dcat:last` sample size and the `dcat:seriesMember` completeness threshold; see §5). Applies consistently to the cached builder and both live `/dcat3/datasetSeries*` endpoints. Raise with care on collections that may contain a very large number of records. |
 | `gpt_dcat3PublicRecordsOnly` | `true` |
 | `gpt_dcat3PrettyPrint` | `true` |
+| `gpt_dcat3MappingConfigPath` | `service/config/dcat3.json` — classpath resource with the profile field mappings / property ordering (see §6.1) |
 | `gpt_dcat3Context` / `gpt_dcat3ConformsTo` / `gpt_dcat3DescribedBy` | DCAT-US 3.0 profile URIs |
 
 > **Important:** set `gpt_dcat3PublisherName`, `gpt_dcat3ContactEmail`,
 > `gpt_dcat3BureauCode` and `gpt_dcat3ProgramCode` to real values before
 > publishing to data.gov.
+
+### 6.1 Profile-driven field mapping (`service/config/dcat3.json`)
+
+`Dcat3Config` loads `mappingConfigPath` (default
+`service/config/dcat3.json`) at startup (and again whenever
+`mappingConfigPath` is re-set). The file declares one or more named
+**profiles** (out of the box: `us` and `world`), each with:
+
+* **`sourceFieldMappings`** — maps a logical key (e.g. `dataset.creator`,
+  `dataset.rights`, `query.collectionMembership`, `datasetSeries.title`) to
+  the actual geoportal index field name (e.g. `sys_owner_s`, `rights_s`,
+  `src_collections_s`, `title`). This is how the field mapping table in §3
+  can be repointed at different index fields per profile without code
+  changes, and also drives the Elasticsearch `_source.includes` list
+  (`datasetSourceIncludes`) so only the fields actually needed are fetched.
+* **`classProperty`** — per DCAT-US 3.0 class (`Dcat3Dataset`,
+  `Dcat3DataService`, `Dcat3DatasetSeries`, `Dcat3Distribution`,
+  `Dcat3Organization`, `Dcat3PeriodOfTime`, `Dcat3ContactPoint`, …) the
+  ordered list of property names to emit first in the serialized JSON
+  (`Dcat3JsonOrder`); any properties not listed are still emitted afterwards
+  in their natural order.
+
+`defaultProfile` (top-level key in the JSON, `us` by default) selects which
+profile is used when the request does not specify one; the `profile` query
+parameter (§5) can select `us` or `world` explicitly per request.
 
 ---
 

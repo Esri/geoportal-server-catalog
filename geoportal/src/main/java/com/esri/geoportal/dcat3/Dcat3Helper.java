@@ -335,6 +335,21 @@ public class Dcat3Helper {
    * @throws Exception if the request fails
    */
   public JsonNode getItemById(String id) throws Exception {
+    return getItemById(id, null);
+  }
+
+  /**
+   * Reads a single metadata item, applying the access / approval filters of
+   * the given profile. Using the wrong profile's access field mappings could
+   * either expose a non-public item or incorrectly hide a public one when a
+   * profile's <code>query.sysAccess</code> / <code>query.approvalStatus</code>
+   * field names differ from the default (US) mapping.
+   * @param id the item id
+   * @param profile the active profile, or <code>null</code> for the default
+   * @return the <code>_source</code> document or <code>null</code> when not found
+   * @throws Exception if the request fails
+   */
+  public JsonNode getItemById(String id, String profile) throws Exception {
     ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
     ElasticClient client = ElasticClient.newClient();
     String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
@@ -343,7 +358,7 @@ ObjectNode query = MAPPER.createObjectNode();
     query.put("size", 1);
     ArrayNode must = MAPPER.createArrayNode();
     must.addObject().putObject("ids").putArray("values").add(id);
-    appendAccessFilters(must);
+    appendAccessFilters(must, profile);
     query.putObject("query").putObject("bool").set("must", must);
 
     String response = client.sendPost(url, query.toString(), CONTENT_TYPE_JSON);
