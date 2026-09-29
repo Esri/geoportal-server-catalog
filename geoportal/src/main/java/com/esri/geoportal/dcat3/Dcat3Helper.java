@@ -716,15 +716,20 @@ ObjectNode query = MAPPER.createObjectNode();
    *
    * @param collection the collection <code>_source</code> document
    * @param baseUrl the geoportal base URL used to build absolute links
-   * @param resolveMemberCount when <code>true</code> the number of members is
-   *                           resolved through an extra <code>_count</code> call
+   * @param includeSeriesMember when <code>true</code> the number of members is
+   *                           resolved through an extra <code>_count</code> call,
+   *                           and <code>dcat:first</code>/<code>dcat:last</code> are
+   *                           populated when possible. <code>dcat:seriesMember</code>
+   *                           is only populated when
+   *                           {@link Dcat3Config#getAllowSeriesMemInDatasetSeries()}
+   *                           is also <code>true</code>.
    * @return the dataset series
    */
-  public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean resolveMemberCount) {
-    return toDatasetSeries(collection, baseUrl, resolveMemberCount, null);
+  public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean includeSeriesMember) {
+    return toDatasetSeries(collection, baseUrl, includeSeriesMember, null);
   }
 
-  public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean resolveMemberCount, String profile) {
+  public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean includeSeriesMember, String profile) {
     String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
     String collectionId = StringUtils.defaultIfBlank(
             mappedText(collection, profile, "datasetSeries", "id", "id"),
@@ -756,15 +761,23 @@ ObjectNode query = MAPPER.createObjectNode();
     Dcat3ContactPoint contactPoint = config.newContactPoint();
     if (contactPoint != null) series.addContactPoint(contactPoint);
 
-    if (resolveMemberCount) {
+    if (includeSeriesMember) {
       List<String> memberIds = searchCollectionMemberIds(collectionId, 1000, profile);
       long count = countCollectionMembers(collectionId, profile);
       boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < 1000;
       if (!memberIds.isEmpty()) {
         series.first = toDatasetReference(root, memberIds.get(0));
         if (completeMemberList) {
-          for (String memberId : memberIds) {
-            series.addSeriesMember(toDatasetReference(root, memberId));
+          // dcat:seriesMember can be a very large array for collections with
+          // many members; only populate it when explicitly allowed via
+          // config (allowSeriesMemInDatasetSeries), regardless of
+          // includeSeriesMember. dcat:first / dcat:last are cheap (single
+          // references) and are always resolved when member resolution is
+          // requested.
+          if (config.getAllowSeriesMemInDatasetSeries()) {
+            for (String memberId : memberIds) {
+              series.addSeriesMember(toDatasetReference(root, memberId));
+            }
           }
           series.last = toDatasetReference(root, memberIds.get(memberIds.size() - 1));
         } else {
@@ -772,6 +785,7 @@ ObjectNode query = MAPPER.createObjectNode();
         }
       }
     }
+
 
     validateDatasetSeries(series, collectionId);
     return series;

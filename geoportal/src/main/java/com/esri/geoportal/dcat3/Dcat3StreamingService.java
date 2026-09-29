@@ -333,7 +333,7 @@ public class Dcat3StreamingService {
    */
   @GetMapping(path = "/dcat3/datasetSeries", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> datasetSeries(@RequestParam(name = "profile", required = false) String profile,
-          @RequestParam(name = "resolveMemberCount", required = false, defaultValue = "false") boolean resolveMemberCount,
+          @RequestParam(name = "includeSeriesMember", required = false, defaultValue = "false") boolean includeSeriesMember,
           HttpServletRequest request) {
     if (!isValidProfile(profile)) {
       return invalidProfileResponse();
@@ -342,7 +342,7 @@ public class Dcat3StreamingService {
       String baseUrl = resolveBaseUrl(request);
       List<JsonNode> collections = helper().searchCollections(10000, profile);
       List<Dcat3DatasetSeries> series = collections.stream()
-              .map(c -> helper().toDatasetSeries(c, baseUrl, resolveMemberCount, profile))
+              .map(c -> helper().toDatasetSeries(c, baseUrl, includeSeriesMember, profile))
               .toList();
       return ResponseEntity.ok(enveloped(series, profile));
     } catch (Exception ex) {
@@ -354,7 +354,7 @@ public class Dcat3StreamingService {
    * Returns a single <code>dcat:DatasetSeries</code>.
    * @param id the dataseries(collection) id
    * @param members when <code>true</code> the member dataset identifiers are resolved
-   * @param resolveMemberCount alias of {@code members}, kept consistent with the
+   * @param includeSeriesMember alias of {@code members}, kept consistent with the
    *        <code>/dcat3/datasetSeries</code> list endpoint; when <code>true</code>
    *        the member dataset identifiers are resolved
    * @param request the servlet request
@@ -363,7 +363,7 @@ public class Dcat3StreamingService {
   @GetMapping(path = "/dcat3/datasetSeries/{id}", produces = MediaType.APPLICATION_JSON_VALUE)
   public ResponseEntity<?> datasetSeries(@PathVariable("id") String id,
           @RequestParam(name = "members", required = false, defaultValue = "false") boolean members,
-          @RequestParam(name = "resolveMemberCount", required = false, defaultValue = "false") boolean resolveMemberCount,
+          @RequestParam(name = "includeSeriesMember", required = false, defaultValue = "false") boolean includeSeriesMember,
           @RequestParam(name = "profile", required = false) String profile,
           HttpServletRequest request) {
     if (!isValidProfile(profile)) {
@@ -375,7 +375,7 @@ public class Dcat3StreamingService {
         return notFound("No dataset series (collection) found with id '%s'.".formatted(id));
       }
       String baseUrl = resolveBaseUrl(request);
-      boolean resolveMembers = members || resolveMemberCount;
+      boolean resolveMembers = members || includeSeriesMember;
       Dcat3DatasetSeries series = helper().toDatasetSeries(collection, baseUrl, resolveMembers, profile);
       return ResponseEntity.ok(enveloped(series, profile));
     } catch (Exception ex) {

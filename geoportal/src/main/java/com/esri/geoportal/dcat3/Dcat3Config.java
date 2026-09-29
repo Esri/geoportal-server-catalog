@@ -90,6 +90,19 @@ public class Dcat3Config {
   /** Emit <code>dcat:DataService</code> entries derived from service resources. */
   private boolean includeDataServices = true;
 
+  /**
+   * Allows the (potentially large) <code>dcat:seriesMember</code> list to be
+   * populated on a <code>dcat:DatasetSeries</code> when member resolution is
+   * requested (<code>includeSeriesMember</code> / <code>members</code> query
+   * parameters on <code>/dcat3/datasetSeries</code> and
+   * <code>/dcat3/datasetSeries/{id}</code>). When <code>false</code> (the
+   * default), <code>dcat:first</code> / <code>dcat:last</code> may still be
+   * resolved, but <code>dcat:seriesMember</code> is always omitted,
+   * regardless of <code>includeSeriesMember</code>, to avoid returning very
+   * large arrays for collections with many members.
+   */
+  private boolean allowSeriesMemInDatasetSeries = false;
+
   /** Emit only publicly accessible / approved records. */
   private boolean publicRecordsOnly = true;
 
@@ -228,6 +241,9 @@ public class Dcat3Config {
 
   public boolean getIncludeDataServices() { return includeDataServices; }
   public void setIncludeDataServices(boolean includeDataServices) { this.includeDataServices = includeDataServices; }
+
+  public boolean getAllowSeriesMemInDatasetSeries() { return allowSeriesMemInDatasetSeries; }
+  public void setAllowSeriesMemInDatasetSeries(boolean allowSeriesMemInDatasetSeries) { this.allowSeriesMemInDatasetSeries = allowSeriesMemInDatasetSeries; }
 
   public boolean getPublicRecordsOnly() { return publicRecordsOnly; }
   public void setPublicRecordsOnly(boolean publicRecordsOnly) { this.publicRecordsOnly = publicRecordsOnly; }

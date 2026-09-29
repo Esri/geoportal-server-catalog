@@ -51,8 +51,12 @@
 
     <!-- Behavior -->
     <beans:property name="pageSize" value="${gpt_dcat3PageSize:100}"/>
+    <!-- Below prop allows dataSeries to be included in dcat3.json -->
     <beans:property name="includeDatasetSeries" value="${gpt_dcat3IncludeDatasetSeries:true}"/>
+    <!-- Below prop allows dataServices ref to be included in dcat3.json or in any distribution-->
     <beans:property name="includeDataServices" value="${gpt_dcat3IncludeDataServices:true}"/>
+    <!-- Below prop allows all seriesMember to be included in /dataSeries if includeSeriesMember=true, be careful in setting true if large number of records exist -->
+    <beans:property name="allowSeriesMemInDatasetSeries" value="${gpt_dcat3AllowSeriesMemInDatasetSeries:false}"/>
     <beans:property name="publicRecordsOnly" value="${gpt_dcat3PublicRecordsOnly:true}"/>
     <beans:property name="prettyPrint" value="${gpt_dcat3PrettyPrint:true}"/>
     <beans:property name="mappingConfigPath" value="${gpt_dcat3MappingConfigPath:service/config/dcat3.json}"/>
