@@ -106,7 +106,7 @@
 				"operationId": "dcat3DatasetSeries",
 				"parameters": [
 					{ "name": "profile", "in": "query", "required": false, "type": "string" },
-					{ "name": "includeSeriesMember", "in": "query", "description": "When true, resolves member counts and (when possible) seriesMember lists for each series. Defaults to false.", "required": false, "type": "boolean", "default": false }
+					{ "name": "includeSeriesMember", "in": "query", "description": "When true, if seriesMember count is less than config(maxSeriesMemberCnt), lists series memebers for each series. Defaults to false.", "required": false, "type": "boolean", "default": false }
 				],
 				"responses": { "default": { "description": "successful operation" } }
 			}
@@ -119,7 +119,7 @@
 				"operationId": "dcat3DatasetSeriesById",
 				"parameters": [
 					{ "name": "id", "in": "path", "required": true, "type": "string" },
-					{ "name": "includeSeriesMember", "in": "query", "required": false, "type": "boolean", "default": false },
+					{ "name": "includeSeriesMember", "in": "query", "description": "When true, if seriesMember count is less than config(maxSeriesMemberCnt), lists series memebers for this series. Defaults to false.","required": false, "type": "boolean", "default": false },
 					{ "name": "profile", "in": "query", "required": false, "type": "string" }
 				],
 				"responses": { "default": { "description": "successful operation" }}
@@ -131,7 +131,7 @@
 				"summary": "dcat:DataService entries for an item",
 				"produces": ["application/json"],
 				"operationId": "dcat3DataServiceById",
-				"parameters": [ { "name": "id", "in": "path", "required": true, "type": "string" }, { "name": "profile", "in": "query", "required": false, "type": "string" } ],
+				"parameters": [ { "name": "id", "in": "path", "required": true, "type": "string" }, { "name": "profile", "in": "query","required": false, "type": "string" } ],
 				"responses": { "default": { "description": "successful operation" }}
 			}
 		},
