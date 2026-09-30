@@ -106,7 +106,7 @@
 				"operationId": "dcat3DatasetSeries",
 				"parameters": [
 					{ "name": "profile", "in": "query", "required": false, "type": "string" },
-					{ "name": "includeSeriesMember", "in": "query", "description": "When true, if seriesMember count is less than config(maxSeriesMemberCnt), lists series memebers for each series. Defaults to false.", "required": false, "type": "boolean", "default": false }
+					{ "name": "includeSeriesMember", "in": "query", "description": "When true, if seriesMember count is less than config(maxSeriesMemberCnt), lists series members for each series. Defaults to false.", "required": false, "type": "boolean", "default": false }
 				],
 				"responses": { "default": { "description": "successful operation" } }
 			}
