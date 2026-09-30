@@ -102,8 +102,14 @@ public class Dcat3DataService {
   /** dcat:endpointDescription - description(s) of the service (e.g. capabilities document). */
   public List<String> endpointDescription;
 
-  /** dcat:servesDataset - references (node objects) of the datasets served by this service. */
-  public List<Dcat3NodeRef> servesDataset;
+  /**
+   * dcat:servesDataset - the dataset(s) served by this service. Emitted as
+   * full <code>dcat:Dataset</code> reference objects (not bare <code>@id</code>
+   * node refs) because the DCAT-US 3.0 schema requires <code>identifier</code>,
+   * <code>title</code>, <code>description</code> and <code>contactPoint</code>
+   * on every <code>dcat:Dataset</code> occurrence, including here.
+   */
+  public List<Dcat3Dataset> servesDataset;
 
   /** dct:conformsTo - standard(s) the service implements (e.g. OGC WMS), as node references. */
   public List<Dcat3NodeRef> conformsTo;
@@ -149,16 +155,17 @@ public class Dcat3DataService {
   }
 
   /**
-   * Adds a served dataset reference.
-   * @param datasetId dataset <code>@id</code> or identifier
+   * Adds a served dataset reference (full <code>dcat:Dataset</code> object,
+   * required by the DCAT-US 3.0 schema), avoiding duplicates by <code>@id</code>.
+   * @param dataset the dataset reference
    */
-  public void addServesDataset(String datasetId) {
-    if (datasetId == null || datasetId.trim().isEmpty()) return;
+  public void addServesDataset(Dcat3Dataset dataset) {
+    if (dataset == null || dataset.atId == null || dataset.atId.trim().isEmpty()) return;
     if (servesDataset == null) servesDataset = new ArrayList<>();
-    for (Dcat3NodeRef existing : servesDataset) {
-      if (existing != null && datasetId.equals(existing.atId)) return;
+    for (Dcat3Dataset existing : servesDataset) {
+      if (existing != null && dataset.atId.equals(existing.atId)) return;
     }
-    servesDataset.add(new Dcat3NodeRef(datasetId));
+    servesDataset.add(dataset);
   }
 
   /**

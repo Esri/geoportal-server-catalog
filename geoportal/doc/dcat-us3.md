@@ -170,7 +170,7 @@ license, bureau/program codes …) come from `Dcat3Config`.
               "title": "MapServer (MapServer)",
               "endpointURL": ["https://services/.../MapServer"],
               "endpointDescription": ["https://services/.../MapServer?f=json"],
-              "servesDataset": [{ "@id": "http://host/geoportal/rest/metadata/item/abc" }],
+              "servesDataset": [{ "@type": "dcat:Dataset", "@id": "http://host/geoportal/rest/metadata/item/abc", "identifier": "abc", "title": "...", "description": "...", "contactPoint": [{ "@type": "vcard:Contact", "fn": "...", "hasEmail": "mailto:..." }] }],
               "conformsTo": [{ "@id": "https://developers.arcgis.com/rest/" }],
               "publisher": { "@type": "org:Organization", "name": "..." },
               "contactPoint": [{ "@type": "vcard:Contact", "fn": "...", "hasEmail": "mailto:..." }]

@@ -913,7 +913,16 @@ ObjectNode query = MAPPER.createObjectNode();
     svc.endpointDescription = List.of(buildEndpointDescription(url, urlType));
     svc.format = urlType;
     svc.mediaType = mediaTypeOf(urlType);
-    svc.addServesDataset(datasetId);
+    // servesDataset must be a full dcat:Dataset object (identifier, title,
+    // description, contactPoint are all required by the DCAT-US 3.0 schema),
+    // not a bare @id reference. Reuse the dataset's already-resolved title
+    // as the reference's title/description.
+    Dcat3Dataset servedDataset = toDatasetReference(root, id);
+    if (servedDataset != null) {
+      servedDataset.title = itemTitle;
+      servedDataset.description = itemTitle;
+      svc.addServesDataset(servedDataset);
+    }
     svc.addConformsTo(conformanceClassOf(urlType));
     svc.publisher = config.newPublisher();
     svc.contactPoint = contactPoints(config.newContactPoint());

@@ -112,15 +112,11 @@ public class Dcat3DatasetSeries {
   }
 
   /**
-   * Adds a series member.
-   * @param datasetId dataset <code>@id</code> or identifier
-   */
-  public void addSeriesMember(String datasetId) {
-    addSeriesMember(ref(datasetId));
-  }
-
-  /**
-   * Adds a series member reference.
+   * Adds a series member reference. Callers must supply a schema-complete
+   * <code>dcat:Dataset</code> (identifier, title, description and
+   * contactPoint populated) - see {@code Dcat3Helper#toDatasetReference}.
+   * A bare <code>@id</code>-only reference does not satisfy the DCAT-US 3.0
+   * schema for a <code>dcat:Dataset</code> occurrence.
    * @param dataset dataset reference
    */
   public void addSeriesMember(Dcat3Dataset dataset) {
@@ -130,18 +126,5 @@ public class Dcat3DatasetSeries {
       if (existing != null && dataset.atId.equals(existing.atId)) return;
     }
     seriesMember.add(dataset);
-  }
-
-  /**
-   * Builds a minimal dataset reference.
-   * @param datasetId dataset <code>@id</code> or identifier
-   * @return the reference or <code>null</code>
-   */
-  private static Dcat3Dataset ref(String datasetId) {
-    if (datasetId == null || datasetId.trim().isEmpty()) return null;
-    Dcat3Dataset dataset = new Dcat3Dataset();
-    dataset.atId = datasetId;
-    dataset.identifier = datasetId;
-    return dataset;
   }
 }
