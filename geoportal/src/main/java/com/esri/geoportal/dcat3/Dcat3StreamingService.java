@@ -84,7 +84,7 @@ public class Dcat3StreamingService {
   private static final String EMPTY_DCAT3_RESPONSE = """
     {
       "@context": "%s",
-      "conformsTo": "%s",
+      "conformsTo": { "@id": "%s" },
       "@type": "dcat:Catalog",
       "@note": "DCAT-US 3.0 document is not ready yet! The generation process has been started. Please try again later.",
       "datasetSeries": [],
@@ -505,7 +505,6 @@ public class Dcat3StreamingService {
   private JsonNode enveloped(Object value, String profile) {
     ObjectNode envelope = Dcat3Helper.MAPPER.createObjectNode();
     envelope.put("@context", dcat3Config.getContext());
-    envelope.put("conformsTo", dcat3Config.getConformsTo());
     envelope.put("describedBy", dcat3Config.getDescribedBy());
 
     JsonNode orderedValue = ordered(value, profile);

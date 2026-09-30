@@ -643,12 +643,15 @@ ObjectNode query = MAPPER.createObjectNode();
     catalog.identifier = StringUtils.defaultIfBlank(config.getCatalogIdentifier(), catalog.atId);
     catalog.title = config.getCatalogTitle();
     catalog.description = config.getCatalogDescription();
-    catalog.homepage = StringUtils.defaultIfBlank(config.getHomepage(), root);
+    catalog.homepage = new Dcat3NodeRef(
+            StringUtils.defaultIfBlank(config.getHomepage(), root),
+            null,
+            config.getCatalogTitle());
     catalog.issued = nowIso();
     catalog.modified = catalog.issued;
     catalog.rights = config.getRights();
     catalog.publisher = config.newPublisher();
-    catalog.contactPoint = config.newContactPoint();
+    catalog.contactPoint = contactPoints(config.newContactPoint());
     catalog.addLanguage(config.getLanguage());
     catalog.addConformsTo(config.getConformsTo());
     return catalog;
@@ -862,55 +865,78 @@ ObjectNode query = MAPPER.createObjectNode();
     if (!config.getIncludeDataServices()) return services;
 
     String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
-    String datasetId = root + "/rest/metadata/item/" + urlEncode(id);
     String title = StringUtils.defaultIfBlank(mappedText(source, profile, "dataset", "title", "title"), id);
 
-    int index = 0;
     for (JsonNode resource : arrayOf(source.path(sourceField(profile, "dataset.resources", "resources_nst")))) {
       String url = text(resource, sourceField(profile, "dataset.resource.url", "url_s"));
       String urlType = text(resource, sourceField(profile, "dataset.resource.urlType", "url_type_s"));
       if (StringUtils.isBlank(url) || !isHrefValid(url)) continue;
       if (!Dcat3Constants.isServiceType(urlType)) continue;
 
-      Dcat3DataService svc = new Dcat3DataService();
-      // Use the item-level dataService endpoint as the service identifier.
-      // The streaming service exposes /dcat3/dataService/{id} which returns
-      // all services for the item. Previously an index suffix was used which
-      // is not registered and results in 404 when dereferenced.
-      svc.atId = root + "/dcat3/dataService/" + urlEncode(id);
-      svc.identifier = svc.atId;
-      svc.title = "%s (%s)".formatted(title, urlType);
-      svc.description = "%s endpoint published for '%s'.".formatted(urlType, title);
-      svc.endpointURL = url;
-      svc.endpointDescription = buildEndpointDescription(url, urlType);
-      svc.format = urlType;
-      svc.mediaType = mediaTypeOf(urlType);
-      svc.addServesDataset(datasetId);
-      svc.addConformsTo(conformanceClassOf(urlType));
-      svc.publisher = config.newPublisher();
-      svc.contactPoint = contactPoints(config.newContactPoint());
-      svc.license = config.getLicense();
-      svc.accessLevel = config.getAccessLevel();
-      // Populate bureauCode and programCode from configuration so emitted
-      // DataService entries include the configured profile codes.
-      if (config.getBureauCode() != null && !config.getBureauCode().isEmpty()) {
-        svc.bureauCode = new ArrayList<>(config.getBureauCode());
-      }
-      if (config.getProgramCode() != null && !config.getProgramCode().isEmpty()) {
-        svc.programCode = new ArrayList<>(config.getProgramCode());
-      }
-      svc.landingPage = Dcat3NodeRef.document(datasetId, title + " Landing Page");
-      String modifiedValue = firstNonBlank(
-              mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
-              mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
-      String createdValue = firstNonBlank(
-              mappedText(source, profile, "dataset", "created", "sys_created_dt"),
-              mappedText(source, profile, "dataset", "createdFallback", "sys_created_dt"));
-      svc.modified = toIso(modifiedValue);
-      svc.issued = toIso(createdValue);
-      services.add(svc);
+      services.add(buildDataService(id, source, root, profile, title, url, urlType));
     }
     return services;
+  }
+
+  /**
+   * Builds a single, schema-complete <code>dcat:DataService</code> for a
+   * service-type resource endpoint. Shared by {@link #toDataServices} (the
+   * standalone <code>/dcat3/dataService/{id}</code> list) and
+   * {@link #toDistributions} (embedded as <code>dcat:accessService</code>) so
+   * both places emit the exact same, fully populated object - required
+   * properties such as <code>title</code>, <code>endpointURL</code>,
+   * <code>publisher</code> and <code>contactPoint</code> included.
+   *
+   * @param id the item id
+   * @param source the <code>_source</code> document
+   * @param root the geoportal base URL (no trailing slash)
+   * @param profile the active mapping profile
+   * @param itemTitle the resolved dataset title
+   * @param url the service endpoint URL
+   * @param urlType the service type (e.g. <code>MapServer</code>)
+   * @return the populated data service
+   */
+  private Dcat3DataService buildDataService(String id, JsonNode source, String root, String profile,
+          String itemTitle, String url, String urlType) {
+    String datasetId = root + "/rest/metadata/item/" + urlEncode(id);
+
+    Dcat3DataService svc = new Dcat3DataService();
+    // Use the item-level dataService endpoint as the service identifier.
+    // The streaming service exposes /dcat3/dataService/{id} which returns
+    // all services for the item. Previously an index suffix was used which
+    // is not registered and results in 404 when dereferenced.
+    svc.atId = root + "/dcat3/dataService/" + urlEncode(id);
+    svc.identifier = svc.atId;
+    svc.title = "%s (%s)".formatted(itemTitle, urlType);
+    svc.description = "%s endpoint published for '%s'.".formatted(urlType, itemTitle);
+    svc.endpointURL = List.of(url);
+    svc.endpointDescription = List.of(buildEndpointDescription(url, urlType));
+    svc.format = urlType;
+    svc.mediaType = mediaTypeOf(urlType);
+    svc.addServesDataset(datasetId);
+    svc.addConformsTo(conformanceClassOf(urlType));
+    svc.publisher = config.newPublisher();
+    svc.contactPoint = contactPoints(config.newContactPoint());
+    svc.license = config.getLicense();
+    svc.accessLevel = config.getAccessLevel();
+    // Populate bureauCode and programCode from configuration so emitted
+    // DataService entries include the configured profile codes.
+    if (config.getBureauCode() != null && !config.getBureauCode().isEmpty()) {
+      svc.bureauCode = new ArrayList<>(config.getBureauCode());
+    }
+    if (config.getProgramCode() != null && !config.getProgramCode().isEmpty()) {
+      svc.programCode = new ArrayList<>(config.getProgramCode());
+    }
+    svc.landingPage = Dcat3NodeRef.document(datasetId, itemTitle + " Landing Page");
+    String modifiedValue = firstNonBlank(
+            mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
+            mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
+    String createdValue = firstNonBlank(
+            mappedText(source, profile, "dataset", "created", "sys_created_dt"),
+            mappedText(source, profile, "dataset", "createdFallback", "sys_created_dt"));
+    svc.modified = toIso(modifiedValue);
+    svc.issued = toIso(createdValue);
+    return svc;
   }
 
   /**
@@ -982,14 +1008,12 @@ ObjectNode query = MAPPER.createObjectNode();
     // streaming endpoints only register /dcat3/dataService/{id}, so we now
     // reference the item-level service list URI instead. The serviceIndex is
     // retained only for internal ordering and not used in the URI.
-    int serviceIndex = 0;
+    String itemTitle = StringUtils.defaultIfBlank(mappedText(source, profile, "dataset", "title", "title"), id);
     for (JsonNode resource : arrayOf(source.path(sourceField(profile, "dataset.resources", "resources_nst")))) {
       String url = text(resource, sourceField(profile, "dataset.resource.url", "url_s"));
       String urlType = text(resource, sourceField(profile, "dataset.resource.urlType", "url_type_s"));
       boolean isValidHref = isHrefValid(url);
       boolean isService = isValidHref && Dcat3Constants.isServiceType(urlType);
-      // Reference the item-level dataService URI (no per-service index).
-      String serviceRef = config.getIncludeDataServices() && isService ? root + "/dcat3/dataService/" + urlEncode(id) : null;
 
       if (!isValidHref || seen.contains(url)) continue;
       seen.add(url);
@@ -1005,7 +1029,11 @@ ObjectNode query = MAPPER.createObjectNode();
       String inferred = inferMediaTypeFromUrl(url);
       d.mediaType = inferred != null ? inferred : mediaTypeOf(urlType);
       d.license = config.getLicense();
-      d.accessService = serviceRef;
+      // Embed the fully populated dcat:DataService (schema requires title,
+      // endpointURL, publisher and contactPoint on each accessService entry).
+      d.accessService = config.getIncludeDataServices() && isService
+              ? List.of(buildDataService(id, source, root, profile, itemTitle, url, urlType))
+              : null;
       distributions.add(d);
     }
 
@@ -1468,15 +1496,26 @@ ObjectNode query = MAPPER.createObjectNode();
   }
 
   /**
-   * Builds a minimal dataset reference object.
-   * @param datasetId the dataset @id
+   * Builds a dataset reference object suitable for use as a
+   * <code>dcat:DatasetSeries</code> <code>first</code>/<code>last</code>/
+   * <code>seriesMember</code> entry. Populates <code>title</code>,
+   * <code>description</code> and <code>contactPoint</code> (falling back to
+   * the identifier / configured contact point) so the reference satisfies
+   * the mandatory <code>dcat:Dataset</code> properties required in that
+   * context.
+   * @param root the geoportal base URL
+   * @param datasetIdentifier the dataset identifier
    * @return the reference or null
    */
-  private static Dcat3Dataset toDatasetReference(String root, String datasetIdentifier) {
+  public Dcat3Dataset toDatasetReference(String root, String datasetIdentifier) {
     if (StringUtils.isBlank(root) || StringUtils.isBlank(datasetIdentifier)) return null;
     Dcat3Dataset dataset = new Dcat3Dataset();
     dataset.atId = root + "/rest/metadata/item/" + urlEncode(datasetIdentifier);
     dataset.identifier = datasetIdentifier;
+    dataset.title = datasetIdentifier;
+    dataset.description = datasetIdentifier;
+    Dcat3ContactPoint contactPoint = config.newContactPoint();
+    if (contactPoint != null) dataset.addContactPoint(contactPoint);
     return dataset;
   }
 }

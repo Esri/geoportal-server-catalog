@@ -185,7 +185,6 @@ public class Dcat3Builder {
 
     ObjectNode envelope = Dcat3Helper.MAPPER.createObjectNode();
     envelope.put("@context", config.getContext());
-    envelope.put("conformsTo", config.getConformsTo());
     envelope.put("describedBy", config.getDescribedBy());
 
     String envelopeJson = jsonWriter.writeValueAsString(envelope).stripTrailing();
@@ -252,21 +251,12 @@ public class Dcat3Builder {
 
         boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < maxSeriesMemberCnt;
         if (!memberIds.isEmpty()) {
-          Dcat3Dataset firstRef = new Dcat3Dataset();
-          firstRef.atId = baseUrl + "/rest/metadata/item/" + Dcat3Helper.urlEncode(memberIds.get(0));
-          firstRef.identifier = memberIds.get(0);
-          series.first = firstRef;
+          series.first = helper.toDatasetReference(baseUrl, memberIds.get(0));
           if (completeMemberList) {
             for (String memberId : memberIds) {
-              Dcat3Dataset ref = new Dcat3Dataset();
-              ref.atId = baseUrl + "/rest/metadata/item/" + Dcat3Helper.urlEncode(memberId);
-              ref.identifier = memberId;
-              series.addSeriesMember(ref);
+              series.addSeriesMember(helper.toDatasetReference(baseUrl, memberId));
             }
-            Dcat3Dataset lastRef = new Dcat3Dataset();
-            lastRef.atId = baseUrl + "/rest/metadata/item/" + Dcat3Helper.urlEncode(memberIds.get(memberIds.size() - 1));
-            lastRef.identifier = memberIds.get(memberIds.size() - 1);
-            series.last = lastRef;
+            series.last = helper.toDatasetReference(baseUrl, memberIds.get(memberIds.size() - 1));
           } else {
             LOGGER.debug("DCAT3: collection {} has more than {} members; omitting incomplete seriesMember list.", collectionId, memberIds.size());
           }

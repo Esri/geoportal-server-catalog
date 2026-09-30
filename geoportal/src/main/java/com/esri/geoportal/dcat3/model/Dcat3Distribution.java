@@ -41,8 +41,8 @@ public class Dcat3Distribution {
   /** dcat:downloadURL - a direct link to a downloadable file for the distribution. */
   public String downloadURL;
 
-  /** dcat:accessService - @id of the dcat:DataService that serves this distribution, when applicable. */
-  public String accessService;
+  /** dcat:accessService - the dcat:DataService object(s) that serve this distribution, when applicable. */
+  public List<Dcat3DataService> accessService;
 
   /** List of access restriction labels or URIs. */
   public List<Dcat3AccessRestriction> accessRestriction;

@@ -96,17 +96,17 @@ public class Dcat3DataService {
   /** DCAT-US programCode */
   public List<String> programCode;
 
-  /** dcat:endpointURL - the root location of the service. */
-  public String endpointURL;
+  /** dcat:endpointURL - the root location(s) of the service. */
+  public List<String> endpointURL;
 
-  /** dcat:endpointDescription - description of the service (e.g. capabilities document). */
-  public String endpointDescription;
+  /** dcat:endpointDescription - description(s) of the service (e.g. capabilities document). */
+  public List<String> endpointDescription;
 
-  /** dcat:servesDataset - identifiers of the datasets served by this service. */
-  public List<String> servesDataset;
+  /** dcat:servesDataset - references (node objects) of the datasets served by this service. */
+  public List<Dcat3NodeRef> servesDataset;
 
-  /** dct:conformsTo - standard the service implements (e.g. OGC WMS). */
-  public List<String> conformsTo;
+  /** dct:conformsTo - standard(s) the service implements (e.g. OGC WMS), as node references. */
+  public List<Dcat3NodeRef> conformsTo;
 
   /** dct:format - the service type (e.g. FeatureServer, WMS). */
   public String format;
@@ -155,7 +155,10 @@ public class Dcat3DataService {
   public void addServesDataset(String datasetId) {
     if (datasetId == null || datasetId.trim().isEmpty()) return;
     if (servesDataset == null) servesDataset = new ArrayList<>();
-    if (!servesDataset.contains(datasetId)) servesDataset.add(datasetId);
+    for (Dcat3NodeRef existing : servesDataset) {
+      if (existing != null && datasetId.equals(existing.atId)) return;
+    }
+    servesDataset.add(new Dcat3NodeRef(datasetId));
   }
 
   /**
@@ -165,6 +168,9 @@ public class Dcat3DataService {
   public void addConformsTo(String standard) {
     if (standard == null || standard.trim().isEmpty()) return;
     if (conformsTo == null) conformsTo = new ArrayList<>();
-    if (!conformsTo.contains(standard)) conformsTo.add(standard);
+    for (Dcat3NodeRef existing : conformsTo) {
+      if (existing != null && standard.equals(existing.atId)) return;
+    }
+    conformsTo.add(new Dcat3NodeRef(standard));
   }
 }

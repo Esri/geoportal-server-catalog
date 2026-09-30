@@ -49,14 +49,14 @@ public class Dcat3Catalog {
   /** dcat:dataset (mandatory). */
   public List<Dcat3Dataset> dataset;
 
-  /** dct:conformsTo (recommended). */
-  public List<String> conformsTo;
+  /** dct:conformsTo (recommended) - a single conformance reference (object), or omitted. */
+  public Dcat3NodeRef conformsTo;
 
   /** dcat:contactPoint (recommended). */
-  public Dcat3ContactPoint contactPoint;
+  public List<Dcat3ContactPoint> contactPoint;
 
-  /** foaf:homepage (recommended). */
-  public String homepage;
+  /** foaf:homepage (recommended) - a node reference (object), or omitted. */
+  public Dcat3NodeRef homepage;
 
   /** dct:issued (recommended). */
   public String issued;
@@ -94,13 +94,22 @@ public class Dcat3Catalog {
   }
 
   /**
-   * Adds a conforming standard or profile URI.
+   * Sets the conforming standard or profile URI as a JSON-LD node reference.
    * @param value URI
    */
   public void addConformsTo(String value) {
     if (value == null || value.trim().isEmpty()) return;
-    if (conformsTo == null) conformsTo = new ArrayList<>();
-    if (!conformsTo.contains(value)) conformsTo.add(value);
+    conformsTo = new Dcat3NodeRef(value);
+  }
+
+  /**
+   * Adds a contact point, avoiding blanks.
+   * @param value contact point
+   */
+  public void addContactPoint(Dcat3ContactPoint value) {
+    if (value == null) return;
+    if (contactPoint == null) contactPoint = new ArrayList<>();
+    contactPoint.add(value);
   }
 
   /**
