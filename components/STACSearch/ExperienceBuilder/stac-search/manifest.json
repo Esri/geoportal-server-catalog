@@ -4,10 +4,10 @@
   "settingDependency": "jimu-arcgis",
   "label": "STAC Search",
   "type": "widget",
-  "version": "1.20.0",
-  "exbVersion": "1.20.0",
-  "author": "GitHub Copilot",
-  "description": "Starter Experience Builder widget for searching STAC APIs with ArcGIS web components.",
+  "version": "1.17.0",
+  "exbVersion": "1.17.0",
+  "author": "Esri, Inc.",
+  "description": "Experience Builder widget for searching STAC APIs with ArcGIS web components.",
   "license": "http://www.apache.org/licenses/LICENSE-2.0",
   "properties": {
     "hasSettingPage": true

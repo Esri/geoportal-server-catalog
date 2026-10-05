@@ -16,6 +16,18 @@
               New
             </button>
             <button data-role="admin"
+              class="collections-action"
+              data-dojo-attach-point="importCollectionButton"
+            >
+              Import
+            </button>
+            <input
+              type="file"
+              accept=".json,application/json"
+              style="display: none"
+              data-dojo-attach-point="importFileInput"
+            />
+            <button data-role="admin"
               class="collections-action collections-action-delete disabled"
               data-dojo-attach-point="deleteCollectionButton"
               disabled
@@ -98,6 +110,13 @@
                 disabled
               >
                 Zoom
+              </button>
+              <button
+                data-dojo-attach-point="exportCollectionButton"
+                class="info-actions info-actions-export disabled"
+                disabled
+              >
+                Export
               </button>
               <button data-role="admin"
                 data-dojo-attach-point="editCollectionButton"
@@ -436,6 +455,10 @@
     }
 
     .info-actions-zoom {
+      margin-right: 15px;
+    }
+
+    .info-actions-export {
       margin-right: 15px;
     }
     
