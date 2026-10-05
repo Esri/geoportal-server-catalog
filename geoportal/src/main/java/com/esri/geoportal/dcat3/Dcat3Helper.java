@@ -794,7 +794,9 @@ ObjectNode query = MAPPER.createObjectNode();
     series.addSpatial(toLocation(collection.path(sourceField(profile, "datasetSeries.envelope", "envelope_geo"))));
     series.addTemporal(toPeriodOfTime(collection.path(sourceField(profile, "datasetSeries.timePeriod", "timeperiod_nst"))));
 
-    series.publisher = config.newPublisher();
+    // dct:publisher - record-level value (mapped via datasetSeries.publisherName,
+    // e.g. "publisher_s, publisher_name") takes precedence over the configured default.
+    series.publisher = config.newPublisher(mappedText(collection, profile, "datasetSeries", "publisherName", null));
     // dcat:contactPoint - record-level values (mapped via datasetSeries.contactName
     // / datasetSeries.contactEmail) take precedence over the configured default.
     String recordContactName = mappedText(collection, profile, "datasetSeries", "contactName", null);
@@ -1395,36 +1397,68 @@ ObjectNode query = MAPPER.createObjectNode();
   }
 
   /**
-   * Reads a textual property.
+   * Reads a textual property. <code>name</code> may be a single field name or
+   * a comma-separated list of candidate field names (e.g.
+   * <code>"publisher_s, publisher_name"</code>, as configured in a
+   * <code>sourceFieldMappings</code> entry) - each candidate is tried, in
+   * order, and the first one with a non-blank value in <code>node</code> wins.
+   * This allows a single mapping to tolerate multiple possible source field
+   * names across differently indexed records, falling back to the next
+   * candidate (and ultimately to the caller-supplied default) when a field is
+   * absent/blank.
    */
   public static String text(JsonNode node, String name) {
-    if (node == null) return null;
-    JsonNode v = node.path(name);
-    if (v.isMissingNode() || v.isNull()) return null;
-    if (v.isArray()) {
-      return v.size() > 0 ? StringUtils.trimToNull(v.get(0).asText()) : null;
+    if (node == null || StringUtils.isBlank(name)) return null;
+    for (String candidate : splitFieldNames(name)) {
+      JsonNode v = node.path(candidate);
+      if (v.isMissingNode() || v.isNull()) continue;
+      String value = v.isArray()
+              ? (v.size() > 0 ? StringUtils.trimToNull(v.get(0).asText()) : null)
+              : StringUtils.trimToNull(v.asText());
+      if (value != null) return value;
     }
-    return StringUtils.trimToNull(v.asText());
+    return null;
   }
 
   /**
    * Reads a property as a list of strings, tolerating single values.
+   * <code>name</code> may be a comma-separated list of candidate field names
+   * (see {@link #text(JsonNode, String)}); the first candidate that yields a
+   * non-empty list wins.
    */
   public static List<String> textList(JsonNode node, String name) {
     List<String> values = new ArrayList<>();
-    if (node == null) return values;
-    JsonNode v = node.path(name);
-    if (v.isMissingNode() || v.isNull()) return values;
-    if (v.isArray()) {
-      for (JsonNode item : v) {
-        String s = StringUtils.trimToNull(item.asText());
-        if (s != null && !values.contains(s)) values.add(s);
+    if (node == null || StringUtils.isBlank(name)) return values;
+    for (String candidate : splitFieldNames(name)) {
+      JsonNode v = node.path(candidate);
+      if (v.isMissingNode() || v.isNull()) continue;
+      List<String> candidateValues = new ArrayList<>();
+      if (v.isArray()) {
+        for (JsonNode item : v) {
+          String s = StringUtils.trimToNull(item.asText());
+          if (s != null && !candidateValues.contains(s)) candidateValues.add(s);
+        }
+      } else {
+        String s = StringUtils.trimToNull(v.asText());
+        if (s != null) candidateValues.add(s);
       }
-    } else {
-      String s = StringUtils.trimToNull(v.asText());
-      if (s != null) values.add(s);
+      if (!candidateValues.isEmpty()) return candidateValues;
     }
     return values;
+  }
+
+  /**
+   * Splits a (possibly comma-separated) field name mapping into its
+   * individual candidate field names, trimming whitespace and discarding
+   * blank entries.
+   */
+  private static List<String> splitFieldNames(String name) {
+    List<String> names = new ArrayList<>();
+    for (String part : name.split(",")) {
+      String trimmed = StringUtils.trimToNull(part);
+      if (trimmed != null) names.add(trimmed);
+    }
+    return names;
   }
 
   /**
