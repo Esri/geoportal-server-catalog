@@ -26,7 +26,6 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Iterator;
-import java.util.Set;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -91,9 +90,6 @@ public class Dcat3StreamingService {
       "dataset": []
     }""";
 
-  /** The only accepted values for the {@code profile} request parameter (case-insensitive). Default is US. */
-  private static final Set<String> VALID_PROFILES = Set.of("us", "world");
-
   @Autowired
   private Dcat3Cache dcat3Cache;
 
@@ -125,6 +121,14 @@ public class Dcat3StreamingService {
 
     // If a cached document exists, stream it directly to the servlet output.
     if (lastModified != null) {
+      // Headers must be set on the raw HttpServletResponse BEFORE writing to
+      // the output stream: once bytes are written/flushed the response is
+      // committed and any headers later applied via the returned
+      // ResponseEntity (e.g. Content-Type from "produces", Last-Modified)
+      // are silently dropped by the servlet container.
+      response.setContentType(MediaType.APPLICATION_JSON_VALUE);
+      response.setCharacterEncoding(StandardCharsets.UTF_8.name());
+      response.setDateHeader("Last-Modified", lastModified.getTime());
       try (OutputStream outStream = response.getOutputStream();
            InputStream input = dcat3Cache.createInputCacheStream(resolvedProfile)) {
         IOUtils.copy(input, outStream);
@@ -133,7 +137,7 @@ public class Dcat3StreamingService {
         LOGGER.error("Error streaming the DCAT-US 3.0 document.", ex);
         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
       }
-      return ResponseEntity.ok().lastModified(lastModified.getTime()).build();
+      return null;
     }
 
     // No cached document: do NOT touch the servlet output. Build the
@@ -457,13 +461,16 @@ public class Dcat3StreamingService {
   }
 
   /**
-   * Validates the {@code profile} request parameter: only blank (defaults to
-   * US), {@code us} or {@code world} (case-insensitive) are accepted.
+   * Validates the {@code profile} request parameter against the accepted
+   * values configured via <code>validProfiles</code> in the JSON mapping
+   * configuration (see {@link Dcat3Config#getValidProfiles()}): only blank
+   * (defaults to the configured default profile) or one of the configured
+   * valid profiles (case-insensitive) are accepted.
    * @param profile the requested profile, or {@code null}/blank for the default
-   * @return {@code true} when the profile is blank or one of the accepted values
+   * @return {@code true} when the profile is blank or a configured valid profile
    */
-  private static boolean isValidProfile(String profile) {
-    return StringUtils.isBlank(profile) || VALID_PROFILES.contains(profile.trim().toLowerCase());
+  private boolean isValidProfile(String profile) {
+    return dcat3Config.isValidProfile(profile);
   }
 
   /**
@@ -471,10 +478,11 @@ public class Dcat3StreamingService {
    * {@code profile} value is requested.
    * @return the 400 response body
    */
-  private static ResponseEntity<String> invalidProfileResponse() {
+  private ResponseEntity<String> invalidProfileResponse() {
     return ResponseEntity.status(HttpStatus.BAD_REQUEST)
             .contentType(MediaType.APPLICATION_JSON)
-            .body("{\"code\":400,\"description\":\"Unsupported profile specified. Valid profiles are US and World only.\"}");
+            .body("{\"code\":400,\"description\":\"Unsupported profile specified. Valid profiles are %s.\"}"
+                    .formatted(escape(String.join(", ", dcat3Config.getValidProfiles()))));
   }
 
   private ResponseEntity<String> error(String message, Exception ex) {

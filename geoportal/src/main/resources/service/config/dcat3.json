@@ -1,5 +1,6 @@
 {
   "defaultProfile": "us",
+  "validProfiles": ["us", "world"],
   "profiles": {
     "us": {
       "sourceFieldMappings": {

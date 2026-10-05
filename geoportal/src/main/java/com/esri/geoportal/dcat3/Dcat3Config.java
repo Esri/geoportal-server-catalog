@@ -18,8 +18,10 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -127,6 +129,14 @@ public class Dcat3Config {
 
   /** Profile-specific mapping and ordering configuration loaded from JSON. */
   private Map<String, ProfileDefinition> profiles = new LinkedHashMap<>();
+
+  /**
+   * Accepted values for the <code>profile</code> request parameter
+   * (lower-case, e.g. <code>us</code>, <code>world</code>), loaded from the
+   * <code>validProfiles</code> array in the JSON mapping configuration. Falls
+   * back to the keys of {@link #profiles} when not explicitly configured.
+   */
+  private Set<String> validProfiles = new LinkedHashSet<>();
 
   private static final class ProfileDefinition {
     private Map<String, String> sourceFieldMappings = new LinkedHashMap<>();
@@ -381,6 +391,30 @@ public class Dcat3Config {
     return StringUtils.defaultIfBlank(requested, fallback);
   }
 
+  /**
+   * Accepted values for the <code>profile</code> request parameter, as
+   * configured via <code>validProfiles</code> in the JSON mapping
+   * configuration (falling back to the configured {@link #profiles} keys
+   * when <code>validProfiles</code> is absent/empty).
+   * @return an unmodifiable, lower-case set of valid profile names
+   */
+  public Set<String> getValidProfiles() {
+    if (!validProfiles.isEmpty()) return Collections.unmodifiableSet(validProfiles);
+    return Collections.unmodifiableSet(profiles.keySet());
+  }
+
+  /**
+   * Checks whether the given <code>profile</code> request parameter value is
+   * acceptable: blank (defaults to {@link #getDefaultProfile()}) or one of
+   * {@link #getValidProfiles()} (case-insensitive).
+   * @param profile the requested profile, or <code>null</code>/blank for the default
+   * @return <code>true</code> when the profile is blank or a configured valid profile
+   */
+  public boolean isValidProfile(String profile) {
+    String normalized = normalizeProfileName(profile);
+    return normalized == null || getValidProfiles().contains(normalized);
+  }
+
   private void loadMappingConfig() {
     try (InputStream in = Thread.currentThread().getContextClassLoader().getResourceAsStream(mappingConfigPath)) {
       if (in == null) return;
@@ -407,6 +441,13 @@ public class Dcat3Config {
         this.profiles = loadedProfiles;
       }
 
+      LinkedHashSet<String> loadedValidProfiles = new LinkedHashSet<>();
+      for (String name : jsonList(root.path("validProfiles"))) {
+        String normalized = normalizeProfileName(name);
+        if (normalized != null) loadedValidProfiles.add(normalized);
+      }
+      this.validProfiles = loadedValidProfiles;
+
       String resolvedDefault = resolveProfile(defaultProfile);
       if (StringUtils.isNotBlank(resolvedDefault)) {
         this.defaultProfile = resolvedDefault;
@@ -415,6 +456,7 @@ public class Dcat3Config {
       LOGGER.warn("DCAT3: unable to load mapping config from '{}'.", mappingConfigPath, ex);
     }
   }
+
 
   private ProfileDefinition getOrCreateProfile(String profile) {
     String key = StringUtils.defaultIfBlank(normalizeProfileName(profile), "default");
