@@ -146,8 +146,20 @@ public class Dcat3Config {
    * @return publisher or <code>null</code> when not configured
    */
   public Dcat3Organization newPublisher() {
-    if (StringUtils.isBlank(publisherName)) return null;
-    Dcat3Organization org = new Dcat3Organization(publisherName);
+    return newPublisher(null);
+  }
+
+  /**
+   * Builds a fresh publisher instance for a resource, preferring a
+   * record-level value (e.g. mapped from the metadata index via
+   * <code>sourceFieldMappings</code>) over the configured default.
+   * @param overrideName record-level publisher name, or <code>null</code>/blank to use the default
+   * @return publisher or <code>null</code> when neither the override nor the default is configured
+   */
+  public Dcat3Organization newPublisher(String overrideName) {
+    String name = StringUtils.defaultIfBlank(StringUtils.trimToNull(overrideName), publisherName);
+    if (StringUtils.isBlank(name)) return null;
+    Dcat3Organization org = new Dcat3Organization(name);
     org.atId = StringUtils.trimToNull(publisherId);
     return org;
   }
@@ -157,8 +169,24 @@ public class Dcat3Config {
    * @return contact point or <code>null</code> when not configured
    */
   public Dcat3ContactPoint newContactPoint() {
-    if (StringUtils.isBlank(contactName) && StringUtils.isBlank(contactEmail)) return null;
-    return new Dcat3ContactPoint(StringUtils.trimToNull(contactName), StringUtils.trimToNull(contactEmail));
+    return newContactPoint(null, null);
+  }
+
+  /**
+   * Builds a fresh contact point instance for a resource, preferring
+   * record-level values (e.g. mapped from the metadata index via
+   * <code>sourceFieldMappings</code>) over the configured defaults. Each
+   * value (name / email) is overridden independently: a blank override
+   * falls back to its own configured default.
+   * @param overrideName record-level contact name, or <code>null</code>/blank to use the default
+   * @param overrideEmail record-level contact email, or <code>null</code>/blank to use the default
+   * @return contact point or <code>null</code> when neither override nor default is configured
+   */
+  public Dcat3ContactPoint newContactPoint(String overrideName, String overrideEmail) {
+    String name = StringUtils.defaultIfBlank(StringUtils.trimToNull(overrideName), contactName);
+    String email = StringUtils.defaultIfBlank(StringUtils.trimToNull(overrideEmail), contactEmail);
+    if (StringUtils.isBlank(name) && StringUtils.isBlank(email)) return null;
+    return new Dcat3ContactPoint(StringUtils.trimToNull(name), StringUtils.trimToNull(email));
   }
 
   /**

@@ -8,6 +8,10 @@
         "query.collectionMembership": "src_collections_s",
         
         "dataset.keywords": "keywords_s",
+		"dataset.contactName": "contact_organization_s",
+		"dataset.contactEmail": "contact_people_s",
+		"dataset.publisherName": "publisher_s",
+		
         "dataset.theme": "itemType_s",       
         "dataset.created": "sys_created_dt",
         "dataset.modified": "sys_modified_dt",        
@@ -30,7 +34,9 @@
         "datasetSeries.modified": "sys_modified_dt",
         "datasetSeries.accrualPeriodicity": "accrualPeriodicity",
         "datasetSeries.envelope": "envelope_geo",
-        "datasetSeries.timePeriod": "timeperiod_nst"
+        "datasetSeries.timePeriod": "timeperiod_nst",
+		"datasetSeries.contactName": "contact_organization_s",
+		"datasetSeries.contactEmail": "contact_people_s"
       },
       "classProperty": {
         "Dcat3Catalog": [
@@ -162,6 +168,9 @@
         "dataset.title": "title",
         "dataset.description": "description",
         "dataset.keywords": "keywords_s",
+		"dataset.contactName": "contact_organization_s",
+		"dataset.contactEmail": "contact_people_s",
+		"dataset.publisherName": "publisher_s",
         "dataset.theme": "itemType_s",
         "dataset.fileId": "fileid",
         "dataset.created": "sys_created_dt",
@@ -186,7 +195,9 @@
         "datasetSeries.modified": "sys_modified_dt",
         "datasetSeries.accrualPeriodicity": "accrualPeriodicity",
         "datasetSeries.envelope": "envelope_geo",
-        "datasetSeries.timePeriod": "timeperiod_nst"
+        "datasetSeries.timePeriod": "timeperiod_nst",
+		"datasetSeries.contactName": "contact_organization_s",
+		"datasetSeries.contactEmail": "contact_people_s"
       },
       "classProperty": {
         "Dcat3Catalog": [

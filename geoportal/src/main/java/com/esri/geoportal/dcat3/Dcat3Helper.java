@@ -695,7 +695,13 @@ ObjectNode query = MAPPER.createObjectNode();
             mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
     ds.modified = StringUtils.defaultIfBlank(toIso(modifiedValue), nowIso());
 
-    Dcat3ContactPoint contactPoint = config.newContactPoint();
+    // dct:publisher / dcat:contactPoint - record-level values (mapped via
+    // sourceFieldMappings, e.g. dataset.publisherName/contactName/contactEmail)
+    // take precedence over the catalog-wide configured defaults; a blank
+    // mapped value falls back to the default independently per field.
+    String recordContactName = mappedText(source, profile, "dataset", "contactName", null);
+    String recordContactEmail = mappedText(source, profile, "dataset", "contactEmail", null);
+    Dcat3ContactPoint contactPoint = config.newContactPoint(recordContactName, recordContactEmail);
     if (contactPoint != null) ds.addContactPoint(contactPoint);
 
     for (String kw : mappedTextList(source, profile, "dataset", "keywords", "keywords_s")) {
@@ -709,7 +715,7 @@ ObjectNode query = MAPPER.createObjectNode();
     Dcat3PeriodOfTime temporal = toPeriodOfTime(source.path(sourceField(profile, "dataset.timePeriod", "timeperiod_nst")));
     if (temporal != null && !temporal.isEmpty()) ds.addTemporal(temporal);
 
-    ds.publisher = config.newPublisher();
+    ds.publisher = config.newPublisher(mappedText(source, profile, "dataset", "publisherName", null));
 
     // dct:creator (sys_owner_s) - the item owner, modeled as an org:Organization
     // consistent with dct:publisher / Dcat3DataService.creator.
@@ -789,7 +795,11 @@ ObjectNode query = MAPPER.createObjectNode();
     series.addTemporal(toPeriodOfTime(collection.path(sourceField(profile, "datasetSeries.timePeriod", "timeperiod_nst"))));
 
     series.publisher = config.newPublisher();
-    Dcat3ContactPoint contactPoint = config.newContactPoint();
+    // dcat:contactPoint - record-level values (mapped via datasetSeries.contactName
+    // / datasetSeries.contactEmail) take precedence over the configured default.
+    String recordContactName = mappedText(collection, profile, "datasetSeries", "contactName", null);
+    String recordContactEmail = mappedText(collection, profile, "datasetSeries", "contactEmail", null);
+    Dcat3ContactPoint contactPoint = config.newContactPoint(recordContactName, recordContactEmail);
     if (contactPoint != null) series.addContactPoint(contactPoint);
 
     if (includeSeriesMember) {

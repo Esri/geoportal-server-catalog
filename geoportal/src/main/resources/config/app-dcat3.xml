@@ -30,10 +30,10 @@
     <beans:property name="language" value="${gpt_dcat3Language:en}"/>
 
     <!-- Resource defaults required by the DCAT-US profile -->
-    <beans:property name="publisherName" value="${gpt_dcat3PublisherName:Your Publisher}"/>
+    <beans:property name="publisherName" value="${gpt_dcat3PublisherName:Esri}"/>
     <beans:property name="publisherId" value="${gpt_dcat3PublisherId:}"/>
     <beans:property name="contactName" value="${gpt_dcat3ContactName:Your contact point}"/>
-    <beans:property name="contactEmail" value="${gpt_dcat3ContactEmail:email@your.org}"/>
+    <beans:property name="contactEmail" value="${gpt_dcat3ContactEmail:ankita_srivastava@esri.com}"/>
     <beans:property name="license" value="${gpt_dcat3License:http://www.usa.gov/publicdomain/label/1.0/}"/>
     <beans:property name="rights" value="${gpt_dcat3Rights:}"/>
     <beans:property name="accessLevel" value="${gpt_dcat3AccessLevel:public}"/>
