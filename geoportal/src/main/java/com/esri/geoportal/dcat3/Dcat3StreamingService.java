@@ -85,7 +85,7 @@ public class Dcat3StreamingService {
       "@context": "%s",
       "conformsTo": { "@id": "%s" },
       "@type": "dcat:Catalog",
-      "@note": "DCAT-US 3.0 document is not ready yet! The generation process has been started. Please try again later.",
+      "description": "DCAT-US 3.0 document is not ready yet! The generation process has been started. Please try again later.",
       "datasetSeries": [],
       "dataset": []
     }""";
