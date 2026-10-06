@@ -97,6 +97,8 @@ per profile via `service/config/dcat3.json` (see §6.1).
 | `description` | `dct:description` |
 | `sys_created_dt` | `dct:issued` |
 | `sys_modified_dt` | `dct:modified` |
+| `publisher_s`, `contact_organizations_s` | `dct:publisher` (`org:Organization.name`) on `dcat:Dataset` and on every `dcat:DataService` derived from it (standalone `/dcat3/dataService/{id}` and embedded `dcat:accessService`), including its `servesDataset` reference — see §3.1 |
+| `contact_people_s` | `dcat:contactPoint.fn` on the same resources as above — see §3.1 |
 | `keywords_s` | `dcat:keyword` |
 | `itemType_s` | `dcat:theme` |
 | `sys_owner_s` | `dct:creator` (`org:Organization`) |
@@ -112,9 +114,62 @@ per profile via `service/config/dcat3.json` (see §6.1).
 | `resources_nst[].url_s` / `url_type_s` | `dcat:Distribution`; when the type is a service (`MapServer`, `WMS`, …) also a `dcat:DataService` attached as `dcat:accessService` |
 | *(item itself)* | `dcat:Distribution` for the JSON / HTML / XML metadata representations |
 | collections index (`id`/`identifier`, `title`/`name`, `description`, `sys_created_dt`, `sys_modified_dt`, `accrualPeriodicity`, `envelope_geo`, `timeperiod_nst`) | `dcat:DatasetSeries` |
+| collections index `contacts[0].organization` / `.name` / `.emails[0].value` | `dcat:DatasetSeries.publisher` / `contactPoint` — see §3.1 |
 
 Values that cannot be derived from the index (publisher, contact point,
 license, bureau/program codes …) come from `Dcat3Config`.
+
+### 3.1 Publisher / contact point resolution precedence
+
+`dct:publisher` and `dcat:contactPoint` are resolved independently (a blank
+value at one precedence level falls through to the next) for every resource
+that carries them:
+
+* **`dcat:Dataset`** (`/dcat3/dataset/{id}`, `/dcat3/dataset`, and the
+  `dataset` array of `/dcat3.json`):
+  1. the item's own `dataset.publisherName` / `dataset.contactName` /
+     `dataset.contactEmail` mapping (defaults: `publisher_s,contact_organizations_s`
+     / `contact_people_s` / *(unmapped)*),
+  2. the catalog-wide configured default (`gpt_dcat3PublisherName` /
+     `gpt_dcat3ContactName` / `gpt_dcat3ContactEmail`).
+* **`dcat:DatasetSeries`** (`/dcat3/datasetSeries*` and the `datasetSeries`
+  array of `/dcat3.json`):
+  1. `organization` / `name` / `emails[0].value` of the **first entry** of
+     the collection's `contacts` array (`datasetSeries.contacts`, default
+     field name `contacts` — populated e.g. through the Collections Panel UI
+     contacts editor; see §3.2),
+  2. the legacy flat-field mapping, when configured (`datasetSeries.publisherName`
+     / `datasetSeries.contactName` / `datasetSeries.contactEmail` — not
+     mapped by default in `service/config/dcat3.json`),
+  3. the catalog-wide configured default.
+* **`dcat:DataService`** (standalone `/dcat3/dataService/{id}` **and**
+  embedded `dcat:accessService` on a `dcat:Distribution`) and its
+  **`servesDataset`** reference: both mirror the **served dataset's**
+  resolved `dct:publisher` / `dcat:contactPoint` (i.e. the same two-level
+  precedence described above for `dcat:Dataset`), so a `dcat:DataService`
+  and the dataset it serves never disagree on publisher/contact.
+
+### 3.2 STAC collection `contacts` (Collections Panel UI)
+
+The Collections Panel's collection editor can attach one or more contacts to
+a collection, stored as a `contacts` array on the STAC collection document
+(STAC [contacts extension](https://github.com/stac-extensions/contacts)
+shape):
+
+```jsonc
+"contacts": [{
+  "name": "John Doe",
+  "position": "CEO",
+  "description": "John Doe is the CEO of Doe Chemicals, overseeing all operations and strategic direction.",
+  "organization": "Doe Chemicals",
+  "emails": [{ "value": "john@doe.com", "roles": ["work"] }]
+}]
+```
+
+Only the **first** contact's `organization` / `name` / first email `value`
+feed `dcat:DatasetSeries.publisher` / `contactPoint` (see §3.1); additional
+contacts are stored on the collection but not currently surfaced elsewhere in
+the DCAT-US 3.0 document.
 
 ---
 
@@ -170,7 +225,7 @@ license, bureau/program codes …) come from `Dcat3Config`.
               "title": "MapServer (MapServer)",
               "endpointURL": ["https://services/.../MapServer"],
               "endpointDescription": ["https://services/.../MapServer?f=json"],
-              "servesDataset": [{ "@type": "dcat:Dataset", "@id": "http://host/geoportal/rest/metadata/item/abc", "identifier": "abc", "title": "...", "description": "...", "contactPoint": [{ "@type": "vcard:Contact", "fn": "...", "hasEmail": "mailto:..." }] }],
+              "servesDataset": [{ "@type": "dcat:Dataset", "@id": "http://host/geoportal/rest/metadata/item/abc", "identifier": "abc", "title": "...", "description": "...", "publisher": { "@type": "org:Organization", "name": "..." }, "contactPoint": [{ "@type": "vcard:Contact", "fn": "...", "hasEmail": "mailto:..." }] }],
               "conformsTo": [{ "@id": "https://developers.arcgis.com/rest/" }],
               "publisher": { "@type": "org:Organization", "name": "..." },
               "contactPoint": [{ "@type": "vcard:Contact", "fn": "...", "hasEmail": "mailto:..." }]
@@ -271,6 +326,11 @@ All properties can be overridden with environment variables:
   can be repointed at different index fields per profile without code
   changes, and also drives the Elasticsearch `_source.includes` list
   (`datasetSourceIncludes`) so only the fields actually needed are fetched.
+  A value may be a **comma-separated list of candidate field names** (e.g.
+  the default `dataset.publisherName`: `"publisher_s,contact_organizations_s"`)
+  — each candidate is tried in order and the first with a non-blank value
+  wins; this is also how `datasetSeries.contacts` (default field name
+  `contacts`) locates the collection's STAC `contacts` array (see §3.1/§3.2).
 * **`classProperty`** — per DCAT-US 3.0 class (`Dcat3Dataset`,
   `Dcat3DataService`, `Dcat3DatasetSeries`, `Dcat3Distribution`,
   `Dcat3Organization`, `Dcat3PeriodOfTime`, `Dcat3ContactPoint`, …) the
