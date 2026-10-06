@@ -9,9 +9,9 @@
         "query.collectionMembership": "src_collections_s",
         
         "dataset.keywords": "keywords_s",
-		"dataset.publisherName": "publisher_s, publisher_name",
-		"dataset.contactName": "contact_organization_s,contact_organization_name",
-		"dataset.contactEmail": "contact_people_s,contact_people_email",
+		"dataset.publisherName": "publisher_s,contact_organizations_s",
+		"dataset.contactName": "contact_people_s",
+		"dataset.contactEmail": "",
 		
         "dataset.theme": "itemType_s",       
         "dataset.created": "sys_created_dt",
@@ -36,9 +36,7 @@
         "datasetSeries.accrualPeriodicity": "accrualPeriodicity",
         "datasetSeries.envelope": "envelope_geo",
         "datasetSeries.timePeriod": "timeperiod_nst",
-		"datasetSeries.publisherName": "publisher_s, publisher_name",
-		"datasetSeries.contactName": "contact_organization_s,contact_organization_name",
-		"datasetSeries.contactEmail": "contact_people_s,contact_people_email"
+		"datasetSeries.contacts": "contacts"
       },
       "classProperty": {
         "Dcat3Catalog": [
@@ -170,9 +168,9 @@
         "dataset.title": "title",
         "dataset.description": "description",
         "dataset.keywords": "keywords_s",
-		"dataset.publisherName": "publisher_s, publisher_name",
-		"dataset.contactName": "contact_organization_s,contact_organization_name",
-		"dataset.contactEmail": "contact_people_s,contact_people_email",
+		"dataset.publisherName": "publisher_s,contact_organizations_s",
+		"dataset.contactName": "contact_people_s",
+		"dataset.contactEmail": "",
         "dataset.theme": "itemType_s",
         "dataset.fileId": "fileid",
         "dataset.created": "sys_created_dt",
@@ -198,9 +196,7 @@
         "datasetSeries.accrualPeriodicity": "accrualPeriodicity",
         "datasetSeries.envelope": "envelope_geo",
         "datasetSeries.timePeriod": "timeperiod_nst",
-		"datasetSeries.publisherName": "publisher_s, publisher_name",
-		"datasetSeries.contactName": "contact_organization_s,contact_organization_name",
-		"datasetSeries.contactEmail": "contact_people_s,contact_people_email"
+		"datasetSeries.contacts": "contacts"
       },
       "classProperty": {
         "Dcat3Catalog": [

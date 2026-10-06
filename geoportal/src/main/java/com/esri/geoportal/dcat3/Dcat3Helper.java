@@ -794,13 +794,31 @@ ObjectNode query = MAPPER.createObjectNode();
     series.addSpatial(toLocation(collection.path(sourceField(profile, "datasetSeries.envelope", "envelope_geo"))));
     series.addTemporal(toPeriodOfTime(collection.path(sourceField(profile, "datasetSeries.timePeriod", "timeperiod_nst"))));
 
-    // dct:publisher - record-level value (mapped via datasetSeries.publisherName,
-    // e.g. "publisher_s, publisher_name") takes precedence over the configured default.
-    series.publisher = config.newPublisher(mappedText(collection, profile, "datasetSeries", "publisherName", null));
-    // dcat:contactPoint - record-level values (mapped via datasetSeries.contactName
-    // / datasetSeries.contactEmail) take precedence over the configured default.
-    String recordContactName = mappedText(collection, profile, "datasetSeries", "contactName", null);
-    String recordContactEmail = mappedText(collection, profile, "datasetSeries", "contactEmail", null);
+    // dct:publisher - record-level value takes precedence over the configured
+    // default (app-dcat3.xml's publisherName). Resolution order:
+    //   1. organization of the first entry in the collection's "contacts"
+    //      array (see datasetSeries.contacts mapping, e.g. the STAC
+    //      collection contacts extension populated through the Collections
+    //      Panel UI),
+    //   2. the legacy flat-field mapping (datasetSeries.publisherName, e.g.
+    //      "publisher_s, publisher_name"),
+    //   3. the configured default (config.newPublisher() -> app-dcat3.xml
+    //      gpt_dcat3PublisherName).
+    JsonNode primaryContact = firstContact(collection, profile);
+    String contactsPublisherName = primaryContact != null ? text(primaryContact, "organization") : null;
+    series.publisher = config.newPublisher(firstNonBlank(
+            contactsPublisherName,
+            mappedText(collection, profile, "datasetSeries", "publisherName", null)));
+    // dcat:contactPoint - same precedence as above, applied independently to
+    // name (contacts[0].name) and email (contacts[0].emails[0].value).
+    String contactsContactName = primaryContact != null ? text(primaryContact, "name") : null;
+    String contactsContactEmail = firstContactEmailValue(primaryContact);
+    String recordContactName = firstNonBlank(
+            contactsContactName,
+            mappedText(collection, profile, "datasetSeries", "contactName", null));
+    String recordContactEmail = firstNonBlank(
+            contactsContactEmail,
+            mappedText(collection, profile, "datasetSeries", "contactEmail", null));
     Dcat3ContactPoint contactPoint = config.newContactPoint(recordContactName, recordContactEmail);
     if (contactPoint != null) series.addContactPoint(contactPoint);
 
@@ -926,18 +944,34 @@ ObjectNode query = MAPPER.createObjectNode();
     svc.format = urlType;
     svc.mediaType = mediaTypeOf(urlType);
     // servesDataset must be a full dcat:Dataset object (identifier, title,
-    // description, contactPoint are all required by the DCAT-US 3.0 schema),
-    // not a bare @id reference. Reuse the dataset's already-resolved title
-    // as the reference's title/description.
-    Dcat3Dataset servedDataset = toDatasetReference(root, id);
+    // description, publisher, contactPoint are all required by the DCAT-US
+    // 3.0 schema), not a bare @id reference. Reuse the dataset's
+    // already-resolved title as the reference's title/description, and the
+    // record-level publisher/contact (resolved below) so the served dataset
+    // reference matches the publisher/contactPoint of the dcat:DataService
+    // itself, rather than always falling back to the catalog default.
+    String recordPublisherName = mappedText(source, profile, "dataset", "publisherName", null);
+    String recordContactName = mappedText(source, profile, "dataset", "contactName", null);
+    String recordContactEmail = mappedText(source, profile, "dataset", "contactEmail", null);
+    Dcat3Dataset servedDataset = toDatasetReference(root, id, recordPublisherName, recordContactName, recordContactEmail);
     if (servedDataset != null) {
       servedDataset.title = itemTitle;
       servedDataset.description = itemTitle;
       svc.addServesDataset(servedDataset);
     }
     svc.addConformsTo(conformanceClassOf(urlType));
-    svc.publisher = config.newPublisher();
-    svc.contactPoint = contactPoints(config.newContactPoint());
+    // dct:publisher / dcat:contactPoint - record-level values (mapped via
+    // dataset.publisherName / dataset.contactName / dataset.contactEmail,
+    // e.g. "publisher_s,contact_organizations_s" / "contact_people_s") take
+    // precedence over the configured catalog-wide defaults, consistent with
+    // how toDataset() populates the parent dcat:Dataset. This ensures the
+    // dcat:DataService emitted here - both embedded as dcat:accessService on
+    // a dcat:Distribution (see toDistributions) and returned standalone by
+    // /dcat3/dataService/{id} (see toDataServices) - reflects the same
+    // publisher/contact as the dataset it serves, rather than always
+    // falling back to the catalog default.
+    svc.publisher = config.newPublisher(recordPublisherName);
+    svc.contactPoint = contactPoints(config.newContactPoint(recordContactName, recordContactEmail));
     svc.license = config.getLicense();
     svc.accessLevel = config.getAccessLevel();
     // Populate bureauCode and programCode from configuration so emitted
@@ -1462,6 +1496,67 @@ ObjectNode query = MAPPER.createObjectNode();
   }
 
   /**
+   * Resolves the first element of the first non-empty array found under one
+   * of the (possibly comma-separated) candidate field names in <code>name</code>.
+   * Used to read the first entry of the collection's <code>contacts</code>
+   * array (see {@link #firstContact(JsonNode, String)}) and the first entry
+   * of a contact's <code>emails</code> array (see
+   * {@link #firstContactEmailValue(JsonNode)}).
+   * @param node the node to read the array from
+   * @param name a field name, or comma-separated list of candidate field names
+   * @return the first array element, or <code>null</code> when none is found
+   */
+  private static JsonNode firstArrayElement(JsonNode node, String name) {
+    if (node == null || StringUtils.isBlank(name)) return null;
+    for (String candidate : splitFieldNames(name)) {
+      JsonNode v = node.path(candidate);
+      if (v.isArray() && v.size() > 0) {
+        return v.get(0);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Resolves the first entry of a collection's <code>contacts</code> array
+   * (mapped via <code>datasetSeries.contacts</code>, defaulting to the
+   * <code>contacts</code> field name), as populated by the STAC collection
+   * contacts extension (e.g. through the Collections Panel UI):
+   * <pre>
+   * "contacts": [{
+   *   "name": "John Doe",
+   *   "position": "CEO",
+   *   "description": "...",
+   *   "organization": "Doe Chemicals",
+   *   "emails": [{ "value": "john@doe.com", "roles": ["work"] }]
+   * }]
+   * </pre>
+   * @param collection the collection <code>_source</code> document
+   * @param profile the active mapping profile, or <code>null</code>
+   * @return the first contact object, or <code>null</code> when the collection
+   *         has no contacts
+   */
+  private JsonNode firstContact(JsonNode collection, String profile) {
+    if (collection == null) return null;
+    String contactsField = sourceField(profile, "datasetSeries.contacts", "contacts");
+    JsonNode contact = firstArrayElement(collection, contactsField);
+    return (contact != null && contact.isObject()) ? contact : null;
+  }
+
+  /**
+   * Resolves the <code>value</code> of the first entry of a contact's
+   * <code>emails</code> array.
+   * @param contact a contact object (see {@link #firstContact(JsonNode, String)}),
+   *                or <code>null</code>
+   * @return the first email value, or <code>null</code> when unavailable
+   */
+  private String firstContactEmailValue(JsonNode contact) {
+    if (contact == null) return null;
+    JsonNode email = firstArrayElement(contact, "emails");
+    return email != null ? text(email, "value") : null;
+  }
+
+  /**
    * Normalizes a node into an iterable of nodes.
    */
   public static Iterable<JsonNode> arrayOf(JsonNode node) {
@@ -1551,23 +1646,46 @@ ObjectNode query = MAPPER.createObjectNode();
   /**
    * Builds a dataset reference object suitable for use as a
    * <code>dcat:DatasetSeries</code> <code>first</code>/<code>last</code>/
-   * <code>seriesMember</code> entry. Populates <code>title</code>,
-   * <code>description</code> and <code>contactPoint</code> (falling back to
-   * the identifier / configured contact point) so the reference satisfies
-   * the mandatory <code>dcat:Dataset</code> properties required in that
-   * context.
+   * <code>seriesMember</code> entry, or as a <code>dcat:DataService</code>
+   * <code>servesDataset</code> entry. Populates <code>title</code>,
+   * <code>description</code>, <code>publisher</code> and
+   * <code>contactPoint</code> (falling back to the identifier / configured
+   * defaults) so the reference satisfies the mandatory <code>dcat:Dataset</code>
+   * properties required in that context.
    * @param root the geoportal base URL
    * @param datasetIdentifier the dataset identifier
    * @return the reference or null
    */
   public Dcat3Dataset toDatasetReference(String root, String datasetIdentifier) {
+    return toDatasetReference(root, datasetIdentifier, null, null, null);
+  }
+
+  /**
+   * Builds a dataset reference object, preferring record-level
+   * <code>publisher</code>/<code>contactPoint</code> values (e.g. resolved
+   * from the served dataset's own <code>dataset.publisherName</code> /
+   * <code>dataset.contactName</code> / <code>dataset.contactEmail</code>
+   * mappings) over the catalog-wide configured defaults. Used by
+   * {@link #buildDataService} so a <code>dcat:DataService</code>'s
+   * <code>servesDataset</code> entry reflects the same publisher/contact as
+   * the dataset it serves.
+   * @param root the geoportal base URL
+   * @param datasetIdentifier the dataset identifier
+   * @param overridePublisherName record-level publisher name, or <code>null</code>/blank to use the default
+   * @param overrideContactName record-level contact name, or <code>null</code>/blank to use the default
+   * @param overrideContactEmail record-level contact email, or <code>null</code>/blank to use the default
+   * @return the reference or null
+   */
+  public Dcat3Dataset toDatasetReference(String root, String datasetIdentifier,
+          String overridePublisherName, String overrideContactName, String overrideContactEmail) {
     if (StringUtils.isBlank(root) || StringUtils.isBlank(datasetIdentifier)) return null;
     Dcat3Dataset dataset = new Dcat3Dataset();
     dataset.atId = root + "/rest/metadata/item/" + urlEncode(datasetIdentifier);
     dataset.identifier = datasetIdentifier;
     dataset.title = datasetIdentifier;
     dataset.description = datasetIdentifier;
-    Dcat3ContactPoint contactPoint = config.newContactPoint();
+    dataset.publisher = config.newPublisher(overridePublisherName);
+    Dcat3ContactPoint contactPoint = config.newContactPoint(overrideContactName, overrideContactEmail);
     if (contactPoint != null) dataset.addContactPoint(contactPoint);
     return dataset;
   }
