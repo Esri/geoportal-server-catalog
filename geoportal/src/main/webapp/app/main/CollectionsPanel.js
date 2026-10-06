@@ -2003,14 +2003,18 @@ define([
     },
 
     updateCollectionInfoBox: function (properties) {
+      // Values such as "contacts" (user-editable name/description/organization/
+      // emails) or "description" may contain HTML-significant characters.
+      // Escape both the key and value before interpolating them into the
+      // table's innerHTML to prevent HTML/script injection (XSS).
       let tableRows = Object.entries(properties).map(([key, value]) => {
         return `    
                 <tr>
-                  <td class="info-table-key">${key}</td>
-                  <td class="info-table-value">${value}</td>
+                  <td class="info-table-key">${this.escapeHtml(key)}</td>
+                  <td class="info-table-value">${this.escapeHtml(value)}</td>
                 </tr>`;
       });
-      this.infoTableTitle.innerHTML = properties.title;
+      this.infoTableTitle.innerHTML = this.escapeHtml(properties.title);
       this.infoTableBody.innerHTML = tableRows.join("");
       this.handleZoomCollectionEnabled();
 	  
@@ -2246,6 +2250,24 @@ define([
 
     replaceSpaceWithPlus: function (str) {
       return str.replace(/ /g, "+");
+    },
+
+    /**
+     * Escapes HTML-significant characters so untrusted/user-editable values
+     * (e.g. collection contacts: name, description, organization, emails)
+     * can be safely interpolated into innerHTML without allowing markup or
+     * script injection (XSS).
+     * @param {*} value the value to escape; non-strings are stringified first
+     * @returns {string} the HTML-escaped string ("" for null/undefined)
+     */
+    escapeHtml: function (value) {
+      if (value === null || value === undefined) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     },
 
     removeAllSpaces: function (str) {
