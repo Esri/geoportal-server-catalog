@@ -2202,8 +2202,11 @@ public class STACService extends Application {
 										searchItemCtx.read(propKeyVal));
 							}else //#688
 							{
+								// Use a real JSON null (not the literal string "null") so that
+								// numeric/array/boolean queryables with no data stay typed as
+								// null rather than being serialized as a String.
 								featureContext.set("$.featurePropPath.properties." + propKey,
-										"null");
+										(Object) null);
 							}
 						}
 					}
