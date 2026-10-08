@@ -4,13 +4,7 @@
   "type" : "object",
   "title" : "Queryables for Geoportal STAC API",
   "description" : "Queryable names Geoportal STAC API Item Search filter.",
-  "properties" : {
-	"properties.provider_s" : {
-     "title": "Provider",
-     "description" : "Provider",
-     "$ref": "",
-      "type": "string"
-	},
+  "properties" : {	
     "updated": {
       "title": "Updated",
       "description": "Date the item was last updated",
