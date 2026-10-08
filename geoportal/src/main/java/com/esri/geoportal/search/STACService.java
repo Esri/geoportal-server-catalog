@@ -2229,10 +2229,12 @@ public class STACService extends Application {
 				}
 			}
 			//Read updated item property object again and add keys from collection
-			HashMap<String, String> updatedPropObj = featureContext.read("$.featurePropPath.properties");
+			//Use Object as value type to preserve original JSON types (number/boolean/array/object)
+			//instead of forcing everything to String via toString()/getAsString().
+			HashMap<String, Object> updatedPropObj = featureContext.read("$.featurePropPath.properties");
 			for(String prop: propToBeAddedFromCollectionList)
 			{
-				updatedPropObj.put(prop, collectionPropObj.getAsString(prop));
+				updatedPropObj.put(prop, collectionPropObj.get(prop));
 			}
 			//finally iterate over search item properties and add those which are not in feature properties, this is to add any additional property from search item which are not in feature template
 			HashMap<String, Object> searchItemPropObj = searchItemCtx.read("$._source.properties");
@@ -2241,12 +2243,16 @@ public class STACService extends Application {
 			{
 				if(!updatedPropObj.containsKey(prop))
 				{
-					updatedPropObj.put(prop, searchItemPropObj.get(prop)!=null? searchItemPropObj.get(prop).toString():null);
+					// Preserve the original JSON value/type (e.g. numbers, booleans, arrays, objects)
+					// rather than converting to a String, so queryables like view:sun_azimuth (number)
+					// and video:shape (array) are serialized with their declared STAC types.
+					updatedPropObj.put(prop, searchItemPropObj.get(prop));
 				}
 			}
 			
 			featureContext.set("$.featurePropPath.properties",updatedPropObj);
 			
+
 			String linkSelfHref = featureContext.read("$.featurePropPath.links[0].href");
 			linkSelfHref = linkSelfHref.replaceAll("\\{itemId\\}", featureContext.read("$.featurePropPath.id").toString());
 			
@@ -2288,7 +2294,8 @@ public class STACService extends Application {
 				featureContext.delete(assetToRemove);
 			}			
 		}
-		HashMap<String, String> finalPropObj =featureContext.read("$.featurePropPath.properties"); // read again to make sure all changes are applied before adding stac_extension based on properties
+		HashMap<String, Object> finalPropObj =featureContext.read("$.featurePropPath.properties"); // read again to make sure all changes are applied before adding stac_extension based on properties
+
 		
 		//Determine stac_extensions to be added in feature based on properties in item, for example if eo:bands properties are available, add "eo" in stac_extension
 		JSONArray stacExtenions = StacHelper.addExtensionsFromProperties(finalPropObj,propExtensionObj);

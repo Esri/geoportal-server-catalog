@@ -1461,7 +1461,7 @@ private static String prepareStatus(String status) {
      * @param aliasCfg  Alias-indexed config (Option B): { "<alias>": { "url": "...", "properties": [...] }, ... }
      * @return the same stacItem instance, mutated
      */
-    public static JSONArray addExtensionsFromProperties(HashMap<String, String> finalPropObj, JSONObject aliasCfg) {
+    public static JSONArray addExtensionsFromProperties(Map<String, ?> finalPropObj, JSONObject aliasCfg) {
     	JSONArray stacExtensions = new JSONArray();
         if (finalPropObj == null || finalPropObj == null) return stacExtensions;
 
