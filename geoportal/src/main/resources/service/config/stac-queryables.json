@@ -164,7 +164,7 @@
       "$ref": "",
       "collections": ["WP_OrthoProducts", "panoramas"]
     },
-    "properties.AcquisitionDate": {
+    "AcquisitionDate": {
       "title": "Acquisition Date",
       "description": "The date when the image was collected. The time of the image collection can also be included.",
       "type": "string",
@@ -200,7 +200,7 @@
       "minimum": 0,
       "$ref": ""
     },
-    "properties.LocationHierarchy": {
+    "LocationHierarchy": {
       "title": "Location Hierarchy",
       "description": "Location hierarchy",
       "type": "string",
