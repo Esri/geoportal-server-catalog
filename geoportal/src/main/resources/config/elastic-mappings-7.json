@@ -311,6 +311,16 @@
 				}
 			},
 			{
+				"stac_properties_date": {
+					"path_match": "properties.*",
+					"match_mapping_type": "date",
+					"mapping": {
+						"type": "date",
+						"format": "strict_date_optional_time||epoch_millis"
+					}
+				}
+			},
+			{
 				"stac_properties": {
 					"path_match": "properties.*",
 					"match_mapping_type": "string",
