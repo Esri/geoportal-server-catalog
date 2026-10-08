@@ -313,6 +313,7 @@
 			{
 				"stac_properties": {
 					"path_match": "properties.*",
+					"match_mapping_type": "string",
 					"mapping": {
 						"type": "keyword",
 						"fields": {
