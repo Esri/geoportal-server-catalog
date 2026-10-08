@@ -133,7 +133,9 @@
 	<!--
         <beans:value>prefix:stac_property=index_field_suffix</beans:value>
 	-->       
-        <beans:value>eo:platform=src_harvested_dataset_s</beans:value>      
+        <beans:value>eo:platform=src_harvested_dataset_s</beans:value> 
+		<beans:value>LocationHierarchy=properties.location_hierarchy_cat</beans:value>
+		<beans:value>AcquisitionDate=properties.AcquisitionDate_dt</beans:value>  
       </beans:list>
     </beans:property>
   </beans:bean> 
