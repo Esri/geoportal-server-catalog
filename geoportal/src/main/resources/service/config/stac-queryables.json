@@ -11,7 +11,7 @@
      "$ref": "",
       "type": "string"
 	},
-    "properties.updated": {
+    "updated": {
       "title": "Updated",
       "description": "Date the item was last updated",
       "type": "string",
