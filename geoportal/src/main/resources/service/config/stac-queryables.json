@@ -93,7 +93,7 @@
       "type": "number",
       "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:column"
     },
-    "properties.eo:platform": {
+    "eo:platform": {
       "title": "Platform",
       "enum": ["SENTINEL-1A", "SENTINEL-1B", "SENTINEL-1C"],
       "description": "eo:platform",
