@@ -611,6 +611,15 @@ private static String prepareStatus(String status) {
 		GeoportalContext gc = GeoportalContext.getInstance();
 		StacContext sc = StacContext.getInstance();
 		GeometryServiceClient geometryClient = new GeometryServiceClient(gc.getGeometryService());
+
+		// Some client pipelines send pointcloud/eo/projection extension properties as
+		// JSON-encoded strings or numeric values wrapped in quotes (e.g. "pc:schemas":"[{...}]",
+		// "eo:epsg":"3857"). The Elasticsearch mapping declares pc:schemas/pc:statistics as
+		// "nested" and proj:projjson as "object", so indexing a raw string for those fields
+		// fails with "tried to parse field [...] as object, but found a concrete value".
+		// Normalize them here so both well-formed and string-encoded payloads are accepted.
+		normalizeStacExtensionTypes(prop);
+
 		// Populate few fields for Add/Update feature
 		
 		// populate STAC item field (collection) with collectionID from URI
@@ -757,6 +766,64 @@ private static String prepareStatus(String status) {
 		}
 
 		return requestPayload;
+	}
+
+	/**
+	 * Normalizes STAC extension properties that are prone to arriving with the wrong
+	 * JSON type from client pipelines, so indexing into Elasticsearch/OpenSearch does not
+	 * fail against the explicit mappings declared in elastic-mappings-7.json.
+	 * <p>
+	 * - pc:schemas, pc:statistics, proj:projjson are mapped as "nested"/"object" in the
+	 *   index, but are sometimes sent as a JSON-encoded string (e.g. "pc:schemas":"[{...}]").
+	 *   These are parsed back into real JSON structures.
+	 * - pc:count, pc:density, eo:epsg are numeric extension fields sometimes sent as
+	 *   quoted strings (e.g. "eo:epsg":"3857"). These are converted to real numbers so
+	 *   they are indexed with a numeric type (enabling correct range/comparison queries)
+	 *   instead of falling back to the "properties.*" keyword catch-all dynamic template.
+	 *
+	 * @param prop the STAC item "properties" object (modified in place)
+	 */
+	private static void normalizeStacExtensionTypes(JSONObject prop) {
+		if (prop == null) {
+			return;
+		}
+
+		// Fields whose ES mapping expects an object/nested array - must not be strings.
+		String[] jsonStructureFields = { "pc:schemas", "pc:statistics", "proj:projjson" };
+		for (String field : jsonStructureFields) {
+			Object val = prop.get(field);
+			if (val instanceof String) {
+				String strVal = ((String) val).trim();
+				if (strVal.length() > 0) {
+					try {
+						JSONParser parser = new JSONParser(JSONParser.DEFAULT_PERMISSIVE_MODE);
+						Object parsed = parser.parse(strVal);
+						prop.put(field, parsed);
+					} catch (Exception ex) {
+						LOGGER.warn("Could not parse stringified JSON for property '" + field + "': " + ex.getMessage());
+					}
+				}
+			}
+		}
+
+		// Numeric extension fields - convert numeric-looking strings to real numbers so
+		// they are indexed with the proper numeric type instead of becoming keyword.
+		String[] numericFields = { "pc:count", "pc:density", "eo:epsg" };
+		for (String field : numericFields) {
+			Object val = prop.get(field);
+			if (val instanceof String) {
+				String strVal = ((String) val).trim();
+				try {
+					if (strVal.matches("-?\\d+")) {
+						prop.put(field, Long.parseLong(strVal));
+					} else if (strVal.matches("-?\\d*\\.\\d+([eE][-+]?\\d+)?")) {
+						prop.put(field, Double.parseDouble(strVal));
+					}
+				} catch (NumberFormatException ex) {
+					// leave as-is if it doesn't actually parse as a number
+				}
+			}
+		}
 	}
 
 	private static JSONObject extract2DGeoJson(JSONObject geometry) {		
