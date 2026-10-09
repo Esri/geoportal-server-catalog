@@ -857,7 +857,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         this._renderUrlLink(item.url_website_s, i18n.item.actions.urlLinks.website);
         this._renderUrlLink(item.url_project_metadata_s, i18n.item.actions.urlLinks.projectMetadata);
 		if (item.stac_version) {
-			var stacItemUrl = window.location.origin + window.location.pathname.replace(/index\.html$/, "").replace(/\/?$/, "/") + "stac/collections/" + item.collection + "/items/" + item.id;
+			var stacItemUrl = new URL("stac/collections/" + encodeURIComponent(item.collection) + "/items/" + encodeURIComponent(item.id), window.location.href).href;
 			this._renderUrlLink(stacItemUrl, i18n.item.actions.urlLinks.granule);
 		} else { 
 			this._renderUrlLink(item.url_granule_s, i18n.item.actions.urlLinks.granule);
