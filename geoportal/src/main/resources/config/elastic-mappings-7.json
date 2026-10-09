@@ -282,6 +282,57 @@
 						}
 					}
 				}
+			},
+			{
+				"stac_properties_long": {
+					"path_match": "properties.*",
+					"match_mapping_type": "long",
+					"mapping": {
+						"type": "long"
+					}
+				}
+			},
+			{
+				"stac_properties_double": {
+					"path_match": "properties.*",
+					"match_mapping_type": "double",
+					"mapping": {
+						"type": "double"
+					}
+				}
+			},
+			{
+				"stac_properties_boolean": {
+					"path_match": "properties.*",
+					"match_mapping_type": "boolean",
+					"mapping": {
+						"type": "boolean"
+					}
+				}
+			},
+			{
+				"stac_properties_date": {
+					"path_match": "properties.*",
+					"match_mapping_type": "date",
+					"mapping": {
+						"type": "date",
+						"format": "strict_date_optional_time||epoch_millis"
+					}
+				}
+			},
+			{
+				"stac_properties": {
+					"path_match": "properties.*",
+					"match_mapping_type": "string",
+					"mapping": {
+						"type": "keyword",
+						"fields": {
+							"text": {
+								"type": "text"
+							}
+						}
+					}
+				}
 			}
 		]
 	}
