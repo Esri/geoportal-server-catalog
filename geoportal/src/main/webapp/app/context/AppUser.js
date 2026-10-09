@@ -170,6 +170,16 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
 
     openOAuthPopup: function() {
       var self = this;
+
+      if (!self._isCryptoSubtleAvailable()) {
+        console.warn('Web Crypto API (crypto.subtle) is unavailable. ' +
+          'This usually happens when the application is not served from a secure context ' +
+          '(HTTPS, or http://localhost). Sign-in via OAuth requires a secure context.');        
+          alert("Web Crypto API (crypto.subtle) is unavailable");
+        
+        return;
+      }
+
       // Get current app context URL
       var currentUrl = window.location.origin + window.location.pathname;
       
@@ -315,7 +325,17 @@ function(declare, lang, Deferred, topic, appTopics, i18n, AppClient, SignIn,
       });
     },
 
+    _isCryptoSubtleAvailable: function() {
+      return !!(window.crypto && window.crypto.subtle && typeof window.crypto.subtle.digest === "function");
+    },
+
     _hashBase64Url: function(value) {
+      if (!this._isCryptoSubtleAvailable()) {
+        return Promise.reject(new Error(
+          'Web Crypto API (crypto.subtle) is unavailable. This operation requires a secure context ' +
+          '(HTTPS, or http://localhost).'
+        ));
+      }
       const data = new TextEncoder().encode(value || '');
       return crypto.subtle.digest('SHA-256', data).then(function(digest) {
         return btoa(String.fromCharCode(...new Uint8Array(digest)))

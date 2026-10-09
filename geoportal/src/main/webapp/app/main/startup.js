@@ -6,10 +6,13 @@ require(["app","dojo/i18n!app/nls/resources"],function(app,i18n) {
     function(ready,esriConfig,AppContext,AppStarter) {
       window.AppContext = new AppContext();
       window.AppContext.appUser.initOAuthListener();
-      ready(function() {       
-        esriConfig.request.proxyUrl = "viewer/proxy.jsp";
-        (new AppStarter()).startupApp();
-      });
+      var startApp = function() {
+        ready(function() {
+          esriConfig.request.proxyUrl = "viewer/proxy.jsp";
+          (new AppStarter()).startupApp();
+        });
+      };
+      window.AppContext.loadAppConfig().then(startApp,startApp);
     });
   } else {
     console.log("Your browser is no longer supported.");
