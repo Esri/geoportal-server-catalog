@@ -100,6 +100,17 @@ define([
       type: "text/plain", // FIXED VALUE
       "esri:wkt": "",
     },
+    DEFAULT_CONTACT: {
+      name: "",
+      position: "",
+      organization: "",
+      description: "",
+      emails: [],
+    },
+    DEFAULT_CONTACT_EMAIL: {
+      value: "",
+      roles: [],
+    },
 
     appActionState: "NONE",
     collections: [],
@@ -108,6 +119,7 @@ define([
     selectedGraphic: null,
     sketchGraphicsLayer: null,
     collectionAssets: {},
+    collectionContacts: [],
 
     sampleCollection: [
       {
@@ -152,6 +164,74 @@ define([
     addNewCollectionAsset: function (key, properties) {
       this.collectionAssets[key] = properties;
       return this.collectionAssets;
+    },
+
+    // -----------------------------------------------------------------
+    // Contacts
+    // -----------------------------------------------------------------
+    setCollectionContacts: function (value) {
+      this.collectionContacts = Array.isArray(value) ? value : [];
+    },
+
+    clearCollectionContacts: function () {
+      this.setCollectionContacts([]);
+      return this.collectionContacts;
+    },
+
+    addNewCollectionContact: function (contact) {
+      this.collectionContacts.push(contact);
+      return this.collectionContacts;
+    },
+
+    deleteCollectionContact: function (contact) {
+      const index = this.collectionContacts.indexOf(contact);
+      if (index > -1) {
+        this.collectionContacts.splice(index, 1);
+      }
+      return this.collectionContacts;
+    },
+
+    handleContactFieldInput: function (contact, field, value) {
+      contact[field] = value;
+      console.log(this.collectionContacts);
+    },
+
+    addNewContactEmail: function (contact) {
+      if (!Array.isArray(contact.emails)) {
+        contact.emails = [];
+      }
+      const email = { ...this.DEFAULT_CONTACT_EMAIL, roles: [] };
+      contact.emails.push(email);
+      return email;
+    },
+
+    deleteContactEmail: function (contact, email) {
+      if (!Array.isArray(contact.emails)) {
+        return;
+      }
+      const index = contact.emails.indexOf(email);
+      if (index > -1) {
+        contact.emails.splice(index, 1);
+      }
+    },
+
+    handleContactEmailFieldInput: function (email, field, value) {
+      if (field === "roles") {
+        email.roles = value
+          .split(",")
+          .map((role) => role.trim())
+          .filter((role) => role.length > 0);
+      } else {
+        email[field] = value;
+      }
+      console.log(this.collectionContacts);
+    },
+
+    isCollectionContactsObjValid: function (contacts) {
+      if (!Array.isArray(contacts) || contacts.length === 0) {
+        return true;
+      }
+      return contacts.every((contact) => !this.isBlank(contact.name));
     },
 
     postCreate: function () {
@@ -435,7 +515,7 @@ define([
         this.sketchGraphicsLayer.visible = true;
       }
 
-      const { id, description, title, assets } = this.getCreateFieldValues();
+      const { id, description, title, assets, contacts } = this.getCreateFieldValues();
       let tempGeometry = null;
 
       if (this.selectedGraphic?.geometry) {
@@ -465,7 +545,9 @@ define([
       const collection = {
         type: "Collection",
         stac_version: "1.0.0",
-        stac_extensions: [],
+        stac_extensions: [
+          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json",
+        ],
         id: this.removeAllSpaces(id),
         title: title,
         description: description,
@@ -493,6 +575,7 @@ define([
         links: [],
         assets: assets,
         item_assets: {},
+        contacts: contacts || [],
       };
 
       try {
@@ -511,6 +594,7 @@ define([
       }
 
       this.clearCollectionAssets();
+      this.clearCollectionContacts();
       this.rerenderCollectionsList();
       this.resetSketch();
       this.hideEditor();
@@ -724,11 +808,28 @@ define([
         title: newTitle,
         description: newDescription,
         assets: newAssets,
+        contacts: newContacts,
       } = properties;
       collection.id = this.removeAllSpaces(collection.id);
       collection.title = newTitle;
       collection.description = newDescription;
       collection.assets = newAssets;
+      collection.contacts = newContacts || [];
+      if (
+        !Array.isArray(collection.stac_extensions)
+      ) {
+        collection.stac_extensions = [];
+      }
+      if (
+        collection.contacts.length > 0 &&
+        !collection.stac_extensions.includes(
+          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json"
+        )
+      ) {
+        collection.stac_extensions.push(
+          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json"
+        );
+      }
       let tempGeometry = null;
 
       if (this.selectedGraphic?.geometry) {
@@ -781,6 +882,7 @@ define([
       this.sketchGraphicsLayer.removeAll();
       this.handleReadCollection(id);
       this.clearCollectionAssets();
+      this.clearCollectionContacts();
       this.hideEditor();
     },
 
@@ -824,6 +926,7 @@ define([
           title: collection.title,
           description: collection.description,
           assets: JSON.stringify(collection.assets),
+          contacts: JSON.stringify(collection.contacts || []),
         };
 
         this.updateCollectionInfoBox(properties);
@@ -1548,6 +1651,193 @@ define([
       });
     },
 
+    createContactEmailNode: function (contact, email) {
+      const id = Date.now() + Math.random().toString(36).slice(2);
+      const emailNode = document.createElement("div");
+      emailNode.classList.add("contact-email-container");
+
+      const inputValue = document.createElement("input");
+      inputValue.id = `contact-email-value-input-${id}`;
+      inputValue.className = "editor-input";
+      inputValue.type = "text";
+      inputValue.placeholder = "email@example.com";
+      inputValue.value = email.value || "";
+      inputValue.oninput = (e) =>
+        this.handleContactEmailFieldInput(email, "value", e.target.value);
+      emailNode.appendChild(inputValue);
+
+      const inputRoles = document.createElement("input");
+      inputRoles.id = `contact-email-roles-input-${id}`;
+      inputRoles.className = "editor-input";
+      inputRoles.type = "text";
+      inputRoles.placeholder = "roles (comma separated, e.g. work)";
+      inputRoles.value = Array.isArray(email.roles) ? email.roles.join(", ") : "";
+      inputRoles.oninput = (e) =>
+        this.handleContactEmailFieldInput(email, "roles", e.target.value);
+      emailNode.appendChild(inputRoles);
+
+      const removeEmailButton = document.createElement("button");
+      removeEmailButton.classList.add("remove-email-button");
+      removeEmailButton.innerText = "Remove Email";
+      removeEmailButton.onclick = () => {
+        this.deleteContactEmail(contact, email);
+        emailNode.remove();
+      };
+      emailNode.appendChild(removeEmailButton);
+
+      return emailNode;
+    },
+
+    createContactNode: function (contact) {
+      const id = Date.now() + Math.random().toString(36).slice(2);
+      const contactNode = document.createElement("div");
+      contactNode.classList.add("contact-container");
+      contactNode.id = `contact-${id}`;
+
+      const hr = document.createElement("hr");
+      contactNode.appendChild(hr);
+
+      // name
+      const labelName = document.createElement("label");
+      labelName.className = "editor-label";
+      labelName.innerHTML = 'Name <span class="required">*</span>:';
+      contactNode.appendChild(labelName);
+
+      const inputName = document.createElement("input");
+      inputName.id = `contact-name-input-${id}`;
+      inputName.className = "editor-input";
+      inputName.type = "text";
+      inputName.placeholder = "value...";
+      inputName.value = contact.name || "";
+      inputName.oninput = (e) =>
+        this.handleContactFieldInput(contact, "name", e.target.value);
+      contactNode.appendChild(inputName);
+
+      // position
+      const labelPosition = document.createElement("label");
+      labelPosition.className = "editor-label";
+      labelPosition.innerText = "Position:";
+      contactNode.appendChild(labelPosition);
+
+      const inputPosition = document.createElement("input");
+      inputPosition.id = `contact-position-input-${id}`;
+      inputPosition.className = "editor-input";
+      inputPosition.type = "text";
+      inputPosition.placeholder = "value...";
+      inputPosition.value = contact.position || "";
+      inputPosition.oninput = (e) =>
+        this.handleContactFieldInput(contact, "position", e.target.value);
+      contactNode.appendChild(inputPosition);
+
+      // organization
+      const labelOrganization = document.createElement("label");
+      labelOrganization.className = "editor-label";
+      labelOrganization.innerText = "Organization:";
+      contactNode.appendChild(labelOrganization);
+
+      const inputOrganization = document.createElement("input");
+      inputOrganization.id = `contact-organization-input-${id}`;
+      inputOrganization.className = "editor-input";
+      inputOrganization.type = "text";
+      inputOrganization.placeholder = "value...";
+      inputOrganization.value = contact.organization || "";
+      inputOrganization.oninput = (e) =>
+        this.handleContactFieldInput(contact, "organization", e.target.value);
+      contactNode.appendChild(inputOrganization);
+
+      // description
+      const labelDescription = document.createElement("label");
+      labelDescription.className = "editor-label";
+      labelDescription.innerText = "Description:";
+      contactNode.appendChild(labelDescription);
+
+      const textareaDescription = document.createElement("textarea");
+      textareaDescription.id = `contact-description-input-${id}`;
+      textareaDescription.className = "editor-input";
+      textareaDescription.style.height = "70px";
+      textareaDescription.rows = 3;
+      textareaDescription.placeholder = "value...";
+      textareaDescription.value = contact.description || "";
+      textareaDescription.oninput = (e) =>
+        this.handleContactFieldInput(contact, "description", e.target.value);
+      contactNode.appendChild(textareaDescription);
+
+      // emails
+      const labelEmails = document.createElement("label");
+      labelEmails.className = "editor-label";
+      labelEmails.innerText = "Emails:";
+      contactNode.appendChild(labelEmails);
+
+      const emailsContainer = document.createElement("div");
+      emailsContainer.classList.add("contact-emails-container");
+      contactNode.appendChild(emailsContainer);
+
+      if (Array.isArray(contact.emails)) {
+        contact.emails.forEach((email) => {
+          emailsContainer.appendChild(this.createContactEmailNode(contact, email));
+        });
+      }
+
+      const addEmailButton = document.createElement("button");
+      addEmailButton.classList.add("add-email-button");
+      addEmailButton.innerText = "Add Email +";
+      addEmailButton.onclick = () => {
+        const email = this.addNewContactEmail(contact);
+        emailsContainer.appendChild(this.createContactEmailNode(contact, email));
+      };
+      contactNode.appendChild(addEmailButton);
+
+      // remove contact
+      const removeContactButton = document.createElement("button");
+      removeContactButton.classList.add("remove-contact-button");
+      removeContactButton.innerText = "Remove Contact";
+      removeContactButton.onclick = () => {
+        this.deleteCollectionContact(contact);
+        contactNode.remove();
+      };
+      contactNode.appendChild(removeContactButton);
+
+      return contactNode;
+    },
+
+    createContactsEditorNode: function () {
+      const contactsEditorNode = document.createElement("div");
+      contactsEditorNode.id = "contact-editor-container";
+
+      const labelContacts = document.createElement("label");
+      labelContacts.className = "editor-label";
+      labelContacts.innerText = "Contacts:";
+      contactsEditorNode.appendChild(labelContacts);
+
+      const addContactContainer = document.createElement("div");
+      addContactContainer.classList.add("add-contact-container");
+
+      const addContactButton = document.createElement("button");
+      addContactButton.classList.add("add-asset-button");
+      addContactButton.innerHTML = "Add Contact +";
+
+      addContactButton.onclick = () => {
+        const contact = { ...this.DEFAULT_CONTACT, emails: [] };
+        this.addNewCollectionContact(contact);
+        const contactNode = this.createContactNode(contact);
+        contactsEditorNode.appendChild(contactNode);
+      };
+
+      addContactContainer.appendChild(addContactButton);
+      contactsEditorNode.appendChild(addContactContainer);
+      return contactsEditorNode;
+    },
+
+    renderUpdateContactsEditor: function (contacts) {
+      const contactsEditorNode = this.createContactsEditorNode();
+      this.editorInputForm.appendChild(contactsEditorNode);
+
+      (contacts || []).forEach((contact) => {
+        const contactNode = this.createContactNode(contact);
+        contactsEditorNode.appendChild(contactNode);
+      });
+    },
+
     renderUpdateCollectionEditor: function (properties) {
       this.collectionEditorTitle.innerHTML = "Update Collection";
       this.editorPrimaryButton.innerHTML = "Update Collection";
@@ -1602,6 +1892,7 @@ define([
       this.editorInputForm.appendChild(textareaDescription);
 
       this.renderUpdateAssetEditor(this.collectionAssets);
+      this.renderUpdateContactsEditor(this.collectionContacts);
       this.initializeCollectionFormListeners();
     },
 
@@ -1621,6 +1912,8 @@ define([
       this.editorInputForm.innerHTML = collectionInputs;
       const assetEditorNode = this.createAssetEditorNode();
       this.editorInputForm.appendChild(assetEditorNode);
+      const contactsEditorNode = this.createContactsEditorNode();
+      this.editorInputForm.appendChild(contactsEditorNode);
       this.initializeCollectionFormListeners();
     },
 
@@ -1645,6 +1938,8 @@ define([
       }
 	  this.clearMapView();	  
       this.selectedGraphic = null;
+      this.clearCollectionAssets();
+      this.clearCollectionContacts();
       // Make sketch layer visible so user can see their drawing
       if (this.sketchGraphicsLayer) {
         this.sketchGraphicsLayer.visible = true;
@@ -1662,6 +1957,7 @@ define([
         this.selectedCollection.properties.id
       );
       this.setCollectionAssets(collection.assets ? collection.assets : {});
+      this.setCollectionContacts(collection.contacts ? collection.contacts : []);
       this.renderUpdateCollectionEditor(this.selectedCollection.properties);
 
       if (graphic) {
@@ -1697,22 +1993,28 @@ define([
       }
       this.showAllGraphicsLayers(this.view);
       this.clearCollectionAssets();
+      this.clearCollectionContacts();
     },
 
     handleCancelCreateCollection: function () {
       this.sketchGraphicsLayer.removeAll();
       this.clearCollectionAssets();
+      this.clearCollectionContacts();
     },
 
     updateCollectionInfoBox: function (properties) {
+      // Values such as "contacts" (user-editable name/description/organization/
+      // emails) or "description" may contain HTML-significant characters.
+      // Escape both the key and value before interpolating them into the
+      // table's innerHTML to prevent HTML/script injection (XSS).
       let tableRows = Object.entries(properties).map(([key, value]) => {
         return `    
                 <tr>
-                  <td class="info-table-key">${key}</td>
-                  <td class="info-table-value">${value}</td>
+                  <td class="info-table-key">${this.escapeHtml(key)}</td>
+                  <td class="info-table-value">${this.escapeHtml(value)}</td>
                 </tr>`;
       });
-      this.infoTableTitle.innerHTML = properties.title;
+      this.infoTableTitle.innerHTML = this.escapeHtml(properties.title);
       this.infoTableBody.innerHTML = tableRows.join("");
       this.handleZoomCollectionEnabled();
 	  
@@ -1736,6 +2038,7 @@ define([
           .value,
         title: document.getElementById("collection-title-input").value,
         assets: this.collectionAssets,
+        contacts: this.collectionContacts,
       };
     },
 
@@ -1746,6 +2049,7 @@ define([
           .value,
         title: document.getElementById("collection-title-input").value,
         assets: this.collectionAssets,
+        contacts: this.collectionContacts,
       };
     },
 
@@ -1946,6 +2250,24 @@ define([
 
     replaceSpaceWithPlus: function (str) {
       return str.replace(/ /g, "+");
+    },
+
+    /**
+     * Escapes HTML-significant characters so untrusted/user-editable values
+     * (e.g. collection contacts: name, description, organization, emails)
+     * can be safely interpolated into innerHTML without allowing markup or
+     * script injection (XSS).
+     * @param {*} value the value to escape; non-strings are stringified first
+     * @returns {string} the HTML-escaped string ("" for null/undefined)
+     */
+    escapeHtml: function (value) {
+      if (value === null || value === undefined) return "";
+      return String(value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
     },
 
     removeAllSpaces: function (str) {

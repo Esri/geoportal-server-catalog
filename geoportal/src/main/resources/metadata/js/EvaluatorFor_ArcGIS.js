@@ -33,12 +33,16 @@ G.evaluators.arcgis = {
     G.evalProps(task,item,root,"keywords_s","//TopicCatCd/@value | //keyword");
     G.evalProps(task,item,root,"links_s","//linkage");
     G.evalProp(task,item,root,"thumbnail_s","dataIdInfo/graphOver/bgFileName");
-    G.evalProps(task,item,root,"contentType_s","/metadata/distInfo/distributor/distorTran/onLineSrc/orDesc");
+    G.evalProps(task,item,root,"contentType_s","/metadata/distInfo/distributor/distorTran/onLineSrc/orDesc | /metadata/distinfo/distributor/distorTran/onLineSrc/orDesc");
   },
 
   evalService: function(task) {
     var item = task.item, root = task.root;
-    G.evalResourceLinks(task,item,root,"distInfo/distributor/distorTran/onLineSrc/linkage");
+    // Some ArcGIS exports (and hand-authored test documents) use a lower-case
+    // "distinfo" element instead of the standard camel-case "distInfo".
+    // Match both so resources_nst / url_type_s still get populated.
+    G.evalResourceLinks(task,item,root,
+      "distInfo/distributor/distorTran/onLineSrc/linkage | distinfo/distributor/distorTran/onLineSrc/linkage");
   },
 
   evalSpatial: function(task) {

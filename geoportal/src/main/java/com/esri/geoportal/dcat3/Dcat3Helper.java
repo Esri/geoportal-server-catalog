@@ -1,0 +1,1692 @@
+/* See the NOTICE file distributed with
+ * this work for additional information regarding copyright ownership.
+ * Esri Inc. licenses this file to You under the Apache License, Version 2.0
+ * (the "License"); you may not use this file except in compliance with
+ * the License.  You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+package com.esri.geoportal.dcat3;
+
+import java.time.Instant;
+import java.time.OffsetDateTime;
+import java.time.ZoneOffset;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
+import java.util.LinkedHashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
+import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.dcat3.model.Dcat3Catalog;
+import com.esri.geoportal.dcat3.model.Dcat3AccessRestriction;
+import com.esri.geoportal.dcat3.model.Dcat3ContactPoint;
+import com.esri.geoportal.dcat3.model.Dcat3Constants;
+import com.esri.geoportal.dcat3.model.Dcat3DataService;
+import com.esri.geoportal.dcat3.model.Dcat3Dataset;
+import com.esri.geoportal.dcat3.model.Dcat3DatasetSeries;
+import com.esri.geoportal.dcat3.model.Dcat3Distribution;
+import com.esri.geoportal.dcat3.model.Dcat3NodeRef;
+import com.esri.geoportal.dcat3.model.Dcat3Location;
+import com.esri.geoportal.dcat3.model.Dcat3Organization;
+import com.esri.geoportal.dcat3.model.Dcat3PeriodOfTime;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ArrayNode;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+/**
+ * DCAT-US 3.0 helper.
+ *
+ * <p>All Elasticsearch / OpenSearch access required to produce a DCAT-US 3.0
+ * document is performed <b>directly in Java</b> here (through
+ * {@link ElasticClient}). This class replaces the Nashorn <code>gs/context/nashorn/execute.js</code> pipeline
+ * used by the legacy <code>com.esri.geoportal.dcat</code> package.</p>
+ *
+ * <p>Responsibilities:</p>
+ * <ul>
+ *   <li>building and issuing the paged <code>_search</code> requests
+ *       (<code>search_after</code> based deep pagination),</li>
+ *   <li>reading the <code>collections</code> index for
+ *       <code>dcat:DatasetSeries</code>,</li>
+ *   <li>mapping a geoportal <code>_source</code> document to
+ *       {@link Dcat3Dataset}, {@link Dcat3DatasetSeries},
+ *       {@link Dcat3DataService} and {@link Dcat3Distribution}.</li>
+ * </ul>
+ */
+public class Dcat3Helper {
+
+  /** Logger. */
+  private static final Logger LOGGER = LoggerFactory.getLogger(Dcat3Helper.class);
+
+  /** Content type used for all index requests. */
+  private static final String CONTENT_TYPE_JSON = "application/json";
+
+  /** JSON processing. */
+  public static final ObjectMapper MAPPER = new ObjectMapper();
+  static {
+    MAPPER.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+    MAPPER.setSerializationInclusion(JsonInclude.Include.NON_NULL);
+  }
+
+  private final Dcat3Config config;
+
+  /**
+   * Creates instance of the helper.
+   * @param config DCAT-US 3.0 configuration
+   */
+  public Dcat3Helper(Dcat3Config config) {
+    this.config = config != null ? config : new Dcat3Config();
+  }
+
+  /**
+   * Gets the configuration.
+   * @return the configuration
+   */
+  public Dcat3Config getConfig() {
+    return config;
+  }
+
+  /* =================================================================== */
+  /* OpenSearch / Elasticsearch access                                   */
+  /* =================================================================== */
+
+  /**
+   * Builds the paged query used to walk the whole metadata index.
+   *
+   * <p>Deep pagination is done with <code>search_after</code> on
+   * <code>_id</code>, which is stable and does not suffer from the
+   * <code>max_result_window</code> limit.</p>
+   *
+   * @param searchAfter the <code>_id</code> of the last record of the previous
+   *                    page, or <code>null</code> for the first page
+   * @param size page size
+   * @return the query as a JSON string
+   */
+  public String prepareDatasetQuery(String searchAfter, int size) {
+    return prepareDatasetQuery(searchAfter, size, null);
+  }
+
+  public String prepareDatasetQuery(String searchAfter, int size, String profile) {
+    return prepareDatasetQuery(searchAfter, size, profile, false);
+  }
+
+  /**
+   * Builds the paged query used to walk the whole metadata index, optionally
+   * walking it backwards (used to implement a "previous page" link on top of
+   * <code>search_after</code>, which is otherwise forward-only).
+   *
+   * <p>When {@code backward} is <code>true</code> the sort direction on
+   * <code>_id</code> is reversed (<code>desc</code>) and <code>searchAfter</code>
+   * is interpreted as the <code>_id</code> of the first record of the page the
+   * caller wants to go back from. The resulting hits therefore come back in
+   * descending <code>_id</code> order and must be reversed by the caller to
+   * restore the natural ascending order.</p>
+   *
+   * @param searchAfter the <code>_id</code> boundary to search after (forward)
+   *                    or before (backward), or <code>null</code> for the first page
+   * @param size page size
+   * @param profile the active profile, or <code>null</code>
+   * @param backward when <code>true</code>, walks the index backwards
+   * @return the query as a JSON string
+   */
+  public String prepareDatasetQuery(String searchAfter, int size, String profile, boolean backward) {
+    ObjectNode query = MAPPER.createObjectNode();
+    query.put("track_total_hits", true);
+    query.put("size", size > 0 ? size : config.getPageSize());
+
+    ArrayNode sort = query.putArray("sort");
+    sort.addObject().put("_id", backward ? "desc" : "asc");
+
+    ArrayNode includes = query.putObject("_source").putArray("includes");
+    for (String f : datasetSourceIncludes(profile)) {
+      includes.add(f);
+    }
+
+    ArrayNode must = MAPPER.createArrayNode();
+    appendAccessFilters(must, profile);
+
+    if (!must.isEmpty()) {
+      query.putObject("query").putObject("bool").set("must", must);
+    } else {
+      query.putObject("query").putObject("match_all");
+    }
+
+    if (StringUtils.isNotBlank(searchAfter)) {
+      query.putArray("search_after").add(searchAfter);
+    }
+
+    return query.toString();
+  }
+
+
+  /**
+   * Appends the access / approval filters honoring the geoportal security
+   * configuration, so that only publicly visible records end up in the
+   * published DCAT document.
+   * @param must the <code>bool.must</code> array to append to
+   */
+  private void appendAccessFilters(ArrayNode must) {
+
+    appendAccessFilters(must, null);
+  }
+
+  private void appendAccessFilters(ArrayNode must, String profile) {
+    if (!config.getPublicRecordsOnly()) return;
+
+    GeoportalContext gc = GeoportalContext.getInstance();
+    if (gc == null) return;
+
+    try {
+      if (gc.getSupportsGroupBasedAccess()) {
+        // A record is publicly visible when sys_access_s equals "public" OR
+        // the field is absent entirely (matches the legacy behavior in
+        // gs/context/nashorn/execute.js: "sys_access_s is missing || === public").
+        // A strict term match alone would incorrectly exclude every record
+        // that never had the field explicitly set to "public".
+        String accessField = sourceField(profile, "query.sysAccess", "sys_access_s");
+        must.add(publicOrMissingFilter(accessField, List.of("public")));
+      }
+      if (gc.getSupportsApprovalStatus()) {
+        // Same "value OR missing" semantics for approval status.
+        String approvalField = sourceField(profile, "query.approvalStatus", "sys_approval_status_s");
+        must.add(publicOrMissingFilter(approvalField, List.of("approved", "reviewed")));
+      }
+    } catch (Exception ex) {
+      LOGGER.warn("DCAT3: unable to determine access filters.", ex);
+    }
+  }
+
+  /**
+   * Builds a <code>bool.should</code> clause matching documents where
+   * <code>field</code> is one of <code>acceptedValues</code>, or where the
+   * field does not exist at all. This mirrors the legacy Nashorn access/
+   * approval filtering, which treats an absent field as implicitly public /
+   * approved rather than excluding the record.
+   * @param field the field to test
+   * @param acceptedValues the accepted values (matched via a <code>terms</code> query)
+   * @return the <code>bool</code> query node to add to an outer <code>must</code> array
+   */
+  private ObjectNode publicOrMissingFilter(String field, List<String> acceptedValues) {
+    ObjectNode outer = MAPPER.createObjectNode();
+    ObjectNode boolNode = outer.putObject("bool");
+    ArrayNode should = boolNode.putArray("should");
+
+    ArrayNode termsValues = should.addObject().putObject("terms").putArray(field);
+    for (String v : acceptedValues) {
+      termsValues.add(v);
+    }
+
+    should.addObject().putObject("bool").putObject("must_not").putObject("exists").put("field", field);
+
+    boolNode.put("minimum_should_match", 1);
+    return outer;
+  }
+
+  /**
+   * Executes one page of the metadata search.
+   * @param searchAfter <code>search_after</code> cursor or <code>null</code>
+   * @param size page size
+   * @return the parsed Elasticsearch / OpenSearch response
+   * @throws Exception if the request fails
+   */
+  public JsonNode searchDatasets(String searchAfter, int size) throws Exception {
+    return searchDatasets(searchAfter, size, null);
+  }
+
+  public JsonNode searchDatasets(String searchAfter, int size, String profile) throws Exception {
+    return searchDatasets(searchAfter, size, profile, false);
+  }
+
+  /**
+   * Executes one page of the metadata search, optionally walking the index
+   * backwards to support a "previous page" link (see
+   * {@link #prepareDatasetQuery(String, int, String, boolean)}).
+   * @param cursor the <code>_id</code> boundary (search_after / search_before)
+   * @param size page size
+   * @param profile the active profile, or <code>null</code>
+   * @param backward when <code>true</code>, walks the index backwards
+   * @return the parsed Elasticsearch / OpenSearch response; hits come back in
+   *         descending <code>_id</code> order when {@code backward} is <code>true</code>
+   * @throws Exception if the request fails
+   */
+  public JsonNode searchDatasets(String cursor, int size, String profile, boolean backward) throws Exception {
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    ElasticClient client = ElasticClient.newClient();
+    String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
+    String query = prepareDatasetQuery(cursor, size, profile, backward);
+
+    LOGGER.trace("DCAT3 search url={} query={}", url, query);
+    String response = client.sendPost(url, query, CONTENT_TYPE_JSON);
+    return MAPPER.readTree(response);
+  }
+
+  /**
+   * Executes a filtered metadata search page, honoring access filters while
+   * applying client-supplied query, paging and sort options.
+   */
+  public JsonNode searchDatasets(int from, int size, String sort, String esdsl, String profile) throws Exception {
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    ElasticClient client = ElasticClient.newClient();
+    String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
+
+    ObjectNode query = MAPPER.createObjectNode();
+    query.put("track_total_hits", true);
+    query.put("from", Math.max(0, from));
+    query.put("size", size > 0 ? size : config.getPageSize());
+
+    ArrayNode includes = query.putObject("_source").putArray("includes");
+    for (String f : datasetSourceIncludes(profile)) {
+      includes.add(f);
+    }
+
+    ArrayNode sortArray = query.putArray("sort");
+    appendSort(sortArray, sort);
+    if (sortArray.isEmpty()) {
+      sortArray.addObject().put("_id", "asc");
+    }
+
+    JsonNode clientQuery = parseClientQuery(esdsl);
+    ArrayNode accessMust = MAPPER.createArrayNode();
+    appendAccessFilters(accessMust, profile);
+
+    if (clientQuery != null && !clientQuery.isMissingNode() && !clientQuery.isNull()) {
+      if (!accessMust.isEmpty()) {
+        ArrayNode must = MAPPER.createArrayNode();
+        must.add(clientQuery.deepCopy());
+        for (JsonNode n : accessMust) {
+          must.add(n);
+        }
+        query.putObject("query").putObject("bool").set("must", must);
+      } else {
+        query.set("query", clientQuery.deepCopy());
+      }
+    } else if (!accessMust.isEmpty()) {
+      query.putObject("query").putObject("bool").set("must", accessMust);
+    } else {
+      query.putObject("query").putObject("match_all");
+    }
+
+    String queryString = query.toString();
+    LOGGER.trace("DCAT3 filtered search url={} query={}", url, queryString);
+    String response = client.sendPost(url, queryString, CONTENT_TYPE_JSON);
+    return MAPPER.readTree(response);
+  }
+
+  /**
+   * Reads a single metadata item.
+   * @param id the item id
+   * @return the <code>_source</code> document or <code>null</code> when not found
+   * @throws Exception if the request fails
+   */
+  public JsonNode getItemById(String id) throws Exception {
+    return getItemById(id, null);
+  }
+
+  /**
+   * Reads a single metadata item, applying the access / approval filters of
+   * the given profile. Using the wrong profile's access field mappings could
+   * either expose a non-public item or incorrectly hide a public one when a
+   * profile's <code>query.sysAccess</code> / <code>query.approvalStatus</code>
+   * field names differ from the default (US) mapping.
+   * @param id the item id
+   * @param profile the active profile, or <code>null</code> for the default
+   * @return the <code>_source</code> document or <code>null</code> when not found
+   * @throws Exception if the request fails
+   */
+  public JsonNode getItemById(String id, String profile) throws Exception {
+    ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+    ElasticClient client = ElasticClient.newClient();
+    String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
+
+ObjectNode query = MAPPER.createObjectNode();
+    query.put("size", 1);
+    ArrayNode must = MAPPER.createArrayNode();
+    must.addObject().putObject("ids").putArray("values").add(id);
+    appendAccessFilters(must, profile);
+    query.putObject("query").putObject("bool").set("must", must);
+
+    String response = client.sendPost(url, query.toString(), CONTENT_TYPE_JSON);
+    JsonNode hits = MAPPER.readTree(response).path("hits").path("hits");
+    if (hits.isArray() && hits.size() > 0) {
+      return hits.get(0).path("_source");
+    }
+    return null;
+  }
+
+  /**
+   * Reads the collections index, used to derive <code>dcat:DatasetSeries</code>.
+   * @param limit maximum number of collections
+   * @return list of collection <code>_source</code> documents (never <code>null</code>)
+   */
+  public List<JsonNode> searchCollections(int limit) {
+    return searchCollections(limit, null);
+  }
+
+  public List<JsonNode> searchCollections(int limit, String profile) {
+    List<JsonNode> result = new ArrayList<>();
+    try {
+      GeoportalContext gc = GeoportalContext.getInstance();
+      if (gc == null || !gc.getSupportsCollections()) return result;
+
+      ElasticContext ec = gc.getElasticContext();
+      String collectionIndex = ec.getCollectionIndexName();
+      if (StringUtils.isBlank(collectionIndex)) return result;
+
+      ElasticClient client = ElasticClient.newClient();
+      String url = client.getTypeUrlForSearch(collectionIndex) + "/_search";
+
+      ObjectNode query = MAPPER.createObjectNode();
+      query.put("track_total_hits", true);
+      query.put("size", limit > 0 ? limit : 10000);
+      query.putArray("sort").addObject().put("_id", "asc");
+
+      // NOTE: intentionally not applying appendAccessFilters() here. The
+      // sys_access_s / sys_approval_status_s fields are dataset-level
+      // concerns and are generally not set on collection documents, so
+      // filtering the collections index on them would incorrectly exclude
+      // every collection (returning zero dcat:DatasetSeries) once
+      // supportsGroupBasedAccess/supportsApprovalStatus and publicRecordsOnly
+      // are enabled. Visibility of a series' members is instead enforced
+      // when resolving seriesMember via searchCollectionMemberIds /
+      // countCollectionMembers, which do apply the access filters against
+      // the metadata index.
+      query.putObject("query").putObject("match_all");
+
+      String queryString = query.toString();
+
+      String response = client.sendPost(url, queryString, CONTENT_TYPE_JSON);
+      JsonNode hits = MAPPER.readTree(response).path("hits").path("hits");
+      if (hits.isArray()) {
+        for (JsonNode hit : hits) {
+          JsonNode source = hit.path("_source");
+          if (!source.isMissingNode() && source.isObject()) {
+            ObjectNode copy = (ObjectNode) source.deepCopy();
+            if (!copy.has("id")) {
+              copy.put("id", hit.path("_id").asText());
+            }
+            result.add(copy);
+          }
+        }
+      }
+    } catch (Exception ex) {
+      LOGGER.warn("DCAT3: unable to read collections index.", ex);
+    }
+    return result;
+  }
+
+  /**
+   * Reads a single collection.
+   * @param id the collection id
+   * @return the collection <code>_source</code> or <code>null</code>
+   */
+  public JsonNode getCollectionById(String id) {
+    return getCollectionById(id, null);
+  }
+
+  public JsonNode getCollectionById(String id, String profile) {
+    for (JsonNode c : searchCollections(10000, profile)) {
+      if (id != null && id.equals(text(c, "id"))) return c;
+    }
+    return null;
+  }
+
+  /**
+   * Counts the members of a collection.
+   * @param collectionId the collection id
+   * @return the number of member datasets, or <code>-1</code> when unknown
+   */
+  public long countCollectionMembers(String collectionId) {
+    return countCollectionMembers(collectionId, null);
+  }
+
+  public long countCollectionMembers(String collectionId, String profile) {
+    try {
+      ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+      ElasticClient client = ElasticClient.newClient();
+      String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_count";
+
+      ObjectNode query = MAPPER.createObjectNode();
+      ArrayNode must = MAPPER.createArrayNode();
+      must.addObject().putObject("term")
+                .put(sourceField(profile, "query.collectionMembership", "src_collections_s"), collectionId);
+      appendAccessFilters(must, profile);
+      query.putObject("query").putObject("bool").set("must", must);
+
+      String response = client.sendPost(url, query.toString(), CONTENT_TYPE_JSON);
+      JsonNode count = MAPPER.readTree(response).path("count");
+      return count.isNumber() ? count.asLong() : -1L;
+    } catch (Exception ex) {
+      LOGGER.debug("DCAT3: unable to count members of collection {}.", collectionId, ex);
+      return -1L;
+    }
+  }
+
+  /**
+   * Resolves the identifiers of the datasets belonging to a collection, used to
+   * populate <code>dcat:seriesMember</code>.
+   *
+   * @param collectionId the collection id
+   * @param limit maximum number of members to resolve
+   * @return the member item ids (never <code>null</code>)
+   */
+  public List<String> searchCollectionMemberIds(String collectionId, int limit) {
+    return searchCollectionMemberIds(collectionId, limit, null);
+  }
+
+  public List<String> searchCollectionMemberIds(String collectionId, int limit, String profile) {
+    List<String> ids = new ArrayList<>();
+    if (StringUtils.isBlank(collectionId)) return ids;
+
+    try {
+      ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+      ElasticClient client = ElasticClient.newClient();
+      String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
+
+      ObjectNode query = MAPPER.createObjectNode();
+      query.put("size", limit > 0 ? limit : 1000);
+      query.putArray("sort").addObject().put("_id", "asc");
+      query.put("_source", false);
+
+      ArrayNode must = MAPPER.createArrayNode();
+      must.addObject().putObject("term").put(sourceField(profile, "query.collectionMembership", "src_collections_s"), collectionId);
+      appendAccessFilters(must, profile);
+      query.putObject("query").putObject("bool").set("must", must);
+
+      String response = client.sendPost(url, query.toString(), CONTENT_TYPE_JSON);
+      JsonNode hits = MAPPER.readTree(response).path("hits").path("hits");
+      if (hits.isArray()) {
+        for (JsonNode hit : hits) {
+          String id = hit.path("_id").asText(null);
+          if (StringUtils.isNotBlank(id)) ids.add(id);
+        }
+      }
+    } catch (Exception ex) {
+      LOGGER.warn("DCAT3: unable to resolve members of collection {}.", collectionId, ex);
+    }
+    return ids;
+  }
+
+  /**
+   * Holder for aggregated collection member information returned by
+   * {@link #fetchCollectionMembersAggregate}.
+   */
+  public static class CollectionMembers {
+    public long count = -1L;
+    public List<String> ids = new ArrayList<>();
+  }
+
+  /**
+   * Fetches member counts and a top-N sample of member ids for the provided
+   * collection identifiers using a single aggregated search request. This
+   * avoids performing a separate _count/_search per collection (N+1 problem)
+   * when building the aggregated DCAT document.
+   *
+   * @param collectionIds the collection ids to fetch information for
+   * @param topN maximum number of member ids to return per collection
+   * @param profile optional profile (may be null)
+   * @return map keyed by collection id of {@link CollectionMembers}
+   */
+  public Map<String, CollectionMembers> fetchCollectionMembersAggregate(List<String> collectionIds, int topN, String profile) {
+    Map<String, CollectionMembers> result = new java.util.HashMap<>();
+    if (collectionIds == null || collectionIds.isEmpty()) return result;
+    try {
+      ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+      ElasticClient client = ElasticClient.newClient();
+      String url = client.getTypeUrlForSearch(ec.getIndexName()) + "/_search";
+
+      ObjectNode query = MAPPER.createObjectNode();
+      query.put("size", 0);
+
+      // Apply access filters at the top-level bool.must
+      ArrayNode must = MAPPER.createArrayNode();
+      appendAccessFilters(must, profile);
+      if (!must.isEmpty()) {
+        query.putObject("query").putObject("bool").set("must", must);
+      }
+
+      ObjectNode aggs = query.putObject("aggs");
+      ObjectNode collectionsAgg = aggs.putObject("collections");
+      ObjectNode terms = collectionsAgg.putObject("terms");
+      // Field name honoring profile mappings
+      terms.put("field", sourceField(profile, "query.collectionMembership", "src_collections_s"));
+      terms.put("size", Math.max(collectionIds.size(), 1000));
+      // Include only the requested collection ids to limit buckets
+      ArrayNode include = terms.putArray("include");
+      for (String cid : collectionIds) {
+        include.add(StringUtils.defaultString(cid));
+      }
+
+      // top_hits sub-aggregation to fetch member ids per bucket
+      ObjectNode topHits = collectionsAgg.putObject("aggs").putObject("top_members").putObject("top_hits");
+      topHits.put("_source", false);
+      topHits.put("size", topN > 0 ? topN : 1000);
+      // sort by _id asc to get stable ordering
+      ArrayNode sortArray = topHits.putArray("sort");
+      sortArray.addObject().putObject("_id").put("order", "asc");
+
+      String queryString = query.toString();
+      LOGGER.trace("DCAT3 collections aggregate url={} query={}", url, queryString);
+      String response = client.sendPost(url, queryString, CONTENT_TYPE_JSON);
+      JsonNode root = MAPPER.readTree(response);
+      JsonNode buckets = root.path("aggregations").path("collections").path("buckets");
+      if (buckets.isArray()) {
+        for (JsonNode bucket : buckets) {
+          String key = bucket.path("key").asText(null);
+          long docCount = bucket.path("doc_count").asLong(-1L);
+          CollectionMembers cm = new CollectionMembers();
+          cm.count = docCount;
+          JsonNode hits = bucket.path("top_members").path("hits").path("hits");
+          if (hits.isArray()) {
+            for (JsonNode h : hits) {
+              String id = h.path("_id").asText(null);
+              if (StringUtils.isNotBlank(id)) cm.ids.add(id);
+            }
+          }
+          result.put(key, cm);
+        }
+      }
+    } catch (Exception ex) {
+      LOGGER.debug("DCAT3: unable to aggregate collection members.", ex);
+    }
+    return result;
+  }
+
+  /**
+   * Extracts the total hit count from a search response, supporting both the
+   * pre-7.x (<code>total</code> as number) and 7.x+
+   * (<code>total.value</code>) layouts.
+   * @param searchResponse a parsed search response
+   * @return the total number of hits, or <code>-1</code> when unknown
+   */
+  public static long getTotalHits(JsonNode searchResponse) {
+    if (searchResponse == null) return -1L;
+    JsonNode total = searchResponse.path("hits").path("total");
+    if (total.isNumber()) return total.asLong();
+    if (total.isObject() && total.path("value").isNumber()) return total.path("value").asLong();
+    return -1L;
+  }
+
+  /* =================================================================== */
+  /* Mapping: index document -> DCAT-US 3.0                              */
+  /* =================================================================== */
+
+  /**
+   * Builds the catalog header (no datasets attached).
+   * @param baseUrl the geoportal base URL used to build absolute links
+   * @return the catalog
+   */
+  public Dcat3Catalog newCatalog(String baseUrl) {
+    return newCatalog(baseUrl, null);
+  }
+
+  public Dcat3Catalog newCatalog(String baseUrl, String profile) {
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
+
+    Dcat3Catalog catalog = new Dcat3Catalog();
+    catalog.atId = root + "/dcat3.json";
+    catalog.identifier = StringUtils.defaultIfBlank(config.getCatalogIdentifier(), catalog.atId);
+    catalog.title = config.getCatalogTitle();
+    catalog.description = config.getCatalogDescription();
+    catalog.homepage = new Dcat3NodeRef(
+            StringUtils.defaultIfBlank(config.getHomepage(), root),
+            null,
+            config.getCatalogTitle());
+    catalog.issued = nowIso();
+    catalog.modified = catalog.issued;
+    catalog.rights = config.getRights();
+    catalog.publisher = config.newPublisher();
+    catalog.contactPoint = contactPoints(config.newContactPoint());
+    catalog.addLanguage(config.getLanguage());
+    catalog.addConformsTo(config.getConformsTo());
+    return catalog;
+  }
+
+  /**
+   * Maps a geoportal metadata document to a <code>dcat:Dataset</code>.
+   *
+   * @param id the item id (<code>_id</code>)
+   * @param source the <code>_source</code> document
+   * @param baseUrl the geoportal base URL used to build absolute links
+   * @return the dataset
+   */
+  public Dcat3Dataset toDataset(String id, JsonNode source, String baseUrl) {
+    return toDataset(id, source, baseUrl, null);
+  }
+
+  public Dcat3Dataset toDataset(String id, JsonNode source, String baseUrl, String profile) {
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
+    String itemUrl = root + "/rest/metadata/item/" + urlEncode(id);
+
+    Dcat3Dataset ds = new Dcat3Dataset();
+
+    ds.atId = itemUrl;
+    ds.identifier = id;
+    ds.title = StringUtils.defaultIfBlank(mappedText(source, profile, "dataset", "title", "title"), id);
+    ds.description = StringUtils.defaultIfBlank(mappedText(source, profile, "dataset", "description", "description"), ds.title);
+    ds.landingPage = Dcat3NodeRef.document(itemUrl + "/html", ds.title + " Landing Page");
+    String restrictionStatus = StringUtils.defaultIfBlank(
+            text(source, sourceField(profile, "query.sysAccess", "sys_access_s")),
+            "public");
+    ds.accessRestriction = new ArrayList<>(List.of(Dcat3AccessRestriction.of(restrictionStatus)));
+    ds.accessLevel = resolveAccessLevel(source, profile);
+    String createdValue = firstNonBlank(
+            mappedText(source, profile, "dataset", "created", "sys_created_dt"),
+            mappedText(source, profile, "dataset", "createdFallback", "sys_created_dt"));
+    ds.issued = toIso(createdValue);
+
+    String modifiedValue = firstNonBlank(
+            mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
+            mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
+    ds.modified = StringUtils.defaultIfBlank(toIso(modifiedValue), nowIso());
+
+    // dct:publisher / dcat:contactPoint - record-level values (mapped via
+    // sourceFieldMappings, e.g. dataset.publisherName/contactName/contactEmail)
+    // take precedence over the catalog-wide configured defaults; a blank
+    // mapped value falls back to the default independently per field.
+    String recordContactName = mappedText(source, profile, "dataset", "contactName", null);
+    String recordContactEmail = mappedText(source, profile, "dataset", "contactEmail", null);
+    Dcat3ContactPoint contactPoint = config.newContactPoint(recordContactName, recordContactEmail);
+    if (contactPoint != null) ds.addContactPoint(contactPoint);
+
+    for (String kw : mappedTextList(source, profile, "dataset", "keywords", "keywords_s")) {
+      ds.addKeyword(kw);
+    }
+    ds.addTheme(mappedText(source, profile, "dataset", "theme", "itemType_s"));
+
+    Dcat3Location location = toLocation(source.path(sourceField(profile, "dataset.envelope", "envelope_geo")));
+    if (location != null) ds.addSpatial(location);
+
+    Dcat3PeriodOfTime temporal = toPeriodOfTime(source.path(sourceField(profile, "dataset.timePeriod", "timeperiod_nst")));
+    if (temporal != null && !temporal.isEmpty()) ds.addTemporal(temporal);
+
+    ds.publisher = config.newPublisher(mappedText(source, profile, "dataset", "publisherName", null));
+
+    // dct:creator (sys_owner_s) - the item owner, modeled as an org:Organization
+    // consistent with dct:publisher / Dcat3DataService.creator.
+    String owner = mappedText(source, profile, "dataset", "creator", "sys_owner_s");
+    if (StringUtils.isNotBlank(owner)) {
+      ds.creator = new Dcat3Organization(owner);
+    }
+
+    // dct:provenance (credits_s) - free-text credits/history associated with the item.
+    ds.provenance = mappedText(source, profile, "dataset", "provenance", "credits_s");
+
+    List<String> rights = mappedTextList(source, profile, "dataset", "rights", "rights_s");
+    ds.rights = rights.isEmpty() ? config.getRights() : String.join("; ", rights);
+    ds.license = config.getLicense();
+
+    for (Dcat3Distribution d : toDistributions(id, source, root, itemUrl, profile)) {
+      ds.addDistribution(d);
+    }
+
+    // Map collection membership (src_collections_s) to dcat:inSeries
+    List<String> collections = mappedTextList(source, profile, "query", "collectionMembership", "src_collections_s");
+    for (String collectionId : collections) {
+      if (StringUtils.isNotBlank(collectionId)) {
+        String seriesAtId = root + "/dcat3/datasetSeries/" + urlEncode(collectionId);
+        ds.addInSeries(seriesAtId);
+      }
+    }
+
+    return ds;
+  }
+
+  /**
+   * Maps a geoportal collection document to a <code>dcat:DatasetSeries</code>.
+   *
+   * @param collection the collection <code>_source</code> document
+   * @param baseUrl the geoportal base URL used to build absolute links
+   * @param includeSeriesMember when <code>true</code> the number of members is
+   *                           resolved through an extra <code>_count</code> call,
+   *                           and <code>dcat:first</code>/<code>dcat:last</code>/
+   *                           <code>dcat:seriesMember</code> are populated when
+   *                           the collection's true member count is within
+   *                           {@link Dcat3Config#getMaxSeriesMemberCnt()};
+   *                           otherwise only <code>dcat:first</code> is populated.
+   * @return the dataset series
+   */
+  public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean includeSeriesMember) {
+    return toDatasetSeries(collection, baseUrl, includeSeriesMember, null);
+  }
+
+
+  public Dcat3DatasetSeries toDatasetSeries(JsonNode collection, String baseUrl, boolean includeSeriesMember, String profile) {
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
+    String collectionId = StringUtils.defaultIfBlank(
+            mappedText(collection, profile, "datasetSeries", "id", "id"),
+            mappedText(collection, profile, "datasetSeries", "identifier", "identifier"));
+    String seriesTitle = StringUtils.defaultIfBlank(
+            firstNonBlank(mappedText(collection, profile, "datasetSeries", "title", "title"), mappedText(collection, profile, "datasetSeries", "name", "name")),
+            StringUtils.defaultIfBlank(collectionId, "Dataset Series"));
+    String seriesDescription = StringUtils.defaultIfBlank(
+            mappedText(collection, profile, "datasetSeries", "description", "description"),
+            "Geoportal collection '%s'.".formatted(StringUtils.defaultIfBlank(collectionId, seriesTitle)));
+
+    Dcat3DatasetSeries series = new Dcat3DatasetSeries();
+    series.atId = root + "/dcat3/datasetSeries/" + urlEncode(collectionId);
+    series.title = seriesTitle;
+    series.description = seriesDescription;
+    series.issued = toIso(firstNonBlank(
+            mappedText(collection, profile, "datasetSeries", "created", "created"),
+            mappedText(collection, profile, "datasetSeries", "createdFallback", "sys_created_dt")));
+    series.modified = StringUtils.defaultIfBlank(
+            toIso(firstNonBlank(mappedText(collection, profile, "datasetSeries", "updated", "updated"),
+                    mappedText(collection, profile, "datasetSeries", "updatedFallback", "sys_modified_dt"))), nowIso());
+    series.accrualPeriodicity = firstNonBlank(
+            mappedText(collection, profile, "datasetSeries", "accrualPeriodicity", "accrualPeriodicity"),
+            config.getAccrualPeriodicity());
+    series.addSpatial(toLocation(collection.path(sourceField(profile, "datasetSeries.envelope", "envelope_geo"))));
+    series.addTemporal(toPeriodOfTime(collection.path(sourceField(profile, "datasetSeries.timePeriod", "timeperiod_nst"))));
+
+    // dct:publisher - record-level value takes precedence over the configured
+    // default (app-dcat3.xml's publisherName). Resolution order:
+    //   1. organization of the first entry in the collection's "contacts"
+    //      array (see datasetSeries.contacts mapping, e.g. the STAC
+    //      collection contacts extension populated through the Collections
+    //      Panel UI),
+    //   2. the legacy flat-field mapping (datasetSeries.publisherName, e.g.
+    //      "publisher_s, publisher_name"),
+    //   3. the configured default (config.newPublisher() -> app-dcat3.xml
+    //      gpt_dcat3PublisherName).
+    JsonNode primaryContact = firstContact(collection, profile);
+    String contactsPublisherName = primaryContact != null ? text(primaryContact, "organization") : null;
+    series.publisher = config.newPublisher(firstNonBlank(
+            contactsPublisherName,
+            mappedText(collection, profile, "datasetSeries", "publisherName", null)));
+    // dcat:contactPoint - same precedence as above, applied independently to
+    // name (contacts[0].name) and email (contacts[0].emails[0].value).
+    String contactsContactName = primaryContact != null ? text(primaryContact, "name") : null;
+    String contactsContactEmail = firstContactEmailValue(primaryContact);
+    String recordContactName = firstNonBlank(
+            contactsContactName,
+            mappedText(collection, profile, "datasetSeries", "contactName", null));
+    String recordContactEmail = firstNonBlank(
+            contactsContactEmail,
+            mappedText(collection, profile, "datasetSeries", "contactEmail", null));
+    Dcat3ContactPoint contactPoint = config.newContactPoint(recordContactName, recordContactEmail);
+    if (contactPoint != null) series.addContactPoint(contactPoint);
+
+    if (includeSeriesMember) {
+      int maxSeriesMemberCnt = config.getMaxSeriesMemberCnt();
+      List<String> memberIds = searchCollectionMemberIds(collectionId, maxSeriesMemberCnt, profile);
+      long count = countCollectionMembers(collectionId, profile);
+      boolean completeMemberList = count >= 0 ? count <= memberIds.size() : memberIds.size() < maxSeriesMemberCnt;
+      if (!memberIds.isEmpty()) {
+        series.first = toDatasetReference(root, memberIds.get(0));
+        if (completeMemberList) {
+          // dcat:seriesMember / dcat:last are only populated when the
+          // collection's true member count fits within
+          // config.maxSeriesMemberCnt (a complete list can be produced);
+          // otherwise they are omitted to avoid returning an incomplete,
+          // misleadingly-truncated list. dcat:first is always resolved when
+          // member resolution is requested.
+          for (String memberId : memberIds) {
+            series.addSeriesMember(toDatasetReference(root, memberId));
+          }
+          series.last = toDatasetReference(root, memberIds.get(memberIds.size() - 1));
+        } else {
+          LOGGER.debug("DCAT3: collection {} has more than {} members; omitting incomplete seriesMember list.", collectionId, memberIds.size());
+        }
+      }
+    }
+
+
+    validateDatasetSeries(series, collectionId);
+    return series;
+  }
+
+  /**
+   * Validates a dataset series after mapping and logs any missing fields.
+   * @param series the series to validate
+   * @param collectionId the source collection identifier
+   */
+  private void validateDatasetSeries(Dcat3DatasetSeries series, String collectionId) {
+    if (series == null) return;
+    if (StringUtils.isBlank(series.title)) {
+      series.title = StringUtils.defaultIfBlank(collectionId, "Dataset Series");
+      LOGGER.warn("DCAT3: dataset series {} missing title; using fallback '{}'.", collectionId, series.title);
+    }
+    if (StringUtils.isBlank(series.description)) {
+      series.description = "Geoportal collection '%s'.".formatted(StringUtils.defaultIfBlank(collectionId, series.title));
+      LOGGER.warn("DCAT3: dataset series {} missing description; using fallback.", collectionId);
+    }
+    if (StringUtils.isBlank(series.atId)) {
+      LOGGER.warn("DCAT3: dataset series {} missing @id.", collectionId);
+    }
+    if (series.publisher == null) {
+      LOGGER.debug("DCAT3: dataset series {} has no publisher configured.", collectionId);
+    }
+    if (series.contactPoint == null) {
+      LOGGER.debug("DCAT3: dataset series {} has no contact point configured.", collectionId);
+    }
+  }
+
+  /**
+   * Derives the <code>dcat:DataService</code> entries of a metadata document
+   * from its <code>resources_nst</code> service endpoints.
+   *
+   * @param id the item id
+   * @param source the <code>_source</code> document
+   * @param baseUrl the geoportal base URL used to build absolute links
+   * @return list of data services (never <code>null</code>)
+   */
+  public List<Dcat3DataService> toDataServices(String id, JsonNode source, String baseUrl) {
+    return toDataServices(id, source, baseUrl, null);
+  }
+
+  public List<Dcat3DataService> toDataServices(String id, JsonNode source, String baseUrl, String profile) {
+    List<Dcat3DataService> services = new ArrayList<>();
+    if (!config.getIncludeDataServices()) return services;
+
+    String root = removeTrailingSlash(StringUtils.defaultIfBlank(baseUrl, config.getBaseUrl()));
+    String title = StringUtils.defaultIfBlank(mappedText(source, profile, "dataset", "title", "title"), id);
+
+    for (JsonNode resource : arrayOf(source.path(sourceField(profile, "dataset.resources", "resources_nst")))) {
+      String url = text(resource, sourceField(profile, "dataset.resource.url", "url_s"));
+      String urlType = text(resource, sourceField(profile, "dataset.resource.urlType", "url_type_s"));
+      if (StringUtils.isBlank(url) || !isHrefValid(url)) continue;
+      if (!Dcat3Constants.isServiceType(urlType)) continue;
+
+      services.add(buildDataService(id, source, root, profile, title, url, urlType));
+    }
+    return services;
+  }
+
+  /**
+   * Builds a single, schema-complete <code>dcat:DataService</code> for a
+   * service-type resource endpoint. Shared by {@link #toDataServices} (the
+   * standalone <code>/dcat3/dataService/{id}</code> list) and
+   * {@link #toDistributions} (embedded as <code>dcat:accessService</code>) so
+   * both places emit the exact same, fully populated object - required
+   * properties such as <code>title</code>, <code>endpointURL</code>,
+   * <code>publisher</code> and <code>contactPoint</code> included.
+   *
+   * @param id the item id
+   * @param source the <code>_source</code> document
+   * @param root the geoportal base URL (no trailing slash)
+   * @param profile the active mapping profile
+   * @param itemTitle the resolved dataset title
+   * @param url the service endpoint URL
+   * @param urlType the service type (e.g. <code>MapServer</code>)
+   * @return the populated data service
+   */
+  private Dcat3DataService buildDataService(String id, JsonNode source, String root, String profile,
+          String itemTitle, String url, String urlType) {
+    String datasetId = root + "/rest/metadata/item/" + urlEncode(id);
+
+    Dcat3DataService svc = new Dcat3DataService();
+    // Use the item-level dataService endpoint as the service identifier.
+    // The streaming service exposes /dcat3/dataService/{id} which returns
+    // all services for the item. Previously an index suffix was used which
+    // is not registered and results in 404 when dereferenced.
+    svc.atId = root + "/dcat3/dataService/" + urlEncode(id);
+    svc.identifier = svc.atId;
+    svc.title = "%s (%s)".formatted(itemTitle, urlType);
+    svc.description = "%s endpoint published for '%s'.".formatted(urlType, itemTitle);
+    svc.endpointURL = List.of(url);
+    svc.endpointDescription = List.of(buildEndpointDescription(url, urlType));
+    svc.format = urlType;
+    svc.mediaType = mediaTypeOf(urlType);
+    // servesDataset must be a full dcat:Dataset object (identifier, title,
+    // description, publisher, contactPoint are all required by the DCAT-US
+    // 3.0 schema), not a bare @id reference. Reuse the dataset's
+    // already-resolved title as the reference's title/description, and the
+    // record-level publisher/contact (resolved below) so the served dataset
+    // reference matches the publisher/contactPoint of the dcat:DataService
+    // itself, rather than always falling back to the catalog default.
+    String recordPublisherName = mappedText(source, profile, "dataset", "publisherName", null);
+    String recordContactName = mappedText(source, profile, "dataset", "contactName", null);
+    String recordContactEmail = mappedText(source, profile, "dataset", "contactEmail", null);
+    Dcat3Dataset servedDataset = toDatasetReference(root, id, recordPublisherName, recordContactName, recordContactEmail);
+    if (servedDataset != null) {
+      servedDataset.title = itemTitle;
+      servedDataset.description = itemTitle;
+      svc.addServesDataset(servedDataset);
+    }
+    svc.addConformsTo(conformanceClassOf(urlType));
+    // dct:publisher / dcat:contactPoint - record-level values (mapped via
+    // dataset.publisherName / dataset.contactName / dataset.contactEmail,
+    // e.g. "publisher_s,contact_organizations_s" / "contact_people_s") take
+    // precedence over the configured catalog-wide defaults, consistent with
+    // how toDataset() populates the parent dcat:Dataset. This ensures the
+    // dcat:DataService emitted here - both embedded as dcat:accessService on
+    // a dcat:Distribution (see toDistributions) and returned standalone by
+    // /dcat3/dataService/{id} (see toDataServices) - reflects the same
+    // publisher/contact as the dataset it serves, rather than always
+    // falling back to the catalog default.
+    svc.publisher = config.newPublisher(recordPublisherName);
+    svc.contactPoint = contactPoints(config.newContactPoint(recordContactName, recordContactEmail));
+    svc.license = config.getLicense();
+    svc.accessLevel = config.getAccessLevel();
+    // Populate bureauCode and programCode from configuration so emitted
+    // DataService entries include the configured profile codes.
+    if (config.getBureauCode() != null && !config.getBureauCode().isEmpty()) {
+      svc.bureauCode = new ArrayList<>(config.getBureauCode());
+    }
+    if (config.getProgramCode() != null && !config.getProgramCode().isEmpty()) {
+      svc.programCode = new ArrayList<>(config.getProgramCode());
+    }
+    svc.landingPage = Dcat3NodeRef.document(datasetId, itemTitle + " Landing Page");
+    String modifiedValue = firstNonBlank(
+            mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
+            mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
+    String createdValue = firstNonBlank(
+            mappedText(source, profile, "dataset", "created", "sys_created_dt"),
+            mappedText(source, profile, "dataset", "createdFallback", "sys_created_dt"));
+    svc.modified = toIso(modifiedValue);
+    svc.issued = toIso(createdValue);
+    return svc;
+  }
+
+  /**
+   * Builds all <code>dcat:Distribution</code> entries of a metadata document.
+   *
+   * <p>Service endpoints are emitted as standard distributions using only the
+   * mandatory and recommended distribution fields.</p>
+   *
+   * @param id the item id
+   * @param source the <code>_source</code> document
+   * @param root the geoportal base URL (no trailing slash)
+   * @param itemUrl the URL of the geoportal item
+   * @return list of distributions (never <code>null</code>)
+   */
+  public List<Dcat3Distribution> toDistributions(String id, JsonNode source, String root, String itemUrl) {
+    return toDistributions(id, source, root, itemUrl, null);
+  }
+
+  public List<Dcat3Distribution> toDistributions(String id, JsonNode source, String root, String itemUrl, String profile) {
+    List<Dcat3Distribution> distributions = new ArrayList<>();
+    List<String> seen = new ArrayList<>();
+
+    // Derive the item's access restriction (sys_access_s) so that every
+    // emitted distribution accurately reflects whether the underlying item
+    // is public, private, etc., instead of hard-coding "public". Items with
+    // no sys_access_s value are treated as public.
+    String accessRestriction = StringUtils.defaultIfBlank(
+            text(source, sourceField(profile, "query.sysAccess", "sys_access_s")),
+            "public");
+
+    // metadata representations of the item itself
+    Dcat3Distribution json = Dcat3Distribution.access(itemUrl, "JSON", accessRestriction);
+    json.title = "Metadata (JSON)";
+    json.description = "Metadata (JSON)";
+    json.mediaType = Dcat3Constants.MEDIA_TYPE_JSON;
+    distributions.add(json);
+    seen.add(itemUrl);
+
+    String metadataType = text(source, sourceField(profile, "dataset.metadataType", "sys_metadatatype_s"));
+    if (!"json".equalsIgnoreCase(StringUtils.defaultString(metadataType))) {
+      Dcat3Distribution html = Dcat3Distribution.access(itemUrl + "/html", "HTML", accessRestriction);
+      html.title = "Metadata (HTML)";
+      html.description = "Metadata (HTML)";
+      html.mediaType = Dcat3Constants.MEDIA_TYPE_HTML;
+      distributions.add(html);
+
+      Dcat3Distribution xml = Dcat3Distribution.access(itemUrl + "/xml", "XML", accessRestriction);
+      xml.title = "Metadata (XML)";
+      xml.description = "Metadata (XML)";
+      xml.mediaType = Dcat3Constants.MEDIA_TYPE_XML;
+      distributions.add(xml);
+    }
+
+    // direct file
+    String fileid = text(source, sourceField(profile, "dataset.fileId", "fileid"));
+      if (isHrefValid(fileid) && !seen.contains(fileid)) {
+        Dcat3Distribution file = Dcat3Distribution.download(fileid, "File", accessRestriction);
+        file.title = "Download";
+        file.description = "Download";
+        String mt = inferMediaTypeFromUrl(fileid);
+        file.mediaType = mt != null ? mt : Dcat3Constants.MEDIA_TYPE_OCTET_STREAM;
+        distributions.add(file);
+        seen.add(fileid);
+      }
+
+    // linked resources
+    // NOTE: previously each emitted DataService used a per-item index and
+    // distributions referenced it (root/dcat3/dataService/{id}/{index}). The
+    // streaming endpoints only register /dcat3/dataService/{id}, so we now
+    // reference the item-level service list URI instead. The serviceIndex is
+    // retained only for internal ordering and not used in the URI.
+    String itemTitle = StringUtils.defaultIfBlank(mappedText(source, profile, "dataset", "title", "title"), id);
+    for (JsonNode resource : arrayOf(source.path(sourceField(profile, "dataset.resources", "resources_nst")))) {
+      String url = text(resource, sourceField(profile, "dataset.resource.url", "url_s"));
+      String urlType = text(resource, sourceField(profile, "dataset.resource.urlType", "url_type_s"));
+      boolean isValidHref = isHrefValid(url);
+      boolean isService = isValidHref && Dcat3Constants.isServiceType(urlType);
+
+      if (!isValidHref || seen.contains(url)) continue;
+      seen.add(url);
+
+      Dcat3Distribution d = Dcat3Distribution.access(url, StringUtils.defaultIfBlank(urlType, "Web Resource"), accessRestriction);
+      d.title = StringUtils.defaultIfBlank(urlType, "Resource");
+      d.description = d.title;
+      String modifiedValue = firstNonBlank(
+              mappedText(source, profile, "dataset", "modified", "sys_modified_dt"),
+              mappedText(source, profile, "dataset", "modifiedFallback", "sys_modified_dt"));
+      d.modified = toIso(modifiedValue);
+      // Prefer inferring media type from URL extension; fall back to type mapping
+      String inferred = inferMediaTypeFromUrl(url);
+      d.mediaType = inferred != null ? inferred : mediaTypeOf(urlType);
+      d.license = config.getLicense();
+      // Embed the fully populated dcat:DataService (schema requires title,
+      // endpointURL, publisher and contactPoint on each accessService entry).
+      d.accessService = config.getIncludeDataServices() && isService
+              ? List.of(buildDataService(id, source, root, profile, itemTitle, url, urlType))
+              : null;
+      distributions.add(d);
+    }
+
+    // thumbnail
+    String thumbnail = text(source, sourceField(profile, "dataset.thumbnail", "thumbnail_s"));
+    if (isHrefValid(thumbnail) && !seen.contains(thumbnail)) {
+      Dcat3Distribution thumb = Dcat3Distribution.access(thumbnail, "Thumbnail", accessRestriction);
+      thumb.title = "Thumbnail";
+      thumb.description = "Thumbnail";
+      String thumbMt = inferMediaTypeFromUrl(thumbnail);
+      thumb.mediaType = thumbMt != null ? thumbMt : "image/png";
+      distributions.add(thumb);
+    }
+
+    return distributions;
+  }
+
+  /* =================================================================== */
+  /* Mapping internals                                                   */
+  /* =================================================================== */
+
+  /**
+   * Populates the properties shared by all cataloged resources.
+   * @param ds the target resource
+   * @param id the item id
+   * @param source the <code>_source</code> document
+   * @param root the geoportal base URL (no trailing slash)
+   * @param itemUrl the URL of the geoportal item
+   */
+  private void populateCommon(Dcat3Dataset ds, String id, JsonNode source, String root, String itemUrl) {
+    // Dataset mapping is performed directly in toDataset(); this helper is retained
+    // for backward compatibility with earlier internal call sites.
+  }
+
+  /**
+   * Determines the DCAT-US access level of an item.
+   * @param source the <code>_source</code> document
+   * @return one of the <code>Dcat3Constants.ACCESS_LEVEL_*</code> values
+   */
+  private String resolveAccessLevel(JsonNode source) {
+    return resolveAccessLevel(source, null);
+  }
+
+  private String resolveAccessLevel(JsonNode source, String profile) {
+    String access = text(source, sourceField(profile, "query.sysAccess", "sys_access_s"));
+    if (StringUtils.isBlank(access)) return config.getAccessLevel();
+    if ("public".equalsIgnoreCase(access)) return Dcat3Constants.ACCESS_LEVEL_PUBLIC;
+    if ("private".equalsIgnoreCase(access)) return Dcat3Constants.ACCESS_LEVEL_NON_PUBLIC;
+    return Dcat3Constants.ACCESS_LEVEL_RESTRICTED;
+  }
+
+  private String sf(String key, String fallback) {
+    return config.getSourceField(key, fallback);
+  }
+
+  private String sourceField(String profile, String key, String fallback) {
+    return config.getProfileSourceField(profile, key, fallback);
+  }
+
+  private String sf(String key, String fieldName, String fallback) {
+    return config.getSourceField(key, fieldName, fallback);
+  }
+
+  private String sourceField(String profile, String key, String fieldName, String fallback) {
+    return config.getProfileSourceField(profile, key, fieldName, fallback);
+  }
+
+  private JsonNode parseClientQuery(String esdsl) {
+    if (StringUtils.isBlank(esdsl)) return null;
+    try {
+      JsonNode root = MAPPER.readTree(esdsl);
+      if (root == null || root.isNull() || root.isMissingNode()) return null;
+      JsonNode query = root.path("query");
+      if (!query.isMissingNode() && !query.isNull()) {
+        return query;
+      }
+      return root;
+    } catch (Exception ex) {
+      LOGGER.debug("DCAT3: invalid esdsl query, ignoring filter.", ex);
+      return null;
+    }
+  }
+
+  private void appendSort(ArrayNode sortArray, String sort) {
+    if (sortArray == null || StringUtils.isBlank(sort)) return;
+    String candidate = StringUtils.trimToEmpty(sort);
+
+    if (candidate.startsWith("{") || candidate.startsWith("[")) {
+      try {
+        JsonNode node = MAPPER.readTree(candidate);
+        appendSortNode(sortArray, node);
+        if (!sortArray.isEmpty()) {
+          return;
+        }
+      } catch (Exception ex) {
+        LOGGER.debug("DCAT3: invalid JSON sort, trying CSV syntax.", ex);
+      }
+    }
+
+    String[] specs = candidate.split(",");
+    for (String spec : specs) {
+      appendSortToken(sortArray, spec);
+    }
+  }
+
+  private void appendSortNode(ArrayNode sortArray, JsonNode node) {
+    if (sortArray == null || node == null || node.isNull() || node.isMissingNode()) return;
+
+    if (node.isArray()) {
+      for (JsonNode item : node) {
+        appendSortNode(sortArray, item);
+      }
+      return;
+    }
+
+    if (node.isObject()) {
+      Iterator<Map.Entry<String, JsonNode>> fields = node.fields();
+      while (fields.hasNext()) {
+        Map.Entry<String, JsonNode> entry = fields.next();
+        String field = StringUtils.trimToEmpty(entry.getKey());
+        if (field.isEmpty()) continue;
+
+        JsonNode value = entry.getValue();
+        String normalizedField = normalizeSortField(field);
+        if (value != null && value.isObject() && value.has("order")) {
+          sortArray.addObject().putObject(normalizedField)
+                  .put("order", normalizeSortOrder(value.path("order").asText(null)));
+        } else if (value != null && value.isTextual()) {
+          sortArray.addObject().putObject(normalizedField)
+                  .put("order", normalizeSortOrder(value.asText()));
+        } else {
+          sortArray.addObject().putObject(normalizedField).put("order", "asc");
+        }
+      }
+    }
+  }
+
+  private void appendSortToken(ArrayNode sortArray, String token) {
+    String spec = StringUtils.trimToEmpty(token);
+    if (spec.isEmpty()) return;
+
+    int sep = spec.indexOf(':');
+    String field = sep >= 0 ? spec.substring(0, sep) : spec;
+    String order = sep >= 0 ? spec.substring(sep + 1) : "asc";
+    field = StringUtils.trimToEmpty(field);
+    if (field.isEmpty()) return;
+
+    sortArray.addObject().putObject(normalizeSortField(field))
+            .put("order", normalizeSortOrder(order));
+  }
+
+  private String normalizeSortOrder(String order) {
+    return "desc".equalsIgnoreCase(StringUtils.trimToEmpty(order)) ? "desc" : "asc";
+  }
+
+  private String normalizeSortField(String field) {
+    String f = StringUtils.trimToEmpty(field);
+    if ("title".equals(f)) {
+      return "title.keyword";
+    }
+    return f;
+  }
+
+  private String mappedText(JsonNode source, String prefix, String fieldName, String fallback) {
+    return mappedText(source, null, prefix, fieldName, fallback);
+  }
+
+  private String mappedText(JsonNode source, String profile, String prefix, String fieldName, String fallback) {
+    return text(source, sourceField(profile, prefix + "." + fieldName, fieldName, fallback));
+  }
+
+  private List<String> mappedTextList(JsonNode source, String prefix, String fieldName, String fallback) {
+    return mappedTextList(source, null, prefix, fieldName, fallback);
+  }
+
+  private List<String> mappedTextList(JsonNode source, String profile, String prefix, String fieldName, String fallback) {
+    return textList(source, sourceField(profile, prefix + "." + fieldName, fieldName, fallback));
+  }
+
+  private List<String> datasetSourceIncludes() {
+    return datasetSourceIncludes(null);
+  }
+
+  private List<String> datasetSourceIncludes(String profile) {
+    LinkedHashSet<String> includes = new LinkedHashSet<>();
+
+    for (Map.Entry<String, String> e : config.getProfileSourceFieldMappings(profile).entrySet()) {
+      String key = StringUtils.defaultString(e.getKey());
+      String value = StringUtils.trimToNull(e.getValue());
+      if (value == null) continue;
+      if (key.startsWith("dataset.") || key.startsWith("query.") || key.startsWith("datasetSeries.")) {
+        includes.add(value);
+      }
+    }
+
+    for (String fieldName : config.getClassProperty(profile, "Dcat3Dataset")) {
+      String sourceField = StringUtils.trimToNull(sourceField(profile, "dataset." + fieldName, fieldName, fieldName));
+      if (sourceField != null && !sourceField.startsWith("@")) {
+        includes.add(sourceField);
+      }
+    }
+    return new ArrayList<>(includes);
+  }
+
+  private static String removeTrailingSlash(String value) {
+    if (value == null) return null;
+    return value.endsWith("/") ? value.substring(0, value.length() - 1) : value;
+  }
+
+  /**
+   * Converts <code>envelope_geo</code> to a <code>dct:Location</code>.
+   * @param envelopeGeo the <code>envelope_geo</code> node
+   * @return the location or <code>null</code>
+   */
+  public static Dcat3Location toLocation(JsonNode envelopeGeo) {
+    for (JsonNode env : arrayOf(envelopeGeo)) {
+      JsonNode coordinates = env.path("coordinates");
+      if (!coordinates.isArray() || coordinates.size() != 2) continue;
+      JsonNode topLeft = coordinates.get(0);
+      JsonNode bottomRight = coordinates.get(1);
+      if (!topLeft.isArray() || topLeft.size() != 2) continue;
+      if (!bottomRight.isArray() || bottomRight.size() != 2) continue;
+
+      Double west = topLeft.get(0).isNumber() ? topLeft.get(0).asDouble() : null;
+      Double north = topLeft.get(1).isNumber() ? topLeft.get(1).asDouble() : null;
+      Double east = bottomRight.get(0).isNumber() ? bottomRight.get(0).asDouble() : null;
+      Double south = bottomRight.get(1).isNumber() ? bottomRight.get(1).asDouble() : null;
+
+      Dcat3Location loc = Dcat3Location.fromBBox(west, south, east, north);
+      if (loc != null) return loc;
+    }
+    return null;
+  }
+
+  /**
+   * Converts <code>timeperiod_nst</code> to a <code>dct:PeriodOfTime</code>.
+   * @param timePeriod the <code>timeperiod_nst</code> node
+   * @return the period or <code>null</code>
+   */
+  public static Dcat3PeriodOfTime toPeriodOfTime(JsonNode timePeriod) {
+    for (JsonNode tp : arrayOf(timePeriod)) {
+      String begin = toIso(text(tp, "begin_dt"));
+      String end = toIso(text(tp, "end_dt"));
+      if (StringUtils.isNotBlank(begin) || StringUtils.isNotBlank(end)) {
+        return new Dcat3PeriodOfTime(begin, end);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Builds a capabilities / service description URL where applicable.
+   */
+  private static String buildEndpointDescription(String url, String urlType) {
+    if (url == null) return null;
+    String separator = url.contains("?") ? "&" : "?";
+    if ("WMS".equalsIgnoreCase(urlType)) return url + separator + "service=WMS&request=GetCapabilities";
+    if ("WFS".equalsIgnoreCase(urlType)) return url + separator + "service=WFS&request=GetCapabilities";
+    if ("WCS".equalsIgnoreCase(urlType)) return url + separator + "service=WCS&request=GetCapabilities";
+    if ("WMTS".equalsIgnoreCase(urlType)) return url + separator + "service=WMTS&request=GetCapabilities";
+    if ("CSW".equalsIgnoreCase(urlType)) return url + separator + "service=CSW&request=GetCapabilities";
+    if (urlType != null && urlType.endsWith("Server")) return url + separator + "f=json";
+    return url;
+  }
+
+  /**
+   * Maps a geoportal resource type to a standard/conformance class.
+   */
+  private static String conformanceClassOf(String urlType) {
+    if (urlType == null) return null;
+    switch (urlType.toUpperCase()) {
+      case "WMS":  return "http://www.opengeospatial.org/standards/wms";
+      case "WFS":  return "http://www.opengeospatial.org/standards/wfs";
+      case "WCS":  return "http://www.opengeospatial.org/standards/wcs";
+      case "WMTS": return "http://www.opengeospatial.org/standards/wmts";
+      case "WPS":  return "http://www.opengeospatial.org/standards/wps";
+      case "SOS":  return "http://www.opengeospatial.org/standards/sos";
+      case "CSW":  return "http://www.opengeospatial.org/standards/cat";
+      default:      return "https://developers.arcgis.com/rest/";
+    }
+  }
+
+  /**
+   * Maps a geoportal resource type to an IANA media type.
+   */
+  private static String mediaTypeOf(String urlType) {
+    if (urlType == null) return Dcat3Constants.MEDIA_TYPE_OCTET_STREAM;
+    switch (urlType.toUpperCase()) {
+      case "KML": return "application/vnd.google-earth.kml+xml";
+      case "SHP": return "application/zip";
+      case "CSV": return "text/csv";
+      case "PDF": return "application/pdf";
+      case "WMS":
+      case "WFS":
+      case "WCS":
+      case "WMTS":
+      case "CSW": return Dcat3Constants.MEDIA_TYPE_XML;
+      default:
+        return Dcat3Constants.isServiceType(urlType)
+                ? Dcat3Constants.MEDIA_TYPE_JSON
+                : Dcat3Constants.MEDIA_TYPE_HTML;
+    }
+  }
+
+  /**
+   * Infers a media type from a resource URL by its file extension.
+   * Returns null when no reasonable inference can be made.
+   */
+  private static String inferMediaTypeFromUrl(String url) {
+    if (StringUtils.isBlank(url)) return null;
+    String lower = url.toLowerCase();
+    // Trim query and fragment
+    int q = lower.indexOf('?');
+    if (q >= 0) lower = lower.substring(0, q);
+    int f = lower.indexOf('#');
+    if (f >= 0) lower = lower.substring(0, f);
+    // Find extension
+    int dot = lower.lastIndexOf('.');
+    if (dot < 0 || dot == lower.length() - 1) return null;
+    String ext = lower.substring(dot + 1);
+    switch (ext) {
+      case "json": return "application/json";
+      case "geojson": return "application/geo+json";
+      case "xml": return "application/xml";
+      case "kml": return "application/vnd.google-earth.kml+xml";
+      case "kmz": return "application/vnd.google-earth.kmz";
+      case "zip": return "application/zip";
+      case "shp": return "application/zip"; // shapefiles usually in zip
+      case "csv": return "text/csv";
+      case "pdf": return "application/pdf";
+      case "png": return "image/png";
+      case "jpg":
+      case "jpeg": return "image/jpeg";
+      case "gif": return "image/gif";
+      case "html":
+      case "htm": return "text/html";
+      case "txt": return "text/plain";
+      default: return null;
+    }
+  }
+
+  /**
+   * Reads a textual property. <code>name</code> may be a single field name or
+   * a comma-separated list of candidate field names (e.g.
+   * <code>"publisher_s, publisher_name"</code>, as configured in a
+   * <code>sourceFieldMappings</code> entry) - each candidate is tried, in
+   * order, and the first one with a non-blank value in <code>node</code> wins.
+   * This allows a single mapping to tolerate multiple possible source field
+   * names across differently indexed records, falling back to the next
+   * candidate (and ultimately to the caller-supplied default) when a field is
+   * absent/blank.
+   */
+  public static String text(JsonNode node, String name) {
+    if (node == null || StringUtils.isBlank(name)) return null;
+    for (String candidate : splitFieldNames(name)) {
+      JsonNode v = node.path(candidate);
+      if (v.isMissingNode() || v.isNull()) continue;
+      String value = v.isArray()
+              ? (v.size() > 0 ? StringUtils.trimToNull(v.get(0).asText()) : null)
+              : StringUtils.trimToNull(v.asText());
+      if (value != null) return value;
+    }
+    return null;
+  }
+
+  /**
+   * Reads a property as a list of strings, tolerating single values.
+   * <code>name</code> may be a comma-separated list of candidate field names
+   * (see {@link #text(JsonNode, String)}); the first candidate that yields a
+   * non-empty list wins.
+   */
+  public static List<String> textList(JsonNode node, String name) {
+    List<String> values = new ArrayList<>();
+    if (node == null || StringUtils.isBlank(name)) return values;
+    for (String candidate : splitFieldNames(name)) {
+      JsonNode v = node.path(candidate);
+      if (v.isMissingNode() || v.isNull()) continue;
+      List<String> candidateValues = new ArrayList<>();
+      if (v.isArray()) {
+        for (JsonNode item : v) {
+          String s = StringUtils.trimToNull(item.asText());
+          if (s != null && !candidateValues.contains(s)) candidateValues.add(s);
+        }
+      } else {
+        String s = StringUtils.trimToNull(v.asText());
+        if (s != null) candidateValues.add(s);
+      }
+      if (!candidateValues.isEmpty()) return candidateValues;
+    }
+    return values;
+  }
+
+  /**
+   * Splits a (possibly comma-separated) field name mapping into its
+   * individual candidate field names, trimming whitespace and discarding
+   * blank entries.
+   */
+  private static List<String> splitFieldNames(String name) {
+    List<String> names = new ArrayList<>();
+    for (String part : name.split(",")) {
+      String trimmed = StringUtils.trimToNull(part);
+      if (trimmed != null) names.add(trimmed);
+    }
+    return names;
+  }
+
+  /**
+   * Resolves the first element of the first non-empty array found under one
+   * of the (possibly comma-separated) candidate field names in <code>name</code>.
+   * Used to read the first entry of the collection's <code>contacts</code>
+   * array (see {@link #firstContact(JsonNode, String)}) and the first entry
+   * of a contact's <code>emails</code> array (see
+   * {@link #firstContactEmailValue(JsonNode)}).
+   * @param node the node to read the array from
+   * @param name a field name, or comma-separated list of candidate field names
+   * @return the first array element, or <code>null</code> when none is found
+   */
+  private static JsonNode firstArrayElement(JsonNode node, String name) {
+    if (node == null || StringUtils.isBlank(name)) return null;
+    for (String candidate : splitFieldNames(name)) {
+      JsonNode v = node.path(candidate);
+      if (v.isArray() && v.size() > 0) {
+        return v.get(0);
+      }
+    }
+    return null;
+  }
+
+  /**
+   * Resolves the first entry of a collection's <code>contacts</code> array
+   * (mapped via <code>datasetSeries.contacts</code>, defaulting to the
+   * <code>contacts</code> field name), as populated by the STAC collection
+   * contacts extension (e.g. through the Collections Panel UI):
+   * <pre>
+   * "contacts": [{
+   *   "name": "John Doe",
+   *   "position": "CEO",
+   *   "description": "...",
+   *   "organization": "Doe Chemicals",
+   *   "emails": [{ "value": "john@doe.com", "roles": ["work"] }]
+   * }]
+   * </pre>
+   * @param collection the collection <code>_source</code> document
+   * @param profile the active mapping profile, or <code>null</code>
+   * @return the first contact object, or <code>null</code> when the collection
+   *         has no contacts
+   */
+  private JsonNode firstContact(JsonNode collection, String profile) {
+    if (collection == null) return null;
+    String contactsField = sourceField(profile, "datasetSeries.contacts", "contacts");
+    JsonNode contact = firstArrayElement(collection, contactsField);
+    return (contact != null && contact.isObject()) ? contact : null;
+  }
+
+  /**
+   * Resolves the <code>value</code> of the first entry of a contact's
+   * <code>emails</code> array.
+   * @param contact a contact object (see {@link #firstContact(JsonNode, String)}),
+   *                or <code>null</code>
+   * @return the first email value, or <code>null</code> when unavailable
+   */
+  private String firstContactEmailValue(JsonNode contact) {
+    if (contact == null) return null;
+    JsonNode email = firstArrayElement(contact, "emails");
+    return email != null ? text(email, "value") : null;
+  }
+
+  /**
+   * Normalizes a node into an iterable of nodes.
+   */
+  public static Iterable<JsonNode> arrayOf(JsonNode node) {
+    List<JsonNode> list = new ArrayList<>();
+    if (node == null || node.isMissingNode() || node.isNull()) return list;
+    if (node.isArray()) {
+      Iterator<JsonNode> it = node.elements();
+      while (it.hasNext()) {
+        JsonNode n = it.next();
+        if (n != null && !n.isNull()) list.add(n);
+      }
+    } else {
+      list.add(node);
+    }
+    return list;
+  }
+
+  /**
+   * Returns the first non blank value.
+   */
+  public static String firstNonBlank(String... values) {
+    if (values == null) return null;
+    for (String v : values) {
+      if (StringUtils.isNotBlank(v)) return v;
+    }
+    return null;
+  }
+
+  /**
+   * Checks whether a href uses a supported protocol.
+   */
+  public static boolean isHrefValid(String href) {
+    if (StringUtils.isBlank(href)) return false;
+    String lower = href.toLowerCase();
+    return lower.startsWith("http://") || lower.startsWith("https://")
+        || lower.startsWith("ftp://") || lower.startsWith("ftps://");
+  }
+
+  /**
+   * Normalizes a date to an ISO-8601 instant.
+   */
+  public static String toIso(String value) {
+    if (StringUtils.isBlank(value)) return null;
+    String v = value.trim();
+    try {
+      return OffsetDateTime.parse(v).withOffsetSameInstant(ZoneOffset.UTC)
+              .format(DateTimeFormatter.ISO_INSTANT);
+    } catch (Exception ignore) {
+    }
+    try {
+      return Instant.parse(v).toString();
+    } catch (Exception ignore) {
+    }
+    try {
+      long epoch = Long.parseLong(v);
+      return Instant.ofEpochMilli(epoch).toString();
+    } catch (Exception ignore) {
+    }
+    return v;
+  }
+
+  /**
+   * Current time as an ISO-8601 instant.
+   */
+  public static String nowIso() {
+    return Instant.now().toString();
+  }
+
+  /**
+   * URL encodes a path segment.
+   */
+  public static String urlEncode(String value) {
+    return java.net.URLEncoder.encode(StringUtils.defaultString(value),
+            java.nio.charset.StandardCharsets.UTF_8);
+  }
+
+  /**
+   * Wraps a contact point into the schema-compliant array form.
+   * @param contactPoint contact point
+   * @return singleton array or <code>null</code>
+   */
+  private static List<Dcat3ContactPoint> contactPoints(Dcat3ContactPoint contactPoint) {
+    if (contactPoint == null) return null;
+    return List.of(contactPoint);
+  }
+
+  /**
+   * Builds a dataset reference object suitable for use as a
+   * <code>dcat:DatasetSeries</code> <code>first</code>/<code>last</code>/
+   * <code>seriesMember</code> entry, or as a <code>dcat:DataService</code>
+   * <code>servesDataset</code> entry. Populates <code>title</code>,
+   * <code>description</code>, <code>publisher</code> and
+   * <code>contactPoint</code> (falling back to the identifier / configured
+   * defaults) so the reference satisfies the mandatory <code>dcat:Dataset</code>
+   * properties required in that context.
+   * @param root the geoportal base URL
+   * @param datasetIdentifier the dataset identifier
+   * @return the reference or null
+   */
+  public Dcat3Dataset toDatasetReference(String root, String datasetIdentifier) {
+    return toDatasetReference(root, datasetIdentifier, null, null, null);
+  }
+
+  /**
+   * Builds a dataset reference object, preferring record-level
+   * <code>publisher</code>/<code>contactPoint</code> values (e.g. resolved
+   * from the served dataset's own <code>dataset.publisherName</code> /
+   * <code>dataset.contactName</code> / <code>dataset.contactEmail</code>
+   * mappings) over the catalog-wide configured defaults. Used by
+   * {@link #buildDataService} so a <code>dcat:DataService</code>'s
+   * <code>servesDataset</code> entry reflects the same publisher/contact as
+   * the dataset it serves.
+   * @param root the geoportal base URL
+   * @param datasetIdentifier the dataset identifier
+   * @param overridePublisherName record-level publisher name, or <code>null</code>/blank to use the default
+   * @param overrideContactName record-level contact name, or <code>null</code>/blank to use the default
+   * @param overrideContactEmail record-level contact email, or <code>null</code>/blank to use the default
+   * @return the reference or null
+   */
+  public Dcat3Dataset toDatasetReference(String root, String datasetIdentifier,
+          String overridePublisherName, String overrideContactName, String overrideContactEmail) {
+    if (StringUtils.isBlank(root) || StringUtils.isBlank(datasetIdentifier)) return null;
+    Dcat3Dataset dataset = new Dcat3Dataset();
+    dataset.atId = root + "/rest/metadata/item/" + urlEncode(datasetIdentifier);
+    dataset.identifier = datasetIdentifier;
+    dataset.title = datasetIdentifier;
+    dataset.description = datasetIdentifier;
+    dataset.publisher = config.newPublisher(overridePublisherName);
+    Dcat3ContactPoint contactPoint = config.newContactPoint(overrideContactName, overrideContactEmail);
+    if (contactPoint != null) dataset.addContactPoint(contactPoint);
+    return dataset;
+  }
+}
