@@ -28,7 +28,9 @@ define({
       updating: "Updating...",
       uploading: "Uploading...",
       working: "...",
-      incompatible: "Your Internet browser is no longer supported.<br>Please, use different browser."
+      incompatible: "Your Internet browser is no longer supported.<br>Please, use different browser.",
+      configError: "Unable to load the application configuration.<br>Please check your network connection and reload the page.",
+      loading: "Geoportal..."
     },
 
     nav: {

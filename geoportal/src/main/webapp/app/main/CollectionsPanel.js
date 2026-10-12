@@ -194,6 +194,7 @@ define([
     handleContactFieldInput: function (contact, field, value) {
       contact[field] = value;
       console.log(this.collectionContacts);
+      this.revalidateEditorPrimaryButton();
     },
 
     addNewContactEmail: function (contact) {
@@ -1400,7 +1401,8 @@ define([
       if (
         !this.isBlank(id) &&
         !this.isBlank(title) &&
-        !this.isBlank(description)
+        !this.isBlank(description) &&
+        this.isCollectionContactsObjValid(this.collectionContacts)
       ) {
         this.editorPrimaryButton.disabled = false;
         this.editorPrimaryButton.classList.remove("disabled-button");
@@ -1408,6 +1410,26 @@ define([
         this.editorPrimaryButton.disabled = true;
         this.editorPrimaryButton.classList.add("disabled-button");
       }
+    },
+
+    /**
+     * Re-reads the collection id/title/description currently in the editor
+     * form and re-runs handleEditorPrimaryButtonEnabled (which also checks
+     * this.collectionContacts via isCollectionContactsObjValid). Must be
+     * called whenever a contact is added, removed, or edited so that an
+     * empty/invalid contact name immediately disables the primary button,
+     * instead of only being caught by the id/title/description fields.
+     */
+    revalidateEditorPrimaryButton: function () {
+      if (!this.editorInputForm) return;
+      var idInput = this.editorInputForm.querySelector("#collection-id-input");
+      var titleInput = this.editorInputForm.querySelector("#collection-title-input");
+      var descriptionInput = this.editorInputForm.querySelector("#collection-description-input");
+      this.handleEditorPrimaryButtonEnabled(
+        idInput ? idInput.value : "",
+        titleInput ? titleInput.value : "",
+        descriptionInput ? descriptionInput.value : ""
+      );
     },
 
     handleUpdateButtonEnabled: function () {
@@ -1794,6 +1816,7 @@ define([
       removeContactButton.onclick = () => {
         this.deleteCollectionContact(contact);
         contactNode.remove();
+        this.revalidateEditorPrimaryButton();
       };
       contactNode.appendChild(removeContactButton);
 
@@ -1821,6 +1844,7 @@ define([
         this.addNewCollectionContact(contact);
         const contactNode = this.createContactNode(contact);
         contactsEditorNode.appendChild(contactNode);
+        this.revalidateEditorPrimaryButton();
       };
 
       addContactContainer.appendChild(addContactButton);
@@ -2087,6 +2111,18 @@ define([
 
       // Editor Events
       this.editorPrimaryButton.addEventListener("click", () => {
+        // Defense-in-depth: re-validate contacts on submit in case the
+        // primary button's disabled state is stale (e.g. programmatic
+        // changes to collectionContacts that did not go through the UI
+        // handlers that call revalidateEditorPrimaryButton()).
+        if (!this.isCollectionContactsObjValid(this.collectionContacts)) {
+          this.showAlert(
+            "Invalid Contact",
+            "Each contact requires a Name. Please fill in the missing contact name(s) before submitting.",
+            "red"
+          );
+          return;
+        }
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
           const updatedProperties = this.getUpdateFieldValues();
           this.handleUpdateCollection(
