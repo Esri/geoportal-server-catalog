@@ -13,10 +13,13 @@
  * limitations under the License.
  */
 package com.esri.geoportal.lib.elastic.request;
+import com.esri.geoportal.base.util.AppConfigUtil;
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.lib.elastic.util.FieldNames;
+
+import org.springframework.security.access.AccessDeniedException;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -41,7 +44,6 @@ public class SetFieldRequest extends BulkEditRequest {
     field=value=
     */
     
-    setAdminOnly(false);
     setProcessMessage("SetField");
     AppResponse response = new AppResponse();
     boolean underConstruction = false;
@@ -50,7 +52,17 @@ public class SetFieldRequest extends BulkEditRequest {
       response.writeNotImplemented(this,JsonUtil.newErrorResponse(msg,getPretty()));
       return response;
     }
-    
+
+    // Enforce the "appui.edit.setField.*" feature flags server-side. These are also
+    // read by the browser (ItemCard.js) to decide whether to show the Set Field UI,
+    // but client-side JS state (including AppContext.appConfig) can be freely edited
+    // in the browser's developer tools, so the restriction MUST be re-checked here
+    // independently of what the client sends or shows.
+    if (!AppConfigUtil.getBoolean("appui.edit.setField.allow",false)) {
+      throw new AccessDeniedException("Set field is not enabled.");
+    }
+    setAdminOnly(AppConfigUtil.getBoolean("appui.edit.setField.adminOnly",false));
+
     String field = getParameter("field");
     if (field != null) field = field.trim();
     if (field == null || field.length() == 0) {

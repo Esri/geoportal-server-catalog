@@ -68,6 +68,62 @@ define(["dojo/_base/declare",
               this._appendLink(name, alt, url);
             },
 
+            _createDcat3Link: function(name, alt, urlParams, postData, rawSort) {
+              var queryNode = postData && postData.query ? postData.query : postData;
+              var q = lang.mixin({}, urlParams, {
+                esdsl: JSON.stringify({ query: queryNode })
+              });
+              q.sort = this._toDcat3SortParam(rawSort, q.sort);
+              if (urlParams && typeof urlParams.profile === "string" && urlParams.profile.length > 0) {
+                q.profile = urlParams.profile;
+              }
+              var sq = ioQuery.objectToQuery(q);
+              var url = "./dcat3/dataset" + (sq ? "?" + sq : "");
+              this._appendLink(name, alt, url);
+            },
+
+            _toDcat3SortParam: function(rawSort, fallbackSort) {
+              var toOrder = function(v) {
+                var order = "asc";
+                if (typeof v === "string") {
+                  order = v.toLowerCase();
+                } else if (v && typeof v === "object" && typeof v.order === "string") {
+                  order = v.order.toLowerCase();
+                }
+                return order === "desc" ? "desc" : "asc";
+              };
+
+              if (typeof rawSort === "string" && rawSort.length > 0) {
+                return rawSort;
+              }
+
+              var parts = [];
+              var pushPair = function(field, value) {
+                if (!field || typeof field !== "string") return;
+                var clean = field.trim();
+                if (clean.length === 0) return;
+                parts.push(clean + ":" + toOrder(value));
+              };
+
+              if (Array.isArray(rawSort)) {
+                rawSort.forEach(function(spec) {
+                  if (!spec || typeof spec !== "object") return;
+                  Object.keys(spec).forEach(function(field) {
+                    pushPair(field, spec[field]);
+                  });
+                });
+              } else if (rawSort && typeof rawSort === "object") {
+                Object.keys(rawSort).forEach(function(field) {
+                  pushPair(field, rawSort[field]);
+                });
+              }
+
+              if (parts.length > 0) {
+                return parts.join(",");
+              }
+              return fallbackSort || "";
+            },
+
             /* SearchComponent API ============================================= */
 
             appendQueryParams: function (params) {
@@ -81,6 +137,7 @@ define(["dojo/_base/declare",
             processResults: function (searchResponse) {
               var postData = JSON.parse(this.searchPane.lastQuery);
               postData = postData? postData: {};
+              var rawSort = searchResponse.urlParams ? searchResponse.urlParams.sort : null;
               
               if (!searchResponse.hasScorable && typeof searchResponse.urlParams.sort === "undefined") {
                   var sortObj = AppContext.appConfig.searchResults.defaultSort;
@@ -103,6 +160,7 @@ define(["dojo/_base/declare",
               this._createLink("KML", i18n.search.links.kml, "kml", openSearchUrlParams, postData);
               this._createLink("RSS", i18n.search.links.rss, "rss", openSearchUrlParams, postData);
               this._createLink("DCAT", i18n.search.links.dcat, "dcat", openSearchUrlParams, postData);
+              this._createDcat3Link("DCAT3", i18n.search.links.dcat3, openSearchUrlParams, postData, rawSort);
               
               // 0-base index
               this._createWebLink("WEB", i18n.search.links.web, "web", searchResponse.urlParams, postData);

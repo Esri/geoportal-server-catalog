@@ -4,7 +4,20 @@
   "type" : "object",
   "title" : "Queryables for Geoportal STAC API",
   "description" : "Queryable names Geoportal STAC API Item Search filter.",
-  "properties" : {
+  "properties" : {	
+    "updated": {
+      "title": "Updated",
+      "description": "Date the item was last updated",
+      "type": "string",
+      "format": "date-time",
+      "pattern": "(\\+00:00|Z)$"
+    },
+    "properties.eo:epsg": {
+      "title": "EPSG Code",
+      "description": "eo:epsg",
+      "type": "integer",
+      "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:epsg"
+    },
     "id" : {
       "title": "Item ID",
       "description" : "Item identifier",
@@ -28,13 +41,13 @@
       "format": "date-time",
       "pattern": "(\\+00:00|Z)$"
     },
-    "view:sun_azimuth": {
+    "properties.view:sun_azimuth": {
       "type": "number",
       "title": "Sun Azimuth",
       "minimum": 0,
       "maximum": 360
     },    
-    "eo:sun_azimuth": {
+    "properties.eo:sun_azimuth": {
       "description": "eo:sun_azimuth",
       "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:sun_azimuth",
       "type": "number",
@@ -43,7 +56,7 @@
       "maximum": 360,
       "collections": ["sentinel"]
     },
-    "eo:sun_elevation": {
+    "properties.eo:sun_elevation": {
       "type": "number",
       "title": "Sun Elevation",
       "description": "eo:sun_elevation",
@@ -52,7 +65,7 @@
       "description": "eo:sun_elevation",
       "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:sun_elevation"
     },
-    "eo:cloud_cover": {
+    "properties.eo:cloud_cover": {
       "title": "Cloud Cover",
       "description": "eo:cloud_cover",
       "type": "number",
@@ -60,7 +73,7 @@
       "maximum": 100,
       "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:cloud_cover"
     },
-    "eo:snow_cover": {
+    "properties.eo:snow_cover": {
       "title": "Snow Cover",
       "description": "eo:snow_cover",
       "type": "number",
@@ -68,13 +81,13 @@
       "maximum": 100,
       "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:snow_cover"
     },
-    "eo:row": {
+    "properties.eo:row": {
       "title": "Row",
       "description": "eo:row",
       "type": "number",
       "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:row"
     },
-    "eo:column": {
+    "properties.eo:column": {
       "title": "Column",
       "description": "eo:column",
       "type": "number",
@@ -86,27 +99,27 @@
       "description": "eo:platform",
       "$ref": "https://stac-extensions.github.io/eo/v2.0.0/schema.json#/definitions/eo:platform"
     },
-    "sentinel:utm_zone": {
+    "properties.sentinel:utm_zone": {
       "description": "sentinel:utm_zone",
       "$ref": ""
     },
-    "sentinel:latitude_band": {
+    "properties.sentinel:latitude_band": {
       "description": "sentinel:latitude_band",
       "$ref": ""
     },
-    "sentinel:grid_square": {
+    "properties.sentinel:grid_square": {
       "description": "sentinel:grid_square",
       "$ref": ""
     },
-    "sentinel:sequence": {
+    "properties.sentinel:sequence": {
       "description": "sentinel:sequence",
       "$ref": ""
     },
-    "sentinel:product_id": {
+    "properties.sentinel:product_id": {
       "description": "sentinel:product_id",
       "$ref": ""
     },
-    "HorizontalFieldOfView": {
+    "properties.HorizontalFieldOfView": {
       "title": "Horizontal Field Of View",
       "description": "The camera’s scope in the horizontal direction. The unit is degrees, and valid values range from 0 to 360.",
       "type": "number",
@@ -114,13 +127,13 @@
       "maximum": 360,
       "$ref": ""
     },
-    "OrientedImageryType": {
+    "properties.OrientedImageryType": {
       "title": "Oriented Imagery Type",
       "description": "Oriented Imagery Type",
       "enum" : ["Horizontal", "Oblique", "Nadir", "360", "Inspection"],
       "$ref": ""
     },
-    "CameraRoll": {
+    "properties.CameraRoll": {
       "title": "Camera Roll",
       "description": "The camera orientation of the final rotation around the z-axis of the camera in the positive clockwise direction. The unit is degrees. Valid values range from -90 to 90.",
       "type": "number",
@@ -128,13 +141,13 @@
       "maximum": 90,
       "$ref": ""
     },
-    "Name": {
+    "properties.Name": {
       "title": "Name",
       "description": "Name",
       "type": "string",
       "$ref": ""
     },
-    "CameraPitch": {
+    "properties.CameraPitch": {
       "title": "Camera Pitch",
       "description": "The camera orientation of the second rotation around the x-axis of the camera in the positive counterclockwise direction. The unit is degrees. The pitch is 0 degrees when the camera is facing vertically down to the ground. The valid range of pitch value is from 0 to 180 degrees, with 180 degrees for a camera facing vertically up, and 90 degrees for a camera facing horizontally.",
       "type": "number",
@@ -142,7 +155,7 @@
       "maximum": 180,
       "$ref": ""
     },
-    "CameraHeading": {
+    "properties.CameraHeading": {
       "title": "Camera Heading",
       "description": "The camera orientation of the first rotation around the z-axis of the camera. The unit is degrees. The heading values are measured in the positive clockwise direction, where north is defined as 0 degrees. When the orientation is unknown, -999 is used.",
       "type": "number",
@@ -159,7 +172,7 @@
       "pattern": "(\\+00:00|Z)$",
       "$ref": ""
     },
-    "VerticalFieldOfView": {
+    "properties.VerticalFieldOfView": {
       "title": "Vertical Field of View",
       "description": "The camera’s scope in the vertical direction. The unit is degrees, and valid values range from 0 to 180.",
       "type": "number",
@@ -167,20 +180,20 @@
       "maximum": 180,
       "$ref": ""
     },
-    "ImagePath": {
+    "properties.ImagePath": {
       "title": "Image Path",
       "description": "The path to the image file. The image path can be a local path or a web-accessible URL. Also, the image path can be a 'FA' if the image is stored as an attachment to the feature. The supported image formats are JPEG, JPG, TIFF, and MRF.",
       "type": "string",
       "$ref": ""
     },
-    "FarDistance": {
+    "properties.FarDistance": {
       "title": "Far Distance",
       "description": "The farthest usable distance of the imagery from the camera position. This value is used to determine the extent of the image footprint, which is used to determine whether an image is returned when you click the map, and for creating optional footprint features. The unit is meters.",
       "type": "number",
       "minimum": 0,
       "$ref": ""
     },
-    "NearDistance": {
+    "properties.NearDistance": {
       "title": "Near Distance",
       "description": "The nearest usable distance of the imagery from the camera position. The unit is meters.",
       "type": "number",
@@ -193,18 +206,18 @@
       "type": "string",
       "$ref": ""
     },
-    "oi:maximum_distance": {
+    "properties.oi:maximum_distance": {
       "title": "Maximum Distance",
       "description": "The farthest usable distance of the imagery from the camera position. This value is used to determine the extent of the image footprint, which is used to determine whether an image is returned when you click the map, and for creating optional footprint features. The unit is meters.",
       "type": "number",
       "minimum": 0,
       "$ref": ""
     },
-    "oi:coverage_percent": {
+    "properties.oi:coverage_percent": {
       "description": "oi:coverage_percent",
       "$ref": ""
     },
-    "oi:camera_heading": {
+    "properties.oi:camera_heading": {
       "title": "Camera Heading (oi)",
       "description": "The camera orientation of the first rotation around the z-axis of the camera. The value is in degrees.",
       "type": "number",
@@ -212,14 +225,14 @@
       "maximum": 360,
       "$ref": ""
     },
-    "oi:camera_height": {
+    "properties.oi:camera_height": {
       "title": "Camera Height",
       "description": "The height of the camera above the ground. The unit is meters. Camera height is used to determine the visible extent of the image in which large values result in a greater view extent. Values must be greater than 0.",
       "type": "number",
       "minimum": 0,
       "$ref": ""
     },
-    "oi:camera_pitch": {
+    "properties.oi:camera_pitch": {
       "title": "Camera Pitch",
       "description": "The camera orientation of the second rotation around the x-axis of the camera in the positive counterclockwise direction. The unit is degrees. The pitch is 0 degrees when the camera is facing vertically down to the ground. The valid range of pitch value is from 0 to 180 degrees, with 180 degrees for a camera facing vertically up, and 90 degrees for a camera facing horizontally.",
       "type": "number",
@@ -227,7 +240,7 @@
       "maximum": 180,
       "$ref": ""
     },
-    "oi:camera_roll": {
+    "properties.oi:camera_roll": {
       "title": "Camera Roll",
       "description": "The camera orientation of the final rotation around the z-axis of the camera in the positive clockwise direction. The unit is degrees. Valid values range from -90 to 90.",
       "type": "number",
@@ -235,7 +248,7 @@
       "maximum": 90,
       "$ref": ""
     },
-    "oi:image_rotation": {
+    "properties.oi:image_rotation": {
       "title": "Image Rotation (oi)",
       "description": "The orientation of the camera in degrees relative to the scene when the image was captured. The value is added to CameraRoll. The valid values range from -360 to 360.",
       "type": "number",
@@ -243,21 +256,21 @@
       "maximum": 360,
       "$ref": ""
     },
-    "oi:near_distance": {
+    "properties.oi:near_distance": {
       "title": "Near Distance (oi)",
       "description": "The nearest usable distance of the imagery from the camera position. The unit is meters.",
       "type": "number",
       "minimum": 0,
       "$ref": ""
     },
-    "oi:far_distance": {
+    "properties.oi:far_distance": {
       "title": "Far Distance (oi)",
       "description": "The farthest usable distance of the imagery from the camera position. This value is used to determine the extent of the image footprint, which is used to determine whether an image is returned when you click the map, and for creating optional footprint features. The unit is meters.",
       "type": "number",
       "minimum": 0,
       "$ref": ""
     },
-    "oi:horizontal_field_of_view": {
+    "properties.oi:horizontal_field_of_view": {
       "title": "Horizontal Field Of View (oi)",
       "description": "The camera’s scope in the horizontal direction. The unit is degrees, and valid values range from 0 to 360.",
       "type": "number",
@@ -265,7 +278,7 @@
       "maximum": 360,
       "$ref": ""
     },
-    "oi:vertical_field_of_view": {
+    "properties.oi:vertical_field_of_view": {
       "title": "Vertical Field of View (oi)",
       "description": "The camera’s scope in the vertical direction. The unit is degrees, and valid values range from 0 to 180.",
       "type": "number",
@@ -273,78 +286,78 @@
       "maximum": 180,
       "$ref": ""
     },
-    "oi:orientation_accuracy": {
+    "properties.oi:orientation_accuracy": {
       "title": "Orientation Accuracy (oi)",
       "description": "Accuracy is defined as a string of eight semicolon-delimited values that define the standard deviation of the oriented imagery properties.",      
       "type": "string",
       "$ref": ""
     },
-    "oi:oriented_imagery_type": {
+    "properties.oi:oriented_imagery_type": {
       "title": "Oriented Imagery Type (oi)",
       "description": "Oriented Imagery Type",
       "enum" : ["Horizontal", "Oblique", "Nadir", "360", "Inspection"],
       "$ref": ""
     },
-    "video:shape": {
+    "properties.video:shape": {
       "description": "video:shape",
       "description": "Pixel dimensions of video, expressed as [rows, columns]",
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:shape"
     },
-    "video:frame_rate": {
+    "properties.video:frame_rate": {
       "title": "video:frame_rate",
       "description": "The mean frame rate, frames per second (frame count / time extent). Either video:frame_rate or video:frame_count are highly recommended.",
       "type": "number",      
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:frame_rate"
     },
-    "video:frame_count": {
+    "properties.video:frame_count": {
       "title": "video:frame_count",
       "description": "The count of frames in the video. Either video:frame_rate or video:frame_count are highly recommended.",
       "type": "integer",
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:frame_count"
     },
-    "video:codec_name": {
+    "properties.video:codec_name": {
       "title": "video:codec_name",
       "description": "Four-letter codec code",
       "type": "",
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:codec_name"
     },
-    "video:constant_scene": {
+    "properties.video:constant_scene": {
       "title": "video:constant_scene",
       "description": "Flag indicating that both the frame geometries and sensor centers remain constant throughout the video. Default is false.",
       "type": "boolean",
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:constant_scene"
     },
-    "video:letterbox": {
+    "properties.video:letterbox": {
       "title": "video:letterbox",
       "description": "Rectangular window containing useful (non-fill) pixel values, if different from video:shape, in the form [columns_offset, rows_offset, width, height]",
       "type": "string",
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:letterbox"
     },
-    "video:sensor_name": {
+    "properties.video:sensor_name": {
       "title": "video:sensor_name",
       "description": "Image source sensor name (corresponds to MISB ST 0601.17.11)",
       "type": "string",
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:sensor_name"
     },
-    "video:miis_core_id": {
+    "properties.video:miis_core_id": {
       "title": "video:miis_core_id",
       "description": "MIIS core identifier (corresponds to MISB ST 0601.17.94)",
       "type": "string",
       "$ref": "https://stac-extensions.github.io/video/v1.0.0/schema.json#/fields/properties/video:miis_core_id"
     },
-    "pc:count": {
+    "properties.pc:count": {
       "title": "pc:count",
       "description": "The number of points in the Item.",
       "type": "integer",
       "$ref": "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json#/definitions/pc:count"
     },
-    "pc:type": {
+    "properties.pc:type": {
       "title": "pc:type",
       "description": " Phenomenology type for the point cloud. Possible valid values might include lidar, eopc, radar, sonar, or other.",
       "type": "string",
       "$ref": "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json#/definitions/pc:density"
     },
-    "pc:density": {
+    "properties.pc:density": {
       "title": "pc:density",
       "description": "Number of points per square unit area.",
       "type": "number",
