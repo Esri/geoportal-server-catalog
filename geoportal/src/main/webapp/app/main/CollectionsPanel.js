@@ -102,7 +102,7 @@ define([
     },
     DEFAULT_CONTACT: {
       name: "",
-      position: "",
+      positionName: "",
       organization: "",
       description: "",
       emails: [],
@@ -1746,9 +1746,9 @@ define([
       inputPosition.className = "editor-input";
       inputPosition.type = "text";
       inputPosition.placeholder = "value...";
-      inputPosition.value = contact.position || "";
+      inputPosition.value = contact.positionName || "";
       inputPosition.oninput = (e) =>
-        this.handleContactFieldInput(contact, "position", e.target.value);
+        this.handleContactFieldInput(contact, "positionName", e.target.value);
       contactNode.appendChild(inputPosition);
 
       // organization
