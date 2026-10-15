@@ -3,10 +3,11 @@ define(["dojo/_base/declare",
         "dojo/dom-construct",
         "dojo/_base/fx",
         "dojo/topic",
+        "dijit/registry",
         "app/context/app-topics",
         "app/context/AppClient",
         "app/main/App"],
-function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
+function(declare, lang, domConstruct, fx, topic, registry, appTopics, AppClient, App) {
 
   var oThisClass = declare(null, {
 
@@ -17,6 +18,23 @@ function(declare, lang, domConstruct, fx, topic, appTopics, AppClient, App) {
     startupApp: function() {
       
       var showApp = function() {
+        // Defensive guard: if, for any reason (e.g. a hot-reload of scripts
+        // without a full page navigation, or startupApp() being invoked more
+        // than once), a widget is already registered against the "app" node,
+        // destroy it first so dijit's registry.add() doesn't throw
+        // "Tried to register widget with id==app but that id is already
+        // registered" when we create the new App widget below.
+        var existing = registry.byId("app");
+        if (existing) {
+          try {
+            // preserveDom=true: only tear down the widget/registry entry,
+            // keep the underlying #app DOM node in place so it can be
+            // reused as the srcNodeRef for the new App widget below.
+            existing.destroyRecursive(true);
+          } catch (e) {
+            console.warn("Unable to destroy existing 'app' widget before re-initializing.", e);
+          }
+        }
         var app = new App({},"app");
         app.startup();
         fx.fadeOut({

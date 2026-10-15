@@ -35,7 +35,9 @@ define([
   "esri4/geometry/support/webMercatorUtils",
   "app/context/AppClient",  
   "app/context/app-topics",
-  "esri4/layers/GeoJSONLayer"
+  "esri4/layers/GeoJSONLayer",
+  "app/main/ItemListPanel",
+  "app/main/ConfirmModal"
 ], function (
   declare,
   lang,
@@ -57,7 +59,9 @@ define([
   Expand,
   BasemapGallery,
   webMercatorUtils,
-  AppClient,appTopics,GeoJSONLayer
+  AppClient,appTopics,GeoJSONLayer,
+  ItemListPanel,
+  ConfirmModal
 ) {
   var oThisClass = declare([Templated], {
     i18n: i18n,
@@ -130,11 +134,6 @@ define([
       },
     ],
 	
-	 pageSize: 10,
-	 geoJSONLayer:null,
-	 nextUrl: null,
-	 pageHistory : [],
-	 currentIndex: -1,
 	 filterByExtent: false,
 
     getStacBaseUrl: function () {
@@ -254,6 +253,9 @@ define([
     handleMapReady: function (view) {
       this.initializeListeners();
       this.initializeSketchViewModel(view);
+      if (this.itemListPanel) {
+        this.itemListPanel.setView(view);
+      }
       this.updateUI();
       this.handleGetCollections(view);
     },
@@ -405,7 +407,7 @@ define([
     removeAllCollectionGraphicsLayers: function (view) {
       let layersToRemove = [];
       view.map.layers.items.forEach((layer, index) => {
-        if (layer.title !== "sketch") {
+        if (layer.title !== "sketch" && layer.title !== "item-editor-sketch") {
           layersToRemove.push(layer);
         }
       });
@@ -767,27 +769,15 @@ define([
     },
 	
 	clearMapView:function() {
-      if(this.pager) {		
-		  this.view.ui.remove(this.pager.container);
-		  this.pager = null;		
-        }
-		this.currentIndex = -1;
-        this.pageHistory = [];
-        this.nextUrl = null;
-  
-        
-        if(this.geoJSONLayer) {
-            this.view.map.remove(this.geoJSONLayer);
-            this.geoJSONLayer.destroy();
-            this.geoJSONLayer = null;
-        }
-        
-         let rasterLayer = this.view.map.layers.find(layer => layer.type === "imagery");
+      if (this.itemListPanel) {
+        this.itemListPanel.clear();
+      }
+		 let rasterLayer = this.view.map.layers.find(layer => layer.type === "imagery");
          if(rasterLayer) {
              this.view.map.remove(rasterLayer);
              rasterLayer.destroy();
          }
-		 if(!this.filterByExtent) {
+		 if(!this.itemListPanel || !this.itemListPanel.isFilterByExtentActive()) {
 			this.view.goTo({
 	            zoom:this.mapProps.zoom,
 	            center:this.mapProps.center
@@ -933,7 +923,7 @@ define([
         this.updateCollectionInfoBox(properties);
 		//Turn off all collection layers first
         this.view.map.layers.forEach(layer => {
-            if(layer.title) {
+            if(layer.title && layer.title !== "item-editor-sketch") {
                 layer.visible = false;
             }
         });
@@ -950,353 +940,30 @@ define([
     },
 	
 	handleViewItems: async function (collectionId) {
-      if (collectionId) {
-        try {
-	         this.updateIsLoading(true);	
-			
-			// get items by collection id
-	        if (AppContext.appConfig.system.secureCatalogApp) {
-	          var client = new AppClient();
-	          url = client.appendAccessToken(url);
-	        }
-			this.selectedCollectionId = collectionId;
-			//Turn off the layer of the selected collection	
-	        this.view.map.layers.forEach(layer => {
-	            if(layer.title === this.selectedCollection.properties.id) {
-	                layer.visible = false;
-	            }
-	        }); 
-			this.filterByExtent = false;
-			this.clearMapView();
-			    
-	       	await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
-			this.updateIsLoading(false);
-        } catch (e) {
-          console.error("goTo failed", e);
+      if (!collectionId) return;
+      try {
+        this.updateIsLoading(true);
+        this.selectedCollectionId = collectionId;
+        // Turn off the collection boundary layer while viewing its items
+        this.view.map.layers.forEach(layer => {
+            if (layer.title === this.selectedCollection.properties.id) {
+                layer.visible = false;
+            }
+        });
+        this.clearMapView();
+        if (this.itemListPanel) {
+          await this.itemListPanel.open({
+            collectionId: collectionId,
+            collectionTitle: this.selectedCollection.properties.title,
+            view: this.view
+          });
         }
+        this.updateIsLoading(false);
+      } catch (e) {
+        this.updateIsLoading(false);
+        console.error("handleViewItems failed", e);
       }
     },
-	
-	addPaginationToMapView: function (view) {
-	  if(this.pager) return ;
-	  
-	  const container = document.createElement("div");
-	  container.className = "esri-widget";
-	  container.style.display = "flex";
-	  container.style.alignItems = "center";
-	  container.style.gap = "6px";
-	  container.style.padding = "6px";
-	  container.style.width = "500px";      
-
-	  const prevBtn = document.createElement("button");
-	  prevBtn.className = "esri-button esri-button--secondary";
-	  prevBtn.innerHTML = "← Prev";
-	  prevBtn.disabled = true;
-
-	  const pageInfo = document.createElement("span");
-	  pageInfo.style.fontWeight = "bold";
-	  pageInfo.style.minWidth = "60px";
-	  pageInfo.style.textAlign = "center";
-	  pageInfo.innerText = "Page 1";
-
-	  const nextBtn = document.createElement("button");
-	  nextBtn.className = "esri-button esri-button--secondary";
-	  nextBtn.innerHTML = "Next →";
-	  nextBtn.disabled = true;
-
-	    const label = document.createElement("label");
-	    label.innerText = "Page size:";
-	    label.style.fontWeight = "bold";
-
-	    const pageSizeSelect = document.createElement("select");
-	    pageSizeSelect.className = "esri-select";
-
-	    [5, 10, 25, 50].forEach(size => {
-	      const opt = document.createElement("option");
-	      opt.value = size;
-	      opt.textContent = size;
-	      if (size === this.pageSize) {
-	        opt.selected = true;
-	      }
-	      pageSizeSelect.appendChild(opt);
-	    });
-
-		const noOfItems = document.createElement("span");
-		noOfItems.style.fontWeight = "bold";
-		noOfItems.style.minWidth = "60px";
-		noOfItems.style.textAlign = "center";
-		noOfItems.innerText = "0 Items";
-
-		// Filter by extent checkbox
-		const filterExtentContainer = document.createElement("div");
-		filterExtentContainer.style.display = "flex";
-		filterExtentContainer.style.alignItems = "center";
-		filterExtentContainer.style.gap = "4px";
-
-		const filterExtentCheckbox = document.createElement("input");
-		filterExtentCheckbox.type = "checkbox";
-		filterExtentCheckbox.id = "filter-by-extent-checkbox";
-		filterExtentCheckbox.checked = this.filterByExtent;
-
-		const filterExtentLabel = document.createElement("label");
-		filterExtentLabel.htmlFor = "filter-by-extent-checkbox";
-		filterExtentLabel.innerText = "Filter by extent";
-		filterExtentLabel.style.fontWeight = "bold";
-		filterExtentLabel.style.whiteSpace = "nowrap";
-
-		filterExtentContainer.appendChild(filterExtentCheckbox);
-		filterExtentContainer.appendChild(filterExtentLabel);
-			
-	  container.append(noOfItems, label, pageSizeSelect, filterExtentContainer, prevBtn, pageInfo, nextBtn);
-	  view.ui.add(container, "bottom-right");
-	  this.pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo, noOfItems, filterExtentCheckbox };
-	  
-	  this.pager.nextBtn.onclick = async () => {
-	  	    if (this.nextUrl) {
-				this.updateIsLoading(true);
-			if(this.currentIndex > 0) {
-                  this.pager.prevBtn.disabled = false;
-                  this.pager.prevBtn.classList.toggle("disabled",false);
-              }
-	  	      await this.loadSTAC(this.nextUrl);
-			  this.updateIsLoading(false);
-	  	    }
-	  	  };
-
-	  this.pager.prevBtn.onclick = async () => {
-		console.log("Prev clicked, index =", this.currentIndex);
-	  	    if (this.currentIndex > 0) {
-				this.updateIsLoading(true);
-	  	      this.currentIndex--;
-	  	      const url = this.pageHistory[this.currentIndex];
-			  //If goingback to first page, disable prev button since we don't have previous url for first page
-			 if(this.currentIndex === 0) {
-                  this.pager.prevBtn.disabled = true;
-                  this.pager.prevBtn.classList.toggle("disabled",true);
-              }
-	  	      await this.loadSTAC(url,true);
-			  this.updateIsLoading(false);
-	  	    }
-	  	  };
-	  	  
-	    //Page size dropdown handler
-	      this.pager.pageSizeSelect.onchange = async () => {
-	          this.pageSize = parseInt(this.pager.pageSizeSelect.value, 10);
-			  this.updateIsLoading(true);
-	          // reset paging
-	          this.pageHistory = [];
-	          this.currentIndex = -1;
-	          this.nextUrl = null;
-	          await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
-			  this.updateIsLoading(false);
-	        };
-
-		// Filter by extent checkbox handler
-		this.pager.filterExtentCheckbox.onchange = async () => {
-			this.filterByExtent = this.pager.filterExtentCheckbox.checked;
-			this.updateIsLoading(true);
-			// reset paging and reload from page 1
-			this.pageHistory = [];
-			this.currentIndex = -1;
-			this.nextUrl = null;
-			await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
-			this.updateIsLoading(false);
-		};
-
-		// Add extent change watcher for filter by extent
-		this.setupExtentChangeWatcher(view);
-	},
-
-	// Debounce timer for extent change
-	extentChangeTimeout: null,
-	extentWatchHandle: null,
-	isLoadingSTAC: false, // Flag to prevent extent watcher from triggering during STAC load
-
-	setupExtentChangeWatcher: function(view) {
-		// Remove existing watcher if any
-		if (this.extentWatchHandle) {
-			this.extentWatchHandle.remove();
-			this.extentWatchHandle = null;
-		}
-
-		// Watch for extent changes (pan/zoom)
-		this.extentWatchHandle = view.watch("stationary", async (isStationary) => {
-			// Only trigger when view becomes stationary (finished panning/zooming)
-			// and not during programmatic STAC loading
-			if (isStationary && this.filterByExtent && this.selectedCollectionId && !this.isLoadingSTAC) {
-				// Clear any pending timeout
-				if (this.extentChangeTimeout) {
-					clearTimeout(this.extentChangeTimeout);
-				}
-
-				// Debounce the search to avoid too many requests
-				this.extentChangeTimeout = setTimeout(async () => {
-					this.isLoadingSTAC = true; // Set flag before loading
-					this.updateIsLoading(true);
-					// Reset paging and reload from page 1
-					this.pageHistory = [];
-					this.currentIndex = -1;
-					this.nextUrl = null;
-					await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
-					this.updateIsLoading(false);
-					// Reset flag after a short delay to allow view.goTo to complete
-					setTimeout(() => {
-						this.isLoadingSTAC = false;
-					}, 500);
-				}, 300); // 300ms debounce delay
-			}
-		});
-	},
-	
-	 buildSearchUrl: function(collectionId, limit) {
-		let url = `${this.getStacBaseUrl()}/collections/${collectionId}/items?limit=${limit}&f=geojson`;
-		
-		// Add bbox parameter if filter by extent is enabled
-		if (this.filterByExtent && this.view && this.view.extent) {
-			let extent = this.view.extent;
-			// Convert to geographic coordinates if in Web Mercator
-			if (extent.spatialReference.isWebMercator) {
-				extent = webMercatorUtils.webMercatorToGeographic(extent);
-			}
-			const bbox = `${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}`;
-			url += `&bbox=${bbox}`;
-		}
-		
-		return url;
-	  },
-
-    loadSTAC: async function (url,fromHistory = false) {
-	  const response = await fetch(url);
-	  let stac = await response.json();
-	  if(stac && stac.features && stac.features.length < 1) {
-			this.showAlert("No items found", `No items found for this collection.`, "orange");
-             this.clearMapView();
-			     
-             return;
-		}
-	  else{
-		this.addPaginationToMapView(this.view);
-		
-		stac.features = stac.features.map(feature => {
-				  feature.properties = {
-				  id: feature.id,
-				  collection: feature.collection,
-				  stac_version: feature.stac_version,
-				  ...(feature.properties || {}),	  
-				 // store full assets object
-				   _assets: JSON.stringify(feature.assets || {})
-				};
-				  return feature;
-				});//Geojson layer only load _source.properties, so we need to stringify assets,id and collection into properties and store to use in popup later
-				
-
-			  this.nextUrl = stac.links?.find(l => l.rel === "next")?.href || null;
-
-			  if (!fromHistory) {
-			    this.pageHistory = this.pageHistory.slice(0, this.currentIndex + 1);
-			    this.pageHistory.push(url);
-			    this.currentIndex++;
-			  }
-			  let preBtnDisabled = this.currentIndex <= 0;
-              let nextBtnDisabled = !this.nextUrl;
-			  
-			  this.pager.prevBtn.disabled = preBtnDisabled;
-			  this.pager.prevBtn.classList.toggle("disabled", preBtnDisabled);
-              
-              this.pager.nextBtn.disabled = nextBtnDisabled;
-              this.pager.nextBtn.classList.toggle("disabled", nextBtnDisabled);			
-			
-			  this.pager.pageInfo.textContent = `Page ${this.currentIndex + 1}`;
-			  this.pager.noOfItems.textContent = `${stac.numberMatched} Items`;
-
-			  if (this.geoJSONLayer) {
-			    this.view.map.remove(this.geoJSONLayer);
-			    this.geoJSONLayer.destroy();
-			  }
-
-
-				// create a new blob from geojson featurecollection
-				const blob = new Blob([JSON.stringify(stac)], {
-				  type: "application/json"
-				});
-
-				// URL reference to the blob
-			  const blobUrl = URL.createObjectURL(blob);
-			  this.geoJSONLayer = new GeoJSONLayer({url:blobUrl});
-			  this.view.map.add(this.geoJSONLayer);
-			  
-			
-			//-------------------------------------------------------
-			  this.geoJSONLayer.load().then(() => {
-			    const fieldNames = this.geoJSONLayer.fields.map(field => field.name);
-			    console.log("Property list:", fieldNames);
-
-				this.geoJSONLayer.popupTemplate = {
-				  title: "{id}",
-				  outFields: ["*"],
-				  content: [
-					{
-					  type: "fields",
-					  fieldInfos: fieldNames.map(name => ({
-						fieldName: name,
-						label: name.replace(/_/g, " ").toUpperCase()
-					  }))
-					},
-					{
-					  type: "custom",
-					  creator: function (event) {
-						const attrs = event.graphic.attributes;
-
-						if (!attrs.F_assets) {
-						  return "No assets available";
-						}
-
-						let assets;
-						try {
-						  assets = JSON.parse(attrs.F_assets);
-						} catch {
-						  return "Assets could not be parsed";
-						}
-
-						let html = `<div style="font-size:13px">`;
-
-						// Thumbnail
-						if (assets.thumbnail?.href) {
-						  html += `
-							<div style="margin:8px 0">
-							  <img src="${assets.thumbnail.href}"
-								   style="max-width:100%; border:1px solid #ccc" />
-							</div>`;
-						}
-
-						html += `<b>Assets</b><ul style="padding-left:16px">`;
-
-						Object.entries(assets).forEach(([key, asset]) => {
-						  if (!asset?.href) return;
-
-						  html += `<li>
-						    <a href="${asset.href}" target="_blank">
-						      📄 ${asset.title || key}
-						    </a>
-						  </li>`;
-						});
-
-
-						html += `</ul></div>`;
-						return html;
-					  }
-					}
-				  ]
-				};
-
-				// Only zoom to extent if filterByExtent is NOT enabled
-				// When filtering by extent, we want to keep the current view
-			    if (this.geoJSONLayer.fullExtent && !this.filterByExtent) {
-			      this.view.goTo(this.geoJSONLayer.fullExtent.expand(1.2));
-			    }
-			  });
-	  }
-	},
 
     handleZoomTo: async function (feature,selectedId) {
       if (feature) {
@@ -1444,17 +1111,25 @@ define([
 
     hideModal: function () {
       this.appActionState = this.actions.NONE;
-      this.modalContainer.style.display = "none";
     },
 
     showModal: function () {
-      this.modalContainer.style.display = "flex";
       const selectedCollections = this.getCollectionsToBeDeleted();
-      this.modalContainerCollectionsListLength.innerHTML =
-        selectedCollections.length;
-      this.modalContainerCollectionsList.innerHTML = selectedCollections
-        .map((c) => c.title)
-        .join(", ");
+      ConfirmModal.confirm({
+        title: "Delete Collection?",
+        message:
+          "Are you sure you would like to delete " +
+          selectedCollections.length +
+          " collection(s)? This action is irreversible.\n" +
+          selectedCollections.map((c) => c.title).join(", "),
+        confirmLabel: "Delete",
+      }).then((ok) => {
+        if (ok) {
+          this.handleDeleteCollections();
+        } else {
+          this.hideModal();
+        }
+      });
     },
 
     hideAlert: function () {
@@ -2141,16 +1816,6 @@ define([
           this.handleCancelCreateCollection();
         }
         this.hideEditor();
-      });
-
-      // Modal Events
-      this.modalSecondaryButton.addEventListener("click", () => {
-        this.hideModal();
-      });
-      this.modalPrimaryButton.addEventListener("click", () => {
-        if (this.appActionState === this.actions.DELETE_COLLECTION) {
-          this.handleDeleteCollections();
-        }
       });
 
       // Alert Events
