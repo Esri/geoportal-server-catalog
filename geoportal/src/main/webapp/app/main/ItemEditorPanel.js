@@ -131,8 +131,8 @@ define([
       this.mode = "create";
       this.collectionId = collectionId;
       this.editingItem = null;
-      this.titleNode.innerText = "Add Item";
-      this.saveButton.innerText = "Save";
+      this.titleNode.innerText = this.i18n.collectionItems.editor.addTitle;
+      this.saveButton.innerText = this.i18n.collectionItems.editor.save;
       this.deleteButton.classList.add("hidden");
       this.idInput.disabled = false;
       this.idInput.value = "";
@@ -151,8 +151,8 @@ define([
       this.mode = "edit";
       this.collectionId = collectionId;
       this.editingItem = feature;
-      this.titleNode.innerText = "Edit Item";
-      this.saveButton.innerText = "Save";
+      this.titleNode.innerText = this.i18n.collectionItems.editor.editTitle;
+      this.saveButton.innerText = this.i18n.collectionItems.editor.save;
       this.deleteButton.classList.remove("hidden");
       this.idInput.disabled = true;
       this.idInput.value = feature.id || "";
@@ -236,7 +236,7 @@ define([
 
     _startDraw: function (tool, button) {
       if (!this.sketchVM) {
-        this._showStatus("The map is not ready yet. Please try again.");
+        this._showStatus(this.i18n.collectionItems.editor.mapNotReady);
         return;
       }
       this._ensureSketchLayerVisible();
@@ -324,11 +324,11 @@ define([
     _onAddAssetClick: function () {
       var key = (this.newAssetKeyInput.value || "").trim();
       if (!key) {
-        this._showStatus("Please enter a unique asset key.");
+        this._showStatus(this.i18n.collectionItems.editor.assetKeyRequired);
         return;
       }
       if (this.assets[key]) {
-        this._showStatus("An asset with key \"" + key + "\" already exists.");
+        this._showStatus(lang.replace(this.i18n.collectionItems.editor.assetKeyDuplicate, { key: key }));
         return;
       }
       this.assets[key] = { title: "", href: "" };
@@ -355,21 +355,21 @@ define([
         var titleInput = document.createElement("input");
         titleInput.className = "item-editor-input";
         titleInput.type = "text";
-        titleInput.placeholder = "title";
+        titleInput.placeholder = self.i18n.collectionItems.editor.assetTitlePlaceholder;
         titleInput.value = asset.title || "";
         titleInput.oninput = function () { asset.title = titleInput.value; };
 
         var hrefInput = document.createElement("input");
         hrefInput.className = "item-editor-input";
         hrefInput.type = "text";
-        hrefInput.placeholder = "href (url)";
+        hrefInput.placeholder = self.i18n.collectionItems.editor.assetHrefPlaceholder;
         hrefInput.value = asset.href || "";
         hrefInput.oninput = function () { asset.href = hrefInput.value; };
 
         var removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.className = "item-editor-remove-row";
-        removeBtn.innerText = "Remove";
+        removeBtn.innerText = self.i18n.collectionItems.editor.remove;
         removeBtn.onclick = function () {
           delete self.assets[key];
           self._renderAssets();
@@ -401,21 +401,21 @@ define([
         var keyInput = document.createElement("input");
         keyInput.className = "item-editor-input";
         keyInput.type = "text";
-        keyInput.placeholder = "key";
+        keyInput.placeholder = self.i18n.collectionItems.editor.keyPlaceholder;
         keyInput.value = prop.key || "";
         keyInput.oninput = function () { prop.key = keyInput.value; };
 
         var valueInput = document.createElement("input");
         valueInput.className = "item-editor-input";
         valueInput.type = "text";
-        valueInput.placeholder = "value";
+        valueInput.placeholder = self.i18n.collectionItems.editor.valuePlaceholder;
         valueInput.value = prop.value || "";
         valueInput.oninput = function () { prop.value = valueInput.value; };
 
         var removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.className = "item-editor-remove-row";
-        removeBtn.innerText = "Remove";
+        removeBtn.innerText = self.i18n.collectionItems.editor.remove;
         removeBtn.onclick = function () {
           self.properties.splice(index, 1);
           self._renderProperties();
@@ -500,8 +500,8 @@ define([
     _validate: function () {
       var id = (this.idInput.value || "").trim();
       var datetime = (this.datetimeInput.value || "").trim();
-      if (!id) return "Id is required.";
-      if (!datetime) return "Datetime is required.";
+      if (!id) return this.i18n.collectionItems.editor.idRequired;
+      if (!datetime) return this.i18n.collectionItems.editor.datetimeRequired;
       return null;
     },
 
@@ -517,7 +517,7 @@ define([
       var isCreate = this.mode === "create";
       var baseUrl = this.getStacBaseUrl();
       if (!baseUrl) {
-        this._showStatus("Unable to determine STAC service URL.");
+        this._showStatus(this.i18n.collectionItems.editor.stacUrlError);
         return;
       }
 
@@ -548,12 +548,12 @@ define([
         }
         return response.json().catch(function () { return {}; }).then(lang.hitch(this, function (body) {
           this._setBusy(false);
-          this._showStatus((body && (body.message || body.description)) || "Unable to save item.");
+          this._showStatus((body && (body.message || body.description)) || this.i18n.collectionItems.editor.saveFailed);
         }));
       })).catch(lang.hitch(this, function (e) {
         this._setBusy(false);
         console.error("Error saving STAC item", e);
-        this._showStatus("Unable to save item: " + e);
+        this._showStatus(lang.replace(this.i18n.collectionItems.editor.saveFailedWith, { error: e }));
       }));
     },
 
@@ -561,10 +561,11 @@ define([
       if (!this.editingItem) return;
       var id = this.editingItem.id;
       var self = this;
+      var dm = this.i18n.collectionItems.editor.deleteModal;
       ConfirmModal.confirm({
-        title: "Delete Item?",
-        message: "Are you sure you would like to delete item \"" + id + "\"? This action is irreversible.",
-        confirmLabel: "Delete"
+        title: dm.title,
+        message: lang.replace(dm.message, { id: id }),
+        confirmLabel: dm.confirm
       }).then(function (ok) {
         if (ok) self._doDelete(id);
       });
@@ -590,12 +591,12 @@ define([
             action: "delete"
           });
         } else {
-          this._showStatus("Unable to delete item.");
+          this._showStatus(this.i18n.collectionItems.editor.deleteFailed);
         }
       })).catch(lang.hitch(this, function (e) {
         this._setBusy(false);
         console.error("Error deleting STAC item", e);
-        this._showStatus("Unable to delete item: " + e);
+        this._showStatus(lang.replace(this.i18n.collectionItems.editor.deleteFailedWith, { error: e }));
       }));
     },
 

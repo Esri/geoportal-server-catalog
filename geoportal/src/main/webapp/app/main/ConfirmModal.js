@@ -36,10 +36,10 @@ define([
 
     show: function (options) {
       options = options || {};
-      this.titleNode.innerText = options.title || "Confirm";
+      this.titleNode.innerText = options.title || this.i18n.general.confirm;
       this.messageNode.innerText = options.message || "";
-      this.confirmButton.innerText = options.confirmLabel || "Delete";
-      this.cancelButton.innerText = options.cancelLabel || "Cancel";
+      this.confirmButton.innerText = options.confirmLabel || this.i18n.general.del;
+      this.cancelButton.innerText = options.cancelLabel || this.i18n.general.cancel;
       if (this._deferred) this._deferred.resolve(false);
       this._deferred = new Deferred();
       this.overlayNode.classList.remove("hidden");

@@ -80,6 +80,8 @@ define([
     postCreate: function () {
       this.inherited(arguments);
       var self = this;
+      this.pageInfoNode.innerText = lang.replace(this.i18n.collectionItems.pagePattern, { page: 1 });
+      this.noOfItemsNode.innerText = lang.replace(this.i18n.collectionItems.countPattern, { count: 0 });
 
       this.addItemButton.onclick = function () {
         if (self.collectionId) {
@@ -231,7 +233,7 @@ define([
       this.prevBtn.classList.add("disabled");
       this.nextBtn.disabled = true;
       this.nextBtn.classList.add("disabled");
-      this.pageInfoNode.innerText = "Page 1";
+      this.pageInfoNode.innerText = lang.replace(this.i18n.collectionItems.pagePattern, { page: 1 });
     },
 
     getStacBaseUrl: function () {
@@ -305,14 +307,16 @@ define([
         var nextDisabled = !self.nextUrl;
         self.nextBtn.disabled = nextDisabled;
         self.nextBtn.classList.toggle("disabled", nextDisabled);
-        self.pageInfoNode.innerText = "Page " + (self.currentIndex + 1);
-        self.noOfItemsNode.innerText = (stac.numberMatched != null ? stac.numberMatched : features.length) + " Items";
+        self.pageInfoNode.innerText = lang.replace(self.i18n.collectionItems.pagePattern, { page: self.currentIndex + 1 });
+        self.noOfItemsNode.innerText = lang.replace(self.i18n.collectionItems.countPattern,
+          { count: (stac.numberMatched != null ? stac.numberMatched : features.length) });
 
         self._renderCards(features);
         self._updateMapLayer(features);
       }).catch(function (e) {
         console.error("Error loading STAC items", e);
-        self.cardsContainer.innerHTML = '<div class="item-list-empty">Unable to load items.</div>';
+        self.cardsContainer.innerHTML = '<div class="item-list-empty">' +
+          self._escapeHtml(self.i18n.collectionItems.loadError) + '</div>';
       });
     },
 
@@ -323,7 +327,7 @@ define([
       if (!features || features.length === 0) {
         var empty = document.createElement("div");
         empty.className = "item-list-empty";
-        empty.innerText = "No items found for this collection.";
+        empty.innerText = this.i18n.collectionItems.noItems;
         this.cardsContainer.appendChild(empty);
         return;
       }
@@ -357,7 +361,7 @@ define([
         var viewBtn = document.createElement("button");
         viewBtn.type = "button";
         viewBtn.className = "item-card-action";
-        viewBtn.innerText = "Zoom";
+        viewBtn.innerText = self.i18n.collectionItems.zoom;
         viewBtn.onclick = function () { self._zoomToFeature(feature); };
         actions.appendChild(viewBtn);
 
@@ -365,7 +369,7 @@ define([
         editBtn.type = "button";
         editBtn.className = "item-card-action";
         editBtn.setAttribute("data-role", "admin");
-        editBtn.innerText = "Edit";
+        editBtn.innerText = self.i18n.collectionItems.edit;
         editBtn.onclick = function () {
           self.itemEditorPanel.showEdit(self.collectionId, feature);
         };
@@ -375,7 +379,7 @@ define([
         deleteBtn.type = "button";
         deleteBtn.className = "item-card-action item-card-action-delete";
         deleteBtn.setAttribute("data-role", "admin");
-        deleteBtn.innerText = "Delete";
+        deleteBtn.innerText = self.i18n.collectionItems.del;
         deleteBtn.onclick = function () { self._deleteItem(feature); };
         actions.appendChild(deleteBtn);
 
@@ -406,10 +410,11 @@ define([
 
     _deleteItem: function (feature) {
       var self = this;
+      var dm = this.i18n.collectionItems.deleteModal;
       ConfirmModal.confirm({
-        title: "Delete Item?",
-        message: "Are you sure you would like to delete item \"" + feature.id + "\"? This action is irreversible.",
-        confirmLabel: "Delete"
+        title: dm.title,
+        message: lang.replace(dm.message, { id: feature.id }),
+        confirmLabel: dm.confirm
       }).then(function (ok) {
         if (ok) self._doDeleteItem(feature);
       });
@@ -433,12 +438,12 @@ define([
           });
         } else {
           self._setListBusy(false);
-          alert("Unable to delete item \"" + feature.id + "\".");
+          alert(lang.replace(self.i18n.collectionItems.deleteFailed, { id: feature.id }));
         }
       }).catch(function (e) {
         self._setListBusy(false);
         console.error("Error deleting STAC item", e);
-        alert("Unable to delete item \"" + feature.id + "\".");
+        alert(lang.replace(self.i18n.collectionItems.deleteFailed, { id: feature.id }));
       });
     },
 
@@ -564,7 +569,7 @@ define([
                 html += '<div style="margin:8px 0"><img src="' + self._escapeHtml(assets.thumbnail.href) +
                   '" style="max-width:100%; border:1px solid #ccc" /></div>';
               }
-              html += "<b>Assets</b><ul style=\"padding-left:16px\">";
+              html += "<b>" + self._escapeHtml(self.i18n.collectionItems.popup.assets) + "</b><ul style=\"padding-left:16px\">";
               Object.keys(assets).forEach(function (key) {
                 var asset = assets[key];
                 if (!asset || !asset.href) return;
@@ -573,7 +578,7 @@ define([
               });
               html += "</ul>";
             } else {
-              html += "<i>No assets available</i>";
+              html += "<i>" + self._escapeHtml(self.i18n.collectionItems.popup.noAssets) + "</i>";
             }
             return html + "</div>";
           }
@@ -621,11 +626,13 @@ define([
       groupKeys.forEach(function (geomType, index) {
         var groupFeatures = groups[geomType];
         // single item: show its id; otherwise collection id + this layer's item count
+        var ci = self.i18n.collectionItems;
         var title = groupFeatures.length === 1
           ? String(groupFeatures[0].id)
-          : (collectionId + " (" + groupFeatures.length + " items)");
+          : lang.replace(ci.layerTitleCount, { collection: collectionId, count: groupFeatures.length });
         if (groupKeys.length > 1 && groupFeatures.length !== 1) {
-          title = collectionId + " - " + geomType + "s (" + groupFeatures.length + " items)";
+          title = lang.replace(ci.layerTitleCountType,
+            { collection: collectionId, type: geomType, count: groupFeatures.length });
         }
         var blob = new Blob([JSON.stringify({ type: "FeatureCollection", features: groupFeatures })],
           { type: "application/json" });

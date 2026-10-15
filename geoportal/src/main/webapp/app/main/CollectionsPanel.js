@@ -17,7 +17,7 @@ define([
   "dojo/_base/lang",
   "app/common/Templated",
   "dojo/text!./templates/CollectionsPanel.html",
-  "dojo/i18n!../gs/widget/nls/strings",
+  "dojo/i18n!app/nls/resources",
   "dojo/Deferred",
   "dojo/topic",
   "esri4/Map",
@@ -462,12 +462,11 @@ define([
             throw new Error(failedDeleteIds.join(", "));
           }
           this.showAlert(
-            "Successfully deleted collections",
-            `Deleted: ${successDeleteIds.join(", ")}. ${
-              failedDeleteIds.length > 0
-                ? `Failed to delete: ${failedDeleteIds.join(", ")}`
-                : ""
-            }`,
+            this.i18n.collections.alerts.deleteSuccessTitle,
+            lang.replace(this.i18n.collections.alerts.deleteSuccessMessage, { deleted: successDeleteIds.join(", ") }) +
+              (failedDeleteIds.length > 0
+                ? lang.replace(this.i18n.collections.alerts.deleteFailedSuffix, { failed: failedDeleteIds.join(", ") })
+                : ""),
             "green"
           );
           this.rerenderCollectionsList();
@@ -476,7 +475,7 @@ define([
           this.handleUpdateButtonEnabled();
         })
         .catch((e) => {
-          this.showAlert("Error deleting collections", `${e}`, "red");
+          this.showAlert(this.i18n.collections.alerts.deleteErrorTitle, `${e}`, "red");
           this.updateIsLoading(false);
           console.error(e);
         });
@@ -504,7 +503,7 @@ define([
         };
       } catch (e) {
         console.error(e);
-        throw new Error(`Error deleting: ${collection.id}`);
+        throw new Error(lang.replace(this.i18n.collections.alerts.deleteError, { id: id }));
       }
     },
 
@@ -587,13 +586,13 @@ define([
           throw new Error(result.response.description);
         }
         this.showAlert(
-          "Successfully created collection",
-          `Created ${collection.id}`,
+          this.i18n.collections.alerts.createSuccessTitle,
+          lang.replace(this.i18n.collections.alerts.createSuccessMessage, { id: collection.id }),
           "green"
         );
       } catch (e) {
         this.updateIsLoading(false);
-        this.showAlert("Error creating collection", `${e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.createErrorTitle, `${e}`, "red");
       }
 
       this.clearCollectionAssets();
@@ -623,7 +622,7 @@ define([
         };
       } catch (e) {
         console.error(e);
-        throw new Error(`Error creating collection ${collection.id}`);
+        throw new Error(lang.replace(this.i18n.collections.alerts.createError, { id: collection.id }));
       }
     },
 
@@ -639,7 +638,7 @@ define([
         this.updateIsLoading(true);
         const collection = await this.getCollectionById(id);
         if (!collection || collection === this.sampleCollection) {
-          throw new Error(`Unable to retrieve collection ${id}`);
+          throw new Error(lang.replace(this.i18n.collections.alerts.exportRetrieveError, { id: id }));
         }
         const blob = new Blob([JSON.stringify(collection, null, 2)], {
           type: "application/json",
@@ -654,14 +653,14 @@ define([
         URL.revokeObjectURL(blobUrl);
         this.updateIsLoading(false);
         this.showAlert(
-          "Successfully exported collection",
-          `Exported ${id}.json`,
+          this.i18n.collections.alerts.exportSuccessTitle,
+          lang.replace(this.i18n.collections.alerts.exportSuccessMessage, { id: id }),
           "green"
         );
       } catch (e) {
         this.updateIsLoading(false);
         console.error(e);
-        this.showAlert("Error exporting collection", `${e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.exportErrorTitle, `${e}`, "red");
       }
     },
 
@@ -687,8 +686,8 @@ define([
         file.type === "application/json";
       if (!isJson) {
         this.showAlert(
-          "Invalid file type",
-          `"${fileName}" is not a .json file. Please select a valid collection .json file.`,
+          this.i18n.collections.alerts.invalidFileTypeTitle,
+          lang.replace(this.i18n.collections.alerts.invalidFileTypeMessage, { name: fileName }),
           "red"
         );
         this.importFileInput.value = "";
@@ -701,8 +700,8 @@ define([
       };
       reader.onerror = () => {
         this.showAlert(
-          "Error reading file",
-          `Unable to read "${fileName}".`,
+          this.i18n.collections.alerts.readErrorTitle,
+          lang.replace(this.i18n.collections.alerts.readErrorMessage, { name: fileName }),
           "red"
         );
       };
@@ -715,8 +714,8 @@ define([
         collection = JSON.parse(text);
       } catch (e) {
         this.showAlert(
-          "Invalid JSON",
-          "The selected file does not contain valid JSON.",
+          this.i18n.collections.alerts.invalidJsonTitle,
+          this.i18n.collections.alerts.invalidJsonMessage,
           "red"
         );
         return;
@@ -724,8 +723,8 @@ define([
 
       if (!collection || typeof collection !== "object" || !collection.id) {
         this.showAlert(
-          "Invalid Collection",
-          "The selected file does not appear to be a valid STAC collection (missing id).",
+          this.i18n.collections.alerts.invalidCollectionTitle,
+          this.i18n.collections.alerts.invalidCollectionMessage,
           "red"
         );
         return;
@@ -737,8 +736,8 @@ define([
       );
       if (existing) {
         this.showAlert(
-          "Duplicate Collection Id",
-          `A collection with id "${collection.id}" already exists. Please remove or rename it before importing.`,
+          this.i18n.collections.alerts.duplicateTitle,
+          lang.replace(this.i18n.collections.alerts.duplicateMessage, { id: collection.id }),
           "red"
         );
         return;
@@ -751,12 +750,12 @@ define([
         if (!result || !result.response || result.response.code !== "201") {
           const description =
             (result && result.response && (result.response.message || result.response.description)) ||
-            "Unknown error occurred while creating the collection.";
+            this.i18n.collections.alerts.importUnknownError;
           throw new Error(description);
         } else {
           this.showAlert(
-            "Successfully imported collection",
-            `Imported ${collection.id}`,
+            this.i18n.collections.alerts.importSuccessTitle,
+            lang.replace(this.i18n.collections.alerts.importSuccessMessage, { id: collection.id }),
             "green"
           );
           this.rerenderCollectionsList();
@@ -764,7 +763,7 @@ define([
       } catch (e) {
         this.updateIsLoading(false);
         console.error(e);
-        this.showAlert("Error importing collection", `${e.message || e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.importErrorTitle, `${e.message || e}`, "red");
       }
     },
 	
@@ -859,13 +858,13 @@ define([
           throw new Error(result.response.description);
         }
         this.showAlert(
-          "Successfully updated collection",
-          `Updating ${collection.id}`,
+          this.i18n.collections.alerts.updateSuccessTitle,
+          lang.replace(this.i18n.collections.alerts.updateSuccessMessage, { id: collection.id }),
           "green"
         );
       } catch (e) {
         this.updateIsLoading(false);
-        this.showAlert("Error updating collection", `${e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.updateErrorTitle, `${e}`, "red");
       }
 
       this.rerenderCollectionsList(this.collections);
@@ -897,7 +896,7 @@ define([
         };
       } catch (e) {
         console.error(e);
-        throw new Error(`Unable to update collection ${collection.id}`);
+        throw new Error(lang.replace(this.i18n.collections.alerts.updateError, { id: collection.id }));
       }
     },
 
@@ -1115,14 +1114,14 @@ define([
 
     showModal: function () {
       const selectedCollections = this.getCollectionsToBeDeleted();
+      const dm = this.i18n.collections.deleteModal;
       ConfirmModal.confirm({
-        title: "Delete Collection?",
-        message:
-          "Are you sure you would like to delete " +
-          selectedCollections.length +
-          " collection(s)? This action is irreversible.\n" +
-          selectedCollections.map((c) => c.title).join(", "),
-        confirmLabel: "Delete",
+        title: dm.title,
+        message: lang.replace(dm.message, {
+          count: selectedCollections.length,
+          titles: selectedCollections.map((c) => c.title).join(", "),
+        }),
+        confirmLabel: dm.confirm,
       }).then((ok) => {
         if (ok) {
           this.handleDeleteCollections();
@@ -1192,6 +1191,7 @@ define([
     },
 
     createAssetNode: function (key, title = "", href = "", wkt = "") {
+      const ed = this.i18n.collections.editor;
       const id = Date.now();
       const assetNode = document.createElement("div");
       assetNode.classList.add("asset-container");
@@ -1204,7 +1204,7 @@ define([
       // <label class="editor-label">Asset key <span class="required">*</span>:</label>
       const labelKey = document.createElement("label");
       labelKey.className = "editor-label";
-      labelKey.innerHTML = 'Asset key <span class="required">*</span>:';
+      labelKey.innerHTML = ed.assetKey + ' <span class="required">*</span>:';
       assetNode.appendChild(labelKey);
 
       // <input id="asset-key-input-${id}" ... disabled />
@@ -1212,7 +1212,7 @@ define([
       inputKey.id = `asset-key-input-${id}`;
       inputKey.className = "editor-input";
       inputKey.type = "text";
-      inputKey.placeholder = "value...";
+      inputKey.placeholder = ed.valuePlaceholder;
       inputKey.value = key;
       inputKey.disabled = true;
       assetNode.appendChild(inputKey);
@@ -1220,7 +1220,7 @@ define([
       // <label class="editor-label">title <span class="required">*</span>:</label>
       const labelTitle = document.createElement("label");
       labelTitle.className = "editor-label";
-      labelTitle.innerHTML = 'title <span class="required">*</span>:';
+      labelTitle.innerHTML = ed.titleLabel + ' <span class="required">*</span>:';
       assetNode.appendChild(labelTitle);
 
       // <input id="asset-title-input-${id}" ... />
@@ -1228,14 +1228,14 @@ define([
       inputTitle.id = `asset-title-input-${id}`;
       inputTitle.className = "editor-input";
       inputTitle.type = "text";
-      inputTitle.placeholder = "value...";
+      inputTitle.placeholder = ed.valuePlaceholder;
       inputTitle.value = title;
       assetNode.appendChild(inputTitle);
 
       // <label class="editor-label">href:</label>
       const labelHref = document.createElement("label");
       labelHref.className = "editor-label";
-      labelHref.innerText = "href:";
+      labelHref.innerText = ed.href + ":";
       assetNode.appendChild(labelHref);
 
       // <input id="asset-href-input-${id}" ... />
@@ -1243,14 +1243,14 @@ define([
       inputHref.id = `asset-href-input-${id}`;
       inputHref.className = "editor-input";
       inputHref.type = "text";
-      inputHref.placeholder = "value...";
+      inputHref.placeholder = ed.valuePlaceholder;
       inputHref.value = href;
       assetNode.appendChild(inputHref);
 
       // <label class="editor-label">esri:wkt:</label>
       const labelWkt = document.createElement("label");
       labelWkt.className = "editor-label";
-      labelWkt.innerText = "esri:wkt:";
+      labelWkt.innerText = ed.wkt + ":";
       assetNode.appendChild(labelWkt);
 
       // <input id="asset-wkt-input-${id}" ... />
@@ -1258,7 +1258,7 @@ define([
       inputWkt.id = `asset-wkt-input-${id}`;
       inputWkt.className = "editor-input";
       inputWkt.type = "text";
-      inputWkt.placeholder = "value...";
+      inputWkt.placeholder = ed.valuePlaceholder;
       inputWkt.value = wkt;
       assetNode.appendChild(inputWkt);
 
@@ -1277,7 +1277,7 @@ define([
 
       const removeAssetButton = document.createElement("button");
       removeAssetButton.classList.add("remove-asset-button");
-      removeAssetButton.innerText = "Remove Asset";
+      removeAssetButton.innerText = ed.removeAsset;
       removeAssetButton.onclick = () => {
         this.deleteCollectionAsset(key);
         assetNode.remove();
@@ -1295,13 +1295,13 @@ define([
 
       const addAssetButton = document.createElement("button");
       addAssetButton.classList.add("add-asset-button");
-      addAssetButton.innerHTML = "Add Asset +";
+      addAssetButton.innerHTML = this.i18n.collections.editor.addAsset;
       addAssetButton.classList.add("disabled-button");
       addAssetButton.disabled = true;
 
       const initialAssetKeyInput = document.createElement("input");
       initialAssetKeyInput.type = "text";
-      initialAssetKeyInput.placeholder = "Unique Asset Key...";
+      initialAssetKeyInput.placeholder = this.i18n.collections.editor.assetKeyPlaceholder;
       initialAssetKeyInput.id = "initial-asset-key";
       initialAssetKeyInput.oninput = (e) => {
         const value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, "");
@@ -1349,6 +1349,7 @@ define([
     },
 
     createContactEmailNode: function (contact, email) {
+      const ed = this.i18n.collections.editor;
       const id = Date.now() + Math.random().toString(36).slice(2);
       const emailNode = document.createElement("div");
       emailNode.classList.add("contact-email-container");
@@ -1357,7 +1358,7 @@ define([
       inputValue.id = `contact-email-value-input-${id}`;
       inputValue.className = "editor-input";
       inputValue.type = "text";
-      inputValue.placeholder = "email@example.com";
+      inputValue.placeholder = ed.emailPlaceholder;
       inputValue.value = email.value || "";
       inputValue.oninput = (e) =>
         this.handleContactEmailFieldInput(email, "value", e.target.value);
@@ -1367,7 +1368,7 @@ define([
       inputRoles.id = `contact-email-roles-input-${id}`;
       inputRoles.className = "editor-input";
       inputRoles.type = "text";
-      inputRoles.placeholder = "roles (comma separated, e.g. work)";
+      inputRoles.placeholder = ed.rolesPlaceholder;
       inputRoles.value = Array.isArray(email.roles) ? email.roles.join(", ") : "";
       inputRoles.oninput = (e) =>
         this.handleContactEmailFieldInput(email, "roles", e.target.value);
@@ -1375,7 +1376,7 @@ define([
 
       const removeEmailButton = document.createElement("button");
       removeEmailButton.classList.add("remove-email-button");
-      removeEmailButton.innerText = "Remove Email";
+      removeEmailButton.innerText = ed.removeEmail;
       removeEmailButton.onclick = () => {
         this.deleteContactEmail(contact, email);
         emailNode.remove();
@@ -1386,6 +1387,7 @@ define([
     },
 
     createContactNode: function (contact) {
+      const ed = this.i18n.collections.editor;
       const id = Date.now() + Math.random().toString(36).slice(2);
       const contactNode = document.createElement("div");
       contactNode.classList.add("contact-container");
@@ -1397,14 +1399,14 @@ define([
       // name
       const labelName = document.createElement("label");
       labelName.className = "editor-label";
-      labelName.innerHTML = 'Name <span class="required">*</span>:';
+      labelName.innerHTML = ed.contactName + ' <span class="required">*</span>:';
       contactNode.appendChild(labelName);
 
       const inputName = document.createElement("input");
       inputName.id = `contact-name-input-${id}`;
       inputName.className = "editor-input";
       inputName.type = "text";
-      inputName.placeholder = "value...";
+      inputName.placeholder = ed.valuePlaceholder;
       inputName.value = contact.name || "";
       inputName.oninput = (e) =>
         this.handleContactFieldInput(contact, "name", e.target.value);
@@ -1413,14 +1415,14 @@ define([
       // position
       const labelPosition = document.createElement("label");
       labelPosition.className = "editor-label";
-      labelPosition.innerText = "Position:";
+      labelPosition.innerText = ed.contactPosition + ":";
       contactNode.appendChild(labelPosition);
 
       const inputPosition = document.createElement("input");
       inputPosition.id = `contact-position-input-${id}`;
       inputPosition.className = "editor-input";
       inputPosition.type = "text";
-      inputPosition.placeholder = "value...";
+      inputPosition.placeholder = ed.valuePlaceholder;
       inputPosition.value = contact.position || "";
       inputPosition.oninput = (e) =>
         this.handleContactFieldInput(contact, "position", e.target.value);
@@ -1429,14 +1431,14 @@ define([
       // organization
       const labelOrganization = document.createElement("label");
       labelOrganization.className = "editor-label";
-      labelOrganization.innerText = "Organization:";
+      labelOrganization.innerText = ed.contactOrganization + ":";
       contactNode.appendChild(labelOrganization);
 
       const inputOrganization = document.createElement("input");
       inputOrganization.id = `contact-organization-input-${id}`;
       inputOrganization.className = "editor-input";
       inputOrganization.type = "text";
-      inputOrganization.placeholder = "value...";
+      inputOrganization.placeholder = ed.valuePlaceholder;
       inputOrganization.value = contact.organization || "";
       inputOrganization.oninput = (e) =>
         this.handleContactFieldInput(contact, "organization", e.target.value);
@@ -1445,7 +1447,7 @@ define([
       // description
       const labelDescription = document.createElement("label");
       labelDescription.className = "editor-label";
-      labelDescription.innerText = "Description:";
+      labelDescription.innerText = ed.contactDescription + ":";
       contactNode.appendChild(labelDescription);
 
       const textareaDescription = document.createElement("textarea");
@@ -1453,7 +1455,7 @@ define([
       textareaDescription.className = "editor-input";
       textareaDescription.style.height = "70px";
       textareaDescription.rows = 3;
-      textareaDescription.placeholder = "value...";
+      textareaDescription.placeholder = ed.valuePlaceholder;
       textareaDescription.value = contact.description || "";
       textareaDescription.oninput = (e) =>
         this.handleContactFieldInput(contact, "description", e.target.value);
@@ -1462,7 +1464,7 @@ define([
       // emails
       const labelEmails = document.createElement("label");
       labelEmails.className = "editor-label";
-      labelEmails.innerText = "Emails:";
+      labelEmails.innerText = ed.contactEmails + ":";
       contactNode.appendChild(labelEmails);
 
       const emailsContainer = document.createElement("div");
@@ -1477,7 +1479,7 @@ define([
 
       const addEmailButton = document.createElement("button");
       addEmailButton.classList.add("add-email-button");
-      addEmailButton.innerText = "Add Email +";
+      addEmailButton.innerText = ed.addEmail;
       addEmailButton.onclick = () => {
         const email = this.addNewContactEmail(contact);
         emailsContainer.appendChild(this.createContactEmailNode(contact, email));
@@ -1487,7 +1489,7 @@ define([
       // remove contact
       const removeContactButton = document.createElement("button");
       removeContactButton.classList.add("remove-contact-button");
-      removeContactButton.innerText = "Remove Contact";
+      removeContactButton.innerText = ed.removeContact;
       removeContactButton.onclick = () => {
         this.deleteCollectionContact(contact);
         contactNode.remove();
@@ -1504,7 +1506,7 @@ define([
 
       const labelContacts = document.createElement("label");
       labelContacts.className = "editor-label";
-      labelContacts.innerText = "Contacts:";
+      labelContacts.innerText = this.i18n.collections.editor.contacts + ":";
       contactsEditorNode.appendChild(labelContacts);
 
       const addContactContainer = document.createElement("div");
@@ -1512,7 +1514,7 @@ define([
 
       const addContactButton = document.createElement("button");
       addContactButton.classList.add("add-asset-button");
-      addContactButton.innerHTML = "Add Contact +";
+      addContactButton.innerHTML = this.i18n.collections.editor.addContact;
 
       addContactButton.onclick = () => {
         const contact = { ...this.DEFAULT_CONTACT, emails: [] };
@@ -1538,14 +1540,15 @@ define([
     },
 
     renderUpdateCollectionEditor: function (properties) {
-      this.collectionEditorTitle.innerHTML = "Update Collection";
-      this.editorPrimaryButton.innerHTML = "Update Collection";
+      const ed = this.i18n.collections.editor;
+      this.collectionEditorTitle.innerHTML = this.i18n.collections.updateTitle;
+      this.editorPrimaryButton.innerHTML = this.i18n.collections.updateButton;
       this.editorInputForm.innerHTML = "";
 
       // <label class="editor-label">id:</label>
       const labelId = document.createElement("label");
       labelId.className = "editor-label";
-      labelId.innerText = "id:";
+      labelId.innerText = ed.idLabel + ":";
       this.editorInputForm.appendChild(labelId);
 
       // <input id="collection-id-input" ... disabled />
@@ -1553,7 +1556,7 @@ define([
       inputId.id = "collection-id-input";
       inputId.className = "editor-input";
       inputId.type = "text";
-      inputId.placeholder = "value...";
+      inputId.placeholder = ed.valuePlaceholder;
       inputId.value = properties.id;
       inputId.disabled = true;
       this.editorInputForm.appendChild(inputId);
@@ -1561,7 +1564,7 @@ define([
       // <label class="editor-label">title <span class="required">*</span>:</label>
       const labelTitle = document.createElement("label");
       labelTitle.className = "editor-label";
-      labelTitle.innerHTML = 'title <span class="required">*</span>:';
+      labelTitle.innerHTML = ed.titleLabel + ' <span class="required">*</span>:';
       this.editorInputForm.appendChild(labelTitle);
 
       // <input id="collection-title-input" ... />
@@ -1569,7 +1572,7 @@ define([
       inputTitle.id = "collection-title-input";
       inputTitle.className = "editor-input";
       inputTitle.type = "text";
-      inputTitle.placeholder = "value...";
+      inputTitle.placeholder = ed.valuePlaceholder;
       inputTitle.value = properties.title;
       this.editorInputForm.appendChild(inputTitle);
 
@@ -1577,7 +1580,7 @@ define([
       const labelDescription = document.createElement("label");
       labelDescription.className = "editor-label";
       labelDescription.innerHTML =
-        'description <span class="required">*</span>:';
+        ed.descriptionLabel + ' <span class="required">*</span>:';
       this.editorInputForm.appendChild(labelDescription);
 
       // <textarea id="collection-description-input" ...>
@@ -1586,7 +1589,7 @@ define([
       textareaDescription.className = "editor-input";
       textareaDescription.style.height = "100px";
       textareaDescription.rows = 5;
-      textareaDescription.placeholder = "value...";
+      textareaDescription.placeholder = ed.valuePlaceholder;
       textareaDescription.textContent = properties.description;
       this.editorInputForm.appendChild(textareaDescription);
 
@@ -1596,17 +1599,19 @@ define([
     },
 
     renderCreateCollectionEditor: function () {
-      this.collectionEditorTitle.innerHTML = "Create New Collection";
-      this.editorPrimaryButton.innerHTML = "Create Collection";
+      const ed = this.i18n.collections.editor;
+      const req = ' <span class="required">*</span>:';
+      this.collectionEditorTitle.innerHTML = this.i18n.collections.createNewTitle;
+      this.editorPrimaryButton.innerHTML = this.i18n.collections.createButton;
       let collectionInputs = `
-      <label class="editor-label">id <span class="required">*</span>:</label>
-      <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."/>
+      <label class="editor-label">${ed.idLabel}${req}</label>
+      <input id="collection-id-input" class="editor-input" type="text" placeholder="${ed.valuePlaceholder}"/>
 
-      <label class="editor-label">title <span class="required">*</span>:</label>
-      <input id="collection-title-input" class="editor-input" type="text" placeholder="value..."/>
+      <label class="editor-label">${ed.titleLabel}${req}</label>
+      <input id="collection-title-input" class="editor-input" type="text" placeholder="${ed.valuePlaceholder}"/>
 
-      <label class="editor-label">description <span class="required">*</span>:</label>
-      <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
+      <label class="editor-label">${ed.descriptionLabel}${req}</label>
+      <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="${ed.valuePlaceholder}"></textArea>
   `;
       this.editorInputForm.innerHTML = collectionInputs;
       const assetEditorNode = this.createAssetEditorNode();
@@ -1723,7 +1728,7 @@ define([
 
     emptyCollectionInfoBox: function () {
       let tableRows = [];
-      this.infoTableTitle.innerHTML = "Collection Info";
+      this.infoTableTitle.innerHTML = this.i18n.collections.infoTitle;
       this.infoTableBody.innerHTML = tableRows.join("");
       this.handleZoomCollectionEnabled();
       this.handleViewItemsEnabled();
@@ -1792,8 +1797,8 @@ define([
         // handlers that call revalidateEditorPrimaryButton()).
         if (!this.isCollectionContactsObjValid(this.collectionContacts)) {
           this.showAlert(
-            "Invalid Contact",
-            "Each contact requires a Name. Please fill in the missing contact name(s) before submitting.",
+            this.i18n.collections.alerts.invalidContactTitle,
+            this.i18n.collections.alerts.invalidContactMessage,
             "red"
           );
           return;
@@ -2046,7 +2051,7 @@ define([
 
           let searchWidgetExpand = new Expand({
             expandIcon: "search",
-            expandTooltip: "Find Address or Place",
+            expandTooltip: this.i18n.collections.alerts.searchWidgetTooltip,
             view: view,
             content: searchWidget,
           });
@@ -2060,7 +2065,7 @@ define([
           });
           let layerListExpand = new Expand({
             expandIcon: "layers",
-            expandTooltip: "Map Layers",
+            expandTooltip: this.i18n.collections.alerts.layersTooltip,
             view: view,
             content: layerList,
           });
@@ -2084,7 +2089,7 @@ define([
           });
           let basemapExpand = new Expand({
             expandIcon: "basemap",
-            expandTooltip: "Basemap",
+            expandTooltip: this.i18n.collections.alerts.basemapTooltip,
             view: view,
             content: basemapWidget,
           });

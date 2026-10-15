@@ -1,7 +1,7 @@
 <div class="item-editor-overlay hidden" data-dojo-attach-point="overlayNode">
   <div class="item-editor-dialog">
     <div class="item-editor-header">
-      <p class="item-editor-title" data-dojo-attach-point="titleNode">Add Item</p>
+      <p class="item-editor-title" data-dojo-attach-point="titleNode">${i18n.collectionItems.editor.addTitle}</p>
       <div class="item-editor-close" data-dojo-attach-event="onclick:_onCancelClick">
         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
           <path d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"/>
@@ -16,33 +16,33 @@
     <div class="item-editor-body">
       <div class="item-editor-status hidden" data-dojo-attach-point="statusNode"></div>
 
-      <label class="item-editor-label">Id <span class="item-editor-required">*</span>:</label>
-      <input type="text" class="item-editor-input" placeholder="unique item id..." data-dojo-attach-point="idInput"/>
+      <label class="item-editor-label">${i18n.collectionItems.editor.id} <span class="item-editor-required">*</span>:</label>
+      <input type="text" class="item-editor-input" placeholder="${i18n.collectionItems.editor.idPlaceholder}" data-dojo-attach-point="idInput"/>
 
-      <label class="item-editor-label">Datetime <span class="item-editor-required">*</span>:</label>
-      <input type="text" class="item-editor-input" placeholder="e.g. 2024-01-01T00:00:00Z" data-dojo-attach-point="datetimeInput"/>
+      <label class="item-editor-label">${i18n.collectionItems.editor.datetime} <span class="item-editor-required">*</span>:</label>
+      <input type="text" class="item-editor-input" placeholder="${i18n.collectionItems.editor.datetimePlaceholder}" data-dojo-attach-point="datetimeInput"/>
 
-      <label class="item-editor-label">Geometry:</label>
+      <label class="item-editor-label">${i18n.collectionItems.editor.geometry}</label>
       <div class="item-editor-draw-tools">
-        <button type="button" class="item-editor-draw-tool" title="Draw point" data-dojo-attach-point="drawPointButton" data-dojo-attach-event="onclick:_onDrawPointClick">
+        <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.drawPoint}" data-dojo-attach-point="drawPointButton" data-dojo-attach-event="onclick:_onDrawPointClick">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M12 2a7 7 0 0 0-7 7c0 5.25 7 13 7 13s7-7.75 7-13a7 7 0 0 0-7-7zm0 1a6 6 0 0 1 6 6c0 4-4.8 9.9-6 11.4C10.8 18.9 6 13 6 9a6 6 0 0 1 6-6zm0 3a3 3 0 1 0 3 3 3 3 0 0 0-3-3zm0 1a2 2 0 1 1-2 2 2 2 0 0 1 2-2z"/>
             <path fill="none" d="M0 0h24v24H0z"/>
           </svg>
         </button>
-        <button type="button" class="item-editor-draw-tool" title="Draw polygon" data-dojo-attach-point="drawPolygonButton" data-dojo-attach-event="onclick:_onDrawPolygonClick">
+        <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.drawPolygon}" data-dojo-attach-point="drawPolygonButton" data-dojo-attach-event="onclick:_onDrawPolygonClick">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M20 3.456L12 9.28V9H9v.433l-5-3.31V4H1v3h1v13H1v3h3v-1h16v1h3v-3h-1V4h1V1h-3zM10 10h1v1h-1zM2 5h1v1H2zm0 17v-1h1v1zm20 0h-1v-1h1zm-1-2h-1v1H4v-1H3V7h.512L9 10.632V12h3v-1.483L20.952 4H21zm1-18v1h-1V2z"/>
             <path fill="none" d="M0 0h24v24H0z"/>
           </svg>
         </button>
-        <button type="button" class="item-editor-draw-tool" title="Draw circle" data-dojo-attach-point="drawCircleButton" data-dojo-attach-event="onclick:_onDrawCircleClick">
+        <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.drawCircle}" data-dojo-attach-point="drawCircleButton" data-dojo-attach-event="onclick:_onDrawCircleClick">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M12.5 2.2a10.3 10.3 0 1 0 10.3 10.3A10.299 10.299 0 0 0 12.5 2.2zm0 19.6a9.3 9.3 0 1 1 9.3-9.3 9.31 9.31 0 0 1-9.3 9.3z"/>
             <path fill="none" d="M0 0h24v24H0z"/>
           </svg>
         </button>
-        <button type="button" class="item-editor-draw-tool" title="Clear geometry" data-dojo-attach-point="clearGeometryButton" data-dojo-attach-event="onclick:_onClearGeometryClick">
+        <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.clearGeometry}" data-dojo-attach-point="clearGeometryButton" data-dojo-attach-event="onclick:_onClearGeometryClick">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
             <path d="M22.577 11.732L11.812 2.279A1.095 1.095 0 0 0 11.08 2a.964.964 0 0 0-.318.05L.115 5.02.076 6.082c-.05 1.38.882 3.505 1.33 4.683a.986.986 0 0 0 .23.36l10.458 10.56a1.07 1.07 0 0 0 .759.315 1.089 1.089 0 0 0 .403-.078l10.075-4.05c1.408-.559.259-3.548-.426-5.3zM11.03 3.012l.121.018 10.091 8.861-7.997 3a2.045 2.045 0 0 1-2.155-.468L2.157 5.489zm11.91 13.952l-10.057 4.03-.03.006a.067.067 0 0 1-.048-.02L2.347 10.422l-.225-.571a12.076 12.076 0 0 1-1.047-3.733l.01-.286 9.298 9.298a3.041 3.041 0 0 0 3.213.696l8.292-3.11.086.22c1.117 2.859 1.141 3.768.965 4.028z"/>
             <path fill="none" d="M0 0h24v24H0z"/>
@@ -50,25 +50,25 @@
         </button>
       </div>
 
-      <label class="item-editor-label">Assets:</label>
+      <label class="item-editor-label">${i18n.collectionItems.editor.assets}</label>
       <div class="item-editor-assets-container" data-dojo-attach-point="assetsContainer"></div>
       <div class="item-editor-add-row">
-        <input type="text" class="item-editor-input" placeholder="unique asset key..." data-dojo-attach-point="newAssetKeyInput"/>
-        <button type="button" class="item-editor-add-button" data-dojo-attach-point="addAssetButton" data-dojo-attach-event="onclick:_onAddAssetClick">Add Asset +</button>
+        <input type="text" class="item-editor-input" placeholder="${i18n.collectionItems.editor.assetKeyPlaceholder}" data-dojo-attach-point="newAssetKeyInput"/>
+        <button type="button" class="item-editor-add-button" data-dojo-attach-point="addAssetButton" data-dojo-attach-event="onclick:_onAddAssetClick">${i18n.collectionItems.editor.addAsset}</button>
       </div>
 
-      <label class="item-editor-label">Additional Properties:</label>
+      <label class="item-editor-label">${i18n.collectionItems.editor.additionalProperties}</label>
       <div class="item-editor-properties-container" data-dojo-attach-point="propertiesContainer"></div>
       <div class="item-editor-add-row">
-        <button type="button" class="item-editor-add-button" data-dojo-attach-point="addPropertyButton" data-dojo-attach-event="onclick:_onAddPropertyClick">Add Property +</button>
+        <button type="button" class="item-editor-add-button" data-dojo-attach-point="addPropertyButton" data-dojo-attach-event="onclick:_onAddPropertyClick">${i18n.collectionItems.editor.addProperty}</button>
       </div>
     </div>
 
     <div class="item-editor-footer">
-      <button type="button" class="item-editor-button item-editor-button-delete hidden" data-dojo-attach-point="deleteButton" data-dojo-attach-event="onclick:_onDeleteClick">Delete</button>
+      <button type="button" class="item-editor-button item-editor-button-delete hidden" data-dojo-attach-point="deleteButton" data-dojo-attach-event="onclick:_onDeleteClick">${i18n.collectionItems.editor.del}</button>
       <div class="item-editor-footer-right">
-        <button type="button" class="item-editor-button item-editor-button-secondary" data-dojo-attach-point="cancelButton" data-dojo-attach-event="onclick:_onCancelClick">Cancel</button>
-        <button type="button" class="item-editor-button item-editor-button-primary" data-dojo-attach-point="saveButton" data-dojo-attach-event="onclick:_onSaveClick">Save</button>
+        <button type="button" class="item-editor-button item-editor-button-secondary" data-dojo-attach-point="cancelButton" data-dojo-attach-event="onclick:_onCancelClick">${i18n.collectionItems.editor.cancel}</button>
+        <button type="button" class="item-editor-button item-editor-button-primary" data-dojo-attach-point="saveButton" data-dojo-attach-event="onclick:_onSaveClick">${i18n.collectionItems.editor.save}</button>
       </div>
     </div>
   </div>
