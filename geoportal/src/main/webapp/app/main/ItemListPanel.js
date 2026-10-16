@@ -136,13 +136,13 @@ define([
       this.pageSizeSelect.onchange = function () {
         self.pageSize = parseInt(self.pageSizeSelect.value, 10);
         self._resetPaging();
-        self._loadPage(self._buildSearchUrl());
+        self._loadPageWithProgress(self._buildSearchUrl());
       };
 
       this.filterExtentCheckbox.onchange = function () {
         self.filterByExtent = self.filterExtentCheckbox.checked;
         self._resetPaging();
-        self._loadPage(self._buildSearchUrl());
+        self._loadPageWithProgress(self._buildSearchUrl());
       };
 
       topic.subscribe(appTopics.StacItemsChanged, lang.hitch(this, function (params) {
@@ -200,6 +200,17 @@ define([
         return (collection && collection.properties) || {};
       }).catch(function () {
         return {};
+      });
+    },
+
+    // loads a page while showing the progress bar until it completes
+    _loadPageWithProgress: function (url) {
+      var self = this;
+      this._setListBusy(true);
+      return this._loadPage(url).then(function () {
+        self._setListBusy(false);
+      }, function () {
+        self._setListBusy(false);
       });
     },
 
