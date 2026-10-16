@@ -61,6 +61,7 @@
       <div class="item-editor-properties-container" data-dojo-attach-point="propertiesContainer"></div>
       <div class="item-editor-add-row">
         <button type="button" class="item-editor-add-button" data-dojo-attach-point="addPropertyButton" data-dojo-attach-event="onclick:_onAddPropertyClick">${i18n.collectionItems.editor.addProperty}</button>
+        <button type="button" class="item-editor-add-button" data-dojo-attach-point="addCollectionPropertiesButton" data-dojo-attach-event="onclick:_onAddCollectionPropertiesClick">${i18n.collectionItems.editor.addCollectionProperties}</button>
       </div>
     </div>
 
@@ -235,6 +236,35 @@
       gap: 6px;
       margin-top: 8px;
       align-items: center;
+    }
+
+    .item-editor-asset-card {
+      margin-top: 8px;
+      padding: 8px;
+      border: 1px solid #e6e6e6;
+      border-radius: 3px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .item-editor-asset-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-editor-asset-key {
+      font-weight: bold;
+      font-size: 14px;
+      word-break: break-all;
+    }
+
+    textarea.item-editor-asset-field {
+      height: auto;
+      padding: 6px 10px;
+      resize: vertical;
+      font-family: inherit;
     }
 
     .item-editor-asset-row input,

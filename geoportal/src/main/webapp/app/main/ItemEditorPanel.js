@@ -44,7 +44,8 @@ define([
   "esri4/widgets/Sketch/SketchViewModel",
   "esri4/geometry/support/webMercatorUtils",
   "esri4/Graphic",
-  "app/main/ConfirmModal"
+  "app/main/ConfirmModal",
+  "app/main/StatusModal"
 ], function (
   declare,
   lang,
@@ -57,7 +58,8 @@ define([
   SketchViewModel,
   webMercatorUtils,
   EsriGraphic,
-  ConfirmModal
+  ConfirmModal,
+  StatusModal
 ) {
   // fields that are managed by dedicated inputs / are system fields and
   // should never show up in the generic "Additional Properties" editor
@@ -126,7 +128,9 @@ define([
       }
     },
 
-    showCreate: function (collectionId) {
+    // defaultProperties: optional plain object (e.g. the collection's
+    // "properties") used to pre-populate the Additional Properties editor.
+    showCreate: function (collectionId, defaultProperties) {
       if (!collectionId) return;
       this.mode = "create";
       this.collectionId = collectionId;
@@ -139,6 +143,12 @@ define([
       this.datetimeInput.value = new Date().toISOString();
       this.assets = {};
       this.properties = [];
+      var defaults = defaultProperties || {};
+      Object.keys(defaults).forEach(lang.hitch(this, function (key) {
+        if (RESERVED_PROPERTY_KEYS.indexOf(key) === -1) {
+          this.properties.push({ key: key, value: this._stringifyPropertyValue(defaults[key]) });
+        }
+      }));
       this._clearGeometry();
       this._renderAssets();
       this._renderProperties();
@@ -163,8 +173,11 @@ define([
       this.assets = {};
       var rawAssets = feature.assets || {};
       Object.keys(rawAssets).forEach(lang.hitch(this, function (key) {
-        var a = rawAssets[key] || {};
-        this.assets[key] = { title: a.title || "", href: a.href || "" };
+        // keep the full asset so unknown fields survive an edit
+        var a = lang.clone(rawAssets[key] || {});
+        a.title = a.title || "";
+        a.href = a.href || "";
+        this.assets[key] = a;
       }));
 
       // additional properties (anything besides datetime / reserved keys)
@@ -199,9 +212,9 @@ define([
       this.statusNode.innerText = "";
     },
 
+    // status messages are shown in the common status modal dialog
     _showStatus: function (message) {
-      this.statusNode.innerText = message;
-      this.statusNode.classList.remove("hidden");
+      StatusModal.error(message);
     },
 
     // Show/hide the progress bar and lock the action buttons while a
@@ -342,44 +355,51 @@ define([
       var self = this;
       Object.keys(this.assets).forEach(function (key) {
         var asset = self.assets[key];
-        var row = document.createElement("div");
-        row.className = "item-editor-asset-row";
+        var ed = self.i18n.collectionItems.editor;
+        var card = document.createElement("div");
+        card.className = "item-editor-asset-card";
 
-        var keyInput = document.createElement("input");
-        keyInput.className = "item-editor-input";
-        keyInput.type = "text";
-        keyInput.value = key;
-        keyInput.disabled = true;
-        keyInput.style.flex = "0 0 110px";
-
-        var titleInput = document.createElement("input");
-        titleInput.className = "item-editor-input";
-        titleInput.type = "text";
-        titleInput.placeholder = self.i18n.collectionItems.editor.assetTitlePlaceholder;
-        titleInput.value = asset.title || "";
-        titleInput.oninput = function () { asset.title = titleInput.value; };
-
-        var hrefInput = document.createElement("input");
-        hrefInput.className = "item-editor-input";
-        hrefInput.type = "text";
-        hrefInput.placeholder = self.i18n.collectionItems.editor.assetHrefPlaceholder;
-        hrefInput.value = asset.href || "";
-        hrefInput.oninput = function () { asset.href = hrefInput.value; };
-
+        var header = document.createElement("div");
+        header.className = "item-editor-asset-header";
+        var keyLabel = document.createElement("span");
+        keyLabel.className = "item-editor-asset-key";
+        keyLabel.innerText = key;
         var removeBtn = document.createElement("button");
         removeBtn.type = "button";
         removeBtn.className = "item-editor-remove-row";
-        removeBtn.innerText = self.i18n.collectionItems.editor.remove;
+        removeBtn.innerText = ed.remove;
         removeBtn.onclick = function () {
           delete self.assets[key];
           self._renderAssets();
         };
+        header.appendChild(keyLabel);
+        header.appendChild(removeBtn);
+        card.appendChild(header);
 
-        row.appendChild(keyInput);
-        row.appendChild(titleInput);
-        row.appendChild(hrefInput);
-        row.appendChild(removeBtn);
-        self.assetsContainer.appendChild(row);
+        function addField(placeholder, value, onChange, multiline) {
+          var el = document.createElement(multiline ? "textarea" : "input");
+          el.className = "item-editor-input item-editor-asset-field";
+          if (!multiline) el.type = "text";
+          else el.rows = 2;
+          el.placeholder = placeholder;
+          el.title = placeholder;
+          el.value = value || "";
+          el.oninput = function () { onChange(el.value); };
+          card.appendChild(el);
+        }
+
+        addField(ed.assetHrefPlaceholder, asset.href, function (v) { asset.href = v; });
+        addField(ed.assetTitlePlaceholder, asset.title, function (v) { asset.title = v; });
+        addField(ed.assetTypePlaceholder, asset.type, function (v) { asset.type = v; });
+        addField(ed.assetDescriptionPlaceholder, asset.description, function (v) { asset.description = v; }, true);
+        addField(ed.assetRolesPlaceholder,
+          Array.isArray(asset.roles) ? asset.roles.join(", ") : "",
+          function (v) {
+            asset.roles = v.split(",").map(function (s) { return s.trim(); })
+              .filter(function (s) { return s; });
+          });
+
+        self.assetsContainer.appendChild(card);
       });
     },
 
@@ -389,6 +409,45 @@ define([
     _onAddPropertyClick: function () {
       this.properties.push({ key: "", value: "" });
       this._renderProperties();
+    },
+
+    // fetches the collection and fills in all of its properties; existing
+    // rows with the same key are overwritten, the user can then edit values.
+    _onAddCollectionPropertiesClick: function () {
+      var baseUrl = this.getStacBaseUrl();
+      if (!baseUrl || !this.collectionId) {
+        this._showStatus(this.i18n.collectionItems.editor.stacUrlError);
+        return;
+      }
+      var url = baseUrl + "/collections/" + encodeURIComponent(this.collectionId);
+      if (AppContext.appConfig.system.secureCatalogApp) {
+        var client = new AppClient();
+        url = client.appendAccessToken(url);
+      }
+      this._clearStatus();
+      this.addCollectionPropertiesButton.disabled = true;
+      fetch(url).then(function (response) {
+        if (!response.ok) throw new Error(response.status);
+        return response.json();
+      }).then(lang.hitch(this, function (collection) {
+        this.addCollectionPropertiesButton.disabled = false;
+        var props = (collection && collection.properties) || {};
+        Object.keys(props).forEach(lang.hitch(this, function (key) {
+          if (RESERVED_PROPERTY_KEYS.indexOf(key) !== -1) return;
+          var value = this._stringifyPropertyValue(props[key]);
+          var existing = null;
+          this.properties.forEach(function (p) {
+            if ((p.key || "").trim() === key) existing = p;
+          });
+          if (existing) existing.value = value;
+          else this.properties.push({ key: key, value: value });
+        }));
+        this._renderProperties();
+      })).catch(lang.hitch(this, function (e) {
+        this.addCollectionPropertiesButton.disabled = false;
+        console.error("Error loading collection properties", e);
+        this._showStatus(this.i18n.collectionItems.editor.collectionPropertiesFailed);
+      }));
     },
 
     _renderProperties: function () {
@@ -476,25 +535,45 @@ define([
 
       var assetsObj = {};
       Object.keys(this.assets).forEach(lang.hitch(this, function (key) {
-        var a = this.assets[key];
-        assetsObj[key] = {
-          title: a.title || "",
-          href: a.href || ""
-        };
+        var out = lang.clone(this.assets[key]);
+        out.title = out.title || "";
+        out.href = out.href || "";
+        ["type", "description"].forEach(function (f) {
+          if (!out[f] || !String(out[f]).trim()) delete out[f];
+        });
+        if (!Array.isArray(out.roles) || !out.roles.length) delete out.roles;
+        assetsObj[key] = out;
       }));
 
       var geometry = this._buildGeoJSONGeometry();
-      var feature = {
-        type: "Feature",
-        stac_version: "1.0.0",
-        id: id,
-        collection: this.collectionId,
-        geometry: geometry,
-        properties: propertiesObj,
-        assets: assetsObj,
-        links: []
-		
-      };      
+
+      // when editing, start from the original item so fields not exposed in
+      // the form (stac_extensions, links, ...) are preserved on PUT
+      var feature = this.mode === "edit" && this.editingItem ? lang.clone(this.editingItem) : {};
+      feature.type = "Feature";
+      feature.stac_version = feature.stac_version || "1.0.0";
+      feature.id = id;
+      feature.collection = this.collectionId;
+      feature.geometry = geometry;
+      feature.properties = propertiesObj;
+      feature.assets = assetsObj;
+      feature.links = feature.links || [];
+      delete feature._assets;
+
+      // recompute bbox from the (possibly changed) geometry
+      delete feature.bbox;
+      if (geometry) {
+        var xs = [], ys = [];
+        (function walk(a) {
+          if (!Array.isArray(a)) return;
+          if (typeof a[0] === "number") { xs.push(a[0]); ys.push(a[1]); return; }
+          a.forEach(walk);
+        })(geometry.coordinates);
+        if (xs.length) {
+          feature.bbox = [Math.min.apply(null, xs), Math.min.apply(null, ys),
+                          Math.max.apply(null, xs), Math.max.apply(null, ys)];
+        }
+      }
       return feature;
     },
     _validate: function () {
@@ -546,9 +625,15 @@ define([
           });
           return null;
         }
-        return response.json().catch(function () { return {}; }).then(lang.hitch(this, function (body) {
+        return response.text().then(lang.hitch(this, function (text) {
+          var body = {};
+          try { body = JSON.parse(text); } catch (e) { body = { message: text }; }
+          var msg = (body && (body.message || body.description)) || this.i18n.collectionItems.editor.saveFailed;
+          if (body && Array.isArray(body.details) && body.details.length) {
+            msg += "\n" + body.details.join("\n");
+          }
           this._setBusy(false);
-          this._showStatus((body && (body.message || body.description)) || this.i18n.collectionItems.editor.saveFailed);
+          this._showStatus("(" + response.status + ") " + msg);
         }));
       })).catch(lang.hitch(this, function (e) {
         this._setBusy(false);

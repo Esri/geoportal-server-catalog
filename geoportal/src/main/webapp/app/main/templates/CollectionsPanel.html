@@ -250,19 +250,6 @@
       ${i18n.collections.loading}
     </div>
   </div>
-  <div class="alert-container hidden" data-dojo-attach-point="alertContainer">
-    <div id="alert-color" data-dojo-attach-point="alertColor"></div>
-    <div class="alert-content">
-      <div id="alert-header">
-        <h4 id="alert-title" data-dojo-attach-point="alertTitle">
-          ${i18n.collections.alertTitlePlaceholder}
-        </h4>
-      </div>
-      <p id="alert-message" data-dojo-attach-point="alertMessage">
-        ${i18n.collections.alertMessagePlaceholder}
-      </p>
-    </div>
-  </div>
   <style>
     .container-stac-admin {
       display: flex;
@@ -542,6 +529,7 @@
       border-radius: 5px;
       height: 40px;
       width: 47%;
+      font-size: 14px;
     }
 
     #editor-secondary {
@@ -671,6 +659,7 @@
       color: white;
       align-self: flex-end;
       height: 40px;
+      font-size: 14px;
     }
 
     .remove-asset-button {
@@ -681,6 +670,7 @@
       border: 1px solid rgb(240, 27, 27);
       color: rgb(240, 27, 27);
       background-color: transparent;
+      font-size: 14px;
     }
 
     #initial-asset-key {
@@ -728,6 +718,7 @@
       border: 1px solid #1653ad;
       color: #1653ad;
       background-color: transparent;
+      font-size: 14px;
     }
 
     .remove-email-button {
@@ -738,6 +729,7 @@
       border: 1px solid rgb(240, 27, 27);
       color: rgb(240, 27, 27);
       background-color: transparent;
+      font-size: 14px;
     }
 
     .remove-contact-button {
@@ -748,6 +740,41 @@
       border: 1px solid rgb(240, 27, 27);
       color: rgb(240, 27, 27);
       background-color: transparent;
+      font-size: 14px;
+    }
+
+    /* additional properties (mirrors ItemEditorPanel's key/value rows) */
+    #property-editor-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #property-rows-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .property-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .property-row .editor-input {
+      flex: 1 1 0;
+      margin-top: 0;
+    }
+
+    .remove-property-button {
+      border: 1px solid rgb(240, 27, 27);
+      color: rgb(240, 27, 27);
+      background-color: transparent;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 5px;
+      font-size: 14px;
+      white-space: nowrap;
     }
 
     /* loader */
@@ -795,53 +822,6 @@
     /* sketch */
     .sketch-active-tool {
       background-color: #0066ff;
-    }
-
-    /* alert */
-    .alert-container {
-      position: absolute;
-      bottom: 75px;
-      right: 25px;
-      height: 100px;
-      width: 500px;
-      background-color: white;
-      z-index: 99;
-      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.062);
-      display: flex;
-      transition: all 0.5s ease-out;
-    }
-
-    .alert-container:hover {
-      background-color: #e9e9e9;
-      cursor: pointer;
-    }
-
-    #alert-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-    }
-
-    #alert-title {
-      font-size: 20px;
-    }
-
-    #alert-message {
-      font-size: 15px;
-    }
-
-    #alert-color {
-      background-color: green;
-      height: 100%;
-      width: 15px;
-    }
-
-    .alert-content {
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
-      width: 100%;
     }
 
     .required {

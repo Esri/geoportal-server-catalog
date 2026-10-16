@@ -37,7 +37,8 @@ define([
   "app/context/app-topics",
   "esri4/layers/GeoJSONLayer",
   "app/main/ItemListPanel",
-  "app/main/ConfirmModal"
+  "app/main/ConfirmModal",
+  "app/main/StatusModal"
 ], function (
   declare,
   lang,
@@ -61,7 +62,8 @@ define([
   webMercatorUtils,
   AppClient,appTopics,GeoJSONLayer,
   ItemListPanel,
-  ConfirmModal
+  ConfirmModal,
+  StatusModal
 ) {
   var oThisClass = declare([Templated], {
     i18n: i18n,
@@ -115,6 +117,12 @@ define([
       value: "",
       roles: [],
     },
+    DEFAULT_PROVIDER: {
+      name: "",
+      description: "",
+      roles: [],
+      url: "",
+    },
 
     appActionState: "NONE",
     collections: [],
@@ -124,6 +132,8 @@ define([
     sketchGraphicsLayer: null,
     collectionAssets: {},
     collectionContacts: [],
+    collectionProviders: [],
+    collectionProperties: [], // [{key, value}] - generic additional properties
 
     sampleCollection: [
       {
@@ -232,6 +242,142 @@ define([
         return true;
       }
       return contacts.every((contact) => !this.isBlank(contact.name));
+    },
+
+    // -----------------------------------------------------------------
+    // Providers
+    // -----------------------------------------------------------------
+    setCollectionProviders: function (value) {
+      this.collectionProviders = Array.isArray(value) ? value : [];
+    },
+
+    clearCollectionProviders: function () {
+      this.setCollectionProviders([]);
+      return this.collectionProviders;
+    },
+
+    addNewCollectionProvider: function (provider) {
+      this.collectionProviders.push(provider);
+      return this.collectionProviders;
+    },
+
+    deleteCollectionProvider: function (provider) {
+      const index = this.collectionProviders.indexOf(provider);
+      if (index > -1) {
+        this.collectionProviders.splice(index, 1);
+      }
+      return this.collectionProviders;
+    },
+
+    handleProviderFieldInput: function (provider, field, value) {
+      if (field === "roles") {
+        provider.roles = value
+          .split(",")
+          .map((role) => role.trim())
+          .filter((role) => role.length > 0);
+      } else {
+        provider[field] = value;
+      }
+      this.revalidateEditorPrimaryButton();
+    },
+
+    isCollectionProvidersObjValid: function (providers) {
+      if (!Array.isArray(providers) || providers.length === 0) {
+        return true;
+      }
+      return providers.every((provider) => !this.isBlank(provider.name));
+    },
+
+    // Parses the summaries textarea value into a JSON object.
+    // Returns { ok: true, value } on success, or
+    // { ok: false, value: null } if the text is not valid JSON / not an object.
+    _parseSummaries: function (text) {
+      const trimmed = (text || "").trim();
+      if (!trimmed) {
+        return { ok: true, value: {} };
+      }
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          return { ok: false, value: null };
+        }
+        return { ok: true, value: parsed };
+      } catch (e) {
+        return { ok: false, value: null };
+      }
+    },
+
+    _parseKeywords: function (text) {
+      return (text || "")
+        .split(",")
+        .map((k) => k.trim())
+        .filter((k) => k.length > 0);
+    },
+
+    // -----------------------------------------------------------------
+    // Additional properties (generic key/value pairs, same pattern as
+    // ItemEditorPanel's "Additional Properties" editor)
+    // -----------------------------------------------------------------
+    setCollectionProperties: function (value) {
+      this.collectionProperties = Array.isArray(value) ? value : [];
+    },
+
+    clearCollectionProperties: function () {
+      this.setCollectionProperties([]);
+      return this.collectionProperties;
+    },
+
+    addNewCollectionProperty: function (property) {
+      this.collectionProperties.push(property);
+      return this.collectionProperties;
+    },
+
+    deleteCollectionProperty: function (property) {
+      const index = this.collectionProperties.indexOf(property);
+      if (index > -1) {
+        this.collectionProperties.splice(index, 1);
+      }
+      return this.collectionProperties;
+    },
+
+    handlePropertyFieldInput: function (property, field, value) {
+      property[field] = value;
+    },
+
+    _stringifyPropertyValue: function (value) {
+      if (value === null || value === undefined) return "";
+      if (typeof value === "string") return value;
+      try {
+        return JSON.stringify(value);
+      } catch (e) {
+        return String(value);
+      }
+    },
+
+    // attempts to parse a property's text value back into JSON (number,
+    // boolean, array, object); falls back to the raw string on failure.
+    _parsePropertyValue: function (text) {
+      if (text === "" || text === undefined || text === null) return text;
+      const trimmed = text.trim();
+      if (trimmed === "true") return true;
+      if (trimmed === "false") return false;
+      if (!isNaN(trimmed) && trimmed !== "") return Number(trimmed);
+      if (trimmed.charAt(0) === "{" || trimmed.charAt(0) === "[") {
+        try { return JSON.parse(trimmed); } catch (e) { /* fall through */ }
+      }
+      return text;
+    },
+
+    // builds a plain object from this.collectionProperties, used for the
+    // collection payload sent to create/update.
+    _buildPropertiesObject: function () {
+      const propertiesObj = {};
+      (this.collectionProperties || []).forEach((p) => {
+        const key = (p.key || "").trim();
+        if (!key) return;
+        propertiesObj[key] = this._parsePropertyValue(p.value);
+      });
+      return propertiesObj;
     },
 
     postCreate: function () {
@@ -517,7 +663,8 @@ define([
         this.sketchGraphicsLayer.visible = true;
       }
 
-      const { id, description, title, assets, contacts } = this.getCreateFieldValues();
+      const { id, description, title, assets, contacts, license, keywordsText, summariesText, providers, properties } =
+        this.getCreateFieldValues();
       let tempGeometry = null;
 
       if (this.selectedGraphic?.geometry) {
@@ -544,6 +691,8 @@ define([
             ]
           : [];
 
+      const parsedSummaries = this._parseSummaries(summariesText);
+
       const collection = {
         type: "Collection",
         stac_version: "1.0.0",
@@ -553,9 +702,9 @@ define([
         id: this.removeAllSpaces(id),
         title: title,
         description: description,
-        keywords: [],
-        license: "Apache-2.0",
-        providers: [],
+        keywords: this._parseKeywords(keywordsText),
+        license: (license || "").trim() || "Apache-2.0",
+        providers: providers || [],
         extent: {
           spatial: {
             bbox: bbox,
@@ -568,16 +717,20 @@ define([
             interval: [["1900-01-01T00:00:00Z", "2099-12-31T23:59:59Z"]],
           },
         },
-        summaries: {
-          datetime: {
-            min: "1900-01-01T00:00:00Z",
-            max: "2099-12-31T23:59:59Z",
+        summaries: Object.assign(
+          {
+            datetime: {
+              min: "1900-01-01T00:00:00Z",
+              max: "2099-12-31T23:59:59Z",
+            },
           },
-        },
+          parsedSummaries.value || {}
+        ),
         links: [],
         assets: assets,
         item_assets: {},
         contacts: contacts || [],
+        properties: properties || {},
       };
 
       try {
@@ -597,6 +750,8 @@ define([
 
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
       this.rerenderCollectionsList();
       this.resetSketch();
       this.hideEditor();
@@ -799,12 +954,23 @@ define([
         description: newDescription,
         assets: newAssets,
         contacts: newContacts,
+        license: newLicense,
+        keywordsText: newKeywordsText,
+        summariesText: newSummariesText,
+        providers: newProviders,
+        properties: newProperties,
       } = properties;
       collection.id = this.removeAllSpaces(collection.id);
       collection.title = newTitle;
       collection.description = newDescription;
       collection.assets = newAssets;
       collection.contacts = newContacts || [];
+      collection.providers = newProviders || [];
+      collection.properties = newProperties || {};
+      collection.license = (newLicense || "").trim() || "Apache-2.0";
+      collection.keywords = this._parseKeywords(newKeywordsText);
+      const parsedSummaries = this._parseSummaries(newSummariesText);
+      collection.summaries = Object.assign({}, collection.summaries, parsedSummaries.value || {});
       if (
         !Array.isArray(collection.stac_extensions)
       ) {
@@ -873,6 +1039,8 @@ define([
       this.handleReadCollection(id);
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
       this.hideEditor();
     },
 
@@ -915,6 +1083,12 @@ define([
           id: collection.id,
           title: collection.title,
           description: collection.description,
+          stac_version: collection.stac_version,
+          license: collection.license,
+          keywords: Array.isArray(collection.keywords) ? collection.keywords.join(", ") : "",
+          providers: JSON.stringify(collection.providers || []),
+          summaries: JSON.stringify(collection.summaries || {}),
+          properties: JSON.stringify(collection.properties || {}),
           assets: JSON.stringify(collection.assets),
           contacts: JSON.stringify(collection.contacts || []),
         };
@@ -1068,7 +1242,8 @@ define([
         !this.isBlank(id) &&
         !this.isBlank(title) &&
         !this.isBlank(description) &&
-        this.isCollectionContactsObjValid(this.collectionContacts)
+        this.isCollectionContactsObjValid(this.collectionContacts) &&
+        this.isCollectionProvidersObjValid(this.collectionProviders)
       ) {
         this.editorPrimaryButton.disabled = false;
         this.editorPrimaryButton.classList.remove("disabled-button");
@@ -1132,7 +1307,11 @@ define([
     },
 
     hideAlert: function () {
-      this.alertContainer.classList.add("hidden");
+      if (this._alertTimer) {
+        clearTimeout(this._alertTimer);
+        this._alertTimer = null;
+      }
+      StatusModal.hide();
     },
 
     showAlert: function (
@@ -1141,11 +1320,15 @@ define([
       color = "green",
       delay = 1500
     ) {
-      this.alertTitle.innerHTML = title;
-      this.alertMessage.innerHTML = message;
-      this.alertColor.style.backgroundColor = color;
-      setTimeout(() => {
-        this.alertContainer.classList.remove("hidden");
+      if (this._alertTimer) clearTimeout(this._alertTimer);
+      this._alertTimer = setTimeout(() => {
+        this._alertTimer = null;
+        StatusModal.show({
+          title: title,
+          message: message,
+          type: color === "red" ? "error" : "success",
+          color: color,
+        });
       }, delay);
     },
 
@@ -1539,6 +1722,220 @@ define([
       });
     },
 
+    // -----------------------------------------------------------------
+    // Providers UI
+    // -----------------------------------------------------------------
+    createProviderNode: function (provider) {
+      const ed = this.i18n.collections.editor;
+      const id = Date.now() + Math.random().toString(36).slice(2);
+      const providerNode = document.createElement("div");
+      providerNode.classList.add("contact-container");
+      providerNode.id = `provider-${id}`;
+
+      const hr = document.createElement("hr");
+      providerNode.appendChild(hr);
+
+      // name
+      const labelName = document.createElement("label");
+      labelName.className = "editor-label";
+      labelName.innerHTML = ed.providerName + ' <span class="required">*</span>:';
+      providerNode.appendChild(labelName);
+
+      const inputName = document.createElement("input");
+      inputName.id = `provider-name-input-${id}`;
+      inputName.className = "editor-input";
+      inputName.type = "text";
+      inputName.placeholder = ed.valuePlaceholder;
+      inputName.value = provider.name || "";
+      inputName.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "name", e.target.value);
+      providerNode.appendChild(inputName);
+
+      // description
+      const labelDescription = document.createElement("label");
+      labelDescription.className = "editor-label";
+      labelDescription.innerText = ed.providerDescription + ":";
+      providerNode.appendChild(labelDescription);
+
+      const textareaDescription = document.createElement("textarea");
+      textareaDescription.id = `provider-description-input-${id}`;
+      textareaDescription.className = "editor-input";
+      textareaDescription.style.height = "70px";
+      textareaDescription.rows = 3;
+      textareaDescription.placeholder = ed.valuePlaceholder;
+      textareaDescription.value = provider.description || "";
+      textareaDescription.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "description", e.target.value);
+      providerNode.appendChild(textareaDescription);
+
+      // roles
+      const labelRoles = document.createElement("label");
+      labelRoles.className = "editor-label";
+      labelRoles.innerText = ed.providerRoles + ":";
+      providerNode.appendChild(labelRoles);
+
+      const inputRoles = document.createElement("input");
+      inputRoles.id = `provider-roles-input-${id}`;
+      inputRoles.className = "editor-input";
+      inputRoles.type = "text";
+      inputRoles.placeholder = ed.providerRolesPlaceholder;
+      inputRoles.value = Array.isArray(provider.roles) ? provider.roles.join(", ") : "";
+      inputRoles.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "roles", e.target.value);
+      providerNode.appendChild(inputRoles);
+
+      // url
+      const labelUrl = document.createElement("label");
+      labelUrl.className = "editor-label";
+      labelUrl.innerText = ed.providerUrl + ":";
+      providerNode.appendChild(labelUrl);
+
+      const inputUrl = document.createElement("input");
+      inputUrl.id = `provider-url-input-${id}`;
+      inputUrl.className = "editor-input";
+      inputUrl.type = "text";
+      inputUrl.placeholder = ed.valuePlaceholder;
+      inputUrl.value = provider.url || "";
+      inputUrl.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "url", e.target.value);
+      providerNode.appendChild(inputUrl);
+
+      // remove provider
+      const removeProviderButton = document.createElement("button");
+      removeProviderButton.classList.add("remove-contact-button");
+      removeProviderButton.innerText = ed.removeProvider;
+      removeProviderButton.onclick = () => {
+        this.deleteCollectionProvider(provider);
+        providerNode.remove();
+        this.revalidateEditorPrimaryButton();
+      };
+      providerNode.appendChild(removeProviderButton);
+
+      return providerNode;
+    },
+
+    createProvidersEditorNode: function () {
+      const providersEditorNode = document.createElement("div");
+      providersEditorNode.id = "provider-editor-container";
+
+      const labelProviders = document.createElement("label");
+      labelProviders.className = "editor-label";
+      labelProviders.innerText = this.i18n.collections.editor.providers + ":";
+      providersEditorNode.appendChild(labelProviders);
+
+      const addProviderContainer = document.createElement("div");
+      addProviderContainer.classList.add("add-contact-container");
+
+      const addProviderButton = document.createElement("button");
+      addProviderButton.classList.add("add-asset-button");
+      addProviderButton.innerHTML = this.i18n.collections.editor.addProvider;
+
+      addProviderButton.onclick = () => {
+        const provider = { ...this.DEFAULT_PROVIDER, roles: [] };
+        this.addNewCollectionProvider(provider);
+        const providerNode = this.createProviderNode(provider);
+        providersEditorNode.appendChild(providerNode);
+        this.revalidateEditorPrimaryButton();
+      };
+
+      addProviderContainer.appendChild(addProviderButton);
+      providersEditorNode.appendChild(addProviderContainer);
+      return providersEditorNode;
+    },
+
+    renderUpdateProvidersEditor: function (providers) {
+      const providersEditorNode = this.createProvidersEditorNode();
+      this.editorInputForm.appendChild(providersEditorNode);
+
+      (providers || []).forEach((provider) => {
+        const providerNode = this.createProviderNode(provider);
+        providersEditorNode.appendChild(providerNode);
+      });
+    },
+
+    // -----------------------------------------------------------------
+    // Additional properties UI (key/value rows, mirrors ItemEditorPanel)
+    // -----------------------------------------------------------------
+    createPropertyNode: function (property) {
+      const ed = this.i18n.collections.editor;
+      const id = Date.now() + Math.random().toString(36).slice(2);
+      const row = document.createElement("div");
+      row.classList.add("property-row");
+      row.id = `property-${id}`;
+
+      const inputKey = document.createElement("input");
+      inputKey.className = "editor-input";
+      inputKey.type = "text";
+      inputKey.placeholder = ed.propertyKeyPlaceholder;
+      inputKey.value = property.key || "";
+      inputKey.oninput = (e) =>
+        this.handlePropertyFieldInput(property, "key", e.target.value);
+      row.appendChild(inputKey);
+
+      const inputValue = document.createElement("input");
+      inputValue.className = "editor-input";
+      inputValue.type = "text";
+      inputValue.placeholder = ed.propertyValuePlaceholder;
+      inputValue.value = property.value || "";
+      inputValue.oninput = (e) =>
+        this.handlePropertyFieldInput(property, "value", e.target.value);
+      row.appendChild(inputValue);
+
+      const removeButton = document.createElement("button");
+      removeButton.classList.add("remove-property-button");
+      removeButton.innerText = ed.removeProperty;
+      removeButton.onclick = () => {
+        this.deleteCollectionProperty(property);
+        row.remove();
+      };
+      row.appendChild(removeButton);
+
+      return row;
+    },
+
+    createPropertiesEditorNode: function () {
+      const propertiesEditorNode = document.createElement("div");
+      propertiesEditorNode.id = "property-editor-container";
+
+      const labelProperties = document.createElement("label");
+      labelProperties.className = "editor-label";
+      labelProperties.innerText = this.i18n.collections.editor.properties + ":";
+      propertiesEditorNode.appendChild(labelProperties);
+
+      const rowsContainer = document.createElement("div");
+      rowsContainer.id = "property-rows-container";
+      propertiesEditorNode.appendChild(rowsContainer);
+
+      const addPropertyContainer = document.createElement("div");
+      addPropertyContainer.classList.add("add-contact-container");
+
+      const addPropertyButton = document.createElement("button");
+      addPropertyButton.classList.add("add-asset-button");
+      addPropertyButton.innerHTML = this.i18n.collections.editor.addProperty;
+
+      addPropertyButton.onclick = () => {
+        const property = { key: "", value: "" };
+        this.addNewCollectionProperty(property);
+        const propertyNode = this.createPropertyNode(property);
+        rowsContainer.appendChild(propertyNode);
+      };
+
+      addPropertyContainer.appendChild(addPropertyButton);
+      propertiesEditorNode.appendChild(addPropertyContainer);
+      return propertiesEditorNode;
+    },
+
+    renderUpdatePropertiesEditor: function (properties) {
+      const propertiesEditorNode = this.createPropertiesEditorNode();
+      this.editorInputForm.appendChild(propertiesEditorNode);
+
+      const rowsContainer = propertiesEditorNode.querySelector("#property-rows-container");
+      (properties || []).forEach((property) => {
+        const propertyNode = this.createPropertyNode(property);
+        rowsContainer.appendChild(propertyNode);
+      });
+    },
+
     renderUpdateCollectionEditor: function (properties) {
       const ed = this.i18n.collections.editor;
       this.collectionEditorTitle.innerHTML = this.i18n.collections.updateTitle;
@@ -1592,9 +1989,72 @@ define([
       textareaDescription.placeholder = ed.valuePlaceholder;
       textareaDescription.textContent = properties.description;
       this.editorInputForm.appendChild(textareaDescription);
+	  
+	  this.renderUpdatePropertiesEditor(this.collectionProperties);
+	  this.renderUpdateAssetEditor(this.collectionAssets);
+	  this.renderUpdateContactsEditor(this.collectionContacts);
+	  this.renderUpdateProvidersEditor(this.collectionProviders);
 
-      this.renderUpdateAssetEditor(this.collectionAssets);
-      this.renderUpdateContactsEditor(this.collectionContacts);
+      // <label class="editor-label">stac_version:</label>
+      const labelStacVersion = document.createElement("label");
+      labelStacVersion.className = "editor-label";
+      labelStacVersion.innerText = ed.stacVersionLabel + ":";
+      this.editorInputForm.appendChild(labelStacVersion);
+
+      // <input id="collection-stacversion-input" ... disabled />
+      const inputStacVersion = document.createElement("input");
+      inputStacVersion.id = "collection-stacversion-input";
+      inputStacVersion.className = "editor-input";
+      inputStacVersion.type = "text";
+      inputStacVersion.value = properties.stac_version || "1.0.0";
+      inputStacVersion.disabled = true;
+      this.editorInputForm.appendChild(inputStacVersion);
+
+      // <label class="editor-label">license:</label>
+      const labelLicense = document.createElement("label");
+      labelLicense.className = "editor-label";
+      labelLicense.innerText = ed.licenseLabel + ":";
+      this.editorInputForm.appendChild(labelLicense);
+
+      // <input id="collection-license-input" ... />
+      const inputLicense = document.createElement("input");
+      inputLicense.id = "collection-license-input";
+      inputLicense.className = "editor-input";
+      inputLicense.type = "text";
+      inputLicense.placeholder = ed.licensePlaceholder;
+      inputLicense.value = properties.license || "";
+      this.editorInputForm.appendChild(inputLicense);
+
+      // <label class="editor-label">keywords:</label>
+      const labelKeywords = document.createElement("label");
+      labelKeywords.className = "editor-label";
+      labelKeywords.innerText = ed.keywordsLabel + ":";
+      this.editorInputForm.appendChild(labelKeywords);
+
+      // <input id="collection-keywords-input" ... />
+      const inputKeywords = document.createElement("input");
+      inputKeywords.id = "collection-keywords-input";
+      inputKeywords.className = "editor-input";
+      inputKeywords.type = "text";
+      inputKeywords.placeholder = ed.keywordsPlaceholder;
+      inputKeywords.value = properties.keywords || "";
+      this.editorInputForm.appendChild(inputKeywords);
+
+      // <label class="editor-label">summaries:</label>
+      const labelSummaries = document.createElement("label");
+      labelSummaries.className = "editor-label";
+      labelSummaries.innerText = ed.summariesLabel + ":";
+      this.editorInputForm.appendChild(labelSummaries);
+
+      // <textarea id="collection-summaries-input" ...>
+      const textareaSummaries = document.createElement("textarea");
+      textareaSummaries.id = "collection-summaries-input";
+      textareaSummaries.className = "editor-input";
+      textareaSummaries.style.height = "80px";
+      textareaSummaries.rows = 4;
+      textareaSummaries.placeholder = ed.summariesPlaceholder;
+      textareaSummaries.textContent = properties.summaries || "";
+      this.editorInputForm.appendChild(textareaSummaries);     
       this.initializeCollectionFormListeners();
     },
 
@@ -1612,12 +2072,28 @@ define([
 
       <label class="editor-label">${ed.descriptionLabel}${req}</label>
       <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="${ed.valuePlaceholder}"></textArea>
+
+      <label class="editor-label">${ed.stacVersionLabel}:</label>
+      <input id="collection-stacversion-input" class="editor-input" type="text" value="1.0.0" disabled/>
+
+      <label class="editor-label">${ed.licenseLabel}:</label>
+      <input id="collection-license-input" class="editor-input" type="text" placeholder="${ed.licensePlaceholder}" value="Apache-2.0"/>
+
+      <label class="editor-label">${ed.keywordsLabel}:</label>
+      <input id="collection-keywords-input" class="editor-input" type="text" placeholder="${ed.keywordsPlaceholder}"/>
+
+      <label class="editor-label">${ed.summariesLabel}:</label>
+      <textArea id="collection-summaries-input" style="height: 80px" class="editor-input" rows="4" placeholder="${ed.summariesPlaceholder}"></textArea>
   `;
       this.editorInputForm.innerHTML = collectionInputs;
       const assetEditorNode = this.createAssetEditorNode();
       this.editorInputForm.appendChild(assetEditorNode);
       const contactsEditorNode = this.createContactsEditorNode();
       this.editorInputForm.appendChild(contactsEditorNode);
+      const providersEditorNode = this.createProvidersEditorNode();
+      this.editorInputForm.appendChild(providersEditorNode);
+      const propertiesEditorNode = this.createPropertiesEditorNode();
+      this.editorInputForm.appendChild(propertiesEditorNode);
       this.initializeCollectionFormListeners();
     },
 
@@ -1644,6 +2120,8 @@ define([
       this.selectedGraphic = null;
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
       // Make sketch layer visible so user can see their drawing
       if (this.sketchGraphicsLayer) {
         this.sketchGraphicsLayer.visible = true;
@@ -1662,7 +2140,24 @@ define([
       );
       this.setCollectionAssets(collection.assets ? collection.assets : {});
       this.setCollectionContacts(collection.contacts ? collection.contacts : []);
-      this.renderUpdateCollectionEditor(this.selectedCollection.properties);
+      this.setCollectionProviders(collection.providers ? collection.providers : []);
+      const rawProperties = collection.properties || {};
+      this.setCollectionProperties(
+        Object.keys(rawProperties).map((key) => ({
+          key: key,
+          value: this._stringifyPropertyValue(rawProperties[key]),
+        }))
+      );
+      const properties = {
+        id: this.selectedCollection.properties.id,
+        title: collection.title,
+        description: collection.description,
+        stac_version: collection.stac_version,
+        license: collection.license || "",
+        keywords: Array.isArray(collection.keywords) ? collection.keywords.join(", ") : "",
+        summaries: collection.summaries ? JSON.stringify(collection.summaries, null, 2) : "",
+      };
+      this.renderUpdateCollectionEditor(properties);
 
       if (graphic) {
         this.hideAllGraphicsLayers(view);
@@ -1698,12 +2193,16 @@ define([
       this.showAllGraphicsLayers(this.view);
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
     },
 
     handleCancelCreateCollection: function () {
       this.sketchGraphicsLayer.removeAll();
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
     },
 
     updateCollectionInfoBox: function (properties) {
@@ -1743,6 +2242,11 @@ define([
         title: document.getElementById("collection-title-input").value,
         assets: this.collectionAssets,
         contacts: this.collectionContacts,
+        license: document.getElementById("collection-license-input").value,
+        keywordsText: document.getElementById("collection-keywords-input").value,
+        summariesText: document.getElementById("collection-summaries-input").value,
+        providers: this.collectionProviders,
+        properties: this._buildPropertiesObject(),
       };
     },
 
@@ -1754,6 +2258,11 @@ define([
         title: document.getElementById("collection-title-input").value,
         assets: this.collectionAssets,
         contacts: this.collectionContacts,
+        license: document.getElementById("collection-license-input").value,
+        keywordsText: document.getElementById("collection-keywords-input").value,
+        summariesText: document.getElementById("collection-summaries-input").value,
+        providers: this.collectionProviders,
+        properties: this._buildPropertiesObject(),
       };
     },
 
@@ -1803,6 +2312,23 @@ define([
           );
           return;
         }
+        if (!this.isCollectionProvidersObjValid(this.collectionProviders)) {
+          this.showAlert(
+            this.i18n.collections.alerts.invalidProviderTitle,
+            this.i18n.collections.alerts.invalidProviderMessage,
+            "red"
+          );
+          return;
+        }
+        const summariesInput = this.editorInputForm.querySelector("#collection-summaries-input");
+        if (summariesInput && !this._parseSummaries(summariesInput.value).ok) {
+          this.showAlert(
+            this.i18n.collections.alerts.invalidSummariesTitle,
+            this.i18n.collections.alerts.invalidSummariesMessage,
+            "red"
+          );
+          return;
+        }
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
           const updatedProperties = this.getUpdateFieldValues();
           this.handleUpdateCollection(
@@ -1821,11 +2347,6 @@ define([
           this.handleCancelCreateCollection();
         }
         this.hideEditor();
-      });
-
-      // Alert Events
-      this.alertContainer.addEventListener("click", () => {
-        this.alertContainer.classList.add("hidden");
       });
 
       // List Filtering

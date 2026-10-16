@@ -41,6 +41,7 @@ define([
   "esri4/geometry/Point",
   "esri4/Graphic",
   "app/main/ConfirmModal",
+  "app/main/StatusModal",
   "app/main/ItemEditorPanel"
 ], function (
   declare,
@@ -55,7 +56,8 @@ define([
   Extent,
   Point,
   Graphic,
-  ConfirmModal
+  ConfirmModal,
+  StatusModal
 ) {
   var oThisClass = declare([Templated], {
     templateString: template,
@@ -86,6 +88,18 @@ define([
       this.addItemButton.onclick = function () {
         if (self.collectionId) {
           self.itemEditorPanel.showCreate(self.collectionId);
+        }
+      };
+
+      this.importItemButton.onclick = function () {
+        if (self.collectionId) {
+          self.importFileInput.value = "";
+          self.importFileInput.click();
+        }
+      };
+      this.importFileInput.onchange = function () {
+        if (self.importFileInput.files && self.importFileInput.files[0]) {
+          self._importFile(self.importFileInput.files[0]);
         }
       };
 
@@ -151,20 +165,42 @@ define([
         delete this.itemsById[params.itemId];
       }
       this._setListBusy(true);
-      setTimeout(function () {
-        var url = self.pageHistory[self.currentIndex] || self._buildSearchUrl();
-        self._loadPage(url, true).then(function () {
-          // deleted the last item of a later page: step back one page
-          if (params.action === "delete" && Object.keys(self.itemsById).length === 0 && self.currentIndex > 0) {
-            self.currentIndex--;
-            return self._loadPage(self.pageHistory[self.currentIndex], true);
-          }
-        }).then(function () {
-          self._setListBusy(false);
-        }, function () {
-          self._setListBusy(false);
-        });
-      }, 1200);
+      // returns a promise that resolves once the list has been reloaded
+      return new Promise(function (resolve) {
+        setTimeout(function () {
+          var url = self.pageHistory[self.currentIndex] || self._buildSearchUrl();
+          self._loadPage(url, true).then(function () {
+            // deleted the last item of a later page: step back one page
+            if (params.action === "delete" && Object.keys(self.itemsById).length === 0 && self.currentIndex > 0) {
+              self.currentIndex--;
+              return self._loadPage(self.pageHistory[self.currentIndex], true);
+            }
+          }).then(function () {
+            self._setListBusy(false);
+            resolve();
+          }, function () {
+            self._setListBusy(false);
+            resolve();
+          });
+        }, 1200);
+      });
+    },
+
+    // Resolves with the collection's "properties" object (or {} on any
+    // failure) so new items can start with the collection's properties.
+    _fetchCollectionProperties: function (collectionId) {
+      var url = this.getStacBaseUrl() + "/collections/" + encodeURIComponent(collectionId);
+      if (AppContext.appConfig.system.secureCatalogApp) {
+        var client = new AppClient();
+        url = client.appendAccessToken(url);
+      }
+      return fetch(url).then(function (response) {
+        return response.json();
+      }).then(function (collection) {
+        return (collection && collection.properties) || {};
+      }).catch(function () {
+        return {};
+      });
     },
 
     _setListBusy: function (busy) {
@@ -365,6 +401,14 @@ define([
         viewBtn.onclick = function () { self._zoomToFeature(feature); };
         actions.appendChild(viewBtn);
 
+        var exportBtn = document.createElement("button");
+        exportBtn.type = "button";
+        exportBtn.className = "item-card-action";
+        exportBtn.innerText = self.i18n.collectionItems.exportItem;
+        exportBtn.onclick = function () { self._exportItem(feature); };
+        actions.appendChild(exportBtn);
+
+
         var editBtn = document.createElement("button");
         editBtn.type = "button";
         editBtn.className = "item-card-action";
@@ -389,6 +433,78 @@ define([
 
       this._applySearchFilter(this.itemSearchInput.value);
       this._updateAdminVisibility();
+    },
+
+    // Downloads a single STAC item as a .json file.
+    _exportItem: function (feature) {
+      var blob = new Blob([JSON.stringify(feature, null, 2)], { type: "application/json" });
+      var a = document.createElement("a");
+      a.href = URL.createObjectURL(blob);
+      a.download = (feature.id || "item") + ".json";
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+      setTimeout(function () { URL.revokeObjectURL(a.href); }, 1000);
+    },
+
+    // Imports a STAC Item or FeatureCollection (JSON file) into the
+    // current collection via POST to /collections/{id}/items.
+    _importFile: function (file) {
+      var self = this;
+      var collectionId = this.collectionId;
+      var msgs = this.i18n.collectionItems;
+      file.text().then(function (text) {
+        var json = JSON.parse(text);
+        var features = json.type === "FeatureCollection" ? (json.features || []) : [json];
+        if (!features.length) throw new Error("no items");
+        var url = self.getStacBaseUrl() + "/collections/" + encodeURIComponent(collectionId) + "/items";
+        if (AppContext.appConfig.system.secureCatalogApp) {
+          url = new AppClient().appendAccessToken(url);
+        }
+        self._setListBusy(true);
+        var ok = 0, failed = 0, errors = [];
+        var chain = Promise.resolve();
+        features.forEach(function (f) {
+          chain = chain.then(function () {
+            f.type = f.type || "Feature";
+            f.collection = collectionId;
+            if (!f.stac_version) f.stac_version = "1.0.0";
+            if (!f.links) f.links = [];
+            return fetch(url, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify(f)
+            }).then(function (r) {
+              if (r.ok) { ok++; return; }
+              failed++;
+              return r.json().catch(function () { return {}; }).then(function (b) {
+                errors.push((f.id || "?") + ": " + ((b && (b.message || b.description)) || r.status));
+              });
+            }, function (e) {
+              failed++;
+              errors.push((f.id || "?") + ": " + (e && e.message ? e.message : e));
+            });
+          });
+        });
+        return chain.then(function () {
+          // keep the progress bar running until the list has been reloaded
+          var done = ok > 0
+            ? self._refreshAfterChange({ collectionId: collectionId, action: "import" })
+            : Promise.resolve();
+          return done.then(function () {
+            self._setListBusy(false);
+            if (failed > 0) {
+              StatusModal.error(lang.replace(msgs.importResult, { ok: ok, failed: failed }) +
+                "\n\n" + errors.slice(0, 10).join("\n"));
+            } else {
+              StatusModal.success(lang.replace(msgs.importSuccess, { ok: ok }));
+            }
+          });
+        });
+      }).catch(function (e) {
+        self._setListBusy(false);
+        StatusModal.error(lang.replace(msgs.importFailed, { error: e && e.message ? e.message : e }));
+      });
     },
 
     _updateAdminVisibility: function () {
@@ -438,12 +554,12 @@ define([
           });
         } else {
           self._setListBusy(false);
-          alert(lang.replace(self.i18n.collectionItems.deleteFailed, { id: feature.id }));
+          StatusModal.error(lang.replace(self.i18n.collectionItems.deleteFailed, { id: feature.id }));
         }
       }).catch(function (e) {
         self._setListBusy(false);
         console.error("Error deleting STAC item", e);
-        alert(lang.replace(self.i18n.collectionItems.deleteFailed, { id: feature.id }));
+        StatusModal.error(lang.replace(self.i18n.collectionItems.deleteFailed, { id: feature.id }));
       });
     },
 
