@@ -1462,7 +1462,9 @@ private static String prepareStatus(String status) {
      * @return the same stacItem instance, mutated
      */
     public static JSONArray addExtensionsFromProperties(Map<String, ?> finalPropObj, JSONObject aliasCfg) {
-    	JSONArray stacExtensions = new JSONArray();
+    	StacContext sc = StacContext.getInstance();
+	
+		JSONArray stacExtensions = new JSONArray();
         if (finalPropObj == null || finalPropObj == null) return stacExtensions;
 
        
@@ -1482,20 +1484,28 @@ private static String prepareStatus(String status) {
                 continue;
             }
 
-            JSONArray propNames = (JSONArray) propListObj;
-
-            // If any configured property for this extension exists in stacItem.properties, add the URL
-            boolean found = false;
-            for (Object p : propNames) {
-                String propName = asString(p);
-                if (propName != null && presentKeys.contains(propName)) {
-                    found = true;
-                    break;
-                }
-            }
-
-            if (found) {
+            // see app-context.xml setting keepAllExtensions
+            if (sc.isKeepAllExtensions()) {
+                // keepAllExtensions = true. Keep all submitted extensions even if no property is included
                 addUnique(stacExtensions, url);
+                
+            } else {
+                // keepAllExtensions = false. Only keep extensions for properties included in this item
+                JSONArray propNames = (JSONArray) propListObj;
+
+                // If any configured property for this extension exists in stacItem.properties, add the URL
+                boolean found = false;
+                for (Object p : propNames) {
+                    String propName = asString(p);
+                    if (propName != null && presentKeys.contains(propName)) {
+                        found = true;
+                        break;
+                    }
+                }
+
+                if (found) {
+                    addUnique(stacExtensions, url);
+                }
             }
         }
         return stacExtensions;
