@@ -693,9 +693,11 @@ define([
 
       const parsedSummaries = this._parseSummaries(summariesText);
 
+      const stacCheckboxNode = document.getElementById("collection-stac-checkbox");
+      const isStacCollection = !!(stacCheckboxNode && stacCheckboxNode.checked);
       const collection = {
         type: "Collection",
-        stac_version: "1.0.0",
+        ...(isStacCollection ? { stac_version: "1.0.0" } : {}),
         stac_extensions: [
           "https://stac-extensions.github.io/contacts/v0.1.0/schema.json",
         ],
@@ -735,6 +737,17 @@ define([
 
       try {
         const result = await this.createCollection(collection);
+        if (result && result.badRequest) {
+          // keep the editor open so the user can correct the input
+          this.updateIsLoading(false);
+          StatusModal.show({
+            title: this.i18n.collections.alerts.createErrorTitle,
+            message: result.message,
+            type: "error",
+            color: "red",
+          });
+          return;
+        }
         if (result.response.code !== "201") {
           throw new Error(result.response.description);
         }
@@ -770,7 +783,14 @@ define([
           method: "POST",
           body: JSON.stringify(collection),
         });
-        const result = await response.json();
+        const text = await response.text();
+        let result = {};
+        try { result = text ? JSON.parse(text) : {}; } catch (parseErr) { result = { description: text }; }
+        if (response.status === 400) {
+          const msg = (result && (result.description || result.message || result.detail || result.error)) ||
+            text || "Bad Request";
+          return { badRequest: true, message: String(msg), id: collection.id };
+        }
         return {
           response: result,
           id: collection.id,
@@ -1093,6 +1113,7 @@ define([
           contacts: JSON.stringify(collection.contacts || []),
         };
 
+        this.selectedCollectionIsStac = !!collection.stac_version;
         this.updateCollectionInfoBox(properties);
 		//Turn off all collection layers first
         this.view.map.layers.forEach(layer => {
@@ -1227,8 +1248,9 @@ define([
     },
 	
 	handleViewItemsEnabled: function () {
-	      // Enable View Items if a collection is selected, regardless of whether it has a bbox/graphic
-	      if (this.selectedCollection) {
+	      // Show View Items only for STAC collections (those with stac_version)
+	      this.viewItemsButton.style.display = this.selectedCollectionIsStac ? "" : "none";
+	      if (this.selectedCollection && this.selectedCollectionIsStac) {
 	        this.viewItemsButton.disabled = false;
 	        this.viewItemsButton.classList.remove("disabled");
 	      } else {
@@ -2073,8 +2095,12 @@ define([
       <label class="editor-label">${ed.descriptionLabel}${req}</label>
       <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="${ed.valuePlaceholder}"></textArea>
 
-      <label class="editor-label">${ed.stacVersionLabel}:</label>
-      <input id="collection-stacversion-input" class="editor-input" type="text" value="1.0.0" disabled/>
+      <label class="editor-label" id="collection-stacversion-label" style="display:none">${ed.stacVersionLabel}:</label>
+      <input id="collection-stacversion-input" class="editor-input" type="text" value="1.0.0" disabled style="display:none"/>
+
+      <label class="editor-label" style="display:flex; align-items:center; gap:6px;">
+        <input id="collection-stac-checkbox" type="checkbox"/> ${ed.stacCollectionLabel}
+      </label>
 
       <label class="editor-label">${ed.licenseLabel}:</label>
       <input id="collection-license-input" class="editor-input" type="text" placeholder="${ed.licensePlaceholder}" value="Apache-2.0"/>
@@ -2229,6 +2255,7 @@ define([
       let tableRows = [];
       this.infoTableTitle.innerHTML = this.i18n.collections.infoTitle;
       this.infoTableBody.innerHTML = tableRows.join("");
+      this.selectedCollectionIsStac = false;
       this.handleZoomCollectionEnabled();
       this.handleViewItemsEnabled();
       this.handleExportCollectionEnabled();
@@ -2285,6 +2312,7 @@ define([
       this.zoomCollectionButton.addEventListener("click", () => {
         this.handleZoomTo(this.selectedCollection.graphic,this.selectedCollection.properties.id);
       });
+	  this.viewItemsButton.style.display = "none"; // shown only for STAC collections
 	  this.viewItemsButton.addEventListener("click", () => {			
 	      this.handleViewItems(this.selectedCollection.properties.id);
 	   });

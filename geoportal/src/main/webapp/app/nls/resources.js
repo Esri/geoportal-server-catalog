@@ -450,6 +450,7 @@ define({
         addEmail: "Add Email",
         removeEmail: "Remove Email",
         stacVersionLabel: "stac_version",
+        stacCollectionLabel: "STAC collection",
         licenseLabel: "license",
         licensePlaceholder: "e.g. Apache-2.0",
         keywordsLabel: "keywords",
