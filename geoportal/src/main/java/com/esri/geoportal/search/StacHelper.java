@@ -1064,11 +1064,11 @@ private static String prepareStatus(String status) {
 		if(requestPayload.containsKey("type") && !requestPayload.getAsString("type").equals("Collection")) {
 			errorMsg = errorMsg+" type should be Collection.";
 		}
-    
-		if(!requestPayload.containsKey("stac_version") || 
-      (requestPayload.containsKey("stac_version") && requestPayload.get("stac_version").toString().isBlank()))	{
-			errorMsg = errorMsg+" stac_version is mandatory.";
-		}
+    //Removed validation for stac_version as all collection(non stac also) will be created using Collection Panel only 
+//		if(!requestPayload.containsKey("stac_version") || 
+//			(requestPayload.containsKey("stac_version") && requestPayload.get("stac_version").toString().isBlank()))	{
+//			errorMsg = errorMsg+" stac_version is mandatory.";
+//		}
     
 		if (!requestPayload.containsKey("id") || 
        (requestPayload.containsKey("id") && requestPayload.get("id").toString().isBlank()))	{
