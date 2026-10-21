@@ -82,6 +82,7 @@ define([
     postCreate: function () {
       this.inherited(arguments);
       var self = this;
+      this.domNode.style.display = "none"; // hidden until a collection's items are opened
       this.pageInfoNode.innerText = lang.replace(this.i18n.collectionItems.pagePattern, { page: 1 });
       this.noOfItemsNode.innerText = lang.replace(this.i18n.collectionItems.countPattern, { count: 0 });
 
@@ -246,6 +247,8 @@ define([
 
       this.placeholderNode.classList.add("hidden");
       this.panelBody.classList.remove("hidden");
+      this.domNode.style.display = "flex";
+
 
       this._setupExtentChangeWatcher();
       return this._loadPage(this._buildSearchUrl());
@@ -258,6 +261,7 @@ define([
 
       this.panelBody.classList.add("hidden");
       this.placeholderNode.classList.remove("hidden");
+      this.domNode.style.display = "none";
 
       this._clearHighlight();
 
