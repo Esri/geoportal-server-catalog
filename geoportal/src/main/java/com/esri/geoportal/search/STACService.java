@@ -2169,75 +2169,67 @@ public class STACService extends Application {
 			
 			//#680 
 			//fill item with collection properties when not available in item, item property overrides default set in collection	
-			Set<String> collectionPropKeySet = null;
-			Set<Entry<String, Object>> collectionPropEntrySet = null;
 			JSONObject collectionPropObj = null;
-			ArrayList <String> propToBeAddedFromCollectionList = new ArrayList<String>();
-				  
-			    Collection collection = new Collection(collectionId);
-			    if(collection.getProperties() != null)
-			    {
-			    	collectionPropObj = collection.getProperties();
-				    if (collectionPropObj != null) {
-				        collectionPropKeySet =  collectionPropObj.keySet(); 
-				        
-				        //Create a combined set of property keys from item and collection
-				        Set<String> combinedPropSet = Stream.concat(propObjKeys.stream(), collectionPropKeySet.stream())
-			                     .collect(Collectors.toSet()); 
-						 propObjKeys = combinedPropSet;
-				    }	
-			 }			
-			
-			// Iterate properties, skip property if it is not available in item and collection			
-			for (String propKey : propObjKeys) {
-				try {
-					//it is item prop, try to fill from searched item
-					if(propObj.containsKey(propKey))
-					{
-						propKeyVal = String.valueOf(propObj.get(propKey));
-						// If it is a json path, set values from search result
-						if (propKeyVal.startsWith("$")) {
-							if (searchItemCtx.read(propKeyVal) != null) {
-								featureContext.set("$.featurePropPath.properties." + propKey,
-										searchItemCtx.read(propKeyVal));
-							}else //#688
-							{
-								// Use a real JSON null (not the literal string "null") so that
-								// numeric/array/boolean queryables with no data stay typed as
-								// null rather than being serialized as a String.
-								featureContext.set("$.featurePropPath.properties." + propKey,
-										(Object) null);
-							}
+			Collection collection = new Collection(collectionId);
+			if (collection.getProperties() != null) {
+				collectionPropObj = collection.getProperties();
+			}
+
+			// STEP 1: set all item properties from the opensearch item. If the source is
+			// mentioned in propObjKeys/propObj (json path), read the value from the opensearch response.
+			// Item property set is built from the opensearch response (searchItemCtx)
+			Set<String> itemPropWithValueSet = new HashSet<String>();
+			try {
+				Map<String, Object> osItemProps = searchItemCtx.read("$._source.properties");
+				if (osItemProps != null) {
+					for (Map.Entry<String, Object> e : osItemProps.entrySet()) {
+						if (e.getValue() != null) {
+							itemPropWithValueSet.add(e.getKey());
 						}
 					}
-					//Not an Item prop, Collection prop
-					else
-					{
-						propToBeAddedFromCollectionList.add(propKey);
+				}
+			} catch (Exception e) {
+				LOGGER.trace("No properties ($._source.properties) in this Stac record with id: " + recordId);
+			}
+			for (String propKey : propObjKeys) {
+				try {
+					propKeyVal = String.valueOf(propObj.get(propKey));
+					// If it is a json path, set values from search result
+					if (propKeyVal.startsWith("$")) {
+						Object itemVal = searchItemCtx.read(propKeyVal);
+						if (itemVal != null) {
+							featureContext.set("$.featurePropPath.properties." + propKey, itemVal);
+							itemPropWithValueSet.add(propKey);
+						} else { //#688
+							// Use a real JSON null (not the literal string "null") so that
+							// numeric/array/boolean queryables with no data stay typed as null.
+							featureContext.set("$.featurePropPath.properties." + propKey, (Object) null);
+						}
+					} else {
+						// literal value in template, keep as is
+						itemPropWithValueSet.add(propKey);
 					}
-					
 				} catch (Exception e) {
-					//item did not have this data, so check if it is available in collection prop. This will be added later from collection
-					if(collectionPropObj != null && collectionPropObj.containsKey(propKey))
-					{
-						propToBeAddedFromCollectionList.add(propKey);
-					}
-					// If json path not found in searchItemCtx.read(propKeyVal) or error in any property, remove this property in the
-					// end. if removed here, concurrentModificationException
-					else 	
-					{
-						propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
-						LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
-					}
+					// If json path not found or error in any property, remove this property in the
+					// end (unless collection supplies it). Removing here causes concurrentModificationException
+					propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
+					LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
 				}
 			}
-			//Read updated item property object again and add keys from collection
-			//Use Object as value type to preserve original JSON types (number/boolean/array/object)
-			//instead of forcing everything to String via toString()/getAsString().
+
+			// Read updated item property object again
+			// Use Object as value type to preserve original JSON types (number/boolean/array/object)
 			HashMap<String, Object> updatedPropObj = featureContext.read("$.featurePropPath.properties");
-			for(String prop: propToBeAddedFromCollectionList)
-			{
-				updatedPropObj.put(prop, collectionPropObj.get(prop));
+
+			// STEP 2: iterate collection properties, set only when not already in item (item value supersedes)
+			if (collectionPropObj != null) {
+				for (Object collKeyObj : collectionPropObj.keySet()) {
+					String collKey = String.valueOf(collKeyObj);
+					if (!itemPropWithValueSet.contains(collKey)) {
+						updatedPropObj.put(collKey, collectionPropObj.get(collKey));
+						propToBeRemovedList.remove("$.featurePropPath.properties." + collKey);
+					}
+				}
 			}
 			//finally iterate over search item properties and add those which are not in feature properties, this is to add any additional property from search item which are not in feature template
 			HashMap<String, Object> searchItemPropObj = searchItemCtx.read("$._source.properties");

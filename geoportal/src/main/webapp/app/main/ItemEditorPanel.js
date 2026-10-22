@@ -560,20 +560,6 @@ define([
       feature.links = feature.links || [];
       delete feature._assets;
 
-      // recompute bbox from the (possibly changed) geometry
-      delete feature.bbox;
-      if (geometry) {
-        var xs = [], ys = [];
-        (function walk(a) {
-          if (!Array.isArray(a)) return;
-          if (typeof a[0] === "number") { xs.push(a[0]); ys.push(a[1]); return; }
-          a.forEach(walk);
-        })(geometry.coordinates);
-        if (xs.length) {
-          feature.bbox = [Math.min.apply(null, xs), Math.min.apply(null, ys),
-                          Math.max.apply(null, xs), Math.max.apply(null, ys)];
-        }
-      }
       return feature;
     },
     _validate: function () {
