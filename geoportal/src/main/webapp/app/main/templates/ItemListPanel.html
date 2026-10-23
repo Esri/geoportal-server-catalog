@@ -1,0 +1,362 @@
+<div class="item-list-panel">
+
+  <div class="item-list-placeholder" data-dojo-attach-point="placeholderNode">
+    <p>${i18n.collectionItems.placeholder}</p>
+  </div>
+
+  <div class="item-list-body hidden" data-dojo-attach-point="panelBody">
+    <div class="item-list-header">
+      <div class="item-list-header-text">
+        <p class="item-list-title">${i18n.collectionItems.title}</p>
+        <p class="item-list-subtitle" data-dojo-attach-point="collectionTitleNode"></p>
+      </div>
+      <div class="item-list-header-actions">
+        <button
+          type="button"
+          data-role="admin"
+          class="item-list-add-button"
+          data-dojo-attach-point="addItemButton"
+        >
+          ${i18n.collectionItems.addItem}
+        </button>
+        <button
+          type="button"
+          data-role="admin"
+          class="item-list-add-button"
+          data-dojo-attach-point="importItemButton"
+        >
+          ${i18n.collectionItems.importItem}
+        </button>
+        <input type="file" accept=".json,.geojson,application/json" class="hidden" style="display:none" data-dojo-attach-point="importFileInput"/>
+        <div class="item-list-close" data-dojo-attach-point="closeButton" title="${i18n.collectionItems.closeTitle}">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
+            <path d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"/>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <div class="item-list-progress hidden" data-dojo-attach-point="progressNode">
+      <div class="item-list-progress-bar"></div>
+    </div>
+
+    <div class="item-list-search-container">
+      <input
+        type="text"
+        class="item-list-search-input"
+        placeholder="${i18n.collectionItems.searchPlaceholder}"
+        data-dojo-attach-point="itemSearchInput"
+      />
+      <div class="item-list-search-icon">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+          <path
+            fill="darkgray"
+            d="M416 208c0 45.9-14.9 88.3-40 122.7L502.6 457.4c12.5 12.5 12.5 32.8 0 45.3s-32.8 12.5-45.3 0L330.7 376c-34.4 25.2-76.8 40-122.7 40C93.1 416 0 322.9 0 208S93.1 0 208 0S416 93.1 416 208zM208 352a144 144 0 1 0 0-288 144 144 0 1 0 0 288z"
+          />
+        </svg>
+      </div>
+    </div>
+
+    <div class="item-list-toolbar">
+      <div class="item-list-toolbar-left">
+        <span class="item-list-count" data-dojo-attach-point="noOfItemsNode"></span>
+      </div>
+      <div class="item-list-toolbar-right">
+        <label class="item-list-filter-extent">
+          <input type="checkbox" data-dojo-attach-point="filterExtentCheckbox"/>
+          ${i18n.collectionItems.filterByExtent}
+        </label>
+        <label class="item-list-page-size-label">
+          ${i18n.collectionItems.pageSize}
+          <select class="item-list-page-size-select" data-dojo-attach-point="pageSizeSelect">
+            <option value="5">5</option>
+            <option value="10" selected>10</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
+          </select>
+        </label>
+      </div>
+    </div>
+
+    <div class="item-list-cards-container" data-dojo-attach-point="cardsContainer">
+      <!-- item cards rendered here -->
+    </div>
+
+    <div class="item-list-pagination">
+      <button type="button" class="item-list-page-button" data-dojo-attach-point="prevBtn" disabled>${i18n.collectionItems.prev}</button>
+      <span class="item-list-page-info" data-dojo-attach-point="pageInfoNode"></span>
+      <button type="button" class="item-list-page-button" data-dojo-attach-point="nextBtn" disabled>${i18n.collectionItems.next}</button>
+    </div>
+  </div>
+
+  <div
+    data-dojo-type="app/main/ItemEditorPanel"
+    data-dojo-attach-point="itemEditorPanel"
+  ></div>
+
+  <style>
+    .item-list-progress {
+      position: relative;
+      height: 4px;
+      margin-bottom: 8px;
+      background-color: #e6e6e6;
+      overflow: hidden;
+    }
+
+    .item-list-progress.hidden {
+      display: none;
+    }
+
+    .item-list-progress-bar {
+      position: absolute;
+      top: 0;
+      left: 0;
+      height: 100%;
+      width: 40%;
+      background-color: #1653ad;
+      animation: item-list-progress-slide 1.1s ease-in-out infinite;
+    }
+
+    @keyframes item-list-progress-slide {
+      0% { left: -40%; }
+      100% { left: 100%; }
+    }
+    .item-list-panel {
+      position: relative;
+      width: 420px;
+      flex: 0 0 420px;
+      height: 100%;
+      background-color: white;
+      border: 1px solid #cecece;
+      display: flex;
+      flex-direction: column;
+      box-sizing: border-box;
+    }
+
+    .item-list-placeholder {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100%;
+      padding: 20px;
+      text-align: center;
+      color: #888;
+      font-size: 14px;
+    }
+
+    .item-list-body {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      padding: 10px;
+      box-sizing: border-box;
+      overflow: hidden;
+    }
+
+    .item-list-body.hidden,
+    .item-list-placeholder.hidden {
+      display: none;
+    }
+
+    .item-list-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 10px;
+    }
+
+    .item-list-title {
+      font-weight: bold;
+      font-size: 18px;
+      margin: 0;
+    }
+
+    .item-list-subtitle {
+      margin: 2px 0 0 0;
+      font-size: 13px;
+      color: #666;
+      max-width: 220px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-list-header-actions {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-list-add-button {
+      color: #0066ff;
+      cursor: pointer;
+      padding: 0;
+      font-size: 14px;
+      border: none;
+      background-color: white;
+      white-space: nowrap;
+    }
+
+    .item-list-add-button:hover {
+      text-decoration: underline;
+    }
+
+    .item-list-close {
+      width: 13px;
+      cursor: pointer;
+    }
+
+    .item-list-search-container {
+      position: relative;
+      margin-bottom: 10px;
+    }
+
+    .item-list-search-input {
+      width: 100%;
+      border: 1px solid #e6e6e6;
+      background-color: #f7f7f7fa;
+      height: 35px;
+      padding: 0 0 0 40px;
+      font-size: 14px;
+      box-sizing: border-box;
+    }
+
+    .item-list-search-icon {
+      position: absolute;
+      top: 8px;
+      left: 12px;
+      width: 18px;
+    }
+
+    .item-list-toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 12px;
+      margin-bottom: 8px;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .item-list-toolbar-right {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .item-list-count {
+      font-weight: bold;
+    }
+
+    .item-list-filter-extent {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .item-list-page-size-label {
+      font-weight: bold;
+      white-space: nowrap;
+    }
+
+    .item-list-cards-container {
+      flex: 1 1 0;
+      overflow-y: auto;
+      border-top: 1px solid #ececec;
+    }
+
+    .item-card {
+      border-bottom: 1px solid #ececec;
+      padding: 8px 4px;
+    }
+
+    .item-card.hidden {
+      display: none;
+    }
+
+    .item-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .item-card-id {
+      font-weight: bold;
+      font-size: 13px;
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .item-card-datetime {
+      font-size: 12px;
+      color: #666;
+      margin: 2px 0 6px 0;
+    }
+
+    .item-card-actions {
+      display: flex;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .item-card-action {
+      color: #0066ff;
+      cursor: pointer;
+      padding: 0;
+      font-size: 12px;
+      border: none;
+      background-color: white;
+    }
+
+    .item-card-action:hover {
+      text-decoration: underline;
+    }
+
+    .item-card-action-delete {
+      color: rgb(219, 38, 38);
+    }
+
+    .item-list-empty {
+      padding: 20px 4px;
+      text-align: center;
+      color: #888;
+      font-size: 13px;
+    }
+
+    .item-list-pagination {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      padding-top: 10px;
+    }
+
+    .item-list-page-button {
+      border: 1px solid #b6b6b6;
+      background-color: white;
+      cursor: pointer;
+      padding: 5px 10px;
+    }
+
+    .item-list-page-button:disabled,
+    .item-list-page-button.disabled {
+      color: gray;
+      cursor: not-allowed;
+    }
+
+    .item-list-page-info {
+      font-weight: bold;
+      font-size: 13px;
+      min-width: 55px;
+      text-align: center;
+    }
+
+    .hidden {
+      display: none;
+    }
+  </style>
+</div>

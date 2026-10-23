@@ -43,5 +43,15 @@ define([],function(){var obj={
   /* params - {} */
   AppStarted: "app/AppStarted",
 
+  /* Fired by ItemEditorPanel after a STAC item is created/updated/deleted so
+   * ItemListPanel (and any other interested widget) can refresh its list.
+   * params - {collectionId:string, itemId:string, action:"create"|"update"|"delete"} */
+  StacItemsChanged: "app/StacItemsChanged",
+
+  /* Fired by ItemCard to open a STAC item in the STAC editor (Collections tab).
+   * params - {collectionId:string, itemId:string} */
+  EditStacItemRequested: "app/EditStacItemRequested",
+
+
 // .......................................................................................
 };return obj;});

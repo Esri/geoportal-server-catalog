@@ -68,6 +68,7 @@ public class StacContext {
   
   private String geomWKTField = "";
   private String geomCRSField = "";
+  private boolean keepAllExtensions = true;
 
   private int delayResponse; // Delay in milliseconds before sending final response from Stac Service
   private String stacUrl; //Alternate url for Stac Service (if it is different than standard url)
@@ -240,6 +241,13 @@ public class StacContext {
 		this.stacUrl = stacUrl;
 	}
 
+  public boolean isKeepAllExtensions() {
+    return this.keepAllExtensions;
+  }
+
+  public void setKeepAllExtensions(boolean keepAllExtensions) {
+    this.keepAllExtensions = keepAllExtensions;
+  }
   
   /* ========== Validation Rule functions here ========== */
   

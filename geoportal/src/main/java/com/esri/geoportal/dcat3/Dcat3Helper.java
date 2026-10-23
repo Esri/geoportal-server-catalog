@@ -1280,7 +1280,9 @@ ObjectNode query = MAPPER.createObjectNode();
       String value = StringUtils.trimToNull(e.getValue());
       if (value == null) continue;
       if (key.startsWith("dataset.") || key.startsWith("query.") || key.startsWith("datasetSeries.")) {
-        includes.add(value);
+        for (String candidate : splitFieldNames(value)) {
+          includes.add(candidate);
+        }
       }
     }
 
