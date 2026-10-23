@@ -138,6 +138,7 @@ define([
       this.titleNode.innerText = this.i18n.collectionItems.editor.addTitle;
       this.saveButton.innerText = this.i18n.collectionItems.editor.save;
       this.deleteButton.classList.add("hidden");
+      this.addCollectionPropertiesButton.style.display = "";
       this.idInput.disabled = false;
       this.idInput.value = "";
       this.datetimeInput.value = new Date().toISOString();
@@ -164,6 +165,7 @@ define([
       this.titleNode.innerText = this.i18n.collectionItems.editor.editTitle;
       this.saveButton.innerText = this.i18n.collectionItems.editor.save;
       this.deleteButton.classList.remove("hidden");
+      this.addCollectionPropertiesButton.style.display = "none";
       this.idInput.disabled = true;
       this.idInput.value = feature.id || "";
       var props = feature.properties || {};
@@ -198,7 +200,11 @@ define([
     hide: function () {
       this.overlayNode.classList.add("hidden");
       this._clearGeometry();
+      this.onHide();
     },
+
+    // extension hook, called after the dialog is closed
+    onHide: function () {},
 
     // -----------------------------------------------------------------
     // Internal - show/hide/status

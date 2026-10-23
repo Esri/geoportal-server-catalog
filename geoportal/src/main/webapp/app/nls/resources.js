@@ -280,6 +280,7 @@ define({
         options: {
           caption: "Options",
           editMetadata: "Edit Metadata",
+          editStacItem: "Edit in STAC Editor",
           uploadMetadata: "Upload Metadata"
         },
         urlLinks: {

@@ -445,6 +445,21 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
             (new UploadMetadata({itemId:itemId})).show();
           }
         }));
+		
+		// If stac item, add a link to edit the item in the STAC editor
+        if (item.stac_version && item.collection && item.id) {
+          links.push(domConstruct.create("a",{
+            "class": "small",
+            href: "javascript:void(0)",
+            innerHTML: i18n.item.actions.options.editStacItem,
+            onclick: function() {
+              topic.publish(appTopics.EditStacItemRequested,{
+                collectionId: item.collection,
+                itemId: item.id
+              });
+            }
+          }));
+        }
       }
 
       if (isAdmin) {

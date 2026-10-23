@@ -48,5 +48,10 @@ define([],function(){var obj={
    * params - {collectionId:string, itemId:string, action:"create"|"update"|"delete"} */
   StacItemsChanged: "app/StacItemsChanged",
 
+  /* Fired by ItemCard to open a STAC item in the STAC editor (Collections tab).
+   * params - {collectionId:string, itemId:string} */
+  EditStacItemRequested: "app/EditStacItemRequested",
+
+
 // .......................................................................................
 };return obj;});

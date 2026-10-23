@@ -2548,6 +2548,61 @@ define([
       return dfd;
     },
 
+    // Opens a STAC item directly in the item editor (used by the search
+    // results "Edit in STAC Editor" link). params: {collectionId, itemId}
+    editStacItem: function (params) {
+      var self = this;
+      if (!params || !params.collectionId || !params.itemId) return;
+      var tries = 0;
+      var wait = function () {
+        if (!self.view || !self.itemListPanel) {
+          if (++tries < 100) setTimeout(wait, 200);
+          return;
+        }
+        var url = self.getStacBaseUrl() + "/collections/" + encodeURIComponent(params.collectionId) +
+          "/items/" + encodeURIComponent(params.itemId);
+        if (AppContext.appConfig.system.secureCatalogApp) {
+          url = (new AppClient()).appendAccessToken(url);
+        }
+        self.updateIsLoading(true);
+        fetch(url).then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        }).then(function (feature) {
+          self.selectedCollectionId = params.collectionId;
+          return Promise.resolve(self.itemListPanel.open({
+            collectionId: params.collectionId,
+            collectionTitle: params.collectionId,
+            view: self.view
+          })).then(function () {
+            self.itemListPanel.setView(self.view);
+            self._returnToCatalog = true;
+            if (!self._returnHooked) {
+              self._returnHooked = true;
+              var editor = self.itemListPanel.itemEditorPanel;
+              // hide() runs before StacItemsChanged is published, so clear
+              // the flag asynchronously (cancel/close => stay here)
+              editor.onHide = function () {
+                setTimeout(function () { self._returnToCatalog = false; }, 0);
+              };
+              topic.subscribe(appTopics.StacItemsChanged, function () {
+                if (self._returnToCatalog) {
+                  self._returnToCatalog = false;
+                  $("a[href='#searchPanel']").tab("show");
+                }
+              });
+            }
+            self.itemListPanel.itemEditorPanel.showEdit(params.collectionId, feature);
+          });
+        }).catch(function (e) {
+          console.error("editStacItem failed", e);
+        }).then(function () {
+          self.updateIsLoading(false);
+        });
+      };
+      wait();
+    },
+
     //Opening map panel
     ensureMap: function () {      
       if (!this.config) {
