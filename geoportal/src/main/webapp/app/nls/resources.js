@@ -259,6 +259,7 @@ define({
         csw:  "CSW result",
         kml:  "KML result",
         dcat: "DCAT result",
+		dcat3: "DCAT3 result",
         stac: "STAC result"
       }
     },
