@@ -25,9 +25,10 @@
 define([
   "dojo/_base/declare",
   "dojo/Deferred",
+  "dojo/on",
   "app/common/Templated",
   "dojo/text!./templates/StatusModal.html"
-], function (declare, Deferred, Templated, template) {
+], function (declare, Deferred, on, Templated, template) {
 
   var COLORS = { success: "green", error: "red", info: "rgb(0, 102, 255)", warning: "orange" };
 

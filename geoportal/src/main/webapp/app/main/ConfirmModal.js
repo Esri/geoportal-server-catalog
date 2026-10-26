@@ -33,6 +33,8 @@ define([
   var Modal = declare([Templated], {
     templateString: template,
     _deferred: null,
+    _previousFocus: null,
+    _keyHandler: null,
 
     show: function (options) {
       options = options || {};
@@ -40,17 +42,64 @@ define([
       this.messageNode.innerText = options.message || "";
       this.confirmButton.innerText = options.confirmLabel || this.i18n.general.del;
       this.cancelButton.innerText = options.cancelLabel || this.i18n.general.cancel;
-      if (this._deferred) this._deferred.resolve(false);
+      this.closeButton.setAttribute("aria-label", options.cancelLabel || this.i18n.general.cancel);
+
+      // already open: resolve previous as cancelled, keep the originally focused element
+      if (this._deferred) {
+        this._deferred.resolve(false);
+      } else {
+        this._previousFocus = document.activeElement;
+      }
       this._deferred = new Deferred();
       this.overlayNode.classList.remove("hidden");
+
+      if (!this._keyHandler) {
+        this._keyHandler = this._onKeyDown.bind(this);
+        document.addEventListener("keydown", this._keyHandler, true);
+      }
+      // safe default: focus Cancel
+      this.cancelButton.focus();
       return this._deferred.promise;
     },
 
     _close: function (result) {
       this.overlayNode.classList.add("hidden");
+      if (this._keyHandler) {
+        document.removeEventListener("keydown", this._keyHandler, true);
+        this._keyHandler = null;
+      }
+      var prev = this._previousFocus;
+      this._previousFocus = null;
+      if (prev && typeof prev.focus === "function" && document.body.contains(prev)) {
+        prev.focus();
+      }
       var d = this._deferred;
       this._deferred = null;
       if (d) d.resolve(result);
+    },
+
+    _onKeyDown: function (evt) {
+      if (!this._deferred) return;
+      if (evt.key === "Escape" || evt.key === "Esc") {
+        evt.preventDefault();
+        evt.stopPropagation();
+        this._close(false);
+        return;
+      }
+      if (evt.key !== "Tab") return;
+      var items = [this.closeButton, this.cancelButton, this.confirmButton];
+      var first = items[0], last = items[items.length - 1];
+      var active = document.activeElement;
+      if (!this.dialogNode.contains(active)) {
+        evt.preventDefault();
+        this.cancelButton.focus();
+      } else if (evt.shiftKey && active === first) {
+        evt.preventDefault();
+        last.focus();
+      } else if (!evt.shiftKey && active === last) {
+        evt.preventDefault();
+        first.focus();
+      }
     },
 
     _onConfirm: function () { this._close(true); },
