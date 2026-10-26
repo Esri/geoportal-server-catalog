@@ -28,15 +28,32 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import org.owasp.esapi.ESAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.util.ResourcePath;
+import com.esri.geoportal.base.util.exception.InvalidParameterException;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.util.FieldNames;
+import com.esri.geoportal.service.stac.Collection;
+import com.esri.geoportal.service.stac.GeometryServiceClient;
+import com.esri.geoportal.service.stac.StacContext;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -60,27 +77,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
-import org.owasp.esapi.ESAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.util.ResourcePath;
-import com.esri.geoportal.base.util.exception.InvalidParameterException;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.http.ElasticClient;
-import com.esri.geoportal.lib.elastic.util.FieldNames;
-import com.esri.geoportal.service.stac.Collection;
-import com.esri.geoportal.service.stac.GeometryServiceClient;
-import com.esri.geoportal.service.stac.StacContext;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;

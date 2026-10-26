@@ -1511,16 +1511,6 @@ private static String prepareStatus(String status) {
         return stacExtensions;
     }
     
-    private static JSONArray getOrCreateArray(JSONObject obj, String key) {
-        Object v = obj.get(key);
-        if (v instanceof JSONArray) {
-            return (JSONArray) v;
-        }
-        JSONArray arr = new JSONArray();
-        obj.put(key, arr);
-        return arr;
-    }
-
     private static void addUnique(JSONArray arr, String value) {
         for (Object o : arr) {
             if (value.equals(String.valueOf(o))) {
