@@ -447,7 +447,7 @@ function(declare, lang, array, string, topic, xhr, on,dojoQuery, appTopics, domS
         }));
 		
 		// If stac item, add a link to edit the item in the STAC editor
-        if (item.stac_version && item.collection && item.id) {
+        if (isAdmin && item.stac_version && item.collection && item.id) {
           links.push(domConstruct.create("a",{
             "class": "small",
             href: "javascript:void(0)",
