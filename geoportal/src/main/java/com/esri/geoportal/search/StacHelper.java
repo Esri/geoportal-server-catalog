@@ -1107,7 +1107,7 @@ private static String prepareStatus(String status) {
     } else {
 			String id = requestPayload.get("id").toString();
 			//Check if same id collection exist
-			JSONObject itemRes = getCollectionWithId(id);	
+			JSONObject itemRes = getAllCollectionsWithId(id);	
 			
 			if(update && (itemRes.isEmpty()))
 			{
