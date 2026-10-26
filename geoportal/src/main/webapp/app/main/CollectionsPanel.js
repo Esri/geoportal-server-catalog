@@ -459,7 +459,7 @@ define([
     getCollectionById: async function (id) {
       let collection = null;
       try {
-        let url = `${this.getStacBaseUrl()}/collections/${this.replaceSpaceWithPlus(
+        let url = `${this.getStacBaseUrl()}/allCollections/${this.replaceSpaceWithPlus(
           id
         )}`;
         if (AppContext.appConfig.system.secureCatalogApp) {

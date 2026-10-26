@@ -1538,6 +1538,46 @@ private static String prepareStatus(String status) {
         return (o == null) ? null : o.toString();
     }
 
+    //This returns all collections(including non stac) with the given collectionId
+	public static JSONObject getAllCollectionsWithId(String collectionId) throws Exception {
+		String response = "";		
+		String queryStr = "";		
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+		
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
+		String url = client.getTypeUrlForSearch(ec.getCollectionIndexName());	
+
+		
+		url = url + "/_search";
+		String idsQry = prepareIds(collectionId);
+		System.out.println("ids " + idsQry);
+
+		if (idsQry.length() > 0)
+			builder.add(JsonUtil.toJsonStructure(idsQry));
+		JsonArray filter = builder.build();
+
+		if (!filter.isEmpty()) {
+			queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
+		}	
+
+		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
+				+ (queryStr.length() > 0 ? "," + queryStr : "")+"}";
+		
+		response = client.sendPost(url, searchQuery, "application/json");		
+		
+		DocumentContext elasticResContext = JsonPath.parse(response);
+		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+		JSONObject item = new JSONObject();
+		
+		if(items != null && items.size()>0)
+		{
+			HashMap itemMap = (HashMap) items.get(0);
+			item = new JSONObject((HashMap)itemMap.get("_source"));
+		}
+		return item;
+	}
+
 
 
 }

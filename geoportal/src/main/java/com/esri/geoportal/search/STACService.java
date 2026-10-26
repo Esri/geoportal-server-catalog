@@ -424,6 +424,39 @@ public class STACService extends Application {
 		}			
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
 	}
+	
+	//This is used from CollectionPanel.js to get all collections including non Stac collections with the given collectionId
+	@GET
+	@Path("/allCollections/{collectionId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAllCollection(@Context HttpServletRequest hsr,
+			@PathParam("collectionId") String collectionId) {
+    
+		String responseJSON = null;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		
+		try {			
+
+			JSONObject collectionObj = StacHelper.getAllCollectionsWithId(collectionId);
+			if (collectionObj == null || collectionObj.isEmpty()) // #518 
+			{
+				status = Response.Status.NOT_FOUND;
+			}
+			else
+			{
+				responseJSON = collectionObj.toString();
+			}          
+        			
+		} catch (Exception e) {
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting collection: "+collectionId+" "+e));
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated. "+e.getMessage(),detailErrArray);
+		}
+    
+		return Response.status(status).entity(responseJSON).build();
+	}
 
   
 	@GET
