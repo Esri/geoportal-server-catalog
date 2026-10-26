@@ -2289,7 +2289,17 @@ public class STACService extends Application {
 
 		
 		//Determine stac_extensions to be added in feature based on properties in item, for example if eo:bands properties are available, add "eo" in stac_extension
-		JSONArray stacExtenions = StacHelper.addExtensionsFromProperties(finalPropObj,propExtensionObj);
+		// Extensions submitted with the item (stored in index), merged when keepAllExtensions=true
+		java.util.List<?> submittedExtensions = null;
+		try {
+			Object subExt = searchItemCtx.read("$._source.stac_extensions");
+			if (subExt instanceof java.util.List) {
+				submittedExtensions = (java.util.List<?>) subExt;
+			}
+		} catch (Exception ex) {
+			// no submitted extensions on the item
+		}
+		JSONArray stacExtenions = StacHelper.addExtensionsFromProperties(finalPropObj,propExtensionObj,submittedExtensions);
 		featureContext.set("$.featurePropPath.stac_extensions", stacExtenions);
 		
 		return featureValid;

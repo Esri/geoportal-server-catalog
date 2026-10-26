@@ -1462,11 +1462,30 @@ private static String prepareStatus(String status) {
      * @return the same stacItem instance, mutated
      */
     public static JSONArray addExtensionsFromProperties(Map<String, ?> finalPropObj, JSONObject aliasCfg) {
+        return addExtensionsFromProperties(finalPropObj, aliasCfg, null);
+    }
+
+    /**
+     * Same as above, with the extensions submitted with the item.
+     * If keepAllExtensions is true: result = submitted extensions + extensions derived from item properties.
+     * If keepAllExtensions is false: result = extensions derived from item properties only.
+     *
+     * @param submittedExtensions stac_extensions submitted with the item (may be null)
+     */
+    public static JSONArray addExtensionsFromProperties(Map<String, ?> finalPropObj, JSONObject aliasCfg, List<?> submittedExtensions) {
     	StacContext sc = StacContext.getInstance();
 	
 		JSONArray stacExtensions = new JSONArray();
-        if (finalPropObj == null || finalPropObj == null) return stacExtensions;
+        if (finalPropObj == null || aliasCfg == null) return stacExtensions;
 
+        if (sc.isKeepAllExtensions() && submittedExtensions != null) {
+            for (Object s : submittedExtensions) {
+                String u = asString(s);
+                if (u != null && !u.isBlank()) {
+                    addUnique(stacExtensions, u);
+                }
+            }
+        }
        
         // Build a set of keys present in stacItem.properties for fast lookup
         Set<String> presentKeys = new HashSet<>(finalPropObj.keySet());
@@ -1485,27 +1504,22 @@ private static String prepareStatus(String status) {
             }
 
             // see app-context.xml setting keepAllExtensions
-            if (sc.isKeepAllExtensions()) {
-                // keepAllExtensions = true. Keep all submitted extensions even if no property is included
+            // true: submitted extensions (added above) are merged with property-based extensions.
+            // false: only property-based extensions.
+            JSONArray propNames = (JSONArray) propListObj;
+
+            // If any configured property for this extension exists in stacItem.properties, add the URL
+            boolean found = false;
+            for (Object p : propNames) {
+                String propName = asString(p);
+                if (propName != null && presentKeys.contains(propName)) {
+                    found = true;
+                    break;
+                }
+            }
+
+            if (found) {
                 addUnique(stacExtensions, url);
-                
-            } else {
-                // keepAllExtensions = false. Only keep extensions for properties included in this item
-                JSONArray propNames = (JSONArray) propListObj;
-
-                // If any configured property for this extension exists in stacItem.properties, add the URL
-                boolean found = false;
-                for (Object p : propNames) {
-                    String propName = asString(p);
-                    if (propName != null && presentKeys.contains(propName)) {
-                        found = true;
-                        break;
-                    }
-                }
-
-                if (found) {
-                    addUnique(stacExtensions, url);
-                }
             }
         }
         return stacExtensions;
