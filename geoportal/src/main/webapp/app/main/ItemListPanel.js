@@ -582,10 +582,7 @@ define([
       var self = this;
       var url = this.getStacBaseUrl() + "/collections/" + encodeURIComponent(this.collectionId) +
         "/items/" + encodeURIComponent(feature.id);
-      if (AppContext.appConfig.system.secureCatalogApp) {
-        var client = new AppClient();
-        url = client.appendAccessToken(url);
-      }
+      url = new AppClient().appendAccessToken(url);
       this._setListBusy(true);
       fetch(url, { method: "DELETE" }).then(function (response) {
         if (response.ok) {
