@@ -680,6 +680,7 @@ define([
       var datetime = (this.datetimeInput.value || "").trim();
       if (!id) return this.i18n.collectionItems.editor.idRequired;
       if (!datetime) return this.i18n.collectionItems.editor.datetimeRequired;
+      if (!this._buildGeoJSONGeometry()) return this.i18n.collectionItems.editor.geometryRequired;
       return null;
     },
 

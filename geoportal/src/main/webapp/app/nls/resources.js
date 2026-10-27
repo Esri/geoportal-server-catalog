@@ -599,6 +599,7 @@ define({
         deleteFailedWith: "Unable to delete item: {error}",
         idRequired: "Id is required.",
         datetimeRequired: "Datetime is required.",
+        geometryRequired: "Geometry is required. Draw a point, line or polygon on the map before saving.",
         deleteModal: {
           title: "Delete Item?",
           message: "Are you sure you would like to delete item \"{id}\"? This action is irreversible.",

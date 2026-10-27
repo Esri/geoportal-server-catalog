@@ -827,6 +827,9 @@ private static String prepareStatus(String status) {
 	}
 
 	private static JSONObject extract2DGeoJson(JSONObject geometry) {		
+		if (geometry == null || geometry.getAsString("type") == null) {
+			return geometry;
+		}
         String type = geometry.getAsString("type");
         type = type.toUpperCase();
         JSONArray coordinates = (JSONArray) geometry.get("coordinates");
@@ -1182,7 +1185,6 @@ private static String prepareStatus(String status) {
 		boolean deleteById = false;
 		int deletedSuccess = 0;		
 		int total = 0; 
-		
 		try {
 			url =  client.getTypeUrlForSearch(ec.getIndexName());
 
