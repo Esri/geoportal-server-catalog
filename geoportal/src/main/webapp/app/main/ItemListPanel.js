@@ -225,6 +225,25 @@ define([
     setView: function (view) {
       this.view = view;
       this.itemEditorPanel.setView(view);
+      // The saved item is also drawn by the list's map layers / highlight. Hide
+      // them while the editor is open so only the editable sketch geometry shows
+      // (otherwise erased geometry appears to remain on the map).
+      var self = this;
+      this.itemEditorPanel.onShowEdit = function () {
+        self._clearHighlight();
+        self._setItemLayersVisible(false);
+      };
+      this.itemEditorPanel.onHide = function (changed) {
+        // after a save/delete the stale layers stay hidden until the list
+        // refresh rebuilds them with the new geometry
+        if (!changed) self._setItemLayersVisible(true);
+      };
+    },
+
+    _setItemLayersVisible: function (visible) {
+      (this.geoJSONLayers || []).forEach(function (layer) {
+        layer.visible = visible;
+      });
     },
 
     isFilterByExtentActive: function () {

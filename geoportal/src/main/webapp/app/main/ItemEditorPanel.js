@@ -74,6 +74,12 @@ define([
     outline: { color: "white", width: 1 }
   };
 
+  var LINE_SYM = {
+    type: "simple-line",
+    color: [255, 140, 0, 1],
+    width: 2
+  };
+
   var POLYGON_SYM = {
     type: "simple-fill",
     color: [255, 165, 0, 0.4],
@@ -92,6 +98,7 @@ define([
     sketchLayer: null,
     sketchVM: null,
     activeGeometry: null, // esri Geometry (map SR) currently drawn
+    originalGeometry: null, // GeoJSON geometry as loaded; saved as-is until the user changes it
 
     postCreate: function () {
       this.inherited(arguments);
@@ -109,7 +116,11 @@ define([
         view.map.layers.add(this.sketchLayer);
         this.sketchVM = new SketchViewModel({
           view: view,
-          layer: this.sketchLayer
+          layer: this.sketchLayer,
+          // orange symbols for newly drawn geometry
+          pointSymbol: POINT_SYM,
+          polylineSymbol: LINE_SYM,
+          polygonSymbol: POLYGON_SYM
         });
         this.sketchVM.on("create", lang.hitch(this, function (e) {
           if (e.state === "complete") {
@@ -118,12 +129,27 @@ define([
               if (g !== e.graphic) this.sketchLayer.remove(g);
             }));
             this.activeGeometry = e.graphic.geometry;
+            this.originalGeometry = null; // newly drawn geometry replaces the original
           }
         }));
+        var updateChanged = false;
         this.sketchVM.on("update", lang.hitch(this, function (e) {
-          if (e.state === "complete" && e.graphics && e.graphics[0]) {
-            this.activeGeometry = e.graphics[0].geometry;
+          if (e.state === "active") updateChanged = true;
+          if (e.state === "complete") {
+            this.selectGeometryButton.classList.remove("item-editor-active-tool");
           }
+          if (e.state === "complete" && e.graphics && e.graphics[0] &&
+              this.sketchLayer.graphics.includes(e.graphics[0])) {
+            this.activeGeometry = e.graphics[0].geometry;
+            if (updateChanged && !e.aborted) this.originalGeometry = null;
+            updateChanged = false;
+          }
+        }));
+        // Delete key on a selected graphic
+        this.sketchVM.on("delete", lang.hitch(this, function () {
+          this.activeGeometry = null;
+          this.originalGeometry = null;
+          this.selectGeometryButton.classList.remove("item-editor-active-tool");
         }));
       }
     },
@@ -195,16 +221,21 @@ define([
       this._setGeometryFromGeoJSON(feature.geometry);
       this._clearStatus();
       this._show();
+      this.onShowEdit(feature);
     },
 
-    hide: function () {
+    // extension hook, called after the dialog is opened for an existing item
+    onShowEdit: function (feature) {},
+
+    // changed: true when the dialog closes after a successful save/delete
+    hide: function (changed) {
       this.overlayNode.classList.add("hidden");
       this._clearGeometry();
-      this.onHide();
+      this.onHide(!!changed);
     },
 
     // extension hook, called after the dialog is closed
-    onHide: function () {},
+    onHide: function (changed) {},
 
     // -----------------------------------------------------------------
     // Internal - show/hide/status
@@ -248,7 +279,10 @@ define([
     },
 
     _clearActiveTools: function () {
+      this.selectGeometryButton.classList.remove("item-editor-active-tool");
       this.drawPointButton.classList.remove("item-editor-active-tool");
+      this.drawMultipointButton.classList.remove("item-editor-active-tool");
+      this.drawLineButton.classList.remove("item-editor-active-tool");
       this.drawPolygonButton.classList.remove("item-editor-active-tool");
       this.drawCircleButton.classList.remove("item-editor-active-tool");
     },
@@ -269,6 +303,14 @@ define([
       this._startDraw("point", this.drawPointButton);
     },
 
+    _onDrawMultipointClick: function () {
+      this._startDraw("multipoint", this.drawMultipointButton);
+    },
+
+    _onDrawLineClick: function () {
+      this._startDraw("polyline", this.drawLineButton);
+    },
+
     _onDrawPolygonClick: function () {
       this._startDraw("polygon", this.drawPolygonButton);
     },
@@ -277,17 +319,45 @@ define([
       this._startDraw("circle", this.drawCircleButton);
     },
 
+    // select the existing geometry so it can be moved/reshaped or deleted
+    _onSelectGeometryClick: function () {
+      if (!this.sketchVM || !this.sketchLayer) return;
+      var graphics = this.sketchLayer.graphics.toArray();
+      if (!graphics.length) return;
+      this._ensureSketchLayerVisible();
+      this._clearActiveTools();
+      this.sketchVM.cancel();
+      this.selectGeometryButton.classList.add("item-editor-active-tool");
+      this.sketchVM.update(graphics);
+    },
+
     _onClearGeometryClick: function () {
       this._clearGeometry();
     },
 
     _clearGeometry: function () {
-      // cancel any in-progress draw/update so its temporary graphic is removed
+      var layer = this.sketchLayer;
       if (this.sketchVM) {
+        // a selected (being updated) graphic is held by the sketch view model;
+        // use its own delete() so the graphic and its handles are really removed
+        try {
+          if (this.sketchVM.updateGraphics && this.sketchVM.updateGraphics.length) {
+            this.sketchVM.delete();
+          }
+        } catch (e) {}
+        // cancel any in-progress draw/update so its temporary graphic is removed
         try { this.sketchVM.cancel(); } catch (e) {}
       }
-      if (this.sketchLayer) this.sketchLayer.removeAll();
+      if (layer) {
+        layer.removeAll();
+        // cancel() can restore the graphic asynchronously, so clean up again
+        setTimeout(lang.hitch(this, function () {
+          if (this.activeGeometry === null && layer.graphics.length) layer.removeAll();
+        }), 0);
+      }
       this.activeGeometry = null;
+      this.originalGeometry = null;
+      if (this.selectGeometryButton) this.selectGeometryButton.classList.remove("item-editor-active-tool");
       if (this.drawPointButton) this._clearActiveTools();
     },
 
@@ -295,28 +365,42 @@ define([
       this._clearGeometry();
       if (!geojsonGeometry || !geojsonGeometry.type || !this.sketchLayer) return;
       var esriGeom = null;
-      if (geojsonGeometry.type === "Point") {
-        esriGeom = {
-          type: "point",
-          x: geojsonGeometry.coordinates[0],
-          y: geojsonGeometry.coordinates[1],
-          spatialReference: { wkid: 4326 }
-        };
-      } else if (geojsonGeometry.type === "Polygon") {
-        esriGeom = {
-          type: "polygon",
-          rings: geojsonGeometry.coordinates,
-          spatialReference: { wkid: 4326 }
-        };
+      var sr = { wkid: 4326 };
+      var c = geojsonGeometry.coordinates;
+      switch (geojsonGeometry.type) {
+        case "Point":
+          esriGeom = { type: "point", x: c[0], y: c[1], spatialReference: sr };
+          break;
+        case "MultiPoint":
+          esriGeom = { type: "multipoint", points: c, spatialReference: sr };
+          break;
+        case "LineString":
+          esriGeom = { type: "polyline", paths: [c], spatialReference: sr };
+          break;
+        case "MultiLineString":
+          esriGeom = { type: "polyline", paths: c, spatialReference: sr };
+          break;
+        case "Polygon":
+          esriGeom = { type: "polygon", rings: c, spatialReference: sr };
+          break;
+        case "MultiPolygon":
+          esriGeom = {
+            type: "polygon",
+            rings: c.reduce(function (acc, poly) { return acc.concat(poly); }, []),
+            spatialReference: sr
+          };
+          break;
       }
       if (!esriGeom) return;
-      var graphic = new EsriGraphic({
-        geometry: esriGeom,
-        symbol: esriGeom.type === "point" ? POINT_SYM : POLYGON_SYM
-      });
+      var symbol = POLYGON_SYM;
+      if (esriGeom.type === "point" || esriGeom.type === "multipoint") symbol = POINT_SYM;
+      else if (esriGeom.type === "polyline") symbol = LINE_SYM;
+      var graphic = new EsriGraphic({ geometry: esriGeom, symbol: symbol });
       this._ensureSketchLayerVisible();
       this.sketchLayer.add(graphic);
       this.activeGeometry = graphic.geometry;
+      // keep the original GeoJSON so it is saved unchanged unless the user edits it
+      this.originalGeometry = lang.clone(geojsonGeometry);
       if (this.view) {
         var target = graphic.geometry.extent ? graphic.geometry.extent.expand(2) : graphic;
         this.view.goTo(target).catch(function () {});
@@ -324,6 +408,7 @@ define([
     },
 
     _buildGeoJSONGeometry: function () {
+      if (this.originalGeometry) return lang.clone(this.originalGeometry);
       if (!this.activeGeometry) return null;
       var geom = this.activeGeometry;
       if (geom.spatialReference && geom.spatialReference.isWebMercator) {
@@ -331,6 +416,12 @@ define([
       }
       if (geom.type === "point") {
         return { type: "Point", coordinates: [geom.x, geom.y] };
+      } else if (geom.type === "multipoint") {
+        return { type: "MultiPoint", coordinates: geom.points };
+      } else if (geom.type === "polyline") {
+        return geom.paths.length === 1
+          ? { type: "LineString", coordinates: geom.paths[0] }
+          : { type: "MultiLineString", coordinates: geom.paths };
       } else if (geom.type === "polygon") {
         return { type: "Polygon", coordinates: geom.rings };
       }
@@ -609,7 +700,7 @@ define([
       }).then(lang.hitch(this, function (response) {
         if (response.ok) {
           this._setBusy(false);
-          this.hide();
+          this.hide(true);
           topic.publish(appTopics.StacItemsChanged, {
             collectionId: collectionId,
             itemId: feature.id,
@@ -661,7 +752,7 @@ define([
       fetch(url, { method: "DELETE" }).then(lang.hitch(this, function (response) {
         this._setBusy(false);
         if (response.ok) {
-          this.hide();
+          this.hide(true);
           topic.publish(appTopics.StacItemsChanged, {
             collectionId: collectionId,
             itemId: id,
