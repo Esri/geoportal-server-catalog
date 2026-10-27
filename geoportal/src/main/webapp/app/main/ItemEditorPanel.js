@@ -685,6 +685,7 @@ define([
     },
 
     _onSaveClick: function () {
+      if (this.sketchVM) this.sketchVM.complete();
       var error = this._validate();
       if (error) {
         this._showStatus(error);
