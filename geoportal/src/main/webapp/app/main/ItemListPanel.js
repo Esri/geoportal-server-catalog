@@ -280,6 +280,7 @@ define([
     },
 
     clear: function () {
+      this.itemEditorPanel.hide();
       this.collectionId = null;
       this.itemsById = {};
       this._resetPaging();
