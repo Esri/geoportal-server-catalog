@@ -2587,14 +2587,14 @@ define([
           })).then(function () {
             self.itemListPanel.setView(self.view);
             self._returnToCatalog = true;
+            var editor = self.itemListPanel.itemEditorPanel;
+            var previousOnHide = editor.onHide;
+            editor.onHide = function (changed) {
+              previousOnHide.call(this, changed);
+              setTimeout(function () { self._returnToCatalog = false; }, 0);
+            };
             if (!self._returnHooked) {
               self._returnHooked = true;
-              var editor = self.itemListPanel.itemEditorPanel;
-              // hide() runs before StacItemsChanged is published, so clear
-              // the flag asynchronously (cancel/close => stay here)
-              editor.onHide = function () {
-                setTimeout(function () { self._returnToCatalog = false; }, 0);
-              };
               topic.subscribe(appTopics.StacItemsChanged, function () {
                 if (self._returnToCatalog) {
                   self._returnToCatalog = false;
