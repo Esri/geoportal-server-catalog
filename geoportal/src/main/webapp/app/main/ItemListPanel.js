@@ -364,6 +364,7 @@ define([
     _loadPage: function (url, fromHistory) {
       var self = this;
       return fetch(url).then(function (response) {
+        if (!response.ok) throw new Error("HTTP " + response.status);
         return response.json();
       }).then(function (stac) {
         self.itemsById = {};
