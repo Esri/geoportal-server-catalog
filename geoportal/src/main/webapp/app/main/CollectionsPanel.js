@@ -993,7 +993,7 @@ define([
       collection.license = (newLicense || "").trim() || "Apache-2.0";
       collection.keywords = this._parseKeywords(newKeywordsText);
       const parsedSummaries = this._parseSummaries(newSummariesText);
-      collection.summaries = Object.assign({}, collection.summaries, parsedSummaries.value || {});
+      collection.summaries = parsedSummaries.value || {};
       if (
         !Array.isArray(collection.stac_extensions)
       ) {
