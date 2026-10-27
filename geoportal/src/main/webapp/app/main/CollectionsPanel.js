@@ -361,7 +361,7 @@ define([
       const trimmed = text.trim();
       if (trimmed === "true") return true;
       if (trimmed === "false") return false;
-      if (!isNaN(trimmed) && trimmed !== "") return Number(trimmed);
+      if (!isNaN(trimmed) && trimmed !== "" && String(Number(trimmed)) === trimmed) return Number(trimmed);
       if (trimmed.charAt(0) === "{" || trimmed.charAt(0) === "[") {
         try { return JSON.parse(trimmed); } catch (e) { /* fall through */ }
       }
@@ -375,7 +375,10 @@ define([
       (this.collectionProperties || []).forEach((p) => {
         const key = (p.key || "").trim();
         if (!key) return;
-        propertiesObj[key] = this._parsePropertyValue(p.value);
+        // unchanged row: send the original typed value (null, "00123", "false", ...)
+        propertiesObj[key] = (p.hasOriginal && p.value === p.originalText)
+          ? p.original
+          : this._parsePropertyValue(p.value);
       });
       return propertiesObj;
     },
@@ -1038,11 +1041,13 @@ define([
 
       collection.extent.spatial.bbox = bbox;
 
+      let updated = false;
       try {
         const result = await this.updateCollection(collection);
         if (result.response.code !== "200") {
           throw new Error(result.response.description);
         }
+        updated = true;
         this.showAlert(
           this.i18n.collections.alerts.updateSuccessTitle,
           lang.replace(this.i18n.collections.alerts.updateSuccessMessage, { id: collection.id }),
@@ -1056,7 +1061,9 @@ define([
       this.rerenderCollectionsList(this.collections);
       this.showAllGraphicsLayers(this.view);
       this.sketchGraphicsLayer.removeAll();
-      this.handleReadCollection(id);
+      // the search index is near-real-time, so re-reading right after the update
+      // can return the old values; show the collection we just saved instead
+      this.handleReadCollection(id, updated ? collection : null);
       this.clearCollectionAssets();
       this.clearCollectionContacts();
       this.clearCollectionProviders();
@@ -1088,14 +1095,16 @@ define([
       }
     },
 
-    handleReadCollection: async function (id) {
+    // prefetchedCollection: optional full collection object to display instead of
+    // fetching it again (used right after an update, before the index catches up)
+    handleReadCollection: async function (id, prefetchedCollection) {
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
       this.selectedGraphic = this.selectedCollection.graphic;
       this.handleUpdateButtonEnabled();  
 	   
       if (this.selectedCollection) {
-        const collection = await this.getCollectionById(
+        const collection = prefetchedCollection || await this.getCollectionById(
           this.selectedCollection.properties.id
         );
         console.log(collection);
@@ -2169,10 +2178,11 @@ define([
       this.setCollectionProviders(collection.providers ? collection.providers : []);
       const rawProperties = collection.properties || {};
       this.setCollectionProperties(
-        Object.keys(rawProperties).map((key) => ({
-          key: key,
-          value: this._stringifyPropertyValue(rawProperties[key]),
-        }))
+        Object.keys(rawProperties).map((key) => {
+          const text = this._stringifyPropertyValue(rawProperties[key]);
+          // keep the typed original so unchanged rows are saved untouched
+          return { key: key, value: text, hasOriginal: true, original: rawProperties[key], originalText: text };
+        })
       );
       const properties = {
         id: this.selectedCollection.properties.id,

@@ -173,7 +173,7 @@ define([
       var defaults = defaultProperties || {};
       Object.keys(defaults).forEach(lang.hitch(this, function (key) {
         if (RESERVED_PROPERTY_KEYS.indexOf(key) === -1) {
-          this.properties.push({ key: key, value: this._stringifyPropertyValue(defaults[key]) });
+          this.properties.push(this._makePropertyRow(key, defaults[key]));
         }
       }));
       this._clearGeometry();
@@ -212,7 +212,7 @@ define([
       this.properties = [];
       Object.keys(props).forEach(lang.hitch(this, function (key) {
         if (RESERVED_PROPERTY_KEYS.indexOf(key) === -1) {
-          this.properties.push({ key: key, value: this._stringifyPropertyValue(props[key]) });
+          this.properties.push(this._makePropertyRow(key, props[key]));
         }
       }));
 
@@ -532,12 +532,17 @@ define([
         Object.keys(props).forEach(lang.hitch(this, function (key) {
           if (RESERVED_PROPERTY_KEYS.indexOf(key) !== -1) return;
           var value = this._stringifyPropertyValue(props[key]);
+          var row = this._makePropertyRow(key, props[key]);
           var existing = null;
           this.properties.forEach(function (p) {
             if ((p.key || "").trim() === key) existing = p;
           });
-          if (existing) existing.value = value;
-          else this.properties.push({ key: key, value: value });
+          if (existing) {
+            existing.value = row.value;
+            existing.hasOriginal = true;
+            existing.original = row.original;
+            existing.originalText = row.originalText;
+          } else this.properties.push(row);
         }));
         this._renderProperties();
       })).catch(lang.hitch(this, function (e) {
@@ -584,6 +589,13 @@ define([
       });
     },
 
+    // a row remembers its typed original value so rows the user did not edit
+    // are saved exactly as loaded (null, "00123", "false", ...)
+    _makePropertyRow: function (key, rawValue) {
+      var text = this._stringifyPropertyValue(rawValue);
+      return { key: key, value: text, hasOriginal: true, original: rawValue, originalText: text };
+    },
+
     _stringifyPropertyValue: function (value) {
       if (value === null || value === undefined) return "";
       if (typeof value === "string") return value;
@@ -601,7 +613,7 @@ define([
       var trimmed = text.trim();
       if (trimmed === "true") return true;
       if (trimmed === "false") return false;
-      if (!isNaN(trimmed) && trimmed !== "") return Number(trimmed);
+      if (!isNaN(trimmed) && trimmed !== "" && String(Number(trimmed)) === trimmed) return Number(trimmed);
       if ((trimmed.charAt(0) === "{" || trimmed.charAt(0) === "[")) {
         try { return JSON.parse(trimmed); } catch (e) { /* fall through */ }
       }
@@ -627,7 +639,9 @@ define([
       this.properties.forEach(lang.hitch(this, function (p) {
         var key = (p.key || "").trim();
         if (!key || RESERVED_PROPERTY_KEYS.indexOf(key) !== -1) return;
-        propertiesObj[key] = this._parsePropertyValue(p.value);
+        propertiesObj[key] = (p.hasOriginal && p.value === p.originalText)
+          ? lang.clone(p.original)
+          : this._parsePropertyValue(p.value);
       }));
 
       var assetsObj = {};
