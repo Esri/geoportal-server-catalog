@@ -463,8 +463,9 @@ ObjectNode query = MAPPER.createObjectNode();
 
       ObjectNode query = MAPPER.createObjectNode();
       ArrayNode must = MAPPER.createArrayNode();
-      must.addObject().putObject("term")
-                .put(sourceField(profile, "query.collectionMembership", "src_collections_s"), collectionId);
+      List<String> membershipFields = candidateFields(
+          sourceField(profile, "query.collectionMembership", "src_collections_s"));
+      appendTermAcrossFields(must, membershipFields, collectionId);
       appendAccessFilters(must, profile);
       query.putObject("query").putObject("bool").set("must", must);
 
@@ -504,7 +505,9 @@ ObjectNode query = MAPPER.createObjectNode();
       query.put("_source", false);
 
       ArrayNode must = MAPPER.createArrayNode();
-      must.addObject().putObject("term").put(sourceField(profile, "query.collectionMembership", "src_collections_s"), collectionId);
+      List<String> membershipFields = candidateFields(
+          sourceField(profile, "query.collectionMembership", "src_collections_s"));
+      appendTermAcrossFields(must, membershipFields, collectionId);
       appendAccessFilters(must, profile);
       query.putObject("query").putObject("bool").set("must", must);
 
@@ -560,16 +563,45 @@ ObjectNode query = MAPPER.createObjectNode();
         query.putObject("query").putObject("bool").set("must", must);
       }
 
+      List<String> membershipFields = candidateFields(
+          sourceField(profile, "query.collectionMembership", "src_collections_s"));
+      if (membershipFields.isEmpty()) return result;
+
       ObjectNode aggs = query.putObject("aggs");
       ObjectNode collectionsAgg = aggs.putObject("collections");
-      ObjectNode terms = collectionsAgg.putObject("terms");
-      // Field name honoring profile mappings
-      terms.put("field", sourceField(profile, "query.collectionMembership", "src_collections_s"));
-      terms.put("size", Math.max(collectionIds.size(), 1000));
-      // Include only the requested collection ids to limit buckets
-      ArrayNode include = terms.putArray("include");
-      for (String cid : collectionIds) {
-        include.add(StringUtils.defaultString(cid));
+      // single mapped field: a plain terms aggregation is sufficient and cheapest
+      boolean usingFiltersAgg = membershipFields.size() > 1;
+      if (!usingFiltersAgg) {
+        ObjectNode terms = collectionsAgg.putObject("terms");
+        // Field name honoring profile mappings
+        terms.put("field", membershipFields.get(0));
+        terms.put("size", Math.max(collectionIds.size(), 1000));
+        // Include only the requested collection ids to limit buckets
+        ArrayNode include = terms.putArray("include");
+        for (String cid : collectionIds) {
+          include.add(StringUtils.defaultString(cid));
+        }
+      } else {
+        // Multiple candidate fields (comma-separated mapping, e.g.
+        // "collection,src_collections_s"): a terms aggregation can only key
+        // off a single field, so a document whose collection id is only
+        // stored under the second candidate field would never be bucketed.
+        // Use a named "filters" aggregation instead - one filter per
+        // requested collection id, each OR-ing the candidate fields - so a
+        // document is counted for a collection id if ANY candidate field
+        // holds it, regardless of which field is actually populated.
+        ObjectNode filtersAgg = collectionsAgg.putObject("filters");
+        ObjectNode filters = filtersAgg.putObject("filters");
+        for (String cid : collectionIds) {
+          ArrayNode filterMust = MAPPER.createArrayNode();
+          appendTermAcrossFields(filterMust, membershipFields, cid);
+          ObjectNode filterQuery = filters.putObject(StringUtils.defaultString(cid));
+          if (!filterMust.isEmpty()) {
+            filterQuery.putObject("bool").set("must", filterMust);
+          } else {
+            filterQuery.putObject("match_none");
+          }
+        }
       }
 
       // top_hits sub-aggregation to fetch member ids per bucket
@@ -586,25 +618,41 @@ ObjectNode query = MAPPER.createObjectNode();
       JsonNode root = MAPPER.readTree(response);
       JsonNode buckets = root.path("aggregations").path("collections").path("buckets");
       if (buckets.isArray()) {
+        // terms aggregation: anonymous array of buckets, each with its own "key"
         for (JsonNode bucket : buckets) {
           String key = bucket.path("key").asText(null);
-          long docCount = bucket.path("doc_count").asLong(-1L);
-          CollectionMembers cm = new CollectionMembers();
-          cm.count = docCount;
-          JsonNode hits = bucket.path("top_members").path("hits").path("hits");
-          if (hits.isArray()) {
-            for (JsonNode h : hits) {
-              String id = h.path("_id").asText(null);
-              if (StringUtils.isNotBlank(id)) cm.ids.add(id);
-            }
-          }
-          result.put(key, cm);
+          result.put(key, toCollectionMembers(bucket));
+        }
+      } else if (buckets.isObject()) {
+        // filters aggregation: object keyed by the filter name (the collection id)
+        Iterator<Map.Entry<String, JsonNode>> fields = buckets.fields();
+        while (fields.hasNext()) {
+          Map.Entry<String, JsonNode> entry = fields.next();
+          result.put(entry.getKey(), toCollectionMembers(entry.getValue()));
         }
       }
     } catch (Exception ex) {
       LOGGER.debug("DCAT3: unable to aggregate collection members.", ex);
     }
     return result;
+  }
+
+  /**
+   * Converts a single bucket (from either a terms or filters aggregation) into
+   * a {@link CollectionMembers}, reading its <code>doc_count</code> and the
+   * member ids from its <code>top_members</code> sub-aggregation.
+   */
+  private CollectionMembers toCollectionMembers(JsonNode bucket) {
+    CollectionMembers cm = new CollectionMembers();
+    cm.count = bucket.path("doc_count").asLong(-1L);
+    JsonNode hits = bucket.path("top_members").path("hits").path("hits");
+    if (hits.isArray()) {
+      for (JsonNode h : hits) {
+        String id = h.path("_id").asText(null);
+        if (StringUtils.isNotBlank(id)) cm.ids.add(id);
+      }
+    }
+    return cm;
   }
 
   /**
@@ -1146,6 +1194,60 @@ ObjectNode query = MAPPER.createObjectNode();
 
   private String sourceField(String profile, String key, String fallback) {
     return config.getProfileSourceField(profile, key, fallback);
+  }
+
+  /**
+   * Splits a (possibly comma-separated) source field mapping into the list of
+   * candidate index field names, in declared order (first entry has
+   * precedence). Some mapping entries (e.g.
+   * <code>query.collectionMembership: "collection,src_collections_s"</code>)
+   * list more than one field because different indices/pipelines populate
+   * collection membership under different field names; these candidates must
+   * be OR'ed together in queries/aggregations rather than used verbatim as a
+   * single (nonexistent) field name.
+   *
+   * @param rawMapping the raw mapping value, e.g. "collection,src_collections_s"
+   * @return the trimmed, non-blank candidate field names (always at least one
+   *         entry when the input is non-blank)
+   */
+  private List<String> candidateFields(String rawMapping) {
+    List<String> fields = new ArrayList<>();
+    if (StringUtils.isBlank(rawMapping)) return fields;
+    for (String candidate : rawMapping.split(",")) {
+      String trimmed = StringUtils.trimToNull(candidate);
+      if (trimmed != null && !fields.contains(trimmed)) {
+        fields.add(trimmed);
+      }
+    }
+    return fields;
+  }
+
+  /**
+   * Appends a term filter for {@code value} against {@code fields} to
+   * {@code must}. When a single candidate field is supplied this is a plain
+   * <code>term</code> clause; when multiple candidate fields are supplied
+   * (comma-separated mapping) an OR (<code>bool.should</code> with
+   * <code>minimum_should_match: 1</code>) is used so a document matches if
+   * any candidate field holds the value - the first field is still tried
+   * first/listed first, giving it precedence when inspecting the clause, but
+   * all candidates are searched.
+   *
+   * @param must the parent bool.must array to append to
+   * @param fields candidate field names, in precedence order
+   * @param value the term value to match
+   */
+  private void appendTermAcrossFields(ArrayNode must, List<String> fields, String value) {
+    if (must == null || fields == null || fields.isEmpty()) return;
+    if (fields.size() == 1) {
+      must.addObject().putObject("term").put(fields.get(0), value);
+      return;
+    }
+    ObjectNode should = must.addObject().putObject("bool");
+    should.put("minimum_should_match", 1);
+    ArrayNode shouldArr = should.putArray("should");
+    for (String field : fields) {
+      shouldArr.addObject().putObject("term").put(field, value);
+    }
   }
 
   private String sf(String key, String fieldName, String fallback) {
