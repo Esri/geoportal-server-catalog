@@ -666,6 +666,7 @@ define([
       feature.id = id;
       feature.collection = this.collectionId;
       feature.geometry = geometry;
+     
       feature.properties = propertiesObj;
       feature.assets = assetsObj;
       feature.links = feature.links || [];
@@ -673,6 +674,7 @@ define([
 
       return feature;
     },
+    
     _validate: function () {
       var id = (this.idInput.value || "").trim();
       var datetime = (this.datetimeInput.value || "").trim();
@@ -706,10 +708,10 @@ define([
         url = client.appendAccessToken(url);
       }
 
-      this._setBusy(true);
+      this._setBusy(true);	  
       fetch(url, {
         method: isCreate ? "POST" : "PUT",
-        headers: { "Content-Type": "application/json" },
+        headers: { "Content-Type": "application/json" },		
         body: JSON.stringify(feature)
       }).then(lang.hitch(this, function (response) {
         if (response.ok) {

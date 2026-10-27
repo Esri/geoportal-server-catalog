@@ -1382,8 +1382,8 @@ private static String prepareStatus(String status) {
 					  if (coordinates!=null && type.equals("POINT")) {
 						  	StacContext sc = StacContext.getInstance();
 						  	double bboxSize = sc.getStacBboxSize();				  	
-						  	double x = (double) coordinates.get(0);
-			                double y = (double) coordinates.get(1);
+						  	double x = toDouble(coordinates.get(0));
+			                double y = toDouble(coordinates.get(1));
 			                
 			                minLng = x-(bboxSize/2);
 			                maxLng = x +(bboxSize/2);		                		
@@ -1394,8 +1394,8 @@ private static String prepareStatus(String status) {
 		                } else if (coordinates!=null && (type.equals("LINESTRING") || type.equals("MULTIPOINT"))) {	                    
 		                    for (int i = 0; i < coordinates.size(); i++) {
 		                        JSONArray coord = (JSONArray) coordinates.get(i);
-		                        double lng = (double) coord.get(0);
-			                    double lat = (double) coord.get(1);
+		                        double lng = toDouble(coord.get(0));
+			                    double lat = toDouble(coord.get(1));
 		                        minLat = Math.min(minLat, lat);
 		                        maxLat = Math.max(maxLat, lat);
 		                        minLng = Math.min(minLng, lng);
@@ -1407,8 +1407,8 @@ private static String prepareStatus(String status) {
 		                        JSONArray ring = (JSONArray) coordinates.get(i);
 		                        for (int j = 0; j < ring.size(); j++) {
 		                            JSONArray coord = (JSONArray) ring.get(j);
-		                            double lng = (double) coord.get(0);
-		    	                    double lat = (double) coord.get(1);
+		                            double lng = toDouble(coord.get(0));
+		    	                    double lat = toDouble(coord.get(1));
 		                            minLat = Math.min(minLat, lat);
 		                            maxLat = Math.max(maxLat, lat);
 		                            minLng = Math.min(minLng, lng);
@@ -1423,8 +1423,8 @@ private static String prepareStatus(String status) {
 		                            JSONArray ring = (JSONArray) polygon.get(j);
 		                            for (int k=0; k<ring.size(); k++){
 		                                JSONArray coord = (JSONArray) ring.get(k);
-		                                double lng = (double) coord.get(0);
-			    	                    double lat = (double) coord.get(1);
+		                                double lng = toDouble(coord.get(0));
+			    	                    double lat = toDouble(coord.get(1));
 		                                minLat = Math.min(minLat, lat);
 		                                maxLat = Math.max(maxLat, lat);
 		                                minLng = Math.min(minLng, lng);

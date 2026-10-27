@@ -170,6 +170,12 @@ define([
       return new Promise(function (resolve) {
         setTimeout(function () {
           var url = self.pageHistory[self.currentIndex] || self._buildSearchUrl();
+          // with "filter by extent" the stored page url holds the map extent from
+          // when it was first loaded; rebuild it so the current extent is used
+          if (self.filterByExtent && self.currentIndex <= 0) {
+            url = self._buildSearchUrl();
+            self.pageHistory[Math.max(self.currentIndex, 0)] = url;
+          }
           self._loadPage(url, true).then(function () {
             // deleted the last item of a later page: step back one page
             if (params.action === "delete" && Object.keys(self.itemsById).length === 0 && self.currentIndex > 0) {
