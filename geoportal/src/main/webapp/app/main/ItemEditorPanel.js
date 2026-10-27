@@ -86,6 +86,82 @@ define([
     outline: { color: [255, 140, 0, 1], width: 2 }
   };
 
+  // -----------------------------------------------------------------
+  // Topology-aware ring -> Polygon/MultiPolygon reconstruction
+  //
+  // esri Polygon.rings is a flat array of rings (no indication of which
+  // exterior ring a hole belongs to), regardless of whether the geometry
+  // started life as a GeoJSON Polygon or MultiPolygon. Naively wrapping all
+  // of those rings in a single GeoJSON Polygon (coordinates: [ring, ring, ...])
+  // turns every ring after the first into a hole of the first ring - if the
+  // original geometry was a MultiPolygon, its disjoint exterior rings become
+  // (incorrect) holes instead of separate polygons.
+  //
+  // To reconstruct the correct Polygon/MultiPolygon boundaries we classify
+  // each ring as exterior or hole using its winding order (esri convention:
+  // exterior rings are clockwise, holes counter-clockwise), then assign each
+  // hole to the exterior ring that contains it via a point-in-polygon test.
+  // -----------------------------------------------------------------
+
+  // signed area via the shoelace formula; positive => counter-clockwise,
+  // negative => clockwise (standard math/Cartesian convention)
+  function _ringSignedArea(ring) {
+    var area = 0;
+    for (var i = 0; i < ring.length - 1; i++) {
+      var p1 = ring[i], p2 = ring[i + 1];
+      area += (p1[0] * p2[1] - p2[0] * p1[1]);
+    }
+    return area / 2;
+  }
+
+  // ray-casting point-in-polygon test
+  function _pointInRing(point, ring) {
+    var x = point[0], y = point[1];
+    var inside = false;
+    for (var i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+      var xi = ring[i][0], yi = ring[i][1];
+      var xj = ring[j][0], yj = ring[j][1];
+      var intersect = ((yi > y) !== (yj > y)) &&
+        (x < (xj - xi) * (y - yi) / (yj - yi) + xi);
+      if (intersect) inside = !inside;
+    }
+    return inside;
+  }
+
+  // Groups a flat array of esri polygon rings into one array of GeoJSON
+  // polygons (each entry: [exteriorRing, ...holeRings]), reconstructing
+  // Polygon/MultiPolygon boundaries instead of assuming a single exterior.
+  function _ringsToPolygons(rings) {
+    var exteriors = [];
+    var holes = [];
+    (rings || []).forEach(function (ring) {
+      if (!ring || ring.length < 4) return;
+      // esri convention: exterior rings are clockwise, i.e. their signed
+      // area (CCW-positive, shoelace formula) is negative; holes are
+      // counter-clockwise (positive signed area)
+      if (_ringSignedArea(ring) < 0) {
+        exteriors.push({ ring: ring, holes: [] });
+      } else {
+        holes.push(ring);
+      }
+    });
+    // no ring was recognized as exterior (e.g. malformed/degenerate winding):
+    // fall back to treating every ring as its own exterior so geometry isn't lost
+    if (!exteriors.length) {
+      (rings || []).forEach(function (ring) { exteriors.push({ ring: ring, holes: [] }); });
+      holes = [];
+    }
+    holes.forEach(function (hole) {
+      var owner = null;
+      for (var i = 0; i < exteriors.length; i++) {
+        if (_pointInRing(hole[0], exteriors[i].ring)) { owner = exteriors[i]; break; }
+      }
+      if (!owner) owner = exteriors[0];
+      owner.holes.push(hole);
+    });
+    return exteriors.map(function (ext) { return [ext.ring].concat(ext.holes); });
+  }
+
   var oThisClass = declare([Templated], {
     templateString: template,
 
@@ -167,7 +243,9 @@ define([
       this.addCollectionPropertiesButton.style.display = "";
       this.idInput.disabled = false;
       this.idInput.value = "";
+      // datetime is system-managed (set/kept by the backend), not user-editable
       this.datetimeInput.value = new Date().toISOString();
+      this.datetimeInput.disabled = true;
       this.assets = {};
       this.properties = [];
       var defaults = defaultProperties || {};
@@ -195,7 +273,12 @@ define([
       this.idInput.disabled = true;
       this.idInput.value = feature.id || "";
       var props = feature.properties || {};
-      this.datetimeInput.value = props.datetime || "";
+      // datetime is system-managed (set/kept by the backend), not user-editable;
+      // fall back to now for legacy/non-STAC items that never had one stored,
+      // so validation (which still requires a value) isn't blocked by a
+      // disabled, empty field the user has no way to fill in.
+      this.datetimeInput.value = props.datetime || new Date().toISOString();
+      this.datetimeInput.disabled = true;
 
       // assets
       this.assets = {};
@@ -423,7 +506,10 @@ define([
           ? { type: "LineString", coordinates: geom.paths[0] }
           : { type: "MultiLineString", coordinates: geom.paths };
       } else if (geom.type === "polygon") {
-        return { type: "Polygon", coordinates: geom.rings };
+        var polygons = _ringsToPolygons(geom.rings);
+        return polygons.length <= 1
+          ? { type: "Polygon", coordinates: polygons[0] || geom.rings }
+          : { type: "MultiPolygon", coordinates: polygons };
       }
       return null;
     },
