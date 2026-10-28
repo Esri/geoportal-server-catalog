@@ -22,6 +22,12 @@
       <label class="item-editor-label" for="${id}_datetimeInput">${i18n.collectionItems.editor.datetime} <span class="item-editor-required">*</span>:</label>
       <input type="text" id="${id}_datetimeInput" class="item-editor-input" placeholder="${i18n.collectionItems.editor.datetimePlaceholder}" data-dojo-attach-point="datetimeInput"/>
 
+      <label class="item-editor-label" for="${id}_stacVersionInput">${i18n.collectionItems.editor.stacVersion}:</label>
+      <input type="text" id="${id}_stacVersionInput" class="item-editor-input" placeholder="${i18n.collectionItems.editor.stacVersionPlaceholder}" data-dojo-attach-point="stacVersionInput"/>
+
+      <label class="item-editor-label" for="${id}_stacExtensionsInput">${i18n.collectionItems.editor.stacExtensions}:</label>
+      <textarea id="${id}_stacExtensionsInput" rows="2" class="item-editor-input" placeholder="${i18n.collectionItems.editor.stacExtensionsPlaceholder}" data-dojo-attach-point="stacExtensionsInput"></textarea>
+
       <label class="item-editor-label">${i18n.collectionItems.editor.geometry}</label>
       <div class="item-editor-draw-tools">
         <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.drawPoint}" data-dojo-attach-point="drawPointButton" data-dojo-attach-event="onclick:_onDrawPointClick">

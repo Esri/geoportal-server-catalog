@@ -698,12 +698,17 @@ define([
 
       const stacCheckboxNode = document.getElementById("collection-stac-checkbox");
       const isStacCollection = !!(stacCheckboxNode && stacCheckboxNode.checked);
+      const stacVersionNode = document.getElementById("collection-stacversion-input");
+      const stacExtNode = document.getElementById("collection-stacextensions-input");
+      const stacExtensions = isStacCollection && stacExtNode
+        ? this._parseStacExtensions(stacExtNode.value)
+        : ["https://stac-extensions.github.io/contacts/v0.1.0/schema.json"];
       const collection = {
         type: "Collection",
-        ...(isStacCollection ? { stac_version: "1.0.0" } : {}),
-        stac_extensions: [
-          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json",
-        ],
+        ...(isStacCollection
+          ? { stac_version: ((stacVersionNode && stacVersionNode.value) || "").trim() || "1.0.0" }
+          : {}),
+        stac_extensions: stacExtensions,
         id: this.removeAllSpaces(id),
         title: title,
         description: description,
@@ -994,6 +999,12 @@ define([
       collection.keywords = this._parseKeywords(newKeywordsText);
       const parsedSummaries = this._parseSummaries(newSummariesText);
       collection.summaries = parsedSummaries.value || {};
+      if (collection.stac_version) {
+        const verNode = document.getElementById("collection-stacversion-input");
+        const extNode = document.getElementById("collection-stacextensions-input");
+        if (verNode) collection.stac_version = (verNode.value || "").trim() || collection.stac_version;
+        if (extNode) collection.stac_extensions = this._parseStacExtensions(extNode.value);
+      }
       if (
         !Array.isArray(collection.stac_extensions)
       ) {
@@ -1095,6 +1106,15 @@ define([
       }
     },
 
+    // shows only the boundary layer of the given collection id (none if null)
+    _showOnlyCollectionLayer: function (id) {
+      this.view.map.layers.forEach(layer => {
+        if (layer.title && layer.title !== "item-editor-sketch" && layer.title !== "sketch") {
+          layer.visible = (id !== null && layer.title === id);
+        }
+      });
+    },
+
     // prefetchedCollection: optional full collection object to display instead of
     // fetching it again (used right after an update, before the index catches up)
     handleReadCollection: async function (id, prefetchedCollection) {
@@ -1104,15 +1124,21 @@ define([
       this.handleUpdateButtonEnabled();  
 	   
       if (this.selectedCollection) {
-        const collection = prefetchedCollection || await this.getCollectionById(
-          this.selectedCollection.properties.id
-        );
+        const selectedId = this.selectedCollection.properties.id;
+        // hide every collection layer immediately so only one is ever shown
+        this._showOnlyCollectionLayer(null);
+        const collection = prefetchedCollection || await this.getCollectionById(selectedId);
+        // a newer selection was made while this one was loading; ignore this result
+        if (!this.selectedCollection || this.selectedCollection.properties.id !== selectedId) {
+          return;
+        }
         console.log(collection);
         const properties = {
           id: collection.id,
           title: collection.title,
           description: collection.description,
           stac_version: collection.stac_version,
+          stac_extensions: Array.isArray(collection.stac_extensions) ? collection.stac_extensions.join(", ") : "",
           license: collection.license,
           keywords: Array.isArray(collection.keywords) ? collection.keywords.join(", ") : "",
           providers: JSON.stringify(collection.providers || []),
@@ -2026,20 +2052,33 @@ define([
 	  this.renderUpdateContactsEditor(this.collectionContacts);
 	  this.renderUpdateProvidersEditor(this.collectionProviders);
 
-      // <label class="editor-label">stac_version:</label>
+      if (properties.stac_version) {
       const labelStacVersion = document.createElement("label");
       labelStacVersion.className = "editor-label";
       labelStacVersion.innerText = ed.stacVersionLabel + ":";
       this.editorInputForm.appendChild(labelStacVersion);
 
-      // <input id="collection-stacversion-input" ... disabled />
       const inputStacVersion = document.createElement("input");
       inputStacVersion.id = "collection-stacversion-input";
       inputStacVersion.className = "editor-input";
       inputStacVersion.type = "text";
       inputStacVersion.value = properties.stac_version || "1.0.0";
-      inputStacVersion.disabled = true;
       this.editorInputForm.appendChild(inputStacVersion);
+
+      const labelStacExt = document.createElement("label");
+      labelStacExt.className = "editor-label";
+      labelStacExt.innerText = ed.stacExtensionsLabel + ":";
+      this.editorInputForm.appendChild(labelStacExt);
+
+      const textareaStacExt = document.createElement("textarea");
+      textareaStacExt.id = "collection-stacextensions-input";
+      textareaStacExt.className = "editor-input";
+      textareaStacExt.style.height = "60px";
+      textareaStacExt.rows = 3;
+      textareaStacExt.placeholder = ed.stacExtensionsPlaceholder;
+      textareaStacExt.value = properties.stac_extensions || "";
+      this.editorInputForm.appendChild(textareaStacExt);
+      }
 
       // <label class="editor-label">license:</label>
       const labelLicense = document.createElement("label");
@@ -2104,12 +2143,15 @@ define([
       <label class="editor-label">${ed.descriptionLabel}${req}</label>
       <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="${ed.valuePlaceholder}"></textArea>
 
-      <label class="editor-label" id="collection-stacversion-label" style="display:none">${ed.stacVersionLabel}:</label>
-      <input id="collection-stacversion-input" class="editor-input" type="text" value="1.0.0" disabled style="display:none"/>
-
       <label class="editor-label" style="display:flex; align-items:center; gap:6px;">
         <input id="collection-stac-checkbox" type="checkbox"/> ${ed.stacCollectionLabel}
       </label>
+
+      <label class="editor-label" id="collection-stacversion-label" style="display:none">${ed.stacVersionLabel}:</label>
+      <input id="collection-stacversion-input" class="editor-input" type="text" value="1.0.0" style="display:none"/>
+
+      <label class="editor-label" id="collection-stacextensions-label" style="display:none">${ed.stacExtensionsLabel}:</label>
+      <textArea id="collection-stacextensions-input" style="height: 60px; display:none" class="editor-input" rows="3" placeholder="${ed.stacExtensionsPlaceholder}">https://stac-extensions.github.io/contacts/v0.1.0/schema.json</textArea>
 
       <label class="editor-label">${ed.licenseLabel}:</label>
       <input id="collection-license-input" class="editor-input" type="text" placeholder="${ed.licensePlaceholder}" value="Apache-2.0"/>
@@ -2129,6 +2171,14 @@ define([
       this.editorInputForm.appendChild(providersEditorNode);
       const propertiesEditorNode = this.createPropertiesEditorNode();
       this.editorInputForm.appendChild(propertiesEditorNode);
+      const stacChk = this.editorInputForm.querySelector("#collection-stac-checkbox");
+      stacChk.addEventListener("change", () => {
+        const d = stacChk.checked ? "" : "none";
+        ["#collection-stacversion-label", "#collection-stacversion-input",
+         "#collection-stacextensions-label", "#collection-stacextensions-input"].forEach((s) => {
+          this.editorInputForm.querySelector(s).style.display = d;
+        });
+      });
       this.initializeCollectionFormListeners();
     },
 
@@ -2189,6 +2239,7 @@ define([
         title: collection.title,
         description: collection.description,
         stac_version: collection.stac_version,
+        stac_extensions: Array.isArray(collection.stac_extensions) ? collection.stac_extensions.join("\n") : "",
         license: collection.license || "",
         keywords: Array.isArray(collection.keywords) ? collection.keywords.join(", ") : "",
         summaries: collection.summaries ? JSON.stringify(collection.summaries, null, 2) : "",
@@ -2269,6 +2320,10 @@ define([
       this.handleZoomCollectionEnabled();
       this.handleViewItemsEnabled();
       this.handleExportCollectionEnabled();
+    },
+
+    _parseStacExtensions: function (text) {
+      return (text || "").split(/[\s,]+/).filter(function (s) { return s; });
     },
 
     getUpdateFieldValues: function () {

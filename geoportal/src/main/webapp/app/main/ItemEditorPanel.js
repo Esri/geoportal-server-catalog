@@ -246,6 +246,8 @@ define([
       // datetime is system-managed (set/kept by the backend), not user-editable
       this.datetimeInput.value = new Date().toISOString();
       this.datetimeInput.disabled = true;
+      this.stacVersionInput.value = "1.0.0";
+      this.stacExtensionsInput.value = "";
       this.assets = {};
       this.properties = [];
       var defaults = defaultProperties || {};
@@ -748,7 +750,9 @@ define([
       // the form (stac_extensions, links, ...) are preserved on PUT
       var feature = this.mode === "edit" && this.editingItem ? lang.clone(this.editingItem) : {};
       feature.type = "Feature";
-      feature.stac_version = feature.stac_version || "1.0.0";
+      feature.stac_version = (this.stacVersionInput.value || "").trim() || "1.0.0";
+      feature.stac_extensions = (this.stacExtensionsInput.value || "").split(/[\s,]+/)
+        .filter(function (s) { return s; });
       feature.id = id;
       feature.collection = this.collectionId;
       feature.geometry = geometry;
