@@ -164,7 +164,7 @@ public class StacHelper {
 	 * @throws Exception
 	 */
 	public static JSONArray getCollectionList() throws Exception {
-    return getCollectionList(10000);
+    return getCollectionList(10000,false);
   }
 
   
@@ -172,7 +172,7 @@ public class StacHelper {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONArray getCollectionList(int limit) throws Exception {
+	public static JSONArray getCollectionList(int limit,boolean includeNonStac) throws Exception {
 		ElasticClient client = ElasticClient.newClient();
 		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 		
@@ -180,14 +180,23 @@ public class StacHelper {
     
     // 616 - only allow max number to return
 		url = url + "/_search?size=" + limit;    
-    String searchAfterStr = "";
+   
+    String query="";
     // TODO - full pagination for collections list
     //    if (searchAfter != null && !searchAfter.isBlank()) {
     //      searchAfterStr = ", \"search_after\":[\"" + searchAfter + "\"]";
     //    } else {
     //      searchAfterStr = "";
     //    }
-		String query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}" + searchAfterStr + "}";
+    	//Add stac_version=false in search
+    	if(includeNonStac) //For includeNonStac=true, do not add stac_version exists filter, so that it will return all collections, even if non-STAC collections are indexed in the same index without stac_version field.
+		{
+    		query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}}";
+		}
+		else
+		{
+			query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"},\"query\":{\"bool\": {\"must\":[{\"exists\": {\"field\": \"stac_version\"}}]}}}";
+		}		
 		
 		String	response = client.sendPost(url, query, "application/json");	
 		DocumentContext elasticResContext = JsonPath.parse(response);

@@ -222,11 +222,11 @@ public class STACService extends Application {
 	public Response getCollections(@Context HttpServletRequest hsr, 
           @QueryParam("limit") int limit, 
           @QueryParam("f") String f,
-          @QueryParam("outCRS") String outCRS) {
+          @QueryParam("outCRS") String outCRS,@QueryParam("includeNonStac") boolean includeNonStac) {
     
 		String responseJSON;
 		String finalresponse = "";
-		Status status = Response.Status.OK;
+		Status status = Response.Status.OK;		
 		JSONArray detailErrArray = new JSONArray();
     
     // 616 return up to 10,000 collections, not full pagination yet
@@ -242,7 +242,7 @@ public class STACService extends Application {
 
 				JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
 				// Get list of collections
-				JSONArray collectionsArray = StacHelper.getCollectionList(limit);
+				JSONArray collectionsArray = StacHelper.getCollectionList(limit,includeNonStac);
 
 				// if reprojecting STAC geometries is supported and a
 				// geometry service has been configured, try projecting

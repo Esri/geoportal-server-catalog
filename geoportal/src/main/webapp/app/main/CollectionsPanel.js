@@ -482,7 +482,7 @@ define([
     {
         let collections = [];
         try {
-          let url = `${this.getStacBaseUrl()}/collections?limit=10000&f=${f}`;
+          let url = `${this.getStacBaseUrl()}/collections?limit=10000&f=${f}&includeNonStac=true`;
           if (AppContext.appConfig.system.secureCatalogApp)
           {
           	var client = new AppClient();
