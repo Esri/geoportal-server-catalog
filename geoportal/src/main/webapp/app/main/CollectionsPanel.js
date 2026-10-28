@@ -134,6 +134,20 @@ define([
     collectionContacts: [],
     collectionProviders: [],
     collectionProperties: [], // [{key, value}] - generic additional properties
+    collectionDefaults: null, // template defaults from stac-collections.json
+
+    // default values for a new collection (from stac-collections.json, with fallbacks)
+    _getCreateDefaults: function () {
+      const d = this.collectionDefaults || {};
+      const interval = (d.temporal && Array.isArray(d.temporal.interval) && d.temporal.interval[0]) || [];
+      return {
+        stac_version: d.stac_version || "1.0.0",
+        stac_extensions: Array.isArray(d.stac_extensions) ? d.stac_extensions : [],
+        license: d.license || "Apache-2.0",
+        temporalStart: interval[0] || "1900-01-01T00:00:00Z",
+        temporalEnd: interval[1] || "2099-12-31T23:59:59Z",
+      };
+    },
 
     sampleCollection: [
       {
@@ -478,6 +492,26 @@ define([
       return collection;
     },
 
+    // loads the new-collection defaults (stac-collections.json) from the
+    // STAC service if they have not been loaded yet
+    ensureCollectionDefaults: async function () {
+      if (this.collectionDefaults) return this.collectionDefaults;
+      try {
+        let url = `${this.getStacBaseUrl()}/collections?collectionDefaultsOnly=true`;
+        if (AppContext.appConfig.system.secureCatalogApp) {
+          url = new AppClient().appendAccessToken(url);
+        }
+        const response = await fetch(url);
+        const result = await response.json();
+        if (result && result.collectionDefaults) {
+          this.collectionDefaults = result.collectionDefaults;
+        }
+      } catch (e) {
+        console.error("Unable to load collection defaults", e);
+      }
+      return this.collectionDefaults;
+    },
+
     getAllCollections: async function (f = "geojson")
     {
         let collections = [];
@@ -700,20 +734,25 @@ define([
       const isStacCollection = !!(stacCheckboxNode && stacCheckboxNode.checked);
       const stacVersionNode = document.getElementById("collection-stacversion-input");
       const stacExtNode = document.getElementById("collection-stacextensions-input");
+      const defs = this._getCreateDefaults();
+      const tsNode = document.getElementById("collection-temporal-start-input");
+      const teNode = document.getElementById("collection-temporal-end-input");
+      const temporalStart = ((tsNode && tsNode.value) || "").trim() || defs.temporalStart;
+      const temporalEnd = ((teNode && teNode.value) || "").trim() || defs.temporalEnd;
       const stacExtensions = isStacCollection && stacExtNode
         ? this._parseStacExtensions(stacExtNode.value)
-        : ["https://stac-extensions.github.io/contacts/v0.1.0/schema.json"];
+        : defs.stac_extensions;
       const collection = {
         type: "Collection",
         ...(isStacCollection
-          ? { stac_version: ((stacVersionNode && stacVersionNode.value) || "").trim() || "1.0.0" }
+          ? { stac_version: ((stacVersionNode && stacVersionNode.value) || "").trim() || defs.stac_version }
           : {}),
         stac_extensions: stacExtensions,
         id: this.removeAllSpaces(id),
         title: title,
         description: description,
         keywords: this._parseKeywords(keywordsText),
-        license: (license || "").trim() || "Apache-2.0",
+        license: (license || "").trim() || defs.license,
         providers: providers || [],
         extent: {
           spatial: {
@@ -724,14 +763,14 @@ define([
             },
           },
           temporal: {
-            interval: [["1900-01-01T00:00:00Z", "2099-12-31T23:59:59Z"]],
+            interval: [[temporalStart, temporalEnd]],
           },
         },
         summaries: Object.assign(
           {
             datetime: {
-              min: "1900-01-01T00:00:00Z",
-              max: "2099-12-31T23:59:59Z",
+              min: temporalStart,
+              max: temporalEnd,
             },
           },
           parsedSummaries.value || {}
@@ -1009,16 +1048,6 @@ define([
         !Array.isArray(collection.stac_extensions)
       ) {
         collection.stac_extensions = [];
-      }
-      if (
-        collection.contacts.length > 0 &&
-        !collection.stac_extensions.includes(
-          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json"
-        )
-      ) {
-        collection.stac_extensions.push(
-          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json"
-        );
       }
       let tempGeometry = null;
 
@@ -2062,7 +2091,7 @@ define([
       inputStacVersion.id = "collection-stacversion-input";
       inputStacVersion.className = "editor-input";
       inputStacVersion.type = "text";
-      inputStacVersion.value = properties.stac_version || "1.0.0";
+      inputStacVersion.value = properties.stac_version || "";
       this.editorInputForm.appendChild(inputStacVersion);
 
       const labelStacExt = document.createElement("label");
@@ -2131,6 +2160,7 @@ define([
     renderCreateCollectionEditor: function () {
       const ed = this.i18n.collections.editor;
       const req = ' <span class="required">*</span>:';
+      const defs = this._getCreateDefaults();
       this.collectionEditorTitle.innerHTML = this.i18n.collections.createNewTitle;
       this.editorPrimaryButton.innerHTML = this.i18n.collections.createButton;
       let collectionInputs = `
@@ -2148,13 +2178,19 @@ define([
       </label>
 
       <label class="editor-label" id="collection-stacversion-label" style="display:none">${ed.stacVersionLabel}:</label>
-      <input id="collection-stacversion-input" class="editor-input" type="text" value="1.0.0" style="display:none"/>
+      <input id="collection-stacversion-input" class="editor-input" type="text" value="${this.escapeHtml(defs.stac_version)}" style="display:none"/>
 
       <label class="editor-label" id="collection-stacextensions-label" style="display:none">${ed.stacExtensionsLabel}:</label>
-      <textArea id="collection-stacextensions-input" style="height: 60px; display:none" class="editor-input" rows="3" placeholder="${ed.stacExtensionsPlaceholder}">https://stac-extensions.github.io/contacts/v0.1.0/schema.json</textArea>
+      <textArea id="collection-stacextensions-input" style="height: 60px; display:none" class="editor-input" rows="3" placeholder="${ed.stacExtensionsPlaceholder}">${this.escapeHtml(defs.stac_extensions.join("\n"))}</textArea>
 
       <label class="editor-label">${ed.licenseLabel}:</label>
-      <input id="collection-license-input" class="editor-input" type="text" placeholder="${ed.licensePlaceholder}" value="Apache-2.0"/>
+      <input id="collection-license-input" class="editor-input" type="text" placeholder="${ed.licensePlaceholder}" value="${this.escapeHtml(defs.license)}"/>
+
+      <label class="editor-label">${ed.temporalStartLabel}:</label>
+      <input id="collection-temporal-start-input" class="editor-input" type="text" value="${this.escapeHtml(defs.temporalStart)}"/>
+
+      <label class="editor-label">${ed.temporalEndLabel}:</label>
+      <input id="collection-temporal-end-input" class="editor-input" type="text" value="${this.escapeHtml(defs.temporalEnd)}"/>
 
       <label class="editor-label">${ed.keywordsLabel}:</label>
       <input id="collection-keywords-input" class="editor-input" type="text" placeholder="${ed.keywordsPlaceholder}"/>
@@ -2211,6 +2247,7 @@ define([
       if (this.sketchGraphicsLayer) {
         this.sketchGraphicsLayer.visible = true;
       }
+      await this.ensureCollectionDefaults();
       this.renderCreateCollectionEditor();
     },
 

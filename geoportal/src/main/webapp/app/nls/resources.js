@@ -451,6 +451,8 @@ define({
         addEmail: "Add Email",
         removeEmail: "Remove Email",
         stacVersionLabel: "stac_version",
+        temporalStartLabel: "temporal start",
+        temporalEndLabel: "temporal end",
         stacExtensionsLabel: "stac_extensions (Add commas to add multiple extensions)",
         stacExtensionsPlaceholder: "Extension schema URLs, separated by commas or new lines",
         stacCollectionLabel: "STAC collection",

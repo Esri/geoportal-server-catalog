@@ -222,12 +222,26 @@ public class STACService extends Application {
 	public Response getCollections(@Context HttpServletRequest hsr, 
           @QueryParam("limit") int limit, 
           @QueryParam("f") String f,
-          @QueryParam("outCRS") String outCRS,@QueryParam("includeNonStac") boolean includeNonStac) {
+          @QueryParam("outCRS") String outCRS,@QueryParam("includeNonStac") boolean includeNonStac,
+          @QueryParam("collectionDefaultsOnly") boolean collectionDefaultsOnly) {
+		
+		// onlyDefaults = Return only the default collection template (stac_version, stac_extensions, license, temporal) defined in stac-collections.json, used by clients for new collections
     
 		String responseJSON;
 		String finalresponse = "";
 		Status status = Response.Status.OK;		
 		JSONArray detailErrArray = new JSONArray();
+		if(collectionDefaultsOnly) {			
+			try {
+				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);				
+			} catch (Exception e) {
+				LOGGER.error("Error in collections " + e);
+				status = Response.Status.INTERNAL_SERVER_ERROR;
+				detailErrArray.add(e.getMessage());
+				responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",detailErrArray);
+			}
+			return Response.status(status).entity(responseJSON).build();
+		}
     
     // 616 return up to 10,000 collections, not full pagination yet
 		// if no limit provided (primitive int defaults to 0), set it to 10,000 (max limit for collections)
@@ -279,6 +293,7 @@ public class STACService extends Application {
 				}
 
 				stacCollections.put("collections", collectionsArray);
+				stacCollections.remove("collectionDefaults");
 
 				// final output formatting
 				if ((f != null) && "geojson".equals(f)) {
