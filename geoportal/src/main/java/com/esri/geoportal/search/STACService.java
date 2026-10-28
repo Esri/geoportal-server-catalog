@@ -2146,6 +2146,10 @@ public class STACService extends Application {
 			val = featureContext.read("$.featurePropPath.collection");
 			String collectionId = searchItemCtx.read(val).toString();
 			featureContext.set("$.featurePropPath.collection", collectionId);
+			
+			val = featureContext.read("$.featurePropPath.stac_version");
+			String stacVersion = searchItemCtx.read(val).toString();			
+			featureContext.set("$.featurePropPath.stac_version", stacVersion);
 
 			// add bbox, geometry
 			this.setBbox(searchItemCtx, featureContext);
