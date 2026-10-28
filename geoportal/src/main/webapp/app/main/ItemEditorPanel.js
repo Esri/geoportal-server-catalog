@@ -246,8 +246,9 @@ define([
       // datetime is system-managed (set/kept by the backend), not user-editable
       this.datetimeInput.value = new Date().toISOString();
       this.datetimeInput.disabled = true;
-      this.stacVersionInput.value = "1.0.0";
+      this.stacVersionInput.value = "";
       this.stacExtensionsInput.value = "";
+      this._loadCollectionStacDefaults(collectionId);
       this.assets = {};
       this.properties = [];
       var defaults = defaultProperties || {};
@@ -281,6 +282,9 @@ define([
       // disabled, empty field the user has no way to fill in.
       this.datetimeInput.value = props.datetime || new Date().toISOString();
       this.datetimeInput.disabled = true;
+      this.stacVersionInput.value = feature.stac_version || "";
+      this.stacExtensionsInput.value = Array.isArray(feature.stac_extensions)
+        ? feature.stac_extensions.join("\n") : "";
 
       // assets
       this.assets = {};
@@ -311,6 +315,31 @@ define([
 
     // extension hook, called after the dialog is opened for an existing item
     onShowEdit: function (feature) {},
+
+    // fills stac_version / stac_extensions of a new item from its collection
+    _loadCollectionStacDefaults: function (collectionId) {
+      var baseUrl = this.getStacBaseUrl();
+      if (!baseUrl) return;
+      var url = baseUrl + "/collections/" + encodeURIComponent(collectionId);
+      if (AppContext.appConfig.system.secureCatalogApp) {
+        url = new AppClient().appendAccessToken(url);
+      }
+      fetch(url).then(function (response) {
+        if (!response.ok) throw new Error(response.status);
+        return response.json();
+      }).then(lang.hitch(this, function (collection) {
+        // ignore if the dialog moved on to another collection / mode
+        if (this.mode !== "create" || this.collectionId !== collectionId || !collection) return;
+        if (!this.stacVersionInput.value) {
+          this.stacVersionInput.value = collection.stac_version || "";
+        }
+        if (!this.stacExtensionsInput.value && Array.isArray(collection.stac_extensions)) {
+          this.stacExtensionsInput.value = collection.stac_extensions.join("\n");
+        }
+      })).catch(function (e) {
+        console.error("Error loading collection STAC defaults", e);
+      });
+    },
 
     // changed: true when the dialog closes after a successful save/delete
     hide: function (changed) {
@@ -750,7 +779,7 @@ define([
       // the form (stac_extensions, links, ...) are preserved on PUT
       var feature = this.mode === "edit" && this.editingItem ? lang.clone(this.editingItem) : {};
       feature.type = "Feature";
-      feature.stac_version = (this.stacVersionInput.value || "").trim() || "1.0.0";
+      feature.stac_version = (this.stacVersionInput.value || "").trim() || feature.stac_version;
       feature.stac_extensions = (this.stacExtensionsInput.value || "").split(/[\s,]+/)
         .filter(function (s) { return s; });
       feature.id = id;
