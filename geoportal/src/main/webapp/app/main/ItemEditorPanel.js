@@ -173,6 +173,10 @@ define([
     properties: [], // [{key, value}]
     sketchLayer: null,
     sketchVM: null,
+    forceMultiLine: false, // save a single drawn path as MultiLineString
+    _drawingMultiline: false,
+    _appendToLine: null, // existing polyline to append the next drawn line to
+
     activeGeometry: null, // esri Geometry (map SR) currently drawn
     originalGeometry: null, // GeoJSON geometry as loaded; saved as-is until the user changes it
 
@@ -201,6 +205,22 @@ define([
         this.sketchVM.on("create", lang.hitch(this, function (e) {
           if (e.state === "complete") {
             this._clearActiveTools();
+            var prev = this._appendToLine;
+            this._appendToLine = null;
+            this.forceMultiLine = !!this._drawingMultiline;
+            this._drawingMultiline = false;
+            if (prev && e.graphic.geometry.type === "polyline") {
+              var newGeom = e.graphic.geometry;
+              if (prev.spatialReference && newGeom.spatialReference &&
+                  prev.spatialReference.isWebMercator !== newGeom.spatialReference.isWebMercator) {
+                prev = newGeom.spatialReference.isWebMercator
+                  ? webMercatorUtils.geographicToWebMercator(prev)
+                  : webMercatorUtils.webMercatorToGeographic(prev);
+              }
+              var merged = prev.clone();
+              newGeom.paths.forEach(function (p) { merged.addPath(p); });
+              e.graphic.geometry = merged;
+            }
             this.sketchLayer.graphics.forEach(lang.hitch(this, function (g) {
               if (g !== e.graphic) this.sketchLayer.remove(g);
             }));
@@ -397,6 +417,7 @@ define([
       this.drawPointButton.classList.remove("item-editor-active-tool");
       this.drawMultipointButton.classList.remove("item-editor-active-tool");
       this.drawLineButton.classList.remove("item-editor-active-tool");
+      this.drawMultilineButton.classList.remove("item-editor-active-tool");
       this.drawPolygonButton.classList.remove("item-editor-active-tool");
       this.drawCircleButton.classList.remove("item-editor-active-tool");
     },
@@ -408,6 +429,8 @@ define([
       }
       this._ensureSketchLayerVisible();
       this._clearActiveTools();
+      this._drawingMultiline = false;
+      this._appendToLine = null;
       this.sketchVM.cancel();
       button.classList.add("item-editor-active-tool");
       this.sketchVM.create(tool);
@@ -423,6 +446,14 @@ define([
 
     _onDrawLineClick: function () {
       this._startDraw("polyline", this.drawLineButton);
+    },
+
+    // draw another line and append it to the existing line(s) -> MultiLineString
+    _onDrawMultilineClick: function () {
+      var existing = this.activeGeometry;
+      this._startDraw("polyline", this.drawMultilineButton);
+      this._drawingMultiline = true;
+      this._appendToLine = (existing && existing.type === "polyline") ? existing : null;
     },
 
     _onDrawPolygonClick: function () {
@@ -471,6 +502,8 @@ define([
       }
       this.activeGeometry = null;
       this.originalGeometry = null;
+      this.forceMultiLine = false;
+      this._drawingMultiline = false;
       if (this.selectGeometryButton) this.selectGeometryButton.classList.remove("item-editor-active-tool");
       if (this.drawPointButton) this._clearActiveTools();
     },
@@ -533,7 +566,7 @@ define([
       } else if (geom.type === "multipoint") {
         return { type: "MultiPoint", coordinates: geom.points };
       } else if (geom.type === "polyline") {
-        return geom.paths.length === 1
+        return (geom.paths.length === 1 && !this.forceMultiLine)
           ? { type: "LineString", coordinates: geom.paths[0] }
           : { type: "MultiLineString", coordinates: geom.paths };
       } else if (geom.type === "polygon") {

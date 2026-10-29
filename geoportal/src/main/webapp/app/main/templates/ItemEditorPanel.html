@@ -28,12 +28,6 @@
       <label class="item-editor-label" for="${id}_stacExtensionsInput">${i18n.collectionItems.editor.stacExtensions}:</label>
       <textarea id="${id}_stacExtensionsInput" rows="2" class="item-editor-input" placeholder="${i18n.collectionItems.editor.stacExtensionsPlaceholder}" data-dojo-attach-point="stacExtensionsInput"></textarea>
 
-      <label class="item-editor-label" for="${id}_stacVersionInput">${i18n.collectionItems.editor.stacVersion}:</label>
-      <input type="text" id="${id}_stacVersionInput" class="item-editor-input" placeholder="${i18n.collectionItems.editor.stacVersionPlaceholder}" data-dojo-attach-point="stacVersionInput"/>
-
-      <label class="item-editor-label" for="${id}_stacExtensionsInput">${i18n.collectionItems.editor.stacExtensions}:</label>
-      <textarea id="${id}_stacExtensionsInput" rows="2" class="item-editor-input" placeholder="${i18n.collectionItems.editor.stacExtensionsPlaceholder}" data-dojo-attach-point="stacExtensionsInput"></textarea>
-
       <label class="item-editor-label">${i18n.collectionItems.editor.geometry}</label>
       <div class="item-editor-draw-tools">
         <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.drawPoint}" data-dojo-attach-point="drawPointButton" data-dojo-attach-event="onclick:_onDrawPointClick">
@@ -56,6 +50,16 @@
             <circle cx="10" cy="7" r="1.8"/>
             <circle cx="15" cy="15" r="1.8"/>
             <circle cx="20" cy="5" r="1.8"/>
+          </svg>
+        </button>
+        <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.drawMultiline}" data-dojo-attach-point="drawMultilineButton" data-dojo-attach-event="onclick:_onDrawMultilineClick">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+            <path d="M3 8l5-4 5 5 3-3" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <path d="M3 20l6-6 4 3 8-8" fill="none" stroke="currentColor" stroke-width="1.5"/>
+            <circle cx="3" cy="8" r="1.6"/>
+            <circle cx="16" cy="6" r="1.6"/>
+            <circle cx="3" cy="20" r="1.6"/>
+            <circle cx="21" cy="9" r="1.6"/>
           </svg>
         </button>
         <button type="button" class="item-editor-draw-tool" title="${i18n.collectionItems.editor.drawPolygon}" data-dojo-attach-point="drawPolygonButton" data-dojo-attach-event="onclick:_onDrawPolygonClick">

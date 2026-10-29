@@ -579,6 +579,7 @@ define({
         selectGeometry: "Select geometry",
         drawMultipoint: "Draw multipoint",
         drawLine: "Draw line",
+        drawMultiline: "Draw multiline (add another line to the existing one)",
         drawPolygon: "Draw polygon",
         drawCircle: "Draw circle",
         clearGeometry: "Clear geometry",
