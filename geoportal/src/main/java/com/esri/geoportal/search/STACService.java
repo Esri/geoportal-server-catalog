@@ -2227,8 +2227,10 @@ public class STACService extends Application {
 			// mentioned in propObjKeys/propObj (json path), read the value from the opensearch response.
 			// Item property set is built from the opensearch response (searchItemCtx)
 			Set<String> itemPropWithValueSet = new HashSet<String>();
+			Map<String, Object> rawItemProps = null;
 			try {
 				Map<String, Object> osItemProps = searchItemCtx.read("$._source.properties");
+				rawItemProps = osItemProps;
 				if (osItemProps != null) {
 					for (Map.Entry<String, Object> e : osItemProps.entrySet()) {
 						if (e.getValue() != null) {
@@ -2258,9 +2260,25 @@ public class STACService extends Application {
 						itemPropWithValueSet.add(propKey);
 					}
 				} catch (Exception e) {
-					// If json path not found or error in any property, remove this property in the
-					// end (unless collection supplies it). Removing here causes concurrentModificationException
-					propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
+					String propPath = "$.featurePropPath.properties." + propKey;
+					boolean usedRaw = false;
+					if (rawItemProps != null && rawItemProps.get(propKey) != null) {
+						// mapping failed, fall back to the raw item value
+						try {
+							featureContext.set(propPath, rawItemProps.get(propKey));
+							itemPropWithValueSet.add(propKey);
+							propToBeRemovedList.remove(propPath);
+							usedRaw = true;
+						} catch (Exception e2) {
+							// fall through to removal
+						}
+					}
+					if (!usedRaw) {
+						// If json path not found or error in any property, remove this property in the
+						// end (unless collection supplies it). Removing here causes concurrentModificationException
+						itemPropWithValueSet.remove(propKey);
+						propToBeRemovedList.add(propPath);
+					}
 					LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
 				}
 			}
