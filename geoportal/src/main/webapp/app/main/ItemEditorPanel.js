@@ -826,7 +826,7 @@ define([
       feature.id = id;
       feature.collection = this.collectionId;
       feature.geometry = geometry;
-     
+      
       feature.properties = propertiesObj;
       feature.assets = assetsObj;
       feature.links = feature.links || [];
@@ -840,6 +840,10 @@ define([
       var datetime = (this.datetimeInput.value || "").trim();
       if (!id) return this.i18n.collectionItems.editor.idRequired;
       if (!datetime) return this.i18n.collectionItems.editor.datetimeRequired;
+      if (!(this.stacVersionInput.value || "").trim()) return this.i18n.collectionItems.editor.stacVersionRequired;
+      if (!(this.stacExtensionsInput.value || "").split(/[\s,]+/).filter(function (s) { return s; }).length) {
+        return this.i18n.collectionItems.editor.stacExtensionsRequired;
+      }
       if (!this._buildGeoJSONGeometry()) return this.i18n.collectionItems.editor.geometryRequired;
       return null;
     },

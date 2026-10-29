@@ -608,6 +608,8 @@ define({
         deleteFailedWith: "Unable to delete item: {error}",
         idRequired: "Id is required.",
         datetimeRequired: "Datetime is required.",
+        stacVersionRequired: "STAC Version is required.",
+        stacExtensionsRequired: "STAC Extensions is required.",
         geometryRequired: "Geometry is required. Draw a point, line or polygon on the map before saving.",
         deleteModal: {
           title: "Delete Item?",
