@@ -500,9 +500,8 @@ define([
         var features = json.type === "FeatureCollection" ? (json.features || []) : [json];
         if (!features.length) throw new Error("no items");
         var url = self.getStacBaseUrl() + "/collections/" + encodeURIComponent(collectionId) + "/items";
-        if (AppContext.appConfig.system.secureCatalogApp) {
-          url = new AppClient().appendAccessToken(url);
-        }
+        // writes always need the access token, regardless of secureCatalogApp
+        url = new AppClient().appendAccessToken(url);
         self._setListBusy(true);
         var ok = 0, failed = 0, errors = [];
         var chain = Promise.resolve();

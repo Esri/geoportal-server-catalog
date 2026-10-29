@@ -865,10 +865,8 @@ define([
       if (!isCreate) {
         url += "/" + encodeURIComponent(feature.id);
       }
-      if (AppContext.appConfig.system.secureCatalogApp) {
-        var client = new AppClient();
-        url = client.appendAccessToken(url);
-      }
+      // writes always need the access token, regardless of secureCatalogApp
+      url = new AppClient().appendAccessToken(url);
 
       this._setBusy(true);	  
       fetch(url, {
