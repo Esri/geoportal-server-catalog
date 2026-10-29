@@ -806,7 +806,9 @@ define([
       var self = this;
       (this.geoJSONLayers || []).forEach(function (layer) {
         if (self.view) self.view.map.remove(layer);
+        var objectUrl = layer.url;
         layer.destroy();
+        URL.revokeObjectURL(objectUrl);
       });
       this.geoJSONLayers = [];
     },

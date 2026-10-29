@@ -528,12 +528,20 @@ define([
           esriGeom = { type: "polyline", paths: c, spatialReference: sr };
           break;
         case "Polygon":
-          esriGeom = { type: "polygon", rings: c, spatialReference: sr };
-          break;
         case "MultiPolygon":
+          var polygons = geojsonGeometry.type === "Polygon" ? [c] : c;
           esriGeom = {
             type: "polygon",
-            rings: c.reduce(function (acc, poly) { return acc.concat(poly); }, []),
+            rings: polygons.reduce(function (acc, poly) {
+              return acc.concat(poly.map(function (ring, index) {
+                var normalized = ring.slice();
+                var area = _ringSignedArea(normalized);
+                if ((index === 0 && area > 0) || (index > 0 && area < 0)) {
+                  normalized.reverse();
+                }
+                return normalized;
+              }));
+            }, []),
             spatialReference: sr
           };
           break;
