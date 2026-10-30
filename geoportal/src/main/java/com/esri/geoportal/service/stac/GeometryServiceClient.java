@@ -547,6 +547,33 @@ public class GeometryServiceClient {
             
             break;
             
+          case "MULTIPOINT":
+            // MULTIPOINT Z ((10 40 1), (40 30 2)) or MULTIPOINT (10 40, 40 30)
+            // ArcGIS: { "points": [[x,y],[x,y]] }
+            geometries = "{\"geometryType\": \"" + arcgisGeometryType + "\", \"geometries\": [ { ";
+
+            if (hasZ) {
+              geometries += "\"hasZ\": true, ";
+            }
+
+            geometries += "\"points\": [";
+            String[] mpCoords = wktCoordinates.replace("(", "").replace(")", "").split(",");
+            boolean firstMp = true;
+            for (String mp : mpCoords) {
+              String mpTrim = mp.trim();
+              if (mpTrim.isEmpty()) {
+                continue;
+              }
+              if (!firstMp) {
+                geometries += ", ";
+              }
+              firstMp = false;
+              geometries += "[" + mpTrim.replaceAll("\\s+", ", ") + "]";
+            }
+            geometries += "]}]}";
+
+            break;
+
           case "POLYGON":
           case "MULTIPOLYGON":
             /*

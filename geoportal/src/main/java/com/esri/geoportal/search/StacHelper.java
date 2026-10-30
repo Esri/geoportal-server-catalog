@@ -853,6 +853,11 @@ private static String prepareStatus(String status) {
     			modifiedObj.put("type", "LineString");
     			modifiedObj.put("coordinates", extract2DLine(coordinates));
     			break;
+    		case "MULTIPOINT":
+    			modifiedObj.put("type", "MultiPoint");
+    			// MultiPoint coordinates have the same structure as LineString (array of points)
+    			modifiedObj.put("coordinates", extract2DLine(coordinates));
+    			break;
     		case "POLYGON":
     			modifiedObj.put("type", "Polygon");
     			modifiedObj.put("coordinates", extract2DPolygon(coordinates));
@@ -1444,6 +1449,11 @@ private static String prepareStatus(String status) {
 		                        }
 		                    }
 		               }				  
+					  // No coordinates were read (null/empty geometry): do not return sentinel values
+					  if (minLng > maxLng || minLat > maxLat) {
+						  LOGGER.debug("No coordinates found to generate bbox for type: " + type);
+						  return null;
+					  }
 					  bbox =  new JSONArray();
 					  bbox.add(0,minLng);
 					  bbox.add(1,minLat);
