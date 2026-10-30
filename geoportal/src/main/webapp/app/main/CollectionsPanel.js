@@ -17,7 +17,7 @@ define([
   "dojo/_base/lang",
   "app/common/Templated",
   "dojo/text!./templates/CollectionsPanel.html",
-  "dojo/i18n!../gs/widget/nls/strings",
+  "dojo/i18n!app/nls/resources",
   "dojo/Deferred",
   "dojo/topic",
   "esri4/Map",
@@ -35,7 +35,10 @@ define([
   "esri4/geometry/support/webMercatorUtils",
   "app/context/AppClient",  
   "app/context/app-topics",
-  "esri4/layers/GeoJSONLayer"
+  "esri4/layers/GeoJSONLayer",
+  "app/main/ItemListPanel",
+  "app/main/ConfirmModal",
+  "app/main/StatusModal"
 ], function (
   declare,
   lang,
@@ -57,7 +60,10 @@ define([
   Expand,
   BasemapGallery,
   webMercatorUtils,
-  AppClient,appTopics,GeoJSONLayer
+  AppClient,appTopics,GeoJSONLayer,
+  ItemListPanel,
+  ConfirmModal,
+  StatusModal
 ) {
   var oThisClass = declare([Templated], {
     i18n: i18n,
@@ -111,6 +117,12 @@ define([
       value: "",
       roles: [],
     },
+    DEFAULT_PROVIDER: {
+      name: "",
+      description: "",
+      roles: [],
+      url: "",
+    },
 
     appActionState: "NONE",
     collections: [],
@@ -120,6 +132,22 @@ define([
     sketchGraphicsLayer: null,
     collectionAssets: {},
     collectionContacts: [],
+    collectionProviders: [],
+    collectionProperties: [], // [{key, value}] - generic additional properties
+    collectionDefaults: null, // template defaults from stac-collections.json
+
+    // default values for a new collection (from stac-collections.json, with fallbacks)
+    _getCreateDefaults: function () {
+      const d = this.collectionDefaults || {};
+      const interval = (d.temporal && Array.isArray(d.temporal.interval) && d.temporal.interval[0]) || [];
+      return {
+        stac_version: d.stac_version || "1.0.0",
+        stac_extensions: Array.isArray(d.stac_extensions) ? d.stac_extensions : [],
+        license: d.license || "Apache-2.0",
+        temporalStart: interval[0] || "1900-01-01T00:00:00Z",
+        temporalEnd: interval[1] || "2099-12-31T23:59:59Z",
+      };
+    },
 
     sampleCollection: [
       {
@@ -130,11 +158,6 @@ define([
       },
     ],
 	
-	 pageSize: 10,
-	 geoJSONLayer:null,
-	 nextUrl: null,
-	 pageHistory : [],
-	 currentIndex: -1,
 	 filterByExtent: false,
 
     getStacBaseUrl: function () {
@@ -194,6 +217,7 @@ define([
     handleContactFieldInput: function (contact, field, value) {
       contact[field] = value;
       console.log(this.collectionContacts);
+      this.revalidateEditorPrimaryButton();
     },
 
     addNewContactEmail: function (contact) {
@@ -234,6 +258,145 @@ define([
       return contacts.every((contact) => !this.isBlank(contact.name));
     },
 
+    // -----------------------------------------------------------------
+    // Providers
+    // -----------------------------------------------------------------
+    setCollectionProviders: function (value) {
+      this.collectionProviders = Array.isArray(value) ? value : [];
+    },
+
+    clearCollectionProviders: function () {
+      this.setCollectionProviders([]);
+      return this.collectionProviders;
+    },
+
+    addNewCollectionProvider: function (provider) {
+      this.collectionProviders.push(provider);
+      return this.collectionProviders;
+    },
+
+    deleteCollectionProvider: function (provider) {
+      const index = this.collectionProviders.indexOf(provider);
+      if (index > -1) {
+        this.collectionProviders.splice(index, 1);
+      }
+      return this.collectionProviders;
+    },
+
+    handleProviderFieldInput: function (provider, field, value) {
+      if (field === "roles") {
+        provider.roles = value
+          .split(",")
+          .map((role) => role.trim())
+          .filter((role) => role.length > 0);
+      } else {
+        provider[field] = value;
+      }
+      this.revalidateEditorPrimaryButton();
+    },
+
+    isCollectionProvidersObjValid: function (providers) {
+      if (!Array.isArray(providers) || providers.length === 0) {
+        return true;
+      }
+      return providers.every((provider) => !this.isBlank(provider.name));
+    },
+
+    // Parses the summaries textarea value into a JSON object.
+    // Returns { ok: true, value } on success, or
+    // { ok: false, value: null } if the text is not valid JSON / not an object.
+    _parseSummaries: function (text) {
+      const trimmed = (text || "").trim();
+      if (!trimmed) {
+        return { ok: true, value: {} };
+      }
+      try {
+        const parsed = JSON.parse(trimmed);
+        if (!parsed || typeof parsed !== "object" || Array.isArray(parsed)) {
+          return { ok: false, value: null };
+        }
+        return { ok: true, value: parsed };
+      } catch (e) {
+        return { ok: false, value: null };
+      }
+    },
+
+    _parseKeywords: function (text) {
+      return (text || "")
+        .split(",")
+        .map((k) => k.trim())
+        .filter((k) => k.length > 0);
+    },
+
+    // -----------------------------------------------------------------
+    // Additional properties (generic key/value pairs, same pattern as
+    // ItemEditorPanel's "Additional Properties" editor)
+    // -----------------------------------------------------------------
+    setCollectionProperties: function (value) {
+      this.collectionProperties = Array.isArray(value) ? value : [];
+    },
+
+    clearCollectionProperties: function () {
+      this.setCollectionProperties([]);
+      return this.collectionProperties;
+    },
+
+    addNewCollectionProperty: function (property) {
+      this.collectionProperties.push(property);
+      return this.collectionProperties;
+    },
+
+    deleteCollectionProperty: function (property) {
+      const index = this.collectionProperties.indexOf(property);
+      if (index > -1) {
+        this.collectionProperties.splice(index, 1);
+      }
+      return this.collectionProperties;
+    },
+
+    handlePropertyFieldInput: function (property, field, value) {
+      property[field] = value;
+    },
+
+    _stringifyPropertyValue: function (value) {
+      if (value === null || value === undefined) return "";
+      if (typeof value === "string") return value;
+      try {
+        return JSON.stringify(value);
+      } catch (e) {
+        return String(value);
+      }
+    },
+
+    // attempts to parse a property's text value back into JSON (number,
+    // boolean, array, object); falls back to the raw string on failure.
+    _parsePropertyValue: function (text) {
+      if (text === "" || text === undefined || text === null) return text;
+      const trimmed = text.trim();
+      if (trimmed === "true") return true;
+      if (trimmed === "false") return false;
+      if (!isNaN(trimmed) && trimmed !== "" && String(Number(trimmed)) === trimmed) return Number(trimmed);
+      if (trimmed.charAt(0) === "{" || trimmed.charAt(0) === "[") {
+        try { return JSON.parse(trimmed); } catch (e) { /* fall through */ }
+      }
+      return text;
+    },
+
+    // builds a plain object from this.collectionProperties, used for the
+    // collection payload sent to create/update.
+    _buildPropertiesObject: function () {
+      const propertiesObj = {};
+      (this.collectionProperties || []).forEach((p) => {
+        const key = (p.key || "").trim();
+        if (!key) return;
+        // unchanged row: send the original typed value (null, "00123", "false", ...)
+        propertiesObj[key] = (p.hasOriginal && p.value === p.originalText)
+          ? p.original
+          : this._parsePropertyValue(p.value);
+      });
+      return propertiesObj;
+    },
+
     postCreate: function () {
       this.inherited(arguments);
       this.readConfig();
@@ -253,6 +416,9 @@ define([
     handleMapReady: function (view) {
       this.initializeListeners();
       this.initializeSketchViewModel(view);
+      if (this.itemListPanel) {
+        this.itemListPanel.setView(view);
+      }
       this.updateUI();
       this.handleGetCollections(view);
     },
@@ -310,7 +476,7 @@ define([
     getCollectionById: async function (id) {
       let collection = null;
       try {
-        let url = `${this.getStacBaseUrl()}/collections/${this.replaceSpaceWithPlus(
+        let url = `${this.getStacBaseUrl()}/allCollections/${this.replaceSpaceWithPlus(
           id
         )}`;
         if (AppContext.appConfig.system.secureCatalogApp) {
@@ -326,11 +492,31 @@ define([
       return collection;
     },
 
+    // loads the new-collection defaults (stac-collections.json) from the
+    // STAC service if they have not been loaded yet
+    ensureCollectionDefaults: async function () {
+      if (this.collectionDefaults) return this.collectionDefaults;
+      try {
+        let url = `${this.getStacBaseUrl()}/collections?collectionDefaultsOnly=true`;
+        if (AppContext.appConfig.system.secureCatalogApp) {
+          url = new AppClient().appendAccessToken(url);
+        }
+        const response = await fetch(url);
+        const result = await response.json();
+        if (result && result.collectionDefaults) {
+          this.collectionDefaults = result.collectionDefaults;
+        }
+      } catch (e) {
+        console.error("Unable to load collection defaults", e);
+      }
+      return this.collectionDefaults;
+    },
+
     getAllCollections: async function (f = "geojson")
     {
         let collections = [];
         try {
-          let url = `${this.getStacBaseUrl()}/collections?limit=10000&f=${f}`;
+          let url = `${this.getStacBaseUrl()}/collections?limit=10000&f=${f}&includeNonStac=true`;
           if (AppContext.appConfig.system.secureCatalogApp)
           {
           	var client = new AppClient();
@@ -404,7 +590,7 @@ define([
     removeAllCollectionGraphicsLayers: function (view) {
       let layersToRemove = [];
       view.map.layers.items.forEach((layer, index) => {
-        if (layer.title !== "sketch") {
+        if (layer.title !== "sketch" && layer.title !== "item-editor-sketch") {
           layersToRemove.push(layer);
         }
       });
@@ -459,12 +645,11 @@ define([
             throw new Error(failedDeleteIds.join(", "));
           }
           this.showAlert(
-            "Successfully deleted collections",
-            `Deleted: ${successDeleteIds.join(", ")}. ${
-              failedDeleteIds.length > 0
-                ? `Failed to delete: ${failedDeleteIds.join(", ")}`
-                : ""
-            }`,
+            this.i18n.collections.alerts.deleteSuccessTitle,
+            lang.replace(this.i18n.collections.alerts.deleteSuccessMessage, { deleted: successDeleteIds.join(", ") }) +
+              (failedDeleteIds.length > 0
+                ? lang.replace(this.i18n.collections.alerts.deleteFailedSuffix, { failed: failedDeleteIds.join(", ") })
+                : ""),
             "green"
           );
           this.rerenderCollectionsList();
@@ -473,7 +658,7 @@ define([
           this.handleUpdateButtonEnabled();
         })
         .catch((e) => {
-          this.showAlert("Error deleting collections", `${e}`, "red");
+          this.showAlert(this.i18n.collections.alerts.deleteErrorTitle, `${e}`, "red");
           this.updateIsLoading(false);
           console.error(e);
         });
@@ -501,7 +686,7 @@ define([
         };
       } catch (e) {
         console.error(e);
-        throw new Error(`Error deleting: ${collection.id}`);
+        throw new Error(lang.replace(this.i18n.collections.alerts.deleteError, { id: id }));
       }
     },
 
@@ -515,7 +700,8 @@ define([
         this.sketchGraphicsLayer.visible = true;
       }
 
-      const { id, description, title, assets, contacts } = this.getCreateFieldValues();
+      const { id, description, title, assets, contacts, license, keywordsText, summariesText, providers, properties } =
+        this.getCreateFieldValues();
       let tempGeometry = null;
 
       if (this.selectedGraphic?.geometry) {
@@ -542,18 +728,32 @@ define([
             ]
           : [];
 
+      const parsedSummaries = this._parseSummaries(summariesText);
+
+      const stacCheckboxNode = document.getElementById("collection-stac-checkbox");
+      const isStacCollection = !!(stacCheckboxNode && stacCheckboxNode.checked);
+      const stacVersionNode = document.getElementById("collection-stacversion-input");
+      const stacExtNode = document.getElementById("collection-stacextensions-input");
+      const defs = this._getCreateDefaults();
+      const tsNode = document.getElementById("collection-temporal-start-input");
+      const teNode = document.getElementById("collection-temporal-end-input");
+      const temporalStart = ((tsNode && tsNode.value) || "").trim() || defs.temporalStart;
+      const temporalEnd = ((teNode && teNode.value) || "").trim() || defs.temporalEnd;
+      const stacExtensions = isStacCollection && stacExtNode
+        ? this._parseStacExtensions(stacExtNode.value)
+        : defs.stac_extensions;
       const collection = {
         type: "Collection",
-        stac_version: "1.0.0",
-        stac_extensions: [
-          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json",
-        ],
+        ...(isStacCollection
+          ? { stac_version: ((stacVersionNode && stacVersionNode.value) || "").trim() || defs.stac_version }
+          : {}),
+        stac_extensions: stacExtensions,
         id: this.removeAllSpaces(id),
         title: title,
         description: description,
-        keywords: [],
-        license: "Apache-2.0",
-        providers: [],
+        keywords: this._parseKeywords(keywordsText),
+        license: (license || "").trim() || defs.license,
+        providers: providers || [],
         extent: {
           spatial: {
             bbox: bbox,
@@ -563,38 +763,55 @@ define([
             },
           },
           temporal: {
-            interval: [["1900-01-01T00:00:00Z", "2099-12-31T23:59:59Z"]],
+            interval: [[temporalStart, temporalEnd]],
           },
         },
-        summaries: {
-          datetime: {
-            min: "1900-01-01T00:00:00Z",
-            max: "2099-12-31T23:59:59Z",
+        summaries: Object.assign(
+          {
+            datetime: {
+              min: temporalStart,
+              max: temporalEnd,
+            },
           },
-        },
+          parsedSummaries.value || {}
+        ),
         links: [],
         assets: assets,
         item_assets: {},
         contacts: contacts || [],
+        properties: properties || {},
       };
 
       try {
         const result = await this.createCollection(collection);
+        if (result && result.badRequest) {
+          // keep the editor open so the user can correct the input
+          this.updateIsLoading(false);
+          StatusModal.show({
+            title: this.i18n.collections.alerts.createErrorTitle,
+            message: result.message,
+            type: "error",
+            color: "red",
+          });
+          return;
+        }
         if (result.response.code !== "201") {
           throw new Error(result.response.description);
         }
         this.showAlert(
-          "Successfully created collection",
-          `Created ${collection.id}`,
+          this.i18n.collections.alerts.createSuccessTitle,
+          lang.replace(this.i18n.collections.alerts.createSuccessMessage, { id: collection.id }),
           "green"
         );
       } catch (e) {
         this.updateIsLoading(false);
-        this.showAlert("Error creating collection", `${e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.createErrorTitle, `${e}`, "red");
       }
 
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
       this.rerenderCollectionsList();
       this.resetSketch();
       this.hideEditor();
@@ -613,14 +830,21 @@ define([
           method: "POST",
           body: JSON.stringify(collection),
         });
-        const result = await response.json();
+        const text = await response.text();
+        let result = {};
+        try { result = text ? JSON.parse(text) : {}; } catch (parseErr) { result = { description: text }; }
+        if (response.status === 400) {
+          const msg = (result && (result.description || result.message || result.detail || result.error)) ||
+            text || "Bad Request";
+          return { badRequest: true, message: String(msg), id: collection.id };
+        }
         return {
           response: result,
           id: collection.id,
         };
       } catch (e) {
         console.error(e);
-        throw new Error(`Error creating collection ${collection.id}`);
+        throw new Error(lang.replace(this.i18n.collections.alerts.createError, { id: collection.id }));
       }
     },
 
@@ -636,7 +860,7 @@ define([
         this.updateIsLoading(true);
         const collection = await this.getCollectionById(id);
         if (!collection || collection === this.sampleCollection) {
-          throw new Error(`Unable to retrieve collection ${id}`);
+          throw new Error(lang.replace(this.i18n.collections.alerts.exportRetrieveError, { id: id }));
         }
         const blob = new Blob([JSON.stringify(collection, null, 2)], {
           type: "application/json",
@@ -651,14 +875,14 @@ define([
         URL.revokeObjectURL(blobUrl);
         this.updateIsLoading(false);
         this.showAlert(
-          "Successfully exported collection",
-          `Exported ${id}.json`,
+          this.i18n.collections.alerts.exportSuccessTitle,
+          lang.replace(this.i18n.collections.alerts.exportSuccessMessage, { id: id }),
           "green"
         );
       } catch (e) {
         this.updateIsLoading(false);
         console.error(e);
-        this.showAlert("Error exporting collection", `${e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.exportErrorTitle, `${e}`, "red");
       }
     },
 
@@ -684,8 +908,8 @@ define([
         file.type === "application/json";
       if (!isJson) {
         this.showAlert(
-          "Invalid file type",
-          `"${fileName}" is not a .json file. Please select a valid collection .json file.`,
+          this.i18n.collections.alerts.invalidFileTypeTitle,
+          lang.replace(this.i18n.collections.alerts.invalidFileTypeMessage, { name: fileName }),
           "red"
         );
         this.importFileInput.value = "";
@@ -698,8 +922,8 @@ define([
       };
       reader.onerror = () => {
         this.showAlert(
-          "Error reading file",
-          `Unable to read "${fileName}".`,
+          this.i18n.collections.alerts.readErrorTitle,
+          lang.replace(this.i18n.collections.alerts.readErrorMessage, { name: fileName }),
           "red"
         );
       };
@@ -712,8 +936,8 @@ define([
         collection = JSON.parse(text);
       } catch (e) {
         this.showAlert(
-          "Invalid JSON",
-          "The selected file does not contain valid JSON.",
+          this.i18n.collections.alerts.invalidJsonTitle,
+          this.i18n.collections.alerts.invalidJsonMessage,
           "red"
         );
         return;
@@ -721,8 +945,8 @@ define([
 
       if (!collection || typeof collection !== "object" || !collection.id) {
         this.showAlert(
-          "Invalid Collection",
-          "The selected file does not appear to be a valid STAC collection (missing id).",
+          this.i18n.collections.alerts.invalidCollectionTitle,
+          this.i18n.collections.alerts.invalidCollectionMessage,
           "red"
         );
         return;
@@ -734,8 +958,8 @@ define([
       );
       if (existing) {
         this.showAlert(
-          "Duplicate Collection Id",
-          `A collection with id "${collection.id}" already exists. Please remove or rename it before importing.`,
+          this.i18n.collections.alerts.duplicateTitle,
+          lang.replace(this.i18n.collections.alerts.duplicateMessage, { id: collection.id }),
           "red"
         );
         return;
@@ -748,12 +972,12 @@ define([
         if (!result || !result.response || result.response.code !== "201") {
           const description =
             (result && result.response && (result.response.message || result.response.description)) ||
-            "Unknown error occurred while creating the collection.";
+            this.i18n.collections.alerts.importUnknownError;
           throw new Error(description);
         } else {
           this.showAlert(
-            "Successfully imported collection",
-            `Imported ${collection.id}`,
+            this.i18n.collections.alerts.importSuccessTitle,
+            lang.replace(this.i18n.collections.alerts.importSuccessMessage, { id: collection.id }),
             "green"
           );
           this.rerenderCollectionsList();
@@ -761,32 +985,20 @@ define([
       } catch (e) {
         this.updateIsLoading(false);
         console.error(e);
-        this.showAlert("Error importing collection", `${e.message || e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.importErrorTitle, `${e.message || e}`, "red");
       }
     },
 	
 	clearMapView:function() {
-      if(this.pager) {		
-		  this.view.ui.remove(this.pager.container);
-		  this.pager = null;		
-        }
-		this.currentIndex = -1;
-        this.pageHistory = [];
-        this.nextUrl = null;
-  
-        
-        if(this.geoJSONLayer) {
-            this.view.map.remove(this.geoJSONLayer);
-            this.geoJSONLayer.destroy();
-            this.geoJSONLayer = null;
-        }
-        
-         let rasterLayer = this.view.map.layers.find(layer => layer.type === "imagery");
+      if (this.itemListPanel) {
+        this.itemListPanel.clear();
+      }
+		 let rasterLayer = this.view.map.layers.find(layer => layer.type === "imagery");
          if(rasterLayer) {
              this.view.map.remove(rasterLayer);
              rasterLayer.destroy();
          }
-		 if(!this.filterByExtent) {
+		 if(!this.itemListPanel || !this.itemListPanel.isFilterByExtentActive()) {
 			this.view.goTo({
 	            zoom:this.mapProps.zoom,
 	            center:this.mapProps.center
@@ -809,26 +1021,33 @@ define([
         description: newDescription,
         assets: newAssets,
         contacts: newContacts,
+        license: newLicense,
+        keywordsText: newKeywordsText,
+        summariesText: newSummariesText,
+        providers: newProviders,
+        properties: newProperties,
       } = properties;
       collection.id = this.removeAllSpaces(collection.id);
       collection.title = newTitle;
       collection.description = newDescription;
       collection.assets = newAssets;
       collection.contacts = newContacts || [];
+      collection.providers = newProviders || [];
+      collection.properties = newProperties || {};
+      collection.license = (newLicense || "").trim() || "Apache-2.0";
+      collection.keywords = this._parseKeywords(newKeywordsText);
+      const parsedSummaries = this._parseSummaries(newSummariesText);
+      collection.summaries = parsedSummaries.value || {};
+      if (collection.stac_version) {
+        const verNode = document.getElementById("collection-stacversion-input");
+        const extNode = document.getElementById("collection-stacextensions-input");
+        if (verNode) collection.stac_version = (verNode.value || "").trim() || collection.stac_version;
+        if (extNode) collection.stac_extensions = this._parseStacExtensions(extNode.value);
+      }
       if (
         !Array.isArray(collection.stac_extensions)
       ) {
         collection.stac_extensions = [];
-      }
-      if (
-        collection.contacts.length > 0 &&
-        !collection.stac_extensions.includes(
-          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json"
-        )
-      ) {
-        collection.stac_extensions.push(
-          "https://stac-extensions.github.io/contacts/v0.1.0/schema.json"
-        );
       }
       let tempGeometry = null;
 
@@ -862,27 +1081,33 @@ define([
 
       collection.extent.spatial.bbox = bbox;
 
+      let updated = false;
       try {
         const result = await this.updateCollection(collection);
         if (result.response.code !== "200") {
           throw new Error(result.response.description);
         }
+        updated = true;
         this.showAlert(
-          "Successfully updated collection",
-          `Updating ${collection.id}`,
+          this.i18n.collections.alerts.updateSuccessTitle,
+          lang.replace(this.i18n.collections.alerts.updateSuccessMessage, { id: collection.id }),
           "green"
         );
       } catch (e) {
         this.updateIsLoading(false);
-        this.showAlert("Error updating collection", `${e}`, "red");
+        this.showAlert(this.i18n.collections.alerts.updateErrorTitle, `${e}`, "red");
       }
 
       this.rerenderCollectionsList(this.collections);
       this.showAllGraphicsLayers(this.view);
       this.sketchGraphicsLayer.removeAll();
-      this.handleReadCollection(id);
+      // the search index is near-real-time, so re-reading right after the update
+      // can return the old values; show the collection we just saved instead
+      this.handleReadCollection(id, updated ? collection : null);
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
       this.hideEditor();
     },
 
@@ -906,33 +1131,57 @@ define([
         };
       } catch (e) {
         console.error(e);
-        throw new Error(`Unable to update collection ${collection.id}`);
+        throw new Error(lang.replace(this.i18n.collections.alerts.updateError, { id: collection.id }));
       }
     },
 
-    handleReadCollection: async function (id) {
+    // shows only the boundary layer of the given collection id (none if null)
+    _showOnlyCollectionLayer: function (id) {
+      this.view.map.layers.forEach(layer => {
+        if (layer.title && layer.title !== "item-editor-sketch" && layer.title !== "sketch") {
+          layer.visible = (id !== null && layer.title === id);
+        }
+      });
+    },
+
+    // prefetchedCollection: optional full collection object to display instead of
+    // fetching it again (used right after an update, before the index catches up)
+    handleReadCollection: async function (id, prefetchedCollection) {
       this.appActionState = this.actions.READ_COLLECTION;
       this.selectedCollection = this.readCollection(id);
       this.selectedGraphic = this.selectedCollection.graphic;
       this.handleUpdateButtonEnabled();  
 	   
       if (this.selectedCollection) {
-        const collection = await this.getCollectionById(
-          this.selectedCollection.properties.id
-        );
+        const selectedId = this.selectedCollection.properties.id;
+        // hide every collection layer immediately so only one is ever shown
+        this._showOnlyCollectionLayer(null);
+        const collection = prefetchedCollection || await this.getCollectionById(selectedId);
+        // a newer selection was made while this one was loading; ignore this result
+        if (!this.selectedCollection || this.selectedCollection.properties.id !== selectedId) {
+          return;
+        }
         console.log(collection);
         const properties = {
           id: collection.id,
           title: collection.title,
           description: collection.description,
+          stac_version: collection.stac_version,
+          stac_extensions: Array.isArray(collection.stac_extensions) ? collection.stac_extensions.join(", ") : "",
+          license: collection.license,
+          keywords: Array.isArray(collection.keywords) ? collection.keywords.join(", ") : "",
+          providers: JSON.stringify(collection.providers || []),
+          summaries: JSON.stringify(collection.summaries || {}),
+          properties: JSON.stringify(collection.properties || {}),
           assets: JSON.stringify(collection.assets),
           contacts: JSON.stringify(collection.contacts || []),
         };
 
+        this.selectedCollectionIsStac = !!collection.stac_version;
         this.updateCollectionInfoBox(properties);
 		//Turn off all collection layers first
         this.view.map.layers.forEach(layer => {
-            if(layer.title) {
+            if(layer.title && layer.title !== "item-editor-sketch") {
                 layer.visible = false;
             }
         });
@@ -949,353 +1198,30 @@ define([
     },
 	
 	handleViewItems: async function (collectionId) {
-      if (collectionId) {
-        try {
-	         this.updateIsLoading(true);	
-			
-			// get items by collection id
-	        if (AppContext.appConfig.system.secureCatalogApp) {
-	          var client = new AppClient();
-	          url = client.appendAccessToken(url);
-	        }
-			this.selectedCollectionId = collectionId;
-			//Turn off the layer of the selected collection	
-	        this.view.map.layers.forEach(layer => {
-	            if(layer.title === this.selectedCollection.properties.id) {
-	                layer.visible = false;
-	            }
-	        }); 
-			this.filterByExtent = false;
-			this.clearMapView();
-			    
-	       	await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId,this.pageSize));
-			this.updateIsLoading(false);
-        } catch (e) {
-          console.error("goTo failed", e);
+      if (!collectionId) return;
+      try {
+        this.updateIsLoading(true);
+        this.selectedCollectionId = collectionId;
+        // Turn off the collection boundary layer while viewing its items
+        this.view.map.layers.forEach(layer => {
+            if (layer.title === this.selectedCollection.properties.id) {
+                layer.visible = false;
+            }
+        });
+        this.clearMapView();
+        if (this.itemListPanel) {
+          await this.itemListPanel.open({
+            collectionId: collectionId,
+            collectionTitle: this.selectedCollection.properties.title,
+            view: this.view
+          });
         }
+        this.updateIsLoading(false);
+      } catch (e) {
+        this.updateIsLoading(false);
+        console.error("handleViewItems failed", e);
       }
     },
-	
-	addPaginationToMapView: function (view) {
-	  if(this.pager) return ;
-	  
-	  const container = document.createElement("div");
-	  container.className = "esri-widget";
-	  container.style.display = "flex";
-	  container.style.alignItems = "center";
-	  container.style.gap = "6px";
-	  container.style.padding = "6px";
-	  container.style.width = "500px";      
-
-	  const prevBtn = document.createElement("button");
-	  prevBtn.className = "esri-button esri-button--secondary";
-	  prevBtn.innerHTML = "← Prev";
-	  prevBtn.disabled = true;
-
-	  const pageInfo = document.createElement("span");
-	  pageInfo.style.fontWeight = "bold";
-	  pageInfo.style.minWidth = "60px";
-	  pageInfo.style.textAlign = "center";
-	  pageInfo.innerText = "Page 1";
-
-	  const nextBtn = document.createElement("button");
-	  nextBtn.className = "esri-button esri-button--secondary";
-	  nextBtn.innerHTML = "Next →";
-	  nextBtn.disabled = true;
-
-	    const label = document.createElement("label");
-	    label.innerText = "Page size:";
-	    label.style.fontWeight = "bold";
-
-	    const pageSizeSelect = document.createElement("select");
-	    pageSizeSelect.className = "esri-select";
-
-	    [5, 10, 25, 50].forEach(size => {
-	      const opt = document.createElement("option");
-	      opt.value = size;
-	      opt.textContent = size;
-	      if (size === this.pageSize) {
-	        opt.selected = true;
-	      }
-	      pageSizeSelect.appendChild(opt);
-	    });
-
-		const noOfItems = document.createElement("span");
-		noOfItems.style.fontWeight = "bold";
-		noOfItems.style.minWidth = "60px";
-		noOfItems.style.textAlign = "center";
-		noOfItems.innerText = "0 Items";
-
-		// Filter by extent checkbox
-		const filterExtentContainer = document.createElement("div");
-		filterExtentContainer.style.display = "flex";
-		filterExtentContainer.style.alignItems = "center";
-		filterExtentContainer.style.gap = "4px";
-
-		const filterExtentCheckbox = document.createElement("input");
-		filterExtentCheckbox.type = "checkbox";
-		filterExtentCheckbox.id = "filter-by-extent-checkbox";
-		filterExtentCheckbox.checked = this.filterByExtent;
-
-		const filterExtentLabel = document.createElement("label");
-		filterExtentLabel.htmlFor = "filter-by-extent-checkbox";
-		filterExtentLabel.innerText = "Filter by extent";
-		filterExtentLabel.style.fontWeight = "bold";
-		filterExtentLabel.style.whiteSpace = "nowrap";
-
-		filterExtentContainer.appendChild(filterExtentCheckbox);
-		filterExtentContainer.appendChild(filterExtentLabel);
-			
-	  container.append(noOfItems, label, pageSizeSelect, filterExtentContainer, prevBtn, pageInfo, nextBtn);
-	  view.ui.add(container, "bottom-right");
-	  this.pager = { container, pageSizeSelect, prevBtn, nextBtn, pageInfo, noOfItems, filterExtentCheckbox };
-	  
-	  this.pager.nextBtn.onclick = async () => {
-	  	    if (this.nextUrl) {
-				this.updateIsLoading(true);
-			if(this.currentIndex > 0) {
-                  this.pager.prevBtn.disabled = false;
-                  this.pager.prevBtn.classList.toggle("disabled",false);
-              }
-	  	      await this.loadSTAC(this.nextUrl);
-			  this.updateIsLoading(false);
-	  	    }
-	  	  };
-
-	  this.pager.prevBtn.onclick = async () => {
-		console.log("Prev clicked, index =", this.currentIndex);
-	  	    if (this.currentIndex > 0) {
-				this.updateIsLoading(true);
-	  	      this.currentIndex--;
-	  	      const url = this.pageHistory[this.currentIndex];
-			  //If goingback to first page, disable prev button since we don't have previous url for first page
-			 if(this.currentIndex === 0) {
-                  this.pager.prevBtn.disabled = true;
-                  this.pager.prevBtn.classList.toggle("disabled",true);
-              }
-	  	      await this.loadSTAC(url,true);
-			  this.updateIsLoading(false);
-	  	    }
-	  	  };
-	  	  
-	    //Page size dropdown handler
-	      this.pager.pageSizeSelect.onchange = async () => {
-	          this.pageSize = parseInt(this.pager.pageSizeSelect.value, 10);
-			  this.updateIsLoading(true);
-	          // reset paging
-	          this.pageHistory = [];
-	          this.currentIndex = -1;
-	          this.nextUrl = null;
-	          await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
-			  this.updateIsLoading(false);
-	        };
-
-		// Filter by extent checkbox handler
-		this.pager.filterExtentCheckbox.onchange = async () => {
-			this.filterByExtent = this.pager.filterExtentCheckbox.checked;
-			this.updateIsLoading(true);
-			// reset paging and reload from page 1
-			this.pageHistory = [];
-			this.currentIndex = -1;
-			this.nextUrl = null;
-			await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
-			this.updateIsLoading(false);
-		};
-
-		// Add extent change watcher for filter by extent
-		this.setupExtentChangeWatcher(view);
-	},
-
-	// Debounce timer for extent change
-	extentChangeTimeout: null,
-	extentWatchHandle: null,
-	isLoadingSTAC: false, // Flag to prevent extent watcher from triggering during STAC load
-
-	setupExtentChangeWatcher: function(view) {
-		// Remove existing watcher if any
-		if (this.extentWatchHandle) {
-			this.extentWatchHandle.remove();
-			this.extentWatchHandle = null;
-		}
-
-		// Watch for extent changes (pan/zoom)
-		this.extentWatchHandle = view.watch("stationary", async (isStationary) => {
-			// Only trigger when view becomes stationary (finished panning/zooming)
-			// and not during programmatic STAC loading
-			if (isStationary && this.filterByExtent && this.selectedCollectionId && !this.isLoadingSTAC) {
-				// Clear any pending timeout
-				if (this.extentChangeTimeout) {
-					clearTimeout(this.extentChangeTimeout);
-				}
-
-				// Debounce the search to avoid too many requests
-				this.extentChangeTimeout = setTimeout(async () => {
-					this.isLoadingSTAC = true; // Set flag before loading
-					this.updateIsLoading(true);
-					// Reset paging and reload from page 1
-					this.pageHistory = [];
-					this.currentIndex = -1;
-					this.nextUrl = null;
-					await this.loadSTAC(this.buildSearchUrl(this.selectedCollectionId, this.pageSize));
-					this.updateIsLoading(false);
-					// Reset flag after a short delay to allow view.goTo to complete
-					setTimeout(() => {
-						this.isLoadingSTAC = false;
-					}, 500);
-				}, 300); // 300ms debounce delay
-			}
-		});
-	},
-	
-	 buildSearchUrl: function(collectionId, limit) {
-		let url = `${this.getStacBaseUrl()}/collections/${collectionId}/items?limit=${limit}&f=geojson`;
-		
-		// Add bbox parameter if filter by extent is enabled
-		if (this.filterByExtent && this.view && this.view.extent) {
-			let extent = this.view.extent;
-			// Convert to geographic coordinates if in Web Mercator
-			if (extent.spatialReference.isWebMercator) {
-				extent = webMercatorUtils.webMercatorToGeographic(extent);
-			}
-			const bbox = `${extent.xmin},${extent.ymin},${extent.xmax},${extent.ymax}`;
-			url += `&bbox=${bbox}`;
-		}
-		
-		return url;
-	  },
-
-    loadSTAC: async function (url,fromHistory = false) {
-	  const response = await fetch(url);
-	  let stac = await response.json();
-	  if(stac && stac.features && stac.features.length < 1) {
-			this.showAlert("No items found", `No items found for this collection.`, "orange");
-             this.clearMapView();
-			     
-             return;
-		}
-	  else{
-		this.addPaginationToMapView(this.view);
-		
-		stac.features = stac.features.map(feature => {
-				  feature.properties = {
-				  id: feature.id,
-				  collection: feature.collection,
-				  stac_version: feature.stac_version,
-				  ...(feature.properties || {}),	  
-				 // store full assets object
-				   _assets: JSON.stringify(feature.assets || {})
-				};
-				  return feature;
-				});//Geojson layer only load _source.properties, so we need to stringify assets,id and collection into properties and store to use in popup later
-				
-
-			  this.nextUrl = stac.links?.find(l => l.rel === "next")?.href || null;
-
-			  if (!fromHistory) {
-			    this.pageHistory = this.pageHistory.slice(0, this.currentIndex + 1);
-			    this.pageHistory.push(url);
-			    this.currentIndex++;
-			  }
-			  let preBtnDisabled = this.currentIndex <= 0;
-              let nextBtnDisabled = !this.nextUrl;
-			  
-			  this.pager.prevBtn.disabled = preBtnDisabled;
-			  this.pager.prevBtn.classList.toggle("disabled", preBtnDisabled);
-              
-              this.pager.nextBtn.disabled = nextBtnDisabled;
-              this.pager.nextBtn.classList.toggle("disabled", nextBtnDisabled);			
-			
-			  this.pager.pageInfo.textContent = `Page ${this.currentIndex + 1}`;
-			  this.pager.noOfItems.textContent = `${stac.numberMatched} Items`;
-
-			  if (this.geoJSONLayer) {
-			    this.view.map.remove(this.geoJSONLayer);
-			    this.geoJSONLayer.destroy();
-			  }
-
-
-				// create a new blob from geojson featurecollection
-				const blob = new Blob([JSON.stringify(stac)], {
-				  type: "application/json"
-				});
-
-				// URL reference to the blob
-			  const blobUrl = URL.createObjectURL(blob);
-			  this.geoJSONLayer = new GeoJSONLayer({url:blobUrl});
-			  this.view.map.add(this.geoJSONLayer);
-			  
-			
-			//-------------------------------------------------------
-			  this.geoJSONLayer.load().then(() => {
-			    const fieldNames = this.geoJSONLayer.fields.map(field => field.name);
-			    console.log("Property list:", fieldNames);
-
-				this.geoJSONLayer.popupTemplate = {
-				  title: "{id}",
-				  outFields: ["*"],
-				  content: [
-					{
-					  type: "fields",
-					  fieldInfos: fieldNames.map(name => ({
-						fieldName: name,
-						label: name.replace(/_/g, " ").toUpperCase()
-					  }))
-					},
-					{
-					  type: "custom",
-					  creator: function (event) {
-						const attrs = event.graphic.attributes;
-
-						if (!attrs.F_assets) {
-						  return "No assets available";
-						}
-
-						let assets;
-						try {
-						  assets = JSON.parse(attrs.F_assets);
-						} catch {
-						  return "Assets could not be parsed";
-						}
-
-						let html = `<div style="font-size:13px">`;
-
-						// Thumbnail
-						if (assets.thumbnail?.href) {
-						  html += `
-							<div style="margin:8px 0">
-							  <img src="${assets.thumbnail.href}"
-								   style="max-width:100%; border:1px solid #ccc" />
-							</div>`;
-						}
-
-						html += `<b>Assets</b><ul style="padding-left:16px">`;
-
-						Object.entries(assets).forEach(([key, asset]) => {
-						  if (!asset?.href) return;
-
-						  html += `<li>
-						    <a href="${asset.href}" target="_blank">
-						      📄 ${asset.title || key}
-						    </a>
-						  </li>`;
-						});
-
-
-						html += `</ul></div>`;
-						return html;
-					  }
-					}
-				  ]
-				};
-
-				// Only zoom to extent if filterByExtent is NOT enabled
-				// When filtering by extent, we want to keep the current view
-			    if (this.geoJSONLayer.fullExtent && !this.filterByExtent) {
-			      this.view.goTo(this.geoJSONLayer.fullExtent.expand(1.2));
-			    }
-			  });
-	  }
-	},
 
     handleZoomTo: async function (feature,selectedId) {
       if (feature) {
@@ -1386,8 +1312,9 @@ define([
     },
 	
 	handleViewItemsEnabled: function () {
-	      // Enable View Items if a collection is selected, regardless of whether it has a bbox/graphic
-	      if (this.selectedCollection) {
+	      // Show View Items only for STAC collections (those with stac_version)
+	      this.viewItemsButton.style.display = this.selectedCollectionIsStac ? "" : "none";
+	      if (this.selectedCollection && this.selectedCollectionIsStac) {
 	        this.viewItemsButton.disabled = false;
 	        this.viewItemsButton.classList.remove("disabled");
 	      } else {
@@ -1400,7 +1327,9 @@ define([
       if (
         !this.isBlank(id) &&
         !this.isBlank(title) &&
-        !this.isBlank(description)
+        !this.isBlank(description) &&
+        this.isCollectionContactsObjValid(this.collectionContacts) &&
+        this.isCollectionProvidersObjValid(this.collectionProviders)
       ) {
         this.editorPrimaryButton.disabled = false;
         this.editorPrimaryButton.classList.remove("disabled-button");
@@ -1408,6 +1337,26 @@ define([
         this.editorPrimaryButton.disabled = true;
         this.editorPrimaryButton.classList.add("disabled-button");
       }
+    },
+
+    /**
+     * Re-reads the collection id/title/description currently in the editor
+     * form and re-runs handleEditorPrimaryButtonEnabled (which also checks
+     * this.collectionContacts via isCollectionContactsObjValid). Must be
+     * called whenever a contact is added, removed, or edited so that an
+     * empty/invalid contact name immediately disables the primary button,
+     * instead of only being caught by the id/title/description fields.
+     */
+    revalidateEditorPrimaryButton: function () {
+      if (!this.editorInputForm) return;
+      var idInput = this.editorInputForm.querySelector("#collection-id-input");
+      var titleInput = this.editorInputForm.querySelector("#collection-title-input");
+      var descriptionInput = this.editorInputForm.querySelector("#collection-description-input");
+      this.handleEditorPrimaryButtonEnabled(
+        idInput ? idInput.value : "",
+        titleInput ? titleInput.value : "",
+        descriptionInput ? descriptionInput.value : ""
+      );
     },
 
     handleUpdateButtonEnabled: function () {
@@ -1422,21 +1371,33 @@ define([
 
     hideModal: function () {
       this.appActionState = this.actions.NONE;
-      this.modalContainer.style.display = "none";
     },
 
     showModal: function () {
-      this.modalContainer.style.display = "flex";
       const selectedCollections = this.getCollectionsToBeDeleted();
-      this.modalContainerCollectionsListLength.innerHTML =
-        selectedCollections.length;
-      this.modalContainerCollectionsList.innerHTML = selectedCollections
-        .map((c) => c.title)
-        .join(", ");
+      const dm = this.i18n.collections.deleteModal;
+      ConfirmModal.confirm({
+        title: dm.title,
+        message: lang.replace(dm.message, {
+          count: selectedCollections.length,
+          titles: selectedCollections.map((c) => c.title).join(", "),
+        }),
+        confirmLabel: dm.confirm,
+      }).then((ok) => {
+        if (ok) {
+          this.handleDeleteCollections();
+        } else {
+          this.hideModal();
+        }
+      });
     },
 
     hideAlert: function () {
-      this.alertContainer.classList.add("hidden");
+      if (this._alertTimer) {
+        clearTimeout(this._alertTimer);
+        this._alertTimer = null;
+      }
+      StatusModal.hide();
     },
 
     showAlert: function (
@@ -1445,11 +1406,15 @@ define([
       color = "green",
       delay = 1500
     ) {
-      this.alertTitle.innerHTML = title;
-      this.alertMessage.innerHTML = message;
-      this.alertColor.style.backgroundColor = color;
-      setTimeout(() => {
-        this.alertContainer.classList.remove("hidden");
+      if (this._alertTimer) clearTimeout(this._alertTimer);
+      this._alertTimer = setTimeout(() => {
+        this._alertTimer = null;
+        StatusModal.show({
+          title: title,
+          message: message,
+          type: color === "red" ? "error" : "success",
+          color: color,
+        });
       }, delay);
     },
 
@@ -1495,6 +1460,7 @@ define([
     },
 
     createAssetNode: function (key, title = "", href = "", wkt = "") {
+      const ed = this.i18n.collections.editor;
       const id = Date.now();
       const assetNode = document.createElement("div");
       assetNode.classList.add("asset-container");
@@ -1507,7 +1473,7 @@ define([
       // <label class="editor-label">Asset key <span class="required">*</span>:</label>
       const labelKey = document.createElement("label");
       labelKey.className = "editor-label";
-      labelKey.innerHTML = 'Asset key <span class="required">*</span>:';
+      labelKey.innerHTML = ed.assetKey + ' <span class="required">*</span>:';
       assetNode.appendChild(labelKey);
 
       // <input id="asset-key-input-${id}" ... disabled />
@@ -1515,7 +1481,7 @@ define([
       inputKey.id = `asset-key-input-${id}`;
       inputKey.className = "editor-input";
       inputKey.type = "text";
-      inputKey.placeholder = "value...";
+      inputKey.placeholder = ed.valuePlaceholder;
       inputKey.value = key;
       inputKey.disabled = true;
       assetNode.appendChild(inputKey);
@@ -1523,7 +1489,7 @@ define([
       // <label class="editor-label">title <span class="required">*</span>:</label>
       const labelTitle = document.createElement("label");
       labelTitle.className = "editor-label";
-      labelTitle.innerHTML = 'title <span class="required">*</span>:';
+      labelTitle.innerHTML = ed.titleLabel + ' <span class="required">*</span>:';
       assetNode.appendChild(labelTitle);
 
       // <input id="asset-title-input-${id}" ... />
@@ -1531,14 +1497,14 @@ define([
       inputTitle.id = `asset-title-input-${id}`;
       inputTitle.className = "editor-input";
       inputTitle.type = "text";
-      inputTitle.placeholder = "value...";
+      inputTitle.placeholder = ed.valuePlaceholder;
       inputTitle.value = title;
       assetNode.appendChild(inputTitle);
 
       // <label class="editor-label">href:</label>
       const labelHref = document.createElement("label");
       labelHref.className = "editor-label";
-      labelHref.innerText = "href:";
+      labelHref.innerText = ed.href + ":";
       assetNode.appendChild(labelHref);
 
       // <input id="asset-href-input-${id}" ... />
@@ -1546,14 +1512,14 @@ define([
       inputHref.id = `asset-href-input-${id}`;
       inputHref.className = "editor-input";
       inputHref.type = "text";
-      inputHref.placeholder = "value...";
+      inputHref.placeholder = ed.valuePlaceholder;
       inputHref.value = href;
       assetNode.appendChild(inputHref);
 
       // <label class="editor-label">esri:wkt:</label>
       const labelWkt = document.createElement("label");
       labelWkt.className = "editor-label";
-      labelWkt.innerText = "esri:wkt:";
+      labelWkt.innerText = ed.wkt + ":";
       assetNode.appendChild(labelWkt);
 
       // <input id="asset-wkt-input-${id}" ... />
@@ -1561,7 +1527,7 @@ define([
       inputWkt.id = `asset-wkt-input-${id}`;
       inputWkt.className = "editor-input";
       inputWkt.type = "text";
-      inputWkt.placeholder = "value...";
+      inputWkt.placeholder = ed.valuePlaceholder;
       inputWkt.value = wkt;
       assetNode.appendChild(inputWkt);
 
@@ -1580,7 +1546,7 @@ define([
 
       const removeAssetButton = document.createElement("button");
       removeAssetButton.classList.add("remove-asset-button");
-      removeAssetButton.innerText = "Remove Asset";
+      removeAssetButton.innerText = ed.removeAsset;
       removeAssetButton.onclick = () => {
         this.deleteCollectionAsset(key);
         assetNode.remove();
@@ -1598,13 +1564,13 @@ define([
 
       const addAssetButton = document.createElement("button");
       addAssetButton.classList.add("add-asset-button");
-      addAssetButton.innerHTML = "Add Asset +";
+      addAssetButton.innerHTML = this.i18n.collections.editor.addAsset;
       addAssetButton.classList.add("disabled-button");
       addAssetButton.disabled = true;
 
       const initialAssetKeyInput = document.createElement("input");
       initialAssetKeyInput.type = "text";
-      initialAssetKeyInput.placeholder = "Unique Asset Key...";
+      initialAssetKeyInput.placeholder = this.i18n.collections.editor.assetKeyPlaceholder;
       initialAssetKeyInput.id = "initial-asset-key";
       initialAssetKeyInput.oninput = (e) => {
         const value = e.target.value.replace(/[^a-zA-Z0-9 ]/g, "");
@@ -1652,6 +1618,7 @@ define([
     },
 
     createContactEmailNode: function (contact, email) {
+      const ed = this.i18n.collections.editor;
       const id = Date.now() + Math.random().toString(36).slice(2);
       const emailNode = document.createElement("div");
       emailNode.classList.add("contact-email-container");
@@ -1660,7 +1627,7 @@ define([
       inputValue.id = `contact-email-value-input-${id}`;
       inputValue.className = "editor-input";
       inputValue.type = "text";
-      inputValue.placeholder = "email@example.com";
+      inputValue.placeholder = ed.emailPlaceholder;
       inputValue.value = email.value || "";
       inputValue.oninput = (e) =>
         this.handleContactEmailFieldInput(email, "value", e.target.value);
@@ -1670,7 +1637,7 @@ define([
       inputRoles.id = `contact-email-roles-input-${id}`;
       inputRoles.className = "editor-input";
       inputRoles.type = "text";
-      inputRoles.placeholder = "roles (comma separated, e.g. work)";
+      inputRoles.placeholder = ed.rolesPlaceholder;
       inputRoles.value = Array.isArray(email.roles) ? email.roles.join(", ") : "";
       inputRoles.oninput = (e) =>
         this.handleContactEmailFieldInput(email, "roles", e.target.value);
@@ -1678,7 +1645,7 @@ define([
 
       const removeEmailButton = document.createElement("button");
       removeEmailButton.classList.add("remove-email-button");
-      removeEmailButton.innerText = "Remove Email";
+      removeEmailButton.innerText = ed.removeEmail;
       removeEmailButton.onclick = () => {
         this.deleteContactEmail(contact, email);
         emailNode.remove();
@@ -1689,6 +1656,7 @@ define([
     },
 
     createContactNode: function (contact) {
+      const ed = this.i18n.collections.editor;
       const id = Date.now() + Math.random().toString(36).slice(2);
       const contactNode = document.createElement("div");
       contactNode.classList.add("contact-container");
@@ -1700,14 +1668,14 @@ define([
       // name
       const labelName = document.createElement("label");
       labelName.className = "editor-label";
-      labelName.innerHTML = 'Name <span class="required">*</span>:';
+      labelName.innerHTML = ed.contactName + ' <span class="required">*</span>:';
       contactNode.appendChild(labelName);
 
       const inputName = document.createElement("input");
       inputName.id = `contact-name-input-${id}`;
       inputName.className = "editor-input";
       inputName.type = "text";
-      inputName.placeholder = "value...";
+      inputName.placeholder = ed.valuePlaceholder;
       inputName.value = contact.name || "";
       inputName.oninput = (e) =>
         this.handleContactFieldInput(contact, "name", e.target.value);
@@ -1716,14 +1684,14 @@ define([
       // position
       const labelPosition = document.createElement("label");
       labelPosition.className = "editor-label";
-      labelPosition.innerText = "Position:";
+      labelPosition.innerText = ed.contactPosition + ":";
       contactNode.appendChild(labelPosition);
 
       const inputPosition = document.createElement("input");
       inputPosition.id = `contact-position-input-${id}`;
       inputPosition.className = "editor-input";
       inputPosition.type = "text";
-      inputPosition.placeholder = "value...";
+      inputPosition.placeholder = ed.valuePlaceholder;
       inputPosition.value = contact.position || "";
       inputPosition.oninput = (e) =>
         this.handleContactFieldInput(contact, "position", e.target.value);
@@ -1732,14 +1700,14 @@ define([
       // organization
       const labelOrganization = document.createElement("label");
       labelOrganization.className = "editor-label";
-      labelOrganization.innerText = "Organization:";
+      labelOrganization.innerText = ed.contactOrganization + ":";
       contactNode.appendChild(labelOrganization);
 
       const inputOrganization = document.createElement("input");
       inputOrganization.id = `contact-organization-input-${id}`;
       inputOrganization.className = "editor-input";
       inputOrganization.type = "text";
-      inputOrganization.placeholder = "value...";
+      inputOrganization.placeholder = ed.valuePlaceholder;
       inputOrganization.value = contact.organization || "";
       inputOrganization.oninput = (e) =>
         this.handleContactFieldInput(contact, "organization", e.target.value);
@@ -1748,7 +1716,7 @@ define([
       // description
       const labelDescription = document.createElement("label");
       labelDescription.className = "editor-label";
-      labelDescription.innerText = "Description:";
+      labelDescription.innerText = ed.contactDescription + ":";
       contactNode.appendChild(labelDescription);
 
       const textareaDescription = document.createElement("textarea");
@@ -1756,7 +1724,7 @@ define([
       textareaDescription.className = "editor-input";
       textareaDescription.style.height = "70px";
       textareaDescription.rows = 3;
-      textareaDescription.placeholder = "value...";
+      textareaDescription.placeholder = ed.valuePlaceholder;
       textareaDescription.value = contact.description || "";
       textareaDescription.oninput = (e) =>
         this.handleContactFieldInput(contact, "description", e.target.value);
@@ -1765,7 +1733,7 @@ define([
       // emails
       const labelEmails = document.createElement("label");
       labelEmails.className = "editor-label";
-      labelEmails.innerText = "Emails:";
+      labelEmails.innerText = ed.contactEmails + ":";
       contactNode.appendChild(labelEmails);
 
       const emailsContainer = document.createElement("div");
@@ -1780,7 +1748,7 @@ define([
 
       const addEmailButton = document.createElement("button");
       addEmailButton.classList.add("add-email-button");
-      addEmailButton.innerText = "Add Email +";
+      addEmailButton.innerText = ed.addEmail;
       addEmailButton.onclick = () => {
         const email = this.addNewContactEmail(contact);
         emailsContainer.appendChild(this.createContactEmailNode(contact, email));
@@ -1790,10 +1758,11 @@ define([
       // remove contact
       const removeContactButton = document.createElement("button");
       removeContactButton.classList.add("remove-contact-button");
-      removeContactButton.innerText = "Remove Contact";
+      removeContactButton.innerText = ed.removeContact;
       removeContactButton.onclick = () => {
         this.deleteCollectionContact(contact);
         contactNode.remove();
+        this.revalidateEditorPrimaryButton();
       };
       contactNode.appendChild(removeContactButton);
 
@@ -1806,7 +1775,7 @@ define([
 
       const labelContacts = document.createElement("label");
       labelContacts.className = "editor-label";
-      labelContacts.innerText = "Contacts:";
+      labelContacts.innerText = this.i18n.collections.editor.contacts + ":";
       contactsEditorNode.appendChild(labelContacts);
 
       const addContactContainer = document.createElement("div");
@@ -1814,13 +1783,14 @@ define([
 
       const addContactButton = document.createElement("button");
       addContactButton.classList.add("add-asset-button");
-      addContactButton.innerHTML = "Add Contact +";
+      addContactButton.innerHTML = this.i18n.collections.editor.addContact;
 
       addContactButton.onclick = () => {
         const contact = { ...this.DEFAULT_CONTACT, emails: [] };
         this.addNewCollectionContact(contact);
         const contactNode = this.createContactNode(contact);
         contactsEditorNode.appendChild(contactNode);
+        this.revalidateEditorPrimaryButton();
       };
 
       addContactContainer.appendChild(addContactButton);
@@ -1838,15 +1808,230 @@ define([
       });
     },
 
+    // -----------------------------------------------------------------
+    // Providers UI
+    // -----------------------------------------------------------------
+    createProviderNode: function (provider) {
+      const ed = this.i18n.collections.editor;
+      const id = Date.now() + Math.random().toString(36).slice(2);
+      const providerNode = document.createElement("div");
+      providerNode.classList.add("contact-container");
+      providerNode.id = `provider-${id}`;
+
+      const hr = document.createElement("hr");
+      providerNode.appendChild(hr);
+
+      // name
+      const labelName = document.createElement("label");
+      labelName.className = "editor-label";
+      labelName.innerHTML = ed.providerName + ' <span class="required">*</span>:';
+      providerNode.appendChild(labelName);
+
+      const inputName = document.createElement("input");
+      inputName.id = `provider-name-input-${id}`;
+      inputName.className = "editor-input";
+      inputName.type = "text";
+      inputName.placeholder = ed.valuePlaceholder;
+      inputName.value = provider.name || "";
+      inputName.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "name", e.target.value);
+      providerNode.appendChild(inputName);
+
+      // description
+      const labelDescription = document.createElement("label");
+      labelDescription.className = "editor-label";
+      labelDescription.innerText = ed.providerDescription + ":";
+      providerNode.appendChild(labelDescription);
+
+      const textareaDescription = document.createElement("textarea");
+      textareaDescription.id = `provider-description-input-${id}`;
+      textareaDescription.className = "editor-input";
+      textareaDescription.style.height = "70px";
+      textareaDescription.rows = 3;
+      textareaDescription.placeholder = ed.valuePlaceholder;
+      textareaDescription.value = provider.description || "";
+      textareaDescription.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "description", e.target.value);
+      providerNode.appendChild(textareaDescription);
+
+      // roles
+      const labelRoles = document.createElement("label");
+      labelRoles.className = "editor-label";
+      labelRoles.innerText = ed.providerRoles + ":";
+      providerNode.appendChild(labelRoles);
+
+      const inputRoles = document.createElement("input");
+      inputRoles.id = `provider-roles-input-${id}`;
+      inputRoles.className = "editor-input";
+      inputRoles.type = "text";
+      inputRoles.placeholder = ed.providerRolesPlaceholder;
+      inputRoles.value = Array.isArray(provider.roles) ? provider.roles.join(", ") : "";
+      inputRoles.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "roles", e.target.value);
+      providerNode.appendChild(inputRoles);
+
+      // url
+      const labelUrl = document.createElement("label");
+      labelUrl.className = "editor-label";
+      labelUrl.innerText = ed.providerUrl + ":";
+      providerNode.appendChild(labelUrl);
+
+      const inputUrl = document.createElement("input");
+      inputUrl.id = `provider-url-input-${id}`;
+      inputUrl.className = "editor-input";
+      inputUrl.type = "text";
+      inputUrl.placeholder = ed.valuePlaceholder;
+      inputUrl.value = provider.url || "";
+      inputUrl.oninput = (e) =>
+        this.handleProviderFieldInput(provider, "url", e.target.value);
+      providerNode.appendChild(inputUrl);
+
+      // remove provider
+      const removeProviderButton = document.createElement("button");
+      removeProviderButton.classList.add("remove-contact-button");
+      removeProviderButton.innerText = ed.removeProvider;
+      removeProviderButton.onclick = () => {
+        this.deleteCollectionProvider(provider);
+        providerNode.remove();
+        this.revalidateEditorPrimaryButton();
+      };
+      providerNode.appendChild(removeProviderButton);
+
+      return providerNode;
+    },
+
+    createProvidersEditorNode: function () {
+      const providersEditorNode = document.createElement("div");
+      providersEditorNode.id = "provider-editor-container";
+
+      const labelProviders = document.createElement("label");
+      labelProviders.className = "editor-label";
+      labelProviders.innerText = this.i18n.collections.editor.providers + ":";
+      providersEditorNode.appendChild(labelProviders);
+
+      const addProviderContainer = document.createElement("div");
+      addProviderContainer.classList.add("add-contact-container");
+
+      const addProviderButton = document.createElement("button");
+      addProviderButton.classList.add("add-asset-button");
+      addProviderButton.innerHTML = this.i18n.collections.editor.addProvider;
+
+      addProviderButton.onclick = () => {
+        const provider = { ...this.DEFAULT_PROVIDER, roles: [] };
+        this.addNewCollectionProvider(provider);
+        const providerNode = this.createProviderNode(provider);
+        providersEditorNode.appendChild(providerNode);
+        this.revalidateEditorPrimaryButton();
+      };
+
+      addProviderContainer.appendChild(addProviderButton);
+      providersEditorNode.appendChild(addProviderContainer);
+      return providersEditorNode;
+    },
+
+    renderUpdateProvidersEditor: function (providers) {
+      const providersEditorNode = this.createProvidersEditorNode();
+      this.editorInputForm.appendChild(providersEditorNode);
+
+      (providers || []).forEach((provider) => {
+        const providerNode = this.createProviderNode(provider);
+        providersEditorNode.appendChild(providerNode);
+      });
+    },
+
+    // -----------------------------------------------------------------
+    // Additional properties UI (key/value rows, mirrors ItemEditorPanel)
+    // -----------------------------------------------------------------
+    createPropertyNode: function (property) {
+      const ed = this.i18n.collections.editor;
+      const id = Date.now() + Math.random().toString(36).slice(2);
+      const row = document.createElement("div");
+      row.classList.add("property-row");
+      row.id = `property-${id}`;
+
+      const inputKey = document.createElement("input");
+      inputKey.className = "editor-input";
+      inputKey.type = "text";
+      inputKey.placeholder = ed.propertyKeyPlaceholder;
+      inputKey.value = property.key || "";
+      inputKey.oninput = (e) =>
+        this.handlePropertyFieldInput(property, "key", e.target.value);
+      row.appendChild(inputKey);
+
+      const inputValue = document.createElement("input");
+      inputValue.className = "editor-input";
+      inputValue.type = "text";
+      inputValue.placeholder = ed.propertyValuePlaceholder;
+      inputValue.value = property.value || "";
+      inputValue.oninput = (e) =>
+        this.handlePropertyFieldInput(property, "value", e.target.value);
+      row.appendChild(inputValue);
+
+      const removeButton = document.createElement("button");
+      removeButton.classList.add("remove-property-button");
+      removeButton.innerText = ed.removeProperty;
+      removeButton.onclick = () => {
+        this.deleteCollectionProperty(property);
+        row.remove();
+      };
+      row.appendChild(removeButton);
+
+      return row;
+    },
+
+    createPropertiesEditorNode: function () {
+      const propertiesEditorNode = document.createElement("div");
+      propertiesEditorNode.id = "property-editor-container";
+
+      const labelProperties = document.createElement("label");
+      labelProperties.className = "editor-label";
+      labelProperties.innerText = this.i18n.collections.editor.properties + ":";
+      propertiesEditorNode.appendChild(labelProperties);
+
+      const rowsContainer = document.createElement("div");
+      rowsContainer.id = "property-rows-container";
+      propertiesEditorNode.appendChild(rowsContainer);
+
+      const addPropertyContainer = document.createElement("div");
+      addPropertyContainer.classList.add("add-contact-container");
+
+      const addPropertyButton = document.createElement("button");
+      addPropertyButton.classList.add("add-asset-button");
+      addPropertyButton.innerHTML = this.i18n.collections.editor.addProperty;
+
+      addPropertyButton.onclick = () => {
+        const property = { key: "", value: "" };
+        this.addNewCollectionProperty(property);
+        const propertyNode = this.createPropertyNode(property);
+        rowsContainer.appendChild(propertyNode);
+      };
+
+      addPropertyContainer.appendChild(addPropertyButton);
+      propertiesEditorNode.appendChild(addPropertyContainer);
+      return propertiesEditorNode;
+    },
+
+    renderUpdatePropertiesEditor: function (properties) {
+      const propertiesEditorNode = this.createPropertiesEditorNode();
+      this.editorInputForm.appendChild(propertiesEditorNode);
+
+      const rowsContainer = propertiesEditorNode.querySelector("#property-rows-container");
+      (properties || []).forEach((property) => {
+        const propertyNode = this.createPropertyNode(property);
+        rowsContainer.appendChild(propertyNode);
+      });
+    },
+
     renderUpdateCollectionEditor: function (properties) {
-      this.collectionEditorTitle.innerHTML = "Update Collection";
-      this.editorPrimaryButton.innerHTML = "Update Collection";
+      const ed = this.i18n.collections.editor;
+      this.collectionEditorTitle.innerHTML = this.i18n.collections.updateTitle;
+      this.editorPrimaryButton.innerHTML = this.i18n.collections.updateButton;
       this.editorInputForm.innerHTML = "";
 
       // <label class="editor-label">id:</label>
       const labelId = document.createElement("label");
       labelId.className = "editor-label";
-      labelId.innerText = "id:";
+      labelId.innerText = ed.idLabel + ":";
       this.editorInputForm.appendChild(labelId);
 
       // <input id="collection-id-input" ... disabled />
@@ -1854,7 +2039,7 @@ define([
       inputId.id = "collection-id-input";
       inputId.className = "editor-input";
       inputId.type = "text";
-      inputId.placeholder = "value...";
+      inputId.placeholder = ed.valuePlaceholder;
       inputId.value = properties.id;
       inputId.disabled = true;
       this.editorInputForm.appendChild(inputId);
@@ -1862,7 +2047,7 @@ define([
       // <label class="editor-label">title <span class="required">*</span>:</label>
       const labelTitle = document.createElement("label");
       labelTitle.className = "editor-label";
-      labelTitle.innerHTML = 'title <span class="required">*</span>:';
+      labelTitle.innerHTML = ed.titleLabel + ' <span class="required">*</span>:';
       this.editorInputForm.appendChild(labelTitle);
 
       // <input id="collection-title-input" ... />
@@ -1870,7 +2055,7 @@ define([
       inputTitle.id = "collection-title-input";
       inputTitle.className = "editor-input";
       inputTitle.type = "text";
-      inputTitle.placeholder = "value...";
+      inputTitle.placeholder = ed.valuePlaceholder;
       inputTitle.value = properties.title;
       this.editorInputForm.appendChild(inputTitle);
 
@@ -1878,7 +2063,7 @@ define([
       const labelDescription = document.createElement("label");
       labelDescription.className = "editor-label";
       labelDescription.innerHTML =
-        'description <span class="required">*</span>:';
+        ed.descriptionLabel + ' <span class="required">*</span>:';
       this.editorInputForm.appendChild(labelDescription);
 
       // <textarea id="collection-description-input" ...>
@@ -1887,33 +2072,149 @@ define([
       textareaDescription.className = "editor-input";
       textareaDescription.style.height = "100px";
       textareaDescription.rows = 5;
-      textareaDescription.placeholder = "value...";
+      textareaDescription.placeholder = ed.valuePlaceholder;
       textareaDescription.textContent = properties.description;
       this.editorInputForm.appendChild(textareaDescription);
+	  
+	  this.renderUpdatePropertiesEditor(this.collectionProperties);
+	  this.renderUpdateAssetEditor(this.collectionAssets);
+	  this.renderUpdateContactsEditor(this.collectionContacts);
+	  this.renderUpdateProvidersEditor(this.collectionProviders);
 
-      this.renderUpdateAssetEditor(this.collectionAssets);
-      this.renderUpdateContactsEditor(this.collectionContacts);
+      if (properties.stac_version) {
+      const labelStacVersion = document.createElement("label");
+      labelStacVersion.className = "editor-label";
+      labelStacVersion.innerText = ed.stacVersionLabel + ":";
+      this.editorInputForm.appendChild(labelStacVersion);
+
+      const inputStacVersion = document.createElement("input");
+      inputStacVersion.id = "collection-stacversion-input";
+      inputStacVersion.className = "editor-input";
+      inputStacVersion.type = "text";
+      inputStacVersion.value = properties.stac_version || "";
+      this.editorInputForm.appendChild(inputStacVersion);
+
+      const labelStacExt = document.createElement("label");
+      labelStacExt.className = "editor-label";
+      labelStacExt.innerText = ed.stacExtensionsLabel + ":";
+      this.editorInputForm.appendChild(labelStacExt);
+
+      const textareaStacExt = document.createElement("textarea");
+      textareaStacExt.id = "collection-stacextensions-input";
+      textareaStacExt.className = "editor-input";
+      textareaStacExt.style.height = "60px";
+      textareaStacExt.rows = 3;
+      textareaStacExt.placeholder = ed.stacExtensionsPlaceholder;
+      textareaStacExt.value = properties.stac_extensions || "";
+      this.editorInputForm.appendChild(textareaStacExt);
+      }
+
+      // <label class="editor-label">license:</label>
+      const labelLicense = document.createElement("label");
+      labelLicense.className = "editor-label";
+      labelLicense.innerText = ed.licenseLabel + ":";
+      this.editorInputForm.appendChild(labelLicense);
+
+      // <input id="collection-license-input" ... />
+      const inputLicense = document.createElement("input");
+      inputLicense.id = "collection-license-input";
+      inputLicense.className = "editor-input";
+      inputLicense.type = "text";
+      inputLicense.placeholder = ed.licensePlaceholder;
+      inputLicense.value = properties.license || "";
+      this.editorInputForm.appendChild(inputLicense);
+
+      // <label class="editor-label">keywords:</label>
+      const labelKeywords = document.createElement("label");
+      labelKeywords.className = "editor-label";
+      labelKeywords.innerText = ed.keywordsLabel + ":";
+      this.editorInputForm.appendChild(labelKeywords);
+
+      // <input id="collection-keywords-input" ... />
+      const inputKeywords = document.createElement("input");
+      inputKeywords.id = "collection-keywords-input";
+      inputKeywords.className = "editor-input";
+      inputKeywords.type = "text";
+      inputKeywords.placeholder = ed.keywordsPlaceholder;
+      inputKeywords.value = properties.keywords || "";
+      this.editorInputForm.appendChild(inputKeywords);
+
+      // <label class="editor-label">summaries:</label>
+      const labelSummaries = document.createElement("label");
+      labelSummaries.className = "editor-label";
+      labelSummaries.innerText = ed.summariesLabel + ":";
+      this.editorInputForm.appendChild(labelSummaries);
+
+      // <textarea id="collection-summaries-input" ...>
+      const textareaSummaries = document.createElement("textarea");
+      textareaSummaries.id = "collection-summaries-input";
+      textareaSummaries.className = "editor-input";
+      textareaSummaries.style.height = "80px";
+      textareaSummaries.rows = 4;
+      textareaSummaries.placeholder = ed.summariesPlaceholder;
+      textareaSummaries.textContent = properties.summaries || "";
+      this.editorInputForm.appendChild(textareaSummaries);     
       this.initializeCollectionFormListeners();
     },
 
     renderCreateCollectionEditor: function () {
-      this.collectionEditorTitle.innerHTML = "Create New Collection";
-      this.editorPrimaryButton.innerHTML = "Create Collection";
+      const ed = this.i18n.collections.editor;
+      const req = ' <span class="required">*</span>:';
+      const defs = this._getCreateDefaults();
+      this.collectionEditorTitle.innerHTML = this.i18n.collections.createNewTitle;
+      this.editorPrimaryButton.innerHTML = this.i18n.collections.createButton;
       let collectionInputs = `
-      <label class="editor-label">id <span class="required">*</span>:</label>
-      <input id="collection-id-input" class="editor-input" type="text" placeholder="value..."/>
+      <label class="editor-label">${ed.idLabel}${req}</label>
+      <input id="collection-id-input" class="editor-input" type="text" placeholder="${ed.valuePlaceholder}"/>
 
-      <label class="editor-label">title <span class="required">*</span>:</label>
-      <input id="collection-title-input" class="editor-input" type="text" placeholder="value..."/>
+      <label class="editor-label">${ed.titleLabel}${req}</label>
+      <input id="collection-title-input" class="editor-input" type="text" placeholder="${ed.valuePlaceholder}"/>
 
-      <label class="editor-label">description <span class="required">*</span>:</label>
-      <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="value..."></textArea>
+      <label class="editor-label">${ed.descriptionLabel}${req}</label>
+      <textArea id="collection-description-input" style="height: 100px" class="editor-input" rows="5" placeholder="${ed.valuePlaceholder}"></textArea>
+
+      <label class="editor-label" style="display:flex; align-items:center; gap:6px;">
+        <input id="collection-stac-checkbox" type="checkbox"/> ${ed.stacCollectionLabel}
+      </label>
+
+      <label class="editor-label" id="collection-stacversion-label" style="display:none">${ed.stacVersionLabel}:</label>
+      <input id="collection-stacversion-input" class="editor-input" type="text" value="${this.escapeHtml(defs.stac_version)}" style="display:none"/>
+
+      <label class="editor-label" id="collection-stacextensions-label" style="display:none">${ed.stacExtensionsLabel}:</label>
+      <textArea id="collection-stacextensions-input" style="height: 60px; display:none" class="editor-input" rows="3" placeholder="${ed.stacExtensionsPlaceholder}">${this.escapeHtml(defs.stac_extensions.join("\n"))}</textArea>
+
+      <label class="editor-label">${ed.licenseLabel}:</label>
+      <input id="collection-license-input" class="editor-input" type="text" placeholder="${ed.licensePlaceholder}" value="${this.escapeHtml(defs.license)}"/>
+
+      <label class="editor-label">${ed.temporalStartLabel}:</label>
+      <input id="collection-temporal-start-input" class="editor-input" type="text" value="${this.escapeHtml(defs.temporalStart)}"/>
+
+      <label class="editor-label">${ed.temporalEndLabel}:</label>
+      <input id="collection-temporal-end-input" class="editor-input" type="text" value="${this.escapeHtml(defs.temporalEnd)}"/>
+
+      <label class="editor-label">${ed.keywordsLabel}:</label>
+      <input id="collection-keywords-input" class="editor-input" type="text" placeholder="${ed.keywordsPlaceholder}"/>
+
+      <label class="editor-label">${ed.summariesLabel}:</label>
+      <textArea id="collection-summaries-input" style="height: 80px" class="editor-input" rows="4" placeholder="${ed.summariesPlaceholder}"></textArea>
   `;
       this.editorInputForm.innerHTML = collectionInputs;
       const assetEditorNode = this.createAssetEditorNode();
       this.editorInputForm.appendChild(assetEditorNode);
       const contactsEditorNode = this.createContactsEditorNode();
       this.editorInputForm.appendChild(contactsEditorNode);
+      const providersEditorNode = this.createProvidersEditorNode();
+      this.editorInputForm.appendChild(providersEditorNode);
+      const propertiesEditorNode = this.createPropertiesEditorNode();
+      this.editorInputForm.appendChild(propertiesEditorNode);
+      const stacChk = this.editorInputForm.querySelector("#collection-stac-checkbox");
+      stacChk.addEventListener("change", () => {
+        const d = stacChk.checked ? "" : "none";
+        ["#collection-stacversion-label", "#collection-stacversion-input",
+         "#collection-stacextensions-label", "#collection-stacextensions-input"].forEach((s) => {
+          this.editorInputForm.querySelector(s).style.display = d;
+        });
+      });
       this.initializeCollectionFormListeners();
     },
 
@@ -1940,10 +2241,13 @@ define([
       this.selectedGraphic = null;
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
       // Make sketch layer visible so user can see their drawing
       if (this.sketchGraphicsLayer) {
         this.sketchGraphicsLayer.visible = true;
       }
+      await this.ensureCollectionDefaults();
       this.renderCreateCollectionEditor();
     },
 
@@ -1958,7 +2262,26 @@ define([
       );
       this.setCollectionAssets(collection.assets ? collection.assets : {});
       this.setCollectionContacts(collection.contacts ? collection.contacts : []);
-      this.renderUpdateCollectionEditor(this.selectedCollection.properties);
+      this.setCollectionProviders(collection.providers ? collection.providers : []);
+      const rawProperties = collection.properties || {};
+      this.setCollectionProperties(
+        Object.keys(rawProperties).map((key) => {
+          const text = this._stringifyPropertyValue(rawProperties[key]);
+          // keep the typed original so unchanged rows are saved untouched
+          return { key: key, value: text, hasOriginal: true, original: rawProperties[key], originalText: text };
+        })
+      );
+      const properties = {
+        id: this.selectedCollection.properties.id,
+        title: collection.title,
+        description: collection.description,
+        stac_version: collection.stac_version,
+        stac_extensions: Array.isArray(collection.stac_extensions) ? collection.stac_extensions.join("\n") : "",
+        license: collection.license || "",
+        keywords: Array.isArray(collection.keywords) ? collection.keywords.join(", ") : "",
+        summaries: collection.summaries ? JSON.stringify(collection.summaries, null, 2) : "",
+      };
+      this.renderUpdateCollectionEditor(properties);
 
       if (graphic) {
         this.hideAllGraphicsLayers(view);
@@ -1994,12 +2317,16 @@ define([
       this.showAllGraphicsLayers(this.view);
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
     },
 
     handleCancelCreateCollection: function () {
       this.sketchGraphicsLayer.removeAll();
       this.clearCollectionAssets();
       this.clearCollectionContacts();
+      this.clearCollectionProviders();
+      this.clearCollectionProperties();
     },
 
     updateCollectionInfoBox: function (properties) {
@@ -2024,11 +2351,16 @@ define([
 
     emptyCollectionInfoBox: function () {
       let tableRows = [];
-      this.infoTableTitle.innerHTML = "Collection Info";
+      this.infoTableTitle.innerHTML = this.i18n.collections.infoTitle;
       this.infoTableBody.innerHTML = tableRows.join("");
+      this.selectedCollectionIsStac = false;
       this.handleZoomCollectionEnabled();
       this.handleViewItemsEnabled();
       this.handleExportCollectionEnabled();
+    },
+
+    _parseStacExtensions: function (text) {
+      return (text || "").split(/[\s,]+/).filter(function (s) { return s; });
     },
 
     getUpdateFieldValues: function () {
@@ -2039,6 +2371,11 @@ define([
         title: document.getElementById("collection-title-input").value,
         assets: this.collectionAssets,
         contacts: this.collectionContacts,
+        license: document.getElementById("collection-license-input").value,
+        keywordsText: document.getElementById("collection-keywords-input").value,
+        summariesText: document.getElementById("collection-summaries-input").value,
+        providers: this.collectionProviders,
+        properties: this._buildPropertiesObject(),
       };
     },
 
@@ -2050,6 +2387,11 @@ define([
         title: document.getElementById("collection-title-input").value,
         assets: this.collectionAssets,
         contacts: this.collectionContacts,
+        license: document.getElementById("collection-license-input").value,
+        keywordsText: document.getElementById("collection-keywords-input").value,
+        summariesText: document.getElementById("collection-summaries-input").value,
+        providers: this.collectionProviders,
+        properties: this._buildPropertiesObject(),
       };
     },
 
@@ -2072,6 +2414,7 @@ define([
       this.zoomCollectionButton.addEventListener("click", () => {
         this.handleZoomTo(this.selectedCollection.graphic,this.selectedCollection.properties.id);
       });
+	  this.viewItemsButton.style.display = "none"; // shown only for STAC collections
 	  this.viewItemsButton.addEventListener("click", () => {			
 	      this.handleViewItems(this.selectedCollection.properties.id);
 	   });
@@ -2087,6 +2430,35 @@ define([
 
       // Editor Events
       this.editorPrimaryButton.addEventListener("click", () => {
+        // Defense-in-depth: re-validate contacts on submit in case the
+        // primary button's disabled state is stale (e.g. programmatic
+        // changes to collectionContacts that did not go through the UI
+        // handlers that call revalidateEditorPrimaryButton()).
+        if (!this.isCollectionContactsObjValid(this.collectionContacts)) {
+          this.showAlert(
+            this.i18n.collections.alerts.invalidContactTitle,
+            this.i18n.collections.alerts.invalidContactMessage,
+            "red"
+          );
+          return;
+        }
+        if (!this.isCollectionProvidersObjValid(this.collectionProviders)) {
+          this.showAlert(
+            this.i18n.collections.alerts.invalidProviderTitle,
+            this.i18n.collections.alerts.invalidProviderMessage,
+            "red"
+          );
+          return;
+        }
+        const summariesInput = this.editorInputForm.querySelector("#collection-summaries-input");
+        if (summariesInput && !this._parseSummaries(summariesInput.value).ok) {
+          this.showAlert(
+            this.i18n.collections.alerts.invalidSummariesTitle,
+            this.i18n.collections.alerts.invalidSummariesMessage,
+            "red"
+          );
+          return;
+        }
         if (this.appActionState === this.actions.UPDATE_COLLECTION) {
           const updatedProperties = this.getUpdateFieldValues();
           this.handleUpdateCollection(
@@ -2105,21 +2477,6 @@ define([
           this.handleCancelCreateCollection();
         }
         this.hideEditor();
-      });
-
-      // Modal Events
-      this.modalSecondaryButton.addEventListener("click", () => {
-        this.hideModal();
-      });
-      this.modalPrimaryButton.addEventListener("click", () => {
-        if (this.appActionState === this.actions.DELETE_COLLECTION) {
-          this.handleDeleteCollections();
-        }
-      });
-
-      // Alert Events
-      this.alertContainer.addEventListener("click", () => {
-        this.alertContainer.classList.add("hidden");
       });
 
       // List Filtering
@@ -2293,6 +2650,61 @@ define([
       return dfd;
     },
 
+    // Opens a STAC item directly in the item editor (used by the search
+    // results "Edit in STAC Editor" link). params: {collectionId, itemId}
+    editStacItem: function (params) {
+      var self = this;
+      if (!params || !params.collectionId || !params.itemId) return;
+      var tries = 0;
+      var wait = function () {
+        if (!self.view || !self.itemListPanel) {
+          if (++tries < 100) setTimeout(wait, 200);
+          return;
+        }
+        var url = self.getStacBaseUrl() + "/collections/" + encodeURIComponent(params.collectionId) +
+          "/items/" + encodeURIComponent(params.itemId);
+        if (AppContext.appConfig.system.secureCatalogApp) {
+          url = (new AppClient()).appendAccessToken(url);
+        }
+        self.updateIsLoading(true);
+        fetch(url).then(function (r) {
+          if (!r.ok) throw new Error(r.status);
+          return r.json();
+        }).then(function (feature) {
+          self.selectedCollectionId = params.collectionId;
+          return Promise.resolve(self.itemListPanel.open({
+            collectionId: params.collectionId,
+            collectionTitle: params.collectionId,
+            view: self.view
+          })).then(function () {
+            self.itemListPanel.setView(self.view);
+            self._returnToCatalog = true;
+            var editor = self.itemListPanel.itemEditorPanel;
+            var previousOnHide = editor.onHide;
+            editor.onHide = function (changed) {
+              previousOnHide.call(this, changed);
+              setTimeout(function () { self._returnToCatalog = false; }, 0);
+            };
+            if (!self._returnHooked) {
+              self._returnHooked = true;
+              topic.subscribe(appTopics.StacItemsChanged, function () {
+                if (self._returnToCatalog) {
+                  self._returnToCatalog = false;
+                  $("a[href='#searchPanel']").tab("show");
+                }
+              });
+            }
+            self.itemListPanel.itemEditorPanel.showEdit(params.collectionId, feature);
+          });
+        }).catch(function (e) {
+          console.error("editStacItem failed", e);
+        }).then(function () {
+          self.updateIsLoading(false);
+        });
+      };
+      wait();
+    },
+
     //Opening map panel
     ensureMap: function () {      
       if (!this.config) {
@@ -2345,7 +2757,7 @@ define([
 
           let searchWidgetExpand = new Expand({
             expandIcon: "search",
-            expandTooltip: "Find Address or Place",
+            expandTooltip: this.i18n.collections.alerts.searchWidgetTooltip,
             view: view,
             content: searchWidget,
           });
@@ -2359,7 +2771,7 @@ define([
           });
           let layerListExpand = new Expand({
             expandIcon: "layers",
-            expandTooltip: "Map Layers",
+            expandTooltip: this.i18n.collections.alerts.layersTooltip,
             view: view,
             content: layerList,
           });
@@ -2383,7 +2795,7 @@ define([
           });
           let basemapExpand = new Expand({
             expandIcon: "basemap",
-            expandTooltip: "Basemap",
+            expandTooltip: this.i18n.collections.alerts.basemapTooltip,
             view: view,
             content: basemapWidget,
           });

@@ -130,6 +130,11 @@ function(declare, lang, array, topic, appTopics, router, Templated, template, i1
         }
       }));
 
+      topic.subscribe(appTopics.EditStacItemRequested,lang.hitch(this, function(params){
+        router.go("collectionsPanel");
+        self.collectionsPanel.editStacItem(params);
+      }));
+
       topic.subscribe(appTopics.SignedIn,function(params){
         self.updateUI();
       });

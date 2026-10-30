@@ -6,20 +6,20 @@
       <div class="collections-section">
         <div class="collections-header">
           <p style="font-weight: bold; font-size: 18px; margin: 0 15px 0 0">
-            Collections
+            ${i18n.collections.title}
           </p>
           <div style="display: flex; align-items: center">
             <button data-role="admin"
               class="collections-action"
               data-dojo-attach-point="newCollectionButton"
             >
-              New
+              ${i18n.collections.newLabel}
             </button>
             <button data-role="admin"
               class="collections-action"
               data-dojo-attach-point="importCollectionButton"
             >
-              Import
+              ${i18n.collections.importLabel}
             </button>
             <input
               type="file"
@@ -32,7 +32,7 @@
               data-dojo-attach-point="deleteCollectionButton"
               disabled
             >
-              Delete
+              ${i18n.collections.deleteLabel}
             </button>
           </div>
         </div>
@@ -40,7 +40,7 @@
           <input
             type="text"
             class="search-input"
-            placeholder="Search..."
+            placeholder="${i18n.collections.searchPlaceholder}"
             data-dojo-attach-point="collectionSearchInput"
           />
           <div style="position: absolute; top: 3px; left: 12px; width: 20px">
@@ -76,7 +76,7 @@
             class="info-collections-tab"
             style="flex: 1 1 0; padding: 10px 0; color: #0066ff"
           >
-            Collection
+            ${i18n.collections.collectionTab}
           </div>
           <div
             class="info-items-tab"
@@ -93,7 +93,7 @@
         <div class="info-body">
           <div class="info-body-header">
             <p class="info-body-title" data-dojo-attach-point="infoTableTitle">
-              Collection Info
+              ${i18n.collections.infoTitle}
             </p>
             <br/>
             <div class="info-action-container">
@@ -102,28 +102,28 @@
                 class="info-actions info-actions-viewItem disabled"
                 disabled
               >
-                View Items
+                ${i18n.collections.viewItems}
               </button>
               <button
                 data-dojo-attach-point="zoomCollectionButton"
                 class="info-actions info-actions-zoom disabled"
                 disabled
               >
-                Zoom
+                ${i18n.collections.zoom}
               </button>
               <button
                 data-dojo-attach-point="exportCollectionButton"
                 class="info-actions info-actions-export disabled"
                 disabled
               >
-                Export
+                ${i18n.collections.exportLabel}
               </button>
               <button data-role="admin"
                 data-dojo-attach-point="editCollectionButton"
                 class="info-actions info-actions-edit disabled"
                 disabled
               >
-                Update
+                ${i18n.collections.update}
               </button>
             </div>
           </div>
@@ -142,14 +142,15 @@
             data-dojo-attach-point="collectionEditorTitle"
             class="editor-title"
           >
-            Create New Collection
+            ${i18n.collections.createNewTitle}
           </p>
           <div class="fields-list">
-            <label class="editor-label">Geometry:</label>
+            <label class="editor-label">${i18n.collections.geometry}</label>
             <div class="editor-draw-tools">
               <button
                 class="editor-draw-tool draw-tool-polygon"
                 data-dojo-attach-point="drawPolygonButton"
+                title="${i18n.collections.tools.drawPolygon}"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path
@@ -161,6 +162,7 @@
               <button
                 class="editor-draw-tool"
                 data-dojo-attach-point="drawCircleButton"
+                title="${i18n.collections.tools.drawCircle}"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path
@@ -172,6 +174,7 @@
               <button
                 class="editor-draw-tool"
                 data-dojo-attach-point="undoButton"
+                title="${i18n.collections.tools.undo}"
               >
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
                   <path
@@ -180,7 +183,7 @@
                   <path fill="none" d="M0 0h24v24H0z" />
                 </svg>
               </button>
-              <button class="editor-draw-tool">
+              <button class="editor-draw-tool" title="${i18n.collections.tools.redo}">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   data-dojo-attach-point="redoButton"
@@ -192,7 +195,7 @@
                   <path fill="none" d="M0 0h24v24H0z" />
                 </svg>
               </button>
-              <button class="editor-draw-tool">
+              <button class="editor-draw-tool" title="${i18n.collections.tools.clearGeometry}">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   data-dojo-attach-point="deletePolygonButton"
@@ -214,7 +217,7 @@
             id="editor-secondary"
             data-dojo-attach-point="editorSecondary"
           >
-            Cancel
+            ${i18n.collections.cancel}
           </button>
           <button
             class="editor-button disabled-button"
@@ -222,12 +225,17 @@
             data-dojo-attach-point="editorPrimaryButton"
             disabled
           >
-            Create Collection
+            ${i18n.collections.createButton}
           </button>
         </div>
       </div>
     </div>
   </div>
+  <div
+    id="item-list-panel-mount"
+    data-dojo-type="app/main/ItemListPanel"
+    data-dojo-attach-point="itemListPanel"
+  ></div>
   <div id="mapViewContainerCollections">
     <div
       class="g-mapframe-container-norm"
@@ -236,65 +244,10 @@
     ></div>
     <!-- <div id="tableContainer" class="tableContainer"></div> -->
   </div>
-  <div id="container-confirm-modal" data-dojo-attach-point="modalContainer">
-    <div id="confirm-modal">
-      <div id="confirm-modal-header" class="confirm-modal-section">
-        <p>Delete Collection?</p>
-        <div id="modal-close-button">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512">
-            <!--!Font Awesome Free 6.7.2 by @fontawesome - https://fontawesome.com License - https://fontawesome.com/license/free Copyright 2025 Fonticons, Inc.-->
-            <path
-              d="M376.6 84.5c11.3-13.6 9.5-33.8-4.1-45.1s-33.8-9.5-45.1 4.1L192 206 56.6 43.5C45.3 29.9 25.1 28.1 11.5 39.4S-3.9 70.9 7.4 84.5L150.3 256 7.4 427.5c-11.3 13.6-9.5 33.8 4.1 45.1s33.8 9.5 45.1-4.1L192 306 327.4 468.5c11.3 13.6 31.5 15.4 45.1 4.1s15.4-31.5 4.1-45.1L233.7 256 376.6 84.5z"
-            />
-          </svg>
-        </div>
-      </div>
-      <div id="confirm-modal-body" class="confirm-modal-section">
-        <p>
-          Are you sure you would like to delete
-          <span
-            data-dojo-attach-point="modalContainerCollectionsListLength"
-          ></span>
-          collection(s)? This action is irreversible.
-        </p>
-        <div data-dojo-attach-point="modalContainerCollectionsList"></div>
-      </div>
-
-      <div id="confirm-modal-footer" class="confirm-modal-section">
-        <button
-          id="confirm-modal-secondary"
-          class="confirm-modal-button"
-          data-dojo-attach-point="modalSecondaryButton"
-        >
-          Cancel
-        </button>
-        <button
-          id="confirm-modal-primary"
-          class="confirm-modal-button"
-          data-dojo-attach-point="modalPrimaryButton"
-        >
-          Delete
-        </button>
-      </div>
-    </div>
-  </div>
   <div class="loader-container hidden" data-dojo-attach-point="loaderContainer">
     <div class="loader-content">
       <span class="loader"></span>
-      Loading...
-    </div>
-  </div>
-  <div class="alert-container hidden" data-dojo-attach-point="alertContainer">
-    <div id="alert-color" data-dojo-attach-point="alertColor"></div>
-    <div class="alert-content">
-      <div id="alert-header">
-        <h4 id="alert-title" data-dojo-attach-point="alertTitle">
-          Alert Title
-        </h4>
-      </div>
-      <p id="alert-message" data-dojo-attach-point="alertMessage">
-        Alert Message
-      </p>
+      ${i18n.collections.loading}
     </div>
   </div>
   <style>
@@ -576,6 +529,7 @@
       border-radius: 5px;
       height: 40px;
       width: 47%;
+      font-size: 14px;
     }
 
     #editor-secondary {
@@ -705,6 +659,7 @@
       color: white;
       align-self: flex-end;
       height: 40px;
+      font-size: 14px;
     }
 
     .remove-asset-button {
@@ -715,6 +670,7 @@
       border: 1px solid rgb(240, 27, 27);
       color: rgb(240, 27, 27);
       background-color: transparent;
+      font-size: 14px;
     }
 
     #initial-asset-key {
@@ -762,6 +718,7 @@
       border: 1px solid #1653ad;
       color: #1653ad;
       background-color: transparent;
+      font-size: 14px;
     }
 
     .remove-email-button {
@@ -772,6 +729,7 @@
       border: 1px solid rgb(240, 27, 27);
       color: rgb(240, 27, 27);
       background-color: transparent;
+      font-size: 14px;
     }
 
     .remove-contact-button {
@@ -782,6 +740,41 @@
       border: 1px solid rgb(240, 27, 27);
       color: rgb(240, 27, 27);
       background-color: transparent;
+      font-size: 14px;
+    }
+
+    /* additional properties (mirrors ItemEditorPanel's key/value rows) */
+    #property-editor-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    #property-rows-container {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .property-row {
+      display: flex;
+      gap: 6px;
+      margin-top: 8px;
+      align-items: center;
+    }
+
+    .property-row .editor-input {
+      flex: 1 1 0;
+      margin-top: 0;
+    }
+
+    .remove-property-button {
+      border: 1px solid rgb(240, 27, 27);
+      color: rgb(240, 27, 27);
+      background-color: transparent;
+      cursor: pointer;
+      padding: 6px 8px;
+      border-radius: 5px;
+      font-size: 14px;
+      white-space: nowrap;
     }
 
     /* loader */
@@ -829,53 +822,6 @@
     /* sketch */
     .sketch-active-tool {
       background-color: #0066ff;
-    }
-
-    /* alert */
-    .alert-container {
-      position: absolute;
-      bottom: 75px;
-      right: 25px;
-      height: 100px;
-      width: 500px;
-      background-color: white;
-      z-index: 99;
-      box-shadow: 2px 2px 2px rgba(0, 0, 0, 0.062);
-      display: flex;
-      transition: all 0.5s ease-out;
-    }
-
-    .alert-container:hover {
-      background-color: #e9e9e9;
-      cursor: pointer;
-    }
-
-    #alert-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      width: 100%;
-    }
-
-    #alert-title {
-      font-size: 20px;
-    }
-
-    #alert-message {
-      font-size: 15px;
-    }
-
-    #alert-color {
-      background-color: green;
-      height: 100%;
-      width: 15px;
-    }
-
-    .alert-content {
-      display: flex;
-      flex-direction: column;
-      padding: 10px;
-      width: 100%;
     }
 
     .required {

@@ -86,7 +86,8 @@
     <beans:property name="canStacAutogenerateBbox" value="${gpt_canStacAutogenerateBbox:true}" />
     <beans:property name="stacBboxSize" value="${gpt_stacBboxSize:0.00001}" />    
     <beans:property name="geomWKTField" value="${gpt_geomWKTField:}" />
-    <beans:property name="geomCRSField" value="${gpt_geomCRSField:}" /> 
+    <beans:property name="geomCRSField" value="${gpt_geomCRSField:}" />
+    <beans:property name="keepAllExtensions" value="${gpt_keepAllExtensions:true}" />
     <!-- 
     <beans:property name="delayResponse" value="1000" />
     <beans:property name="stacUrl" value="" /> 
