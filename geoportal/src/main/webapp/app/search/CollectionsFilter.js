@@ -153,7 +153,7 @@ function(declare, lang, array, domConstruct, domClass, dojoRequest, topic, appTo
     },
     
     processResults: function(searchResponse) {
-      var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/_search";
+      var url = "./elastic/_search";
       
       if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
               AppContext.geoportal.supportsGroupBasedAccess)) {

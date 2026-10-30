@@ -53,6 +53,26 @@ public class ConfigProperties {
     @Value("${security.public-endpoints:}")
     private String publicEndpoints;
 
+    // Search settings (shared with the client app config, appui.* prefix)
+    @Value("${appui.search.allowSettings:false}")
+    private boolean searchAllowSettings;
+
+    @Value("${appui.search.aggregation.fields:}")
+    private String searchAggregationFields;
+
+    public boolean isSearchAllowSettings() {
+        return searchAllowSettings;
+    }
+
+    /** The allowed aggregation fields (quotes and whitespace removed). */
+    public List<String> getSearchAggregationFieldsList() {
+        return splitAndTrim(searchAggregationFields).stream()
+                .map(s -> (s.length() >= 2 && s.startsWith("\"") && s.endsWith("\""))
+                        ? s.substring(1, s.length() - 1).trim() : s)
+                .filter(s -> !s.isEmpty())
+                .collect(Collectors.toList());
+    }
+
     @jakarta.annotation.PostConstruct
     private void validate() {
         StringBuilder missing = new StringBuilder();

@@ -91,7 +91,7 @@ public class BalancerSupport {
         BalancerNode node =  balancerNodes.get(index);
     	target = new StringBuilder(node.proxyTo);
     }
-	String pathInfo = request.getPathInfo();
+	String pathInfo = ec.addIndexName(request.getPathInfo());
     if (pathInfo != null) {
       target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
     

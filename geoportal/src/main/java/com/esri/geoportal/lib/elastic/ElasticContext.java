@@ -245,6 +245,22 @@ public class ElasticContext {
     this.is7Plus = is7Plus;
   }
   
+  /**
+   * Adds the metadata index name to a proxied path when the client omitted it.
+   * <br/>/_search and /_count (but not /_search/scroll) become /{indexName}/_search and /{indexName}/_count.
+   * Any other path is returned unchanged.
+   * @param path the proxied path (request path info)
+   * @return the path including the index name
+   */
+  public String addIndexName(String path) {
+    if (path == null) return null;
+    if (path.equals("/_count") || path.startsWith("/_count/") || path.startsWith("/_count?")
+        || path.equals("/_search") || (path.startsWith("/_search/") && !path.startsWith("/_search/scroll"))) {
+      return "/" + getIndexName() + path;
+    }
+    return path;
+  }
+
   /** The index name holding metadata items.
    * @return  */
   public String getItemIndexName() {

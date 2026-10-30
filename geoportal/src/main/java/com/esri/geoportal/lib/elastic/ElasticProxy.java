@@ -14,20 +14,33 @@
  */
 package com.esri.geoportal.lib.elastic;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Set;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
+
+import org.eclipse.jetty.client.BytesRequestContent;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.ee10.proxy.BalancerServlet;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.client.transport.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.base.util.BalancerSupport;
 import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
 import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.security.ConfigProperties;
+
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +59,221 @@ public class ElasticProxy extends BalancerServlet {
   private String _authString = null;
   private boolean _useHttps = false;
   private Integer proxyBufferSize = null;
+
+  // ---- Security settings ----
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final int MAX_AGG_SIZE = 100;
+  private static final int MAX_GEOHASH_PRECISION = 7;
+  private static final int MAX_BODY_BYTES = 10 * 1024 * 1024;
+  private static final String QUERY_TIMEOUT = "7s";
+  private static final String SANITIZED_ATTR = ElasticProxy.class.getName() + ".sanitizedBody";
+
+  private static final Set<String> BLOCKED_KEYS = Set.of(
+      "script", "script_score", "script_fields", "runtime_mappings", "scripted_metric");
+
+  private static final Set<String> ALLOWED_AGG_TYPES = Set.of(
+      "terms", "date_histogram", "nested", "geohash_grid", "filter", "filters");
+
+
+
+  /** Default allowed aggregation fields (used if appui.search.aggregation.fields is not configured). */
+  private static final Set<String> DEFAULT_AGG_FIELDS = Set.of(
+      "envelope_cen_pt", "src_collections_s", "sys_owner_s", "apiso_TopicCategory_s",
+      "sys_metadatatype_s", "contact_organizations_s", "keywords_s", "src_source_type_s",
+      "src_source_name_s", "timeperiod_nst.begin_dt", "timeperiod_nst.end_dt", "sys_modified_dt");
+
+  /** Allowed aggregation fields, loaded from appui.search.aggregation.fields. */
+  private Set<String> allowedAggFields = DEFAULT_AGG_FIELDS;
+  /** If true (appui.search.allowSettings), aggregation fields are not validated. */
+  private boolean allowSettings = false;
+
+  /** Loads appui.search.allowSettings and appui.search.aggregation.fields from the Spring ConfigProperties bean. */
+  private void loadAggregationSettings() {
+    try {
+      GeoportalContext gc = GeoportalContext.getInstance();
+      if (gc == null || gc.getApplicationContext() == null) {
+        LOGGER.warn("Spring context not available, using default aggregation fields.");
+        return;
+      }
+      ConfigProperties cfg = gc.getApplicationContext().getBean(ConfigProperties.class);
+      allowSettings = cfg.isSearchAllowSettings();
+      Set<String> set = new HashSet<>(cfg.getSearchAggregationFieldsList());
+      if (!set.isEmpty()) allowedAggFields = set;
+    } catch (Exception e) {
+      LOGGER.warn("Unable to read ConfigProperties, using default aggregation fields.", e);
+    }
+    LOGGER.debug("allowSettings=" + allowSettings + ", allowed aggregation fields=" + allowedAggFields);
+  }
+
+  /** Thrown when a request violates the security rules. */
+  private static class AccessDeniedException extends Exception {
+    private static final long serialVersionUID = 1L;
+    AccessDeniedException(String msg) {
+      super(msg);
+    }
+  }
+
+  @Override
+  protected void service(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    String method = request.getMethod();
+    boolean hasBody = "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
+        || "PATCH".equalsIgnoreCase(method);
+    if (hasBody) {
+      byte[] bytes = request.getInputStream().readNBytes(MAX_BODY_BYTES + 1);
+      if (bytes.length > MAX_BODY_BYTES) {
+        response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+        return;
+      }
+      if (bytes.length > 0) {
+        try {
+          byte[] sanitized = sanitizeBody(new String(bytes, StandardCharsets.UTF_8), request.getRequestURI());
+          request.setAttribute(SANITIZED_ATTR, sanitized);
+        } catch (AccessDeniedException e) {
+          LOGGER.warn("Blocked Elasticsearch request: " + e.getMessage());
+          response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+          return;
+        } catch (IOException e) {
+          response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JSON request body");
+          return;
+        }
+      }
+    }
+    super.service(request, response);
+  }
+
+  @Override
+  protected Request.Content proxyRequestContent(HttpServletRequest request,
+      HttpServletResponse response, Request proxyRequest) throws IOException {
+    byte[] sanitized = (byte[]) request.getAttribute(SANITIZED_ATTR);
+    if (sanitized == null) {
+      return super.proxyRequestContent(request, response, proxyRequest);
+    }
+    // body may have changed: let the client compute Content-Length
+    proxyRequest.headers(h -> h.remove(HttpHeader.CONTENT_LENGTH));
+    String contentType = request.getContentType();
+    if (contentType == null) contentType = "application/json";
+    return new BytesRequestContent(contentType, sanitized);
+  }
+
+  /** Validates and sanitizes a request body (JSON or NDJSON). */
+  private byte[] sanitizeBody(String body, String path) throws AccessDeniedException, IOException {
+    boolean isSearch = path != null && path.contains("_search");
+    boolean isMSearch = path != null && path.contains("_msearch");
+    String trimmed = body.trim();
+
+    if (!isMSearch) {
+      try {
+        JsonNode node = MAPPER.readTree(trimmed);
+        if (node != null && node.isObject()) {
+          sanitizeObject((ObjectNode) node, isSearch);
+        } else if (node != null) {
+          checkNoBlockedKeys(node);
+        }
+        return MAPPER.writeValueAsBytes(node);
+      } catch (JsonProcessingException e) {
+        // fall through to NDJSON handling
+      }
+    }
+
+    // NDJSON (_msearch, _bulk)
+    StringBuilder sb = new StringBuilder();
+    int idx = 0;
+    for (String line : trimmed.split("\n")) {
+      if (line.isBlank()) continue;
+      JsonNode node = MAPPER.readTree(line);
+      if (node != null && node.isObject()) {
+        sanitizeObject((ObjectNode) node, isMSearch && (idx % 2 == 1));
+      }
+      sb.append(MAPPER.writeValueAsString(node)).append('\n');
+      idx++;
+    }
+    return sb.toString().getBytes(StandardCharsets.UTF_8);
+  }
+
+  /** Sanitizes a single search body object. */
+  private void sanitizeObject(ObjectNode body, boolean isSearch) throws AccessDeniedException {
+    checkNoBlockedKeys(body);
+    if (isSearch) {
+      body.put("timeout", QUERY_TIMEOUT);
+    }
+    JsonNode aggs = body.has("aggs") ? body.get("aggs") : body.get("aggregations");
+    if (aggs != null) {
+      validateAggs(aggs);
+    }
+  }
+
+  /** Recursively blocks any script related keys. */
+  private void checkNoBlockedKeys(JsonNode node) throws AccessDeniedException {
+    if (node.isObject()) {
+      Iterator<Map.Entry<String, JsonNode>> it = node.fields();
+      while (it.hasNext()) {
+        Map.Entry<String, JsonNode> e = it.next();
+        if (BLOCKED_KEYS.contains(e.getKey())) {
+          throw new AccessDeniedException("Scripts are not allowed");
+        }
+        checkNoBlockedKeys(e.getValue());
+      }
+    } else if (node.isArray()) {
+      for (JsonNode child : node) {
+        checkNoBlockedKeys(child);
+      }
+    }
+  }
+
+  /** Recursively validates the aggregations. */
+  private void validateAggs(JsonNode aggs) throws AccessDeniedException {
+    if (!aggs.isObject()) {
+      throw new AccessDeniedException("Invalid aggregations");
+    }
+    Iterator<Map.Entry<String, JsonNode>> names = aggs.fields();
+    while (names.hasNext()) {
+      JsonNode def = names.next().getValue();
+      if (!def.isObject()) {
+        throw new AccessDeniedException("Invalid aggregation definition");
+      }
+      Iterator<String> keys = def.fieldNames();
+      while (keys.hasNext()) {
+        String aggType = keys.next();
+        if ("aggs".equals(aggType) || "aggregations".equals(aggType)) {
+          validateAggs(def.get(aggType));
+        } else if ("meta".equals(aggType)) {
+          continue;
+        } else if (!ALLOWED_AGG_TYPES.contains(aggType)) {
+          throw new AccessDeniedException("Aggregation type not allowed: " + aggType);
+        } else {
+          validateAggBody(aggType, def.get(aggType));
+        }
+      }
+    }
+  }
+
+  /** Validates field restrictions and limits of an individual aggregation. */
+  private void validateAggBody(String aggType, JsonNode agg) throws AccessDeniedException {
+    if (!agg.isObject()) return;
+    ObjectNode obj = (ObjectNode) agg;
+    switch (aggType) {
+      case "terms":
+      case "date_histogram":
+      case "geohash_grid":
+        JsonNode field = obj.get("field");
+        if (!allowSettings && (field == null || !allowedAggFields.contains(field.asText()))) {
+          throw new AccessDeniedException("Aggregation not allowed on field: "
+              + (field == null ? "(none)" : field.asText()));
+        }
+        if (obj.has("size") && obj.get("size").asInt() > MAX_AGG_SIZE) {
+          obj.put("size", MAX_AGG_SIZE);
+        }
+        if ("geohash_grid".equals(aggType) && obj.has("precision")
+            && obj.get("precision").asInt() > MAX_GEOHASH_PRECISION) {
+          obj.put("precision", MAX_GEOHASH_PRECISION);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+  
   
   @Override
   protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
@@ -66,6 +294,7 @@ public class ElasticProxy extends BalancerServlet {
   @Override
   public void init() throws ServletException {
     LOGGER.debug("Starting up ElasticProxy...");
+    loadAggregationSettings();
     GeoportalContext gc = GeoportalContext.getInstance();
     if (gc!=null) {
       ElasticContext ec = gc.getElasticContext();

@@ -72,7 +72,7 @@ public class ElasticProxyFilter implements Filter {
     if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
       user = new AppUser(hsr,null);
       if (!user.isAdmin()) {
-        String path = hsr.getPathInfo();
+        String path = gc.getElasticContext().addIndexName(hsr.getPathInfo());
         String idxName = gc.getElasticContext().getIndexName();
         String itmType = gc.getElasticContext().getActualItemIndexType();
         // This will limit the ability to use other Elasticsearch indexes for non admin users
