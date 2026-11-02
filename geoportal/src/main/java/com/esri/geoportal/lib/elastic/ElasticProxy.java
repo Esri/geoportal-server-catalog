@@ -82,6 +82,40 @@ public class ElasticProxy extends BalancerServlet {
   private static final Set<String> ALLOWED_AGG_TYPES = Set.of(
       "terms", "date_histogram", "nested", "geohash_grid", "filter", "filters");
 
+  // ---- Path allow-list ----
+  // This app only ever needs to search/count the metadata index (see doc/api.txt
+  // and every client usage under src/main/webapp - all of it hits "_search", none
+  // of it hits anything else). Without an explicit allow-list, any other
+  // Elasticsearch REST API would be forwarded unrestricted - cluster/node admin
+  // (_cat, _cluster, _nodes), destructive bulk ops (_bulk, _delete_by_query,
+  // _update_by_query), scripted/stored-query execution (_scripts, _search/template),
+  // long-lived resource consumers (_reindex, _pit, scroll), cross-index wildcard
+  // reads (_all), etc. The final path segment must be one of the allowed
+  // operations, and no segment anywhere in the path may be one of the explicitly
+  // forbidden ones (this also blocks sneaky combinations like "_all/_search").
+  private static final Set<String> ALLOWED_OPS = Set.of("_search", "_count");
+  private static final Set<String> FORBIDDEN_SEGMENTS = Set.of(
+      "_all", "_cat", "_cluster", "_nodes", "_bulk", "_delete_by_query", "_update_by_query",
+      "_mget", "_scripts", "_reindex", "_pit", "_sql", "_async_search", "_field_caps",
+      "_mapping", "_settings", "_alias", "_aliases", "_close", "_open", "_flush",
+      "_forcemerge", "_snapshot", "_tasks", "_template", "_component_template",
+      "_index_template", "_ilm", "_license", "_security", "_ml", "_watcher", "_xpack",
+      "_render", "_validate", "_explain", "_termvectors", "_mtermvectors", "_rank_eval",
+      "_graph", "_eql", "_async", "scroll");
+
+  /** True only for paths ending in an allowed operation and containing no forbidden segment. */
+  private boolean isAllowedElasticPath(String pathInfo) {
+    if (pathInfo == null) return false;
+    String[] segments = pathInfo.toLowerCase().split("/");
+    if (segments.length == 0) return false;
+    String lastSegment = segments[segments.length - 1];
+    if (!ALLOWED_OPS.contains(lastSegment)) return false;
+    for (String seg : segments) {
+      if (FORBIDDEN_SEGMENTS.contains(seg)) return false;
+    }
+    return true;
+  }
+
 
 
   /** Default allowed aggregation fields (used if appui.search.aggregation.fields is not configured). */
@@ -124,6 +158,11 @@ public class ElasticProxy extends BalancerServlet {
   @Override
   protected void service(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
+    if (!isAllowedElasticPath(request.getPathInfo())) {
+      LOGGER.warn("Blocked Elasticsearch path: " + request.getPathInfo());
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "This endpoint is not supported.");
+      return;
+    }
     String method = request.getMethod();
     // Elasticsearch accepts (and Jetty will forward) a request body on GET
     // as well, e.g. GET _search with a query body - so GET must be
