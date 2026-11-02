@@ -6,7 +6,7 @@
       "sourceFieldMappings": {
         "query.sysAccess": "sys_access_s",
         "query.approvalStatus": "sys_approval_status_s",
-        "query.collectionMembership": "src_collections_s",
+        "query.collectionMembership": "collection,src_collections_s",
         
         "dataset.keywords": "keywords_s",
 		"dataset.publisherName": "publisher_s,contact_organizations_s",
@@ -163,7 +163,7 @@
       "sourceFieldMappings": {
         "query.sysAccess": "sys_access_s",
         "query.approvalStatus": "sys_approval_status_s",
-        "query.collectionMembership": "src_collections_s",
+        "query.collectionMembership": "collection,src_collections_s",
 
         "dataset.title": "title",
         "dataset.description": "description",

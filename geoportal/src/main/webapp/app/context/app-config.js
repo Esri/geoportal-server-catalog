@@ -1,66 +1,8 @@
-define([],function(){var obj={
-// .......................................................................................
-
-  system: {
-    searchLimit: 10000,
-    secureCatalogApp:false,
-    showTabs:"MapPanel,AdminPanel,AboutPanel,ApiPanel,CollectionsPanel,SearchPanel",//MapPanel,AdminPanel,AboutPanel,ApiPanel,CollectionsPanel,SearchPanel
-	defaultTab:"searchPanel" //searchPanel, mapPanel, apiPanel, collectionsPanel, aboutPanel
-  },
-
-  edit: {
-    setField: {
-      allow: false,
-      adminOnly: false
-    }
-  },
-
-  bulkEdit: {
-    allowByOwner: true,
-    allowBySourceUri: true,
-    allowByTaskRef: true,
-    allowByQuery: true
-  },
-
-  search: {
-    allowSettings: true,
-    useSimpleQueryString: false,
-    escapeFilter: false,
-	footPrintServiceUrl: "https://basemap.nationalmap.gov/arcgis/rest/services/USGSTopo/MapServer/export"
-  },
-
-  searchMap: {
-    basemap: "streets",
-	threeDBasemap: "streets-vector",
-    basemapUrl: "",
-    isTiled: false,
-    autoResize: true,
-    wrapAround180: true,
-    center: [-98, 40],
-    zoom: 2
-  },
-
-  searchResults: {
-    numPerPage: 10,
-    showDate: true,
-    showOwner: true,
-    showThumbnails: true,
-    showFootprint: true,
-    showAccess: true,
-    showApprovalStatus: true,
-    defaultSort: {"title.keyword": {"order" : "asc" ,"unmapped_type": "keyword"}},   
-    sortDesc:{"title.keyword": {"order" : "desc" ,"unmapped_type": "keyword"}},
-    showLinks: true,
-    showCustomLinks: true,
-    showOpenSearchLinks: true,
-    showTotalCountInHierarchy: true
-  },
-
-  statusChecker: {
-    apiUrl: "http://registry.fgdc.gov/statuschecker/api/v2/results?",
-    infoUrl: "http://registry.fgdc.gov/statuschecker/ServiceDetail.php?",
-    authKey: null
-  }
-
-// .......................................................................................
-};return obj;});
+// This module is no longer used.
+//
+// Client (web app) configuration values have been moved to
+// classpath:config/config.properties (server-side, under the "appui." prefix) and
+// are served to the browser via GET /rest/app-config
+// (see com.esri.geoportal.service.rest.AppConfigService). AppContext.js loads that
+// endpoint directly via AppContext.loadAppConfig() into AppContext.appConfig.
+define([],function(){return {};});
