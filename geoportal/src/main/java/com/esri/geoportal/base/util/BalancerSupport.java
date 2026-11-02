@@ -132,6 +132,18 @@ public class BalancerSupport {
     return null;
   }
   
+  /** Parameters that are not allowed at all (scroll opens server side search contexts). */
+  private static final Set<String> BLOCKED_PARAMS = Set.of("scroll");
+
+  /** Determines if a query-string parameter name is blocked (compared URL-decoded). Undecodable names are blocked. */
+  private boolean isBlockedParam(String name) {
+    try {
+      return BLOCKED_PARAMS.contains(URLDecoder.decode(name,"UTF-8").trim().toLowerCase());
+    } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+      return true;
+    }
+  }
+
   /** Parameter names that only exist to carry scripts. */
   private static final Set<String> SCRIPT_PARAMS = Set.of(
       "script","script_fields","script_score","runtime_mappings","scripted_metric");

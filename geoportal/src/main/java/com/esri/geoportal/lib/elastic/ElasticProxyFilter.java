@@ -23,6 +23,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -93,12 +94,9 @@ public class ElasticProxyFilter implements Filter {
                 path.indexOf("/"+idxName+"/_count") != -1) {
               checkAccess = true;
               String qstr = hsr.getQueryString();
-              if (qstr != null && qstr.length() > 0) {
-                String lc = "?" + qstr.toLowerCase();
-                if (lc.indexOf("?q=") != -1 || lc.indexOf("&q=") != -1) {
-                  // Throw an exception here or rely on app-security.xml?
-                  throw new ServletException("Parameter q is not supported, Post a {query: ...}");
-                }
+              if (hasQueryParam(qstr,"q")) {
+                // Throw an exception here or rely on app-security.xml?
+                throw new ServletException("Parameter q is not supported, Post a {query: ...}");
               }
             }
           }
@@ -130,6 +128,25 @@ public class ElasticProxyFilter implements Filter {
 
   @Override
   public void init(FilterConfig filterConfig) {}
+  
+  /**
+   * Checks if a query string contains a parameter, comparing URL-decoded names
+   * (Elasticsearch decodes names, so "%71=" is the same as "q="). A name that
+   * cannot be decoded is treated as a match (rejected).
+   */
+  private boolean hasQueryParam(String qstr, String name) {
+    if (qstr == null || qstr.length() == 0) return false;
+    for (String pair: qstr.split("&")) {
+      int eq = pair.indexOf('=');
+      String key = (eq >= 0) ? pair.substring(0,eq) : pair;
+      try {
+        if (URLDecoder.decode(key,"UTF-8").trim().equalsIgnoreCase(name)) return true;
+      } catch (Exception e) {
+        return true;
+      }
+    }
+    return false;
+  }
   
   private JsonObject mergeAccessQuery(HttpServletRequest hsr, AppUser user, String body) 
       throws ServletException{
