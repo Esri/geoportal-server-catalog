@@ -106,7 +106,7 @@ public class BalancerSupport {
         String[] p = kvp.split("=");
         if (p.length != 2) continue;
         if (p[0].equalsIgnoreCase("access_token")) continue;
-        if (isScriptingParam(p[0],p[1])) {
+        if (isScriptingParam(p[0],p[1]) || isBlockedParam(p[0])) {
           LOGGER.warn("Blocked Elasticsearch query parameter: "+p[0]);
           return null;
         }
@@ -133,7 +133,7 @@ public class BalancerSupport {
   }
   
   /** Parameters that are not allowed at all (scroll opens server side search contexts). */
-  private static final Set<String> BLOCKED_PARAMS = Set.of("scroll");
+  private static final Set<String> BLOCKED_PARAMS = Set.of("scroll","scroll_id","search_type","request_cache","preference","filter_path","track_scores","terminate_after");
 
   /** Determines if a query-string parameter name is blocked (compared URL-decoded). Undecodable names are blocked. */
   private boolean isBlockedParam(String name) {

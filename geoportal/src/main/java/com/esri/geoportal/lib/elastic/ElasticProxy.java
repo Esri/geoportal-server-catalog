@@ -425,8 +425,23 @@ public class ElasticProxy extends BalancerServlet {
     if (uri != null && sanitizedSource != null) {
       uri = replaceQueryParam(uri, "source", sanitizedSource);
     }
+    // sanitizeObject() only forces a safety "timeout" into the JSON body, so a
+    // GET _search with no body and no "source" (nothing for it to sanitize)
+    // would otherwise run with no time limit at all. "timeout" is also a valid
+    // _search query-string parameter, so enforce the same default here too -
+    // unconditionally overwriting any client-supplied value, same as the body
+    // path - regardless of request method or whether a body was present.
+    if (uri != null && isSearchPath(request)) {
+      uri = replaceQueryParam(uri, "timeout", QUERY_TIMEOUT);
+    }
     LOGGER.debug("ProxyTo: "+uri);
     return uri;
+  }
+
+  /** True for /_search paths (but not /_search/scroll), matching the isSearch check in sanitizeBody(). */
+  private boolean isSearchPath(HttpServletRequest request) {
+    String path = request.getRequestURI();
+    return path != null && path.contains("_search") && !path.contains("_search/scroll");
   }
 
   /** Replaces (or appends) a query-string parameter in an already-built target URL. */
