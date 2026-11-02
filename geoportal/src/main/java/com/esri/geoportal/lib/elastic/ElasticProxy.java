@@ -16,6 +16,8 @@ package com.esri.geoportal.lib.elastic;
 
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +69,12 @@ public class ElasticProxy extends BalancerServlet {
   private static final int MAX_BODY_BYTES = 10 * 1024 * 1024;
   private static final String QUERY_TIMEOUT = "7s";
   private static final String SANITIZED_ATTR = ElasticProxy.class.getName() + ".sanitizedBody";
+  // Elasticsearch also accepts the request body via a "source" query-string
+  // parameter (?source=<json>&source_content_type=application/json), most
+  // often paired with GET - this bypasses the body-based checks entirely,
+  // so the sanitized value is stashed here and spliced back into the
+  // proxied URL by rewriteTarget().
+  private static final String SANITIZED_SOURCE_ATTR = ElasticProxy.class.getName() + ".sanitizedSource";
 
   private static final Set<String> BLOCKED_KEYS = Set.of(
       "script", "script_score", "script_fields", "runtime_mappings", "scripted_metric");
@@ -142,7 +150,51 @@ public class ElasticProxy extends BalancerServlet {
         }
       }
     }
+
+    // Elasticsearch also accepts the query body via a "source" query-string
+    // parameter (?source=<json>&source_content_type=application/json),
+    // typically combined with GET so no request body is sent at all. This
+    // query parameter bypasses the body checks above entirely, so it must
+    // be validated/sanitized the same way. Parsed directly from the raw
+    // query string (rather than request.getParameter()) to avoid any
+    // interaction with the input stream already consumed above.
+    String source = extractQueryParam(request.getQueryString(), "source");
+    if (source != null) {
+      if (source.getBytes(StandardCharsets.UTF_8).length > MAX_BODY_BYTES) {
+        response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+        return;
+      }
+      try {
+        byte[] sanitized = sanitizeBody(source, request.getRequestURI());
+        request.setAttribute(SANITIZED_SOURCE_ATTR, new String(sanitized, StandardCharsets.UTF_8));
+      } catch (AccessDeniedException e) {
+        LOGGER.warn("Blocked Elasticsearch request: " + e.getMessage());
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        return;
+      } catch (IOException e) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JSON in source parameter");
+        return;
+      }
+    }
+
     super.service(request, response);
+  }
+
+  /** Extracts and URL-decodes a single query-string parameter's raw value, or null if absent/undecodable. */
+  private String extractQueryParam(String query, String name) {
+    if (query == null) return null;
+    for (String pair : query.split("&")) {
+      int eq = pair.indexOf('=');
+      if (eq < 0) continue;
+      String key = pair.substring(0, eq);
+      if (!key.equalsIgnoreCase(name)) continue;
+      try {
+        return URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        return null;
+      }
+    }
+    return null;
   }
 
   @Override
@@ -366,8 +418,48 @@ public class ElasticProxy extends BalancerServlet {
   @Override
   protected String rewriteTarget(HttpServletRequest request) {
     String uri = balancerSupport.rewriteTarget(request);
+    // if the "source" query parameter was validated/sanitized in service(),
+    // splice the sanitized value back in so the (possibly clamped/modified)
+    // version is what actually gets forwarded to Elasticsearch
+    String sanitizedSource = (String) request.getAttribute(SANITIZED_SOURCE_ATTR);
+    if (uri != null && sanitizedSource != null) {
+      uri = replaceQueryParam(uri, "source", sanitizedSource);
+    }
     LOGGER.debug("ProxyTo: "+uri);
     return uri;
+  }
+
+  /** Replaces (or appends) a query-string parameter in an already-built target URL. */
+  private String replaceQueryParam(String uri, String paramName, String newRawValue) {
+    try {
+      int qIdx = uri.indexOf('?');
+      String base = qIdx >= 0 ? uri.substring(0, qIdx) : uri;
+      String query = qIdx >= 0 ? uri.substring(qIdx + 1) : "";
+      String encodedValue = URLEncoder.encode(newRawValue, StandardCharsets.UTF_8);
+      StringBuilder sb = new StringBuilder();
+      boolean replaced = false;
+      if (!query.isEmpty()) {
+        for (String pair : query.split("&")) {
+          int eq = pair.indexOf('=');
+          String key = eq >= 0 ? pair.substring(0, eq) : pair;
+          if (sb.length() > 0) sb.append('&');
+          if (key.equalsIgnoreCase(paramName)) {
+            sb.append(paramName).append('=').append(encodedValue);
+            replaced = true;
+          } else {
+            sb.append(pair);
+          }
+        }
+      }
+      if (!replaced) {
+        if (sb.length() > 0) sb.append('&');
+        sb.append(paramName).append('=').append(encodedValue);
+      }
+      return base + "?" + sb;
+    } catch (Exception e) {
+      LOGGER.error("Error rewriting \"" + paramName + "\" query parameter", e);
+      return uri;
+    }
   }
   
 
