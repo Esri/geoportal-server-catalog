@@ -164,7 +164,7 @@ public class StacHelper {
 	 * @throws Exception
 	 */
 	public static JSONArray getCollectionList() throws Exception {
-    return getCollectionList(10000);
+    return getCollectionList(10000,false);
   }
 
   
@@ -172,7 +172,7 @@ public class StacHelper {
 	 * @return
 	 * @throws Exception
 	 */
-	public static JSONArray getCollectionList(int limit) throws Exception {
+	public static JSONArray getCollectionList(int limit,boolean includeNonStac) throws Exception {
 		ElasticClient client = ElasticClient.newClient();
 		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
 		
@@ -180,14 +180,23 @@ public class StacHelper {
     
     // 616 - only allow max number to return
 		url = url + "/_search?size=" + limit;    
-    String searchAfterStr = "";
+   
+    String query="";
     // TODO - full pagination for collections list
     //    if (searchAfter != null && !searchAfter.isBlank()) {
     //      searchAfterStr = ", \"search_after\":[\"" + searchAfter + "\"]";
     //    } else {
     //      searchAfterStr = "";
     //    }
-		String query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}" + searchAfterStr + "}";
+    	//Add stac_version=false in search
+    	if(includeNonStac) //For includeNonStac=true, do not add stac_version exists filter, so that it will return all collections, even if non-STAC collections are indexed in the same index without stac_version field.
+		{
+    		query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}}";
+		}
+		else
+		{
+			query = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"},\"query\":{\"bool\": {\"must\":[{\"exists\": {\"field\": \"stac_version\"}}]}}}";
+		}		
 		
 		String	response = client.sendPost(url, query, "application/json");	
 		DocumentContext elasticResContext = JsonPath.parse(response);
@@ -827,6 +836,9 @@ private static String prepareStatus(String status) {
 	}
 
 	private static JSONObject extract2DGeoJson(JSONObject geometry) {		
+		if (geometry == null || geometry.getAsString("type") == null) {
+			return geometry;
+		}
         String type = geometry.getAsString("type");
         type = type.toUpperCase();
         JSONArray coordinates = (JSONArray) geometry.get("coordinates");
@@ -839,6 +851,11 @@ private static String prepareStatus(String status) {
     			break;
     		case "LINESTRING":
     			modifiedObj.put("type", "LineString");
+    			modifiedObj.put("coordinates", extract2DLine(coordinates));
+    			break;
+    		case "MULTIPOINT":
+    			modifiedObj.put("type", "MultiPoint");
+    			// MultiPoint coordinates have the same structure as LineString (array of points)
     			modifiedObj.put("coordinates", extract2DLine(coordinates));
     			break;
     		case "POLYGON":
@@ -1064,11 +1081,11 @@ private static String prepareStatus(String status) {
 		if(requestPayload.containsKey("type") && !requestPayload.getAsString("type").equals("Collection")) {
 			errorMsg = errorMsg+" type should be Collection.";
 		}
-    
-		if(!requestPayload.containsKey("stac_version") || 
-      (requestPayload.containsKey("stac_version") && requestPayload.get("stac_version").toString().isBlank()))	{
-			errorMsg = errorMsg+" stac_version is mandatory.";
-		}
+    //Removed validation for stac_version as all collection(non stac also) will be created using Collection Panel only 
+//		if(!requestPayload.containsKey("stac_version") || 
+//			(requestPayload.containsKey("stac_version") && requestPayload.get("stac_version").toString().isBlank()))	{
+//			errorMsg = errorMsg+" stac_version is mandatory.";
+//		}
     
 		if (!requestPayload.containsKey("id") || 
        (requestPayload.containsKey("id") && requestPayload.get("id").toString().isBlank()))	{
@@ -1107,7 +1124,7 @@ private static String prepareStatus(String status) {
     } else {
 			String id = requestPayload.get("id").toString();
 			//Check if same id collection exist
-			JSONObject itemRes = getCollectionWithId(id);	
+			JSONObject itemRes = getAllCollectionsWithId(id);	
 			
 			if(update && (itemRes.isEmpty()))
 			{
@@ -1182,7 +1199,6 @@ private static String prepareStatus(String status) {
 		boolean deleteById = false;
 		int deletedSuccess = 0;		
 		int total = 0; 
-		
 		try {
 			url =  client.getTypeUrlForSearch(ec.getIndexName());
 
@@ -1382,8 +1398,8 @@ private static String prepareStatus(String status) {
 					  if (coordinates!=null && type.equals("POINT")) {
 						  	StacContext sc = StacContext.getInstance();
 						  	double bboxSize = sc.getStacBboxSize();				  	
-						  	double x = (double) coordinates.get(0);
-			                double y = (double) coordinates.get(1);
+						  	double x = toDouble(coordinates.get(0));
+			                double y = toDouble(coordinates.get(1));
 			                
 			                minLng = x-(bboxSize/2);
 			                maxLng = x +(bboxSize/2);		                		
@@ -1394,8 +1410,8 @@ private static String prepareStatus(String status) {
 		                } else if (coordinates!=null && (type.equals("LINESTRING") || type.equals("MULTIPOINT"))) {	                    
 		                    for (int i = 0; i < coordinates.size(); i++) {
 		                        JSONArray coord = (JSONArray) coordinates.get(i);
-		                        double lng = (double) coord.get(0);
-			                    double lat = (double) coord.get(1);
+		                        double lng = toDouble(coord.get(0));
+			                    double lat = toDouble(coord.get(1));
 		                        minLat = Math.min(minLat, lat);
 		                        maxLat = Math.max(maxLat, lat);
 		                        minLng = Math.min(minLng, lng);
@@ -1407,8 +1423,8 @@ private static String prepareStatus(String status) {
 		                        JSONArray ring = (JSONArray) coordinates.get(i);
 		                        for (int j = 0; j < ring.size(); j++) {
 		                            JSONArray coord = (JSONArray) ring.get(j);
-		                            double lng = (double) coord.get(0);
-		    	                    double lat = (double) coord.get(1);
+		                            double lng = toDouble(coord.get(0));
+		    	                    double lat = toDouble(coord.get(1));
 		                            minLat = Math.min(minLat, lat);
 		                            maxLat = Math.max(maxLat, lat);
 		                            minLng = Math.min(minLng, lng);
@@ -1423,8 +1439,8 @@ private static String prepareStatus(String status) {
 		                            JSONArray ring = (JSONArray) polygon.get(j);
 		                            for (int k=0; k<ring.size(); k++){
 		                                JSONArray coord = (JSONArray) ring.get(k);
-		                                double lng = (double) coord.get(0);
-			    	                    double lat = (double) coord.get(1);
+		                                double lng = toDouble(coord.get(0));
+			    	                    double lat = toDouble(coord.get(1));
 		                                minLat = Math.min(minLat, lat);
 		                                maxLat = Math.max(maxLat, lat);
 		                                minLng = Math.min(minLng, lng);
@@ -1433,6 +1449,11 @@ private static String prepareStatus(String status) {
 		                        }
 		                    }
 		               }				  
+					  // No coordinates were read (null/empty geometry): do not return sentinel values
+					  if (minLng > maxLng || minLat > maxLat) {
+						  LOGGER.debug("No coordinates found to generate bbox for type: " + type);
+						  return null;
+					  }
 					  bbox =  new JSONArray();
 					  bbox.add(0,minLng);
 					  bbox.add(1,minLat);
@@ -1462,9 +1483,30 @@ private static String prepareStatus(String status) {
      * @return the same stacItem instance, mutated
      */
     public static JSONArray addExtensionsFromProperties(Map<String, ?> finalPropObj, JSONObject aliasCfg) {
-    	JSONArray stacExtensions = new JSONArray();
-        if (finalPropObj == null || finalPropObj == null) return stacExtensions;
+        return addExtensionsFromProperties(finalPropObj, aliasCfg, null);
+    }
 
+    /**
+     * Same as above, with the extensions submitted with the item.
+     * If keepAllExtensions is true: result = submitted extensions + extensions derived from item properties.
+     * If keepAllExtensions is false: result = extensions derived from item properties only.
+     *
+     * @param submittedExtensions stac_extensions submitted with the item (may be null)
+     */
+    public static JSONArray addExtensionsFromProperties(Map<String, ?> finalPropObj, JSONObject aliasCfg, List<?> submittedExtensions) {
+    	StacContext sc = StacContext.getInstance();
+	
+		JSONArray stacExtensions = new JSONArray();
+        if (finalPropObj == null || aliasCfg == null) return stacExtensions;
+
+        if (sc.isKeepAllExtensions() && submittedExtensions != null) {
+            for (Object s : submittedExtensions) {
+                String u = asString(s);
+                if (u != null && !u.isBlank()) {
+                    addUnique(stacExtensions, u);
+                }
+            }
+        }
        
         // Build a set of keys present in stacItem.properties for fast lookup
         Set<String> presentKeys = new HashSet<>(finalPropObj.keySet());
@@ -1482,6 +1524,9 @@ private static String prepareStatus(String status) {
                 continue;
             }
 
+            // see app-context.xml setting keepAllExtensions
+            // true: submitted extensions (added above) are merged with property-based extensions.
+            // false: only property-based extensions.
             JSONArray propNames = (JSONArray) propListObj;
 
             // If any configured property for this extension exists in stacItem.properties, add the URL
@@ -1501,16 +1546,6 @@ private static String prepareStatus(String status) {
         return stacExtensions;
     }
     
-    private static JSONArray getOrCreateArray(JSONObject obj, String key) {
-        Object v = obj.get(key);
-        if (v instanceof JSONArray) {
-            return (JSONArray) v;
-        }
-        JSONArray arr = new JSONArray();
-        obj.put(key, arr);
-        return arr;
-    }
-
     private static void addUnique(JSONArray arr, String value) {
         for (Object o : arr) {
             if (value.equals(String.valueOf(o))) {
@@ -1523,6 +1558,46 @@ private static String prepareStatus(String status) {
     private static String asString(Object o) {
         return (o == null) ? null : o.toString();
     }
+
+    //This returns all collections(including non stac) with the given collectionId
+	public static JSONObject getAllCollectionsWithId(String collectionId) throws Exception {
+		String response = "";		
+		String queryStr = "";		
+		JsonArrayBuilder builder = Json.createArrayBuilder();
+		
+		ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
+		ElasticClient client = ElasticClient.newClient();
+		String url = client.getTypeUrlForSearch(ec.getCollectionIndexName());	
+
+		
+		url = url + "/_search";
+		String idsQry = prepareIds(collectionId);
+		System.out.println("ids " + idsQry);
+
+		if (idsQry.length() > 0)
+			builder.add(JsonUtil.toJsonStructure(idsQry));
+		JsonArray filter = builder.build();
+
+		if (!filter.isEmpty()) {
+			queryStr = "\"query\":{\"bool\": {\"must\":" + JsonUtil.toJson(filter) + "}}";
+		}	
+
+		String searchQuery = "{\"track_total_hits\":true,\"sort\": {\"_id\": \"asc\"}"
+				+ (queryStr.length() > 0 ? "," + queryStr : "")+"}";
+		
+		response = client.sendPost(url, searchQuery, "application/json");		
+		
+		DocumentContext elasticResContext = JsonPath.parse(response);
+		net.minidev.json.JSONArray items = elasticResContext.read("$.hits.hits");
+		JSONObject item = new JSONObject();
+		
+		if(items != null && items.size()>0)
+		{
+			HashMap itemMap = (HashMap) items.get(0);
+			item = new JSONObject((HashMap)itemMap.get("_source"));
+		}
+		return item;
+	}
 
 
 

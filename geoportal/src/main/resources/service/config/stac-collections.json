@@ -1,32 +1,17 @@
 {
-	"collections": [
-		{
-			"stac_version": "1.0.0",
-			"stac_extensions": [
-        "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
-        "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
-        "https://stac-extensions.github.io/video/v1.0.0/schema.json",
-        "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
-        "https://stac-extensions.github.io/sar/v1.3.0/schema.json",
-        "https://stac-extensions.github.io/view/v1.1.0/schema.json"
-      ],
-			"type": "Collection",
-			"id": "{collectionId}",
-			"title": "Esri Geoportal Server Metadata",
-			"description": "STAC API Powered by Esri Geoportal Server Catalog",
+	"collections": [],
+	"collectionDefaults": {
+		"stac_version": "1.0.0",
+		"stac_extensions": [
+		    "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
+		    "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",
+		    "https://stac-extensions.github.io/video/v1.0.0/schema.json",
+		    "https://stac-extensions.github.io/processing/v1.2.0/schema.json",
+		    "https://stac-extensions.github.io/sar/v1.3.0/schema.json",
+		    "https://stac-extensions.github.io/view/v1.1.0/schema.json"
+		  ],			
 			"license": "Apache-2.0",
-			"extent": {
-				"spatial": {
-					"bbox": [
-						[
-							-180.0,
-							 -90.0, 
-							 180.0,
-							  90.0
-						]
-					]
-				},
-				"temporal": {
+			"temporal": {
 					"interval": [
 						[
 							"2018-06-23T00:00:00Z",
@@ -34,27 +19,7 @@
 						]
 					]
 				}
-			},
-			"item_assets": {
-				"thumbnail": {
-					"type": "image/jpeg",
-					"title": "Thumbnail",
-					"description": "A medium sized thumbnail",
-					"roles": [
-						"thumbnail"
-					]
-				},
-				"metadata": {
-					"type": "mtl",
-					"roles": [
-						"metadata"
-					],
-					"title": "Original Metadata",
-					"description": "The original metadata file"
-				}
-			}
-    }
-  ],
+	},
   "links": [
     {
       "rel": "self",

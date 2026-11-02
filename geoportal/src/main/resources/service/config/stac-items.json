@@ -11,7 +11,7 @@
     "type": "Feature",	
     "id": "$._source.id",
     "collection": "$._source.collection",		
-    "stac_version": "1.0.0",
+    "stac_version": "$._source.stac_version",
     "stac_extensions": [
       "https://stac-extensions.github.io/eo/v2.0.0/schema.json",
       "https://stac-extensions.github.io/pointcloud/v2.0.0/schema.json",

@@ -28,15 +28,32 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Map.Entry;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
 import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
+
+import org.owasp.esapi.ESAPI;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.web.bind.annotation.RequestBody;
+
+import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.util.ResourcePath;
+import com.esri.geoportal.base.util.exception.InvalidParameterException;
+import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.lib.elastic.ElasticContext;
+import com.esri.geoportal.lib.elastic.http.ElasticClient;
+import com.esri.geoportal.lib.elastic.util.FieldNames;
+import com.esri.geoportal.service.stac.Collection;
+import com.esri.geoportal.service.stac.GeometryServiceClient;
+import com.esri.geoportal.service.stac.StacContext;
+import com.jayway.jsonpath.Configuration;
+import com.jayway.jsonpath.DocumentContext;
+import com.jayway.jsonpath.JsonPath;
+import com.jayway.jsonpath.Option;
 
 import jakarta.json.Json;
 import jakarta.json.JsonArray;
@@ -60,27 +77,6 @@ import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.Response.Status;
-
-import org.owasp.esapi.ESAPI;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.web.bind.annotation.RequestBody;
-
-import com.esri.geoportal.base.util.JsonUtil;
-import com.esri.geoportal.base.util.ResourcePath;
-import com.esri.geoportal.base.util.exception.InvalidParameterException;
-import com.esri.geoportal.context.GeoportalContext;
-import com.esri.geoportal.lib.elastic.ElasticContext;
-import com.esri.geoportal.lib.elastic.http.ElasticClient;
-import com.esri.geoportal.lib.elastic.util.FieldNames;
-import com.esri.geoportal.service.stac.Collection;
-import com.esri.geoportal.service.stac.GeometryServiceClient;
-import com.esri.geoportal.service.stac.StacContext;
-import com.jayway.jsonpath.Configuration;
-import com.jayway.jsonpath.DocumentContext;
-import com.jayway.jsonpath.JsonPath;
-import com.jayway.jsonpath.Option;
-
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -226,12 +222,26 @@ public class STACService extends Application {
 	public Response getCollections(@Context HttpServletRequest hsr, 
           @QueryParam("limit") int limit, 
           @QueryParam("f") String f,
-          @QueryParam("outCRS") String outCRS) {
+          @QueryParam("outCRS") String outCRS,@QueryParam("includeNonStac") boolean includeNonStac,
+          @QueryParam("collectionDefaultsOnly") boolean collectionDefaultsOnly) {
+		
+		// onlyDefaults = Return only the default collection template (stac_version, stac_extensions, license, temporal) defined in stac-collections.json, used by clients for new collections
     
 		String responseJSON;
 		String finalresponse = "";
-		Status status = Response.Status.OK;
+		Status status = Response.Status.OK;		
 		JSONArray detailErrArray = new JSONArray();
+		if(collectionDefaultsOnly) {			
+			try {
+				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);				
+			} catch (Exception e) {
+				LOGGER.error("Error in collections " + e);
+				status = Response.Status.INTERNAL_SERVER_ERROR;
+				detailErrArray.add(e.getMessage());
+				responseJSON = this.generateResponse("500", "STAC API collection response could not be generated.",detailErrArray);
+			}
+			return Response.status(status).entity(responseJSON).build();
+		}
     
     // 616 return up to 10,000 collections, not full pagination yet
 		// if no limit provided (primitive int defaults to 0), set it to 10,000 (max limit for collections)
@@ -246,7 +256,7 @@ public class STACService extends Application {
 
 				JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
 				// Get list of collections
-				JSONArray collectionsArray = StacHelper.getCollectionList(limit);
+				JSONArray collectionsArray = StacHelper.getCollectionList(limit,includeNonStac);
 
 				// if reprojecting STAC geometries is supported and a
 				// geometry service has been configured, try projecting
@@ -283,6 +293,7 @@ public class STACService extends Application {
 				}
 
 				stacCollections.put("collections", collectionsArray);
+				stacCollections.remove("collectionDefaults");
 
 				// final output formatting
 				if ((f != null) && "geojson".equals(f)) {
@@ -427,6 +438,39 @@ public class STACService extends Application {
 			responseJSON = this.generateResponse("500", "Stac collection could not be added.",detailErrArray);
 		}			
 		return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();			
+	}
+	
+	//This is used from CollectionPanel.js to get all collections including non Stac collections with the given collectionId
+	@GET
+	@Path("/allCollections/{collectionId}")
+	@Produces(MediaType.APPLICATION_JSON)
+	public Response getAllCollection(@Context HttpServletRequest hsr,
+			@PathParam("collectionId") String collectionId) {
+    
+		String responseJSON = null;
+		Status status = Response.Status.OK;
+		JSONArray detailErrArray = new JSONArray();
+		
+		try {			
+
+			JSONObject collectionObj = StacHelper.getAllCollectionsWithId(collectionId);
+			if (collectionObj == null || collectionObj.isEmpty()) // #518 
+			{
+				status = Response.Status.NOT_FOUND;
+			}
+			else
+			{
+				responseJSON = collectionObj.toString();
+			}          
+        			
+		} catch (Exception e) {
+			LOGGER.error(ESAPI.encoder().encodeForHTML("Error in getting collection: "+collectionId+" "+e));
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			responseJSON = this.generateResponse("500", "STAC API collection response could not be generated. "+e.getMessage(),detailErrArray);
+		}
+    
+		return Response.status(status).entity(responseJSON).build();
 	}
 
   
@@ -2102,6 +2146,10 @@ public class STACService extends Application {
 			val = featureContext.read("$.featurePropPath.collection");
 			String collectionId = searchItemCtx.read(val).toString();
 			featureContext.set("$.featurePropPath.collection", collectionId);
+			
+			val = featureContext.read("$.featurePropPath.stac_version");
+			String stacVersion = searchItemCtx.read(val).toString();			
+			featureContext.set("$.featurePropPath.stac_version", stacVersion);
 
 			// add bbox, geometry
 			this.setBbox(searchItemCtx, featureContext);
@@ -2179,8 +2227,10 @@ public class STACService extends Application {
 			// mentioned in propObjKeys/propObj (json path), read the value from the opensearch response.
 			// Item property set is built from the opensearch response (searchItemCtx)
 			Set<String> itemPropWithValueSet = new HashSet<String>();
+			Map<String, Object> rawItemProps = null;
 			try {
 				Map<String, Object> osItemProps = searchItemCtx.read("$._source.properties");
+				rawItemProps = osItemProps;
 				if (osItemProps != null) {
 					for (Map.Entry<String, Object> e : osItemProps.entrySet()) {
 						if (e.getValue() != null) {
@@ -2210,9 +2260,25 @@ public class STACService extends Application {
 						itemPropWithValueSet.add(propKey);
 					}
 				} catch (Exception e) {
-					// If json path not found or error in any property, remove this property in the
-					// end (unless collection supplies it). Removing here causes concurrentModificationException
-					propToBeRemovedList.add("$.featurePropPath.properties." + propKey);
+					String propPath = "$.featurePropPath.properties." + propKey;
+					boolean usedRaw = false;
+					if (rawItemProps != null && rawItemProps.get(propKey) != null) {
+						// mapping failed, fall back to the raw item value
+						try {
+							featureContext.set(propPath, rawItemProps.get(propKey));
+							itemPropWithValueSet.add(propKey);
+							propToBeRemovedList.remove(propPath);
+							usedRaw = true;
+						} catch (Exception e2) {
+							// fall through to removal
+						}
+					}
+					if (!usedRaw) {
+						// If json path not found or error in any property, remove this property in the
+						// end (unless collection supplies it). Removing here causes concurrentModificationException
+						itemPropWithValueSet.remove(propKey);
+						propToBeRemovedList.add(propPath);
+					}
 					LOGGER.trace("key: " + propKey + " could not be added. Reason : " + e.getMessage());
 				}
 			}
@@ -2293,7 +2359,17 @@ public class STACService extends Application {
 
 		
 		//Determine stac_extensions to be added in feature based on properties in item, for example if eo:bands properties are available, add "eo" in stac_extension
-		JSONArray stacExtenions = StacHelper.addExtensionsFromProperties(finalPropObj,propExtensionObj);
+		// Extensions submitted with the item (stored in index), merged when keepAllExtensions=true
+		java.util.List<?> submittedExtensions = null;
+		try {
+			Object subExt = searchItemCtx.read("$._source.stac_extensions");
+			if (subExt instanceof java.util.List) {
+				submittedExtensions = (java.util.List<?>) subExt;
+			}
+		} catch (Exception ex) {
+			// no submitted extensions on the item
+		}
+		JSONArray stacExtenions = StacHelper.addExtensionsFromProperties(finalPropObj,propExtensionObj,submittedExtensions);
 		featureContext.set("$.featurePropPath.stac_extensions", stacExtenions);
 		
 		return featureValid;

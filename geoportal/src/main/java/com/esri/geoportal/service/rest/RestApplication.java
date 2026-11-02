@@ -34,6 +34,7 @@ public class RestApplication extends Application {
     Set<Class<?>> resources = new HashSet<Class<?>>();
     resources.add(GeoportalService.class);
     resources.add(MetadataService.class);
+    resources.add(AppConfigService.class);
     return resources;
   }
 
