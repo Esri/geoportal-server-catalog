@@ -117,9 +117,12 @@ public class ElasticProxy extends BalancerServlet {
   protected void service(HttpServletRequest request, HttpServletResponse response)
       throws ServletException, IOException {
     String method = request.getMethod();
-    boolean hasBody = "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
-        || "PATCH".equalsIgnoreCase(method);
-    if (hasBody) {
+    // Elasticsearch accepts (and Jetty will forward) a request body on GET
+    // as well, e.g. GET _search with a query body - so GET must be
+    // sanitized/size-checked too, not just POST/PUT/PATCH.
+    boolean mayHaveBody = "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
+        || "PATCH".equalsIgnoreCase(method) || "GET".equalsIgnoreCase(method);
+    if (mayHaveBody) {
       byte[] bytes = request.getInputStream().readNBytes(MAX_BODY_BYTES + 1);
       if (bytes.length > MAX_BODY_BYTES) {
         response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
