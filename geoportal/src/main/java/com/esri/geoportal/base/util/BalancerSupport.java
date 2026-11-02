@@ -18,7 +18,9 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -98,20 +100,16 @@ public class BalancerSupport {
     }    
     String query = request.getQueryString();
     if (query != null) {
-      try {
-        String lc = query.toLowerCase();
-        String lcd = URLDecoder.decode(query,"UTF-8").toLowerCase();
-        if (lc.contains("<script") && lc.contains("</script>")) return null;
-        if (lcd.contains("<script") && lcd.contains("</script>")) return null;
-      } catch (UnsupportedEncodingException e) {}
-    }
-    if (query != null) {
       StringBuilder qsb = new StringBuilder();
       String[] pairs = query.split("&");
       for (String kvp: pairs) {
         String[] p = kvp.split("=");
         if (p.length != 2) continue;
         if (p[0].equalsIgnoreCase("access_token")) continue;
+        if (isScriptingParam(p[0],p[1])) {
+          LOGGER.warn("Blocked Elasticsearch query parameter: "+p[0]);
+          return null;
+        }
         if (qsb.length() > 0) qsb.append("&");
         String v = p[1];
         //try {v = URLEncoder.encode(v,"UTF-8");}
@@ -134,6 +132,36 @@ public class BalancerSupport {
     return null;
   }
   
+  /** Parameter names that only exist to carry scripts. */
+  private static final Set<String> SCRIPT_PARAMS = Set.of(
+      "script","script_fields","script_score","runtime_mappings","scripted_metric");
+
+  /** JSON keys that introduce Elasticsearch scripting inside any parameter value (e.g. source=). */
+  private static final Pattern SCRIPT_JSON_KEY = Pattern.compile(
+      "\"(script|script_fields|script_score|runtime_mappings|scripted_metric)\"\\s*:",
+      Pattern.CASE_INSENSITIVE);
+
+  /**
+   * Determines if a query-string parameter carries Elasticsearch scripting, either
+   * as a dedicated parameter or as a script key inside a JSON value. The value is
+   * decoded repeatedly so double-encoded payloads are also detected. Undecodable
+   * values are rejected.
+   */
+  private boolean isScriptingParam(String name, String value) {
+    try {
+      String n = URLDecoder.decode(name,"UTF-8").toLowerCase();
+      if (SCRIPT_PARAMS.contains(n)) return true;
+      String v = value;
+      for (int i = 0; i < 3; i++) {
+        v = URLDecoder.decode(v,"UTF-8");
+        if (SCRIPT_JSON_KEY.matcher(v).find()) return true;
+      }
+    } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+      return true;
+    }
+    return false;
+  }
+
   /** A node that is part of the cluster to which requests are proxied. */
   public static class BalancerNode {
     
