@@ -406,7 +406,6 @@ public class ElasticProxy extends BalancerServlet {
     ElasticContext ec = null;
     if (gc != null) ec = gc.getElasticContext();
     if (ec != null) {
-      balancerSupport.setIs7Plus(ec.getIs7Plus());
       String[] nodes = ec.nodesToArray();
       String scheme = "http://";
       if (ec.getUseHttps()) {

@@ -39,18 +39,9 @@ public class BalancerSupport {
   /** Instance vriables. */
   protected final AtomicLong balancerCount = new AtomicLong();
   private List<BalancerNode> balancerNodes = new ArrayList<>();
-  private boolean is7Plus;
   private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
   private static final Logger LOGGER = LoggerFactory.getLogger(BalancerSupport.class);
-  
-  public boolean getIs7Plus() {
-    return is7Plus;
-  }
 
-  public void setIs7Plus(boolean is7Plus) {
-    this.is7Plus = is7Plus;
-  }
-  
   /** The cluster of nodes. */ 
   public List<BalancerNode> getBalancerNodes() {
     return balancerNodes;
@@ -95,8 +86,7 @@ public class BalancerSupport {
     }
 	String pathInfo = ec.addIndexName(request.getPathInfo());
     if (pathInfo != null) {
-      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
-    
+      target.append(pathInfo);
     }    
     String query = request.getQueryString();
     if (query != null) {
