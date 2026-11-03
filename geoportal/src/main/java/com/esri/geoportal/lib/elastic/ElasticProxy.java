@@ -19,8 +19,10 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -122,38 +124,36 @@ public class ElasticProxy extends BalancerServlet {
       "terms", "date_histogram", "nested", "geohash_grid", "filter", "filters");
 
   // ---- Path allow-list ----
-  // This app only ever needs to search the metadata index (see doc/api.txt
-  // and every client usage under src/main/webapp - all of it hits "_search", none
-  // of it hits anything else, including "_count"). Without an explicit allow-list,
-  // any other Elasticsearch REST API would be forwarded unrestricted - cluster/node
-  // admin (_cat, _cluster, _nodes), destructive bulk ops (_bulk, _delete_by_query,
-  // _update_by_query), scripted/stored-query execution (_scripts, _search/template),
-  // long-lived resource consumers (_reindex, _pit, scroll), cross-index wildcard
-  // reads (_all), etc. The final path segment must be one of the allowed
-  // operations, and no segment anywhere in the path may be one of the explicitly
-  // forbidden ones (this also blocks sneaky combinations like "_all/_search").
-  private static final Set<String> ALLOWED_OPS = Set.of("_search");
-  private static final Set<String> FORBIDDEN_SEGMENTS = Set.of(
-      "_all", "_cat", "_cluster", "_nodes", "_bulk", "_delete_by_query", "_update_by_query",
-      "_mget", "_scripts", "_reindex", "_pit", "_sql", "_async_search", "_field_caps",
-      "_mapping", "_settings", "_alias", "_aliases", "_close", "_open", "_flush",
-      "_forcemerge", "_snapshot", "_tasks", "_template", "_component_template",
-      "_index_template", "_ilm", "_license", "_security", "_ml", "_watcher", "_xpack",
-      "_render", "_validate", "_explain", "_termvectors", "_mtermvectors", "_rank_eval",
-      "_graph", "_eql", "_async", "scroll", "template");
-
-  /** True only for paths ending in an allowed operation and containing no forbidden segment. */
+  // This app only ever needs to search the configured metadata index (see doc/api.txt
+  // and every client usage under src/main/webapp - all of it hits "_search" against the
+  // one metadata index, nothing else). A keyword-based allow/forbidden-segment list is
+  // NOT sufficient here: it would still let a client search a *different* index entirely
+  // (e.g. "/elastic/some_other_index/_search", or even "/elastic/.kibana/_search" - any
+  // index name is, by definition, not a "forbidden" keyword), and a path-traversal segment
+  // like "/elastic/x/../_search" would sail through such a check (no forbidden segment
+  // present) only to have the proxy's own URI normalization later collapse "x/.." away,
+  // producing a *bare* "/_search" that Elasticsearch runs across *all* indices. So instead
+  // the path is required to be *exactly* the one shape this app ever sends: either a bare
+  // "/_search" (which addIndexName() below expands to the configured index) or an explicit
+  // "/{indexName}/_search" naming that same index - nothing more, nothing less. "." and
+  // ".." segments are rejected outright (never silently resolved) so they can't be used to
+  // disguise a different effective path.
   private boolean isAllowedElasticPath(String pathInfo) {
     if (pathInfo == null) return false;
-    String[] segments = pathInfo.toLowerCase().split("/");
-    if (segments.length == 0) return false;
-    String lastSegment = segments[segments.length - 1];
-    if (!ALLOWED_OPS.contains(lastSegment)) return false;
-    for (String seg : segments) {
-      if (FORBIDDEN_SEGMENTS.contains(seg)) return false;
+    GeoportalContext gc = GeoportalContext.getInstance();
+    ElasticContext ec = gc != null ? gc.getElasticContext() : null;
+    if (ec == null) return false;
+    String path = ec.addIndexName(pathInfo);
+    if (path == null) return false;
+    List<String> segs = new ArrayList<>();
+    for (String s : path.split("/")) {
+      if (s.isEmpty()) continue;
+      if (s.equals(".") || s.equals("..")) return false;
+      segs.add(s);
     }
-    return true;
+    return segs.size() == 2 && segs.get(0).equals(ec.getIndexName()) && segs.get(1).equalsIgnoreCase("_search");
   }
+
 
 
 
