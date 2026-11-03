@@ -122,17 +122,17 @@ public class ElasticProxy extends BalancerServlet {
       "terms", "date_histogram", "nested", "geohash_grid", "filter", "filters");
 
   // ---- Path allow-list ----
-  // This app only ever needs to search/count the metadata index (see doc/api.txt
+  // This app only ever needs to search the metadata index (see doc/api.txt
   // and every client usage under src/main/webapp - all of it hits "_search", none
-  // of it hits anything else). Without an explicit allow-list, any other
-  // Elasticsearch REST API would be forwarded unrestricted - cluster/node admin
-  // (_cat, _cluster, _nodes), destructive bulk ops (_bulk, _delete_by_query,
+  // of it hits anything else, including "_count"). Without an explicit allow-list,
+  // any other Elasticsearch REST API would be forwarded unrestricted - cluster/node
+  // admin (_cat, _cluster, _nodes), destructive bulk ops (_bulk, _delete_by_query,
   // _update_by_query), scripted/stored-query execution (_scripts, _search/template),
   // long-lived resource consumers (_reindex, _pit, scroll), cross-index wildcard
   // reads (_all), etc. The final path segment must be one of the allowed
   // operations, and no segment anywhere in the path may be one of the explicitly
   // forbidden ones (this also blocks sneaky combinations like "_all/_search").
-  private static final Set<String> ALLOWED_OPS = Set.of("_search", "_count");
+  private static final Set<String> ALLOWED_OPS = Set.of("_search");
   private static final Set<String> FORBIDDEN_SEGMENTS = Set.of(
       "_all", "_cat", "_cluster", "_nodes", "_bulk", "_delete_by_query", "_update_by_query",
       "_mget", "_scripts", "_reindex", "_pit", "_sql", "_async_search", "_field_caps",

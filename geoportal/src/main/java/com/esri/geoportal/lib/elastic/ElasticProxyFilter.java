@@ -76,30 +76,27 @@ public class ElasticProxyFilter implements Filter {
         String path = gc.getElasticContext().addIndexName(hsr.getPathInfo());
         String idxName = gc.getElasticContext().getIndexName();
    
-        // This will limit the ability to use other Elasticsearch indexes for non admin users
-        // _search, _count URI queries (q=) are problematic
-        if (path != null && (path.indexOf("_search") != -1 || path.indexOf("_count") != -1)) {
-          if (path.indexOf("_search/scroll") == -1) {
-            if (path.indexOf("/"+idxName+"/item/_search") != -1 || 
-                path.indexOf("/"+idxName+"/_count") != -1 ||
-                path.indexOf("/"+idxName+"/clob/item/_search") != -1 ||
-                path.indexOf("/"+idxName+"/clob/_count") != -1 ||
-                path.indexOf(",") != -1) {
-              // Throw an exception here or rely on app-security.xml?
-              throw new ServletException("This endpoint is not supported.");
-            }
-            if (path.indexOf("/"+idxName+"/_search") != -1 || 
-                path.indexOf("/"+idxName+"/_count") != -1) {
-              checkAccess = true;
-              String qstr = hsr.getQueryString();
-              if (hasQueryParam(qstr,"q")) {
-                // Throw an exception here or rely on app-security.xml?
-                throw new ServletException("Parameter q is not supported, Post a {query: ...}");
-              }
-            }
+        // ElasticProxy itself now only allows "_search" on the metadata
+        // index, with no "/_count,/item", "/clob", multi-index, or scroll variants, and
+        // everything else is already rejected there. So the only path this filter
+        // needs to recognize (and merge the access query into) is exactly
+        // "/<idxName>/_search" - matched exactly (not with indexOf substring
+        // matching, which could be fooled by e.g. "/other/metadata/_search" or
+        // Elasticsearch interpreting extra path segments as a different index/type).
+        List<String> segs = new ArrayList<String>();
+        if (path != null) {
+          for (String s: path.split("/")) {
+            if (s.length() > 0) segs.add(s);
+          }
+        }
+        if (segs.equals(List.of(idxName,"_search"))) {
+          checkAccess = true;
+          String qstr = hsr.getQueryString();
+          if (hasQueryParam(qstr,"q")) {
+            // Throw an exception here or rely on app-security.xml?
+            throw new ServletException("Parameter q is not supported, Post a {query: ...}");
           }
         } else {
-          // TODO check others?
           // Throw an exception here or rely on app-security.xml?
           throw new ServletException("This endpoint is not supported.");
         }
