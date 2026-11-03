@@ -55,10 +55,7 @@ public class ElasticContext {
   private boolean autoCreateCollectionIndex = false;
   private String collectionIndexName = "collections";
   private boolean indexNameIsAlias = true;
-  private boolean is6Plus = false;
-  private boolean is7Plus = false;
-  private String itemIndexType = "item";
-  private String mappingsFile = "config/elastic-mappings.json";
+  private String itemIndexType = "item"; 
   private String mappingsFile7 = "config/elastic-mappings-7.json";
   private List<String> nodes;
  // private PreBuiltTransportClient transportClient;
@@ -223,28 +220,6 @@ public class ElasticContext {
     this.indexNameIsAlias = indexNameIsAlias;
   }
   
-  /** Version 6+
-   * @return  */
-  public boolean getIs6Plus() {
-    return is6Plus;
-  }
-  /** Version 6+
-   * @param is6Plus */
-  public void setIs6Plus(boolean is6Plus) {
-    this.is6Plus = is6Plus;
-  }
-  
-  /** Version 7+
-   * @return  */
-  public boolean getIs7Plus() {
-    return is7Plus;
-  }
-  /** Version 7+
-   * @param is7Plus */
-  public void setIs7Plus(boolean is7Plus) {
-    this.is7Plus = is7Plus;
-  }
-  
   /**
    * Adds the metadata index name to a proxied path when the client omitted it.
    * <br/>/_search and /_count (but not /_search/scroll) become /{indexName}/_search and /{indexName}/_count.
@@ -266,29 +241,9 @@ public class ElasticContext {
   public String getItemIndexName() {
     return this.indexName;
   }
-
-  /** The item index type (default=item).
-   * @return  */
-  public String getItemIndexType() {
-    return this.itemIndexType;
-  }
-  /** The item index type (default=item).
-   * @param itemIndexType */
-  public void setItemIndexType(String itemIndexType) {
-    this.itemIndexType = itemIndexType;
-  }
   
   public String getActualItemIndexType() {
-    return !getIs7Plus()? getItemIndexType(): "_doc";
-  }
-  
-  /** The index mappings file (default=config/elastic-mappings.json). */
-  public String getMappingsFile() {
-    return mappingsFile;
-  }
-  /** The index mappings file (default=config/elastic-mappings.json). */
-  public void setMappingsFile(String mappingsFile) {
-    this.mappingsFile = mappingsFile;
+    return "_doc";
   }
   
   /** The index mappings file (default=config/elastic-mappings-7.json). */
@@ -305,7 +260,7 @@ public class ElasticContext {
    * @return mappings file
    */
   public String getActualMappingsFile() {
-    return getIs7Plus()? getMappingsFile7(): getMappingsFile();
+    return getMappingsFile7();
   }
 
   /** The node names. */
