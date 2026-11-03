@@ -24,6 +24,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -184,20 +185,25 @@ public class ElasticProxyFilter implements Filter {
   private static class LocalRequestWrapper extends HttpServletRequestWrapper {
 
     protected String content;
+    protected byte[] contentBytes;
     protected String contentType;
 
     public LocalRequestWrapper(HttpServletRequest request, 
         String content, String contentType) {
       super(request);
       this.content = content;
+      // Elasticsearch requests/responses are UTF-8, and Content-Length must be a byte
+      // count, not a character count - String.length() and the platform-default
+      // getBytes() both break on non-ASCII query text (truncation or mangled bytes).
+      this.contentBytes = content != null ? content.getBytes(StandardCharsets.UTF_8) : null;
       this.contentType = contentType;
       //this.setCharacterEncoding(arg0); TODO?
     }
 
     @Override
     public int getContentLength() {
-      if (content != null) {
-        return content.length();
+      if (contentBytes != null) {
+        return contentBytes.length;
       } 
       return super.getContentLength();
     }
@@ -230,7 +236,7 @@ public class ElasticProxyFilter implements Filter {
             ht.put("content-type","content-type");
             useht = true;
           }
-          if (!hasContentLength && content != null) {
+          if (!hasContentLength && contentBytes != null) {
             ht.put("content-length","content-length");
             useht = true;
           }
@@ -244,9 +250,9 @@ public class ElasticProxyFilter implements Filter {
 
     @Override
     public Enumeration<String> getHeaders(String name) {
-      if (name.equals("content-length") && content != null) {
+      if (name.equals("content-length") && contentBytes != null) {
         List<String> list = new ArrayList<String>();
-        list.add(""+content.length());
+        list.add(""+contentBytes.length);
         return Collections.enumeration(list);
       }
       if (name.equals("content-type") && contentType != null) {
@@ -259,8 +265,8 @@ public class ElasticProxyFilter implements Filter {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-      if (content != null) {
-        ByteArrayInputStream stream = new ByteArrayInputStream(content.getBytes());
+      if (contentBytes != null) {
+        ByteArrayInputStream stream = new ByteArrayInputStream(contentBytes);
         return new LocalInputStream(stream);
       }
       return super.getInputStream();
