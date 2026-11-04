@@ -709,17 +709,21 @@ public class ElasticProxy extends BalancerServlet {
     if (value == null) return null;
     Matcher m = FIXED_INTERVAL_PATTERN.matcher(value.trim());
     if (!m.matches()) return null;
-    long amount = Long.parseLong(m.group(1));
-    long unitMs;
-    switch (m.group(2).toLowerCase()) {
-      case "ms": unitMs = 1L; break;
-      case "s": unitMs = 1000L; break;
-      case "m": unitMs = 60_000L; break;
-      case "h": unitMs = 3_600_000L; break;
-      case "d": unitMs = 86_400_000L; break;
-      default: return null;
+    try {
+      long amount = Long.parseLong(m.group(1));
+      long unitMs;
+      switch (m.group(2).toLowerCase()) {
+        case "ms": unitMs = 1L; break;
+        case "s": unitMs = 1000L; break;
+        case "m": unitMs = 60_000L; break;
+        case "h": unitMs = 3_600_000L; break;
+        case "d": unitMs = 86_400_000L; break;
+        default: return null;
+      }
+      return Math.multiplyExact(amount, unitMs);
+    } catch (NumberFormatException | ArithmeticException e) {
+      return null;
     }
-    return amount * unitMs;
   }
 
   
