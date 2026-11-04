@@ -591,13 +591,19 @@ public class ElasticProxy extends BalancerServlet {
     }
     for (String field : new String[]{"fixed_interval", "interval"}) {
       if (!obj.has(field)) continue;
-      Long ms = parseFixedIntervalMillis(obj.get(field).asText());
+      String value = obj.get(field).asText().trim();
+      if ("interval".equals(field) && Set.of(
+          "year", "1y", "quarter", "1q", "month", "1M",
+          "week", "1w", "day", "1d", "hour", "1h").contains(value)) {
+        continue;
+      }
+      Long ms = parseFixedIntervalMillis(value);
       if (ms == null || ms < MIN_DATE_HISTOGRAM_INTERVAL_MS) {
         obj.put(field, "1h");
       }
     }
     if (obj.has("calendar_interval")) {
-      String v = obj.get("calendar_interval").asText().trim().toLowerCase();
+      String v = obj.get("calendar_interval").asText().trim();
       if (SUB_HOUR_CALENDAR_INTERVALS.contains(v)) {
         obj.put("calendar_interval", "hour");
       }
