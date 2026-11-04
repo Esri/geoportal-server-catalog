@@ -551,7 +551,8 @@ public class ElasticProxy extends BalancerServlet {
           throw new AccessDeniedException("Aggregation not allowed on field: "
               + (field == null ? "(none)" : field.asText()));
         }
-        if (obj.has("size") && obj.get("size").asInt() > MAX_AGG_SIZE) {
+        if (("geohash_grid".equals(aggType) && !obj.has("size"))
+            || (obj.has("size") && obj.get("size").asInt() > MAX_AGG_SIZE)) {
           obj.put("size", MAX_AGG_SIZE);
         }
         if ("geohash_grid".equals(aggType) && obj.has("precision")
