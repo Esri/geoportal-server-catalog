@@ -601,6 +601,7 @@ public class ElasticProxy extends BalancerServlet {
       case "terms":
       case "date_histogram":
       case "geohash_grid":
+      case "histogram":
         JsonNode field = obj.get("field");
         if (!allowSettings && (field == null || !allowedAggFields.contains(field.asText()))) {
           throw new AccessDeniedException("Aggregation not allowed on field: "
