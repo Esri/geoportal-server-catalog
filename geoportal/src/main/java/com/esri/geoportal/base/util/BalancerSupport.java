@@ -134,7 +134,7 @@ public class BalancerSupport {
   }
   
   /** Parameters that are not allowed at all (scroll opens server side search contexts). */
-  private static final Set<String> BLOCKED_PARAMS = Set.of("scroll","scroll_id","search_type","request_cache","preference","filter_path","track_scores","terminate_after");
+  private static final Set<String> BLOCKED_PARAMS = Set.of("q","scroll","scroll_id","search_type","request_cache","preference","filter_path","track_scores","terminate_after");
 
   /** Determines if a query-string parameter name is blocked (compared URL-decoded). Undecodable names are blocked. */
   private boolean isBlockedParam(String name) {
