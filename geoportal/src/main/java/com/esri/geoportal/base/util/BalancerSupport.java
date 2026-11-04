@@ -85,7 +85,18 @@ public class BalancerSupport {
     	target = new StringBuilder(node.proxyTo);
     }
 	String pathInfo = ec.addIndexName(request.getPathInfo());
+    // Defense in depth: this class's caller (ElasticProxy) already validates the path
+    // against an exact allow-list, but "." / ".." segments are rejected here too, so
+    // that even if this method is ever reached directly, a path-traversal segment like
+    // "/x/../_search" can't be forwarded as-is and later get silently resolved (by the
+    // URI.normalize() call below) into a bare, all-indices "/_search".
     if (pathInfo != null) {
+      for (String seg : pathInfo.split("/")) {
+        if (seg.equals(".") || seg.equals("..")) {
+          LOGGER.warn("Blocked Elasticsearch path (traversal segment): "+pathInfo);
+          return null;
+        }
+      }
       target.append(pathInfo);
     }    
     String query = request.getQueryString();

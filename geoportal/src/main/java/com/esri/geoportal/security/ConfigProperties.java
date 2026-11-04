@@ -60,6 +60,21 @@ public class ConfigProperties {
     @Value("${appui.search.aggregation.fields:}")
     private String searchAggregationFields;
 
+    // Injected as a String (not int) so a stray space or bad value can't fail startup;
+    // parsed leniently in getSearchResultsNumPerPage().
+    @Value("${appui.searchResults.numPerPage:10}")
+    private String searchResultsNumPerPage;
+
+    /** The UI page size (appui.searchResults.numPerPage); 10 if missing or not a positive integer. */
+    public int getSearchResultsNumPerPage() {
+        try {
+            int n = Integer.parseInt(searchResultsNumPerPage == null ? "" : searchResultsNumPerPage.trim());
+            return n > 0 ? n : 10;
+        } catch (NumberFormatException e) {
+            return 10;
+        }
+    }
+
     public boolean isSearchAllowSettings() {
         return searchAllowSettings;
     }

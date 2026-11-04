@@ -18,11 +18,8 @@ import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.search.SearchRequest;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
@@ -43,6 +40,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -54,6 +52,15 @@ public class ElasticProxyFilter implements Filter {
   
   /** Logger. */
   public static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxyFilter.class);
+
+  // Keep in sync with ElasticProxy.MAX_BODY_BYTES. This filter runs *before* ElasticProxy
+  // (when approval-status/group-based access is enabled) and reads the whole body itself
+  // in order to merge the access-control query into it - so the size bound has to be
+  // enforced here too, at the very first read of the body, before any buffering/parsing/
+  // rewriting takes place. Enforcing it only in ElasticProxy would be too late: an
+  // unbounded StringBuilder here would already have done the (potentially huge)
+  // allocation and JSON parsing work for every anonymous request first.
+  private static final int MAX_BODY_BYTES = 1 * 1024 * 1024;
   
   /** Constructor */
   public ElasticProxyFilter() {}
@@ -106,8 +113,15 @@ public class ElasticProxyFilter implements Filter {
     if (checkAccess) {
       String content = null;
       String contentType = null;
-      content = this.readCharacters(hsr);
-      if (content != null  && content.length() == 0) content = null;
+      // Enforce the body size bound here, at the very first read, before any of the
+      // buffering/JSON-parsing/access-query-merge work below runs - see MAX_BODY_BYTES.
+      byte[] bytes = hsr.getInputStream().readNBytes(MAX_BODY_BYTES + 1);
+      if (bytes.length > MAX_BODY_BYTES) {
+        ((HttpServletResponse) response).sendError(
+            HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+        return;
+      }
+      if (bytes.length > 0) content = new String(bytes, StandardCharsets.UTF_8);
       //content = "{\"query\":{\"term\":{\"sys_owner_s\":\"publisher\"}}}"; 
       //contentType = "application/json";
       JsonObject jso = this.mergeAccessQuery(hsr,user,content);
@@ -154,30 +168,6 @@ public class ElasticProxyFilter implements Filter {
 		 
   }
   
-  private String readCharacters(HttpServletRequest hsr) throws IOException {
-    StringBuilder sb = new StringBuilder();
-    BufferedReader br = null;
-    InputStreamReader ir = null;
-    InputStream st = null;
-    try {
-      char cbuf[] = new char[2048];
-      int n = 0;
-      int nLen = cbuf.length;
-      st = hsr.getInputStream();
-      if (st != null) {
-        ir = new InputStreamReader(st,"UTF-8");
-        br = new BufferedReader(ir);
-        while ((n = br.read(cbuf,0,nLen)) >= 0) {
-          sb.append(cbuf,0,n);
-        }
-      }
-    } finally {
-      try {if (br != null) br.close();} catch (Exception ef) {}
-      try {if (ir != null) ir.close();} catch (Exception ef) {}
-      try {if (st != null) st.close();} catch (Exception ef) {}
-    }
-    return sb.toString();
-  }
   
   /**
    * Request wrapper.

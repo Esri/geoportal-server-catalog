@@ -28,11 +28,6 @@ import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.node.ObjectNode;
-
 import org.eclipse.jetty.client.BytesRequestContent;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
@@ -46,7 +41,10 @@ import com.esri.geoportal.base.util.BalancerSupport;
 import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.security.ConfigProperties;
-
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -86,8 +84,16 @@ public class ElasticProxy extends BalancerServlet {
   private static final int MAX_BODY_BYTES = 1 * 1024 * 1024;
   // "size"/"from"/"search_after" are otherwise unbounded, letting a client pull back
   // (or deep-page through) far more of the index than a UI search ever needs.
-  private static final int MAX_SEARCH_SIZE = 100;
+  // The size cap is never below DEFAULT_MAX_SEARCH_SIZE, but follows the UI page size
+  // (appui.searchResults.numPerPage) when that is larger - otherwise the UI's own paging
+  // requests would be silently truncated and its page arithmetic would skip results.
+  // It is also never above ABSOLUTE_MAX_SEARCH_SIZE (the Elasticsearch default
+  // index.max_result_window), so a misconfigured page size can't remove the cap.
+  private static final int DEFAULT_MAX_SEARCH_SIZE = 100;
+  private static final int ABSOLUTE_MAX_SEARCH_SIZE = 10000;
   private static final int MAX_SEARCH_FROM = 10000;
+  /** Effective "size" cap; set in loadAggregationSettings() from the UI page size. */
+  private volatile int maxSearchSize = DEFAULT_MAX_SEARCH_SIZE;
   // Limits for the "heavy" query types (regexp, wildcard, fuzzy, query_string,
   // simple_query_string) - these aren't blocked outright (query_string/simple_query_string
   // back the main search box), but their most expensive features are capped/disabled.
@@ -121,7 +127,18 @@ public class ElasticProxy extends BalancerServlet {
       "_source", "fields", "docvalue_fields", "stored_fields", "highlight");
 
   private static final Set<String> ALLOWED_AGG_TYPES = Set.of(
-      "terms", "date_histogram", "nested", "geohash_grid", "filter", "filters");
+      "terms", "date_histogram", "histogram", "nested", "geohash_grid", "filter", "filters");
+
+  // Numeric "histogram" aggregations (BasicNumericFilter.js / NumericFilter.js, e.g. the
+  // Paleo-Date filter) have no "size" - their bucket count is (data range / interval), and
+  // the proxy can't know the data range. So they're bounded by: a required finite numeric
+  // interval of at least MIN_HISTOGRAM_INTERVAL, min_doc_count forced to >= 1 (only
+  // non-empty buckets are returned - never one per interval across the whole range, which
+  // is what min_doc_count:0 / extended_bounds would do), and a whitelist of parameters
+  // (anything else, e.g. extended_bounds/hard_bounds/order/missing, is rejected).
+  private static final double MIN_HISTOGRAM_INTERVAL = 0.001;
+  private static final Set<String> ALLOWED_HISTOGRAM_KEYS = Set.of(
+      "field", "interval", "min_doc_count", "offset");
 
   // ---- Path allow-list ----
   // This app only ever needs to search the configured metadata index (see doc/api.txt
@@ -161,7 +178,8 @@ public class ElasticProxy extends BalancerServlet {
   private static final Set<String> DEFAULT_AGG_FIELDS = Set.of(
       "envelope_cen_pt", "src_collections_s", "sys_owner_s", "apiso_TopicCategory_s",
       "sys_metadatatype_s", "contact_organizations_s", "keywords_s", "src_source_type_s",
-      "src_source_name_s", "timeperiod_nst.begin_dt", "timeperiod_nst.end_dt", "sys_modified_dt");
+      "src_source_name_s", "timeperiod_nst.begin_dt", "timeperiod_nst.end_dt", "sys_modified_dt",
+      "sys_approval_status_s", "sys_access_s", "sys_access_groups_s");
 
   /** Allowed aggregation fields, loaded from appui.search.aggregation.fields. */
   private Set<String> allowedAggFields = DEFAULT_AGG_FIELDS;
@@ -178,12 +196,15 @@ public class ElasticProxy extends BalancerServlet {
       }
       ConfigProperties cfg = gc.getApplicationContext().getBean(ConfigProperties.class);
       allowSettings = cfg.isSearchAllowSettings();
+      maxSearchSize = Math.min(ABSOLUTE_MAX_SEARCH_SIZE,
+          Math.max(DEFAULT_MAX_SEARCH_SIZE, cfg.getSearchResultsNumPerPage()));
       Set<String> set = new HashSet<>(cfg.getSearchAggregationFieldsList());
       if (!set.isEmpty()) allowedAggFields = set;
     } catch (Exception e) {
       LOGGER.warn("Unable to read ConfigProperties, using default aggregation fields.", e);
     }
-    LOGGER.debug("allowSettings=" + allowSettings + ", allowed aggregation fields=" + allowedAggFields);
+    LOGGER.debug("allowSettings=" + allowSettings + ", maxSearchSize=" + maxSearchSize
+        + ", allowed aggregation fields=" + allowedAggFields);
   }
 
   /** Thrown when a request violates the security rules. */
@@ -236,7 +257,14 @@ public class ElasticProxy extends BalancerServlet {
     // be validated/sanitized the same way. Parsed directly from the raw
     // query string (rather than request.getParameter()) to avoid any
     // interaction with the input stream already consumed above.
-    String source = extractQueryParam(request.getQueryString(), "source");
+    String source;
+    try {
+      source = extractQueryParam(request.getQueryString(), "source");
+    } catch (AccessDeniedException e) {
+      LOGGER.warn("Blocked Elasticsearch request: " + e.getMessage());
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+      return;
+    }
     if (source != null) {
       if (source.getBytes(StandardCharsets.UTF_8).length > MAX_BODY_BYTES) {
         response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
@@ -258,21 +286,48 @@ public class ElasticProxy extends BalancerServlet {
     super.service(request, response);
   }
 
-  /** Extracts and URL-decodes a single query-string parameter's raw value, or null if absent/undecodable. */
-  private String extractQueryParam(String query, String name) {
+  /**
+   * Extracts and URL-decodes a single query-string parameter's value, or null if absent.
+   * <p>Both the name and the value are decoded before the name is compared - comparing the
+   * raw name (as this used to do) means an encoded name like "%73ource" is never recognized
+   * as "source", so it would sail straight past the caller's sanitizeBody() check while still
+   * being forwarded to (and decoded the same way by) Elasticsearch. For the same reason, if
+   * more than one query parameter decodes to the requested name, the whole request is
+   * rejected outright: there is no reliable way to guarantee the one value this method
+   * returns (and the caller sanitizes) is the one Elasticsearch actually uses, so a hidden,
+   * differently-encoded duplicate could carry an unsanitized value straight through. A name
+   * or value that cannot be decoded at all is rejected the same way, rather than silently
+   * skipped/returned as null, since there's no way to tell whether it would decode to the
+   * requested name.
+   * @throws AccessDeniedException if the parameter is duplicated (after decoding) or if a
+   *         name/value matching (or potentially matching) it cannot be URL-decoded.
+   */
+  private String extractQueryParam(String query, String name) throws AccessDeniedException {
     if (query == null) return null;
+    String found = null;
+    boolean any = false;
     for (String pair : query.split("&")) {
       int eq = pair.indexOf('=');
-      if (eq < 0) continue;
-      String key = pair.substring(0, eq);
-      if (!key.equalsIgnoreCase(name)) continue;
+      String rawKey = eq >= 0 ? pair.substring(0, eq) : pair;
+      String decodedKey;
       try {
-        return URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+        decodedKey = URLDecoder.decode(rawKey, "UTF-8");
       } catch (UnsupportedEncodingException | IllegalArgumentException e) {
-        return null;
+        throw new AccessDeniedException("Unable to decode a query parameter name");
+      }
+      if (!decodedKey.equalsIgnoreCase(name)) continue;
+      if (any) {
+        throw new AccessDeniedException("Duplicate \"" + name + "\" query parameter is not allowed");
+      }
+      any = true;
+      if (eq < 0) continue;
+      try {
+        found = URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        throw new AccessDeniedException("Unable to decode the \"" + name + "\" query parameter value");
       }
     }
-    return null;
+    return found;
   }
 
   @Override
@@ -333,8 +388,8 @@ public class ElasticProxy extends BalancerServlet {
     if (isSearch) {
       body.put("timeout", QUERY_TIMEOUT);
     }
-    if (body.has("size") && body.get("size").asInt() > MAX_SEARCH_SIZE) {
-      body.put("size", MAX_SEARCH_SIZE);
+    if (body.has("size") && body.get("size").asInt() > maxSearchSize) {
+      body.put("size", maxSearchSize);
     }
     if (body.has("from") && body.get("from").asInt() > MAX_SEARCH_FROM) {
       body.put("from", MAX_SEARCH_FROM);
@@ -573,9 +628,44 @@ public class ElasticProxy extends BalancerServlet {
         if ("date_histogram".equals(aggType) && !allowSettings) {
           validateDateHistogram(obj);
         }
+        if ("histogram".equals(aggType) && !allowSettings) {
+          validateHistogram(obj);
+        }
         break;
       default:
         break;
+    }
+  }
+
+  /**
+   * Bounds a numeric histogram aggregation (see MIN_HISTOGRAM_INTERVAL): rejects parameters
+   * other than those the UI sends, requires a finite numeric interval of at least
+   * MIN_HISTOGRAM_INTERVAL, and forces min_doc_count to at least 1 (a missing value is
+   * set, since Elasticsearch's default of 0 would fill in every empty bucket in the range).
+   */
+  private void validateHistogram(ObjectNode obj) throws AccessDeniedException {
+    Iterator<String> names = obj.fieldNames();
+    while (names.hasNext()) {
+      String n = names.next();
+      if (!ALLOWED_HISTOGRAM_KEYS.contains(n)) {
+        throw new AccessDeniedException("histogram aggregation parameter not allowed: " + n);
+      }
+    }
+    JsonNode interval = obj.get("interval");
+    if (interval == null || !interval.isNumber()) {
+      throw new AccessDeniedException("histogram aggregation requires a numeric \"interval\"");
+    }
+    double iv = interval.asDouble();
+    if (Double.isNaN(iv) || Double.isInfinite(iv) || iv < MIN_HISTOGRAM_INTERVAL) {
+      throw new AccessDeniedException("histogram aggregation \"interval\" must be at least "
+          + MIN_HISTOGRAM_INTERVAL);
+    }
+    JsonNode off = obj.get("offset");
+    if (off != null && !off.isNumber()) {
+      throw new AccessDeniedException("histogram aggregation \"offset\" must be numeric");
+    }
+    if (!obj.has("min_doc_count") || obj.get("min_doc_count").asInt(1) < 1) {
+      obj.put("min_doc_count", 1);
     }
   }
 
@@ -733,8 +823,74 @@ public class ElasticProxy extends BalancerServlet {
     if (uri != null && isSearchPath(request)) {
       uri = replaceQueryParam(uri, "timeout", QUERY_TIMEOUT);
     }
+    // "size" and "from" are also valid _search query-string parameters, and Elasticsearch
+    // gives them precedence over the same keys in the body - so the clamps in
+    // sanitizeObject() don't constrain them (e.g. GET _search?size=10000 has no body to
+    // clamp at all, and a URL value would override a clamped body value). The UI itself
+    // pages via URL parameters, so clamp rather than reject over-limit values.
+    if (uri != null) {
+      uri = clampQueryParam(uri, "size", maxSearchSize);
+    }
+    if (uri != null) {
+      uri = clampQueryParam(uri, "from", MAX_SEARCH_FROM);
+    }
     LOGGER.debug("ProxyTo: "+uri);
     return uri;
+  }
+
+  /**
+   * Clamps a numeric query-string parameter in an already-built target URL to a maximum.
+   * <p>The name is URL-decoded before comparing (so "%73ize" is recognized as "size"). If it
+   * occurs more than once, the largest value is used (clamped), and every occurrence is
+   * replaced by a single canonical one, so no unclamped duplicate can survive. A parameter
+   * that is absent is left absent. A value that isn't a non-negative integer, or a name/value
+   * that can't be decoded, is rejected (null is returned, which makes the proxy refuse the
+   * request) rather than forwarded unchecked.
+   * @return the rewritten URL, the unchanged URL if the parameter is absent or within the
+   *         limit, or null if the request must be rejected.
+   */
+  private String clampQueryParam(String uri, String paramName, int max) {
+    int qIdx = uri.indexOf('?');
+    if (qIdx < 0) return uri;
+    String query = uri.substring(qIdx + 1);
+    if (query.isEmpty()) return uri;
+    java.math.BigInteger largest = null;
+    boolean modified = false;
+    int count = 0;
+    for (String pair : query.split("&")) {
+      int eq = pair.indexOf('=');
+      String rawKey = eq >= 0 ? pair.substring(0, eq) : pair;
+      String decodedKey;
+      try {
+        decodedKey = URLDecoder.decode(rawKey, "UTF-8");
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        LOGGER.warn("Blocked Elasticsearch query parameter with undecodable name");
+        return null;
+      }
+      if (!decodedKey.trim().equalsIgnoreCase(paramName)) continue;
+      count++;
+      try {
+        String v = eq >= 0 ? URLDecoder.decode(pair.substring(eq + 1), "UTF-8").trim() : "";
+        java.math.BigInteger n = new java.math.BigInteger(v);
+        if (n.signum() < 0) {
+          LOGGER.warn("Blocked negative \"" + paramName + "\" query parameter");
+          return null;
+        }
+        if (largest == null || n.compareTo(largest) > 0) largest = n;
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        // NumberFormatException is an IllegalArgumentException
+        LOGGER.warn("Blocked non-numeric \"" + paramName + "\" query parameter");
+        return null;
+      }
+    }
+    if (count == 0) return uri;
+    if (largest.compareTo(java.math.BigInteger.valueOf(max)) > 0) {
+      largest = java.math.BigInteger.valueOf(max);
+      modified = true;
+    }
+    // collapse duplicates / re-encode only when something actually needs changing
+    if (!modified && count == 1) return uri;
+    return replaceQueryParam(uri, paramName, largest.toString());
   }
 
   /** True for /_search paths (but not /_search/scroll), matching the isSearch check in sanitizeBody(). */
@@ -743,7 +899,18 @@ public class ElasticProxy extends BalancerServlet {
     return path != null && path.contains("_search") && !path.contains("_search/scroll");
   }
 
-  /** Replaces (or appends) a query-string parameter in an already-built target URL. */
+  /**
+   * Replaces (or appends) a query-string parameter in an already-built target URL, dropping
+   * every existing occurrence of it first - the name is decoded before comparing (the same
+   * fix as extractQueryParam(), and for the same reason: a differently-encoded occurrence of
+   * paramName must still be recognized and removed, not left behind as an unsanitized
+   * duplicate alongside the canonical one appended below) so no unchecked value can survive
+   * rewriting no matter how many raw duplicates were present. An occurrence whose name can't
+   * be decoded is left untouched (it is, by definition, not a byte-for-byte match for
+   * paramName, and this method is also used for non-security-critical params like "timeout");
+   * callers that need to guarantee a parameter is unique/sanitized (e.g. "source") must
+   * reject ambiguous duplicates up front, as extractQueryParam() does.
+   */
   private String replaceQueryParam(String uri, String paramName, String newRawValue) {
     try {
       int qIdx = uri.indexOf('?');
@@ -751,24 +918,23 @@ public class ElasticProxy extends BalancerServlet {
       String query = qIdx >= 0 ? uri.substring(qIdx + 1) : "";
       String encodedValue = URLEncoder.encode(newRawValue, StandardCharsets.UTF_8);
       StringBuilder sb = new StringBuilder();
-      boolean replaced = false;
       if (!query.isEmpty()) {
         for (String pair : query.split("&")) {
           int eq = pair.indexOf('=');
-          String key = eq >= 0 ? pair.substring(0, eq) : pair;
-          if (sb.length() > 0) sb.append('&');
-          if (key.equalsIgnoreCase(paramName)) {
-            sb.append(paramName).append('=').append(encodedValue);
-            replaced = true;
-          } else {
-            sb.append(pair);
+          String rawKey = eq >= 0 ? pair.substring(0, eq) : pair;
+          String decodedKey;
+          try {
+            decodedKey = URLDecoder.decode(rawKey, "UTF-8");
+          } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+            decodedKey = null;
           }
+          if (decodedKey != null && decodedKey.equalsIgnoreCase(paramName)) continue;
+          if (sb.length() > 0) sb.append('&');
+          sb.append(pair);
         }
       }
-      if (!replaced) {
-        if (sb.length() > 0) sb.append('&');
-        sb.append(paramName).append('=').append(encodedValue);
-      }
+      if (sb.length() > 0) sb.append('&');
+      sb.append(paramName).append('=').append(encodedValue);
       return base + "?" + sb;
     } catch (Exception e) {
       LOGGER.error("Error rewriting \"" + paramName + "\" query parameter", e);
