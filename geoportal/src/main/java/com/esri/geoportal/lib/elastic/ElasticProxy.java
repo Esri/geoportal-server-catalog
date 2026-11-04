@@ -586,7 +586,7 @@ public class ElasticProxy extends BalancerServlet {
    * generate an unbounded number of buckets.
    */
   private void validateDateHistogram(ObjectNode obj) {
-    if (obj.has("min_doc_count") && obj.get("min_doc_count").asInt(1) <= 0) {
+    if (!obj.has("min_doc_count") || obj.get("min_doc_count").asInt(1) <= 0) {
       obj.put("min_doc_count", 1);
     }
     for (String field : new String[]{"fixed_interval", "interval"}) {
