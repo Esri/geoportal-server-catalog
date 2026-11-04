@@ -895,7 +895,7 @@ public class ElasticProxy extends BalancerServlet {
 
   /** True for /_search paths (but not /_search/scroll), matching the isSearch check in sanitizeBody(). */
   private boolean isSearchPath(HttpServletRequest request) {
-    String path = request.getRequestURI();
+    String path = request.getPathInfo();
     return path != null && path.contains("_search") && !path.contains("_search/scroll");
   }
 
