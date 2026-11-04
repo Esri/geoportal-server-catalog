@@ -394,6 +394,9 @@ public class ElasticProxy extends BalancerServlet {
     if (body.has("from") && body.get("from").asInt() > MAX_SEARCH_FROM) {
       body.put("from", MAX_SEARCH_FROM);
     }
+    if (body.has("aggs") && body.has("aggregations")) {
+      throw new AccessDeniedException("Use either aggs or aggregations, not both");
+    }
     JsonNode aggs = body.has("aggs") ? body.get("aggs") : body.get("aggregations");
     if (aggs != null) {
       validateAggs(aggs, 1, new int[]{0});
