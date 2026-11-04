@@ -146,18 +146,15 @@ public class BalancerSupport {
   /**
    * Determines if a query-string parameter carries Elasticsearch scripting, either
    * as a dedicated parameter or as a script key inside a JSON value. The value is
-   * decoded repeatedly so double-encoded payloads are also detected. Undecodable
+   * decoded once, matching Elasticsearch's parameter decoding. Undecodable
    * values are rejected.
    */
   private boolean isScriptingParam(String name, String value) {
     try {
       String n = URLDecoder.decode(name,"UTF-8").toLowerCase();
       if (SCRIPT_PARAMS.contains(n)) return true;
-      String v = value;
-      for (int i = 0; i < 3; i++) {
-        v = URLDecoder.decode(v,"UTF-8");
-        if (SCRIPT_JSON_KEY.matcher(v).find()) return true;
-      }
+      String v = URLDecoder.decode(value,"UTF-8");
+      if (SCRIPT_JSON_KEY.matcher(v).find()) return true;
     } catch (UnsupportedEncodingException | IllegalArgumentException e) {
       return true;
     }
