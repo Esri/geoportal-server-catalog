@@ -561,13 +561,13 @@ public class ElasticProxy extends BalancerServlet {
     if (!aggs.isObject()) {
       throw new AccessDeniedException("Invalid aggregations");
     }
-    if (!allowSettings && depth > MAX_AGG_DEPTH) {
+    if (depth > MAX_AGG_DEPTH) {
       throw new AccessDeniedException("Aggregation nesting too deep (max " + MAX_AGG_DEPTH + ")");
     }
     Iterator<Map.Entry<String, JsonNode>> names = aggs.fields();
     while (names.hasNext()) {
       names.next();
-      if (!allowSettings && ++totalAggCount[0] > MAX_TOTAL_AGGS) {
+      if (++totalAggCount[0] > MAX_TOTAL_AGGS) {
         throw new AccessDeniedException("Too many aggregations in request (max " + MAX_TOTAL_AGGS + ")");
       }
     }
