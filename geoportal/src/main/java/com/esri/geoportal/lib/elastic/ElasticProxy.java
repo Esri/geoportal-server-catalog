@@ -114,10 +114,14 @@ public class ElasticProxy extends BalancerServlet {
   // Blocked anywhere in the body: real scripting keys, plus stored-script/template
   // references ("source"/"inline"/"id" - matter for _search/template, already blocked
   // at the path level too, but defended here as well) and query types that read other
-  // documents (more_like_this "like" docs, percolate) which this app never uses.
+  // documents (more_like_this "like" docs, percolate) which this app never uses. Also
+  // "wrapper": a query that carries a Base64-encoded query which Elasticsearch decodes
+  // itself downstream, so none of the checks in this class (script keys, heavy-query
+  // limits, terms lookup, ...) would ever see the real query inside it.
   private static final Set<String> BLOCKED_KEYS = Set.of(
       "script", "script_score", "script_fields", "runtime_mappings", "scripted_metric",
-      "source", "inline", "id", "template", "percolate", "more_like_this", "inner_hits");
+      "source", "inline", "id", "template", "percolate", "more_like_this", "inner_hits",
+      "wrapper");
 
   // Blocked only at the top level of the search body - these are legitimate ES query
   // clause parameters (e.g. "fields" inside simple_query_string) when nested, but at
@@ -475,17 +479,38 @@ public class ElasticProxy extends BalancerServlet {
   /** Validates/clamps the per-field clauses of a "wildcard" or "regexp" query. */
   private void sanitizePatternFieldClauses(ObjectNode fieldClauses, String type, boolean blockLeadingWildcard)
       throws AccessDeniedException {
-    Iterator<Map.Entry<String, JsonNode>> it = fieldClauses.fields();
-    while (it.hasNext()) {
-      JsonNode v = it.next().getValue();
+    boolean isRegexp = "regexp".equals(type);
+    // snapshot the entries so shorthand clauses can be replaced while iterating
+    List<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
+    fieldClauses.fields().forEachRemaining(entries::add);
+    for (Map.Entry<String, JsonNode> entry : entries) {
+      JsonNode v = entry.getValue();
       String pattern = null;
       if (v.isTextual()) {
         pattern = v.asText();
+        if (isRegexp) {
+          // shorthand {"field": "pattern"} carries no room for max_determinized_states,
+          // so it would run with Elasticsearch's default (10,000) - expand it to the
+          // full form so the limit below can be applied to it as well
+          ObjectNode expanded = MAPPER.createObjectNode();
+          expanded.put("value", pattern);
+          expanded.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+          fieldClauses.set(entry.getKey(), expanded);
+        }
       } else if (v.isObject()) {
         ObjectNode o = (ObjectNode) v;
         JsonNode pn = o.has("value") ? o.get("value") : o.get(type);
         if (pn != null) pattern = pn.asText();
-        if (o.has("max_determinized_states") && o.get("max_determinized_states").asInt() > MAX_DETERMINIZED_STATES) {
+        // regexp only: wildcard doesn't accept this parameter at all. For regexp it is
+        // set when absent (Elasticsearch's default of 10,000 exceeds our limit) as well
+        // as clamped when too large (or not a usable number).
+        if (isRegexp) {
+          if (!o.has("max_determinized_states") || !o.get("max_determinized_states").isNumber()
+              || o.get("max_determinized_states").asInt() > MAX_DETERMINIZED_STATES
+              || o.get("max_determinized_states").asInt() < 1) {
+            o.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+          }
+        } else if (o.has("max_determinized_states") && o.get("max_determinized_states").asInt() > MAX_DETERMINIZED_STATES) {
           o.put("max_determinized_states", MAX_DETERMINIZED_STATES);
         }
       }
@@ -529,6 +554,11 @@ public class ElasticProxy extends BalancerServlet {
       clause.put("max_determinized_states", MAX_DETERMINIZED_STATES);
     }
     if (isFullQueryString) {
+      // also set when absent: query_string defaults to 10,000 states, above our limit
+      // (simple_query_string has no such parameter, so it's only clamped above if present)
+      if (!clause.has("max_determinized_states")) {
+        clause.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+      }
       // allow_leading_wildcard is only valid for the full "query_string" query (not
       // simple_query_string, which would reject it as an unknown parameter) - force it
       // off regardless of client input, since a leading wildcard forces a full index scan.
@@ -618,7 +648,11 @@ public class ElasticProxy extends BalancerServlet {
             && obj.get("precision").asInt() > MAX_GEOHASH_PRECISION) {
           obj.put("precision", MAX_GEOHASH_PRECISION);
         }
-        if ("terms".equals(aggType) && !allowSettings) {
+        // The resource guards below (terms include/exclude/shard_size, date_histogram and
+        // histogram bounds) apply regardless of allowSettings: that setting only relaxes
+        // the field allow-list above, since the shipped config enables it and these
+        // guards would otherwise never run for anonymous requests.
+        if ("terms".equals(aggType)) {
           // include/exclude (regex or large value lists) and shard_size (forces every
           // shard to compute and return far more terms than "size") are all ways to
           // make an otherwise-bounded terms aggregation expensive again.
@@ -629,10 +663,10 @@ public class ElasticProxy extends BalancerServlet {
             throw new AccessDeniedException("terms aggregation \"shard_size\" is not allowed");
           }
         }
-        if ("date_histogram".equals(aggType) && !allowSettings) {
+        if ("date_histogram".equals(aggType)) {
           validateDateHistogram(obj);
         }
-        if ("histogram".equals(aggType) && !allowSettings) {
+        if ("histogram".equals(aggType)) {
           validateHistogram(obj);
         }
         break;

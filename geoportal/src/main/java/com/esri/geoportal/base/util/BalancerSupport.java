@@ -133,8 +133,18 @@ public class BalancerSupport {
     return null;
   }
   
-  /** Parameters that are not allowed at all (scroll opens server side search contexts). */
-  private static final Set<String> BLOCKED_PARAMS = Set.of("q","scroll","scroll_id","search_type","request_cache","preference","filter_path","track_scores","terminate_after");
+  /**
+   * Parameters that are not allowed at all (scroll opens server side search contexts).
+   * Also includes the query-string equivalents of the response-shaping options that
+   * ElasticProxy.checkNoDataLeakRootKeys() rejects in the request body (_source,
+   * stored_fields, docvalue_fields, ...) - Elasticsearch accepts them as URL parameters
+   * too (e.g. ?stored_fields=* or ?docvalue_fields=sys_owner_s), so blocking only the
+   * body form would let a caller bypass the restriction by supplying the same option in
+   * the URL instead. Includes the legacy singular _source_include/_source_exclude names.
+   */
+  private static final Set<String> BLOCKED_PARAMS = Set.of("q","scroll","scroll_id","search_type","request_cache","preference","filter_path","track_scores","terminate_after",
+      "_source","_source_includes","_source_excludes","_source_include","_source_exclude",
+      "stored_fields","docvalue_fields","fields","highlight");
 
   /** Determines if a query-string parameter name is blocked (compared URL-decoded). Undecodable names are blocked. */
   private boolean isBlockedParam(String name) {
