@@ -607,6 +607,7 @@ define({
         deleteFailed: "Unable to delete item.",
         deleteFailedWith: "Unable to delete item: {error}",
         idRequired: "Id is required.",
+        idInvalid: "Id may contain only alphanumeric characters and hyphens (A-Z, a-z, 0-9, -).",
         datetimeRequired: "Datetime is required.",
         stacVersionRequired: "STAC Version is required.",
         stacExtensionsRequired: "STAC Extensions is required.",
