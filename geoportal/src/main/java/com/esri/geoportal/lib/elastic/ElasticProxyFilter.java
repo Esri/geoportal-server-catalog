@@ -18,11 +18,10 @@ import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.search.SearchRequest;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Enumeration;
@@ -41,6 +40,7 @@ import jakarta.servlet.ServletRequest;
 import jakarta.servlet.ServletResponse;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletRequestWrapper;
+import jakarta.servlet.http.HttpServletResponse;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -52,6 +52,15 @@ public class ElasticProxyFilter implements Filter {
   
   /** Logger. */
   public static final Logger LOGGER = LoggerFactory.getLogger(ElasticProxyFilter.class);
+
+  // Keep in sync with ElasticProxy.MAX_BODY_BYTES. This filter runs *before* ElasticProxy
+  // (when approval-status/group-based access is enabled) and reads the whole body itself
+  // in order to merge the access-control query into it - so the size bound has to be
+  // enforced here too, at the very first read of the body, before any buffering/parsing/
+  // rewriting takes place. Enforcing it only in ElasticProxy would be too late: an
+  // unbounded StringBuilder here would already have done the (potentially huge)
+  // allocation and JSON parsing work for every anonymous request first.
+  private static final int MAX_BODY_BYTES = 1 * 1024 * 1024;
   
   /** Constructor */
   public ElasticProxyFilter() {}
@@ -72,38 +81,30 @@ public class ElasticProxyFilter implements Filter {
     if (gc.getSupportsApprovalStatus() || gc.getSupportsGroupBasedAccess()) {
       user = new AppUser(hsr,null);
       if (!user.isAdmin()) {
-        String path = hsr.getPathInfo();
+        String path = gc.getElasticContext().addIndexName(hsr.getPathInfo());
         String idxName = gc.getElasticContext().getIndexName();
-        String itmType = gc.getElasticContext().getActualItemIndexType();
-        // This will limit the ability to use other Elasticsearch indexes for non admin users
-        // _search, _count URI queries (q=) are problematic
-        if (path != null && (path.indexOf("_search") != -1 || path.indexOf("_count") != -1)) {
-          if (path.indexOf("_search/scroll") == -1) {
-            if (path.indexOf("/"+idxName+"/item/_search") != -1 || 
-                path.indexOf("/"+idxName+"/_count") != -1 ||
-                path.indexOf("/"+idxName+"/clob/item/_search") != -1 ||
-                path.indexOf("/"+idxName+"/clob/_count") != -1 ||
-                path.indexOf(",") != -1) {
-              // Throw an exception here or rely on app-security.xml?
-              throw new ServletException("This endpoint is not supported.");
-            }
-            if (path.indexOf("/"+idxName+"/"+itmType+"/_search") != -1 || 
-                path.indexOf("/"+idxName+"/"+itmType+"/_count") != -1 ||
-                path.indexOf("/"+idxName+"/_search") != -1 || 
-                path.indexOf("/"+idxName+"/_count") != -1) {
-              checkAccess = true;
-              String qstr = hsr.getQueryString();
-              if (qstr != null && qstr.length() > 0) {
-                String lc = "?" + qstr.toLowerCase();
-                if (lc.indexOf("?q=") != -1 || lc.indexOf("&q=") != -1) {
-                  // Throw an exception here or rely on app-security.xml?
-                  throw new ServletException("Parameter q is not supported, Post a {query: ...}");
-                }
-              }
-            }
+   
+        // ElasticProxy itself now only allows "_search" on the metadata
+        // index, with no "/_count,/item", "/clob", multi-index, or scroll variants, and
+        // everything else is already rejected there. So the only path this filter
+        // needs to recognize (and merge the access query into) is exactly
+        // "/<idxName>/_search" - matched exactly (not with indexOf substring
+        // matching, which could be fooled by e.g. "/other/metadata/_search" or
+        // Elasticsearch interpreting extra path segments as a different index/type).
+        List<String> segs = new ArrayList<String>();
+        if (path != null) {
+          for (String s: path.split("/")) {
+            if (s.length() > 0) segs.add(s);
+          }
+        }
+        if (segs.equals(List.of(idxName,"_search"))) {
+          checkAccess = true;
+          String qstr = hsr.getQueryString();
+          if (hasQueryParam(qstr,"q")) {
+            // Throw an exception here or rely on app-security.xml?
+            throw new ServletException("Parameter q is not supported, Post a {query: ...}");
           }
         } else {
-          // TODO check others?
           // Throw an exception here or rely on app-security.xml?
           throw new ServletException("This endpoint is not supported.");
         }
@@ -112,8 +113,15 @@ public class ElasticProxyFilter implements Filter {
     if (checkAccess) {
       String content = null;
       String contentType = null;
-      content = this.readCharacters(hsr);
-      if (content != null  && content.length() == 0) content = null;
+      // Enforce the body size bound here, at the very first read, before any of the
+      // buffering/JSON-parsing/access-query-merge work below runs - see MAX_BODY_BYTES.
+      byte[] bytes = hsr.getInputStream().readNBytes(MAX_BODY_BYTES + 1);
+      if (bytes.length > MAX_BODY_BYTES) {
+        ((HttpServletResponse) response).sendError(
+            HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+        return;
+      }
+      if (bytes.length > 0) content = new String(bytes, StandardCharsets.UTF_8);
       //content = "{\"query\":{\"term\":{\"sys_owner_s\":\"publisher\"}}}"; 
       //contentType = "application/json";
       JsonObject jso = this.mergeAccessQuery(hsr,user,content);
@@ -131,6 +139,25 @@ public class ElasticProxyFilter implements Filter {
   @Override
   public void init(FilterConfig filterConfig) {}
   
+  /**
+   * Checks if a query string contains a parameter, comparing URL-decoded names
+   * (Elasticsearch decodes names, so "%71=" is the same as "q="). A name that
+   * cannot be decoded is treated as a match (rejected).
+   */
+  private boolean hasQueryParam(String qstr, String name) {
+    if (qstr == null || qstr.length() == 0) return false;
+    for (String pair: qstr.split("&")) {
+      int eq = pair.indexOf('=');
+      String key = (eq >= 0) ? pair.substring(0,eq) : pair;
+      try {
+        if (URLDecoder.decode(key,"UTF-8").trim().equalsIgnoreCase(name)) return true;
+      } catch (Exception e) {
+        return true;
+      }
+    }
+    return false;
+  }
+  
   private JsonObject mergeAccessQuery(HttpServletRequest hsr, AppUser user, String body) 
       throws ServletException{
 		
@@ -141,30 +168,6 @@ public class ElasticProxyFilter implements Filter {
 		 
   }
   
-  private String readCharacters(HttpServletRequest hsr) throws IOException {
-    StringBuilder sb = new StringBuilder();
-    BufferedReader br = null;
-    InputStreamReader ir = null;
-    InputStream st = null;
-    try {
-      char cbuf[] = new char[2048];
-      int n = 0;
-      int nLen = cbuf.length;
-      st = hsr.getInputStream();
-      if (st != null) {
-        ir = new InputStreamReader(st,"UTF-8");
-        br = new BufferedReader(ir);
-        while ((n = br.read(cbuf,0,nLen)) >= 0) {
-          sb.append(cbuf,0,n);
-        }
-      }
-    } finally {
-      try {if (br != null) br.close();} catch (Exception ef) {}
-      try {if (ir != null) ir.close();} catch (Exception ef) {}
-      try {if (st != null) st.close();} catch (Exception ef) {}
-    }
-    return sb.toString();
-  }
   
   /**
    * Request wrapper.
@@ -172,20 +175,25 @@ public class ElasticProxyFilter implements Filter {
   private static class LocalRequestWrapper extends HttpServletRequestWrapper {
 
     protected String content;
+    protected byte[] contentBytes;
     protected String contentType;
 
     public LocalRequestWrapper(HttpServletRequest request, 
         String content, String contentType) {
       super(request);
       this.content = content;
+      // Elasticsearch requests/responses are UTF-8, and Content-Length must be a byte
+      // count, not a character count - String.length() and the platform-default
+      // getBytes() both break on non-ASCII query text (truncation or mangled bytes).
+      this.contentBytes = content != null ? content.getBytes(StandardCharsets.UTF_8) : null;
       this.contentType = contentType;
       //this.setCharacterEncoding(arg0); TODO?
     }
 
     @Override
     public int getContentLength() {
-      if (content != null) {
-        return content.length();
+      if (contentBytes != null) {
+        return contentBytes.length;
       } 
       return super.getContentLength();
     }
@@ -218,7 +226,7 @@ public class ElasticProxyFilter implements Filter {
             ht.put("content-type","content-type");
             useht = true;
           }
-          if (!hasContentLength && content != null) {
+          if (!hasContentLength && contentBytes != null) {
             ht.put("content-length","content-length");
             useht = true;
           }
@@ -232,9 +240,9 @@ public class ElasticProxyFilter implements Filter {
 
     @Override
     public Enumeration<String> getHeaders(String name) {
-      if (name.equals("content-length") && content != null) {
+      if (name.equals("content-length") && contentBytes != null) {
         List<String> list = new ArrayList<String>();
-        list.add(""+content.length());
+        list.add(""+contentBytes.length);
         return Collections.enumeration(list);
       }
       if (name.equals("content-type") && contentType != null) {
@@ -247,8 +255,8 @@ public class ElasticProxyFilter implements Filter {
 
     @Override
     public ServletInputStream getInputStream() throws IOException {
-      if (content != null) {
-        ByteArrayInputStream stream = new ByteArrayInputStream(content.getBytes());
+      if (contentBytes != null) {
+        ByteArrayInputStream stream = new ByteArrayInputStream(contentBytes);
         return new LocalInputStream(stream);
       }
       return super.getInputStream();

@@ -18,7 +18,9 @@ import java.net.URI;
 import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.atomic.AtomicLong;
+import java.util.regex.Pattern;
 
 import jakarta.servlet.http.HttpServletRequest;
 
@@ -37,18 +39,9 @@ public class BalancerSupport {
   /** Instance vriables. */
   protected final AtomicLong balancerCount = new AtomicLong();
   private List<BalancerNode> balancerNodes = new ArrayList<>();
-  private boolean is7Plus;
   private ElasticContext ec = GeoportalContext.getInstance().getElasticContext();
   private static final Logger LOGGER = LoggerFactory.getLogger(BalancerSupport.class);
-  
-  public boolean getIs7Plus() {
-    return is7Plus;
-  }
 
-  public void setIs7Plus(boolean is7Plus) {
-    this.is7Plus = is7Plus;
-  }
-  
   /** The cluster of nodes. */ 
   public List<BalancerNode> getBalancerNodes() {
     return balancerNodes;
@@ -91,20 +84,22 @@ public class BalancerSupport {
         BalancerNode node =  balancerNodes.get(index);
     	target = new StringBuilder(node.proxyTo);
     }
-	String pathInfo = request.getPathInfo();
+	String pathInfo = ec.addIndexName(request.getPathInfo());
+    // Defense in depth: this class's caller (ElasticProxy) already validates the path
+    // against an exact allow-list, but "." / ".." segments are rejected here too, so
+    // that even if this method is ever reached directly, a path-traversal segment like
+    // "/x/../_search" can't be forwarded as-is and later get silently resolved (by the
+    // URI.normalize() call below) into a bare, all-indices "/_search".
     if (pathInfo != null) {
-      target.append(getIs7Plus()? pathInfo.replaceAll("/item", "/_doc"): pathInfo);
-    
+      for (String seg : pathInfo.split("/")) {
+        if (seg.equals(".") || seg.equals("..")) {
+          LOGGER.warn("Blocked Elasticsearch path (traversal segment): "+pathInfo);
+          return null;
+        }
+      }
+      target.append(pathInfo);
     }    
     String query = request.getQueryString();
-    if (query != null) {
-      try {
-        String lc = query.toLowerCase();
-        String lcd = URLDecoder.decode(query,"UTF-8").toLowerCase();
-        if (lc.contains("<script") && lc.contains("</script>")) return null;
-        if (lcd.contains("<script") && lcd.contains("</script>")) return null;
-      } catch (UnsupportedEncodingException e) {}
-    }
     if (query != null) {
       StringBuilder qsb = new StringBuilder();
       String[] pairs = query.split("&");
@@ -112,6 +107,10 @@ public class BalancerSupport {
         String[] p = kvp.split("=");
         if (p.length != 2) continue;
         if (p[0].equalsIgnoreCase("access_token")) continue;
+        if (isScriptingParam(p[0],p[1]) || isBlockedParam(p[0])) {
+          LOGGER.warn("Blocked Elasticsearch query parameter: "+p[0]);
+          return null;
+        }
         if (qsb.length() > 0) qsb.append("&");
         String v = p[1];
         //try {v = URLEncoder.encode(v,"UTF-8");}
@@ -134,6 +133,55 @@ public class BalancerSupport {
     return null;
   }
   
+  /**
+   * Parameters that are not allowed at all (scroll opens server side search contexts).
+   * Also includes the query-string equivalents of the response-shaping options that
+   * ElasticProxy.checkNoDataLeakRootKeys() rejects in the request body (_source,
+   * stored_fields, docvalue_fields, ...) - Elasticsearch accepts them as URL parameters
+   * too (e.g. ?stored_fields=* or ?docvalue_fields=sys_owner_s), so blocking only the
+   * body form would let a caller bypass the restriction by supplying the same option in
+   * the URL instead. Includes the legacy singular _source_include/_source_exclude names.
+   */
+  private static final Set<String> BLOCKED_PARAMS = Set.of("q","scroll","scroll_id","search_type","request_cache","preference","filter_path","track_scores","terminate_after",
+      "_source","_source_includes","_source_excludes","_source_include","_source_exclude",
+      "stored_fields","docvalue_fields","fields","highlight");
+
+  /** Determines if a query-string parameter name is blocked (compared URL-decoded). Undecodable names are blocked. */
+  private boolean isBlockedParam(String name) {
+    try {
+      return BLOCKED_PARAMS.contains(URLDecoder.decode(name,"UTF-8").trim().toLowerCase());
+    } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+      return true;
+    }
+  }
+
+  /** Parameter names that only exist to carry scripts. */
+  private static final Set<String> SCRIPT_PARAMS = Set.of(
+      "script","script_fields","script_score","runtime_mappings","scripted_metric");
+
+  /** JSON keys that introduce Elasticsearch scripting inside any parameter value (e.g. source=). */
+  private static final Pattern SCRIPT_JSON_KEY = Pattern.compile(
+      "\"(script|script_fields|script_score|runtime_mappings|scripted_metric)\"\\s*:",
+      Pattern.CASE_INSENSITIVE);
+
+  /**
+   * Determines if a query-string parameter carries Elasticsearch scripting, either
+   * as a dedicated parameter or as a script key inside a JSON value. The value is
+   * decoded once, matching Elasticsearch's parameter decoding. Undecodable
+   * values are rejected.
+   */
+  private boolean isScriptingParam(String name, String value) {
+    try {
+      String n = URLDecoder.decode(name,"UTF-8").toLowerCase();
+      if (SCRIPT_PARAMS.contains(n)) return true;
+      String v = URLDecoder.decode(value,"UTF-8");
+      if (SCRIPT_JSON_KEY.matcher(v).find()) return true;
+    } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+      return true;
+    }
+    return false;
+  }
+
   /** A node that is part of the cluster to which requests are proxied. */
   public static class BalancerNode {
     

@@ -14,20 +14,37 @@
  */
 package com.esri.geoportal.lib.elastic;
 
+import java.io.IOException;
 import java.io.UnsupportedEncodingException;
+import java.net.URLDecoder;
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
+import org.eclipse.jetty.client.BytesRequestContent;
 import org.eclipse.jetty.client.HttpClient;
 import org.eclipse.jetty.client.Request;
 import org.eclipse.jetty.ee10.proxy.BalancerServlet;
 import org.eclipse.jetty.http.HttpHeader;
 import org.eclipse.jetty.util.ssl.SslContextFactory;
-import org.eclipse.jetty.client.transport.HttpRequest;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.base.util.BalancerSupport;
 import com.esri.geoportal.base.util.BalancerSupport.BalancerNode;
 import com.esri.geoportal.context.GeoportalContext;
+import com.esri.geoportal.security.ConfigProperties;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.node.ObjectNode;
 
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -46,6 +63,704 @@ public class ElasticProxy extends BalancerServlet {
   private String _authString = null;
   private boolean _useHttps = false;
   private Integer proxyBufferSize = null;
+
+  // ---- Security settings ----
+  private static final ObjectMapper MAPPER = new ObjectMapper();
+  private static final int MAX_AGG_SIZE = 100;
+  private static final int MAX_GEOHASH_PRECISION = 7;
+  // Nested aggregations multiply bucket counts (100 x 100 x ...), and a flat list
+  // of many sibling aggregations can be just as expensive, so both the nesting
+  // depth and the total number of aggregation definitions in a request are capped.
+  private static final int MAX_AGG_DEPTH = 3;
+  private static final int MAX_TOTAL_AGGS = 30;
+  // date_histogram with a tiny interval over a large date range (or min_doc_count:0,
+  // which forces empty buckets to be filled in across that whole range) can generate
+  // huge numbers of buckets, so intervals finer than this are clamped and min_doc_count:0
+  // is bumped to 1.
+  private static final long MIN_DATE_HISTOGRAM_INTERVAL_MS = 60 * 60 * 1000L; // 1 hour
+  private static final Pattern FIXED_INTERVAL_PATTERN = Pattern.compile("(\\d+)\\s*(ms|s|m|h|d)", Pattern.CASE_INSENSITIVE);
+  private static final Set<String> SUB_HOUR_CALENDAR_INTERVALS = Set.of("second", "seconds", "1s", "minute", "minutes", "1m");
+  // 10 MB was too generous for a search/count body - lowered to 1 MB.
+  private static final int MAX_BODY_BYTES = 1 * 1024 * 1024;
+  // "size"/"from"/"search_after" are otherwise unbounded, letting a client pull back
+  // (or deep-page through) far more of the index than a UI search ever needs.
+  // The size cap is never below DEFAULT_MAX_SEARCH_SIZE, but follows the UI page size
+  // (appui.searchResults.numPerPage) when that is larger - otherwise the UI's own paging
+  // requests would be silently truncated and its page arithmetic would skip results.
+  // It is also never above ABSOLUTE_MAX_SEARCH_SIZE (the Elasticsearch default
+  // index.max_result_window), so a misconfigured page size can't remove the cap.
+  private static final int DEFAULT_MAX_SEARCH_SIZE = 100;
+  private static final int ABSOLUTE_MAX_SEARCH_SIZE = 10000;
+  private static final int MAX_SEARCH_FROM = 10000;
+  /** Effective "size" cap; set in loadAggregationSettings() from the UI page size. */
+  private volatile int maxSearchSize = DEFAULT_MAX_SEARCH_SIZE;
+  // Limits for the "heavy" query types (regexp, wildcard, fuzzy, query_string,
+  // simple_query_string) - these aren't blocked outright (query_string/simple_query_string
+  // back the main search box), but their most expensive features are capped/disabled.
+  private static final int MAX_DETERMINIZED_STATES = 1000;
+  private static final int MAX_PATTERN_LENGTH = 200;
+  private static final int MAX_QUERY_TEXT_LENGTH = 1000;
+  private static final int MAX_FUZZINESS = 2;
+  private static final int MAX_FUZZY_EXPANSIONS = 50;
+  private static final String QUERY_TIMEOUT = "7s";
+  private static final String SANITIZED_ATTR = ElasticProxy.class.getName() + ".sanitizedBody";
+  // Elasticsearch also accepts the request body via a "source" query-string
+  // parameter (?source=<json>&source_content_type=application/json), most
+  // often paired with GET - this bypasses the body-based checks entirely,
+  // so the sanitized value is stashed here and spliced back into the
+  // proxied URL by rewriteTarget().
+  private static final String SANITIZED_SOURCE_ATTR = ElasticProxy.class.getName() + ".sanitizedSource";
+
+  // Blocked anywhere in the body: real scripting keys, plus stored-script/template
+  // references ("source"/"inline"/"id" - matter for _search/template, already blocked
+  // at the path level too, but defended here as well) and query types that read other
+  // documents (more_like_this "like" docs, percolate) which this app never uses. Also
+  // "wrapper": a query that carries a Base64-encoded query which Elasticsearch decodes
+  // itself downstream, so none of the checks in this class (script keys, heavy-query
+  // limits, terms lookup, ...) would ever see the real query inside it.
+  private static final Set<String> BLOCKED_KEYS = Set.of(
+      "script", "script_score", "script_fields", "runtime_mappings", "scripted_metric",
+      "source", "inline", "id", "template", "percolate", "more_like_this", "inner_hits",
+      "wrapper");
+
+  // Blocked only at the top level of the search body - these are legitimate ES query
+  // clause parameters (e.g. "fields" inside simple_query_string) when nested, but at
+  // the root they are response-shaping options that can expose fields not meant to be
+  // public, none of which this app's client code ever sends.
+  private static final Set<String> DATA_LEAK_ROOT_KEYS = Set.of(
+      "_source", "fields", "docvalue_fields", "stored_fields", "highlight");
+
+  private static final Set<String> ALLOWED_AGG_TYPES = Set.of(
+      "terms", "date_histogram", "histogram", "nested", "geohash_grid", "filter", "filters");
+
+  // Numeric "histogram" aggregations (BasicNumericFilter.js / NumericFilter.js, e.g. the
+  // Paleo-Date filter) have no "size" - their bucket count is (data range / interval), and
+  // the proxy can't know the data range. So they're bounded by: a required finite numeric
+  // interval of at least MIN_HISTOGRAM_INTERVAL, min_doc_count forced to >= 1 (only
+  // non-empty buckets are returned - never one per interval across the whole range, which
+  // is what min_doc_count:0 / extended_bounds would do), and a whitelist of parameters
+  // (anything else, e.g. extended_bounds/hard_bounds/order/missing, is rejected).
+  private static final double MIN_HISTOGRAM_INTERVAL = 0.001;
+  private static final Set<String> ALLOWED_HISTOGRAM_KEYS = Set.of(
+      "field", "interval", "min_doc_count", "offset");
+
+  // ---- Path allow-list ----
+  // This app only ever needs to search the configured metadata index (see doc/api.txt
+  // and every client usage under src/main/webapp - all of it hits "_search" against the
+  // one metadata index, nothing else). A keyword-based allow/forbidden-segment list is
+  // NOT sufficient here: it would still let a client search a *different* index entirely
+  // (e.g. "/elastic/some_other_index/_search", or even "/elastic/.kibana/_search" - any
+  // index name is, by definition, not a "forbidden" keyword), and a path-traversal segment
+  // like "/elastic/x/../_search" would sail through such a check (no forbidden segment
+  // present) only to have the proxy's own URI normalization later collapse "x/.." away,
+  // producing a *bare* "/_search" that Elasticsearch runs across *all* indices. So instead
+  // the path is required to be *exactly* the one shape this app ever sends: either a bare
+  // "/_search" (which addIndexName() below expands to the configured index) or an explicit
+  // "/{indexName}/_search" naming that same index - nothing more, nothing less. "." and
+  // ".." segments are rejected outright (never silently resolved) so they can't be used to
+  // disguise a different effective path.
+  private boolean isAllowedElasticPath(String pathInfo) {
+    if (pathInfo == null) return false;
+    GeoportalContext gc = GeoportalContext.getInstance();
+    ElasticContext ec = gc != null ? gc.getElasticContext() : null;
+    if (ec == null) return false;
+    String path = ec.addIndexName(pathInfo);
+    if (path == null) return false;
+    List<String> segs = new ArrayList<>();
+    for (String s : path.split("/")) {
+      if (s.isEmpty()) continue;
+      if (s.equals(".") || s.equals("..")) return false;
+      segs.add(s);
+    }
+    return segs.size() == 2 && segs.get(0).equals(ec.getIndexName()) && segs.get(1).equalsIgnoreCase("_search");
+  }
+
+
+
+
+  /** Default allowed aggregation fields (used if appui.search.aggregation.fields is not configured). */
+  private static final Set<String> DEFAULT_AGG_FIELDS = Set.of(
+      "envelope_cen_pt", "src_collections_s", "sys_owner_s", "apiso_TopicCategory_s",
+      "sys_metadatatype_s", "contact_organizations_s", "keywords_s", "src_source_type_s",
+      "src_source_name_s", "timeperiod_nst.begin_dt", "timeperiod_nst.end_dt", "sys_modified_dt",
+      "sys_approval_status_s", "sys_access_s", "sys_access_groups_s");
+
+  /** Allowed aggregation fields, loaded from appui.search.aggregation.fields. */
+  private Set<String> allowedAggFields = DEFAULT_AGG_FIELDS;
+  /** If true (appui.search.allowSettings), aggregation fields are not validated. */
+  private boolean allowSettings = false;
+
+  /** Loads appui.search.allowSettings and appui.search.aggregation.fields from the Spring ConfigProperties bean. */
+  private void loadAggregationSettings() {
+    try {
+      GeoportalContext gc = GeoportalContext.getInstance();
+      if (gc == null || gc.getApplicationContext() == null) {
+        LOGGER.warn("Spring context not available, using default aggregation fields.");
+        return;
+      }
+      ConfigProperties cfg = gc.getApplicationContext().getBean(ConfigProperties.class);
+      allowSettings = cfg.isSearchAllowSettings();
+      maxSearchSize = Math.min(ABSOLUTE_MAX_SEARCH_SIZE,
+          Math.max(DEFAULT_MAX_SEARCH_SIZE, cfg.getSearchResultsNumPerPage()));
+      Set<String> set = new HashSet<>(cfg.getSearchAggregationFieldsList());
+      if (!set.isEmpty()) allowedAggFields = set;
+    } catch (Exception e) {
+      LOGGER.warn("Unable to read ConfigProperties, using default aggregation fields.", e);
+    }
+    LOGGER.debug("allowSettings=" + allowSettings + ", maxSearchSize=" + maxSearchSize
+        + ", allowed aggregation fields=" + allowedAggFields);
+  }
+
+  /** Thrown when a request violates the security rules. */
+  private static class AccessDeniedException extends Exception {
+    private static final long serialVersionUID = 1L;
+    AccessDeniedException(String msg) {
+      super(msg);
+    }
+  }
+
+  @Override
+  protected void service(HttpServletRequest request, HttpServletResponse response)
+      throws ServletException, IOException {
+    if (!isAllowedElasticPath(request.getPathInfo())) {
+      LOGGER.warn("Blocked Elasticsearch path: " + request.getPathInfo());
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, "This endpoint is not supported.");
+      return;
+    }
+    String method = request.getMethod();
+    // Elasticsearch accepts (and Jetty will forward) a request body on GET
+    // as well, e.g. GET _search with a query body - so GET must be
+    // sanitized/size-checked too, not just POST/PUT/PATCH.
+    boolean mayHaveBody = "POST".equalsIgnoreCase(method) || "PUT".equalsIgnoreCase(method)
+        || "PATCH".equalsIgnoreCase(method) || "GET".equalsIgnoreCase(method);
+    if (mayHaveBody) {
+      byte[] bytes = request.getInputStream().readNBytes(MAX_BODY_BYTES + 1);
+      if (bytes.length > MAX_BODY_BYTES) {
+        response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+        return;
+      }
+      if (bytes.length > 0) {
+        try {
+          byte[] sanitized = sanitizeBody(new String(bytes, StandardCharsets.UTF_8), request.getRequestURI());
+          request.setAttribute(SANITIZED_ATTR, sanitized);
+        } catch (AccessDeniedException e) {
+          LOGGER.warn("Blocked Elasticsearch request: " + e.getMessage());
+          response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+          return;
+        } catch (IOException e) {
+          response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JSON request body");
+          return;
+        }
+      }
+    }
+
+    // Elasticsearch also accepts the query body via a "source" query-string
+    // parameter (?source=<json>&source_content_type=application/json),
+    // typically combined with GET so no request body is sent at all. This
+    // query parameter bypasses the body checks above entirely, so it must
+    // be validated/sanitized the same way. Parsed directly from the raw
+    // query string (rather than request.getParameter()) to avoid any
+    // interaction with the input stream already consumed above.
+    String source;
+    try {
+      source = extractQueryParam(request.getQueryString(), "source");
+    } catch (AccessDeniedException e) {
+      LOGGER.warn("Blocked Elasticsearch request: " + e.getMessage());
+      response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+      return;
+    }
+    if (source != null) {
+      if (source.getBytes(StandardCharsets.UTF_8).length > MAX_BODY_BYTES) {
+        response.sendError(HttpServletResponse.SC_REQUEST_ENTITY_TOO_LARGE, "Request body too large");
+        return;
+      }
+      try {
+        byte[] sanitized = sanitizeBody(source, request.getRequestURI());
+        request.setAttribute(SANITIZED_SOURCE_ATTR, new String(sanitized, StandardCharsets.UTF_8));
+      } catch (AccessDeniedException e) {
+        LOGGER.warn("Blocked Elasticsearch request: " + e.getMessage());
+        response.sendError(HttpServletResponse.SC_FORBIDDEN, e.getMessage());
+        return;
+      } catch (IOException e) {
+        response.sendError(HttpServletResponse.SC_BAD_REQUEST, "Invalid JSON in source parameter");
+        return;
+      }
+    }
+
+    super.service(request, response);
+  }
+
+  /**
+   * Extracts and URL-decodes a single query-string parameter's value, or null if absent.
+   * <p>Both the name and the value are decoded before the name is compared - comparing the
+   * raw name (as this used to do) means an encoded name like "%73ource" is never recognized
+   * as "source", so it would sail straight past the caller's sanitizeBody() check while still
+   * being forwarded to (and decoded the same way by) Elasticsearch. For the same reason, if
+   * more than one query parameter decodes to the requested name, the whole request is
+   * rejected outright: there is no reliable way to guarantee the one value this method
+   * returns (and the caller sanitizes) is the one Elasticsearch actually uses, so a hidden,
+   * differently-encoded duplicate could carry an unsanitized value straight through. A name
+   * or value that cannot be decoded at all is rejected the same way, rather than silently
+   * skipped/returned as null, since there's no way to tell whether it would decode to the
+   * requested name.
+   * @throws AccessDeniedException if the parameter is duplicated (after decoding) or if a
+   *         name/value matching (or potentially matching) it cannot be URL-decoded.
+   */
+  private String extractQueryParam(String query, String name) throws AccessDeniedException {
+    if (query == null) return null;
+    String found = null;
+    boolean any = false;
+    for (String pair : query.split("&")) {
+      int eq = pair.indexOf('=');
+      String rawKey = eq >= 0 ? pair.substring(0, eq) : pair;
+      String decodedKey;
+      try {
+        decodedKey = URLDecoder.decode(rawKey, "UTF-8");
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        throw new AccessDeniedException("Unable to decode a query parameter name");
+      }
+      if (!decodedKey.equalsIgnoreCase(name)) continue;
+      if (any) {
+        throw new AccessDeniedException("Duplicate \"" + name + "\" query parameter is not allowed");
+      }
+      any = true;
+      if (eq < 0) continue;
+      try {
+        found = URLDecoder.decode(pair.substring(eq + 1), "UTF-8");
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        throw new AccessDeniedException("Unable to decode the \"" + name + "\" query parameter value");
+      }
+    }
+    return found;
+  }
+
+  @Override
+  protected Request.Content proxyRequestContent(HttpServletRequest request,
+      HttpServletResponse response, Request proxyRequest) throws IOException {
+    byte[] sanitized = (byte[]) request.getAttribute(SANITIZED_ATTR);
+    if (sanitized == null) {
+      return super.proxyRequestContent(request, response, proxyRequest);
+    }
+    // body may have changed: let the client compute Content-Length
+    proxyRequest.headers(h -> h.remove(HttpHeader.CONTENT_LENGTH));
+    String contentType = request.getContentType();
+    if (contentType == null) contentType = "application/json";
+    return new BytesRequestContent(contentType, sanitized);
+  }
+
+  /** Validates and sanitizes a request body (JSON or NDJSON). */
+  private byte[] sanitizeBody(String body, String path) throws AccessDeniedException, IOException {
+    boolean isSearch = path != null && path.contains("_search");
+    boolean isMSearch = path != null && path.contains("_msearch");
+    String trimmed = body.trim();
+
+    if (!isMSearch) {
+      try {
+        JsonNode node = MAPPER.readTree(trimmed);
+        if (node != null && node.isObject()) {
+          sanitizeObject((ObjectNode) node, isSearch);
+        } else if (node != null) {
+          checkNoBlockedKeys(node);
+        }
+        return MAPPER.writeValueAsBytes(node);
+      } catch (JsonProcessingException e) {
+        // fall through to NDJSON handling
+      }
+    }
+
+    // NDJSON (_msearch, _bulk)
+    StringBuilder sb = new StringBuilder();
+    int idx = 0;
+    for (String line : trimmed.split("\n")) {
+      if (line.isBlank()) continue;
+      JsonNode node = MAPPER.readTree(line);
+      if (node != null && node.isObject()) {
+        sanitizeObject((ObjectNode) node, isMSearch && (idx % 2 == 1));
+      }
+      sb.append(MAPPER.writeValueAsString(node)).append('\n');
+      idx++;
+    }
+    return sb.toString().getBytes(StandardCharsets.UTF_8);
+  }
+
+  /** Sanitizes a single search body object. */
+  private void sanitizeObject(ObjectNode body, boolean isSearch) throws AccessDeniedException {
+    checkNoBlockedKeys(body);
+    checkNoDataLeakRootKeys(body);
+    checkNoTermsLookup(body);
+    sanitizeHeavyQueries(body);
+    if (isSearch) {
+      body.put("timeout", QUERY_TIMEOUT);
+    }
+    if (body.has("size") && body.get("size").asInt() > maxSearchSize) {
+      body.put("size", maxSearchSize);
+    }
+    if (body.has("from") && body.get("from").asInt() > MAX_SEARCH_FROM) {
+      body.put("from", MAX_SEARCH_FROM);
+    }
+    if (body.has("aggs") && body.has("aggregations")) {
+      throw new AccessDeniedException("Use either aggs or aggregations, not both");
+    }
+    JsonNode aggs = body.has("aggs") ? body.get("aggs") : body.get("aggregations");
+    if (aggs != null) {
+      validateAggs(aggs, 1, new int[]{0});
+    }
+  }
+
+  /** Rejects response-shaping options that can expose fields not meant to be public (root level only). */
+  private void checkNoDataLeakRootKeys(ObjectNode body) throws AccessDeniedException {
+    for (String key : DATA_LEAK_ROOT_KEYS) {
+      if (body.has(key)) {
+        throw new AccessDeniedException("\"" + key + "\" is not allowed");
+      }
+    }
+  }
+
+  /** Recursively rejects "terms lookup" (a terms query that reads its values from another document via index/id/path). */
+  private void checkNoTermsLookup(JsonNode node) throws AccessDeniedException {
+    if (node.isObject()) {
+      Iterator<Map.Entry<String, JsonNode>> it = node.fields();
+      while (it.hasNext()) {
+        Map.Entry<String, JsonNode> e = it.next();
+        if ("terms".equals(e.getKey()) && e.getValue().isObject()) {
+          Iterator<JsonNode> vals = e.getValue().elements();
+          while (vals.hasNext()) {
+            JsonNode v = vals.next();
+            if (v.isObject() && (v.has("index") || v.has("id") || v.has("path"))) {
+              throw new AccessDeniedException("terms lookup (index/id/path) is not allowed");
+            }
+          }
+        }
+        checkNoTermsLookup(e.getValue());
+      }
+    } else if (node.isArray()) {
+      for (JsonNode child : node) {
+        checkNoTermsLookup(child);
+      }
+    }
+  }
+
+  /**
+   * Recursively caps/disables the most expensive features of the "heavy" query types
+   * (regexp, wildcard, fuzzy, query_string, simple_query_string). These query types are
+   * not blocked outright - query_string/simple_query_string back the application's main
+   * search box - but options that can turn them into a full index scan are capped.
+   */
+  private void sanitizeHeavyQueries(JsonNode node) throws AccessDeniedException {
+    if (node.isObject()) {
+      ObjectNode obj = (ObjectNode) node;
+      Iterator<Map.Entry<String, JsonNode>> it = obj.fields();
+      while (it.hasNext()) {
+        Map.Entry<String, JsonNode> e = it.next();
+        String key = e.getKey();
+        JsonNode val = e.getValue();
+        if (val.isObject()) {
+          if ("wildcard".equals(key)) {
+            sanitizePatternFieldClauses((ObjectNode) val, "wildcard", true);
+          } else if ("regexp".equals(key)) {
+            sanitizePatternFieldClauses((ObjectNode) val, "regexp", false);
+          } else if ("fuzzy".equals(key)) {
+            sanitizeFuzzyFieldClauses((ObjectNode) val);
+          } else if ("query_string".equals(key)) {
+            sanitizeQueryStringClause((ObjectNode) val, true);
+          } else if ("simple_query_string".equals(key)) {
+            sanitizeQueryStringClause((ObjectNode) val, false);
+          }
+        }
+        sanitizeHeavyQueries(val);
+      }
+    } else if (node.isArray()) {
+      for (JsonNode child : node) {
+        sanitizeHeavyQueries(child);
+      }
+    }
+  }
+
+  /** Validates/clamps the per-field clauses of a "wildcard" or "regexp" query. */
+  private void sanitizePatternFieldClauses(ObjectNode fieldClauses, String type, boolean blockLeadingWildcard)
+      throws AccessDeniedException {
+    boolean isRegexp = "regexp".equals(type);
+    // snapshot the entries so shorthand clauses can be replaced while iterating
+    List<Map.Entry<String, JsonNode>> entries = new ArrayList<>();
+    fieldClauses.fields().forEachRemaining(entries::add);
+    for (Map.Entry<String, JsonNode> entry : entries) {
+      JsonNode v = entry.getValue();
+      String pattern = null;
+      if (v.isTextual()) {
+        pattern = v.asText();
+        if (isRegexp) {
+          // shorthand {"field": "pattern"} carries no room for max_determinized_states,
+          // so it would run with Elasticsearch's default (10,000) - expand it to the
+          // full form so the limit below can be applied to it as well
+          ObjectNode expanded = MAPPER.createObjectNode();
+          expanded.put("value", pattern);
+          expanded.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+          fieldClauses.set(entry.getKey(), expanded);
+        }
+      } else if (v.isObject()) {
+        ObjectNode o = (ObjectNode) v;
+        JsonNode pn = o.has("value") ? o.get("value") : o.get(type);
+        if (pn != null) pattern = pn.asText();
+        // regexp only: wildcard doesn't accept this parameter at all. For regexp it is
+        // set when absent (Elasticsearch's default of 10,000 exceeds our limit) as well
+        // as clamped when too large (or not a usable number).
+        if (isRegexp) {
+          if (!o.has("max_determinized_states") || !o.get("max_determinized_states").isNumber()
+              || o.get("max_determinized_states").asInt() > MAX_DETERMINIZED_STATES
+              || o.get("max_determinized_states").asInt() < 1) {
+            o.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+          }
+        } else if (o.has("max_determinized_states") && o.get("max_determinized_states").asInt() > MAX_DETERMINIZED_STATES) {
+          o.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+        }
+      }
+      if (pattern != null) {
+        if (pattern.length() > MAX_PATTERN_LENGTH) {
+          throw new AccessDeniedException(type + " pattern exceeds max length of " + MAX_PATTERN_LENGTH);
+        }
+        if (blockLeadingWildcard && (pattern.startsWith("*") || pattern.startsWith("?"))) {
+          throw new AccessDeniedException("Leading wildcard in " + type + " query is not allowed");
+        }
+      }
+    }
+  }
+
+  /** Clamps the per-field clauses of a "fuzzy" query. */
+  private void sanitizeFuzzyFieldClauses(ObjectNode fieldClauses) {
+    Iterator<Map.Entry<String, JsonNode>> it = fieldClauses.fields();
+    while (it.hasNext()) {
+      JsonNode v = it.next().getValue();
+      if (v.isObject()) {
+        ObjectNode o = (ObjectNode) v;
+        if (o.has("fuzziness") && o.get("fuzziness").isNumber() && o.get("fuzziness").asInt() > MAX_FUZZINESS) {
+          o.put("fuzziness", MAX_FUZZINESS);
+        }
+        if (o.has("max_expansions") && o.get("max_expansions").asInt() > MAX_FUZZY_EXPANSIONS) {
+          o.put("max_expansions", MAX_FUZZY_EXPANSIONS);
+        }
+      }
+    }
+  }
+
+  /** Validates/clamps a "query_string" or "simple_query_string" clause. */
+  private void sanitizeQueryStringClause(ObjectNode clause, boolean isFullQueryString) throws AccessDeniedException {
+    if (clause.has("query") && clause.get("query").asText("").length() > MAX_QUERY_TEXT_LENGTH) {
+      throw new AccessDeniedException("Query text exceeds max length of " + MAX_QUERY_TEXT_LENGTH);
+    }
+    if (clause.has("fuzziness") && clause.get("fuzziness").isNumber() && clause.get("fuzziness").asInt() > MAX_FUZZINESS) {
+      clause.put("fuzziness", MAX_FUZZINESS);
+    }
+    if (clause.has("max_determinized_states") && clause.get("max_determinized_states").asInt() > MAX_DETERMINIZED_STATES) {
+      clause.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+    }
+    if (isFullQueryString) {
+      // also set when absent: query_string defaults to 10,000 states, above our limit
+      // (simple_query_string has no such parameter, so it's only clamped above if present)
+      if (!clause.has("max_determinized_states")) {
+        clause.put("max_determinized_states", MAX_DETERMINIZED_STATES);
+      }
+      // allow_leading_wildcard is only valid for the full "query_string" query (not
+      // simple_query_string, which would reject it as an unknown parameter) - force it
+      // off regardless of client input, since a leading wildcard forces a full index scan.
+      clause.put("allow_leading_wildcard", false);
+    }
+  }
+
+  /** Recursively blocks any script related keys. */
+  private void checkNoBlockedKeys(JsonNode node) throws AccessDeniedException {
+    if (node.isObject()) {
+      Iterator<Map.Entry<String, JsonNode>> it = node.fields();
+      while (it.hasNext()) {
+        Map.Entry<String, JsonNode> e = it.next();
+        if (BLOCKED_KEYS.contains(e.getKey())) {
+          throw new AccessDeniedException("Scripts are not allowed");
+        }
+        checkNoBlockedKeys(e.getValue());
+      }
+    } else if (node.isArray()) {
+      for (JsonNode child : node) {
+        checkNoBlockedKeys(child);
+      }
+    }
+  }
+
+  /**
+   * Recursively validates the aggregations.
+   * @param aggs the "aggs"/"aggregations" object
+   * @param depth the current nesting depth (top-level = 1)
+   * @param totalAggCount mutable running count of aggregation definitions seen so far, across the whole request
+   */
+  private void validateAggs(JsonNode aggs, int depth, int[] totalAggCount) throws AccessDeniedException {
+    if (!aggs.isObject()) {
+      throw new AccessDeniedException("Invalid aggregations");
+    }
+    if (depth > MAX_AGG_DEPTH) {
+      throw new AccessDeniedException("Aggregation nesting too deep (max " + MAX_AGG_DEPTH + ")");
+    }
+    Iterator<Map.Entry<String, JsonNode>> names = aggs.fields();
+    while (names.hasNext()) {
+      names.next();
+      if (++totalAggCount[0] > MAX_TOTAL_AGGS) {
+        throw new AccessDeniedException("Too many aggregations in request (max " + MAX_TOTAL_AGGS + ")");
+      }
+    }
+    names = aggs.fields();
+    while (names.hasNext()) {
+      JsonNode def = names.next().getValue();
+      if (!def.isObject()) {
+        throw new AccessDeniedException("Invalid aggregation definition");
+      }
+      Iterator<String> keys = def.fieldNames();
+      while (keys.hasNext()) {
+        String aggType = keys.next();
+        if ("aggs".equals(aggType) || "aggregations".equals(aggType)) {
+          validateAggs(def.get(aggType), depth + 1, totalAggCount);
+        } else if ("meta".equals(aggType)) {
+          continue;
+        } else if (!ALLOWED_AGG_TYPES.contains(aggType)) {
+          throw new AccessDeniedException("Aggregation type not allowed: " + aggType);
+        } else {
+          validateAggBody(aggType, def.get(aggType));
+        }
+      }
+    }
+  }
+
+  /** Validates field restrictions and limits of an individual aggregation. */
+  private void validateAggBody(String aggType, JsonNode agg) throws AccessDeniedException {
+    if (!agg.isObject()) return;
+    ObjectNode obj = (ObjectNode) agg;
+    switch (aggType) {
+      case "terms":
+      case "date_histogram":
+      case "geohash_grid":
+      case "histogram":
+        JsonNode field = obj.get("field");
+        if (!allowSettings && (field == null || !allowedAggFields.contains(field.asText()))) {
+          throw new AccessDeniedException("Aggregation not allowed on field: "
+              + (field == null ? "(none)" : field.asText()));
+        }
+        if (("geohash_grid".equals(aggType) && !obj.has("size"))
+            || (obj.has("size") && obj.get("size").asInt() > MAX_AGG_SIZE)) {
+          obj.put("size", MAX_AGG_SIZE);
+        }
+        if ("geohash_grid".equals(aggType) && obj.has("precision")
+            && obj.get("precision").asInt() > MAX_GEOHASH_PRECISION) {
+          obj.put("precision", MAX_GEOHASH_PRECISION);
+        }
+        // The resource guards below (terms include/exclude/shard_size, date_histogram and
+        // histogram bounds) apply regardless of allowSettings: that setting only relaxes
+        // the field allow-list above, since the shipped config enables it and these
+        // guards would otherwise never run for anonymous requests.
+        if ("terms".equals(aggType)) {
+          // include/exclude (regex or large value lists) and shard_size (forces every
+          // shard to compute and return far more terms than "size") are all ways to
+          // make an otherwise-bounded terms aggregation expensive again.
+          if (obj.has("include") || obj.has("exclude")) {
+            throw new AccessDeniedException("terms aggregation \"include\"/\"exclude\" is not allowed");
+          }
+          if (obj.has("shard_size")) {
+            throw new AccessDeniedException("terms aggregation \"shard_size\" is not allowed");
+          }
+        }
+        if ("date_histogram".equals(aggType)) {
+          validateDateHistogram(obj);
+        }
+        if ("histogram".equals(aggType)) {
+          validateHistogram(obj);
+        }
+        break;
+      default:
+        break;
+    }
+  }
+
+  /**
+   * Bounds a numeric histogram aggregation (see MIN_HISTOGRAM_INTERVAL): rejects parameters
+   * other than those the UI sends, requires a finite numeric interval of at least
+   * MIN_HISTOGRAM_INTERVAL, and forces min_doc_count to at least 1 (a missing value is
+   * set, since Elasticsearch's default of 0 would fill in every empty bucket in the range).
+   */
+  private void validateHistogram(ObjectNode obj) throws AccessDeniedException {
+    Iterator<String> names = obj.fieldNames();
+    while (names.hasNext()) {
+      String n = names.next();
+      if (!ALLOWED_HISTOGRAM_KEYS.contains(n)) {
+        throw new AccessDeniedException("histogram aggregation parameter not allowed: " + n);
+      }
+    }
+    JsonNode interval = obj.get("interval");
+    if (interval == null || !interval.isNumber()) {
+      throw new AccessDeniedException("histogram aggregation requires a numeric \"interval\"");
+    }
+    double iv = interval.asDouble();
+    if (Double.isNaN(iv) || Double.isInfinite(iv) || iv < MIN_HISTOGRAM_INTERVAL) {
+      throw new AccessDeniedException("histogram aggregation \"interval\" must be at least "
+          + MIN_HISTOGRAM_INTERVAL);
+    }
+    JsonNode off = obj.get("offset");
+    if (off != null && !off.isNumber()) {
+      throw new AccessDeniedException("histogram aggregation \"offset\" must be numeric");
+    }
+    if (!obj.has("min_doc_count") || obj.get("min_doc_count").asInt(1) < 1) {
+      obj.put("min_doc_count", 1);
+    }
+  }
+
+  /**
+   * Clamps a date_histogram's interval to a minimum granularity and forces
+   * min_doc_count to at least 1, so a tiny interval over a large date range
+   * (or min_doc_count:0 filling in empty buckets across that range) cannot
+   * generate an unbounded number of buckets.
+   */
+  private void validateDateHistogram(ObjectNode obj) {
+    if (!obj.has("min_doc_count") || obj.get("min_doc_count").asInt(1) <= 0) {
+      obj.put("min_doc_count", 1);
+    }
+    for (String field : new String[]{"fixed_interval", "interval"}) {
+      if (!obj.has(field)) continue;
+      String value = obj.get(field).asText().trim();
+      if ("interval".equals(field) && Set.of(
+          "year", "1y", "quarter", "1q", "month", "1M",
+          "week", "1w", "day", "1d", "hour", "1h").contains(value)) {
+        continue;
+      }
+      Long ms = parseFixedIntervalMillis(value);
+      if (ms == null || ms < MIN_DATE_HISTOGRAM_INTERVAL_MS) {
+        obj.put(field, "1h");
+      }
+    }
+    if (obj.has("calendar_interval")) {
+      String v = obj.get("calendar_interval").asText().trim();
+      if (SUB_HOUR_CALENDAR_INTERVALS.contains(v)) {
+        obj.put("calendar_interval", "hour");
+      }
+    }
+  }
+
+  /** Parses an Elasticsearch fixed interval/date-histogram interval string (e.g. "30s","2h") to milliseconds, or null if unparseable. */
+  private Long parseFixedIntervalMillis(String value) {
+    if (value == null) return null;
+    Matcher m = FIXED_INTERVAL_PATTERN.matcher(value.trim());
+    if (!m.matches()) return null;
+    try {
+      long amount = Long.parseLong(m.group(1));
+      long unitMs;
+      switch (m.group(2).toLowerCase()) {
+        case "ms": unitMs = 1L; break;
+        case "s": unitMs = 1000L; break;
+        case "m": unitMs = 60_000L; break;
+        case "h": unitMs = 3_600_000L; break;
+        case "d": unitMs = 86_400_000L; break;
+        default: return null;
+      }
+      return Math.multiplyExact(amount, unitMs);
+    } catch (NumberFormatException | ArithmeticException e) {
+      return null;
+    }
+  }
+
+  
   
   @Override
   protected void copyRequestHeaders(HttpServletRequest clientRequest, Request proxyRequest) {
@@ -66,6 +781,7 @@ public class ElasticProxy extends BalancerServlet {
   @Override
   public void init() throws ServletException {
     LOGGER.debug("Starting up ElasticProxy...");
+    loadAggregationSettings();
     GeoportalContext gc = GeoportalContext.getInstance();
     if (gc!=null) {
       ElasticContext ec = gc.getElasticContext();
@@ -83,7 +799,6 @@ public class ElasticProxy extends BalancerServlet {
     ElasticContext ec = null;
     if (gc != null) ec = gc.getElasticContext();
     if (ec != null) {
-      balancerSupport.setIs7Plus(ec.getIs7Plus());
       String[] nodes = ec.nodesToArray();
       String scheme = "http://";
       if (ec.getUseHttps()) {
@@ -134,8 +849,139 @@ public class ElasticProxy extends BalancerServlet {
   @Override
   protected String rewriteTarget(HttpServletRequest request) {
     String uri = balancerSupport.rewriteTarget(request);
+    // if the "source" query parameter was validated/sanitized in service(),
+    // splice the sanitized value back in so the (possibly clamped/modified)
+    // version is what actually gets forwarded to Elasticsearch
+    String sanitizedSource = (String) request.getAttribute(SANITIZED_SOURCE_ATTR);
+    if (uri != null && sanitizedSource != null) {
+      uri = replaceQueryParam(uri, "source", sanitizedSource);
+    }
+    // sanitizeObject() only forces a safety "timeout" into the JSON body, so a
+    // GET _search with no body and no "source" (nothing for it to sanitize)
+    // would otherwise run with no time limit at all. "timeout" is also a valid
+    // _search query-string parameter, so enforce the same default here too -
+    // unconditionally overwriting any client-supplied value, same as the body
+    // path - regardless of request method or whether a body was present.
+    if (uri != null && isSearchPath(request)) {
+      uri = replaceQueryParam(uri, "timeout", QUERY_TIMEOUT);
+    }
+    // "size" and "from" are also valid _search query-string parameters, and Elasticsearch
+    // gives them precedence over the same keys in the body - so the clamps in
+    // sanitizeObject() don't constrain them (e.g. GET _search?size=10000 has no body to
+    // clamp at all, and a URL value would override a clamped body value). The UI itself
+    // pages via URL parameters, so clamp rather than reject over-limit values.
+    if (uri != null) {
+      uri = clampQueryParam(uri, "size", maxSearchSize);
+    }
+    if (uri != null) {
+      uri = clampQueryParam(uri, "from", MAX_SEARCH_FROM);
+    }
     LOGGER.debug("ProxyTo: "+uri);
     return uri;
+  }
+
+  /**
+   * Clamps a numeric query-string parameter in an already-built target URL to a maximum.
+   * <p>The name is URL-decoded before comparing (so "%73ize" is recognized as "size"). If it
+   * occurs more than once, the largest value is used (clamped), and every occurrence is
+   * replaced by a single canonical one, so no unclamped duplicate can survive. A parameter
+   * that is absent is left absent. A value that isn't a non-negative integer, or a name/value
+   * that can't be decoded, is rejected (null is returned, which makes the proxy refuse the
+   * request) rather than forwarded unchecked.
+   * @return the rewritten URL, the unchanged URL if the parameter is absent or within the
+   *         limit, or null if the request must be rejected.
+   */
+  private String clampQueryParam(String uri, String paramName, int max) {
+    int qIdx = uri.indexOf('?');
+    if (qIdx < 0) return uri;
+    String query = uri.substring(qIdx + 1);
+    if (query.isEmpty()) return uri;
+    java.math.BigInteger largest = null;
+    boolean modified = false;
+    int count = 0;
+    for (String pair : query.split("&")) {
+      int eq = pair.indexOf('=');
+      String rawKey = eq >= 0 ? pair.substring(0, eq) : pair;
+      String decodedKey;
+      try {
+        decodedKey = URLDecoder.decode(rawKey, "UTF-8");
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        LOGGER.warn("Blocked Elasticsearch query parameter with undecodable name");
+        return null;
+      }
+      if (!decodedKey.trim().equalsIgnoreCase(paramName)) continue;
+      count++;
+      try {
+        String v = eq >= 0 ? URLDecoder.decode(pair.substring(eq + 1), "UTF-8").trim() : "";
+        java.math.BigInteger n = new java.math.BigInteger(v);
+        if (n.signum() < 0) {
+          LOGGER.warn("Blocked negative \"" + paramName + "\" query parameter");
+          return null;
+        }
+        if (largest == null || n.compareTo(largest) > 0) largest = n;
+      } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+        // NumberFormatException is an IllegalArgumentException
+        LOGGER.warn("Blocked non-numeric \"" + paramName + "\" query parameter");
+        return null;
+      }
+    }
+    if (count == 0) return uri;
+    if (largest.compareTo(java.math.BigInteger.valueOf(max)) > 0) {
+      largest = java.math.BigInteger.valueOf(max);
+      modified = true;
+    }
+    // collapse duplicates / re-encode only when something actually needs changing
+    if (!modified && count == 1) return uri;
+    return replaceQueryParam(uri, paramName, largest.toString());
+  }
+
+  /** True for /_search paths (but not /_search/scroll), matching the isSearch check in sanitizeBody(). */
+  private boolean isSearchPath(HttpServletRequest request) {
+    String path = request.getPathInfo();
+    return path != null && path.contains("_search") && !path.contains("_search/scroll");
+  }
+
+  /**
+   * Replaces (or appends) a query-string parameter in an already-built target URL, dropping
+   * every existing occurrence of it first - the name is decoded before comparing (the same
+   * fix as extractQueryParam(), and for the same reason: a differently-encoded occurrence of
+   * paramName must still be recognized and removed, not left behind as an unsanitized
+   * duplicate alongside the canonical one appended below) so no unchecked value can survive
+   * rewriting no matter how many raw duplicates were present. An occurrence whose name can't
+   * be decoded is left untouched (it is, by definition, not a byte-for-byte match for
+   * paramName, and this method is also used for non-security-critical params like "timeout");
+   * callers that need to guarantee a parameter is unique/sanitized (e.g. "source") must
+   * reject ambiguous duplicates up front, as extractQueryParam() does.
+   */
+  private String replaceQueryParam(String uri, String paramName, String newRawValue) {
+    try {
+      int qIdx = uri.indexOf('?');
+      String base = qIdx >= 0 ? uri.substring(0, qIdx) : uri;
+      String query = qIdx >= 0 ? uri.substring(qIdx + 1) : "";
+      String encodedValue = URLEncoder.encode(newRawValue, StandardCharsets.UTF_8);
+      StringBuilder sb = new StringBuilder();
+      if (!query.isEmpty()) {
+        for (String pair : query.split("&")) {
+          int eq = pair.indexOf('=');
+          String rawKey = eq >= 0 ? pair.substring(0, eq) : pair;
+          String decodedKey;
+          try {
+            decodedKey = URLDecoder.decode(rawKey, "UTF-8");
+          } catch (UnsupportedEncodingException | IllegalArgumentException e) {
+            decodedKey = null;
+          }
+          if (decodedKey != null && decodedKey.equalsIgnoreCase(paramName)) continue;
+          if (sb.length() > 0) sb.append('&');
+          sb.append(pair);
+        }
+      }
+      if (sb.length() > 0) sb.append('&');
+      sb.append(paramName).append('=').append(encodedValue);
+      return base + "?" + sb;
+    } catch (Exception e) {
+      LOGGER.error("Error rewriting \"" + paramName + "\" query parameter", e);
+      return uri;
+    }
   }
   
 
@@ -145,6 +991,10 @@ public class ElasticProxy extends BalancerServlet {
 		// Remove problematic headers
 		proxyRequest.headers(headers -> headers.remove("Forwarded")); // AWS ALB doesn't like this
 		proxyRequest.headers(headers -> headers.remove("Via")); // We'll add a proper one later 
+		// Client cookies (session cookies, etc.) must never be forwarded to Elasticsearch -
+		// they are not needed by ES and could leak sensitive session identifiers to the
+		// search cluster (and to AWS ALB in the serverless case).
+		proxyRequest.headers(headers -> headers.remove(HttpHeader.COOKIE));
 
 		// Remove duplicate Content-Type and Content-Length and add only one
 		if (proxyRequest.getHeaders().contains(HttpHeader.CONTENT_TYPE))  {

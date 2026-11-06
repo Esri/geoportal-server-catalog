@@ -100,7 +100,7 @@ function(declare, lang, array, query, domClass, topic, appTopics, registry,
         component.appendQueryParams(params);
       });
       // history.replaceState(location.pathname, document.title, location.pathname.replace(/\/+$/g, "") + "/#searchPanel");
-      var url = "./elastic/"+AppContext.geoportal.metadataIndexName+"/_search";
+      var url = "./elastic/_search";
       var v, postData = null;
 
       if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 

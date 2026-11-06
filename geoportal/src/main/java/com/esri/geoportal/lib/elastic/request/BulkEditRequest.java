@@ -18,7 +18,6 @@ import com.esri.geoportal.base.util.Val;
 import com.esri.geoportal.base.util.exception.UsageException;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
-import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
 import com.esri.geoportal.lib.elastic.http.util.PITSearchScroller;
 import com.esri.geoportal.lib.elastic.util.AccessUtil;
@@ -143,15 +142,9 @@ public class BulkEditRequest extends BulkRequest {
   protected void appendHit(ElasticContext ec, StringBuilder data, com.esri.geoportal.lib.elastic.http.util.SearchHit hit) {
     // https://www.elastic.co/guide/en/opensearch/reference/current/docs-bulk.html
     JsonObjectBuilder line1 = Json.createObjectBuilder();
-    // should "_retry_on_conflict" be "retry_on_conflict" at ES6?
-    String retryName = "_retry_on_conflict";
-    if (ec.getIs6Plus()) retryName = "retry_on_conflict";
     JsonObjectBuilder joBuilder = Json.createObjectBuilder()
             .add("_id",hit.getId());
-            //.add(retryName,this.getRetryOnConflict()); //This parameter not working with opensearch
-    if (!ec.getIs7Plus()) {
-      joBuilder = joBuilder.add("_type",ec.getActualItemIndexType());
-    }
+            //.add("retry_on_conflict",this.getRetryOnConflict()); //This parameter not working with opensearch
     line1.add("update", joBuilder);
     data.append(line1.build().toString()).append("\n");
     if (getUpdateScript() != null) {
@@ -192,9 +185,6 @@ public class BulkEditRequest extends BulkRequest {
       JsonObjectBuilder jb = Json.createObjectBuilder();
       JsonObjectBuilder joBuilder = Json.createObjectBuilder()
               .add("values",ja);
-      if (!GeoportalContext.getInstance().getElasticContext().getIs7Plus()) {
-        joBuilder = joBuilder.add("type",GeoportalContext.getInstance().getElasticContext().getActualItemIndexType());
-      }
       jb.add("ids", joBuilder);
       httpFilters.add(jb.build());
     }

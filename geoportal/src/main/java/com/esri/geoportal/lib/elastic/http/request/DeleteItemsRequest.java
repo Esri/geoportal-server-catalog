@@ -43,9 +43,6 @@ public class DeleteItemsRequest extends BulkEditRequest {
     JsonObjectBuilder line1 = Json.createObjectBuilder();
     JsonObjectBuilder joBuilder = Json.createObjectBuilder()
             .add("_id",hit.getId());
-    if (!ec.getIs7Plus()) {
-      joBuilder =joBuilder.add("_type",ec.getActualItemIndexType());
-    }
     line1.add("delete", joBuilder);
     data.append(line1.build().toString()).append("\n");
     if (ec.getUseSeparateXmlItem()) {

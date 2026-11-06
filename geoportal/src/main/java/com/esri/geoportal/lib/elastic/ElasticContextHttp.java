@@ -137,8 +137,6 @@ public class ElasticContextHttp extends ElasticContext {
    */
   public void ensureIndex(String name, boolean considerAsAlias) throws Exception {
     LOGGER.debug("Checking index: "+name);
-  //For OpenSearch this would always be true
-    this.setIs7Plus(true);
     try {
       if (name == null || name.trim().length() == 0) return;
       String result, url;

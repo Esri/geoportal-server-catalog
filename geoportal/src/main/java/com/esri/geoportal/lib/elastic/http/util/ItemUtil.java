@@ -162,30 +162,7 @@ public class ItemUtil {
         }
       }
     }
-//      if (result != null && result.length() > 0) {
-//        JsonObject item = (JsonObject)JsonUtil.toJsonStructure(result);
-//        try {
-//          String xml = item.getJsonObject("_source").getString(FieldNames.FIELD_SYS_CLOB);
-//          return xml;
-//        } catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-//    } else {
-//      String field = FieldNames.FIELD_SYS_XML;
-//      if (itemSource == null) {
-//        JsonObject item = readItemJson(indexName,ec.getItemIndexType(),id);
-//        itemSource = this.getItemSource(item);
-//      }
-//      if (itemSource != null && itemSource.containsKey(field)) {
-//        try {
-//          String xml = itemSource.getString(FieldNames.FIELD_SYS_XML);
-//          return xml;
-//        } catch (Exception e) {
-//          e.printStackTrace();
-//        }
-//      }
-//    }
+
     return null;
   }
   

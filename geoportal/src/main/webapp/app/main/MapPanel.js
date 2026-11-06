@@ -766,7 +766,7 @@ function(declare, lang, Templated, template, i18n, i18resources, domConstruct, D
         if (window && window.top && window.top.geoportalServiceInfo) {
           var loc = window.top.location;
           var gpt = window.top.geoportalServiceInfo;
-          var url = loc.protocol + "//" + loc.host + loc.pathname + "elastic/" + gpt.metadataIndexName + "/_search";
+          var url = loc.protocol + "//" + loc.host + loc.pathname + "elastic/_search";
           
           if (AppContext.appConfig.system.secureCatalogApp || (AppContext.geoportal.supportsApprovalStatus || 
                   AppContext.geoportal.supportsGroupBasedAccess)) {

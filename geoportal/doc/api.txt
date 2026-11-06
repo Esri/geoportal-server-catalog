@@ -37,9 +37,8 @@ geoportal/elastic/*
 HTTP requests to these endpoints are proxied to the Elasticsearch cluster. 
 See: WEB-INF/classes/app-context.html for cluster configuration
 See: WEB-INF/classes/app-security.html for securing these endpoints
-Example: http://localhost:8080/geoportal/elastic/metadata/_mappings?pretty=true
-Example: http://localhost:8080/geoportal/elastic/metadata/item/item/_search?pretty=true
-Example: http://localhost:8080/geoportal/elastic/metadata/xml/item/_search?pretty=true
+
+Example: http://localhost:8080/geoportal/elastic/metadata/s_search?pretty=true
 
 When using /elastic/metadata/item/item/_search, POST your query using the 
 Elasticsearch Query DSL (aggregations requests are also supported).
