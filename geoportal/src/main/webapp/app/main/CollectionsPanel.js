@@ -1373,9 +1373,38 @@ define([
       this.appActionState = this.actions.NONE;
     },
 
-    showModal: function () {
+    // true if the collection has at least one item
+    collectionHasItems: async function (id) {
+      let url = `${this.getStacBaseUrl()}/collections/${this.replaceSpaceWithPlus(id)}/items?limit=1`;
+      if (AppContext.appConfig.system.secureCatalogApp) {
+        url = new AppClient().appendAccessToken(url);
+      }
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(response.status);
+      const result = await response.json();
+      return !!(result && Array.isArray(result.features) && result.features.length);
+    },
+
+    showModal: async function () {
       const selectedCollections = this.getCollectionsToBeDeleted();
       const dm = this.i18n.collections.deleteModal;
+      try {
+        const flags = await Promise.all(
+          selectedCollections.map((c) => this.collectionHasItems(c.id))
+        );
+        const withItems = selectedCollections.filter((c, i) => flags[i]);
+        if (withItems.length) {
+          this.hideModal();
+          StatusModal.error(
+            lang.replace(dm.hasItems, {
+              titles: withItems.map((c) => c.title || c.id).join(", "),
+            })
+          );
+          return;
+        }
+      } catch (e) {
+        console.error("Error checking collection items", e);
+      }
       ConfirmModal.confirm({
         title: dm.title,
         message: lang.replace(dm.message, {

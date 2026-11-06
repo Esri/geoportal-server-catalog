@@ -104,6 +104,10 @@ define([
         }
       };
 
+      this.deleteAllItemsButton.onclick = function () {
+        if (self.collectionId) self._deleteAllItems();
+      };
+
       this.closeButton.onclick = function () {
         self.clear();
       };
@@ -575,6 +579,30 @@ define([
       }).then(function (ok) {
         if (ok) self._doDeleteItem(feature);
       });
+    },
+
+    _deleteAllItems: function () {
+      var self = this;
+      var dm = this.i18n.collectionItems.deleteAllModal;
+      ConfirmModal.confirm({
+        title: dm.title,
+        message: lang.replace(dm.message, { collection: this.collectionTitle || this.collectionId }),
+        confirmLabel: dm.confirm
+      }).then(function (ok) {
+        if (ok) self._doDeleteAllItems();
+      });
+    },
+
+    // Deleting many items can take a long time, so the request is only
+    // initiated here; the user is told to check back after a few minutes.
+    _doDeleteAllItems: function () {
+      var self = this;
+      var url = this.getStacBaseUrl() + "/collections/" + encodeURIComponent(this.collectionId) + "/items";
+      url = new AppClient().appendAccessToken(url);
+      fetch(url, { method: "DELETE", keepalive: true }).catch(function (e) {
+        console.error("Error deleting all STAC items", e);
+      });
+      StatusModal.info(this.i18n.collectionItems.deleteAllInitiated);
     },
 
     _doDeleteItem: function (feature) {
