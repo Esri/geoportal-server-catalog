@@ -479,7 +479,8 @@ define({
       deleteModal: {
         title: "Delete Collection?",
         message: "Are you sure you would like to delete {count} collection(s)? This action is irreversible.\n{titles}",
-        confirm: "Delete"
+        confirm: "Delete",
+        hasItems: "The following collection(s) still contain items: {titles}.\nPlease delete all items first (open the collection with \"View Items\" and use \"Delete All Items\"), then delete the collection."
       },
       alerts: {
         deleteSuccessTitle: "Successfully deleted collections",
@@ -554,6 +555,13 @@ define({
         confirm: "Delete"
       },
       deleteFailed: "Unable to delete item \"{id}\".",
+      deleteAll: "Delete All Items",
+      deleteAllModal: {
+        title: "Delete All Items?",
+        message: "Are you sure you would like to delete ALL items in collection \"{collection}\"? This action is irreversible and may take a long time to complete.",
+        confirm: "Delete All"
+      },
+      deleteAllInitiated: "Delete all items has been initiated. This may take some time. Please check after a few minutes.",
       popup: {
         assets: "Assets",
         noAssets: "No assets available"
