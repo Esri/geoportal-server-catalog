@@ -478,12 +478,16 @@ define({
       },
       deleteModal: {
         title: "Delete Collection?",
-        message: "Are you sure you would like to delete {count} collection(s)? This action is irreversible.\n{titles}",
-        confirm: "Delete",
-        hasItems: "The following collection(s) still contain items: {titles}.\nPlease delete all items first (open the collection with \"View Items\" and use \"Delete All Items\"), then delete the collection."
+        message: "Are you sure you would like to delete collection \"{titles}\" and all of their items? This action is irreversible.",
+		messageNonStac: "Are you sure you would like to delete collection \"{titles}\" ? This action is irreversible.",
+        confirm: "Delete"
       },
       alerts: {
         deleteSuccessTitle: "Successfully deleted collections",
+        deleteStartedTitle: "Collection deletion started",
+        deleteStartedMessage: "Deletion of the STAC collection \"{started}\" and its items has started. This may take some time, please check after a while.",
+        deleteNonStacStartedTitle: "Collection deletion started",
+        deleteNonStacStartedMessage: "Deletion of the collection \"{started}\" has started. Only the collection will be deleted; its items are not deleted. This may take some time, please check after a while.",
         deleteSuccessMessage: "Deleted: {deleted}.",
         deleteFailedSuffix: " Failed to delete: {failed}",
         deleteErrorTitle: "Error deleting collections",
