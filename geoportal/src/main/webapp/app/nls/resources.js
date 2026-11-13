@@ -423,6 +423,7 @@ define({
       tools: {
         drawPolygon: "Draw polygon",
         drawCircle: "Draw circle",
+        drawRectangle: "Draw rectangle",
         undo: "Undo",
         redo: "Redo",
         clearGeometry: "Clear geometry"
@@ -594,6 +595,7 @@ define({
         drawMultiline: "Draw multiline (add another line to the existing one)",
         drawPolygon: "Draw polygon",
         drawCircle: "Draw circle",
+        drawRectangle: "Draw rectangle",
         clearGeometry: "Clear geometry",
         assets: "Assets:",
         assetKeyPlaceholder: "unique asset key...",

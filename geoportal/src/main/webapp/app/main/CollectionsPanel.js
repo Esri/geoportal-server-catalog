@@ -744,9 +744,9 @@ define([
       const teNode = document.getElementById("collection-temporal-end-input");
       const temporalStart = ((tsNode && tsNode.value) || "").trim() || defs.temporalStart;
       const temporalEnd = ((teNode && teNode.value) || "").trim() || defs.temporalEnd;
-      const stacExtensions = isStacCollection && stacExtNode
-        ? this._parseStacExtensions(stacExtNode.value)
-        : defs.stac_extensions;
+      const stacExtensions = isStacCollection
+        ? (stacExtNode ? this._parseStacExtensions(stacExtNode.value) : defs.stac_extensions)
+        : null;
       const collection = {
         type: "Collection",
         ...(isStacCollection
@@ -2302,6 +2302,10 @@ define([
 
       if (graphic) {
         this.hideAllGraphicsLayers(view);
+        // Make sketch layer visible so the geometry can be seen/edited
+        if (this.sketchGraphicsLayer) {
+          this.sketchGraphicsLayer.visible = true;
+        }
         const tempGraphic = graphic.clone();
         tempGraphic.symbol = this.POLYGON_SYM;
         this.sketchGraphicsLayer.add(tempGraphic);
@@ -2331,7 +2335,7 @@ define([
       if (this.selectedCollection.graphic) {
         this.sketchGraphicsLayer.removeAll();
       }
-      this.showAllGraphicsLayers(this.view);
+      this._showOnlyCollectionLayer(this.selectedCollection?.properties?.id ?? null);
       this.clearCollectionAssets();
       this.clearCollectionContacts();
       this.clearCollectionProviders();
@@ -2567,14 +2571,17 @@ define([
         layer: sketchGraphicsLayer,
       });
 
-      sketchVM.on("create", (e) => {
-        if (e.state === "complete") {
-          if (e.tool === "circle") {
-            this.drawCircleButton.classList.remove("sketch-active-tool");
-          } else if (e.tool === "polygon") {
-            this.drawPolygonButton.classList.remove("sketch-active-tool");
-          }
+      const clearActiveTools = () => {
+        [this.drawPolygonButton, this.drawCircleButton, this.drawRectangleButton].forEach((b) =>
+          b.classList.remove("sketch-active-tool")
+        );
+      };
 
+      sketchVM.on("create", (e) => {
+        if (e.state === "complete" || e.state === "cancel") {
+          clearActiveTools();
+        }
+        if (e.state === "complete") {
           this.selectedGraphic = e.graphic;
           sketchGraphicsLayer.graphics.forEach((g) => {
             if (g !== e.graphic) {
@@ -2600,6 +2607,11 @@ define([
       this.drawCircleButton.onclick = (e) => {
         sketchVM.create("circle");
         this.drawCircleButton.classList.add("sketch-active-tool");
+      };
+
+      this.drawRectangleButton.onclick = (e) => {
+        sketchVM.create("rectangle");
+        this.drawRectangleButton.classList.add("sketch-active-tool");
       };
 
       this.undoButton.onclick = (e) => {
