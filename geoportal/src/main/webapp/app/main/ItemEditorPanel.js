@@ -420,6 +420,7 @@ define([
       this.drawMultilineButton.classList.remove("item-editor-active-tool");
       this.drawPolygonButton.classList.remove("item-editor-active-tool");
       this.drawCircleButton.classList.remove("item-editor-active-tool");
+      this.drawRectangleButton.classList.remove("item-editor-active-tool");
     },
 
     _startDraw: function (tool, button) {
@@ -462,6 +463,10 @@ define([
 
     _onDrawCircleClick: function () {
       this._startDraw("circle", this.drawCircleButton);
+    },
+
+    _onDrawRectangleClick: function () {
+      this._startDraw("rectangle", this.drawRectangleButton);
     },
 
     // select the existing geometry so it can be moved/reshaped or deleted
@@ -839,6 +844,10 @@ define([
       var id = (this.idInput.value || "").trim();
       var datetime = (this.datetimeInput.value || "").trim();
       if (!id) return this.i18n.collectionItems.editor.idRequired;
+      // existing items keep their id (field is disabled); only validate new ones
+      if (this.mode === "create" && !/^[A-Za-z0-9-]+$/.test(id)) {
+        return this.i18n.collectionItems.editor.idInvalid;
+      }
       if (!datetime) return this.i18n.collectionItems.editor.datetimeRequired;
       if (!(this.stacVersionInput.value || "").trim()) return this.i18n.collectionItems.editor.stacVersionRequired;
       if (!(this.stacExtensionsInput.value || "").split(/[\s,]+/).filter(function (s) { return s; }).length) {

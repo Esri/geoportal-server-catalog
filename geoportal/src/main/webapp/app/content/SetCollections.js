@@ -86,7 +86,7 @@ function(declare, topic, appTopics, BulkEdit, template, i18n, ApplyTo) {
       if (this._collectionOptionsLoaded) {
         return;
       }
-      $.getJSON("./stac/collections?limit=10000").done(function(response) {
+      $.getJSON("./stac/allCollections?limit=10000").done(function(response) {
         self._populateCollectionOptions(response && response.collections ? response.collections : []);
       }).fail(function(error) {
         self._populateCollectionOptions([]);

@@ -581,6 +581,13 @@ define([
         checkBoxes.forEach((cbox) => {
           const id = cbox.getAttribute("data-id");
           cbox.onclick = (e) => {
+            // Only one collection may be selected for deletion
+            if (cbox.checked) {
+              checkBoxes.forEach((other) => {
+                if (other !== cbox) other.checked = false;
+              });
+              this.collectionIdsToBeDeleted = [];
+            }
             this.handleClickCheckbox(id);
           };
         });
@@ -612,56 +619,54 @@ define([
       }, 1500);
     },
 
-    handleDeleteCollections: function () {
+    handleDeleteCollections: async function () {
       this.appActionState = this.actions.DELETE_COLLECTION;
-      this.updateIsLoading(true);
       const that = this;
 
-      // loop through and delete every collection selected
       const collectionsToBeDeleted = this.getCollectionsToBeDeleted();
-      const allDeletePromises = collectionsToBeDeleted.map((collection) => {
+
+      // Determine whether each collection is STAC (stac_version non-empty) before deleting
+      const stacIds = [];
+      const nonStacIds = [];
+      for (const collection of collectionsToBeDeleted) {
+        let isStac = false;
+        try {
+          const full = await this.getCollectionById(collection.id);
+          isStac = !!(full && full.stac_version && String(full.stac_version).trim());
+        } catch (e) {
+          console.error(e);
+        }
+        (isStac ? stacIds : nonStacIds).push(collection.id);
+      }
+
+      // Fire delete requests without waiting: for STAC collections the server deletes items and collection and may take long
+      collectionsToBeDeleted.forEach((collection) => {
         if (collection.id === that.selectedCollection?.properties?.id) {
           // Clear selection first, then empty info box to ensure UI state is consistent
           this.selectedCollection = null;
           this.emptyCollectionInfoBox();
         }
-        return this.deleteCollection(collection.id);
+        this.deleteCollection(collection.id).catch((e) => console.error(e));
       });
 
-      Promise.all(allDeletePromises)
-        .then((results) => {
-          let successDeleteIds = [];
-          let failedDeleteIds = [];
-
-          results.forEach((r) => {
-            if (r.response.code === "200") {
-              successDeleteIds.push(r.id);
-            } else {
-              failedDeleteIds.push(r.id);
-            }
-          });
-
-          if (failedDeleteIds.length === results.length) {
-            throw new Error(failedDeleteIds.join(", "));
-          }
-          this.showAlert(
-            this.i18n.collections.alerts.deleteSuccessTitle,
-            lang.replace(this.i18n.collections.alerts.deleteSuccessMessage, { deleted: successDeleteIds.join(", ") }) +
-              (failedDeleteIds.length > 0
-                ? lang.replace(this.i18n.collections.alerts.deleteFailedSuffix, { failed: failedDeleteIds.join(", ") })
-                : ""),
-            "green"
-          );
-          this.rerenderCollectionsList();
-          this.collectionIdsToBeDeleted = [];
-          this.handleDeleteCollectionEnabled();
-          this.handleUpdateButtonEnabled();
-        })
-        .catch((e) => {
-          this.showAlert(this.i18n.collections.alerts.deleteErrorTitle, `${e}`, "red");
-          this.updateIsLoading(false);
-          console.error(e);
-        });
+      const alerts = this.i18n.collections.alerts;
+      if (stacIds.length > 0) {
+        this.showAlert(
+          alerts.deleteStartedTitle,
+          lang.replace(alerts.deleteStartedMessage, { started: stacIds.join(", ") }),
+          "green"
+        );
+      }
+      if (nonStacIds.length > 0) {
+        this.showAlert(
+          alerts.deleteNonStacStartedTitle,
+          lang.replace(alerts.deleteNonStacStartedMessage, { started: nonStacIds.join(", ") }),
+          "green"
+        );
+      }
+      this.collectionIdsToBeDeleted = [];
+      this.handleDeleteCollectionEnabled();
+      this.handleUpdateButtonEnabled();
       this.hideModal();
     },
 
@@ -739,9 +744,9 @@ define([
       const teNode = document.getElementById("collection-temporal-end-input");
       const temporalStart = ((tsNode && tsNode.value) || "").trim() || defs.temporalStart;
       const temporalEnd = ((teNode && teNode.value) || "").trim() || defs.temporalEnd;
-      const stacExtensions = isStacCollection && stacExtNode
-        ? this._parseStacExtensions(stacExtNode.value)
-        : defs.stac_extensions;
+      const stacExtensions = isStacCollection
+        ? (stacExtNode ? this._parseStacExtensions(stacExtNode.value) : defs.stac_extensions)
+        : null;
       const collection = {
         type: "Collection",
         ...(isStacCollection
@@ -1373,13 +1378,25 @@ define([
       this.appActionState = this.actions.NONE;
     },
 
-    showModal: function () {
+    showModal: async function () {
       const selectedCollections = this.getCollectionsToBeDeleted();
       const dm = this.i18n.collections.deleteModal;
+      // STAC collection delete also deletes all of its items; non-STAC deletes only the collection
+      let isStac = false;
+      for (const c of selectedCollections) {
+        try {
+          const full = await this.getCollectionById(c.id);
+          if (full && full.stac_version && String(full.stac_version).trim()) {
+            isStac = true;
+            break;
+          }
+        } catch (e) {
+          console.error(e);
+        }
+      }
       ConfirmModal.confirm({
         title: dm.title,
-        message: lang.replace(dm.message, {
-          count: selectedCollections.length,
+        message: lang.replace(isStac ? dm.message : dm.messageNonStac, {
           titles: selectedCollections.map((c) => c.title).join(", "),
         }),
         confirmLabel: dm.confirm,
@@ -2285,6 +2302,10 @@ define([
 
       if (graphic) {
         this.hideAllGraphicsLayers(view);
+        // Make sketch layer visible so the geometry can be seen/edited
+        if (this.sketchGraphicsLayer) {
+          this.sketchGraphicsLayer.visible = true;
+        }
         const tempGraphic = graphic.clone();
         tempGraphic.symbol = this.POLYGON_SYM;
         this.sketchGraphicsLayer.add(tempGraphic);
@@ -2314,7 +2335,7 @@ define([
       if (this.selectedCollection.graphic) {
         this.sketchGraphicsLayer.removeAll();
       }
-      this.showAllGraphicsLayers(this.view);
+      this._showOnlyCollectionLayer(this.selectedCollection?.properties?.id ?? null);
       this.clearCollectionAssets();
       this.clearCollectionContacts();
       this.clearCollectionProviders();
@@ -2550,14 +2571,17 @@ define([
         layer: sketchGraphicsLayer,
       });
 
-      sketchVM.on("create", (e) => {
-        if (e.state === "complete") {
-          if (e.tool === "circle") {
-            this.drawCircleButton.classList.remove("sketch-active-tool");
-          } else if (e.tool === "polygon") {
-            this.drawPolygonButton.classList.remove("sketch-active-tool");
-          }
+      const clearActiveTools = () => {
+        [this.drawPolygonButton, this.drawCircleButton, this.drawRectangleButton].forEach((b) =>
+          b.classList.remove("sketch-active-tool")
+        );
+      };
 
+      sketchVM.on("create", (e) => {
+        if (e.state === "complete" || e.state === "cancel") {
+          clearActiveTools();
+        }
+        if (e.state === "complete") {
           this.selectedGraphic = e.graphic;
           sketchGraphicsLayer.graphics.forEach((g) => {
             if (g !== e.graphic) {
@@ -2583,6 +2607,11 @@ define([
       this.drawCircleButton.onclick = (e) => {
         sketchVM.create("circle");
         this.drawCircleButton.classList.add("sketch-active-tool");
+      };
+
+      this.drawRectangleButton.onclick = (e) => {
+        sketchVM.create("rectangle");
+        this.drawRectangleButton.classList.add("sketch-active-tool");
       };
 
       this.undoButton.onclick = (e) => {

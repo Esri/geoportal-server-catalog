@@ -423,6 +423,7 @@ define({
       tools: {
         drawPolygon: "Draw polygon",
         drawCircle: "Draw circle",
+        drawRectangle: "Draw rectangle",
         undo: "Undo",
         redo: "Redo",
         clearGeometry: "Clear geometry"
@@ -478,11 +479,16 @@ define({
       },
       deleteModal: {
         title: "Delete Collection?",
-        message: "Are you sure you would like to delete {count} collection(s)? This action is irreversible.\n{titles}",
+        message: "Are you sure you would like to delete collection \"{titles}\" and all of their items? This action is irreversible.",
+		messageNonStac: "Are you sure you would like to delete collection \"{titles}\" ? This action is irreversible.",
         confirm: "Delete"
       },
       alerts: {
         deleteSuccessTitle: "Successfully deleted collections",
+        deleteStartedTitle: "Collection deletion started",
+        deleteStartedMessage: "Deletion of the STAC collection \"{started}\" and its items has started. This may take some time, please check after a while.",
+        deleteNonStacStartedTitle: "Collection deletion started",
+        deleteNonStacStartedMessage: "Deletion of the collection \"{started}\" has started. Only the collection will be deleted; its items are not deleted. This may take some time, please check after a while.",
         deleteSuccessMessage: "Deleted: {deleted}.",
         deleteFailedSuffix: " Failed to delete: {failed}",
         deleteErrorTitle: "Error deleting collections",
@@ -554,6 +560,13 @@ define({
         confirm: "Delete"
       },
       deleteFailed: "Unable to delete item \"{id}\".",
+      deleteAll: "Delete All Items",
+      deleteAllModal: {
+        title: "Delete All Items?",
+        message: "Are you sure you would like to delete ALL items in collection \"{collection}\"? This action is irreversible and may take a long time to complete.",
+        confirm: "Delete All"
+      },
+      deleteAllInitiated: "Delete all items has been initiated. This may take some time. Please check after a few minutes.",
       popup: {
         assets: "Assets",
         noAssets: "No assets available"
@@ -582,6 +595,7 @@ define({
         drawMultiline: "Draw multiline (add another line to the existing one)",
         drawPolygon: "Draw polygon",
         drawCircle: "Draw circle",
+        drawRectangle: "Draw rectangle",
         clearGeometry: "Clear geometry",
         assets: "Assets:",
         assetKeyPlaceholder: "unique asset key...",
@@ -607,6 +621,7 @@ define({
         deleteFailed: "Unable to delete item.",
         deleteFailedWith: "Unable to delete item: {error}",
         idRequired: "Id is required.",
+        idInvalid: "Id may contain only alphanumeric characters and hyphens (A-Z, a-z, 0-9, -).",
         datetimeRequired: "Datetime is required.",
         stacVersionRequired: "STAC Version is required.",
         stacExtensionsRequired: "STAC Extensions is required.",

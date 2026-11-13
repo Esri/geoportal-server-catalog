@@ -215,6 +215,47 @@ public class STACService extends Application {
 		}
 		return Response.status(status).entity(responseJSON).build();
 	}
+	
+	@GET
+	@Path("/allCollections")
+	@Produces(MediaType.APPLICATION_JSON)
+	//This returns all collections including non STAC collections, used by CollectionPanel.js/SetCollections.js to get all collections
+	public Response getAllCollections(@Context HttpServletRequest hsr, 
+          @QueryParam("limit") int limit) {
+		String responseJSON;
+		String finalresponse = "";
+		Status status = Response.Status.OK;		
+		JSONArray detailErrArray = new JSONArray();
+		
+		 // 616 return up to 10,000 collections, not full pagination yet
+		// if no limit provided (primitive int defaults to 0), set it to 10,000 (max limit for collections)
+		if(limit == 0) {
+			limit = 10000;
+		}
+		limit = setLimit(limit);
+
+		try {
+				// STAC will have collection for each Geoportal collection
+				responseJSON = this.readResourceFile("service/config/stac-collections.json", hsr);
+
+				JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
+				// Get list of collections
+				JSONArray collectionsArray = StacHelper.getCollectionList(limit,true);
+
+				stacCollections.put("collections", collectionsArray);
+				// respond in STAC JSON
+				finalresponse = stacCollections.toString();		
+
+				finalresponse = finalresponse.replaceAll("\\{url\\}", this.getBaseUrl(hsr));			
+
+		} catch (Exception e) {
+			LOGGER.error("Error in collections " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			finalresponse = this.generateResponse("500", "STAC API collection response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(finalresponse).build();
+	}
 
 	@GET
 	@Path("/collections")
@@ -785,19 +826,35 @@ public class STACService extends Application {
 		Status status = Response.Status.OK;		
 		JSONArray detailErrArray = new JSONArray();
 		try {
-			JSONObject itemRes = StacHelper.getCollectionWithId(collectionId);
+			//Search for all collections (including non STAC)
+			JSONObject itemRes = StacHelper.getAllCollectionsWithId(collectionId);
 			if(itemRes == null || itemRes.isEmpty())
 			{
 				responseJSON = this.generateResponse("404", "Collection not found.",null);
 				status = Response.Status.NOT_FOUND;
 			} else
 			{
-				JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,null,true);
-				responseJSON = resObj.toString();
-				if(sc.getDelayResponse()>0)
+				//if non stac collection, delete collection from elastic and return
+				if(!itemRes.containsKey("stac_version"))
 				{
-					TimeUnit.MILLISECONDS.sleep(sc.getDelayResponse());
+					String url = client.getTypeUrlForSearch(ec.getCollectionIndexName());
+					responseJSON = client.sendDelete(url+"/_doc/"+collectionId);
+					if(sc.getDelayResponse()>0)
+					{
+						TimeUnit.MILLISECONDS.sleep(sc.getDelayResponse());
+					}
+					return Response.status(status).header("Content-Type", "application/json").entity(responseJSON).build();
 				}
+				//For Stac collection, delete all items and then delete collection
+				else
+				{
+					JSONObject resObj = StacHelper.deleteCollectionItems(collectionId,null,true);
+					responseJSON = resObj.toString();
+					if(sc.getDelayResponse()>0)
+					{
+						TimeUnit.MILLISECONDS.sleep(sc.getDelayResponse());
+					}
+				}				
 			}
 
 		} catch (InvalidParameterException e) {
