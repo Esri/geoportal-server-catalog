@@ -1,6 +1,11 @@
 package com.esri.geoportal.search;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,15 +17,12 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonArrayBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.util.ResourcePath;
 import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
@@ -37,6 +39,10 @@ import com.esri.geoportal.service.stac.filter.StacFilterLang;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.servlet.http.HttpServletRequest;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -45,6 +51,7 @@ import net.minidev.json.parser.JSONParser;
 
 public class StacHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StacHelper.class);
+	private static final StacContext sc = StacContext.getInstance();
 	
 	/** Validates single STAC feature for required fields and duplicate id in collection
 	 * @param requestPayload
@@ -1598,7 +1605,53 @@ private static String prepareStatus(String status) {
 		}
 		return item;
 	}
+	public static String readResourceFile(String path, HttpServletRequest hsr) throws IOException, URISyntaxException {
+		ResourcePath rp = new ResourcePath();
+		URI uri = rp.makeUrl(path).toURI();
+		String filedataString = new String(Files.readAllBytes(Paths.get(uri)), "UTF-8");
 
+		if (filedataString != null)
+			filedataString = filedataString.trim();
+		String requestURL = hsr.getRequestURL().toString();
+		// Remove last /
+		requestURL = requestURL.substring(0, requestURL.length() - 1);
 
+		// Replace {url}
+		filedataString = filedataString.replaceAll("\\{url\\}", getBaseUrl(hsr));
+		return filedataString;
+	}
+	
+	public static String getBaseUrl(HttpServletRequest hsr) {		
+		if(sc.getStacUrl()!=null && !sc.getStacUrl().isBlank())
+		{
+			return sc.getStacUrl();
+		}
+		StringBuffer requestURL = hsr.getRequestURL();
+		String ctxPath = hsr.getContextPath();
+		String urlScheme = hsr.getScheme();
+		String urlServerName = hsr.getServerName();
+		int urlPort = hsr.getServerPort();
+		String baseUrl;
+
+		if (ctxPath.length() > 0) {
+			baseUrl = requestURL.substring(0, requestURL.indexOf(ctxPath) + ctxPath.length());
+		} else {
+			baseUrl = urlScheme + "://" + urlServerName;
+			if ((urlPort != 80) && (urlPort != 443)) {
+				baseUrl += ":" + urlPort;
+			}
+		}
+		return baseUrl + "/stac";
+	}
+	public static String generateResponse(String code, String description, JSONArray detailMsgArr) {
+		JSONObject resObj = new JSONObject();
+		resObj.put("code", code);
+		resObj.put("message", description);
+		
+		if(detailMsgArr != null && !detailMsgArr.isEmpty())
+			resObj.put("detail",detailMsgArr);
+
+		return resObj.toString();
+	}
 
 }
