@@ -128,6 +128,7 @@ define([
     collections: [],
     selectedCollection: null,
     collectionIdsToBeDeleted: [],
+    collectionIdsBeingDeleted: [],
     selectedGraphic: null,
     sketchGraphicsLayer: null,
     collectionAssets: {},
@@ -592,6 +593,24 @@ define([
           };
         });
       }
+      this.applyDeletingState();
+    },
+
+    // disables list items (checkbox + info button) of collections being deleted
+    applyDeletingState: function () {
+      if (!this.collectionsList) return;
+      const deleting = this.collectionIdsBeingDeleted || [];
+      this.collectionsList.querySelectorAll(".list-item").forEach((item) => {
+        const cbox = item.querySelector(".list-item-checkbox");
+        const id = cbox ? cbox.getAttribute("data-id") : null;
+        const isDeleting = id !== null && deleting.indexOf(id) > -1;
+        if (cbox) {
+          cbox.disabled = isDeleting;
+          if (isDeleting) cbox.checked = false;
+        }
+        item.style.opacity = isDeleting ? "0.5" : "";
+        item.style.pointerEvents = isDeleting ? "none" : "";
+      });
     },
 
     removeAllCollectionGraphicsLayers: function (view) {
@@ -646,8 +665,24 @@ define([
           this.selectedCollection = null;
           this.emptyCollectionInfoBox();
         }
-        this.deleteCollection(collection.id).catch((e) => console.error(e));
+        // close the item panel if it shows the collection being deleted
+        if (this.itemListPanel && String(this.itemListPanel.collectionId) === String(collection.id)) {
+          this.itemListPanel.clear();
+        }
+        this.collectionIdsBeingDeleted.push(String(collection.id));
+        this.deleteCollection(collection.id)
+          .catch((e) => console.error(e))
+          .then(() => {
+            const idx = this.collectionIdsBeingDeleted.indexOf(String(collection.id));
+            if (idx > -1) this.collectionIdsBeingDeleted.splice(idx, 1);
+            if (this.collectionIdsBeingDeleted.length === 0) {
+              this.rerenderCollectionsList();
+            } else {
+              this.applyDeletingState();
+            }
+          });
       });
+      this.applyDeletingState();
 
       const alerts = this.i18n.collections.alerts;
       if (stacIds.length > 0) {
