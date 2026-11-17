@@ -1211,7 +1211,7 @@ private static String prepareStatus(String status) {
 
 			List<String> idArrList = new ArrayList<String>();
 			if(idList ==null || idList.isBlank()) {				
-				String idSearch = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"collection\":\""+collectionId+"\"}}]}}}";
+				String idSearch = "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"collection.keyword\":\""+collectionId+"\"}}]}}}";
 				String searchRes = client.sendPost(url+"/_search", idSearch, "application/json");
 				DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
