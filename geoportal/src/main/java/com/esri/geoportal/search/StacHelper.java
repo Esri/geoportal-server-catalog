@@ -1206,21 +1206,35 @@ private static String prepareStatus(String status) {
 		boolean deleteById = false;
 		int deletedSuccess = 0;		
 		int total = 0; 
+		long remaining = 0;
 		try {
 			url =  client.getTypeUrlForSearch(ec.getIndexName());
 
 			List<String> idArrList = new ArrayList<String>();
 			if(idList ==null || idList.isBlank()) {				
-				String idSearch = "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"collection.keyword\":\""+collectionId+"\"}}]}}}";
-				String searchRes = client.sendPost(url+"/_search", idSearch, "application/json");
-				DocumentContext elasticResContext = JsonPath.parse(searchRes);
+				// collect ALL matching ids using search_after pagination (default search size is only 10)
+				String collectionQuery = "\"query\":{\"bool\":{\"must\":[{\"match\":{\"collection\":"+JSONValue.toJSONString(collectionId)+"}}]}}";
+				String lastId = null;
+				while (true) {
+					String idSearch = "{\"size\":1000,\"_source\":false,\"sort\":[{\"_id\":\"asc\"}],"
+							+ collectionQuery
+							+ (lastId != null ? ",\"search_after\":[" + JSONValue.toJSONString(lastId) + "]" : "") + "}";
+					String searchRes = client.sendPost(url+"/_search", idSearch, "application/json");
+					DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
-				net.minidev.json.JSONArray resArr = elasticResContext.read("$.hits.hits");
-				
-				for(var i=0;i<resArr.size();i++)
-				{
-					HashMap<?, ?> elasticCollectionMap = (HashMap<?, ?>) resArr.get(i);
-					idArrList.add((String) elasticCollectionMap.get("_id"));			
+					net.minidev.json.JSONArray resArr = elasticResContext.read("$.hits.hits");
+					if (resArr == null || resArr.isEmpty()) {
+						break;
+					}
+					for(var i=0;i<resArr.size();i++)
+					{
+						HashMap<?, ?> elasticCollectionMap = (HashMap<?, ?>) resArr.get(i);
+						idArrList.add((String) elasticCollectionMap.get("_id"));			
+					}
+					lastId = idArrList.get(idArrList.size() - 1);
+					if (resArr.size() < 1000) {
+						break;
+					}
 				}
 			}
 			else
@@ -1242,6 +1256,14 @@ private static String prepareStatus(String status) {
 						deletedSuccess++;
 					}					
 				}
+			}
+			// verify completion: refresh the index and count what is still left in the collection
+			if (idList == null || idList.isBlank()) {
+				client.sendPost(url+"/_refresh", "", "application/json");
+				String countQuery = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"collection\":"+JSONValue.toJSONString(collectionId)+"}}]}}}";
+				String countRes = client.sendPost(url+"/_count", countQuery, "application/json");
+				Number cnt = JsonPath.parse(countRes).read("$.count");
+				remaining = cnt == null ? 0 : cnt.longValue();
 			}
 		}catch(Exception e)
 		{
@@ -1268,13 +1290,13 @@ private static String prepareStatus(String status) {
 				resObj.put("code", "200");
 				resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Deleting collection is not allowed when items are deleted with id list.");	
 			}			
-			if(!deleteById && deletedSuccess != total)
+			if(!deleteById && (deletedSuccess != total || remaining > 0))
 			{
 				resObj.put("code", "200");
 				resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Collection will not be deleted as some features could not be deleted.");	
 				
 			}
-			if(!deleteById && deletedSuccess == total)
+			if(!deleteById && deletedSuccess == total && remaining == 0)
 			{
 				//Now delete collection which is an item in Collection Index
 				try {
@@ -1293,6 +1315,8 @@ private static String prepareStatus(String status) {
 	}
 
 	  
+
+
   /*
    * get the WKT of the CRS from the collection
    *
