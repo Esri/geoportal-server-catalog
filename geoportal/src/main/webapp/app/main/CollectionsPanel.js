@@ -129,6 +129,7 @@ define([
     selectedCollection: null,
     collectionIdsToBeDeleted: [],
     collectionIdsBeingDeleted: [],
+    collectionIdsDeletingItems: [], // collections with a running "Delete All Items"
     selectedGraphic: null,
     sketchGraphicsLayer: null,
     collectionAssets: {},
@@ -401,6 +402,17 @@ define([
     postCreate: function () {
       this.inherited(arguments);
       this.readConfig();
+      topic.subscribe(appTopics.StacItemsDeleteAll, lang.hitch(this, function (params) {
+        if (!params || params.collectionId === undefined) return;
+        var id = String(params.collectionId);
+        var idx = this.collectionIdsDeletingItems.indexOf(id);
+        if (params.state === "started" && idx === -1) {
+          this.collectionIdsDeletingItems.push(id);
+        } else if (params.state === "finished" && idx > -1) {
+          this.collectionIdsDeletingItems.splice(idx, 1);
+        }
+        this.handleViewItemsEnabled();
+      }));
       topic.subscribe(appTopics.SignedIn,lang.hitch(this,function(params){
     	 // this.handleGetCollections();  
     	  this.updateUI();
@@ -1239,6 +1251,7 @@ define([
 	
 	handleViewItems: async function (collectionId) {
       if (!collectionId) return;
+      if (this.collectionIdsDeletingItems.indexOf(String(collectionId)) > -1) return; // items are being deleted
       try {
         this.updateIsLoading(true);
         this.selectedCollectionId = collectionId;
@@ -1354,7 +1367,10 @@ define([
 	handleViewItemsEnabled: function () {
 	      // Show View Items only for STAC collections (those with stac_version)
 	      this.viewItemsButton.style.display = this.selectedCollectionIsStac ? "" : "none";
-	      if (this.selectedCollection && this.selectedCollectionIsStac) {
+	      var selectedId = this.selectedCollection && this.selectedCollection.properties
+	        ? String(this.selectedCollection.properties.id) : null;
+	      var itemsBeingDeleted = selectedId !== null && this.collectionIdsDeletingItems.indexOf(selectedId) > -1;
+	      if (this.selectedCollection && this.selectedCollectionIsStac && !itemsBeingDeleted) {
 	        this.viewItemsButton.disabled = false;
 	        this.viewItemsButton.classList.remove("disabled");
 	      } else {
