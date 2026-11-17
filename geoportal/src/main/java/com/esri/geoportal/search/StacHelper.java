@@ -1260,7 +1260,7 @@ private static String prepareStatus(String status) {
 			// verify completion: refresh the index and count what is still left in the collection
 			if (idList == null || idList.isBlank()) {
 				client.sendPost(url+"/_refresh", "", "application/json");
-				String countQuery = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"collection\":"+JSONValue.toJSONString(collectionId)+"}}]}}}";
+				String countQuery = "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"collection.keyword\":"+JSONValue.toJSONString(collectionId)+"}}]}}}";
 				String countRes = client.sendPost(url+"/_count", countQuery, "application/json");
 				Number cnt = JsonPath.parse(countRes).read("$.count");
 				remaining = cnt == null ? 0 : cnt.longValue();
