@@ -794,7 +794,7 @@ public class STACService extends Application {
 			} else
 			{
 				//if non stac collection, delete collection from elastic and return
-				if(!itemRes.containsKey("stac_version"))
+				if (itemRes.get("stac_version") == null || itemRes.get("stac_version").toString().isBlank())
 				{
 					String url = client.getTypeUrlForSearch(ec.getCollectionIndexName());
 					responseJSON = client.sendDelete(url+"/_doc/"+collectionId);
