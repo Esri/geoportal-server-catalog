@@ -597,7 +597,8 @@ define([
     // initiated here; the user is told to check back after a few minutes.
     _doDeleteAllItems: function () {
       var self = this;
-      var url = this.getStacBaseUrl() + "/collections/" + encodeURIComponent(this.collectionId) + "/items";
+      var requestedCollectionId = this.collectionId;
+      var url = this.getStacBaseUrl() + "/collections/" + encodeURIComponent(requestedCollectionId) + "/items";
       url = new AppClient().appendAccessToken(url);
       fetch(url, { method: "DELETE", keepalive: true }).then(function (response) {
         if (!response.ok) throw new Error(response.statusText || String(response.status));
@@ -605,6 +606,23 @@ define([
       }).then(function (body) {
         if (!body || String(body.code) !== "200") {
           throw new Error((body && (body.message || body.description || String(body.code))) || "Invalid deletion response");
+        }
+        // reload from the first page, only if that collection is still open
+        if (self.collectionId === requestedCollectionId) {
+          self._setListBusy(true);
+          // the search index is near-real-time, so wait briefly before re-querying
+          setTimeout(function () {
+            if (self.collectionId !== requestedCollectionId) {
+              self._setListBusy(false);
+              return;
+            }
+            self._resetPaging();
+            self._loadPage(self._buildSearchUrl()).then(function () {
+              self._setListBusy(false);
+            }, function () {
+              self._setListBusy(false);
+            });
+          }, 1200);
         }
       }).catch(function (e) {
         console.error("Error deleting all STAC items", e);
