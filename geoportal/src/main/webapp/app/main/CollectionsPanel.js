@@ -1421,12 +1421,17 @@ define([
       for (const c of selectedCollections) {
         try {
           const full = await this.getCollectionById(c.id);
-          if (full && full.stac_version && String(full.stac_version).trim()) {
+          if (!full || Array.isArray(full) || String(full.id) !== String(c.id)) {
+            throw new Error(lang.replace(this.i18n.collections.alerts.deleteError, { id: c.id }));
+          }
+          if (full.stac_version && String(full.stac_version).trim()) {
             isStac = true;
             break;
           }
         } catch (e) {
           console.error(e);
+          this.showAlert(this.i18n.collections.alerts.deleteErrorTitle, String(e), "red");
+          return;
         }
       }
       ConfirmModal.confirm({
