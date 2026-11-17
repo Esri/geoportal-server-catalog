@@ -1913,6 +1913,34 @@
 				}
 			}
 		},
+
+		"/rest/metadata/allCollections": {
+			"get": {
+				"tags": [
+					"REST"
+				],
+				"summary": "Returns list of all collections.",
+				"description": "",
+				"operationId": "listAllCollections",				
+				"produces": [
+					"application/json"
+				],
+				"parameters": [					
+					{
+						"name": "limit",
+						"in": "query",
+						"description": "no of collections to return",
+						"required": false,
+						"type": "number"
+					}
+				],
+				"responses": {
+					"default": {
+						"description": "successful operation"
+					}
+				}
+			}
+		},
 		"/csw?request=GetCapabilities": {
 			"get": {
 				"tags": [
