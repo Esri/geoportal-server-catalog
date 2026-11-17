@@ -599,8 +599,16 @@ define([
       var self = this;
       var url = this.getStacBaseUrl() + "/collections/" + encodeURIComponent(this.collectionId) + "/items";
       url = new AppClient().appendAccessToken(url);
-      fetch(url, { method: "DELETE", keepalive: true }).catch(function (e) {
+      fetch(url, { method: "DELETE", keepalive: true }).then(function (response) {
+        if (!response.ok) throw new Error(response.statusText || String(response.status));
+        return response.json();
+      }).then(function (body) {
+        if (!body || String(body.code) !== "200") {
+          throw new Error((body && (body.message || body.description || String(body.code))) || "Invalid deletion response");
+        }
+      }).catch(function (e) {
         console.error("Error deleting all STAC items", e);
+        StatusModal.error(e && e.message ? e.message : String(e));
       });
       StatusModal.info(this.i18n.collectionItems.deleteAllInitiated);
     },
