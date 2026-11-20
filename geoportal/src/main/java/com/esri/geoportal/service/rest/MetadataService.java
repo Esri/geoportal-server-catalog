@@ -13,6 +13,10 @@
  * limitations under the License.
  */
 package com.esri.geoportal.service.rest;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.AppResponse;
 import com.esri.geoportal.context.AppUser;
 import com.esri.geoportal.context.GeoportalContext;
@@ -31,6 +35,7 @@ import com.esri.geoportal.lib.elastic.http.request.SetOwnerRequest;
 import com.esri.geoportal.lib.elastic.http.request.TransformMetadataRequest;
 import com.esri.geoportal.lib.elastic.request.ValidateMetadataRequest;
 import com.esri.geoportal.search.SearchRequest;
+import com.esri.geoportal.search.StacHelper;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.ws.rs.Consumes;
@@ -40,6 +45,7 @@ import jakarta.ws.rs.POST;
 import jakarta.ws.rs.PUT;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.PathParam;
+import jakarta.ws.rs.Produces;
 import jakarta.ws.rs.QueryParam;
 import jakarta.ws.rs.container.AsyncResponse;
 import jakarta.ws.rs.container.Suspended;
@@ -48,12 +54,17 @@ import jakarta.ws.rs.core.MediaType;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import jakarta.ws.rs.core.SecurityContext;
+import jakarta.ws.rs.core.Response.Status;
+import net.minidev.json.JSONArray;
+import net.minidev.json.JSONObject;
+import net.minidev.json.JSONValue;
 
 /**
  * Handles /rest/metadata/* requests.
  */
 @Path("/metadata")
 public class MetadataService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(MetadataService.class);
   
   /*
    * @Deprecated use SetOwnerRequest
@@ -612,5 +623,48 @@ public class MetadataService {
   protected Response writeException(Throwable t, boolean pretty) {
     return (new AppResponse()).buildException(t,pretty);
   }
+  
+    @GET
+	@Path("/allCollections")
+	@Produces(MediaType.APPLICATION_JSON)
+	//This returns all collections including non STAC collections, used by SetCollections.js to get all collections
+	public Response getAllCollections(@Context HttpServletRequest hsr, 
+	    @QueryParam("limit") int limit) {
+		String responseJSON;
+		String finalresponse = "";
+		Status status = Response.Status.OK;		
+		JSONArray detailErrArray = new JSONArray();
+		
+		 // 616 return up to 10,000 collections, not full pagination yet
+		// if no limit provided (primitive int defaults to 0), set it to 10,000 (max limit for collections)
+		if(limit == 0) {
+			limit = 10000;
+		}		
+		if (limit < 0 || limit > 10000) {
+			throw new InvalidParameterException("limit", "limit can only be between 1 and 10000");
+		}
+	
+		try {
+			// STAC will have collection for each Geoportal collection
+			responseJSON = StacHelper.readResourceFile("service/config/stac-collections.json", hsr);
+
+			JSONObject stacCollections = (JSONObject) JSONValue.parse(responseJSON);
+			// Get list of collections
+			JSONArray collectionsArray = StacHelper.getCollectionList(limit,true);
+
+			stacCollections.put("collections", collectionsArray);
+			// respond in STAC JSON
+			finalresponse = stacCollections.toString();		
+
+			finalresponse = finalresponse.replaceAll("\\{url\\}", StacHelper.getBaseUrl(hsr));			
+	
+		} catch (Exception e) {
+			LOGGER.error("Error in collections " + e);
+			status = Response.Status.INTERNAL_SERVER_ERROR;
+			detailErrArray.add(e.getMessage());
+			finalresponse = StacHelper.generateResponse("500", "STAC API collection response could not be generated.",detailErrArray);
+		}
+		return Response.status(status).entity(finalresponse).build();
+	}
 
 }

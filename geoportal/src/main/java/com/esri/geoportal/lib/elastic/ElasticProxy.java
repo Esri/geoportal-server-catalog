@@ -411,6 +411,14 @@ public class ElasticProxy extends BalancerServlet {
   private void checkNoDataLeakRootKeys(ObjectNode body) throws AccessDeniedException {
     for (String key : DATA_LEAK_ROOT_KEYS) {
       if (body.has(key)) {
+        JsonNode value = body.get(key);
+        if ("_source".equals(key)
+            && value.isArray()
+            && value.size() == 1
+            && value.get(0).isTextual()
+            && "_id".equals(value.get(0).textValue())) {
+          continue;
+        }
         throw new AccessDeniedException("\"" + key + "\" is not allowed");
       }
     }

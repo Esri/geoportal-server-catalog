@@ -1,6 +1,11 @@
 package com.esri.geoportal.search;
 
+import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -12,15 +17,12 @@ import java.util.logging.Level;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import jakarta.json.Json;
-import jakarta.json.JsonArray;
-import jakarta.json.JsonArrayBuilder;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import com.esri.geoportal.base.util.DateUtil;
 import com.esri.geoportal.base.util.JsonUtil;
+import com.esri.geoportal.base.util.ResourcePath;
 import com.esri.geoportal.base.util.exception.InvalidParameterException;
 import com.esri.geoportal.context.GeoportalContext;
 import com.esri.geoportal.lib.elastic.ElasticContext;
@@ -37,6 +39,10 @@ import com.esri.geoportal.service.stac.filter.StacFilterLang;
 import com.jayway.jsonpath.DocumentContext;
 import com.jayway.jsonpath.JsonPath;
 
+import jakarta.json.Json;
+import jakarta.json.JsonArray;
+import jakarta.json.JsonArrayBuilder;
+import jakarta.servlet.http.HttpServletRequest;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONObject;
 import net.minidev.json.JSONValue;
@@ -45,6 +51,7 @@ import net.minidev.json.parser.JSONParser;
 
 public class StacHelper {
 	private static final Logger LOGGER = LoggerFactory.getLogger(StacHelper.class);
+	private static final StacContext sc = StacContext.getInstance();
 	
 	/** Validates single STAC feature for required fields and duplicate id in collection
 	 * @param requestPayload
@@ -1199,21 +1206,35 @@ private static String prepareStatus(String status) {
 		boolean deleteById = false;
 		int deletedSuccess = 0;		
 		int total = 0; 
+		long remaining = 0;
 		try {
 			url =  client.getTypeUrlForSearch(ec.getIndexName());
 
 			List<String> idArrList = new ArrayList<String>();
 			if(idList ==null || idList.isBlank()) {				
-				String idSearch = "{\"query\":{\"bool\":{\"must\":[{\"match\":{\"src_collections_s\":\""+collectionId+"\"}}]}}}";
-				String searchRes = client.sendPost(url+"/_search", idSearch, "application/json");
-				DocumentContext elasticResContext = JsonPath.parse(searchRes);
+				// collect ALL matching ids using search_after pagination (default search size is only 10)
+				String collectionQuery = "\"query\":{\"bool\":{\"must\":[{\"match\":{\"collection\":"+JSONValue.toJSONString(collectionId)+"}}]}}";
+				String lastId = null;
+				while (true) {
+					String idSearch = "{\"size\":1000,\"_source\":false,\"sort\":[{\"_id\":\"asc\"}],"
+							+ collectionQuery
+							+ (lastId != null ? ",\"search_after\":[" + JSONValue.toJSONString(lastId) + "]" : "") + "}";
+					String searchRes = client.sendPost(url+"/_search", idSearch, "application/json");
+					DocumentContext elasticResContext = JsonPath.parse(searchRes);
 
-				net.minidev.json.JSONArray resArr = elasticResContext.read("$.hits.hits");
-				
-				for(var i=0;i<resArr.size();i++)
-				{
-					HashMap<?, ?> elasticCollectionMap = (HashMap<?, ?>) resArr.get(i);
-					idArrList.add((String) elasticCollectionMap.get("_id"));			
+					net.minidev.json.JSONArray resArr = elasticResContext.read("$.hits.hits");
+					if (resArr == null || resArr.isEmpty()) {
+						break;
+					}
+					for(var i=0;i<resArr.size();i++)
+					{
+						HashMap<?, ?> elasticCollectionMap = (HashMap<?, ?>) resArr.get(i);
+						idArrList.add((String) elasticCollectionMap.get("_id"));			
+					}
+					lastId = idArrList.get(idArrList.size() - 1);
+					if (resArr.size() < 1000) {
+						break;
+					}
 				}
 			}
 			else
@@ -1235,6 +1256,14 @@ private static String prepareStatus(String status) {
 						deletedSuccess++;
 					}					
 				}
+			}
+			// verify completion: refresh the index and count what is still left in the collection
+			if (idList == null || idList.isBlank()) {
+				client.sendPost(url+"/_refresh", "", "application/json");
+				String countQuery = "{\"query\":{\"bool\":{\"must\":[{\"term\":{\"collection.keyword\":"+JSONValue.toJSONString(collectionId)+"}}]}}}";
+				String countRes = client.sendPost(url+"/_count", countQuery, "application/json");
+				Number cnt = JsonPath.parse(countRes).read("$.count");
+				remaining = cnt == null ? 0 : cnt.longValue();
 			}
 		}catch(Exception e)
 		{
@@ -1261,13 +1290,13 @@ private static String prepareStatus(String status) {
 				resObj.put("code", "200");
 				resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Deleting collection is not allowed when items are deleted with id list.");	
 			}			
-			if(!deleteById && deletedSuccess != total)
+			if(!deleteById && (deletedSuccess != total || remaining > 0))
 			{
 				resObj.put("code", "200");
 				resObj.put("description", "Stac features requested for deletion: "+total+", deleted: "+deletedSuccess+", failed: "+(total-deletedSuccess)+". Collection will not be deleted as some features could not be deleted.");	
 				
 			}
-			if(!deleteById && deletedSuccess == total)
+			if(!deleteById && deletedSuccess == total && remaining == 0)
 			{
 				//Now delete collection which is an item in Collection Index
 				try {
@@ -1286,6 +1315,8 @@ private static String prepareStatus(String status) {
 	}
 
 	  
+
+
   /*
    * get the WKT of the CRS from the collection
    *
@@ -1598,7 +1629,53 @@ private static String prepareStatus(String status) {
 		}
 		return item;
 	}
+	public static String readResourceFile(String path, HttpServletRequest hsr) throws IOException, URISyntaxException {
+		ResourcePath rp = new ResourcePath();
+		URI uri = rp.makeUrl(path).toURI();
+		String filedataString = new String(Files.readAllBytes(Paths.get(uri)), "UTF-8");
 
+		if (filedataString != null)
+			filedataString = filedataString.trim();
+		String requestURL = hsr.getRequestURL().toString();
+		// Remove last /
+		requestURL = requestURL.substring(0, requestURL.length() - 1);
 
+		// Replace {url}
+		filedataString = filedataString.replaceAll("\\{url\\}", getBaseUrl(hsr));
+		return filedataString;
+	}
+	
+	public static String getBaseUrl(HttpServletRequest hsr) {		
+		if(sc.getStacUrl()!=null && !sc.getStacUrl().isBlank())
+		{
+			return sc.getStacUrl();
+		}
+		StringBuffer requestURL = hsr.getRequestURL();
+		String ctxPath = hsr.getContextPath();
+		String urlScheme = hsr.getScheme();
+		String urlServerName = hsr.getServerName();
+		int urlPort = hsr.getServerPort();
+		String baseUrl;
+
+		if (ctxPath.length() > 0) {
+			baseUrl = requestURL.substring(0, requestURL.indexOf(ctxPath) + ctxPath.length());
+		} else {
+			baseUrl = urlScheme + "://" + urlServerName;
+			if ((urlPort != 80) && (urlPort != 443)) {
+				baseUrl += ":" + urlPort;
+			}
+		}
+		return baseUrl + "/stac";
+	}
+	public static String generateResponse(String code, String description, JSONArray detailMsgArr) {
+		JSONObject resObj = new JSONObject();
+		resObj.put("code", code);
+		resObj.put("message", description);
+		
+		if(detailMsgArr != null && !detailMsgArr.isEmpty())
+			resObj.put("detail",detailMsgArr);
+
+		return resObj.toString();
+	}
 
 }

@@ -166,7 +166,7 @@ public class MCPService extends Application {
 
     JSONObject result = new JSONObject();
     result.put("tools", tools);
-    result.put("nextCursor", "");
+    //result.put("nextCursor", "");
     result.put("protocolVersion", "2024-11-05");
 
     return jsonRpcResult(id, result);

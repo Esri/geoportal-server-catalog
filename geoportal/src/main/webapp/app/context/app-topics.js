@@ -48,6 +48,12 @@ define([],function(){var obj={
    * params - {collectionId:string, itemId:string, action:"create"|"update"|"delete"} */
   StacItemsChanged: "app/StacItemsChanged",
 
+  /* Fired by ItemListPanel when a "Delete All Items" request starts/ends so
+   * the collection's View Items action can be disabled while it runs.
+   * params - {collectionId:string, state:"started"|"finished"} */
+  StacItemsDeleteAll: "app/StacItemsDeleteAll",
+
+
   /* Fired by ItemCard to open a STAC item in the STAC editor (Collections tab).
    * params - {collectionId:string, itemId:string} */
   EditStacItemRequested: "app/EditStacItemRequested",

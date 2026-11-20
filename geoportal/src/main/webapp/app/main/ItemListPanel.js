@@ -104,6 +104,10 @@ define([
         }
       };
 
+      this.deleteAllItemsButton.onclick = function () {
+        if (self.collectionId) self._deleteAllItems();
+      };
+
       this.closeButton.onclick = function () {
         self.clear();
       };
@@ -269,6 +273,7 @@ define([
       this.filterExtentCheckbox.checked = false;
       this.filterByExtent = false;
       this._resetPaging();
+      this._setDeleteAllEnabled(false); // enabled once the first page shows at least one item
 
       this.placeholderNode.classList.add("hidden");
       this.panelBody.classList.remove("hidden");
@@ -284,6 +289,7 @@ define([
       this.collectionId = null;
       this.itemsById = {};
       this._resetPaging();
+      this._setDeleteAllEnabled(false);
 
       this.panelBody.classList.add("hidden");
       this.placeholderNode.classList.remove("hidden");
@@ -386,16 +392,26 @@ define([
         self.nextBtn.disabled = nextDisabled;
         self.nextBtn.classList.toggle("disabled", nextDisabled);
         self.pageInfoNode.innerText = lang.replace(self.i18n.collectionItems.pagePattern, { page: self.currentIndex + 1 });
+        var itemCount = (stac.numberMatched != null ? stac.numberMatched : features.length);
         self.noOfItemsNode.innerText = lang.replace(self.i18n.collectionItems.countPattern,
-          { count: (stac.numberMatched != null ? stac.numberMatched : features.length) });
+          { count: itemCount });
+        self._setDeleteAllEnabled(Number(itemCount) > 0 || features.length > 0);
 
         self._renderCards(features);
         self._updateMapLayer(features);
       }).catch(function (e) {
         console.error("Error loading STAC items", e);
+        self._setDeleteAllEnabled(false);
         self.cardsContainer.innerHTML = '<div class="item-list-empty">' +
           self._escapeHtml(self.i18n.collectionItems.loadError) + '</div>';
       });
+    },
+
+    // "Delete All Items" is only available when the collection has at least one item
+    _setDeleteAllEnabled: function (enabled) {
+      if (!this.deleteAllItemsButton) return;
+      this.deleteAllItemsButton.disabled = !enabled;
+      this.deleteAllItemsButton.classList.toggle("disabled", !enabled);
     },
 
     _renderCards: function (features) {
@@ -576,6 +592,47 @@ define([
         if (ok) self._doDeleteItem(feature);
       });
     },
+
+    _deleteAllItems: function () {
+      var self = this;
+      var dm = this.i18n.collectionItems.deleteAllModal;
+      ConfirmModal.confirm({
+        title: dm.title,
+        message: lang.replace(dm.message, { collection: this.collectionTitle || this.collectionId }),
+        confirmLabel: dm.confirm
+      }).then(function (ok) {
+        if (ok) self._doDeleteAllItems();
+      });
+    },
+
+    // Deleting many items (100s or 1000s) can take a long time, so the UI does
+    // not wait for the service: the item panel is closed right away, View Items
+    // is disabled for the collection until the request ends, and the user is
+    // told to check back later.
+    _doDeleteAllItems: function () {
+      var requestedCollectionId = this.collectionId;
+      var url = this.getStacBaseUrl() + "/collections/" + encodeURIComponent(requestedCollectionId) + "/items";
+      url = new AppClient().appendAccessToken(url);
+
+      topic.publish(appTopics.StacItemsDeleteAll, { collectionId: requestedCollectionId, state: "started" });
+      this.clear(); // close the item panel, its items are going away
+      StatusModal.info(this.i18n.collectionItems.deleteAllInitiated);
+
+      fetch(url, { method: "DELETE", keepalive: true }).then(function (response) {
+        if (!response.ok) throw new Error(response.statusText || String(response.status));
+        return response.json();
+      }).then(function (body) {
+        if (!body || String(body.code) !== "200") {
+          throw new Error((body && (body.message || body.description || String(body.code))) || "Invalid deletion response");
+        }
+      }).catch(function (e) {
+        console.error("Error deleting all STAC items", e);
+        StatusModal.error(e && e.message ? e.message : String(e));
+      }).then(function () {
+        topic.publish(appTopics.StacItemsDeleteAll, { collectionId: requestedCollectionId, state: "finished" });
+      });
+    },
+
 
     _doDeleteItem: function (feature) {
       var self = this;

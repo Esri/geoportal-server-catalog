@@ -2,7 +2,7 @@
 	"swagger": "2.0",
 	"info": {
 		"description": "https://github.com/Esri/geoportal-server-catalog",
-		"version": "4.0.0",
+		"version": "4.1.0",
 		"title": "Esri Geoportal Server",
 		"contact": { "name": "portal@esri.com" },
 		"license": { "name": "Apache 2.0", "url": "http://www.apache.org/licenses/LICENSE-2.0.html" }
@@ -1904,6 +1904,34 @@
 						"description": "for an indented response",
 						"required": false,
 						"type": "boolean"
+					}
+				],
+				"responses": {
+					"default": {
+						"description": "successful operation"
+					}
+				}
+			}
+		},
+
+		"/rest/metadata/allCollections": {
+			"get": {
+				"tags": [
+					"REST"
+				],
+				"summary": "Returns list of all collections.",
+				"description": "",
+				"operationId": "listAllCollections",				
+				"produces": [
+					"application/json"
+				],
+				"parameters": [					
+					{
+						"name": "limit",
+						"in": "query",
+						"description": "no of collections to return",
+						"required": false,
+						"type": "number"
 					}
 				],
 				"responses": {

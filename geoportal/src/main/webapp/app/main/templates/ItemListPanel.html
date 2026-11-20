@@ -27,6 +27,14 @@
         >
           ${i18n.collectionItems.importItem}
         </button>
+        <button
+          type="button"
+          data-role="admin"
+          class="item-list-add-button"
+          data-dojo-attach-point="deleteAllItemsButton"
+        >
+          ${i18n.collectionItems.deleteAll}
+        </button>
         <input type="file" accept=".json,.geojson,application/json" class="hidden" style="display:none" data-dojo-attach-point="importFileInput"/>
         <button type="button" class="item-list-close" style="border:0;background:transparent;padding:0" data-dojo-attach-point="closeButton" title="${i18n.collectionItems.closeTitle}" aria-label="${i18n.collectionItems.closeTitle}">
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 384 512" aria-hidden="true">

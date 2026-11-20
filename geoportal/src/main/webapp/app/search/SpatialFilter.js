@@ -55,7 +55,7 @@ define(["dojo/_base/declare",
         "esri4/widgets/Search",
         "esri4/core/reactiveUtils",
         "dojo/Deferred",
-        "esri4/rest/locator",
+        "esri4/widgets/Search/LocatorSearchSource",
         "esri4/geometry/support/webMercatorUtils"],
 function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domGeometry, domStyle, djNumber,
     topic, appTopics, template, i18n, SearchComponent, DropPane, QClause, GeohashEx, util, Settings, Map,MapView,
@@ -226,7 +226,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     destroy: function() {
       try {
         if (this._locator) {
-          this._locator.destroyRecursive(false);
+          this._locator.destroy();
         }
         this._clearTmpHandles();
       } catch(ex) {}
@@ -244,7 +244,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       array.forEach(config.sources, lang.hitch(this, function(source) {
         if (source && source.url && source.type === 'locator') {
           var _source = {
-            locator: new Locator(source.url || ""),
+            url: source.url || "",
             outFields: ["*"],
             singleLineFieldName: source.singleLineFieldName || "",
             name: source.name || "",
@@ -253,7 +253,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
             maxSuggestions: source.maxSuggestions,
             maxResults: source.maxResults || 6,
             zoomScale: source.zoomScale || 50000,
-            useMapExtent: !!source.searchInCurrentMapExtent
+            withinViewEnabled: !!source.searchInCurrentMapExtent
           };
           if (source.enableLocalSearch) {
             _source.localSearchOptions = {
@@ -261,7 +261,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
               distance: source.localSearchDistance
             };
           }
-          sources.push(_source);
+          sources.push(new Locator(_source));
         } else if (source && source.url && source.type === 'query') {
           // not supported
         }
@@ -408,14 +408,7 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
       this.view.when(lang.hitch(this,function() {    	
     	  this.map = map;
     	  window.AppContext.searchMap = this.map
-    	  // this.initializeLocator();
-    	  const searchWidget = new SearchWidget({
-    		  view: this.view
-    		});
-    	  this.view.ui.add(searchWidget, {
-    		  position: "top-left",
-    		  index: 0
-    		});  
+    	  this.initializeLocator();
     	}))    	
       
       reactiveUtils.when(() => this.view.stationary === true, () => {    	 
@@ -433,7 +426,29 @@ function(declare, lang, array, aspect, djQuery, on, domConstruct, domClass, domG
     },
 
     /* SearchComponent API ============================================= */
+	initializeLocator: function() {
+	     if (!this.showLocator) return;
+	     var params = {
+	       view: this.view
+	     };
+	     var cfgParams = this.locatorParams;
+	     if (!cfgParams && AppContext.appConfig.searchMap) {
+	       cfgParams = AppContext.appConfig.searchMap.locatorParams;
+	     }
+	     if (cfgParams) {
+	       var sources = this._convertConfig(cfgParams);
+	       if (sources && sources.length > 0) {
+	         lang.mixin(params,cfgParams);
+	         params.sources = sources;
+	       }
+	     }
+	     //if (cfgParams) lang.mixin(params,cfgParams);
+	     var locator = new SearchWidget(params);
+	     this.view.ui.add(locator, {position: "top-left", index: 0});
+	     this._locator = locator;
+	   },
 
+	
     appendQueryParams: function(params) {
       if (!this.hasField()) return;
       var field = this.field, pointField = this.pointField;
