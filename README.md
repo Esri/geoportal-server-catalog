@@ -49,7 +49,7 @@ For Geoportal Server 4.x:
 * JDK 25+
 
 ## Installation
-- See the [installation instructions](https://github.com/Esri/geoportal-server-catalog/wiki/Installation) on the wiki.
+- See the [installation instructions](https://github.com/Esri/geoportal-server-catalog/wiki/Installing-Geoportal-Server-4.x.x) on the wiki.
 
 ## Issues
 
