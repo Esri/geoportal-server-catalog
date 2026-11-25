@@ -26,11 +26,12 @@ This repository contains the capability of **Geoportal Server Catalog**, while i
 - [All releases](https://github.com/Esri/geoportal-server-catalog/wiki).
 
 ## Can't Wait to Get Started?
-- Geoportal 3.1.0 added a Model Context Protocol (MCP) API to its STAC configuration, enabling integration of STAC in agentic workflows. Try it out with this sandbox deployment: https://gpt.geocloud.com/geoportal/mcp!
-- Try the [sandbox site](https://gpt.geocloud.com/geoportal3) and learn what the new Geoportal Server 3.1.0 is all about!
+- Geoportal includes a Model Context Protocol (MCP) API to its STAC configuration, enabling integration of STAC in agentic workflows. Try it out with this sandbox deployment: https://gpt.geocloud.com/geoportal/mcp!
+- Try the [sandbox site](https://gpt.geocloud.com/geoportal).
 - A different configuration that contains several 100,000 images as its [catalog](https://gpt.geocloud.com/imagecatalog/)
 
 ## Features
+* **STAC Server** - Configure Geoportal Server as your STAC server, complete with STAC API and transactions API. Manage collections and items using the web application. 
 * **Metadata editor** - Create and edit metadata in ArcGIS Metadata, FGDC, ISO 19115 (Data), ISO 19119 (Service), ISO 19115-2 (Imagery and Gridded Data), INSPIRE 2.0.1 (Data), INSPIRE 2.0.1 (Service), GEMINI (Data), GEMINI (Service)
 * **Faceted Search** - Configure different facets to allow your user to filter from the hay stack to the needle
 * **Scalability** - You can run the index of metadata in Elasticsearch and OpenSearch locally, in a cluster, as well as using cloud native platform services
