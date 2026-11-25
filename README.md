@@ -2,7 +2,7 @@
 
 [![apache licensed](https://img.shields.io/badge/license-Apache%202.0-orange.svg?style=flat-square)](https://raw.githubusercontent.com/Esri/geoportal-server-catalog/master/LICENSE.txt)
 
-> ## Geoportal Server Catalog 4.0.1 IS HERE!
+> ## Geoportal Server Catalog 4.1.0 IS HERE!
 
 Esri Geoportal Server is Esri's free and open source metadata catalog and search application, based on elasticsearch. 
 
